@@ -1,0 +1,605 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-7 by Raw Material Software ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the
+   GNU General Public License, as published by the Free Software Foundation;
+   either version 2 of the License, or (at your option) any later version.
+
+   JUCE is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with JUCE; if not, visit www.gnu.org/licenses or write to the
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Boston, MA 02111-1307 USA
+
+  ------------------------------------------------------------------------------
+
+   If you'd like to release a closed-source product which uses JUCE, commercial
+   licenses are also available: visit www.rawmaterialsoftware.com/juce for
+   more information.
+
+  ==============================================================================
+*/
+
+#include "win32_headers.h"
+#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+
+
+//==============================================================================
+// Auto-link the other win32 libs that are needed by library calls..
+#if defined (JUCE_DLL_BUILD) && JUCE_MSVC
+
+  #pragma comment(lib, "kernel32.lib")
+  #pragma comment(lib, "user32.lib")
+  #pragma comment(lib, "shell32.lib")
+  #pragma comment(lib, "gdi32.lib")
+  #pragma comment(lib, "vfw32.lib")
+  #pragma comment(lib, "comdlg32.lib")
+  #pragma comment(lib, "winmm.lib")
+  #pragma comment(lib, "wininet.lib")
+  #pragma comment(lib, "ole32.lib")
+  #pragma comment(lib, "advapi32.lib")
+  #pragma comment(lib, "ws2_32.lib")
+
+  #if JUCE_OPENGL
+    #pragma comment(lib, "OpenGL32.Lib")
+    #pragma comment(lib, "GlU32.Lib")
+  #endif
+#endif
+
+
+//==============================================================================
+BEGIN_JUCE_NAMESPACE
+
+#include "../../../src/juce_core/io/files/juce_File.h"
+#include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "juce_win32_DynamicLibraryLoader.h"
+
+extern void juce_updateMultiMonitorInfo(); // from WindowDriver
+
+//==============================================================================
+void Logger::outputDebugString (const String& text)
+{
+    OutputDebugString (text + T("\n"));
+}
+
+void Logger::outputDebugPrintf (const tchar* format, ...)
+{
+    String text;
+    va_list args;
+    va_start (args, format);
+    text.vprintf(format, args);
+    outputDebugString (text);
+}
+
+//==============================================================================
+static int64 hiResTicksPerSecond;
+static double hiResTicksScaleFactor;
+static SYSTEM_INFO systemInfo;
+
+static struct _LogicalCpuInfo
+{
+    bool htSupported;
+    bool htAvailable;
+    int numPackages;
+    int numLogicalPerPackage;
+    unsigned long physicalAffinityMask;
+} logicalCpuInfo;
+
+
+//==============================================================================
+#if JUCE_USE_INTRINSICS
+
+// CPU info functions using intrinsics...
+
+#pragma intrinsic (__cpuid)
+#pragma intrinsic (__rdtsc)
+
+static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
+{
+    int info [4];
+    __cpuid (info, 1);
+
+    if (familyModel != 0)
+        *familyModel = info [0];
+
+    if (extFeatures != 0)
+        *extFeatures = info[1];
+
+    return info[3];
+}
+
+const String SystemStats::getCpuVendor()
+{
+    int info [4];
+    __cpuid (info, 0);
+
+    char v [12];
+    memcpy (v, info + 1, 4);
+    memcpy (v + 4, info + 3, 4);
+    memcpy (v + 8, info + 2, 4);
+
+    return String (v, 12);
+}
+
+#else
+
+//==============================================================================
+// CPU info functions using old fashioned inline asm...
+
+static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
+{
+    unsigned int cpu = 0;
+    unsigned int ext = 0;
+    unsigned int family = 0;
+
+  #ifdef JUCE_GCC
+    unsigned int dummy = 0;
+  #endif
+
+  #ifndef __MINGW32__
+    __try
+  #endif
+    {
+  #ifdef JUCE_GCC
+        __asm__ ("cpuid" : "=a" (family), "=b" (ext), "=c" (dummy),"=d" (cpu) : "a" (1));
+  #else
+        __asm
+        {
+            mov eax, 1
+            cpuid
+            mov cpu, edx
+            mov family, eax
+            mov ext, ebx
+        }
+
+  #endif
+    }
+  #ifndef __MINGW32__
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return 0;
+    }
+  #endif
+
+    if (familyModel != 0)
+        *familyModel = family;
+
+    if (extFeatures != 0)
+        *extFeatures = ext;
+
+    return cpu;
+}
+
+static void juce_getCpuVendor (char* const v)
+{
+    int vendor[4];
+    zeromem (vendor, 16);
+
+#ifdef JUCE_64BIT
+#else
+  #ifndef __MINGW32__
+    __try
+  #endif
+    {
+  #ifdef JUCE_GCC
+        unsigned int dummy = 0;
+        __asm__ ("cpuid" : "=a" (dummy), "=b" (vendor[0]), "=c" (vendor[2]),"=d" (vendor[1]) : "a" (0));
+  #else
+        __asm
+        {
+            mov eax, 0
+            cpuid
+            mov [vendor], ebx
+            mov [vendor + 4], edx
+            mov [vendor + 8], ecx
+        }
+  #endif
+    }
+  #ifndef __MINGW32__
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        *v = 0;
+    }
+  #endif
+#endif
+
+    memcpy (v, vendor, 16);
+}
+
+const String SystemStats::getCpuVendor()
+{
+    char v [16];
+    juce_getCpuVendor (v);
+    return String (v, 16);
+}
+#endif
+
+static void initLogicalCpuInfo()
+{
+    int familyModelWord, extFeaturesWord;
+    int featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
+    HANDLE hCurrentProcessHandle = GetCurrentProcess();
+
+    logicalCpuInfo.htSupported = false;
+    logicalCpuInfo.htAvailable = false;
+    logicalCpuInfo.numLogicalPerPackage = 1;
+    logicalCpuInfo.numPackages = 0;
+    logicalCpuInfo.physicalAffinityMask = 0;
+
+    DWORD_PTR processAffinity, systemAffinity;
+
+    if (! GetProcessAffinityMask (hCurrentProcessHandle, &processAffinity, &systemAffinity))
+        return;
+
+    // Checks: CPUID supported, model >= Pentium 4, Hyperthreading bit set, logical CPUs per package > 1
+    if (featuresWord == 0
+        || ((familyModelWord >> 8) & 0xf) < 15
+        || (featuresWord & (1 << 28)) == 0
+        || ((extFeaturesWord >> 16) & 0xff) < 2)
+    {
+        logicalCpuInfo.physicalAffinityMask = static_cast <unsigned long> (processAffinity);
+        return;
+    }
+
+    logicalCpuInfo.htSupported = true;
+    logicalCpuInfo.numLogicalPerPackage = (extFeaturesWord >> 16) & 0xff;
+
+    unsigned int affinityMask;
+    unsigned int physAff = 0;
+
+    unsigned char i = 1;
+    unsigned char physIdMask = 0xFF;
+    unsigned char physIdShift = 0;
+
+    unsigned char apicId;
+    unsigned char logId;
+    unsigned char physId;
+
+    while (i < logicalCpuInfo.numLogicalPerPackage)
+    {
+        i *= 2;
+        physIdMask <<= 1;
+        physIdShift++;
+    }
+
+    affinityMask = 1;
+    logicalCpuInfo.numPackages = 0;
+
+    while ((affinityMask != 0) && (affinityMask <= processAffinity))
+    {
+        if (SetProcessAffinityMask (hCurrentProcessHandle, affinityMask))
+        {
+            Sleep(0); // schedule onto correct CPU
+
+            featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
+            apicId = (unsigned char) (extFeaturesWord >> 24);
+            logId = (unsigned char) (apicId & ~physIdMask);
+            physId = (unsigned char) (apicId >> physIdShift);
+
+            if (logId != 0)
+                logicalCpuInfo.htAvailable = true;
+
+            if ((((int) logId) % logicalCpuInfo.numLogicalPerPackage) == 0)
+            {
+                // This is a physical CPU
+                physAff |= affinityMask;
+                logicalCpuInfo.numPackages++;
+            }
+        }
+
+        affinityMask = affinityMask << 1;
+    }
+
+    logicalCpuInfo.physicalAffinityMask = physAff;
+
+    SetProcessAffinityMask(hCurrentProcessHandle, processAffinity);
+}
+
+//==============================================================================
+void juce_initialiseThreadEvents();
+void juce_initialiseUnicodeFileFunctions();
+
+static struct JuceCpuProps
+{
+    bool hasMMX : 1, hasSSE : 1, hasSSE2 : 1, has3DNow : 1;
+} juce_CpuProps;
+
+bool SystemStats::hasMMX()
+{
+    return juce_CpuProps.hasMMX;
+}
+
+bool SystemStats::hasSSE()
+{
+    return juce_CpuProps.hasSSE;
+}
+
+bool SystemStats::hasSSE2()
+{
+    return juce_CpuProps.hasSSE2;
+}
+
+bool SystemStats::has3DNow()
+{
+    return juce_CpuProps.has3DNow;
+}
+
+void SystemStats::initialiseStats()
+{
+    juce_initialiseUnicodeFileFunctions();
+    juce_initialiseThreadEvents();
+
+    juce_CpuProps.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
+    juce_CpuProps.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
+    juce_CpuProps.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
+#ifdef PF_AMD3D_INSTRUCTIONS_AVAILABLE
+    juce_CpuProps.has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
+#else
+    juce_CpuProps.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
+#endif
+
+    LARGE_INTEGER f;
+    QueryPerformanceFrequency (&f);
+    hiResTicksPerSecond = f.QuadPart;
+    hiResTicksScaleFactor = 1000.0 / hiResTicksPerSecond;
+
+    String s (SystemStats::getJUCEVersion());
+
+    GetSystemInfo (&systemInfo);
+    initLogicalCpuInfo();
+
+#ifdef JUCE_DEBUG
+    const MMRESULT res = timeBeginPeriod (1);
+    jassert (res == TIMERR_NOERROR);
+#else
+    timeBeginPeriod (1);
+#endif
+
+#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+    _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+}
+
+//==============================================================================
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
+{
+    OSVERSIONINFO info;
+    info.dwOSVersionInfoSize = sizeof (info);
+    GetVersionEx (&info);
+
+    if (info.dwPlatformId == VER_PLATFORM_WIN32_NT)
+    {
+        switch (info.dwMajorVersion)
+        {
+        case 3:
+            return WinNT351;
+
+        case 4:
+            return WinNT40;
+
+        case 5:
+            return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
+
+        case 6:
+            return WinVista;
+
+        default:
+            break;
+        }
+    }
+    else if (info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+    {
+        return (info.dwMinorVersion == 0) ? Win95 : Win98;
+    }
+
+    return UnknownOS;
+}
+
+const String SystemStats::getOperatingSystemName()
+{
+    const tchar* name = T("Unknown OS");
+
+    switch (getOperatingSystemType())
+    {
+    case WinXP:
+        name = T("Windows XP");
+        break;
+
+    case Win2000:
+        name = T("Windows 2000");
+        break;
+
+    case Win98:
+        name = T("Windows 98");
+        break;
+
+    case Win95:
+        name = T("Windows 95");
+        break;
+
+    case WinNT351:
+        name = T("Windows NT 3.51");
+        break;
+
+    case WinNT40:
+        name = T("Windows NT4");
+        break;
+
+    case WinVista:
+        name = T("Windows Vista");
+        break;
+
+    default:
+        break;
+    }
+
+    return name;
+}
+
+//==============================================================================
+int SystemStats::getMemorySizeInMegabytes()
+{
+    MEMORYSTATUS mem;
+    GlobalMemoryStatus (&mem);
+    return (int) (mem.dwTotalPhys / (1024 * 1024)) + 1;
+}
+
+bool SystemStats::hasHyperThreading()
+{
+    return logicalCpuInfo.htAvailable;
+}
+
+int SystemStats::getNumPhysicalCpus()
+{
+    if (logicalCpuInfo.numPackages)
+        return logicalCpuInfo.numPackages;
+
+    return getNumLogicalCpus();
+}
+
+int SystemStats::getNumLogicalCpus()
+{
+    return systemInfo.dwNumberOfProcessors;
+}
+
+uint32 SystemStats::getPhysicalAffinityMask()
+{
+    return logicalCpuInfo.physicalAffinityMask;
+}
+
+//==============================================================================
+uint32 juce_millisecondsSinceStartup() throw()
+{
+    return (uint32) GetTickCount();
+}
+
+int64 Time::getHighResolutionTicks() throw()
+{
+    LARGE_INTEGER ticks;
+    QueryPerformanceCounter (&ticks);
+
+    const int64 mainCounterAsHiResTicks = (GetTickCount() * hiResTicksPerSecond) / 1000;
+    const int64 newOffset = mainCounterAsHiResTicks - ticks.QuadPart;
+
+    // fix for a very obscure PCI hardware bug that can make the counter
+    // sometimes jump forwards by a few seconds..
+    static int64 hiResTicksOffset = 0;
+    const int offsetDrift = abs ((int) (newOffset - hiResTicksOffset));
+
+    if (offsetDrift > ((int) hiResTicksPerSecond) >> 1)
+        hiResTicksOffset = newOffset;
+
+    return ticks.QuadPart + hiResTicksOffset;
+}
+
+double Time::getMillisecondCounterHiRes() throw()
+{
+    return getHighResolutionTicks() * hiResTicksScaleFactor;
+}
+
+int64 Time::getHighResolutionTicksPerSecond() throw()
+{
+    return hiResTicksPerSecond;
+}
+
+int64 SystemStats::getClockCycleCounter()
+{
+#if JUCE_USE_INTRINSICS
+    // MS intrinsics version...
+    return __rdtsc();
+
+#elif JUCE_GCC
+    // GNU inline asm version...
+    unsigned int hi = 0, lo = 0;
+
+    __asm__ __volatile__ (
+        "xor %%eax, %%eax               \n\
+         xor %%edx, %%edx               \n\
+         rdtsc                          \n\
+         movl %%eax, %[lo]              \n\
+         movl %%edx, %[hi]"
+         :
+         : [hi] "m" (hi),
+           [lo] "m" (lo)
+         : "cc", "eax", "ebx", "ecx", "edx", "memory");
+
+    return (int64) ((((uint64) hi) << 32) | lo);
+#else
+    // MSVC inline asm version...
+    unsigned int hi = 0, lo = 0;
+
+    __asm
+    {
+        xor eax, eax
+        xor edx, edx
+        rdtsc
+        mov lo, eax
+        mov hi, edx
+    }
+
+    return (int64) ((((uint64) hi) << 32) | lo);
+#endif
+}
+
+int SystemStats::getCpuSpeedInMegaherz()
+{
+    const int64 cycles = SystemStats::getClockCycleCounter();
+    const uint32 millis = Time::getMillisecondCounter();
+    int lastResult = 0;
+
+    for (;;)
+    {
+        int n = 1000000;
+        while (--n > 0) {}
+
+        const uint32 millisElapsed = Time::getMillisecondCounter() - millis;
+        const int64 cyclesNow = SystemStats::getClockCycleCounter();
+
+        if (millisElapsed > 80)
+        {
+            const int newResult = (int) (((cyclesNow - cycles) / millisElapsed) / 1000);
+
+            if (millisElapsed > 500 || (lastResult == newResult && newResult > 100))
+                return newResult;
+
+            lastResult = newResult;
+        }
+    }
+}
+
+
+//==============================================================================
+bool Time::setSystemTimeToThisTime() const
+{
+    SYSTEMTIME st;
+
+    st.wDayOfWeek = 0;
+    st.wYear           = (WORD) getYear();
+    st.wMonth          = (WORD) (getMonth() + 1);
+    st.wDay            = (WORD) getDayOfMonth();
+    st.wHour           = (WORD) getHours();
+    st.wMinute         = (WORD) getMinutes();
+    st.wSecond         = (WORD) getSeconds();
+    st.wMilliseconds   = (WORD) (millisSinceEpoch % 1000);
+
+    // do this twice because of daylight saving conversion problems - the
+    // first one sets it up, the second one kicks it in.
+    return SetLocalTime (&st) != 0
+            && SetLocalTime (&st) != 0;
+}
+
+int SystemStats::getPageSize()
+{
+    return systemInfo.dwPageSize;
+}
+
+END_JUCE_NAMESPACE

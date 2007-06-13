@@ -1,0 +1,193 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-7 by Raw Material Software ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the
+   GNU General Public License, as published by the Free Software Foundation;
+   either version 2 of the License, or (at your option) any later version.
+
+   JUCE is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with JUCE; if not, visit www.gnu.org/licenses or write to the
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Boston, MA 02111-1307 USA
+
+  ------------------------------------------------------------------------------
+
+   If you'd like to release a closed-source product which uses JUCE, commercial
+   licenses are also available: visit www.rawmaterialsoftware.com/juce for
+   more information.
+
+  ==============================================================================
+*/
+
+#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
+#define __JUCE_PROPERTYSET_JUCEHEADER__
+
+#include "../text/juce_StringPairArray.h"
+#include "../text/juce_XmlElement.h"
+
+
+//==============================================================================
+/**
+    A set of named property values, which can be strings, integers, floating point, etc.
+
+    Effectively, this just wraps a StringPairArray in an interface that makes it easier
+    to load and save types other than strings.
+
+    See the PropertiesFile class for a subclass of this, which automatically broadcasts change
+    messages and saves/loads the list from a file.
+*/
+class JUCE_API  PropertySet
+{
+public:
+    //==============================================================================
+    /** Creates an empty PropertySet.
+
+        @param ignoreCaseOfKeyNames         if true, the names of properties are compared in a
+                                            case-insensitive way
+    */
+    PropertySet (const bool ignoreCaseOfKeyNames = false);
+
+    /** Destructor. */
+    virtual ~PropertySet();
+
+    //==============================================================================
+    /** Returns one of the properties as a string.
+
+        @param keyName              the name of the property to retrieve
+        @param defaultReturnValue   a value to return if the named property doesn't actually exist
+    */
+    const String getValue (const String& keyName,
+                           const String& defaultReturnValue = String::empty) const throw();
+
+    /** Returns one of the properties as an integer.
+
+        @param keyName              the name of the property to retrieve
+        @param defaultReturnValue   a value to return if the named property doesn't actually exist
+    */
+    int getIntValue (const String& keyName,
+                     const int defaultReturnValue = 0) const throw();
+
+    /** Returns one of the properties as an double.
+
+        @param keyName              the name of the property to retrieve
+        @param defaultReturnValue   a value to return if the named property doesn't actually exist
+    */
+    double getDoubleValue (const String& keyName,
+                           const double defaultReturnValue = 0.0) const throw();
+
+    /** Returns one of the properties as an boolean.
+
+        The result will be true if the string found for this key name can be parsed as a non-zero
+        integer.
+
+        @param keyName              the name of the property to retrieve
+        @param defaultReturnValue   a value to return if the named property doesn't actually exist
+    */
+    bool getBoolValue (const String& keyName,
+                       const bool defaultReturnValue = false) const throw();
+
+    /** Returns one of the properties as an XML element.
+
+        The result will a new XMLElement object that the caller must delete. If may return 0 if the
+        key isn't found, or if the entry contains an string that isn't valid XML.
+
+        @param keyName              the name of the property to retrieve
+    */
+    XmlElement* getXmlValue (const String& keyName) const;
+
+    //==============================================================================
+    /** Sets a named property as a string.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param value        the new value to set it to
+    */
+    void setValue (const String& keyName, const String& value) throw();
+
+    /** Sets a named property as a string.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param value        the new value to set it to
+    */
+    void setValue (const String& keyName, const tchar* const value) throw();
+
+    /** Sets a named property to an integer.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param value        the new value to set it to
+    */
+    void setValue (const String& keyName, const int value) throw();
+
+    /** Sets a named property to a double.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param value        the new value to set it to
+    */
+    void setValue (const String& keyName, const double value) throw();
+
+    /** Sets a named property to a boolean.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param value        the new value to set it to
+    */
+    void setValue (const String& keyName, const bool value) throw();
+
+    /** Sets a named property to an XML element.
+
+        @param keyName      the name of the property to set. (This mustn't be an empty string)
+        @param xml          the new element to set it to. If this is zero, the value will be set to
+                            an empty string
+        @see getXmlValue
+    */
+    void setValue (const String& keyName, const XmlElement* const xml);
+
+    //==============================================================================
+    /** Deletes a property.
+
+        @param keyName      the name of the property to delete. (This mustn't be an empty string)
+    */
+    void removeValue (const String& keyName) throw();
+
+    /** Returns true if the properies include the given key. */
+    bool containsKey (const String& keyName) const throw();
+
+    //==============================================================================
+    /** Returns the keys/value pair array containing all the properties. */
+    StringPairArray& getAllProperties() throw()                         { return properties; }
+
+    /** Returns the lock used when reading or writing to this set */
+    const CriticalSection& getLock() const throw()                      { return lock; }
+
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+
+protected:
+    //==============================================================================
+    /** Subclasses can override this to be told when one of the properies has been changed.
+    */
+    virtual void propertyChanged();
+
+
+private:
+    //==============================================================================
+    StringPairArray properties;
+    bool ignoreCaseOfKeys;
+    CriticalSection lock;
+
+    PropertySet (const PropertySet&);
+    const PropertySet& operator= (const PropertySet&);
+};
+
+
+#endif   // __JUCE_PROPERTYSET_JUCEHEADER__

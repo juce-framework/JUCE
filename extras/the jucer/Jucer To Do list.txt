@@ -1,0 +1,28 @@
+
+Jucer things to do:
+====================
+
+- add tooltips when testing components
+- add password character option to textboxes
+- add a field for specifying constructor parameters for the component's base class
+- add textbox font settings
+- ability to change some properties when more than one item is selected
+- a treeview of sub-objects and graphics elements, which can be selected
+- creation of more event handling callback code for the various types of component
+- polygon editing needs to be better and to support creating sub-paths
+- gradient points should probably be relative to the shape they're in rather than the whole component (not sure about this though)
+- look-and-feel editing
+- add lots of code comments explaining how it all works!
+- add UI help tips for the various property editors
+- grouping components
+- component effects like drop-shadows, etc
+- some way of selecting things that are behind other things
+- add callbacks for embedded jucer comps that are buttons
+- flip + rotate of shapes
+- editor for setting component properties on any component
+- hit test alpha channel options
+- auto-scrolling when you drag the mouse
+- allow gradients to have more intermediate colours
+- menu editor
+- options for making font sizes, rounded rect corners, etc proportional
+- allow standard widgets to specify a custom sub-class which will be created instead of the normal classname

@@ -1,0 +1,157 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-7 by Raw Material Software ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the
+   GNU General Public License, as published by the Free Software Foundation;
+   either version 2 of the License, or (at your option) any later version.
+
+   JUCE is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with JUCE; if not, visit www.gnu.org/licenses or write to the
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Boston, MA 02111-1307 USA
+
+  ------------------------------------------------------------------------------
+
+   If you'd like to release a closed-source product which uses JUCE, commercial
+   licenses are also available: visit www.rawmaterialsoftware.com/juce for
+   more information.
+
+  ==============================================================================
+*/
+
+#ifndef __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
+#define __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
+
+#include "juce_PropertiesFile.h"
+#include "juce_DeletedAtShutdown.h"
+#include "../../juce_core/basics/juce_Singleton.h"
+
+
+//==============================================================================
+/**
+    Manages a collection of properties.
+
+    This is a slightly higher-level wrapper for PropertiesFile, which can be used
+    as a singleton.
+
+    It holds two different PropertiesFile objects internally, one for user-specific
+    settings (stored in your user directory), and one for settings that are common to
+    all users (stored in a folder accessible to all users).
+
+    The class manages the creation of these files on-demand, allowing access via the
+    getUserSettings() and getCommonSettings() methods. It also has a few handy
+    methods like testWriteAccess() to check that the files can be saved.
+
+    If you're using one of these as a singleton, then your app's start-up code should
+    first of all call setStorageParameters() to tell it the parameters to use to create
+    the properties files.
+
+    @see PropertiesFile
+*/
+class JUCE_API  ApplicationProperties   : public DeletedAtShutdown
+{
+public:
+    //==============================================================================
+    /**
+        Creates an ApplicationProperties object.
+
+        Before using it, you must call setStorageParameters() to give it the info
+        it needs to create the property files.
+    */
+    ApplicationProperties();
+
+    /** Destructor.
+    */
+    ~ApplicationProperties();
+
+    //==============================================================================
+    juce_DeclareSingleton (ApplicationProperties, false)
+
+    //==============================================================================
+    /** Gives the object the information it needs to create the appropriate properties files.
+
+        See the comments for PropertiesFile::createDefaultAppPropertiesFile() for more
+        info about how these parameters are used.
+    */
+    void setStorageParameters (const String& applicationName,
+                               const String& fileNameSuffix,
+                               const String& folderName,
+                               const int millisecondsBeforeSaving,
+                               const int propertiesFileOptions);
+
+    /** Tests whether the files can be successfully written to, and can show
+        an error message if not.
+
+        Returns true if none of the tests fail.
+
+        @param testUserSettings     if true, the user settings file will be tested
+        @param testCommonSettings   if true, the common settings file will be tested
+        @param showWarningDialogOnFailure   if true, the method will show a helpful error
+                                    message box if either of the tests fail
+    */
+    bool testWriteAccess (const bool testUserSettings,
+                          const bool testCommonSettings,
+                          const bool showWarningDialogOnFailure);
+
+    //==============================================================================
+    /** Returns the user settings file.
+
+        The first time this is called, it will create and load the file.
+
+        @see getCommonSettings
+    */
+    PropertiesFile* getUserSettings();
+
+    /** Returns the common settings file.
+
+        The first time this is called, it will create and load the file.
+
+        If the common settings file doesn't have write access but the user one does,
+        then this may return the same PropertiesFile object as getUserSettings().
+
+        @see getUserSettings
+    */
+    PropertiesFile* getCommonSettings();
+
+    //==============================================================================
+    /** Saves both files if they need to be saved.
+
+        @see PropertiesFile::saveIfNeeded
+    */
+    bool saveIfNeeded();
+
+    /** Flushes and closes both files if they are open.
+
+        This flushes any pending changes to disk with PropertiesFile::saveIfNeeded()
+        and closes both files. They will then be re-opened the next time getUserSettings()
+        or getCommonSettings() is called.
+    */
+    void closeFiles();
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    //==============================================================================
+    PropertiesFile* userProps;
+    PropertiesFile* commonProps;
+
+    String appName, fileSuffix, folderName;
+    int msBeforeSaving, options;
+
+    ApplicationProperties (const ApplicationProperties&);
+    const ApplicationProperties& operator= (const ApplicationProperties&);
+};
+
+
+#endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__

@@ -1,0 +1,301 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8456E9D008A29AE60087C412 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8456E9CF08A29AE60087C412 /* CoreServices.framework */; };
+		845FAE4C0A5C09FA008C94D8 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */; };
+		84BACBD20987847C0073300C /* juce_VstWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84BACBD10987847C0073300C /* juce_VstWrapper.cpp */; };
+		84E1AE51089EBAAA00E85E4F /* DemoEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE4D089EBAAA00E85E4F /* DemoEditorComponent.cpp */; };
+		84E1AE52089EBAAA00E85E4F /* DemoJuceFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE4F089EBAAA00E85E4F /* DemoJuceFilter.cpp */; };
+		84E1AE59089EBAEA00E85E4F /* juce_AudioFilterBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE55089EBAEA00E85E4F /* juce_AudioFilterBase.cpp */; };
+		84E1AE5A089EBAEA00E85E4F /* juce_AudioFilterEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE57089EBAEA00E85E4F /* juce_AudioFilterEditor.cpp */; };
+		84E1AF2B089EBE4C00E85E4F /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E1AF2A089EBE4C00E85E4F /* Carbon.framework */; };
+		84E1AF30089EBE5A00E85E4F /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E1AF2F089EBE5A00E85E4F /* QuickTime.framework */; };
+		84E1AF34089EBE6C00E85E4F /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E1AF33089EBE6C00E85E4F /* AGL.framework */; };
+		84E1AF38089EBF1300E85E4F /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E1AF37089EBF1300E85E4F /* CoreAudio.framework */; };
+		84E1AF42089EBFD900E85E4F /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84E1AF41089EBFD900E85E4F /* Info.plist */; };
+		84F5CF040B1B66B100A2E279 /* How to use this framework.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84F5CF030B1B66B100A2E279 /* How to use this framework.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		84551AA009BDB8F3009C9F3E /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
+		8456E9CF08A29AE60087C412 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
+		845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
+		84BACBD10987847C0073300C /* juce_VstWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_VstWrapper.cpp; path = ../../../wrapper/formats/VST/juce_VstWrapper.cpp; sourceTree = SOURCE_ROOT; };
+		84E1AE47089EBA6A00E85E4F /* JuceVST.vst */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuceVST.vst; sourceTree = BUILT_PRODUCTS_DIR; };
+		84E1AE4D089EBAAA00E85E4F /* DemoEditorComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DemoEditorComponent.cpp; path = ../../src/DemoEditorComponent.cpp; sourceTree = SOURCE_ROOT; };
+		84E1AE4E089EBAAA00E85E4F /* DemoEditorComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DemoEditorComponent.h; path = ../../src/DemoEditorComponent.h; sourceTree = SOURCE_ROOT; };
+		84E1AE4F089EBAAA00E85E4F /* DemoJuceFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DemoJuceFilter.cpp; path = ../../src/DemoJuceFilter.cpp; sourceTree = SOURCE_ROOT; };
+		84E1AE50089EBAAA00E85E4F /* DemoJuceFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DemoJuceFilter.h; path = ../../src/DemoJuceFilter.h; sourceTree = SOURCE_ROOT; };
+		84E1AE55089EBAEA00E85E4F /* juce_AudioFilterBase.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioFilterBase.cpp; path = ../../../wrapper/juce_AudioFilterBase.cpp; sourceTree = SOURCE_ROOT; };
+		84E1AE56089EBAEA00E85E4F /* juce_AudioFilterBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_AudioFilterBase.h; path = ../../../wrapper/juce_AudioFilterBase.h; sourceTree = SOURCE_ROOT; };
+		84E1AE57089EBAEA00E85E4F /* juce_AudioFilterEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioFilterEditor.cpp; path = ../../../wrapper/juce_AudioFilterEditor.cpp; sourceTree = SOURCE_ROOT; };
+		84E1AE58089EBAEA00E85E4F /* juce_AudioFilterEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_AudioFilterEditor.h; path = ../../../wrapper/juce_AudioFilterEditor.h; sourceTree = SOURCE_ROOT; };
+		84E1AF2A089EBE4C00E85E4F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		84E1AF2F089EBE5A00E85E4F /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
+		84E1AF33089EBE6C00E85E4F /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		84E1AF37089EBF1300E85E4F /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
+		84E1AF41089EBFD900E85E4F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
+		84F5CF030B1B66B100A2E279 /* How to use this framework.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "How to use this framework.txt"; path = "../../../How to use this framework.txt"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		84E1AE45089EBA6A00E85E4F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84E1AF2B089EBE4C00E85E4F /* Carbon.framework in Frameworks */,
+				84E1AF30089EBE5A00E85E4F /* QuickTime.framework in Frameworks */,
+				84E1AF34089EBE6C00E85E4F /* AGL.framework in Frameworks */,
+				84E1AF38089EBF1300E85E4F /* CoreAudio.framework in Frameworks */,
+				8456E9D008A29AE60087C412 /* CoreServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		089C166AFE841209C02AAC07 /* JuceVST */ = {
+			isa = PBXGroup;
+			children = (
+				08FB77ADFE841716C02AAC07 /* Source */,
+				84F5CF030B1B66B100A2E279 /* How to use this framework.txt */,
+				089C167CFE841241C02AAC07 /* Resources */,
+				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
+				19C28FB4FE9D528D11CA2CBB /* Products */,
+			);
+			name = JuceVST;
+			sourceTree = "<group>";
+		};
+		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AF2A089EBE4C00E85E4F /* Carbon.framework */,
+				8456E9CF08A29AE60087C412 /* CoreServices.framework */,
+				84E1AF37089EBF1300E85E4F /* CoreAudio.framework */,
+				84E1AF33089EBE6C00E85E4F /* AGL.framework */,
+				84E1AF2F089EBE5A00E85E4F /* QuickTime.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C167CFE841241C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AF41089EBFD900E85E4F /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ADFE841716C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AE4C089EBA9300E85E4F /* filter */,
+				84E1AE53089EBACA00E85E4F /* wrapper code */,
+				845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		19C28FB4FE9D528D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AE47089EBA6A00E85E4F /* JuceVST.vst */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		84E1AE4C089EBA9300E85E4F /* filter */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AE4D089EBAAA00E85E4F /* DemoEditorComponent.cpp */,
+				84E1AE4E089EBAAA00E85E4F /* DemoEditorComponent.h */,
+				84E1AE4F089EBAAA00E85E4F /* DemoJuceFilter.cpp */,
+				84E1AE50089EBAAA00E85E4F /* DemoJuceFilter.h */,
+				84551AA009BDB8F3009C9F3E /* JucePluginCharacteristics.h */,
+			);
+			name = filter;
+			sourceTree = "<group>";
+		};
+		84E1AE53089EBACA00E85E4F /* wrapper code */ = {
+			isa = PBXGroup;
+			children = (
+				84E1AE55089EBAEA00E85E4F /* juce_AudioFilterBase.cpp */,
+				84E1AE56089EBAEA00E85E4F /* juce_AudioFilterBase.h */,
+				84E1AE57089EBAEA00E85E4F /* juce_AudioFilterEditor.cpp */,
+				84E1AE58089EBAEA00E85E4F /* juce_AudioFilterEditor.h */,
+				84E1AE54089EBAD200E85E4F /* VST specific */,
+			);
+			name = "wrapper code";
+			sourceTree = "<group>";
+		};
+		84E1AE54089EBAD200E85E4F /* VST specific */ = {
+			isa = PBXGroup;
+			children = (
+				84BACBD10987847C0073300C /* juce_VstWrapper.cpp */,
+			);
+			name = "VST specific";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		84E1AE46089EBA6A00E85E4F /* JuceVST */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84E1AE48089EBA8900E85E4F /* Build configuration list for PBXNativeTarget "JuceVST" */;
+			buildPhases = (
+				84E1AE43089EBA6A00E85E4F /* Resources */,
+				84E1AE44089EBA6A00E85E4F /* Sources */,
+				84E1AE45089EBA6A00E85E4F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JuceVST;
+			productName = JuceVST;
+			productReference = 84E1AE47089EBA6A00E85E4F /* JuceVST.vst */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		089C1669FE841209C02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 84E1ADD2089EB1BA00E85E4F /* Build configuration list for PBXProject "JuceVST" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 089C166AFE841209C02AAC07 /* JuceVST */;
+			projectDirPath = "";
+			targets = (
+				84E1AE46089EBA6A00E85E4F /* JuceVST */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		84E1AE43089EBA6A00E85E4F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84E1AF42089EBFD900E85E4F /* Info.plist in Resources */,
+				845FAE4C0A5C09FA008C94D8 /* juce.xcconfig in Resources */,
+				84F5CF040B1B66B100A2E279 /* How to use this framework.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		84E1AE44089EBA6A00E85E4F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84E1AE51089EBAAA00E85E4F /* DemoEditorComponent.cpp in Sources */,
+				84E1AE52089EBAAA00E85E4F /* DemoJuceFilter.cpp in Sources */,
+				84E1AE59089EBAEA00E85E4F /* juce_AudioFilterBase.cpp in Sources */,
+				84E1AE5A089EBAEA00E85E4F /* juce_AudioFilterEditor.cpp in Sources */,
+				84BACBD20987847C0073300C /* juce_VstWrapper.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		84E1ADD3089EB1BA00E85E4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				HEADER_SEARCH_PATHS = (
+					../../../../..,
+					"~/stuff/vstsdk2.4/",
+				);
+				LIBRARY_SEARCH_PATHS = ../../../../../bin;
+				OTHER_LDFLAGS = "-ljucedebug";
+			};
+			name = Debug;
+		};
+		84E1ADD4089EB1BA00E85E4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = NDEBUG;
+				HEADER_SEARCH_PATHS = (
+					../../../../..,
+					"~/stuff/vstsdk2.4/",
+				);
+				LIBRARY_SEARCH_PATHS = ../../../../../bin;
+				OTHER_LDFLAGS = "-ljuce";
+			};
+			name = Release;
+		};
+		84E1AE49089EBA8900E85E4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = info.plist;
+				PRODUCT_NAME = JuceVST;
+				SYMROOT = "$(HOME)/Library/Audio/Plug-Ins/VST";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = vst;
+			};
+			name = Debug;
+		};
+		84E1AE4A089EBA8900E85E4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = info.plist;
+				PRODUCT_NAME = JuceVST;
+				SYMROOT = "$(HOME)/Library/Audio/Plug-Ins/VST";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = vst;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		84E1ADD2089EB1BA00E85E4F /* Build configuration list for PBXProject "JuceVST" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84E1ADD3089EB1BA00E85E4F /* Debug */,
+				84E1ADD4089EB1BA00E85E4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		84E1AE48089EBA8900E85E4F /* Build configuration list for PBXNativeTarget "JuceVST" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84E1AE49089EBA8900E85E4F /* Debug */,
+				84E1AE4A089EBA8900E85E4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
+}

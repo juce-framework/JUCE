@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="windows-1250"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="Content-Language" content="en-us" />
+<meta name="description" content="Raw Material Software" />
+<meta name="keywords" content="audio, music, juce, tracktion, c++, sequencer, library, programming, software, julian storer$otherkeywords" />
+<meta name="robots" content="index,follow" />
+<title>JUCE - installation and compiling</title>
+<link href="rawmat.css" rel="stylesheet" type="text/css" media="all" />
+</head>
+
+<body>
+<div class="pageholder">
+
+<div class="banner">
+<a href="http://www.rawmaterialsoftware.com">
+<img src="images/rms_logo.gif" alt="raw material software" title="raw material software"/></a>
+</div>
+
+<p><a href="#intro">Introduction</a> - <a href="#license">License</a> - 
+<a href="#install">Installation</a> -
+<a href="#buildvc2005">Building with VC2005</a> - 
+<a href="#buildvcx">Building with VC Express</a> - 
+<a href="#buildvc6">Building with VC6</a> -
+<a href="#buildvc7">Building with VC7</a> -
+<a href="#buildxcode">Building with XCode</a> -
+<a href="#builddevcpp">Building with Dev-Cpp</a> -
+<a href="#buildlinux">Building on Linux</a> -
+</p>
+
+<h1>JUCE</h1>
+
+<h2><a name="intro"></a>Introduction</h2>
+
+<p>JUCE is an all-encompassing C++ class
+library for developing cross-platform applications.</p>
+
+<p>A complete doxygen-created API guide is available <a href="http://www.rawmaterialsoftware.com/juce/api/index.html" target="juce api">here</a> 
+as HTML, or can be downloaded as a precompiled Windows help file from the 
+<a href="http://www.rawmaterialsoftware.com/juce/download.php">downloads</a> page.</p>
+
+<p>For more help and information, please visit the <a href="http://www.rawmaterialsoftware.com/juce">JUCE website</a>.</p>
+<h2><a name="license"></a>License</h2>
+
+<p>JUCE is released under the <a href="http://www.gnu.org/copyleft/gpl.html">Gnu Public License</a>, 
+which means it can be freely copied and distributed, and costs nothing to use in open-source applications.</p>
+<p>If you'd like to release a closed-source application that uses JUCE, commercial licenses are available 
+for a fee - click <a href="http://www.rawmaterialsoftware.com/juce/licensing.php">here</a> for more information on pricing and terms.</p>
+
+<h2><a name="install"></a>Installation</h2>
+
+<h3>Installing the source code</h3>
+
+<p>The JUCE source code all lives in a folder called, unsurprisingly, <code>juce</code>, which you can unzip 
+and put somewhere on your system.</p>
+
+<p>To compile the library, there is a subfolder <code>juce/build</code> that contains projects for different 
+operating systems and compilers.</p>
+
+<h3>Building the demo application</h3>
+
+<p>Inside the <code>juce</code> folder is a demo application that shows off a few of Juce's features. 
+The <code>juce/extras/juce demo/build</code> folder contains projects and workspaces for the various platforms and compilers.</p>
+
+<h2>Building your application with JUCE</h2>
+
+<h3><a name="buildvc2005"></a>Compiling with Microsoft Visual Studio 2005</h3>
+
+<p>The quickest way to get started is to try building the demo application - there's a Visual Studio
+soluion in <code>juce/extras/juce demo/build/win32_vc8/jucedemo.sln</code> which contains both the juce 
+library project and the demo application project.</p>
+<p>This should build and run with no extra set-up needed in Visual Studio. (If you're using VCExpress Edition
+see below for the few extra steps needed).</p>
+<p>The only thing to check if you're unfamiliar with Visual Studio is that the <code>jucedemo</code> 
+project needs to be selected as your "startup" project (right-click on the 
+jucedemo project in the solution explorer for this option). Also, the active configuration should be
+set to "Debug" or "Release", (the first time you load a project, VS selects one of the configurations and 
+usually picks "Debug DLL" as its default, for reasons best known to itself).</p>
+
+<p>To create your own application that links to Juce:</p>
+<ol>
+<li>Either make a copy of the example project in <code>juce/projects</code> and rename/customise 
+it, or create a new application project as an 'empty' WIN32 application - avoid saying yes to 
+MFC or any of the other rubbish that Visual Studio might offer to pollute your application with.</li>
+<li>Include the header file <code>juce.h</code> in all your source files (it's best to
+put this in a precompiled header).</li>
+<li>Ensure that the linker's search path for libraries includes the the <code>juce/bin</code> directory.
+This path can be set globally, or can be added to your project's linker settings.</li>
+<li>Choose to link to the "Multithreaded" or "Debug Multithreaded" run-time libraries, depending on
+whether you're doing a debug or release build. On VC6, this is set in the Project Settings / C/C++ / Code
+Generation options panel. In Visual Studio, it's in the project properties.</li>
+<li>Make sure that your project has exception handling and run-time type information (RTTI) turned ON.</li>
+<li>Have a look at the 'hello world' projects, demo projects, or the API documentation about the 
+<code>JUCEApplication</code> class to find out how to create the application launch code.</li>
+</ol>
+
+<h3><a name="buildvcx"></a>Compiling with Microsoft Visual C++ Express edition</h3>
+
+<p>Although VCExpress is basically the same thing as Visual Studio 2005, it doesn't come
+with all the Win32 library code pre-installed, so a couple of extra steps are required before JUCE
+can be compiled with it:</p>
+
+<ol>
+<li>Install the latest Platform SDK from Microsoft.</li>
+<li>A few extra items need to be added to your include and library search paths. The first few 
+entries on your include path should look like this (obviously you might have things installed in 
+different places, but the order is important!):
+<pre>C:\Program Files\Microsoft Platform SDK\include
+C:\Program Files\Microsoft Platform SDK\include\crt
+C:\Program Files\Microsoft Platform SDK\include\mfc
+C:\mycode\juce
+...</pre>
+And the library search path should begin like this:
+<pre>$(VSInstallDir)VC\lib
+C:\Program Files\Microsoft Platform SDK\lib
+C:\mycode\juce\bin
+...</pre>
+</li>
+</ol>
+    
+<p>Then, you can follow the same instructions as for Visual Studio 2005 above.</p>
+
+<h3><a name="buildvc6"></a>Compiling with Microsoft Visual Studio 6</h3>
+
+<p>To compile the JUCE .lib files from the source code:</p>
+
+<ol>
+<li>Install the latest Platform SDK from Microsoft.</li>
+<li>Set up your include and library search paths. The first few items on your include path 
+should look like this (obviously you might have things installed in different places, but the 
+order is important!):
+<pre>C:\Program Files\Microsoft Platform SDK\include
+C:\Program Files\Microsoft Platform SDK\include\crt
+C:\Program Files\Microsoft Platform SDK\include\mfc
+C:\mycode\juce
+...</pre>
+And the library search path should begin like this:
+<pre>C:\Program Files\Microsoft Visual Studio\VC98\LIB
+C:\Program Files\Microsoft Platform SDK\lib
+C:\mycode\juce\bin
+...</pre>
+</li>
+<li>Open the juce.dsp project file in <code>juce/build/win32/vc6</code></li>
+<li>There are several configurations: debug, release, debug-unicode, and release-unicode. 
+You can build all or some of these, and the resultant .lib files should end up in the 
+"juce/bin" folder.</li>
+</ol>
+
+<p>Note that there's a rather lame bug in VC6 that causes an internal compiler error if you include
+filenames that are too long. This can get triggered if you put the juce folder in a deeply-nested
+directory (such as your user home directory). Unfortunately I think the only workaround for this 
+is to move the source tree to a shallower directory.</p>
+
+<p>For info on how to create an application that uses Juce, see the VC2005 notes above.</p>
+
+<h3><a name="buildvc7"></a>Compiling with Microsoft Visual Studio 7</h3>
+
+<p>For VC7, you can import the VC6 projects and this should work ok. It's also possible to
+tweak the version number in the VC8 projects so that they can be opened in VC7, but that's a 
+less reliable method!</p>
+
+<h3><a name="buildxcode"></a>Compiling with XCode on MacOSX</h3>
+
+<p>To compile the JUCE binaries from the source code:</p>
+
+<ol>
+<li>Open the <code>Juce.xcodeproj</code> file in <code>juce/build/macosx</code></li>
+<li>This project has "debug" and "release" configurations, and the library files it creates
+are <code>libjuce.a</code> (release) and <code>libjucedebug.a</code> (debug), which will appear 
+in the <code>juce/bin</code> directory.</li>
+</ol>
+
+<p>Then, to create and build an application:</p>
+
+<ol>
+<li>Either make a copy of the example project in <code>juce/extras/example projects</code> and rename/customise it, or
+create a new "Carbon Application" project.</li>
+<li>Include the header file <code>juce.h</code> in all your source files.</li>
+<li>Get rid of any main() functions that XCode might have generated for you, and instead use the 
+<code>JUCEApplication</code> class as your application launcher - see the API documentation for this 
+class for more details, or have a look at the example projects, or demos.</li>
+<li>Drag-and-drop the <code>juce.xcodeproj</code> file into the project's "External Frameworks and Libraries" 
+list.</li>
+<li>Expand this item in the treeview, and inside there'll be an item "libjuce.a" or "libjucedebug.a" - drag-and-drop
+this into the "link binary with libraries" phase inside the xcode target. When you select either a debug
+or release juce build these entries will (usually) update themselves to show the correct debug or release library
+name. If you want your project to automatically rebuild Juce when you make changes to a juce file, you can 
+also add Juce to your target's "Direct Dependency" list (show information for the target, and this is on the 
+"general" tab).<br/>Alternative ways of linking to juce would be to add the libjuce.a or libjucedebug.a library to
+your "External Frameworks and Libraries" list, or to add switch to the linker's command-line of either "-ljuce" 
+or "-ljucedebug".</li>
+<li>You'll also need to add some of the following OSX frameworks to your "External Frameworks and Libraries" list,
+depending on what features your application uses:
+<pre>Carbon.framework
+IOKit.framework
+CoreAudio.framework
+CoreMIDI.framework
+QuickTime.framework
+OpenGL.framework
+AGL.framework</pre>
+In future there may be other frameworks that you'll need to link with to support new JUCE features. 
+(It should be pretty obvious from the link-time error when one of these is missing).
+</li>
+</ol>
+
+<h3><a name="builddevcpp"></a>Creating a JUCE application with Dev-C++</h3>
+<ol>
+<li>open <code>\juce\build\win32\devcpp\juce.dev</code></li>
+<li>You may need to install the Platform SDK from Microsoft, and add <pre>C:\Program Files\Microsoft Platform SDK\Include</pre>
+at the <strong>end</strong> of your include path to get some of the more recent header files.</li>
+<li>Compile! It should produce a library file called <code>juce/bin/libjuce.a</code></li>
+</ol>
+
+<p>Then, to create and build an application:</p>
+<ol>
+<li>Create a new project, as a "win32 GUI".</li>
+<li>Remove <code>main.cpp</code></li>
+<li>Either copy the example main.cpp from the MSVC juce example project, or write your own based
+around the <code>JUCEApplication</code> class</li>
+<li>In your project settings (alt-P), you'll need to adjust the linker's options so that it links the following libraries:
+<pre>libjuce.a (this will be in your juce/bin/ directory)
+libwininet.a
+libdsound.a
+libole32.a
+libwinmm.a
+libgdi32.a
+libuuid.a
+libshell32.a
+libvfw32.a
+librpcrt4.a (these are all in the Dev-C++ libraries folder)</pre>
+</li>
+</ol>
+
+<h3><a name="buildlinux"></a>Creating a JUCE application on Linux with GCC</h3>
+
+<ol>
+<li>Most linux distros should come with the tools you need, although you might want to get hold of 
+<a href="http://premake.sourceforge.net/">premake</a>, which is used to automatically generate the
+juce makefile. (This isn't necessary if you're just going to use the makefile that's provided).</li>
+<li>Get a command prompt and go into <code>/juce/build/linux</code></li>
+<li>To build the debug version, use "<code>make CONFIG=Debug</code>", or use "<code>make CONFIG=Release</code>" 
+to build the release version. You can also use "<code>make clean</code>" to delete the intermediate 
+files.</li>
+</ol>
+
+<p>Then, to create and build an application:</p>
+<ol>
+<li>Building the library will have produced the library files <code>/juce/bin/libjuce.a</code> and
+<code>/juce/bin/libjuce_debug.a</code>. You'll need to link to one of these in your app, and you'll 
+also need to link to these libraries:
+<pre>freetype
+pthread
+X11</pre>
+If you've set the <code>JUCE_USE_XINERAMA</code> flag in juce_Config.h, you'll also need to link to the 
+<code>xinerama</code> library.
+And you'll need the <code>GL</code> and <code>GLU</code> libraries if you've enabled 
+<code>JUCE_OPENGL</code>
+</li>
+</ol>
+
+<div class="ad">
+<p class="ad">***</p>
+</div>
+<div class="bottomsection">
+<p class="bottombar">- Copyright 2005 Raw Material Software Ltd -</p> 
+</div>
+</div>
+
+</body>
+</html>

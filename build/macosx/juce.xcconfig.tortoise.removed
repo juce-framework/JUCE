@@ -1,0 +1,6 @@
+ARCHS = ppc i386
+SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk
+GCC_VERSION_ppc = 3.3
+MACOSX_DEPLOYMENT_TARGET_ppc = 10.2
+OTHER_LD_FLAGS_ppc = /Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3/libstdc++.a
+SDKROOT_ppc = /Developer/SDKs/MacOSX10.2.8.sdk

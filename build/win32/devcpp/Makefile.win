@@ -1,0 +1,979 @@
+# Project: juce
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = ../../../bin/intermediate_devcpp/juce_Logger.o ../../../bin/intermediate_devcpp/juce_Random.o ../../../bin/intermediate_devcpp/juce_RelativeTime.o ../../../bin/intermediate_devcpp/juce_SystemStats.o ../../../bin/intermediate_devcpp/juce_Time.o ../../../bin/intermediate_devcpp/juce_BitArray.o ../../../bin/intermediate_devcpp/juce_MemoryBlock.o ../../../bin/intermediate_devcpp/juce_BlowFish.o ../../../bin/intermediate_devcpp/juce_MD5.o ../../../bin/intermediate_devcpp/juce_Primes.o ../../../bin/intermediate_devcpp/juce_RSAKey.o ../../../bin/intermediate_devcpp/juce_InputStream.o ../../../bin/intermediate_devcpp/juce_OutputStream.o ../../../bin/intermediate_devcpp/juce_DirectoryIterator.o ../../../bin/intermediate_devcpp/juce_File.o ../../../bin/intermediate_devcpp/juce_FileInputStream.o ../../../bin/intermediate_devcpp/juce_FileOutputStream.o ../../../bin/intermediate_devcpp/juce_FileSearchPath.o ../../../bin/intermediate_devcpp/juce_URL.o ../../../bin/intermediate_devcpp/juce_BufferedInputStream.o ../../../bin/intermediate_devcpp/juce_GZIPCompressorOutputStream.o ../../../bin/intermediate_devcpp/juce_GZIPDecompressorInputStream.o ../../../bin/intermediate_devcpp/juce_MemoryInputStream.o ../../../bin/intermediate_devcpp/juce_MemoryOutputStream.o ../../../bin/intermediate_devcpp/juce_SubregionStream.o ../../../bin/intermediate_devcpp/juce_PerformanceCounter.o ../../../bin/intermediate_devcpp/juce_Uuid.o ../../../bin/intermediate_devcpp/juce_ZipFile.o ../../../bin/intermediate_devcpp/juce_String.o ../../../bin/intermediate_devcpp/juce_StringArray.o ../../../bin/intermediate_devcpp/juce_StringPairArray.o ../../../bin/intermediate_devcpp/juce_XmlDocument.o ../../../bin/intermediate_devcpp/juce_XmlElement.o ../../../bin/intermediate_devcpp/juce_InterProcessLock.o ../../../bin/intermediate_devcpp/juce_Thread.o ../../../bin/intermediate_devcpp/juce_ThreadPool.o ../../../bin/intermediate_devcpp/juce_Application.o ../../../bin/intermediate_devcpp/juce_DeletedAtShutdown.o ../../../bin/intermediate_devcpp/juce_AiffAudioFormat.o ../../../bin/intermediate_devcpp/juce_AudioCDReader.o ../../../bin/intermediate_devcpp/juce_AudioFormat.o ../../../bin/intermediate_devcpp/juce_AudioSubsectionReader.o ../../../bin/intermediate_devcpp/juce_WavAudioFormat.o ../../../bin/intermediate_devcpp/juce_ActionBroadcaster.o ../../../bin/intermediate_devcpp/juce_ActionListenerList.o ../../../bin/intermediate_devcpp/juce_AsyncUpdater.o ../../../bin/intermediate_devcpp/juce_ChangeBroadcaster.o ../../../bin/intermediate_devcpp/juce_ChangeListenerList.o ../../../bin/intermediate_devcpp/juce_Message.o ../../../bin/intermediate_devcpp/juce_MessageListener.o ../../../bin/intermediate_devcpp/juce_MessageManager.o ../../../bin/intermediate_devcpp/juce_Timer.o ../../../bin/intermediate_devcpp/juce_Brush.o ../../../bin/intermediate_devcpp/juce_GradientBrush.o ../../../bin/intermediate_devcpp/juce_ImageBrush.o ../../../bin/intermediate_devcpp/juce_SolidColourBrush.o ../../../bin/intermediate_devcpp/juce_Colour.o ../../../bin/intermediate_devcpp/juce_Colours.o ../../../bin/intermediate_devcpp/juce_EdgeTable.o ../../../bin/intermediate_devcpp/juce_Graphics.o ../../../bin/intermediate_devcpp/juce_Justification.o ../../../bin/intermediate_devcpp/juce_DropShadowEffect.o ../../../bin/intermediate_devcpp/juce_GlowEffect.o ../../../bin/intermediate_devcpp/juce_ReduceOpacityEffect.o ../../../bin/intermediate_devcpp/juce_Font.o ../../../bin/intermediate_devcpp/juce_GlyphArrangement.o ../../../bin/intermediate_devcpp/juce_TextLayout.o ../../../bin/intermediate_devcpp/juce_Typeface.o ../../../bin/intermediate_devcpp/juce_AffineTransform.o ../../../bin/intermediate_devcpp/juce_Line.o ../../../bin/intermediate_devcpp/juce_Path.o ../../../bin/intermediate_devcpp/juce_PathIterator.o ../../../bin/intermediate_devcpp/juce_PathStrokeType.o ../../../bin/intermediate_devcpp/juce_Point.o ../../../bin/intermediate_devcpp/juce_Rectangle.o ../../../bin/intermediate_devcpp/juce_RectangleList.o ../../../bin/intermediate_devcpp/juce_Image.o ../../../bin/intermediate_devcpp/juce_ImageCache.o ../../../bin/intermediate_devcpp/juce_ImageConvolutionKernel.o ../../../bin/intermediate_devcpp/juce_ImageFileFormat.o ../../../bin/intermediate_devcpp/juce_GIFLoader.o ../../../bin/intermediate_devcpp/juce_JPEGLoader.o ../../../bin/intermediate_devcpp/juce_PNGLoader.o ../../../bin/intermediate_devcpp/juce_win32_ASIO.o ../../../bin/intermediate_devcpp/juce_win32_AudioCDReader.o ../../../bin/intermediate_devcpp/juce_win32_DirectSound.o ../../../bin/intermediate_devcpp/juce_win32_DynamicLibraryLoader.o ../../../bin/intermediate_devcpp/juce_win32_FileChooser.o ../../../bin/intermediate_devcpp/juce_win32_Files.o ../../../bin/intermediate_devcpp/juce_win32_Fonts.o ../../../bin/intermediate_devcpp/juce_win32_Messaging.o ../../../bin/intermediate_devcpp/juce_win32_Midi.o ../../../bin/intermediate_devcpp/juce_win32_Misc.o ../../../bin/intermediate_devcpp/juce_win32_Network.o ../../../bin/intermediate_devcpp/juce_win32_PlatformUtils.o ../../../bin/intermediate_devcpp/juce_win32_SystemStats.o ../../../bin/intermediate_devcpp/juce_win32_Threads.o ../../../bin/intermediate_devcpp/juce_win32_Windowing.o ../../../bin/intermediate_devcpp/juce_AudioFormatReaderSource.o ../../../bin/intermediate_devcpp/juce_AudioSourcePlayer.o ../../../bin/intermediate_devcpp/juce_AudioTransportSource.o ../../../bin/intermediate_devcpp/juce_BufferingAudioSource.o ../../../bin/intermediate_devcpp/juce_MixerAudioSource.o ../../../bin/intermediate_devcpp/juce_ResamplingAudioSource.o ../../../bin/intermediate_devcpp/juce_TimeSliceThread.o ../../../bin/intermediate_devcpp/juce_ReadWriteLock.o ../../../bin/intermediate_devcpp/juce_LocalisedStrings.o ../../../bin/intermediate_devcpp/juce_PropertySet.o ../../../bin/intermediate_devcpp/juce_Drawable.o ../../../bin/intermediate_devcpp/juce_DrawableComposite.o ../../../bin/intermediate_devcpp/juce_DrawableImage.o ../../../bin/intermediate_devcpp/juce_DrawablePath.o ../../../bin/intermediate_devcpp/juce_DrawableText.o ../../../bin/intermediate_devcpp/juce_ColourGradient.o ../../../bin/intermediate_devcpp/juce_ArrowButton.o ../../../bin/intermediate_devcpp/juce_Button.o ../../../bin/intermediate_devcpp/juce_DrawableButton.o ../../../bin/intermediate_devcpp/juce_HyperlinkButton.o ../../../bin/intermediate_devcpp/juce_ImageButton.o ../../../bin/intermediate_devcpp/juce_ShapeButton.o ../../../bin/intermediate_devcpp/juce_TextButton.o ../../../bin/intermediate_devcpp/juce_ToggleButton.o ../../../bin/intermediate_devcpp/juce_ComboBox.o ../../../bin/intermediate_devcpp/juce_Label.o ../../../bin/intermediate_devcpp/juce_ListBox.o ../../../bin/intermediate_devcpp/juce_ProgressBar.o ../../../bin/intermediate_devcpp/juce_Slider.o ../../../bin/intermediate_devcpp/juce_TextEditor.o ../../../bin/intermediate_devcpp/juce_TreeView.o ../../../bin/intermediate_devcpp/juce_KeyListener.o ../../../bin/intermediate_devcpp/juce_KeyMappingEditorComponent.o ../../../bin/intermediate_devcpp/juce_KeyPress.o ../../../bin/intermediate_devcpp/juce_KeyPressMappingSet.o ../../../bin/intermediate_devcpp/juce_ModifierKeys.o ../../../bin/intermediate_devcpp/juce_GroupComponent.o ../../../bin/intermediate_devcpp/juce_ResizableBorderComponent.o ../../../bin/intermediate_devcpp/juce_ResizableCornerComponent.o ../../../bin/intermediate_devcpp/juce_ScrollBar.o ../../../bin/intermediate_devcpp/juce_StretchableLayoutManager.o ../../../bin/intermediate_devcpp/juce_StretchableLayoutResizerBar.o ../../../bin/intermediate_devcpp/juce_TabbedButtonBar.o ../../../bin/intermediate_devcpp/juce_TabbedComponent.o ../../../bin/intermediate_devcpp/juce_Viewport.o ../../../bin/intermediate_devcpp/juce_LookAndFeel.o ../../../bin/intermediate_devcpp/juce_ShinyLookAndFeel.o ../../../bin/intermediate_devcpp/juce_PopupMenu.o ../../../bin/intermediate_devcpp/juce_ComponentDragger.o ../../../bin/intermediate_devcpp/juce_DragAndDropContainer.o ../../../bin/intermediate_devcpp/juce_MouseCursor.o ../../../bin/intermediate_devcpp/juce_MouseEvent.o ../../../bin/intermediate_devcpp/juce_MouseHoverDetector.o ../../../bin/intermediate_devcpp/juce_MouseListener.o ../../../bin/intermediate_devcpp/juce_BubbleComponent.o ../../../bin/intermediate_devcpp/juce_ColourSelector.o ../../../bin/intermediate_devcpp/juce_DropShadower.o ../../../bin/intermediate_devcpp/juce_OpenGLComponent.o ../../../bin/intermediate_devcpp/juce_PreferencesPanel.o ../../../bin/intermediate_devcpp/juce_QuickTimeMovieComponent.o ../../../bin/intermediate_devcpp/juce_AlertWindow.o ../../../bin/intermediate_devcpp/juce_DialogWindow.o ../../../bin/intermediate_devcpp/juce_ResizableWindow.o ../../../bin/intermediate_devcpp/juce_SplashScreen.o ../../../bin/intermediate_devcpp/juce_ThreadWithProgressWindow.o ../../../bin/intermediate_devcpp/juce_ToolTipWindow.o ../../../bin/intermediate_devcpp/juce_MenuBarComponent.o ../../../bin/intermediate_devcpp/juce_BubbleMessageComponent.o ../../../bin/intermediate_devcpp/juce_Component.o ../../../bin/intermediate_devcpp/juce_ComponentListener.o ../../../bin/intermediate_devcpp/juce_Desktop.o ../../../bin/intermediate_devcpp/juce_ToneGeneratorAudioSource.o ../../../bin/intermediate_devcpp/adler32.o ../../../bin/intermediate_devcpp/compress.o ../../../bin/intermediate_devcpp/crc32.o ../../../bin/intermediate_devcpp/deflate.o ../../../bin/intermediate_devcpp/infback.o ../../../bin/intermediate_devcpp/inffast.o ../../../bin/intermediate_devcpp/inflate.o ../../../bin/intermediate_devcpp/inftrees.o ../../../bin/intermediate_devcpp/trees.o ../../../bin/intermediate_devcpp/uncompr.o ../../../bin/intermediate_devcpp/zutil.o ../../../bin/intermediate_devcpp/png.o ../../../bin/intermediate_devcpp/pngerror.o ../../../bin/intermediate_devcpp/pnggccrd.o ../../../bin/intermediate_devcpp/pngget.o ../../../bin/intermediate_devcpp/pngmem.o ../../../bin/intermediate_devcpp/pngpread.o ../../../bin/intermediate_devcpp/pngread.o ../../../bin/intermediate_devcpp/pngrio.o ../../../bin/intermediate_devcpp/pngrtran.o ../../../bin/intermediate_devcpp/pngrutil.o ../../../bin/intermediate_devcpp/pngset.o ../../../bin/intermediate_devcpp/pngtrans.o ../../../bin/intermediate_devcpp/pngvcrd.o ../../../bin/intermediate_devcpp/pngwio.o ../../../bin/intermediate_devcpp/pngwrite.o ../../../bin/intermediate_devcpp/pngwtran.o ../../../bin/intermediate_devcpp/pngwutil.o ../../../bin/intermediate_devcpp/jcapimin.o ../../../bin/intermediate_devcpp/jcapistd.o ../../../bin/intermediate_devcpp/jccoefct.o ../../../bin/intermediate_devcpp/jccolor.o ../../../bin/intermediate_devcpp/jcdctmgr.o ../../../bin/intermediate_devcpp/jchuff.o ../../../bin/intermediate_devcpp/jcinit.o ../../../bin/intermediate_devcpp/jcmainct.o ../../../bin/intermediate_devcpp/jcmarker.o ../../../bin/intermediate_devcpp/jcmaster.o ../../../bin/intermediate_devcpp/jcomapi.o ../../../bin/intermediate_devcpp/jcparam.o ../../../bin/intermediate_devcpp/jcphuff.o ../../../bin/intermediate_devcpp/jcprepct.o ../../../bin/intermediate_devcpp/jcsample.o ../../../bin/intermediate_devcpp/jctrans.o ../../../bin/intermediate_devcpp/jdapimin.o ../../../bin/intermediate_devcpp/jdapistd.o ../../../bin/intermediate_devcpp/jdatasrc.o ../../../bin/intermediate_devcpp/jdcoefct.o ../../../bin/intermediate_devcpp/jdcolor.o ../../../bin/intermediate_devcpp/jddctmgr.o ../../../bin/intermediate_devcpp/jdhuff.o ../../../bin/intermediate_devcpp/jdinput.o ../../../bin/intermediate_devcpp/jdmainct.o ../../../bin/intermediate_devcpp/jdmarker.o ../../../bin/intermediate_devcpp/jdmaster.o ../../../bin/intermediate_devcpp/jdmerge.o ../../../bin/intermediate_devcpp/jdphuff.o ../../../bin/intermediate_devcpp/jdpostct.o ../../../bin/intermediate_devcpp/jdsample.o ../../../bin/intermediate_devcpp/jdtrans.o ../../../bin/intermediate_devcpp/jerror.o ../../../bin/intermediate_devcpp/jfdctflt.o ../../../bin/intermediate_devcpp/jfdctfst.o ../../../bin/intermediate_devcpp/jfdctint.o ../../../bin/intermediate_devcpp/jidctflt.o ../../../bin/intermediate_devcpp/jidctfst.o ../../../bin/intermediate_devcpp/jidctint.o ../../../bin/intermediate_devcpp/jidctred.o ../../../bin/intermediate_devcpp/jmemmgr.o ../../../bin/intermediate_devcpp/jmemnobs.o ../../../bin/intermediate_devcpp/jquant1.o ../../../bin/intermediate_devcpp/jquant2.o ../../../bin/intermediate_devcpp/jutils.o ../../../bin/intermediate_devcpp/transupp.o ../../../bin/intermediate_devcpp/juce_MidiKeyboardComponent.o ../../../bin/intermediate_devcpp/juce_AudioFormatManager.o ../../../bin/intermediate_devcpp/juce_LowLevelGraphicsSoftwareRenderer.o ../../../bin/intermediate_devcpp/juce_AudioDeviceManager.o ../../../bin/intermediate_devcpp/juce_AudioDeviceSelectorComponent.o ../../../bin/intermediate_devcpp/juce_DocumentWindow.o ../../../bin/intermediate_devcpp/juce_ComponentBoundsConstrainer.o ../../../bin/intermediate_devcpp/juce_MidiBuffer.o ../../../bin/intermediate_devcpp/juce_MidiFile.o ../../../bin/intermediate_devcpp/juce_MidiKeyboardState.o ../../../bin/intermediate_devcpp/juce_MidiMessage.o ../../../bin/intermediate_devcpp/juce_MidiMessageCollector.o ../../../bin/intermediate_devcpp/juce_MidiMessageSequence.o ../../../bin/intermediate_devcpp/juce_TopLevelWindow.o ../../../bin/intermediate_devcpp/juce_ComponentPeer.o ../../../bin/intermediate_devcpp/juce_BorderSize.o ../../../bin/intermediate_devcpp/juce_PropertiesFile.o ../../../bin/intermediate_devcpp/juce_FileBasedDocument.o ../../../bin/intermediate_devcpp/juce_RecentlyOpenedFilesList.o ../../../bin/intermediate_devcpp/juce_UndoManager.o ../../../bin/intermediate_devcpp/juce_DirectoryContentsList.o ../../../bin/intermediate_devcpp/juce_FileBrowserComponent.o ../../../bin/intermediate_devcpp/juce_FileChooser.o ../../../bin/intermediate_devcpp/juce_FileChooserDialogBox.o ../../../bin/intermediate_devcpp/juce_FileFilter.o ../../../bin/intermediate_devcpp/juce_FileListComponent.o ../../../bin/intermediate_devcpp/juce_ImagePreviewComponent.o ../../../bin/intermediate_devcpp/juce_WildcardFileFilter.o ../../../bin/intermediate_devcpp/juce_AudioIODevice.o ../../../bin/intermediate_devcpp/juce_AudioIODeviceType.o ../../../bin/intermediate_devcpp/juce_Socket.o ../../../bin/intermediate_devcpp/juce_NamedPipe.o ../../../bin/intermediate_devcpp/juce_InterprocessConnection.o ../../../bin/intermediate_devcpp/juce_InterprocessConnectionServer.o ../../../bin/intermediate_devcpp/juce_FlacAudioFormat.o ../../../bin/intermediate_devcpp/juce_OggVorbisAudioFormat.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandInfo.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandManager.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandTarget.o ../../../bin/intermediate_devcpp/juce_PositionedRectangle.o ../../../bin/intermediate_devcpp/juce_MultiDocumentPanel.o ../../../bin/intermediate_devcpp/juce_ButtonPropertyComponent.o ../../../bin/intermediate_devcpp/juce_ChoicePropertyComponent.o ../../../bin/intermediate_devcpp/juce_PropertyComponent.o ../../../bin/intermediate_devcpp/juce_PropertyPanel.o ../../../bin/intermediate_devcpp/juce_SliderPropertyComponent.o ../../../bin/intermediate_devcpp/juce_TextPropertyComponent.o ../../../bin/intermediate_devcpp/juce_MagnifierComponent.o ../../../bin/intermediate_devcpp/juce_FilenameComponent.o ../../../bin/intermediate_devcpp/juce_KeyboardFocusTraverser.o ../../../bin/intermediate_devcpp/juce_BooleanPropertyComponent.o ../../../bin/intermediate_devcpp/juce_CharacterFunctions.o ../../../bin/intermediate_devcpp/juce_SVGParser.o ../../../bin/intermediate_devcpp/juce_RectanglePlacement.o ../../../bin/intermediate_devcpp/juce_TableHeaderComponent.o ../../../bin/intermediate_devcpp/juce_TableListBox.o ../../../bin/intermediate_devcpp/juce_StretchableObjectResizer.o ../../../bin/intermediate_devcpp/juce_Toolbar.o ../../../bin/intermediate_devcpp/juce_ToolbarItemComponent.o ../../../bin/intermediate_devcpp/juce_ToolbarItemPalette.o ../../../bin/intermediate_devcpp/juce_ComponentAnimator.o ../../../bin/intermediate_devcpp/juce_MultiTimer.o ../../../bin/intermediate_devcpp/juce_ToolbarButton.o ../../../bin/intermediate_devcpp/juce_Sampler.o ../../../bin/intermediate_devcpp/juce_Synthesiser.o ../../../bin/intermediate_devcpp/juce_ComponentMovementWatcher.o ../../../bin/intermediate_devcpp/juce_AudioDataConverters.o ../../../bin/intermediate_devcpp/juce_AudioSampleBuffer.o ../../../bin/intermediate_devcpp/juce_IIRFilter.o ../../../bin/intermediate_devcpp/juce_ApplicationProperties.o ../../../bin/intermediate_devcpp/juce_SystemTrayIconComponent.o ../../../bin/intermediate_devcpp/juce_MenuBarModel.o ../../../bin/intermediate_devcpp/juce_ChannelRemappingAudioSource.o $(RES)
+LINKOBJ  = ../../../bin/intermediate_devcpp/juce_Logger.o ../../../bin/intermediate_devcpp/juce_Random.o ../../../bin/intermediate_devcpp/juce_RelativeTime.o ../../../bin/intermediate_devcpp/juce_SystemStats.o ../../../bin/intermediate_devcpp/juce_Time.o ../../../bin/intermediate_devcpp/juce_BitArray.o ../../../bin/intermediate_devcpp/juce_MemoryBlock.o ../../../bin/intermediate_devcpp/juce_BlowFish.o ../../../bin/intermediate_devcpp/juce_MD5.o ../../../bin/intermediate_devcpp/juce_Primes.o ../../../bin/intermediate_devcpp/juce_RSAKey.o ../../../bin/intermediate_devcpp/juce_InputStream.o ../../../bin/intermediate_devcpp/juce_OutputStream.o ../../../bin/intermediate_devcpp/juce_DirectoryIterator.o ../../../bin/intermediate_devcpp/juce_File.o ../../../bin/intermediate_devcpp/juce_FileInputStream.o ../../../bin/intermediate_devcpp/juce_FileOutputStream.o ../../../bin/intermediate_devcpp/juce_FileSearchPath.o ../../../bin/intermediate_devcpp/juce_URL.o ../../../bin/intermediate_devcpp/juce_BufferedInputStream.o ../../../bin/intermediate_devcpp/juce_GZIPCompressorOutputStream.o ../../../bin/intermediate_devcpp/juce_GZIPDecompressorInputStream.o ../../../bin/intermediate_devcpp/juce_MemoryInputStream.o ../../../bin/intermediate_devcpp/juce_MemoryOutputStream.o ../../../bin/intermediate_devcpp/juce_SubregionStream.o ../../../bin/intermediate_devcpp/juce_PerformanceCounter.o ../../../bin/intermediate_devcpp/juce_Uuid.o ../../../bin/intermediate_devcpp/juce_ZipFile.o ../../../bin/intermediate_devcpp/juce_String.o ../../../bin/intermediate_devcpp/juce_StringArray.o ../../../bin/intermediate_devcpp/juce_StringPairArray.o ../../../bin/intermediate_devcpp/juce_XmlDocument.o ../../../bin/intermediate_devcpp/juce_XmlElement.o ../../../bin/intermediate_devcpp/juce_InterProcessLock.o ../../../bin/intermediate_devcpp/juce_Thread.o ../../../bin/intermediate_devcpp/juce_ThreadPool.o ../../../bin/intermediate_devcpp/juce_Application.o ../../../bin/intermediate_devcpp/juce_DeletedAtShutdown.o ../../../bin/intermediate_devcpp/juce_AiffAudioFormat.o ../../../bin/intermediate_devcpp/juce_AudioCDReader.o ../../../bin/intermediate_devcpp/juce_AudioFormat.o ../../../bin/intermediate_devcpp/juce_AudioSubsectionReader.o ../../../bin/intermediate_devcpp/juce_WavAudioFormat.o ../../../bin/intermediate_devcpp/juce_ActionBroadcaster.o ../../../bin/intermediate_devcpp/juce_ActionListenerList.o ../../../bin/intermediate_devcpp/juce_AsyncUpdater.o ../../../bin/intermediate_devcpp/juce_ChangeBroadcaster.o ../../../bin/intermediate_devcpp/juce_ChangeListenerList.o ../../../bin/intermediate_devcpp/juce_Message.o ../../../bin/intermediate_devcpp/juce_MessageListener.o ../../../bin/intermediate_devcpp/juce_MessageManager.o ../../../bin/intermediate_devcpp/juce_Timer.o ../../../bin/intermediate_devcpp/juce_Brush.o ../../../bin/intermediate_devcpp/juce_GradientBrush.o ../../../bin/intermediate_devcpp/juce_ImageBrush.o ../../../bin/intermediate_devcpp/juce_SolidColourBrush.o ../../../bin/intermediate_devcpp/juce_Colour.o ../../../bin/intermediate_devcpp/juce_Colours.o ../../../bin/intermediate_devcpp/juce_EdgeTable.o ../../../bin/intermediate_devcpp/juce_Graphics.o ../../../bin/intermediate_devcpp/juce_Justification.o ../../../bin/intermediate_devcpp/juce_DropShadowEffect.o ../../../bin/intermediate_devcpp/juce_GlowEffect.o ../../../bin/intermediate_devcpp/juce_ReduceOpacityEffect.o ../../../bin/intermediate_devcpp/juce_Font.o ../../../bin/intermediate_devcpp/juce_GlyphArrangement.o ../../../bin/intermediate_devcpp/juce_TextLayout.o ../../../bin/intermediate_devcpp/juce_Typeface.o ../../../bin/intermediate_devcpp/juce_AffineTransform.o ../../../bin/intermediate_devcpp/juce_Line.o ../../../bin/intermediate_devcpp/juce_Path.o ../../../bin/intermediate_devcpp/juce_PathIterator.o ../../../bin/intermediate_devcpp/juce_PathStrokeType.o ../../../bin/intermediate_devcpp/juce_Point.o ../../../bin/intermediate_devcpp/juce_Rectangle.o ../../../bin/intermediate_devcpp/juce_RectangleList.o ../../../bin/intermediate_devcpp/juce_Image.o ../../../bin/intermediate_devcpp/juce_ImageCache.o ../../../bin/intermediate_devcpp/juce_ImageConvolutionKernel.o ../../../bin/intermediate_devcpp/juce_ImageFileFormat.o ../../../bin/intermediate_devcpp/juce_GIFLoader.o ../../../bin/intermediate_devcpp/juce_JPEGLoader.o ../../../bin/intermediate_devcpp/juce_PNGLoader.o ../../../bin/intermediate_devcpp/juce_win32_ASIO.o ../../../bin/intermediate_devcpp/juce_win32_AudioCDReader.o ../../../bin/intermediate_devcpp/juce_win32_DirectSound.o ../../../bin/intermediate_devcpp/juce_win32_DynamicLibraryLoader.o ../../../bin/intermediate_devcpp/juce_win32_FileChooser.o ../../../bin/intermediate_devcpp/juce_win32_Files.o ../../../bin/intermediate_devcpp/juce_win32_Fonts.o ../../../bin/intermediate_devcpp/juce_win32_Messaging.o ../../../bin/intermediate_devcpp/juce_win32_Midi.o ../../../bin/intermediate_devcpp/juce_win32_Misc.o ../../../bin/intermediate_devcpp/juce_win32_Network.o ../../../bin/intermediate_devcpp/juce_win32_PlatformUtils.o ../../../bin/intermediate_devcpp/juce_win32_SystemStats.o ../../../bin/intermediate_devcpp/juce_win32_Threads.o ../../../bin/intermediate_devcpp/juce_win32_Windowing.o ../../../bin/intermediate_devcpp/juce_AudioFormatReaderSource.o ../../../bin/intermediate_devcpp/juce_AudioSourcePlayer.o ../../../bin/intermediate_devcpp/juce_AudioTransportSource.o ../../../bin/intermediate_devcpp/juce_BufferingAudioSource.o ../../../bin/intermediate_devcpp/juce_MixerAudioSource.o ../../../bin/intermediate_devcpp/juce_ResamplingAudioSource.o ../../../bin/intermediate_devcpp/juce_TimeSliceThread.o ../../../bin/intermediate_devcpp/juce_ReadWriteLock.o ../../../bin/intermediate_devcpp/juce_LocalisedStrings.o ../../../bin/intermediate_devcpp/juce_PropertySet.o ../../../bin/intermediate_devcpp/juce_Drawable.o ../../../bin/intermediate_devcpp/juce_DrawableComposite.o ../../../bin/intermediate_devcpp/juce_DrawableImage.o ../../../bin/intermediate_devcpp/juce_DrawablePath.o ../../../bin/intermediate_devcpp/juce_DrawableText.o ../../../bin/intermediate_devcpp/juce_ColourGradient.o ../../../bin/intermediate_devcpp/juce_ArrowButton.o ../../../bin/intermediate_devcpp/juce_Button.o ../../../bin/intermediate_devcpp/juce_DrawableButton.o ../../../bin/intermediate_devcpp/juce_HyperlinkButton.o ../../../bin/intermediate_devcpp/juce_ImageButton.o ../../../bin/intermediate_devcpp/juce_ShapeButton.o ../../../bin/intermediate_devcpp/juce_TextButton.o ../../../bin/intermediate_devcpp/juce_ToggleButton.o ../../../bin/intermediate_devcpp/juce_ComboBox.o ../../../bin/intermediate_devcpp/juce_Label.o ../../../bin/intermediate_devcpp/juce_ListBox.o ../../../bin/intermediate_devcpp/juce_ProgressBar.o ../../../bin/intermediate_devcpp/juce_Slider.o ../../../bin/intermediate_devcpp/juce_TextEditor.o ../../../bin/intermediate_devcpp/juce_TreeView.o ../../../bin/intermediate_devcpp/juce_KeyListener.o ../../../bin/intermediate_devcpp/juce_KeyMappingEditorComponent.o ../../../bin/intermediate_devcpp/juce_KeyPress.o ../../../bin/intermediate_devcpp/juce_KeyPressMappingSet.o ../../../bin/intermediate_devcpp/juce_ModifierKeys.o ../../../bin/intermediate_devcpp/juce_GroupComponent.o ../../../bin/intermediate_devcpp/juce_ResizableBorderComponent.o ../../../bin/intermediate_devcpp/juce_ResizableCornerComponent.o ../../../bin/intermediate_devcpp/juce_ScrollBar.o ../../../bin/intermediate_devcpp/juce_StretchableLayoutManager.o ../../../bin/intermediate_devcpp/juce_StretchableLayoutResizerBar.o ../../../bin/intermediate_devcpp/juce_TabbedButtonBar.o ../../../bin/intermediate_devcpp/juce_TabbedComponent.o ../../../bin/intermediate_devcpp/juce_Viewport.o ../../../bin/intermediate_devcpp/juce_LookAndFeel.o ../../../bin/intermediate_devcpp/juce_ShinyLookAndFeel.o ../../../bin/intermediate_devcpp/juce_PopupMenu.o ../../../bin/intermediate_devcpp/juce_ComponentDragger.o ../../../bin/intermediate_devcpp/juce_DragAndDropContainer.o ../../../bin/intermediate_devcpp/juce_MouseCursor.o ../../../bin/intermediate_devcpp/juce_MouseEvent.o ../../../bin/intermediate_devcpp/juce_MouseHoverDetector.o ../../../bin/intermediate_devcpp/juce_MouseListener.o ../../../bin/intermediate_devcpp/juce_BubbleComponent.o ../../../bin/intermediate_devcpp/juce_ColourSelector.o ../../../bin/intermediate_devcpp/juce_DropShadower.o ../../../bin/intermediate_devcpp/juce_OpenGLComponent.o ../../../bin/intermediate_devcpp/juce_PreferencesPanel.o ../../../bin/intermediate_devcpp/juce_QuickTimeMovieComponent.o ../../../bin/intermediate_devcpp/juce_AlertWindow.o ../../../bin/intermediate_devcpp/juce_DialogWindow.o ../../../bin/intermediate_devcpp/juce_ResizableWindow.o ../../../bin/intermediate_devcpp/juce_SplashScreen.o ../../../bin/intermediate_devcpp/juce_ThreadWithProgressWindow.o ../../../bin/intermediate_devcpp/juce_ToolTipWindow.o ../../../bin/intermediate_devcpp/juce_MenuBarComponent.o ../../../bin/intermediate_devcpp/juce_BubbleMessageComponent.o ../../../bin/intermediate_devcpp/juce_Component.o ../../../bin/intermediate_devcpp/juce_ComponentListener.o ../../../bin/intermediate_devcpp/juce_Desktop.o ../../../bin/intermediate_devcpp/juce_ToneGeneratorAudioSource.o ../../../bin/intermediate_devcpp/adler32.o ../../../bin/intermediate_devcpp/compress.o ../../../bin/intermediate_devcpp/crc32.o ../../../bin/intermediate_devcpp/deflate.o ../../../bin/intermediate_devcpp/infback.o ../../../bin/intermediate_devcpp/inffast.o ../../../bin/intermediate_devcpp/inflate.o ../../../bin/intermediate_devcpp/inftrees.o ../../../bin/intermediate_devcpp/trees.o ../../../bin/intermediate_devcpp/uncompr.o ../../../bin/intermediate_devcpp/zutil.o ../../../bin/intermediate_devcpp/png.o ../../../bin/intermediate_devcpp/pngerror.o ../../../bin/intermediate_devcpp/pnggccrd.o ../../../bin/intermediate_devcpp/pngget.o ../../../bin/intermediate_devcpp/pngmem.o ../../../bin/intermediate_devcpp/pngpread.o ../../../bin/intermediate_devcpp/pngread.o ../../../bin/intermediate_devcpp/pngrio.o ../../../bin/intermediate_devcpp/pngrtran.o ../../../bin/intermediate_devcpp/pngrutil.o ../../../bin/intermediate_devcpp/pngset.o ../../../bin/intermediate_devcpp/pngtrans.o ../../../bin/intermediate_devcpp/pngvcrd.o ../../../bin/intermediate_devcpp/pngwio.o ../../../bin/intermediate_devcpp/pngwrite.o ../../../bin/intermediate_devcpp/pngwtran.o ../../../bin/intermediate_devcpp/pngwutil.o ../../../bin/intermediate_devcpp/jcapimin.o ../../../bin/intermediate_devcpp/jcapistd.o ../../../bin/intermediate_devcpp/jccoefct.o ../../../bin/intermediate_devcpp/jccolor.o ../../../bin/intermediate_devcpp/jcdctmgr.o ../../../bin/intermediate_devcpp/jchuff.o ../../../bin/intermediate_devcpp/jcinit.o ../../../bin/intermediate_devcpp/jcmainct.o ../../../bin/intermediate_devcpp/jcmarker.o ../../../bin/intermediate_devcpp/jcmaster.o ../../../bin/intermediate_devcpp/jcomapi.o ../../../bin/intermediate_devcpp/jcparam.o ../../../bin/intermediate_devcpp/jcphuff.o ../../../bin/intermediate_devcpp/jcprepct.o ../../../bin/intermediate_devcpp/jcsample.o ../../../bin/intermediate_devcpp/jctrans.o ../../../bin/intermediate_devcpp/jdapimin.o ../../../bin/intermediate_devcpp/jdapistd.o ../../../bin/intermediate_devcpp/jdatasrc.o ../../../bin/intermediate_devcpp/jdcoefct.o ../../../bin/intermediate_devcpp/jdcolor.o ../../../bin/intermediate_devcpp/jddctmgr.o ../../../bin/intermediate_devcpp/jdhuff.o ../../../bin/intermediate_devcpp/jdinput.o ../../../bin/intermediate_devcpp/jdmainct.o ../../../bin/intermediate_devcpp/jdmarker.o ../../../bin/intermediate_devcpp/jdmaster.o ../../../bin/intermediate_devcpp/jdmerge.o ../../../bin/intermediate_devcpp/jdphuff.o ../../../bin/intermediate_devcpp/jdpostct.o ../../../bin/intermediate_devcpp/jdsample.o ../../../bin/intermediate_devcpp/jdtrans.o ../../../bin/intermediate_devcpp/jerror.o ../../../bin/intermediate_devcpp/jfdctflt.o ../../../bin/intermediate_devcpp/jfdctfst.o ../../../bin/intermediate_devcpp/jfdctint.o ../../../bin/intermediate_devcpp/jidctflt.o ../../../bin/intermediate_devcpp/jidctfst.o ../../../bin/intermediate_devcpp/jidctint.o ../../../bin/intermediate_devcpp/jidctred.o ../../../bin/intermediate_devcpp/jmemmgr.o ../../../bin/intermediate_devcpp/jmemnobs.o ../../../bin/intermediate_devcpp/jquant1.o ../../../bin/intermediate_devcpp/jquant2.o ../../../bin/intermediate_devcpp/jutils.o ../../../bin/intermediate_devcpp/transupp.o ../../../bin/intermediate_devcpp/juce_MidiKeyboardComponent.o ../../../bin/intermediate_devcpp/juce_AudioFormatManager.o ../../../bin/intermediate_devcpp/juce_LowLevelGraphicsSoftwareRenderer.o ../../../bin/intermediate_devcpp/juce_AudioDeviceManager.o ../../../bin/intermediate_devcpp/juce_AudioDeviceSelectorComponent.o ../../../bin/intermediate_devcpp/juce_DocumentWindow.o ../../../bin/intermediate_devcpp/juce_ComponentBoundsConstrainer.o ../../../bin/intermediate_devcpp/juce_MidiBuffer.o ../../../bin/intermediate_devcpp/juce_MidiFile.o ../../../bin/intermediate_devcpp/juce_MidiKeyboardState.o ../../../bin/intermediate_devcpp/juce_MidiMessage.o ../../../bin/intermediate_devcpp/juce_MidiMessageCollector.o ../../../bin/intermediate_devcpp/juce_MidiMessageSequence.o ../../../bin/intermediate_devcpp/juce_TopLevelWindow.o ../../../bin/intermediate_devcpp/juce_ComponentPeer.o ../../../bin/intermediate_devcpp/juce_BorderSize.o ../../../bin/intermediate_devcpp/juce_PropertiesFile.o ../../../bin/intermediate_devcpp/juce_FileBasedDocument.o ../../../bin/intermediate_devcpp/juce_RecentlyOpenedFilesList.o ../../../bin/intermediate_devcpp/juce_UndoManager.o ../../../bin/intermediate_devcpp/juce_DirectoryContentsList.o ../../../bin/intermediate_devcpp/juce_FileBrowserComponent.o ../../../bin/intermediate_devcpp/juce_FileChooser.o ../../../bin/intermediate_devcpp/juce_FileChooserDialogBox.o ../../../bin/intermediate_devcpp/juce_FileFilter.o ../../../bin/intermediate_devcpp/juce_FileListComponent.o ../../../bin/intermediate_devcpp/juce_ImagePreviewComponent.o ../../../bin/intermediate_devcpp/juce_WildcardFileFilter.o ../../../bin/intermediate_devcpp/juce_AudioIODevice.o ../../../bin/intermediate_devcpp/juce_AudioIODeviceType.o ../../../bin/intermediate_devcpp/juce_Socket.o ../../../bin/intermediate_devcpp/juce_NamedPipe.o ../../../bin/intermediate_devcpp/juce_InterprocessConnection.o ../../../bin/intermediate_devcpp/juce_InterprocessConnectionServer.o ../../../bin/intermediate_devcpp/juce_FlacAudioFormat.o ../../../bin/intermediate_devcpp/juce_OggVorbisAudioFormat.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandInfo.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandManager.o ../../../bin/intermediate_devcpp/juce_ApplicationCommandTarget.o ../../../bin/intermediate_devcpp/juce_PositionedRectangle.o ../../../bin/intermediate_devcpp/juce_MultiDocumentPanel.o ../../../bin/intermediate_devcpp/juce_ButtonPropertyComponent.o ../../../bin/intermediate_devcpp/juce_ChoicePropertyComponent.o ../../../bin/intermediate_devcpp/juce_PropertyComponent.o ../../../bin/intermediate_devcpp/juce_PropertyPanel.o ../../../bin/intermediate_devcpp/juce_SliderPropertyComponent.o ../../../bin/intermediate_devcpp/juce_TextPropertyComponent.o ../../../bin/intermediate_devcpp/juce_MagnifierComponent.o ../../../bin/intermediate_devcpp/juce_FilenameComponent.o ../../../bin/intermediate_devcpp/juce_KeyboardFocusTraverser.o ../../../bin/intermediate_devcpp/juce_BooleanPropertyComponent.o ../../../bin/intermediate_devcpp/juce_CharacterFunctions.o ../../../bin/intermediate_devcpp/juce_SVGParser.o ../../../bin/intermediate_devcpp/juce_RectanglePlacement.o ../../../bin/intermediate_devcpp/juce_TableHeaderComponent.o ../../../bin/intermediate_devcpp/juce_TableListBox.o ../../../bin/intermediate_devcpp/juce_StretchableObjectResizer.o ../../../bin/intermediate_devcpp/juce_Toolbar.o ../../../bin/intermediate_devcpp/juce_ToolbarItemComponent.o ../../../bin/intermediate_devcpp/juce_ToolbarItemPalette.o ../../../bin/intermediate_devcpp/juce_ComponentAnimator.o ../../../bin/intermediate_devcpp/juce_MultiTimer.o ../../../bin/intermediate_devcpp/juce_ToolbarButton.o ../../../bin/intermediate_devcpp/juce_Sampler.o ../../../bin/intermediate_devcpp/juce_Synthesiser.o ../../../bin/intermediate_devcpp/juce_ComponentMovementWatcher.o ../../../bin/intermediate_devcpp/juce_AudioDataConverters.o ../../../bin/intermediate_devcpp/juce_AudioSampleBuffer.o ../../../bin/intermediate_devcpp/juce_IIRFilter.o ../../../bin/intermediate_devcpp/juce_ApplicationProperties.o ../../../bin/intermediate_devcpp/juce_SystemTrayIconComponent.o ../../../bin/intermediate_devcpp/juce_MenuBarModel.o ../../../bin/intermediate_devcpp/juce_ChannelRemappingAudioSource.o $(RES)
+LIBS =  -L"C:/prog/Dev-Cpp/lib" -L"C:/essentials/QT6 SDK (Win)/Interfaces & Libraries/QTDevWin/Libraries"  -s 
+INCS =  -I"C:/prog/Dev-Cpp/include" 
+CXXINCS =  -I"C:/prog/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"C:/prog/Dev-Cpp/include/c++/3.4.2/backward"  -I"C:/prog/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"C:/prog/Dev-Cpp/include/c++/3.4.2"  -I"C:/prog/Dev-Cpp/include"  -I"C:/essentials/asiosdk2/common"  -I"C:/essentials/QT6 SDK (Win)/Interfaces & Libraries/QTDevWin/CIncludes"  -I"c:/program files/QuickTime" 
+BIN  = ../../../bin/libjuce.a
+CXXFLAGS = $(CXXINCS) -Wno-multichar -DJUCE_USE_FLAC=0 -DJUCE_USE_OGGVORBIS=0   -Wall -fexceptions -fexpensive-optimizations -O3
+CFLAGS = $(INCS)   -Wall -fexceptions -fexpensive-optimizations -O3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before ../../../bin/libjuce.a all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(LINKOBJ)
+	ar r $(BIN) $(LINKOBJ)
+	ranlib $(BIN)
+
+../../../bin/intermediate_devcpp/juce_Logger.o: ../../../src/juce_core/basics/juce_Logger.cpp
+	$(CPP) -c ../../../src/juce_core/basics/juce_Logger.cpp -o ../../../bin/intermediate_devcpp/juce_Logger.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Random.o: ../../../src/juce_core/basics/juce_Random.cpp
+	$(CPP) -c ../../../src/juce_core/basics/juce_Random.cpp -o ../../../bin/intermediate_devcpp/juce_Random.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_RelativeTime.o: ../../../src/juce_core/basics/juce_RelativeTime.cpp
+	$(CPP) -c ../../../src/juce_core/basics/juce_RelativeTime.cpp -o ../../../bin/intermediate_devcpp/juce_RelativeTime.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SystemStats.o: ../../../src/juce_core/basics/juce_SystemStats.cpp
+	$(CPP) -c ../../../src/juce_core/basics/juce_SystemStats.cpp -o ../../../bin/intermediate_devcpp/juce_SystemStats.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Time.o: ../../../src/juce_core/basics/juce_Time.cpp
+	$(CPP) -c ../../../src/juce_core/basics/juce_Time.cpp -o ../../../bin/intermediate_devcpp/juce_Time.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BitArray.o: ../../../src/juce_core/containers/juce_BitArray.cpp
+	$(CPP) -c ../../../src/juce_core/containers/juce_BitArray.cpp -o ../../../bin/intermediate_devcpp/juce_BitArray.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MemoryBlock.o: ../../../src/juce_core/containers/juce_MemoryBlock.cpp
+	$(CPP) -c ../../../src/juce_core/containers/juce_MemoryBlock.cpp -o ../../../bin/intermediate_devcpp/juce_MemoryBlock.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BlowFish.o: ../../../src/juce_core/cryptography/juce_BlowFish.cpp
+	$(CPP) -c ../../../src/juce_core/cryptography/juce_BlowFish.cpp -o ../../../bin/intermediate_devcpp/juce_BlowFish.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MD5.o: ../../../src/juce_core/cryptography/juce_MD5.cpp
+	$(CPP) -c ../../../src/juce_core/cryptography/juce_MD5.cpp -o ../../../bin/intermediate_devcpp/juce_MD5.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Primes.o: ../../../src/juce_core/cryptography/juce_Primes.cpp
+	$(CPP) -c ../../../src/juce_core/cryptography/juce_Primes.cpp -o ../../../bin/intermediate_devcpp/juce_Primes.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_RSAKey.o: ../../../src/juce_core/cryptography/juce_RSAKey.cpp
+	$(CPP) -c ../../../src/juce_core/cryptography/juce_RSAKey.cpp -o ../../../bin/intermediate_devcpp/juce_RSAKey.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_InputStream.o: ../../../src/juce_core/io/juce_InputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/juce_InputStream.cpp -o ../../../bin/intermediate_devcpp/juce_InputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_OutputStream.o: ../../../src/juce_core/io/juce_OutputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/juce_OutputStream.cpp -o ../../../bin/intermediate_devcpp/juce_OutputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DirectoryIterator.o: ../../../src/juce_core/io/files/juce_DirectoryIterator.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_DirectoryIterator.cpp -o ../../../bin/intermediate_devcpp/juce_DirectoryIterator.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_File.o: ../../../src/juce_core/io/files/juce_File.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_File.cpp -o ../../../bin/intermediate_devcpp/juce_File.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileInputStream.o: ../../../src/juce_core/io/files/juce_FileInputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_FileInputStream.cpp -o ../../../bin/intermediate_devcpp/juce_FileInputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileOutputStream.o: ../../../src/juce_core/io/files/juce_FileOutputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_FileOutputStream.cpp -o ../../../bin/intermediate_devcpp/juce_FileOutputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileSearchPath.o: ../../../src/juce_core/io/files/juce_FileSearchPath.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_FileSearchPath.cpp -o ../../../bin/intermediate_devcpp/juce_FileSearchPath.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_URL.o: ../../../src/juce_core/io/network/juce_URL.cpp
+	$(CPP) -c ../../../src/juce_core/io/network/juce_URL.cpp -o ../../../bin/intermediate_devcpp/juce_URL.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BufferedInputStream.o: ../../../src/juce_core/io/streams/juce_BufferedInputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_BufferedInputStream.cpp -o ../../../bin/intermediate_devcpp/juce_BufferedInputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GZIPCompressorOutputStream.o: ../../../src/juce_core/io/streams/juce_GZIPCompressorOutputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_GZIPCompressorOutputStream.cpp -o ../../../bin/intermediate_devcpp/juce_GZIPCompressorOutputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GZIPDecompressorInputStream.o: ../../../src/juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp -o ../../../bin/intermediate_devcpp/juce_GZIPDecompressorInputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MemoryInputStream.o: ../../../src/juce_core/io/streams/juce_MemoryInputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_MemoryInputStream.cpp -o ../../../bin/intermediate_devcpp/juce_MemoryInputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MemoryOutputStream.o: ../../../src/juce_core/io/streams/juce_MemoryOutputStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_MemoryOutputStream.cpp -o ../../../bin/intermediate_devcpp/juce_MemoryOutputStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SubregionStream.o: ../../../src/juce_core/io/streams/juce_SubregionStream.cpp
+	$(CPP) -c ../../../src/juce_core/io/streams/juce_SubregionStream.cpp -o ../../../bin/intermediate_devcpp/juce_SubregionStream.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PerformanceCounter.o: ../../../src/juce_core/misc/juce_PerformanceCounter.cpp
+	$(CPP) -c ../../../src/juce_core/misc/juce_PerformanceCounter.cpp -o ../../../bin/intermediate_devcpp/juce_PerformanceCounter.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Uuid.o: ../../../src/juce_core/misc/juce_Uuid.cpp
+	$(CPP) -c ../../../src/juce_core/misc/juce_Uuid.cpp -o ../../../bin/intermediate_devcpp/juce_Uuid.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ZipFile.o: ../../../src/juce_core/misc/juce_ZipFile.cpp
+	$(CPP) -c ../../../src/juce_core/misc/juce_ZipFile.cpp -o ../../../bin/intermediate_devcpp/juce_ZipFile.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_String.o: ../../../src/juce_core/text/juce_String.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_String.cpp -o ../../../bin/intermediate_devcpp/juce_String.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_StringArray.o: ../../../src/juce_core/text/juce_StringArray.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_StringArray.cpp -o ../../../bin/intermediate_devcpp/juce_StringArray.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_StringPairArray.o: ../../../src/juce_core/text/juce_StringPairArray.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_StringPairArray.cpp -o ../../../bin/intermediate_devcpp/juce_StringPairArray.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_XmlDocument.o: ../../../src/juce_core/text/juce_XmlDocument.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_XmlDocument.cpp -o ../../../bin/intermediate_devcpp/juce_XmlDocument.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_XmlElement.o: ../../../src/juce_core/text/juce_XmlElement.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_XmlElement.cpp -o ../../../bin/intermediate_devcpp/juce_XmlElement.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_InterProcessLock.o: ../../../src/juce_core/threads/juce_InterProcessLock.cpp
+	$(CPP) -c ../../../src/juce_core/threads/juce_InterProcessLock.cpp -o ../../../bin/intermediate_devcpp/juce_InterProcessLock.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Thread.o: ../../../src/juce_core/threads/juce_Thread.cpp
+	$(CPP) -c ../../../src/juce_core/threads/juce_Thread.cpp -o ../../../bin/intermediate_devcpp/juce_Thread.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ThreadPool.o: ../../../src/juce_core/threads/juce_ThreadPool.cpp
+	$(CPP) -c ../../../src/juce_core/threads/juce_ThreadPool.cpp -o ../../../bin/intermediate_devcpp/juce_ThreadPool.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Application.o: ../../../src/juce_appframework/application/juce_Application.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_Application.cpp -o ../../../bin/intermediate_devcpp/juce_Application.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DeletedAtShutdown.o: ../../../src/juce_appframework/application/juce_DeletedAtShutdown.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_DeletedAtShutdown.cpp -o ../../../bin/intermediate_devcpp/juce_DeletedAtShutdown.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AiffAudioFormat.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.cpp -o ../../../bin/intermediate_devcpp/juce_AiffAudioFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioCDReader.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.cpp -o ../../../bin/intermediate_devcpp/juce_AudioCDReader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioFormat.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioFormat.cpp -o ../../../bin/intermediate_devcpp/juce_AudioFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioSubsectionReader.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.cpp -o ../../../bin/intermediate_devcpp/juce_AudioSubsectionReader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_WavAudioFormat.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.cpp -o ../../../bin/intermediate_devcpp/juce_WavAudioFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ActionBroadcaster.o: ../../../src/juce_appframework/events/juce_ActionBroadcaster.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_ActionBroadcaster.cpp -o ../../../bin/intermediate_devcpp/juce_ActionBroadcaster.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ActionListenerList.o: ../../../src/juce_appframework/events/juce_ActionListenerList.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_ActionListenerList.cpp -o ../../../bin/intermediate_devcpp/juce_ActionListenerList.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AsyncUpdater.o: ../../../src/juce_appframework/events/juce_AsyncUpdater.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_AsyncUpdater.cpp -o ../../../bin/intermediate_devcpp/juce_AsyncUpdater.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ChangeBroadcaster.o: ../../../src/juce_appframework/events/juce_ChangeBroadcaster.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_ChangeBroadcaster.cpp -o ../../../bin/intermediate_devcpp/juce_ChangeBroadcaster.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ChangeListenerList.o: ../../../src/juce_appframework/events/juce_ChangeListenerList.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_ChangeListenerList.cpp -o ../../../bin/intermediate_devcpp/juce_ChangeListenerList.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Message.o: ../../../src/juce_appframework/events/juce_Message.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_Message.cpp -o ../../../bin/intermediate_devcpp/juce_Message.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MessageListener.o: ../../../src/juce_appframework/events/juce_MessageListener.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_MessageListener.cpp -o ../../../bin/intermediate_devcpp/juce_MessageListener.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MessageManager.o: ../../../src/juce_appframework/events/juce_MessageManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_MessageManager.cpp -o ../../../bin/intermediate_devcpp/juce_MessageManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Timer.o: ../../../src/juce_appframework/events/juce_Timer.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_Timer.cpp -o ../../../bin/intermediate_devcpp/juce_Timer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Brush.o: ../../../src/juce_appframework/gui/graphics/brushes/juce_Brush.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/brushes/juce_Brush.cpp -o ../../../bin/intermediate_devcpp/juce_Brush.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GradientBrush.o: ../../../src/juce_appframework/gui/graphics/brushes/juce_GradientBrush.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/brushes/juce_GradientBrush.cpp -o ../../../bin/intermediate_devcpp/juce_GradientBrush.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImageBrush.o: ../../../src/juce_appframework/gui/graphics/brushes/juce_ImageBrush.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/brushes/juce_ImageBrush.cpp -o ../../../bin/intermediate_devcpp/juce_ImageBrush.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SolidColourBrush.o: ../../../src/juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.cpp -o ../../../bin/intermediate_devcpp/juce_SolidColourBrush.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Colour.o: ../../../src/juce_appframework/gui/graphics/colour/juce_Colour.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/colour/juce_Colour.cpp -o ../../../bin/intermediate_devcpp/juce_Colour.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Colours.o: ../../../src/juce_appframework/gui/graphics/colour/juce_Colours.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/colour/juce_Colours.cpp -o ../../../bin/intermediate_devcpp/juce_Colours.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_EdgeTable.o: ../../../src/juce_appframework/gui/graphics/contexts/juce_EdgeTable.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/contexts/juce_EdgeTable.cpp -o ../../../bin/intermediate_devcpp/juce_EdgeTable.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Graphics.o: ../../../src/juce_appframework/gui/graphics/contexts/juce_Graphics.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/contexts/juce_Graphics.cpp -o ../../../bin/intermediate_devcpp/juce_Graphics.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Justification.o: ../../../src/juce_appframework/gui/graphics/contexts/juce_Justification.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/contexts/juce_Justification.cpp -o ../../../bin/intermediate_devcpp/juce_Justification.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DropShadowEffect.o: ../../../src/juce_appframework/gui/graphics/effects/juce_DropShadowEffect.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/effects/juce_DropShadowEffect.cpp -o ../../../bin/intermediate_devcpp/juce_DropShadowEffect.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GlowEffect.o: ../../../src/juce_appframework/gui/graphics/effects/juce_GlowEffect.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/effects/juce_GlowEffect.cpp -o ../../../bin/intermediate_devcpp/juce_GlowEffect.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ReduceOpacityEffect.o: ../../../src/juce_appframework/gui/graphics/effects/juce_ReduceOpacityEffect.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/effects/juce_ReduceOpacityEffect.cpp -o ../../../bin/intermediate_devcpp/juce_ReduceOpacityEffect.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Font.o: ../../../src/juce_appframework/gui/graphics/fonts/juce_Font.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/fonts/juce_Font.cpp -o ../../../bin/intermediate_devcpp/juce_Font.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GlyphArrangement.o: ../../../src/juce_appframework/gui/graphics/fonts/juce_GlyphArrangement.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/fonts/juce_GlyphArrangement.cpp -o ../../../bin/intermediate_devcpp/juce_GlyphArrangement.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TextLayout.o: ../../../src/juce_appframework/gui/graphics/fonts/juce_TextLayout.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/fonts/juce_TextLayout.cpp -o ../../../bin/intermediate_devcpp/juce_TextLayout.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Typeface.o: ../../../src/juce_appframework/gui/graphics/fonts/juce_Typeface.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/fonts/juce_Typeface.cpp -o ../../../bin/intermediate_devcpp/juce_Typeface.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AffineTransform.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_AffineTransform.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_AffineTransform.cpp -o ../../../bin/intermediate_devcpp/juce_AffineTransform.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Line.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_Line.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_Line.cpp -o ../../../bin/intermediate_devcpp/juce_Line.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Path.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_Path.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_Path.cpp -o ../../../bin/intermediate_devcpp/juce_Path.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PathIterator.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_PathIterator.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_PathIterator.cpp -o ../../../bin/intermediate_devcpp/juce_PathIterator.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PathStrokeType.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp -o ../../../bin/intermediate_devcpp/juce_PathStrokeType.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Point.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_Point.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_Point.cpp -o ../../../bin/intermediate_devcpp/juce_Point.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Rectangle.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_Rectangle.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_Rectangle.cpp -o ../../../bin/intermediate_devcpp/juce_Rectangle.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_RectangleList.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_RectangleList.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_RectangleList.cpp -o ../../../bin/intermediate_devcpp/juce_RectangleList.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Image.o: ../../../src/juce_appframework/gui/graphics/imaging/juce_Image.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/juce_Image.cpp -o ../../../bin/intermediate_devcpp/juce_Image.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImageCache.o: ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageCache.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageCache.cpp -o ../../../bin/intermediate_devcpp/juce_ImageCache.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImageConvolutionKernel.o: ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp -o ../../../bin/intermediate_devcpp/juce_ImageConvolutionKernel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImageFileFormat.o: ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.cpp -o ../../../bin/intermediate_devcpp/juce_ImageFileFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GIFLoader.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp -o ../../../bin/intermediate_devcpp/juce_GIFLoader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_JPEGLoader.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp -o ../../../bin/intermediate_devcpp/juce_JPEGLoader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PNGLoader.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp -o ../../../bin/intermediate_devcpp/juce_PNGLoader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_ASIO.o: ../platform_specific_code/juce_win32_ASIO.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_ASIO.cpp -o ../../../bin/intermediate_devcpp/juce_win32_ASIO.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_AudioCDReader.o: ../platform_specific_code/juce_win32_AudioCDReader.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_AudioCDReader.cpp -o ../../../bin/intermediate_devcpp/juce_win32_AudioCDReader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_DirectSound.o: ../platform_specific_code/juce_win32_DirectSound.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_DirectSound.cpp -o ../../../bin/intermediate_devcpp/juce_win32_DirectSound.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_DynamicLibraryLoader.o: ../platform_specific_code/juce_win32_DynamicLibraryLoader.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_DynamicLibraryLoader.cpp -o ../../../bin/intermediate_devcpp/juce_win32_DynamicLibraryLoader.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_FileChooser.o: ../platform_specific_code/juce_win32_FileChooser.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_FileChooser.cpp -o ../../../bin/intermediate_devcpp/juce_win32_FileChooser.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Files.o: ../platform_specific_code/juce_win32_Files.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Files.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Files.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Fonts.o: ../platform_specific_code/juce_win32_Fonts.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Fonts.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Fonts.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Messaging.o: ../platform_specific_code/juce_win32_Messaging.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Messaging.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Messaging.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Midi.o: ../platform_specific_code/juce_win32_Midi.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Midi.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Midi.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Misc.o: ../platform_specific_code/juce_win32_Misc.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Misc.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Misc.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Network.o: ../platform_specific_code/juce_win32_Network.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Network.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Network.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_PlatformUtils.o: ../platform_specific_code/juce_win32_PlatformUtils.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_PlatformUtils.cpp -o ../../../bin/intermediate_devcpp/juce_win32_PlatformUtils.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_SystemStats.o: ../platform_specific_code/juce_win32_SystemStats.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_SystemStats.cpp -o ../../../bin/intermediate_devcpp/juce_win32_SystemStats.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Threads.o: ../platform_specific_code/juce_win32_Threads.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Threads.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Threads.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_win32_Windowing.o: ../platform_specific_code/juce_win32_Windowing.cpp
+	$(CPP) -c ../platform_specific_code/juce_win32_Windowing.cpp -o ../../../bin/intermediate_devcpp/juce_win32_Windowing.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioFormatReaderSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_AudioFormatReaderSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_AudioFormatReaderSource.cpp -o ../../../bin/intermediate_devcpp/juce_AudioFormatReaderSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioSourcePlayer.o: ../../../src/juce_appframework/audio/audio_sources/juce_AudioSourcePlayer.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_AudioSourcePlayer.cpp -o ../../../bin/intermediate_devcpp/juce_AudioSourcePlayer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioTransportSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_AudioTransportSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_AudioTransportSource.cpp -o ../../../bin/intermediate_devcpp/juce_AudioTransportSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BufferingAudioSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_BufferingAudioSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_BufferingAudioSource.cpp -o ../../../bin/intermediate_devcpp/juce_BufferingAudioSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MixerAudioSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_MixerAudioSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_MixerAudioSource.cpp -o ../../../bin/intermediate_devcpp/juce_MixerAudioSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ResamplingAudioSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_ResamplingAudioSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_ResamplingAudioSource.cpp -o ../../../bin/intermediate_devcpp/juce_ResamplingAudioSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TimeSliceThread.o: ../../../src/juce_core/threads/juce_TimeSliceThread.cpp
+	$(CPP) -c ../../../src/juce_core/threads/juce_TimeSliceThread.cpp -o ../../../bin/intermediate_devcpp/juce_TimeSliceThread.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ReadWriteLock.o: ../../../src/juce_core/threads/juce_ReadWriteLock.cpp
+	$(CPP) -c ../../../src/juce_core/threads/juce_ReadWriteLock.cpp -o ../../../bin/intermediate_devcpp/juce_ReadWriteLock.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_LocalisedStrings.o: ../../../src/juce_core/text/juce_LocalisedStrings.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_LocalisedStrings.cpp -o ../../../bin/intermediate_devcpp/juce_LocalisedStrings.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PropertySet.o: ../../../src/juce_core/containers/juce_PropertySet.cpp
+	$(CPP) -c ../../../src/juce_core/containers/juce_PropertySet.cpp -o ../../../bin/intermediate_devcpp/juce_PropertySet.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Drawable.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_Drawable.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_Drawable.cpp -o ../../../bin/intermediate_devcpp/juce_Drawable.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DrawableComposite.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableComposite.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableComposite.cpp -o ../../../bin/intermediate_devcpp/juce_DrawableComposite.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DrawableImage.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableImage.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableImage.cpp -o ../../../bin/intermediate_devcpp/juce_DrawableImage.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DrawablePath.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawablePath.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawablePath.cpp -o ../../../bin/intermediate_devcpp/juce_DrawablePath.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DrawableText.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableText.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_DrawableText.cpp -o ../../../bin/intermediate_devcpp/juce_DrawableText.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ColourGradient.o: ../../../src/juce_appframework/gui/graphics/colour/juce_ColourGradient.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/colour/juce_ColourGradient.cpp -o ../../../bin/intermediate_devcpp/juce_ColourGradient.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ArrowButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_ArrowButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_ArrowButton.cpp -o ../../../bin/intermediate_devcpp/juce_ArrowButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Button.o: ../../../src/juce_appframework/gui/components/buttons/juce_Button.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_Button.cpp -o ../../../bin/intermediate_devcpp/juce_Button.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DrawableButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_DrawableButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_DrawableButton.cpp -o ../../../bin/intermediate_devcpp/juce_DrawableButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_HyperlinkButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_HyperlinkButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_HyperlinkButton.cpp -o ../../../bin/intermediate_devcpp/juce_HyperlinkButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImageButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_ImageButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_ImageButton.cpp -o ../../../bin/intermediate_devcpp/juce_ImageButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ShapeButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_ShapeButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_ShapeButton.cpp -o ../../../bin/intermediate_devcpp/juce_ShapeButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TextButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_TextButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_TextButton.cpp -o ../../../bin/intermediate_devcpp/juce_TextButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToggleButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_ToggleButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_ToggleButton.cpp -o ../../../bin/intermediate_devcpp/juce_ToggleButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComboBox.o: ../../../src/juce_appframework/gui/components/controls/juce_ComboBox.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_ComboBox.cpp -o ../../../bin/intermediate_devcpp/juce_ComboBox.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Label.o: ../../../src/juce_appframework/gui/components/controls/juce_Label.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_Label.cpp -o ../../../bin/intermediate_devcpp/juce_Label.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ListBox.o: ../../../src/juce_appframework/gui/components/controls/juce_ListBox.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_ListBox.cpp -o ../../../bin/intermediate_devcpp/juce_ListBox.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ProgressBar.o: ../../../src/juce_appframework/gui/components/controls/juce_ProgressBar.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_ProgressBar.cpp -o ../../../bin/intermediate_devcpp/juce_ProgressBar.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Slider.o: ../../../src/juce_appframework/gui/components/controls/juce_Slider.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_Slider.cpp -o ../../../bin/intermediate_devcpp/juce_Slider.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TextEditor.o: ../../../src/juce_appframework/gui/components/controls/juce_TextEditor.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_TextEditor.cpp -o ../../../bin/intermediate_devcpp/juce_TextEditor.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TreeView.o: ../../../src/juce_appframework/gui/components/controls/juce_TreeView.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_TreeView.cpp -o ../../../bin/intermediate_devcpp/juce_TreeView.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_KeyListener.o: ../../../src/juce_appframework/gui/components/keyboard/juce_KeyListener.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_KeyListener.cpp -o ../../../bin/intermediate_devcpp/juce_KeyListener.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_KeyMappingEditorComponent.o: ../../../src/juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.cpp -o ../../../bin/intermediate_devcpp/juce_KeyMappingEditorComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_KeyPress.o: ../../../src/juce_appframework/gui/components/keyboard/juce_KeyPress.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_KeyPress.cpp -o ../../../bin/intermediate_devcpp/juce_KeyPress.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_KeyPressMappingSet.o: ../../../src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.cpp -o ../../../bin/intermediate_devcpp/juce_KeyPressMappingSet.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ModifierKeys.o: ../../../src/juce_appframework/gui/components/keyboard/juce_ModifierKeys.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_ModifierKeys.cpp -o ../../../bin/intermediate_devcpp/juce_ModifierKeys.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_GroupComponent.o: ../../../src/juce_appframework/gui/components/layout/juce_GroupComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_GroupComponent.cpp -o ../../../bin/intermediate_devcpp/juce_GroupComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ResizableBorderComponent.o: ../../../src/juce_appframework/gui/components/layout/juce_ResizableBorderComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ResizableBorderComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ResizableBorderComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ResizableCornerComponent.o: ../../../src/juce_appframework/gui/components/layout/juce_ResizableCornerComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ResizableCornerComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ResizableCornerComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ScrollBar.o: ../../../src/juce_appframework/gui/components/layout/juce_ScrollBar.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ScrollBar.cpp -o ../../../bin/intermediate_devcpp/juce_ScrollBar.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_StretchableLayoutManager.o: ../../../src/juce_appframework/gui/components/layout/juce_StretchableLayoutManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_StretchableLayoutManager.cpp -o ../../../bin/intermediate_devcpp/juce_StretchableLayoutManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_StretchableLayoutResizerBar.o: ../../../src/juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.cpp -o ../../../bin/intermediate_devcpp/juce_StretchableLayoutResizerBar.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TabbedButtonBar.o: ../../../src/juce_appframework/gui/components/layout/juce_TabbedButtonBar.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_TabbedButtonBar.cpp -o ../../../bin/intermediate_devcpp/juce_TabbedButtonBar.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TabbedComponent.o: ../../../src/juce_appframework/gui/components/layout/juce_TabbedComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_TabbedComponent.cpp -o ../../../bin/intermediate_devcpp/juce_TabbedComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Viewport.o: ../../../src/juce_appframework/gui/components/layout/juce_Viewport.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_Viewport.cpp -o ../../../bin/intermediate_devcpp/juce_Viewport.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_LookAndFeel.o: ../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.cpp -o ../../../bin/intermediate_devcpp/juce_LookAndFeel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ShinyLookAndFeel.o: ../../../src/juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.cpp -o ../../../bin/intermediate_devcpp/juce_ShinyLookAndFeel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PopupMenu.o: ../../../src/juce_appframework/gui/components/menus/juce_PopupMenu.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/menus/juce_PopupMenu.cpp -o ../../../bin/intermediate_devcpp/juce_PopupMenu.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentDragger.o: ../../../src/juce_appframework/gui/components/mouse/juce_ComponentDragger.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_ComponentDragger.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentDragger.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DragAndDropContainer.o: ../../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.cpp -o ../../../bin/intermediate_devcpp/juce_DragAndDropContainer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MouseCursor.o: ../../../src/juce_appframework/gui/components/mouse/juce_MouseCursor.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_MouseCursor.cpp -o ../../../bin/intermediate_devcpp/juce_MouseCursor.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MouseEvent.o: ../../../src/juce_appframework/gui/components/mouse/juce_MouseEvent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_MouseEvent.cpp -o ../../../bin/intermediate_devcpp/juce_MouseEvent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MouseHoverDetector.o: ../../../src/juce_appframework/gui/components/mouse/juce_MouseHoverDetector.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_MouseHoverDetector.cpp -o ../../../bin/intermediate_devcpp/juce_MouseHoverDetector.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MouseListener.o: ../../../src/juce_appframework/gui/components/mouse/juce_MouseListener.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/mouse/juce_MouseListener.cpp -o ../../../bin/intermediate_devcpp/juce_MouseListener.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BubbleComponent.o: ../../../src/juce_appframework/gui/components/special/juce_BubbleComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_BubbleComponent.cpp -o ../../../bin/intermediate_devcpp/juce_BubbleComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ColourSelector.o: ../../../src/juce_appframework/gui/components/special/juce_ColourSelector.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_ColourSelector.cpp -o ../../../bin/intermediate_devcpp/juce_ColourSelector.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DropShadower.o: ../../../src/juce_appframework/gui/components/special/juce_DropShadower.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_DropShadower.cpp -o ../../../bin/intermediate_devcpp/juce_DropShadower.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_OpenGLComponent.o: ../../../src/juce_appframework/gui/components/special/juce_OpenGLComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_OpenGLComponent.cpp -o ../../../bin/intermediate_devcpp/juce_OpenGLComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PreferencesPanel.o: ../../../src/juce_appframework/gui/components/special/juce_PreferencesPanel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_PreferencesPanel.cpp -o ../../../bin/intermediate_devcpp/juce_PreferencesPanel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_QuickTimeMovieComponent.o: ../../../src/juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.cpp -o ../../../bin/intermediate_devcpp/juce_QuickTimeMovieComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AlertWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.cpp -o ../../../bin/intermediate_devcpp/juce_AlertWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DialogWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_DialogWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_DialogWindow.cpp -o ../../../bin/intermediate_devcpp/juce_DialogWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ResizableWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_ResizableWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_ResizableWindow.cpp -o ../../../bin/intermediate_devcpp/juce_ResizableWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SplashScreen.o: ../../../src/juce_appframework/gui/components/windows/juce_SplashScreen.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_SplashScreen.cpp -o ../../../bin/intermediate_devcpp/juce_SplashScreen.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ThreadWithProgressWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_ThreadWithProgressWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_ThreadWithProgressWindow.cpp -o ../../../bin/intermediate_devcpp/juce_ThreadWithProgressWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToolTipWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_ToolTipWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_ToolTipWindow.cpp -o ../../../bin/intermediate_devcpp/juce_ToolTipWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MenuBarComponent.o: ../../../src/juce_appframework/gui/components/menus/juce_MenuBarComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/menus/juce_MenuBarComponent.cpp -o ../../../bin/intermediate_devcpp/juce_MenuBarComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BubbleMessageComponent.o: ../../../src/juce_appframework/gui/components/special/juce_BubbleMessageComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_BubbleMessageComponent.cpp -o ../../../bin/intermediate_devcpp/juce_BubbleMessageComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Component.o: ../../../src/juce_appframework/gui/components/juce_Component.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/juce_Component.cpp -o ../../../bin/intermediate_devcpp/juce_Component.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentListener.o: ../../../src/juce_appframework/gui/components/juce_ComponentListener.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/juce_ComponentListener.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentListener.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Desktop.o: ../../../src/juce_appframework/gui/components/juce_Desktop.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/juce_Desktop.cpp -o ../../../bin/intermediate_devcpp/juce_Desktop.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToneGeneratorAudioSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp -o ../../../bin/intermediate_devcpp/juce_ToneGeneratorAudioSource.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/adler32.o: ../../../src/juce_core/io/streams/zlib/adler32.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/adler32.c -o ../../../bin/intermediate_devcpp/adler32.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/compress.o: ../../../src/juce_core/io/streams/zlib/compress.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/compress.c -o ../../../bin/intermediate_devcpp/compress.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/crc32.o: ../../../src/juce_core/io/streams/zlib/crc32.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/crc32.c -o ../../../bin/intermediate_devcpp/crc32.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/deflate.o: ../../../src/juce_core/io/streams/zlib/deflate.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/deflate.c -o ../../../bin/intermediate_devcpp/deflate.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/infback.o: ../../../src/juce_core/io/streams/zlib/infback.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/infback.c -o ../../../bin/intermediate_devcpp/infback.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/inffast.o: ../../../src/juce_core/io/streams/zlib/inffast.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/inffast.c -o ../../../bin/intermediate_devcpp/inffast.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/inflate.o: ../../../src/juce_core/io/streams/zlib/inflate.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/inflate.c -o ../../../bin/intermediate_devcpp/inflate.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/inftrees.o: ../../../src/juce_core/io/streams/zlib/inftrees.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/inftrees.c -o ../../../bin/intermediate_devcpp/inftrees.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/trees.o: ../../../src/juce_core/io/streams/zlib/trees.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/trees.c -o ../../../bin/intermediate_devcpp/trees.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/uncompr.o: ../../../src/juce_core/io/streams/zlib/uncompr.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/uncompr.c -o ../../../bin/intermediate_devcpp/uncompr.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/zutil.o: ../../../src/juce_core/io/streams/zlib/zutil.c
+	$(CC) -c ../../../src/juce_core/io/streams/zlib/zutil.c -o ../../../bin/intermediate_devcpp/zutil.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/png.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/png.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/png.c -o ../../../bin/intermediate_devcpp/png.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngerror.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngerror.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngerror.c -o ../../../bin/intermediate_devcpp/pngerror.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pnggccrd.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pnggccrd.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pnggccrd.c -o ../../../bin/intermediate_devcpp/pnggccrd.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngget.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngget.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngget.c -o ../../../bin/intermediate_devcpp/pngget.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngmem.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngmem.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngmem.c -o ../../../bin/intermediate_devcpp/pngmem.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngpread.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngpread.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngpread.c -o ../../../bin/intermediate_devcpp/pngpread.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngread.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngread.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngread.c -o ../../../bin/intermediate_devcpp/pngread.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngrio.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrio.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrio.c -o ../../../bin/intermediate_devcpp/pngrio.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngrtran.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrtran.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrtran.c -o ../../../bin/intermediate_devcpp/pngrtran.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngrutil.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrutil.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngrutil.c -o ../../../bin/intermediate_devcpp/pngrutil.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngset.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngset.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngset.c -o ../../../bin/intermediate_devcpp/pngset.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngtrans.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngtrans.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngtrans.c -o ../../../bin/intermediate_devcpp/pngtrans.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngvcrd.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngvcrd.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngvcrd.c -o ../../../bin/intermediate_devcpp/pngvcrd.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngwio.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwio.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwio.c -o ../../../bin/intermediate_devcpp/pngwio.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngwrite.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwrite.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwrite.c -o ../../../bin/intermediate_devcpp/pngwrite.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngwtran.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwtran.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwtran.c -o ../../../bin/intermediate_devcpp/pngwtran.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/pngwutil.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwutil.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngwutil.c -o ../../../bin/intermediate_devcpp/pngwutil.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcapimin.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcapimin.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcapimin.c -o ../../../bin/intermediate_devcpp/jcapimin.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcapistd.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcapistd.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcapistd.c -o ../../../bin/intermediate_devcpp/jcapistd.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jccoefct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jccoefct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jccoefct.c -o ../../../bin/intermediate_devcpp/jccoefct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jccolor.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jccolor.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jccolor.c -o ../../../bin/intermediate_devcpp/jccolor.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcdctmgr.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcdctmgr.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcdctmgr.c -o ../../../bin/intermediate_devcpp/jcdctmgr.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jchuff.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jchuff.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jchuff.c -o ../../../bin/intermediate_devcpp/jchuff.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcinit.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcinit.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcinit.c -o ../../../bin/intermediate_devcpp/jcinit.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcmainct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmainct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmainct.c -o ../../../bin/intermediate_devcpp/jcmainct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcmarker.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmarker.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmarker.c -o ../../../bin/intermediate_devcpp/jcmarker.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcmaster.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmaster.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcmaster.c -o ../../../bin/intermediate_devcpp/jcmaster.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcomapi.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcomapi.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcomapi.c -o ../../../bin/intermediate_devcpp/jcomapi.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcparam.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcparam.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcparam.c -o ../../../bin/intermediate_devcpp/jcparam.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcphuff.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcphuff.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcphuff.c -o ../../../bin/intermediate_devcpp/jcphuff.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcprepct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcprepct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcprepct.c -o ../../../bin/intermediate_devcpp/jcprepct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jcsample.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcsample.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jcsample.c -o ../../../bin/intermediate_devcpp/jcsample.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jctrans.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jctrans.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jctrans.c -o ../../../bin/intermediate_devcpp/jctrans.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdapimin.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdapimin.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdapimin.c -o ../../../bin/intermediate_devcpp/jdapimin.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdapistd.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdapistd.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdapistd.c -o ../../../bin/intermediate_devcpp/jdapistd.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdatasrc.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdatasrc.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdatasrc.c -o ../../../bin/intermediate_devcpp/jdatasrc.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdcoefct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdcoefct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdcoefct.c -o ../../../bin/intermediate_devcpp/jdcoefct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdcolor.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdcolor.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdcolor.c -o ../../../bin/intermediate_devcpp/jdcolor.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jddctmgr.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jddctmgr.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jddctmgr.c -o ../../../bin/intermediate_devcpp/jddctmgr.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdhuff.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdhuff.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdhuff.c -o ../../../bin/intermediate_devcpp/jdhuff.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdinput.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdinput.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdinput.c -o ../../../bin/intermediate_devcpp/jdinput.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdmainct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmainct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmainct.c -o ../../../bin/intermediate_devcpp/jdmainct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdmarker.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmarker.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmarker.c -o ../../../bin/intermediate_devcpp/jdmarker.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdmaster.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmaster.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmaster.c -o ../../../bin/intermediate_devcpp/jdmaster.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdmerge.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmerge.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdmerge.c -o ../../../bin/intermediate_devcpp/jdmerge.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdphuff.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdphuff.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdphuff.c -o ../../../bin/intermediate_devcpp/jdphuff.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdpostct.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdpostct.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdpostct.c -o ../../../bin/intermediate_devcpp/jdpostct.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdsample.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdsample.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdsample.c -o ../../../bin/intermediate_devcpp/jdsample.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jdtrans.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdtrans.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jdtrans.c -o ../../../bin/intermediate_devcpp/jdtrans.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jerror.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jerror.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jerror.c -o ../../../bin/intermediate_devcpp/jerror.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jfdctflt.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctflt.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctflt.c -o ../../../bin/intermediate_devcpp/jfdctflt.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jfdctfst.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctfst.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctfst.c -o ../../../bin/intermediate_devcpp/jfdctfst.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jfdctint.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctint.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jfdctint.c -o ../../../bin/intermediate_devcpp/jfdctint.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jidctflt.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctflt.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctflt.c -o ../../../bin/intermediate_devcpp/jidctflt.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jidctfst.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctfst.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctfst.c -o ../../../bin/intermediate_devcpp/jidctfst.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jidctint.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctint.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctint.c -o ../../../bin/intermediate_devcpp/jidctint.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jidctred.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctred.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jidctred.c -o ../../../bin/intermediate_devcpp/jidctred.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jmemmgr.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jmemmgr.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jmemmgr.c -o ../../../bin/intermediate_devcpp/jmemmgr.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jmemnobs.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jmemnobs.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jmemnobs.c -o ../../../bin/intermediate_devcpp/jmemnobs.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jquant1.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jquant1.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jquant1.c -o ../../../bin/intermediate_devcpp/jquant1.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jquant2.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jquant2.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jquant2.c -o ../../../bin/intermediate_devcpp/jquant2.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/jutils.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jutils.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/jutils.c -o ../../../bin/intermediate_devcpp/jutils.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/transupp.o: ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/transupp.c
+	$(CC) -c ../../../src/juce_appframework/gui/graphics/imaging/image_file_formats/jpglib/transupp.c -o ../../../bin/intermediate_devcpp/transupp.o $(CFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiKeyboardComponent.o: ../../../src/juce_appframework/gui/components/special/juce_MidiKeyboardComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_MidiKeyboardComponent.cpp -o ../../../bin/intermediate_devcpp/juce_MidiKeyboardComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioFormatManager.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioFormatManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_AudioFormatManager.cpp -o ../../../bin/intermediate_devcpp/juce_AudioFormatManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_LowLevelGraphicsSoftwareRenderer.o: ../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp -o ../../../bin/intermediate_devcpp/juce_LowLevelGraphicsSoftwareRenderer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioDeviceManager.o: ../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.cpp -o ../../../bin/intermediate_devcpp/juce_AudioDeviceManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioDeviceSelectorComponent.o: ../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.cpp -o ../../../bin/intermediate_devcpp/juce_AudioDeviceSelectorComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DocumentWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_DocumentWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_DocumentWindow.cpp -o ../../../bin/intermediate_devcpp/juce_DocumentWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentBoundsConstrainer.o: ../../../src/juce_appframework/gui/components/layout/juce_ComponentBoundsConstrainer.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ComponentBoundsConstrainer.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentBoundsConstrainer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiBuffer.o: ../../../src/juce_appframework/audio/midi/juce_MidiBuffer.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiBuffer.cpp -o ../../../bin/intermediate_devcpp/juce_MidiBuffer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiFile.o: ../../../src/juce_appframework/audio/midi/juce_MidiFile.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiFile.cpp -o ../../../bin/intermediate_devcpp/juce_MidiFile.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiKeyboardState.o: ../../../src/juce_appframework/audio/midi/juce_MidiKeyboardState.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiKeyboardState.cpp -o ../../../bin/intermediate_devcpp/juce_MidiKeyboardState.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiMessage.o: ../../../src/juce_appframework/audio/midi/juce_MidiMessage.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiMessage.cpp -o ../../../bin/intermediate_devcpp/juce_MidiMessage.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiMessageCollector.o: ../../../src/juce_appframework/audio/midi/juce_MidiMessageCollector.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiMessageCollector.cpp -o ../../../bin/intermediate_devcpp/juce_MidiMessageCollector.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MidiMessageSequence.o: ../../../src/juce_appframework/audio/midi/juce_MidiMessageSequence.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/midi/juce_MidiMessageSequence.cpp -o ../../../bin/intermediate_devcpp/juce_MidiMessageSequence.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TopLevelWindow.o: ../../../src/juce_appframework/gui/components/windows/juce_TopLevelWindow.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_TopLevelWindow.cpp -o ../../../bin/intermediate_devcpp/juce_TopLevelWindow.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentPeer.o: ../../../src/juce_appframework/gui/components/windows/juce_ComponentPeer.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/windows/juce_ComponentPeer.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentPeer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BorderSize.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_BorderSize.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_BorderSize.cpp -o ../../../bin/intermediate_devcpp/juce_BorderSize.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PropertiesFile.o: ../../../src/juce_appframework/application/juce_PropertiesFile.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_PropertiesFile.cpp -o ../../../bin/intermediate_devcpp/juce_PropertiesFile.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileBasedDocument.o: ../../../src/juce_appframework/documents/juce_FileBasedDocument.cpp
+	$(CPP) -c ../../../src/juce_appframework/documents/juce_FileBasedDocument.cpp -o ../../../bin/intermediate_devcpp/juce_FileBasedDocument.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_RecentlyOpenedFilesList.o: ../../../src/juce_appframework/documents/juce_RecentlyOpenedFilesList.cpp
+	$(CPP) -c ../../../src/juce_appframework/documents/juce_RecentlyOpenedFilesList.cpp -o ../../../bin/intermediate_devcpp/juce_RecentlyOpenedFilesList.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_UndoManager.o: ../../../src/juce_appframework/documents/juce_UndoManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/documents/juce_UndoManager.cpp -o ../../../bin/intermediate_devcpp/juce_UndoManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_DirectoryContentsList.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.cpp -o ../../../bin/intermediate_devcpp/juce_DirectoryContentsList.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileBrowserComponent.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FileBrowserComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FileBrowserComponent.cpp -o ../../../bin/intermediate_devcpp/juce_FileBrowserComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileChooser.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.cpp -o ../../../bin/intermediate_devcpp/juce_FileChooser.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileChooserDialogBox.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooserDialogBox.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooserDialogBox.cpp -o ../../../bin/intermediate_devcpp/juce_FileChooserDialogBox.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileFilter.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FileFilter.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FileFilter.cpp -o ../../../bin/intermediate_devcpp/juce_FileFilter.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FileListComponent.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FileListComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FileListComponent.cpp -o ../../../bin/intermediate_devcpp/juce_FileListComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ImagePreviewComponent.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ImagePreviewComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_WildcardFileFilter.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.cpp -o ../../../bin/intermediate_devcpp/juce_WildcardFileFilter.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioIODevice.o: ../../../src/juce_appframework/audio/devices/juce_AudioIODevice.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/devices/juce_AudioIODevice.cpp -o ../../../bin/intermediate_devcpp/juce_AudioIODevice.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioIODeviceType.o: ../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.cpp -o ../../../bin/intermediate_devcpp/juce_AudioIODeviceType.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Socket.o: ../../../src/juce_core/io/network/juce_Socket.cpp
+	$(CPP) -c ../../../src/juce_core/io/network/juce_Socket.cpp -o ../../../bin/intermediate_devcpp/juce_Socket.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_NamedPipe.o: ../../../src/juce_core/io/files/juce_NamedPipe.cpp
+	$(CPP) -c ../../../src/juce_core/io/files/juce_NamedPipe.cpp -o ../../../bin/intermediate_devcpp/juce_NamedPipe.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_InterprocessConnection.o: ../../../src/juce_appframework/events/juce_InterprocessConnection.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_InterprocessConnection.cpp -o ../../../bin/intermediate_devcpp/juce_InterprocessConnection.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_InterprocessConnectionServer.o: ../../../src/juce_appframework/events/juce_InterprocessConnectionServer.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_InterprocessConnectionServer.cpp -o ../../../bin/intermediate_devcpp/juce_InterprocessConnectionServer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FlacAudioFormat.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp -o ../../../bin/intermediate_devcpp/juce_FlacAudioFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_OggVorbisAudioFormat.o: ../../../src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp -o ../../../bin/intermediate_devcpp/juce_OggVorbisAudioFormat.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ApplicationCommandInfo.o: ../../../src/juce_appframework/application/juce_ApplicationCommandInfo.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_ApplicationCommandInfo.cpp -o ../../../bin/intermediate_devcpp/juce_ApplicationCommandInfo.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ApplicationCommandManager.o: ../../../src/juce_appframework/application/juce_ApplicationCommandManager.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_ApplicationCommandManager.cpp -o ../../../bin/intermediate_devcpp/juce_ApplicationCommandManager.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ApplicationCommandTarget.o: ../../../src/juce_appframework/application/juce_ApplicationCommandTarget.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_ApplicationCommandTarget.cpp -o ../../../bin/intermediate_devcpp/juce_ApplicationCommandTarget.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PositionedRectangle.o: ../../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp -o ../../../bin/intermediate_devcpp/juce_PositionedRectangle.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MultiDocumentPanel.o: ../../../src/juce_appframework/gui/components/layout/juce_MultiDocumentPanel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_MultiDocumentPanel.cpp -o ../../../bin/intermediate_devcpp/juce_MultiDocumentPanel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ButtonPropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_ButtonPropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_ButtonPropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ButtonPropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ChoicePropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_ChoicePropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_ChoicePropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ChoicePropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_PropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_PropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_PropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_PropertyPanel.o: ../../../src/juce_appframework/gui/components/properties/juce_PropertyPanel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_PropertyPanel.cpp -o ../../../bin/intermediate_devcpp/juce_PropertyPanel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SliderPropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_SliderPropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_SliderPropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_SliderPropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TextPropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_TextPropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_TextPropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_TextPropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MagnifierComponent.o: ../../../src/juce_appframework/gui/components/special/juce_MagnifierComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_MagnifierComponent.cpp -o ../../../bin/intermediate_devcpp/juce_MagnifierComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_FilenameComponent.o: ../../../src/juce_appframework/gui/components/filebrowser/juce_FilenameComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/filebrowser/juce_FilenameComponent.cpp -o ../../../bin/intermediate_devcpp/juce_FilenameComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_KeyboardFocusTraverser.o: ../../../src/juce_appframework/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp -o ../../../bin/intermediate_devcpp/juce_KeyboardFocusTraverser.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_BooleanPropertyComponent.o: ../../../src/juce_appframework/gui/components/properties/juce_BooleanPropertyComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/properties/juce_BooleanPropertyComponent.cpp -o ../../../bin/intermediate_devcpp/juce_BooleanPropertyComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_CharacterFunctions.o: ../../../src/juce_core/text/juce_CharacterFunctions.cpp
+	$(CPP) -c ../../../src/juce_core/text/juce_CharacterFunctions.cpp -o ../../../bin/intermediate_devcpp/juce_CharacterFunctions.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SVGParser.o: ../../../src/juce_appframework/gui/graphics/drawables/juce_SVGParser.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/drawables/juce_SVGParser.cpp -o ../../../bin/intermediate_devcpp/juce_SVGParser.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_RectanglePlacement.o: ../../../src/juce_appframework/gui/graphics/contexts/juce_RectanglePlacement.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/graphics/contexts/juce_RectanglePlacement.cpp -o ../../../bin/intermediate_devcpp/juce_RectanglePlacement.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TableHeaderComponent.o: ../../../src/juce_appframework/gui/components/controls/juce_TableHeaderComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_TableHeaderComponent.cpp -o ../../../bin/intermediate_devcpp/juce_TableHeaderComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_TableListBox.o: ../../../src/juce_appframework/gui/components/controls/juce_TableListBox.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_TableListBox.cpp -o ../../../bin/intermediate_devcpp/juce_TableListBox.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_StretchableObjectResizer.o: ../../../src/juce_appframework/gui/components/layout/juce_StretchableObjectResizer.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_StretchableObjectResizer.cpp -o ../../../bin/intermediate_devcpp/juce_StretchableObjectResizer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Toolbar.o: ../../../src/juce_appframework/gui/components/controls/juce_Toolbar.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_Toolbar.cpp -o ../../../bin/intermediate_devcpp/juce_Toolbar.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToolbarItemComponent.o: ../../../src/juce_appframework/gui/components/controls/juce_ToolbarItemComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_ToolbarItemComponent.cpp -o ../../../bin/intermediate_devcpp/juce_ToolbarItemComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToolbarItemPalette.o: ../../../src/juce_appframework/gui/components/controls/juce_ToolbarItemPalette.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/controls/juce_ToolbarItemPalette.cpp -o ../../../bin/intermediate_devcpp/juce_ToolbarItemPalette.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentAnimator.o: ../../../src/juce_appframework/gui/components/layout/juce_ComponentAnimator.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ComponentAnimator.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentAnimator.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MultiTimer.o: ../../../src/juce_appframework/events/juce_MultiTimer.cpp
+	$(CPP) -c ../../../src/juce_appframework/events/juce_MultiTimer.cpp -o ../../../bin/intermediate_devcpp/juce_MultiTimer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ToolbarButton.o: ../../../src/juce_appframework/gui/components/buttons/juce_ToolbarButton.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/buttons/juce_ToolbarButton.cpp -o ../../../bin/intermediate_devcpp/juce_ToolbarButton.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Sampler.o: ../../../src/juce_appframework/audio/synthesisers/juce_Sampler.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/synthesisers/juce_Sampler.cpp -o ../../../bin/intermediate_devcpp/juce_Sampler.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_Synthesiser.o: ../../../src/juce_appframework/audio/synthesisers/juce_Synthesiser.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/synthesisers/juce_Synthesiser.cpp -o ../../../bin/intermediate_devcpp/juce_Synthesiser.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ComponentMovementWatcher.o: ../../../src/juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.cpp -o ../../../bin/intermediate_devcpp/juce_ComponentMovementWatcher.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioDataConverters.o: ../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.cpp -o ../../../bin/intermediate_devcpp/juce_AudioDataConverters.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_AudioSampleBuffer.o: ../../../src/juce_appframework/audio/dsp/juce_AudioSampleBuffer.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/dsp/juce_AudioSampleBuffer.cpp -o ../../../bin/intermediate_devcpp/juce_AudioSampleBuffer.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_IIRFilter.o: ../../../src/juce_appframework/audio/dsp/juce_IIRFilter.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/dsp/juce_IIRFilter.cpp -o ../../../bin/intermediate_devcpp/juce_IIRFilter.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ApplicationProperties.o: ../../../src/juce_appframework/application/juce_ApplicationProperties.cpp
+	$(CPP) -c ../../../src/juce_appframework/application/juce_ApplicationProperties.cpp -o ../../../bin/intermediate_devcpp/juce_ApplicationProperties.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_SystemTrayIconComponent.o: ../../../src/juce_appframework/gui/components/special/juce_SystemTrayIconComponent.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/special/juce_SystemTrayIconComponent.cpp -o ../../../bin/intermediate_devcpp/juce_SystemTrayIconComponent.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_MenuBarModel.o: ../../../src/juce_appframework/gui/components/menus/juce_MenuBarModel.cpp
+	$(CPP) -c ../../../src/juce_appframework/gui/components/menus/juce_MenuBarModel.cpp -o ../../../bin/intermediate_devcpp/juce_MenuBarModel.o $(CXXFLAGS)
+
+../../../bin/intermediate_devcpp/juce_ChannelRemappingAudioSource.o: ../../../src/juce_appframework/audio/audio_sources/juce_ChannelRemappingAudioSource.cpp
+	$(CPP) -c ../../../src/juce_appframework/audio/audio_sources/juce_ChannelRemappingAudioSource.cpp -o ../../../bin/intermediate_devcpp/juce_ChannelRemappingAudioSource.o $(CXXFLAGS)

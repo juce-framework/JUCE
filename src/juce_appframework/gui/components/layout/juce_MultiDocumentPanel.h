@@ -1,0 +1,261 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-7 by Raw Material Software ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the
+   GNU General Public License, as published by the Free Software Foundation;
+   either version 2 of the License, or (at your option) any later version.
+
+   JUCE is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with JUCE; if not, visit www.gnu.org/licenses or write to the
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Boston, MA 02111-1307 USA
+
+  ------------------------------------------------------------------------------
+
+   If you'd like to release a closed-source product which uses JUCE, commercial
+   licenses are also available: visit www.rawmaterialsoftware.com/juce for
+   more information.
+
+  ==============================================================================
+*/
+
+#ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
+#define __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
+
+#include "juce_TabbedComponent.h"
+class MDIDocumentWindowInternal;
+class MDITabbedComponentInternal;
+
+
+//==============================================================================
+/**
+    A component that contains a set of other components either in floating windows
+    or tabs.
+
+    This acts as a panel that can be used to hold a set of open document windows, with
+    different layout modes.
+
+    Use addDocument() and closeDocument() to add or remove components from the
+    panel - never use any of the Component methods to access the panel's child
+    components directly, as these are managed internally.
+*/
+class JUCE_API  MultiDocumentPanel  : public Component,
+                                      private ComponentListener
+{
+public:
+    //==============================================================================
+    /** Creates an empty panel.
+
+        Use addDocument() and closeDocument() to add or remove components from the
+        panel - never use any of the Component methods to access the panel's child
+        components directly, as these are managed internally.
+    */
+    MultiDocumentPanel();
+
+    /** Destructor.
+
+        When deleted, this will call closeAllDocuments (false) to make sure all its
+        components are deleted. If you need to make sure all documents are saved
+        before closing, then you should call closeAllDocuments (true) and check that
+        it returns true before deleting the panel.
+    */
+    ~MultiDocumentPanel();
+
+    //==============================================================================
+    /** Tries to close all the documents.
+
+        If checkItsOkToCloseFirst is true, then the tryToCloseDocument() method will
+        be called for each open document, and any of these calls fails, this method
+        will stop and return false, leaving some documents still open.
+
+        If checkItsOkToCloseFirst is false, then all documents will be closed
+        unconditionally.
+
+        @see closeDocument
+    */
+    bool closeAllDocuments (const bool checkItsOkToCloseFirst);
+
+    /** Adds a document component to the panel.
+
+        If the number of documents would exceed the limit set by setMaximumNumDocuments() then
+        this will fail and return false. (If it does fail, the component passed-in will not be
+        deleted, even if deleteWhenRemoved was set to true).
+
+        @param component            the component to add
+        @param backgroundColour     the background colour to use to fill the component's
+                                    window or tab
+        @param deleteWhenRemoved    if true, then when the component is removed by closeDocument()
+                                    or closeAllDocuments(), then it will be deleted. If false, then
+                                    the caller must handle the component's deletion
+    */
+    bool addDocument (Component* const component,
+                      const Colour& backgroundColour,
+                      const bool deleteWhenRemoved);
+
+    /** Closes one of the documents.
+
+        If checkItsOkToCloseFirst is true, then the tryToCloseDocument() method will
+        be called, and if it fails, this method will return false without closing the
+        document.
+
+        If checkItsOkToCloseFirst is false, then the documents will be closed
+        unconditionally.
+
+        The component will be deleted if the deleteWhenRemoved parameter was set to
+        true when it was added with addDocument.
+
+        @see addDocument, closeAllDocuments
+    */
+    bool closeDocument (Component* component,
+                        const bool checkItsOkToCloseFirst);
+
+    /** Returns the number of open document windows.
+
+        @see getDocument
+    */
+    int getNumDocuments() const throw();
+
+    /** Returns one of the open documents.
+
+        The order of the documents in this array may change when they are added, removed
+        or moved around.
+
+        @see getNumDocuments
+    */
+    Component* getDocument (const int index) const throw();
+
+    /** Returns the document component that is currently focused or on top.
+
+        If currently using floating windows, then this will be the component in the currently
+        active window, or the top component if none are active.
+
+        If it's currently in tabbed mode, then it'll return the component in the active tab.
+
+        @see setActiveDocument
+    */
+    Component* getActiveDocument() const throw();
+
+    /** Makes one of the components active and brings it to the top.
+
+        @see getActiveDocument
+    */
+    void setActiveDocument (Component* component);
+
+    /** Callback which gets invoked when the currently-active document changes. */
+    virtual void activeDocumentChanged();
+
+    /** Sets a limit on how many windows can be open at once.
+
+        If this is zero or less there's no limit (the default). addDocument() will fail
+        if this number is exceeded.
+    */
+    void setMaximumNumDocuments (const int maximumNumDocuments);
+
+    /** Sets an option to make the document fullscreen if there's only one document open.
+
+        If set to true, then if there's only one document, it'll fill the whole of this
+        component without tabs or a window border. If false, then tabs or a window
+        will always be shown, even if there's only one document. If there's more than
+        one document open, then this option makes no difference.
+    */
+    void useFullscreenWhenOneDocument (const bool shouldUseTabs);
+
+    /** Returns the result of the last time useFullscreenWhenOneDocument() was called.
+    */
+    bool isFullscreenWhenOneDocument() const throw();
+
+    //==============================================================================
+    /** The different layout modes available. */
+    enum LayoutMode
+    {
+        FloatingWindows,            /**< In this mode, there are overlapping DocumentWindow components for each document. */
+        MaximisedWindowsWithTabs    /**< In this mode, a TabbedComponent is used to show one document at a time. */
+    };
+
+    /** Changes the panel's mode.
+
+        @see LayoutMode, getLayoutMode
+    */
+    void setLayoutMode (const LayoutMode newLayoutMode);
+
+    /** Returns the current layout mode. */
+    LayoutMode getLayoutMode() const throw()                            { return mode; }
+
+    /** Sets the background colour for the whole panel.
+
+        Each document has its own background colour, but this is the one used to fill the areas
+        behind them.
+    */
+    void setBackgroundColour (const Colour& newBackgroundColour);
+
+    /** Returns the current background colour.
+
+        @see setBackgroundColour
+    */
+    const Colour& getBackgroundColour() const throw()                   { return backgroundColour; }
+
+
+    //==============================================================================
+    /** A subclass must override this to say whether its currently ok for a document
+        to be closed.
+
+        This method is called by closeDocument() and closeAllDocuments() to indicate that
+        a document should be saved if possible, ready for it to be closed.
+
+        If this method returns true, then it means the document is ok and can be closed.
+
+        If it returns false, then it means that the closeDocument() method should stop
+        and not close.
+
+        Normally, you'd use this method to ask the user if they want to save any changes,
+        then return true if the save operation went ok. If the user cancelled the save
+        operation you could return false here to abort the close operation.
+
+        If your component is based on the FileBasedDocument class, then you'd probably want
+        to call FileBasedDocument::saveIfNeededAndUserAgrees() and return true if this returned
+        FileBasedDocument::savedOk
+
+        @see closeDocument, FileBasedDocument::saveIfNeededAndUserAgrees()
+    */
+    virtual bool tryToCloseDocument (Component* component) = 0;
+
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void componentNameChanged (Component&);
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+
+private:
+    LayoutMode mode;
+    Array <Component*> components;
+    TabbedComponent* tabComponent;
+    Colour backgroundColour;
+    int maximumNumDocuments, numDocsBeforeTabsUsed;
+
+    friend class MDIDocumentWindowInternal;
+    friend class MDITabbedComponentInternal;
+
+    Component* getContainerComp (Component* c) const;
+    void updateOrder();
+
+    void addWindow (Component* component);
+};
+
+
+#endif   // __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
