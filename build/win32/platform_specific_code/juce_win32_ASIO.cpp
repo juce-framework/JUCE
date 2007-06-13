@@ -773,7 +773,9 @@ public:
 
     bool isPlaying()
     {
-        return isASIOOpen && (isThreadRunning() || !isUsingThread) && (currentCallback != 0);
+        return isASIOOpen 
+                && (isThreadRunning() || ! isUsingThread) 
+                && (currentCallback != 0);
     }
 
     const String getLastError()
@@ -849,12 +851,12 @@ public:
         }
     }
 
-    void resetRequest()
+    void resetRequest() throw()
     {
         needToReset = true;
     }
 
-    void resyncRequest()
+    void resyncRequest() throw()
     {
         needToReset = true;
         isReSync = true;
@@ -1241,7 +1243,7 @@ private:
     }
 
     //==============================================================================
-    void callback (long index)
+    void callback (const long index) throw()
     {
         if (isStarted)
         {
@@ -1268,7 +1270,7 @@ private:
         calledback = true;
     }
 
-    void processBuffer()
+    void processBuffer() throw()
     {
         const ASIOBufferInfo* const infos = bufferInfos;
         const int bi = bufferIndex;
@@ -1416,7 +1418,7 @@ private:
     }
 
     //==============================================================================
-    static ASIOTime* bufferSwitchTimeInfoCallback (ASIOTime*, long index, long)
+    static ASIOTime* bufferSwitchTimeInfoCallback (ASIOTime*, long index, long) throw()
     {
         if (currentASIODev != 0)
             currentASIODev->callback (index);
@@ -1424,13 +1426,13 @@ private:
         return 0;
     }
 
-    static void bufferSwitchCallback (long index, long)
+    static void bufferSwitchCallback (long index, long) throw()
     {
         if (currentASIODev != 0)
             currentASIODev->callback (index);
     }
 
-    static long asioMessagesCallback (long selector, long value, void*, double*)
+    static long asioMessagesCallback (long selector, long value, void*, double*) throw()
     {
         switch (selector)
         {
@@ -1472,7 +1474,7 @@ private:
         return 0;
     }
 
-    static void sampleRateChangedCallback (ASIOSampleRate)
+    static void sampleRateChangedCallback (ASIOSampleRate) throw()
     {
     }
 

@@ -100,29 +100,23 @@ void AudioFilterStreamer::audioDeviceAboutToStart (double sampleRate_,
 {
     sampleRate = sampleRate_;
 
-    if (! isPlaying)
-    {
-        isPlaying = true;
+    isPlaying = true;
 
-        emptyBuffer.setSize (1 + filter.getNumOutputChannels(),
-                             jmax (2048, numSamplesPerBlock * 2));
-        emptyBuffer.clear();
+    emptyBuffer.setSize (1 + filter.getNumOutputChannels(),
+                         jmax (2048, numSamplesPerBlock * 2));
+    emptyBuffer.clear();
 
-        midiCollector.reset (sampleRate);
+    midiCollector.reset (sampleRate);
 
-        filter.prepareToPlay (sampleRate, numSamplesPerBlock);
-    }
+    filter.prepareToPlay (sampleRate, numSamplesPerBlock);
 }
 
 void AudioFilterStreamer::audioDeviceStopped()
 {
-    if (isPlaying)
-    {
-        isPlaying = false;
-        filter.releaseResources();
-        midiCollector.reset (sampleRate);
-        emptyBuffer.setSize (1, 32);
-    }
+    isPlaying = false;
+    filter.releaseResources();
+    midiCollector.reset (sampleRate);
+    emptyBuffer.setSize (1, 32);
 }
 
 void AudioFilterStreamer::handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message)
