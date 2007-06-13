@@ -66,6 +66,12 @@ void JUCE_API initialiseJuce_NonGUI()
         jassert (atomicDecrementAndReturn (n) == 1);
 
         jassert (swapByteOrder ((uint32) 0x11223344) == 0x44332211);
+
+        // quick test to make sure the run-time lib doesn't crash on freeing a null-pointer.
+        SystemStats* nullPointer = 0;
+        juce_free (nullPointer);
+        delete[] nullPointer;
+        delete nullPointer;
 #endif
         // Now the real initialisation..
 

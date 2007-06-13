@@ -250,9 +250,7 @@ public:
         {
             DeleteDC (dc);
             DeleteObject (fontH);
-
-            if (kps)
-                juce_free (kps);
+            juce_free (kps);
         }
     }
 
@@ -284,11 +282,8 @@ public:
                 DeleteDC (dc);
                 DeleteObject (fontH);
 
-                if (kps != 0)
-                {
-                    juce_free (kps);
-                    kps = 0;
-                }
+                juce_free (kps);
+                kps = 0;
             }
 
             fontH = 0;

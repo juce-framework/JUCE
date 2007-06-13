@@ -1225,16 +1225,14 @@ private:
 
         int i;
         for (i = 0; i < numInputBuffers; ++i)
-            if (inputBuffers[i] != 0)
-                juce_free (inputBuffers[i]);
+            juce_free (inputBuffers[i]);
 
         delete[] inputBuffers;
         inputBuffers = 0;
         numInputBuffers = 0;
 
         for (i = 0; i < numOutputBuffers; ++i)
-            if (outputBuffers[i] != 0)
-                juce_free (outputBuffers[i]);
+            juce_free (outputBuffers[i]);
 
         delete[] outputBuffers;
         outputBuffers = 0;

@@ -121,17 +121,13 @@ public:
 
         stop (false);
 
-        if (audioBuffer != 0)
-            juce_free (audioBuffer);
-
-        if (inputDevice != 0)
-            delete inputDevice;
+        juce_free (audioBuffer);
+        delete inputDevice;
     }
 
     void setTempBufferSize (const int numChannels, const int numSamples)
     {
-        if (audioBuffer != 0)
-            juce_free (audioBuffer);
+        juce_free (audioBuffer);
 
         audioBuffer = (float*) juce_calloc (32 + numChannels * numSamples * sizeof (float));
 

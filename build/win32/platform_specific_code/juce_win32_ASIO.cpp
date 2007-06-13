@@ -166,8 +166,7 @@ public:
         log (T("ASIO - exiting"));
         removeCurrentDriver();
 
-        if (tempBuffer != 0)
-            juce_free (tempBuffer);
+        juce_free (tempBuffer);
 
         if (isUsingThread)
         {
@@ -487,8 +486,7 @@ public:
 
                 jassert (! isThreadRunning());
 
-                if (tempBuffer != 0)
-                    juce_free (tempBuffer);
+                juce_free (tempBuffer);
 
                 tempBuffer = (float*) juce_calloc (totalBuffers * currentBlockSizeSamples * sizeof (float) + 128);
 

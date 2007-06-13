@@ -61,8 +61,7 @@ EdgeTable::EdgeTable (const EdgeTable& other) throw()
 
 const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
 {
-    if (table != 0)
-        juce_free (table);
+    juce_free (table);
 
     top = other.top;
     height = other.height;
