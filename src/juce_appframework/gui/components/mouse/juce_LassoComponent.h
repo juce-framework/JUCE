@@ -112,12 +112,8 @@ public:
         The fill colour is used to fill the lasso'ed rectangle, and the outline
         colour is used to draw a line around its edge.
     */
-    LassoComponent (const Colour& fillColour_     = Colour (0x66dddddd),
-                    const Colour& outlineColour_  = Colour (0x99111111),
-                    const int outlineThickness_   = 1)
+    LassoComponent (const int outlineThickness_ = 1)
         : source (0),
-          fillColour (fillColour_),
-          outlineColour (outlineColour_),
           outlineThickness (outlineThickness_)
     {
     }
@@ -207,13 +203,30 @@ public:
         setVisible (false);
     }
 
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the label.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        Note that you can also use the constants from TextEditor::ColourIds to change the
+        colour of the text editor that is opened when a label is editable.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        lassoFillColourId       = 0x1000440, /**< The colour to fill the lasso rectangle with. */
+        lassoOutlineColourId    = 0x1000441, /**< The colour to draw the outline with. */
+    };
 
     //==============================================================================
     /** @internal */
     void paint (Graphics& g)
     {
-        g.fillAll (fillColour);
-        g.setColour (outlineColour);
+        g.fillAll (findColour (lassoFillColourId));
+
+        g.setColour (findColour (lassoOutlineColourId));
         g.drawRect (0, 0, getWidth(), getHeight(), outlineThickness);
 
         // this suggests that you've left a lasso comp lying around after the
@@ -231,7 +244,6 @@ public:
 private:
     Array <SelectableItemType> originalSelection;
     LassoSource <SelectableItemType>* source;
-    Colour fillColour, outlineColour;
     int outlineThickness;
 };
 

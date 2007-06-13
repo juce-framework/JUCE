@@ -46,6 +46,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../menus/juce_MenuBarComponent.h"
 #include "../menus/juce_PopupMenu.h"
 #include "../layout/juce_ScrollBar.h"
+#include "../mouse/juce_LassoComponent.h"
 #include "../controls/juce_Slider.h"
 #include "../controls/juce_ListBox.h"
 #include "../controls/juce_TableHeaderComponent.h"
@@ -152,6 +153,9 @@ LookAndFeel::LookAndFeel()
 
     setColour (FileListComponent::highlightColourId, findColour (TextEditor::highlightColourId));
     setColour (FileListComponent::textColourId,     Colours::black);
+
+    setColour (0x1000440, /*LassoComponent::lassoFillColourId*/    Colour (0x66dddddd));
+    setColour (0x1000441, /*LassoComponent::lassoOutlineColourId*/ Colour (0x99111111));
 
     setColour (MidiKeyboardComponent::whiteNoteColourId,                Colours::white);
     setColour (MidiKeyboardComponent::blackNoteColourId,                Colours::black);
