@@ -1626,10 +1626,11 @@ private:
         }
 
         const juce_wchar textChar = (juce_wchar) key;
+        const int virtualScanCode = (flags >> 16) & 0xff;
 
         if (key >= '0' && key <= '9')
         {
-            switch ((flags >> 16) & 0xff)  // check for a numeric keypad scan-code
+            switch (virtualScanCode)  // check for a numeric keypad scan-code
             {
             case 0x52:
             case 0x4f:
@@ -1646,6 +1647,17 @@ private:
             default:
                 break;
             }
+        }
+        else
+        {
+            // convert the scan code to an unmodified character code..
+            UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (wMapVirtualKeyW (virtualScanCode, 1), 2)
+                                                : MapVirtualKey (MapVirtualKey (virtualScanCode, 1), 2);
+
+            keyChar = LOWORD (keyChar);
+
+            if (keyChar != 0)
+                key = (int) keyChar;
         }
 
         handleKeyPress (key, textChar);
