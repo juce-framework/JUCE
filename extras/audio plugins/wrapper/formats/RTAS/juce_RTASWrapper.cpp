@@ -364,7 +364,8 @@ public:
             void paint (Graphics& g)
             {
 #if JUCE_MAC
-                forcedRepaintTimer->stopTimer();
+                if (forcedRepaintTimer != 0)
+                    forcedRepaintTimer->stopTimer();
 #endif
             }
 
