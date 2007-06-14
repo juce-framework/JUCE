@@ -174,6 +174,10 @@ public:
     /** True if the window is currently full-screen. */
     virtual bool isFullScreen() const = 0;
 
+    /** Attempts to change the icon associated with this window.
+    */
+    virtual void setIcon (const Image& newIcon) = 0;
+
     /** Sets a constrainer to use if the peer can resize itself.
 
         The constrainer won't be deleted by this object, so the caller must manage its lifetime.

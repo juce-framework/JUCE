@@ -684,6 +684,11 @@ public:
         }
     }
 
+    void setIcon (const Image& /*newIcon*/)
+    {
+        // to do..
+    }
+
     //==============================================================================
     void viewFocusGain()
     {

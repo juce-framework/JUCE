@@ -517,7 +517,8 @@ public:
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
-          taskBarIcon (0)
+          taskBarIcon (0),
+          currentWindowIcon (0)
     {
         juce_initialiseUnicodeWindowFunctions();
 
@@ -551,6 +552,9 @@ public:
 
         MessageManager::getInstance()
             ->callFunctionOnMessageThread (&destroyWindowCallback, (void*) hwnd);
+
+        if (currentWindowIcon != 0)
+            DestroyIcon (currentWindowIcon);
     }
 
     //==============================================================================
@@ -928,6 +932,7 @@ private:
     DropShadower* shadower;
     bool fullScreen, isDragging, isMouseOver;
     BorderSize windowBorder;
+    HICON currentWindowIcon;
     NOTIFYICONDATA* taskBarIcon;
     friend class WindowClassHolder;
 
@@ -1178,6 +1183,23 @@ private:
     }
 
     inline bool hasTitleBar() const throw()         { return (styleFlags & windowHasTitleBar) != 0; }
+
+
+    void setIcon (const Image& newIcon)
+    {
+        HICON hicon = createHICONFromImage (newIcon, TRUE, 0, 0);
+
+        if (hicon != 0)
+        {
+            SendMessage (hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
+            SendMessage (hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
+
+            if (currentWindowIcon != 0)
+                DestroyIcon (currentWindowIcon);
+
+            currentWindowIcon = hicon;
+        }
+    }
 
     //==============================================================================
     void handlePaintMessage()

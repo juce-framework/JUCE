@@ -68,6 +68,7 @@ public:
     bool setAlwaysOnTop (bool)                      { return true; }
     void toFront (bool)                             {}
     void toBehind (ComponentPeer*)                  {}
+    void setIcon (const Image&)                     {}
 
     bool isFocused() const
     {

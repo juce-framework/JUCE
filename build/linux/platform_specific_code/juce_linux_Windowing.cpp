@@ -1087,6 +1087,18 @@ public:
         repainter->performAnyPendingRepaintsNow();
     }
 
+    void setIcon (const Image& newIcon)
+    {
+        /*XWMHints* wmHints = XAllocWMHints();
+        wmHints->flags = IconPixmapHint | IconMaskHint;
+        wmHints->icon_pixmap = 
+        wmHints->icon_mask = 
+
+        XSetWMHints (display, windowH, wmHints);
+        XFree (wmHints);
+        */
+    }
+
     //==============================================================================
     void handleWindowMessage (XEvent* event)
     {
@@ -2557,8 +2569,8 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     }
 
     const int stride = (cursorW + 7) >> 3;
-    unsigned char* const maskPlane = (unsigned char*) juce_calloc (stride * cursorH);
-    unsigned char* const sourcePlane = (unsigned char*) juce_calloc (stride * cursorH);
+    uint8* const maskPlane = (uint8*) juce_calloc (stride * cursorH);
+    uint8* const sourcePlane = (uint8*) juce_calloc (stride * cursorH);
 
     bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
@@ -2566,7 +2578,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     {
         for (int x = cursorW; --x >= 0;)
         {
-            const unsigned char mask = (unsigned char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+            const uint8 mask = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
             const int offset = y * stride + (x >> 3);
 
             const Colour c (im.getPixelAt (x, y));
@@ -2903,7 +2915,7 @@ void SystemClipboard::copyTextToClipboard (const String& clipText)
 
     XRotateWindowProperties (display, root, cutBuffers, 8, 1);
     XChangeProperty (display, root, cutBuffers[0],
-                     XA_STRING, 8, PropModeReplace, (const unsigned char*)((const char*)clipText),
+                     XA_STRING, 8, PropModeReplace, (const unsigned char*) (const char*) clipText,
                      clipText.length());
 }
 
