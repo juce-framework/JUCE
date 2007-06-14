@@ -847,18 +847,22 @@ public:
 
     void doIdleCallback()
     {
-        if (! recursionCheck)
+        // (wavelab calls this on a separate thread and causes a deadlock)..
+        if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            const MessageManagerLock mml;
+            if (! recursionCheck)
+            {
+                const MessageManagerLock mml;
 
-            recursionCheck = true;
+                recursionCheck = true;
 
-            juce_callAnyTimersSynchronously();
+                juce_callAnyTimersSynchronously();
 
-            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
+                for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+                    ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
 
-            recursionCheck = false;
+                recursionCheck = false;
+            }
         }
     }
 
