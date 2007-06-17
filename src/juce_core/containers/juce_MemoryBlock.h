@@ -45,48 +45,48 @@ class JUCE_API  MemoryBlock
 public:
     //==============================================================================
     /** Create an uninitialised block with 0 size. */
-    MemoryBlock() throw();
+    JUCE_CALLTYPE MemoryBlock() throw();
 
     /** Creates a memory block with a given initial size.
 
         @param initialSize          the size of block to create
         @param initialiseToZero     whether to clear the memory or just leave it uninitialised
     */
-    MemoryBlock (const int initialSize,
-                 const bool initialiseToZero = false) throw();
+    JUCE_CALLTYPE MemoryBlock (const int initialSize,
+                               const bool initialiseToZero = false) throw();
 
     /** Creates a copy of another memory block. */
-    MemoryBlock (const MemoryBlock& other) throw();
+    JUCE_CALLTYPE MemoryBlock (const MemoryBlock& other) throw();
 
     /** Creates a memory block using a copy of a block of data.
 
         @param dataToInitialiseFrom     some data to copy into this block
         @param sizeInBytes              how much space to use
     */
-    MemoryBlock (const void* const dataToInitialiseFrom,
-                 const int sizeInBytes) throw();
+    JUCE_CALLTYPE MemoryBlock (const void* const dataToInitialiseFrom,
+                               const int sizeInBytes) throw();
 
     /** Destructor. */
-    ~MemoryBlock() throw();
+    JUCE_CALLTYPE ~MemoryBlock() throw();
 
     /** Copies another memory block onto this one.
 
         This block will be resized and copied to exactly match the other one.
     */
-    const MemoryBlock& operator= (const MemoryBlock& other) throw();
+    const MemoryBlock& JUCE_CALLTYPE operator= (const MemoryBlock& other) throw();
 
     //==============================================================================
     /** Compares two memory blocks.
 
         @returns true only if the two blocks are the same size and have identical contents.
     */
-    bool operator== (const MemoryBlock& other) const throw();
+    bool JUCE_CALLTYPE operator== (const MemoryBlock& other) const throw();
 
     /** Compares two memory blocks.
 
         @returns true if the two blocks are different sizes or have different contents.
     */
-    bool operator!= (const MemoryBlock& other) const throw();
+    bool JUCE_CALLTYPE operator!= (const MemoryBlock& other) const throw();
 
     //==============================================================================
     /** Returns a pointer to the data, casting it to any type of primitive data required.
@@ -95,25 +95,25 @@ public:
         block is resized.
     */
     template <class DataType>
-    operator DataType*() const throw()                          { return (DataType*) data; }
+    JUCE_CALLTYPE operator DataType*() const throw()                    { return (DataType*) data; }
 
     /** Returns a void pointer to the data.
 
         Note that the pointer returned will probably become invalid when the
         block is resized.
     */
-    void* getData() const throw()                               { return data; }
+    void* JUCE_CALLTYPE getData() const throw()                         { return data; }
 
     /** Returns a byte from the memory block.
 
         This returns a reference, so you can also use it to set a byte.
     */
-    char& operator[] (const int offset) const throw()           { return data [offset]; }
+    char& JUCE_CALLTYPE operator[] (const int offset) const throw()     { return data [offset]; }
 
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */
-    int getSize() const throw()                                 { return size; }
+    int JUCE_CALLTYPE getSize() const throw()                           { return size; }
 
     /** Resizes the memory block.
 
@@ -127,8 +127,8 @@ public:
                                             uninitialised
         @see ensureSize
     */
-    void setSize (const int newSize,
-                  const bool initialiseNewSpaceToZero = false) throw();
+    void JUCE_CALLTYPE setSize (const int newSize,
+                                const bool initialiseNewSpaceToZero = false) throw();
 
     /** Increases the block's size only if it's smaller than a given size.
 
@@ -139,22 +139,22 @@ public:
                                             uninitialised
         @see setSize
     */
-    void ensureSize (const int minimumSize,
-                     const bool initialiseNewSpaceToZero = false) throw();
+    void JUCE_CALLTYPE ensureSize (const int minimumSize,
+                                   const bool initialiseNewSpaceToZero = false) throw();
 
     //==============================================================================
     /** Fills the entire memory block with a repeated byte value.
 
         This is handy for clearing a block of memory to zero.
     */
-    void fillWith (const uint8 valueToUse) throw();
+    void JUCE_CALLTYPE fillWith (const uint8 valueToUse) throw();
 
     /** Adds another block of data to the end of this one.
 
         This block's size will be increased accordingly.
     */
-    void append (const void* const data,
-                 const int numBytes) throw();
+    void JUCE_CALLTYPE append (const void* const data,
+                               const int numBytes) throw();
 
     //==============================================================================
     /** Copies data into this MemoryBlock from a memory address.
@@ -164,9 +164,9 @@ public:
         @param numBytes             how much to copy in (if this goes beyond the size of the memory block,
                                     it will be clipped so not to do anything nasty)
     */
-    void copyFrom (const void* srcData,
-                   int destinationOffset,
-                   int numBytes) throw();
+    void JUCE_CALLTYPE copyFrom (const void* srcData,
+                                 int destinationOffset,
+                                 int numBytes) throw();
 
     /** Copies data from this MemoryBlock to a memory address.
 
@@ -175,9 +175,9 @@ public:
         @param numBytes         how much to copy (if this extends beyond the limits of the memory block,
                                 zeros will be used for that portion of the data)
     */
-    void copyTo (void* destData,
-                 int sourceOffset,
-                 int numBytes) const throw();
+    void JUCE_CALLTYPE copyTo (void* destData,
+                               int sourceOffset,
+                               int numBytes) const throw();
 
     /** Chops out a section  of the block.
 
@@ -186,12 +186,12 @@ public:
 
         If the range specified goes beyond the size of the block, it will be clipped.
     */
-    void removeSection (int startByte, int numBytesToRemove) throw();
+    void JUCE_CALLTYPE removeSection (int startByte, int numBytesToRemove) throw();
 
     //==============================================================================
     /** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
         characters in the system's default encoding. */
-    const String toString() const throw();
+    const String JUCE_CALLTYPE toString() const throw();
 
     //==============================================================================
     /** Parses a string of hexadecimal numbers and writes this data into the memory block.
@@ -201,17 +201,17 @@ public:
 
         @see String::toHexString()
     */
-    void loadFromHexString (const String& sourceHexString) throw();
+    void JUCE_CALLTYPE loadFromHexString (const String& sourceHexString) throw();
 
     //==============================================================================
     /** Sets a number of bits in the memory block, treating it as a long binary sequence. */
-    void setBitRange (int bitRangeStart,
-                      int numBits,
-                      int binaryNumberToApply) throw();
+    void JUCE_CALLTYPE setBitRange (int bitRangeStart,
+                                    int numBits,
+                                    int binaryNumberToApply) throw();
 
     /** Reads a number of bits from the memory block, treating it as one long binary sequence */
-    int getBitRange (int bitRangeStart,
-                     int numBitsToRead) const throw();
+    int JUCE_CALLTYPE getBitRange (int bitRangeStart,
+                                   int numBitsToRead) const throw();
 
     //==============================================================================
     /** Returns a string of characters that represent the binary contents of this block.
@@ -221,7 +221,7 @@ public:
 
         @see fromBase64Encoding
     */
-    const String toBase64Encoding() const throw();
+    const String JUCE_CALLTYPE toBase64Encoding() const throw();
 
     /** Takes a string of encoded characters and turns it into binary data.
 
@@ -230,7 +230,7 @@ public:
 
         @see toBase64Encoding
     */
-    bool fromBase64Encoding  (const String& encodedString) throw();
+    bool JUCE_CALLTYPE fromBase64Encoding  (const String& encodedString) throw();
 
 
     //==============================================================================

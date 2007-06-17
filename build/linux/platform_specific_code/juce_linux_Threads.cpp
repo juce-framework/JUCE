@@ -176,7 +176,7 @@ void Thread::sleep (int millisecs) throw()
 }
 
 //==============================================================================
-CriticalSection::CriticalSection() throw()
+JUCE_CALLTYPE CriticalSection::CriticalSection() throw()
 {
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
@@ -184,22 +184,22 @@ CriticalSection::CriticalSection() throw()
     pthread_mutex_init (&internal, &atts);
 }
 
-CriticalSection::~CriticalSection() throw()
+JUCE_CALLTYPE CriticalSection::~CriticalSection() throw()
 {
     pthread_mutex_destroy (&internal);
 }
 
-void CriticalSection::enter() const throw()
+void JUCE_CALLTYPE CriticalSection::enter() const throw()
 {
     pthread_mutex_lock (&internal);
 }
 
-bool CriticalSection::tryEnter() const throw()
+bool JUCE_CALLTYPE CriticalSection::tryEnter() const throw()
 {
     return pthread_mutex_trylock (&internal) == 0;
 }
 
-void CriticalSection::exit() const throw()
+void JUCE_CALLTYPE CriticalSection::exit() const throw()
 {
     pthread_mutex_unlock (&internal);
 }

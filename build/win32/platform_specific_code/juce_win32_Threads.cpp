@@ -57,7 +57,7 @@ extern HWND juce_messageWindowHandle;
 
 
 //==============================================================================
-CriticalSection::CriticalSection() throw()
+JUCE_CALLTYPE CriticalSection::CriticalSection() throw()
 {
     // (just to check the MS haven't changed this structure and broken things...)
 #if _MSC_VER >= 1400
@@ -69,22 +69,22 @@ CriticalSection::CriticalSection() throw()
     InitializeCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-CriticalSection::~CriticalSection() throw()
+JUCE_CALLTYPE CriticalSection::~CriticalSection() throw()
 {
     DeleteCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-void CriticalSection::enter() const throw()
+void JUCE_CALLTYPE CriticalSection::enter() const throw()
 {
     EnterCriticalSection ((CRITICAL_SECTION*) internal);
 }
 
-bool CriticalSection::tryEnter() const throw()
+bool JUCE_CALLTYPE CriticalSection::tryEnter() const throw()
 {
     return TryEnterCriticalSection ((CRITICAL_SECTION*) internal) != FALSE;
 }
 
-void CriticalSection::exit() const throw()
+void JUCE_CALLTYPE CriticalSection::exit() const throw()
 {
     LeaveCriticalSection ((CRITICAL_SECTION*) internal);
 }

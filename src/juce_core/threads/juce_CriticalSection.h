@@ -46,14 +46,14 @@ public:
     /**
         Creates a CriticalSection object
     */
-    CriticalSection() throw();
+    JUCE_CALLTYPE CriticalSection() throw();
 
     /** Destroys a CriticalSection object.
 
         If the critical section is deleted whilst locked, its subsequent behaviour
         is unpredictable.
     */
-    ~CriticalSection() throw();
+    JUCE_CALLTYPE ~CriticalSection() throw();
 
     //==============================================================================
     /** Locks this critical section.
@@ -65,7 +65,7 @@ public:
 
         @see exit, ScopedLock
     */
-    void enter() const throw();
+    void JUCE_CALLTYPE enter() const throw();
 
     /** Attempts to lock this critical section without blocking.
 
@@ -75,7 +75,7 @@ public:
         @returns false if the lock is currently held by another thread, true otherwise.
         @see enter
     */
-    bool tryEnter() const throw();
+    bool JUCE_CALLTYPE tryEnter() const throw();
 
     /** Releases the lock.
 
@@ -87,7 +87,7 @@ public:
 
         @see enter, ScopedLock
     */
-    void exit() const throw();
+    void JUCE_CALLTYPE exit() const throw();
 
 
     //==============================================================================

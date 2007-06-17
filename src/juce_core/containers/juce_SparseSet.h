@@ -53,24 +53,24 @@ class SparseSet
 public:
     //==============================================================================
     /** Creates a new empty set. */
-    SparseSet() throw()
+    JUCE_CALLTYPE SparseSet() throw()
     {
     }
 
     /** Creates a copy of another SparseSet. */
-    SparseSet (const SparseSet<Type>& other) throw()
+    JUCE_CALLTYPE SparseSet (const SparseSet<Type>& other) throw()
         : values (other.values)
     {
     }
 
     /** Destructor. */
-    ~SparseSet() throw()
+    JUCE_CALLTYPE ~SparseSet() throw()
     {
     }
 
     //==============================================================================
     /** Clears the set. */
-    void clear() throw()
+    void JUCE_CALLTYPE clear() throw()
     {
         values.clear();
     }
@@ -79,7 +79,7 @@ public:
 
         This is much quicker than using (size() == 0).
     */
-    bool isEmpty() const throw()
+    bool JUCE_CALLTYPE isEmpty() const throw()
     {
         return values.size() == 0;
     }
@@ -90,7 +90,7 @@ public:
         are a lot of items in the set. Use isEmpty() for a quick test of whether there
         are any items.
     */
-    Type size() const throw()
+    Type JUCE_CALLTYPE size() const throw()
     {
         Type num = 0;
 
@@ -105,7 +105,7 @@ public:
         @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
         @returns        the value at this index, or 0 if it's out-of-range
     */
-    Type operator[] (int index) const throw()
+    Type JUCE_CALLTYPE operator[] (int index) const throw()
     {
         for (int i = 0; i < values.size(); i += 2)
         {
@@ -122,7 +122,7 @@ public:
     }
 
     /** Checks whether a particular value is in the set. */
-    bool contains (const Type valueToLookFor) const throw()
+    bool JUCE_CALLTYPE contains (const Type valueToLookFor) const throw()
     {
         bool on = false;
 
@@ -142,7 +142,7 @@ public:
 
         @see getRange
     */
-    int getNumRanges() const throw()
+    int JUCE_CALLTYPE getNumRanges() const throw()
     {
         return values.size() >> 1;
     }
@@ -156,9 +156,9 @@ public:
 
         @see getTotalRange
     */
-    bool getRange (const int rangeIndex,
-                   Type& startValue,
-                   Type& numValues) const throw()
+    bool JUCE_CALLTYPE getRange (const int rangeIndex,
+                                 Type& startValue,
+                                 Type& numValues) const throw()
     {
         if (rangeIndex >= 0 && rangeIndex < getNumRanges())
         {
@@ -175,8 +175,8 @@ public:
 
         @see getRange
     */
-    bool getTotalRange (Type& lowestValue,
-                        Type& highestValue) const throw()
+    bool JUCE_CALLTYPE getTotalRange (Type& lowestValue,
+                                      Type& highestValue) const throw()
     {
         if (values.size() > 0)
         {
@@ -196,8 +196,8 @@ public:
         @param firstValue       the start of the range of values to add
         @param numValuesToAdd   how many values to add
     */
-    void addRange (const Type firstValue,
-                   const Type numValuesToAdd) throw()
+    void JUCE_CALLTYPE addRange (const Type firstValue,
+                                 const Type numValuesToAdd) throw()
     {
         jassert (numValuesToAdd >= 0);
 
@@ -220,8 +220,8 @@ public:
         @param firstValue           the start of the range of values to remove
         @param numValuesToRemove    how many values to remove
     */
-    void removeRange (const Type firstValue,
-                      const Type numValuesToRemove) throw()
+    void JUCE_CALLTYPE removeRange (const Type firstValue,
+                                    const Type numValuesToRemove) throw()
     {
         jassert (numValuesToRemove >= 0);
 
@@ -258,8 +258,8 @@ public:
     }
 
     /** Does an XOR of the values in a given range. */
-    void invertRange (const Type firstValue,
-                      const Type numValues)
+    void JUCE_CALLTYPE invertRange (const Type firstValue,
+                                    const Type numValues)
     {
         SparseSet newItems;
         newItems.addRange (firstValue, numValues);
@@ -285,8 +285,8 @@ public:
     }
 
     /** Checks whether any part of a given range overlaps any part of this one. */
-    bool overlapsRange (const Type firstValue,
-                        const Type numValues) throw()
+    bool JUCE_CALLTYPE overlapsRange (const Type firstValue,
+                                      const Type numValues) throw()
     {
         jassert (numValues >= 0);
 
@@ -306,8 +306,8 @@ public:
     }
 
     /** Checks whether the whole of a given range is contained within this one. */
-    bool containsRange (const Type firstValue,
-                        const Type numValues) throw()
+    bool JUCE_CALLTYPE containsRange (const Type firstValue,
+                                      const Type numValues) throw()
     {
         jassert (numValues >= 0);
 
@@ -328,12 +328,12 @@ public:
     }
 
     //==============================================================================
-    bool operator== (const SparseSet<Type>& other) throw()
+    bool JUCE_CALLTYPE operator== (const SparseSet<Type>& other) throw()
     {
         return values == other.values;
     }
 
-    bool operator!= (const SparseSet<Type>& other) throw()
+    bool JUCE_CALLTYPE operator!= (const SparseSet<Type>& other) throw()
     {
         return values != other.values;
     }
@@ -345,7 +345,7 @@ private:
     // alternating start/end values of ranges of values that are present.
     Array<Type> values;
 
-    void simplify() throw()
+    void JUCE_CALLTYPE simplify() throw()
     {
         jassert ((values.size() & 1) == 0);
 
