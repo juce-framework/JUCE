@@ -447,25 +447,25 @@ const String Time::getWeekdayName (const bool threeLetterVersion) const throw()
 const String Time::getMonthName (int monthNumber,
                                  const bool threeLetterVersion) throw()
 {
-    const tchar* const shortMonthNames[] = { T("Jan"), T("Feb"), T("Mar"), T("Apr"), T("May"), T("Jun"), T("Jul"), T("Aug"), T("Sep"), T("Oct"), T("Nov"), T("Dec") };
-    const tchar* const longMonthNames[]  = { T("January"), T("February"), T("March"), T("April"), T("May"), T("June"), T("July"), T("August"), T("September"), T("October"), T("November"), T("December") };
+    const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+    const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
     monthNumber %= 12;
 
-    return TRANS((threeLetterVersion) ? shortMonthNames [monthNumber]
-                                      : longMonthNames [monthNumber]);
+    return TRANS (threeLetterVersion ? shortMonthNames [monthNumber]
+                                     : longMonthNames [monthNumber]);
 }
 
 const String Time::getWeekdayName (int day,
                                    const bool threeLetterVersion) throw()
 {
-    const tchar* const shortDayNames[] = { T("Sun"), T("Mon"), T("Tue"), T("Wed"), T("Thu"), T("Fri"), T("Sat") };
-    const tchar* const longDayNames[]  = { T("Sunday"), T("Monday"), T("Tuesday"), T("Wednesday"), T("Thursday"), T("Friday"), T("Saturday") };
+    const char* const shortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+    const char* const longDayNames[]  = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
     day %= 7;
 
-    return TRANS((threeLetterVersion) ? shortDayNames [day]
-                                      : longDayNames [day]);
+    return TRANS (threeLetterVersion ? shortDayNames [day]
+                                     : longDayNames [day]);
 }
 
 END_JUCE_NAMESPACE

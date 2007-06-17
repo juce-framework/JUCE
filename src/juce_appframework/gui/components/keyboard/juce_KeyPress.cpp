@@ -229,22 +229,22 @@ const String KeyPress::getTextDescription() const
     if (keyCode > 0)
     {
         if (mods.isCtrlDown())
-            desc += T("ctrl + ");
+            desc << "ctrl + ";
 
         if (mods.isShiftDown())
-            desc += T("shift + ");
+            desc << "shift + ";
 
 #ifdef JUCE_MAC
           // only do this on the mac, because on Windows ctrl and command are the same,
           // and this would get confusing
           if (mods.isCommandDown())
-              desc += T("command + ");
+              desc << "command + ";
 
         if (mods.isAltDown())
-            desc += T("option + ");
+            desc << "option + ";
 #else
         if (mods.isAltDown())
-            desc += T("alt + ");
+            desc << "alt + ";
 #endif
 
         for (int i = 0; i < numElementsInArray (keyNameTranslations); ++i)
@@ -252,13 +252,13 @@ const String KeyPress::getTextDescription() const
                 return desc + keyNameTranslations[i].name;
 
         if (keyCode >= F1Key && keyCode <= F16Key)
-            desc << T("F") << (1 + keyCode - F1Key);
+            desc << 'F' << (1 + keyCode - F1Key);
         else if (keyCode >= numberPad0 && keyCode <= numberPad9)
             desc << numberPadPrefix << (keyCode - numberPad0);
         else if (keyCode >= 33 && keyCode < 176)
             desc += CharacterFunctions::toUpperCase ((tchar) keyCode);
         else
-            desc << T('#') << String::toHexString (keyCode);
+            desc << '#' << String::toHexString (keyCode);
     }
 
     return desc;

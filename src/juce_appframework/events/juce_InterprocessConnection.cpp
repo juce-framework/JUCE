@@ -40,7 +40,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThread,
                                                 const uint32 magicMessageHeaderNumber)
-    : Thread (T("Juce IPC connection")),
+    : Thread ("Juce IPC connection"),
       socket (0),
       pipe (0),
       callbackConnectionState (false),

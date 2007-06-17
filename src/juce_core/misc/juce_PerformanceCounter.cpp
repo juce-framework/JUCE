@@ -50,9 +50,11 @@ PerformanceCounter::PerformanceCounter (const String& name_,
 {
     if (outputFile != File::nonexistent)
     {
-        String s (T("**** Counter for \""));
-        s += name_ + T("\" started at: ");
-        s += Time::getCurrentTime().toString (true, true) + T("\r\n");
+        String s ("**** Counter for \"");
+        s << name_ << "\" started at: "
+          << Time::getCurrentTime().toString (true, true) 
+          << "\r\n";
+
         outputFile.appendText (s, false, false);
     }
 }
@@ -81,22 +83,24 @@ void PerformanceCounter::printStatistics()
 {
     if (numRuns > 0)
     {
-        String s (T("Performance count for \""));
-        s << name << T("\" - average over ") << numRuns << T(" run(s) = ");
+        String s ("Performance count for \"");
+        s << name << "\" - average over " << numRuns << " run(s) = ";
 
-        const int micros = (int)(totalTime * (1000.0 / numRuns));
+        const int micros = (int) (totalTime * (1000.0 / numRuns));
 
         if (micros > 10000)
-            s << (micros/1000) << T(" millisecs");
+            s << (micros/1000) << " millisecs";
         else
-            s << micros << T(" microsecs");
+            s << micros << " microsecs";
 
-        s << (", total = ") << String (totalTime / 1000, 5) << T(" seconds");
+        s << ", total = " << String (totalTime / 1000, 5) << " seconds";
 
         Logger::outputDebugString (s);
 
+        s << "\r\n";
+
         if (outputFile != File::nonexistent)
-            outputFile.appendText (s + T("\r\n"), false, false);
+            outputFile.appendText (s, false, false);
 
         numRuns = 0;
         totalTime = 0;

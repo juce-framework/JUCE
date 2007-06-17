@@ -55,7 +55,7 @@ public:
     //==============================================================================
     MidiInThread (MidiInput* const input_,
                   MidiInputCallback* const callback_)
-        : Thread (T("Juce Midi")),
+        : Thread ("Juce Midi"),
           hIn (0),
           input (input_),
           callback (callback_),

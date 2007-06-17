@@ -393,21 +393,21 @@ const String XmlElement::createDocument (const String& dtd,
 
     if (includeXmlHeader)
     {
-        doc << T("<?xml version=\"1.0\" encoding=\"")
+        doc << "<?xml version=\"1.0\" encoding=\""
             << encoding;
 
         if (allOnOneLine)
-            doc += T("\"?> ");
+            doc += "\"?> ";
         else
-            doc += T("\"?>\n\n");
+            doc += "\"?>\n\n";
     }
 
     if (dtd.isNotEmpty())
     {
         if (allOnOneLine)
-            doc << dtd << T(" ");
+            doc << dtd << " ";
         else
-            doc << dtd << T("\r\n");
+            doc << dtd << "\r\n";
     }
 
     MemoryOutputStream mem (2048, 4096);
@@ -429,8 +429,8 @@ bool XmlElement::writeToFile (const File& f,
 
         if (out != 0)
         {
-            *out << T("<?xml version=\"1.0\" encoding=\"") << encoding << T("\"?>\r\n\r\n")
-                 << dtd << T("\r\n");
+            *out << "<?xml version=\"1.0\" encoding=\"" << encoding << "\"?>\r\n\r\n"
+                 << dtd << "\r\n";
 
             writeElementAsText (*out, 0);
 

@@ -993,7 +993,7 @@ private:
     {
     public:
         JUCE_CALLTYPE WindowClassHolder()
-            : windowClassName (T("JUCE_"))
+            : windowClassName ("JUCE_")
         {
             // this name has to be different for each app/dll instance because otherwise
             // poor old Win32 can get a bit confused (even despite it not being a process-global

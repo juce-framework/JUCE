@@ -415,9 +415,9 @@ bool OggVorbisAudioFormat::isCompressed()
 const StringArray OggVorbisAudioFormat::getQualityOptions()
 {
     StringArray s;
-    s.add (T("Low Quality"));
-    s.add (T("Medium Quality"));
-    s.add (T("High Quality"));
+    s.add ("Low Quality");
+    s.add ("Medium Quality");
+    s.add ("High Quality");
     return s;
 }
 

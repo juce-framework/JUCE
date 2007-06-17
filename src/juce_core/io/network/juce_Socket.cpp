@@ -325,7 +325,7 @@ bool Socket::createListener (int newPortNumber)
     if (connected)
         close();
 
-    hostName = T("listener");
+    hostName = "listener";
     portNumber = newPortNumber;
     isListener = true;
 

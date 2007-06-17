@@ -45,7 +45,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 const String SystemStats::getJUCEVersion() throw()
 {
-    return T("JUCE v") + String (JUCE_MAJOR_VERSION) + T(".") + String (JUCE_MINOR_VERSION);
+    return T("JUCE v") + String (JUCE_MAJOR_VERSION) + "." + String (JUCE_MINOR_VERSION);
 }
 
 

@@ -1922,7 +1922,6 @@ const String JUCE_CALLTYPE String::toHexString (const unsigned char* data,
     String s (numChars, (int) 0);
 
     tchar* d = s.text->text;
-    static const tchar* hexDigits = T("0123456789abcdef");
 
     for (int i = 0; i < size; ++i)
     {

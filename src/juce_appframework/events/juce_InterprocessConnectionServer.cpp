@@ -38,7 +38,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 InterprocessConnectionServer::InterprocessConnectionServer()
-    : Thread (T("Juce IPC server")),
+    : Thread ("Juce IPC server"),
       socket (0)
 {
 }

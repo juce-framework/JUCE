@@ -43,7 +43,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
                                                     const int timeOutMsWhenCancelling_)
-  : Thread (T("Juce Progress Window")),
+  : Thread ("Juce Progress Window"),
     progress (0.0),
     alertWindow (title, String::empty, AlertWindow::NoIcon),
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)

@@ -106,9 +106,9 @@ const String Button::getTooltip()
             String key (keyPresses.getUnchecked(i).getTextDescription());
 
             if (key.length() == 1)
-                tt << T(" [shortcut: '") << key << T("']");
+                tt << " [shortcut: '" << key << "']";
             else
-                tt << T(" [") << key << T(']');
+                tt << " [" << key << ']';
         }
 
         return tt;

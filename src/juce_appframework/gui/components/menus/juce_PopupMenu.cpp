@@ -115,10 +115,10 @@ public:
                 const String key (keyPresses.getUnchecked(i).getTextDescription());
 
                 if (shortcutKey.isNotEmpty())
-                    shortcutKey << T(", ");
+                    shortcutKey << ", ";
 
                 if (key.length() == 1)
-                    shortcutKey << T("shortcut: '") << key << T("'");
+                    shortcutKey << "shortcut: '" << key << '\'';
                 else
                     shortcutKey << key;
             }
@@ -126,7 +126,7 @@ public:
             shortcutKey = shortcutKey.trim();
 
             if (shortcutKey.isNotEmpty())
-                text << T("<end>") << shortcutKey;
+                text << "<end>" << shortcutKey;
         }
     }
 

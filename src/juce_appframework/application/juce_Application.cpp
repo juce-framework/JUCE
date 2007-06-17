@@ -134,9 +134,9 @@ void JUCEApplication::getCommandInfo (const CommandID commandID, ApplicationComm
 {
     if (commandID == StandardApplicationCommandIDs::quit)
     {
-        result.setInfo (T("Quit"),
-                        T("Quits the application"),
-                        T("Application"),
+        result.setInfo ("Quit",
+                        "Quits the application",
+                        "Application",
                         0);
 
         result.defaultKeypresses.add (KeyPress (T('q'), ModifierKeys::commandModifier, 0));
@@ -199,7 +199,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 
     JUCE_TRY
     {
-        juce_setCurrentThreadName (T("Juce Message Thread"));
+        juce_setCurrentThreadName ("Juce Message Thread");
 
         // let the app do its setting-up..
         app->initialise (commandLine.trim());

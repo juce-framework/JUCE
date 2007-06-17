@@ -974,13 +974,13 @@ const String MidiMessage::getMidiNoteName (int note,
                                            bool includeOctaveNumber,
                                            int octaveNumForMiddleC) throw()
 {
-    static const tchar* sharpNoteNames[] = { T("C"), T("C#"), T("D"), T("D#"), T("E"),
-                                             T("F"), T("F#"), T("G"), T("G#"), T("A"),
-                                             T("A#"), T("B") };
+    static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E",
+                                                  "F", "F#", "G", "G#", "A",
+                                                  "A#", "B" };
 
-    static const tchar* flatNoteNames[]  = { T("C"), T("Db"), T("D"), T("Eb"), T("E"),
-                                             T("F"), T("Gb"), T("G"), T("Ab"), T("A"),
-                                             T("Bb"), T("B") };
+    static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E",
+                                                  "F", "Gb", "G", "Ab", "A",
+                                                  "Bb", "B" };
 
     if (note >= 0 && note < 128)
     {

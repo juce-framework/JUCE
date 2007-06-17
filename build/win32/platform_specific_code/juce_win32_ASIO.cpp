@@ -135,7 +135,7 @@ public:
 
     ASIOAudioIODevice (const String& name_, CLSID classId_)
        : AudioIODevice (name_, T("ASIO")),
-         Thread (T("Juce ASIO")),
+         Thread ("Juce ASIO"),
          classId (classId_),
          currentBitDepth (16),
          currentSampleRate (0),

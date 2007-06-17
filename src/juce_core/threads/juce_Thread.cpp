@@ -183,7 +183,7 @@ void Thread::stopThread (const int timeOutMilliseconds)
             // there are bound to be locks and events left in
             // silly states when a thread is killed by force..
             jassertfalse
-            Logger::writeToLog (T("!! killing thread by force !!"));
+            Logger::writeToLog ("!! killing thread by force !!");
 
             juce_killThread (threadHandle_);
             threadHandle_ = 0;

@@ -164,7 +164,7 @@ private:
 
 public:
     InternalTimerThread()
-        : Thread (T("Juce Timer")),
+        : Thread ("Juce Timer"),
           firstTimer (0),
           callbackNeeded (false)
     {

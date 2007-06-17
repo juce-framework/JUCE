@@ -58,11 +58,13 @@ FileLogger::FileLogger (const File& logFile_,
     logStream = logFile_.createOutputStream (256);
     jassert (logStream != 0);
 
-    logMessage (T("\r\n**********************************************************\r\n")
-                 + welcomeMessage
-                 + T("\r\nLog started: ")
-                 + Time::getCurrentTime().toString (true, true)
-                 + T("\r\n"));
+    String welcome;
+    welcome << "\r\n**********************************************************\r\n"
+            << welcomeMessage
+            << "\r\nLog started: " << Time::getCurrentTime().toString (true, true)
+            << "\r\n";
+
+    logMessage (welcome);
 }
 
 FileLogger::~FileLogger()

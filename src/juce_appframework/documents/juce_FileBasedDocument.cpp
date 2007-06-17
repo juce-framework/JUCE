@@ -105,7 +105,7 @@ bool FileBasedDocument::loadFrom (const File& newFile,
     }
     else
     {
-        error = T("The file doesn't exist");
+        error = "The file doesn't exist";
     }
 
     documentFile = oldFile;

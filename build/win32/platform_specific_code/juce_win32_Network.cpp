@@ -226,7 +226,7 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum)
 {
     int numFound = 0;
 
-    DynamicLibraryLoader dll (T("iphlpapi.dll"));
+    DynamicLibraryLoader dll ("iphlpapi.dll");
     DynamicLibraryImport (GetAdaptersInfo, getAdaptersInfo, DWORD, dll, (PIP_ADAPTER_INFO, PULONG))
 
     if (getAdaptersInfo != 0)
@@ -266,7 +266,7 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum)
 {
     int numFound = 0;
 
-    DynamicLibraryLoader dll (T("netapi32.dll"));
+    DynamicLibraryLoader dll ("netapi32.dll");
     DynamicLibraryImport (Netbios, NetbiosCall, UCHAR, dll, (PNCB))
 
     if (NetbiosCall != 0)

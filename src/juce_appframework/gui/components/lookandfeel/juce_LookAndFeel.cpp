@@ -1346,7 +1346,7 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
         shape.addLineSegment (0.0f, 0.0f, 1.0f, 1.0f, 0.35f);
         shape.addLineSegment (1.0f, 0.0f, 0.0f, 1.0f, 0.35f);
 
-        ShapeButton* const b = new ShapeButton (T("close"),
+        ShapeButton* const b = new ShapeButton ("close",
                                                 Colour (0x7fff3333),
                                                 Colour (0xd7ff3333),
                                                 Colour (0xf7ff3333));
@@ -1358,7 +1358,7 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
     {
         shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, 0.25f);
 
-        DrawableButton* b = new DrawableButton (T("minimise"), DrawableButton::ImageFitted);
+        DrawableButton* b = new DrawableButton ("minimise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
         dp.setSolidFill (Colours::black.withAlpha (0.3f));
@@ -1370,7 +1370,7 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
         shape.addLineSegment (0.5f, 0.0f, 0.5f, 1.0f, 0.25f);
         shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, 0.25f);
 
-        DrawableButton* b = new DrawableButton (T("maximise"), DrawableButton::ImageFitted);
+        DrawableButton* b = new DrawableButton ("maximise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
         dp.setSolidFill (Colours::black.withAlpha (0.3f));

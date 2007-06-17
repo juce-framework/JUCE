@@ -375,7 +375,7 @@ void XmlDocument::readQuotedString (String& result) throw()
                 else if (character == 0)
                 {
                     outOfData = true;
-                    setLastError (T("unmatched quotes"), false);
+                    setLastError ("unmatched quotes", false);
                     break;
                 }
 
@@ -408,7 +408,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
 
             if (tagLen == 0)
             {
-                setLastError (T("tag name missing"), false);
+                setLastError ("tag name missing", false);
                 return node;
             }
         }
@@ -484,7 +484,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
             else
             {
                 if (! outOfData)
-                    setLastError (T("illegal characters found"), false);
+                    setLastError ("illegal characters found", false);
             }
 
             break;
@@ -504,7 +504,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
 
         if (outOfData)
         {
-            setLastError (T("unmatched tags"), false);
+            setLastError ("unmatched tags", false);
             break;
         }
 
@@ -535,7 +535,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
                 {
                     if (*input == 0)
                     {
-                        setLastError (T("unterminated CDATA section"), false);
+                        setLastError ("unterminated CDATA section", false);
                         outOfData = true;
                         break;
                     }
@@ -604,7 +604,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
 
                 if (c == 0)
                 {
-                    setLastError (T("unmatched tags"), false);
+                    setLastError ("unmatched tags", false);
                     outOfData = true;
                     return;
                 }
@@ -660,7 +660,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
                         }
                         else if (c == 0)
                         {
-                            setLastError (T("unmatched tags"), false);
+                            setLastError ("unmatched tags", false);
                             outOfData = true;
                             return;
                         }
@@ -727,7 +727,7 @@ void XmlDocument::readEntity (String& result) throw()
 
                 if (hexValue < 0 || ++numChars > 8)
                 {
-                    setLastError (T("illegal escape sequence"), true);
+                    setLastError ("illegal escape sequence", true);
                     break;
                 }
 
@@ -745,7 +745,7 @@ void XmlDocument::readEntity (String& result) throw()
             {
                 if (++numChars > 12)
                 {
-                    setLastError (T("illegal escape sequence"), true);
+                    setLastError ("illegal escape sequence", true);
                     break;
                 }
 
@@ -757,7 +757,7 @@ void XmlDocument::readEntity (String& result) throw()
         }
         else
         {
-            setLastError (T("illegal escape sequence"), true);
+            setLastError ("illegal escape sequence", true);
             result += T("&");
             return;
         }
@@ -817,7 +817,7 @@ const String XmlDocument::expandEntity (const String& ent)
             return String::charToString ((tchar) ent.substring (1).getIntValue());
         }
 
-        setLastError (T("illegal escape sequence"), false);
+        setLastError ("illegal escape sequence", false);
         return T("&");
     }
     else
@@ -902,7 +902,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
 
                     if (semiColon < 0)
                     {
-                        setLastError (T("entity without terminating semi-colon"), false);
+                        setLastError ("entity without terminating semi-colon", false);
                         break;
                     }
 
@@ -920,7 +920,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
         }
     }
 
-    setLastError (T("unknown entity"), true);
+    setLastError ("unknown entity", true);
 
     return entity;
 }

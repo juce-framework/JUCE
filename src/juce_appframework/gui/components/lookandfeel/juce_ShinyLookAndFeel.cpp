@@ -553,7 +553,7 @@ void ShinyLookAndFeel::drawLinearSlider (Graphics& g,
 
 Button* ShinyLookAndFeel::createSliderButton (const bool isIncrement)
 {
-    return new TextButton (isIncrement ? T("+") : T("-"), String::empty);
+    return new TextButton (isIncrement ? "+" : "-", String::empty);
 }
 
 ImageEffectFilter* ShinyLookAndFeel::getSliderEffect()
@@ -735,13 +735,13 @@ Button* ShinyLookAndFeel::createDocumentWindowButton (int buttonType)
         shape.addLineSegment (0.0f, 0.0f, 1.0f, 1.0f, crossThickness * 1.4f);
         shape.addLineSegment (1.0f, 0.0f, 0.0f, 1.0f, crossThickness * 1.4f);
 
-        return new GlassWindowButton (T("close"), Colour (0xffdd1100), shape, shape);
+        return new GlassWindowButton ("close", Colour (0xffdd1100), shape, shape);
     }
     else if (buttonType == DocumentWindow::minimiseButton)
     {
         shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, crossThickness);
 
-        return new GlassWindowButton (T("minimise"), Colour (0xffaa8811), shape, shape);
+        return new GlassWindowButton ("minimise", Colour (0xffaa8811), shape, shape);
     }
     else if (buttonType == DocumentWindow::maximiseButton)
     {
@@ -757,7 +757,7 @@ Button* ShinyLookAndFeel::createDocumentWindowButton (int buttonType)
         fullscreenShape.addRectangle (45.0f, 45.0f, 100.0f, 100.0f);
         PathStrokeType (30.0f).createStrokedPath (fullscreenShape, fullscreenShape);
 
-        return new GlassWindowButton (T("maximise"), Colour (0xff119911), shape, fullscreenShape);
+        return new GlassWindowButton ("maximise", Colour (0xff119911), shape, fullscreenShape);
     }
 
     jassertfalse

@@ -450,7 +450,7 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
             if (volume.isEmpty())
                 volume = TRANS("Hard Drive");
 
-            name << T(" [") << drive->getVolumeLabel() << T(']');
+            name << " [" << drive->getVolumeLabel() << ']';
         }
         else if (drive->isOnCDRomDrive())
         {
@@ -463,18 +463,18 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
     separators.setBit (rootPaths.size());
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (T("Documents"));
+    rootNames.add ("Documents");
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (T("Desktop"));
+    rootNames.add ("Desktop");
 #endif
 
 #ifdef JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (T("Home folder"));
+    rootNames.add ("Home folder");
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (T("Documents"));
+    rootNames.add ("Documents");
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (T("Desktop"));
+    rootNames.add ("Desktop");
 
     separators.setBit (rootPaths.size());
 
@@ -495,12 +495,12 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
 #endif
 
 #ifdef JUCE_LINUX
-    rootPaths.add (T("/"));
-    rootNames.add (T("/"));
+    rootPaths.add ("/");
+    rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (T("Home folder"));
+    rootNames.add ("Home folder");
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (T("Desktop"));
+    rootNames.add ("Desktop");
 #endif
 
     return separators;

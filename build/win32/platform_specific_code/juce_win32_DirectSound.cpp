@@ -153,60 +153,60 @@ BEGIN_JUCE_NAMESPACE
 
 static const String getDSErrorMessage (HRESULT hr)
 {
-    const tchar* result = 0;
+    const char* result = 0;
 
     switch (hr)
     {
     case MAKE_HRESULT(1, 0x878, 10):
-        result = T("Device already allocated");
+        result = "Device already allocated";
         break;
     case MAKE_HRESULT(1, 0x878, 30):
-        result = T("Control unavailable");
+        result = "Control unavailable";
         break;
     case E_INVALIDARG:
-        result = T("Invalid parameter");
+        result = "Invalid parameter";
         break;
     case MAKE_HRESULT(1, 0x878, 50):
-        result = T("Invalid call");
+        result = "Invalid call";
         break;
     case E_FAIL:
-        result = T("Generic error");
+        result = "Generic error";
         break;
     case MAKE_HRESULT(1, 0x878, 70):
-        result = T("Priority level error");
+        result = "Priority level error";
         break;
     case E_OUTOFMEMORY:
-        result = T("Out of memory");
+        result = "Out of memory";
         break;
     case MAKE_HRESULT(1, 0x878, 100):
-        result = T("Bad format");
+        result = "Bad format";
         break;
     case E_NOTIMPL:
-        result = T("Unsupported function");
+        result = "Unsupported function";
         break;
     case MAKE_HRESULT(1, 0x878, 120):
-        result = T("No driver");
+        result = "No driver";
         break;
     case MAKE_HRESULT(1, 0x878, 130):
-        result = T("Already initialised");
+        result = "Already initialised";
         break;
     case CLASS_E_NOAGGREGATION:
-        result = T("No aggregation");
+        result = "No aggregation";
         break;
     case MAKE_HRESULT(1, 0x878, 150):
-        result = T("Buffer lost");
+        result = "Buffer lost";
         break;
     case MAKE_HRESULT(1, 0x878, 160):
-        result = T("Another app has priority");
+        result = "Another app has priority";
         break;
     case MAKE_HRESULT(1, 0x878, 170):
-        result = T("Uninitialised");
+        result = "Uninitialised";
         break;
     case E_NOINTERFACE:
-        result = T("No interface");
+        result = "No interface";
         break;
     case S_OK:
-        result = T("No error");
+        result = "No error";
         break;
 
     default:
@@ -982,7 +982,7 @@ public:
                          const int index,
                          const int inputIndex_)
         : AudioIODevice (deviceName, T("DirectSound")),
-          Thread (T("Juce DSound")),
+          Thread ("Juce DSound"),
           isOpen_ (false),
           isStarted (false),
           deviceIndex (index),

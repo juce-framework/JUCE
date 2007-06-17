@@ -211,9 +211,9 @@ void Font::getDefaultFontNames (String& defaultSans,
                                 String& defaultSerif,
                                 String& defaultFixed)
 {
-    defaultSans  = T("Verdana");
-    defaultSerif = T("Times");
-    defaultFixed = T("Lucida Console");
+    defaultSans  = "Verdana";
+    defaultSerif = "Times";
+    defaultFixed = "Lucida Console";
 }
 
 //==============================================================================

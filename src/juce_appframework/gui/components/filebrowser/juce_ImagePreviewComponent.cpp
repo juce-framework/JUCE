@@ -96,9 +96,9 @@ void ImagePreviewComponent::timerCallback()
                 int h = currentThumbnail->getHeight();
 
                 currentDetails
-                    << fileToLoad.getFileName() << T("\n")
-                    << format->getFormatName() << T("\n")
-                    << w << T(" x ") << h << T(" pixels\n")
+                    << fileToLoad.getFileName() << "\n"
+                    << format->getFormatName() << "\n"
+                    << w << " x " << h << " pixels\n"
                     << File::descriptionOfSizeInBytes (fileToLoad.getSize());
 
                 getThumbSize (w, h);

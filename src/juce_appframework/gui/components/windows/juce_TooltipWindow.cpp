@@ -43,7 +43,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 TooltipWindow::TooltipWindow (Component* const parentComponent,
                               const int millisecondsBeforeTipAppears_)
-    : Component (T("tooltip")),
+    : Component ("tooltip"),
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
       mouseX (0),
       mouseY (0),

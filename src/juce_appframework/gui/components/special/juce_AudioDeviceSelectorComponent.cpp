@@ -277,7 +277,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     jassert (minOutputChannels >= 0 && minOutputChannels <= maxOutputChannels);
     jassert (minInputChannels >= 0 && minInputChannels <= maxInputChannels);
 
-    audioDeviceDropDown = new ComboBox (T("device"));
+    audioDeviceDropDown = new ComboBox ("device");
     deviceManager_.addDeviceNamesToComboBox (*audioDeviceDropDown);
     audioDeviceDropDown->setSelectedId (-1, true);
 
@@ -287,7 +287,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     audioDeviceDropDown->addListener (this);
     addAndMakeVisible (audioDeviceDropDown);
 
-    Label* label = new Label (T("l1"), TRANS ("audio device:"));
+    Label* label = new Label ("l1", TRANS ("audio device:"));
     label->attachToComponent (audioDeviceDropDown, true);
 
     if (showMidiOptions)
@@ -298,7 +298,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                        TRANS("(no midi inputs available)"),
                                                        0, 0));
 
-        midiInputsLabel = new Label (T("lm"), TRANS ("active midi inputs:"));
+        midiInputsLabel = new Label ("lm", TRANS ("active midi inputs:"));
         midiInputsLabel->setJustificationType (Justification::topRight);
         midiInputsLabel->attachToComponent (midiInputsList, true);
     }
@@ -458,8 +458,8 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
     if (currentDevice != 0)
     {
         // sample rate
-        addAndMakeVisible (sampleRateDropDown = new ComboBox (T("samplerate")));
-        sampleRateLabel = new Label (T("l2"), TRANS ("sample rate:"));
+        addAndMakeVisible (sampleRateDropDown = new ComboBox ("samplerate"));
+        sampleRateLabel = new Label ("l2", TRANS ("sample rate:"));
         sampleRateLabel->attachToComponent (sampleRateDropDown, true);
 
         const int numRates = currentDevice->getNumSampleRates();
@@ -476,8 +476,8 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
         sampleRateDropDown->addListener (this);
 
         // buffer size
-        addAndMakeVisible (bufferSizeDropDown = new ComboBox (T("buffersize")));
-        bufferSizeLabel = new Label (T("l2"), TRANS ("audio buffer size:"));
+        addAndMakeVisible (bufferSizeDropDown = new ComboBox ("buffersize"));
+        bufferSizeLabel = new Label ("l2", TRANS ("audio buffer size:"));
         bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
 
         const int numBufferSizes = currentDevice->getNumBufferSizesAvailable();
@@ -509,10 +509,10 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
             addAndMakeVisible (outputChansBox
                                 = new AudioDeviceSelectorComponentListBox (deviceManager,
                                                            AudioDeviceSelectorComponentListBox::audioOutputType,
-                                                           TRANS("(no audio output channels found)"),
+                                                           TRANS ("(no audio output channels found)"),
                                                            minOutputChannels, maxOutputChannels));
 
-            outputsLabel = new Label (T("l3"), TRANS ("active output channels:"));
+            outputsLabel = new Label ("l3", TRANS ("active output channels:"));
             outputsLabel->attachToComponent (outputChansBox, true);
         }
 
@@ -522,10 +522,10 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
             addAndMakeVisible (inputChansBox
                                 = new AudioDeviceSelectorComponentListBox (deviceManager,
                                                            AudioDeviceSelectorComponentListBox::audioInputType,
-                                                           TRANS("(no audio input channels found)"),
+                                                           TRANS ("(no audio input channels found)"),
                                                            minInputChannels, maxInputChannels));
 
-            inputsLabel = new Label (T("l4"), TRANS("active input channels:"));
+            inputsLabel = new Label ("l4", TRANS ("active input channels:"));
             inputsLabel->attachToComponent (inputChansBox, true);
         }
 

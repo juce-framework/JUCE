@@ -514,23 +514,23 @@ const String JUCE_CALLTYPE File::descriptionOfSizeInBytes (const int64 bytes)
 {
     if (bytes == 1)
     {
-        return T("1 byte");
+        return "1 byte";
     }
     else if (bytes < 1024)
     {
-        return String ((int) bytes) + T(" bytes");
+        return String ((int) bytes) + " bytes";
     }
     else if (bytes < 1024 * 1024)
     {
-        return String (bytes / 1024.0, 1) + T(" KB");
+        return String (bytes / 1024.0, 1) + " KB";
     }
     else if (bytes < 1024 * 1024 * 1024)
     {
-        return String (bytes / (1024.0 * 1024.0), 1) + T(" MB");
+        return String (bytes / (1024.0 * 1024.0), 1) + " MB";
     }
     else
     {
-        return String (bytes / (1024.0 * 1024.0 * 1024.0), 1) + T(" GB");
+        return String (bytes / (1024.0 * 1024.0 * 1024.0), 1) + " GB";
     }
 }
 
