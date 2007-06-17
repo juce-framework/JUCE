@@ -255,7 +255,7 @@ public:
 
         @see isNegative, negate
     */
-    void setNegative (const bool neg) throw();
+    void setNegative (const bool shouldBeNegative) throw();
 
     /** Inverts the sign of the number.
 
