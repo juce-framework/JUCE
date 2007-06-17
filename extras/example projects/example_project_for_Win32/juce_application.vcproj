@@ -144,6 +144,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -175,6 +176,8 @@
 				AdditionalLibraryDirectories="../../bin"
 				ProgramDatabaseFile=".\Release/juce_application.pdb"
 				SubSystem="2"
+				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="1"
 				TargetMachine="1"
 			/>
 			<Tool

@@ -51,12 +51,12 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton (FontList, false)
+    juce_DeclareSingleton_SingleThreaded (FontList, false)
 
     StringArray fontNames;
 };
 
-juce_ImplementSingleton (FontList)
+juce_ImplementSingleton_SingleThreaded (FontList)
 
 void FontPropertyComponent::preloadAllFonts()
 {

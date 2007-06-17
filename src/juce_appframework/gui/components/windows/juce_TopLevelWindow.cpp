@@ -61,7 +61,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton (TopLevelWindowManager, false)
+    juce_DeclareSingleton_SingleThreaded (TopLevelWindowManager, false)
 
     void timerCallback()
     {
@@ -138,7 +138,7 @@ private:
     const TopLevelWindowManager& operator= (const TopLevelWindowManager&);
 };
 
-juce_ImplementSingleton (TopLevelWindowManager)
+juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
 void juce_CheckCurrentlyFocusedTopLevelWindow()
 {
