@@ -117,14 +117,14 @@ public:
 
         A 4-digit format is used, e.g. 2004.
     */
-    int getYear() const;
+    int getYear() const throw();
 
     /** Returns the number of the month.
 
         The value returned is in the range 0 to 11.
         @see getMonthName
     */
-    int getMonth() const;
+    int getMonth() const throw();
 
     /** Returns the name of the month.
 
@@ -132,26 +132,26 @@ public:
                                     it'll return the long form, e.g. "January"
         @see getMonth
     */
-    const String getMonthName (const bool threeLetterVersion) const;
+    const String getMonthName (const bool threeLetterVersion) const throw();
 
     /** Returns the day of the month.
 
         The value returned is in the range 1 to 31.
     */
-    int getDayOfMonth() const;
+    int getDayOfMonth() const throw();
 
     /** Returns the number of the day of the week.
 
         The value returned is in the range 0 to 6 (0 = sunday, 1 = monday, etc).
     */
-    int getDayOfWeek() const;
+    int getDayOfWeek() const throw();
 
     /** Returns the name of the weekday.
 
         @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
                                     false, it'll return the full version, e.g. "Tuesday".
     */
-    const String getWeekdayName (const bool threeLetterVersion) const;
+    const String getWeekdayName (const bool threeLetterVersion) const throw();
 
     /** Returns the number of hours since midnight.
 
@@ -159,7 +159,7 @@ public:
 
         @see getHoursInAmPmFormat, isAfternoon
     */
-    int getHours() const;
+    int getHours() const throw();
 
     /** Returns true if the time is in the afternoon.
 
@@ -167,7 +167,7 @@ public:
 
         @see getHoursInAmPmFormat, getHours
     */
-    bool isAfternoon() const;
+    bool isAfternoon() const throw();
 
     /** Returns the hours in 12-hour clock format.
 
@@ -176,13 +176,13 @@ public:
 
         @see getHours, isAfternoon
     */
-    int getHoursInAmPmFormat() const;
+    int getHoursInAmPmFormat() const throw();
 
     /** Returns the number of minutes, 0 to 59. */
-    int getMinutes() const;
+    int getMinutes() const throw();
 
     /** Returns the number of seconds, 0 to 59. */
-    int getSeconds() const;
+    int getSeconds() const throw();
 
     /** Returns the number of milliseconds, 0 to 999.
 
@@ -191,13 +191,13 @@ public:
 
         @see toMilliseconds
     */
-    int getMilliseconds() const;
+    int getMilliseconds() const throw();
 
     /** Returns true if the local timezone uses a daylight saving correction. */
-    bool isDaylightSavingTime() const;
+    bool isDaylightSavingTime() const throw();
 
     /** Returns a 3-character string to indicate the local timezone. */
-    const String getTimeZone() const;
+    const String getTimeZone() const throw();
 
     //==============================================================================
     /** Quick way of getting a string version of a date and time.
@@ -215,7 +215,7 @@ public:
     const String toString (const bool includeDate,
                            const bool includeTime,
                            const bool includeSeconds = true,
-                           const bool use24HourClock = false) const;
+                           const bool use24HourClock = false) const throw();
 
     /** Converts this date/time to a string with a user-defined format.
 
@@ -248,7 +248,7 @@ public:
 
         @see toString
     */
-    const String formatted (const tchar* const format) const;
+    const String formatted (const tchar* const format) const throw();
 
     //==============================================================================
     /** Adds a RelativeTime to this time and returns the result. */
@@ -284,7 +284,7 @@ public:
         @returns    true if this succeeds, although depending on the system, the
                     application might not have sufficient privileges to do this.
     */
-    bool setSystemTimeToThisTime() const;
+    bool setSystemTimeToThisTime() const throw();
 
     //==============================================================================
     /** Returns the name of a day of the week.

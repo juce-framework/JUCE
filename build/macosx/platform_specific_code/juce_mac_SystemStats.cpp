@@ -46,7 +46,7 @@ static int64 highResTimerFrequency;
 
 #if JUCE_INTEL
 
-static void juce_getCpuVendor (char* const v)
+static void juce_getCpuVendor (char* const v) throw()
 {
     int vendor[4];
     zerostruct (vendor);
@@ -60,7 +60,7 @@ static void juce_getCpuVendor (char* const v)
     memcpy (v, vendor, 16);
 }
 
-static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures)
+static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures) throw()
 {
     unsigned int cpu = 0;
     unsigned int ext = 0;
@@ -91,14 +91,14 @@ static CPUFlags cpuFlags;
 #endif
 
 //==============================================================================
-void Logger::outputDebugString (const String& text)
+void Logger::outputDebugString (const String& text) throw()
 {
     String withLineFeed (text + T("\n"));
     const char* const utf8 = withLineFeed.toUTF8();
     fwrite (utf8, strlen (utf8), 1, stdout);
 }
 
-void Logger::outputDebugPrintf (const tchar* format, ...)
+void Logger::outputDebugPrintf (const tchar* format, ...) throw()
 {
     String text;
     va_list args;
@@ -107,7 +107,7 @@ void Logger::outputDebugPrintf (const tchar* format, ...)
     outputDebugString (text);
 }
 
-int SystemStats::getMemorySizeInMegabytes()
+int SystemStats::getMemorySizeInMegabytes() throw()
 {
     long bytes;
     if (Gestalt (gestaltPhysicalRAMSize, &bytes) == noErr)
@@ -117,18 +117,18 @@ int SystemStats::getMemorySizeInMegabytes()
 }
 
 //==============================================================================
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
 {
     return MacOSX;
 }
 
-const String SystemStats::getOperatingSystemName()
+const String SystemStats::getOperatingSystemName() throw()
 {
     return T("Mac OS X");
 }
 
 //==============================================================================
-void SystemStats::initialiseStats()
+void SystemStats::initialiseStats() throw()
 {
     static bool initialised = false;
 
@@ -165,7 +165,7 @@ void SystemStats::initialiseStats()
     }
 }
 
-bool SystemStats::hasMMX()
+bool SystemStats::hasMMX() throw()
 {
 #if JUCE_INTEL
     return cpuFlags.hasMMX;
@@ -174,7 +174,7 @@ bool SystemStats::hasMMX()
 #endif
 }
 
-bool SystemStats::hasSSE()
+bool SystemStats::hasSSE() throw()
 {
 #if JUCE_INTEL
     return cpuFlags.hasSSE;
@@ -183,7 +183,7 @@ bool SystemStats::hasSSE()
 #endif
 }
 
-bool SystemStats::hasSSE2()
+bool SystemStats::hasSSE2() throw()
 {
 #if JUCE_INTEL
     return cpuFlags.hasSSE2;
@@ -192,7 +192,7 @@ bool SystemStats::hasSSE2()
 #endif
 }
 
-bool SystemStats::has3DNow()
+bool SystemStats::has3DNow() throw()
 {
 #if JUCE_INTEL
     return cpuFlags.has3DNow;
@@ -201,7 +201,7 @@ bool SystemStats::has3DNow()
 #endif
 }
 
-bool SystemStats::hasHyperThreading()
+bool SystemStats::hasHyperThreading() throw()
 {
 #if JUCE_INTEL
     return cpuFlags.hasHT;
@@ -210,7 +210,7 @@ bool SystemStats::hasHyperThreading()
 #endif
 }
 
-const String SystemStats::getCpuVendor()
+const String SystemStats::getCpuVendor() throw()
 {
 #if JUCE_INTEL
     char v [16];
@@ -221,22 +221,22 @@ const String SystemStats::getCpuVendor()
 #endif
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegaherz() throw()
 {
     return GetCPUSpeed();
 }
 
-int SystemStats::getNumPhysicalCpus()
+int SystemStats::getNumPhysicalCpus() throw()
 {
     return MPProcessors();
 }
 
-int SystemStats::getNumLogicalCpus()
+int SystemStats::getNumLogicalCpus() throw()
 {
     return getNumPhysicalCpus();
 }
 
-uint32 SystemStats::getPhysicalAffinityMask()
+uint32 SystemStats::getPhysicalAffinityMask() throw()
 {
     jassertfalse
     return 0;
@@ -271,20 +271,20 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
     return highResTimerFrequency;
 }
 
-int64 SystemStats::getClockCycleCounter()
+int64 SystemStats::getClockCycleCounter() throw()
 {
     jassertfalse
     return 0;
 }
 
-bool Time::setSystemTimeToThisTime() const
+bool Time::setSystemTimeToThisTime() const throw()
 {
     jassertfalse
     return false;
 }
 
 //==============================================================================
-int SystemStats::getPageSize()
+int SystemStats::getPageSize() throw()
 {
     jassertfalse
     return 512; //xxx

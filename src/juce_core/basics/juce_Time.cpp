@@ -250,7 +250,7 @@ const Time Time::getCurrentTime() throw()
 const String Time::toString (const bool includeDate,
                              const bool includeTime,
                              const bool includeSeconds,
-                             const bool use24HourClock) const
+                             const bool use24HourClock) const throw()
 {
     String result;
 
@@ -289,7 +289,7 @@ const String Time::toString (const bool includeDate,
     return result.trimEnd();
 }
 
-const String Time::formatted (const tchar* const format) const
+const String Time::formatted (const tchar* const format) const throw()
 {
     tchar buffer[80];
 
@@ -316,42 +316,42 @@ const String Time::formatted (const tchar* const format) const
 }
 
 //==============================================================================
-int Time::getYear() const
+int Time::getYear() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_year + 1900;
 }
 
-int Time::getMonth() const
+int Time::getMonth() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_mon;
 }
 
-int Time::getDayOfMonth() const
+int Time::getDayOfMonth() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_mday;
 }
 
-int Time::getDayOfWeek() const
+int Time::getDayOfWeek() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_wday;
 }
 
-int Time::getHours() const
+int Time::getHours() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_hour;
 }
 
-int Time::getHoursInAmPmFormat() const
+int Time::getHoursInAmPmFormat() const throw()
 {
     const int hours = getHours();
 
@@ -363,34 +363,34 @@ int Time::getHoursInAmPmFormat() const
         return hours - 12;
 }
 
-bool Time::isAfternoon() const
+bool Time::isAfternoon() const throw()
 {
     return getHours() >= 12;
 }
 
-int Time::getMinutes() const
+int Time::getMinutes() const throw()
 {
     return (int) ((millisSinceEpoch / 60000) % 60);
 }
 
-int Time::getSeconds() const
+int Time::getSeconds() const throw()
 {
     return (int) ((millisSinceEpoch / 1000) % 60);
 }
 
-int Time::getMilliseconds() const
+int Time::getMilliseconds() const throw()
 {
     return (int) (millisSinceEpoch % 1000);
 }
 
-bool Time::isDaylightSavingTime() const
+bool Time::isDaylightSavingTime() const throw()
 {
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
     return t.tm_isdst != 0;
 }
 
-const String Time::getTimeZone() const
+const String Time::getTimeZone() const throw()
 {
     String zone[2];
 
@@ -434,12 +434,12 @@ const String Time::getTimeZone() const
     return zone[0].substring (0, 3);
 }
 
-const String Time::getMonthName (const bool threeLetterVersion) const
+const String Time::getMonthName (const bool threeLetterVersion) const throw()
 {
     return getMonthName (getMonth(), threeLetterVersion);
 }
 
-const String Time::getWeekdayName (const bool threeLetterVersion) const
+const String Time::getWeekdayName (const bool threeLetterVersion) const throw()
 {
     return getWeekdayName (getDayOfWeek(), threeLetterVersion);
 }

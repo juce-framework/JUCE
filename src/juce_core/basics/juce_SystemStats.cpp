@@ -43,7 +43,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-const String SystemStats::getJUCEVersion()
+const String SystemStats::getJUCEVersion() throw()
 {
     return T("JUCE v") + String (JUCE_MAJOR_VERSION) + T(".") + String (JUCE_MINOR_VERSION);
 }
@@ -52,7 +52,7 @@ const String SystemStats::getJUCEVersion()
 //==============================================================================
 static bool juceInitialisedNonGUI = false;
 
-void JUCE_API initialiseJuce_NonGUI()
+void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
     {
@@ -83,7 +83,7 @@ void JUCE_API initialiseJuce_NonGUI()
     }
 }
 
-void JUCE_API shutdownJuce_NonGUI()
+void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {

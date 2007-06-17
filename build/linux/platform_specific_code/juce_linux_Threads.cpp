@@ -51,7 +51,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-void* threadEntryProc (void* value)
+void* threadEntryProc (void* value) throw()
 {
     // New threads start off as root when running suid
     Process::lowerPrivilege();
@@ -60,7 +60,7 @@ void* threadEntryProc (void* value)
     return 0;
 }
 
-void* juce_createThread (void* userData)
+void* juce_createThread (void* userData) throw()
 {
     pthread_t handle = 0;
 
@@ -73,17 +73,17 @@ void* juce_createThread (void* userData)
     return 0;
 }
 
-void juce_killThread (void* handle)
+void juce_killThread (void* handle) throw()
 {
     if (handle != 0)
         pthread_cancel ((pthread_t)handle);
 }
 
-void juce_setCurrentThreadName (const String& /*name*/)
+void juce_setCurrentThreadName (const String& /*name*/) throw()
 {
 }
 
-int Thread::getCurrentThreadId()
+int Thread::getCurrentThreadId() throw()
 {
     return (int) pthread_self();
 }
@@ -104,7 +104,7 @@ int Thread::getCurrentThreadId()
 
 // priority 1 to 10 where 5=normal, 1=low. If the handle is 0, sets the
 // priority of the current thread
-void juce_setThreadPriority (void* handle, int priority)
+void juce_setThreadPriority (void* handle, int priority) throw()
 {
     struct sched_param param;
     int policy, maxp, minp, pri;
@@ -162,12 +162,12 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 #endif
 }
 
-void Thread::yield()
+void Thread::yield() throw()
 {
     sched_yield();
 }
 
-void Thread::sleep (int millisecs)
+void Thread::sleep (int millisecs) throw()
 {
     struct timespec time;
     time.tv_sec = millisecs / 1000;

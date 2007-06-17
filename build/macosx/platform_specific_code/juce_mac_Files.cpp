@@ -193,14 +193,14 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 }
 
 //==============================================================================
-static bool juce_stat (const String& fileName, struct stat& info)
+static bool juce_stat (const String& fileName, struct stat& info) throw()
 {
     return fileName.isNotEmpty()
             && (stat (fileName.toUTF8(), &info) == 0);
 }
 
 //==============================================================================
-bool juce_isDirectory (const String& fileName)
+bool juce_isDirectory (const String& fileName) throw()
 {
     if (fileName.isEmpty())
         return true;
@@ -211,7 +211,7 @@ bool juce_isDirectory (const String& fileName)
             && ((info.st_mode & S_IFDIR) != 0);
 }
 
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
+bool juce_fileExists (const String& fileName, const bool dontCountDirectories) throw()
 {
     if (fileName.isEmpty())
         return false;
@@ -231,7 +231,7 @@ bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
     return exists;
 }
 
-int64 juce_getFileSize (const String& fileName)
+int64 juce_getFileSize (const String& fileName) throw()
 {
     struct stat info;
 
@@ -243,7 +243,7 @@ int64 juce_getFileSize (const String& fileName)
 
 const unsigned int macTimeToUnixTimeDiff = 0x7c25be90;
 
-static uint64 utcDateTimeToUnixTime (const UTCDateTime& d)
+static uint64 utcDateTimeToUnixTime (const UTCDateTime& d) throw()
 {
     if (d.highSeconds == 0 && d.lowSeconds == 0 && d.fraction == 0)
         return  0;
@@ -253,7 +253,7 @@ static uint64 utcDateTimeToUnixTime (const UTCDateTime& d)
             - 2082844800000ll;
 }
 
-static void unixTimeToUtcDateTime (uint64 t, UTCDateTime& d)
+static void unixTimeToUtcDateTime (uint64 t, UTCDateTime& d) throw()
 {
     if (t != 0)
         t += 2082844800000ll;
@@ -266,7 +266,7 @@ static void unixTimeToUtcDateTime (uint64 t, UTCDateTime& d)
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
-                        int64& creationTime)
+                        int64& creationTime) throw()
 {
     modificationTime = 0;
     accessTime = 0;
@@ -296,7 +296,7 @@ void juce_getFileTimes (const String& fileName,
 bool juce_setFileTimes (const String& fileName,
                         int64 modificationTime,
                         int64 accessTime,
-                        int64 creationTime)
+                        int64 creationTime) throw()
 {
     FSRef fileRef;
     if (PlatformUtilities::makeFSRefFromPath (&fileRef, fileName))
@@ -328,12 +328,12 @@ bool juce_setFileTimes (const String& fileName,
     return false;
 }
 
-bool juce_canWriteToFile (const String& fileName)
+bool juce_canWriteToFile (const String& fileName) throw()
 {
     return access (fileName.toUTF8(), W_OK) == 0;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
 {
     const char* const fileNameUTF8 = fileName.toUTF8();
 
@@ -358,7 +358,7 @@ bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
     return ok;
 }
 
-bool juce_deleteFile (const String& fileName)
+bool juce_deleteFile (const String& fileName) throw()
 {
     const char* const fileNameUTF8 = fileName.toUTF8();
 
@@ -368,7 +368,7 @@ bool juce_deleteFile (const String& fileName)
         return remove (fileNameUTF8) == 0;
 }
 
-bool juce_copyFile (const String& src, const String& dst)
+bool juce_copyFile (const String& src, const String& dst) throw()
 {
     const File destFile (dst);
 
@@ -446,7 +446,7 @@ bool juce_copyFile (const String& src, const String& dst)
     return false;
 }
 
-bool juce_moveFile (const String& source, const String& dest)
+bool juce_moveFile (const String& source, const String& dest) throw()
 {
     if (rename (source.toUTF8(), dest.toUTF8()) == 0)
         return true;
@@ -463,12 +463,12 @@ bool juce_moveFile (const String& source, const String& dest)
     return false;
 }
 
-void juce_createDirectory (const String& fileName)
+void juce_createDirectory (const String& fileName) throw()
 {
     mkdir (fileName.toUTF8(), 0777);
 }
 
-void* juce_fileOpen (const String& fileName, bool forWriting)
+void* juce_fileOpen (const String& fileName, bool forWriting) throw()
 {
     const char* const fileNameUTF8 = fileName.toUTF8();
     const char* mode = "rb";
@@ -493,13 +493,13 @@ void* juce_fileOpen (const String& fileName, bool forWriting)
     return (void*) fopen (fileNameUTF8, mode);
 }
 
-void juce_fileClose (void* handle)
+void juce_fileClose (void* handle) throw()
 {
     if (handle != 0)
         fclose ((FILE*) handle);
 }
 
-int juce_fileRead (void* handle, void* buffer, int size)
+int juce_fileRead (void* handle, void* buffer, int size) throw()
 {
     if (handle != 0)
         return fread (buffer, 1, size, (FILE*) handle);
@@ -507,7 +507,7 @@ int juce_fileRead (void* handle, void* buffer, int size)
     return 0;
 }
 
-int juce_fileWrite (void* handle, const void* buffer, int size)
+int juce_fileWrite (void* handle, const void* buffer, int size) throw()
 {
     if (handle != 0)
         return fwrite (buffer, 1, size, (FILE*) handle);
@@ -515,7 +515,7 @@ int juce_fileWrite (void* handle, const void* buffer, int size)
     return 0;
 }
 
-int64 juce_fileSetPosition (void* handle, int64 pos)
+int64 juce_fileSetPosition (void* handle, int64 pos) throw()
 {
     if (handle != 0 && fseek ((FILE*) handle, pos, SEEK_SET) == 0)
         return pos;
@@ -523,7 +523,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
     return -1;
 }
 
-int64 juce_fileGetPosition (void* handle)
+int64 juce_fileGetPosition (void* handle) throw()
 {
     if (handle != 0)
         return ftell ((FILE*) handle);
@@ -531,27 +531,27 @@ int64 juce_fileGetPosition (void* handle)
         return -1;
 }
 
-void juce_fileFlush (void* handle)
+void juce_fileFlush (void* handle) throw()
 {
     if (handle != 0)
         fflush ((FILE*) handle);
 }
 
-const StringArray juce_getFileSystemRoots()
+const StringArray juce_getFileSystemRoots() throw()
 {
     StringArray s;
     s.add (T("/"));
     return s;
 }
 
-const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSerialNumber)
+const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSerialNumber) throw()
 {
     volumeSerialNumber = 0;
     return String::empty;
 }
 
 // if this file doesn't exist, find a parent of it that does..
-static bool doStatFS (const File* file, struct statfs& result)
+static bool doStatFS (const File* file, struct statfs& result) throw()
 {
     File f (*file);
 
@@ -579,7 +579,7 @@ int64 File::getBytesFreeOnVolume() const throw()
 }
 
 //==============================================================================
-static bool isFileOnDriveType (const File* const f, const char** types)
+static bool isFileOnDriveType (const File* const f, const char** types) throw()
 {
     struct statfs buf;
 
@@ -671,13 +671,13 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     return File::nonexistent;
 }
 
-void juce_setCurrentExecutableFileName (const String& filename)
+void juce_setCurrentExecutableFileName (const String& filename) throw()
 {
     executableFile = File::getCurrentWorkingDirectory()
                         .getChildFile (PlatformUtilities::convertToPrecomposedUnicode (filename));
 }
 
-void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId)
+void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw()
 {
     CFStringRef bundleIdStringRef = PlatformUtilities::juceStringToCFString (bundleId);
     CFBundleRef bundleRef = CFBundleGetBundleWithIdentifier (bundleIdStringRef);
@@ -722,7 +722,7 @@ struct FindFileStruct
     DIR* dir;
 
     bool getNextMatch (String& result, bool* const isDir, bool* const isHidden, int64* const fileSize,
-                       Time* const modTime, Time* const creationTime, bool* const isReadOnly)
+                       Time* const modTime, Time* const creationTime, bool* const isReadOnly) throw()
     {
         const char* const wildCardUTF8 = wildCard.toUTF8();
 
@@ -779,7 +779,7 @@ struct FindFileStruct
 
 // returns 0 on failure
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
+                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
 {
     DIR* const d = opendir (directory.toUTF8());
 
@@ -811,7 +811,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 }
 
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
+                        bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
 {
     FindFileStruct* const ff = (FindFileStruct*) handle;
 
@@ -821,7 +821,7 @@ bool juce_findFileNext (void* handle, String& resultFile,
     return false;
 }
 
-void juce_findFileClose (void* handle)
+void juce_findFileClose (void* handle) throw()
 {
     FindFileStruct* const ff = (FindFileStruct*)handle;
 
@@ -833,7 +833,7 @@ void juce_findFileClose (void* handle)
 }
 
 //==============================================================================
-bool juce_launchExecutable (const String& pathAndArguments)
+bool juce_launchExecutable (const String& pathAndArguments) throw()
 {
     char* const argv[4] = { "/bin/sh", "-c", (char*) (const char*) pathAndArguments, 0 };
 
@@ -855,7 +855,7 @@ bool juce_launchExecutable (const String& pathAndArguments)
 }
 
 bool juce_launchFile (const String& fileName,
-                      const String& parameters)
+                      const String& parameters) throw()
 {
     bool ok = false;
 

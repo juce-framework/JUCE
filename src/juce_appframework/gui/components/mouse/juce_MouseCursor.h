@@ -96,7 +96,7 @@ public:
     */
     MouseCursor (Image& image,
                  const int hotSpotX,
-                 const int hotSpotY);
+                 const int hotSpotY) throw();
 
     //==============================================================================
     /** Creates a copy of another cursor object. */
@@ -135,7 +135,7 @@ public:
 
         @see MessageManager::setTimeBeforeShowingWaitCursor
     */
-    static void showWaitCursor();
+    static void showWaitCursor() throw();
 
     /** If showWaitCursor has been called, this will return the mouse to its
         normal state.
@@ -145,7 +145,7 @@ public:
 
         @see showWaitCursor
     */
-    static void hideWaitCursor();
+    static void hideWaitCursor() throw();
 
 
     //==============================================================================

@@ -83,6 +83,7 @@
 				AdditionalLibraryDirectories="../../../juce/bin"
 				ProgramDatabaseFile=".\Release/jucer.pdb"
 				SubSystem="2"
+				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
 				TargetMachine="1"
 			/>

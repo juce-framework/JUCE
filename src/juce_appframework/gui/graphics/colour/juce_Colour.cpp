@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static forcedinline uint8 floatAlphaToInt (const float alpha)
+static forcedinline uint8 JUCE_CALLTYPE floatAlphaToInt (const float alpha)
 {
     return (uint8) jlimit (0, 0xff, roundFloatToInt (alpha * 255.0f));
 }
@@ -46,57 +46,57 @@ static const float oneOver255 = 1.0f / 255.0f;
 
 
 //==============================================================================
-Colour::Colour() throw()
+JUCE_CALLTYPE Colour::Colour() throw()
     : argb (0)
 {
 }
 
-Colour::Colour (const Colour& other) throw()
+JUCE_CALLTYPE Colour::Colour (const Colour& other) throw()
     : argb (other.argb)
 {
 }
 
-const Colour& Colour::operator= (const Colour& other) throw()
+const Colour& JUCE_CALLTYPE Colour::operator= (const Colour& other) throw()
 {
     argb = other.argb;
     return *this;
 }
 
-bool Colour::operator== (const Colour& other) const throw()
+bool JUCE_CALLTYPE Colour::operator== (const Colour& other) const throw()
 {
     return argb.getARGB() == other.argb.getARGB();
 }
 
-bool Colour::operator!= (const Colour& other) const throw()
+bool JUCE_CALLTYPE Colour::operator!= (const Colour& other) const throw()
 {
     return argb.getARGB() != other.argb.getARGB();
 }
 
 //==============================================================================
-Colour::Colour (const uint32 argb_) throw()
+JUCE_CALLTYPE Colour::Colour (const uint32 argb_) throw()
     : argb (argb_)
 {
 }
 
-Colour::Colour (const uint8 red,
-                const uint8 green,
-                const uint8 blue) throw()
+JUCE_CALLTYPE Colour::Colour (const uint8 red,
+                              const uint8 green,
+                              const uint8 blue) throw()
 {
     argb.setARGB (0xff, red, green, blue);
 }
 
-Colour::Colour (const uint8 red,
-                const uint8 green,
-                const uint8 blue,
-                const uint8 alpha) throw()
+JUCE_CALLTYPE Colour::Colour (const uint8 red,
+                              const uint8 green,
+                              const uint8 blue,
+                              const uint8 alpha) throw()
 {
     argb.setARGB (alpha, red, green, blue);
 }
 
-Colour::Colour (const uint8 red,
-                const uint8 green,
-                const uint8 blue,
-                const float alpha) throw()
+JUCE_CALLTYPE Colour::Colour (const uint8 red,
+                              const uint8 green,
+                              const uint8 blue,
+                              const float alpha) throw()
 {
     argb.setARGB (floatAlphaToInt (alpha), red, green, blue);
 }
@@ -168,10 +168,10 @@ static void convertHSBtoRGB (float h, const float s, float v,
     }
 }
 
-Colour::Colour (const float hue,
-                const float saturation,
-                const float brightness,
-                const float alpha) throw()
+JUCE_CALLTYPE Colour::Colour (const float hue,
+                              const float saturation,
+                              const float brightness,
+                              const float alpha) throw()
 {
     uint8 r = getRed(), g = getGreen(), b = getBlue();
     convertHSBtoRGB (hue, saturation, brightness, r, g, b);
@@ -179,10 +179,10 @@ Colour::Colour (const float hue,
     argb.setARGB (floatAlphaToInt (alpha), r, g, b);
 }
 
-Colour::Colour (const float hue,
-                const float saturation,
-                const float brightness,
-                const uint8 alpha) throw()
+JUCE_CALLTYPE Colour::Colour (const float hue,
+                              const float saturation,
+                              const float brightness,
+                              const uint8 alpha) throw()
 {
     uint8 r = getRed(), g = getGreen(), b = getBlue();
     convertHSBtoRGB (hue, saturation, brightness, r, g, b);
@@ -190,51 +190,51 @@ Colour::Colour (const float hue,
     argb.setARGB (alpha, r, g, b);
 }
 
-Colour::~Colour() throw()
+JUCE_CALLTYPE Colour::~Colour() throw()
 {
 }
 
 //==============================================================================
-const PixelARGB Colour::getPixelARGB() const throw()
+const PixelARGB JUCE_CALLTYPE Colour::getPixelARGB() const throw()
 {
     PixelARGB p (argb);
     p.premultiply();
     return p;
 }
 
-uint32 Colour::getARGB() const throw()
+uint32 JUCE_CALLTYPE Colour::getARGB() const throw()
 {
     return argb.getARGB();
 }
 
 //==============================================================================
-bool Colour::isTransparent() const throw()
+bool JUCE_CALLTYPE Colour::isTransparent() const throw()
 {
     return getAlpha() == 0;
 }
 
-bool Colour::isOpaque() const throw()
+bool JUCE_CALLTYPE Colour::isOpaque() const throw()
 {
     return getAlpha() == 0xff;
 }
 
-const Colour Colour::withAlpha (const uint8 newAlpha) const throw()
+const Colour JUCE_CALLTYPE Colour::withAlpha (const uint8 newAlpha) const throw()
 {
     return Colour (getRed(), getGreen(), getBlue(), newAlpha);
 }
 
-const Colour Colour::withAlpha (const float newAlpha) const throw()
+const Colour JUCE_CALLTYPE Colour::withAlpha (const float newAlpha) const throw()
 {
     return withAlpha (floatAlphaToInt (newAlpha));
 }
 
-const Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const throw()
+const Colour JUCE_CALLTYPE Colour::withMultipliedAlpha (const float alphaMultiplier) const throw()
 {
     return withAlpha ((uint8) jlimit (0, 0xff, roundFloatToInt (alphaMultiplier * getAlpha())));
 }
 
 //==============================================================================
-const Colour Colour::overlaidWith (const Colour& src) const throw()
+const Colour JUCE_CALLTYPE Colour::overlaidWith (const Colour& src) const throw()
 {
     const int destAlpha = getAlpha();
 
@@ -262,28 +262,28 @@ const Colour Colour::overlaidWith (const Colour& src) const throw()
 }
 
 //==============================================================================
-float Colour::getFloatRed() const throw()
+float JUCE_CALLTYPE Colour::getFloatRed() const throw()
 {
     return getRed() * oneOver255;
 }
 
-float Colour::getFloatGreen() const throw()
+float JUCE_CALLTYPE Colour::getFloatGreen() const throw()
 {
     return getGreen() * oneOver255;
 }
 
-float Colour::getFloatBlue() const throw()
+float JUCE_CALLTYPE Colour::getFloatBlue() const throw()
 {
     return getBlue() * oneOver255;
 }
 
-float Colour::getFloatAlpha() const throw()
+float JUCE_CALLTYPE Colour::getFloatAlpha() const throw()
 {
     return getAlpha() * oneOver255;
 }
 
 //==============================================================================
-void Colour::getHSB (float& h, float& s, float& v) const throw()
+void JUCE_CALLTYPE Colour::getHSB (float& h, float& s, float& v) const throw()
 {
     const int r = getRed();
     const int g = getGreen();
@@ -331,14 +331,14 @@ void Colour::getHSB (float& h, float& s, float& v) const throw()
 }
 
 //==============================================================================
-float Colour::getHue() const throw()
+float JUCE_CALLTYPE Colour::getHue() const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
     return h;
 }
 
-const Colour Colour::withHue (const float hue) const throw()
+const Colour JUCE_CALLTYPE Colour::withHue (const float hue) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -346,7 +346,7 @@ const Colour Colour::withHue (const float hue) const throw()
     return Colour (hue, s, b, getAlpha());
 }
 
-const Colour Colour::withRotatedHue (const float amountToRotate) const throw()
+const Colour JUCE_CALLTYPE Colour::withRotatedHue (const float amountToRotate) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -358,14 +358,14 @@ const Colour Colour::withRotatedHue (const float amountToRotate) const throw()
 }
 
 //==============================================================================
-float Colour::getSaturation() const throw()
+float JUCE_CALLTYPE Colour::getSaturation() const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
     return s;
 }
 
-const Colour Colour::withSaturation (const float saturation) const throw()
+const Colour JUCE_CALLTYPE Colour::withSaturation (const float saturation) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -373,7 +373,7 @@ const Colour Colour::withSaturation (const float saturation) const throw()
     return Colour (h, saturation, b, getAlpha());
 }
 
-const Colour Colour::withMultipliedSaturation (const float amount) const throw()
+const Colour JUCE_CALLTYPE Colour::withMultipliedSaturation (const float amount) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -382,14 +382,14 @@ const Colour Colour::withMultipliedSaturation (const float amount) const throw()
 }
 
 //==============================================================================
-float Colour::getBrightness() const throw()
+float JUCE_CALLTYPE Colour::getBrightness() const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
     return b;
 }
 
-const Colour Colour::withBrightness (const float brightness) const throw()
+const Colour JUCE_CALLTYPE Colour::withBrightness (const float brightness) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -397,7 +397,7 @@ const Colour Colour::withBrightness (const float brightness) const throw()
     return Colour (h, s, brightness, getAlpha());
 }
 
-const Colour Colour::withMultipliedBrightness (const float amount) const throw()
+const Colour JUCE_CALLTYPE Colour::withMultipliedBrightness (const float amount) const throw()
 {
     float h, s, b;
     getHSB (h, s, b);
@@ -411,7 +411,7 @@ const Colour Colour::withMultipliedBrightness (const float amount) const throw()
 }
 
 //==============================================================================
-const Colour Colour::brighter (float amount) const throw()
+const Colour JUCE_CALLTYPE Colour::brighter (float amount) const throw()
 {
     amount = 1.0f / (1.0f + amount);
 
@@ -421,7 +421,7 @@ const Colour Colour::brighter (float amount) const throw()
                    getAlpha());
 }
 
-const Colour Colour::darker (float amount) const throw()
+const Colour JUCE_CALLTYPE Colour::darker (float amount) const throw()
 {
     amount = 1.0f / (1.0f + amount);
 
@@ -432,7 +432,7 @@ const Colour Colour::darker (float amount) const throw()
 }
 
 //==============================================================================
-const Colour Colour::greyLevel (const float brightness) throw()
+const Colour JUCE_CALLTYPE Colour::greyLevel (const float brightness) throw()
 {
     const uint8 level
         = (uint8) jlimit (0x00, 0xff, roundFloatToInt (brightness * 255.0f));
@@ -441,15 +441,15 @@ const Colour Colour::greyLevel (const float brightness) throw()
 }
 
 //==============================================================================
-const Colour Colour::contrasting (const float amount) const throw()
+const Colour JUCE_CALLTYPE Colour::contrasting (const float amount) const throw()
 {
     return overlaidWith ((((int) getRed() + (int) getGreen() + (int) getBlue() >= 3 * 128)
                             ? Colours::black
                             : Colours::white).withAlpha (amount));
 }
 
-const Colour Colour::contrasting (const Colour& colour1,
-                                  const Colour& colour2) throw()
+const Colour JUCE_CALLTYPE Colour::contrasting (const Colour& colour1,
+                                                const Colour& colour2) throw()
 {
     const float b1 = colour1.getBrightness();
     const float b2 = colour2.getBrightness();
@@ -474,12 +474,12 @@ const Colour Colour::contrasting (const Colour& colour1,
 }
 
 //==============================================================================
-const String Colour::toString() const throw()
+const String JUCE_CALLTYPE Colour::toString() const throw()
 {
     return String::toHexString ((int) argb.getARGB());
 }
 
-const Colour Colour::fromString (const String& encodedColourString)
+const Colour JUCE_CALLTYPE Colour::fromString (const String& encodedColourString)
 {
     return Colour ((uint32) encodedColourString.getHexValue32());
 }

@@ -60,7 +60,7 @@ protected:
         @param granularity_  this is the size of increment by which the internal storage
         will be increased.
     */
-    ArrayAllocationBase (const int granularity_) throw()
+    JUCE_CALLTYPE ArrayAllocationBase (const int granularity_) throw()
         : elements (0),
           numAllocated (0),
           granularity (granularity_)
@@ -68,7 +68,7 @@ protected:
     }
 
     /** Destructor. */
-    ~ArrayAllocationBase() throw()
+    JUCE_CALLTYPE ~ArrayAllocationBase() throw()
     {
         if (elements != 0)
             juce_free (elements);
@@ -82,7 +82,7 @@ protected:
 
         @param numElements  the number of elements that are needed
     */
-    void setAllocatedSize (const int numElements) throw()
+    void JUCE_CALLTYPE setAllocatedSize (const int numElements) throw()
     {
         if (numAllocated != numElements)
         {
@@ -114,7 +114,7 @@ protected:
 
         @param minNumElements  the minimum number of elements that are needed
     */
-    void ensureAllocatedSize (int minNumElements) throw()
+    void JUCE_CALLTYPE ensureAllocatedSize (int minNumElements) throw()
     {
         if (minNumElements > numAllocated)
         {

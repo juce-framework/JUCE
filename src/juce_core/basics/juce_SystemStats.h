@@ -47,7 +47,7 @@ public:
 
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
-    static const String getJUCEVersion();
+    static const String getJUCEVersion() throw();
 
     //==============================================================================
     /** The set of possible results of the getOperatingSystemType() method.
@@ -78,14 +78,14 @@ public:
         @returns one of the values from the OSType enum.
         @see getOperatingSystemName
     */
-    static OperatingSystemType getOperatingSystemType();
+    static OperatingSystemType getOperatingSystemType() throw();
 
     /** Returns the name of the type of operating system we're running on.
 
         @returns a string describing the OS type.
         @see getOperatingSystemType
     */
-    static const String getOperatingSystemName();
+    static const String getOperatingSystemName() throw();
 
     //==============================================================================
     // CPU and memory information..
@@ -95,43 +95,43 @@ public:
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
                     what year you're reading this...)
     */
-    static int getCpuSpeedInMegaherz();
+    static int getCpuSpeedInMegaherz() throw();
 
     /** Returns a string to indicate the CPU vendor.
 
         Might not be known on some systems.
     */
-    static const String getCpuVendor();
+    static const String getCpuVendor() throw();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX();
+    static bool hasMMX() throw();
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE();
+    static bool hasSSE() throw();
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2();
+    static bool hasSSE2() throw();
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow();
+    static bool has3DNow() throw();
 
     /** True if the chip has hyperthreading.
 
         Probably only uber-geeks will care less about this.
     */
-    static bool hasHyperThreading();
+    static bool hasHyperThreading() throw();
 
     /** Checks whether there are multiple processors in the box.
 
         @see getNumLogicalCpus
     */
-    static int getNumPhysicalCpus();
+    static int getNumPhysicalCpus() throw();
 
     /** Counts the number of logical processors.
 
         May give a different result to getNumPhysicalCpus()...
     */
-    static int getNumLogicalCpus();
+    static int getNumLogicalCpus() throw();
 
     /** Returns a bitmask for the physical processors.
 
@@ -139,7 +139,7 @@ public:
 
         @see Thread::setAffinityMask
     */
-    static uint32 getPhysicalAffinityMask();
+    static uint32 getPhysicalAffinityMask() throw();
 
     /** Returns a clock-cycle tick counter, if available.
 
@@ -149,7 +149,7 @@ public:
 
         @returns    the tick count, or zero if not available.
     */
-    static int64 getClockCycleCounter();
+    static int64 getClockCycleCounter() throw();
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -157,13 +157,13 @@ public:
         @returns    the approximate number of megabytes of memory, or zero if
                     something goes wrong when finding out.
     */
-    static int getMemorySizeInMegabytes();
+    static int getMemorySizeInMegabytes() throw();
 
     /** Returns the system page-size.
 
         This is only used by programmers with beards.
     */
-    static int getPageSize();
+    static int getPageSize() throw();
 
     //==============================================================================
     /** Returns a list of MAC addresses found on this machine.
@@ -172,12 +172,12 @@ public:
         @param  maxNum      the number of elements in this array
         @returns            the number of MAC addresses that were found
     */
-    static int getMACAddresses (int64* addresses, int maxNum);
+    static int getMACAddresses (int64* addresses, int maxNum) throw();
 
 
     //==============================================================================
     // not-for-public-use platform-specific method gets called at startup to initialise things.
-    static void initialiseStats();
+    static void initialiseStats() throw();
 };
 
 

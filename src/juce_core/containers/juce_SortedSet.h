@@ -72,7 +72,7 @@ public:
 
         @see ArrayAllocationBase
     */
-    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
+    JUCE_CALLTYPE SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
        : ArrayAllocationBase <ElementType> (granularity),
          numUsed (0)
     {
@@ -81,7 +81,7 @@ public:
     /** Creates a copy of another set.
         @param other    the set to copy
     */
-    SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    JUCE_CALLTYPE SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
        : ArrayAllocationBase <ElementType> (other.granularity)
     {
         other.lockSet();
@@ -92,14 +92,14 @@ public:
     }
 
     /** Destructor. */
-    ~SortedSet() throw()
+    JUCE_CALLTYPE ~SortedSet() throw()
     {
     }
 
     /** Copies another set over this one.
         @param other    the set to copy
     */
-    const SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    const SortedSet <ElementType, TypeOfCriticalSectionToUse>& JUCE_CALLTYPE operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
     {
         if (this != &other)
         {
@@ -127,7 +127,7 @@ public:
 
         @param other    the other set to compare with
     */
-    bool operator== (const SortedSet<ElementType>& other) const throw()
+    bool JUCE_CALLTYPE operator== (const SortedSet<ElementType>& other) const throw()
     {
         lock.enter();
 
@@ -157,7 +157,7 @@ public:
 
         @param other    the other set to compare with
     */
-    bool operator!= (const SortedSet<ElementType>& other) const throw()
+    bool JUCE_CALLTYPE operator!= (const SortedSet<ElementType>& other) const throw()
     {
         return ! operator== (other);
     }
@@ -171,7 +171,7 @@ public:
 
         @see clearQuick
     */
-    void clear() throw()
+    void JUCE_CALLTYPE clear() throw()
     {
         lock.enter();
         this->setAllocatedSize (0);
@@ -183,7 +183,7 @@ public:
 
         @see clear
     */
-    void clearQuick() throw()
+    void JUCE_CALLTYPE clearQuick() throw()
     {
         lock.enter();
         numUsed = 0;
@@ -193,7 +193,7 @@ public:
     //==============================================================================
     /** Returns the current number of elements in the set.
     */
-    inline int size() const throw()
+    inline int JUCE_CALLTYPE size() const throw()
     {
         return numUsed;
     }
@@ -209,7 +209,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the set)
         @see getUnchecked, getFirst, getLast
     */
-    inline ElementType operator[] (const int index) const throw()
+    inline ElementType JUCE_CALLTYPE operator[] (const int index) const throw()
     {
         lock.enter();
         const ElementType result = (index >= 0 && index < numUsed) ? this->elements [index]
@@ -227,7 +227,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the set)
         @see operator[], getFirst, getLast
     */
-    inline ElementType getUnchecked (const int index) const throw()
+    inline ElementType JUCE_CALLTYPE getUnchecked (const int index) const throw()
     {
         lock.enter();
         jassert (index >= 0 && index < numUsed);
@@ -241,7 +241,7 @@ public:
 
         @see operator[], getUnchecked, getLast
     */
-    inline ElementType getFirst() const throw()
+    inline ElementType JUCE_CALLTYPE getFirst() const throw()
     {
         lock.enter();
         const ElementType result = (numUsed > 0) ? this->elements [0]
@@ -255,7 +255,7 @@ public:
 
         @see operator[], getUnchecked, getFirst
     */
-    inline ElementType getLast() const throw()
+    inline ElementType JUCE_CALLTYPE getLast() const throw()
     {
         lock.enter();
         const ElementType result = (numUsed > 0) ? this->elements [numUsed - 1]
@@ -274,7 +274,7 @@ public:
         @param elementToLookFor   the value or object to look for
         @returns                  the index of the object, or -1 if it's not found
     */
-    int indexOf (const ElementType elementToLookFor) const throw()
+    int JUCE_CALLTYPE indexOf (const ElementType elementToLookFor) const throw()
     {
         lock.enter();
 
@@ -315,7 +315,7 @@ public:
         @param elementToLookFor     the value or object to look for
         @returns                    true if the item is found
     */
-    bool contains (const ElementType elementToLookFor) const throw()
+    bool JUCE_CALLTYPE contains (const ElementType elementToLookFor) const throw()
     {
         lock.enter();
 
@@ -357,7 +357,7 @@ public:
         @param newElement       the new object to add to the set
         @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
     */
-    void add (const ElementType newElement) throw()
+    void JUCE_CALLTYPE add (const ElementType newElement) throw()
     {
         lock.enter();
 
@@ -405,8 +405,8 @@ public:
         @param numElementsToAdd     how many elements are in this other array
         @see add
     */
-    void addArray (const ElementType* elementsToAdd,
-                   int numElementsToAdd) throw()
+    void JUCE_CALLTYPE addArray (const ElementType* elementsToAdd,
+                                 int numElementsToAdd) throw()
     {
         lock.enter();
 
@@ -426,9 +426,9 @@ public:
         @see add
     */
     template <class OtherSetType>
-    void addSet (const OtherSetType& setToAddFrom,
-                 int startIndex = 0,
-                 int numElementsToAdd = -1) throw()
+    void JUCE_CALLTYPE addSet (const OtherSetType& setToAddFrom,
+                               int startIndex = 0,
+                               int numElementsToAdd = -1) throw()
     {
         setToAddFrom.lockSet();
         lock.enter();
@@ -463,7 +463,7 @@ public:
         @returns                the element that has been removed
         @see removeValue, removeRange
     */
-    ElementType remove (const int indexToRemove) throw()
+    ElementType JUCE_CALLTYPE remove (const int indexToRemove) throw()
     {
         lock.enter();
 
@@ -498,7 +498,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void removeValue (const ElementType valueToRemove) throw()
+    void JUCE_CALLTYPE removeValue (const ElementType valueToRemove) throw()
     {
         lock.enter();
         remove (indexOf (valueToRemove));
@@ -511,7 +511,7 @@ public:
         @see removeValuesNotIn, remove, removeValue, removeRange
     */
     template <class OtherSetType>
-    void removeValuesIn (const OtherSetType& otherSet) throw()
+    void JUCE_CALLTYPE removeValuesIn (const OtherSetType& otherSet) throw()
     {
         otherSet.lockSet();
         lock.enter();
@@ -542,7 +542,7 @@ public:
         @see removeValuesIn, remove, removeValue, removeRange
     */
     template <class OtherSetType>
-    void removeValuesNotIn (const OtherSetType& otherSet) throw()
+    void JUCE_CALLTYPE removeValuesNotIn (const OtherSetType& otherSet) throw()
     {
         otherSet.lockSet();
         lock.enter();
@@ -572,7 +572,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() throw()
+    void JUCE_CALLTYPE minimiseStorageOverheads() throw()
     {
         lock.enter();
 
@@ -599,7 +599,7 @@ public:
 
         @see unlockSet
     */
-    void lockSet() const throw()
+    void JUCE_CALLTYPE lockSet() const throw()
     {
         lock.enter();
     }
@@ -611,7 +611,7 @@ public:
 
         @see lockSet
     */
-    void unlockSet() const throw()
+    void JUCE_CALLTYPE unlockSet() const throw()
     {
         lock.exit();
     }
@@ -624,7 +624,7 @@ private:
     int numUsed;
     TypeOfCriticalSectionToUse lock;
 
-    void insertInternal (const int indexToInsertAt, const ElementType newElement) throw()
+    void JUCE_CALLTYPE insertInternal (const int indexToInsertAt, const ElementType newElement) throw()
     {
         this->ensureAllocatedSize (numUsed + 1);
 

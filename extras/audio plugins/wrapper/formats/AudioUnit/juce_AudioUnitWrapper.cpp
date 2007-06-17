@@ -44,7 +44,7 @@ static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurat
 static const int numChannelConfigs = numElementsInArray (channelConfigs);
 
 BEGIN_JUCE_NAMESPACE
-extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId);
+extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
 END_JUCE_NAMESPACE
 
 

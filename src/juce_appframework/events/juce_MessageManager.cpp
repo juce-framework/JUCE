@@ -52,7 +52,7 @@ MessageManager* MessageManager::instance = 0;
 
 static const int quitMessageId = 0xfffff321;
 
-MessageManager::MessageManager() throw()
+JUCE_CALLTYPE MessageManager::MessageManager() throw()
   : broadcastListeners (0),
     quitMessagePosted (false),
     quitMessageReceived (false),
@@ -67,7 +67,7 @@ MessageManager::MessageManager() throw()
     currentLockingThreadId = messageThreadId = Thread::getCurrentThreadId();
 }
 
-MessageManager::~MessageManager() throw()
+JUCE_CALLTYPE MessageManager::~MessageManager() throw()
 {
     jassert (instance == this);
     instance = 0;
@@ -76,7 +76,7 @@ MessageManager::~MessageManager() throw()
     doPlatformSpecificShutdown();
 }
 
-MessageManager* MessageManager::getInstance() throw()
+MessageManager* JUCE_CALLTYPE MessageManager::getInstance() throw()
 {
     if (instance == 0)
     {
@@ -89,7 +89,7 @@ MessageManager* MessageManager::getInstance() throw()
     return instance;
 }
 
-void MessageManager::postMessageToQueue (Message* const message)
+void JUCE_CALLTYPE MessageManager::postMessageToQueue (Message* const message)
 {
     if (quitMessagePosted || ! juce_postMessageToSystemQueue (message))
         delete message;
@@ -97,7 +97,7 @@ void MessageManager::postMessageToQueue (Message* const message)
 
 //==============================================================================
 // not for public use..
-void MessageManager::deliverMessage (void* message)
+void JUCE_CALLTYPE MessageManager::deliverMessage (void* message)
 {
     const MessageManagerLock lock;
 
@@ -130,8 +130,8 @@ void MessageManager::deliverMessage (void* message)
 }
 
 //==============================================================================
-bool MessageManager::dispatchNextMessage (const bool returnImmediatelyIfNoMessages,
-                                          bool* const wasAMessageDispatched)
+bool JUCE_CALLTYPE MessageManager::dispatchNextMessage (const bool returnImmediatelyIfNoMessages,
+                                                        bool* const wasAMessageDispatched)
 {
     if (quitMessageReceived)
     {
@@ -163,7 +163,7 @@ bool MessageManager::dispatchNextMessage (const bool returnImmediatelyIfNoMessag
     return result || ! returnImmediatelyIfNoMessages;
 }
 
-void MessageManager::dispatchPendingMessages (int maxNumberOfMessagesToDispatch)
+void JUCE_CALLTYPE MessageManager::dispatchPendingMessages (int maxNumberOfMessagesToDispatch)
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
@@ -187,7 +187,7 @@ void MessageManager::dispatchPendingMessages (int maxNumberOfMessagesToDispatch)
     }
 }
 
-bool MessageManager::runDispatchLoop()
+bool JUCE_CALLTYPE MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
@@ -199,7 +199,7 @@ bool MessageManager::runDispatchLoop()
 }
 
 //==============================================================================
-void MessageManager::postQuitMessage (const bool useMaximumForce)
+void JUCE_CALLTYPE MessageManager::postQuitMessage (const bool useMaximumForce)
 {
     if (! quitMessagePosted)
     {
@@ -213,13 +213,13 @@ void MessageManager::postQuitMessage (const bool useMaximumForce)
     }
 }
 
-bool MessageManager::hasQuitMessageBeenPosted() const
+bool JUCE_CALLTYPE MessageManager::hasQuitMessageBeenPosted() const
 {
     return quitMessagePosted;
 }
 
 //==============================================================================
-void MessageManager::deliverBroadcastMessage (const String& value)
+void JUCE_CALLTYPE MessageManager::deliverBroadcastMessage (const String& value)
 {
     if (broadcastListeners == 0)
         broadcastListeners = new ActionListenerList();
@@ -227,7 +227,7 @@ void MessageManager::deliverBroadcastMessage (const String& value)
     broadcastListeners->sendActionMessage (value);
 }
 
-void MessageManager::registerBroadcastListener (ActionListener* listener)
+void JUCE_CALLTYPE MessageManager::registerBroadcastListener (ActionListener* listener)
 {
     if (broadcastListeners == 0)
         broadcastListeners = new ActionListenerList();
@@ -235,7 +235,7 @@ void MessageManager::registerBroadcastListener (ActionListener* listener)
     broadcastListeners->addActionListener (listener);
 }
 
-void MessageManager::deregisterBroadcastListener (ActionListener* listener)
+void JUCE_CALLTYPE MessageManager::deregisterBroadcastListener (ActionListener* listener)
 {
     if (broadcastListeners == 0)
         broadcastListeners = new ActionListenerList();
@@ -246,13 +246,13 @@ void MessageManager::deregisterBroadcastListener (ActionListener* listener)
 //==============================================================================
 // This gets called occasionally by the timer thread (to save using an extra thread
 // for it).
-void MessageManager::inactivityCheckCallback()
+void JUCE_CALLTYPE MessageManager::inactivityCheckCallback()
 {
     if (instance != 0)
         instance->inactivityCheckCallbackInt();
 }
 
-void MessageManager::inactivityCheckCallbackInt()
+void JUCE_CALLTYPE MessageManager::inactivityCheckCallbackInt()
 {
     const unsigned int now = Time::getApproximateMillisecondCounter();
 
@@ -277,7 +277,7 @@ void MessageManager::inactivityCheckCallbackInt()
     }
 }
 
-void MessageManager::delayWaitCursor()
+void JUCE_CALLTYPE MessageManager::delayWaitCursor()
 {
     if (instance != 0)
     {
@@ -291,7 +291,7 @@ void MessageManager::delayWaitCursor()
     }
 }
 
-void MessageManager::setTimeBeforeShowingWaitCursor (const int millisecs)
+void JUCE_CALLTYPE MessageManager::setTimeBeforeShowingWaitCursor (const int millisecs)
 {
      // if this is a bit too small you'll get a lot of unwanted hourglass cursors..
     jassert (millisecs <= 0 || millisecs > 200);
@@ -311,28 +311,28 @@ void MessageManager::timerCallback()
     ++messageCounter;
 }
 
-int MessageManager::getTimeBeforeShowingWaitCursor() const
+int JUCE_CALLTYPE MessageManager::getTimeBeforeShowingWaitCursor() const
 {
     return timeBeforeWaitCursor;
 }
 
-bool MessageManager::isThisTheMessageThread() const
+bool JUCE_CALLTYPE MessageManager::isThisTheMessageThread() const
 {
     return Thread::getCurrentThreadId() == messageThreadId;
 }
 
-void MessageManager::setCurrentMessageThread (const int threadId)
+void JUCE_CALLTYPE MessageManager::setCurrentMessageThread (const int threadId)
 {
     messageThreadId = threadId;
 }
 
-bool MessageManager::currentThreadHasLockedMessageManager() const
+bool JUCE_CALLTYPE MessageManager::currentThreadHasLockedMessageManager() const
 {
     return Thread::getCurrentThreadId() == currentLockingThreadId;
 }
 
 //==============================================================================
-MessageManagerLock::MessageManagerLock()
+JUCE_CALLTYPE MessageManagerLock::MessageManagerLock()
 {
     if (MessageManager::instance != 0)
     {
@@ -342,7 +342,7 @@ MessageManagerLock::MessageManagerLock()
     }
 }
 
-MessageManagerLock::~MessageManagerLock()
+JUCE_CALLTYPE MessageManagerLock::~MessageManagerLock()
 {
     if (MessageManager::instance != 0)
     {

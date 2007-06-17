@@ -62,11 +62,11 @@
     @see sortArrayRetainingOrder
 */
 template <class ElementType, class ElementComparator>
-static void sortArray (ElementComparator& comparator,
-                       ElementType* const array,
-                       int firstElement,
-                       int lastElement,
-                       const bool retainOrderOfEquivalentItems)
+static void JUCE_CALLTYPE sortArray (ElementComparator& comparator,
+                                     ElementType* const array,
+                                     int firstElement,
+                                     int lastElement,
+                                     const bool retainOrderOfEquivalentItems)
 {
     (void) comparator;  // if you pass in an object with a static compareElements() method, this
                         // avoids getting warning messages about the parameter being unused
@@ -216,11 +216,11 @@ static void sortArray (ElementComparator& comparator,
     @param lastElement      the index of the last element in the range (this is non-inclusive)
 */
 template <class ElementType, class ElementComparator>
-static int findInsertIndexInSortedArray (ElementComparator& comparator,
-                                         ElementType* const array,
-                                         const ElementType newElement,
-                                         int firstElement,
-                                         int lastElement)
+static int JUCE_CALLTYPE findInsertIndexInSortedArray (ElementComparator& comparator,
+                                                       ElementType* const array,
+                                                       const ElementType newElement,
+                                                       int firstElement,
+                                                       int lastElement)
 {
     jassert (firstElement <= lastElement);
 
@@ -279,8 +279,8 @@ template <class ElementType>
 class IntegerElementComparator
 {
 public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
+    static int JUCE_CALLTYPE compareElements (const ElementType first,
+                                              const ElementType second) throw()
     {
         return first - second;
     }
@@ -307,8 +307,8 @@ template <class ElementType>
 class FloatElementComparator
 {
 public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
+    static int JUCE_CALLTYPE compareElements (const ElementType first,
+                                              const ElementType second) throw()
     {
         return (first < second) ? -1
                                 : ((first == second) ? 0

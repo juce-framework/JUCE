@@ -118,7 +118,7 @@ void WaitableEvent::reset() const throw()
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-static unsigned int __stdcall threadEntryProc (void* userData)
+static unsigned int __stdcall threadEntryProc (void* userData) throw()
 {
     AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
                        GetCurrentThreadId(), TRUE);
@@ -129,7 +129,7 @@ static unsigned int __stdcall threadEntryProc (void* userData)
     return 0;
 }
 
-void* juce_createThread (void* userData)
+void* juce_createThread (void* userData) throw()
 {
     unsigned int threadId;
 
@@ -139,7 +139,7 @@ void* juce_createThread (void* userData)
                                    0, &threadId);
 }
 
-void juce_killThread (void* handle)
+void juce_killThread (void* handle) throw()
 {
     if (handle != 0)
     {
@@ -150,7 +150,7 @@ void juce_killThread (void* handle)
     }
 }
 
-void juce_setCurrentThreadName (const String& name)
+void juce_setCurrentThreadName (const String& name) throw()
 {
 #if JUCE_DEBUG && JUCE_MSVC
     struct
@@ -179,13 +179,13 @@ void juce_setCurrentThreadName (const String& name)
 #endif
 }
 
-int Thread::getCurrentThreadId()
+int Thread::getCurrentThreadId() throw()
 {
     return (int) GetCurrentThreadId();
 }
 
 // priority 1 to 10 where 5=normal, 1=low
-void juce_setThreadPriority (void* threadHandle, int priority)
+void juce_setThreadPriority (void* threadHandle, int priority) throw()
 {
     int pri = THREAD_PRIORITY_TIME_CRITICAL;
 
@@ -215,17 +215,17 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 
 static HANDLE sleepEvent = 0;
 
-void juce_initialiseThreadEvents()
+void juce_initialiseThreadEvents() throw()
 {
     sleepEvent = CreateEvent (0, 0, 0, 0);
 }
 
-void Thread::yield()
+void Thread::yield() throw()
 {
     Sleep (0);
 }
 
-void Thread::sleep (int millisecs)
+void Thread::sleep (const int millisecs) throw()
 {
     if (millisecs >= 10)
     {

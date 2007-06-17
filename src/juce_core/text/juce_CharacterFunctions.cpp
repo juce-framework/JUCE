@@ -49,12 +49,12 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_String.h"
 
 //==============================================================================
-int CharacterFunctions::length (const char* const s) throw()
+int JUCE_CALLTYPE CharacterFunctions::length (const char* const s) throw()
 {
     return (int) strlen (s);
 }
 
-int CharacterFunctions::length (const juce_wchar* const s) throw()
+int JUCE_CALLTYPE CharacterFunctions::length (const juce_wchar* const s) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     int n = 0;
@@ -67,12 +67,12 @@ int CharacterFunctions::length (const juce_wchar* const s) throw()
 #endif
 }
 
-void CharacterFunctions::copy (char* dest, const char* src, const int maxChars) throw()
+void JUCE_CALLTYPE CharacterFunctions::copy (char* dest, const char* src, const int maxChars) throw()
 {
     strncpy (dest, src, maxChars);
 }
 
-void CharacterFunctions::copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw()
+void JUCE_CALLTYPE CharacterFunctions::copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     while (--maxChars >= 0 && *src != 0)
@@ -84,22 +84,22 @@ void CharacterFunctions::copy (juce_wchar* dest, const juce_wchar* src, int maxC
 #endif
 }
 
-void CharacterFunctions::copy (juce_wchar* dest, const char* src, const int maxChars) throw()
+void JUCE_CALLTYPE CharacterFunctions::copy (juce_wchar* dest, const char* src, const int maxChars) throw()
 {
     mbstowcs (dest, src, maxChars);
 }
 
-void CharacterFunctions::copy (char* dest, const juce_wchar* src, const int maxChars) throw()
+void JUCE_CALLTYPE CharacterFunctions::copy (char* dest, const juce_wchar* src, const int maxChars) throw()
 {
     wcstombs (dest, src, maxChars);
 }
 
-void CharacterFunctions::append (char* dest, const char* src) throw()
+void JUCE_CALLTYPE CharacterFunctions::append (char* dest, const char* src) throw()
 {
     strcat (dest, src);
 }
 
-void CharacterFunctions::append (juce_wchar* dest, const juce_wchar* src) throw()
+void JUCE_CALLTYPE CharacterFunctions::append (juce_wchar* dest, const juce_wchar* src) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     while (*dest != 0)
@@ -114,12 +114,12 @@ void CharacterFunctions::append (juce_wchar* dest, const juce_wchar* src) throw(
 #endif
 }
 
-int CharacterFunctions::compare (const char* const s1, const char* const s2) throw()
+int JUCE_CALLTYPE CharacterFunctions::compare (const char* const s1, const char* const s2) throw()
 {
     return strcmp (s1, s2);
 }
 
-int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2) throw()
+int JUCE_CALLTYPE CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -146,14 +146,14 @@ int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2) thr
 #endif
 }
 
-int CharacterFunctions::compare (const char* const s1, const char* const s2, const int maxChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::compare (const char* const s1, const char* const s2, const int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
     return strncmp (s1, s2, maxChars);
 }
 
-int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -175,7 +175,7 @@ int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int
 #endif
 }
 
-int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2) throw()
+int JUCE_CALLTYPE CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -186,7 +186,7 @@ int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* con
 #endif
 }
 
-int CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw()
+int JUCE_CALLTYPE CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -213,7 +213,7 @@ int CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wcha
 #endif
 }
 
-int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2, const int maxChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2, const int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -224,7 +224,7 @@ int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* con
 #endif
 }
 
-int CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
 
@@ -251,12 +251,12 @@ int CharacterFunctions::compareIgnoreCase (const juce_wchar* s1, const juce_wcha
 #endif
 }
 
-const char* CharacterFunctions::find (const char* const haystack, const char* const needle) throw()
+const char* JUCE_CALLTYPE CharacterFunctions::find (const char* const haystack, const char* const needle) throw()
 {
     return strstr (haystack, needle);
 }
 
-const juce_wchar* CharacterFunctions::find (const juce_wchar* haystack, const juce_wchar* const needle) throw()
+const juce_wchar* JUCE_CALLTYPE CharacterFunctions::find (const juce_wchar* haystack, const juce_wchar* const needle) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     while (*haystack != 0)
@@ -285,7 +285,7 @@ const juce_wchar* CharacterFunctions::find (const juce_wchar* haystack, const ju
 #endif
 }
 
-int CharacterFunctions::indexOfChar (const char* const haystack, const char needle, const bool ignoreCase) throw()
+int JUCE_CALLTYPE CharacterFunctions::indexOfChar (const char* const haystack, const char needle, const bool ignoreCase) throw()
 {
     if (haystack != 0)
     {
@@ -324,7 +324,7 @@ int CharacterFunctions::indexOfChar (const char* const haystack, const char need
     return -1;
 }
 
-int CharacterFunctions::indexOfChar (const juce_wchar* const haystack, const juce_wchar needle, const bool ignoreCase) throw()
+int JUCE_CALLTYPE CharacterFunctions::indexOfChar (const juce_wchar* const haystack, const juce_wchar needle, const bool ignoreCase) throw()
 {
     if (haystack != 0)
     {
@@ -363,7 +363,7 @@ int CharacterFunctions::indexOfChar (const juce_wchar* const haystack, const juc
     return -1;
 }
 
-int CharacterFunctions::indexOfCharFast (const char* const haystack, const char needle) throw()
+int JUCE_CALLTYPE CharacterFunctions::indexOfCharFast (const char* const haystack, const char needle) throw()
 {
     jassert (haystack != 0);
 
@@ -379,7 +379,7 @@ int CharacterFunctions::indexOfCharFast (const char* const haystack, const char 
     return -1;
 }
 
-int CharacterFunctions::indexOfCharFast (const juce_wchar* const haystack, const juce_wchar needle) throw()
+int JUCE_CALLTYPE CharacterFunctions::indexOfCharFast (const juce_wchar* const haystack, const juce_wchar needle) throw()
 {
     jassert (haystack != 0);
 
@@ -395,12 +395,12 @@ int CharacterFunctions::indexOfCharFast (const juce_wchar* const haystack, const
     return -1;
 }
 
-int CharacterFunctions::getIntialSectionContainingOnly (const char* const text, const char* const allowedChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::getIntialSectionContainingOnly (const char* const text, const char* const allowedChars) throw()
 {
     return allowedChars == 0 ? 0 : (int) strspn (text, allowedChars);
 }
 
-int CharacterFunctions::getIntialSectionContainingOnly (const juce_wchar* const text, const juce_wchar* const allowedChars) throw()
+int JUCE_CALLTYPE CharacterFunctions::getIntialSectionContainingOnly (const juce_wchar* const text, const juce_wchar* const allowedChars) throw()
 {
     if (allowedChars == 0)
         return 0;
@@ -418,12 +418,12 @@ int CharacterFunctions::getIntialSectionContainingOnly (const juce_wchar* const 
     return i;
 }
 
-int CharacterFunctions::ftime (char* const dest, const int maxChars, const char* const format, const struct tm* const tm) throw()
+int JUCE_CALLTYPE CharacterFunctions::ftime (char* const dest, const int maxChars, const char* const format, const struct tm* const tm) throw()
 {
     return (int) strftime (dest, maxChars, format, tm);
 }
 
-int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
+int JUCE_CALLTYPE CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     const String formatTemp (format);
@@ -437,12 +437,12 @@ int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const
 #endif
 }
 
-int CharacterFunctions::getIntValue (const char* const s) throw()
+int JUCE_CALLTYPE CharacterFunctions::getIntValue (const char* const s) throw()
 {
     return atoi (s);
 }
 
-int CharacterFunctions::getIntValue (const juce_wchar* s) throw()
+int JUCE_CALLTYPE CharacterFunctions::getIntValue (const juce_wchar* s) throw()
 {
 #if JUCE_WIN32
     return _wtoi (s);
@@ -470,7 +470,7 @@ int CharacterFunctions::getIntValue (const juce_wchar* s) throw()
 #endif
 }
 
-int64 CharacterFunctions::getInt64Value (const char* s) throw()
+int64 JUCE_CALLTYPE CharacterFunctions::getInt64Value (const char* s) throw()
 {
 #ifdef JUCE_LINUX
     return atoll (s);
@@ -500,7 +500,7 @@ int64 CharacterFunctions::getInt64Value (const char* s) throw()
 #endif
 }
 
-int64 CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
+int64 JUCE_CALLTYPE CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
 {
 #if JUCE_WIN32
     return _wtoi64 (s);
@@ -528,12 +528,12 @@ int64 CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
 #endif
 }
 
-double CharacterFunctions::getDoubleValue (const char* const s) throw()
+double JUCE_CALLTYPE CharacterFunctions::getDoubleValue (const char* const s) throw()
 {
     return atof (s);
 }
 
-double CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
+double JUCE_CALLTYPE CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     String temp (s);
@@ -545,12 +545,12 @@ double CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
 }
 
 //==============================================================================
-char CharacterFunctions::toUpperCase (const char character) throw()
+char JUCE_CALLTYPE CharacterFunctions::toUpperCase (const char character) throw()
 {
     return (char) toupper (character);
 }
 
-juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
+juce_wchar JUCE_CALLTYPE CharacterFunctions::toUpperCase (const juce_wchar character) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     return toupper ((char) character);
@@ -559,7 +559,7 @@ juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
 #endif
 }
 
-void CharacterFunctions::toUpperCase (char* s) throw()
+void JUCE_CALLTYPE CharacterFunctions::toUpperCase (char* s) throw()
 {
 #if JUCE_WIN32
     strupr (s);
@@ -572,7 +572,7 @@ void CharacterFunctions::toUpperCase (char* s) throw()
 #endif
 }
 
-void CharacterFunctions::toUpperCase (juce_wchar* s) throw()
+void JUCE_CALLTYPE CharacterFunctions::toUpperCase (juce_wchar* s) throw()
 {
 #if JUCE_WIN32
     _wcsupr (s);
@@ -585,12 +585,12 @@ void CharacterFunctions::toUpperCase (juce_wchar* s) throw()
 #endif
 }
 
-bool CharacterFunctions::isUpperCase (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isUpperCase (const char character) throw()
 {
     return isupper (character) != 0;
 }
 
-bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isUpperCase (const juce_wchar character) throw()
 {
 #if JUCE_WIN32
     return iswupper (character) != 0;
@@ -600,12 +600,12 @@ bool CharacterFunctions::isUpperCase (const juce_wchar character) throw()
 }
 
 //==============================================================================
-char CharacterFunctions::toLowerCase (const char character) throw()
+char JUCE_CALLTYPE CharacterFunctions::toLowerCase (const char character) throw()
 {
     return (char) tolower (character);
 }
 
-juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
+juce_wchar JUCE_CALLTYPE CharacterFunctions::toLowerCase (const juce_wchar character) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     return tolower ((char) character);
@@ -614,7 +614,7 @@ juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
 #endif
 }
 
-void CharacterFunctions::toLowerCase (char* s) throw()
+void JUCE_CALLTYPE CharacterFunctions::toLowerCase (char* s) throw()
 {
 #if JUCE_WIN32
     strlwr (s);
@@ -627,7 +627,7 @@ void CharacterFunctions::toLowerCase (char* s) throw()
 #endif
 }
 
-void CharacterFunctions::toLowerCase (juce_wchar* s) throw()
+void JUCE_CALLTYPE CharacterFunctions::toLowerCase (juce_wchar* s) throw()
 {
 #if JUCE_WIN32
     _wcslwr (s);
@@ -640,12 +640,12 @@ void CharacterFunctions::toLowerCase (juce_wchar* s) throw()
 #endif
 }
 
-bool CharacterFunctions::isLowerCase (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLowerCase (const char character) throw()
 {
     return islower (character) != 0;
 }
 
-bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLowerCase (const juce_wchar character) throw()
 {
 #if JUCE_WIN32
     return iswlower (character) != 0;
@@ -655,12 +655,12 @@ bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
 }
 
 //==============================================================================
-bool CharacterFunctions::isWhitespace (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isWhitespace (const char character) throw()
 {
     return character == T(' ') || (character <= 13 && character >= 9);
 }
 
-bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isWhitespace (const juce_wchar character) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     return isWhitespace ((char) character);
@@ -669,23 +669,23 @@ bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
 #endif
 }
 
-bool CharacterFunctions::isDigit (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isDigit (const char character) throw()
 {
     return (character >= '0' && character <= '9');
 }
 
-bool CharacterFunctions::isDigit (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isDigit (const juce_wchar character) throw()
 {
     return isdigit (character) != 0;
 }
 
-bool CharacterFunctions::isLetter (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLetter (const char character) throw()
 {
     return (character >= 'a' && character <= 'z')
         || (character >= 'A' && character <= 'Z');
 }
 
-bool CharacterFunctions::isLetter (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLetter (const juce_wchar character) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     return isLetter ((char) character);
@@ -694,14 +694,14 @@ bool CharacterFunctions::isLetter (const juce_wchar character) throw()
 #endif
 }
 
-bool CharacterFunctions::isLetterOrDigit (const char character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLetterOrDigit (const char character) throw()
 {
     return (character >= 'a' && character <= 'z')
         || (character >= 'A' && character <= 'Z')
         || (character >= '0' && character <= '9');
 }
 
-bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
+bool JUCE_CALLTYPE CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 {
 #ifdef MACOS_10_2_OR_EARLIER
     return isLetterOrDigit ((char) character);
@@ -710,7 +710,7 @@ bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 #endif
 }
 
-int CharacterFunctions::getHexDigitValue (const tchar digit) throw()
+int JUCE_CALLTYPE CharacterFunctions::getHexDigitValue (const tchar digit) throw()
 {
     if (digit >= T('0') && digit <= T('9'))
         return digit - T('0');
@@ -723,21 +723,21 @@ int CharacterFunctions::getHexDigitValue (const tchar digit) throw()
 }
 
 //==============================================================================
-int CharacterFunctions::printf (char* const dest, const int maxLength, const char* const format, ...) throw()
+int JUCE_CALLTYPE CharacterFunctions::printf (char* const dest, const int maxLength, const char* const format, ...) throw()
 {
     va_list list;
     va_start (list, format);
     return vprintf (dest, maxLength, format, list);
 }
 
-int CharacterFunctions::printf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, ...) throw()
+int JUCE_CALLTYPE CharacterFunctions::printf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, ...) throw()
 {
     va_list list;
     va_start (list, format);
     return vprintf (dest, maxLength, format, list);
 }
 
-int CharacterFunctions::vprintf (char* const dest, const int maxLength, const char* const format, va_list& args) throw()
+int JUCE_CALLTYPE CharacterFunctions::vprintf (char* const dest, const int maxLength, const char* const format, va_list& args) throw()
 {
 #if JUCE_WIN32
     return (int) _vsnprintf (dest, maxLength, format, args);
@@ -746,7 +746,7 @@ int CharacterFunctions::vprintf (char* const dest, const int maxLength, const ch
 #endif
 }
 
-int CharacterFunctions::vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw()
+int JUCE_CALLTYPE CharacterFunctions::vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw()
 {
 #ifdef MACOS_10_3_OR_EARLIER
     const String formatTemp (format);

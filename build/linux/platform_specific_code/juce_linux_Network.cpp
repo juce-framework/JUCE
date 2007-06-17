@@ -50,7 +50,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum)
+int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
 {
     // xxx todo
     return 0;

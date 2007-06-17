@@ -66,12 +66,12 @@ BEGIN_JUCE_NAMESPACE
 extern void juce_updateMultiMonitorInfo(); // from WindowDriver
 
 //==============================================================================
-void Logger::outputDebugString (const String& text)
+void Logger::outputDebugString (const String& text) throw()
 {
     OutputDebugString (text + T("\n"));
 }
 
-void Logger::outputDebugPrintf (const tchar* format, ...)
+void Logger::outputDebugPrintf (const tchar* format, ...) throw()
 {
     String text;
     va_list args;
@@ -103,7 +103,7 @@ static struct _LogicalCpuInfo
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
-static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
+static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0) throw()
 {
     int info [4];
     __cpuid (info, 1);
@@ -117,7 +117,7 @@ static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
     return info[3];
 }
 
-const String SystemStats::getCpuVendor()
+const String SystemStats::getCpuVendor() throw()
 {
     int info [4];
     __cpuid (info, 0);
@@ -223,7 +223,7 @@ const String SystemStats::getCpuVendor()
 }
 #endif
 
-static void initLogicalCpuInfo()
+static void initLogicalCpuInfo() throw()
 {
     int familyModelWord, extFeaturesWord;
     int featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
@@ -305,35 +305,35 @@ static void initLogicalCpuInfo()
 }
 
 //==============================================================================
-void juce_initialiseThreadEvents();
-void juce_initialiseUnicodeFileFunctions();
+void juce_initialiseThreadEvents() throw();
+void juce_initialiseUnicodeFileFunctions() throw();
 
 static struct JuceCpuProps
 {
     bool hasMMX : 1, hasSSE : 1, hasSSE2 : 1, has3DNow : 1;
 } juce_CpuProps;
 
-bool SystemStats::hasMMX()
+bool SystemStats::hasMMX() throw()
 {
     return juce_CpuProps.hasMMX;
 }
 
-bool SystemStats::hasSSE()
+bool SystemStats::hasSSE() throw()
 {
     return juce_CpuProps.hasSSE;
 }
 
-bool SystemStats::hasSSE2()
+bool SystemStats::hasSSE2() throw()
 {
     return juce_CpuProps.hasSSE2;
 }
 
-bool SystemStats::has3DNow()
+bool SystemStats::has3DNow() throw()
 {
     return juce_CpuProps.has3DNow;
 }
 
-void SystemStats::initialiseStats()
+void SystemStats::initialiseStats() throw()
 {
     juce_initialiseUnicodeFileFunctions();
     juce_initialiseThreadEvents();
@@ -370,7 +370,7 @@ void SystemStats::initialiseStats()
 }
 
 //==============================================================================
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
 {
     OSVERSIONINFO info;
     info.dwOSVersionInfoSize = sizeof (info);
@@ -380,12 +380,6 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     {
         switch (info.dwMajorVersion)
         {
-        case 3:
-            return WinNT351;
-
-        case 4:
-            return WinNT40;
-
         case 5:
             return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
 
@@ -393,52 +387,44 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
             return WinVista;
 
         default:
+            jassertfalse // !! not a supported OS!
             break;
         }
     }
     else if (info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
     {
-        return (info.dwMinorVersion == 0) ? Win95 : Win98;
+        jassert (info.dwMinorVersion != 0); // !! still running on Windows 95??
+
+        return Win98;
     }
 
     return UnknownOS;
 }
 
-const String SystemStats::getOperatingSystemName()
+const String SystemStats::getOperatingSystemName() throw()
 {
-    const tchar* name = T("Unknown OS");
+    const char* name = "Unknown OS";
 
     switch (getOperatingSystemType())
     {
+    case WinVista:
+        name = "Windows Vista";
+        break;
+
     case WinXP:
-        name = T("Windows XP");
+        name = "Windows XP";
         break;
 
     case Win2000:
-        name = T("Windows 2000");
+        name = "Windows 2000";
         break;
 
     case Win98:
-        name = T("Windows 98");
-        break;
-
-    case Win95:
-        name = T("Windows 95");
-        break;
-
-    case WinNT351:
-        name = T("Windows NT 3.51");
-        break;
-
-    case WinNT40:
-        name = T("Windows NT4");
-        break;
-
-    case WinVista:
-        name = T("Windows Vista");
+        name = "Windows 98";
         break;
 
     default:
+        jassertfalse // !! new type of OS?
         break;
     }
 
@@ -446,19 +432,19 @@ const String SystemStats::getOperatingSystemName()
 }
 
 //==============================================================================
-int SystemStats::getMemorySizeInMegabytes()
+int SystemStats::getMemorySizeInMegabytes() throw()
 {
     MEMORYSTATUS mem;
     GlobalMemoryStatus (&mem);
     return (int) (mem.dwTotalPhys / (1024 * 1024)) + 1;
 }
 
-bool SystemStats::hasHyperThreading()
+bool SystemStats::hasHyperThreading() throw()
 {
     return logicalCpuInfo.htAvailable;
 }
 
-int SystemStats::getNumPhysicalCpus()
+int SystemStats::getNumPhysicalCpus() throw()
 {
     if (logicalCpuInfo.numPackages)
         return logicalCpuInfo.numPackages;
@@ -466,12 +452,12 @@ int SystemStats::getNumPhysicalCpus()
     return getNumLogicalCpus();
 }
 
-int SystemStats::getNumLogicalCpus()
+int SystemStats::getNumLogicalCpus() throw()
 {
     return systemInfo.dwNumberOfProcessors;
 }
 
-uint32 SystemStats::getPhysicalAffinityMask()
+uint32 SystemStats::getPhysicalAffinityMask() throw()
 {
     return logicalCpuInfo.physicalAffinityMask;
 }
@@ -511,7 +497,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
     return hiResTicksPerSecond;
 }
 
-int64 SystemStats::getClockCycleCounter()
+int64 SystemStats::getClockCycleCounter() throw()
 {
 #if JUCE_USE_INTRINSICS
     // MS intrinsics version...
@@ -550,7 +536,7 @@ int64 SystemStats::getClockCycleCounter()
 #endif
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegaherz() throw()
 {
     const int64 cycles = SystemStats::getClockCycleCounter();
     const uint32 millis = Time::getMillisecondCounter();
@@ -578,7 +564,7 @@ int SystemStats::getCpuSpeedInMegaherz()
 
 
 //==============================================================================
-bool Time::setSystemTimeToThisTime() const
+bool Time::setSystemTimeToThisTime() const throw()
 {
     SYSTEMTIME st;
 
@@ -597,7 +583,7 @@ bool Time::setSystemTimeToThisTime() const
             && SetLocalTime (&st) != 0;
 }
 
-int SystemStats::getPageSize()
+int SystemStats::getPageSize() throw()
 {
     return systemInfo.dwPageSize;
 }

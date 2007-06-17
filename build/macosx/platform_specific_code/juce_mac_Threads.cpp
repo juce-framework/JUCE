@@ -156,13 +156,13 @@ void WaitableEvent::reset() const throw()
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-void* threadEntryProc (void* userData)
+void* threadEntryProc (void* userData) throw()
 {
     juce_threadEntryPoint (userData);
     return 0;
 }
 
-void* juce_createThread (void* userData)
+void* juce_createThread (void* userData) throw()
 {
     pthread_t handle = 0;
 
@@ -175,22 +175,22 @@ void* juce_createThread (void* userData)
     return 0;
 }
 
-void juce_killThread (void* handle)
+void juce_killThread (void* handle) throw()
 {
     if (handle != 0)
         pthread_cancel ((pthread_t) handle);
 }
 
-void juce_setCurrentThreadName (const String& /*name*/)
+void juce_setCurrentThreadName (const String& /*name*/) throw()
 {
 }
 
-int Thread::getCurrentThreadId()
+int Thread::getCurrentThreadId() throw()
 {
     return (int) pthread_self();
 }
 
-void juce_setThreadPriority (void* handle, int priority)
+void juce_setThreadPriority (void* handle, int priority) throw()
 {
     if (handle == 0)
         handle = (void*) pthread_self();
@@ -202,7 +202,7 @@ void juce_setThreadPriority (void* handle, int priority)
     pthread_setschedparam ((pthread_t) handle, policy, &param);
 }
 
-void Thread::yield()
+void Thread::yield() throw()
 {
     sched_yield();
 }
@@ -213,7 +213,7 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
     jassertfalse
 }
 
-void Thread::sleep (int millisecs)
+void Thread::sleep (int millisecs) throw()
 {
     struct timespec time;
     time.tv_sec = millisecs / 1000;

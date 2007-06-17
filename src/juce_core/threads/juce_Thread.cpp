@@ -40,10 +40,10 @@ BEGIN_JUCE_NAMESPACE
 #include "../containers/juce_VoidArray.h"
 
 // these functions are implemented in the platform-specific code.
-void* juce_createThread (void* userData);
-void juce_killThread (void* handle);
-void juce_setThreadPriority (void* handle, int priority);
-void juce_setCurrentThreadName (const String& name);
+void* juce_createThread (void* userData) throw();
+void juce_killThread (void* handle) throw();
+void juce_setThreadPriority (void* handle, int priority) throw();
+void juce_setCurrentThreadName (const String& name) throw();
 
 //==============================================================================
 static VoidArray runningThreads (4);
@@ -220,12 +220,12 @@ int Thread::getThreadId() const throw()
 }
 
 //==============================================================================
-bool Thread::wait (const int timeOutMilliseconds) const
+bool Thread::wait (const int timeOutMilliseconds) const throw()
 {
     return defaultEvent_.wait (timeOutMilliseconds);
 }
 
-void Thread::notify() const
+void Thread::notify() const throw()
 {
     defaultEvent_.signal();
 }

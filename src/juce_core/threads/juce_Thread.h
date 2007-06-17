@@ -192,10 +192,10 @@ public:
 
     //==============================================================================
     // this can be called from any thread that needs to pause..
-    static void sleep (int milliseconds);
+    static void sleep (int milliseconds) throw();
 
     /** Yields the calling thread's current time-slot. */
-    static void yield();
+    static void yield() throw();
 
     //==============================================================================
     /** Makes the thread wait for a notification.
@@ -205,7 +205,7 @@ public:
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */
-    bool wait (const int timeOutMilliseconds) const;
+    bool wait (const int timeOutMilliseconds) const throw();
 
     /** Wakes up the thread.
 
@@ -213,7 +213,7 @@ public:
 
         @see wait
     */
-    void notify() const;
+    void notify() const throw();
 
     //==============================================================================
     /** Returns an id that identifies the caller thread.
@@ -223,7 +223,7 @@ public:
         @returns    a unique identifier that identifies the calling thread.
         @see getThreadId
     */
-    static int getCurrentThreadId();
+    static int getCurrentThreadId() throw();
 
     /** Returns the ID of this thread.
 

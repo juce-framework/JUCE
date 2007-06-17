@@ -76,7 +76,7 @@ public:
     /** Returns true if this application process is the one that the user is
         currently using.
     */
-    static bool isForegroundProcess();
+    static bool isForegroundProcess() throw();
 
     //==============================================================================
     /** Raises the current process's privilege level.

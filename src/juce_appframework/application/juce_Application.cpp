@@ -52,8 +52,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../juce_core/threads/juce_Process.h"
 #include "../../juce_core/threads/juce_InterProcessLock.h"
 
-void juce_setCurrentExecutableFileName (const String& filename);
-void juce_setCurrentThreadName (const String& name);
+void juce_setCurrentExecutableFileName (const String& filename) throw();
+void juce_setCurrentThreadName (const String& name) throw();
 
 static JUCEApplication* appInstance = 0;
 
@@ -302,7 +302,7 @@ int JUCEApplication::main (int argc, char* argv[],
 static bool juceInitialisedGUI = false;
 
 
-void JUCE_API initialiseJuce_GUI()
+void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
 {
     if (! juceInitialisedGUI)
     {
@@ -335,7 +335,7 @@ void JUCE_API initialiseJuce_GUI()
     }
 }
 
-void JUCE_API shutdownJuce_GUI()
+void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
 {
     if (juceInitialisedGUI)
     {

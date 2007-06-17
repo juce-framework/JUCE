@@ -2185,7 +2185,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 
 
 //==============================================================================
-bool Process::isForegroundProcess()
+bool Process::isForegroundProcess() throw()
 {
     ProcessSerialNumber psn, front;
     GetCurrentProcess (&psn);
@@ -2298,7 +2298,7 @@ struct CursorWrapper
     ThemeCursor themeCursor;
 };
 
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
     const int maxW = 16;
     const int maxH = 16;
@@ -2360,7 +2360,7 @@ static void* cursorFromData (const unsigned char* data, const int size, int hx, 
 
 const unsigned int kSpecialNoCursor = 'nocr';
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
 {
     ThemeCursor id = kThemeArrowCursor;
 
@@ -2481,15 +2481,13 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
     return (void*) cw;
 }
 
-void juce_deleteMouseCursor (void* cursorHandle, bool isStandard)
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()
 {
-    CursorWrapper* cw = (CursorWrapper*)cursorHandle;
+    CursorWrapper* const cw = (CursorWrapper*) cursorHandle;
 
     if (cw != 0)
     {
-        if (cw->cursor != 0)
-            delete cw->cursor;
-
+        delete cw->cursor;
         delete cw;
     }
 }

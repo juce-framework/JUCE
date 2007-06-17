@@ -70,10 +70,10 @@ public:
 
         Obviously you shouldn't delete the image before this context is deleted.
     */
-    Graphics (Image& imageToDrawOnto);
+    JUCE_CALLTYPE Graphics (Image& imageToDrawOnto) throw();
 
     /** Destructor. */
-    ~Graphics() throw();
+    JUCE_CALLTYPE ~Graphics() throw();
 
     //==============================================================================
     /** Changes the current drawing colour.
@@ -86,7 +86,7 @@ public:
 
         @see setOpacity, setBrush, getColour
     */
-    void setColour (const Colour& newColour) throw();
+    void JUCE_CALLTYPE setColour (const Colour& newColour) throw();
 
     /** Returns the colour that's currently being used.
 
@@ -95,7 +95,7 @@ public:
 
         @see setColour
     */
-    const Colour& getCurrentColour() const throw();
+    const Colour& JUCE_CALLTYPE getCurrentColour() const throw();
 
     /** Changes the opacity to use with the current colour.
 
@@ -104,7 +104,7 @@ public:
 
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
-    void setOpacity (const float newOpacity) throw();
+    void JUCE_CALLTYPE setOpacity (const float newOpacity) throw();
 
     /** Changes the current brush to use for drawing.
 
@@ -116,7 +116,7 @@ public:
 
         @see SolidColourBrush, GradientBrush, ImageBrush, Brush
     */
-    void setBrush (const Brush* const newBrush);
+    void JUCE_CALLTYPE setBrush (const Brush* const newBrush) throw();
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
@@ -126,7 +126,7 @@ public:
 
         @see drawSingleLineText, drawMultiLineText, drawTextAsPath, drawText, drawFittedText
     */
-    void setFont (const Font& newFont) throw();
+    void JUCE_CALLTYPE setFont (const Font& newFont) throw();
 
     /** Changes the size and style of the currently-selected font.
 
@@ -135,14 +135,14 @@ public:
 
         @see Font
     */
-    void setFont (const float newFontHeight,
-                  const int fontStyleFlags = Font::plain) throw();
+    void JUCE_CALLTYPE setFont (const float newFontHeight,
+                                const int fontStyleFlags = Font::plain) throw();
 
     /** Returns the font that's currently being used for text operations.
 
         @see setFont
     */
-    const Font& getCurrentFont() const;
+    const Font& JUCE_CALLTYPE getCurrentFont() const throw();
 
     /** Draws a one-line text string.
 
@@ -154,9 +154,9 @@ public:
         @param baselineY    the position of the text's baseline
         @see drawMultiLineText, drawText, drawFittedText, GlyphArrangement::addLineOfText
     */
-    void drawSingleLineText (const String& text,
-                             const int startX,
-                             const int baselineY) const;
+    void JUCE_CALLTYPE drawSingleLineText (const String& text,
+                                           const int startX,
+                                           const int baselineY) const throw();
 
     /** Draws text across multiple lines.
 
@@ -166,10 +166,10 @@ public:
 
         @see setFont, drawSingleLineText, drawFittedText, GlyphArrangement::addJustifiedText
     */
-    void drawMultiLineText (const String& text,
-                            const int startX,
-                            const int baselineY,
-                            const int maximumLineWidth) const;
+    void JUCE_CALLTYPE drawMultiLineText (const String& text,
+                                          const int startX,
+                                          const int baselineY,
+                                          const int maximumLineWidth) const throw();
 
     /** Renders a string of text as a vector path.
 
@@ -179,8 +179,8 @@ public:
 
         @see setFont
     */
-    void drawTextAsPath (const String& text,
-                         const AffineTransform& transform) const;
+    void JUCE_CALLTYPE drawTextAsPath (const String& text,
+                                       const AffineTransform& transform) const throw();
 
     /** Draws a line of text within a specified rectangle.
 
@@ -191,13 +191,13 @@ public:
 
         @see drawSingleLineText, drawFittedText, drawMultiLineText, GlyphArrangement::addJustifiedText
     */
-    void drawText (const String& text,
-                   const int x,
-                   const int y,
-                   const int width,
-                   const int height,
-                   const Justification& justificationType,
-                   const bool useEllipsesIfTooBig) const;
+    void JUCE_CALLTYPE drawText (const String& text,
+                                 const int x,
+                                 const int y,
+                                 const int width,
+                                 const int height,
+                                 const Justification& justificationType,
+                                 const bool useEllipsesIfTooBig) const throw();
 
     /** Tries to draw a text string inside a given space.
 
@@ -218,14 +218,14 @@ public:
 
         @see GlyphArrangement::addFittedText
     */
-    void drawFittedText (const String& text,
-                         const int x,
-                         const int y,
-                         const int width,
-                         const int height,
-                         const Justification& justificationFlags,
-                         const int maximumNumberOfLines,
-                         const float minimumHorizontalScale = 0.7f) const;
+    void JUCE_CALLTYPE drawFittedText (const String& text,
+                                       const int x,
+                                       const int y,
+                                       const int width,
+                                       const int height,
+                                       const Justification& justificationFlags,
+                                       const int maximumNumberOfLines,
+                                       const float minimumHorizontalScale = 0.7f) const throw();
 
     //==============================================================================
     /** Fills the context's entire clip region with the current colour or brush.
@@ -233,56 +233,56 @@ public:
         (See also the fillAll (const Colour&) method which is a quick way of filling
         it with a given colour).
     */
-    void fillAll() const;
+    void JUCE_CALLTYPE fillAll() const throw();
 
     /** Fills the context's entire clip region with a given colour.
 
         This leaves the context's current colour and brush unchanged, it just
         uses the specified colour temporarily.
     */
-    void fillAll (const Colour& colourToUse) const;
+    void JUCE_CALLTYPE fillAll (const Colour& colourToUse) const throw();
 
     //==============================================================================
     /** Fills a rectangle with the current colour or brush.
 
         @see drawRect, fillRoundedRectangle
     */
-    void fillRect (int x,
-                   int y,
-                   int width,
-                   int height) const;
+    void JUCE_CALLTYPE fillRect (int x,
+                                 int y,
+                                 int width,
+                                 int height) const throw();
 
     /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle& rectangle) const;
+    void JUCE_CALLTYPE fillRect (const Rectangle& rectangle) const throw();
 
     /** Fills a rectangle with the current colour or brush.
 
         This uses sub-pixel positioning so is slower than the fillRect method which
         takes integer co-ordinates.
     */
-    void fillRect (const float x,
-                   const float y,
-                   const float width,
-                   const float height) const;
+    void JUCE_CALLTYPE fillRect (const float x,
+                                 const float y,
+                                 const float width,
+                                 const float height) const throw();
 
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
 
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
-    void fillRoundedRectangle (const float x,
-                               const float y,
-                               const float width,
-                               const float height,
-                               const float cornerSize) const;
+    void JUCE_CALLTYPE fillRoundedRectangle (const float x,
+                                             const float y,
+                                             const float width,
+                                             const float height,
+                                             const float cornerSize) const throw();
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
     */
-    void fillCheckerBoard (int x, int y,
-                           int width, int height,
-                           const int checkWidth,
-                           const int checkHeight,
-                           const Colour& colour1,
-                           const Colour& colour2) const;
+    void JUCE_CALLTYPE fillCheckerBoard (int x, int y,
+                                         int width, int height,
+                                         const int checkWidth,
+                                         const int checkHeight,
+                                         const Colour& colour1,
+                                         const Colour& colour2) const throw();
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -291,22 +291,22 @@ public:
 
         @see fillRect
     */
-    void drawRect (const int x,
-                   const int y,
-                   const int width,
-                   const int height,
-                   const int lineThickness = 1) const;
+    void JUCE_CALLTYPE drawRect (const int x,
+                                 const int y,
+                                 const int width,
+                                 const int height,
+                                 const int lineThickness = 1) const throw();
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
 
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
-    void drawRoundedRectangle (const float x,
-                               const float y,
-                               const float width,
-                               const float height,
-                               const float cornerSize,
-                               const float lineThickness) const;
+    void JUCE_CALLTYPE drawRoundedRectangle (const float x,
+                                             const float y,
+                                             const float width,
+                                             const float height,
+                                             const float cornerSize,
+                                             const float lineThickness) const throw();
 
     /** Draws a 3D raised (or indented) bevel using two colours.
 
@@ -317,18 +317,18 @@ public:
         bevel; the bottom-right colour is used for the bottom- and right-hand
         edges.
     */
-    void drawBevel (const int x,
-                    const int y,
-                    const int width,
-                    const int height,
-                    const int bevelThickness,
-                    const Colour& topLeftColour = Colours::white,
-                    const Colour& bottomRightColour = Colours::black,
-                    const bool useGradient = true) const;
-
+    void JUCE_CALLTYPE drawBevel (const int x,
+                                  const int y,
+                                  const int width,
+                                  const int height,
+                                  const int bevelThickness,
+                                  const Colour& topLeftColour = Colours::white,
+                                  const Colour& bottomRightColour = Colours::black,
+                                  const bool useGradient = true) const throw();
+ 
     /** Draws a pixel using the current colour or brush.
     */
-    void setPixel (int x, int y) const;
+    void JUCE_CALLTYPE setPixel (int x, int y) const throw();
 
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
@@ -337,53 +337,53 @@ public:
 
         @see drawEllipse, Path::addEllipse
     */
-    void fillEllipse (const float x,
-                      const float y,
-                      const float width,
-                      const float height) const;
+    void JUCE_CALLTYPE fillEllipse (const float x,
+                                    const float y,
+                                    const float width,
+                                    const float height) const throw();
 
     /** Draws an elliptical stroke using the current colour or brush.
 
         @see fillEllipse, Path::addEllipse
     */
-    void drawEllipse (const float x,
-                      const float y,
-                      const float width,
-                      const float height,
-                      const float lineThickness) const;
+    void JUCE_CALLTYPE drawEllipse (const float x,
+                                    const float y,
+                                    const float width,
+                                    const float height,
+                                    const float lineThickness) const throw();
 
     //==============================================================================
     /** Draws a line between two points.
 
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
-    void drawLine (float startX,
-                   float startY,
-                   float endX,
-                   float endY) const;
+    void JUCE_CALLTYPE drawLine (float startX,
+                                 float startY,
+                                 float endX,
+                                 float endY) const throw();
 
     /** Draws a line between two points with a given thickness.
 
         @see Path::addLineSegment
     */
-    void drawLine (const float startX,
-                   const float startY,
-                   const float endX,
-                   const float endY,
-                   const float lineThickness) const;
+    void JUCE_CALLTYPE drawLine (const float startX,
+                                 const float startY,
+                                 const float endX,
+                                 const float endY,
+                                 const float lineThickness) const throw();
 
     /** Draws a line between two points.
 
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
-    void drawLine (const Line& line) const;
+    void JUCE_CALLTYPE drawLine (const Line& line) const throw();
 
     /** Draws a line between two points with a given thickness.
 
         @see Path::addLineSegment
     */
-    void drawLine (const Line& line,
-                   const float lineThickness) const;
+    void JUCE_CALLTYPE drawLine (const Line& line,
+                                 const float lineThickness) const throw();
 
     /** Draws a dashed line using a custom set of dash-lengths.
 
@@ -398,39 +398,39 @@ public:
         @param lineThickness    the thickness of the line to draw
         @see PathStrokeType::createDashedStroke
     */
-    void drawDashedLine (const float startX,
-                         const float startY,
-                         const float endX,
-                         const float endY,
-                         const float* const dashLengths,
-                         const int numDashLengths,
-                         const float lineThickness = 1.0f) const;
+    void JUCE_CALLTYPE drawDashedLine (const float startX,
+                                       const float startY,
+                                       const float endX,
+                                       const float endY,
+                                       const float* const dashLengths,
+                                       const int numDashLengths,
+                                       const float lineThickness = 1.0f) const throw();
 
     /** Draws a vertical line of pixels at a given x position.
 
         The x position is an integer, but the top and bottom of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
     */
-    void drawVerticalLine (const int x, float top, float bottom) const;
+    void JUCE_CALLTYPE drawVerticalLine (const int x, float top, float bottom) const throw();
 
     /** Draws a horizontal line of pixels at a given y position.
 
         The y position is an integer, but the left and right ends of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
     */
-    void drawHorizontalLine (const int y, float left, float right) const;
+    void JUCE_CALLTYPE drawHorizontalLine (const int y, float left, float right) const throw();
 
     //==============================================================================
     /** Fills a path using the currently selected colour or brush.
     */
-    void fillPath (const Path& path,
-                   const AffineTransform& transform = AffineTransform::identity) const;
+    void JUCE_CALLTYPE fillPath (const Path& path,
+                                 const AffineTransform& transform = AffineTransform::identity) const throw();
 
     /** Draws a path's outline using the currently selected colour or brush.
     */
-    void strokePath (const Path& path,
-                     const PathStrokeType& strokeType,
-                     const AffineTransform& transform = AffineTransform::identity) const;
+    void JUCE_CALLTYPE strokePath (const Path& path,
+                                   const PathStrokeType& strokeType,
+                                   const AffineTransform& transform = AffineTransform::identity) const throw();
 
     /** Draws a line with an arrowhead.
 
@@ -442,13 +442,13 @@ public:
         @param arrowheadWidth   the width of the arrow head (perpendicular to the line)
         @param arrowheadLength  the length of the arrow head (along the length of the line)
     */
-    void drawArrow (const float startX,
-                    const float startY,
-                    const float endX,
-                    const float endY,
-                    const float lineThickness,
-                    const float arrowheadWidth,
-                    const float arrowheadLength) const;
+    void JUCE_CALLTYPE drawArrow (const float startX,
+                                  const float startY,
+                                  const float endX,
+                                  const float endY,
+                                  const float lineThickness,
+                                  const float arrowheadWidth,
+                                  const float arrowheadLength) const throw();
 
 
     //==============================================================================
@@ -469,7 +469,7 @@ public:
 
         @see Graphics::drawImage, Graphics::drawImageTransformed, Graphics::drawImageWithin
     */
-    void setImageResamplingQuality (const ResamplingQuality newQuality);
+    void JUCE_CALLTYPE setImageResamplingQuality (const ResamplingQuality newQuality) throw();
 
     /** Draws an image.
 
@@ -482,10 +482,10 @@ public:
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
         (or setColour() with an opaque colour) before drawing images.
     */
-    void drawImageAt (const Image* const imageToDraw,
-                      const int topLeftX,
-                      const int topLeftY,
-                      const bool fillAlphaChannelWithCurrentBrush = false) const;
+    void JUCE_CALLTYPE drawImageAt (const Image* const imageToDraw,
+                                    const int topLeftX,
+                                    const int topLeftY,
+                                    const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
     /** Draws part of an image, rescaling it to fit in a given target region.
 
@@ -512,16 +512,16 @@ public:
                                                     it will just fill the target with a solid rectangle)
         @see setImageResamplingQuality, drawImageAt, drawImageWithin, fillAlphaMap
     */
-    void drawImage (const Image* const imageToDraw,
-                    int destX,
-                    int destY,
-                    int destWidth,
-                    int destHeight,
-                    int sourceX,
-                    int sourceY,
-                    int sourceWidth,
-                    int sourceHeight,
-                    const bool fillAlphaChannelWithCurrentBrush = false) const;
+    void JUCE_CALLTYPE drawImage (const Image* const imageToDraw,
+                                  int destX,
+                                  int destY,
+                                  int destWidth,
+                                  int destHeight,
+                                  int sourceX,
+                                  int sourceY,
+                                  int sourceWidth,
+                                  int sourceHeight,
+                                  const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
     /** Draws part of an image, having applied an affine transform to it.
 
@@ -540,13 +540,13 @@ public:
 
         @see setImageResamplingQuality, drawImage
     */
-    void drawImageTransformed (const Image* const imageToDraw,
-                               int sourceClipX,
-                               int sourceClipY,
-                               int sourceClipWidth,
-                               int sourceClipHeight,
-                               const AffineTransform& transform,
-                               const bool fillAlphaChannelWithCurrentBrush) const;
+    void JUCE_CALLTYPE drawImageTransformed (const Image* const imageToDraw,
+                                             int sourceClipX,
+                                             int sourceClipY,
+                                             int sourceClipWidth,
+                                             int sourceClipHeight,
+                                             const AffineTransform& transform,
+                                             const bool fillAlphaChannelWithCurrentBrush) const throw();
 
     /** Draws an image to fit within a designated rectangle.
 
@@ -569,13 +569,13 @@ public:
                                                     similar to fillAlphaMap(), and see also drawImage()
         @see setImageResamplingQuality, drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
     */
-    void drawImageWithin (const Image* const imageToDraw,
-                          const int destX,
-                          const int destY,
-                          const int destWidth,
-                          const int destHeight,
-                          const RectanglePlacement& placementWithinTarget,
-                          const bool fillAlphaChannelWithCurrentBrush) const;
+    void JUCE_CALLTYPE drawImageWithin (const Image* const imageToDraw,
+                                        const int destX,
+                                        const int destY,
+                                        const int destWidth,
+                                        const int destHeight,
+                                        const RectanglePlacement& placementWithinTarget,
+                                        const bool fillAlphaChannelWithCurrentBrush) const throw();
 
 
     //==============================================================================
@@ -583,7 +583,7 @@ public:
 
         @see getClipRegion, clipRegionIntersects
     */
-    const Rectangle getClipBounds() const;
+    const Rectangle JUCE_CALLTYPE getClipBounds() const throw();
 
     /** Checks whether a rectangle overlaps the context's clipping region.
 
@@ -591,39 +591,39 @@ public:
         method can be used to optimise a component's paint() method, by letting it
         avoid drawing complex objects that aren't within the region being repainted.
     */
-    bool clipRegionIntersects (const int x, const int y, const int width, const int height) const throw();
+    bool JUCE_CALLTYPE clipRegionIntersects (const int x, const int y, const int width, const int height) const throw();
 
     /** Intersects the current clipping region with another region.
 
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
     */
-    bool reduceClipRegion (const int x, const int y,
-                           const int width, const int height);
+    bool JUCE_CALLTYPE reduceClipRegion (const int x, const int y,
+                                         const int width, const int height) throw();
 
     /** Intersects the current clipping region with a rectangle list region.
 
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
     */
-    bool reduceClipRegion (const RectangleList& clipRegion);
+    bool JUCE_CALLTYPE reduceClipRegion (const RectangleList& clipRegion) throw();
 
     /** Excludes a rectangle to stop it being drawn into. */
-    void excludeClipRegion (const int x, const int y,
-                            const int width, const int height);
+    void JUCE_CALLTYPE excludeClipRegion (const int x, const int y,
+                                          const int width, const int height) throw();
 
     /** Returns true if no drawing can be done because the clip region is zero. */
-    bool isClipEmpty() const;
+    bool JUCE_CALLTYPE isClipEmpty() const throw();
 
     /** Saves the current graphics state on an internal stack.
 
         To restore the state, use restoreState().
     */
-    void saveState();
+    void JUCE_CALLTYPE saveState() throw();
 
     /** Restores a graphics state that was previously saved with saveState().
     */
-    void restoreState();
+    void JUCE_CALLTYPE restoreState() throw();
 
     /** Moves the position of the context's origin.
 
@@ -635,14 +635,14 @@ public:
 
         @see reduceClipRegion
     */
-    void setOrigin (const int newOriginX,
-                    const int newOriginY);
+    void JUCE_CALLTYPE setOrigin (const int newOriginX,
+                                  const int newOriginY) throw();
 
     /** Resets the current colour, brush, and font to default settings. */
-    void resetToDefaultState();
+    void JUCE_CALLTYPE resetToDefaultState() throw();
 
     /** Returns true if this context is drawing to a vector-based device, such as a printer. */
-    bool isVectorDevice() const;
+    bool JUCE_CALLTYPE isVectorDevice() const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -653,10 +653,10 @@ public:
 
         NB. The context will NOT be deleted by this object when it is deleted.
     */
-    Graphics (LowLevelGraphicsContext* const internalContext);
+    JUCE_CALLTYPE Graphics (LowLevelGraphicsContext* const internalContext) throw();
 
     /** @internal */
-    LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
+    LowLevelGraphicsContext* JUCE_CALLTYPE getInternalContext() const throw()     { return context; }
 
 private:
     //==============================================================================
@@ -665,9 +665,9 @@ private:
 
     struct GraphicsState
     {
-        GraphicsState();
-        GraphicsState (const GraphicsState&);
-        ~GraphicsState();
+        JUCE_CALLTYPE GraphicsState() throw();
+        JUCE_CALLTYPE GraphicsState (const GraphicsState&) throw();
+        JUCE_CALLTYPE ~GraphicsState() throw();
 
         Colour colour;
         Brush* brush;
@@ -679,7 +679,7 @@ private:
     OwnedArray <GraphicsState> stateStack;
     bool saveStatePending;
 
-    void saveStateIfPending();
+    void JUCE_CALLTYPE saveStateIfPending() throw();
 
     const Graphics& operator= (const Graphics& other);
     Graphics (const Graphics&);

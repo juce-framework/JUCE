@@ -121,7 +121,7 @@
 
 /** This macro defines the C calling convention used as the standard for Juce calls. */
 #if JUCE_MSVC
-  #define JUCE_CALLTYPE             __cdecl
+  #define JUCE_CALLTYPE             __stdcall
 #else
   #define JUCE_CALLTYPE
 #endif

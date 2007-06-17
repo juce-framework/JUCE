@@ -151,7 +151,7 @@ static bool untrapErrors()
 //==============================================================================
 static bool isActiveApplication = false;
 
-bool Process::isForegroundProcess()
+bool Process::isForegroundProcess() throw()
 {
     return isActiveApplication;
 }
@@ -2541,7 +2541,7 @@ void Desktop::setMousePosition (int x, int y)
 }
 
 //==============================================================================
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
     Window root = RootWindow (display, DefaultScreen (display));
     const unsigned int imageW = image.getWidth();
@@ -2609,13 +2609,13 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     return result;
 }
 
-void juce_deleteMouseCursor (void* cursorHandle, bool)
+void juce_deleteMouseCursor (void* const cursorHandle, const bool) throw()
 {
     if (cursorHandle != None)
-        XFreeCursor (display, (Cursor)cursorHandle);
+        XFreeCursor (display, (Cursor) cursorHandle);
 }
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
 {
     unsigned int shape;
 

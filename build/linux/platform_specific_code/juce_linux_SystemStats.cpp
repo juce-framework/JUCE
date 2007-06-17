@@ -57,7 +57,7 @@ static struct _LogicalCpuInfo
 } logicalCpuInfo;
 
 //==============================================================================
-static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures)
+static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures) throw()
 {
     unsigned int cpu = 0;
     unsigned int ext = 0;
@@ -77,7 +77,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatur
     return cpu;
 }
 
-void juce_initLogicalCpuInfo()
+void juce_initLogicalCpuInfo() throw()
 {
     int familyModelWord, extFeaturesWord;
     int featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
@@ -182,13 +182,13 @@ void juce_initLogicalCpuInfo()
 }
 
 //==============================================================================
-void Logger::outputDebugString (const String& text)
+void Logger::outputDebugString (const String& text) throw()
 {
     fprintf (stdout, text.toUTF8());
     fprintf (stdout, "\n");
 }
 
-void Logger::outputDebugPrintf (const tchar* format, ...)
+void Logger::outputDebugPrintf (const tchar* format, ...) throw()
 {
     String text;
     va_list args;
@@ -197,17 +197,17 @@ void Logger::outputDebugPrintf (const tchar* format, ...)
     outputDebugString(text);
 }
 
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
 {
     return Linux;
 }
 
-const String SystemStats::getOperatingSystemName()
+const String SystemStats::getOperatingSystemName() throw()
 {
     return T("Linux");
 }
 
-static const String getCpuInfo (const char* key, bool lastOne = false)
+static const String getCpuInfo (const char* key, bool lastOne = false) throw()
 {
     String info;
     char buf [256];
@@ -243,44 +243,44 @@ static const String getCpuInfo (const char* key, bool lastOne = false)
     return info;
 }
 
-bool SystemStats::hasMMX()
+bool SystemStats::hasMMX() throw()
 {
     return getCpuInfo ("flags").contains (T("mmx"));
 }
 
-bool SystemStats::hasSSE()
+bool SystemStats::hasSSE() throw()
 {
     return getCpuInfo ("flags").contains (T("sse"));
 }
 
-bool SystemStats::hasSSE2()
+bool SystemStats::hasSSE2() throw()
 {
     return getCpuInfo ("flags").contains (T("sse2"));
 }
 
-bool SystemStats::has3DNow()
+bool SystemStats::has3DNow() throw()
 {
     return getCpuInfo ("flags").contains (T("3dnow"));
 }
 
-const String SystemStats::getCpuVendor()
+const String SystemStats::getCpuVendor() throw()
 {
     return getCpuInfo ("vendor_id");
 }
 
-int SystemStats::getCpuSpeedInMegaherz()
+int SystemStats::getCpuSpeedInMegaherz() throw()
 {
     const String speed (getCpuInfo ("cpu MHz"));
 
     return (int) (speed.getFloatValue() + 0.5f);
 }
 
-bool SystemStats::hasHyperThreading()
+bool SystemStats::hasHyperThreading() throw()
 {
     return logicalCpuInfo.htAvailable;
 }
 
-int SystemStats::getMemorySizeInMegabytes()
+int SystemStats::getMemorySizeInMegabytes() throw()
 {
     struct sysinfo sysi;
 
@@ -336,7 +336,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
     return 1000000;
 }
 
-bool Time::setSystemTimeToThisTime() const
+bool Time::setSystemTimeToThisTime() const throw()
 {
     timeval t;
     t.tv_sec = millisSinceEpoch % 1000000;
@@ -345,7 +345,7 @@ bool Time::setSystemTimeToThisTime() const
     return settimeofday (&t, NULL) ? false : true;
 }
 
-int SystemStats::getPageSize()
+int SystemStats::getPageSize() throw()
 {
     static int systemPageSize = 0;
 
@@ -355,7 +355,7 @@ int SystemStats::getPageSize()
     return systemPageSize;
 }
 
-int SystemStats::getNumPhysicalCpus()
+int SystemStats::getNumPhysicalCpus() throw()
 {
     if (logicalCpuInfo.numPackages)
         return logicalCpuInfo.numPackages;
@@ -363,14 +363,14 @@ int SystemStats::getNumPhysicalCpus()
     return getNumLogicalCpus();
 }
 
-int SystemStats::getNumLogicalCpus()
+int SystemStats::getNumLogicalCpus() throw()
 {
     const int lastCpu = getCpuInfo ("processor", true).getIntValue();
 
     return lastCpu + 1;
 }
 
-uint32 SystemStats::getPhysicalAffinityMask()
+uint32 SystemStats::getPhysicalAffinityMask() throw()
 {
 #if SUPPORT_AFFINITIES
     return logicalCpuInfo.physicalAffinityMask;
@@ -385,7 +385,7 @@ uint32 SystemStats::getPhysicalAffinityMask()
 }
 
 //==============================================================================
-void SystemStats::initialiseStats()
+void SystemStats::initialiseStats() throw()
 {
     // Process starts off as root when running suid
     Process::lowerPrivilege();

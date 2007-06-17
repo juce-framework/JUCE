@@ -37,10 +37,10 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Component.h"
 #include "../../../../juce_core/threads/juce_ScopedLock.h"
 
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type);
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw();
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw();
 // isStandard set depending on which interface was used to create the cursor
-void juce_deleteMouseCursor (void* cursorHandle, bool isStandard);
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw();
 
 
 //==============================================================================
@@ -51,7 +51,7 @@ static VoidArray standardCursors (2);
 class RefCountedMouseCursor
 {
 public:
-    RefCountedMouseCursor (MouseCursor::StandardCursorType t)
+    RefCountedMouseCursor (const MouseCursor::StandardCursorType t) throw()
         : refCount (1),
           standardType (t),
           isStandard (true)
@@ -62,7 +62,7 @@ public:
 
     RefCountedMouseCursor (Image& image,
                            const int hotSpotX,
-                           const int hotSpotY)
+                           const int hotSpotY) throw()
         : refCount (1),
           standardType (MouseCursor::NormalCursor),
           isStandard (false)
@@ -70,13 +70,13 @@ public:
         handle = juce_createMouseCursorFromImage (image, hotSpotX, hotSpotY);
     }
 
-    ~RefCountedMouseCursor()
+    ~RefCountedMouseCursor() throw()
     {
         juce_deleteMouseCursor (handle, isStandard);
         standardCursors.removeValue (this);
     }
 
-    void decRef()
+    void decRef() throw()
     {
         if (--refCount == 0)
             delete this;
@@ -92,7 +92,7 @@ public:
         return handle;
     }
 
-    static RefCountedMouseCursor* findInstance (MouseCursor::StandardCursorType type)
+    static RefCountedMouseCursor* findInstance (MouseCursor::StandardCursorType type) throw()
     {
         const ScopedLock sl (mouseCursorLock);
 
@@ -116,8 +116,10 @@ public:
 private:
     void* handle;
     int refCount;
-    MouseCursor::StandardCursorType standardType;
-    bool isStandard;
+    const MouseCursor::StandardCursorType standardType;
+    const bool isStandard;
+
+    const RefCountedMouseCursor& operator= (const RefCountedMouseCursor&);
 };
 
 
@@ -134,7 +136,7 @@ MouseCursor::MouseCursor (const StandardCursorType type) throw()
 
 MouseCursor::MouseCursor (Image& image,
                           const int hotSpotX,
-                          const int hotSpotY)
+                          const int hotSpotY) throw()
 {
     cursorHandle = new RefCountedMouseCursor (image, hotSpotX, hotSpotY);
 }
@@ -181,13 +183,13 @@ void* MouseCursor::getHandle() const throw()
     return cursorHandle->getHandle();
 }
 
-void MouseCursor::showWaitCursor()
+void MouseCursor::showWaitCursor() throw()
 {
     MouseCursor mc (MouseCursor::WaitCursor);
     mc.showInAllWindows();
 }
 
-void MouseCursor::hideWaitCursor()
+void MouseCursor::hideWaitCursor() throw()
 {
     if (Component::getComponentUnderMouse()->isValidComponent())
     {
