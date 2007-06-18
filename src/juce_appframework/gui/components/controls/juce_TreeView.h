@@ -394,10 +394,12 @@ public:
         you want the tree to contain a number of root items, you should still use a single
         root item above these, but hide it using setRootItemVisible().
 
-        The object passed in will not be deleted by the treeview, it's up to the caller
-        to delete it when no longer needed.
+        You can pass in 0 to this method to clear the tree and remove its current root item.
 
-        You can pass in 0 to this method to clear the tree.
+        The object passed in will not be deleted by the treeview, it's up to the caller
+        to delete it when no longer needed. BUT make absolutely sure that you don't delete 
+        this item until you've removed it from the tree, either by calling setRootItem (0), 
+        or by deleting the tree first.
     */
     void setRootItem (TreeViewItem* const newRootItem);
 

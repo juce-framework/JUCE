@@ -123,54 +123,122 @@ public:
 
 //==============================================================================
 class TreeViewDemo  : public Component,
-                      public DragAndDropContainer
+                      public DragAndDropContainer,
+                      public ButtonListener
 {
     XmlElement* treeXml;
 
     TreeViewItem* rootItem;
     TreeView* treeView;
 
+    FileTreeComponent* fileTreeComp;
+    DirectoryContentsList* directoryList;
+    TimeSliceThread thread;
+
+    TextButton* typeButton;
+
 public:
     //==============================================================================
     TreeViewDemo()
+        : treeView (0),
+          rootItem (0),
+          fileTreeComp (0),
+          directoryList (0),
+          thread ("Demo file tree thread")
     {
         setName (T("Tree Views"));
 
         const String treeXmlString (BinaryData::treedemo_xml);
-
         XmlDocument parser (treeXmlString);
-
         treeXml = parser.getDocumentElement();
 
         rootItem = new TreeViewDemoItem (treeXml);
         rootItem->setOpen (true);
 
-        addAndMakeVisible (treeView = new TreeView());
+        OwnedArray <File> roots;
+        File::findFileSystemRoots (roots);
+        directoryList = new DirectoryContentsList (0, thread);
+        directoryList->setDirectory (*roots[0], true, true);
+        thread.startThread (3);
 
-        treeView->setRootItem (rootItem);
+        addAndMakeVisible (typeButton = new TextButton (T("Type of treeview...")));
+        typeButton->addButtonListener (this);
+        typeButton->setAlwaysOnTop (true);
+        typeButton->setTriggeredOnMouseDown (true);
+
+        showCustomTreeView();
     }
 
     ~TreeViewDemo()
     {
         deleteAllChildren();
 
-        if (rootItem != 0)
-            delete rootItem;
-
-        if (treeXml != 0)
-            delete treeXml;
+        delete rootItem;
+        delete treeXml;
+        delete directoryList;
     }
 
     void paint (Graphics& g)
     {
         g.setColour (Colours::grey);
-        g.drawRect (treeView->getX(), treeView->getY(),
-                    treeView->getWidth(), treeView->getHeight());
+
+        if (treeView != 0)
+            g.drawRect (treeView->getX(), treeView->getY(),
+                        treeView->getWidth(), treeView->getHeight());
+
+        if (fileTreeComp != 0)
+            g.drawRect (fileTreeComp->getX(), fileTreeComp->getY(),
+                        fileTreeComp->getWidth(), fileTreeComp->getHeight());
     }
 
     void resized()
     {
-        treeView->setBoundsRelative (0.05f, 0.05f, 0.9f, 0.9f);
+        if (treeView != 0)
+            treeView->setBoundsRelative (0.05f, 0.07f, 0.9f, 0.9f);
+        else if (fileTreeComp != 0)
+            fileTreeComp->setBoundsRelative (0.05f, 0.07f, 0.9f, 0.9f);
+
+        typeButton->changeWidthToFitText (20);
+        typeButton->setTopLeftPosition (40, 10);
+    }
+
+    void showCustomTreeView()
+    {
+        deleteAndZero (treeView);
+        deleteAndZero (fileTreeComp);
+
+        addAndMakeVisible (treeView = new TreeView());
+        treeView->setRootItem (rootItem);
+
+        resized();
+    }
+
+    void showFileTreeComp()
+    {
+        deleteAndZero (treeView);
+        deleteAndZero (fileTreeComp);
+
+        addAndMakeVisible (fileTreeComp = new FileTreeComponent (*directoryList));
+
+        resized();
+    }
+
+    void buttonClicked (Button*)
+    {
+        PopupMenu m;
+        m.addItem (1, T("Custom treeview showing an XML tree"));
+        m.addItem (2, T("FileTreeComponent showing the file system"));
+
+        const int r = m.showAt (typeButton);
+
+        if (r == 1)
+        {
+            showCustomTreeView();
+        }
+        else if (r == 2)
+        {
+            showFileTreeComp();
+        }
     }
 
     juce_UseDebuggingNewOperator

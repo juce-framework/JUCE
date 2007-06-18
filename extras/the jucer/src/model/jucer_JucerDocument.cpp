@@ -508,7 +508,7 @@ void JucerDocument::fillInGeneratedCode (GeneratedCode& code) const
 
     // call these now, just to make sure they're the first two methods in the list.
     code.getCallbackCode (String::empty, T("void"), T("paint (Graphics& g)"), false)
-        << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]";
+        << "//[UserPrePaint] Add your own custom painting code here..\n//[/UserPrePaint]\n\n";
 
     code.getCallbackCode (String::empty, T("void"), T("resized()"), false);
 

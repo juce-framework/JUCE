@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/drawables/juce_DrawablePath.h"
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../../../../juce_core/basics/juce_SystemStats.h"
+#include "juce_FileListComponent.h"
 
 
 //==============================================================================
@@ -83,9 +84,13 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
 
     fileList = new DirectoryContentsList (fileFilter, thread);
 
-    addAndMakeVisible (fileListComponent = new FileListComponent (*fileList));
-    fileListComponent->addListener (this);
-    fileListComponent->setOutlineThickness (1);
+    // this component could alternatively be a FileTreeComponent
+    FileListComponent* const list = new FileListComponent (*fileList);
+    list->setOutlineThickness (1);
+
+    fileListComponent = list;
+    addAndMakeVisible (list);
+    list->addListener (this);
 
     addAndMakeVisible (currentPathBox = new ComboBox (T("path")));
     currentPathBox->setEditableText (true);
@@ -190,7 +195,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
 {
     if (currentRoot != newRootDirectory)
     {
-        fileListComponent->getVerticalScrollBar()->setCurrentRangeStart (0);
+        fileListComponent->scrollToTop();
 
         if (mode == chooseDirectoryMode)
             filenameBox->setText (String::empty, false);
@@ -279,9 +284,11 @@ void FileBrowserComponent::resized()
     goUpButton->setBounds (x + w - upButtonWidth, y, upButtonWidth, controlsHeight);
 
     y += controlsHeight + 4;
-    fileListComponent->setBounds (x, y, w, getHeight() - y - bottomSectionHeight);
 
-    y = fileListComponent->getBottom() + 4;
+    Component* const listAsComp = dynamic_cast <Component*> (fileListComponent);
+    listAsComp->setBounds (x, y, w, getHeight() - y - bottomSectionHeight);
+
+    y = listAsComp->getBottom() + 4;
     filenameBox->setBounds (x + 50, y, w - 50, controlsHeight);
 }
 
@@ -313,7 +320,7 @@ void FileBrowserComponent::selectionChanged()
     if ((mode == chooseDirectoryMode && selected.isDirectory())
          || selected.existsAsFile())
     {
-        filenameBox->setText (selected.getFileName(), false);
+        filenameBox->setText (selected.getRelativePathFrom (getRoot()), false);
     }
 
     sendListenerChangeMessage();

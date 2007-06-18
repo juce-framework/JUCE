@@ -32,7 +32,7 @@
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
-#include "juce_FileListComponent.h"
+#include "juce_DirectoryContentsDisplayComponent.h"
 #include "juce_FilePreviewComponent.h"
 #include "../../../../juce_core/io/files/juce_File.h"
 #include "../../../../juce_core/containers/juce_BitArray.h"
@@ -190,7 +190,7 @@ private:
     File currentRoot;
     SortedSet <void*> listeners;
 
-    FileListComponent* fileListComponent;
+    DirectoryContentsDisplayComponent* fileListComponent;
     FilePreviewComponent* previewComp;
     ComboBox* currentPathBox;
     TextEditor* filenameBox;

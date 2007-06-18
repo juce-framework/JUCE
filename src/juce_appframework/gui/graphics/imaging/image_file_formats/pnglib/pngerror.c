@@ -29,7 +29,7 @@ png_default_warning PNGARG((png_structp png_ptr,
  * to replace the error function at run-time.
  */
 void PNGAPI
-png_error(png_structp png_ptr, png_const_charp error_message)
+png_error_nostring(png_structp png_ptr, png_const_charp error_message)
 {
 #ifdef PNG_ERROR_NUMBERS_SUPPORTED
    char msg[16];
@@ -77,7 +77,7 @@ png_error(png_structp png_ptr, png_const_charp error_message)
  * png_set_error_fn() to replace the warning function at run-time.
  */
 void PNGAPI
-png_warning(png_structp png_ptr, png_const_charp warning_message)
+png_warning_nostring(png_structp png_ptr, png_const_charp warning_message)
 {
    int offset = 0;
 #ifdef PNG_ERROR_NUMBERS_SUPPORTED
@@ -143,7 +143,7 @@ png_format_buffer(png_structp png_ptr, png_charp buffer, png_const_charp
 }
 
 void PNGAPI
-png_chunk_error(png_structp png_ptr, png_const_charp error_message)
+png_chunk_error_nostring(png_structp png_ptr, png_const_charp error_message)
 {
    char msg[18+64];
    png_format_buffer(png_ptr, msg, error_message);
@@ -151,7 +151,7 @@ png_chunk_error(png_structp png_ptr, png_const_charp error_message)
 }
 
 void PNGAPI
-png_chunk_warning(png_structp png_ptr, png_const_charp warning_message)
+png_chunk_warning_nostring(png_structp png_ptr, png_const_charp warning_message)
 {
    char msg[18+64];
    png_format_buffer(png_ptr, msg, warning_message);

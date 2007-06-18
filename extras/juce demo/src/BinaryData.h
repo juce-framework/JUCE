@@ -30,7 +30,7 @@ namespace BinaryData
     const int           juce_pngSize = 15290;
 
     extern const char*  opengldemo_cpp;
-    const int           opengldemo_cppSize = 8538;
+    const int           opengldemo_cppSize = 8540;
 
     extern const char*  pathsandtransformsdemo_cpp;
     const int           pathsandtransformsdemo_cppSize = 14232;
@@ -51,7 +51,7 @@ namespace BinaryData
     const int           treedemo_xmlSize = 1126;
 
     extern const char*  treeviewdemo_cpp;
-    const int           treeviewdemo_cppSize = 5430;
+    const int           treeviewdemo_cppSize = 7486;
 
     extern const char*  widgetsdemo_cpp;
     const int           widgetsdemo_cppSize = 50519;

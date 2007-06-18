@@ -138,7 +138,7 @@ public:
         glLoadIdentity();
         glOrtho (0.0, getWidth(), 0.0, getHeight(), 0, 1);
 
-        glColor4f (1.0f, 1.0f, 1.0f, fabsf (sinf (rotation / 100.0f)));
+        glColor4f (1.0f, 1.0f, 1.0f, fabsf (::sinf (rotation / 100.0f)));
         glBegin(GL_QUADS);
             glTexCoord2i (0, 0); glVertex2f (50.0f, getHeight() - 50.0f);
             glTexCoord2i (1, 0); glVertex2f (getWidth() - 50.0f, getHeight() - 50.0f);

@@ -38,24 +38,24 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ChangeBroadcaster::ChangeBroadcaster() throw()
+JUCE_CALLTYPE ChangeBroadcaster::ChangeBroadcaster() throw()
 {
     // are you trying to create this object before or after juce has been intialised??
     jassert (MessageManager::instance != 0);
 }
 
-ChangeBroadcaster::~ChangeBroadcaster()
+JUCE_CALLTYPE ChangeBroadcaster::~ChangeBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
     jassert (MessageManager::instance != 0);
 }
 
-void ChangeBroadcaster::addChangeListener (ChangeListener* const listener) throw()
+void JUCE_CALLTYPE ChangeBroadcaster::addChangeListener (ChangeListener* const listener) throw()
 {
     changeListenerList.addChangeListener (listener);
 }
 
-void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener) throw()
+void JUCE_CALLTYPE ChangeBroadcaster::removeChangeListener (ChangeListener* const listener) throw()
 {
     jassert (changeListenerList.isValidMessageListener());
 
@@ -63,22 +63,22 @@ void ChangeBroadcaster::removeChangeListener (ChangeListener* const listener) th
         changeListenerList.removeChangeListener (listener);
 }
 
-void ChangeBroadcaster::removeAllChangeListeners() throw()
+void JUCE_CALLTYPE ChangeBroadcaster::removeAllChangeListeners() throw()
 {
     changeListenerList.removeAllChangeListeners();
 }
 
-void ChangeBroadcaster::sendChangeMessage (void* objectThatHasChanged) throw()
+void JUCE_CALLTYPE ChangeBroadcaster::sendChangeMessage (void* objectThatHasChanged) throw()
 {
     changeListenerList.sendChangeMessage (objectThatHasChanged);
 }
 
-void ChangeBroadcaster::sendSynchronousChangeMessage (void* objectThatHasChanged)
+void JUCE_CALLTYPE ChangeBroadcaster::sendSynchronousChangeMessage (void* objectThatHasChanged)
 {
     changeListenerList.sendSynchronousChangeMessage (objectThatHasChanged);
 }
 
-void ChangeBroadcaster::dispatchPendingMessages()
+void JUCE_CALLTYPE ChangeBroadcaster::dispatchPendingMessages()
 {
     changeListenerList.dispatchPendingMessages();
 }

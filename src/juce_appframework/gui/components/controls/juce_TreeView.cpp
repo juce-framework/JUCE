@@ -311,6 +311,9 @@ TreeView::TreeView (const String& componentName)
 
 TreeView::~TreeView()
 {
+    if (rootItem != 0)
+        rootItem->setOwnerView (0);
+
     deleteAllChildren();
 }
 
@@ -325,6 +328,9 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
             if (newRootItem->ownerView != 0)
                 newRootItem->ownerView->setRootItem (0);
         }
+
+        if (rootItem != 0)
+            rootItem->setOwnerView (0);
 
         rootItem = newRootItem;
 

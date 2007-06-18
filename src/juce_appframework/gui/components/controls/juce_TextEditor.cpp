@@ -160,7 +160,7 @@ public:
         }
     }
 
-    UniformTextSection* split (const int indexToBreakAt, 
+    UniformTextSection* split (const int indexToBreakAt,
                                const tchar passwordCharacter) throw()
     {
         UniformTextSection* const section2 = new UniformTextSection (String::empty,
@@ -271,7 +271,7 @@ private:
     VoidArray atoms;
 
     //==============================================================================
-    void initialiseAtoms (const String& textToParse, 
+    void initialiseAtoms (const String& textToParse,
                           const tchar passwordCharacter) throw()
     {
         int i = 0;

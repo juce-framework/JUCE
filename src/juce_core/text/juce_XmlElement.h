@@ -589,7 +589,16 @@ public:
 
     /** Returns the text for a text element.
 
-        @see isTextElement
+        Note that if you have an element like this:
+
+        @code<xyz>hello</xyz>@endcode
+
+        then calling getText on the "xyz" element won't return "hello", because that is
+        actually stored in a special text sub-element inside the xyz element. To get the
+        "hello" string, you could either call getText on the (unnamed) sub-element, or
+        use getAllSubText() to do this automatically.
+
+        @see isTextElement, getAllSubText, getChildElementAllSubText
     */
     const String getText() const throw();
 
@@ -605,15 +614,20 @@ public:
         This iterates all the child elements and when it finds text elements,
         it concatenates their text into a big string which it returns.
 
-        @see isTextElement, getText, addTextElement
+        E.g. @code<xyz> hello <x></x> there </xyz>@endcode
+        if you called getAllSubText on the "xyz" element, it'd return "hello there".
+
+        @see isTextElement, getChildElementAllSubText, getText, addTextElement
     */
     const String getAllSubText() const throw();
 
     /** Returns all the sub-text of a named child element.
 
         If there is a child element with the given tag name, this will return
-        all of its sub-text (using the getAllSubText() method). If there is
+        all of its sub-text (by calling getAllSubText() on it). If there is
         no such child element, this will return the default string passed-in.
+
+        @see getAllSubText
     */
     const String getChildElementAllSubText (const tchar* const childTagName,
                                             const String& defaultReturnValue) const throw();

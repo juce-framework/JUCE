@@ -1096,6 +1096,10 @@ static const tchar* const juce_xmltextContentAttributeName = T("text");
 
 const String XmlElement::getText() const throw()
 {
+    jassert (isTextElement());  // you're trying to get the text from an element that
+                                // isn't actually a text element.. If this contains text sub-nodes, you
+                                // can use getAllSubText instead to
+
     return getStringAttribute (juce_xmltextContentAttributeName);
 }
 

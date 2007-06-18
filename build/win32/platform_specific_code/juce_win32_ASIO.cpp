@@ -773,8 +773,8 @@ public:
 
     bool isPlaying()
     {
-        return isASIOOpen 
-                && (isThreadRunning() || ! isUsingThread) 
+        return isASIOOpen
+                && (isThreadRunning() || ! isUsingThread)
                 && (currentCallback != 0);
     }
 
@@ -1090,7 +1090,7 @@ private:
                         }
 
                         log (String ("latencies: ")
-                                + String ((int) inputLatency) 
+                                + String ((int) inputLatency)
                                 + T(", ") + String ((int) outputLatency));
 
                         // create some dummy buffers now.. because cubase does..

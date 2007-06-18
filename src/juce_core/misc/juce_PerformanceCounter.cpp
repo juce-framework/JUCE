@@ -52,7 +52,7 @@ PerformanceCounter::PerformanceCounter (const String& name_,
     {
         String s ("**** Counter for \"");
         s << name_ << "\" started at: "
-          << Time::getCurrentTime().toString (true, true) 
+          << Time::getCurrentTime().toString (true, true)
           << "\r\n";
 
         outputFile.appendText (s, false, false);

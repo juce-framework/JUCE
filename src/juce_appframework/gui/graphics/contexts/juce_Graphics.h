@@ -325,7 +325,7 @@ public:
                                   const Colour& topLeftColour = Colours::white,
                                   const Colour& bottomRightColour = Colours::black,
                                   const bool useGradient = true) const throw();
- 
+
     /** Draws a pixel using the current colour or brush.
     */
     void JUCE_CALLTYPE setPixel (int x, int y) const throw();

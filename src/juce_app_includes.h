@@ -539,6 +539,9 @@
 #ifndef __JUCE_VIEWPORT_JUCEHEADER__
  #include "juce_appframework/gui/components/layout/juce_Viewport.h"
 #endif
+#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.h"
+#endif
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.h"
 #endif
@@ -565,6 +568,9 @@
 #endif
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h"
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h"
 #endif
 #ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.h"

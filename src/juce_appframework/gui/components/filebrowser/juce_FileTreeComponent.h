@@ -29,18 +29,16 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
 
 #include "juce_DirectoryContentsDisplayComponent.h"
-#include "juce_FileBrowserListener.h"
-#include "../controls/juce_ListBox.h"
 #include "../controls/juce_TreeView.h"
 
 
 //==============================================================================
 /**
-    A component that displays the files in a directory as a listbox.
+    A component that displays the files in a directory as a treeview.
 
     This implements the DirectoryContentsDisplayComponent base class so that
     it can be used in a FileBrowserComponent.
@@ -48,21 +46,19 @@
     To attach a listener to it, use its DirectoryContentsDisplayComponent base
     class and the FileBrowserListener class.
 
-    @see DirectoryContentsList, FileTreeComponent
+    @see DirectoryContentsList, FileListComponent
 */
-class JUCE_API  FileListComponent  : public DirectoryContentsDisplayComponent,
-                                     public ListBox,
-                                     private ListBoxModel,
-                                     private ChangeListener
+class JUCE_API  FileTreeComponent  : public DirectoryContentsDisplayComponent,
+                                     public TreeView
 {
 public:
     //==============================================================================
     /** Creates a listbox to show the contents of a specified directory.
     */
-    FileListComponent (DirectoryContentsList& listToShow);
+    FileTreeComponent (DirectoryContentsList& listToShow);
 
     /** Destructor. */
-    ~FileListComponent();
+    ~FileTreeComponent();
 
     //==============================================================================
     /** Returns the file that the user has currently selected.
@@ -71,32 +67,16 @@ public:
     */
     const File getSelectedFile() const;
 
-    /** Scrolls to the top of the list. */
+    /** Scrolls the list to the top. */
     void scrollToTop();
-
-    //==============================================================================
-    /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    /** @internal */
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void deleteKeyPressed (int currentSelectedRow);
-    /** @internal */
-    void returnKeyPressed (int currentSelectedRow);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    FileListComponent (const FileListComponent&);
-    const FileListComponent& operator= (const FileListComponent&);
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
 };
 
 
-#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__

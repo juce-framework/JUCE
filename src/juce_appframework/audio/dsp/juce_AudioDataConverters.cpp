@@ -190,8 +190,8 @@ void AudioDataConverters::convertFloat32BEToFloat (const void* const source, flo
 
 //==============================================================================
 void AudioDataConverters::convertFloatToFormat (const DataFormat destFormat,
-                                                const float* const source, 
-                                                void* const dest, 
+                                                const float* const source,
+                                                void* const dest,
                                                 const int numSamples)
 {
     switch (destFormat)
@@ -235,8 +235,8 @@ void AudioDataConverters::convertFloatToFormat (const DataFormat destFormat,
 }
 
 void AudioDataConverters::convertFormatToFloat (const DataFormat sourceFormat,
-                                                const void* const source, 
-                                                float* const dest, 
+                                                const void* const source,
+                                                float* const dest,
                                                 const int numSamples)
 {
     switch (sourceFormat)
@@ -280,9 +280,9 @@ void AudioDataConverters::convertFormatToFloat (const DataFormat sourceFormat,
 }
 
 //==============================================================================
-void AudioDataConverters::interleaveSamples (const float** const source, 
+void AudioDataConverters::interleaveSamples (const float** const source,
                                              float* const dest,
-                                             const int numSamples, 
+                                             const int numSamples,
                                              const int numChannels)
 {
     for (int chan = 0; chan < numChannels; ++chan)
@@ -298,9 +298,9 @@ void AudioDataConverters::interleaveSamples (const float** const source,
     }
 }
 
-void AudioDataConverters::deinterleaveSamples (const float* const source, 
+void AudioDataConverters::deinterleaveSamples (const float* const source,
                                                float** const dest,
-                                               const int numSamples, 
+                                               const int numSamples,
                                                const int numChannels)
 {
     for (int chan = 0; chan < numChannels; ++chan)

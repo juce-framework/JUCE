@@ -144,7 +144,7 @@
 #if JUCE_MSVC
   /** This is a compiler-indenpendent way of declaring a variable as being thread-local.
 
-      E.g. 
+      E.g.
       @code
       juce_ThreadLocal int myVariable;
       @endcode

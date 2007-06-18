@@ -1993,20 +1993,28 @@ extern void *png_far_to_near PNGARG((png_structp png_ptr,png_voidp ptr,
 #endif /* USE_FAR_KEYWORD */
 
 /* Fatal error in PNG image of libpng - can't continue */
-extern PNG_EXPORT(void,png_error) PNGARG((png_structp png_ptr,
+extern PNG_EXPORT(void,png_error_nostring) PNGARG((png_structp png_ptr,
    png_const_charp error_message));
+
+#define png_error(a, b) png_error_nostring (a, 0)
 
 /* The same, but the chunk name is prepended to the error string. */
-extern PNG_EXPORT(void,png_chunk_error) PNGARG((png_structp png_ptr,
+extern PNG_EXPORT(void,png_chunk_error_nostring) PNGARG((png_structp png_ptr,
    png_const_charp error_message));
 
+#define png_chunk_error(a, b) png_chunk_error_nostring (a, 0)
+
 /* Non-fatal error in libpng.  Can continue, but may have a problem. */
-extern PNG_EXPORT(void,png_warning) PNGARG((png_structp png_ptr,
+extern PNG_EXPORT(void,png_warning_nostring) PNGARG((png_structp png_ptr,
    png_const_charp warning_message));
 
+#define png_warning(a, b) png_warning_nostring (a, 0)
+
 /* Non-fatal error in libpng, chunk name is prepended to message. */
-extern PNG_EXPORT(void,png_chunk_warning) PNGARG((png_structp png_ptr,
+extern PNG_EXPORT(void,png_chunk_warning_nostring) PNGARG((png_structp png_ptr,
    png_const_charp warning_message));
+
+#define png_chunk_warning(a, b) png_chunk_warning_nostring (a, 0)
 
 /* The png_set_<chunk> functions are for storing values in the png_info_struct.
  * Similarly, the png_get_<chunk> calls are used to read values from the

@@ -21,7 +21,15 @@
   #pragma warning (disable: 4996 4267)
 #endif
 
-#define PNG_iTXt_SUPPORTED 1  // (this define is added for the Juce build)
+#define PNG_NO_CONSOLE_IO 1     // (these defines added for the Juce build, to keep the size down)
+//#define PNG_iTXt_SUPPORTED 1
+#define PNG_NO_READ_iTXt 1
+#define PNG_NO_WRITE_iTXt 1
+#define PNG_NO_ERROR_NUMBERS 1
+#define PNG_NO_STDIO 1
+#define PNG_NO_READ_zTXt 1
+#define PNG_NO_WRITE_zTXt 1
+#define PNG_NO_READ_iCCP 1
 
 #define PNG_1_2_X
 

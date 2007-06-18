@@ -4069,6 +4069,14 @@
 							Name="filebrowser"
 							>
 							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.h"
+								>
+							</File>
+							<File
 								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsList.cpp"
 								>
 							</File>
@@ -4130,6 +4138,14 @@
 							</File>
 							<File
 								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilePreviewComponent.h"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.h"
 								>
 							</File>
 							<File

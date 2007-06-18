@@ -1091,8 +1091,8 @@ public:
     {
         /*XWMHints* wmHints = XAllocWMHints();
         wmHints->flags = IconPixmapHint | IconMaskHint;
-        wmHints->icon_pixmap = 
-        wmHints->icon_mask = 
+        wmHints->icon_pixmap =
+        wmHints->icon_mask =
 
         XSetWMHints (display, windowH, wmHints);
         XFree (wmHints);

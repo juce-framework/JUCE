@@ -37,17 +37,17 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ChangeListenerList::ChangeListenerList() throw()
+JUCE_CALLTYPE ChangeListenerList::ChangeListenerList() throw()
    : lastChangedObject (0),
      messagePending (false)
 {
 }
 
-ChangeListenerList::~ChangeListenerList() throw()
+JUCE_CALLTYPE ChangeListenerList::~ChangeListenerList() throw()
 {
 }
 
-void ChangeListenerList::addChangeListener (ChangeListener* const listener) throw()
+void JUCE_CALLTYPE ChangeListenerList::addChangeListener (ChangeListener* const listener) throw()
 {
     const ScopedLock sl (lock);
 
@@ -57,19 +57,19 @@ void ChangeListenerList::addChangeListener (ChangeListener* const listener) thro
         listeners.add (listener);
 }
 
-void ChangeListenerList::removeChangeListener (ChangeListener* const listener) throw()
+void JUCE_CALLTYPE ChangeListenerList::removeChangeListener (ChangeListener* const listener) throw()
 {
     const ScopedLock sl (lock);
     listeners.removeValue (listener);
 }
 
-void ChangeListenerList::removeAllChangeListeners() throw()
+void JUCE_CALLTYPE ChangeListenerList::removeAllChangeListeners() throw()
 {
     const ScopedLock sl (lock);
     listeners.clear();
 }
 
-void ChangeListenerList::sendChangeMessage (void* objectThatHasChanged) throw()
+void JUCE_CALLTYPE ChangeListenerList::sendChangeMessage (void* objectThatHasChanged) throw()
 {
     const ScopedLock sl (lock);
 
@@ -86,7 +86,7 @@ void ChangeListenerList::handleMessage (const Message& message)
     sendSynchronousChangeMessage (message.pointerParameter);
 }
 
-void ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChanged)
+void JUCE_CALLTYPE ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChanged)
 {
     const ScopedLock sl (lock);
     messagePending = false;
@@ -104,7 +104,7 @@ void ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChange
     }
 }
 
-void ChangeListenerList::dispatchPendingMessages()
+void JUCE_CALLTYPE ChangeListenerList::dispatchPendingMessages()
 {
     if (messagePending)
         sendSynchronousChangeMessage (lastChangedObject);

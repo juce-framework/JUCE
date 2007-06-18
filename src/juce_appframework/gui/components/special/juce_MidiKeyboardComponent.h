@@ -379,7 +379,7 @@ protected:
                                 always works in terms of a horizontal keyboard)
         @param w                the width of the key
     */
-    virtual void getKeyPosition (int midiNoteNumber, float keyWidth, 
+    virtual void getKeyPosition (int midiNoteNumber, float keyWidth,
                                  int& x, int& w) const;
 
 private:

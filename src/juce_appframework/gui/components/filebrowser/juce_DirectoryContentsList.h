@@ -178,6 +178,11 @@ public:
     */
     const File getFile (const int index) const;
 
+    /** Returns the file filter being used.
+
+        The filter is specified in the constructor.
+    */
+    const FileFilter* getFilter() const throw()             { return fileFilter; }
 
     //==============================================================================
     /** @internal */

@@ -43,9 +43,8 @@ Image* juce_createIconForFile (const File& file);
 
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
-    : ListBox (String::empty, 0),
-      fileList (listToShow),
-      listeners (2)
+    : DirectoryContentsDisplayComponent (listToShow),
+      ListBox (String::empty, 0)
 {
     setModel (this);
     fileList.addChangeListener (this);
@@ -62,29 +61,12 @@ const File FileListComponent::getSelectedFile() const
     return fileList.getFile (getSelectedRow());
 }
 
-//==============================================================================
-FileBrowserListener::~FileBrowserListener()
+void FileListComponent::scrollToTop()
 {
-}
-
-void FileListComponent::addListener (FileBrowserListener* const listener) throw()
-{
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
-}
-
-void FileListComponent::removeListener (FileBrowserListener* const listener) throw()
-{
-    listeners.removeValue (listener);
+    getVerticalScrollBar()->setCurrentRangeStart (0);
 }
 
 //==============================================================================
-void FileListComponent::resized()
-{
-    ListBox::resized();
-}
-
 void FileListComponent::changeListenerCallback (void*)
 {
     updateContent();
@@ -96,95 +78,30 @@ class FileListItemComponent  : public Component,
                                public AsyncUpdater
 {
 public:
-    FileListItemComponent (FileListComponent& owner_,
-                           TimeSliceThread& thread_)
+    //==============================================================================
+    JUCE_CALLTYPE FileListItemComponent (FileListComponent& owner_,
+                                         TimeSliceThread& thread_) throw()
         : owner (owner_),
           thread (thread_),
-          icon (0),
-          defaultFileIcon (0),
-          defaultFolderIcon (0)
+          icon (0)
     {
     }
 
-    ~FileListItemComponent()
+    JUCE_CALLTYPE ~FileListItemComponent() throw()
     {
         thread.removeTimeSliceClient (this);
 
         clearIcon();
-        ImageCache::release (defaultFileIcon);
-        ImageCache::release (defaultFolderIcon);
     }
 
+    //==============================================================================
     void paint (Graphics& g)
     {
-        if (highlighted)
-            g.fillAll (owner.findColour (FileListComponent::highlightColourId));
-
-        g.setColour (owner.findColour (FileListComponent::textColourId));
-        g.setFont (getHeight() * 0.7f);
-
-        const int x = 32;
-
-        Image* im = icon;
-
-        if (im == 0)
-        {
-            if (defaultFileIcon == 0)
-                lookAndFeelChanged();
-
-            im = isDirectory ? defaultFolderIcon : defaultFileIcon;
-        }
-
-        if (im != 0)
-        {
-            g.drawImageWithin (im, 2, 2, x - 4, getHeight() - 4,
-                               RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                               false);
-        }
-
-        if (getWidth() > 450 && ! isDirectory)
-        {
-            const int sizeX = proportionOfWidth (0.7f);
-            const int dateX = proportionOfWidth (0.8f);
-
-            g.drawFittedText (file.getFileName(),
-                              x, 0, sizeX - x, getHeight(),
-                              Justification::centredLeft, 1);
-
-            g.setFont (getHeight() * 0.5f);
-            g.setColour (Colours::darkgrey);
-
-            if (! isDirectory)
-            {
-                g.drawFittedText (fileSize,
-                                  sizeX, 0, dateX - sizeX - 8, getHeight(),
-                                  Justification::centredRight, 1);
-
-                g.drawFittedText (modTime,
-                                  dateX, 0, getWidth() - 8 - dateX, getHeight(),
-                                  Justification::centredRight, 1);
-            }
-        }
-        else
-        {
-            g.drawFittedText (file.getFileName(),
-                              x, 0, getWidth() - x, getHeight(),
-                              Justification::centredLeft, 1);
-
-        }
-    }
-
-    void resized()
-    {
-    }
-
-    void lookAndFeelChanged()
-    {
-        ImageCache::release (defaultFileIcon);
-        ImageCache::release (defaultFolderIcon);
-
-        defaultFileIcon = getLookAndFeel().getDefaultDocumentFileImage();
-        defaultFolderIcon = getLookAndFeel().getDefaultFolderImage();
+        getLookAndFeel().drawFileBrowserRow (g, getWidth(), getHeight(),
+                                             file.getFileName(),
+                                             icon,
+                                             fileSize, modTime,
+                                             isDirectory, highlighted);
     }
 
     void mouseDown (const MouseEvent& e)
@@ -198,10 +115,10 @@ public:
         owner.sendDoubleClickMessage (file);
     }
 
-    void update (const File& root,
-                 const DirectoryContentsList::FileInfo* fileInfo,
-                 const int index_,
-                 const bool highlighted_)
+    void JUCE_CALLTYPE update (const File& root,
+                               const DirectoryContentsList::FileInfo* const fileInfo,
+                               const int index_,
+                               const bool highlighted_) throw()
     {
         thread.removeTimeSliceClient (this);
 
@@ -259,6 +176,9 @@ public:
         repaint();
     }
 
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
 private:
     FileListComponent& owner;
     TimeSliceThread& thread;
@@ -269,16 +189,14 @@ private:
     String modTime;
     Image* icon;
     bool isDirectory;
-    Image* defaultFileIcon;
-    Image* defaultFolderIcon;
 
-    void clearIcon()
+    void JUCE_CALLTYPE clearIcon() throw()
     {
         ImageCache::release (icon);
         icon = 0;
     }
 
-    void updateIcon (const bool onlyUpdateIfCached)
+    void JUCE_CALLTYPE updateIcon (const bool onlyUpdateIfCached) throw()
     {
         if (icon == 0)
         {
@@ -302,6 +220,7 @@ private:
     }
 };
 
+//==============================================================================
 int FileListComponent::getNumRows()
 {
     return fileList.getNumFiles();
@@ -333,17 +252,7 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
 
 void FileListComponent::selectedRowsChanged (int /*lastRowSelected*/)
 {
-    ComponentDeletionWatcher deletionWatcher (this);
-
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((FileBrowserListener*) listeners.getUnchecked (i))->selectionChanged();
-
-        if (deletionWatcher.hasBeenDeleted())
-            return;
-
-        i = jmin (i, listeners.size() - 1);
-    }
+    sendSelectionChangeMessage();
 }
 
 void FileListComponent::deleteKeyPressed (int /*currentSelectedRow*/)
@@ -353,42 +262,6 @@ void FileListComponent::deleteKeyPressed (int /*currentSelectedRow*/)
 void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
     sendDoubleClickMessage (fileList.getFile (currentSelectedRow));
-}
-
-void FileListComponent::sendMouseClickMessage (const File& file, const MouseEvent& e)
-{
-    if (file.exists())
-    {
-        ComponentDeletionWatcher deletionWatcher (this);
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (file, e);
-
-            if (deletionWatcher.hasBeenDeleted())
-                return;
-
-            i = jmin (i, listeners.size() - 1);
-        }
-    }
-}
-
-void FileListComponent::sendDoubleClickMessage (const File& file)
-{
-    if (file.exists())
-    {
-        ComponentDeletionWatcher deletionWatcher (this);
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            ((FileBrowserListener*) listeners.getUnchecked (i))->fileDoubleClicked (file);
-
-            if (deletionWatcher.hasBeenDeleted())
-                return;
-
-            i = jmin (i, listeners.size() - 1);
-        }
-    }
 }
 
 

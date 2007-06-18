@@ -1164,8 +1164,8 @@ bool JUCE_CALLTYPE String::containsWholeWordIgnoreCase (const tchar* const wordT
 }
 
 //==============================================================================
-static int indexOfMatch (const tchar* const wildcard, 
-                         const tchar* const test, 
+static int indexOfMatch (const tchar* const wildcard,
+                         const tchar* const test,
                          const bool ignoreCase) throw()
 {
     int start = 0;
@@ -1631,7 +1631,7 @@ const String JUCE_CALLTYPE String::unquoted() const throw()
 
     const int lastCharIndex = s.length() - 1;
 
-    if (lastCharIndex >= 0 
+    if (lastCharIndex >= 0
          && (s [lastCharIndex] == T('"') || s[lastCharIndex] == T('\'')))
         s [lastCharIndex] = 0;
 

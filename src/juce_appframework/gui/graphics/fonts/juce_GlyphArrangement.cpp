@@ -1050,8 +1050,8 @@ void GlyphArrangement::justifyGlyphs (const int startIndex,
     if (numGlyphs > 0 && num > 0)
     {
         float left, top, right, bottom;
-        getBoundingBox (startIndex, num, left, top, right, bottom, 
-                        ! justification.testFlags (Justification::horizontallyJustified 
+        getBoundingBox (startIndex, num, left, top, right, bottom,
+                        ! justification.testFlags (Justification::horizontallyJustified
                                                     | Justification::horizontallyCentred));
 
         float deltaX = 0.0f;

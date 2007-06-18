@@ -55,7 +55,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ProgressBar.h"
 #include "../controls/juce_TreeView.h"
 #include "../filebrowser/juce_FilenameComponent.h"
-#include "../filebrowser/juce_FileListComponent.h"
+#include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
 #include "../layout/juce_GroupComponent.h"
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
@@ -151,8 +151,8 @@ LookAndFeel::LookAndFeel()
     setColour (GroupComponent::outlineColourId,     Colours::black.withAlpha (0.4f));
     setColour (GroupComponent::textColourId,        Colours::black);
 
-    setColour (FileListComponent::highlightColourId, findColour (TextEditor::highlightColourId));
-    setColour (FileListComponent::textColourId,     Colours::black);
+    setColour (DirectoryContentsDisplayComponent::highlightColourId,    findColour (TextEditor::highlightColourId));
+    setColour (DirectoryContentsDisplayComponent::textColourId,         Colours::black);
 
     setColour (0x1000440, /*LassoComponent::lassoFillColourId*/    Colour (0x66dddddd));
     setColour (0x1000441, /*LassoComponent::lassoOutlineColourId*/ Colour (0x99111111));
@@ -1993,6 +1993,71 @@ void LookAndFeel::createFileChooserHeaderText (const String& title,
                            Justification::centred);
 }
 
+void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
+                                      const String& filename, Image* icon,
+                                      const String& fileSizeDescription,
+                                      const String& fileTimeDescription,
+                                      const bool isDirectory,
+                                      const bool isItemSelected)
+{
+    if (isItemSelected)
+        g.fillAll (findColour (DirectoryContentsDisplayComponent::highlightColourId));
+
+    g.setColour (findColour (DirectoryContentsDisplayComponent::textColourId));
+    g.setFont (height * 0.7f);
+
+    Image* im = icon;
+    Image* toRelease = 0;
+
+    if (im == 0)
+    {
+        toRelease = im = (isDirectory ? getDefaultFolderImage()
+                                      : getDefaultDocumentFileImage());
+    }
+
+    const int x = 32;
+
+    if (im != 0)
+    {
+        g.drawImageWithin (im, 2, 2, x - 4, height - 4,
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
+                           false);
+
+        ImageCache::release (toRelease);
+    }
+
+    if (width > 450 && ! isDirectory)
+    {
+        const int sizeX = roundFloatToInt (width * 0.7f);
+        const int dateX = roundFloatToInt (width * 0.8f);
+
+        g.drawFittedText (filename,
+                          x, 0, sizeX - x, height,
+                          Justification::centredLeft, 1);
+
+        g.setFont (height * 0.5f);
+        g.setColour (Colours::darkgrey);
+
+        if (! isDirectory)
+        {
+            g.drawFittedText (fileSizeDescription,
+                              sizeX, 0, dateX - sizeX - 8, height,
+                              Justification::centredRight, 1);
+
+            g.drawFittedText (fileTimeDescription,
+                              dateX, 0, width - 8 - dateX, height,
+                              Justification::centredRight, 1);
+        }
+    }
+    else
+    {
+        g.drawFittedText (filename,
+                          x, 0, width - x, height,
+                          Justification::centredLeft, 1);
+
+    }
+}
+
 Image* LookAndFeel::getDefaultFolderImage()
 {
     const unsigned char foldericon_png[] = {137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,32,0,0,0,28,8,6,0,0,0,0,194,189,34,0,0,0,9,112,72,89,
@@ -2099,7 +2164,6 @@ Image* LookAndFeel::getDefaultDocumentFileImage()
 
     return ImageCache::getFromMemory (fileicon_png, sizeof (fileicon_png));
 }
-
 
 
 END_JUCE_NAMESPACE

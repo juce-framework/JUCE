@@ -308,6 +308,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_ToolbarItemComponent.o \
 	$(OBJDIR)/juce_ToolbarItemPalette.o \
 	$(OBJDIR)/juce_TreeView.o \
+	$(OBJDIR)/juce_DirectoryContentsDisplayComponent.o \
 	$(OBJDIR)/juce_DirectoryContentsList.o \
 	$(OBJDIR)/juce_FileBrowserComponent.o \
 	$(OBJDIR)/juce_FileChooser.o \
@@ -315,6 +316,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_FileFilter.o \
 	$(OBJDIR)/juce_FileListComponent.o \
 	$(OBJDIR)/juce_FilenameComponent.o \
+	$(OBJDIR)/juce_FileTreeComponent.o \
 	$(OBJDIR)/juce_ImagePreviewComponent.o \
 	$(OBJDIR)/juce_WildcardFileFilter.o \
 	$(OBJDIR)/juce_KeyboardFocusTraverser.o \
@@ -1795,6 +1797,11 @@ $(OBJDIR)/juce_TreeView.o: ../../src/juce_appframework/gui/components/controls/j
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/juce_DirectoryContentsDisplayComponent.o: ../../src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/juce_DirectoryContentsList.o: ../../src/juce_appframework/gui/components/filebrowser/juce_DirectoryContentsList.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1826,6 +1833,11 @@ $(OBJDIR)/juce_FileListComponent.o: ../../src/juce_appframework/gui/components/f
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_FilenameComponent.o: ../../src/juce_appframework/gui/components/filebrowser/juce_FilenameComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_FileTreeComponent.o: ../../src/juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

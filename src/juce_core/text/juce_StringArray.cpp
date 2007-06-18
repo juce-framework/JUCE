@@ -314,12 +314,12 @@ void StringArray::sort (const bool ignoreCase) throw()
 {
     if (ignoreCase)
     {
-        const InsensitiveInternalStringArrayComparator comp;
+        InsensitiveInternalStringArrayComparator comp;
         strings.sort (comp);
     }
     else
     {
-        const InternalStringArrayComparator comp;
+        InternalStringArrayComparator comp;
         strings.sort (comp);
     }
 }

@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__x
-#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__x
+#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
+#define __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 
 #include "juce_DirectoryContentsList.h"
 #include "juce_FileBrowserListener.h"
@@ -42,16 +42,16 @@
 
     @see DirectoryContentsList
 */
-class JUCE_API  FileListComponentBase
+class JUCE_API  DirectoryContentsDisplayComponent
 {
 public:
     //==============================================================================
-    /** 
+    /**
     */
-    FileListComponentBase (DirectoryContentsList& listToShow);
+    DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow);
 
     /** Destructor. */
-    virtual ~FileListComponentBase();
+    virtual ~DirectoryContentsDisplayComponent();
 
     //==============================================================================
     /** Returns the file that the user has currently selected.
@@ -60,6 +60,7 @@ public:
     */
     virtual const File getSelectedFile() const = 0;
 
+    /** Scrolls this view to the top. */
     virtual void scrollToTop() = 0;
 
     //==============================================================================
@@ -108,101 +109,9 @@ protected:
     DirectoryContentsList& fileList;
     SortedSet <void*> listeners;
 
-    FileListComponentBase (const FileListComponentBase&);
-    const FileListComponentBase& operator= (const FileListComponentBase&);
+    DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
+    const DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
 };
 
 
-//==============================================================================
-/**
-    A listbox showing the files in a directory.
-
-    @see DirectoryContentsList
-*/
-class JUCE_API  FileListComponent  : public FileListComponentBase,
-                                     public ListBox,
-                                     private ListBoxModel,
-                                     private ChangeListener
-{
-public:
-    //==============================================================================
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileListComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileListComponent();
-
-    //==============================================================================
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    void scrollToTop();
-
-    //==============================================================================
-    /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    /** @internal */
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void deleteKeyPressed (int currentSelectedRow);
-    /** @internal */
-    void returnKeyPressed (int currentSelectedRow);
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-    FileListComponent (const FileListComponent&);
-    const FileListComponent& operator= (const FileListComponent&);
-};
-
-
-
-
-//==============================================================================
-/**
-    A listbox showing the files in a directory.
-
-    @see DirectoryContentsList
-*/
-class JUCE_API  FileTreeComponent  : public FileListComponentBase,
-                                     public TreeView
-{
-public:
-    //==============================================================================
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    //==============================================================================
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    void scrollToTop();
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-
-#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__

@@ -249,6 +249,13 @@ public:
                                               GlyphArrangement& destArrangement,
                                               int width);
 
+    virtual void drawFileBrowserRow (Graphics& g, int width, int height,
+                                     const String& filename, Image* icon,
+                                     const String& fileSizeDescription,
+                                     const String& fileTimeDescription,
+                                     const bool isDirectory,
+                                     const bool isItemSelected);
+
     //==============================================================================
     virtual void drawBubble (Graphics& g,
                              float tipX, float tipY,
