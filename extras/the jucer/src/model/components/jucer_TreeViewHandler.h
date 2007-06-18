@@ -136,7 +136,9 @@ private:
 
         ~DemoTreeView()
         {
-            delete getRootItem();
+            TreeViewItem* root = getRootItem();
+            setRootItem (0);
+            delete root;
         }
 
     private:
