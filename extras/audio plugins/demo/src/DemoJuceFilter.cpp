@@ -38,7 +38,7 @@
     This function must be implemented to create the actual plugin object that
     you want to use.
 */
-AudioFilterBase* createPluginFilter()
+AudioFilterBase* JUCE_CALLTYPE createPluginFilter()
 {
     return new DemoJuceFilter();
 }
