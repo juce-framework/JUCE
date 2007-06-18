@@ -36,10 +36,21 @@
 #include <IOKit/network/IOEthernetController.h>
 #include <Carbon/Carbon.h>
 
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 
 BEGIN_JUCE_NAMESPACE
 
+#include "../../../src/juce_core/text/juce_String.h"
+#include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
+#include "../../../src/juce_core/text/juce_StringArray.h"
+#include "juce_mac_HTTPStream.h"
 
 
 //==============================================================================
