@@ -183,7 +183,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     if (! XInitThreads())
     {
         // This is fatal!  Print error and closedown
-        Logger::outputDebugString (T("Failed to initialise xlib thread support."));
+        Logger::outputDebugString ("Failed to initialise xlib thread support.");
 
         if (juce_isRunningAsApplication())
             Process::terminate();

@@ -305,7 +305,7 @@ void Socket::close()
         {
             // need to do this to interrupt the accept() function..
             Socket temp;
-            temp.connect (T("localhost"), portNumber, 1000);
+            temp.connect ("localhost", portNumber, 1000);
         }
     }
 

@@ -412,7 +412,7 @@ public:
                          int bufferSizeSamples)
     {
         error = String::empty;
-        log (T("CoreAudio reopen"));
+        log ("CoreAudio reopen");
         callbacksAllowed = false;
         stopTimer();
 
@@ -449,13 +449,13 @@ public:
         }
 
         if (i < 0)
-            error = T("Couldn't change sample rate/buffer size");
+            error = "Couldn't change sample rate/buffer size";
 
         if (sampleRates.size() == 0)
-            error = T("Device has no available sample-rates");
+            error = "Device has no available sample-rates";
 
         if (bufferSizes.size() == 0)
-            error = T("Device has no available buffer-sizes");
+            error = "Device has no available buffer-sizes";
 
         numInputChans = jmin (numInputChans, numInputChannelInfos);
         numOutputChans = jmin (numOutputChans, numOutputChannelInfos);
@@ -652,7 +652,7 @@ public:
     void timerCallback()
     {
         stopTimer();
-        log (T("CoreAudio device changed callback"));
+        log ("CoreAudio device changed callback");
 
         const double oldSampleRate = sampleRate;
         const int oldBufferSize = bufferSize;
@@ -824,7 +824,7 @@ class CoreAudioIODevice   : public AudioIODevice
 public:
     CoreAudioIODevice (const String& deviceName,
                        AudioDeviceID deviceId1)
-        : AudioIODevice (deviceName, T("CoreAudio")),
+        : AudioIODevice (deviceName, "CoreAudio"),
           isOpen_ (false),
           isStarted (false)
     {

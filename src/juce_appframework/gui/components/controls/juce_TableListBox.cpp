@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/basics/juce_Random.h"
 #include "../mouse/juce_DragAndDropContainer.h"
 #include "../../graphics/imaging/juce_Image.h"
+#include "../../../../juce_core/text/juce_LocalisedStrings.h"
 
 
 //==============================================================================
@@ -290,8 +291,8 @@ public:
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
-            menu.addItem (0xf836743, T("Auto-size this column"), columnIdClicked != 0);
-            menu.addItem (0xf836744, T("Auto-size all columns"), owner.getHeader()->getNumColumns (true) > 0);
+            menu.addItem (0xf836743, TRANS("Auto-size this column"), columnIdClicked != 0);
+            menu.addItem (0xf836744, TRANS("Auto-size all columns"), owner.getHeader()->getNumColumns (true) > 0);
             menu.addSeparator();
         }
 

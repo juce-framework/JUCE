@@ -374,23 +374,23 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     case userDocumentsDirectory:
-        return File (T("~"));
+        return File ("~");
 
     case userDesktopDirectory:
-        return File (T("~/Desktop"));
+        return File ("~/Desktop");
 
     case userApplicationDataDirectory:
-        return File (T("~"));
+        return File ("~");
 
     case commonApplicationDataDirectory:
-        return File (T("/var"));
+        return File ("/var");
 
     case globalApplicationsDirectory:
-        return File (T("/usr"));
+        return File ("/usr");
 
     case tempDirectory:
     {
-        File tmp (T("/var/tmp"));
+        File tmp ("/var/tmp");
 
         if (! tmp.isDirectory())
         {

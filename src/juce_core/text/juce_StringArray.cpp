@@ -65,26 +65,16 @@ StringArray::StringArray (const juce_wchar** const strings) throw()
 {
     int i = 0;
 
-    for (;;)
-    {
-        if (strings[i] != 0)
-            add (strings [i++]);
-        else
-            break;
-    }
+    while (strings[i] != 0)
+        add (strings [i++]);
 }
 
 StringArray::StringArray (const char** const strings) throw()
 {
     int i = 0;
 
-    for (;;)
-    {
-        if (strings[i] != 0)
-            add (strings [i++]);
-        else
-            break;
-    }
+    while (strings[i] != 0)
+        add (strings [i++]);
 }
 
 const StringArray& StringArray::operator= (const StringArray& other) throw()
@@ -249,7 +239,7 @@ int StringArray::indexOf (const String& stringToLookFor,
 //==============================================================================
 void StringArray::remove (const int index) throw()
 {
-    String* const s = (String*) strings[index];
+    String* const s = (String*) strings [index];
 
     if (s != 0)
     {
@@ -305,7 +295,7 @@ void StringArray::trim() throw()
 class InternalStringArrayComparator
 {
 public:
-    static int compareElements (void* const first, void* const second) throw()
+    static int JUCE_CALLTYPE compareElements (void* const first, void* const second) throw()
     {
         return ((const String*) first)->compare (*(const String*) second);
     }
@@ -314,7 +304,7 @@ public:
 class InsensitiveInternalStringArrayComparator
 {
 public:
-    static int compareElements (void* const first, void* const second) throw()
+    static int JUCE_CALLTYPE compareElements (void* const first, void* const second) throw()
     {
         return ((const String*) first)->compareIgnoreCase (*(const String*) second);
     }
@@ -324,12 +314,12 @@ void StringArray::sort (const bool ignoreCase) throw()
 {
     if (ignoreCase)
     {
-        InsensitiveInternalStringArrayComparator comp;
+        const InsensitiveInternalStringArrayComparator comp;
         strings.sort (comp);
     }
     else
     {
-        InternalStringArrayComparator comp;
+        const InternalStringArrayComparator comp;
         strings.sort (comp);
     }
 }
@@ -366,7 +356,7 @@ const String StringArray::joinIntoString (const String& separator,
     String result;
     result.preallocateStorage (charsNeeded);
 
-    tchar* dest = (tchar*)(const tchar*) result;
+    tchar* dest = (tchar*) (const tchar*) result;
 
     while (start < last)
     {

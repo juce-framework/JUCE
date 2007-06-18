@@ -136,11 +136,11 @@ void* juce_openInternetFile (const String& url,
                     if (request != 0)
                     {
                         // (this header is needed to make webservers process a POST request correctly)
-                        const String hdr (T("Content-Type: application/x-www-form-urlencoded"));
+                        const String hdr ("Content-Type: application/x-www-form-urlencoded");
 
                         if (HttpSendRequest (request,
                                              hdr, hdr.length(),
-                                             (void*)(const char*) postText,
+                                             (void*) (const char*) postText,
                                              postText.length()))
                         {
                             ConnectionAndRequestStruct* const result = new ConnectionAndRequestStruct();

@@ -251,8 +251,8 @@ const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationN
     jassert (applicationName == File::createLegalFileName (applicationName));
 
 #ifdef JUCE_MAC
-    File dir (commonToAllUsers ? T("/Library/Preferences")
-                               : T("~/Library/Preferences"));
+    File dir (commonToAllUsers ? "/Library/Preferences"
+                               : "~/Library/Preferences");
 
     if (folderName.isNotEmpty())
         dir = dir.getChildFile (folderName);

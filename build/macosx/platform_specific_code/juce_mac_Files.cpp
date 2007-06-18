@@ -629,19 +629,19 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     case userDocumentsDirectory:
-        return File (T("~/Documents"));
+        return File ("~/Documents");
 
     case userDesktopDirectory:
-        return File (T("~/Desktop"));
+        return File ("~/Desktop");
 
     case userApplicationDataDirectory:
-        return File (T("~/Library"));
+        return File ("~/Library");
 
     case commonApplicationDataDirectory:
-        return File (T("/Library"));
+        return File ("/Library");
 
     case globalApplicationsDirectory:
-        return File (T("/Applications"));
+        return File ("/Applications");
 
     case tempDirectory:
     {

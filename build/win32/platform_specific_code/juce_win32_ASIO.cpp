@@ -87,22 +87,22 @@ BEGIN_JUCE_NAMESPACE
 #ifdef ASIO_DEBUGGING
 static void logError (const String& context, long error)
 {
-    String err (T("unknown error"));
+    String err ("unknown error");
 
     if (error == ASE_NotPresent)
-        err = T("Not Present");
+        err = "Not Present";
     else if (error == ASE_HWMalfunction)
-        err = T("Hardware Malfunction");
+        err = "Hardware Malfunction";
     else if (error == ASE_InvalidParameter)
-        err = T("Invalid Parameter");
+        err = "Invalid Parameter";
     else if (error == ASE_InvalidMode)
-        err = T("Invalid Mode");
+        err = "Invalid Mode";
     else if (error == ASE_SPNotAdvancing)
-        err = T("Sample position not advancing");
+        err = "Sample position not advancing";
     else if (error == ASE_NoClock)
-        err = T("No Clock");
+        err = "No Clock";
     else if (error == ASE_NoMemory)
-        err = T("Out of memory");
+        err = "Out of memory";
 
     log (T("!!error: ") + context + T(" - ") + err);
 }
@@ -163,7 +163,7 @@ public:
             currentASIODev = 0;
 
         close();
-        log (T("ASIO - exiting"));
+        log ("ASIO - exiting");
         removeCurrentDriver();
 
         juce_free (tempBuffer);
@@ -259,7 +259,7 @@ public:
 
         if (asioObject == 0 || ! isASIOOpen)
         {
-            log (T("Warning: device not open"));
+            log ("Warning: device not open");
             const String err (openDevice());
 
             if (asioObject == 0 || ! isASIOOpen)
@@ -293,7 +293,7 @@ public:
 
         if (shouldUsePreferredSize)
         {
-            log (T("Using preferred size for buffer.."));
+            log ("Using preferred size for buffer..");
 
             if ((err = asioObject->getBufferSize (&minSize, &maxSize, &preferredSize, &granularity)) == 0)
             {
@@ -302,7 +302,7 @@ public:
             else
             {
                 bufferSizeSamples = 1024;
-                logError (T("GetBufferSize1"), err);
+                logError ("GetBufferSize1", err);
             }
 
             shouldUsePreferredSize = false;
@@ -333,13 +333,13 @@ public:
         int i;
         for (i = 0; i < numSources; ++i)
         {
-            String s (T("clock: "));
+            String s ("clock: ");
             s += clocks[i].name;
 
             if (clocks[i].isCurrentSource)
             {
                 isSourceSet = true;
-                s += T(" (cur)");
+                s << " (cur)";
             }
 
             log (s);
@@ -347,7 +347,7 @@ public:
 
         if (numSources > 1 && ! isSourceSet)
         {
-            log (T("setting clock source"));
+            log ("setting clock source");
             asioObject->setClockSource (clocks[0].index);
             Thread::sleep (20);
         }
@@ -355,7 +355,7 @@ public:
         {
             if (numSources == 0)
             {
-                log (T("ASIO - no clock sources!"));
+                log ("ASIO - no clock sources!");
             }
         }
 
@@ -367,7 +367,7 @@ public:
         }
         else
         {
-            logError (T("GetSampleRate"), err);
+            logError ("GetSampleRate", err);
             currentSampleRate = 0;
         }
 
@@ -384,12 +384,12 @@ public:
 
             if (err == ASE_NoClock && numSources > 0)
             {
-                log (T("trying to set a clock source.."));
+                log ("trying to set a clock source..");
                 Thread::sleep (10);
                 err = asioObject->setClockSource (clocks[0].index);
                 if (err != 0)
                 {
-                    logError (T("SetClock"), err);
+                    logError ("SetClock", err);
                 }
 
                 Thread::sleep (10);
@@ -405,10 +405,10 @@ public:
             {
                 if (isReSync)
                 {
-                    log (T("Resync request"));
+                    log ("Resync request");
                 }
 
-                log (T("! Resetting ASIO after sample rate change"));
+                log ("! Resetting ASIO after sample rate change");
                 removeCurrentDriver();
 
                 loadDriver();
@@ -459,7 +459,7 @@ public:
             callbacks.asioMessage = &asioMessagesCallback;
             callbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfoCallback;
 
-            log (T("disposing buffers"));
+            log ("disposing buffers");
             err = asioObject->disposeBuffers();
 
             log (T("creating buffers: ") + String (totalBuffers) + T(", ") + String (currentBlockSizeSamples));
@@ -471,7 +471,7 @@ public:
             if (err != 0)
             {
                 currentBlockSizeSamples = preferredSize;
-                logError (T("create buffers 2"), err);
+                logError ("create buffers 2", err);
 
                 asioObject->disposeBuffers();
                 err = asioObject->createBuffers (bufferInfos,
@@ -567,7 +567,7 @@ public:
                         if (bufferInfos[n].buffers[0] == 0
                             || bufferInfos[n].buffers[1] == 0)
                         {
-                            log (T("!! Null buffers"));
+                            log ("!! Null buffers");
                         }
                         else
                         {
@@ -585,7 +585,7 @@ public:
 
                 if (asioObject->getLatencies (&inputLatency, &outputLatency) != 0)
                 {
-                    log (T("ASIO - no latencies"));
+                    log ("ASIO - no latencies");
                 }
                 else
                 {
@@ -610,11 +610,11 @@ public:
 
                 if (isUsingThread && ! isThreadRunning())
                 {
-                    error = T("Can't start thread!");
+                    error = "Can't start thread!";
                 }
                 else
                 {
-                    log (T("starting ASIO"));
+                    log ("starting ASIO");
                     calledback = false;
                     err = asioObject->start();
 
@@ -628,10 +628,10 @@ public:
                         }
 
                         isOpen_ = false;
-                        log (T("ASIO - stop on failure"));
+                        log ("ASIO - stop on failure");
                         Thread::sleep (10);
                         asioObject->stop();
-                        error = T("Can't start device");
+                        error = "Can't start device";
                         Thread::sleep (10);
                     }
                     else
@@ -644,8 +644,8 @@ public:
 
                         if (! calledback)
                         {
-                            error = T("Device didn't start correctly");
-                            log (T("ASIO didn't callback - stopping.."));
+                            error = "Device didn't start correctly";
+                            log ("ASIO didn't callback - stopping..");
                             asioObject->stop();
                         }
                     }
@@ -653,12 +653,12 @@ public:
             }
             else
             {
-                error = T("Can't create i/o buffers");
+                error = "Can't create i/o buffers";
             }
         }
         else
         {
-            error = T("Can't set sample rate: ");
+            error = "Can't set sample rate: ";
             error << sampleRate;
         }
 
@@ -703,7 +703,7 @@ public:
             needToReset = false;
             isReSync = false;
 
-            log (T("ASIO - stopping"));
+            log ("ASIO - stopping");
 
             if (asioObject != 0)
             {
@@ -795,7 +795,7 @@ public:
 
     bool showControlPanel()
     {
-        log (T("ASIO - showing control panel"));
+        log ("ASIO - showing control panel");
 
         Component modalWindow (String::empty);
         modalWindow.setOpaque (true);
@@ -847,7 +847,7 @@ public:
 
         if (bufferIndex < 0)
         {
-            log (T("! ASIO callback never called"));
+            log ("! ASIO callback never called");
         }
     }
 
@@ -869,7 +869,7 @@ public:
             stopTimer();
 
             // used to cause a reset
-            log (T("! ASIO restart request!"));
+            log ("! ASIO restart request!");
 
             if (isOpen_)
             {
@@ -982,7 +982,7 @@ private:
             return String::empty;
         }
 
-        return T("No Driver");
+        return "No Driver";
     }
 
     const String openDevice()
@@ -1062,11 +1062,11 @@ private:
 
                         if (currentRate <= 0.0 || currentRate > 192001.0)
                         {
-                            log (T("setting sample rate"));
+                            log ("setting sample rate");
                             err = asioObject->setSampleRate (44100.0);
                             if (err != 0)
                             {
-                                logError (T("setting sample rate"), err);
+                                logError ("setting sample rate", err);
                             }
 
                             asioObject->getSampleRate (&currentRate);
@@ -1077,7 +1077,7 @@ private:
                         postOutput = (asioObject->outputReady() == 0);
                         if (postOutput)
                         {
-                            log (T("ASIO outputReady = ok"));
+                            log ("ASIO outputReady = ok");
                         }
 
                         updateSampleRates();
@@ -1086,11 +1086,12 @@ private:
                         inputLatency = outputLatency = 0;
                         if (asioObject->getLatencies (&inputLatency, &outputLatency) != 0)
                         {
-                            log (T("ASIO - no latencies"));
+                            log ("ASIO - no latencies");
                         }
 
-                        log (String (T("latencies: "))
-                                + String ((int)inputLatency) + T(", ") + String ((int)outputLatency));
+                        log (String ("latencies: ")
+                                + String ((int) inputLatency) 
+                                + T(", ") + String ((int) outputLatency));
 
                         // create some dummy buffers now.. because cubase does..
                         numActiveInputChans = 0;
@@ -1131,7 +1132,7 @@ private:
                             err = asioObject->createBuffers (bufferInfos, numChans, preferredSize, &callbacks);
                             if (err != 0)
                             {
-                                logError (T("dummy buffers"), err);
+                                logError ("dummy buffers", err);
                             }
                         }
 
@@ -1197,7 +1198,7 @@ private:
                         if ((err = asioObject->start()) != 0)
                         {
                             // ignore an error here, as it might start later after setting other stuff up
-                            logError (T("ASIO start"), err);
+                            logError ("ASIO start", err);
                         }
 
                         Thread::sleep (100);
@@ -1205,18 +1206,18 @@ private:
                     }
                     else
                     {
-                        error = T("Can't detect buffer sizes");
+                        error = "Can't detect buffer sizes";
                     }
                 }
                 else
                 {
-                    error = T("Can't detect asio channels");
+                    error = "Can't detect asio channels";
                 }
             }
         }
         else
         {
-            error = T("No such device");
+            error = "No such device";
         }
 
         if (error.isNotEmpty())
@@ -1232,7 +1233,7 @@ private:
         else
         {
             isASIOOpen = true;
-            log (T("ASIO device open"));
+            log ("ASIO device open");
         }
 
         isOpen_ = false;
@@ -1283,7 +1284,7 @@ private:
 
             if (isReSync)
             {
-                log (T("! ASIO resync"));
+                log ("! ASIO resync");
                 isReSync = false;
             }
             else

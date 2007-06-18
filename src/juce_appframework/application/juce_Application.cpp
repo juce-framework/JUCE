@@ -192,7 +192,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
             appInstance = 0;
             commandLine = String::empty;
 
-            DBG (T("Another instance is running - quitting..."));
+            DBG ("Another instance is running - quitting...");
             return 0;
         }
     }

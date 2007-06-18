@@ -205,13 +205,13 @@ const StringArray MidiOutput::getDevices()
             String name (getConnectedEndpointName (dest));
 
             if (name.isEmpty())
-                name = T("<error>");
+                name = "<error>";
 
             s.add (name);
         }
         else
         {
-            s.add (T("<error>"));
+            s.add ("<error>");
         }
     }
 
@@ -351,13 +351,13 @@ const StringArray MidiInput::getDevices()
             String name (getConnectedEndpointName (source));
 
             if (name.isEmpty())
-                name = T("<error>");
+                name = "<error>";
 
             s.add (name);
         }
         else
         {
-            s.add (T("<error>"));
+            s.add ("<error>");
         }
     }
 

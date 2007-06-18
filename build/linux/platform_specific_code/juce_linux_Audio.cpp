@@ -199,7 +199,7 @@ public:
 
         if (bitDepth == 0)
         {
-            error = T("device doesn't support a compatible PCM format");
+            error = "device doesn't support a compatible PCM format";
             DBG (T("ALSA error: ") + error + T("\n"));
             return false;
         }
@@ -353,7 +353,7 @@ class ALSAThread  : public Thread
 {
 public:
     ALSAThread (const String& deviceName_)
-        : Thread (T("Juce ALSA")),
+        : Thread ("Juce ALSA"),
           sampleRate (0),
           bufferSize (0),
           deviceName (deviceName_),
@@ -457,7 +457,7 @@ public:
 
         if (outputDevice == 0 && inputDevice == 0)
         {
-            error = T("no channels");
+            error = "no channels";
             return;
         }
 
@@ -482,7 +482,7 @@ public:
 
             if (--count < 0 || ! isThreadRunning())
             {
-                error = T("device didn't start");
+                error = "device didn't start";
                 break;
             }
         }
@@ -528,7 +528,7 @@ public:
 
                 if (! inputDevice->read (inputChannelData, bufferSize))
                 {
-                    DBG (T("ALSA: read failure"));
+                    DBG ("ALSA: read failure");
                     break;
                 }
             }
@@ -567,7 +567,7 @@ public:
                 jassert (numChannelsRunning >= outputDevice->numChannelsRunning);
                 if (! outputDevice->write (outputChannelData, bufferSize))
                 {
-                    DBG (T("ALSA: write failure"));
+                    DBG ("ALSA: write failure");
                     break;
                 }
             }
@@ -858,7 +858,7 @@ public:
                             break;
 
                         String id, name;
-                        id << T("hw:") << cardId << T(",") << device;
+                        id << "hw:" << cardId << ',' << device;
 
                         if (testDevice (id))
                         {
@@ -868,7 +868,7 @@ public:
                                 name = id;
 
                             if (device > 0)
-                                name << T(" (") << (device + 1) << T(")");
+                                name << " (" << (device + 1) << ')';
 
                             ids.add (id);
                             names.add (name);

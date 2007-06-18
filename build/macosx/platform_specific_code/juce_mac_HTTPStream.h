@@ -198,12 +198,12 @@ private:
                                       const String& optionalPostText,
                                       const bool isPost)
     {
-        String header (isPost ? T("POST ") : T("GET "));
+        String header (isPost ? "POST " : "GET ");
 
         if (proxyURL.isEmpty())
         {
-            header << hostPath << T(" HTTP/1.1\r\nHost: ")
-                   << hostName << ":" << hostPort;
+            header << hostPath << " HTTP/1.1\r\nHost: "
+                   << hostName << ':' << hostPort;
         }
         else
         {
@@ -213,8 +213,8 @@ private:
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
                 return String::empty;
 
-            header << originalURL << T(" HTTP/1.1\r\nHost: ")
-                   << proxyName << T(":") << proxyPort;
+            header << originalURL << " HTTP/1.1\r\nHost: "
+                   << proxyName << ':' << proxyPort;
 
             /* xxx needs finishing
             const char* proxyAuth = getenv ("http_proxy_auth");
@@ -223,20 +223,20 @@ private:
             */
         }
 
-        header << T("\r\nUser-Agent: JUCE/")
-               << JUCE_MAJOR_VERSION << T('.') << JUCE_MINOR_VERSION
-               << T("\r\nConnection: Close\r\n");
+        header << "\r\nUser-Agent: JUCE/"
+               << JUCE_MAJOR_VERSION << '.' << JUCE_MINOR_VERSION
+               << "\r\nConnection: Close\r\n";
 
         if (isPost && optionalPostText.isNotEmpty())
         {
             const char* const postTextUTF8 = (const char*) optionalPostText.toUTF8();
 
-            header << T("Content-type: application/x-www-form-urlencoded\r\nContent-length: ")
-                   << (int) strlen (postTextUTF8) << T("\r\n\r\n")
+            header << "Content-type: application/x-www-form-urlencoded\r\nContent-length: "
+                   << (int) strlen (postTextUTF8) << "\r\n\r\n"
                    << optionalPostText;
         }
 
-        header << T("\r\n");
+        header << "\r\n";
         //DBG (header);
         return header;
     }

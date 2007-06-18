@@ -520,9 +520,9 @@ const StringArray Font::findAllTypefaceNames()
 
 void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
 {
-    defaultSans  = T("Lucida Grande");
-    defaultSerif = T("Times New Roman");
-    defaultFixed = T("Monaco");
+    defaultSans  = "Lucida Grande";
+    defaultSerif = "Times New Roman";
+    defaultFixed = "Monaco";
 }
 
 

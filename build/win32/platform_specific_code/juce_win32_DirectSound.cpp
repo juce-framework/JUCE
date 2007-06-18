@@ -228,7 +228,7 @@ static const String getDSErrorMessage (HRESULT hr)
     {
         if (hr != S_OK)
         {
-            String error (T("DS error at line "));
+            String error ("DS error at line ");
             error << lineNum << T(" - ") << getDSErrorMessage (hr);
             log (error);
         }
@@ -392,7 +392,7 @@ public:
                 primaryDesc.dwBufferBytes = 0;
                 primaryDesc.lpwfxFormat = 0;
 
-                log (T("opening dsound out step 2"));
+                log ("opening dsound out step 2");
                 hr = pDirectSound->CreateSoundBuffer (&primaryDesc, &pPrimaryBuffer, 0);
                 logError (hr);
 
@@ -426,7 +426,7 @@ public:
 
                         if (hr == S_OK)
                         {
-                            log (T("opening dsound out step 3"));
+                            log ("opening dsound out step 3");
 
                             DWORD dwDataLen;
                             unsigned char* pDSBuffData;
@@ -981,7 +981,7 @@ public:
     DSoundAudioIODevice (const String& deviceName,
                          const int index,
                          const int inputIndex_)
-        : AudioIODevice (deviceName, T("DirectSound")),
+        : AudioIODevice (deviceName, "DirectSound"),
           Thread ("Juce DSound"),
           isOpen_ (false),
           isStarted (false),

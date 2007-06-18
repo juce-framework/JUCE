@@ -47,11 +47,11 @@ BEGIN_JUCE_NAMESPACE
 
 static void findCDs (OwnedArray<File>& cds)
 {
-    File volumes (T("/Volumes"));
+    File volumes ("/Volumes");
     volumes.findChildFiles (cds, File::findDirectories, false);
 
     for (int i = cds.size(); --i >= 0;)
-        if (! cds[i]->getChildFile (T(".TOC.plist")).exists())
+        if (! cds[i]->getChildFile (".TOC.plist").exists())
             cds.remove (i);
 }
 
@@ -80,7 +80,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 }
 
 AudioCDReader::AudioCDReader (const File& volume)
-   : AudioFormatReader (0, T("CD Audio")),
+   : AudioFormatReader (0, "CD Audio"),
      volumeDir (volume),
      currentReaderTrack (-1),
      reader (0)

@@ -812,7 +812,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
 
     NamedPipeInternal* const intern = new NamedPipeInternal();
 
-    String file (T("\\\\.\\pipe\\"));
+    String file ("\\\\.\\pipe\\");
     file += pipeName;
 
     intern->createdPipe = createPipe;

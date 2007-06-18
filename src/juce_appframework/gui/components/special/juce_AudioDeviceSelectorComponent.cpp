@@ -497,8 +497,8 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
 
         if (currentDevice->hasControlPanel())
         {
-            addAndMakeVisible (launchUIButton = new TextButton (T("show this device's control panel"),
-                                                                T("opens the device's own control panel")));
+            addAndMakeVisible (launchUIButton = new TextButton (TRANS ("show this device's control panel"),
+                                                                TRANS ("opens the device's own control panel")));
 
             launchUIButton->addButtonListener (this);
         }

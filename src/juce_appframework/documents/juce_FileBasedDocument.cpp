@@ -171,7 +171,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                             TRANS("File already exists"),
                                             TRANS("There's already a file called:\n\n")
                                               + newFile.getFullPathName()
-                                              + T("\n\nAre you sure you want to overwrite it?"),
+                                              + TRANS("\n\nAre you sure you want to overwrite it?"),
                                             TRANS("overwrite"),
                                             TRANS("cancel")))
         {
@@ -203,7 +203,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                      TRANS("Error writing to file..."),
                                      TRANS("An error occurred while trying to save \"")
                                         + getDocumentTitle()
-                                        + T("\" to the file:\n\n")
+                                        + TRANS("\" to the file:\n\n")
                                         + newFile.getFullPathName()
                                         + T("\n\n")
                                         + error);
@@ -251,7 +251,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
     String legalFilename (File::createLegalFileName (getDocumentTitle()));
 
     if (legalFilename.isEmpty())
-        legalFilename = T("unnamed");
+        legalFilename = "unnamed";
 
     if (f.existsAsFile() || f.getParentDirectory().isDirectory())
         f = f.getSiblingFile (legalFilename);

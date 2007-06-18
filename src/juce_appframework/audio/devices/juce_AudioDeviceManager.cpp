@@ -170,7 +170,7 @@ void AudioDeviceManager::addDeviceNamesToComboBox (ComboBox& combo) const
         combo.addSeparator();
     }
 
-    combo.addItem (T("<< no audio device >>"), -1);
+    combo.addItem ("<< no audio device >>", -1);
 }
 
 const String AudioDeviceManager::getCurrentAudioDeviceName() const
@@ -256,7 +256,7 @@ const String AudioDeviceManager::setAudioDevice (const String& deviceNameToUse,
         else
         {
             deleteAndZero (currentAudioDevice);
-            error << T("No such device: ") << deviceNameToUse;
+            error << "No such device: " << deviceNameToUse;
         }
     }
     else

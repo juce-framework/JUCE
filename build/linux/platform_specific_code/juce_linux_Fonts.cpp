@@ -130,7 +130,7 @@ public:
 
         if (fontDirs.size() == 0)
         {
-            XmlDocument fontsConfig (File (T("/etc/fonts/fonts.conf")));
+            XmlDocument fontsConfig (File ("/etc/fonts/fonts.conf"));
             XmlElement* const fontsInfo = fontsConfig.getDocumentElement();
 
             if (fontsInfo != 0)
@@ -145,7 +145,7 @@ public:
         }
 
         if (fontDirs.size() == 0)
-            fontDirs.add (T("/usr/X11R6/lib/X11/fonts"));
+            fontDirs.add ("/usr/X11R6/lib/X11/fonts");
 
         for (int i = 0; i < fontDirs.size(); ++i)
             enumerateFaces (fontDirs[i]);

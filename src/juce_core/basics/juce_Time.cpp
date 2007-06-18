@@ -256,12 +256,12 @@ const String Time::toString (const bool includeDate,
 
     if (includeDate)
     {
-        result << getDayOfMonth() << T(' ')
-               << getMonthName (true) << T(' ')
+        result << getDayOfMonth() << ' '
+               << getMonthName (true) << ' '
                << getYear();
 
         if (includeTime)
-            result << T(' ');
+            result << ' ';
     }
 
     if (includeTime)
@@ -283,7 +283,7 @@ const String Time::toString (const bool includeDate,
         }
 
         if (! use24HourClock)
-            result << (isAfternoon() ? T("pm") : T("am"));
+            result << (isAfternoon() ? "pm" : "am");
     }
 
     return result.trimEnd();
@@ -428,7 +428,7 @@ const String Time::getTimeZone() const throw()
         if (zone[0].length() > 3
              && zone[0].containsIgnoreCase (T("daylight"))
              && zone[0].contains (T("GMT")))
-            zone[0] = T("BST");
+            zone[0] = "BST";
     }
 
     return zone[0].substring (0, 3);

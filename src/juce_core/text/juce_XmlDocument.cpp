@@ -64,7 +64,7 @@ static bool isXmlIdentifierChar_Slow (const tchar c)
 class FileInputSource  : public XmlInputSource
 {
 public:
-    FileInputSource (const File& file_)
+    FileInputSource (const File& file_) throw()
         : file (file_)
     {
     }
@@ -117,75 +117,66 @@ void XmlDocument::setInputSource (XmlInputSource* const newSource) throw()
 
 XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
 {
-    JUCE_TRY
+    String textToParse (originalText);
+
+    if (textToParse.isEmpty() && inputSource != 0)
     {
-        String textToParse (originalText);
+        InputStream* const in = inputSource->createInputStreamFor (String::empty);
 
-        if (textToParse.isEmpty() && inputSource != 0)
+        if (in != 0)
         {
-            InputStream* const in = inputSource->createInputStreamFor (String::empty);
+            MemoryBlock data;
 
-            if (in != 0)
+            in->readIntoMemoryBlock (data, onlyReadOuterDocumentElement ? 8192 : -1);
+            delete in;
+
+            if (data.getSize() >= 2
+                 && ((data[0] == (char)-2 && data[1] == (char)-1)
+                      || (data[0] == (char)-1 && data[1] == (char)-2)))
             {
-                MemoryBlock data;
-
-                in->readIntoMemoryBlock (data, onlyReadOuterDocumentElement ? 8192 : -1);
-                delete in;
-
-                if (data.getSize() >= 2
-                     && ((data[0] == (char)-2 && data[1] == (char)-1)
-                          || (data[0] == (char)-1 && data[1] == (char)-2)))
-                {
-                    textToParse = String::createStringFromData ((const char*) data.getData(), data.getSize());
-                }
-                else
-                {
-                    textToParse = String::fromUTF8 ((const uint8*) data.getData(), data.getSize());
-                }
-
-                if (! onlyReadOuterDocumentElement)
-                    originalText = textToParse;
-            }
-        }
-
-        input = textToParse;
-        lastError = String::empty;
-        errorOccurred = false;
-        outOfData = false;
-        needToLoadDTD = true;
-
-        for (int i = 0; i < 128; ++i)
-            identifierLookupTable[i] = isXmlIdentifierChar_Slow ((tchar) i);
-
-        if (textToParse.isEmpty())
-        {
-            lastError = T("not enough input");
-        }
-        else
-        {
-            skipHeader();
-
-            if (input != 0)
-            {
-                XmlElement* const result = readNextElement (! onlyReadOuterDocumentElement);
-
-                if (errorOccurred && (result != 0))
-                    delete result;
-                else
-                    return result;
+                textToParse = String::createStringFromData ((const char*) data.getData(), data.getSize());
             }
             else
             {
-                lastError = T("incorrect xml header");
+                textToParse = String::fromUTF8 ((const uint8*) data.getData(), data.getSize());
             }
+
+            if (! onlyReadOuterDocumentElement)
+                originalText = textToParse;
         }
     }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-    catch (...)
+
+    input = textToParse;
+    lastError = String::empty;
+    errorOccurred = false;
+    outOfData = false;
+    needToLoadDTD = true;
+
+    for (int i = 0; i < 128; ++i)
+        identifierLookupTable[i] = isXmlIdentifierChar_Slow ((tchar) i);
+
+    if (textToParse.isEmpty())
     {
-        lastError = T("internal error");
+        lastError = "not enough input";
     }
-#endif
+    else
+    {
+        skipHeader();
+
+        if (input != 0)
+        {
+            XmlElement* const result = readNextElement (! onlyReadOuterDocumentElement);
+
+            if (errorOccurred)
+                delete result;
+            else
+                return result;
+        }
+        else
+        {
+            lastError = "incorrect xml header";
+        }
+    }
 
     return 0;
 }

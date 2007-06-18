@@ -60,7 +60,7 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
      mode (mode_),
      listeners (2),
      previewComp (previewComp_),
-     thread (T("Juce FileBrowser"))
+     thread ("Juce FileBrowser")
 {
     String filename;
 
@@ -479,7 +479,7 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
     separators.setBit (rootPaths.size());
 
     OwnedArray <File> volumes;
-    File vol (T("/Volumes"));
+    File vol ("/Volumes");
     vol.findChildFiles (volumes, File::findDirectories, false);
 
     for (int i = 0; i < volumes.size(); ++i)
