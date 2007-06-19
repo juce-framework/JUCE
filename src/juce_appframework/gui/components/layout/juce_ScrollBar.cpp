@@ -50,7 +50,6 @@ public:
           direction (direction_),
           owner (owner_)
     {
-        setRepeatSpeed (100, 50, 10);
         setWantsKeyboardFocus (false);
     }
 
@@ -98,9 +97,9 @@ ScrollBar::ScrollBar (const bool vertical_,
       thumbAreaSize (0),
       thumbStart (0),
       thumbSize (0),
-      initialDelayInMillisecs (-1),
-      repeatDelayInMillisecs (0),
-      minimumDelayInMillisecs (-1),
+      initialDelayInMillisecs (100),
+      repeatDelayInMillisecs (50),
+      minimumDelayInMillisecs (10),
       vertical (vertical_),
       isDraggingThumb (false),
       upButton (0),
