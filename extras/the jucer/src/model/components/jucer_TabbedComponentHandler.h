@@ -154,6 +154,8 @@ public:
 
             properties.add (new TabContentConstructorParamsProperty (t, document, i));
 
+            properties.add (new TabMoveProperty (t, document, i, t->getNumTabs()));
+
             panel.addSection (T("Tab ") + String (i), properties);
         }
     }
@@ -1158,6 +1160,90 @@ private:
 
             int tabIndex;
             String newValue, oldValue;
+        };
+    };
+
+    //==============================================================================
+    class TabMoveProperty   : public ButtonPropertyComponent
+    {
+    public:
+        TabMoveProperty (TabbedComponent* comp, JucerDocument& document_, 
+                         const int tabIndex_, const int totalNumTabs_)
+            : ButtonPropertyComponent (T("add tab"), false),
+              component (comp),
+              document (document_),
+              tabIndex (tabIndex_),
+              totalNumTabs (totalNumTabs_)
+        {
+
+        }
+
+        void buttonClicked()
+        {
+            PopupMenu m;
+            m.addItem (1, T("Move this tab up"), tabIndex > 0);
+            m.addItem (2, T("Move this tab down"), tabIndex < totalNumTabs - 1);
+
+            const int r = m.showAt (this);
+
+            if (r != 0)
+            {
+                document.perform (new MoveTabAction (component, *document.getComponentLayout(), tabIndex, tabIndex + (r == 2 ? 1 : -1)),
+                                  T("Move a tab"));
+            }
+        }
+
+        const String getButtonText() const
+        {
+            return T("Move this tab...");
+        }
+
+        TabbedComponent* const component;
+        JucerDocument& document;
+        const int tabIndex, totalNumTabs;
+
+    private:
+        class MoveTabAction  : public ComponentUndoableAction <TabbedComponent>
+        {
+        public:
+            MoveTabAction (TabbedComponent* const comp, ComponentLayout& layout, 
+                           const int oldIndex_, const int newIndex_)
+                : ComponentUndoableAction <TabbedComponent> (comp, layout),
+                  oldIndex (oldIndex_), 
+                  newIndex (newIndex_)
+            {
+            }
+
+            void move (int from, int to)
+            {
+                showCorrectTab();
+
+                XmlElement* const state = getTabState (getComponent(), from);
+
+                getComponent()->removeTab (from);
+                addNewTab (getComponent(), to);
+
+                restoreTabState (getComponent(), to, *state);
+                delete state;
+
+                layout.getDocument()->refreshAllPropertyComps();
+                changed();
+            }
+
+            bool perform()
+            {
+                move (oldIndex, newIndex);
+                return true;
+            }
+
+            bool undo()
+            {
+                move (newIndex, oldIndex);
+                return true;
+            }
+
+        private:
+            const int oldIndex, newIndex;
         };
     };
 };
