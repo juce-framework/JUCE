@@ -78,7 +78,7 @@ Button::~Button()
 }
 
 //==============================================================================
-void Button::setButtonText (const String& newText)
+void Button::setButtonText (const String& newText) throw()
 {
     if (text != newText)
     {
@@ -145,7 +145,7 @@ void Button::setToggleState (const bool shouldBeOn,
     }
 }
 
-void Button::setClickingTogglesState (const bool shouldToggle)
+void Button::setClickingTogglesState (const bool shouldToggle) throw()
 {
     clickTogglesState = shouldToggle;
 
@@ -333,7 +333,7 @@ void Button::handleCommandMessage (int commandId)
 }
 
 //==============================================================================
-void Button::addButtonListener (ButtonListener* const newListener)
+void Button::addButtonListener (ButtonListener* const newListener) throw()
 {
     jassert (newListener != 0);
     jassert (! buttonListeners.contains (newListener)); // trying to add a listener to the list twice!
@@ -342,7 +342,7 @@ void Button::addButtonListener (ButtonListener* const newListener)
         buttonListeners.add (newListener);
 }
 
-void Button::removeButtonListener (ButtonListener* const listener)
+void Button::removeButtonListener (ButtonListener* const listener) throw()
 {
     jassert (buttonListeners.contains (listener)); // trying to remove a listener that isn't on the list!
 

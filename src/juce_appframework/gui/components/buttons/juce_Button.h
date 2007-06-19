@@ -95,7 +95,7 @@ public:
 
         @see getButtonText
     */
-    void setButtonText (const String& newText);
+    void setButtonText (const String& newText) throw();
 
     /** Returns the text displayed in the button.
 
@@ -153,7 +153,7 @@ public:
         If set to true, then before the clicked() callback occurs, the toggle-state
         of the button is flipped.
     */
-    void setClickingTogglesState (const bool shouldToggle);
+    void setClickingTogglesState (const bool shouldToggle) throw();
 
     /** Returns true if this button is set to be an automatic toggle-button.
 
@@ -194,13 +194,13 @@ public:
 
         @see removeButtonListener
     */
-    void addButtonListener (ButtonListener* const newListener);
+    void addButtonListener (ButtonListener* const newListener) throw();
 
     /** Removes a previously-registered button listener
 
         @see addButtonListener
     */
-    void removeButtonListener (ButtonListener* const listener);
+    void removeButtonListener (ButtonListener* const listener) throw();
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
