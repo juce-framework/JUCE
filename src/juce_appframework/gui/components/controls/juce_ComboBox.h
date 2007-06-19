@@ -111,7 +111,7 @@ public:
         The default is Justification::centredLeft. The text is displayed using a
         Label component inside the ComboBox.
     */
-    void setJustificationType (const Justification& justification);
+    void setJustificationType (const Justification& justification) throw();
 
     /** Returns the current justification for the text box.
         @see setJustificationType
@@ -127,13 +127,13 @@ public:
         @see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
     */
     void addItem (const String& newItemText,
-                  const int newItemId);
+                  const int newItemId) throw();
 
     /** Adds a separator line to the drop-down list.
 
         This is like adding a separator to a popup menu. See PopupMenu::addSeparator().
     */
-    void addSeparator();
+    void addSeparator() throw();
 
     /** Adds a heading to the drop-down list, so that you can group the items into
         different sections.
@@ -144,7 +144,7 @@ public:
 
         @see addItem, addSeparator
     */
-    void addSectionHeading (const String& headingName);
+    void addSectionHeading (const String& headingName) throw();
 
     /** This allows items in the drop-down list to be selectively disabled.
 
@@ -155,12 +155,12 @@ public:
         current selection - it just stops the user choosing that item from the list.
     */
     void setItemEnabled (const int itemId,
-                         const bool isEnabled);
+                         const bool isEnabled) throw();
 
     /** Changes the text for an existing item.
     */
     void changeItemText (const int itemId,
-                         const String& newText);
+                         const String& newText) throw();
 
     /** Removes all the items from the drop-down list.
 
@@ -172,7 +172,7 @@ public:
 
         Note that this doesn't include headers or separators.
     */
-    int getNumItems() const;
+    int getNumItems() const throw();
 
     /** Returns the text for one of the items in the list.
 
@@ -180,7 +180,7 @@ public:
 
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    const String getItemText (const int index) const;
+    const String getItemText (const int index) const throw();
 
     /** Returns the ID for one of the items in the list.
 
@@ -188,7 +188,7 @@ public:
 
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    int getItemId (const int index) const;
+    int getItemId (const int index) const throw();
 
     //==============================================================================
     /** Returns the ID of the item that's currently shown in the box.
@@ -199,7 +199,7 @@ public:
 
         @see setSelectedId, getSelectedItemIndex, getText
     */
-    int getSelectedId() const;
+    int getSelectedId() const throw();
 
     /** Sets one of the items to be the current selection.
 
@@ -223,7 +223,7 @@ public:
 
         @see setSelectedItemIndex, getSelectedId, getText
     */
-    int getSelectedItemIndex() const;
+    int getSelectedItemIndex() const throw();
 
     /** Sets one of the items to be the current selection.
 
@@ -247,7 +247,7 @@ public:
 
         @see setText, getSelectedId, getSelectedItemIndex
     */
-    const String getText() const;
+    const String getText() const throw();
 
     /** Sets the contents of the combo-box's text field.
 
@@ -276,7 +276,7 @@ public:
 
         @see getTextWhenNothingSelected
     */
-    void setTextWhenNothingSelected (const String& newMessage);
+    void setTextWhenNothingSelected (const String& newMessage) throw();
 
     /** Returns the text that is shown when no item is selected.
 
@@ -291,7 +291,7 @@ public:
         By default it just says "no choices", but this lets you change it to something more
         meaningful.
     */
-    void setTextWhenNoChoicesAvailable (const String& newMessage);
+    void setTextWhenNoChoicesAvailable (const String& newMessage) throw();
 
     /** Returns the text shown when no items have been added to the list.
         @see setTextWhenNoChoicesAvailable
@@ -371,8 +371,8 @@ private:
 
     void showPopup();
 
-    ItemInfo* getItemForId (const int id) const;
-    ItemInfo* getItemForIndex (const int index) const;
+    ItemInfo* getItemForId (const int id) const throw();
+    ItemInfo* getItemForIndex (const int index) const throw();
 
     ComboBox (const ComboBox&);
     const ComboBox& operator= (const ComboBox&);

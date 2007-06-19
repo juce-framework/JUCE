@@ -48,7 +48,7 @@ class JUCE_API  ChangeBroadcaster
 public:
     //==============================================================================
     /** Creates an ChangeBroadcaster. */
-    JUCE_CALLTYPE ChangeBroadcaster() throw();
+    ChangeBroadcaster() throw();
 
     /** Destructor. */
     virtual ~ChangeBroadcaster();
@@ -58,16 +58,16 @@ public:
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void JUCE_CALLTYPE addChangeListener (ChangeListener* const listener) throw();
+    void addChangeListener (ChangeListener* const listener) throw();
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void JUCE_CALLTYPE removeChangeListener (ChangeListener* const listener) throw();
+    void removeChangeListener (ChangeListener* const listener) throw();
 
     /** Removes all listeners from the list. */
-    void JUCE_CALLTYPE removeAllChangeListeners() throw();
+    void removeAllChangeListeners() throw();
 
     //==============================================================================
     /** Broadcasts a change message to all the registered listeners.
@@ -78,18 +78,18 @@ public:
 
         @see ChangeListenerList::sendActionMessage
     */
-    void JUCE_CALLTYPE sendChangeMessage (void* objectThatHasChanged) throw();
+    void sendChangeMessage (void* objectThatHasChanged) throw();
 
     /** Sends a synchronous change message to all the registered listeners.
 
         @see ChangeListenerList::sendSynchronousChangeMessage
     */
-    void JUCE_CALLTYPE sendSynchronousChangeMessage (void* objectThatHasChanged);
+    void sendSynchronousChangeMessage (void* objectThatHasChanged);
 
     /** If a change message has been sent but not yet dispatched, this will
         use sendSynchronousChangeMessage() to make the callback immediately.
     */
-    void JUCE_CALLTYPE dispatchPendingMessages();
+    void dispatchPendingMessages();
 
 
 private:

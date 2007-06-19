@@ -104,20 +104,20 @@ public:
                                             the user has finished typing and pressed the return
                                             key.
     */
-    const String getText (const bool returnActiveEditorContents = false) const;
+    const String getText (const bool returnActiveEditorContents = false) const throw();
 
     //==============================================================================
     /** Changes the font to use to draw the text.
 
         @see getFont
     */
-    void setFont (const Font& newFont);
+    void setFont (const Font& newFont) throw();
 
     /** Returns the font currently being used.
 
         @see setFont
     */
-    const Font getFont() const;
+    const Font& getFont() const throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the label.
@@ -143,7 +143,7 @@ public:
 
         (The default is Justification::centredLeft)
     */
-    void setJustificationType (const Justification& justification);
+    void setJustificationType (const Justification& justification) throw();
 
     /** Returns the type of justification, as set in setJustificationType(). */
     const Justification getJustificationType() const throw()                    { return justification; }
@@ -204,7 +204,7 @@ public:
     */
     void setEditable (const bool editOnSingleClick,
                       const bool editOnDoubleClick = false,
-                      const bool lossOfFocusDiscardsChanges = false);
+                      const bool lossOfFocusDiscardsChanges = false) throw();
 
     /** Returns true if this option was set using setEditable(). */
     bool isEditableOnSingleClick() const throw()                        { return editSingleClick; }
@@ -235,7 +235,7 @@ public:
     void hideEditor (const bool discardCurrentEditorContents);
 
     /** Returns true if the editor is currently focused and active. */
-    bool isBeingEdited() const;
+    bool isBeingEdited() const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

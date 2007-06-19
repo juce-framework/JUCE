@@ -46,7 +46,7 @@ BEGIN_JUCE_NAMESPACE
 TypefaceGlyphInfo::TypefaceGlyphInfo (const juce_wchar character_,
                                       const Path& shape,
                                       const float horizontalSeparation,
-                                      Typeface* const typeface_)
+                                      Typeface* const typeface_) throw()
     : character (character_),
       path (shape),
       width (horizontalSeparation),
@@ -54,11 +54,11 @@ TypefaceGlyphInfo::TypefaceGlyphInfo (const juce_wchar character_,
 {
 }
 
-TypefaceGlyphInfo::~TypefaceGlyphInfo()
+TypefaceGlyphInfo::~TypefaceGlyphInfo() throw()
 {
 }
 
-float TypefaceGlyphInfo::getHorizontalSpacing (const juce_wchar subsequentCharacter) const
+float TypefaceGlyphInfo::getHorizontalSpacing (const juce_wchar subsequentCharacter) const throw()
 {
     if (subsequentCharacter != 0)
     {
@@ -74,7 +74,7 @@ float TypefaceGlyphInfo::getHorizontalSpacing (const juce_wchar subsequentCharac
 }
 
 void TypefaceGlyphInfo::addKerningPair (const juce_wchar subsequentCharacter,
-                                        const float extraKerningAmount)
+                                        const float extraKerningAmount) throw()
 {
     const int numPairs = getNumKerningPairs();
     kerningPairs.setSize ((numPairs + 1) * sizeof (KerningPair));
@@ -84,19 +84,19 @@ void TypefaceGlyphInfo::addKerningPair (const juce_wchar subsequentCharacter,
     p.kerningAmount = extraKerningAmount;
 }
 
-TypefaceGlyphInfo::KerningPair& TypefaceGlyphInfo::getKerningPair (const int index) const
+TypefaceGlyphInfo::KerningPair& TypefaceGlyphInfo::getKerningPair (const int index) const throw()
 {
     return ((KerningPair*) kerningPairs.getData()) [index];
 }
 
-int TypefaceGlyphInfo::getNumKerningPairs() const
+int TypefaceGlyphInfo::getNumKerningPairs() const throw()
 {
     return kerningPairs.getSize() / sizeof (KerningPair);
 }
 
 
 //==============================================================================
-Typeface::Typeface()
+Typeface::Typeface() throw()
     : hash (0),
       isFullyPopulated (false)
 {
@@ -136,7 +136,7 @@ Typeface::~Typeface()
     clear();
 }
 
-const Typeface& Typeface::operator= (const Typeface& other)
+const Typeface& Typeface::operator= (const Typeface& other) throw()
 {
     if (this != &other)
     {
@@ -158,7 +158,7 @@ const Typeface& Typeface::operator= (const Typeface& other)
     return *this;
 }
 
-void Typeface::updateHashCode()
+void Typeface::updateHashCode() throw()
 {
     hash = typefaceName.hashCode();
 
@@ -169,7 +169,7 @@ void Typeface::updateHashCode()
         hash ^= 0xffff0000;
 }
 
-void Typeface::clear()
+void Typeface::clear() throw()
 {
     zeromem (lookupTable, sizeof (lookupTable));
     typefaceName = String::empty;
@@ -265,7 +265,7 @@ void Typeface::serialise (OutputStream& outputStream)
     }
 }
 
-const Path* Typeface::getOutlineForGlyph (const juce_wchar character)
+const Path* Typeface::getOutlineForGlyph (const juce_wchar character) throw()
 {
     const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) getGlyph (character);
 
@@ -275,7 +275,7 @@ const Path* Typeface::getOutlineForGlyph (const juce_wchar character)
         return 0;
 }
 
-const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character)
+const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character) throw()
 {
     if (character > 0 && character < 128 && lookupTable [character] > 0)
         return (const TypefaceGlyphInfo*) glyphs [(int)lookupTable [character]];
@@ -325,7 +325,7 @@ const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character)
 
 void Typeface::addGlyph (const juce_wchar character,
                          const Path& path,
-                         const float horizontalSpacing)
+                         const float horizontalSpacing) throw()
 {
     if (character > 0 && character < 128)
         lookupTable [character] = (short) glyphs.size();
@@ -336,7 +336,7 @@ void Typeface::addGlyph (const juce_wchar character,
                                        this));
 }
 
-void Typeface::addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy)
+void Typeface::addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy) throw()
 {
     if (glyphInfoToCopy != 0)
     {
@@ -356,7 +356,7 @@ void Typeface::addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy)
 
 void Typeface::addKerningPair (const juce_wchar char1,
                                const juce_wchar char2,
-                               const float extraAmount)
+                               const float extraAmount) throw()
 {
     TypefaceGlyphInfo* const g = (TypefaceGlyphInfo*) getGlyph (char1);
 
@@ -444,7 +444,7 @@ public:
     }
 
     //==============================================================================
-    static TypefaceCache* getInstance()
+    static TypefaceCache* getInstance() throw()
     {
         if (typefaceCacheInstance == 0)
             typefaceCacheInstance = new TypefaceCache();
@@ -453,7 +453,7 @@ public:
     }
 
     //==============================================================================
-    const Typeface::Ptr findTypefaceFor (const Font& font)
+    const Typeface::Ptr findTypefaceFor (const Font& font) throw()
     {
         const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
 
@@ -497,7 +497,7 @@ public:
     }
 };
 
-const Typeface::Ptr Typeface::getTypefaceFor (const Font& font)
+const Typeface::Ptr Typeface::getTypefaceFor (const Font& font) throw()
 {
     return TypefaceCache::getInstance()->findTypefaceFor (font);
 }

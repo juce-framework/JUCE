@@ -53,7 +53,7 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext()
 }
 
 //==============================================================================
-JUCE_CALLTYPE Graphics::Graphics (Image& imageToDrawOnto) throw()
+Graphics::Graphics (Image& imageToDrawOnto) throw()
     : context (imageToDrawOnto.createLowLevelContext()),
       ownsContext (true),
       state (new GraphicsState()),
@@ -61,7 +61,7 @@ JUCE_CALLTYPE Graphics::Graphics (Image& imageToDrawOnto) throw()
 {
 }
 
-JUCE_CALLTYPE Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
+Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
     : context (internalContext),
       ownsContext (false),
       state (new GraphicsState()),
@@ -69,7 +69,7 @@ JUCE_CALLTYPE Graphics::Graphics (LowLevelGraphicsContext* const internalContext
 {
 }
 
-JUCE_CALLTYPE Graphics::~Graphics() throw()
+Graphics::~Graphics() throw()
 {
     delete state;
 
@@ -78,55 +78,55 @@ JUCE_CALLTYPE Graphics::~Graphics() throw()
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::resetToDefaultState() throw()
+void Graphics::resetToDefaultState() throw()
 {
     setColour (Colours::black);
     state->font.resetToDefaultState();
     state->quality = defaultQuality;
 }
 
-bool JUCE_CALLTYPE Graphics::isVectorDevice() const throw()
+bool Graphics::isVectorDevice() const throw()
 {
     return context->isVectorDevice();
 }
 
-bool JUCE_CALLTYPE Graphics::reduceClipRegion (const int x, const int y,
-                                               const int w, const int h) throw()
+bool Graphics::reduceClipRegion (const int x, const int y,
+                                 const int w, const int h) throw()
 {
     saveStateIfPending();
     return context->reduceClipRegion (x, y, w, h);
 }
 
-bool JUCE_CALLTYPE Graphics::reduceClipRegion (const RectangleList& clipRegion) throw()
+bool Graphics::reduceClipRegion (const RectangleList& clipRegion) throw()
 {
     saveStateIfPending();
     return context->reduceClipRegion (clipRegion);
 }
 
-void JUCE_CALLTYPE Graphics::excludeClipRegion (const int x, const int y,
-                                                const int w, const int h) throw()
+void Graphics::excludeClipRegion (const int x, const int y,
+                                  const int w, const int h) throw()
 {
     saveStateIfPending();
     context->excludeClipRegion (x, y, w, h);
 }
 
-bool JUCE_CALLTYPE Graphics::isClipEmpty() const throw()
+bool Graphics::isClipEmpty() const throw()
 {
     return context->isClipEmpty();
 }
 
-const Rectangle JUCE_CALLTYPE Graphics::getClipBounds() const throw()
+const Rectangle Graphics::getClipBounds() const throw()
 {
     return context->getClipBounds();
 }
 
-void JUCE_CALLTYPE Graphics::saveState() throw()
+void Graphics::saveState() throw()
 {
     saveStateIfPending();
     saveStatePending = true;
 }
 
-void JUCE_CALLTYPE Graphics::restoreState() throw()
+void Graphics::restoreState() throw()
 {
     if (saveStatePending)
     {
@@ -154,7 +154,7 @@ void JUCE_CALLTYPE Graphics::restoreState() throw()
     }
 }
 
-void JUCE_CALLTYPE Graphics::saveStateIfPending() throw()
+void Graphics::saveStateIfPending() throw()
 {
     if (saveStatePending)
     {
@@ -165,39 +165,39 @@ void JUCE_CALLTYPE Graphics::saveStateIfPending() throw()
     }
 }
 
-void JUCE_CALLTYPE Graphics::setOrigin (const int newOriginX,
-                                        const int newOriginY) throw()
+void Graphics::setOrigin (const int newOriginX,
+                          const int newOriginY) throw()
 {
     saveStateIfPending();
     context->setOrigin (newOriginX, newOriginY);
 }
 
-bool JUCE_CALLTYPE Graphics::clipRegionIntersects (const int x, const int y,
-                                                   const int w, const int h) const throw()
+bool Graphics::clipRegionIntersects (const int x, const int y,
+                                     const int w, const int h) const throw()
 {
     return context->clipRegionIntersects (x, y, w, h);
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::setColour (const Colour& newColour) throw()
+void Graphics::setColour (const Colour& newColour) throw()
 {
     saveStateIfPending();
     state->colour = newColour;
     deleteAndZero (state->brush);
 }
 
-const Colour& JUCE_CALLTYPE Graphics::getCurrentColour() const throw()
+const Colour& Graphics::getCurrentColour() const throw()
 {
     return state->colour;
 }
 
-void JUCE_CALLTYPE Graphics::setOpacity (const float newOpacity) throw()
+void Graphics::setOpacity (const float newOpacity) throw()
 {
     saveStateIfPending();
     state->colour = state->colour.withAlpha (newOpacity);
 }
 
-void JUCE_CALLTYPE Graphics::setBrush (const Brush* const newBrush) throw()
+void Graphics::setBrush (const Brush* const newBrush) throw()
 {
     saveStateIfPending();
     delete state->brush;
@@ -209,14 +209,14 @@ void JUCE_CALLTYPE Graphics::setBrush (const Brush* const newBrush) throw()
 }
 
 //==============================================================================
-JUCE_CALLTYPE Graphics::GraphicsState::GraphicsState() throw()
+Graphics::GraphicsState::GraphicsState() throw()
     : colour (Colours::black),
       brush (0),
       quality (defaultQuality)
 {
 }
 
-JUCE_CALLTYPE Graphics::GraphicsState::GraphicsState (const GraphicsState& other) throw()
+Graphics::GraphicsState::GraphicsState (const GraphicsState& other) throw()
     : colour (other.colour),
       brush (other.brush != 0 ? other.brush->createCopy() : 0),
       font (other.font),
@@ -224,34 +224,34 @@ JUCE_CALLTYPE Graphics::GraphicsState::GraphicsState (const GraphicsState& other
 {
 }
 
-JUCE_CALLTYPE Graphics::GraphicsState::~GraphicsState() throw()
+Graphics::GraphicsState::~GraphicsState() throw()
 {
     delete brush;
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::setFont (const Font& newFont) throw()
+void Graphics::setFont (const Font& newFont) throw()
 {
     saveStateIfPending();
     state->font = newFont;
 }
 
-void JUCE_CALLTYPE Graphics::setFont (const float newFontHeight,
-                                      const int newFontStyleFlags) throw()
+void Graphics::setFont (const float newFontHeight,
+                        const int newFontStyleFlags) throw()
 {
     saveStateIfPending();
     state->font.setSizeAndStyle (newFontHeight, newFontStyleFlags, 1.0f, 0.0f);
 }
 
-const Font& JUCE_CALLTYPE Graphics::getCurrentFont() const throw()
+const Font& Graphics::getCurrentFont() const throw()
 {
     return state->font;
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::drawSingleLineText (const String& text,
-                                                 const int startX,
-                                                 const int baselineY) const throw()
+void Graphics::drawSingleLineText (const String& text,
+                                   const int startX,
+                                   const int baselineY) const throw()
 {
     if (text.isNotEmpty()
          && startX < context->getClipBounds().getRight())
@@ -262,8 +262,8 @@ void JUCE_CALLTYPE Graphics::drawSingleLineText (const String& text,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawTextAsPath (const String& text,
-                                             const AffineTransform& transform) const throw()
+void Graphics::drawTextAsPath (const String& text,
+                               const AffineTransform& transform) const throw()
 {
     if (text.isNotEmpty())
     {
@@ -273,10 +273,10 @@ void JUCE_CALLTYPE Graphics::drawTextAsPath (const String& text,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawMultiLineText (const String& text,
-                                                const int startX,
-                                                const int baselineY,
-                                                const int maximumLineWidth) const throw()
+void Graphics::drawMultiLineText (const String& text,
+                                  const int startX,
+                                  const int baselineY,
+                                  const int maximumLineWidth) const throw()
 {
     if (text.isNotEmpty()
          && startX < context->getClipBounds().getRight())
@@ -289,13 +289,13 @@ void JUCE_CALLTYPE Graphics::drawMultiLineText (const String& text,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawText (const String& text,
-                                       const int x,
-                                       const int y,
-                                       const int width,
-                                       const int height,
-                                       const Justification& justificationType,
-                                       const bool useEllipsesIfTooBig) const throw()
+void Graphics::drawText (const String& text,
+                         const int x,
+                         const int y,
+                         const int width,
+                         const int height,
+                         const Justification& justificationType,
+                         const bool useEllipsesIfTooBig) const throw()
 {
     if (text.isNotEmpty() && context->clipRegionIntersects (x, y, width, height))
     {
@@ -313,14 +313,14 @@ void JUCE_CALLTYPE Graphics::drawText (const String& text,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawFittedText (const String& text,
-                                             const int x,
-                                             const int y,
-                                             const int width,
-                                             const int height,
-                                             const Justification& justification,
-                                             const int maximumNumberOfLines,
-                                             const float minimumHorizontalScale) const throw()
+void Graphics::drawFittedText (const String& text,
+                               const int x,
+                               const int y,
+                               const int width,
+                               const int height,
+                               const Justification& justification,
+                               const int maximumNumberOfLines,
+                               const float minimumHorizontalScale) const throw()
 {
     if (text.isNotEmpty()
          && width > 0 && height > 0
@@ -340,16 +340,16 @@ void JUCE_CALLTYPE Graphics::drawFittedText (const String& text,
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::fillRect (int x,
-                                       int y,
-                                       int width,
-                                       int height) const throw()
+void Graphics::fillRect (int x,
+                         int y,
+                         int width,
+                         int height) const throw()
 {
     SolidColourBrush colourBrush (state->colour);
     (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush).paintRectangle (*context, x, y, width, height);
 }
 
-void JUCE_CALLTYPE Graphics::fillRect (const Rectangle& r) const throw()
+void Graphics::fillRect (const Rectangle& r) const throw()
 {
     fillRect (r.getX(),
               r.getY(),
@@ -357,17 +357,17 @@ void JUCE_CALLTYPE Graphics::fillRect (const Rectangle& r) const throw()
               r.getHeight());
 }
 
-void JUCE_CALLTYPE Graphics::fillRect (const float x,
-                                       const float y,
-                                       const float width,
-                                       const float height) const throw()
+void Graphics::fillRect (const float x,
+                         const float y,
+                         const float width,
+                         const float height) const throw()
 {
     Path p;
     p.addRectangle (x, y, width, height);
     fillPath (p);
 }
 
-void JUCE_CALLTYPE Graphics::setPixel (int x, int y) const throw()
+void Graphics::setPixel (int x, int y) const throw()
 {
     if (context->clipRegionIntersects (x, y, 1, 1))
     {
@@ -376,12 +376,12 @@ void JUCE_CALLTYPE Graphics::setPixel (int x, int y) const throw()
     }
 }
 
-void JUCE_CALLTYPE Graphics::fillAll() const throw()
+void Graphics::fillAll() const throw()
 {
     fillRect (context->getClipBounds());
 }
 
-void JUCE_CALLTYPE Graphics::fillAll (const Colour& colourToUse) const throw()
+void Graphics::fillAll (const Colour& colourToUse) const throw()
 {
     if (! colourToUse.isTransparent())
     {
@@ -394,8 +394,8 @@ void JUCE_CALLTYPE Graphics::fillAll (const Colour& colourToUse) const throw()
 
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::fillPath (const Path& path,
-                                       const AffineTransform& transform) const throw()
+void Graphics::fillPath (const Path& path,
+                         const AffineTransform& transform) const throw()
 {
     if ((! context->isClipEmpty()) && ! path.isEmpty())
     {
@@ -404,9 +404,9 @@ void JUCE_CALLTYPE Graphics::fillPath (const Path& path,
     }
 }
 
-void JUCE_CALLTYPE Graphics::strokePath (const Path& path,
-                                         const PathStrokeType& strokeType,
-                                         const AffineTransform& transform) const throw()
+void Graphics::strokePath (const Path& path,
+                           const PathStrokeType& strokeType,
+                           const AffineTransform& transform) const throw()
 {
     if (! state->colour.isTransparent())
     {
@@ -417,11 +417,11 @@ void JUCE_CALLTYPE Graphics::strokePath (const Path& path,
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::drawRect (const int x,
-                                       const int y,
-                                       const int width,
-                                       const int height,
-                                       const int lineThickness) const throw()
+void Graphics::drawRect (const int x,
+                         const int y,
+                         const int width,
+                         const int height,
+                         const int lineThickness) const throw()
 {
     SolidColourBrush colourBrush (state->colour);
     Brush& b = (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush);
@@ -432,14 +432,14 @@ void JUCE_CALLTYPE Graphics::drawRect (const int x,
     b.paintRectangle (*context, x, y + height - lineThickness, width, lineThickness);
 }
 
-void JUCE_CALLTYPE Graphics::drawBevel (const int x,
-                                        const int y,
-                                        const int width,
-                                        const int height,
-                                        const int bevelThickness,
-                                        const Colour& topLeftColour,
-                                        const Colour& bottomRightColour,
-                                        const bool useGradient) const throw()
+void Graphics::drawBevel (const int x,
+                          const int y,
+                          const int width,
+                          const int height,
+                          const int bevelThickness,
+                          const Colour& topLeftColour,
+                          const Colour& bottomRightColour,
+                          const bool useGradient) const throw()
 {
     if (clipRegionIntersects (x, y, width, height))
     {
@@ -460,57 +460,57 @@ void JUCE_CALLTYPE Graphics::drawBevel (const int x,
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::fillEllipse (const float x,
-                                          const float y,
-                                          const float width,
-                                          const float height) const throw()
+void Graphics::fillEllipse (const float x,
+                            const float y,
+                            const float width,
+                            const float height) const throw()
 {
     Path p;
     p.addEllipse (x, y, width, height);
     fillPath (p);
 }
 
-void JUCE_CALLTYPE Graphics::drawEllipse (const float x,
-                                          const float y,
-                                          const float width,
-                                          const float height,
-                                        const float lineThickness) const throw()
+void Graphics::drawEllipse (const float x,
+                            const float y,
+                            const float width,
+                            const float height,
+                            const float lineThickness) const throw()
 {
     Path p;
     p.addEllipse (x, y, width, height);
     strokePath (p, PathStrokeType (lineThickness));
 }
 
-void JUCE_CALLTYPE Graphics::fillRoundedRectangle (const float x,
-                                                   const float y,
-                                                   const float width,
-                                                   const float height,
-                                                   const float cornerSize) const throw()
+void Graphics::fillRoundedRectangle (const float x,
+                                     const float y,
+                                     const float width,
+                                     const float height,
+                                     const float cornerSize) const throw()
 {
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
     fillPath (p);
 }
 
-void JUCE_CALLTYPE Graphics::drawRoundedRectangle (const float x,
-                                                   const float y,
-                                                   const float width,
-                                                   const float height,
-                                                   const float cornerSize,
-                                                   const float lineThickness) const throw()
+void Graphics::drawRoundedRectangle (const float x,
+                                     const float y,
+                                     const float width,
+                                     const float height,
+                                     const float cornerSize,
+                                     const float lineThickness) const throw()
 {
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
     strokePath (p, PathStrokeType (lineThickness));
 }
 
-void JUCE_CALLTYPE Graphics::drawArrow (const float startX,
-                                        const float startY,
-                                        const float endX,
-                                        const float endY,
-                                        const float lineThickness,
-                                        const float arrowheadWidth,
-                                        const float arrowheadLength) const throw()
+void Graphics::drawArrow (const float startX,
+                          const float startY,
+                          const float endX,
+                          const float endY,
+                          const float lineThickness,
+                          const float arrowheadWidth,
+                          const float arrowheadLength) const throw()
 {
     Path p;
     p.addArrow (startX, startY, endX, endY,
@@ -518,12 +518,12 @@ void JUCE_CALLTYPE Graphics::drawArrow (const float startX,
     fillPath (p);
 }
 
-void JUCE_CALLTYPE Graphics::fillCheckerBoard (int x, int y,
-                                               int width, int height,
-                                               const int checkWidth,
-                                               const int checkHeight,
-                                               const Colour& colour1,
-                                               const Colour& colour2) const throw()
+void Graphics::fillCheckerBoard (int x, int y,
+                                 int width, int height,
+                                 const int checkWidth,
+                                 const int checkHeight,
+                                 const Colour& colour1,
+                                 const Colour& colour2) const throw()
 {
     jassert (checkWidth > 0 && checkHeight > 0); // can't be zero or less!
 
@@ -560,20 +560,20 @@ void JUCE_CALLTYPE Graphics::fillCheckerBoard (int x, int y,
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::drawVerticalLine (const int x, float top, float bottom) const throw()
+void Graphics::drawVerticalLine (const int x, float top, float bottom) const throw()
 {
     SolidColourBrush colourBrush (state->colour);
     (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush).paintVerticalLine (*context, x, top, bottom);
 }
 
-void JUCE_CALLTYPE Graphics::drawHorizontalLine (const int y, float left, float right) const throw()
+void Graphics::drawHorizontalLine (const int y, float left, float right) const throw()
 {
     SolidColourBrush colourBrush (state->colour);
     (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush).paintHorizontalLine (*context, y, left, right);
 }
 
-void JUCE_CALLTYPE Graphics::drawLine (float x1, float y1,
-                                       float x2, float y2) const throw()
+void Graphics::drawLine (float x1, float y1,
+                         float x2, float y2) const throw()
 {
     if (! context->isClipEmpty())
     {
@@ -582,35 +582,35 @@ void JUCE_CALLTYPE Graphics::drawLine (float x1, float y1,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawLine (const float startX,
-                                       const float startY,
-                                       const float endX,
-                                       const float endY,
-                                       const float lineThickness) const throw()
+void Graphics::drawLine (const float startX,
+                         const float startY,
+                         const float endX,
+                         const float endY,
+                         const float lineThickness) const throw()
 {
     Path p;
     p.addLineSegment (startX, startY, endX, endY, lineThickness);
     fillPath (p);
 }
 
-void JUCE_CALLTYPE Graphics::drawLine (const Line& line) const throw()
+void Graphics::drawLine (const Line& line) const throw()
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
 }
 
-void JUCE_CALLTYPE Graphics::drawLine (const Line& line,
-                                       const float lineThickness) const throw()
+void Graphics::drawLine (const Line& line,
+                         const float lineThickness) const throw()
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), lineThickness);
 }
 
-void JUCE_CALLTYPE Graphics::drawDashedLine (const float startX,
-                                             const float startY,
-                                             const float endX,
-                                             const float endY,
-                                             const float* const dashLengths,
-                                             const int numDashLengths,
-                                             const float lineThickness) const throw()
+void Graphics::drawDashedLine (const float startX,
+                               const float startY,
+                               const float endX,
+                               const float endY,
+                               const float* const dashLengths,
+                               const int numDashLengths,
+                               const float lineThickness) const throw()
 {
     const double dx = endX - startX;
     const double dy = endY - startY;
@@ -648,17 +648,17 @@ void JUCE_CALLTYPE Graphics::drawDashedLine (const float startX,
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQuality) throw()
+void Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQuality) throw()
 {
     saveStateIfPending();
     state->quality = newQuality;
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Graphics::drawImageAt (const Image* const imageToDraw,
-                                          const int topLeftX,
-                                          const int topLeftY,
-                                          const bool fillAlphaChannelWithCurrentBrush) const throw()
+void Graphics::drawImageAt (const Image* const imageToDraw,
+                            const int topLeftX,
+                            const int topLeftY,
+                            const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     if (imageToDraw != 0)
     {
@@ -672,13 +672,13 @@ void JUCE_CALLTYPE Graphics::drawImageAt (const Image* const imageToDraw,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawImageWithin (const Image* const imageToDraw,
-                                              const int destX,
-                                              const int destY,
-                                              const int destW,
-                                              const int destH,
-                                              const RectanglePlacement& placementWithinTarget,
-                                              const bool fillAlphaChannelWithCurrentBrush) const throw()
+void Graphics::drawImageWithin (const Image* const imageToDraw,
+                                const int destX,
+                                const int destY,
+                                const int destW,
+                                const int destH,
+                                const RectanglePlacement& placementWithinTarget,
+                                const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     if (imageToDraw != 0)
     {
@@ -706,10 +706,10 @@ void JUCE_CALLTYPE Graphics::drawImageWithin (const Image* const imageToDraw,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawImage (const Image* const imageToDraw,
-                                        int dx, int dy, int dw, int dh,
-                                        int sx, int sy, int sw, int sh,
-                                        const bool fillAlphaChannelWithCurrentBrush) const throw()
+void Graphics::drawImage (const Image* const imageToDraw,
+                          int dx, int dy, int dw, int dh,
+                          int sx, int sy, int sw, int sh,
+                          const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     if (imageToDraw == 0 || ! context->clipRegionIntersects  (dx, dy, dw, dh))
         return;
@@ -812,13 +812,13 @@ void JUCE_CALLTYPE Graphics::drawImage (const Image* const imageToDraw,
     }
 }
 
-void JUCE_CALLTYPE Graphics::drawImageTransformed (const Image* const imageToDraw,
-                                                   int sourceClipX,
-                                                   int sourceClipY,
-                                                   int sourceClipWidth,
-                                                   int sourceClipHeight,
-                                                   const AffineTransform& transform,
-                                                   const bool fillAlphaChannelWithCurrentBrush) const throw()
+void Graphics::drawImageTransformed (const Image* const imageToDraw,
+                                     int sourceClipX,
+                                     int sourceClipY,
+                                     int sourceClipWidth,
+                                     int sourceClipHeight,
+                                     const AffineTransform& transform,
+                                     const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     if (imageToDraw != 0
          && (! context->isClipEmpty())

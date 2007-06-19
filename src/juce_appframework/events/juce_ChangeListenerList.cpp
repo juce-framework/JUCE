@@ -37,17 +37,17 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-JUCE_CALLTYPE ChangeListenerList::ChangeListenerList() throw()
+ChangeListenerList::ChangeListenerList() throw()
    : lastChangedObject (0),
      messagePending (false)
 {
 }
 
-JUCE_CALLTYPE ChangeListenerList::~ChangeListenerList() throw()
+ChangeListenerList::~ChangeListenerList() throw()
 {
 }
 
-void JUCE_CALLTYPE ChangeListenerList::addChangeListener (ChangeListener* const listener) throw()
+void ChangeListenerList::addChangeListener (ChangeListener* const listener) throw()
 {
     const ScopedLock sl (lock);
 
@@ -57,19 +57,19 @@ void JUCE_CALLTYPE ChangeListenerList::addChangeListener (ChangeListener* const 
         listeners.add (listener);
 }
 
-void JUCE_CALLTYPE ChangeListenerList::removeChangeListener (ChangeListener* const listener) throw()
+void ChangeListenerList::removeChangeListener (ChangeListener* const listener) throw()
 {
     const ScopedLock sl (lock);
     listeners.removeValue (listener);
 }
 
-void JUCE_CALLTYPE ChangeListenerList::removeAllChangeListeners() throw()
+void ChangeListenerList::removeAllChangeListeners() throw()
 {
     const ScopedLock sl (lock);
     listeners.clear();
 }
 
-void JUCE_CALLTYPE ChangeListenerList::sendChangeMessage (void* objectThatHasChanged) throw()
+void ChangeListenerList::sendChangeMessage (void* objectThatHasChanged) throw()
 {
     const ScopedLock sl (lock);
 
@@ -86,7 +86,7 @@ void ChangeListenerList::handleMessage (const Message& message)
     sendSynchronousChangeMessage (message.pointerParameter);
 }
 
-void JUCE_CALLTYPE ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChanged)
+void ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChanged)
 {
     const ScopedLock sl (lock);
     messagePending = false;
@@ -104,7 +104,7 @@ void JUCE_CALLTYPE ChangeListenerList::sendSynchronousChangeMessage (void* objec
     }
 }
 
-void JUCE_CALLTYPE ChangeListenerList::dispatchPendingMessages()
+void ChangeListenerList::dispatchPendingMessages()
 {
     if (messagePending)
         sendSynchronousChangeMessage (lastChangedObject);

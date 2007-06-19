@@ -42,21 +42,21 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 PathStrokeType::PathStrokeType (const float strokeThickness,
                                 const JointStyle jointStyle_,
-                                const EndCapStyle endStyle_)
+                                const EndCapStyle endStyle_) throw()
     : thickness (strokeThickness),
       jointStyle (jointStyle_),
       endStyle (endStyle_)
 {
 }
 
-PathStrokeType::PathStrokeType (const PathStrokeType& other)
+PathStrokeType::PathStrokeType (const PathStrokeType& other) throw()
     : thickness (other.thickness),
       jointStyle (other.jointStyle),
       endStyle (other.endStyle)
 {
 }
 
-const PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other)
+const PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) throw()
 {
     thickness = other.thickness;
     jointStyle = other.jointStyle;
@@ -64,7 +64,7 @@ const PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other)
     return *this;
 }
 
-PathStrokeType::~PathStrokeType()
+PathStrokeType::~PathStrokeType() throw()
 {
 }
 
@@ -87,7 +87,7 @@ static bool lineIntersection (const float x1, const float y1,
                               const float x4, const float y4,
                               float& intersectionX,
                               float& intersectionY,
-                              float& distanceBeyondLine1EndSquared)
+                              float& distanceBeyondLine1EndSquared) throw()
 {
     if (x2 != x3 || y2 != y3)
     {
@@ -206,7 +206,7 @@ static void addEdgeAndJoint (Path& destPath,
                              const float x2, const float y2,
                              const float x3, const float y3,
                              const float x4, const float y4,
-                             const float midX, const float midY)
+                             const float midX, const float midY) throw()
 {
     if (style == PathStrokeType::beveled
         || (x3 == x4 && y3 == y4)
@@ -271,7 +271,7 @@ static inline void addLineEnd (Path& destPath,
                                const PathStrokeType::EndCapStyle style,
                                const float x1, const float y1,
                                const float x2, const float y2,
-                               const float width)
+                               const float width) throw()
 {
     if (style == PathStrokeType::butt)
     {
@@ -339,7 +339,7 @@ struct LineSection
 static void addSubPath (Path& destPath, const Array <LineSection>& subPath,
                         const bool isClosed,
                         const float width, const float maxMiterExtensionSquared,
-                        const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle)
+                        const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle) throw()
 {
     jassert (subPath.size() > 0);
 
@@ -447,7 +447,7 @@ static void addSubPath (Path& destPath, const Array <LineSection>& subPath,
 void PathStrokeType::createStrokedPath (Path& destPath,
                                         const Path& source,
                                         const AffineTransform& transform,
-                                        const float extraAccuracy) const
+                                        const float extraAccuracy) const throw()
 {
     if (thickness <= 0)
     {
@@ -556,7 +556,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                                          const float* dashLengths,
                                          int numDashLengths,
                                          const AffineTransform& transform,
-                                         const float extraAccuracy) const
+                                         const float extraAccuracy) const throw()
 {
     if (thickness <= 0)
         return;

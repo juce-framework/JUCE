@@ -102,7 +102,7 @@ public:
 
     //==============================================================================
     /** Returns true if the scrollbar is vertical, false if it's horizontal. */
-    bool isVertical() const                             { return vertical; }
+    bool isVertical() const throw()                                 { return vertical; }
 
     /** Changes the scrollbar's direction.
 
@@ -111,7 +111,7 @@ public:
 
         @param shouldBeVertical     true makes it vertical; false makes it horizontal.
     */
-    void setOrientation (const bool shouldBeVertical);
+    void setOrientation (const bool shouldBeVertical) throw();
 
     /** Shows or hides the scrollbar's buttons. */
     void setButtonVisibility (const bool buttonsAreVisible);
@@ -131,13 +131,13 @@ public:
 
         This is the value set by setRangeLimits().
     */
-    double getMinimumRangeLimit() const                 { return minimum; }
+    double getMinimumRangeLimit() const throw()                     { return minimum; }
 
     /** Returns the upper value that the thumb can be set to.
 
         This is the value set by setRangeLimits().
     */
-    double getMaximumRangeLimit() const                 { return maximum; }
+    double getMaximumRangeLimit() const throw()                     { return maximum; }
 
     //==============================================================================
     /** Changes the position of the scrollbar's 'thumb'.
@@ -158,7 +158,7 @@ public:
         @see setCurrentRangeStart, getCurrentRangeStart, getCurrentRangeSize
     */
     void setCurrentRange (double newStart,
-                          double newSize);
+                          double newSize) throw();
 
     /** Moves the bar's thumb position.
 
@@ -171,19 +171,19 @@ public:
 
         @see setCurrentRange
     */
-    void setCurrentRangeStart (double newStart);
+    void setCurrentRangeStart (double newStart) throw();
 
     /** Returns the position of the top of the thumb.
 
         @see setCurrentRangeStart
     */
-    double getCurrentRangeStart() const                 { return rangeStart; }
+    double getCurrentRangeStart() const throw()                     { return rangeStart; }
 
     /** Returns the current size of the thumb.
 
         @see setCurrentRange
     */
-    double getCurrentRangeSize() const                  { return rangeSize; }
+    double getCurrentRangeSize() const throw()                      { return rangeSize; }
 
     //==============================================================================
     /** Sets the amount by which the up and down buttons will move the bar.
@@ -191,7 +191,7 @@ public:
         The value here is in terms of the total range, and is added or subtracted
         from the thumb position when the user clicks an up/down (or left/right) button.
     */
-    void setSingleStepSize (const double newSingleStepSize);
+    void setSingleStepSize (const double newSingleStepSize) throw();
 
     /** Moves the scrollbar by a number of single-steps.
 
@@ -201,7 +201,7 @@ public:
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
     */
-    void moveScrollbarInSteps (const int howManySteps);
+    void moveScrollbarInSteps (const int howManySteps) throw();
 
     /** Moves the scroll bar up or down in pages.
 
@@ -211,19 +211,19 @@ public:
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
     */
-    void moveScrollbarInPages (const int howManyPages);
+    void moveScrollbarInPages (const int howManyPages) throw();
 
     /** Scrolls to the top (or left).
 
         This is the same as calling setCurrentRangeStart (getMinimumRangeLimit());
     */
-    void scrollToTop();
+    void scrollToTop() throw();
 
     /** Scrolls to the bottom (or right).
 
         This is the same as calling setCurrentRangeStart (getMaximumRangeLimit() - getCurrentRangeSize());
     */
-    void scrollToBottom();
+    void scrollToBottom() throw();
 
     /** Changes the delay before the up and down buttons autorepeat when they are held
         down.
@@ -234,7 +234,7 @@ public:
     */
     void setButtonRepeatSpeed (const int initialDelayInMillisecs,
                                const int repeatDelayInMillisecs,
-                               const int minimumDelayInMillisecs = -1);
+                               const int minimumDelayInMillisecs = -1) throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
@@ -292,7 +292,7 @@ private:
     Button* downButton;
     SortedSet <void*> listeners;
 
-    void updateThumbPosition();
+    void updateThumbPosition() throw();
     void timerCallback();
 
     ScrollBar (const ScrollBar&);

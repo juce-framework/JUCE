@@ -37,14 +37,14 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-JUCE_CALLTYPE MemoryBlock::MemoryBlock() throw()
+MemoryBlock::MemoryBlock() throw()
     : data (0),
       size (0)
 {
 }
 
-JUCE_CALLTYPE MemoryBlock::MemoryBlock (const int initialSize,
-                                        const bool initialiseToZero) throw()
+MemoryBlock::MemoryBlock (const int initialSize,
+                          const bool initialiseToZero) throw()
 {
     if (initialSize > 0)
     {
@@ -62,7 +62,7 @@ JUCE_CALLTYPE MemoryBlock::MemoryBlock (const int initialSize,
     }
 }
 
-JUCE_CALLTYPE MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
+MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
     : data (0),
       size (other.size)
 {
@@ -74,8 +74,8 @@ JUCE_CALLTYPE MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
     }
 }
 
-JUCE_CALLTYPE MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
-                                        const int sizeInBytes) throw()
+MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
+                          const int sizeInBytes) throw()
     : data (0),
       size (jmax (0, sizeInBytes))
 {
@@ -92,7 +92,7 @@ JUCE_CALLTYPE MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
     }
 }
 
-JUCE_CALLTYPE MemoryBlock::~MemoryBlock() throw()
+MemoryBlock::~MemoryBlock() throw()
 {
     jassert (size >= 0);    // should never happen
     jassert (size == 0 || data != 0); // non-zero size but no data allocated?
@@ -100,7 +100,7 @@ JUCE_CALLTYPE MemoryBlock::~MemoryBlock() throw()
     juce_free (data);
 }
 
-const MemoryBlock& JUCE_CALLTYPE MemoryBlock::operator= (const MemoryBlock& other) throw()
+const MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
 {
     if (this != &other)
     {
@@ -112,21 +112,21 @@ const MemoryBlock& JUCE_CALLTYPE MemoryBlock::operator= (const MemoryBlock& othe
 }
 
 //==============================================================================
-bool JUCE_CALLTYPE MemoryBlock::operator== (const MemoryBlock& other) const throw()
+bool MemoryBlock::operator== (const MemoryBlock& other) const throw()
 {
     return (size == other.size)
             && (memcmp (data, other.data, size) == 0);
 }
 
-bool JUCE_CALLTYPE MemoryBlock::operator!= (const MemoryBlock& other) const throw()
+bool MemoryBlock::operator!= (const MemoryBlock& other) const throw()
 {
     return ! operator== (other);
 }
 
 //==============================================================================
 // this will resize the block to this size
-void JUCE_CALLTYPE MemoryBlock::setSize (const int newSize,
-                                         const bool initialiseToZero) throw()
+void MemoryBlock::setSize (const int newSize,
+                           const bool initialiseToZero) throw()
 {
     if (size != newSize)
     {
@@ -158,21 +158,21 @@ void JUCE_CALLTYPE MemoryBlock::setSize (const int newSize,
     }
 }
 
-void JUCE_CALLTYPE MemoryBlock::ensureSize (const int minimumSize,
-                                            const bool initialiseToZero) throw()
+void MemoryBlock::ensureSize (const int minimumSize,
+                              const bool initialiseToZero) throw()
 {
     if (size < minimumSize)
         setSize (minimumSize, initialiseToZero);
 }
 
 //==============================================================================
-void JUCE_CALLTYPE MemoryBlock::fillWith (const uint8 value) throw()
+void MemoryBlock::fillWith (const uint8 value) throw()
 {
     memset (data, (int) value, size);
 }
 
-void JUCE_CALLTYPE MemoryBlock::append (const void* const srcData,
-                                        const int numBytes) throw()
+void MemoryBlock::append (const void* const srcData,
+                          const int numBytes) throw()
 {
     if (numBytes > 0)
     {
@@ -182,7 +182,7 @@ void JUCE_CALLTYPE MemoryBlock::append (const void* const srcData,
     }
 }
 
-void JUCE_CALLTYPE MemoryBlock::copyFrom (const void* const src, int offset, int num) throw()
+void MemoryBlock::copyFrom (const void* const src, int offset, int num) throw()
 {
     const char* d = (const char*) src;
 
@@ -200,7 +200,7 @@ void JUCE_CALLTYPE MemoryBlock::copyFrom (const void* const src, int offset, int
         memcpy (data + offset, d, num);
 }
 
-void JUCE_CALLTYPE MemoryBlock::copyTo (void* const dst, int offset, int num) const throw()
+void MemoryBlock::copyTo (void* const dst, int offset, int num) const throw()
 {
     char* d = (char*) dst;
 
@@ -224,7 +224,7 @@ void JUCE_CALLTYPE MemoryBlock::copyTo (void* const dst, int offset, int num) co
         memcpy (d, data + offset, num);
 }
 
-void JUCE_CALLTYPE MemoryBlock::removeSection (int startByte, int numBytesToRemove) throw()
+void MemoryBlock::removeSection (int startByte, int numBytesToRemove) throw()
 {
     if (startByte < 0)
     {
@@ -246,13 +246,13 @@ void JUCE_CALLTYPE MemoryBlock::removeSection (int startByte, int numBytesToRemo
     }
 }
 
-const String JUCE_CALLTYPE MemoryBlock::toString() const throw()
+const String MemoryBlock::toString() const throw()
 {
     return String (data, size);
 }
 
 //==============================================================================
-int JUCE_CALLTYPE MemoryBlock::getBitRange (const int bitRangeStart, int numBits) const throw()
+int MemoryBlock::getBitRange (const int bitRangeStart, int numBits) const throw()
 {
     int res = 0;
 
@@ -276,7 +276,7 @@ int JUCE_CALLTYPE MemoryBlock::getBitRange (const int bitRangeStart, int numBits
     return res;
 }
 
-void JUCE_CALLTYPE MemoryBlock::setBitRange (const int bitRangeStart, int numBits, int bitsToSet) throw()
+void MemoryBlock::setBitRange (const int bitRangeStart, int numBits, int bitsToSet) throw()
 {
     int byte = bitRangeStart >> 3;
     int offsetInByte = bitRangeStart & 7;
@@ -300,7 +300,7 @@ void JUCE_CALLTYPE MemoryBlock::setBitRange (const int bitRangeStart, int numBit
 }
 
 //==============================================================================
-void JUCE_CALLTYPE MemoryBlock::loadFromHexString (const String& hex) throw()
+void MemoryBlock::loadFromHexString (const String& hex) throw()
 {
     ensureSize (hex.length() >> 1);
     char* dest = data;
@@ -349,7 +349,7 @@ void JUCE_CALLTYPE MemoryBlock::loadFromHexString (const String& hex) throw()
 static const char* const encodingTable
     = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
-const String JUCE_CALLTYPE MemoryBlock::toBase64Encoding() const throw()
+const String MemoryBlock::toBase64Encoding() const throw()
 {
     const int numChars = ((size << 3) + 5) / 6;
 
@@ -368,7 +368,7 @@ const String JUCE_CALLTYPE MemoryBlock::toBase64Encoding() const throw()
     return destString;
 }
 
-bool JUCE_CALLTYPE MemoryBlock::fromBase64Encoding (const String& s) throw()
+bool MemoryBlock::fromBase64Encoding (const String& s) throw()
 {
     const int startPos = s.indexOfChar (T('.')) + 1;
 

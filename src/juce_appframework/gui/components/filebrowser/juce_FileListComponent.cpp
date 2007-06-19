@@ -79,15 +79,15 @@ class FileListItemComponent  : public Component,
 {
 public:
     //==============================================================================
-    JUCE_CALLTYPE FileListItemComponent (FileListComponent& owner_,
-                                         TimeSliceThread& thread_) throw()
+    FileListItemComponent (FileListComponent& owner_,
+                           TimeSliceThread& thread_) throw()
         : owner (owner_),
           thread (thread_),
           icon (0)
     {
     }
 
-    JUCE_CALLTYPE ~FileListItemComponent() throw()
+    ~FileListItemComponent() throw()
     {
         thread.removeTimeSliceClient (this);
 
@@ -115,10 +115,10 @@ public:
         owner.sendDoubleClickMessage (file);
     }
 
-    void JUCE_CALLTYPE update (const File& root,
-                               const DirectoryContentsList::FileInfo* const fileInfo,
-                               const int index_,
-                               const bool highlighted_) throw()
+    void update (const File& root,
+                 const DirectoryContentsList::FileInfo* const fileInfo,
+                 const int index_,
+                 const bool highlighted_) throw()
     {
         thread.removeTimeSliceClient (this);
 
@@ -190,13 +190,13 @@ private:
     Image* icon;
     bool isDirectory;
 
-    void JUCE_CALLTYPE clearIcon() throw()
+    void clearIcon() throw()
     {
         ImageCache::release (icon);
         icon = 0;
     }
 
-    void JUCE_CALLTYPE updateIcon (const bool onlyUpdateIfCached) throw()
+    void updateIcon (const bool onlyUpdateIfCached) throw()
     {
         if (icon == 0)
         {

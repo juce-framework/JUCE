@@ -202,7 +202,8 @@ public:
              getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
-    virtual void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = 0);
+    virtual void addToDesktop (int windowStyleFlags, 
+                               void* nativeWindowToAttachTo = 0);
 
     /** If the component is currently showing on the desktop, this will hide it.
 
@@ -217,7 +218,7 @@ public:
 
         @see addToDesktop, removeFromDesktop
     */
-    bool isOnDesktop() const;
+    bool isOnDesktop() const throw();
 
     /** Returns the heavyweight window that contains this component.
 
@@ -229,7 +230,7 @@ public:
 
         @see addToDesktop, isOnDesktop
     */
-    ComponentPeer* getPeer() const;
+    ComponentPeer* getPeer() const throw();
 
     /** For components on the desktop, this is called if the system wants to close the window.
 
@@ -286,7 +287,7 @@ public:
 
         @see setAlwaysOnTop
     */
-    bool isAlwaysOnTop() const;
+    bool isAlwaysOnTop() const throw();
 
     //==============================================================================
     /** Returns the x co-ordinate of the component's left edge.
@@ -357,13 +358,13 @@ public:
 
         @see globalPositionToRelative, relativePositionToOtherComponent
     */
-    void relativePositionToGlobal (int& x, int& y) const;
+    void relativePositionToGlobal (int& x, int& y) const throw();
 
     /** Converts a screen co-ordinate into a position relative to this component's top-left.
 
         @see relativePositionToGlobal, relativePositionToOtherComponent
     */
-    void globalPositionToRelative (int& x, int& y) const;
+    void globalPositionToRelative (int& x, int& y) const throw();
 
     /** Converts a position relative to this component's top-left into a position
         relative to another component's top-left.
@@ -371,7 +372,7 @@ public:
         @see relativePositionToGlobal, globalPositionToRelative
     */
     void relativePositionToOtherComponent (const Component* const targetComponent,
-                                           int& x, int& y) const;
+                                           int& x, int& y) const throw();
 
     //==============================================================================
     /** Moves the component to a new position.
@@ -535,7 +536,7 @@ public:
 
         @see getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
     */
-    int getIndexOfChildComponent (const Component* const child) const;
+    int getIndexOfChildComponent (const Component* const child) const throw();
 
     /** Adds a child component to this one.
 
@@ -597,7 +598,7 @@ public:
         If this is the highest-level component or hasn't yet been added to
         a parent, this will return null.
     */
-    Component* getParentComponent() const throw()               { return parentComponent_; }
+    Component* getParentComponent() const throw()                   { return parentComponent_; }
 
     /** Searches the parent components for a component of a specified class.
 
@@ -630,14 +631,14 @@ public:
         finds the highest one that doesn't have a parent (i.e. is on the desktop or
         not yet added to a parent), and will return that.
     */
-    Component* getTopLevelComponent() const;
+    Component* getTopLevelComponent() const throw();
 
     /** Checks whether a component is anywhere inside this component or its children.
 
         This will recursively check through this components children to see if the
         given component is anywhere inside.
     */
-    bool isParentOf (const Component* possibleChild) const;
+    bool isParentOf (const Component* possibleChild) const throw();
 
     //==============================================================================
     /** Called to indicate that the component's parents have changed.
@@ -715,7 +716,7 @@ public:
         @see hitTest, getInterceptsMouseClicks
     */
     void setInterceptsMouseClicks (const bool allowClicksOnThisComponent,
-                                   const bool allowClicksOnChildComponents);
+                                   const bool allowClicksOnChildComponents) throw();
 
     /** Retrieves the current state of the mouse-click interception flags.
 
@@ -725,7 +726,7 @@ public:
         @see setInterceptsMouseClicks
     */
     void getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
-                                   bool& allowsClicksOnChildComponents);
+                                   bool& allowsClicksOnChildComponents) const throw();
 
 
     /** Returns true if a given point lies within this component or one of its children.
@@ -821,7 +822,7 @@ public:
 
         @see repaint, paint, createComponentSnapshot
     */
-    void setBufferedToImage (const bool shouldBeBuffered);
+    void setBufferedToImage (const bool shouldBeBuffered) throw();
 
     /** Generates a snapshot of part of this component.
 
@@ -879,7 +880,7 @@ public:
 
         @see setComponentEffect
     */
-    ImageEffectFilter* getComponentEffect() const throw()           { return effect_; }
+    ImageEffectFilter* getComponentEffect() const throw()               { return effect_; }
 
     //==============================================================================
     /** Finds the appropriate look-and-feel to use for this component.
@@ -943,7 +944,7 @@ public:
 
         @see isOpaque, getVisibleArea
     */
-    void setOpaque (const bool shouldBeOpaque);
+    void setOpaque (const bool shouldBeOpaque) throw();
 
     /** Returns true if no parts of this component are transparent.
 
@@ -965,7 +966,7 @@ public:
 
         @see setMouseClickGrabsKeyboardFocus
     */
-    void setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront);
+    void setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront) throw();
 
     /** Indicates whether the component should be brought to the front when clicked-on.
 
@@ -986,7 +987,7 @@ public:
 
         @see grabKeyboardFocus, getWantsKeyboardFocus
     */
-    void setWantsKeyboardFocus (const bool wantsFocus);
+    void setWantsKeyboardFocus (const bool wantsFocus) throw();
 
     /** Returns true if the component is interested in getting keyboard focus.
 
@@ -1096,7 +1097,7 @@ public:
 
         @see setEnabled, enablementChanged
     */
-    bool isEnabled() const;
+    bool isEnabled() const throw();
 
     /** Enables or disables this component.
 
@@ -1130,7 +1131,7 @@ public:
 
         @see MouseCursor
     */
-    void setMouseCursor (const MouseCursor& cursorType);
+    void setMouseCursor (const MouseCursor& cursorType) throw();
 
     /** Returns the mouse cursor shape to use when the mouse is over this component.
 
@@ -1151,7 +1152,7 @@ public:
 
         This isn't needed if you're only using setMouseCursor().
     */
-    void updateMouseCursor() const;
+    void updateMouseCursor() const throw();
 
     //==============================================================================
     /** Components can override this method to draw their content.
@@ -1351,7 +1352,7 @@ public:
 
         @see mouseEnter, mouseExit, mouseDown, mouseUp
     */
-    void setRepaintsOnMouseActivity (const bool shouldRepaint);
+    void setRepaintsOnMouseActivity (const bool shouldRepaint) throw();
 
     /** Registers a listener to be told when mouse events occur in this component.
 
@@ -1371,13 +1372,13 @@ public:
         @see MouseListener, removeMouseListener
     */
     void addMouseListener (MouseListener* const newListener,
-                           const bool wantsEventsForAllNestedChildComponents);
+                           const bool wantsEventsForAllNestedChildComponents) throw();
 
     /** Deregisters a mouse listener.
 
         @see addMouseListener, MouseListener
     */
-    void removeMouseListener (MouseListener* const listenerToRemove);
+    void removeMouseListener (MouseListener* const listenerToRemove) throw();
 
     //==============================================================================
     /** Adds a listener that wants to hear about keypresses that this component receives.
@@ -1390,13 +1391,13 @@ public:
 
         @see keyPressed, keyStateChanged, removeKeyListener
     */
-    void addKeyListener (KeyListener* const newListener);
+    void addKeyListener (KeyListener* const newListener) throw();
 
     /** Removes a previously-registered key listener.
 
         @see addKeyListener
     */
-    void removeKeyListener (KeyListener* const listenerToRemove);
+    void removeKeyListener (KeyListener* const listenerToRemove) throw();
 
     /** Called when a key is pressed.
 
@@ -1534,7 +1535,7 @@ public:
 
         The co-ordinates are relative to the component's top-left corner.
     */
-    void getMouseXYRelative (int& x, int& y) const;
+    void getMouseXYRelative (int& x, int& y) const throw();
 
     /** Returns the component that's currently underneath the mouse.
 
@@ -1562,7 +1563,7 @@ public:
                                                     is moved beyond the edge of the screen
     */
     void enableUnboundedMouseMovement (bool shouldUnboundedMovementBeEnabled,
-                                       bool keepCursorVisibleUntilOffscreen = false);
+                                       bool keepCursorVisibleUntilOffscreen = false) throw();
 
     //==============================================================================
     /** Called when this component's size has been changed.
@@ -1671,7 +1672,7 @@ public:
 
         @see handleCommandMessage
     */
-    void postCommandMessage (const int commandId);
+    void postCommandMessage (const int commandId) throw();
 
     /** Called to handle a command that was sent by postCommandMessage().
 
@@ -1732,14 +1733,14 @@ public:
 
         @see getCurrentlyModalComponent
     */
-    bool isCurrentlyModal() const;
+    bool isCurrentlyModal() const throw();
 
     /** Returns the component that is currently modal.
 
         @returns the modal component, or null if no components are modal
         @see runModalLoop, isCurrentlyModal
     */
-    static Component* getCurrentlyModalComponent();
+    static Component* getCurrentlyModalComponent() throw();
 
     /** Checks whether there's a modal component somewhere that's stopping this one
         from receiving messages.
@@ -1749,7 +1750,7 @@ public:
 
         @see runModalLoop, getCurrentlyModalComponent
     */
-    bool isCurrentlyBlockedByAnotherModalComponent() const;
+    bool isCurrentlyBlockedByAnotherModalComponent() const throw();
 
     /** When a component is modal, this callback allows it to choose which other
         components can still receive events.
@@ -1895,7 +1896,7 @@ public:
 
         @see getComponentProperty, setComponentProperty
     */
-    PropertySet* getComponentProperties() const throw()                 { return propertySet_; }
+    PropertySet* getComponentProperties() const throw()           { return propertySet_; }
 
     //==============================================================================
     /** Looks for a colour that has been registered with the given colour ID number.
@@ -1952,7 +1953,7 @@ public:
 
         This is platform-dependent and strictly for power-users only!
     */
-    void* getWindowHandle() const;
+    void* getWindowHandle() const throw();
 
     /** When created, each component is given a number to uniquely identify it.
 
@@ -1960,7 +1961,7 @@ public:
         unique way of identifying a component than using its memory location (which
         may be reused after the component is deleted, of course).
     */
-    uint32 getComponentUID() const throw()                              { return componentUID; }
+    uint32 getComponentUID() const throw()                { return componentUID; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -2036,9 +2037,9 @@ private:
     void internalChildrenChanged();
     void internalHierarchyChanged();
     void internalFilesDropped (const int x, const int y, const StringArray& files);
-    void internalUpdateMouseCursor (const bool forcedUpdate);
+    void internalUpdateMouseCursor (const bool forcedUpdate) throw();
     void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
-    void repaintParent();
+    void repaintParent() throw();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (FocusChangeType cause);
     void grabFocusInternal (FocusChangeType cause, const bool canTryParent = true);
@@ -2048,9 +2049,9 @@ private:
     void subtractObscuredRegions (RectangleList& result,
                                   const int deltaX, const int deltaY,
                                   const Rectangle& clipRect,
-                                  const Component* const compToAvoid) const;
+                                  const Component* const compToAvoid) const throw();
     void clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
-                              const int deltaX, const int deltaY) const;
+                              const int deltaX, const int deltaY) const throw();
 
     // how much of the component is not off the edges of its parents
     const Rectangle getUnclippedArea() const;

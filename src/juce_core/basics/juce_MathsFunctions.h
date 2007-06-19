@@ -105,58 +105,58 @@ typedef wchar_t                     juce_wchar;
 // Some indispensible min/max functions
 
 /** Returns the larger of two values. */
-forcedinline int    JUCE_CALLTYPE jmax (const int a, const int b) throw()                                   { return (a < b) ? b : a; }
+forcedinline int    jmax (const int a, const int b) throw()                                   { return (a < b) ? b : a; }
 /** Returns the larger of two values. */
-forcedinline int64  JUCE_CALLTYPE jmax (const int64 a, const int64 b) throw()                               { return (a < b) ? b : a; }
+forcedinline int64  jmax (const int64 a, const int64 b) throw()                               { return (a < b) ? b : a; }
 /** Returns the larger of two values. */
-forcedinline float  JUCE_CALLTYPE jmax (const float a, const float b) throw()                               { return (a < b) ? b : a; }
+forcedinline float  jmax (const float a, const float b) throw()                               { return (a < b) ? b : a; }
 /** Returns the larger of two values. */
-forcedinline double JUCE_CALLTYPE jmax (const double a, const double b) throw()                             { return (a < b) ? b : a; }
+forcedinline double jmax (const double a, const double b) throw()                             { return (a < b) ? b : a; }
 
 /** Returns the larger of three values. */
-inline int    JUCE_CALLTYPE jmax (const int a, const int b, const int c) throw()                            { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+inline int    jmax (const int a, const int b, const int c) throw()                            { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 /** Returns the larger of three values. */
-inline int64  JUCE_CALLTYPE jmax (const int64 a, const int64 b, const int64 c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+inline int64  jmax (const int64 a, const int64 b, const int64 c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 /** Returns the larger of three values. */
-inline float  JUCE_CALLTYPE jmax (const float a, const float b, const float c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+inline float  jmax (const float a, const float b, const float c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 /** Returns the larger of three values. */
-inline double JUCE_CALLTYPE jmax (const double a, const double b, const double c) throw()                   { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+inline double jmax (const double a, const double b, const double c) throw()                   { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 
 /** Returns the larger of four values. */
-inline int    JUCE_CALLTYPE jmax (const int a, const int b, const int c, const int d) throw()               { return jmax (a, jmax (b, c, d)); }
+inline int    jmax (const int a, const int b, const int c, const int d) throw()               { return jmax (a, jmax (b, c, d)); }
 /** Returns the larger of four values. */
-inline int64  JUCE_CALLTYPE jmax (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmax (a, jmax (b, c, d)); }
+inline int64  jmax (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmax (a, jmax (b, c, d)); }
 /** Returns the larger of four values. */
-inline float  JUCE_CALLTYPE jmax (const float a, const float b, const float c, const float d) throw()       { return jmax (a, jmax (b, c, d)); }
+inline float  jmax (const float a, const float b, const float c, const float d) throw()       { return jmax (a, jmax (b, c, d)); }
 /** Returns the larger of four values. */
-inline double JUCE_CALLTYPE jmax (const double a, const double b, const double c, const double d) throw()   { return jmax (a, jmax (b, c, d)); }
+inline double jmax (const double a, const double b, const double c, const double d) throw()   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
-inline int    JUCE_CALLTYPE jmin (const int a, const int b) throw()                                         { return (a > b) ? b : a; }
+inline int    jmin (const int a, const int b) throw()                                         { return (a > b) ? b : a; }
 /** Returns the smaller of two values. */
-inline int64  JUCE_CALLTYPE jmin (const int64 a, const int64 b) throw()                                     { return (a > b) ? b : a; }
+inline int64  jmin (const int64 a, const int64 b) throw()                                     { return (a > b) ? b : a; }
 /** Returns the smaller of two values. */
-inline float  JUCE_CALLTYPE jmin (const float a, const float b) throw()                                     { return (a > b) ? b : a; }
+inline float  jmin (const float a, const float b) throw()                                     { return (a > b) ? b : a; }
 /** Returns the smaller of two values. */
-inline double JUCE_CALLTYPE jmin (const double a, const double b) throw()                                   { return (a > b) ? b : a; }
+inline double jmin (const double a, const double b) throw()                                   { return (a > b) ? b : a; }
 
 /** Returns the smaller of three values. */
-inline int    JUCE_CALLTYPE jmin (const int a, const int b, const int c) throw()                            { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline int    jmin (const int a, const int b, const int c) throw()                            { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
 /** Returns the smaller of three values. */
-inline int64  JUCE_CALLTYPE jmin (const int64 a, const int64 b, const int64 c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline int64  jmin (const int64 a, const int64 b, const int64 c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
 /** Returns the smaller of three values. */
-inline float  JUCE_CALLTYPE jmin (const float a, const float b, const float c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline float  jmin (const float a, const float b, const float c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
 /** Returns the smaller of three values. */
-inline double JUCE_CALLTYPE jmin (const double a, const double b, const double c) throw()                   { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline double jmin (const double a, const double b, const double c) throw()                   { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
 
 /** Returns the smaller of four values. */
-inline int    JUCE_CALLTYPE jmin (const int a, const int b, const int c, const int d) throw()               { return jmin (a, jmin (b, c, d)); }
+inline int    jmin (const int a, const int b, const int c, const int d) throw()               { return jmin (a, jmin (b, c, d)); }
 /** Returns the smaller of four values. */
-inline int64  JUCE_CALLTYPE jmin (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmin (a, jmin (b, c, d)); }
+inline int64  jmin (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmin (a, jmin (b, c, d)); }
 /** Returns the smaller of four values. */
-inline float  JUCE_CALLTYPE jmin (const float a, const float b, const float c, const float d) throw()       { return jmin (a, jmin (b, c, d)); }
+inline float  jmin (const float a, const float b, const float c, const float d) throw()       { return jmin (a, jmin (b, c, d)); }
 /** Returns the smaller of four values. */
-inline double JUCE_CALLTYPE jmin (const double a, const double b, const double c, const double d) throw()   { return jmin (a, jmin (b, c, d)); }
+inline double jmin (const double a, const double b, const double c, const double d) throw()   { return jmin (a, jmin (b, c, d)); }
 
 
 //==============================================================================
@@ -172,9 +172,9 @@ inline double JUCE_CALLTYPE jmin (const double a, const double b, const double c
                 and upperLimit (inclusive)
 */
 template <class Type>
-inline Type JUCE_CALLTYPE jlimit (const Type lowerLimit,
-                                  const Type upperLimit,
-                                  const Type valueToConstrain) throw()
+inline Type jlimit (const Type lowerLimit,
+                    const Type upperLimit,
+                    const Type valueToConstrain) throw()
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
@@ -187,7 +187,7 @@ inline Type JUCE_CALLTYPE jlimit (const Type lowerLimit,
 /** Handy function to swap two values over.
 */
 template <class Type>
-inline void JUCE_CALLTYPE swapVariables (Type& variable1, Type& variable2) throw()
+inline void swapVariables (Type& variable1, Type& variable2) throw()
 {
     const Type tempVal = variable1;
     variable1 = variable2;

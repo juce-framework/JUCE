@@ -545,13 +545,13 @@ private:
 //==============================================================================
 void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
                                                   bool bold, bool italic,
-                                                  bool addAllGlyphsToFont)
+                                                  bool addAllGlyphsToFont) throw()
 {
     FreeTypeInterface::getInstance()
         ->createTypeface (fontName, bold, italic, *this, addAllGlyphsToFont);
 }
 
-void Typeface::findAndAddSystemGlyph (juce_wchar character)
+void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
     FreeTypeInterface::getInstance()
         ->addGlyphToFont (character, getName(), isBold(), isItalic(), *this);

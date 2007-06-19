@@ -72,7 +72,7 @@ public:
         This is done automatically by the smart pointer, but is public just
         in case it's needed for nefarious purposes.
     */
-    inline void JUCE_CALLTYPE incReferenceCount() throw()
+    inline void incReferenceCount() throw()
     {
         atomicIncrement (refCounts);
 
@@ -83,7 +83,7 @@ public:
 
         If the count gets to zero, the object will be deleted.
     */
-    inline void JUCE_CALLTYPE decReferenceCount() throw()
+    inline void decReferenceCount() throw()
     {
         jassert (refCounts > 0);
 
@@ -92,7 +92,7 @@ public:
     }
 
     /** Returns the object's current reference count. */
-    inline int JUCE_CALLTYPE getReferenceCount() const throw()
+    inline int getReferenceCount() const throw()
     {
         return refCounts;
     }
@@ -101,13 +101,13 @@ public:
 protected:
     //==============================================================================
     /** Creates the reference-counted object (with an initial ref count of zero). */
-    JUCE_CALLTYPE ReferenceCountedObject()
+    ReferenceCountedObject()
         : refCounts (0)
     {
     }
 
     /** Destructor. */
-    virtual JUCE_CALLTYPE ~ReferenceCountedObject()
+    virtual ~ReferenceCountedObject()
     {
         // it's dangerous to delete an object that's still referenced by something else!
         jassert (refCounts == 0);
@@ -137,7 +137,7 @@ class ReferenceCountedObjectPtr
 public:
     //==============================================================================
     /** Creates a pointer to a null object. */
-    inline JUCE_CALLTYPE ReferenceCountedObjectPtr() throw()
+    inline ReferenceCountedObjectPtr() throw()
         : referencedObject (0)
     {
     }
@@ -146,7 +146,7 @@ public:
 
         This will increment the object's reference-count if it is non-null.
     */
-    inline JUCE_CALLTYPE ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
+    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
         : referencedObject (refCountedObject)
     {
         if (refCountedObject != 0)
@@ -157,7 +157,7 @@ public:
 
         This will increment the object's reference-count (if it is non-null).
     */
-    inline JUCE_CALLTYPE ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
         : referencedObject (other.referencedObject)
     {
         if (referencedObject != 0)
@@ -169,7 +169,7 @@ public:
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& JUCE_CALLTYPE operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
     {
         ReferenceCountedObjectClass* const newObject = other.referencedObject;
 
@@ -192,7 +192,7 @@ public:
         The reference count of the old object is decremented, and it might be
         deleted if it hits zero. The new object's count is incremented.
     */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& JUCE_CALLTYPE operator= (ReferenceCountedObjectClass* const newObject)
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
     {
         if (referencedObject != newObject)
         {
@@ -213,7 +213,7 @@ public:
         This will decrement the object's reference-count, and may delete it if it
         gets to zero.
     */
-    inline JUCE_CALLTYPE ~ReferenceCountedObjectPtr()
+    inline ~ReferenceCountedObjectPtr()
     {
         if (referencedObject != 0)
             referencedObject->decReferenceCount();
@@ -223,25 +223,25 @@ public:
 
         The pointer returned may be zero, of course.
     */
-    inline JUCE_CALLTYPE operator ReferenceCountedObjectClass*() const throw()
+    inline operator ReferenceCountedObjectClass*() const throw()
     {
         return referencedObject;
     }
 
     /** Returns true if this pointer refers to the given object. */
-    inline bool JUCE_CALLTYPE operator== (ReferenceCountedObjectClass* const object) const throw()
+    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
     {
         return referencedObject == object;
     }
 
     /** Returns true if this pointer doesn't refer to the given object. */
-    inline bool JUCE_CALLTYPE operator!= (ReferenceCountedObjectClass* const object) const throw()
+    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
     {
         return referencedObject != object;
     }
 
     // the -> operator is called on the referenced object
-    inline ReferenceCountedObjectClass* JUCE_CALLTYPE operator->() const throw()
+    inline ReferenceCountedObjectClass* operator->() const throw()
     {
         return referencedObject;
     }

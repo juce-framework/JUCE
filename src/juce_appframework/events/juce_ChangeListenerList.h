@@ -52,26 +52,26 @@ class JUCE_API  ChangeListenerList  : public MessageListener
 public:
     //==============================================================================
     /** Creates an empty list. */
-    JUCE_CALLTYPE ChangeListenerList() throw();
+    ChangeListenerList() throw();
 
     /** Destructor. */
-    JUCE_CALLTYPE ~ChangeListenerList() throw();
+    ~ChangeListenerList() throw();
 
     //==============================================================================
     /** Adds a listener to the list.
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void JUCE_CALLTYPE addChangeListener (ChangeListener* const listener) throw();
+    void addChangeListener (ChangeListener* const listener) throw();
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void JUCE_CALLTYPE removeChangeListener (ChangeListener* const listener) throw();
+    void removeChangeListener (ChangeListener* const listener) throw();
 
     /** Removes all listeners from the list. */
-    void JUCE_CALLTYPE removeAllChangeListeners() throw();
+    void removeAllChangeListeners() throw();
 
     //==============================================================================
     /** Posts an asynchronous change message to all the listeners.
@@ -91,19 +91,19 @@ public:
                                         and can be any value the application needs
         @see sendSynchronousChangeMessage
     */
-    void JUCE_CALLTYPE sendChangeMessage (void* objectThatHasChanged) throw();
+    void sendChangeMessage (void* objectThatHasChanged) throw();
 
     /** This will synchronously callback all the ChangeListeners.
 
         Use this if you need to synchronously force a call to all the
         listeners' ChangeListener::changeListenerCallback() methods.
     */
-    void JUCE_CALLTYPE sendSynchronousChangeMessage (void* objectThatHasChanged);
+    void sendSynchronousChangeMessage (void* objectThatHasChanged);
 
     /** If a change message has been sent but not yet dispatched, this will
         use sendSynchronousChangeMessage() to make the callback immediately.
     */
-    void JUCE_CALLTYPE dispatchPendingMessages();
+    void dispatchPendingMessages();
 
     //==============================================================================
     /** @internal */

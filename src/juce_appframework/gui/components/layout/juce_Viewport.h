@@ -139,14 +139,14 @@ public:
         This will be the width of the viewport component minus the width of a
         vertical scrollbar (if visible).
     */
-    int getMaximumVisibleWidth() const;
+    int getMaximumVisibleWidth() const throw();
 
     /** Returns the height available within this component for the contents.
 
         This will be the height of the viewport component minus the space taken up
         by a horizontal scrollbar (if visible).
     */
-    int getMaximumVisibleHeight() const;
+    int getMaximumVisibleHeight() const throw();
 
     //==============================================================================
     /** Callback method that is called when the visible area changes.
@@ -188,7 +188,7 @@ public:
 
         @see setScrollBarThickness
     */
-    int getScrollBarThickness() const;
+    int getScrollBarThickness() const throw();
 
     /** Changes the distance that a single-step click on a scrollbar button
         will move the viewport.

@@ -70,7 +70,7 @@ public:
     //==============================================================================
     /** There's only one dektop object, and this method will return it.
     */
-    static Desktop& JUCE_CALLTYPE getInstance();
+    static Desktop& getInstance();
 
     //==============================================================================
     /** Returns a list of the positions of all the monitors available.

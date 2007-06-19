@@ -51,14 +51,14 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length)
+static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length) throw()
 {
     InputStream* const in = (InputStream*) png_get_io_ptr (pngReadStruct);
     in->read (data, (int) length);
 }
 
 //==============================================================================
-Image* juce_loadPNGImageFromStream (InputStream& in)
+Image* juce_loadPNGImageFromStream (InputStream& in) throw()
 {
     Image* image = 0;
 
@@ -169,7 +169,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
 }
 
 //==============================================================================
-static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_t length)
+static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_t length) throw()
 {
     OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
 
@@ -179,8 +179,7 @@ static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_
     jassert (ok);
 }
 
-bool juce_writePNGImageToStream (const Image& image,
-                                 OutputStream& out)
+bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
 {
     const int width = image.getWidth();
     const int height = image.getHeight();

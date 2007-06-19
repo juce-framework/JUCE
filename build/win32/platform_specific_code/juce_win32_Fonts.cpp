@@ -537,7 +537,7 @@ static void addGlyphToTypeface (HDC dc,
 }
 
 //==============================================================================
-void Typeface::findAndAddSystemGlyph (juce_wchar character)
+void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
     HDC dc = FontDCHolder::getInstance()->loadFont (getName(), isBold(), isItalic(), 0);
     addGlyphToTypeface (dc, character, *this, true);
@@ -595,7 +595,7 @@ void Typeface::findAndAddSystemGlyph (juce_wchar character)
 void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
                                                   bool bold,
                                                   bool italic,
-                                                  bool addAllGlyphsToFont)
+                                                  bool addAllGlyphsToFont) throw()
 {
     zerostruct (identityMatrix);
     identityMatrix.eM11.value = 1;

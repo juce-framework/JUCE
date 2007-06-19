@@ -393,7 +393,7 @@ juce_ImplementSingleton_SingleThreaded (ATSFontHelperCache)
 void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
                                                   bool bold,
                                                   bool italic,
-                                                  bool addAllGlyphsToFont)
+                                                  bool addAllGlyphsToFont) throw()
 {
     ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
                                     ->getFont (fontName, bold, italic);
@@ -414,7 +414,7 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
     ATSFontHelperCache::getInstance()->releaseFont (helper);
 }
 
-void Typeface::findAndAddSystemGlyph (juce_wchar character)
+void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
     ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
                                     ->getFont (getName(), isBold(), isItalic());

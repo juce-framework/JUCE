@@ -67,7 +67,7 @@ public:
 
         The value returned is expressed as a proportion of the font's height.
     */
-    float getHorizontalSpacing (const juce_wchar subsequentCharacter) const;
+    float getHorizontalSpacing (const juce_wchar subsequentCharacter) const throw();
 
     /** Returns the typeface that this glyph belongs to. */
     Typeface* getTypeface() const throw()           { return typeface; }
@@ -92,14 +92,14 @@ private:
     TypefaceGlyphInfo (const juce_wchar character,
                        const Path& shape,
                        const float horizontalSeparation,
-                       Typeface* const typeface);
-    ~TypefaceGlyphInfo();
+                       Typeface* const typeface) throw();
+    ~TypefaceGlyphInfo() throw();
 
-    KerningPair& getKerningPair (const int index) const;
-    int getNumKerningPairs() const;
+    KerningPair& getKerningPair (const int index) const throw();
+    int getNumKerningPairs() const throw();
 
     void addKerningPair (const juce_wchar subsequentCharacter,
-                         const float extraKerningAmount);
+                         const float extraKerningAmount) throw();
 
     const TypefaceGlyphInfo& operator= (const TypefaceGlyphInfo&);
 };
@@ -136,7 +136,7 @@ public:
     ~Typeface();
 
     /** Copies another typeface over this one. */
-    const Typeface& operator= (const Typeface& other);
+    const Typeface& operator= (const Typeface& other) throw();
 
     /** Returns a unique ID for the typeface.
 
@@ -167,7 +167,7 @@ public:
         that is asked for is not found, it will first try to return a default
         character instead.
     */
-    const Path* getOutlineForGlyph (const juce_wchar character);
+    const Path* getOutlineForGlyph (const juce_wchar character) throw();
 
     /** Tries to find the information describing a glyph for this character.
 
@@ -175,11 +175,11 @@ public:
         a default glyph instead; if the typeface is empty, it may return a null
         pointer.
     */
-    const TypefaceGlyphInfo* getGlyph (const juce_wchar character);
+    const TypefaceGlyphInfo* getGlyph (const juce_wchar character) throw();
 
     //==============================================================================
     /** Deletes all the glyphs and kerning data fom the typeface. */
-    void clear();
+    void clear() throw();
 
     /** Adds a glyph to the typeface.
 
@@ -188,7 +188,7 @@ public:
     */
     void addGlyph (const juce_wchar character,
                    const Path& path,
-                   const float horizontalSpacing);
+                   const float horizontalSpacing) throw();
 
     /** Adds a kerning distance to the typeface.
 
@@ -200,7 +200,7 @@ public:
     */
     void addKerningPair (const juce_wchar firstChar,
                          const juce_wchar secondChar,
-                         const float extraAmount);
+                         const float extraAmount) throw();
 
     /** Sets the typeface's name.
 
@@ -277,14 +277,14 @@ private:
     bool bold, italic, isFullyPopulated;
     juce_wchar defaultCharacter; // the char to use if a matching glyph can't be found.
 
-    Typeface();
-    void addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy);
+    Typeface() throw();
+    void addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy) throw();
 
     friend class Font;
     friend class TypefaceCache;
     friend class FontGlyphAlphaMap;
 
-    static const Ptr getTypefaceFor (const Font& font);
+    static const Ptr getTypefaceFor (const Font& font) throw();
 
     // this is a platform-dependent method that will look for the given typeface
     // and set up its kerning tables, etc. accordingly.
@@ -292,12 +292,12 @@ private:
     // to the typeface immediately, rather than having to add them later on-demand.
     void initialiseTypefaceCharacteristics (const String& fontName,
                                             bool bold, bool italic,
-                                            bool addAllGlyphsToFont);
+                                            bool addAllGlyphsToFont) throw();
 
     // platform-specific routine to look up and add a glyph to this typeface
-    void findAndAddSystemGlyph (juce_wchar character);
+    void findAndAddSystemGlyph (juce_wchar character) throw();
 
-    void updateHashCode();
+    void updateHashCode() throw();
 };
 
 

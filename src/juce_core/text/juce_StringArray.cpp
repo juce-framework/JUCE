@@ -295,7 +295,7 @@ void StringArray::trim() throw()
 class InternalStringArrayComparator
 {
 public:
-    static int JUCE_CALLTYPE compareElements (void* const first, void* const second) throw()
+    static int compareElements (void* const first, void* const second) throw()
     {
         return ((const String*) first)->compare (*(const String*) second);
     }
@@ -304,7 +304,7 @@ public:
 class InsensitiveInternalStringArrayComparator
 {
 public:
-    static int JUCE_CALLTYPE compareElements (void* const first, void* const second) throw()
+    static int compareElements (void* const first, void* const second) throw()
     {
         return ((const String*) first)->compareIgnoreCase (*(const String*) second);
     }

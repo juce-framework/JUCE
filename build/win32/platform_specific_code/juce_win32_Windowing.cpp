@@ -110,7 +110,7 @@ static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
 
-static HICON JUCE_CALLTYPE createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
+static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw();
 #define WM_TRAYNOTIFY WM_USER + 100
 
 //==============================================================================
@@ -232,8 +232,8 @@ public:
     unsigned char* bitmapData;
 
     //==============================================================================
-    JUCE_CALLTYPE WindowsBitmapImage (const PixelFormat format_,
-                                      const int w, const int h, const bool clearImage)
+    WindowsBitmapImage (const PixelFormat format_,
+                        const int w, const int h, const bool clearImage)
         : Image (format_, w, h)
     {
         jassert (format_ == RGB || format_ == ARGB);
@@ -292,7 +292,7 @@ public:
         imageData = bitmapData - (lineStride * (h - 1));
     }
 
-    JUCE_CALLTYPE ~WindowsBitmapImage()
+    ~WindowsBitmapImage()
     {
         DeleteDC (hdc);
         DeleteObject (hBitmap);
@@ -300,8 +300,8 @@ public:
 
     }
 
-    void JUCE_CALLTYPE blitToWindow (HWND hwnd, HDC dc, const bool transparent,
-                                     int x, int y, const RectangleList& maskedRegion) throw()
+    void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
+                       int x, int y, const RectangleList& maskedRegion) throw()
     {
         static HDRAWDIB hdd = 0;
         static bool needToCreateDrawDib = true;
@@ -424,7 +424,7 @@ long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 //==============================================================================
 static int currentModifiers = 0;
 
-static void JUCE_CALLTYPE updateKeyModifiers()
+static void updateKeyModifiers() throw()
 {
     currentModifiers &= ~(ModifierKeys::shiftModifier
                           | ModifierKeys::ctrlModifier
@@ -489,7 +489,7 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
     return ModifierKeys (currentModifiers);
 }
 
-static int64 JUCE_CALLTYPE getMouseEventTime()
+static int64 getMouseEventTime() throw()
 {
     static int64 eventTimeOffset = 0;
     static DWORD lastMessageTime = 0;
@@ -510,8 +510,8 @@ class Win32ComponentPeer  : public ComponentPeer
 {
 public:
     //==============================================================================
-    JUCE_CALLTYPE Win32ComponentPeer (Component* const component,
-                                      const int windowStyleFlags)
+    Win32ComponentPeer (Component* const component,
+                        const int windowStyleFlags)
         : ComponentPeer (component, windowStyleFlags),
           dontRepaint (false),
           fullScreen (false),
@@ -862,7 +862,7 @@ public:
     }
 
     //==============================================================================
-    static Win32ComponentPeer* JUCE_CALLTYPE getOwnerOfWindow (HWND h)
+    static Win32ComponentPeer* getOwnerOfWindow (HWND h) throw()
     {
         if (h != 0 && GetWindowLongPtr (h, GWLP_USERDATA) == improbableWindowNumber)
             return (Win32ComponentPeer*) GetWindowLongPtr (h, 8);
@@ -941,18 +941,18 @@ private:
     {
     public:
         //==============================================================================
-        JUCE_CALLTYPE TemporaryImage()
+        TemporaryImage()
             : image (0)
         {
         }
 
-        JUCE_CALLTYPE ~TemporaryImage()
+        ~TemporaryImage()
         {
             delete image;
         }
 
         //==============================================================================
-        WindowsBitmapImage* JUCE_CALLTYPE getImage (const bool transparent, const int w, const int h)
+        WindowsBitmapImage* getImage (const bool transparent, const int w, const int h) throw()
         {
             const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
 
@@ -992,7 +992,7 @@ private:
     class WindowClassHolder    : public DeletedAtShutdown
     {
     public:
-        JUCE_CALLTYPE WindowClassHolder()
+        WindowClassHolder()
             : windowClassName ("JUCE_")
         {
             // this name has to be different for each app/dll instance because otherwise
@@ -1047,7 +1047,7 @@ private:
             }
         }
 
-        JUCE_CALLTYPE ~WindowClassHolder()
+        ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
                 UnregisterClass (windowClassName, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
@@ -1056,7 +1056,7 @@ private:
         String windowClassName;
     };
 
-    void JUCE_CALLTYPE createWindow()
+    void createWindow()
     {
         DWORD exstyle = WS_EX_ACCEPTFILES;
         DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
@@ -1202,7 +1202,7 @@ private:
     }
 
     //==============================================================================
-    void JUCE_CALLTYPE handlePaintMessage()
+    void handlePaintMessage()
     {
 #if DEBUG_REPAINT_TIMES
         const double paintStart = Time::getMillisecondCounterHiRes();
@@ -1352,7 +1352,7 @@ private:
     }
 
     //==============================================================================
-    void JUCE_CALLTYPE doMouseMove (const int x, const int y)
+    void doMouseMove (const int x, const int y)
     {
         static uint32 lastMouseTime = 0;
         // this can be set to throttle the mouse-messages to less than a
@@ -1417,7 +1417,7 @@ private:
         }
     }
 
-    void JUCE_CALLTYPE doMouseDown (const int x, const int y, const WPARAM wParam)
+    void doMouseDown (const int x, const int y, const WPARAM wParam)
     {
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
@@ -1441,7 +1441,7 @@ private:
         handleMouseDown (x, y, getMouseEventTime());
     }
 
-    void JUCE_CALLTYPE doMouseUp (const int x, const int y, const WPARAM wParam)
+    void doMouseUp (const int x, const int y, const WPARAM wParam)
     {
         int numButtons = 0;
 
@@ -1479,7 +1479,7 @@ private:
         handleMouseUp (oldModifiers, x, y, getMouseEventTime());
     }
 
-    void JUCE_CALLTYPE doCaptureChanged()
+    void doCaptureChanged()
     {
         if (isDragging)
         {
@@ -1494,7 +1494,7 @@ private:
         }
     }
 
-    void JUCE_CALLTYPE doMouseExit()
+    void doMouseExit()
     {
         if (isMouseOver)
         {
@@ -1510,7 +1510,7 @@ private:
         }
     }
 
-    void JUCE_CALLTYPE doMouseWheel (const WPARAM wParam, const bool isVertical)
+    void doMouseWheel (const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
 
@@ -1522,7 +1522,7 @@ private:
     }
 
     //==============================================================================
-    void JUCE_CALLTYPE doKeyUp (const WPARAM key)
+    void doKeyUp (const WPARAM key)
     {
         updateKeyModifiers();
 
@@ -1549,7 +1549,7 @@ private:
         handleKeyUpOrDown();
     }
 
-    void JUCE_CALLTYPE doKeyDown (const WPARAM key)
+    void doKeyDown (const WPARAM key)
     {
         updateKeyModifiers();
 
@@ -1637,7 +1637,7 @@ private:
         }
     }
 
-    void JUCE_CALLTYPE doKeyChar (int key, const LPARAM flags)
+    void doKeyChar (int key, const LPARAM flags)
     {
         updateKeyModifiers();
 
@@ -1685,7 +1685,7 @@ private:
         handleKeyPress (key, textChar);
     }
 
-    bool JUCE_CALLTYPE doAppCommand (const LPARAM lParam)
+    bool doAppCommand (const LPARAM lParam)
     {
         int key = 0;
 
@@ -1723,7 +1723,7 @@ private:
     }
 
     //==============================================================================
-    void JUCE_CALLTYPE doDroppedFiles (HDROP hdrop)
+    void doDroppedFiles (HDROP hdrop)
     {
         POINT p;
         DragQueryPoint (hdrop, &p);
@@ -1754,7 +1754,7 @@ private:
         handleFilesDropped (p.x, p.y, files);
     }
 
-    void JUCE_CALLTYPE doSettingChange()
+    void doSettingChange()
     {
         Desktop::getInstance().refreshMonitorSizes();
 
@@ -1781,7 +1781,7 @@ public:
     }
 
 private:
-    LRESULT JUCE_CALLTYPE peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
         {
             const MessageManagerLock messLock;
@@ -2259,7 +2259,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 }
 
 //==============================================================================
-static Image* JUCE_CALLTYPE createImageFromHBITMAP (HBITMAP bitmap)
+static Image* createImageFromHBITMAP (HBITMAP bitmap) throw()
 {
     Image* im = 0;
 
@@ -2297,7 +2297,7 @@ static Image* JUCE_CALLTYPE createImageFromHBITMAP (HBITMAP bitmap)
     return im;
 }
 
-static Image* JUCE_CALLTYPE createImageFromHICON (HICON icon)
+static Image* createImageFromHICON (HICON icon) throw()
 {
     ICONINFO info;
 
@@ -2331,7 +2331,7 @@ static Image* JUCE_CALLTYPE createImageFromHICON (HICON icon)
     return 0;
 }
 
-static HICON JUCE_CALLTYPE createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
+static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw()
 {
     HBITMAP mask = CreateBitmap (image.getWidth(), image.getHeight(), 1, 1, 0);
 
@@ -2834,7 +2834,7 @@ public:
     HRESULT __stdcall EnumDAdvise (IEnumSTATDATA __RPC_FAR *__RPC_FAR *)                                { return OLE_E_ADVISENOTSUPPORTED; }
 };
 
-static HDROP JUCE_CALLTYPE createHDrop (const StringArray& fileNames)
+static HDROP createHDrop (const StringArray& fileNames) throw()
 {
     int totalChars = 0;
     for (int i = fileNames.size(); --i >= 0;)
@@ -2882,7 +2882,7 @@ static HDROP JUCE_CALLTYPE createHDrop (const StringArray& fileNames)
     return hDrop;
 }
 
-static bool JUCE_CALLTYPE performDragDrop (FORMATETC* format, STGMEDIUM* medium, const DWORD whatToDo)
+static bool performDragDrop (FORMATETC* format, STGMEDIUM* medium, const DWORD whatToDo) throw()
 {
     JuceDropSource* const source = new JuceDropSource();
     JuceDataObject* const data = new JuceDataObject (source, format, medium, 1);

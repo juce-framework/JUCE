@@ -59,23 +59,23 @@ public:
 
         Text can then be appended using the appendText() method.
     */
-    TextLayout();
+    TextLayout() throw();
 
     /** Creates a copy of another layout object. */
-    TextLayout (const TextLayout& other);
+    TextLayout (const TextLayout& other) throw();
 
     /** Creates a text layout from an initial string and font. */
-    TextLayout (const String& text, const Font& font);
+    TextLayout (const String& text, const Font& font) throw();
 
     /** Destructor. */
-    ~TextLayout();
+    ~TextLayout() throw();
 
     /** Copies another layout onto this one. */
-    const TextLayout& operator= (const TextLayout& layoutToCopy);
+    const TextLayout& operator= (const TextLayout& layoutToCopy) throw();
 
     //==============================================================================
     /** Clears the layout, removing all its text. */
-    void clear();
+    void clear() throw();
 
     /** Adds a string to the end of the arrangement.
 
@@ -84,14 +84,14 @@ public:
         to wrap long lines into a paragraph and justify it.
     */
     void appendText (const String& textToAppend,
-                     const Font& fontToUse);
+                     const Font& fontToUse) throw();
 
     /** Replaces all the text with a new string.
 
         This is equivalent to calling clear() followed by appendText().
     */
     void setText (const String& newText,
-                  const Font& fontToUse);
+                  const Font& fontToUse) throw();
 
     //==============================================================================
     /** Breaks the text up to form a paragraph with the given width.
@@ -108,15 +108,15 @@ public:
     */
     void layout (int maximumWidth,
                  const Justification& justification,
-                 const bool attemptToBalanceLineLengths);
+                 const bool attemptToBalanceLineLengths) throw();
 
 
     //==============================================================================
     /** Returns the overall width of the entire text layout. */
-    int getWidth() const;
+    int getWidth() const throw();
 
     /** Returns the overall height of the entire text layout. */
-    int getHeight() const;
+    int getHeight() const throw();
 
     /** Returns the total number of lines of text. */
     int getNumLines() const throw()                 { return totalLines; }
@@ -125,14 +125,14 @@ public:
 
         @param lineNumber   the line, from 0 to (getNumLines() - 1)
     */
-    int getLineWidth (const int lineNumber) const;
+    int getLineWidth (const int lineNumber) const throw();
 
     //==============================================================================
     /** Renders the text at a specified position using a graphics context.
     */
     void draw (Graphics& g,
                const int topLeftX,
-               const int topLeftY) const;
+               const int topLeftY) const throw();
 
     /** Renders the text within a specified rectangle using a graphics context.
 
@@ -141,7 +141,7 @@ public:
     */
     void drawWithin (Graphics& g,
                      int x, int y, int w, int h,
-                     const Justification& layoutFlags) const;
+                     const Justification& layoutFlags) const throw();
 
 
     //==============================================================================

@@ -80,16 +80,16 @@ public:
     */
     PathStrokeType (const float strokeThickness,
                     const JointStyle jointStyle = mitered,
-                    const EndCapStyle endStyle = butt);
+                    const EndCapStyle endStyle = butt) throw();
 
     /** Createes a copy of another stroke type. */
-    PathStrokeType (const PathStrokeType& other);
+    PathStrokeType (const PathStrokeType& other) throw();
 
     /** Copies another stroke onto this one. */
-    const PathStrokeType& operator= (const PathStrokeType& other);
+    const PathStrokeType& operator= (const PathStrokeType& other) throw();
 
     /** Destructor. */
-    ~PathStrokeType();
+    ~PathStrokeType() throw();
 
     //==============================================================================
     /** Applies this stroke type to a path and returns the resultant stroke as another Path.
@@ -110,7 +110,7 @@ public:
     void createStrokedPath (Path& destPath,
                             const Path& sourcePath,
                             const AffineTransform& transform = AffineTransform::identity,
-                            const float extraAccuracy = 1.0f) const;
+                            const float extraAccuracy = 1.0f) const throw();
 
 
     //==============================================================================
@@ -141,7 +141,7 @@ public:
                              const float* dashLengths,
                              int numDashLengths,
                              const AffineTransform& transform = AffineTransform::identity,
-                             const float extraAccuracy = 1.0f) const;
+                             const float extraAccuracy = 1.0f) const throw();
 
     //==============================================================================
     /** Returns the stroke thickness. */

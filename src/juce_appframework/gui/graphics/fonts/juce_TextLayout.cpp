@@ -49,7 +49,7 @@ public:
 
     TextLayoutToken (const String& t,
                      const Font& f,
-                     const bool isWhitespace_)
+                     const bool isWhitespace_) throw()
         : text (t),
           font (f),
           x(0),
@@ -61,7 +61,7 @@ public:
         isNewLine = t.containsAnyOf (T("\r\n"));
     }
 
-    TextLayoutToken (const TextLayoutToken& other)
+    TextLayoutToken (const TextLayoutToken& other) throw()
         : text (other.text),
           font (other.font),
           x (other.x),
@@ -75,13 +75,13 @@ public:
     {
     }
 
-    ~TextLayoutToken()
+    ~TextLayoutToken() throw()
     {
     }
 
     void draw (Graphics& g,
                const int xOffset,
-               const int yOffset)
+               const int yOffset) throw()
     {
         if (! isWhitespace)
         {
@@ -98,28 +98,28 @@ public:
 
 
 //==============================================================================
-TextLayout::TextLayout()
+TextLayout::TextLayout() throw()
     : tokens (64),
       totalLines (0)
 {
 }
 
 TextLayout::TextLayout (const String& text,
-                        const Font& font)
+                        const Font& font) throw()
     : tokens (64),
       totalLines (0)
 {
     appendText (text, font);
 }
 
-TextLayout::TextLayout (const TextLayout& other)
+TextLayout::TextLayout (const TextLayout& other) throw()
     : tokens (64),
       totalLines (0)
 {
     *this = other;
 }
 
-const TextLayout& TextLayout::operator= (const TextLayout& other)
+const TextLayout& TextLayout::operator= (const TextLayout& other) throw()
 {
     if (this != &other)
     {
@@ -134,13 +134,13 @@ const TextLayout& TextLayout::operator= (const TextLayout& other)
     return *this;
 }
 
-TextLayout::~TextLayout()
+TextLayout::~TextLayout() throw()
 {
     clear();
 }
 
 //==============================================================================
-void TextLayout::clear()
+void TextLayout::clear() throw()
 {
     for (int i = tokens.size(); --i >= 0;)
     {
@@ -153,7 +153,7 @@ void TextLayout::clear()
 }
 
 void TextLayout::appendText (const String& text,
-                             const Font& font)
+                             const Font& font) throw()
 {
     const tchar* t = text;
     String currentString;
@@ -206,7 +206,7 @@ void TextLayout::appendText (const String& text,
                                          lastCharType == 2));
 }
 
-void TextLayout::setText (const String& text, const Font& font)
+void TextLayout::setText (const String& text, const Font& font) throw()
 {
     clear();
     appendText (text, font);
@@ -215,7 +215,7 @@ void TextLayout::setText (const String& text, const Font& font)
 //==============================================================================
 void TextLayout::layout (int maxWidth,
                          const Justification& justification,
-                         const bool attemptToBalanceLineLengths)
+                         const bool attemptToBalanceLineLengths) throw()
 {
     if (attemptToBalanceLineLengths)
     {
@@ -331,7 +331,7 @@ void TextLayout::layout (int maxWidth,
 }
 
 //==============================================================================
-int TextLayout::getLineWidth (const int lineNumber) const
+int TextLayout::getLineWidth (const int lineNumber) const throw()
 {
     int maxW = 0;
 
@@ -346,7 +346,7 @@ int TextLayout::getLineWidth (const int lineNumber) const
     return maxW;
 }
 
-int TextLayout::getWidth() const
+int TextLayout::getWidth() const throw()
 {
     int maxW = 0;
 
@@ -360,7 +360,7 @@ int TextLayout::getWidth() const
     return maxW;
 }
 
-int TextLayout::getHeight() const
+int TextLayout::getHeight() const throw()
 {
     int maxH = 0;
 
@@ -378,7 +378,7 @@ int TextLayout::getHeight() const
 //==============================================================================
 void TextLayout::draw (Graphics& g,
                        const int xOffset,
-                       const int yOffset) const
+                       const int yOffset) const throw()
 {
     for (int i = tokens.size(); --i >= 0;)
         ((TextLayoutToken*) tokens.getUnchecked(i))->draw (g, xOffset, yOffset);
@@ -386,12 +386,13 @@ void TextLayout::draw (Graphics& g,
 
 void TextLayout::drawWithin (Graphics& g,
                              int x, int y, int w, int h,
-                             const Justification& justification) const
+                             const Justification& justification) const throw()
 {
     justification.applyToRectangle (x, y, getWidth(), getHeight(),
                                     x, y, w, h);
 
     draw (g, x, y);
 }
+
 
 END_JUCE_NAMESPACE

@@ -87,27 +87,27 @@ void Label::setText (const String& newText,
     }
 }
 
-const String Label::getText (const bool returnActiveEditorContents) const
+const String Label::getText (const bool returnActiveEditorContents) const throw()
 {
     return (returnActiveEditorContents && isBeingEdited())
                 ? editor->getText()
                 : text;
 }
 
-void Label::setFont (const Font& newFont)
+void Label::setFont (const Font& newFont) throw()
 {
     font = newFont;
     repaint();
 }
 
-const Font Label::getFont() const
+const Font& Label::getFont() const throw()
 {
     return font;
 }
 
 void Label::setEditable (const bool editOnSingleClick,
                          const bool editOnDoubleClick,
-                         const bool lossOfFocusDiscardsChanges_)
+                         const bool lossOfFocusDiscardsChanges_) throw()
 {
     editSingleClick = editOnSingleClick;
     editDoubleClick = editOnDoubleClick;
@@ -117,7 +117,7 @@ void Label::setEditable (const bool editOnSingleClick,
     setFocusContainer (editOnSingleClick || editOnDoubleClick);
 }
 
-void Label::setJustificationType (const Justification& justification_)
+void Label::setJustificationType (const Justification& justification_) throw()
 {
     justification = justification_;
     repaint();
@@ -250,7 +250,7 @@ void Label::inputAttemptWhenModal()
     }
 }
 
-bool Label::isBeingEdited() const
+bool Label::isBeingEdited() const throw()
 {
     return editor != 0;
 }

@@ -46,7 +46,7 @@ class JUCE_API  MessageListener
 protected:
     //==============================================================================
     /** Creates a MessageListener. */
-    JUCE_CALLTYPE MessageListener() throw();
+    MessageListener() throw();
 
 public:
     //==============================================================================
@@ -56,7 +56,7 @@ public:
         of registered listeners, so that the isValidMessageListener() method
         will no longer return true.
     */
-    virtual JUCE_CALLTYPE ~MessageListener();
+    virtual ~MessageListener();
 
     //==============================================================================
     /** This is the callback method that receives incoming messages.
@@ -78,7 +78,7 @@ public:
                             references to it after calling this method.
         @see handleMessage
     */
-    void JUCE_CALLTYPE postMessage (Message* const message) const throw();
+    void postMessage (Message* const message) const throw();
 
     //==============================================================================
     /** Checks whether this MessageListener has been deleted.
@@ -92,7 +92,7 @@ public:
         exact same memory location, but I can't think of a good way of avoiding
         this.
     */
-    bool JUCE_CALLTYPE isValidMessageListener() const throw();
+    bool isValidMessageListener() const throw();
 };
 
 

@@ -47,7 +47,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-JUCE_CALLTYPE CriticalSection::CriticalSection() throw()
+CriticalSection::CriticalSection() throw()
 {
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
@@ -55,22 +55,22 @@ JUCE_CALLTYPE CriticalSection::CriticalSection() throw()
     pthread_mutex_init (&internal, &atts);
 }
 
-JUCE_CALLTYPE CriticalSection::~CriticalSection() throw()
+CriticalSection::~CriticalSection() throw()
 {
     pthread_mutex_destroy (&internal);
 }
 
-void JUCE_CALLTYPE CriticalSection::enter() const throw()
+void CriticalSection::enter() const throw()
 {
     pthread_mutex_lock (&internal);
 }
 
-bool JUCE_CALLTYPE CriticalSection::tryEnter() const throw()
+bool CriticalSection::tryEnter() const throw()
 {
     return pthread_mutex_trylock (&internal) == 0;
 }
 
-void JUCE_CALLTYPE CriticalSection::exit() const throw()
+void CriticalSection::exit() const throw()
 {
     pthread_mutex_unlock (&internal);
 }

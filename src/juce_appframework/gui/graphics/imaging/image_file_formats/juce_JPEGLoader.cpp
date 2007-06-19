@@ -95,7 +95,7 @@ static boolean jpegFill (j_decompress_ptr) throw()
 }
 
 //==============================================================================
-Image* juce_loadJPEGImageFromStream (InputStream& in)
+Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
 {
     MemoryBlock mb;
     in.readIntoMemoryBlock (mb);
@@ -207,7 +207,7 @@ static boolean jpegWriteFlush (j_compress_ptr cinfo) throw()
 //==============================================================================
 bool juce_writeJPEGImageToStream (const Image& image,
                                   OutputStream& out,
-                                  float quality)
+                                  float quality) throw()
 {
     if (image.hasAlphaChannel())
     {

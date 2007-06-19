@@ -948,7 +948,7 @@ void TextEditor::setMultiLine (const bool shouldBeMultiLine,
     scrollToMakeSureCursorIsVisible();
 }
 
-bool TextEditor::isMultiLine() const
+bool TextEditor::isMultiLine() const throw()
 {
     return multiline;
 }

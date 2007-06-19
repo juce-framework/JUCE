@@ -65,19 +65,19 @@ protected:
 
         When created, the timer is stopped, so use startTimer() to get it going.
     */
-    JUCE_CALLTYPE Timer() throw();
+    Timer() throw();
 
     /** Creates a copy of another timer.
 
         Note that this timer won't be started, even if the one you're copying
         is running.
     */
-    JUCE_CALLTYPE Timer (const Timer& other) throw();
+    Timer (const Timer& other) throw();
 
 public:
     //==============================================================================
     /** Destructor. */
-    virtual JUCE_CALLTYPE ~Timer();
+    virtual ~Timer();
 
     //==============================================================================
     /** The user-defined callback routine that actually gets called periodically.
@@ -97,7 +97,7 @@ public:
         @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
                                         rounded up to 1)
     */
-    void JUCE_CALLTYPE startTimer (const int intervalInMilliseconds) throw();
+    void startTimer (const int intervalInMilliseconds) throw();
 
     /** Stops the timer.
 
@@ -107,20 +107,20 @@ public:
         be currently executing may be allowed to finish before the method
         returns.
     */
-    void JUCE_CALLTYPE stopTimer() throw();
+    void stopTimer() throw();
 
     //==============================================================================
     /** Checks if the timer has been started.
 
         @returns true if the timer is running.
     */
-    bool JUCE_CALLTYPE isTimerRunning() const throw()               { return periodMs > 0; }
+    bool isTimerRunning() const throw()                     { return periodMs > 0; }
 
     /** Returns the timer's interval.
 
         @returns the timer's interval in milliseconds if it's running, or 0 if it's not.
     */
-    int JUCE_CALLTYPE getTimerInterval() const throw()              { return periodMs; }
+    int getTimerInterval() const throw()                    { return periodMs; }
 
 
     //==============================================================================

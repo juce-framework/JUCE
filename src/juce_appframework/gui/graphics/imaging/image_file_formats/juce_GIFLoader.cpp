@@ -39,8 +39,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static inline int makeWord (unsigned char a,
-                            unsigned char b)
+static inline int makeWord (const unsigned char a, const unsigned char b) throw()
 {
     return (b << 8) | a;
 }

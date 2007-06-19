@@ -61,7 +61,7 @@ private:
     InternalTimerThread (const InternalTimerThread&);
     const InternalTimerThread& operator= (const InternalTimerThread&);
 
-    void JUCE_CALLTYPE addTimer (Timer* const t) throw()
+    void addTimer (Timer* const t) throw()
     {
 #ifdef JUCE_DEBUG
         Timer* tt = firstTimer;
@@ -106,7 +106,7 @@ private:
         notify();
     }
 
-    void JUCE_CALLTYPE removeTimer (Timer* const t) throw()
+    void removeTimer (Timer* const t) throw()
     {
 #ifdef JUCE_DEBUG
         Timer* tt = firstTimer;
@@ -319,7 +319,7 @@ void juce_callAnyTimersSynchronously()
 static SortedSet <Timer*> activeTimers;
 #endif
 
-JUCE_CALLTYPE Timer::Timer() throw()
+Timer::Timer() throw()
    : countdownMs (0),
      periodMs (0),
      previous (0),
@@ -330,7 +330,7 @@ JUCE_CALLTYPE Timer::Timer() throw()
 #endif
 }
 
-JUCE_CALLTYPE Timer::Timer (const Timer&) throw()
+Timer::Timer (const Timer&) throw()
    : countdownMs (0),
      periodMs (0),
      previous (0),
@@ -341,7 +341,7 @@ JUCE_CALLTYPE Timer::Timer (const Timer&) throw()
 #endif
 }
 
-JUCE_CALLTYPE Timer::~Timer()
+Timer::~Timer()
 {
     stopTimer();
 
@@ -350,7 +350,7 @@ JUCE_CALLTYPE Timer::~Timer()
 #endif
 }
 
-void JUCE_CALLTYPE Timer::startTimer (const int interval) throw()
+void Timer::startTimer (const int interval) throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 
@@ -371,7 +371,7 @@ void JUCE_CALLTYPE Timer::startTimer (const int interval) throw()
     }
 }
 
-void JUCE_CALLTYPE Timer::stopTimer() throw()
+void Timer::stopTimer() throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 

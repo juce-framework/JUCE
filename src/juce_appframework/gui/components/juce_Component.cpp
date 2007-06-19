@@ -68,7 +68,7 @@ int juce_LastMousePosY = 0;
 int juce_MouseClickCounter = 0;
 bool juce_MouseHasMovedSignificantlySincePressed = false;
 
-static int countMouseClicks()
+static int countMouseClicks() throw()
 {
     int numClicks = 0;
 
@@ -424,7 +424,7 @@ bool Component::isValidComponent() const throw()
     return (this != 0) && isValidMessageListener();
 }
 
-void* Component::getWindowHandle() const
+void* Component::getWindowHandle() const throw()
 {
     const ComponentPeer* const peer = getPeer();
 
@@ -538,7 +538,7 @@ void Component::removeFromDesktop()
     }
 }
 
-bool Component::isOnDesktop() const
+bool Component::isOnDesktop() const throw()
 {
     return flags.hasHeavyweightPeerFlag;
 }
@@ -560,7 +560,7 @@ void Component::minimisationStateChanged (bool)
 }
 
 //==============================================================================
-void Component::setOpaque (const bool shouldBeOpaque)
+void Component::setOpaque (const bool shouldBeOpaque) throw()
 {
     if (shouldBeOpaque != flags.opaqueFlag)
     {
@@ -587,7 +587,7 @@ bool Component::isOpaque() const throw()
 }
 
 //==============================================================================
-void Component::setBufferedToImage (const bool shouldBeBuffered)
+void Component::setBufferedToImage (const bool shouldBeBuffered) throw()
 {
     if (shouldBeBuffered != flags.bufferToImageFlag)
     {
@@ -763,7 +763,7 @@ void Component::setAlwaysOnTop (const bool shouldStayOnTop)
     }
 }
 
-bool Component::isAlwaysOnTop() const
+bool Component::isAlwaysOnTop() const throw()
 {
     return flags.alwaysOnTopFlag;
 }
@@ -820,7 +820,7 @@ int Component::getScreenY() const throw()
                                                                    : compY_);
 }
 
-void Component::relativePositionToGlobal (int& x, int& y) const
+void Component::relativePositionToGlobal (int& x, int& y) const throw()
 {
     const Component* c = this;
 
@@ -839,7 +839,7 @@ void Component::relativePositionToGlobal (int& x, int& y) const
     while (c != 0);
 }
 
-void Component::globalPositionToRelative (int& x, int& y) const
+void Component::globalPositionToRelative (int& x, int& y) const throw()
 {
     if (flags.hasHeavyweightPeerFlag)
     {
@@ -855,7 +855,7 @@ void Component::globalPositionToRelative (int& x, int& y) const
     }
 }
 
-void Component::relativePositionToOtherComponent (const Component* const targetComponent, int& x, int& y) const
+void Component::relativePositionToOtherComponent (const Component* const targetComponent, int& x, int& y) const throw()
 {
     if (targetComponent != 0)
     {
@@ -1111,14 +1111,14 @@ bool Component::hitTest (int x, int y)
 }
 
 void Component::setInterceptsMouseClicks (const bool allowClicks,
-                                          const bool allowClicksOnChildComponents)
+                                          const bool allowClicksOnChildComponents) throw()
 {
     flags.ignoresMouseClicksFlag = ! allowClicks;
     flags.allowChildMouseClicksFlag = allowClicksOnChildComponents;
 }
 
 void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
-                                          bool& allowsClicksOnChildComponents)
+                                          bool& allowsClicksOnChildComponents) const throw()
 {
     allowsClicksOnThisComponent = ! flags.ignoresMouseClicksFlag;
     allowsClicksOnChildComponents = flags.allowChildMouseClicksFlag;
@@ -1146,8 +1146,7 @@ bool Component::contains (const int x, const int y)
     return false;
 }
 
-bool Component::reallyContains (int x, int y,
-                                const bool returnTrueIfWithinAChild)
+bool Component::reallyContains (int x, int y, const bool returnTrueIfWithinAChild)
 {
     if (! contains (x, y))
         return false;
@@ -1191,8 +1190,7 @@ Component* Component::getComponentAt (const int x, const int y)
 }
 
 //==============================================================================
-void Component::addChildComponent (Component* const child,
-                                   int zOrder)
+void Component::addChildComponent (Component* const child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1231,8 +1229,7 @@ void Component::addChildComponent (Component* const child,
     }
 }
 
-void Component::addAndMakeVisible (Component* const child,
-                                   int zOrder)
+void Component::addAndMakeVisible (Component* const child, int zOrder)
 {
     if (child != 0)
     {
@@ -1318,12 +1315,12 @@ Component* Component::getChildComponent (const int index) const throw()
     return childComponentList_ [index];
 }
 
-int Component::getIndexOfChildComponent (const Component* const child) const
+int Component::getIndexOfChildComponent (const Component* const child) const throw()
 {
     return childComponentList_.indexOf (const_cast <Component*> (child));
 }
 
-Component* Component::getTopLevelComponent() const
+Component* Component::getTopLevelComponent() const throw()
 {
     const Component* comp = this;
 
@@ -1333,7 +1330,7 @@ Component* Component::getTopLevelComponent() const
     return (Component*) comp;
 }
 
-bool Component::isParentOf (const Component* possibleChild) const
+bool Component::isParentOf (const Component* possibleChild) const throw()
 {
     while (possibleChild->isValidComponent())
     {
@@ -1539,13 +1536,13 @@ void Component::exitModalState (const int returnValue)
     }
 }
 
-bool Component::isCurrentlyModal() const
+bool Component::isCurrentlyModal() const throw()
 {
     return flags.currentlyModalFlag
             && getCurrentlyModalComponent() == this;
 }
 
-bool Component::isCurrentlyBlockedByAnotherModalComponent() const
+bool Component::isCurrentlyBlockedByAnotherModalComponent() const throw()
 {
     Component* const mc = getCurrentlyModalComponent();
 
@@ -1555,7 +1552,7 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const
             && ! mc->canModalEventBeSentToComponent (this);
 }
 
-Component* Component::getCurrentlyModalComponent()
+Component* Component::getCurrentlyModalComponent() throw()
 {
     Component* const c = (Component*) modalComponentStack.getLast();
 
@@ -1563,7 +1560,7 @@ Component* Component::getCurrentlyModalComponent()
 }
 
 //==============================================================================
-void Component::setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront)
+void Component::setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront) throw()
 {
     flags.bringToFrontOnClickFlag = shouldBeBroughtToFront;
 }
@@ -1574,7 +1571,7 @@ bool Component::isBroughtToFrontOnMouseClick() const throw()
 }
 
 //==============================================================================
-void Component::setMouseCursor (const MouseCursor& cursor)
+void Component::setMouseCursor (const MouseCursor& cursor) throw()
 {
     cursor_ = cursor;
 
@@ -1595,12 +1592,12 @@ const MouseCursor Component::getMouseCursor()
     return cursor_;
 }
 
-void Component::updateMouseCursor() const
+void Component::updateMouseCursor() const throw()
 {
     sendFakeMouseMove();
 }
 
-void Component::internalUpdateMouseCursor (const bool forcedUpdate)
+void Component::internalUpdateMouseCursor (const bool forcedUpdate) throw()
 {
     ComponentPeer* const peer = getPeer();
 
@@ -1626,13 +1623,13 @@ void Component::internalUpdateMouseCursor (const bool forcedUpdate)
 }
 
 //==============================================================================
-void Component::setRepaintsOnMouseActivity (const bool shouldRepaint)
+void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) throw()
 {
     flags.repaintOnMouseActivityFlag = shouldRepaint;
 }
 
 //==============================================================================
-void Component::repaintParent()
+void Component::repaintParent() throw()
 {
     if (flags.visibleFlag)
         internalRepaint (0, 0, compW_, compH_);
@@ -1972,7 +1969,7 @@ const Rectangle Component::getUnclippedArea() const
 }
 
 void Component::clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
-                                     const int deltaX, const int deltaY) const
+                                     const int deltaX, const int deltaY) const throw()
 {
     for (int i = childComponentList_.size(); --i >= 0;)
     {
@@ -2034,7 +2031,7 @@ void Component::subtractObscuredRegions (RectangleList& result,
                                          const int deltaX,
                                          const int deltaY,
                                          const Rectangle& clipRect,
-                                         const Component* const compToAvoid) const
+                                         const Component* const compToAvoid) const throw()
 {
     for (int i = childComponentList_.size(); --i >= 0;)
     {
@@ -2196,7 +2193,7 @@ void Component::handleMessage (const Message& message)
 }
 
 //==============================================================================
-void Component::postCommandMessage (const int commandId)
+void Component::postCommandMessage (const int commandId) throw()
 {
     postMessage (new Message (customCommandMessage, commandId, 0, 0));
 }
@@ -2208,7 +2205,7 @@ void Component::handleCommandMessage (int)
 
 //==============================================================================
 void Component::addMouseListener (MouseListener* const newListener,
-                                  const bool wantsEventsForAllNestedChildComponents)
+                                  const bool wantsEventsForAllNestedChildComponents) throw()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -2231,7 +2228,7 @@ void Component::addMouseListener (MouseListener* const newListener,
     }
 }
 
-void Component::removeMouseListener (MouseListener* const listenerToRemove)
+void Component::removeMouseListener (MouseListener* const listenerToRemove) throw()
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -3137,7 +3134,7 @@ void Component::internalChildFocusChange (FocusChangeType cause)
 }
 
 //==============================================================================
-bool Component::isEnabled() const
+bool Component::isEnabled() const throw()
 {
     return (! flags.isDisabledFlag)
             && (parentComponent_ == 0 || parentComponent_->isEnabled());
@@ -3184,7 +3181,7 @@ void Component::enablementChanged()
 }
 
 //==============================================================================
-void Component::setWantsKeyboardFocus (const bool wantsFocus)
+void Component::setWantsKeyboardFocus (const bool wantsFocus) throw()
 {
     flags.wantsFocusFlag = wantsFocus;
 }
@@ -3410,7 +3407,7 @@ bool Component::isMouseButtonDownAnywhere() throw()
     return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 }
 
-void Component::getMouseXYRelative (int& mx, int& my) const
+void Component::getMouseXYRelative (int& mx, int& my) const throw()
 {
     Desktop::getMousePosition (mx, my);
     globalPositionToRelative (mx, my);
@@ -3420,7 +3417,7 @@ void Component::getMouseXYRelative (int& mx, int& my) const
 }
 
 void Component::enableUnboundedMouseMovement (bool enable,
-                                              bool keepCursorVisibleUntilOffscreen)
+                                              bool keepCursorVisibleUntilOffscreen) throw()
 {
     enable = enable && isMouseButtonDown();
     isCursorVisibleUntilOffscreen = keepCursorVisibleUntilOffscreen;
@@ -3468,7 +3465,7 @@ const Rectangle Component::getParentMonitorArea() const throw()
 }
 
 //==============================================================================
-void Component::addKeyListener (KeyListener* const newListener)
+void Component::addKeyListener (KeyListener* const newListener) throw()
 {
     if (keyListeners_ == 0)
         keyListeners_ = new VoidArray (4);
@@ -3476,7 +3473,7 @@ void Component::addKeyListener (KeyListener* const newListener)
     keyListeners_->addIfNotAlreadyThere (newListener);
 }
 
-void Component::removeKeyListener (KeyListener* const listenerToRemove)
+void Component::removeKeyListener (KeyListener* const listenerToRemove) throw()
 {
     if (keyListeners_ != 0)
         keyListeners_->removeValue (listenerToRemove);
@@ -3602,7 +3599,7 @@ void Component::internalFilesDropped (const int x,
     }
 }
 
-ComponentPeer* Component::getPeer() const
+ComponentPeer* Component::getPeer() const throw()
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);

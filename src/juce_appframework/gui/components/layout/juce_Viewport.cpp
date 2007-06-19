@@ -104,12 +104,12 @@ void Viewport::setViewedComponent (Component* const newViewedComponent)
     }
 }
 
-int Viewport::getMaximumVisibleWidth() const
+int Viewport::getMaximumVisibleWidth() const throw()
 {
     return jmax (0, getWidth() - (verticalScrollBar->isVisible() ? getScrollBarThickness() : 0));
 }
 
-int Viewport::getMaximumVisibleHeight() const
+int Viewport::getMaximumVisibleHeight() const throw()
 {
     return jmax (0, getHeight() - (horizontalScrollBar->isVisible() ? getScrollBarThickness() : 0));
 }
@@ -250,7 +250,7 @@ void Viewport::setScrollBarThickness (const int thickness)
     updateVisibleRegion();
 }
 
-int Viewport::getScrollBarThickness() const
+int Viewport::getScrollBarThickness() const throw()
 {
     return (scrollBarThickness > 0) ? scrollBarThickness
                                     : getLookAndFeel().getDefaultScrollbarWidth();

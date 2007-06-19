@@ -40,8 +40,8 @@ BEGIN_JUCE_NAMESPACE
 #include "image_file_formats/juce_GIFLoader.h"
 
 //==============================================================================
-Image* juce_loadPNGImageFromStream (InputStream& inputStream);
-bool juce_writePNGImageToStream (const Image& image, OutputStream& out);
+Image* juce_loadPNGImageFromStream (InputStream& inputStream) throw();
+bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw();
 
 PNGImageFormat::PNGImageFormat() throw() {}
 PNGImageFormat::~PNGImageFormat() throw() {}
@@ -74,8 +74,8 @@ bool PNGImageFormat::writeImageToStream (const Image& sourceImage,
 }
 
 //==============================================================================
-Image* juce_loadJPEGImageFromStream (InputStream& inputStream);
-bool juce_writeJPEGImageToStream (const Image& image, OutputStream& out, float quality);
+Image* juce_loadJPEGImageFromStream (InputStream& inputStream) throw();
+bool juce_writeJPEGImageToStream (const Image& image, OutputStream& out, float quality) throw();
 
 JPEGImageFormat::JPEGImageFormat() throw()
     : quality (-1.0f)

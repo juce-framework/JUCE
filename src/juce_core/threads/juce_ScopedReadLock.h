@@ -72,7 +72,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline JUCE_CALLTYPE ScopedReadLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterRead(); }
+    inline ScopedReadLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterRead(); }
 
     /** Destructor.
 
@@ -81,7 +81,7 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline JUCE_CALLTYPE ~ScopedReadLock() throw()                                { lock_.exitRead(); }
+    inline ~ScopedReadLock() throw()                                { lock_.exitRead(); }
 
 
 private:

@@ -55,13 +55,13 @@ static const int safeEmptyStringRefCount                        = 0x3fffffff;
 String::InternalRefCountedStringHolder String::emptyString      = { safeEmptyStringRefCount, 0, { 0 } };
 
 //==============================================================================
-void JUCE_CALLTYPE String::deleteInternal() throw()
+void String::deleteInternal() throw()
 {
     if (atomicDecrementAndReturn (text->refCount) == 0)
         juce_free (text);
 }
 
-void JUCE_CALLTYPE String::createInternal (const int numChars) throw()
+void String::createInternal (const int numChars) throw()
 {
     jassert (numChars > 0);
 
@@ -72,7 +72,7 @@ void JUCE_CALLTYPE String::createInternal (const int numChars) throw()
     text->text[0] = 0;
 }
 
-void JUCE_CALLTYPE String::appendInternal (const tchar* const newText,
+void String::appendInternal (const tchar* const newText,
                              const int numExtraChars) throw()
 {
     if (numExtraChars > 0)
@@ -117,7 +117,7 @@ void JUCE_CALLTYPE String::appendInternal (const tchar* const newText,
     }
 }
 
-void JUCE_CALLTYPE String::dupeInternalIfMultiplyReferenced() throw()
+void String::dupeInternalIfMultiplyReferenced() throw()
 {
     if (text->refCount > 1)
     {
@@ -145,24 +145,24 @@ const String String::empty;
 
 
 //==============================================================================
-JUCE_CALLTYPE String::String() throw()
+String::String() throw()
     : text (&emptyString)
 {
 }
 
-JUCE_CALLTYPE String::String (const String& other) throw()
+String::String (const String& other) throw()
     : text (other.text)
 {
     atomicIncrement (text->refCount);
 }
 
-JUCE_CALLTYPE String::String (const int numChars,
-                              const int /*dummyVariable*/) throw()
+String::String (const int numChars,
+                const int /*dummyVariable*/) throw()
 {
     createInternal (numChars);
 }
 
-JUCE_CALLTYPE String::String (const char* const t) throw()
+String::String (const char* const t) throw()
 {
     if (t != 0 && *t != 0)
     {
@@ -182,7 +182,7 @@ JUCE_CALLTYPE String::String (const char* const t) throw()
     }
 }
 
-JUCE_CALLTYPE String::String (const juce_wchar* const t) throw()
+String::String (const juce_wchar* const t) throw()
 {
     if (t != 0 && *t != 0)
     {
@@ -202,8 +202,8 @@ JUCE_CALLTYPE String::String (const juce_wchar* const t) throw()
     }
 }
 
-JUCE_CALLTYPE String::String (const char* const t,
-                              const int maxChars) throw()
+String::String (const char* const t,
+                const int maxChars) throw()
 {
     int i;
     for (i = 0; i < maxChars; ++i)
@@ -229,8 +229,8 @@ JUCE_CALLTYPE String::String (const char* const t,
     }
 }
 
-JUCE_CALLTYPE String::String (const juce_wchar* const t,
-                              const int maxChars) throw()
+String::String (const juce_wchar* const t,
+                const int maxChars) throw()
 {
     int i;
     for (i = 0; i < maxChars; ++i)
@@ -255,7 +255,7 @@ JUCE_CALLTYPE String::String (const juce_wchar* const t,
     }
 }
 
-const String JUCE_CALLTYPE String::charToString (const tchar character) throw()
+const String String::charToString (const tchar character) throw()
 {
     tchar temp[2];
     temp[0] = character;
@@ -297,7 +297,7 @@ static tchar* uintToCharString (tchar* t, unsigned int v)
     return t;
 }
 
-JUCE_CALLTYPE String::String (const int number) throw()
+String::String (const int number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -308,7 +308,7 @@ JUCE_CALLTYPE String::String (const int number) throw()
     memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
-JUCE_CALLTYPE String::String (const unsigned int number) throw()
+String::String (const unsigned int number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -319,7 +319,7 @@ JUCE_CALLTYPE String::String (const unsigned int number) throw()
     memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
-JUCE_CALLTYPE String::String (const short number) throw()
+String::String (const short number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -330,7 +330,7 @@ JUCE_CALLTYPE String::String (const short number) throw()
     memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
-JUCE_CALLTYPE String::String (const unsigned short number) throw()
+String::String (const unsigned short number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -341,7 +341,7 @@ JUCE_CALLTYPE String::String (const unsigned short number) throw()
     memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
-JUCE_CALLTYPE String::String (const int64 number) throw()
+String::String (const int64 number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -365,7 +365,7 @@ JUCE_CALLTYPE String::String (const int64 number) throw()
     memcpy (text->text, t, len);
 }
 
-JUCE_CALLTYPE String::String (const uint64 number) throw()
+String::String (const uint64 number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -388,7 +388,7 @@ JUCE_CALLTYPE String::String (const uint64 number) throw()
 
 // a double-to-string routine that actually uses the number of dec. places you asked for
 // without resorting to exponent notation if the number's too big or small (which is what printf does).
-void JUCE_CALLTYPE String::doubleToStringWithDecPlaces (double n, int numDecPlaces) throw()
+void String::doubleToStringWithDecPlaces (double n, int numDecPlaces) throw()
 {
     const int bufSize = 80;
     tchar buffer [bufSize];
@@ -439,28 +439,28 @@ void JUCE_CALLTYPE String::doubleToStringWithDecPlaces (double n, int numDecPlac
     }
 }
 
-JUCE_CALLTYPE String::String (const float number,
-                              const int numberOfDecimalPlaces) throw()
+String::String (const float number,
+                const int numberOfDecimalPlaces) throw()
 {
     doubleToStringWithDecPlaces ((double) number,
                                  numberOfDecimalPlaces);
 }
 
-JUCE_CALLTYPE String::String (const double number,
-                              const int numberOfDecimalPlaces) throw()
+String::String (const double number,
+                const int numberOfDecimalPlaces) throw()
 {
     doubleToStringWithDecPlaces (number,
                                  numberOfDecimalPlaces);
 }
 
-JUCE_CALLTYPE String::~String() throw()
+String::~String() throw()
 {
     if (atomicDecrementAndReturn (text->refCount) == 0)
         juce_free (text);
 }
 
 //==============================================================================
-void JUCE_CALLTYPE String::preallocateStorage (const int numChars) throw()
+void String::preallocateStorage (const int numChars) throw()
 {
     if (numChars > text->allocatedNumChars)
     {
@@ -474,7 +474,7 @@ void JUCE_CALLTYPE String::preallocateStorage (const int numChars) throw()
 
 //==============================================================================
 #if JUCE_STRINGS_ARE_UNICODE
-JUCE_CALLTYPE String::operator const char*() const throw()
+String::operator const char*() const throw()
 {
     if (isEmpty())
     {
@@ -500,7 +500,7 @@ JUCE_CALLTYPE String::operator const char*() const throw()
 
 #else
 
-JUCE_CALLTYPE String::operator const juce_wchar*() const throw()
+String::operator const juce_wchar*() const throw()
 {
     if (isEmpty())
     {
@@ -527,8 +527,8 @@ JUCE_CALLTYPE String::operator const juce_wchar*() const throw()
 
 #endif
 
-void JUCE_CALLTYPE String::copyToBuffer (char* const destBuffer,
-                                         const int maxCharsToCopy) const throw()
+void String::copyToBuffer (char* const destBuffer,
+                           const int maxCharsToCopy) const throw()
 {
     const int len = jmin (maxCharsToCopy, length());
 
@@ -541,8 +541,8 @@ void JUCE_CALLTYPE String::copyToBuffer (char* const destBuffer,
     destBuffer [len] = 0;
 }
 
-void JUCE_CALLTYPE String::copyToBuffer (juce_wchar* const destBuffer,
-                                         const int maxCharsToCopy) const throw()
+void String::copyToBuffer (juce_wchar* const destBuffer,
+                           const int maxCharsToCopy) const throw()
 {
     const int len = jmin (maxCharsToCopy, length());
 
@@ -556,12 +556,12 @@ void JUCE_CALLTYPE String::copyToBuffer (juce_wchar* const destBuffer,
 }
 
 //==============================================================================
-int JUCE_CALLTYPE String::length() const throw()
+int String::length() const throw()
 {
     return CharacterFunctions::length (text->text);
 }
 
-int JUCE_CALLTYPE String::hashCode() const throw()
+int String::hashCode() const throw()
 {
     const tchar* t = text->text;
     int result = 0;
@@ -572,7 +572,7 @@ int JUCE_CALLTYPE String::hashCode() const throw()
     return result;
 }
 
-int64 JUCE_CALLTYPE String::hashCode64() const throw()
+int64 String::hashCode64() const throw()
 {
     const tchar* t = text->text;
     int64 result = 0;
@@ -584,7 +584,7 @@ int64 JUCE_CALLTYPE String::hashCode64() const throw()
 }
 
 //==============================================================================
-const String& JUCE_CALLTYPE String::operator= (const tchar* const otherText) throw()
+const String& String::operator= (const tchar* const otherText) throw()
 {
     if (otherText != 0 && *otherText != 0)
     {
@@ -615,7 +615,7 @@ const String& JUCE_CALLTYPE String::operator= (const tchar* const otherText) thr
     return *this;
 }
 
-const String& JUCE_CALLTYPE String::operator= (const String& other) throw()
+const String& String::operator= (const String& other) throw()
 {
     if (this != &other)
     {
@@ -631,75 +631,75 @@ const String& JUCE_CALLTYPE String::operator= (const String& other) throw()
 }
 
 //==============================================================================
-bool JUCE_CALLTYPE String::operator== (const String& other) const throw()
+bool String::operator== (const String& other) const throw()
 {
     return text == other.text
             || CharacterFunctions::compare (text->text, other.text->text) == 0;
 }
 
-bool JUCE_CALLTYPE String::operator== (const tchar* const t) const throw()
+bool String::operator== (const tchar* const t) const throw()
 {
     return t != 0 ? CharacterFunctions::compare (text->text, t) == 0
                   : isEmpty();
 }
 
-bool JUCE_CALLTYPE String::equalsIgnoreCase (const tchar* t) const throw()
+bool String::equalsIgnoreCase (const tchar* t) const throw()
 {
     return t != 0 ? CharacterFunctions::compareIgnoreCase (text->text, t) == 0
                   : isEmpty();
 }
 
-bool JUCE_CALLTYPE String::equalsIgnoreCase (const String& other) const throw()
+bool String::equalsIgnoreCase (const String& other) const throw()
 {
     return text == other.text
             || CharacterFunctions::compareIgnoreCase (text->text, other.text->text) == 0;
 }
 
-bool JUCE_CALLTYPE String::operator!= (const String& other) const throw()
+bool String::operator!= (const String& other) const throw()
 {
     return text != other.text
             && CharacterFunctions::compare (text->text, other.text->text) != 0;
 }
 
-bool JUCE_CALLTYPE String::operator!= (const tchar* const t) const throw()
+bool String::operator!= (const tchar* const t) const throw()
 {
     return t != 0 ? (CharacterFunctions::compare (text->text, t) != 0)
                   : isNotEmpty();
 }
 
-bool JUCE_CALLTYPE String::operator> (const String& other) const throw()
+bool String::operator> (const String& other) const throw()
 {
     return compare (other) > 0;
 }
 
-bool JUCE_CALLTYPE String::operator< (const tchar* const other) const throw()
+bool String::operator< (const tchar* const other) const throw()
 {
     return compare (other) < 0;
 }
 
-bool JUCE_CALLTYPE String::operator>= (const String& other) const throw()
+bool String::operator>= (const String& other) const throw()
 {
     return compare (other) >= 0;
 }
 
-bool JUCE_CALLTYPE String::operator<= (const tchar* const other) const throw()
+bool String::operator<= (const tchar* const other) const throw()
 {
     return compare (other) <= 0;
 }
 
-int JUCE_CALLTYPE String::compare (const tchar* const other) const throw()
+int String::compare (const tchar* const other) const throw()
 {
     return other != 0 ? CharacterFunctions::compare (text->text, other)
                       : isEmpty();
 }
 
-int JUCE_CALLTYPE String::compareIgnoreCase (const tchar* const other) const throw()
+int String::compareIgnoreCase (const tchar* const other) const throw()
 {
     return other != 0 ? CharacterFunctions::compareIgnoreCase (text->text, other)
                       : isEmpty();
 }
 
-int JUCE_CALLTYPE String::compareLexicographically (const tchar* other) const throw()
+int String::compareLexicographically (const tchar* other) const throw()
 {
     if (other == 0)
         return isEmpty();
@@ -715,7 +715,7 @@ int JUCE_CALLTYPE String::compareLexicographically (const tchar* other) const th
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::operator+ (const String& other) const throw()
+const String String::operator+ (const String& other) const throw()
 {
     if (*(other.text->text) == 0)
         return *this;
@@ -734,7 +734,7 @@ const String JUCE_CALLTYPE String::operator+ (const String& other) const throw()
     return result;
 }
 
-const String JUCE_CALLTYPE String::operator+ (const tchar* const textToAppend) const throw()
+const String String::operator+ (const tchar* const textToAppend) const throw()
 {
     if (textToAppend == 0 || *textToAppend == 0)
         return *this;
@@ -750,7 +750,7 @@ const String JUCE_CALLTYPE String::operator+ (const tchar* const textToAppend) c
     return result;
 }
 
-const String JUCE_CALLTYPE String::operator+ (const tchar characterToAppend) const throw()
+const String String::operator+ (const tchar characterToAppend) const throw()
 {
     if (characterToAppend == 0)
         return *this;
@@ -779,7 +779,7 @@ const String JUCE_PUBLIC_FUNCTION operator+ (const juce_wchar* const string1,
 }
 
 //==============================================================================
-const String& JUCE_CALLTYPE String::operator+= (const tchar* const t) throw()
+const String& String::operator+= (const tchar* const t) throw()
 {
     if (t != 0)
         appendInternal (t, CharacterFunctions::length (t));
@@ -787,7 +787,7 @@ const String& JUCE_CALLTYPE String::operator+= (const tchar* const t) throw()
     return *this;
 }
 
-const String& JUCE_CALLTYPE String::operator+= (const String& other) throw()
+const String& String::operator+= (const String& other) throw()
 {
     if (isEmpty())
         operator= (other);
@@ -798,7 +798,7 @@ const String& JUCE_CALLTYPE String::operator+= (const String& other) throw()
     return *this;
 }
 
-const String& JUCE_CALLTYPE String::operator+= (const char ch) throw()
+const String& String::operator+= (const char ch) throw()
 {
     char asString[2];
     asString[0] = ch;
@@ -813,7 +813,7 @@ const String& JUCE_CALLTYPE String::operator+= (const char ch) throw()
     return *this;
 }
 
-const String& JUCE_CALLTYPE String::operator+= (const juce_wchar ch) throw()
+const String& String::operator+= (const juce_wchar ch) throw()
 {
     juce_wchar asString[2];
     asString[0] = ch;
@@ -828,8 +828,8 @@ const String& JUCE_CALLTYPE String::operator+= (const juce_wchar ch) throw()
     return *this;
 }
 
-void JUCE_CALLTYPE String::append (const tchar* const other,
-                                   const int howMany) throw()
+void String::append (const tchar* const other,
+                     const int howMany) throw()
 {
     if (howMany > 0)
     {
@@ -842,7 +842,7 @@ void JUCE_CALLTYPE String::append (const tchar* const other,
     }
 }
 
-String& JUCE_CALLTYPE String::operator<< (const int number) throw()
+String& String::operator<< (const int number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -852,7 +852,7 @@ String& JUCE_CALLTYPE String::operator<< (const int number) throw()
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const unsigned int number) throw()
+String& String::operator<< (const unsigned int number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -862,7 +862,7 @@ String& JUCE_CALLTYPE String::operator<< (const unsigned int number) throw()
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const short number) throw()
+String& String::operator<< (const short number) throw()
 {
     tchar buffer [64];
     tchar* const end = buffer + 64;
@@ -872,31 +872,31 @@ String& JUCE_CALLTYPE String::operator<< (const short number) throw()
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const double number) throw()
+String& String::operator<< (const double number) throw()
 {
     operator+= (String (number));
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const float number) throw()
+String& String::operator<< (const float number) throw()
 {
     operator+= (String (number));
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const char character) throw()
+String& String::operator<< (const char character) throw()
 {
     operator+= (character);
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const juce_wchar character) throw()
+String& String::operator<< (const juce_wchar character) throw()
 {
     operator+= (character);
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const char* const t) throw()
+String& String::operator<< (const char* const t) throw()
 {
 #if JUCE_STRINGS_ARE_UNICODE
     operator+= (String (t));
@@ -906,7 +906,7 @@ String& JUCE_CALLTYPE String::operator<< (const char* const t) throw()
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const juce_wchar* const t) throw()
+String& String::operator<< (const juce_wchar* const t) throw()
 {
 #if JUCE_STRINGS_ARE_UNICODE
     operator+= (t);
@@ -916,14 +916,14 @@ String& JUCE_CALLTYPE String::operator<< (const juce_wchar* const t) throw()
     return *this;
 }
 
-String& JUCE_CALLTYPE String::operator<< (const String& t) throw()
+String& String::operator<< (const String& t) throw()
 {
     operator+= (t);
     return *this;
 }
 
 //==============================================================================
-int JUCE_CALLTYPE String::indexOfChar (const tchar character) const throw()
+int String::indexOfChar (const tchar character) const throw()
 {
     const tchar* t = text->text;
 
@@ -937,7 +937,7 @@ int JUCE_CALLTYPE String::indexOfChar (const tchar character) const throw()
     }
 }
 
-int JUCE_CALLTYPE String::lastIndexOfChar (const tchar character) const throw()
+int String::lastIndexOfChar (const tchar character) const throw()
 {
     for (int i = CharacterFunctions::length (text->text); --i >= 0;)
         if (text->text[i] == character)
@@ -946,15 +946,15 @@ int JUCE_CALLTYPE String::lastIndexOfChar (const tchar character) const throw()
     return -1;
 }
 
-int JUCE_CALLTYPE String::indexOf (const tchar* const t) const throw()
+int String::indexOf (const tchar* const t) const throw()
 {
     const tchar* const r = CharacterFunctions::find (text->text, t);
     return (r == 0) ? -1
                     : (int) (r - text->text);
 }
 
-int JUCE_CALLTYPE String::indexOfChar (const int startIndex,
-                                       const tchar character) const throw()
+int String::indexOfChar (const int startIndex,
+                         const tchar character) const throw()
 {
     if (startIndex >= 0 && startIndex >= CharacterFunctions::length (text->text))
         return -1;
@@ -971,9 +971,9 @@ int JUCE_CALLTYPE String::indexOfChar (const int startIndex,
     }
 }
 
-int JUCE_CALLTYPE String::indexOfAnyOf (const tchar* const charactersToLookFor,
-                                        const int startIndex,
-                                        const bool ignoreCase) const throw()
+int String::indexOfAnyOf (const tchar* const charactersToLookFor,
+                          const int startIndex,
+                          const bool ignoreCase) const throw()
 {
     if (charactersToLookFor == 0
          || (startIndex >= 0 && startIndex >= CharacterFunctions::length (text->text)))
@@ -988,8 +988,8 @@ int JUCE_CALLTYPE String::indexOfAnyOf (const tchar* const charactersToLookFor,
     return -1;
 }
 
-int JUCE_CALLTYPE String::indexOf (const int startIndex,
-                                   const tchar* const other) const throw()
+int String::indexOf (const int startIndex,
+                     const tchar* const other) const throw()
 {
     if (other == 0 || startIndex >= CharacterFunctions::length (text->text))
         return -1;
@@ -1001,7 +1001,7 @@ int JUCE_CALLTYPE String::indexOf (const int startIndex,
                         : (int) (found - text->text);
 }
 
-int JUCE_CALLTYPE String::indexOfIgnoreCase (const tchar* const other) const throw()
+int String::indexOfIgnoreCase (const tchar* const other) const throw()
 {
     if (other != 0 && *other != 0)
     {
@@ -1016,8 +1016,8 @@ int JUCE_CALLTYPE String::indexOfIgnoreCase (const tchar* const other) const thr
     return -1;
 }
 
-int JUCE_CALLTYPE String::indexOfIgnoreCase (const int startIndex,
-                                             const tchar* const other) const throw()
+int String::indexOfIgnoreCase (const int startIndex,
+                               const tchar* const other) const throw()
 {
     if (other != 0 && *other != 0)
     {
@@ -1032,7 +1032,7 @@ int JUCE_CALLTYPE String::indexOfIgnoreCase (const int startIndex,
     return -1;
 }
 
-int JUCE_CALLTYPE String::lastIndexOf (const tchar* const other) const throw()
+int String::lastIndexOf (const tchar* const other) const throw()
 {
     if (other != 0 && *other != 0)
     {
@@ -1056,7 +1056,7 @@ int JUCE_CALLTYPE String::lastIndexOf (const tchar* const other) const throw()
     return -1;
 }
 
-int JUCE_CALLTYPE String::lastIndexOfIgnoreCase (const tchar* const other) const throw()
+int String::lastIndexOfIgnoreCase (const tchar* const other) const throw()
 {
     if (other != 0 && *other != 0)
     {
@@ -1080,8 +1080,8 @@ int JUCE_CALLTYPE String::lastIndexOfIgnoreCase (const tchar* const other) const
     return -1;
 }
 
-int JUCE_CALLTYPE String::lastIndexOfAnyOf (const tchar* const charactersToLookFor,
-                                            const bool ignoreCase) const throw()
+int String::lastIndexOfAnyOf (const tchar* const charactersToLookFor,
+                              const bool ignoreCase) const throw()
 {
     for (int i = CharacterFunctions::length (text->text); --i >= 0;)
         if (CharacterFunctions::indexOfChar (charactersToLookFor, text->text [i], ignoreCase) >= 0)
@@ -1090,22 +1090,22 @@ int JUCE_CALLTYPE String::lastIndexOfAnyOf (const tchar* const charactersToLookF
     return -1;
 }
 
-bool JUCE_CALLTYPE String::contains (const tchar* const other) const throw()
+bool String::contains (const tchar* const other) const throw()
 {
     return indexOf (other) >= 0;
 }
 
-bool JUCE_CALLTYPE String::containsChar (const tchar character) const throw()
+bool String::containsChar (const tchar character) const throw()
 {
     return indexOfChar (character) >= 0;
 }
 
-bool JUCE_CALLTYPE String::containsIgnoreCase (const tchar* const t) const throw()
+bool String::containsIgnoreCase (const tchar* const t) const throw()
 {
     return indexOfIgnoreCase (t) >= 0;
 }
 
-int JUCE_CALLTYPE String::indexOfWholeWord (const tchar* const word) const throw()
+int String::indexOfWholeWord (const tchar* const word) const throw()
 {
     if (word != 0 && *word != 0)
     {
@@ -1129,7 +1129,7 @@ int JUCE_CALLTYPE String::indexOfWholeWord (const tchar* const word) const throw
     return -1;
 }
 
-int JUCE_CALLTYPE String::indexOfWholeWordIgnoreCase (const tchar* const word) const throw()
+int String::indexOfWholeWordIgnoreCase (const tchar* const word) const throw()
 {
     if (word != 0 && *word != 0)
     {
@@ -1153,12 +1153,12 @@ int JUCE_CALLTYPE String::indexOfWholeWordIgnoreCase (const tchar* const word) c
     return -1;
 }
 
-bool JUCE_CALLTYPE String::containsWholeWord (const tchar* const wordToLookFor) const throw()
+bool String::containsWholeWord (const tchar* const wordToLookFor) const throw()
 {
     return indexOfWholeWord (wordToLookFor) >= 0;
 }
 
-bool JUCE_CALLTYPE String::containsWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw()
+bool String::containsWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw()
 {
     return indexOfWholeWordIgnoreCase (wordToLookFor) >= 0;
 }
@@ -1208,7 +1208,7 @@ static int indexOfMatch (const tchar* const wildcard,
     return -1;
 }
 
-bool JUCE_CALLTYPE String::matchesWildcard (const tchar* wildcard, const bool ignoreCase) const throw()
+bool String::matchesWildcard (const tchar* wildcard, const bool ignoreCase) const throw()
 {
     int i = 0;
 
@@ -1237,7 +1237,7 @@ bool JUCE_CALLTYPE String::matchesWildcard (const tchar* wildcard, const bool ig
 }
 
 //==============================================================================
-void JUCE_CALLTYPE String::printf (const tchar* const pf, ...) throw()
+void String::printf (const tchar* const pf, ...) throw()
 {
     va_list list;
     va_start (list, pf);
@@ -1245,7 +1245,7 @@ void JUCE_CALLTYPE String::printf (const tchar* const pf, ...) throw()
     vprintf (pf, list);
 }
 
-const String JUCE_CALLTYPE String::formatted (const tchar* const pf, ...) throw()
+const String String::formatted (const tchar* const pf, ...) throw()
 {
     va_list list;
     va_start (list, pf);
@@ -1256,7 +1256,7 @@ const String JUCE_CALLTYPE String::formatted (const tchar* const pf, ...) throw(
 }
 
 //==============================================================================
-void JUCE_CALLTYPE String::vprintf (const tchar* const pf, va_list& args) throw()
+void String::vprintf (const tchar* const pf, va_list& args) throw()
 {
     tchar stackBuf [256];
     unsigned int bufSize = 256;
@@ -1293,8 +1293,8 @@ void JUCE_CALLTYPE String::vprintf (const tchar* const pf, va_list& args) throw(
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::repeatedString (const tchar* const stringToRepeat,
-                                                   int numberOfTimesToRepeat) throw()
+const String String::repeatedString (const tchar* const stringToRepeat,
+                                     int numberOfTimesToRepeat) throw()
 {
     const int len = CharacterFunctions::length (stringToRepeat);
     String result ((int) (len * numberOfTimesToRepeat + 1), (int) 0);
@@ -1312,9 +1312,9 @@ const String JUCE_CALLTYPE String::repeatedString (const tchar* const stringToRe
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::replaceSection (int index,
-                                                   int numCharsToReplace,
-                                                   const tchar* const stringToInsert) const throw()
+const String String::replaceSection (int index,
+                                     int numCharsToReplace,
+                                     const tchar* const stringToInsert) const throw()
 {
     if (index < 0)
     {
@@ -1370,9 +1370,9 @@ const String JUCE_CALLTYPE String::replaceSection (int index,
     return result;
 }
 
-const String JUCE_CALLTYPE String::replace (const tchar* const stringToReplace,
-                                            const tchar* const stringToInsert,
-                                            const bool ignoreCase) const throw()
+const String String::replace (const tchar* const stringToReplace,
+                              const tchar* const stringToInsert,
+                              const bool ignoreCase) const throw()
 {
     int i = 0;
     String result (*this);
@@ -1387,8 +1387,8 @@ const String JUCE_CALLTYPE String::replace (const tchar* const stringToReplace,
     return result;
 }
 
-const String JUCE_CALLTYPE String::replaceCharacter (const tchar charToReplace,
-                                                     const tchar charToInsert) const throw()
+const String String::replaceCharacter (const tchar charToReplace,
+                                       const tchar charToInsert) const throw()
 {
     const int index = indexOfChar (charToReplace);
 
@@ -1411,8 +1411,8 @@ const String JUCE_CALLTYPE String::replaceCharacter (const tchar charToReplace,
     return result;
 }
 
-const String JUCE_CALLTYPE String::replaceCharacters (const String& charactersToReplace,
-                                                      const tchar* const charactersToInsertInstead) const throw()
+const String String::replaceCharacters (const String& charactersToReplace,
+                                        const tchar* const charactersToInsertInstead) const throw()
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1437,30 +1437,30 @@ const String JUCE_CALLTYPE String::replaceCharacters (const String& charactersTo
 }
 
 //==============================================================================
-bool JUCE_CALLTYPE String::startsWith (const tchar* const other) const throw()
+bool String::startsWith (const tchar* const other) const throw()
 {
     return other != 0
             && CharacterFunctions::compare (text->text, other, CharacterFunctions::length (other)) == 0;
 }
 
-bool JUCE_CALLTYPE String::startsWithIgnoreCase (const tchar* const other) const throw()
+bool String::startsWithIgnoreCase (const tchar* const other) const throw()
 {
     return other != 0
             && CharacterFunctions::compareIgnoreCase (text->text, other, CharacterFunctions::length (other)) == 0;
 }
 
-bool JUCE_CALLTYPE String::startsWithChar (const tchar character) const throw()
+bool String::startsWithChar (const tchar character) const throw()
 {
     return text->text[0] == character;
 }
 
-bool JUCE_CALLTYPE String::endsWithChar (const tchar character) const throw()
+bool String::endsWithChar (const tchar character) const throw()
 {
     return text->text[0] != 0
             && text->text [length() - 1] == character;
 }
 
-bool JUCE_CALLTYPE String::endsWith (const tchar* const other) const throw()
+bool String::endsWith (const tchar* const other) const throw()
 {
     if (other == 0)
         return false;
@@ -1472,7 +1472,7 @@ bool JUCE_CALLTYPE String::endsWith (const tchar* const other) const throw()
             && CharacterFunctions::compare (text->text + thisLen - otherLen, other) == 0;
 }
 
-bool JUCE_CALLTYPE String::endsWithIgnoreCase (const tchar* const other) const throw()
+bool String::endsWithIgnoreCase (const tchar* const other) const throw()
 {
     if (other == 0)
         return false;
@@ -1485,7 +1485,7 @@ bool JUCE_CALLTYPE String::endsWithIgnoreCase (const tchar* const other) const t
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::toUpperCase() const throw()
+const String String::toUpperCase() const throw()
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1493,7 +1493,7 @@ const String JUCE_CALLTYPE String::toUpperCase() const throw()
     return result;
 }
 
-const String JUCE_CALLTYPE String::toLowerCase() const throw()
+const String String::toLowerCase() const throw()
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1502,7 +1502,7 @@ const String JUCE_CALLTYPE String::toLowerCase() const throw()
 }
 
 //==============================================================================
-tchar& JUCE_CALLTYPE String::operator[] (const int index) throw()
+tchar& String::operator[] (const int index) throw()
 {
     jassert (index >= 0 && index <= length());
 
@@ -1511,13 +1511,13 @@ tchar& JUCE_CALLTYPE String::operator[] (const int index) throw()
     return text->text [index];
 }
 
-tchar JUCE_CALLTYPE String::getLastCharacter() const throw()
+tchar String::getLastCharacter() const throw()
 {
     return (isEmpty()) ? ((tchar) 0)
                        : text->text [CharacterFunctions::length (text->text) - 1];
 }
 
-const String JUCE_CALLTYPE String::substring (int start, int end) const throw()
+const String String::substring (int start, int end) const throw()
 {
     if (start < 0)
         start = 0;
@@ -1542,7 +1542,7 @@ const String JUCE_CALLTYPE String::substring (int start, int end) const throw()
                    end - start);
 }
 
-const String JUCE_CALLTYPE String::substring (const int start) const throw()
+const String String::substring (const int start) const throw()
 {
     if (start <= 0)
         return *this;
@@ -1556,15 +1556,15 @@ const String JUCE_CALLTYPE String::substring (const int start) const throw()
                        len - start);
 }
 
-const String JUCE_CALLTYPE String::dropLastCharacters (const int numberToDrop) const throw()
+const String String::dropLastCharacters (const int numberToDrop) const throw()
 {
     return String (text->text,
                    jmax (0, CharacterFunctions::length (text->text) - numberToDrop));
 }
 
-const String JUCE_CALLTYPE String::fromFirstOccurrenceOf (const tchar* const sub,
-                                                          const bool includeSubString,
-                                                          const bool ignoreCase) const throw()
+const String String::fromFirstOccurrenceOf (const tchar* const sub,
+                                            const bool includeSubString,
+                                            const bool ignoreCase) const throw()
 {
     const int i = ignoreCase ? indexOf (sub)
                              : indexOfIgnoreCase (sub);
@@ -1576,9 +1576,9 @@ const String JUCE_CALLTYPE String::fromFirstOccurrenceOf (const tchar* const sub
 }
 
 
-const String JUCE_CALLTYPE String::fromLastOccurrenceOf (const tchar* const sub,
-                                                         const bool includeSubString,
-                                                         const bool ignoreCase) const throw()
+const String String::fromLastOccurrenceOf (const tchar* const sub,
+                                           const bool includeSubString,
+                                           const bool ignoreCase) const throw()
 {
     const int i = ignoreCase ? lastIndexOf (sub)
                              : lastIndexOfIgnoreCase (sub);
@@ -1589,9 +1589,9 @@ const String JUCE_CALLTYPE String::fromLastOccurrenceOf (const tchar* const sub,
         return substring ((includeSubString) ? i : i + CharacterFunctions::length (sub));
 }
 
-const String JUCE_CALLTYPE String::upToFirstOccurrenceOf (const tchar* const sub,
-                                                          const bool includeSubString,
-                                                          const bool ignoreCase) const throw()
+const String String::upToFirstOccurrenceOf (const tchar* const sub,
+                                            const bool includeSubString,
+                                            const bool ignoreCase) const throw()
 {
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
@@ -1602,9 +1602,9 @@ const String JUCE_CALLTYPE String::upToFirstOccurrenceOf (const tchar* const sub
         return substring (0, (includeSubString) ? i + CharacterFunctions::length (sub) : i);
 }
 
-const String JUCE_CALLTYPE String::upToLastOccurrenceOf (const tchar* const sub,
-                                                         const bool includeSubString,
-                                                         const bool ignoreCase) const throw()
+const String String::upToLastOccurrenceOf (const tchar* const sub,
+                                           const bool includeSubString,
+                                           const bool ignoreCase) const throw()
 {
     const int i = ignoreCase ? lastIndexOfIgnoreCase (sub)
                              : lastIndexOf (sub);
@@ -1614,7 +1614,7 @@ const String JUCE_CALLTYPE String::upToLastOccurrenceOf (const tchar* const sub,
     return substring (0, (includeSubString) ? i + CharacterFunctions::length (sub) : i);
 }
 
-bool JUCE_CALLTYPE String::isQuotedString() const throw()
+bool String::isQuotedString() const throw()
 {
     const String trimmed (trimStart());
 
@@ -1622,7 +1622,7 @@ bool JUCE_CALLTYPE String::isQuotedString() const throw()
         || trimmed[0] == T('\'');
 }
 
-const String JUCE_CALLTYPE String::unquoted() const throw()
+const String String::unquoted() const throw()
 {
     String s (*this);
 
@@ -1638,7 +1638,7 @@ const String JUCE_CALLTYPE String::unquoted() const throw()
     return s;
 }
 
-const String JUCE_CALLTYPE String::quoted (const tchar quoteCharacter) const throw()
+const String String::quoted (const tchar quoteCharacter) const throw()
 {
     if (isEmpty())
         return charToString (quoteCharacter) + quoteCharacter;
@@ -1655,7 +1655,7 @@ const String JUCE_CALLTYPE String::quoted (const tchar quoteCharacter) const thr
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::trim() const throw()
+const String String::trim() const throw()
 {
     if (isEmpty())
         return empty;
@@ -1681,7 +1681,7 @@ const String JUCE_CALLTYPE String::trim() const throw()
         return *this;
 }
 
-const String JUCE_CALLTYPE String::trimStart() const throw()
+const String String::trimStart() const throw()
 {
     if (isEmpty())
         return empty;
@@ -1697,7 +1697,7 @@ const String JUCE_CALLTYPE String::trimStart() const throw()
         return String (t);
 }
 
-const String JUCE_CALLTYPE String::trimEnd() const throw()
+const String String::trimEnd() const throw()
 {
     if (isEmpty())
         return empty;
@@ -1711,7 +1711,7 @@ const String JUCE_CALLTYPE String::trimEnd() const throw()
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::retainCharacters (const tchar* const charactersToRetain) const throw()
+const String String::retainCharacters (const tchar* const charactersToRetain) const throw()
 {
     jassert (charactersToRetain != 0);
 
@@ -1734,7 +1734,7 @@ const String JUCE_CALLTYPE String::retainCharacters (const tchar* const characte
     return result;
 }
 
-const String JUCE_CALLTYPE String::removeCharacters (const tchar* const charactersToRemove) const throw()
+const String String::removeCharacters (const tchar* const charactersToRemove) const throw()
 {
     jassert (charactersToRemove != 0);
 
@@ -1757,12 +1757,12 @@ const String JUCE_CALLTYPE String::removeCharacters (const tchar* const characte
     return result;
 }
 
-const String JUCE_CALLTYPE String::initialSectionContainingOnly (const tchar* const permittedCharacters) const throw()
+const String String::initialSectionContainingOnly (const tchar* const permittedCharacters) const throw()
 {
     return substring (0, CharacterFunctions::getIntialSectionContainingOnly (text->text, permittedCharacters));
 }
 
-const String JUCE_CALLTYPE String::initialSectionNotContaining (const tchar* const charactersToStopAt) const throw()
+const String String::initialSectionNotContaining (const tchar* const charactersToStopAt) const throw()
 {
     jassert (charactersToStopAt != 0);
 
@@ -1780,7 +1780,7 @@ const String JUCE_CALLTYPE String::initialSectionNotContaining (const tchar* con
     return empty;
 }
 
-bool JUCE_CALLTYPE String::containsOnly (const tchar* const chars) const throw()
+bool String::containsOnly (const tchar* const chars) const throw()
 {
     jassert (chars != 0);
 
@@ -1793,7 +1793,7 @@ bool JUCE_CALLTYPE String::containsOnly (const tchar* const chars) const throw()
     return true;
 }
 
-bool JUCE_CALLTYPE String::containsAnyOf (const tchar* const chars) const throw()
+bool String::containsAnyOf (const tchar* const chars) const throw()
 {
     jassert (chars != 0);
 
@@ -1807,12 +1807,12 @@ bool JUCE_CALLTYPE String::containsAnyOf (const tchar* const chars) const throw(
 }
 
 //==============================================================================
-int JUCE_CALLTYPE String::getIntValue() const throw()
+int String::getIntValue() const throw()
 {
     return CharacterFunctions::getIntValue (text->text);
 }
 
-int JUCE_CALLTYPE String::getTrailingIntValue() const throw()
+int String::getTrailingIntValue() const throw()
 {
     int n = 0;
     int mult = 1;
@@ -1837,24 +1837,24 @@ int JUCE_CALLTYPE String::getTrailingIntValue() const throw()
     return n;
 }
 
-int64 JUCE_CALLTYPE String::getLargeIntValue() const throw()
+int64 String::getLargeIntValue() const throw()
 {
     return CharacterFunctions::getInt64Value (text->text);
 }
 
-float JUCE_CALLTYPE String::getFloatValue() const throw()
+float String::getFloatValue() const throw()
 {
     return (float) CharacterFunctions::getDoubleValue (text->text);
 }
 
-double JUCE_CALLTYPE String::getDoubleValue() const throw()
+double String::getDoubleValue() const throw()
 {
     return CharacterFunctions::getDoubleValue (text->text);
 }
 
 static const tchar* const hexDigits = T("0123456789abcdef");
 
-const String JUCE_CALLTYPE String::toHexString (const int number) throw()
+const String String::toHexString (const int number) throw()
 {
     tchar buffer[32];
     tchar* const end = buffer + 32;
@@ -1872,7 +1872,7 @@ const String JUCE_CALLTYPE String::toHexString (const int number) throw()
     return String (t, (int) (((char*) end) - (char*) t) - 1);
 }
 
-const String JUCE_CALLTYPE String::toHexString (const int64 number) throw()
+const String String::toHexString (const int64 number) throw()
 {
     tchar buffer[32];
     tchar* const end = buffer + 32;
@@ -1890,7 +1890,7 @@ const String JUCE_CALLTYPE String::toHexString (const int64 number) throw()
     return String (t, (int) (((char*) end) - (char*) t));
 }
 
-const String JUCE_CALLTYPE String::toHexString (const short number) throw()
+const String String::toHexString (const short number) throw()
 {
     tchar buffer[32];
     tchar* const end = buffer + 32;
@@ -1908,9 +1908,9 @@ const String JUCE_CALLTYPE String::toHexString (const short number) throw()
     return String (t, (int) (((char*) end) - (char*) t));
 }
 
-const String JUCE_CALLTYPE String::toHexString (const unsigned char* data,
-                                                const int size,
-                                                const int groupSize) throw()
+const String String::toHexString (const unsigned char* data,
+                                  const int size,
+                                  const int groupSize) throw()
 {
     if (size <= 0)
         return empty;
@@ -1941,7 +1941,7 @@ const String JUCE_CALLTYPE String::toHexString (const unsigned char* data,
     return s;
 }
 
-int JUCE_CALLTYPE String::getHexValue32() const throw()
+int String::getHexValue32() const throw()
 {
     int result = 0;
     const tchar* c = text->text;
@@ -1961,7 +1961,7 @@ int JUCE_CALLTYPE String::getHexValue32() const throw()
     return result;
 }
 
-int64 JUCE_CALLTYPE String::getHexValue64() const throw()
+int64 String::getHexValue64() const throw()
 {
     int64 result = 0;
     const tchar* c = text->text;
@@ -1982,8 +1982,8 @@ int64 JUCE_CALLTYPE String::getHexValue64() const throw()
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE String::createStringFromData (const void* const data_,
-                                                         const int size) throw()
+const String String::createStringFromData (const void* const data_,
+                                           const int size) throw()
 {
     const char* const data = (const char*) data_;
 
@@ -2048,7 +2048,7 @@ const String JUCE_CALLTYPE String::createStringFromData (const void* const data_
 }
 
 //==============================================================================
-const char* JUCE_CALLTYPE String::toUTF8() const
+const char* String::toUTF8() const
 {
     if (isEmpty())
     {
@@ -2074,7 +2074,7 @@ const char* JUCE_CALLTYPE String::toUTF8() const
     }
 }
 
-int JUCE_CALLTYPE String::copyToUTF8 (uint8* buffer) const
+int String::copyToUTF8 (uint8* buffer) const
 {
 #if JUCE_STRINGS_ARE_UNICODE
     int num = 0, index = 0;
@@ -2141,7 +2141,7 @@ int JUCE_CALLTYPE String::copyToUTF8 (uint8* buffer) const
 #endif
 }
 
-const String JUCE_CALLTYPE String::fromUTF8 (const uint8* buffer, int bufferSizeBytes)
+const String String::fromUTF8 (const uint8* buffer, int bufferSizeBytes)
 {
     if (buffer == 0)
         return empty;

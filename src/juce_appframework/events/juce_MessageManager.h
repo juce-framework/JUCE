@@ -56,7 +56,7 @@ class JUCE_API  MessageManager  : private DeletedAtShutdown,
 public:
     //==============================================================================
     /** Returns the global instance of the MessageManager. */
-    static MessageManager* JUCE_CALLTYPE getInstance() throw();
+    static MessageManager* getInstance() throw();
 
     //==============================================================================
     /** Synchronously dispatches up to a certain number of messages from the queue.
@@ -64,7 +64,7 @@ public:
         This will return when the queue becomes empty, or when the given number of
         messages has been sent.
     */
-    void JUCE_CALLTYPE dispatchPendingMessages (int maxNumberOfMessagesToDispatch = 1000);
+    void dispatchPendingMessages (int maxNumberOfMessagesToDispatch = 1000);
 
     /** Synchronously sends the next pending message.
 
@@ -79,8 +79,8 @@ public:
         @returns    false if the thing that's calling it should stop calling - i.e. if the
                     app is trying to quit.
     */
-    bool JUCE_CALLTYPE dispatchNextMessage (const bool returnImmediatelyIfNoMessages = false,
-                                            bool* const wasAMessageDispatched = 0);
+    bool dispatchNextMessage (const bool returnImmediatelyIfNoMessages = false,
+                              bool* const wasAMessageDispatched = 0);
 
     //==============================================================================
     /** Calls a function using the message-thread.
@@ -101,25 +101,25 @@ public:
         @returns            the value that the callback function returns.
         @see MessageManagerLock
     */
-    void* JUCE_CALLTYPE callFunctionOnMessageThread (MessageCallbackFunction* callback,
-                                                     void* userData);
+    void* callFunctionOnMessageThread (MessageCallbackFunction* callback,
+                                       void* userData);
 
     /** Returns true if the caller-thread is the message thread. */
-    bool JUCE_CALLTYPE isThisTheMessageThread() const;
+    bool isThisTheMessageThread() const;
 
     /** Called to tell the manager which thread is the one that's running the dispatch loop.
 
         (Best to ignore this method unless you really know what you're doing..)
         @see getCurrentMessageThread
     */
-    void JUCE_CALLTYPE setCurrentMessageThread (const int threadId);
+    void setCurrentMessageThread (const int threadId);
 
     /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
 
         (Best to ignore this method unless you really know what you're doing..)
         @see setCurrentMessageThread
     */
-    int JUCE_CALLTYPE getCurrentMessageThread() const throw()       { return messageThreadId; }
+    int getCurrentMessageThread() const throw()             { return messageThreadId; }
 
     /** Returns true if the caller thread has currenltly got the message manager locked.
 
@@ -128,7 +128,7 @@ public:
         This will be true if the caller is the message thread, because that automatically
         gains a lock while a message is being dispatched.
     */
-    bool JUCE_CALLTYPE currentThreadHasLockedMessageManager() const;
+    bool currentThreadHasLockedMessageManager() const;
 
     //==============================================================================
     /** Sends a message to all other JUCE applications that are running.
@@ -137,7 +137,7 @@ public:
                                 method of the broadcast listeners in the other app.
         @see registerBroadcastListener, ActionListener
     */
-    static void JUCE_CALLTYPE broadcastMessage (const String& messageText);
+    static void broadcastMessage (const String& messageText);
 
     /** Registers a listener to get told about broadcast messages.
 
@@ -146,10 +146,10 @@ public:
 
         @see broadcastMessage
     */
-    void JUCE_CALLTYPE registerBroadcastListener (ActionListener* listener);
+    void registerBroadcastListener (ActionListener* listener);
 
     /** Deregisters a broadcast listener. */
-    void JUCE_CALLTYPE deregisterBroadcastListener (ActionListener* listener);
+    void deregisterBroadcastListener (ActionListener* listener);
 
     //==============================================================================
     /** Sets a time-limit for the app to be 'busy' before an hourglass cursor will be shown.
@@ -159,30 +159,30 @@ public:
                             Mac the system might still decide to show it after a while).
         @see MouseCursor::showWaitCursor
     */
-    void JUCE_CALLTYPE setTimeBeforeShowingWaitCursor (const int millisecs);
+    void setTimeBeforeShowingWaitCursor (const int millisecs);
 
     /** Returns the time-out before the 'busy' cursor is shown when the app is busy.
 
         @see setTimeBeforeShowingWaitCursor, MouseCursor::showWaitCursor
     */
-    int JUCE_CALLTYPE getTimeBeforeShowingWaitCursor() const;
+    int getTimeBeforeShowingWaitCursor() const;
 
     /** Tells the message manager that the system isn't locked-up, even if the message
         loop isn't active.
 
         Used internally, this is handy when an OS enters its own modal loop.
     */
-    static void JUCE_CALLTYPE delayWaitCursor();
+    static void delayWaitCursor();
 
     //==============================================================================
     /** Returns true if JUCEApplication::quit() has been called. */
-    bool JUCE_CALLTYPE hasQuitMessageBeenPosted() const;
+    bool hasQuitMessageBeenPosted() const;
 
     //==============================================================================
     /** @internal */
-    void JUCE_CALLTYPE deliverMessage (void*);
+    void deliverMessage (void*);
     /** @internal */
-    void JUCE_CALLTYPE deliverBroadcastMessage (const String&);
+    void deliverBroadcastMessage (const String&);
     /** @internal */
     void timerCallback();
 
@@ -210,16 +210,16 @@ private:
     int volatile timeBeforeWaitCursor;
     unsigned int lastActivityCheckOkTime;
 
-    bool JUCE_CALLTYPE runDispatchLoop();
-    void JUCE_CALLTYPE postMessageToQueue (Message* const message);
-    void JUCE_CALLTYPE postQuitMessage (const bool useMaximumForce);
+    bool runDispatchLoop();
+    void postMessageToQueue (Message* const message);
+    void postQuitMessage (const bool useMaximumForce);
 
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
 
     friend class InternalTimerThread;
-    static void JUCE_CALLTYPE inactivityCheckCallback();
-    void JUCE_CALLTYPE inactivityCheckCallbackInt();
+    static void inactivityCheckCallback();
+    void inactivityCheckCallbackInt();
 
     friend class MessageManagerLock;
     CriticalSection messageDispatchLock;
@@ -274,14 +274,14 @@ public:
         If the current thread already has the lock, nothing will be done, so it's perfectly
         safe to create these locks recursively.
     */
-    JUCE_CALLTYPE MessageManagerLock();
+    MessageManagerLock();
 
     /** Releases the current thread's lock on the message manager.
 
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    JUCE_CALLTYPE ~MessageManagerLock();
+    ~MessageManagerLock();
 
 private:
     int lastLockingThreadId;

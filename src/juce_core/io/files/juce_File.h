@@ -64,7 +64,7 @@ public:
 
         You can use its operator= method to point it at a proper file.
     */
-    JUCE_CALLTYPE File() throw()   {}
+    File() throw()   {}
 
     /** Creates a file from an absolute path.
 
@@ -76,13 +76,13 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    JUCE_CALLTYPE File (const String& path) throw();
+    File (const String& path) throw();
 
     /** Creates a copy of another file object. */
-    JUCE_CALLTYPE File (const File& other) throw();
+    File (const File& other) throw();
 
     /** Destructor. */
-    JUCE_CALLTYPE ~File() throw()  {}
+    ~File() throw()  {}
 
     /** Sets the file based on an absolute pathname.
 
@@ -94,10 +94,10 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    const File& JUCE_CALLTYPE operator= (const String& newFilePath) throw();
+    const File& operator= (const String& newFilePath) throw();
 
     /** Copies from another file object. */
-    const File& JUCE_CALLTYPE operator= (const File& otherFile) throw();
+    const File& operator= (const File& otherFile) throw();
 
     //==============================================================================
     /** This static constant is used for referring to an 'invalid' file. */
@@ -109,7 +109,7 @@ public:
         @returns    true if the file exists, either as a file or a directory.
         @see existsAsFile, isDirectory
     */
-    bool JUCE_CALLTYPE exists() const throw();
+    bool exists() const throw();
 
     /** Checks whether the file exists and is a file rather than a directory.
 
@@ -117,7 +117,7 @@ public:
                     or doesn't exist
         @see exists, isDirectory
     */
-    bool JUCE_CALLTYPE existsAsFile() const throw();
+    bool existsAsFile() const throw();
 
     /** Checks whether the file is a directory that exists.
 
@@ -125,20 +125,20 @@ public:
                     false if it's a file or doesn't exist at all
         @see exists, existsAsFile
     */
-    bool JUCE_CALLTYPE isDirectory() const throw();
+    bool isDirectory() const throw();
 
     /** Returns the size of the file in bytes.
 
         @returns    the number of bytes in the file, or 0 if it doesn't exist.
     */
-    int64 JUCE_CALLTYPE getSize() const throw();
+    int64 getSize() const throw();
 
     /** Utility function to convert a file size in bytes to a neat string description.
 
         So for example 100 would return "100 bytes", 2000 would return "2 KB",
         2000000 would produce "2 MB", etc.
     */
-    static const String JUCE_CALLTYPE descriptionOfSizeInBytes (const int64 bytes);
+    static const String descriptionOfSizeInBytes (const int64 bytes);
 
     //==============================================================================
     /** Returns the complete, absolute path of this file.
@@ -152,7 +152,7 @@ public:
 
         @see getFileName, getRelativePathFrom
     */
-    const String& JUCE_CALLTYPE getFullPathName() const throw()    { return fullPath; }
+    const String& getFullPathName() const throw()    { return fullPath; }
 
     /** Returns the last section of the pathname.
 
@@ -167,7 +167,7 @@ public:
 
         @see getFullPathName, getFileNameWithoutExtension
     */
-    const String JUCE_CALLTYPE getFileName() const throw();
+    const String getFileName() const throw();
 
     /** Creates a relative path that refers to a file relatively to a given directory.
 
@@ -184,7 +184,7 @@ public:
                                         If it doesn't exist, it's assumed to be a directory.
         @see getChildFile
     */
-    const String JUCE_CALLTYPE getRelativePathFrom (const File& directoryToBeRelativeTo) const throw();
+    const String getRelativePathFrom (const File& directoryToBeRelativeTo) const throw();
 
     //==============================================================================
     /** Returns the file's extension.
@@ -195,7 +195,7 @@ public:
 
         @see hasFileExtension, withFileExtension, getFileNameWithoutExtension
     */
-    const String JUCE_CALLTYPE getFileExtension() const throw();
+    const String getFileExtension() const throw();
 
     /** Checks whether the file has a given extension.
 
@@ -206,7 +206,7 @@ public:
 
         @see getFileExtension, withFileExtension, getFileNameWithoutExtension
     */
-    bool JUCE_CALLTYPE hasFileExtension (const String& extensionToTest) const throw();
+    bool hasFileExtension (const String& extensionToTest) const throw();
 
     /** Returns a version of this file with a different file extension.
 
@@ -218,7 +218,7 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, getFileNameWithoutExtension
     */
-    const File JUCE_CALLTYPE withFileExtension (const String& newExtension) const throw();
+    const File withFileExtension (const String& newExtension) const throw();
 
     /** Returns the last part of the filename, without its file extension.
 
@@ -226,7 +226,7 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, withFileExtension
     */
-    const String JUCE_CALLTYPE getFileNameWithoutExtension() const throw();
+    const String getFileNameWithoutExtension() const throw();
 
     //==============================================================================
     /** Returns a 32-bit hash-code that identifies this file.
@@ -234,14 +234,14 @@ public:
         This is based on the filename. Obviously it's possible, although unlikely, that
         two files will have the same hash-code.
     */
-    int JUCE_CALLTYPE hashCode() const throw();
+    int hashCode() const throw();
 
     /** Returns a 64-bit hash-code that identifies this file.
 
         This is based on the filename. Obviously it's possible, although unlikely, that
         two files will have the same hash-code.
     */
-    int64 JUCE_CALLTYPE hashCode64() const throw();
+    int64 hashCode64() const throw();
 
     //==============================================================================
     /** Returns a file based on a relative path.
@@ -257,7 +257,7 @@ public:
 
         @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
     */
-    const File JUCE_CALLTYPE getChildFile (String relativePath) const throw();
+    const File getChildFile (String relativePath) const throw();
 
     /** Returns a file which is in the same directory as this one.
 
@@ -265,14 +265,14 @@ public:
 
         @see getChildFile, getParentDirectory
     */
-    const File JUCE_CALLTYPE getSiblingFile (const String& siblingFileName) const throw();
+    const File getSiblingFile (const String& siblingFileName) const throw();
 
     //==============================================================================
     /** Returns the directory that contains this file or directory.
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
     */
-    const File JUCE_CALLTYPE getParentDirectory() const throw();
+    const File getParentDirectory() const throw();
 
     /** Checks whether a file is somewhere inside a directory.
 
@@ -283,7 +283,7 @@ public:
         e.g. File ("/moose/fish/foo.txt").isAChildOf ("/moose") is true.
              File ("/moose/fish/foo.txt").isAChildOf ("/moose/fish") is also true.
     */
-    bool JUCE_CALLTYPE isAChildOf (const File& potentialParentDirectory) const throw();
+    bool isAChildOf (const File& potentialParentDirectory) const throw();
 
     //==============================================================================
     /** Chooses a filename relative to this one that doesn't already exist.
@@ -303,9 +303,9 @@ public:
                                         format "prefix(number)suffix", if false, it will leave the
                                         brackets out.
     */
-    const File JUCE_CALLTYPE getNonexistentChildFile (const String& prefix,
-                                                      const String& suffix,
-                                                      bool putNumbersInBrackets = true) const throw();
+    const File getNonexistentChildFile (const String& prefix,
+                                        const String& suffix,
+                                        bool putNumbersInBrackets = true) const throw();
 
     /** Chooses a filename for a sibling file to this one that doesn't already exist.
 
@@ -316,13 +316,13 @@ public:
         @param putNumbersInBrackets     whether to add brackets around the numbers that
                                         get appended to the new filename.
     */
-    const File JUCE_CALLTYPE getNonexistentSibling (const bool putNumbersInBrackets = true) const throw();
+    const File getNonexistentSibling (const bool putNumbersInBrackets = true) const throw();
 
     //==============================================================================
     /** Compares the pathnames for two files. */
-    bool JUCE_CALLTYPE operator== (const File& otherFile) const throw();
+    bool operator== (const File& otherFile) const throw();
     /** Compares the pathnames for two files. */
-    bool JUCE_CALLTYPE operator!= (const File& otherFile) const throw();
+    bool operator!= (const File& otherFile) const throw();
 
     //==============================================================================
     /** Checks whether a file can be created or written to.
@@ -332,7 +332,7 @@ public:
                     see if writing is allowed.
         @see setReadOnly
     */
-    bool JUCE_CALLTYPE hasWriteAccess() const throw();
+    bool hasWriteAccess() const throw();
 
     /** Changes the write-permission of a file or directory.
 
@@ -343,8 +343,8 @@ public:
         @returns    true if it manages to change the file's permissions.
         @see hasWriteAccess
     */
-    bool JUCE_CALLTYPE setReadOnly (const bool shouldBeReadOnly,
-                                    const bool applyRecursively = false) const throw();
+    bool setReadOnly (const bool shouldBeReadOnly,
+                      const bool applyRecursively = false) const throw();
 
     //==============================================================================
     /** Returns the last modification time of this file.
@@ -352,21 +352,21 @@ public:
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastModificationTime, getLastAccessTime, getCreationTime
     */
-    const Time JUCE_CALLTYPE getLastModificationTime() const throw();
+    const Time getLastModificationTime() const throw();
 
     /** Returns the last time this file was accessed.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastAccessTime, getLastModificationTime, getCreationTime
     */
-    const Time JUCE_CALLTYPE getLastAccessTime() const throw();
+    const Time getLastAccessTime() const throw();
 
     /** Returns the time that this file was created.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see getLastModificationTime, getLastAccessTime
     */
-    const Time JUCE_CALLTYPE getCreationTime() const throw();
+    const Time getCreationTime() const throw();
 
     /** Changes the modification time for this file.
 
@@ -374,7 +374,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastModificationTime, setLastAccessTime, setCreationTime
     */
-    bool JUCE_CALLTYPE setLastModificationTime (const Time& newTime) const throw();
+    bool setLastModificationTime (const Time& newTime) const throw();
 
     /** Changes the last-access time for this file.
 
@@ -382,7 +382,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastAccessTime, setLastModificationTime, setCreationTime
     */
-    bool JUCE_CALLTYPE setLastAccessTime (const Time& newTime) const throw();
+    bool setLastAccessTime (const Time& newTime) const throw();
 
     /** Changes the creation date for this file.
 
@@ -390,7 +390,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getCreationTime, setLastModificationTime, setLastAccessTime
     */
-    bool JUCE_CALLTYPE setCreationTime (const Time& newTime) const throw();
+    bool setCreationTime (const Time& newTime) const throw();
 
     //==============================================================================
     /** Creates an empty file if it doesn't already exist.
@@ -403,7 +403,7 @@ public:
         @returns    true if the file has been created (or if it already existed).
         @see createDirectory
     */
-    bool JUCE_CALLTYPE create() const throw();
+    bool create() const throw();
 
     /** Creates a new directory for this filename.
 
@@ -414,7 +414,7 @@ public:
                     already existed beforehand).
         @see create
     */
-    bool JUCE_CALLTYPE createDirectory() const throw();
+    bool createDirectory() const throw();
 
     /** Deletes a file.
 
@@ -425,7 +425,7 @@ public:
                     begin with).
         @see deleteRecursively
     */
-    bool JUCE_CALLTYPE deleteFile() const throw();
+    bool deleteFile() const throw();
 
     /** Deletes a file or directory and all its subdirectories.
 
@@ -436,7 +436,7 @@ public:
                     (or if it didn't exist to begin with).
         @see deleteFile
     */
-    bool JUCE_CALLTYPE deleteRecursively() const throw();
+    bool deleteRecursively() const throw();
 
     /** Moves or renames a file.
 
@@ -446,7 +446,7 @@ public:
 
         @returns    true if the operation succeeds
     */
-    bool JUCE_CALLTYPE moveFileTo (const File& targetLocation) const throw();
+    bool moveFileTo (const File& targetLocation) const throw();
 
     /** Copies a file.
 
@@ -456,7 +456,7 @@ public:
 
         @returns    true if the operation succeeds
     */
-    bool JUCE_CALLTYPE copyFileTo (const File& targetLocation) const throw();
+    bool copyFileTo (const File& targetLocation) const throw();
 
     /** Copies a directory.
 
@@ -471,7 +471,7 @@ public:
                                write privileges to create it if it doesn't exist. Any files inside
                                it will be overwritten by similarly named ones that are copied.
     */
-    bool JUCE_CALLTYPE copyDirectoryTo (const File& newDirectory) const throw();
+    bool copyDirectoryTo (const File& newDirectory) const throw();
 
     //==============================================================================
     /** Used in file searching, to specify whether to return files, directories, or both.
@@ -501,10 +501,10 @@ public:
 
         @see getNumberOfChildFiles, DirectoryIterator
     */
-    int JUCE_CALLTYPE findChildFiles (OwnedArray<File>& results,
-                                      const int whatToLookFor,
-                                      const bool searchRecursively,
-                                      const String& wildCardPattern = JUCE_T("*")) const throw();
+    int findChildFiles (OwnedArray<File>& results,
+                        const int whatToLookFor,
+                        const bool searchRecursively,
+                        const String& wildCardPattern = JUCE_T("*")) const throw();
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
 
@@ -522,8 +522,8 @@ public:
         @returns                the number of matches found
         @see findChildFiles, DirectoryIterator
     */
-    int JUCE_CALLTYPE getNumberOfChildFiles (const int whatToLookFor,
-                                             const String& wildCardPattern = JUCE_T("*")) const throw();
+    int getNumberOfChildFiles (const int whatToLookFor,
+                               const String& wildCardPattern = JUCE_T("*")) const throw();
 
     //==============================================================================
     /** Creates a stream to read from this file.
@@ -532,7 +532,7 @@ public:
                     start of the file), or 0 if the file can't be opened for some reason
         @see createOutputStream, loadFileAsData
     */
-    FileInputStream* JUCE_CALLTYPE createInputStream() const throw();
+    FileInputStream* createInputStream() const throw();
 
     /** Creates a stream to write to this file.
 
@@ -544,7 +544,7 @@ public:
                     end of the file), or 0 if the file can't be opened for some reason
         @see createInputStream, printf, appendData, appendText
     */
-    FileOutputStream* JUCE_CALLTYPE createOutputStream (const int bufferSize = 0x8000) const throw();
+    FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const throw();
 
     //==============================================================================
     /** Loads a file's contents into memory as a block of binary data.
@@ -557,7 +557,7 @@ public:
                         might want to clear it first
         @returns        true if the file could all be read into memory
     */
-    bool JUCE_CALLTYPE loadFileAsData (MemoryBlock& result) const throw();
+    bool loadFileAsData (MemoryBlock& result) const throw();
 
     /** Reads a file into memory as a string.
 
@@ -566,7 +566,7 @@ public:
         This makes use of InputStream::readEntireStreamAsString, which should
         automatically cope with unicode/acsii file formats.
     */
-    const String JUCE_CALLTYPE loadFileAsString() const throw();
+    const String loadFileAsString() const throw();
 
     //==============================================================================
     /** Writes text to the end of the file.
@@ -575,7 +575,7 @@ public:
 
         @returns  false if it can't write to the file for some reason
     */
-    bool JUCE_CALLTYPE printf (const tchar* format, ...) const throw();
+    bool printf (const tchar* format, ...) const throw();
 
     /** Appends a block of binary data to the end of the file.
 
@@ -583,8 +583,8 @@ public:
 
         @returns false if it can't write to the file for some reason
     */
-    bool JUCE_CALLTYPE appendData (const void* const dataToAppend,
-                                   const int numberOfBytes) const throw();
+    bool appendData (const void* const dataToAppend,
+                     const int numberOfBytes) const throw();
 
     /** Replaces this file's contents with a given block of data.
 
@@ -600,8 +600,8 @@ public:
 
         @see appendText
     */
-    bool JUCE_CALLTYPE replaceWithData (const void* const dataToWrite,
-                                        const int numberOfBytes) const throw();
+    bool replaceWithData (const void* const dataToWrite,
+                          const int numberOfBytes) const throw();
 
     /** Appends a string to the end of the file.
 
@@ -615,9 +615,9 @@ public:
 
         @see replaceWithText
     */
-    bool JUCE_CALLTYPE appendText (const String& textToAppend,
-                                   const bool asUnicode = false,
-                                   const bool writeUnicodeHeaderBytes = false) const throw();
+    bool appendText (const String& textToAppend,
+                     const bool asUnicode = false,
+                     const bool writeUnicodeHeaderBytes = false) const throw();
 
     /** Replaces this file's contents with a given text string.
 
@@ -635,9 +635,9 @@ public:
 
         @see appendText
     */
-    bool JUCE_CALLTYPE replaceWithText (const String& textToWrite,
-                                        const bool asUnicode = false,
-                                        const bool writeUnicodeHeaderBytes = false) const throw();
+    bool replaceWithText (const String& textToWrite,
+                          const bool asUnicode = false,
+                          const bool writeUnicodeHeaderBytes = false) const throw();
 
     //==============================================================================
     /** Creates a set of files to represent each file root.
@@ -646,41 +646,41 @@ public:
         to which ones are available. On the Mac/Linux, this will probably
         just add a single entry for "/".
     */
-    static void JUCE_CALLTYPE findFileSystemRoots (OwnedArray<File>& results) throw();
+    static void findFileSystemRoots (OwnedArray<File>& results) throw();
 
     /** Finds the name of the drive on which this file lives.
 
         @returns the volume label of the drive, or an empty string if this isn't possible
     */
-    const String JUCE_CALLTYPE getVolumeLabel() const throw();
+    const String getVolumeLabel() const throw();
 
     /** Returns the serial number of the volume on which this file lives.
 
         @returns the serial number, or zero if there's a problem doing this
     */
-    int JUCE_CALLTYPE getVolumeSerialNumber() const throw();
+    int getVolumeSerialNumber() const throw();
 
     /** Returns the number of bytes free on the drive that this file lives on.
 
         @returns the number of bytes free, or 0 if there's a problem finding this out
     */
-    int64 JUCE_CALLTYPE getBytesFreeOnVolume() const throw();
+    int64 getBytesFreeOnVolume() const throw();
 
     /** Returns true if this file is on a CD or DVD drive. */
-    bool JUCE_CALLTYPE isOnCDRomDrive() const throw();
+    bool isOnCDRomDrive() const throw();
 
     /** Returns true if this file is on a hard disk.
 
         This will fail if it's a network drive, but will still be true for
         removable hard-disks.
     */
-    bool JUCE_CALLTYPE isOnHardDisk() const throw();
+    bool isOnHardDisk() const throw();
 
     /** Returns true if this file is on a removable disk drive.
 
         This might be a usb-drive, a CD-rom, or maybe a network drive.
     */
-    bool JUCE_CALLTYPE isOnRemovableDrive() const throw();
+    bool isOnRemovableDrive() const throw();
 
     //==============================================================================
     /** Launches the file as a process.
@@ -692,7 +692,7 @@ public:
 
         - if it's a folder, it will be opened in Explorer, Finder, or equivalent.
     */
-    bool JUCE_CALLTYPE startAsProcess (const String& parameters = String::empty) const throw();
+    bool startAsProcess (const String& parameters = String::empty) const throw();
 
     //==============================================================================
     /** A set of types of location that can be passed to the getSpecialLocation() method.
@@ -767,7 +767,7 @@ public:
 
         @see SpecialLocationType
     */
-    static const File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
+    static const File getSpecialLocation (const SpecialLocationType type);
 
     //==============================================================================
     /** Returns a temporary file in the system's temp directory.
@@ -776,7 +776,7 @@ public:
 
         To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
     */
-    static const File JUCE_CALLTYPE createTempFile (const String& fileNameEnding) throw();
+    static const File createTempFile (const String& fileNameEnding) throw();
 
 
     //==============================================================================
@@ -784,7 +784,7 @@ public:
 
         @see setAsCurrentWorkingDirectory
     */
-    static const File JUCE_CALLTYPE getCurrentWorkingDirectory() throw();
+    static const File getCurrentWorkingDirectory() throw();
 
     /** Sets the current working directory to be this file.
 
@@ -793,7 +793,7 @@ public:
         @returns true if the current directory has been changed.
         @see getCurrentWorkingDirectory
     */
-    bool JUCE_CALLTYPE setAsCurrentWorkingDirectory() const throw();
+    bool setAsCurrentWorkingDirectory() const throw();
 
     //==============================================================================
     /** The system-specific file separator character.
@@ -819,7 +819,7 @@ public:
 
         @see createLegalPathName
     */
-    static const String JUCE_CALLTYPE createLegalFileName (const String& fileNameToFix) throw();
+    static const String createLegalFileName (const String& fileNameToFix) throw();
 
     /** Removes illegal characters from a pathname.
 
@@ -828,11 +828,11 @@ public:
 
         @see createLegalFileName
     */
-    static const String JUCE_CALLTYPE createLegalPathName (const String& pathNameToFix) throw();
+    static const String createLegalPathName (const String& pathNameToFix) throw();
 
     /** Indicates whether filenames are case-sensitive on the current operating system.
     */
-    static bool JUCE_CALLTYPE areFileNamesCaseSensitive();
+    static bool areFileNamesCaseSensitive();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -844,7 +844,7 @@ private:
     // internal way of contructing a file without checking the path
     friend class DirectoryIterator;
     File (const String&, int) throw();
-    const String JUCE_CALLTYPE getPathUpToLastSlash() const throw();
+    const String getPathUpToLastSlash() const throw();
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__

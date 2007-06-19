@@ -45,7 +45,7 @@ public:
     int direction;
 
     ScrollbarButton (const int direction_,
-                     ScrollBar& owner_)
+                     ScrollBar& owner_) throw()
         : Button (String::empty),
           direction (direction_),
           owner (owner_)
@@ -131,7 +131,7 @@ void ScrollBar::setRangeLimits (const double newMinimum,
 }
 
 void ScrollBar::setCurrentRange (double newStart,
-                                 double newSize)
+                                 double newSize) throw()
 {
     newSize  = jlimit (0.0, maximum - minimum, newSize);
     newStart = jlimit (minimum, maximum - newSize, newStart);
@@ -147,39 +147,39 @@ void ScrollBar::setCurrentRange (double newStart,
     }
 }
 
-void ScrollBar::setCurrentRangeStart (double newStart)
+void ScrollBar::setCurrentRangeStart (double newStart) throw()
 {
     setCurrentRange (newStart, rangeSize);
 }
 
-void ScrollBar::setSingleStepSize (const double newSingleStepSize)
+void ScrollBar::setSingleStepSize (const double newSingleStepSize) throw()
 {
     singleStepSize = newSingleStepSize;
 }
 
-void ScrollBar::moveScrollbarInSteps (const int howManySteps)
+void ScrollBar::moveScrollbarInSteps (const int howManySteps) throw()
 {
     setCurrentRangeStart (rangeStart + howManySteps * singleStepSize);
 }
 
-void ScrollBar::moveScrollbarInPages (const int howManyPages)
+void ScrollBar::moveScrollbarInPages (const int howManyPages) throw()
 {
     setCurrentRangeStart (rangeStart + howManyPages * rangeSize);
 }
 
-void ScrollBar::scrollToTop()
+void ScrollBar::scrollToTop() throw()
 {
     setCurrentRangeStart (minimum);
 }
 
-void ScrollBar::scrollToBottom()
+void ScrollBar::scrollToBottom() throw()
 {
     setCurrentRangeStart (maximum - rangeSize);
 }
 
 void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
                                       const int repeatDelayInMillisecs_,
-                                      const int minimumDelayInMillisecs_)
+                                      const int minimumDelayInMillisecs_) throw()
 {
     initialDelayInMillisecs = initialDelayInMillisecs_;
     repeatDelayInMillisecs = repeatDelayInMillisecs_;
@@ -217,7 +217,7 @@ void ScrollBar::handleAsyncUpdate()
 }
 
 //==============================================================================
-void ScrollBar::updateThumbPosition()
+void ScrollBar::updateThumbPosition() throw()
 {
     int newThumbSize = roundDoubleToInt ((maximum > minimum) ? (rangeSize * thumbAreaSize) / (maximum - minimum)
                                                              : thumbAreaSize);
@@ -251,7 +251,7 @@ void ScrollBar::updateThumbPosition()
     }
 }
 
-void ScrollBar::setOrientation (const bool shouldBeVertical)
+void ScrollBar::setOrientation (const bool shouldBeVertical) throw()
 {
     if (vertical != shouldBeVertical)
     {

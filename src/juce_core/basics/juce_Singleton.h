@@ -97,7 +97,7 @@
     static classname* _singletonInstance;  \
     static CriticalSection _singletonLock; \
 \
-    static classname* JUCE_CALLTYPE getInstance() \
+    static classname* getInstance() \
     { \
         if (_singletonInstance == 0) \
         {\
@@ -125,12 +125,12 @@
         return _singletonInstance; \
     } \
 \
-    static inline classname* JUCE_CALLTYPE getInstanceWithoutCreating() throw() \
+    static inline classname* getInstanceWithoutCreating() throw() \
     { \
         return _singletonInstance; \
     } \
 \
-    static void JUCE_CALLTYPE deleteInstance() \
+    static void deleteInstance() \
     { \
         const ScopedLock sl (_singletonLock); \
         if (_singletonInstance != 0) \
@@ -141,7 +141,7 @@
         } \
     } \
 \
-    void JUCE_CALLTYPE clearSingletonInstance() throw() \
+    void clearSingletonInstance() throw() \
     { \
         if (_singletonInstance == this) \
             _singletonInstance = 0; \
@@ -179,7 +179,7 @@
 \
     static classname* _singletonInstance;  \
 \
-    static classname* JUCE_CALLTYPE getInstance() \
+    static classname* getInstance() \
     { \
         if (_singletonInstance == 0) \
         { \
@@ -202,12 +202,12 @@
         return _singletonInstance; \
     } \
 \
-    static inline classname* JUCE_CALLTYPE getInstanceWithoutCreating() throw() \
+    static inline classname* getInstanceWithoutCreating() throw() \
     { \
         return _singletonInstance; \
     } \
 \
-    static void JUCE_CALLTYPE deleteInstance() \
+    static void deleteInstance() \
     { \
         if (_singletonInstance != 0) \
         { \
@@ -217,7 +217,7 @@
         } \
     } \
 \
-    void JUCE_CALLTYPE clearSingletonInstance() throw() \
+    void clearSingletonInstance() throw() \
     { \
         if (_singletonInstance == this) \
             _singletonInstance = 0; \

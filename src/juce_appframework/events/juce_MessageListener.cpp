@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-JUCE_CALLTYPE MessageListener::MessageListener() throw()
+MessageListener::MessageListener() throw()
 {
     // are you trying to create a messagelistener before or after juce has been intialised??
     jassert (MessageManager::instance != 0);
@@ -46,13 +46,13 @@ JUCE_CALLTYPE MessageListener::MessageListener() throw()
         MessageManager::instance->messageListeners.add (this);
 }
 
-JUCE_CALLTYPE MessageListener::~MessageListener()
+MessageListener::~MessageListener()
 {
     if (MessageManager::instance != 0)
         MessageManager::instance->messageListeners.removeValue (this);
 }
 
-void JUCE_CALLTYPE MessageListener::postMessage (Message* const message) const throw()
+void MessageListener::postMessage (Message* const message) const throw()
 {
     message->messageRecipient = const_cast <MessageListener*> (this);
 
@@ -62,7 +62,7 @@ void JUCE_CALLTYPE MessageListener::postMessage (Message* const message) const t
     MessageManager::instance->postMessageToQueue (message);
 }
 
-bool JUCE_CALLTYPE MessageListener::isValidMessageListener() const throw()
+bool MessageListener::isValidMessageListener() const throw()
 {
     return (MessageManager::instance != 0)
              && MessageManager::instance->messageListeners.contains (this);

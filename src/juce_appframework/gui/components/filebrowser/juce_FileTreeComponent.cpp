@@ -49,11 +49,11 @@ class FileListTreeItem   : public TreeViewItem,
 {
 public:
     //==============================================================================
-    JUCE_CALLTYPE FileListTreeItem (FileTreeComponent& owner_,
-                                    DirectoryContentsList* const parentContentsList_,
-                                    const int indexInContentsList_,
-                                    const File& file_,
-                                    TimeSliceThread& thread_) throw()
+    FileListTreeItem (FileTreeComponent& owner_,
+                      DirectoryContentsList* const parentContentsList_,
+                      const int indexInContentsList_,
+                      const File& file_,
+                      TimeSliceThread& thread_) throw()
         : file (file_),
           owner (owner_),
           parentContentsList (parentContentsList_),
@@ -120,7 +120,7 @@ public:
         }
     }
 
-    void JUCE_CALLTYPE setSubContentsList (DirectoryContentsList* newList) throw()
+    void setSubContentsList (DirectoryContentsList* newList) throw()
     {
         jassert (subContentsList == 0);
         subContentsList = newList;
@@ -206,7 +206,7 @@ private:
     String fileSize;
     String modTime;
 
-    void JUCE_CALLTYPE updateIcon (const bool onlyUpdateIfCached) throw()
+    void updateIcon (const bool onlyUpdateIfCached) throw()
     {
         if (icon == 0)
         {

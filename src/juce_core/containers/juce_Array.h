@@ -66,7 +66,7 @@ public:
 
         @see ArrayAllocationBase
     */
-    JUCE_CALLTYPE Array (const int granularity = juceDefaultArrayGranularity) throw()
+    Array (const int granularity = juceDefaultArrayGranularity) throw()
        : ArrayAllocationBase <ElementType> (granularity),
          numUsed (0)
     {
@@ -75,7 +75,7 @@ public:
     /** Creates a copy of another array.
         @param other    the array to copy
     */
-    JUCE_CALLTYPE Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other) throw()
        : ArrayAllocationBase <ElementType> (other.granularity)
     {
         other.lockArray();
@@ -89,7 +89,7 @@ public:
 
         @param values   the array to copy from
     */
-    JUCE_CALLTYPE Array (const ElementType* values) throw()
+    Array (const ElementType* values) throw()
        : ArrayAllocationBase <ElementType> (juceDefaultArrayGranularity),
          numUsed (0)
     {
@@ -102,7 +102,7 @@ public:
         @param values       the array to copy from
         @param numValues    the number of values in the array
     */
-    JUCE_CALLTYPE Array (const ElementType* values, int numValues) throw()
+    Array (const ElementType* values, int numValues) throw()
        : ArrayAllocationBase <ElementType> (juceDefaultArrayGranularity),
          numUsed (numValues)
     {
@@ -111,14 +111,14 @@ public:
     }
 
     /** Destructor. */
-    JUCE_CALLTYPE ~Array() throw()
+    ~Array() throw()
     {
     }
 
     /** Copies another array.
         @param other    the array to copy
     */
-    const Array <ElementType, TypeOfCriticalSectionToUse>& JUCE_CALLTYPE operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    const Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other) throw()
     {
         if (this != &other)
         {
@@ -145,7 +145,7 @@ public:
         @param other    the other array to compare with
     */
     template <class OtherArrayType>
-    bool JUCE_CALLTYPE operator== (const OtherArrayType& other) const throw()
+    bool operator== (const OtherArrayType& other) const throw()
     {
         lock.enter();
 
@@ -174,7 +174,7 @@ public:
         @param other    the other array to compare with
     */
     template <class OtherArrayType>
-    bool JUCE_CALLTYPE operator!= (const OtherArrayType& other) const throw()
+    bool operator!= (const OtherArrayType& other) const throw()
     {
         return ! operator== (other);
     }
@@ -187,7 +187,7 @@ public:
 
         @see clearQuick
     */
-    void JUCE_CALLTYPE clear() throw()
+    void clear() throw()
     {
         lock.enter();
         this->setAllocatedSize (0);
@@ -199,7 +199,7 @@ public:
 
         @see clear
     */
-    void JUCE_CALLTYPE clearQuick() throw()
+    void clearQuick() throw()
     {
         lock.enter();
         numUsed = 0;
@@ -209,7 +209,7 @@ public:
     //==============================================================================
     /** Returns the current number of elements in the array.
     */
-    inline int JUCE_CALLTYPE size() const throw()
+    inline int size() const throw()
     {
         return numUsed;
     }
@@ -224,7 +224,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see getUnchecked, getFirst, getLast
     */
-    inline ElementType JUCE_CALLTYPE operator[] (const int index) const throw()
+    inline ElementType operator[] (const int index) const throw()
     {
         lock.enter();
         const ElementType result = (index >= 0 && index < numUsed) ? this->elements [index]
@@ -243,7 +243,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see operator[], getFirst, getLast
     */
-    inline ElementType JUCE_CALLTYPE getUnchecked (const int index) const throw()
+    inline ElementType getUnchecked (const int index) const throw()
     {
         lock.enter();
         jassert (index >= 0 && index < numUsed);
@@ -262,7 +262,7 @@ public:
         @param index    the index of the element being requested (0 is the first element in the array)
         @see operator[], getFirst, getLast
     */
-    inline ElementType& JUCE_CALLTYPE getReference (const int index) const throw()
+    inline ElementType& getReference (const int index) const throw()
     {
         jassert (index >= 0 && index < numUsed);
         return this->elements [index];
@@ -272,7 +272,7 @@ public:
 
         @see operator[], getUnchecked, getLast
     */
-    inline ElementType JUCE_CALLTYPE getFirst() const throw()
+    inline ElementType getFirst() const throw()
     {
         lock.enter();
         const ElementType result = (numUsed > 0) ? this->elements [0]
@@ -286,7 +286,7 @@ public:
 
         @see operator[], getUnchecked, getFirst
     */
-    inline ElementType JUCE_CALLTYPE getLast() const throw()
+    inline ElementType getLast() const throw()
     {
         lock.enter();
         const ElementType result = (numUsed > 0) ? this->elements [numUsed - 1]
@@ -305,7 +305,7 @@ public:
         @param elementToLookFor   the value or object to look for
         @returns                  the index of the object, or -1 if it's not found
     */
-    int JUCE_CALLTYPE indexOf (const ElementType elementToLookFor) const throw()
+    int indexOf (const ElementType elementToLookFor) const throw()
     {
         lock.enter();
         const ElementType* e = this->elements;
@@ -330,7 +330,7 @@ public:
         @param elementToLookFor     the value or object to look for
         @returns                    true if the item is found
     */
-    bool JUCE_CALLTYPE contains (const ElementType elementToLookFor) const throw()
+    bool contains (const ElementType elementToLookFor) const throw()
     {
         lock.enter();
 
@@ -374,7 +374,7 @@ public:
         @param newElement       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addArray
     */
-    void JUCE_CALLTYPE add (const ElementType newElement) throw()
+    void add (const ElementType newElement) throw()
     {
         lock.enter();
         this->ensureAllocatedSize (numUsed + 1);
@@ -394,7 +394,7 @@ public:
         @param newElement         the new object to add to the array
         @see add, addSorted, set
     */
-    void JUCE_CALLTYPE insert (int indexToInsertAt, const ElementType newElement) throw()
+    void insert (int indexToInsertAt, const ElementType newElement) throw()
     {
         lock.enter();
         this->ensureAllocatedSize (numUsed + 1);
@@ -433,8 +433,8 @@ public:
         @param numberOfTimesToInsertIt  how many copies of the value to insert
         @see insert, add, addSorted, set
     */
-    void JUCE_CALLTYPE insertMultiple (int indexToInsertAt, const ElementType newElement,
-                                       int numberOfTimesToInsertIt) throw()
+    void insertMultiple (int indexToInsertAt, const ElementType newElement,
+                         int numberOfTimesToInsertIt) throw()
     {
         if (numberOfTimesToInsertIt > 0)
         {
@@ -474,9 +474,9 @@ public:
         @param numberOfElements     how many items are in the array
         @see insert, add, addSorted, set
     */
-    void JUCE_CALLTYPE insertArray (int indexToInsertAt,
-                                    const ElementType* newElements,
-                                    int numberOfElements) throw()
+    void insertArray (int indexToInsertAt,
+                      const ElementType* newElements,
+                      int numberOfElements) throw()
     {
         if (numberOfElements > 0)
         {
@@ -512,7 +512,7 @@ public:
 
         @param newElement   the new object to add to the array
     */
-    void JUCE_CALLTYPE addIfNotAlreadyThere (const ElementType newElement) throw()
+    void addIfNotAlreadyThere (const ElementType newElement) throw()
     {
         lock.enter();
 
@@ -531,8 +531,8 @@ public:
         @param newValue         the new value to set for this index.
         @see add, insert
     */
-    void JUCE_CALLTYPE set (const int indexToChange,
-                            const ElementType newValue) throw()
+    void set (const int indexToChange,
+              const ElementType newValue) throw()
     {
         jassert (indexToChange >= 0);
 
@@ -563,8 +563,8 @@ public:
         @param newValue         the new value to set for this index.
         @see set, getUnchecked
     */
-    void JUCE_CALLTYPE setUnchecked (const int indexToChange,
-                                     const ElementType newValue) throw()
+    void setUnchecked (const int indexToChange,
+                       const ElementType newValue) throw()
     {
         lock.enter();
         jassert (indexToChange >= 0 && indexToChange < numUsed);
@@ -578,8 +578,8 @@ public:
         @param numElementsToAdd     how many elements are in this other array
         @see add
     */
-    void JUCE_CALLTYPE addArray (const ElementType* elementsToAdd,
-                                 int numElementsToAdd) throw()
+    void addArray (const ElementType* elementsToAdd,
+                   int numElementsToAdd) throw()
     {
         lock.enter();
 
@@ -600,7 +600,7 @@ public:
         because it just swaps their internal pointers.
     */
     template <class OtherArrayType>
-    void JUCE_CALLTYPE swapWithArray (OtherArrayType& otherArray) throw()
+    void swapWithArray (OtherArrayType& otherArray) throw()
     {
         lock.enter();
         otherArray.lock.enter();
@@ -621,9 +621,9 @@ public:
         @see add
     */
     template <class OtherArrayType>
-    void JUCE_CALLTYPE addArray (const OtherArrayType& arrayToAddFrom,
-                                 int startIndex = 0,
-                                 int numElementsToAdd = -1) throw()
+    void addArray (const OtherArrayType& arrayToAddFrom,
+                   int startIndex = 0,
+                   int numElementsToAdd = -1) throw()
     {
         arrayToAddFrom.lockArray();
         lock.enter();
@@ -656,8 +656,8 @@ public:
         @see add, sort
     */
     template <class ElementComparator>
-    void JUCE_CALLTYPE addSorted (ElementComparator& comparator,
-                                  const ElementType newElement) throw()
+    void addSorted (ElementComparator& comparator,
+                    const ElementType newElement) throw()
     {
         lock.enter();
         insert (findInsertIndexInSortedArray (comparator, this->elements, newElement, 0, numUsed), newElement);
@@ -677,8 +677,8 @@ public:
         @see addSorted, sort
     */
     template <class ElementComparator>
-    int JUCE_CALLTYPE indexOfSorted (ElementComparator& comparator,
-                                     const ElementType elementToLookFor) const throw()
+    int indexOfSorted (ElementComparator& comparator,
+                       const ElementType elementToLookFor) const throw()
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -727,7 +727,7 @@ public:
         @returns                the element that has been removed
         @see removeValue, removeRange
     */
-    ElementType JUCE_CALLTYPE remove (const int indexToRemove) throw()
+    ElementType remove (const int indexToRemove) throw()
     {
         lock.enter();
 
@@ -763,7 +763,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void JUCE_CALLTYPE removeValue (const ElementType valueToRemove) throw()
+    void removeValue (const ElementType valueToRemove) throw()
     {
         lock.enter();
         ElementType* e = this->elements;
@@ -794,8 +794,8 @@ public:
         @param numberToRemove   how many elements should be removed
         @see remove, removeValue
     */
-    void JUCE_CALLTYPE removeRange (int startIndex,
-                                    const int numberToRemove) throw()
+    void removeRange (int startIndex,
+                      const int numberToRemove) throw()
     {
         lock.enter();
         const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -826,7 +826,7 @@ public:
         @param howManyToRemove   how many elements to remove from the end of the array
         @see remove, removeValue, removeRange
     */
-    void JUCE_CALLTYPE removeLast (int howManyToRemove = 1) throw()
+    void removeLast (int howManyToRemove = 1) throw()
     {
         lock.enter();
         numUsed = jmax (0, numUsed - howManyToRemove);
@@ -843,7 +843,7 @@ public:
         @see removeValuesNotIn, remove, removeValue, removeRange
     */
     template <class OtherArrayType>
-    void JUCE_CALLTYPE removeValuesIn (const OtherArrayType& otherArray) throw()
+    void removeValuesIn (const OtherArrayType& otherArray) throw()
     {
         otherArray.lockArray();
         lock.enter();
@@ -874,7 +874,7 @@ public:
         @see removeValuesIn, remove, removeValue, removeRange
     */
     template <class OtherArrayType>
-    void JUCE_CALLTYPE removeValuesNotIn (const OtherArrayType& otherArray) throw()
+    void removeValuesNotIn (const OtherArrayType& otherArray) throw()
     {
         otherArray.lockArray();
         lock.enter();
@@ -905,8 +905,8 @@ public:
         @param index1   index of one of the elements to swap
         @param index2   index of the other element to swap
     */
-    void JUCE_CALLTYPE swap (const int index1,
-                             const int index2) throw()
+    void swap (const int index1,
+               const int index2) throw()
     {
         lock.enter();
 
@@ -934,8 +934,8 @@ public:
                                 is less than zero, the value will be moved to the end
                                 of the array
     */
-    void JUCE_CALLTYPE move (const int currentIndex,
-                             int newIndex) throw()
+    void move (const int currentIndex,
+               int newIndex) throw()
     {
         if (currentIndex != newIndex)
         {
@@ -975,7 +975,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void JUCE_CALLTYPE minimiseStorageOverheads() throw()
+    void minimiseStorageOverheads() throw()
     {
         lock.enter();
 
@@ -1000,7 +1000,7 @@ public:
         the array won't have to keep dynamically resizing itself as the elements
         are added, and it'll therefore be more efficient.
     */
-    void JUCE_CALLTYPE ensureStorageAllocated (const int minNumElements) throw()
+    void ensureStorageAllocated (const int minNumElements) throw()
     {
         this->ensureAllocatedSize (minNumElements);
     }
@@ -1033,8 +1033,8 @@ public:
         @see addSorted, indexOfSorted, sortArray
     */
     template <class ElementComparator>
-    void JUCE_CALLTYPE sort (ElementComparator& comparator,
-                             const bool retainOrderOfEquivalentItems = false) const throw()
+    void sort (ElementComparator& comparator,
+               const bool retainOrderOfEquivalentItems = false) const throw()
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -1051,7 +1051,7 @@ public:
 
         @see unlockArray
     */
-    void JUCE_CALLTYPE lockArray() const throw()
+    void lockArray() const throw()
     {
         lock.enter();
     }
@@ -1063,7 +1063,7 @@ public:
 
         @see lockArray
     */
-    void JUCE_CALLTYPE unlockArray() const throw()
+    void unlockArray() const throw()
     {
         lock.exit();
     }

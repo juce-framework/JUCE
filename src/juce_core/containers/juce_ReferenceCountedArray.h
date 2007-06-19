@@ -61,14 +61,14 @@ public:
 
         @see ReferenceCountedObject, ArrayAllocationBase, Array, OwnedArray
     */
-    JUCE_CALLTYPE ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
+    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
         : ArrayAllocationBase <ObjectClass*> (granularity),
           numUsed (0)
     {
     }
 
     /** Creates a copy of another array */
-    JUCE_CALLTYPE ReferenceCountedArray (const ReferenceCountedArray<ObjectClass>& other) throw()
+    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass>& other) throw()
         : ArrayAllocationBase <ObjectClass*> (other.granularity),
           numUsed (other.numUsed)
     {
@@ -84,7 +84,7 @@ public:
 
         Any existing objects in this array will first be released.
     */
-    const ReferenceCountedArray<ObjectClass>& JUCE_CALLTYPE operator= (const ReferenceCountedArray<ObjectClass>& other) throw()
+    const ReferenceCountedArray<ObjectClass>& operator= (const ReferenceCountedArray<ObjectClass>& other) throw()
     {
         if (this != &other)
         {
@@ -108,7 +108,7 @@ public:
 
         Any objects in the array will be released, and may be deleted if not referenced from elsewhere.
     */
-    JUCE_CALLTYPE ~ReferenceCountedArray()
+    ~ReferenceCountedArray()
     {
         clear();
     }
@@ -118,7 +118,7 @@ public:
 
         Any objects in the array that are not referenced from elsewhere will be deleted.
     */
-    void JUCE_CALLTYPE clear()
+    void clear()
     {
         while (numUsed > 0)
             if (this->elements [--numUsed] != 0)
@@ -129,7 +129,7 @@ public:
     }
 
     /** Returns the current number of objects in the array. */
-    inline int JUCE_CALLTYPE size() const throw()
+    inline int size() const throw()
     {
         return numUsed;
     }
@@ -142,7 +142,7 @@ public:
 
         @see getUnchecked
     */
-    inline ObjectClass* JUCE_CALLTYPE operator[] (const int index) const throw()
+    inline ObjectClass* operator[] (const int index) const throw()
     {
         return (index >= 0 && index < numUsed) ? this->elements [index]
                                                : (ObjectClass*) 0;
@@ -153,7 +153,7 @@ public:
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
-    inline ObjectClass* JUCE_CALLTYPE getUnchecked (const int index) const throw()
+    inline ObjectClass* getUnchecked (const int index) const throw()
     {
         jassert (index >= 0 && index < numUsed);
         return this->elements [index];
@@ -164,7 +164,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getLast
     */
-    inline ObjectClass* JUCE_CALLTYPE getFirst() const throw()
+    inline ObjectClass* getFirst() const throw()
     {
         return (numUsed > 0) ? this->elements [0]
                              : (ObjectClass*) 0;
@@ -175,7 +175,7 @@ public:
         This will return a null pointer if the array's empty.
         @see getFirst
     */
-    inline ObjectClass* JUCE_CALLTYPE getLast() const throw()
+    inline ObjectClass* getLast() const throw()
     {
         return (numUsed > 0) ? this->elements [numUsed - 1]
                              : (ObjectClass*) 0;
@@ -187,7 +187,7 @@ public:
         @param objectToLookFor    the object to look for
         @returns                  the index at which the object was found, or -1 if it's not found
     */
-    int JUCE_CALLTYPE indexOf (const ObjectClass* const objectToLookFor) const throw()
+    int indexOf (const ObjectClass* const objectToLookFor) const throw()
     {
         ObjectClass** e = this->elements;
 
@@ -207,7 +207,7 @@ public:
         @param objectToLookFor      the object to look for
         @returns                    true if the object is in the array
     */
-    bool JUCE_CALLTYPE contains (const ObjectClass* const objectToLookFor) const throw()
+    bool contains (const ObjectClass* const objectToLookFor) const throw()
     {
         ObjectClass** e = this->elements;
 
@@ -229,7 +229,7 @@ public:
         @param newObject       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addArray
     */
-    void JUCE_CALLTYPE add (ObjectClass* const newObject) throw()
+    void add (ObjectClass* const newObject) throw()
     {
         this->ensureAllocatedSize (numUsed + 1);
         this->elements [numUsed++] = newObject;
@@ -251,8 +251,8 @@ public:
         @param newObject            the new object to add to the array
         @see add, addSorted, addIfNotAlreadyThere, set
     */
-    void JUCE_CALLTYPE insert (int indexToInsertAt,
-                               ObjectClass* const newObject) throw()
+    void insert (int indexToInsertAt,
+                 ObjectClass* const newObject) throw()
     {
         if (indexToInsertAt >= 0)
         {
@@ -287,7 +287,7 @@ public:
 
         @param newObject   the new object to add to the array
     */
-    void JUCE_CALLTYPE addIfNotAlreadyThere (ObjectClass* const newObject) throw()
+    void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
     {
         if (! contains (newObject))
             add (newObject);
@@ -305,8 +305,8 @@ public:
         @param newObject            the new value to set for this index.
         @see add, insert, remove
     */
-    void JUCE_CALLTYPE set (const int indexToChange,
-                            ObjectClass* const newObject)
+    void set (const int indexToChange,
+              ObjectClass* const newObject)
     {
         if (indexToChange >= 0)
         {
@@ -337,9 +337,9 @@ public:
                                     all available elements will be copied.
         @see add
     */
-    void JUCE_CALLTYPE addArray (const ReferenceCountedArray<ObjectClass>& arrayToAddFrom,
-                                 int startIndex = 0,
-                                 int numElementsToAdd = -1) throw()
+    void addArray (const ReferenceCountedArray<ObjectClass>& arrayToAddFrom,
+                   int startIndex = 0,
+                   int numElementsToAdd = -1) throw()
     {
         if (startIndex < 0)
         {
@@ -371,8 +371,8 @@ public:
         @see add, sort
     */
     template <class ElementComparator>
-    void JUCE_CALLTYPE addSorted (ElementComparator& comparator,
-                                  ObjectClass* newObject) throw()
+    void addSorted (ElementComparator& comparator,
+                    ObjectClass* newObject) throw()
     {
         insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
     }
@@ -391,7 +391,7 @@ public:
         @param indexToRemove    the index of the element to remove
         @see removeObject, removeRange
     */
-    void JUCE_CALLTYPE remove (const int indexToRemove)
+    void remove (const int indexToRemove)
     {
         if (indexToRemove >= 0 && indexToRemove < numUsed)
         {
@@ -419,7 +419,7 @@ public:
         @param objectToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void JUCE_CALLTYPE removeObject (ObjectClass* const objectToRemove)
+    void removeObject (ObjectClass* const objectToRemove)
     {
         remove (indexOf (objectToRemove));
     }
@@ -439,8 +439,8 @@ public:
         @param numberToRemove   how many objects should be removed
         @see remove, removeObject
     */
-    void JUCE_CALLTYPE removeRange (const int startIndex,
-                                    const int numberToRemove)
+    void removeRange (const int startIndex,
+                      const int numberToRemove)
     {
         const int start = jlimit (0, numUsed, startIndex);
         const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -481,7 +481,7 @@ public:
         @param howManyToRemove   how many objects to remove from the end of the array
         @see remove, removeObject, removeRange
     */
-    void JUCE_CALLTYPE removeLast (int howManyToRemove = 1)
+    void removeLast (int howManyToRemove = 1)
     {
         if (howManyToRemove > numUsed)
             howManyToRemove = numUsed;
@@ -495,8 +495,8 @@ public:
         If either of the indexes passed in is out-of-range, nothing will happen,
         otherwise the two objects at these positions will be exchanged.
     */
-    void JUCE_CALLTYPE swap (const int index1,
-                             const int index2) throw()
+    void swap (const int index1,
+               const int index2) throw()
     {
         if (index1 >= 0 && index1 < numUsed
              && index2 >= 0 && index2 < numUsed)
@@ -519,8 +519,8 @@ public:
         @param newIndex         the index at which you'd like this object to end up. If this
                                 is less than zero, it will be moved to the end of the array
     */
-    void JUCE_CALLTYPE move (const int currentIndex,
-                             int newIndex) throw()
+    void move (const int currentIndex,
+               int newIndex) throw()
     {
         if (currentIndex != newIndex)
         {
@@ -554,7 +554,7 @@ public:
 
         @returns true only if the other array contains the same objects in the same order
     */
-    bool JUCE_CALLTYPE operator== (const ReferenceCountedArray<ObjectClass>& other) const throw()
+    bool operator== (const ReferenceCountedArray<ObjectClass>& other) const throw()
     {
         if (numUsed != other.numUsed)
             return false;
@@ -570,7 +570,7 @@ public:
 
         @see operator==
     */
-    bool JUCE_CALLTYPE operator!= (const ReferenceCountedArray<ObjectClass>& other) const throw()
+    bool operator!= (const ReferenceCountedArray<ObjectClass>& other) const throw()
     {
         return ! operator== (other);
     }
@@ -603,8 +603,8 @@ public:
         @see sortArray
     */
     template <class ElementComparator>
-    void JUCE_CALLTYPE sort (ElementComparator& comparator,
-                             const bool retainOrderOfEquivalentItems = false) const throw()
+    void sort (ElementComparator& comparator,
+               const bool retainOrderOfEquivalentItems = false) const throw()
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -618,7 +618,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void JUCE_CALLTYPE minimiseStorageOverheads() throw()
+    void minimiseStorageOverheads() throw()
     {
         if (numUsed == 0)
         {

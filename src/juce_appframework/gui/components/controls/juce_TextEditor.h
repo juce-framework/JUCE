@@ -113,7 +113,7 @@ public:
 
     /** Returns true if the editor is in multi-line mode.
     */
-    bool isMultiLine() const;
+    bool isMultiLine() const throw();
 
     //==============================================================================
     /** Changes the behaviour of the return key.
