@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-BorderSize::BorderSize()
+BorderSize::BorderSize() throw()
     : top (0),
       left (0),
       bottom (0),
@@ -45,7 +45,7 @@ BorderSize::BorderSize()
 {
 }
 
-BorderSize::BorderSize (const BorderSize& other)
+BorderSize::BorderSize (const BorderSize& other) throw()
     : top (other.top),
       left (other.left),
       bottom (other.bottom),
@@ -56,7 +56,7 @@ BorderSize::BorderSize (const BorderSize& other)
 BorderSize::BorderSize (const int topGap,
                         const int leftGap,
                         const int bottomGap,
-                        const int rightGap)
+                        const int rightGap) throw()
     : top (topGap),
       left (leftGap),
       bottom (bottomGap),
@@ -64,7 +64,7 @@ BorderSize::BorderSize (const int topGap,
 {
 }
 
-BorderSize::BorderSize (const int allGaps)
+BorderSize::BorderSize (const int allGaps) throw()
     : top (allGaps),
       left (allGaps),
       bottom (allGaps),
@@ -72,7 +72,7 @@ BorderSize::BorderSize (const int allGaps)
 {
 }
 
-BorderSize::~BorderSize()
+BorderSize::~BorderSize() throw()
 {
 }
 

@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
+ImageConvolutionKernel::ImageConvolutionKernel (const int size_) throw()
     : size (size_)
 {
     values = new float* [size];
@@ -48,7 +48,7 @@ ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
     clear();
 }
 
-ImageConvolutionKernel::~ImageConvolutionKernel()
+ImageConvolutionKernel::~ImageConvolutionKernel() throw()
 {
     for (int i = size; --i >= 0;)
         delete[] values[i];
@@ -59,7 +59,7 @@ ImageConvolutionKernel::~ImageConvolutionKernel()
 //==============================================================================
 void ImageConvolutionKernel::setKernelValue (const int x,
                                              const int y,
-                                             const float value)
+                                             const float value) throw()
 {
     if (x >= 0 && x < size
          && y >= 0 && y < size)
@@ -72,14 +72,14 @@ void ImageConvolutionKernel::setKernelValue (const int x,
     }
 }
 
-void ImageConvolutionKernel::clear()
+void ImageConvolutionKernel::clear() throw()
 {
     for (int y = size; --y >= 0;)
         for (int x = size; --x >= 0;)
             values[x][y] = 0;
 }
 
-void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum)
+void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum) throw()
 {
     double currentTotal = 0.0;
 
@@ -90,7 +90,7 @@ void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum)
     rescaleAllValues ((float) (desiredTotalSum / currentTotal));
 }
 
-void ImageConvolutionKernel::rescaleAllValues (const float multiplier)
+void ImageConvolutionKernel::rescaleAllValues (const float multiplier) throw()
 {
     for (int y = size; --y >= 0;)
         for (int x = size; --x >= 0;)
@@ -98,7 +98,7 @@ void ImageConvolutionKernel::rescaleAllValues (const float multiplier)
 }
 
 //==============================================================================
-void ImageConvolutionKernel::createGaussianBlur (const float radius)
+void ImageConvolutionKernel::createGaussianBlur (const float radius) throw()
 {
     const double radiusFactor = -1.0 / (radius * radius * 2);
     const int centre = size >> 1;

@@ -62,10 +62,10 @@ public:
     */
     PathFlatteningIterator (const Path& path,
                             const AffineTransform& transform = AffineTransform::identity,
-                            float tolerence = 9.0f);
+                            float tolerence = 9.0f) throw();
 
     /** Destructor. */
-    ~PathFlatteningIterator();
+    ~PathFlatteningIterator() throw();
 
     //==============================================================================
     /** Fetches the next line segment from the path.
@@ -75,7 +75,7 @@ public:
 
         @returns false when there are no more lines to fetch.
     */
-    bool next();
+    bool next() throw();
 
     /** The x position of the start of the current line segment. */
     float x1;

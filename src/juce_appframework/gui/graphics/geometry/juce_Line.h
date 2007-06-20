@@ -50,79 +50,79 @@ class JUCE_API  Line
 public:
     //==============================================================================
     /** Creates a line, using (0, 0) as its start and end points. */
-    Line();
+    Line() throw();
 
     /** Creates a copy of another line. */
-    Line (const Line& other);
+    Line (const Line& other) throw();
 
     /** Creates a line based on the co-ordinates of its start and end points. */
     Line (const float startX,
           const float startY,
           const float endX,
-          const float endY);
+          const float endY) throw();
 
     /** Creates a line from its start and end points. */
     Line (const Point& start,
-          const Point& end);
+          const Point& end) throw();
 
     /** Copies a line from another one. */
-    const Line& operator= (const Line& other);
+    const Line& operator= (const Line& other) throw();
 
     /** Destructor. */
-    ~Line();
+    ~Line() throw();
 
     //==============================================================================
     /** Returns the x co-ordinate of the line's start point. */
-    inline float getStartX() const                              { return startX; }
+    inline float getStartX() const throw()                              { return startX; }
 
     /** Returns the y co-ordinate of the line's start point. */
-    inline float getStartY() const                              { return startY; }
+    inline float getStartY() const throw()                              { return startY; }
 
     /** Returns the x co-ordinate of the line's end point. */
-    inline float getEndX() const                                { return endX; }
+    inline float getEndX() const throw()                                { return endX; }
 
     /** Returns the y co-ordinate of the line's end point. */
-    inline float getEndY() const                                { return endY; }
+    inline float getEndY() const throw()                                { return endY; }
 
     /** Returns the line's start point. */
-    const Point getStart() const;
+    const Point getStart() const throw();
 
     /** Returns the line's end point. */
-    const Point getEnd() const;
+    const Point getEnd() const throw();
 
     /** Changes this line's start point */
     void setStart (const float newStartX,
-                   const float newStartY);
+                   const float newStartY) throw();
 
     /** Changes this line's end point */
     void setEnd (const float newEndX,
-                 const float newEndY);
+                 const float newEndY) throw();
 
     /** Changes this line's start point */
-    void setStart (const Point& newStart);
+    void setStart (const Point& newStart) throw();
 
     /** Changes this line's end point */
-    void setEnd (const Point& newEnd);
+    void setEnd (const Point& newEnd) throw();
 
     /** Applies an affine transform to the line's start and end points. */
-    void applyTransform (const AffineTransform& transform);
+    void applyTransform (const AffineTransform& transform) throw();
 
     //==============================================================================
     /** Returns the length of the line. */
-    float getLength() const;
+    float getLength() const throw();
 
     /** Returns true if the line's start and end x co-ordinates are the same. */
-    bool isVertical() const;
+    bool isVertical() const throw();
 
     /** Returns true if the line's start and end y co-ordinates are the same. */
-    bool isHorizontal() const;
+    bool isHorizontal() const throw();
 
     /** Returns the line's angle.
 
         This value is the number of radians clockwise from the 3 o'clock direction,
         where the line's start point is considered to be at the centre.
     */
-    float getAngle() const;
+    float getAngle() const throw();
 
     //==============================================================================
     /** Compares two lines. */
@@ -147,7 +147,7 @@ public:
     */
     bool intersects (const Line& line,
                      float& intersectionX,
-                     float& intersectionY) const;
+                     float& intersectionY) const throw();
 
     //==============================================================================
     /** Returns the location of the point which is a given distance along this line.
@@ -157,7 +157,7 @@ public:
                                     than the line itself
         @see getPointAlongLineProportionally
     */
-    const Point getPointAlongLine (const float distanceFromStart) const;
+    const Point getPointAlongLine (const float distanceFromStart) const throw();
 
     /** Returns a point which is a certain distance along and to the side of this line.
 
@@ -173,7 +173,7 @@ public:
                                     right, negative value move to the left.
     */
     const Point getPointAlongLine (const float distanceFromStart,
-                                   const float perpendicularDistance) const;
+                                   const float perpendicularDistance) const throw();
 
     /** Returns the location of the point which is a given distance along this line
         proportional to the line's length.
@@ -185,7 +185,7 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    const Point getPointAlongLineProportionally (const float proportionOfLength) const;
+    const Point getPointAlongLineProportionally (const float proportionOfLength) const throw();
 
     /** Returns the smallest distance between this line segment and a given point.
 
@@ -199,7 +199,7 @@ public:
         @see getPositionAlongLineOfNearestPoint
     */
     float getDistanceFromLine (const float x,
-                               const float y) const;
+                               const float y) const throw();
 
     /** Finds the point on this line which is nearest to a given point, and
         returns its position as a proportional position along the line.
@@ -212,7 +212,7 @@ public:
         @see getDistanceFromLine, getPointAlongLineProportionally
     */
     float findNearestPointTo (const float x,
-                              const float y) const;
+                              const float y) const throw();
 
     /** Returns true if the given point lies above this line.
 
@@ -220,7 +220,7 @@ public:
         coordinate of this line at the given x (assuming the line extends infinitely
         in both directions).
     */
-    bool isPointAbove (const float x, const float y) const;
+    bool isPointAbove (const float x, const float y) const throw();
 
     //==============================================================================
     /** Returns a shortened copy of this line.
@@ -228,14 +228,14 @@ public:
         This will chop off part of the start of this line by a certain amount, (leaving the
         end-point the same), and return the new line.
     */
-    const Line withShortenedStart (const float distanceToShortenBy) const;
+    const Line withShortenedStart (const float distanceToShortenBy) const throw();
 
     /** Returns a shortened copy of this line.
 
         This will chop off part of the end of this line by a certain amount, (leaving the
         start-point the same), and return the new line.
     */
-    const Line withShortenedEnd (const float distanceToShortenBy) const;
+    const Line withShortenedEnd (const float distanceToShortenBy) const throw();
 
     /** Cuts off parts of this line to keep the parts that are either inside or
         outside a path.
@@ -251,7 +251,7 @@ public:
         @returns true if the line was changed.
     */
     bool clipToPath (const Path& path,
-                     const bool keepSectionOutsidePath);
+                     const bool keepSectionOutsidePath) throw();
 
 
     //==============================================================================

@@ -51,7 +51,7 @@ static const float closePathMarker  = 100005.0f;
 //==============================================================================
 PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
                                                 const AffineTransform& transform_,
-                                                float tolerence_)
+                                                float tolerence_) throw()
     : x2 (0),
       y2 (0),
       closesSubPath (false),
@@ -70,12 +70,12 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
     stackPos = stackBase;
 }
 
-PathFlatteningIterator::~PathFlatteningIterator()
+PathFlatteningIterator::~PathFlatteningIterator() throw()
 {
     juce_free (stackBase);
 }
 
-bool PathFlatteningIterator::next()
+bool PathFlatteningIterator::next() throw()
 {
     x1 = x2;
     y1 = y2;

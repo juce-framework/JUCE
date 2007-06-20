@@ -48,38 +48,38 @@ class JUCE_API  Point
 public:
     //==============================================================================
     /** Creates a point with co-ordinates (0, 0). */
-    Point();
+    Point() throw();
 
     /** Creates a copy of another point. */
-    Point (const Point& other);
+    Point (const Point& other) throw();
 
     /** Creates a point from an (x, y) position. */
-    Point (const float x, const float y);
+    Point (const float x, const float y) throw();
 
     /** Copies this point from another one.
         @see setXY
     */
-    const Point& operator= (const Point& other);
+    const Point& operator= (const Point& other) throw();
 
     /** Destructor. */
-    ~Point();
+    ~Point() throw();
 
     //==============================================================================
     /** Returns the point's x co-ordinate. */
-    inline float getX() const  { return x; }
+    inline float getX() const throw()                   { return x; }
 
     /** Returns the point's y co-ordinate. */
-    inline float getY() const  { return y; }
+    inline float getY() const throw()                   { return y; }
 
     /** Changes the point's x and y co-ordinates. */
     void setXY (const float x,
-                const float y);
+                const float y) throw();
 
     /** Uses a transform to change the point's co-ordinates.
 
         @see AffineTransform::transformPoint
     */
-    void applyTransform (const AffineTransform& transform);
+    void applyTransform (const AffineTransform& transform) throw();
 
 
     //==============================================================================

@@ -54,13 +54,13 @@ public:
     RectangleList() throw();
 
     /** Creates a copy of another list */
-    RectangleList (const RectangleList& other);
+    RectangleList (const RectangleList& other) throw();
 
     /** Creates a list containing just one rectangle. */
-    RectangleList (const Rectangle& rect);
+    RectangleList (const Rectangle& rect) throw();
 
     /** Copies this list from another one. */
-    const RectangleList& operator= (const RectangleList& other);
+    const RectangleList& operator= (const RectangleList& other) throw();
 
     /** Destructor. */
     ~RectangleList() throw();
@@ -82,7 +82,7 @@ public:
 
     //==============================================================================
     /** Removes all rectangles to leave an empty region. */
-    void clear();
+    void clear() throw();
 
     /** Merges a new rectangle into the list.
 
@@ -90,7 +90,7 @@ public:
         that overlap existing rectangles in the list.
     */
     void add (const int x, const int y,
-              const int w, const int h);
+              const int w, const int h) throw();
 
     /** Merges a new rectangle into the list.
 
@@ -98,35 +98,35 @@ public:
         that overlap existing rectangles in the list, and adjacent rectangles will be
         merged into it.
     */
-    void add (const Rectangle& rect);
+    void add (const Rectangle& rect) throw();
 
     /** Dumbly adds a rectangle to the list without checking for overlaps.
 
         This simply adds the rectangle to the end, it doesn't merge it or remove
         any overlapping bits.
     */
-    void addWithoutMerging (const Rectangle& rect);
+    void addWithoutMerging (const Rectangle& rect) throw();
 
     /** Merges another rectangle list into this one.
 
         Any overlaps between the two lists will be clipped, so that the result is
         the union of both lists.
     */
-    void add (const RectangleList& other);
+    void add (const RectangleList& other) throw();
 
     /** Removes a rectangular region from the list.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
     */
-    void subtract (const Rectangle& rect);
+    void subtract (const Rectangle& rect) throw();
 
     /** Removes all areas in another RectangleList from this one.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
     */
-    void subtract (const RectangleList& otherList);
+    void subtract (const RectangleList& otherList) throw();
 
     /** Removes any areas of the region that lie outside a given rectangle.
 
@@ -137,7 +137,7 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const Rectangle& rect);
+    bool clipTo (const Rectangle& rect) throw();
 
     /** Removes any areas of the region that lie outside a given rectangle list.
 
@@ -148,7 +148,7 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const RectangleList& other);
+    bool clipTo (const RectangleList& other) throw();
 
     /** Creates a region which is the result of clipping this one to a given rectangle.
 
@@ -159,21 +159,21 @@ public:
 
         @see clipTo
     */
-    bool getIntersectionWith (const Rectangle& rect, RectangleList& destRegion) const;
+    bool getIntersectionWith (const Rectangle& rect, RectangleList& destRegion) const throw();
 
     /** Swaps the contents of this and another list.
 
         This swaps their internal pointers, so is hugely faster than using copy-by-value
         to swap them.
     */
-    void swapWith (RectangleList& otherList);
+    void swapWith (RectangleList& otherList) throw();
 
     //==============================================================================
     /** Checks whether the region contains a given point.
 
         @returns true if the point lies within one of the rectangles in the list
     */
-    bool containsPoint (const int x, const int y) const;
+    bool containsPoint (const int x, const int y) const throw();
 
     /** Checks whether the region contains the whole of a given rectangle.
 
@@ -181,7 +181,7 @@ public:
                     defined by this object
         @see intersectsRectangle, containsPoint
     */
-    bool containsRectangle (const Rectangle& rectangleToCheck) const;
+    bool containsRectangle (const Rectangle& rectangleToCheck) const throw();
 
     /** Checks whether the region contains any part of a given rectangle.
 
@@ -189,17 +189,17 @@ public:
                     defined by this object
         @see containsRectangle
     */
-    bool intersectsRectangle (const Rectangle& rectangleToCheck) const;
+    bool intersectsRectangle (const Rectangle& rectangleToCheck) const throw();
 
     /** Checks whether this region intersects any part of another one.
 
         @see intersectsRectangle
     */
-    bool intersects (const RectangleList& other) const;
+    bool intersects (const RectangleList& other) const throw();
 
     //==============================================================================
     /** Returns the smallest rectangle that can enclose the whole of this region. */
-    const Rectangle getBounds() const;
+    const Rectangle getBounds() const throw();
 
     /** Optimises the list into a minimum number of constituent rectangles.
 
@@ -207,14 +207,14 @@ public:
         possible, to simplify lists that might have been fragmented by repeated
         add/subtract calls.
     */
-    void consolidate();
+    void consolidate() throw();
 
     /** Adds an x and y value to all the co-ordinates. */
-    void offsetAll (const int dx, const int dy);
+    void offsetAll (const int dx, const int dy) throw();
 
     //==============================================================================
     /** Creates a Path object to represent this region. */
-    const Path toPath() const;
+    const Path toPath() const throw();
 
 
     //==============================================================================
@@ -223,15 +223,15 @@ public:
     {
     public:
         //==============================================================================
-        Iterator (const RectangleList& list);
-        ~Iterator();
+        Iterator (const RectangleList& list) throw();
+        ~Iterator() throw();
 
         //==============================================================================
         /** Advances to the next rectangle, and returns true if it's not finished.
 
             Call this before using getRectangle() to find the rectangle that was returned.
         */
-        bool next();
+        bool next() throw();
 
         /** Returns the current rectangle. */
         const Rectangle& getRectangle() const throw()       { return current; }

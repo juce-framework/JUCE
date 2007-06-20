@@ -39,12 +39,12 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-bool juce_lineIntersection (const float x1, const float y1,
-                            const float x2, const float y2,
-                            const float x3, const float y3,
-                            const float x4, const float y4,
-                            float& intersectionX,
-                            float& intersectionY)
+static bool juce_lineIntersection (const float x1, const float y1,
+                                   const float x2, const float y2,
+                                   const float x3, const float y3,
+                                   const float x4, const float y4,
+                                   float& intersectionX,
+                                   float& intersectionY) throw()
 {
     if (x2 != x3 || y2 != y3)
     {
@@ -122,7 +122,7 @@ bool juce_lineIntersection (const float x1, const float y1,
 }
 
 //==============================================================================
-Line::Line()
+Line::Line() throw()
     : startX (0.0f),
       startY (0.0f),
       endX (0.0f),
@@ -130,7 +130,7 @@ Line::Line()
 {
 }
 
-Line::Line (const Line& other)
+Line::Line (const Line& other) throw()
     : startX (other.startX),
       startY (other.startY),
       endX (other.endX),
@@ -139,7 +139,7 @@ Line::Line (const Line& other)
 }
 
 Line::Line (const float startX_, const float startY_,
-            const float endX_, const float endY_)
+            const float endX_, const float endY_) throw()
     : startX (startX_),
       startY (startY_),
       endX (endX_),
@@ -148,7 +148,7 @@ Line::Line (const float startX_, const float startY_,
 }
 
 Line::Line (const Point& start,
-            const Point& end)
+            const Point& end) throw()
     : startX (start.getX()),
       startY (start.getY()),
       endX (end.getX()),
@@ -156,7 +156,7 @@ Line::Line (const Point& start,
 {
 }
 
-const Line& Line::operator= (const Line& other)
+const Line& Line::operator= (const Line& other) throw()
 {
     startX = other.startX;
     startY = other.startY;
@@ -166,42 +166,42 @@ const Line& Line::operator= (const Line& other)
     return *this;
 }
 
-Line::~Line()
+Line::~Line() throw()
 {
 }
 
 //==============================================================================
-const Point Line::getStart() const
+const Point Line::getStart() const throw()
 {
     return Point (startX, startY);
 }
 
-const Point Line::getEnd() const
+const Point Line::getEnd() const throw()
 {
     return Point (endX, endY);
 }
 
 void Line::setStart (const float newStartX,
-                     const float newStartY)
+                     const float newStartY) throw()
 {
     startX = newStartX;
     startY = newStartY;
 }
 
-void Line::setStart (const Point& newStart)
+void Line::setStart (const Point& newStart) throw()
 {
     startX = newStart.getX();
     startY = newStart.getY();
 }
 
 void Line::setEnd (const float newEndX,
-                   const float newEndY)
+                   const float newEndY) throw()
 {
     endX = newEndX;
     endY = newEndY;
 }
 
-void Line::setEnd (const Point& newEnd)
+void Line::setEnd (const Point& newEnd) throw()
 {
     endX = newEnd.getX();
     endY = newEnd.getY();
@@ -224,26 +224,26 @@ bool Line::operator!= (const Line& other) const throw()
 }
 
 //==============================================================================
-void Line::applyTransform (const AffineTransform& transform)
+void Line::applyTransform (const AffineTransform& transform) throw()
 {
     transform.transformPoint (startX, startY);
     transform.transformPoint (endX, endY);
 }
 
 //==============================================================================
-float Line::getLength() const
+float Line::getLength() const throw()
 {
     return (float) juce_hypot (startX - endX,
                                startY - endY);
 }
 
-float Line::getAngle() const
+float Line::getAngle() const throw()
 {
     return atan2f (endX - startX,
                    endY - startY);
 }
 
-const Point Line::getPointAlongLine (const float distanceFromStart) const
+const Point Line::getPointAlongLine (const float distanceFromStart) const throw()
 {
     const float alpha = distanceFromStart / getLength();
 
@@ -252,7 +252,7 @@ const Point Line::getPointAlongLine (const float distanceFromStart) const
 }
 
 const Point Line::getPointAlongLine (const float offsetX,
-                                     const float offsetY) const
+                                     const float offsetY) const throw()
 {
     const float dx = endX - startX;
     const float dy = endY - startY;
@@ -265,14 +265,14 @@ const Point Line::getPointAlongLine (const float offsetX,
                       startY + (float) (((dy * offsetX) + (dx * offsetY)) / length));
 }
 
-const Point Line::getPointAlongLineProportionally (const float alpha) const
+const Point Line::getPointAlongLineProportionally (const float alpha) const throw()
 {
     return Point (startX + (endX - startX) * alpha,
                   startY + (endY - startY) * alpha);
 }
 
 float Line::getDistanceFromLine (const float x,
-                                 const float y) const
+                                 const float y) const throw()
 {
     const double dx = endX - startX;
     const double dy = endY - startY;
@@ -294,7 +294,7 @@ float Line::getDistanceFromLine (const float x,
 }
 
 float Line::findNearestPointTo (const float x,
-                                const float y) const
+                                const float y) const throw()
 {
     const double dx = endX - startX;
     const double dy = endY - startY;
@@ -307,7 +307,7 @@ float Line::findNearestPointTo (const float x,
                    (float) (((x - startX) * dx + (y - startY) * dy) / length));
 }
 
-const Line Line::withShortenedStart (const float distanceToShortenBy) const
+const Line Line::withShortenedStart (const float distanceToShortenBy) const throw()
 {
     const float length = getLength();
 
@@ -315,7 +315,7 @@ const Line Line::withShortenedStart (const float distanceToShortenBy) const
                  getEnd());
 }
 
-const Line Line::withShortenedEnd (const float distanceToShortenBy) const
+const Line Line::withShortenedEnd (const float distanceToShortenBy) const throw()
 {
     const float length = getLength();
 
@@ -325,7 +325,7 @@ const Line Line::withShortenedEnd (const float distanceToShortenBy) const
 
 //==============================================================================
 bool Line::clipToPath (const Path& path,
-                       const bool keepSectionOutsidePath)
+                       const bool keepSectionOutsidePath) throw()
 {
     const bool startInside = path.contains (startX, startY);
     const bool endInside = path.contains (endX, endY);
@@ -382,7 +382,7 @@ bool Line::clipToPath (const Path& path,
 //==============================================================================
 bool Line::intersects (const Line& line,
                        float& intersectionX,
-                       float& intersectionY) const
+                       float& intersectionY) const throw()
 {
     return juce_lineIntersection (startX, startY,
                                   endX, endY,
@@ -392,20 +392,21 @@ bool Line::intersects (const Line& line,
                                   intersectionY);
 }
 
-bool Line::isVertical() const
+bool Line::isVertical() const throw()
 {
     return startX == endX;
 }
 
-bool Line::isHorizontal() const
+bool Line::isHorizontal() const throw()
 {
     return startY == endY;
 }
 
-bool Line::isPointAbove (const float x, const float y) const
+bool Line::isPointAbove (const float x, const float y) const throw()
 {
     return startX != endX
             && y < ((endY - startY) * (x - startX)) / (endX - startX) + startY;
 }
+
 
 END_JUCE_NAMESPACE

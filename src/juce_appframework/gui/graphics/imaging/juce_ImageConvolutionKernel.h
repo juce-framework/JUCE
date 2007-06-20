@@ -50,10 +50,10 @@ public:
         @param size     the length of each dimension of the kernel, so e.g. if the size
                         is 5, it will create a 5x5 kernel
     */
-    ImageConvolutionKernel (const int size);
+    ImageConvolutionKernel (const int size) throw();
 
     /** Destructor. */
-    ~ImageConvolutionKernel();
+    ~ImageConvolutionKernel() throw();
 
     //==============================================================================
     /** Resets all values in the kernel to zero.
@@ -68,16 +68,16 @@ public:
     */
     void setKernelValue (const int x,
                          const int y,
-                         const float value);
+                         const float value) throw();
 
     /** Rescales all values in the kernel to make the total add up to a fixed value.
 
         This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
     */
-    void setOverallSum (const float desiredTotalSum);
+    void setOverallSum (const float desiredTotalSum) throw();
 
     /** Multiplies all values in the kernel by a value. */
-    void rescaleAllValues (const float multiplier);
+    void rescaleAllValues (const float multiplier) throw();
 
     /** Intialises the kernel for a gaussian blur.
 
@@ -86,7 +86,7 @@ public:
                             edges. Ideally the kernel should be just larger than
                             (blurRadius * 2).
     */
-    void createGaussianBlur (const float blurRadius);
+    void createGaussianBlur (const float blurRadius) throw();
 
     //==============================================================================
     /** Returns the size of the kernel.

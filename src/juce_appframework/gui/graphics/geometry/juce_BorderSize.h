@@ -52,22 +52,22 @@ public:
 
         All sizes are left as 0.
     */
-    BorderSize();
+    BorderSize() throw();
 
     /** Creates a copy of another border. */
-    BorderSize (const BorderSize& other);
+    BorderSize (const BorderSize& other) throw();
 
     /** Creates a border with the given gaps. */
     BorderSize (const int topGap,
                 const int leftGap,
                 const int bottomGap,
-                const int rightGap);
+                const int rightGap) throw();
 
     /** Creates a border with the given gap on all sides. */
-    BorderSize (const int allGaps);
+    BorderSize (const int allGaps) throw();
 
     /** Destructor. */
-    ~BorderSize();
+    ~BorderSize() throw();
 
     //==============================================================================
     /** Returns the gap that should be left at the top of the region. */

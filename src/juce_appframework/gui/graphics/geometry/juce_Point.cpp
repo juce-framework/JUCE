@@ -38,19 +38,19 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Point::Point()
+Point::Point() throw()
    : x (0.0f),
      y (0.0f)
 {
 }
 
-Point::Point (const Point& other)
+Point::Point (const Point& other) throw()
    : x (other.x),
      y (other.y)
 {
 }
 
-const Point& Point::operator= (const Point& other)
+const Point& Point::operator= (const Point& other) throw()
 {
     x = other.x;
     y = other.y;
@@ -59,24 +59,24 @@ const Point& Point::operator= (const Point& other)
 }
 
 Point::Point (const float x_,
-              const float y_)
+              const float y_) throw()
    : x (x_),
      y (y_)
 {
 }
 
-Point::~Point()
+Point::~Point() throw()
 {
 }
 
 void Point::setXY (const float x_,
-                   const float y_)
+                   const float y_) throw()
 {
     x = x_;
     y = y_;
 }
 
-void Point::applyTransform (const AffineTransform& transform)
+void Point::applyTransform (const AffineTransform& transform) throw()
 {
     transform.transformPoint (x, y);
 }
