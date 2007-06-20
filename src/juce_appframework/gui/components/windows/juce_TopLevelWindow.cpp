@@ -100,7 +100,7 @@ public:
         }
     }
 
-    bool addWindow (TopLevelWindow* const w)
+    bool addWindow (TopLevelWindow* const w) throw()
     {
         windows.add (w);
         startTimer (10);
@@ -108,7 +108,7 @@ public:
         return isWindowActive (w);
     }
 
-    void removeWindow (TopLevelWindow* const w)
+    void removeWindow (TopLevelWindow* const w) throw()
     {
         startTimer (10);
 
@@ -126,7 +126,7 @@ public:
 private:
     TopLevelWindow* currentActive;
 
-    bool isWindowActive (TopLevelWindow* const tlw) const
+    bool isWindowActive (TopLevelWindow* const tlw) const throw()
     {
         return (tlw == currentActive
                  || tlw->isParentOf (currentActive)
@@ -140,7 +140,7 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
-void juce_CheckCurrentlyFocusedTopLevelWindow()
+void juce_CheckCurrentlyFocusedTopLevelWindow() throw()
 {
     if (TopLevelWindowManager::getInstanceWithoutCreating() != 0)
         TopLevelWindowManager::getInstanceWithoutCreating()->startTimer (20);
@@ -182,7 +182,7 @@ void TopLevelWindow::focusOfChildComponentChanged (FocusChangeType)
         TopLevelWindowManager::getInstance()->startTimer (10);
 }
 
-void TopLevelWindow::setWindowActive (const bool isNowActive)
+void TopLevelWindow::setWindowActive (const bool isNowActive) throw()
 {
     if (windowIsActive_ != isNowActive)
     {
@@ -338,7 +338,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
         }
         else
         {
-            Rectangle screenArea (getParentMonitorArea());
+            const Rectangle screenArea (getParentMonitorArea());
 
             setBounds (jlimit (screenArea.getX(), jmax (screenArea.getX(), screenArea.getWidth() - width), x),
                        jlimit (screenArea.getY(), jmax (screenArea.getY(), screenArea.getHeight() - height), y),
@@ -348,17 +348,17 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
 }
 
 //==============================================================================
-int TopLevelWindow::getNumTopLevelWindows()
+int TopLevelWindow::getNumTopLevelWindows() throw()
 {
     return TopLevelWindowManager::getInstance()->windows.size();
 }
 
-TopLevelWindow* TopLevelWindow::getTopLevelWindow (const int index)
+TopLevelWindow* TopLevelWindow::getTopLevelWindow (const int index) throw()
 {
     return (TopLevelWindow*) TopLevelWindowManager::getInstance()->windows [index];
 }
 
-TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow()
+TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() throw()
 {
     TopLevelWindow* best = 0;
     int bestNumTWLParents = -1;
@@ -371,11 +371,11 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow()
         {
             int numTWLParents = 0;
 
-            Component* c = tlw->getParentComponent();
+            const Component* c = tlw->getParentComponent();
 
             while (c != 0)
             {
-                if (dynamic_cast <TopLevelWindow*> (c) != 0)
+                if (dynamic_cast <const TopLevelWindow*> (c) != 0)
                     ++numTWLParents;
 
                 c = c->getParentComponent();

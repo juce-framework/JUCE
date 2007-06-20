@@ -180,7 +180,7 @@ void DocumentWindow::paint (Graphics& g)
 
     if (resizableBorder == 0 && getBorderSize() == 1)
     {
-        g.setColour (getBackgroundColour().overlaidWith (Colours::black.withAlpha (0.5f)));
+        g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
         g.drawRect (0, 0, getWidth(), getHeight());
     }
 

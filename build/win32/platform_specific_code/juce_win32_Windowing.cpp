@@ -91,8 +91,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_win32_DynamicLibraryLoader.h"
 
 
-extern void repeatLastProcessPriority(); // in juce_win32_Threads.cpp
-extern void juce_CheckCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
+extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.cpp
+extern void juce_CheckCurrentlyFocusedTopLevelWindow() throw();  // in juce_TopLevelWindow.cpp
 
 const int juce_windowIsSemiTransparentFlag = (1 << 31); // also in component.cpp
 
@@ -1927,7 +1927,7 @@ private:
                         // Windows does weird things to process priority when you swap apps,
                         // so this forces an update when the app is brought to the front
                         if (wParam != FALSE)
-                            repeatLastProcessPriority();
+                            juce_repeatLastProcessPriority();
 
                         juce_CheckCurrentlyFocusedTopLevelWindow();
                         return 0;

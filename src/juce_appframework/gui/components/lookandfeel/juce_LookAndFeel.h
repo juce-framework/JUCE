@@ -81,7 +81,7 @@ public:
 
         @see setDefaultLookAndFeel
     */
-    static LookAndFeel& getDefaultLookAndFeel();
+    static LookAndFeel& getDefaultLookAndFeel() throw();
 
     /** Changes the default look-and-feel.
 
@@ -91,7 +91,7 @@ public:
                                         it's no longer needed.
         @see getDefaultLookAndFeel
     */
-    static void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel);
+    static void setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) throw();
 
 
     //==============================================================================
@@ -120,7 +120,7 @@ public:
 
         @see findColour, Component::findColour, Component::setColour
     */
-    void setColour (const int colourId, const Colour& colour);
+    void setColour (const int colourId, const Colour& colour) throw();
 
     //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
@@ -539,7 +539,7 @@ protected:
 
 private:
     friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();
-    static void clearDefaultLookAndFeel(); // called at shutdown
+    static void clearDefaultLookAndFeel() throw(); // called at shutdown
 
     Array <int> colourIds;
     Array <Colour> colours;
@@ -552,6 +552,9 @@ private:
                                const bool flatOnRight,
                                const bool flatOnTop,
                                const bool flatOnBottom) throw();
+
+    LookAndFeel (const LookAndFeel&);
+    const LookAndFeel& operator= (const LookAndFeel&);
 };
 
 

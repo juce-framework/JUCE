@@ -247,7 +247,7 @@ static int lastProcessPriority = -1;
 
 // called by WindowDriver because Windows does wierd things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
-void repeatLastProcessPriority()
+void juce_repeatLastProcessPriority() throw()
 {
     if (lastProcessPriority >= 0) // (avoid changing this if it's not been explicitly set by the app..)
     {
@@ -285,7 +285,7 @@ void Process::setPriority (ProcessPriority prior)
     if (lastProcessPriority != (int) prior)
     {
         lastProcessPriority = (int) prior;
-        repeatLastProcessPriority();
+        juce_repeatLastProcessPriority();
     }
 }
 

@@ -121,19 +121,19 @@ public:
 
         @see getTopLevelWindow
     */
-    static int getNumTopLevelWindows();
+    static int getNumTopLevelWindows() throw();
 
     /** Returns one of the TopLevelWindow objects currently in use.
 
         The index is 0 to (getNumTopLevelWindows() - 1).
     */
-    static TopLevelWindow* getTopLevelWindow (const int index);
+    static TopLevelWindow* getTopLevelWindow (const int index) throw();
 
     /** Returns the currently-active top level window.
 
         There might not be one, of course, so this can return 0.
     */
-    static TopLevelWindow* getActiveTopLevelWindow();
+    static TopLevelWindow* getActiveTopLevelWindow() throw();
 
 
     //==============================================================================
@@ -168,7 +168,7 @@ private:
     bool useDropShadow, useNativeTitleBar, windowIsActive_;
     DropShadower* shadower;
 
-    void setWindowActive (const bool isNowActive);
+    void setWindowActive (const bool isNowActive) throw();
 
     TopLevelWindow (const TopLevelWindow&);
     const TopLevelWindow& operator= (const TopLevelWindow&);
