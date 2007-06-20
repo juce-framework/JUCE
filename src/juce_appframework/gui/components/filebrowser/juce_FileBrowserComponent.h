@@ -89,11 +89,14 @@ public:
                                         is deleted.
         @param previewComp              an optional preview component that will be used to
                                         show previews of files that the user selects
+        @param useTreeView              if this is false, the files are shown in a list; if true,
+                                        they are shown in a treeview
     */
     FileBrowserComponent (FileChooserMode browserMode,
                           const File& initialFileOrDirectory,
                           const FileFilter* fileFilter,
-                          FilePreviewComponent* previewComp);
+                          FilePreviewComponent* previewComp,
+                          const bool useTreeView = false);
 
     /** Destructor. */
     ~FileBrowserComponent();

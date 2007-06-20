@@ -39,6 +39,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../../../../juce_core/basics/juce_SystemStats.h"
 #include "juce_FileListComponent.h"
+#include "juce_FileTreeComponent.h"
 
 
 //==============================================================================
@@ -56,7 +57,8 @@ public:
 FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter,
-                                            FilePreviewComponent* previewComp_)
+                                            FilePreviewComponent* previewComp_,
+                                            const bool useTreeView)
    : directoriesOnlyFilter (0),
      mode (mode_),
      listeners (2),
@@ -84,13 +86,21 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
 
     fileList = new DirectoryContentsList (fileFilter, thread);
 
-    // this component could alternatively be a FileTreeComponent
-    FileListComponent* const list = new FileListComponent (*fileList);
-    list->setOutlineThickness (1);
+    if (useTreeView)
+    {
+        FileTreeComponent* const tree = new FileTreeComponent (*fileList);
+        addAndMakeVisible (tree);
+        fileListComponent = tree;
+    }
+    else
+    {
+        FileListComponent* const list = new FileListComponent (*fileList);
+        list->setOutlineThickness (1);
+        addAndMakeVisible (list);
+        fileListComponent = list;
+    }
 
-    fileListComponent = list;
-    addAndMakeVisible (list);
-    list->addListener (this);
+    fileListComponent->addListener (this);
 
     addAndMakeVisible (currentPathBox = new ComboBox (T("path")));
     currentPathBox->setEditableText (true);
