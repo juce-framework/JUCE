@@ -202,7 +202,7 @@ public:
              getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen
     */
-    virtual void addToDesktop (int windowStyleFlags, 
+    virtual void addToDesktop (int windowStyleFlags,
                                void* nativeWindowToAttachTo = 0);
 
     /** If the component is currently showing on the desktop, this will hide it.

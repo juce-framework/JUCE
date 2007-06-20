@@ -92,7 +92,7 @@ class ContentComp  : public Component,
     //==============================================================================
     MainDemoWindow* mainWindow;
 
-    ShinyLookAndFeel shinyLookAndFeel;
+    OldSchoolLookAndFeel oldLookAndFeel;
 
     Component* currentDemo;
     int currentDemoId;
@@ -119,7 +119,7 @@ class ContentComp  : public Component,
         showSourceCode             = 0x200a,
 
         setDefaultLookAndFeel      = 0x200b,
-        setShinyLookAndFeel        = 0x200c,
+        setOldSchoolLookAndFeel    = 0x200c,
         useNativeTitleBar          = 0x200d,
         useNativeMenus             = 0x200e
     };
@@ -132,15 +132,13 @@ public:
           currentDemoId (0),
           demoSourceCodeText (0)
     {
-        LookAndFeel::setDefaultLookAndFeel (&shinyLookAndFeel);
-
         invokeDirectly (showWidgets, true);
     }
 
     ~ContentComp()
     {
-        // (need to do this because the default look-and-feel object is one of our members,
-        // so will be deleted with us, and would leave a dangling pointer)
+        // (need to do this because the old school look-and-feel object is one of our members,
+        // so will be deleted with us, and would leave a dangling pointer if it's selected)
         LookAndFeel::setDefaultLookAndFeel (0);
 
         deleteAllChildren();
@@ -218,7 +216,7 @@ public:
         else if (menuIndex == 2)
         {
             menu.addCommandItem (commandManager, setDefaultLookAndFeel);
-            menu.addCommandItem (commandManager, setShinyLookAndFeel);
+            menu.addCommandItem (commandManager, setOldSchoolLookAndFeel);
             menu.addSeparator();
             menu.addCommandItem (commandManager, useNativeTitleBar);
 
@@ -265,7 +263,7 @@ public:
                                   showInterprocessComms,
                                   showSourceCode,
                                   setDefaultLookAndFeel,
-                                  setShinyLookAndFeel,
+                                  setOldSchoolLookAndFeel,
                                   useNativeTitleBar
 #if JUCE_MAC
                                 , useNativeMenus
@@ -366,9 +364,9 @@ public:
             result.setTicked ((typeid (LookAndFeel) == typeid (getLookAndFeel())) != 0);
             break;
 
-        case setShinyLookAndFeel:
-            result.setInfo (T("Use shiny look-and-feel"), String::empty, generalCategory, 0);
-            result.setTicked ((typeid (ShinyLookAndFeel) == typeid (getLookAndFeel())) != 0);
+        case setOldSchoolLookAndFeel:
+            result.setInfo (T("Use the old, original juce look-and-feel"), String::empty, generalCategory, 0);
+            result.setTicked ((typeid (OldSchoolLookAndFeel) == typeid (getLookAndFeel())) != 0);
             break;
 
         case useNativeTitleBar:
@@ -460,8 +458,8 @@ public:
             LookAndFeel::setDefaultLookAndFeel (0);
             break;
 
-        case setShinyLookAndFeel:
-            LookAndFeel::setDefaultLookAndFeel (&shinyLookAndFeel);
+        case setOldSchoolLookAndFeel:
+            LookAndFeel::setDefaultLookAndFeel (&oldLookAndFeel);
             break;
 
         case useNativeTitleBar:

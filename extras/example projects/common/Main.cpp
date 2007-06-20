@@ -86,7 +86,6 @@ class JUCEHelloWorldApplication : public JUCEApplication
        initialised, so any embedded objects would also get constructed too soon.
    */
     HelloWorldWindow* helloWorldWindow;
-    ShinyLookAndFeel shinyLookAndFeel;
 
 public:
     //==============================================================================
@@ -109,8 +108,6 @@ public:
     //==============================================================================
     void initialise (const String& commandLine)
     {
-        LookAndFeel::setDefaultLookAndFeel (&shinyLookAndFeel);
-
         // just create the main window...
         helloWorldWindow = new HelloWorldWindow();
 
@@ -129,8 +126,6 @@ public:
 
         if (helloWorldWindow != 0)
             delete helloWorldWindow;
-
-        LookAndFeel::setDefaultLookAndFeel (0);
     }
 
     //==============================================================================

@@ -235,7 +235,7 @@ FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
     : DirectoryContentsDisplayComponent (listToShow)
 {
     FileListTreeItem* const root
-        = new FileListTreeItem (*this, 0, 0, listToShow.getDirectory(), 
+        = new FileListTreeItem (*this, 0, 0, listToShow.getDirectory(),
                                 listToShow.getTimeSliceThread());
 
     root->setSubContentsList (&listToShow);

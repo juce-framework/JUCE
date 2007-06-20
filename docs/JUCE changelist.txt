@@ -6,6 +6,7 @@
 ==============================================================================
 Changelist for version 1.44
 
+- swapped the look and feel classes around, so that the basic LookAndFeel class is now what used to be the "shiny" one. The ShinyLookAndFeel class has been removed, and for that old fashioned look, I've added an OldSchoolLookAndFeel that you can use if you need the original L+F. This means that any custom looks that you were using may need to change their base class.
 - changed the MouseEvent structure so that it now contains a pointer to the event component and also the original component.
 - added a PopupMenu::dismissAllActiveMenus() method.
 - added the JUCE_LOG_ASSERTIONS flag, which can automatically log assertion failures, even in release builds.

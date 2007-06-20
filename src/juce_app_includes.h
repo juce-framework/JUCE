@@ -644,8 +644,8 @@
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
  #include "juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
 #endif
-#ifndef __JUCE_SHINYLOOKANDFEEL_JUCEHEADER__
- #include "juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.h"
+#ifndef __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
+ #include "juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.h"
 #endif
 #ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
  #include "juce_appframework/documents/juce_FileBasedDocument.h"

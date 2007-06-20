@@ -497,6 +497,21 @@ public:
 
     virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
 
+
+    //==============================================================================
+    /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
+    static void drawGlassSphere (Graphics& g, float x, float y, float diameter,
+                                 const Colour& colour, const float outlineThickness) throw();
+
+    static void drawGlassPointer (Graphics& g, float x, float y, float diameter,
+                                  const Colour& colour, const float outlineThickness,
+                                  const int direction) throw();
+
+    /** Utility function to draw a shiny, glassy oblong (for text buttons). */
+    static void drawGlassLozenge (Graphics& g, float x, float y, float width, float height,
+                                  const Colour& colour, const float outlineThickness, const float cornerSize,
+                                  const bool flatOnLeft, const bool flatOnRight, const bool flatOnTop, const bool flatOnBottom) throw();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -513,13 +528,20 @@ protected:
     virtual void getTabButtonBestWidth (int, const String&, int) {}
 
 private:
-    DropShadowEffect scrollbarShadow;
-
     friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();
     static void clearDefaultLookAndFeel(); // called at shutdown
 
     Array <int> colourIds;
     Array <Colour> colours;
+
+    void drawShinyButtonShape (Graphics& g,
+                               float x, float y, float w, float h, float maxCornerSize,
+                               const Colour& baseColour,
+                               const float strokeWidth,
+                               const bool flatOnLeft,
+                               const bool flatOnRight,
+                               const bool flatOnTop,
+                               const bool flatOnBottom) throw();
 };
 
 

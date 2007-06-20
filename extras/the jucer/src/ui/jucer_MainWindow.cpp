@@ -39,7 +39,7 @@
 #include "../properties/jucer_FontPropertyComponent.h"
 
 
-static ShinyLookAndFeel* shinyLook = 0;
+static OldSchoolLookAndFeel* oldLook = 0;
 static const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
 //==============================================================================
@@ -71,10 +71,8 @@ MainWindow::MainWindow()
                       Colours::azure,
                       DocumentWindow::allButtons)
 {
-    if (shinyLook == 0)
-        shinyLook = new ShinyLookAndFeel();
-
-    LookAndFeel::setDefaultLookAndFeel (shinyLook);
+    if (oldLook == 0)
+        oldLook = new OldSchoolLookAndFeel();
 
     setContentComponent (multiDocHolder = new MultiDocHolder());
 
@@ -142,7 +140,7 @@ MainWindow::~MainWindow()
     setContentComponent (0);
 
     LookAndFeel::setDefaultLookAndFeel (0);
-    deleteAndZero (shinyLook);
+    deleteAndZero (oldLook);
 }
 
 void MainWindow::closeButtonPressed()
@@ -309,8 +307,8 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         menu.addCommandItem (commandManager, CommandIDs::test);
 
         PopupMenu lookAndFeels;
-        lookAndFeels.addItem (200, T("Shiny"), true, (typeid (ShinyLookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
         lookAndFeels.addItem (201, T("Default"), true, (typeid (LookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
+        lookAndFeels.addItem (200, T("Old School"), true, (typeid (OldSchoolLookAndFeel) == typeid (LookAndFeel::getDefaultLookAndFeel())) != 0);
 
         menu.addSeparator();
         menu.addSubMenu (T("Look and Feel"), lookAndFeels);
@@ -365,7 +363,7 @@ void MainWindow::menuItemSelected (int menuItemID,
     }
     else if (menuItemID == 200)
     {
-        LookAndFeel::setDefaultLookAndFeel (shinyLook);
+        LookAndFeel::setDefaultLookAndFeel (oldLook);
     }
     else if (menuItemID == 201)
     {

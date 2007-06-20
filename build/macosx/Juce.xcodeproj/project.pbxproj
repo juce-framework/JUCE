@@ -299,8 +299,8 @@
 		84A48AAD08A22E4B00752A2B /* juce_Viewport.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488C408A22E4900752A2B /* juce_Viewport.h */; };
 		84A48AAE08A22E4B00752A2B /* juce_LookAndFeel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A488C608A22E4900752A2B /* juce_LookAndFeel.cpp */; };
 		84A48AAF08A22E4B00752A2B /* juce_LookAndFeel.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488C708A22E4900752A2B /* juce_LookAndFeel.h */; };
-		84A48AB008A22E4B00752A2B /* juce_ShinyLookAndFeel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A488C808A22E4900752A2B /* juce_ShinyLookAndFeel.cpp */; };
-		84A48AB108A22E4B00752A2B /* juce_ShinyLookAndFeel.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488C908A22E4900752A2B /* juce_ShinyLookAndFeel.h */; };
+		84A48AB008A22E4B00752A2B /* juce_OldSchoolLookAndFeel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A488C808A22E4900752A2B /* juce_OldSchoolLookAndFeel.cpp */; };
+		84A48AB108A22E4B00752A2B /* juce_OldSchoolLookAndFeel.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488C908A22E4900752A2B /* juce_OldSchoolLookAndFeel.h */; };
 		84A48AB208A22E4B00752A2B /* juce_MenuBarComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A488CB08A22E4900752A2B /* juce_MenuBarComponent.cpp */; };
 		84A48AB308A22E4B00752A2B /* juce_MenuBarComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488CC08A22E4900752A2B /* juce_MenuBarComponent.h */; };
 		84A48AB408A22E4B00752A2B /* juce_MenuBarModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A488CD08A22E4900752A2B /* juce_MenuBarModel.h */; };
@@ -943,8 +943,8 @@
 		84A488C408A22E4900752A2B /* juce_Viewport.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_Viewport.h; path = ../../src/juce_appframework/gui/components/layout/juce_Viewport.h; sourceTree = SOURCE_ROOT; };
 		84A488C608A22E4900752A2B /* juce_LookAndFeel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_LookAndFeel.cpp; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.cpp; sourceTree = SOURCE_ROOT; };
 		84A488C708A22E4900752A2B /* juce_LookAndFeel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_LookAndFeel.h; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h; sourceTree = SOURCE_ROOT; };
-		84A488C808A22E4900752A2B /* juce_ShinyLookAndFeel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ShinyLookAndFeel.cpp; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.cpp; sourceTree = SOURCE_ROOT; };
-		84A488C908A22E4900752A2B /* juce_ShinyLookAndFeel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_ShinyLookAndFeel.h; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.h; sourceTree = SOURCE_ROOT; };
+		84A488C808A22E4900752A2B /* juce_OldSchoolLookAndFeel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_OldSchoolLookAndFeel.cpp; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.cpp; sourceTree = SOURCE_ROOT; };
+		84A488C908A22E4900752A2B /* juce_OldSchoolLookAndFeel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_OldSchoolLookAndFeel.h; path = ../../src/juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.h; sourceTree = SOURCE_ROOT; };
 		84A488CB08A22E4900752A2B /* juce_MenuBarComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_MenuBarComponent.cpp; path = ../../src/juce_appframework/gui/components/menus/juce_MenuBarComponent.cpp; sourceTree = SOURCE_ROOT; };
 		84A488CC08A22E4900752A2B /* juce_MenuBarComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_MenuBarComponent.h; path = ../../src/juce_appframework/gui/components/menus/juce_MenuBarComponent.h; sourceTree = SOURCE_ROOT; };
 		84A488CD08A22E4900752A2B /* juce_MenuBarModel.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_MenuBarModel.h; path = ../../src/juce_appframework/gui/components/menus/juce_MenuBarModel.h; sourceTree = SOURCE_ROOT; };
@@ -1731,8 +1731,8 @@
 			children = (
 				84A488C608A22E4900752A2B /* juce_LookAndFeel.cpp */,
 				84A488C708A22E4900752A2B /* juce_LookAndFeel.h */,
-				84A488C808A22E4900752A2B /* juce_ShinyLookAndFeel.cpp */,
-				84A488C908A22E4900752A2B /* juce_ShinyLookAndFeel.h */,
+				84A488C808A22E4900752A2B /* juce_OldSchoolLookAndFeel.cpp */,
+				84A488C908A22E4900752A2B /* juce_OldSchoolLookAndFeel.h */,
 			);
 			name = lookandfeel;
 			path = ../../src/juce_appframework/gui/components/lookandfeel;
@@ -2496,7 +2496,7 @@
 				84A48AAB08A22E4B00752A2B /* juce_TabbedComponent.h in Headers */,
 				84A48AAD08A22E4B00752A2B /* juce_Viewport.h in Headers */,
 				84A48AAF08A22E4B00752A2B /* juce_LookAndFeel.h in Headers */,
-				84A48AB108A22E4B00752A2B /* juce_ShinyLookAndFeel.h in Headers */,
+				84A48AB108A22E4B00752A2B /* juce_OldSchoolLookAndFeel.h in Headers */,
 				84A48AB308A22E4B00752A2B /* juce_MenuBarComponent.h in Headers */,
 				84A48AB408A22E4B00752A2B /* juce_MenuBarModel.h in Headers */,
 				84A48AB608A22E4B00752A2B /* juce_PopupMenu.h in Headers */,
@@ -2827,7 +2827,7 @@
 				84A48AAA08A22E4B00752A2B /* juce_TabbedComponent.cpp in Sources */,
 				84A48AAC08A22E4B00752A2B /* juce_Viewport.cpp in Sources */,
 				84A48AAE08A22E4B00752A2B /* juce_LookAndFeel.cpp in Sources */,
-				84A48AB008A22E4B00752A2B /* juce_ShinyLookAndFeel.cpp in Sources */,
+				84A48AB008A22E4B00752A2B /* juce_OldSchoolLookAndFeel.cpp in Sources */,
 				84A48AB208A22E4B00752A2B /* juce_MenuBarComponent.cpp in Sources */,
 				84A48AB508A22E4B00752A2B /* juce_PopupMenu.cpp in Sources */,
 				84A48AB808A22E4B00752A2B /* juce_ComponentDragger.cpp in Sources */,

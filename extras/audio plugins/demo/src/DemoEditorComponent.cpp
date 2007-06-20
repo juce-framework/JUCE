@@ -68,27 +68,11 @@ static const String ppqToBarsBeatsString (const double ppq,
     return s;
 }
 
-//==============================================================================
-// just a quick way of using a single static look and feel object without
-// it getting leaked when the plugin is deleted..
-class AutoDeletedLookAndFeel : public ShinyLookAndFeel,
-                               public DeletedAtShutdown
-{
-public:
-    AutoDeletedLookAndFeel() {}
-};
 
 //==============================================================================
 DemoEditorComponent::DemoEditorComponent (DemoJuceFilter* const ownerFilter)
     : AudioFilterEditor (ownerFilter)
 {
-    static ShinyLookAndFeel* shinyLook = 0;
-
-    if (shinyLook == 0)
-        shinyLook = new AutoDeletedLookAndFeel();
-
-    LookAndFeel::setDefaultLookAndFeel (shinyLook);
-
     // create our gain slider..
     addAndMakeVisible (gainSlider = new Slider (T("gain")));
     gainSlider->addListener (this);

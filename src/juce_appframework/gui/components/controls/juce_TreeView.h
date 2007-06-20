@@ -397,8 +397,8 @@ public:
         You can pass in 0 to this method to clear the tree and remove its current root item.
 
         The object passed in will not be deleted by the treeview, it's up to the caller
-        to delete it when no longer needed. BUT make absolutely sure that you don't delete 
-        this item until you've removed it from the tree, either by calling setRootItem (0), 
+        to delete it when no longer needed. BUT make absolutely sure that you don't delete
+        this item until you've removed it from the tree, either by calling setRootItem (0),
         or by deleting the tree first.
     */
     void setRootItem (TreeViewItem* const newRootItem);

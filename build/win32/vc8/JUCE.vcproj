@@ -3789,11 +3789,11 @@
 								>
 							</File>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_ShinyLookAndFeel.cpp"
+								RelativePath="..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.cpp"
 								>
 							</File>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_ShinyLookAndFeel.h"
+								RelativePath="..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.h"
 								>
 							</File>
 						</Filter>

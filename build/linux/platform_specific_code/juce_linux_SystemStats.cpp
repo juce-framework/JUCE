@@ -65,7 +65,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatur
     unsigned int dummy = 0;
 
 #if JUCE_64BIT
-    __asm__ ("cpuid" 
+    __asm__ ("cpuid"
                : "=a" (family), "=b" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
 
 #else

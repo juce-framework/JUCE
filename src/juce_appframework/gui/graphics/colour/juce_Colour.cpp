@@ -220,17 +220,27 @@ bool Colour::isOpaque() const throw()
 
 const Colour Colour::withAlpha (const uint8 newAlpha) const throw()
 {
-    return Colour (getRed(), getGreen(), getBlue(), newAlpha);
+    PixelARGB newCol (argb);
+    newCol.setAlpha (newAlpha);
+    return Colour (newCol.getARGB());
 }
 
 const Colour Colour::withAlpha (const float newAlpha) const throw()
 {
-    return withAlpha (floatAlphaToInt (newAlpha));
+    jassert (newAlpha >= 0 && newAlpha <= 1.0f);
+
+    PixelARGB newCol (argb);
+    newCol.setAlpha (floatAlphaToInt (newAlpha));
+    return Colour (newCol.getARGB());
 }
 
 const Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const throw()
 {
-    return withAlpha ((uint8) jlimit (0, 0xff, roundFloatToInt (alphaMultiplier * getAlpha())));
+    jassert (alphaMultiplier >= 0);
+
+    PixelARGB newCol (argb);
+    newCol.setAlpha ((uint8) jmin (0xff, roundFloatToInt (alphaMultiplier * newCol.getAlpha())));
+    return Colour (newCol.getARGB());
 }
 
 //==============================================================================
@@ -247,9 +257,9 @@ const Colour Colour::overlaidWith (const Colour& src) const throw()
         {
             const int da = (invA * destAlpha) / resA;
 
-            return Colour ((uint8) (src.getRed()   + ((((int) getRed() - src.getRed())   * da) >> 8)),
+            return Colour ((uint8) (src.getRed()   + ((((int) getRed() - src.getRed())     * da) >> 8)),
                            (uint8) (src.getGreen() + ((((int) getGreen() - src.getGreen()) * da) >> 8)),
-                           (uint8) (src.getBlue()  + ((((int) getBlue() - src.getBlue())  * da) >> 8)),
+                           (uint8) (src.getBlue()  + ((((int) getBlue() - src.getBlue())   * da) >> 8)),
                            (uint8) resA);
         }
 

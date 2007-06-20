@@ -1167,7 +1167,7 @@ private:
     class TabMoveProperty   : public ButtonPropertyComponent
     {
     public:
-        TabMoveProperty (TabbedComponent* comp, JucerDocument& document_, 
+        TabMoveProperty (TabbedComponent* comp, JucerDocument& document_,
                          const int tabIndex_, const int totalNumTabs_)
             : ButtonPropertyComponent (T("add tab"), false),
               component (comp),
@@ -1206,10 +1206,10 @@ private:
         class MoveTabAction  : public ComponentUndoableAction <TabbedComponent>
         {
         public:
-            MoveTabAction (TabbedComponent* const comp, ComponentLayout& layout, 
+            MoveTabAction (TabbedComponent* const comp, ComponentLayout& layout,
                            const int oldIndex_, const int newIndex_)
                 : ComponentUndoableAction <TabbedComponent> (comp, layout),
-                  oldIndex (oldIndex_), 
+                  oldIndex (oldIndex_),
                   newIndex (newIndex_)
             {
             }
