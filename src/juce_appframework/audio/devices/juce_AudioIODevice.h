@@ -42,6 +42,10 @@
     One of these is passed to an AudioIODevice object to stream the audio data
     in and out.
 
+    The AudioIODevice will repeatedly call this class's audioDeviceIOCallback() 
+    method on its own high-priority audio thread, when it needs to send or receive 
+    the next block of data.
+
     @see AudioIODevice, AudioDeviceManager
 */
 class JUCE_API  AudioIODeviceCallback
