@@ -58,7 +58,7 @@ public:
     //==============================================================================
     /** Resets all values in the kernel to zero.
     */
-    void clear();
+    void clear() throw();
 
     /** Sets the value of a specific cell in the kernel.
 
