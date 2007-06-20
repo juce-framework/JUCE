@@ -55,7 +55,7 @@ UNICODE_FUNCTION (RegSetValueExW,   LONG, (HKEY, LPCWSTR, DWORD, DWORD, const BY
 UNICODE_FUNCTION (RegDeleteValueW,  LONG, (HKEY, LPCWSTR))
 UNICODE_FUNCTION (RegDeleteKeyW,    LONG, (HKEY, LPCWSTR))
 
-void juce_initialiseUnicodeRegistryFunctions()
+static void juce_initialiseUnicodeRegistryFunctions() throw()
 {
     static bool initialised = false;
 
@@ -80,7 +80,7 @@ void juce_initialiseUnicodeRegistryFunctions()
 //==============================================================================
 static HKEY findKeyForPath (String name,
                             const bool createForWriting,
-                            String& valueName)
+                            String& valueName) throw()
 {
     juce_initialiseUnicodeRegistryFunctions();
 
