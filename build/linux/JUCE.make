@@ -340,7 +340,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_TabbedComponent.o \
 	$(OBJDIR)/juce_Viewport.o \
 	$(OBJDIR)/juce_LookAndFeel.o \
-	$(OBJDIR)/juce_ShinyLookAndFeel.o \
+	$(OBJDIR)/juce_OldSchoolLookAndFeel.o \
 	$(OBJDIR)/juce_MenuBarComponent.o \
 	$(OBJDIR)/juce_MenuBarModel.o \
 	$(OBJDIR)/juce_PopupMenu.o \
@@ -1957,7 +1957,7 @@ $(OBJDIR)/juce_LookAndFeel.o: ../../src/juce_appframework/gui/components/lookand
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(OBJDIR)/juce_ShinyLookAndFeel.o: ../../src/juce_appframework/gui/components/lookandfeel/juce_ShinyLookAndFeel.cpp
+$(OBJDIR)/juce_OldSchoolLookAndFeel.o: ../../src/juce_appframework/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

@@ -2376,7 +2376,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
 
     case MouseCursor::DraggingHandCursor:
         {
-            static unsigned char cursData[] = {71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
+            static const unsigned char cursData[] = {71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
               0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
               16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
               132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217,

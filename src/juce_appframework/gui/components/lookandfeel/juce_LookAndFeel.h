@@ -500,17 +500,27 @@ public:
 
     //==============================================================================
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
-    static void drawGlassSphere (Graphics& g, float x, float y, float diameter,
-                                 const Colour& colour, const float outlineThickness) throw();
+    static void drawGlassSphere (Graphics& g,
+                                 const float x, const float y, 
+                                 const float diameter,
+                                 const Colour& colour, 
+                                 const float outlineThickness) throw();
 
-    static void drawGlassPointer (Graphics& g, float x, float y, float diameter,
+    static void drawGlassPointer (Graphics& g, 
+                                  const float x, const float y, 
+                                  const float diameter,
                                   const Colour& colour, const float outlineThickness,
                                   const int direction) throw();
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
-    static void drawGlassLozenge (Graphics& g, float x, float y, float width, float height,
-                                  const Colour& colour, const float outlineThickness, const float cornerSize,
-                                  const bool flatOnLeft, const bool flatOnRight, const bool flatOnTop, const bool flatOnBottom) throw();
+    static void drawGlassLozenge (Graphics& g, 
+                                  const float x, const float y, 
+                                  const float width, const float height,
+                                  const Colour& colour, 
+                                  const float outlineThickness, 
+                                  const float cornerSize,
+                                  const bool flatOnLeft, const bool flatOnRight, 
+                                  const bool flatOnTop, const bool flatOnBottom) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
