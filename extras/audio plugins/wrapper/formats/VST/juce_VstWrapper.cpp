@@ -470,6 +470,7 @@ public:
         VstInt32 result = 0;
 
         if (strcmp (text, "receiveVstEvents") == 0
+            || strcmp (text, "receiveVstMidiEvent") == 0
             || strcmp (text, "receiveVstMidiEvents") == 0)
         {
 #if JucePlugin_WantsMidiInput
@@ -479,7 +480,8 @@ public:
 #endif
         }
         else if (strcmp (text, "sendVstEvents") == 0
-                 || strcmp (text, "sendVstMidiEvent") == 0)
+                 || strcmp (text, "sendVstMidiEvent") == 0
+                 || strcmp (text, "sendVstMidiEvents") == 0)
         {
 #if JucePlugin_ProducesMidiOutput
             result = 1;
@@ -1211,6 +1213,10 @@ void EditorCompWrapper::handleAsyncUpdate()
 //==============================================================================
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
+#if JUCE_MAC || JUCE_LINUX
+    initialiseJuce_GUI();
+#endif
+
     MessageManager::getInstance()->setTimeBeforeShowingWaitCursor (0);
 
     try
