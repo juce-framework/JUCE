@@ -105,6 +105,9 @@ Slider::Slider (const String& name)
     maximum (10),
     interval (0),
     skewFactor (1.0),
+    velocityModeSensitivity (1.0),
+    velocityModeOffset (0.0),
+    velocityModeThreshold (1),
     rotaryStart (float_Pi * 1.2f),
     rotaryEnd (float_Pi * 2.8f),
     numDecimalPlaces (7),
@@ -219,6 +222,19 @@ void Slider::setRotaryParameters (const float startAngleRadians,
 void Slider::setVelocityBasedMode (const bool velBased) throw()
 {
     isVelocityBased = velBased;
+}
+
+void Slider::setVelocityModeParameters (const double sensitivity,
+                                        const int threshold,
+                                        const double offset) throw()
+{
+    jassert (threshold >= 0);
+    jassert (sensitivity > 0);
+    jassert (offset >= 0);
+
+    velocityModeSensitivity = sensitivity;
+    velocityModeOffset = offset;
+    velocityModeThreshold = threshold;
 }
 
 void Slider::setSkewFactor (const double factor) throw()
@@ -1188,7 +1204,10 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                 if (speed != 0)
                 {
-                    speed = 0.2 * (1.0 + sin (double_Pi * (1.5 + jmax (0.0, speed - 1.0) / maxSpeed)));
+                    speed = 0.2 * velocityModeSensitivity
+                              * (1.0 + sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset 
+                                                                            + jmax (0.0, (double) (speed - velocityModeThreshold)) 
+                                                                                / maxSpeed))));
 
                     if (mouseDiff < 0)
                         speed = -speed;

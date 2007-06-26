@@ -122,6 +122,7 @@ public:
     */
     SliderStyle getSliderStyle() const throw()                                  { return style; }
 
+    //==============================================================================
     /** Changes the properties of a rotary slider.
 
         @param startAngleRadians        the angle (in radians, clockwise from the top) at which
@@ -137,6 +138,15 @@ public:
                               const float endAngleRadians,
                               const bool stopAtEnd);
 
+    /** Sets the distance the mouse has to move to drag the slider across
+        the full extent of its range.
+
+        This only applies when in modes like RotaryHorizontalDrag, where it's using
+        relative mouse movements to adjust the slider.
+    */
+    void setMouseDragSensitivity (const int distanceForFullScaleDrag);
+
+    //==============================================================================
     /** Changes the way the the mouse is used when dragging the slider.
 
         If true, this will turn on velocity-sensitive dragging, so that
@@ -147,6 +157,22 @@ public:
     */
     void setVelocityBasedMode (const bool isVelocityBased) throw();
 
+    /** Changes aspects of the scaling used when in velocity-sensitive mode.
+        
+        These apply when you've used setVelocityBasedMode() to turn on velocity mode,
+        or if you're holding down ctrl.
+
+        @param sensitivity      higher values than 1.0 increase the range of acceleration used
+        @param threshold        the minimum number of pixels that the mouse needs to move for it
+                                to be treated as a movement
+        @param offset           values greater than 0.0 increase the minimum speed that will be used when
+                                the threshold is reached
+    */
+    void setVelocityModeParameters (const double sensitivity = 1.0,
+                                    const int threshold = 1.0,
+                                    const double offset = 0.0) throw();
+
+    //==============================================================================
     /** Sets up a skew factor to alter the way values are distributed.
 
         You may want to use a range of values on the slider where more accuracy
@@ -173,14 +199,7 @@ public:
      */
     void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint) throw();
 
-    /** Sets the distance the mouse has to move to drag the slider across
-        the full extent of its range.
-
-        This only applies when in modes like RotaryHorizontalDrag, where it's using
-        relative mouse movements to adjust the slider.
-    */
-    void setMouseDragSensitivity (const int distanceForFullScaleDrag);
-
+    //==============================================================================
     /** Used by setIncDecButtonsMode().
     */
     enum IncDecButtonMode
@@ -637,6 +656,8 @@ private:
     double currentValue, valueMin, valueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
+    double velocityModeSensitivity, velocityModeOffset;
+    int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
     int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
     int sliderRegionStart, sliderRegionSize;
