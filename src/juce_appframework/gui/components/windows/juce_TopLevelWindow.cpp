@@ -225,6 +225,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
 
     if (isOnDesktop())
     {
+        deleteAndZero (shadower);
         Component::addToDesktop (getDesktopWindowStyleFlags());
     }
     else
