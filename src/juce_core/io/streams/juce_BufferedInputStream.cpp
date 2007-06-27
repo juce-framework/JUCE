@@ -100,7 +100,7 @@ void BufferedInputStream::ensureBuffered()
              && position >= bufferStart)
         {
             const int bytesToKeep = (int) (lastReadPos - position);
-            memcpy (buffer, buffer + position - bufferStart, bytesToKeep);
+            memmove (buffer, buffer + position - bufferStart, bytesToKeep);
 
             bufferStart = position;
 
