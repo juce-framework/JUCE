@@ -50,7 +50,7 @@
 		84F559320A223B0E00A8311C /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F5592A0A223B0E00A8311C /* IOKit.framework */; };
 		84F559330A223B0E00A8311C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F5592B0A223B0E00A8311C /* OpenGL.framework */; };
 		84F559340A223B0E00A8311C /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F5592C0A223B0E00A8311C /* QuickTime.framework */; };
-		84FDB1B50C15C24F00CD0087 /* libjuce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB1B20C15C24300CD0087 /* libjuce.a */; };
+		84FDB1B50C15C24F00CD0087 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB1B20C15C24300CD0087 /* libjucedebug.a */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -59,7 +59,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 84F559480A223B8400A8311C /* Juce.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libjuce.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = Juce;
 		};
 /* End PBXContainerItemProxy section */
@@ -189,7 +189,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84FDB1B50C15C24F00CD0087 /* libjuce.a in Frameworks */,
+				84FDB1B50C15C24F00CD0087 /* libjucedebug.a in Frameworks */,
 				84F5592D0A223B0E00A8311C /* AGL.framework in Frameworks */,
 				84F5592E0A223B0E00A8311C /* Carbon.framework in Frameworks */,
 				84F5592F0A223B0E00A8311C /* CoreAudio.framework in Frameworks */,
@@ -441,7 +441,7 @@
 		84FDB1AE0C15C24300CD0087 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84FDB1B20C15C24300CD0087 /* libjuce.a */,
+				84FDB1B20C15C24300CD0087 /* libjucedebug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -489,10 +489,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		84FDB1B20C15C24300CD0087 /* libjuce.a */ = {
+		84FDB1B20C15C24300CD0087 /* libjucedebug.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libjuce.a;
+			path = libjucedebug.a;
 			remoteRef = 84FDB1B10C15C24300CD0087 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
