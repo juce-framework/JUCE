@@ -63,7 +63,7 @@
 
 //==============================================================================
 #ifndef JUCE_ENABLE_WIN98_COMPATIBILITY
-//  #define JUCE_ENABLE_WIN98_COMPATIBILITY 1
+  #define JUCE_ENABLE_WIN98_COMPATIBILITY 1
 #endif
 
 // helpers for dynamically loading unicode functions..
