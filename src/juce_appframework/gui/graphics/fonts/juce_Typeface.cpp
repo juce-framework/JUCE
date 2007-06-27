@@ -406,8 +406,14 @@ private:
     //==============================================================================
     struct CachedFace
     {
-        int lastUsageCount;
+        CachedFace() throw()
+            : lastUsageCount (0),
+              flags (0)
+        {
+        }
+
         String typefaceName;
+        int lastUsageCount;
         int flags;
         Typeface::Ptr typeFace;
     };
@@ -427,9 +433,8 @@ public:
         while (--numToCache >= 0)
         {
             CachedFace* const face = new CachedFace();
-            faces.add (face);
-            face->lastUsageCount = 0;
             face->typeFace = new Typeface();
+            faces.add (face);
         }
     }
 

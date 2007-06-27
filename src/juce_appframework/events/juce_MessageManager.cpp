@@ -120,7 +120,7 @@ void MessageManager::deliverMessage (void* message)
 
         ++messageCounter;
     }
-    else if (m->intParameter1 == quitMessageId)
+    else if (recipient == 0 && m->intParameter1 == quitMessageId)
     {
         quitMessageReceived = true;
         useMaximumForceWhenQuitting = (m->intParameter2 != 0);

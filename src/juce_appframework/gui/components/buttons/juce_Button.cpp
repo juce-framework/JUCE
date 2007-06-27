@@ -61,7 +61,8 @@ Button::Button (const String& name)
     needsToRelease (false),
     needsRepainting (false),
     isKeyDown (false),
-    triggerOnMouseDown (false)
+    triggerOnMouseDown (false),
+    generateTooltip (false)
 {
     setWantsKeyboardFocus (true);
 }

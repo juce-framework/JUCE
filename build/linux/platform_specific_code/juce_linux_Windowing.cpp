@@ -187,7 +187,7 @@ enum MouseButtons
     WheelDown = 5
 };
 
-static void getMousePos (int& x, int& y, int& mouseMods)
+static void getMousePos (int& x, int& y, int& mouseMods) throw()
 {
     Window root, child;
     int winx, winy;
@@ -223,7 +223,7 @@ static bool numLock = 0;
 static bool capsLock = 0;
 static char keyStates [32];
 
-static void updateKeyStates (const int keycode, const bool press)
+static void updateKeyStates (const int keycode, const bool press) throw()
 {
     const int keybyte = keycode >> 3;
     const int keybit = (1 << (keycode & 7));
@@ -234,7 +234,7 @@ static void updateKeyStates (const int keycode, const bool press)
         keyStates [keybyte] &= ~keybit;
 }
 
-static bool keyDown (const int keycode)
+static bool keyDown (const int keycode) throw()
 {
     const int keybyte = keycode >> 3;
     const int keybit = (1 << (keycode & 7));
@@ -271,7 +271,7 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
 //==============================================================================
 // Alt and Num lock are not defined by standard X
 // modifier constants: check what they're mapped to
-static void getModifierMapping()
+static void getModifierMapping() throw()
 {
     const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
     const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
@@ -313,7 +313,7 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
     return ModifierKeys (currentModifiers);
 }
 
-static void updateKeyModifiers (const int status)
+static void updateKeyModifiers (const int status) throw()
 {
     currentModifiers &= ~(ModifierKeys::shiftModifier
                            | ModifierKeys::ctrlModifier
@@ -332,7 +332,7 @@ static void updateKeyModifiers (const int status)
     capsLock = ((status & LockMask) != 0);
 }
 
-static bool updateKeyModifiersFromSym (KeySym sym, const bool press)
+static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
 {
     int modifier = 0;
     bool isModifier = true;
@@ -387,7 +387,7 @@ static bool updateKeyModifiersFromSym (KeySym sym, const bool press)
 
 //==============================================================================
 #if JUCE_USE_XSHM
-static bool isShmAvailable()
+static bool isShmAvailable() throw()
 {
     static bool isChecked = false;
     static bool isAvailable = false;
@@ -703,7 +703,7 @@ public:
         return (void*) windowH;
     }
 
-    static LinuxComponentPeer* getPeerFor (Window windowHandle)
+    static LinuxComponentPeer* getPeerFor (Window windowHandle) throw()
     {
         LinuxComponentPeer* peer = 0;
 
@@ -1455,6 +1455,16 @@ public:
                 updateBorderSize();
                 handleMovedOrResized();
 
+                // if the native title bar is dragged, need to tell any active menus, etc.
+                if ((styleFlags & windowHasTitleBar) != 0 
+                      && component->isCurrentlyBlockedByAnotherModalComponent())
+                {
+                    Component* const currentModalComp = Component::getCurrentlyModalComponent();
+
+                    if (currentModalComp != 0)
+                        currentModalComp->inputAttemptWhenModal();
+                }
+
                 XConfigureEvent* const confEvent = (XConfigureEvent*) &event->xconfigure;
 
                 if (confEvent->window == windowH
@@ -2107,7 +2117,7 @@ private:
         {}
     }
 
-    static int64 getEventTime (::Time t)
+    static int64 getEventTime (::Time t) throw()
     {
         static int64 eventTimeOffset = 0x12345678;
         const int64 thisMessageTime = t;
@@ -2118,7 +2128,7 @@ private:
         return eventTimeOffset + thisMessageTime;
     }
 
-    static void setWindowTitle (Window xwin, const char* const title)
+    static void setWindowTitle (Window xwin, const char* const title) throw()
     {
         XTextProperty nameProperty;
         char* strings[] = { (char*) title };
@@ -2127,6 +2137,8 @@ private:
         {
             XSetWMName (display, xwin, &nameProperty);
             XSetWMIconName (display, xwin, &nameProperty);
+
+            XFree (nameProperty.value);
         }
     }
 
@@ -2623,10 +2635,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     {
         case MouseCursor::NoCursor:
         {
-            void* invisibleCursor;
-
             Image im (Image::ARGB, 16, 16, true);
-            invisibleCursor = juce_createMouseCursorFromImage (im, 0, 0);
+            void* const invisibleCursor = juce_createMouseCursorFromImage (im, 0, 0);
 
             return invisibleCursor;
         }
@@ -2636,7 +2646,6 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
 
         case MouseCursor::DraggingHandCursor:
         {
-            void* dragHandCursor;
             static unsigned char dragHandData[] = {71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,
               0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
               16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,
@@ -2644,8 +2653,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            Image* im = ImageFileFormat::loadFrom ((const char*) dragHandData, dragHandDataSize);
-            dragHandCursor = juce_createMouseCursorFromImage (*im, 8, 7);
+            Image* const im = ImageFileFormat::loadFrom ((const char*) dragHandData, dragHandDataSize);
+            void* const dragHandCursor = juce_createMouseCursorFromImage (*im, 8, 7);
             delete im;
 
             return dragHandCursor;
@@ -2653,8 +2662,6 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
 
         case MouseCursor::CopyingCursor:
         {
-            void* copyCursor;
-
             static unsigned char copyCursorData[] = {71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,
               128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0,
               21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,
@@ -2663,8 +2670,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            Image* im = ImageFileFormat::loadFrom ((const char*)copyCursorData, copyCursorSize);
-            copyCursor = juce_createMouseCursorFromImage (*im, 1, 3);
+            Image* const im = ImageFileFormat::loadFrom ((const char*) copyCursorData, copyCursorSize);
+            void* const copyCursor = juce_createMouseCursorFromImage (*im, 1, 3);
             delete im;
 
             return copyCursor;
@@ -2886,7 +2893,7 @@ void juce_repaintOpenGLWindow (void* context)
 
 
 //==============================================================================
-static void initClipboard (Window root, Atom* cutBuffers)
+static void initClipboard (Window root, Atom* cutBuffers) throw()
 {
     static bool init = false;
 

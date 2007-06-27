@@ -316,6 +316,7 @@ public:
          numColumns (0),
          contentHeight (0),
          childYOffset (0),
+         timeEnteredCurrentChildComp (0),
          scrollAcceleration (1.0)
     {
         menuCreationTime = lastFocused = lastScroll = Time::getMillisecondCounter();

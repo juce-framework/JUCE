@@ -41,6 +41,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 DrawableImage::DrawableImage()
     : image (0),
+      canDeleteImage (false),
       opacity (1.0f),
       overlayColour (0x00000000)
 {

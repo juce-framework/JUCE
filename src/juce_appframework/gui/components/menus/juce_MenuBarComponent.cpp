@@ -60,6 +60,8 @@ MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
       itemUnderMouse (-1),
       currentPopupIndex (-1),
       indexToShowAgain (-1),
+      lastMouseX (0),
+      lastMouseY (0),
       inModalState (false),
       currentPopup (0)
 {

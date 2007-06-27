@@ -45,6 +45,8 @@ class ListBoxRowComponent  : public Component
 public:
     ListBoxRowComponent (ListBox& owner_)
         : owner (owner_),
+          row (-1), 
+          selected (false),
           isDragging (false)
     {
     }

@@ -350,6 +350,8 @@ public:
 
     /** Called by the host to find out the value of one of the plugin's parameters.
 
+        The host will expect the value returned to be between 0 and 1.0.
+
         This could be called quite frequently, so try to make your code efficient.
     */
     virtual float JUCE_CALLTYPE getParameter (int parameterIndex) = 0;
@@ -367,6 +369,8 @@ public:
         setParameterNotifyingHost() method, which will also send a message to
         the host telling it about the change. If the message isn't sent, the host
         won't be able to automate your parameters properly.
+
+        The value passed will be between 0 and 1.0.
     */
     virtual void JUCE_CALLTYPE setParameter (int parameterIndex,
                                              float newValue) = 0;
@@ -374,7 +378,7 @@ public:
     /** Your plugin can call this when it needs to change one of its parameters.
 
         This could happen when the editor or some other internal operation changes
-        a parameter. This method will call the setParamete() method to change the
+        a parameter. This method will call the setParameter() method to change the
         value, and will then send a message to the host telling it about the change.
     */
     void JUCE_CALLTYPE setParameterNotifyingHost (int parameterIndex,
