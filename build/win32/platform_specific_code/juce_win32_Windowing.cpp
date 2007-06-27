@@ -129,42 +129,46 @@ bool Desktop::canUseSemiTransparentWindows()
 }
 
 //==============================================================================
-UNICODE_FUNCTION (SetWindowTextW, BOOL, (HWND, LPCWSTR))
-UNICODE_FUNCTION (DragQueryFileW, UINT, (HDROP, UINT, LPWSTR, UINT))
-UNICODE_FUNCTION (MapVirtualKeyW, UINT, (UINT, UINT))
-UNICODE_FUNCTION (RegisterClassExW, ATOM, (CONST WNDCLASSEXW*))
-UNICODE_FUNCTION (CreateWindowExW, HWND, (DWORD, LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID))
-UNICODE_FUNCTION (DefWindowProcW, LRESULT, (HWND, UINT, WPARAM, LPARAM))
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+    UNICODE_FUNCTION (SetWindowTextW, BOOL, (HWND, LPCWSTR))
+    UNICODE_FUNCTION (DragQueryFileW, UINT, (HDROP, UINT, LPWSTR, UINT))
+    UNICODE_FUNCTION (MapVirtualKeyW, UINT, (UINT, UINT))
+    UNICODE_FUNCTION (RegisterClassExW, ATOM, (CONST WNDCLASSEXW*))
+    UNICODE_FUNCTION (CreateWindowExW, HWND, (DWORD, LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID))
+    UNICODE_FUNCTION (DefWindowProcW, LRESULT, (HWND, UINT, WPARAM, LPARAM))
 
-void juce_initialiseUnicodeWindowFunctions()
-{
-    static bool initialised = false;
-
-    if (! initialised)
+    void juce_initialiseUnicodeWindowFunctions()
     {
-        initialised = true;
+        static bool initialised = false;
 
-        if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
+        if (! initialised)
         {
-            HMODULE h = LoadLibraryA ("user32.dll");
-            UNICODE_FUNCTION_LOAD (SetWindowTextW)
-            UNICODE_FUNCTION_LOAD (MapVirtualKeyW)
-            UNICODE_FUNCTION_LOAD (RegisterClassExW)
-            UNICODE_FUNCTION_LOAD (CreateWindowExW)
-            UNICODE_FUNCTION_LOAD (DefWindowProcW)
+            initialised = true;
 
-            if (wDefWindowProcW == 0)
-                wDefWindowProcW = & DefWindowProcA;
+            if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
+            {
+                HMODULE h = LoadLibraryA ("user32.dll");
+                UNICODE_FUNCTION_LOAD (SetWindowTextW)
+                UNICODE_FUNCTION_LOAD (MapVirtualKeyW)
+                UNICODE_FUNCTION_LOAD (RegisterClassExW)
+                UNICODE_FUNCTION_LOAD (CreateWindowExW)
+                UNICODE_FUNCTION_LOAD (DefWindowProcW)
 
-            h = LoadLibraryA ("shell32.dll");
-            UNICODE_FUNCTION_LOAD (DragQueryFileW)
+                if (wDefWindowProcW == 0)
+                    wDefWindowProcW = & DefWindowProcA;
+
+                h = LoadLibraryA ("shell32.dll");
+                UNICODE_FUNCTION_LOAD (DragQueryFileW)
+            }
         }
     }
-}
 
-#undef DefWindowProc
-#define DefWindowProc wDefWindowProcW
-
+    #undef DefWindowProc
+    #define DefWindowProc wDefWindowProcW
+#else
+    #undef DefWindowProc
+    #define DefWindowProc DefWindowProcW
+#endif
 
 //==============================================================================
 static const int extendedKeyModifier    = 0x10000;
@@ -520,7 +524,9 @@ public:
           taskBarIcon (0),
           currentWindowIcon (0)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         juce_initialiseUnicodeWindowFunctions();
+#endif
 
         MessageManager::getInstance()
            ->callFunctionOnMessageThread (&createWindowCallback, (void*) this);
@@ -575,10 +581,14 @@ public:
 
     void setTitle (const String& title)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wSetWindowTextW != 0)
             wSetWindowTextW (hwnd, title);
         else
             SetWindowText (hwnd, title);
+#else
+        SetWindowTextW (hwnd, title);
+#endif
     }
 
     void setPosition (int x, int y)
@@ -1007,6 +1017,7 @@ private:
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
             if (wRegisterClassExW != 0)
             {
                 WNDCLASSEXW wcex;
@@ -1045,6 +1056,24 @@ private:
 
                 RegisterClassEx (&wcex);
             }
+#else
+            WNDCLASSEXW wcex;
+            wcex.cbSize         = sizeof (wcex);
+            wcex.style          = CS_OWNDC;
+            wcex.lpfnWndProc    = (WNDPROC) windowProc;
+            wcex.lpszClassName  = windowClassName;
+            wcex.cbClsExtra     = 0;
+            wcex.cbWndExtra     = 32;
+            wcex.hInstance      = moduleHandle;
+            wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
+            iconNum = 1;
+            wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
+            wcex.hCursor        = 0;
+            wcex.hbrBackground  = 0;
+            wcex.lpszMenuName   = 0;
+
+            RegisterClassExW (&wcex);
+#endif
         }
 
         ~WindowClassHolder()
@@ -1107,10 +1136,14 @@ private:
         if (windowClassHolder == 0)
             windowClassHolder = new WindowClassHolder();
 
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wCreateWindowExW != 0)
             hwnd = wCreateWindowExW (exstyle, windowClassHolder->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
         else
             hwnd = CreateWindowEx (exstyle, windowClassHolder->windowClassName, _T(""), type, 0, 0, 0, 0, 0, 0, 0, 0);
+#else
+        hwnd = CreateWindowExW (exstyle, windowClassHolder->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
+#endif
 
         if (hwnd != 0)
         {
@@ -1627,8 +1660,12 @@ private:
 
                 if ((currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
                 {
-                    UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (key, 2)
-                                                        : MapVirtualKey (key, 2);
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+                    const UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (key, 2)
+                                                              : MapVirtualKey (key, 2);
+#else
+                    const UINT keyChar = MapVirtualKeyW (key, 2);
+#endif
 
                     handleKeyPress ((int) LOWORD (keyChar), 0);
                 }
@@ -1673,8 +1710,12 @@ private:
         else
         {
             // convert the scan code to an unmodified character code..
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
             UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (wMapVirtualKeyW (virtualScanCode, 1), 2)
                                                 : MapVirtualKey (MapVirtualKey (virtualScanCode, 1), 2);
+#else
+            UINT keyChar = MapVirtualKeyW (MapVirtualKeyW (virtualScanCode, 1), 2);
+#endif
 
             keyChar = LOWORD (keyChar);
 
@@ -1736,6 +1777,7 @@ private:
 
         for (int i = 0; i < numFiles; ++i)
         {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
             if (wDragQueryFileW != 0)
             {
                 wDragQueryFileW (hdrop, i, (LPWSTR) name, MAX_PATH);
@@ -1746,6 +1788,10 @@ private:
                 DragQueryFile (hdrop, i, (LPSTR) name, MAX_PATH);
                 files.add ((LPSTR) name);
             }
+#else
+            DragQueryFileW (hdrop, i, (LPWSTR) name, MAX_PATH);
+            files.add ((LPWSTR) name);
+#endif
         }
 
         juce_free (name);

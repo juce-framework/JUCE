@@ -306,7 +306,10 @@ static void initLogicalCpuInfo() throw()
 
 //==============================================================================
 void juce_initialiseThreadEvents() throw();
-void juce_initialiseUnicodeFileFunctions() throw();
+
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+ void juce_initialiseUnicodeFileFunctions() throw();
+#endif
 
 static struct JuceCpuProps
 {
@@ -335,7 +338,10 @@ bool SystemStats::has3DNow() throw()
 
 void SystemStats::initialiseStats() throw()
 {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
     juce_initialiseUnicodeFileFunctions();
+#endif
+
     juce_initialiseThreadEvents();
 
     juce_CpuProps.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;

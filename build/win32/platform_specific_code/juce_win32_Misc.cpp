@@ -45,9 +45,15 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
 {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
     return MessageBox (0, bodyText, title,
                        (isOkCancel) ? MB_OKCANCEL
                                     : MB_OK) == IDOK;
+#else
+    return MessageBoxW (0, bodyText, title,
+                        (isOkCancel) ? MB_OKCANCEL
+                                     : MB_OK) == IDOK;
+#endif
 }
 
 //==============================================================================

@@ -48,6 +48,7 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
 UNICODE_FUNCTION (RegCreateKeyExW,  LONG, (HKEY, LPCWSTR, DWORD, LPWSTR, DWORD, REGSAM, LPSECURITY_ATTRIBUTES, PHKEY, LPDWORD))
 UNICODE_FUNCTION (RegOpenKeyExW,    LONG, (HKEY, LPCWSTR, DWORD, REGSAM, PHKEY))
 UNICODE_FUNCTION (RegQueryValueExW, LONG, (HKEY, LPCWSTR, LPDWORD, LPDWORD, LPBYTE, LPDWORD))
@@ -75,14 +76,16 @@ static void juce_initialiseUnicodeRegistryFunctions() throw()
         }
     }
 }
-
+#endif
 
 //==============================================================================
 static HKEY findKeyForPath (String name,
                             const bool createForWriting,
                             String& valueName) throw()
 {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
     juce_initialiseUnicodeRegistryFunctions();
+#endif
 
     HKEY rootKey = 0;
 
@@ -106,39 +109,42 @@ static HKEY findKeyForPath (String name,
 
         if (createForWriting)
         {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
             if (wRegCreateKeyExW != 0)
             {
                 if (wRegCreateKeyExW (rootKey, name, 0, L"", REG_OPTION_NON_VOLATILE,
                                       (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
-                {
                     return key;
-                }
             }
             else
             {
                 if (RegCreateKeyEx (rootKey, name, 0, _T(""), REG_OPTION_NON_VOLATILE,
                                     (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
-                {
                     return key;
-                }
             }
+#else
+            if (RegCreateKeyExW (rootKey, name, 0, L"", REG_OPTION_NON_VOLATILE,
+                                 (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
+                return key;
+#endif
         }
         else
         {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
             if (wRegOpenKeyExW != 0)
             {
                 if (wRegOpenKeyExW (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
-                {
                     return key;
-                }
             }
             else
             {
                 if (RegOpenKeyEx (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
-                {
                     return key;
-                }
             }
+#else
+            if (RegOpenKeyExW (rootKey, name, 0, KEY_READ, &key) == ERROR_SUCCESS)
+                return key;
+#endif
         }
     }
 
@@ -153,6 +159,7 @@ const String PlatformUtilities::getRegistryValue (const String& regValuePath,
 
     if (k != 0)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wRegQueryValueExW != 0)
         {
             WCHAR buffer [2048];
@@ -175,6 +182,16 @@ const String PlatformUtilities::getRegistryValue (const String& regValuePath,
             else
                 s = defaultValue;
         }
+#else
+        WCHAR buffer [2048];
+        unsigned long bufferSize = sizeof (buffer);
+        DWORD type = REG_SZ;
+
+        if (RegQueryValueExW (k, valueName, 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
+            s = buffer;
+        else
+            s = defaultValue;
+#endif
 
         RegCloseKey (k);
     }
@@ -190,6 +207,7 @@ void PlatformUtilities::setRegistryValue (const String& regValuePath,
 
     if (k != 0)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wRegSetValueExW != 0)
             wRegSetValueExW (k, valueName, 0, REG_SZ,
                              (const BYTE*) (const WCHAR*) value,
@@ -198,6 +216,11 @@ void PlatformUtilities::setRegistryValue (const String& regValuePath,
             RegSetValueEx (k, valueName, 0, REG_SZ,
                            (const BYTE*) (const TCHAR*) value,
                            sizeof (TCHAR) * (value.length() + 1));
+#else
+        RegSetValueExW (k, valueName, 0, REG_SZ,
+                        (const BYTE*) (const WCHAR*) value,
+                        sizeof (WCHAR) * (value.length() + 1));
+#endif
 
         RegCloseKey (k);
     }
@@ -215,6 +238,7 @@ bool PlatformUtilities::registryValueExists (const String& regValuePath)
         unsigned long bufferSize = sizeof (buffer);
         DWORD type = 0;
 
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wRegQueryValueExW != 0)
         {
             if (wRegQueryValueExW (k, valueName, 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
@@ -225,6 +249,10 @@ bool PlatformUtilities::registryValueExists (const String& regValuePath)
             if (RegQueryValueEx (k, valueName, 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
                 exists = true;
         }
+#else
+        if (RegQueryValueExW (k, valueName, 0, &type, buffer, &bufferSize) == ERROR_SUCCESS)
+            exists = true;
+#endif
 
         RegCloseKey (k);
     }
@@ -239,10 +267,14 @@ void PlatformUtilities::deleteRegistryValue (const String& regValuePath)
 
     if (k != 0)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wRegDeleteValueW != 0)
             wRegDeleteValueW (k, valueName);
         else
             RegDeleteValue (k, valueName);
+#else
+        RegDeleteValueW (k, valueName);
+#endif
 
         RegCloseKey (k);
     }
@@ -255,10 +287,14 @@ void PlatformUtilities::deleteRegistryKey (const String& regKeyPath)
 
     if (k != 0)
     {
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         if (wRegDeleteKeyW != 0)
             wRegDeleteKeyW (k, valueName);
         else
             RegDeleteKey (k, valueName);
+#else
+        RegDeleteKeyW (k, valueName);
+#endif
 
         RegCloseKey (k);
     }

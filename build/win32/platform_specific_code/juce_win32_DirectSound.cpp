@@ -137,8 +137,6 @@ DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
 
 };
 
-#define USE_UNICODE_FUNCTIONS 1
-
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
 
@@ -255,9 +253,12 @@ typedef BOOL (CALLBACK *LPDSENUMCALLBACKA) (LPGUID, LPCSTR, LPCSTR, LPVOID);
 DSOUND_FUNCTION (DirectSoundCreate, (const GUID*, IDirectSound**, LPUNKNOWN))
 DSOUND_FUNCTION (DirectSoundCaptureCreate, (const GUID*, IDirectSoundCapture**, LPUNKNOWN))
 DSOUND_FUNCTION (DirectSoundEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
-DSOUND_FUNCTION (DirectSoundEnumerateA, (LPDSENUMCALLBACKA, LPVOID))
 DSOUND_FUNCTION (DirectSoundCaptureEnumerateW, (LPDSENUMCALLBACKW, LPVOID))
-DSOUND_FUNCTION (DirectSoundCaptureEnumerateA, (LPDSENUMCALLBACKA, LPVOID))
+
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+ DSOUND_FUNCTION (DirectSoundEnumerateA, (LPDSENUMCALLBACKA, LPVOID))
+ DSOUND_FUNCTION (DirectSoundCaptureEnumerateA, (LPDSENUMCALLBACKA, LPVOID))
+#endif
 
 static void initialiseDSoundFunctions()
 {
@@ -269,8 +270,11 @@ static void initialiseDSoundFunctions()
         DSOUND_FUNCTION_LOAD (DirectSoundCaptureCreate)
         DSOUND_FUNCTION_LOAD (DirectSoundEnumerateW)
         DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
+
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         DSOUND_FUNCTION_LOAD (DirectSoundEnumerateA)
         DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateA)
+#endif
     }
 }
 
@@ -1445,11 +1449,13 @@ public:
             dsDirectSoundEnumerateW (outputEnumProcW, this);
             dsDirectSoundCaptureEnumerateW (inputEnumProcW, this);
         }
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         else if (dsDirectSoundEnumerateA != 0)
         {
             dsDirectSoundEnumerateA (outputEnumProcA, this);
             dsDirectSoundCaptureEnumerateA (inputEnumProcA, this);
         }
+#endif
     }
 
     const StringArray getDeviceNames (const bool preferInputNames) const

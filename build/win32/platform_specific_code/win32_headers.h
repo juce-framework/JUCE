@@ -62,15 +62,21 @@
 #endif
 
 //==============================================================================
+#ifndef JUCE_ENABLE_WIN98_COMPATIBILITY
+//  #define JUCE_ENABLE_WIN98_COMPATIBILITY 1
+#endif
+
 // helpers for dynamically loading unicode functions..
 
-#define UNICODE_FUNCTION(functionName, returnType, params) \
-    typedef returnType (WINAPI *type##functionName) params; \
-    static type##functionName w##functionName = 0;
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+  #define UNICODE_FUNCTION(functionName, returnType, params) \
+      typedef returnType (WINAPI *type##functionName) params; \
+      static type##functionName w##functionName = 0;
 
-#define UNICODE_FUNCTION_LOAD(functionName) \
-    w##functionName = (type##functionName) GetProcAddress (h, #functionName);  \
-    jassert (w##functionName != 0); \
+  #define UNICODE_FUNCTION_LOAD(functionName) \
+      w##functionName = (type##functionName) GetProcAddress (h, #functionName);  \
+      jassert (w##functionName != 0);
+#endif
 
 
 #endif   // __WIN32_HEADERS_JUCEHEADER__
