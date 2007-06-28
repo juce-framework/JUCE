@@ -181,7 +181,7 @@
 		84F5592C0A223B0E00A8311C /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		84F559480A223B8400A8311C /* Juce.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Juce.xcodeproj; path = ../../../../build/macosx/Juce.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D0C4E970486CD37000505A6 /* Jucer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Jucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D0C4E970486CD37000505A6 /* Jucer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,7 +228,15 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				84F5556B0A22381000A8311C /* src */,
+				84F555740A22381000A8311C /* model */,
+				84F5559F0A22381000A8311C /* properties */,
+				84F555AE0A22381000A8311C /* templates */,
+				84F555B10A22381000A8311C /* ui */,
+				84F555C90A22381000A8311C /* utility */,
+				84F555700A22381000A8311C /* BinaryData.cpp */,
+				84F555710A22381000A8311C /* BinaryData.h */,
+				84F555720A22381000A8311C /* jucer_Headers.h */,
+				84F555730A22381000A8311C /* jucer_Main.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -322,23 +330,6 @@
 			);
 			path = paintelements;
 			sourceTree = "<group>";
-		};
-		84F5556B0A22381000A8311C /* src */ = {
-			isa = PBXGroup;
-			children = (
-				84F555740A22381000A8311C /* model */,
-				84F5559F0A22381000A8311C /* properties */,
-				84F555AE0A22381000A8311C /* templates */,
-				84F555B10A22381000A8311C /* ui */,
-				84F555C90A22381000A8311C /* utility */,
-				84F555700A22381000A8311C /* BinaryData.cpp */,
-				84F555710A22381000A8311C /* BinaryData.h */,
-				84F555720A22381000A8311C /* jucer_Headers.h */,
-				84F555730A22381000A8311C /* jucer_Main.cpp */,
-			);
-			name = src;
-			path = ../../src;
-			sourceTree = SOURCE_ROOT;
 		};
 		84F555740A22381000A8311C /* model */ = {
 			isa = PBXGroup;
@@ -599,7 +590,7 @@
 			buildSettings = {
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = ../../../bin;
+				LIBRARY_SEARCH_PATHS = ../../../../bin;
 				PREBINDING = NO;
 			};
 			name = Debug;
@@ -610,7 +601,7 @@
 			buildSettings = {
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = ../../../bin;
+				LIBRARY_SEARCH_PATHS = ../../../../bin;
 				PREBINDING = NO;
 			};
 			name = Release;
