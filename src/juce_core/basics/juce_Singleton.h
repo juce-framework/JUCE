@@ -109,7 +109,7 @@
                 static bool createdOnceAlready = false; \
 \
                 const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-                jassert (!problem); \
+                jassert (! problem); \
                 if (! problem) \
                 { \
                     createdOnceAlready = true; \
@@ -173,7 +173,7 @@
     how to use it, the only difference being that you have to use
     juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
 
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
 */
 #define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
 \
@@ -187,7 +187,7 @@
             static bool createdOnceAlready = false; \
 \
             const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-            jassert (!problem); \
+            jassert (! problem); \
             if (! problem) \
             { \
                 createdOnceAlready = true; \
@@ -223,12 +223,63 @@
             _singletonInstance = 0; \
     }
 
+//==============================================================================
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
+    for recursion or repeated instantiation. It's intended for use as a lightweight
+    version of a singleton, where you're using it in very straightforward 
+    circumstances and don't need the extra checking.
+
+    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
+    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
+*/
+#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+            _singletonInstance = new classname(); \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
 
 //==============================================================================
 /** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
 
-    After adding the juce_DeclareSingleton_SingleThreaded to the class definition,
-    this macro has to be used in the cpp file.
+    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
+    to the class definition, this macro has to be used somewhere in the cpp file.
 */
 #define juce_ImplementSingleton_SingleThreaded(classname) \
 \

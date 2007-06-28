@@ -194,7 +194,7 @@ public:
         messageManager->setCurrentMessageThread (originalThreadId);
     }
 
-    juce_DeclareSingleton (SharedMessageThread, true)
+    juce_DeclareSingleton (SharedMessageThread, false)
 };
 
 juce_ImplementSingleton (SharedMessageThread);

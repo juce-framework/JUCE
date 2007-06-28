@@ -249,7 +249,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton_SingleThreaded (MouseCheckTimer, false)
+    juce_DeclareSingleton_SingleThreaded_Minimal (MouseCheckTimer)
 
     bool hasEverHadAMouseMove;
 
@@ -2540,6 +2540,9 @@ Image* juce_createIconForFile (const File& file)
 
 
 //==============================================================================
+class MainMenuHandler;
+static MainMenuHandler* mainMenu = 0;
+
 class MainMenuHandler   : private MenuBarModelListener,
                           private DeletedAtShutdown
 {
@@ -2552,6 +2555,9 @@ public:
     ~MainMenuHandler() throw()
     {
         setMenu (0);
+
+        jassert (mainMenu == this);
+        mainMenu = 0;
     }
 
     void setMenu (MenuBarModel* const newMenuBarModel) throw()
@@ -2795,15 +2801,14 @@ private:
     }
 };
 
-static MainMenuHandler* mainMenu = 0;
-
 void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel) throw()
 {
     if (getMacMainMenu() != newMenuBarModel)
     {
         if (newMenuBarModel == 0)
         {
-            deleteAndZero (mainMenu);
+            delete mainMenu;
+            jassert (mainMenu == 0); // should be zeroed in the destructor
         }
         else
         {

@@ -37,6 +37,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
 #include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "../../../src/juce_core/basics/juce_Singleton.h"
 #include "../../../src/juce_appframework/gui/graphics/imaging/juce_Image.h"
 
 
@@ -285,17 +286,11 @@ public:
             DeleteObject (fontH);
             juce_free (kps);
         }
+
+        clearSingletonInstance();
     }
 
-    static FontDCHolder* getInstance() throw()
-    {
-        static FontDCHolder* instance = 0;
-
-        if (instance == 0)
-            instance = new FontDCHolder();
-
-        return instance;
-    }
+    juce_DeclareSingleton_SingleThreaded_Minimal (FontDCHolder);
 
     //==============================================================================
     HDC loadFont (const String& fontName_,
@@ -454,6 +449,8 @@ public:
         return kps;
     }
 };
+
+juce_ImplementSingleton_SingleThreaded (FontDCHolder);
 
 
 //==============================================================================

@@ -34,6 +34,7 @@
 
 #include "juce_AudioIODeviceType.h"
 #include "juce_MidiInput.h"
+#include "juce_MidiOutput.h"
 #include "../../../juce_core/text/juce_XmlElement.h"
 #include "../../gui/components/controls/juce_ComboBox.h"
 

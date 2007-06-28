@@ -69,6 +69,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/text/juce_StringArray.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "../../../src/juce_core/basics/juce_Singleton.h"
 #include "../../../src/juce_core/threads/juce_Process.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../src/juce_appframework/events/juce_Timer.h"
@@ -224,6 +225,7 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
 
 //==============================================================================
 class WindowsBitmapImage  : public Image
@@ -944,7 +946,6 @@ private:
     BorderSize windowBorder;
     HICON currentWindowIcon;
     NOTIFYICONDATA* taskBarIcon;
-    friend class WindowClassHolder;
 
     //==============================================================================
     class TemporaryImage    : public Timer
@@ -993,12 +994,6 @@ private:
     TemporaryImage offscreenImageGenerator;
 
     //==============================================================================
-    static void* createWindowCallback (void* userData)
-    {
-        ((Win32ComponentPeer*) userData)->createWindow();
-        return 0;
-    }
-
     class WindowClassHolder    : public DeletedAtShutdown
     {
     public:
@@ -1017,7 +1012,7 @@ private:
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
+    #if JUCE_ENABLE_WIN98_COMPATIBILITY
             if (wRegisterClassExW != 0)
             {
                 WNDCLASSEXW wcex;
@@ -1056,7 +1051,7 @@ private:
 
                 RegisterClassEx (&wcex);
             }
-#else
+    #else
             WNDCLASSEXW wcex;
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
@@ -1073,17 +1068,28 @@ private:
             wcex.lpszMenuName   = 0;
 
             RegisterClassExW (&wcex);
-#endif
+    #endif
         }
 
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
                 UnregisterClass (windowClassName, (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle());
+
+            clearSingletonInstance();
         }
 
         String windowClassName;
+
+        juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder);
     };
+
+    //==============================================================================
+    static void* createWindowCallback (void* userData)
+    {
+        ((Win32ComponentPeer*) userData)->createWindow();
+        return 0;
+    }
 
     void createWindow()
     {
@@ -1131,18 +1137,15 @@ private:
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-        static WindowClassHolder* windowClassHolder = 0;
-
-        if (windowClassHolder == 0)
-            windowClassHolder = new WindowClassHolder();
-
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
+        const WindowClassHolder* const windowClassHolder = WindowClassHolder::getInstance();
+
         if (wCreateWindowExW != 0)
             hwnd = wCreateWindowExW (exstyle, windowClassHolder->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
         else
             hwnd = CreateWindowEx (exstyle, windowClassHolder->windowClassName, _T(""), type, 0, 0, 0, 0, 0, 0, 0, 0);
 #else
-        hwnd = CreateWindowExW (exstyle, windowClassHolder->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
+        hwnd = CreateWindowExW (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
 #endif
 
         if (hwnd != 0)
@@ -2188,11 +2191,12 @@ private:
     const Win32ComponentPeer& operator= (const Win32ComponentPeer&);
 };
 
-
 ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
 {
     return new Win32ComponentPeer (this, styleFlags);
 }
+
+juce_ImplementSingleton_SingleThreaded (Win32ComponentPeer::WindowClassHolder);
 
 //==============================================================================
 void SystemTrayIconComponent::setIconImage (const Image& newImage)

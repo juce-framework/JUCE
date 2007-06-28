@@ -51,7 +51,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton_SingleThreaded (FontList, false)
+    juce_DeclareSingleton_SingleThreaded_Minimal (FontList)
 
     StringArray fontNames;
 };

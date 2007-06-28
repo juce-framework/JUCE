@@ -384,7 +384,7 @@ public:
         delete this;
     }
 
-    juce_DeclareSingleton_SingleThreaded (ATSFontHelperCache, false)
+    juce_DeclareSingleton_SingleThreaded_Minimal (ATSFontHelperCache)
 };
 
 juce_ImplementSingleton_SingleThreaded (ATSFontHelperCache)

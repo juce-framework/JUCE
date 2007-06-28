@@ -158,6 +158,8 @@ public:
 
         if (ftLib != 0)
             FT_Done_FreeType (ftLib);
+
+        clearSingletonInstance();
     }
 
     //==============================================================================
@@ -522,15 +524,7 @@ public:
                 sansSerif.add (faces[i]->getFamilyName());
     }
 
-    static FreeTypeInterface* getInstance()
-    {
-        static FreeTypeInterface* instance = 0;
-
-        if (instance == 0)
-            instance = new FreeTypeInterface();
-
-        return instance;
-    }
+    juce_DeclareSingleton_SingleThreaded_Minimal (FreeTypeInterface, false);
 
 private:
     //==============================================================================
@@ -540,6 +534,8 @@ private:
     bool lastBold, lastItalic;
     OwnedArray<FreeTypeFontFace> faces;
 };
+
+juce_ImplementSingleton_SingleThreaded (FreeTypeInterface);
 
 
 //==============================================================================

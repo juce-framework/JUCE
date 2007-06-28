@@ -61,7 +61,7 @@ public:
         clearSingletonInstance();
     }
 
-    juce_DeclareSingleton_SingleThreaded (TopLevelWindowManager, false)
+    juce_DeclareSingleton_SingleThreaded_Minimal (TopLevelWindowManager)
 
     void timerCallback()
     {
