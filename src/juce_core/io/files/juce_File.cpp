@@ -889,7 +889,7 @@ FileOutputStream* File::createOutputStream (const int bufferSize) const throw()
 {
     FileOutputStream* const out = new FileOutputStream (*this, bufferSize);
 
-    if (out->areAnyErrors())
+    if (out->failedToOpen())
     {
         delete out;
         return 0;

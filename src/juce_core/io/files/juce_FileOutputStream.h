@@ -49,7 +49,7 @@ public:
     /** Creates a FileOutputStream.
 
         If the file doesn't exist, it will first be created. If the file can't be
-        created or opened, the areAnyErrors() method will return
+        created or opened, the failedToOpen() method will return
         true.
 
         If the file already exists when opened, the stream's write-postion will
@@ -67,15 +67,19 @@ public:
     ~FileOutputStream();
 
     //==============================================================================
-    const File getFile() const;
+    /** Returns the file that this stream is writing to.
+    */
+    const File& getFile() const throw()                 { return file; }
+
+    /** Returns true if the stream couldn't be opened for some reason.
+    */
+    bool failedToOpen() const throw()                   { return fileHandle == 0; }
 
     //==============================================================================
     void flush();
     int64 getPosition();
     bool setPosition (int64 pos);
     bool write (const void* data, int numBytes);
-
-    bool areAnyErrors();
 
 
     //==============================================================================

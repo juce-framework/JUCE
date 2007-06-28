@@ -33,15 +33,14 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_FileOutputStream.h"
 
-void* juce_fileOpen (const String& path, bool forWriting);
-void juce_fileClose (void* handle);
-int juce_fileWrite (void* handle, const void* buffer, int size);
-void juce_fileFlush (void* handle);
-int64 juce_fileGetPosition (void* handle);
-int64 juce_fileSetPosition (void* handle, int64 pos);
+void* juce_fileOpen (const String& path, bool forWriting) throw();
+void juce_fileClose (void* handle) throw();
+int juce_fileWrite (void* handle, const void* buffer, int size) throw();
+void juce_fileFlush (void* handle) throw();
+int64 juce_fileGetPosition (void* handle) throw();
+int64 juce_fileSetPosition (void* handle, int64 pos) throw();
 
 
 //==============================================================================
@@ -65,7 +64,7 @@ FileOutputStream::FileOutputStream (const File& f,
         }
     }
 
-    buffer = (char*) juce_malloc (jmax (bufferSize_, 64));
+    buffer = (char*) juce_malloc (jmax (bufferSize_, 16));
 }
 
 FileOutputStream::~FileOutputStream()
@@ -74,16 +73,6 @@ FileOutputStream::~FileOutputStream()
 
     juce_fileClose (fileHandle);
     juce_free (buffer);
-}
-
-const File FileOutputStream::getFile() const
-{
-    return file;
-}
-
-bool FileOutputStream::areAnyErrors()
-{
-    return fileHandle == 0;
 }
 
 int64 FileOutputStream::getPosition()
@@ -113,7 +102,7 @@ void FileOutputStream::flush()
     juce_fileFlush (fileHandle);
 }
 
-bool FileOutputStream::write (const void* src, int numBytes)
+bool FileOutputStream::write (const void* const src, const int numBytes)
 {
     if (bytesInBuffer + numBytes < bufferSize)
     {

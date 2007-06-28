@@ -37,10 +37,10 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-void* juce_fileOpen (const String& path, bool forWriting);
-void juce_fileClose (void* handle);
-int juce_fileRead (void* handle, void* buffer, int size);
-int64 juce_fileSetPosition (void* handle, int64 pos);
+void* juce_fileOpen (const String& path, bool forWriting) throw();
+void juce_fileClose (void* handle) throw();
+int juce_fileRead (void* handle, void* buffer, int size) throw();
+int64 juce_fileSetPosition (void* handle, int64 pos) throw();
 
 
 //==============================================================================
