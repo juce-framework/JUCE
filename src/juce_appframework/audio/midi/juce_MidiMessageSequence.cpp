@@ -173,17 +173,17 @@ void MidiMessageSequence::deleteEvent (const int index,
 void MidiMessageSequence::addSequence (const MidiMessageSequence& other,
                                        double timeAdjustment,
                                        double firstAllowableTime,
-                                       double lastAllowableTime)
+                                       double endOfAllowableDestTimes)
 {
     firstAllowableTime -= timeAdjustment;
-    lastAllowableTime -= timeAdjustment;
+    endOfAllowableDestTimes -= timeAdjustment;
 
     for (int i = 0; i < other.list.size(); ++i)
     {
         const MidiMessage& m = other.list.getUnchecked(i)->message;
         const double t = m.getTimeStamp();
 
-        if (t >= firstAllowableTime && t < lastAllowableTime)
+        if (t >= firstAllowableTime && t < endOfAllowableDestTimes)
         {
             MidiEventHolder* const newOne = new MidiEventHolder (m);
             newOne->message.setTimeStamp (timeAdjustment + t);

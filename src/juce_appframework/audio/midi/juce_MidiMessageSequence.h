@@ -188,15 +188,17 @@ public:
         @param other                    the sequence to add from
         @param timeAdjustmentDelta      an amount to add to the timestamps of the midi events
                                         as they are read from the other sequence
-        @param firstAllowableDestTime   events being added will be discarded if they
-                                        are earlier than this time
-        @param lastAllowableDestTime    events being added will be discarded if they
-                                        are later than this time
+        @param firstAllowableDestTime   events will not be added if their time is earlier 
+                                        than this time. (This is after their time has been adjusted
+                                        by the timeAdjustmentDelta)
+        @param endOfAllowableDestTimes  events will not be added if their time is equal to 
+                                        or greater than this time. (This is after their time has 
+                                        been adjusted by the timeAdjustmentDelta)
     */
     void addSequence (const MidiMessageSequence& other,
                       double timeAdjustmentDelta,
                       double firstAllowableDestTime,
-                      double lastAllowableDestTime);
+                      double endOfAllowableDestTimes);
 
     //==============================================================================
     /** Makes sure all the note-on and note-off pairs are up-to-date.
