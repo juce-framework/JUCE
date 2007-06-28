@@ -1112,43 +1112,37 @@ public:
 
         static const int keyTranslations[] =
         {
-            122, KeyPress::F1Key, 120, KeyPress::F2Key,
-            99, KeyPress::F3Key, 118, KeyPress::F4Key,
-            96, KeyPress::F5Key, 97, KeyPress::F6Key,
-            98, KeyPress::F7Key, 100, KeyPress::F8Key,
-            101, KeyPress::F9Key, 109, KeyPress::F10Key,
-            103, KeyPress::F11Key, 111, KeyPress::F12Key,
-            105, KeyPress::F13Key, 107, KeyPress::F14Key,
-            113, KeyPress::F15Key, 106, KeyPress::F16Key,
-            36, KeyPress::returnKey, 51, KeyPress::backspaceKey,
-            123, KeyPress::leftKey, 124, KeyPress::rightKey,
-            126, KeyPress::upKey, 125, KeyPress::downKey,
-            115, KeyPress::homeKey, 119, KeyPress::endKey,
-            116, KeyPress::pageUpKey, 121, KeyPress::pageDownKey,
-            76, KeyPress::returnKey,
-            82, KeyPress::numberPad0, 83, KeyPress::numberPad1,
-            84, KeyPress::numberPad2, 85, KeyPress::numberPad3,
-            86, KeyPress::numberPad4, 87, KeyPress::numberPad5,
-            88, KeyPress::numberPad6, 89, KeyPress::numberPad7,
-            91, KeyPress::numberPad8, 92, KeyPress::numberPad9,
-            65, KeyPress::numberPadDecimalPoint, 78, KeyPress::numberPadSubtract,
-            67, KeyPress::numberPadMultiply, 75, KeyPress::numberPadDivide,
-            69, KeyPress::numberPadAdd,
-            0
+            0, 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 0xa7, 'b',  
+            'q', 'w', 'e', 'r', 'y', 't', '1', '2', '3', '4', '6', '5', 
+            '=', '9', '7', '-', '8', '0', ']', 'o', 'u', '[', 'i', 'p', 
+            KeyPress::returnKey, 'l', 'j', '\'', 'k', ';', '\\', ',', '/',
+            'n', 'm', '.', 0, 0, '`', KeyPress::backspaceKey, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, KeyPress::numberPadDecimalPoint, 
+            0, KeyPress::numberPadMultiply, 0, KeyPress::numberPadAdd,
+            0, 0, 0, 0, 0, KeyPress::numberPadDivide, KeyPress::returnKey,
+            0, KeyPress::numberPadSubtract, 0, 0, 0, KeyPress::numberPad0,
+            KeyPress::numberPad1, KeyPress::numberPad2, KeyPress::numberPad3,
+            KeyPress::numberPad4, KeyPress::numberPad5, KeyPress::numberPad6,
+            KeyPress::numberPad7, 0, KeyPress::numberPad8, KeyPress::numberPad9,
+            0, 0, 0, KeyPress::F5Key, KeyPress::F6Key, KeyPress::F7Key, KeyPress::F3Key,
+            KeyPress::F8Key, KeyPress::F9Key, 0, KeyPress::F11Key, 0, KeyPress::F13Key,
+            KeyPress::F16Key, KeyPress::F14Key, 0, KeyPress::F10Key, 0, KeyPress::F12Key,
+            0, KeyPress::F15Key, 0, KeyPress::homeKey, KeyPress::pageUpKey, 0, KeyPress::F4Key,
+            KeyPress::endKey, KeyPress::F2Key, KeyPress::pageDownKey, KeyPress::F1Key, 
+            KeyPress::leftKey, KeyPress::rightKey, KeyPress::downKey, KeyPress::upKey, 0 
         };
 
-        const int* kt = keyTranslations;
-
-        while (*kt != 0)
+        if (rawKey > 0 && rawKey < numElementsInArray (keyTranslations))
         {
-            if ((int) rawKey == *kt)
-            {
-                keyCode = *++kt;
-                break;
-            }
-
-            kt += 2;
+            keyCode = keyTranslations [rawKey];
         }
+        else if (rawKey == 0 && textCharacter != 0)
+        {
+            keyCode = 'a';
+        }
+
+        if ((currentModifiers & (ModifierKeys::commandModifier | ModifierKeys::ctrlModifier)) != 0)
+            textCharacter = 0;
 
         static juce_wchar lastTextCharacter = 0;
 
