@@ -185,7 +185,7 @@ void* MouseCursor::getHandle() const throw()
 
 void MouseCursor::showWaitCursor() throw()
 {
-    MouseCursor mc (MouseCursor::WaitCursor);
+    const MouseCursor mc (MouseCursor::WaitCursor);
     mc.showInAllWindows();
 }
 
@@ -197,7 +197,7 @@ void MouseCursor::hideWaitCursor() throw()
     }
     else
     {
-        MouseCursor mc (MouseCursor::NormalCursor);
+        const MouseCursor mc (MouseCursor::NormalCursor);
         mc.showInAllWindows();
     }
 }

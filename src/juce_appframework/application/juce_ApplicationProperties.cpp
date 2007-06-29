@@ -77,8 +77,7 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
 {
     const bool userOk = (! testUserSettings) || getUserSettings()->save();
     const bool commonOk = (! testCommonSettings)
-                            || ((userProps == getCommonSettings()) ? false
-                                                                   : getCommonSettings()->save());
+                            || (userProps != getCommonSettings() && getCommonSettings()->save());
 
     if (! (userOk && commonOk))
     {
@@ -90,7 +89,17 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
                 filenames << "\n" << getUserSettings()->getFile().getFullPathName();
 
             if (! commonOk)
-                filenames << "\n" << getCommonSettings()->getFile().getFullPathName();
+            {
+                PropertiesFile* const realCommonProps 
+                    = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
+                                                                      true, msBeforeSaving, options);
+
+                if (realCommonProps != 0)
+                {
+                    filenames << "\n" << realCommonProps->getFile().getFullPathName();
+                    delete realCommonProps;
+                }
+            }
 
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          appName + TRANS(" - Unable to save settings"),
