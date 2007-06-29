@@ -224,7 +224,6 @@ void MessageManager::doPlatformSpecificInitialisation()
 
     wc.cbSize         = sizeof (wc);
     wc.lpfnWndProc    = (WNDPROC) juce_MessageWndProc;
-    wc.cbClsExtra     = 0;
     wc.cbWndExtra     = 4;
     wc.hInstance      = hmod;
     wc.lpszClassName  = className;

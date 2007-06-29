@@ -524,7 +524,7 @@ public:
                 sansSerif.add (faces[i]->getFamilyName());
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (FreeTypeInterface, false);
+    juce_DeclareSingleton_SingleThreaded_Minimal (FreeTypeInterface);
 
 private:
     //==============================================================================
