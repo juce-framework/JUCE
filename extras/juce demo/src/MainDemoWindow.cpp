@@ -55,6 +55,8 @@ public:
         textBox->setMultiLine (true, false);
         textBox->setReturnKeyStartsNewLine (true);
 
+        setAlwaysOnTop (true);
+
         setResizable (true, true); // we'll choose a corner-resizer component for this window,
                                    // as a contrast to the resizable border on the main window
     }

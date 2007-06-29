@@ -41,6 +41,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
+#include "../../../src/juce_core/basics/juce_Singleton.h"
 #include "../../../src/juce_core/io/streams/juce_MemoryInputStream.h"
 #include "../../../src/juce_core/io/files/juce_DirectoryIterator.h"
 #include "../../../src/juce_core/text/juce_XmlDocument.h"
@@ -524,7 +525,7 @@ public:
                 sansSerif.add (faces[i]->getFamilyName());
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (FreeTypeInterface);
+    juce_DeclareSingleton_SingleThreaded_Minimal (FreeTypeInterface)
 
 private:
     //==============================================================================
@@ -535,7 +536,7 @@ private:
     OwnedArray<FreeTypeFontFace> faces;
 };
 
-juce_ImplementSingleton_SingleThreaded (FreeTypeInterface);
+juce_ImplementSingleton_SingleThreaded (FreeTypeInterface)
 
 
 //==============================================================================
