@@ -982,10 +982,18 @@ public:
     {
         if (windowH != 0)
         {
+            const bool wasVisible = component->isVisible();
+
+            if (wasVisible)
+                setVisible (false);  // doesn't always seem to work if the window is visible when this is done..
+
             XSetWindowAttributes swa;
-            swa.override_redirect = getComponent()->isAlwaysOnTop() ? True : False;
+            swa.override_redirect = alwaysOnTop ? True : False;
 
             XChangeWindowAttributes (display, windowH, CWOverrideRedirect, &swa);
+
+            if (wasVisible)
+                setVisible (true);
         }
 
         return true;
