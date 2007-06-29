@@ -416,7 +416,7 @@ double Slider::getValue() const throw()
 {
     // for a two-value style slider, you should use the getMinValue() and getMaxValue()
     // methods to get the two values.
-    jassert (style != TwoValueHorizontal || style != TwoValueVertical);
+    jassert (style != TwoValueHorizontal && style != TwoValueVertical);
 
     return currentValue;
 }
@@ -427,7 +427,7 @@ void Slider::setValue (double newValue,
 {
     // for a two-value style slider, you should use the setMinValue() and setMaxValue()
     // methods to set the two values.
-    jassert (style != TwoValueHorizontal || style != TwoValueVertical);
+    jassert (style != TwoValueHorizontal && style != TwoValueVertical);
 
     newValue = constrainedValue (newValue);
 
