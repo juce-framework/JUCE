@@ -63,7 +63,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "juce_win32_DynamicLibraryLoader.h"
 
-extern void juce_updateMultiMonitorInfo(); // from WindowDriver
+extern void juce_updateMultiMonitorInfo() throw();
+
 
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()

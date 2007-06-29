@@ -1583,7 +1583,7 @@ public:
         }
     }
 
-    void showMouseCursor (Cursor cursor)
+    void showMouseCursor (Cursor cursor) throw()
     {
         XDefineCursor (display, windowH, cursor);
     }
@@ -2460,7 +2460,7 @@ void juce_windowMessageReceive (XEvent* event)
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
 #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
@@ -2635,10 +2635,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     {
         case MouseCursor::NoCursor:
         {
-            Image im (Image::ARGB, 16, 16, true);
-            void* const invisibleCursor = juce_createMouseCursorFromImage (im, 0, 0);
-
-            return invisibleCursor;
+            const Image im (Image::ARGB, 16, 16, true);
+            return juce_createMouseCursorFromImage (im, 0, 0);
         }
 
         case MouseCursor::NormalCursor:
@@ -2744,7 +2742,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     return (void*) XCreateFontCursor (display, shape);
 }
 
-void MouseCursor::showInWindow (ComponentPeer* peer) const
+void MouseCursor::showInWindow (ComponentPeer* peer) const throw()
 {
     LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (peer);
 
@@ -2752,7 +2750,7 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
         lp->showMouseCursor ((Cursor) getHandle());
 }
 
-void MouseCursor::showInAllWindows() const
+void MouseCursor::showInAllWindows() const throw()
 {
     for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         showInWindow (ComponentPeer::getPeer (i));

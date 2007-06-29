@@ -2239,7 +2239,7 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
     int mainMon = 0;
     int distFrom00 = 0x7fffff;
@@ -2308,7 +2308,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
         hotspotY = (hotspotY * maxH) / image.getHeight();
     }
 
-    Cursor* c = new Cursor();
+    Cursor* const c = new Cursor();
     c->hotSpot.h = hotspotX;
     c->hotSpot.v = hotspotY;
 
@@ -2337,13 +2337,13 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     if (newIm != 0)
         delete newIm;
 
-    CursorWrapper* cw = new CursorWrapper();
+    CursorWrapper* const cw = new CursorWrapper();
     cw->cursor = c;
     cw->themeCursor = kThemeArrowCursor;
-    return (void*)cw;
+    return (void*) cw;
 }
 
-static void* cursorFromData (const unsigned char* data, const int size, int hx, int hy)
+static void* cursorFromData (const unsigned char* data, const int size, int hx, int hy) throw()
 {
     Image* const im = ImageFileFormat::loadFrom ((const char*) data, size);
     jassert (im != 0);
@@ -2486,12 +2486,12 @@ void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) th
     }
 }
 
-void MouseCursor::showInAllWindows() const
+void MouseCursor::showInAllWindows() const throw()
 {
     showInWindow (0);
 }
 
-void MouseCursor::showInWindow (ComponentPeer*) const
+void MouseCursor::showInWindow (ComponentPeer*) const throw()
 {
     const CursorWrapper* const cw = (CursorWrapper*) getHandle();
 

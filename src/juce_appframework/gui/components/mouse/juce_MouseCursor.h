@@ -156,8 +156,8 @@ private:
 
     friend class Component;
 
-    void showInWindow (ComponentPeer* window) const;
-    void showInAllWindows() const;
+    void showInWindow (ComponentPeer* window) const throw();
+    void showInAllWindows() const throw();
 
     void* getHandle() const throw();
 };

@@ -39,7 +39,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../graphics/geometry/juce_RectangleList.h"
 
 extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
-                                         const bool clipToWorkArea);
+                                         const bool clipToWorkArea) throw();
 
 
 //==============================================================================
@@ -66,7 +66,7 @@ Desktop::~Desktop()
     jassert (desktopComponents.size() == 0);
 }
 
-Desktop& Desktop::getInstance()
+Desktop& JUCE_CALLTYPE Desktop::getInstance()
 {
     if (instance == 0)
         instance = new Desktop();

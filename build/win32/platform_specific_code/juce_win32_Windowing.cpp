@@ -2270,7 +2270,7 @@ BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
     DynamicLibraryLoader user32Dll ("user32.dll");
     DynamicLibraryImport (EnumDisplayMonitors, enumDisplayMonitors, BOOL, user32Dll,
@@ -2606,12 +2606,12 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
 }
 
 //==============================================================================
-void MouseCursor::showInWindow (ComponentPeer*) const
+void MouseCursor::showInWindow (ComponentPeer*) const throw()
 {
     SetCursor ((HCURSOR) getHandle());
 }
 
-void MouseCursor::showInAllWindows() const
+void MouseCursor::showInAllWindows() const throw()
 {
     showInWindow (0);
 }
