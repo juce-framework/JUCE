@@ -87,10 +87,10 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
             String filenames;
 
             if (! userOk)
-                filenames << T("\n") << getUserSettings()->getFile().getFullPathName();
+                filenames << "\n" << getUserSettings()->getFile().getFullPathName();
 
             if (! commonOk)
-                filenames << T("\n") << getCommonSettings()->getFile().getFullPathName();
+                filenames << "\n" << getCommonSettings()->getFile().getFullPathName();
 
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          appName + TRANS(" - Unable to save settings"),
@@ -144,7 +144,7 @@ PropertiesFile* ApplicationProperties::getCommonSettings()
         if (commonProps == 0 || ! commonProps->save())
         {
             delete commonProps;
-            commonProps = userProps;
+            commonProps = getUserSettings();
         }
     }
 
@@ -154,7 +154,7 @@ PropertiesFile* ApplicationProperties::getCommonSettings()
 bool ApplicationProperties::saveIfNeeded()
 {
     return (userProps == 0 || userProps->saveIfNeeded())
-         && (commonProps == 0 || commonProps->saveIfNeeded());
+         && (commonProps == 0 || commonProps == userProps || commonProps->saveIfNeeded());
 }
 
 void ApplicationProperties::closeFiles()
