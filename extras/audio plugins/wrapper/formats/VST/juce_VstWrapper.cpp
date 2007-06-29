@@ -1238,13 +1238,18 @@ static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
     return 0;
 }
 
+
 //==============================================================================
 // Mac startup code..
 #if JUCE_MAC
 
-extern "C" __attribute__((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
+extern "C" __attribute__ ((visibility("default"))) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
 {
-    initialiseJuce_GUI();
+    return pluginEntryPoint (audioMaster);
+}
+
+extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMasterCallback audioMaster)
+{
     return pluginEntryPoint (audioMaster);
 }
 
@@ -1257,8 +1262,7 @@ extern "C" AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
 extern "C" AEffect* main_plugin (audioMasterCallback audioMaster)
 {
     initialiseJuce_GUI();
-
-    SharedMessageThread::getInstance ();
+    SharedMessageThread::getInstance();
 
     return pluginEntryPoint (audioMaster);
 }
@@ -1277,7 +1281,12 @@ __attribute__((destructor)) void myPluginFini()
 // Win32 startup code..
 #else
 
-__declspec(dllexport) void* main (audioMasterCallback audioMaster)
+extern "C" __declspec (dllexport) AEffect* VSTPluginMain (audioMasterCallback audioMaster)
+{
+    return pluginEntryPoint (audioMaster);
+}
+
+extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
 {
     return (void*) pluginEntryPoint (audioMaster);
 }
