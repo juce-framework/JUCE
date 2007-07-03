@@ -1541,17 +1541,17 @@ static int FindCDDevices (CDDeviceInfo* const list,
                 {
                     for (BYTE lun = 0; lun < 8; ++lun)
                     {
-                        SRB_GDEVBlock s;
-                        zerostruct (s);
+                        SRB_GDEVBlock sb;
+                        zerostruct (sb);
 
-                        s.SRB_Cmd = SC_GET_DEV_TYPE;
-                        s.SRB_HaID = ha;
-                        s.SRB_Target = tgt;
-                        s.SRB_Lun = lun;
-                        fSendASPI32Command ((LPSRB)&s);
+                        sb.SRB_Cmd = SC_GET_DEV_TYPE;
+                        sb.SRB_HaID = ha;
+                        sb.SRB_Target = tgt;
+                        sb.SRB_Lun = lun;
+                        fSendASPI32Command ((LPSRB) &sb);
 
-                        if (s.SRB_Status == SS_COMP
-                             && s.SRB_DeviceType == DTYPE_CROM)
+                        if (sb.SRB_Status == SS_COMP
+                             && sb.SRB_DeviceType == DTYPE_CROM)
                         {
                             zeromem (&list[count], sizeof (CDDeviceInfo));
 

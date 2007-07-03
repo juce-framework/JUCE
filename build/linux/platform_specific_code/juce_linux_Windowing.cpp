@@ -1751,7 +1751,7 @@ private:
 
                 for (RectangleList::Iterator i (regionsNeedingRepaint); i.next();)
                 {
-                    const Rectangle& r = i.getRectangle();
+                    const Rectangle& r = *i.getRectangle();
 
                     image->blitToWindow (peer->windowH,
                                          r.getX(), r.getY(), r.getWidth(), r.getHeight(),

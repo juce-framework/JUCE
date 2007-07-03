@@ -44,7 +44,7 @@ const int ModifierKeys::leftButtonModifier       = 16;
 const int ModifierKeys::rightButtonModifier      = 32;
 const int ModifierKeys::middleButtonModifier     = 64;
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
  const int ModifierKeys::commandModifier         = 8;
  const int ModifierKeys::popupMenuClickModifier  = ModifierKeys::rightButtonModifier
                                                     | ModifierKeys::ctrlModifier;

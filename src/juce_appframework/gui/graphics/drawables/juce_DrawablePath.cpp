@@ -94,14 +94,16 @@ void DrawablePath::draw (Graphics& g, const AffineTransform& transform) const
     const Colour oldColour (g.getCurrentColour()); // save this so we can restore it later
     const float currentOpacity = oldColour.getFloatAlpha();
 
-    Brush* const tempBrush = fillBrush->createCopy();
-    tempBrush->applyTransform (transform);
-    tempBrush->multiplyOpacity (currentOpacity);
+    {
+        Brush* const tempBrush = fillBrush->createCopy();
+        tempBrush->applyTransform (transform);
+        tempBrush->multiplyOpacity (currentOpacity);
 
-    g.setBrush (tempBrush);
-    g.fillPath (path, transform);
+        g.setBrush (tempBrush);
+        g.fillPath (path, transform);
 
-    delete tempBrush;
+        delete tempBrush;
+    }
 
     if (strokeBrush != 0 && strokeType.getStrokeThickness() > 0.0f)
     {

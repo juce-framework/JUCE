@@ -40,16 +40,16 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Brush::Brush()
+Brush::Brush() throw()
 {
 }
 
-Brush::~Brush()
+Brush::~Brush() throw()
 {
 }
 
 void Brush::paintVerticalLine (LowLevelGraphicsContext& context,
-                               int x, float y1, float y2)
+                               int x, float y1, float y2) throw()
 {
     Path p;
     p.addRectangle ((float) x, y1, 1.0f, y2 - y1);
@@ -57,7 +57,7 @@ void Brush::paintVerticalLine (LowLevelGraphicsContext& context,
 }
 
 void Brush::paintHorizontalLine (LowLevelGraphicsContext& context,
-                                 int y, float x1, float x2)
+                                 int y, float x1, float x2) throw()
 {
     Path p;
     p.addRectangle (x1, (float) y, x2 - x1, 1.0f);
@@ -65,7 +65,7 @@ void Brush::paintHorizontalLine (LowLevelGraphicsContext& context,
 }
 
 void Brush::paintLine (LowLevelGraphicsContext& context,
-                       float x1, float y1, float x2, float y2)
+                       float x1, float y1, float x2, float y2) throw()
 {
     Path p;
     p.addLineSegment (x1, y1, x2, y2, 1.0f);

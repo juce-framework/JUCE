@@ -48,7 +48,7 @@ DocumentWindow::DocumentWindow (const String& title,
       titleBarHeight (26),
       menuBarHeight (24),
       requiredButtons (requiredButtons_),
-#ifdef JUCE_MAC
+#if JUCE_MAC
       positionTitleBarButtonsOnLeft (true),
 #else
       positionTitleBarButtonsOnLeft (false),
@@ -296,7 +296,7 @@ void DocumentWindow::lookAndFeelChanged()
 
         if (getCloseButton() != 0)
         {
-#ifdef JUCE_MAC
+#if JUCE_MAC
             getCloseButton()->addShortcut (KeyPress (T('w'), ModifierKeys::commandModifier, 0));
 #else
             getCloseButton()->addShortcut (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0));

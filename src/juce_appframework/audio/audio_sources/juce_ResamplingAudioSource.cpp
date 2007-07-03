@@ -229,7 +229,7 @@ void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& f
                      - coefficients[4] * fs.y1
                      - coefficients[5] * fs.y2;
 
-#ifdef JUCE_INTEL
+#if JUCE_INTEL
         if (! (out < -1.0e-8 || out > 1.0e-8))
             out = 0;
 #endif

@@ -119,7 +119,7 @@ FileLogger* FileLogger::createDefaultAppLogger (const String& logFileSubDirector
                                                 const String& welcomeMessage,
                                                 const int maxInitialFileSizeBytes)
 {
-#ifdef JUCE_MAC
+#if JUCE_MAC
     File logFile ("~/Library/Logs");
     logFile = logFile.getChildFile (logFileName);
 

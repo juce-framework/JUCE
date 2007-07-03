@@ -72,33 +72,33 @@ public:
                    const Colour& colour2,
                    const float x2,
                    const float y2,
-                   const bool isRadial);
+                   const bool isRadial) throw();
 
     /** Creates a gradient brush from a ColourGradient object.
     */
-    GradientBrush (const ColourGradient& gradient);
+    GradientBrush (const ColourGradient& gradient) throw();
 
     /** Destructor. */
-    ~GradientBrush();
+    ~GradientBrush() throw();
 
     //==============================================================================
-    Brush* createCopy() const;
+    Brush* createCopy() const throw();
 
-    void applyTransform (const AffineTransform& transform);
+    void applyTransform (const AffineTransform& transform) throw();
 
-    void multiplyOpacity (const float multiple);
+    void multiplyOpacity (const float multiple) throw();
 
-    bool isInvisible() const;
+    bool isInvisible() const throw();
 
     void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform);
+                    const Path& path, const AffineTransform& transform) throw();
 
     void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h);
+                         int x, int y, int w, int h) throw();
 
     void paintAlphaChannel (LowLevelGraphicsContext& context,
                             const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h);
+                            int x, int y, int w, int h) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

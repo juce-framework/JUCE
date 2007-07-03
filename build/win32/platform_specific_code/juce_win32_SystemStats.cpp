@@ -142,7 +142,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFe
     unsigned int ext = 0;
     unsigned int family = 0;
 
-  #ifdef JUCE_GCC
+  #if JUCE_GCC
     unsigned int dummy = 0;
   #endif
 
@@ -150,7 +150,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFe
     __try
   #endif
     {
-  #ifdef JUCE_GCC
+  #if JUCE_GCC
         __asm__ ("cpuid" : "=a" (family), "=b" (ext), "=c" (dummy),"=d" (cpu) : "a" (1));
   #else
         __asm
@@ -191,7 +191,7 @@ static void juce_getCpuVendor (char* const v)
     __try
   #endif
     {
-  #ifdef JUCE_GCC
+  #if JUCE_GCC
         unsigned int dummy = 0;
         __asm__ ("cpuid" : "=a" (dummy), "=b" (vendor[0]), "=c" (vendor[2]),"=d" (vendor[1]) : "a" (0));
   #else
@@ -371,7 +371,7 @@ void SystemStats::initialiseStats() throw()
     timeBeginPeriod (1);
 #endif
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 }

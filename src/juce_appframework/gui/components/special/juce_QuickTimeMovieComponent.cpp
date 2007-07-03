@@ -281,7 +281,7 @@ void QuickTimeMovieComponent::paint (Graphics& g)
 #endif
 
 //==============================================================================
-#ifdef JUCE_MAC
+#if JUCE_MAC
 
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../events/juce_MessageManager.h"

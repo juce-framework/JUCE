@@ -56,7 +56,7 @@ public:
     const Array <int> getPossibleBitDepths();
     bool canDoStereo();
     bool canDoMono();
-#ifdef JUCE_MAC
+#if JUCE_MAC
     bool canHandleFile (const File& fileToTest);
 #endif
 

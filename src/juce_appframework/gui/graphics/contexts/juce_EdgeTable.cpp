@@ -91,10 +91,10 @@ void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
         maxEdgesPerLine = newNumEdgesPerLine;
 
         const int newLineStrideElements = maxEdgesPerLine * 2 + 1;
-        int* const newTable = (int*) juce_malloc ((height << (int)oversampling)
+        int* const newTable = (int*) juce_malloc ((height << (int) oversampling)
                                                     * newLineStrideElements * sizeof (int));
 
-        for (int i = 0; i < (height << (int)oversampling); ++i)
+        for (int i = 0; i < (height << (int) oversampling); ++i)
         {
             const int* srcLine = table + lineStrideElements * i;
             int* dstLine = newTable + newLineStrideElements * i;

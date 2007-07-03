@@ -388,7 +388,7 @@ public:
 
 private:
     //==============================================================================
-#ifdef JUCE_MAC
+#if JUCE_MAC
     uint8 r, g, b;
 #else
     uint8 b, g, r;
@@ -397,7 +397,7 @@ private:
 } PACKED;
 
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma pack (pop)
 #endif
 

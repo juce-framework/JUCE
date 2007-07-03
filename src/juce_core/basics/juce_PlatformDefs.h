@@ -83,7 +83,7 @@
 #endif
 
 //==============================================================================
-#ifdef JUCE_MAC
+#if JUCE_MAC
 
   #include <CoreServices/CoreServices.h>
 
@@ -119,7 +119,7 @@
 #endif
 
 //==============================================================================
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
 
   #ifdef _DEBUG
     #define JUCE_DEBUG 1
@@ -301,7 +301,7 @@
       forcedinline void myfunction (int x)
       @endcode
   */
-  #if JUCE_DEBUG
+  #ifdef JUCE_DEBUG
     #define forcedinline  __forceinline
   #else
     #define forcedinline  inline

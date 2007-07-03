@@ -64,7 +64,7 @@ void PlatformUtilities::beep()
 
 
 //==============================================================================
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (disable : 4127)    // "Conditional expression is constant" warning
 #endif
 

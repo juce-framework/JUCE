@@ -462,7 +462,7 @@ void Component::addToDesktop (int desktopWindowStyleFlags, void* nativeWindowToA
     {
         const ComponentDeletionWatcher deletionChecker (this);
 
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
         // it's wise to give the component a non-zero size before
         // putting it on the desktop, as X windows get confused by this, and
         // a (1, 1) minimum size is enforced here.
@@ -2666,23 +2666,25 @@ void Component::internalMouseUp (const int oldModifiers, int x, int y, const int
             }
         }
 
-        const Component* p = parentComponent_;
-
-        while (p != 0)
         {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
+            const Component* p = parentComponent_;
 
-            for (int i = p->numDeepMouseListeners; --i >= 0;)
+            while (p != 0)
             {
-                ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseUp (me);
+                const ComponentDeletionWatcher parentDeletionChecker (p);
 
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
-                    return;
+                for (int i = p->numDeepMouseListeners; --i >= 0;)
+                {
+                    ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseUp (me);
 
-                i = jmin (i, p->numDeepMouseListeners);
+                    if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                        return;
+
+                    i = jmin (i, p->numDeepMouseListeners);
+                }
+
+                p = p->parentComponent_;
             }
-
-            p = p->parentComponent_;
         }
 
         // check for double-click

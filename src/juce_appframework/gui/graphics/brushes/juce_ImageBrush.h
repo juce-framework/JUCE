@@ -55,30 +55,30 @@ public:
     ImageBrush (Image* const image,
                 const int anchorX,
                 const int anchorY,
-                const float opacity);
+                const float opacity) throw();
 
     /** Destructor. */
-    ~ImageBrush();
+    ~ImageBrush() throw();
 
 
     //==============================================================================
-    Brush* createCopy() const;
+    Brush* createCopy() const throw();
 
-    void applyTransform (const AffineTransform& transform);
+    void applyTransform (const AffineTransform& transform) throw();
 
-    void multiplyOpacity (const float multiple);
+    void multiplyOpacity (const float multiple) throw();
 
-    bool isInvisible() const;
+    bool isInvisible() const throw();
 
     void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform);
+                    const Path& path, const AffineTransform& transform) throw();
 
     void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h);
+                         int x, int y, int w, int h) throw();
 
     void paintAlphaChannel (LowLevelGraphicsContext& context,
                             const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h);
+                            int x, int y, int w, int h) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -92,7 +92,7 @@ private:
     ImageBrush (const ImageBrush&);
     const ImageBrush& operator= (const ImageBrush&);
 
-    void getStartXY (int& x, int& y) const;
+    void getStartXY (int& x, int& y) const throw();
 };
 
 #endif   // __JUCE_IMAGEBRUSH_JUCEHEADER__

@@ -220,7 +220,7 @@ const File& File::operator= (const File& other) throw()
 }
 
 //==============================================================================
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
   #define NAMES_ARE_CASE_SENSITIVE 1
 #endif
 

@@ -102,7 +102,7 @@ void AudioDataConverters::convertFloatToFloat32LE (const float* source, void* de
     if (source != (const float*) dest)
         memcpy (dest, source, numSamples * sizeof (float));
 
-#ifdef JUCE_BIG_ENDIAN
+#if JUCE_BIG_ENDIAN
     uint32* const data = (uint32*) dest;
 
     for (int i = 0; i < numSamples; ++i)
@@ -115,7 +115,7 @@ void AudioDataConverters::convertFloatToFloat32BE (const float* source, void* de
     if (source != (const float*) dest)
         memcpy (dest, source, numSamples * sizeof (float));
 
-#ifdef JUCE_LITTLE_ENDIAN
+#if JUCE_LITTLE_ENDIAN
     uint32* const data = (uint32*) dest;
 
     for (int i = 0; i < numSamples; ++i)

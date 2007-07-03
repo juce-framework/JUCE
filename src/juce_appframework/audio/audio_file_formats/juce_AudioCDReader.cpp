@@ -33,7 +33,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
 
 //==============================================================================
 // Mac version doesn't need any native code because it's all done with files..

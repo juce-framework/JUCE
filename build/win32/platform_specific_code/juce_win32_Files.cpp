@@ -355,7 +355,7 @@ static int64 fileTimeToTime (const FILETIME* const ft) throw()
     // tell me if this fails!
     static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME));
 
-#ifdef JUCE_GCC
+#if JUCE_GCC
     return (((const ULARGE_INTEGER*) ft)->QuadPart - 116444736000000000LL) / 10000;
 #else
     return (((const ULARGE_INTEGER*) ft)->QuadPart - 116444736000000000) / 10000;
@@ -364,7 +364,7 @@ static int64 fileTimeToTime (const FILETIME* const ft) throw()
 
 static void timeToFileTime (const int64 time, FILETIME* const ft) throw()
 {
-#ifdef JUCE_GCC
+#if JUCE_GCC
     ((ULARGE_INTEGER*) ft)->QuadPart = time * 10000 + 116444736000000000LL;
 #else
     ((ULARGE_INTEGER*) ft)->QuadPart = time * 10000 + 116444736000000000;

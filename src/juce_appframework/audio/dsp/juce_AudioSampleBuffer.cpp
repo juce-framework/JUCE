@@ -502,9 +502,9 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
 
         if (! reader->usesFloatingPointData)
         {
-            for (int i = 0; i < 2; ++i)
+            for (int j = 0; j < 2; ++j)
             {
-                float* const d = (float*)(chans[i]);
+                float* const d = (float*) (chans[j]);
 
                 if (d != 0)
                 {
@@ -550,7 +550,6 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
         }
         else
         {
-            int* chans [3];
             chans[0] = (int*) juce_malloc (sizeof (int) * numSamples * 2);
 
             if (numChannels > 1)
@@ -560,13 +559,13 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
 
             chans[2] = 0;
 
-            for (int i = 0; i < 2; ++i)
+            for (int j = 0; j < 2; ++j)
             {
-                int* const dest = chans[i];
+                int* const dest = chans[j];
 
                 if (dest != 0)
                 {
-                    const float* const src = channels [i] + startSample;
+                    const float* const src = channels [j] + startSample;
 
                     for (int i = 0; i < numSamples; ++i)
                     {

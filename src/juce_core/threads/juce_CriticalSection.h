@@ -96,7 +96,7 @@ public:
 private:
     //==============================================================================
 #if JUCE_WIN32
-  #ifdef JUCE_64BIT
+  #if JUCE_64BIT
     // To avoid including windows.h in the public Juce includes, we'll just allocate a
     // block of memory here that's big enough to be used internally as a windows critical
     // section object.

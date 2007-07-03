@@ -152,7 +152,7 @@ void juce_killThread (void* handle) throw()
 
 void juce_setCurrentThreadName (const String& name) throw()
 {
-#if JUCE_DEBUG && JUCE_MSVC
+#if defined (JUCE_DEBUG) && JUCE_MSVC
     struct
     {
         DWORD dwType;
@@ -302,7 +302,7 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();
 #endif
 

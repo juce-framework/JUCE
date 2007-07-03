@@ -39,48 +39,48 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-SolidColourBrush::SolidColourBrush()
+SolidColourBrush::SolidColourBrush() throw()
     : colour (0xff000000)
 {
 }
 
-SolidColourBrush::SolidColourBrush (const Colour& colour_)
+SolidColourBrush::SolidColourBrush (const Colour& colour_) throw()
     : colour (colour_)
 {
 }
 
-SolidColourBrush::~SolidColourBrush()
+SolidColourBrush::~SolidColourBrush() throw()
 {
 }
 
-Brush* SolidColourBrush::createCopy() const
+Brush* SolidColourBrush::createCopy() const throw()
 {
     return new SolidColourBrush (colour);
 }
 
-void SolidColourBrush::applyTransform (const AffineTransform& /*transform*/)
+void SolidColourBrush::applyTransform (const AffineTransform& /*transform*/) throw()
 {
 }
 
-void SolidColourBrush::multiplyOpacity (const float multiple)
+void SolidColourBrush::multiplyOpacity (const float multiple) throw()
 {
     colour = colour.withMultipliedAlpha (multiple);
 }
 
-bool SolidColourBrush::isInvisible() const
+bool SolidColourBrush::isInvisible() const throw()
 {
     return colour.isTransparent();
 }
 
 void SolidColourBrush::paintPath (LowLevelGraphicsContext& context,
-                                  const Path& path, const AffineTransform& transform)
+                                  const Path& path, const AffineTransform& transform) throw()
 {
     if (! colour.isTransparent())
         context.fillPathWithColour (path, transform, colour, EdgeTable::Oversampling_4times);
 }
 
 void SolidColourBrush::paintRectangle (LowLevelGraphicsContext& context,
-                                       int x, int y, int w, int h)
+                                       int x, int y, int w, int h) throw()
 {
     if (! colour.isTransparent())
         context.fillRectWithColour (x, y, w, h, colour, false);
@@ -88,7 +88,7 @@ void SolidColourBrush::paintRectangle (LowLevelGraphicsContext& context,
 
 void SolidColourBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
                                           const Image& alphaChannelImage, int imageX, int imageY,
-                                          int x, int y, int w, int h)
+                                          int x, int y, int w, int h) throw()
 {
     if (! colour.isTransparent())
     {
@@ -102,19 +102,19 @@ void SolidColourBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
 }
 
 void SolidColourBrush::paintVerticalLine (LowLevelGraphicsContext& context,
-                                          int x, float y1, float y2)
+                                          int x, float y1, float y2) throw()
 {
     context.drawVerticalLine (x, y1, y2, colour);
 }
 
 void SolidColourBrush::paintHorizontalLine (LowLevelGraphicsContext& context,
-                                            int y, float x1, float x2)
+                                            int y, float x1, float x2) throw()
 {
     context.drawHorizontalLine (y, x1, x2, colour);
 }
 
 void SolidColourBrush::paintLine (LowLevelGraphicsContext& context,
-                                  float x1, float y1, float x2, float y2)
+                                  float x1, float y1, float x2, float y2) throw()
 {
     context.drawLine (x1, y1, x2, y2, colour);
 }

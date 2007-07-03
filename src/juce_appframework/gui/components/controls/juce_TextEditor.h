@@ -36,6 +36,7 @@
 #include "../../../events/juce_Timer.h"
 #include "../../../documents/juce_UndoManager.h"
 #include "../layout/juce_Viewport.h"
+#include "../menus/juce_PopupMenu.h"
 class TextEditor;
 class TextHolderComponent;
 
@@ -327,16 +328,16 @@ l    */
 
     //==============================================================================
     /** Returns the entire contents of the editor. */
-    const String getText() const;
+    const String getText() const throw();
 
     /** Returns a section of the contents of the editor. */
-    const String getTextSubstring (const int startCharacter, const int endCharacter) const;
+    const String getTextSubstring (const int startCharacter, const int endCharacter) const throw();
 
     /** Returns true if there are no characters in the editor.
 
         This is more efficient than calling getText().isEmpty().
     */
-    bool isEmpty() const;
+    bool isEmpty() const throw();
 
     /** Sets the entire content of the editor.
 
@@ -391,18 +392,18 @@ l    */
 
         @see getCaretPosition
     */
-    void setCaretPosition (const int newIndex);
+    void setCaretPosition (const int newIndex) throw();
 
     /** Returns the current index of the caret.
 
         @see setCaretPosition
     */
-    int getCaretPosition() const;
+    int getCaretPosition() const throw();
 
     /** Selects a section of the text.
     */
     void setHighlightedRegion (int startIndex,
-                               int numberOfCharactersToHighlight);
+                               int numberOfCharactersToHighlight) throw();
 
     /** Returns the first character that is selected.
 
@@ -426,33 +427,33 @@ l    */
 
         The co-ordinates are relative to the component's top-left.
     */
-    int getTextIndexAt (const int x, const int y);
+    int getTextIndexAt (const int x, const int y) throw();
 
     /** Returns the total width of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextWidth() const;
+    int getTextWidth() const throw();
 
     /** Returns the maximum height of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextHeight() const;
+    int getTextHeight() const throw();
 
     /** Changes the size of the gap at the top and left-edge of the editor.
 
         By default there's a gap of 4 pixels.
     */
-    void setIndents (const int newLeftIndent, const int newTopIndent);
+    void setIndents (const int newLeftIndent, const int newTopIndent) throw();
 
     /** Changes the size of border left around the edge of the component.
 
         @see getBorder
     */
-    void setBorder (const BorderSize& border);
+    void setBorder (const BorderSize& border) throw();
 
     /** Returns the size of border around the edge of the component.
 
@@ -500,10 +501,65 @@ l    */
     juce_UseDebuggingNewOperator
 
 protected:
-    void scrollToMakeSureCursorIsVisible();
-    void moveCaret (int newCaretPos);
-    void moveCursorTo (const int newPosition, const bool isSelecting);
-    void textChanged();
+    /** This adds the items to the popup menu.
+
+        By default it adds the cut/copy/paste items, but you can override this if
+        you need to replace these with your own items.
+
+        If you want to add your own items to the existing ones, you can override this,
+        call the base class's addPopupMenuItems() method, then append your own items.
+
+        When the menu has been shown, performPopupMenuAction() will be called to 
+        perform the item that the user has chosen.
+
+        The default menu items will be added using item IDs in the range
+        0x7fff0000 - 0x7fff1000, so you should avoid those values for your own
+        menu IDs.
+
+        @see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void addPopupMenuItems (PopupMenu& menuToAddTo);
+
+    /** This is called to perform one of the items that was shown on the popup menu.
+
+        If you've overridden addPopupMenuItems(), you should also override this
+        to perform the actions that you've added.
+
+        If you've overridden addPopupMenuItems() but have still left the default items
+        on the menu, remember to call the superclass's performPopupMenuAction()
+        so that it can perform the default actions if that's what the user clicked on.
+
+        @see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
+    */
+    virtual void performPopupMenuAction (const int menuItemID);
+
+    /** Scrolls the minimum distance needed to get the caret into view. */
+    void scrollToMakeSureCursorIsVisible() throw();
+
+    /** @internal */
+    void moveCaret (int newCaretPos) throw();
+
+    /** @internal */
+    void moveCursorTo (const int newPosition, const bool isSelecting) throw();
+
+    /** Used internally to dispatch a text-change message. */
+    void textChanged() throw();
+
+    /** Counts the number of characters in the text.
+
+        This is quicker than getting the text as a string if you just need to know 
+        the length.
+    */
+    int getTotalNumChars() throw();
+
+    /** Begins a new transaction in the UndoManager.
+    */
+    void newTransaction() throw();
+
+    /** Used internally to trigger an undo or redo. */
+    void doUndoRedo (const bool isRedo);
+
+    /** @internal */
     void handleCommandMessage (int commandId);
 
     virtual void returnPressed();
@@ -522,7 +578,6 @@ private:
     bool popupMenuEnabled           : 1;
     bool selectAllTextWhenFocused   : 1;
     bool scrollbarVisible           : 1;
-    bool menuVisible                : 1;
     bool wasFocused                 : 1;
     bool caretFlashState            : 1;
     bool keepCursorOnScreen         : 1;
@@ -554,45 +609,40 @@ private:
     friend class TextEditorInsertAction;
     friend class TextEditorRemoveAction;
 
-    void coalesceSimilarSections();
-    void splitSection (const int sectionIndex, const int charToSplitAt);
+    void coalesceSimilarSections() throw();
+    void splitSection (const int sectionIndex, const int charToSplitAt) throw();
 
-    void clearInternal (UndoManager* const um);
+    void clearInternal (UndoManager* const um) throw();
 
     void insert (const String& text,
                  const int insertIndex,
                  const Font& font,
                  const Colour& colour,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo);
+                 const int caretPositionToMoveTo) throw();
 
     void reinsert (const int insertIndex,
-                   const VoidArray sections);
+                   const VoidArray& sections) throw();
 
-    void remove (int startIndex,
+    void remove (const int startIndex,
                  int endIndex,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo);
-
-    int getTotalNumChars();
+                 const int caretPositionToMoveTo) throw();
 
     void getCharPosition (const int index,
                           float& x, float& y,
-                          float& lineHeight);
+                          float& lineHeight) const throw();
 
     int indexAtPosition (const float x,
-                         const float y);
+                         const float y) throw();
 
-    int findWordBreakAfter (int position) const;
-    int findWordBreakBefore (int position) const;
-
-    void newTransaction();
-    void doUndoRedo (const bool isRedo);
+    int findWordBreakAfter (int position) const throw();
+    int findWordBreakBefore (int position) const throw();
 
     friend class TextHolderComponent;
     friend class TextEditorViewport;
     void drawContent (Graphics& g);
-    void updateTextHolderSize();
+    void updateTextHolderSize() throw();
     float getWordWrapWidth() const throw();
     void timerCallbackInt();
     void repaintCaret();

@@ -37,7 +37,7 @@
 
 // As well as being for the mac, this file is included by the linux build.
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
  #include <Carbon/Carbon.h>
 #else
  #include <sys/wait.h>

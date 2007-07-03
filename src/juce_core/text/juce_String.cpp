@@ -36,7 +36,7 @@
 
 #include "../basics/juce_StandardHeader.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #include <float.h>
 #endif
 

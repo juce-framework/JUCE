@@ -34,7 +34,7 @@
 
 #include "juce_AudioFormatReader.h"
 #include "../../../juce_core/text/juce_StringArray.h"
-#ifdef JUCE_MAC
+#if JUCE_MAC
 #include "../../../juce_core/io/files/juce_File.h"
 #endif
 
@@ -154,7 +154,7 @@ public:
 
 private:
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
     File volumeDir;
     OwnedArray<File> tracks;
     Array <int> trackStartSamples;

@@ -38,7 +38,7 @@
     preference to the standard calls.
 */
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
   #ifndef JUCE_DLL
     //==============================================================================
     // Win32 debug non-DLL versions..

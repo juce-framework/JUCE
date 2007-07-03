@@ -40,7 +40,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_core/containers/juce_MemoryBlock.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (disable: 4312)
 #endif
 

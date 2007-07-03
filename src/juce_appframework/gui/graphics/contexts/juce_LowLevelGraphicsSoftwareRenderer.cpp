@@ -45,7 +45,7 @@ BEGIN_JUCE_NAMESPACE
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
-#if JUCE_DEBUG && JUCE_MSVC
+#if defined (JUCE_DEBUG) && JUCE_MSVC
  #pragma warning (disable: 4714)
 #endif
 
@@ -158,9 +158,9 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
 #if defined (JUCE_USE_SSE_INSTRUCTIONS) && ! JUCE_64BIT
         if (SystemStats::hasSSE())
         {
-            int64 rgb0 = ((int64) blendColour.getRed() << 32)
-                           | (blendColour.getGreen() << 16)
-                           | blendColour.getBlue();
+            int64 rgb0 = (((int64) blendColour.getRed()) << 32)
+                           | (int64) ((blendColour.getGreen() << 16)
+                                        | blendColour.getBlue());
 
             const int invAlpha = 0xff - alpha;
             int64 aaaa = (invAlpha << 16) | invAlpha;
@@ -1122,7 +1122,7 @@ void LowLevelGraphicsSoftwareRenderer::fillRectWithColour (int x, int y, int w, 
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        clippedFillRectWithColour (i.getRectangle(), x, y, w, h, colour, replaceExistingContents);
+        clippedFillRectWithColour (*i.getRectangle(), x, y, w, h, colour, replaceExistingContents);
     }
 }
 
@@ -1185,7 +1185,7 @@ void LowLevelGraphicsSoftwareRenderer::fillPathWithColour (const Path& path, con
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillPathWithColour (r.getX(), r.getY(), r.getWidth(), r.getHeight(), path, t, colour, quality);
     }
@@ -1233,7 +1233,7 @@ void LowLevelGraphicsSoftwareRenderer::fillPathWithGradient (const Path& path, c
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillPathWithGradient (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                      path, t, gradient, quality);
@@ -1339,7 +1339,7 @@ void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, cons
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillPathWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                   path, transform, sourceImage, imageX, imageY, opacity, quality);
@@ -1422,7 +1422,7 @@ void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithColour (const Image& 
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillAlphaChannelWithColour (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                            clipImage, x, y, colour);
@@ -1464,7 +1464,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithColour (int cl
         const uint8* const alphaValues
             = clipImage.lockPixelDataReadOnly (sx, sy, w, h, alphaStride, pixelStride);
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
         const uint8* const alphas = alphaValues;
 #else
         const uint8* const alphas = alphaValues + (clipImage.getFormat() == Image::ARGB ? 3 : 0);
@@ -1501,7 +1501,7 @@ void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithGradient (const Image
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillAlphaChannelWithGradient (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                              alphaChannelImage, imageX, imageY, gradient);
@@ -1541,7 +1541,7 @@ void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithImage (const Image& a
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedFillAlphaChannelWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                           alphaImage, alphaImageX, alphaImageY,
@@ -1565,7 +1565,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithImage (int x, 
         const uint8* const alpha
             = alphaImage.lockPixelDataReadOnly (x - alphaImageX, y - alphaImageY, w, h, maskStride, maskPixStride);
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
         const uint8* const alphaValues = alpha;
 #else
         const uint8* const alphaValues = alpha + (alphaImage.getFormat() == Image::ARGB ? 3 : 0);
@@ -1622,7 +1622,7 @@ void LowLevelGraphicsSoftwareRenderer::blendImage (const Image& sourceImage, int
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedBlendImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                            sourceImage, dx, dy, dw, dh, sx, sy, opacity);
@@ -1755,7 +1755,7 @@ void LowLevelGraphicsSoftwareRenderer::blendImageWarping (const Image& sourceIma
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedBlendImageWarping (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                   sourceImage, srcClipX, srcClipY, srcClipW, srcClipH,
@@ -1878,7 +1878,7 @@ void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2
 
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedDrawLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                          x1, y1, x2, y2, colour);
@@ -1949,7 +1949,7 @@ void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedDrawVerticalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                  x + xOffset, top + yOffset, bottom + yOffset, col);
@@ -1982,7 +1982,7 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double l
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         clippedDrawHorizontalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                    y + yOffset, left + xOffset, right + xOffset, col);

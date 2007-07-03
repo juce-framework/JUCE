@@ -50,7 +50,7 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
       startingFile (currentFileOrDirectory),
       useNativeDialogBox (useNativeDialogBox_)
 {
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
     useNativeDialogBox = false;
 #endif
 

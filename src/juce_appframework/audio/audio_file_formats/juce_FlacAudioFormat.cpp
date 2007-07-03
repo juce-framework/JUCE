@@ -406,7 +406,7 @@ public:
         buffer[10] = (uint8) ((info.sample_rate >> 12) & 0xff);
         buffer[11] = (uint8) ((info.sample_rate >> 4) & 0xff);
         buffer[12] = (uint8) (((info.sample_rate & 0x0f) << 4) | (channelsMinus1 << 1) | (bitsMinus1 >> 4));
-        buffer[13] = (FLAC__byte) (((bitsMinus1 & 0x0f) << 4) | ((info.total_samples >> 32) & 0x0f));
+        buffer[13] = (FLAC__byte) (((bitsMinus1 & 0x0f) << 4) | (unsigned int) ((info.total_samples >> 32) & 0x0f));
         packUint32 ((FLAC__uint32) info.total_samples, buffer + 14, 4);
         memcpy (buffer + 18, info.md5sum, 16);
 

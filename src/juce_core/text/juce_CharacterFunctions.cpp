@@ -56,7 +56,7 @@ int CharacterFunctions::length (const char* const s) throw()
 
 int CharacterFunctions::length (const juce_wchar* const s) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     int n = 0;
     while (s[n] != 0)
         ++n;
@@ -74,7 +74,7 @@ void CharacterFunctions::copy (char* dest, const char* src, const int maxChars) 
 
 void CharacterFunctions::copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     while (--maxChars >= 0 && *src != 0)
         *dest++ = *src++;
 
@@ -101,7 +101,7 @@ void CharacterFunctions::append (char* dest, const char* src) throw()
 
 void CharacterFunctions::append (juce_wchar* dest, const juce_wchar* src) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     while (*dest != 0)
         ++dest;
 
@@ -123,7 +123,7 @@ int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2) thr
 {
     jassert (s1 != 0 && s2 != 0);
 
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     for (;;)
     {
         if (*s1 != *s2)
@@ -157,7 +157,7 @@ int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int
 {
     jassert (s1 != 0 && s2 != 0);
 
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     while (--maxChars >= 0)
     {
         if (*s1 != *s2)
@@ -258,7 +258,7 @@ const char* CharacterFunctions::find (const char* const haystack, const char* co
 
 const juce_wchar* CharacterFunctions::find (const juce_wchar* haystack, const juce_wchar* const needle) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     while (*haystack != 0)
     {
         const juce_wchar* s1 = haystack;
@@ -425,7 +425,7 @@ int CharacterFunctions::ftime (char* const dest, const int maxChars, const char*
 
 int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     const String formatTemp (format);
     size_t num = strftime ((char*) dest, maxChars, (const char*) formatTemp, tm);
     String temp ((char*) dest);
@@ -472,7 +472,7 @@ int CharacterFunctions::getIntValue (const juce_wchar* s) throw()
 
 int64 CharacterFunctions::getInt64Value (const char* s) throw()
 {
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
     return atoll (s);
 #elif defined (JUCE_WIN32)
     return _atoi64 (s);
@@ -535,7 +535,7 @@ double CharacterFunctions::getDoubleValue (const char* const s) throw()
 
 double CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     String temp (s);
     return atof ((const char*) temp);
 #else
@@ -552,7 +552,7 @@ char CharacterFunctions::toUpperCase (const char character) throw()
 
 juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     return toupper ((char) character);
 #else
     return towupper (character);
@@ -607,7 +607,7 @@ char CharacterFunctions::toLowerCase (const char character) throw()
 
 juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     return tolower ((char) character);
 #else
     return towlower (character);
@@ -662,7 +662,7 @@ bool CharacterFunctions::isWhitespace (const char character) throw()
 
 bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     return isWhitespace ((char) character);
 #else
     return iswspace (character) != 0;
@@ -687,7 +687,7 @@ bool CharacterFunctions::isLetter (const char character) throw()
 
 bool CharacterFunctions::isLetter (const juce_wchar character) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     return isLetter ((char) character);
 #else
     return iswalpha (character) != 0;
@@ -703,7 +703,7 @@ bool CharacterFunctions::isLetterOrDigit (const char character) throw()
 
 bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 {
-#ifdef MACOS_10_2_OR_EARLIER
+#if MACOS_10_2_OR_EARLIER
     return isLetterOrDigit ((char) character);
 #else
     return iswalnum (character) != 0;
@@ -748,7 +748,7 @@ int CharacterFunctions::vprintf (char* const dest, const int maxLength, const ch
 
 int CharacterFunctions::vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw()
 {
-#ifdef MACOS_10_3_OR_EARLIER
+#if MACOS_10_3_OR_EARLIER
     const String formatTemp (format);
     size_t num = vprintf ((char*) dest, maxLength, formatTemp, args);
     String temp ((char*) dest);

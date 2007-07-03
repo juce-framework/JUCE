@@ -74,7 +74,7 @@ const StringPairArray WavAudioFormat::createBWAVMetadata (const String& descript
 
 
 //==============================================================================
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma pack (push, 1)
   #define PACKED
 #elif defined (JUCE_GCC)
@@ -150,7 +150,7 @@ struct BWAVChunk
 
 } PACKED;
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma pack (pop)
 #endif
 
@@ -221,9 +221,13 @@ public:
                     {
                         // Broadcast-wav extension chunk..
                         BWAVChunk* const bwav = (BWAVChunk*) juce_calloc (jmax (length + 1, (int) sizeof (BWAVChunk)));
-                        input->read (bwav, length);
-                        bwav->copyTo (metadataValues);
-                        juce_free (bwav);
+
+                        if (bwav != 0)
+                        {
+                            input->read (bwav, length);
+                            bwav->copyTo (metadataValues);
+                            juce_free (bwav);
+                        }
                     }
                     else if ((hasGotType && hasGotData) || chunkEnd <= input->getPosition())
                     {
@@ -268,7 +272,7 @@ public:
             start = 0;
         }
 
-        int numToDo = (int) jlimit ((int64) 0, (int64) numSamples, lengthInSamples - start);
+        const int numToDo = (int) jlimit ((int64) 0, (int64) numSamples, lengthInSamples - start);
 
         if (numToDo > 0)
         {
@@ -284,8 +288,8 @@ public:
                 right += startOffsetInDestBuffer;
 
             // (keep this a multiple of 3)
-            const int tempBufSize = 1440 * 16;
-            char tempBuffer[tempBufSize];
+            const int tempBufSize = 1440 * 4;
+            char tempBuffer [tempBufSize];
 
             while (num > 0)
             {
@@ -297,7 +301,7 @@ public:
 
                 if (bitsPerSample == 16)
                 {
-                    const short* src = (const short*)tempBuffer;
+                    const short* src = (const short*) tempBuffer;
 
                     if (numChannels > 1)
                     {
@@ -306,14 +310,14 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *right++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                             }
                         }
                         else if (right == 0)
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                                 ++src;
                             }
                         }
@@ -321,8 +325,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
-                                *right++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                             }
                         }
                     }
@@ -330,13 +334,13 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                            *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
                     }
                 }
                 else if (bitsPerSample == 24)
                 {
-                    const char* src = (const char*)tempBuffer;
+                    const char* src = (const char*) tempBuffer;
 
                     if (numChannels > 1)
                     {
@@ -378,9 +382,9 @@ public:
                 }
                 else if (bitsPerSample == 32)
                 {
-                    const unsigned int* src = (const unsigned int*)tempBuffer;
-                    unsigned int* l = (unsigned int*)left;
-                    unsigned int* r = (unsigned int*)right;
+                    const unsigned int* src = (const unsigned int*) tempBuffer;
+                    unsigned int* l = (unsigned int*) left;
+                    unsigned int* r = (unsigned int*) right;
 
                     if (numChannels > 1)
                     {
@@ -422,7 +426,7 @@ public:
                 }
                 else if (bitsPerSample == 8)
                 {
-                    const unsigned char* src = (const unsigned char*)tempBuffer;
+                    const unsigned char* src = (const unsigned char*) tempBuffer;
 
                     if (numChannels > 1)
                     {
@@ -431,14 +435,14 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *right++ = ((int)*src++ - 128) << 24;
+                                *right++ = ((int) *src++ - 128) << 24;
                             }
                         }
                         else if (right == 0)
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = ((int)*src++ - 128) << 24;
+                                *left++ = ((int) *src++ - 128) << 24;
                                 ++src;
                             }
                         }
@@ -446,8 +450,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = ((int)*src++ - 128) << 24;
-                                *right++ = ((int)*src++ - 128) << 24;
+                                *left++ = ((int) *src++ - 128) << 24;
+                                *right++ = ((int) *src++ - 128) << 24;
                             }
                         }
                     }

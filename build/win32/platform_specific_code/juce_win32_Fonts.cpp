@@ -454,8 +454,6 @@ juce_ImplementSingleton_SingleThreaded (FontDCHolder);
 
 
 //==============================================================================
-static MAT2 identityMatrix;
-
 static void addGlyphToTypeface (HDC dc,
                                 juce_wchar character,
                                 Typeface& dest,
@@ -497,6 +495,7 @@ static void addGlyphToTypeface (HDC dc,
 
     const float scaleX = 1.0f / height;
     const float scaleY = -1.0f / height;
+    static const MAT2 identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
 
     int bufSize;
 
@@ -672,10 +671,6 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
                                                   bool italic,
                                                   bool addAllGlyphsToFont) throw()
 {
-    zerostruct (identityMatrix);
-    identityMatrix.eM11.value = 1;
-    identityMatrix.eM22.value = 1;
-
     clear();
 
     HDC dc = FontDCHolder::getInstance()->loadFont (fontName, bold, italic, 0);

@@ -86,7 +86,8 @@ bool RectangleList::isEmpty() const throw()
 
 //==============================================================================
 RectangleList::Iterator::Iterator (const RectangleList& list) throw()
-    : owner (list),
+    : current (0),
+      owner (list),
       index (list.rects.size())
 {
 }
@@ -99,7 +100,7 @@ bool RectangleList::Iterator::next() throw()
 {
     if (--index >= 0)
     {
-        current = owner.rects.getReference (index);
+        current = & (owner.rects.getReference (index));
         return true;
     }
 
@@ -494,12 +495,12 @@ const Rectangle RectangleList::getBounds() const throw()
 
         for (int i = rects.size(); --i > 0;)
         {
-            const Rectangle& r = rects.getReference (i);
+            const Rectangle& r2 = rects.getReference (i);
 
-            minX = jmin (minX, r.x);
-            minY = jmin (minY, r.y);
-            maxX = jmax (maxX, r.getRight());
-            maxY = jmax (maxY, r.getBottom());
+            minX = jmin (minX, r2.x);
+            minY = jmin (minY, r2.y);
+            maxX = jmax (maxX, r2.getRight());
+            maxY = jmax (maxY, r2.getBottom());
         }
 
         return Rectangle (minX, minY, maxX - minX, maxY - minY);

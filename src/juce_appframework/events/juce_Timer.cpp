@@ -315,7 +315,7 @@ void juce_callAnyTimersSynchronously()
 }
 
 //==============================================================================
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
 static SortedSet <Timer*> activeTimers;
 #endif
 
@@ -325,7 +325,7 @@ Timer::Timer() throw()
      previous (0),
      next (0)
 {
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
     activeTimers.add (this);
 #endif
 }
@@ -336,7 +336,7 @@ Timer::Timer (const Timer&) throw()
      previous (0),
      next (0)
 {
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
     activeTimers.add (this);
 #endif
 }
@@ -345,7 +345,7 @@ Timer::~Timer()
 {
     stopTimer();
 
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
     activeTimers.removeValue (this);
 #endif
 }
@@ -354,7 +354,7 @@ void Timer::startTimer (const int interval) throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
     jassert (activeTimers.contains (this));
 #endif
@@ -375,7 +375,7 @@ void Timer::stopTimer() throw()
 {
     const ScopedLock sl (InternalTimerThread::lock);
 
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
     // this isn't a valid object! Your timer might be a dangling pointer or something..
     jassert (activeTimers.contains (this));
 #endif

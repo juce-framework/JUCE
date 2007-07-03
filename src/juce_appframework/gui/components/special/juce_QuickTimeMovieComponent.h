@@ -172,7 +172,7 @@ public:
     void parentHierarchyChanged();
     /** @internal */
     void visibilityChanged();
-#ifdef JUCE_MAC
+#if JUCE_MAC
     /** @internal */
     void handleMCEvent (void*);
     /** @internal */
@@ -193,7 +193,7 @@ private:
 
     void* internal;
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
     void* associatedWindow;
     Rectangle lastPositionApplied;
     bool controllerAssignedToWindow, reentrant, looping;

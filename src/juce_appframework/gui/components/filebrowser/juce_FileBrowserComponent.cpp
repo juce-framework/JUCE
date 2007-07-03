@@ -485,7 +485,7 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
     rootNames.add ("Desktop");
 #endif
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     rootNames.add ("Home folder");
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
@@ -511,7 +511,7 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
     }
 #endif
 
-#ifdef JUCE_LINUX
+#if JUCE_LINUX
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());

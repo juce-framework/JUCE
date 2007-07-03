@@ -234,14 +234,14 @@ public:
         bool next() throw();
 
         /** Returns the current rectangle. */
-        const Rectangle& getRectangle() const throw()       { return current; }
+        const Rectangle* getRectangle() const throw()       { return current; }
 
 
         //==============================================================================
         juce_UseDebuggingNewOperator
 
     private:
-        Rectangle current;
+        const Rectangle* current;
         const RectangleList& owner;
         int index;
 

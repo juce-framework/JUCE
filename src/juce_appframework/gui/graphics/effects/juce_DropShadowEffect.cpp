@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../imaging/juce_Image.h"
 #include "../colour/juce_PixelFormats.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma optimize ("t", on)  // try to avoid slowing everything down in debug builds
 #endif
 

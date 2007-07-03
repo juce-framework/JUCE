@@ -234,7 +234,7 @@ const String KeyPress::getTextDescription() const
         if (mods.isShiftDown())
             desc << "shift + ";
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
           // only do this on the mac, because on Windows ctrl and command are the same,
           // and this would get confusing
           if (mods.isCommandDown())

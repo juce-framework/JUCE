@@ -120,7 +120,7 @@ END_JUCE_NAMESPACE
    Note that this can be disabled by defining DONT_AUTOLINK_TO_JUCE_LIBRARY before
    including this header file.
 */
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
 
   #ifndef DONT_AUTOLINK_TO_JUCE_LIBRARY
 

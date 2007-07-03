@@ -200,8 +200,8 @@ public:
                 right += startOffsetInDestBuffer;
 
             // (keep this a multiple of 3)
-            const int tempBufSize = 1440 * 16;
-            char tempBuffer[tempBufSize];
+            const int tempBufSize = 1440 * 4;
+            char tempBuffer [tempBufSize];
 
             while (num > 0)
             {
@@ -215,7 +215,7 @@ public:
                 {
                     if (littleEndian)
                     {
-                        const short* src = (const short*)tempBuffer;
+                        const short* src = (const short*) tempBuffer;
 
                         if (numChannels > 1)
                         {
@@ -223,7 +223,7 @@ public:
                             {
                                 for (int i = numThisTime; --i >= 0;)
                                 {
-                                    *right++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                    *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                                     ++src;
                                 }
                             }
@@ -232,15 +232,15 @@ public:
                                 for (int i = numThisTime; --i >= 0;)
                                 {
                                     ++src;
-                                    *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                    *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                                 }
                             }
                             else
                             {
                                 for (int i = numThisTime; --i >= 0;)
                                 {
-                                    *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
-                                    *right++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                    *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                                    *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                                 }
                             }
                         }
@@ -248,13 +248,13 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = (int) swapIfBigEndian ((unsigned short)*src++) << 16;
+                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                             }
                         }
                     }
                     else
                     {
-                        const char* src = (const char*)tempBuffer;
+                        const char* src = (const char*) tempBuffer;
 
                         if (numChannels > 1)
                         {
@@ -385,9 +385,9 @@ public:
                 }
                 else if (bitsPerSample == 32)
                 {
-                    const unsigned int* src = (const unsigned int*)tempBuffer;
-                    unsigned int* l = (unsigned int*)left;
-                    unsigned int* r = (unsigned int*)right;
+                    const unsigned int* src = (const unsigned int*) tempBuffer;
+                    unsigned int* l = (unsigned int*) left;
+                    unsigned int* r = (unsigned int*) right;
 
                     if (littleEndian)
                     {
@@ -464,12 +464,12 @@ public:
                         }
                     }
 
-                    left = (int*)l;
-                    right = (int*)r;
+                    left = (int*) l;
+                    right = (int*) r;
                 }
                 else if (bitsPerSample == 8)
                 {
-                    const char* src = (const char*)tempBuffer;
+                    const char* src = (const char*) tempBuffer;
 
                     if (numChannels > 1)
                     {
@@ -477,7 +477,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *right++ = ((int)*src++) << 24;
+                                *right++ = ((int) *src++) << 24;
                                 ++src;
                             }
                         }
@@ -486,15 +486,15 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *left++ = ((int)*src++) << 24;
+                                *left++ = ((int) *src++) << 24;
                             }
                         }
                         else
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = ((int)*src++) << 24;
-                                *right++ = ((int)*src++) << 24;
+                                *left++ = ((int) *src++) << 24;
+                                *right++ = ((int) *src++) << 24;
                             }
                         }
                     }
@@ -502,7 +502,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = ((int)*src++) << 24;
+                            *left++ = ((int) *src++) << 24;
                         }
                     }
                 }
@@ -797,7 +797,7 @@ bool AiffAudioFormat::canDoMono()
     return true;
 }
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
 bool AiffAudioFormat::canHandleFile (const File& f)
 {
     if (AudioFormat::canHandleFile (f))

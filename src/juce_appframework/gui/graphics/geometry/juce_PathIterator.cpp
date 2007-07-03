@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_PathIterator.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma optimize ("t", on)
 #endif
 

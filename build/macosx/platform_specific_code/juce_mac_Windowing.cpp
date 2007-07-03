@@ -865,7 +865,7 @@ public:
             // stuff away
             for (RectangleList::Iterator i (regionsNeedingRepaint); i.next();)
             {
-                const Rectangle& r = i.getRectangle();
+                const Rectangle& r = *i.getRectangle();
                 peer->repaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
             }
         }
@@ -916,7 +916,7 @@ public:
                     {
                         for (RectangleList::Iterator i (*context.getRawClipRegion()); i.next();)
                         {
-                            const Rectangle& r = i.getRectangle();
+                            const Rectangle& r = *i.getRectangle();
                             image->clear (r.getX(), r.getY(), r.getWidth(), r.getHeight());
                         }
                     }
@@ -940,7 +940,7 @@ public:
 
                     for (RectangleList::Iterator i (total); i.next();)
                     {
-                        const Rectangle& r = i.getRectangle();
+                        const Rectangle& r = *i.getRectangle();
                         rects[n].origin.x = (int) r.getX();
                         rects[n].origin.y = (int) r.getY();
                         rects[n].size.width = roundFloatToInt (r.getWidth());

@@ -45,58 +45,58 @@ GradientBrush::GradientBrush (const Colour& colour1,
                               const Colour& colour2,
                               const float x2,
                               const float y2,
-                              const bool isRadial)
+                              const bool isRadial) throw()
     : gradient (colour1, x1, y1,
                 colour2, x2, y2,
                 isRadial)
 {
 }
 
-GradientBrush::GradientBrush (const ColourGradient& gradient_)
+GradientBrush::GradientBrush (const ColourGradient& gradient_) throw()
     : gradient (gradient_)
 {
 }
 
-GradientBrush::~GradientBrush()
+GradientBrush::~GradientBrush() throw()
 {
 }
 
-Brush* GradientBrush::createCopy() const
+Brush* GradientBrush::createCopy() const throw()
 {
     return new GradientBrush (gradient);
 }
 
-void GradientBrush::applyTransform (const AffineTransform& transform)
+void GradientBrush::applyTransform (const AffineTransform& transform) throw()
 {
     gradient.transform = gradient.transform.followedBy (transform);
 }
 
-void GradientBrush::multiplyOpacity (const float multiple)
+void GradientBrush::multiplyOpacity (const float multiple) throw()
 {
     gradient.multiplyOpacity (multiple);
 }
 
-bool GradientBrush::isInvisible() const
+bool GradientBrush::isInvisible() const throw()
 {
     return gradient.isInvisible();
 }
 
 //==============================================================================
 void GradientBrush::paintPath (LowLevelGraphicsContext& context,
-                               const Path& path, const AffineTransform& transform)
+                               const Path& path, const AffineTransform& transform) throw()
 {
     context.fillPathWithGradient (path, transform, gradient, EdgeTable::Oversampling_4times);
 }
 
 void GradientBrush::paintRectangle (LowLevelGraphicsContext& context,
-                                    int x, int y, int w, int h)
+                                    int x, int y, int w, int h) throw()
 {
     context.fillRectWithGradient (x, y, w, h, gradient);
 }
 
 void GradientBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
                                        const Image& alphaChannelImage, int imageX, int imageY,
-                                       int x, int y, int w, int h)
+                                       int x, int y, int w, int h) throw()
 {
     context.saveState();
 

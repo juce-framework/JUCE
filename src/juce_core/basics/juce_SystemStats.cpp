@@ -117,7 +117,7 @@ void juce_Free (void* const block)
     free (block);
 }
 
-#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
 
 void* juce_DebugMalloc (const int size, const char* file, const int line)
 {

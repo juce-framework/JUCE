@@ -44,7 +44,7 @@
 /** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
 forcedinline uint32 swapByteOrder (uint32 n) throw()
 {
-#ifdef JUCE_MAC
+#if JUCE_MAC
     // Mac version
     return CFSwapInt32 (n);
 #elif JUCE_GCC
@@ -73,7 +73,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
-#ifdef JUCE_MAC
+#if JUCE_MAC
     return CFSwapInt64 (value);
 #else
     return (((int64) swapByteOrder ((uint32) value)) << 32)
@@ -81,7 +81,7 @@ inline uint64 swapByteOrder (const uint64 value) throw()
 #endif
 }
 
-#ifdef JUCE_LITTLE_ENDIAN
+#if JUCE_LITTLE_ENDIAN
   /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
   inline uint16     swapIfBigEndian (const uint16 v) throw()             { return v; }
   /** Swaps the byte order of a 32-bit int if the CPU is big-endian */

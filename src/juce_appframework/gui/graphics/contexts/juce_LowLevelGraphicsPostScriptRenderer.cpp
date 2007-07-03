@@ -41,7 +41,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_Rectangle.h"
 #include "../../../../juce_core/containers/juce_SparseSet.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (disable: 4996) // deprecated sprintf warning
 #endif
 
@@ -52,7 +52,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if JUCE_DEBUG && WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS
+#if defined (JUCE_DEBUG) && WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS
  #define notPossibleInPostscriptAssert jassertfalse
 #else
  #define notPossibleInPostscriptAssert
@@ -218,7 +218,7 @@ void LowLevelGraphicsPostScriptRenderer::writeClip()
                 out << '\n';
             }
 
-            const Rectangle& r = i.getRectangle();
+            const Rectangle& r = *i.getRectangle();
 
             out << r.getX() << ' ' << -r.getY() << ' '
                 << r.getWidth() << ' ' << -r.getHeight() << " pr ";
@@ -541,10 +541,10 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
                 pixel = Colours::transparentWhite;
             }
 
-            char data [16];
-            sprintf (data, "%x%x%x", pixel.getRed(), pixel.getGreen(), pixel.getBlue());
+            char colourString [16];
+            sprintf (colourString, "%x%x%x", pixel.getRed(), pixel.getGreen(), pixel.getBlue());
 
-            out << (const char*) data;
+            out << (const char*) colourString;
             charsOnLine += 3;
 
             if (charsOnLine > 100)
@@ -591,7 +591,7 @@ void LowLevelGraphicsPostScriptRenderer::blendImageWarping (const Image& sourceI
             itemsOnLine = 0;
         }
 
-        const Rectangle& r = i.getRectangle();
+        const Rectangle& r = *i.getRectangle();
 
         out << r.getX() << ' ' << r.getY() << ' ' << r.getWidth() << ' ' << r.getHeight() << " pr ";
     }

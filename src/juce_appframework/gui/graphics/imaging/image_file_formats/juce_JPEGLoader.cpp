@@ -31,7 +31,7 @@
 
 #include "../../../../../juce_core/basics/juce_StandardHeader.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (push)
 #endif
 
@@ -40,7 +40,7 @@ extern "C"
 #include "jpglib/jpeglib.h"
 }
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 

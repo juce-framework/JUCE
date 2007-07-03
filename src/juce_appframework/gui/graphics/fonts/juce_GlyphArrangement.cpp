@@ -1079,19 +1079,19 @@ void GlyphArrangement::justifyGlyphs (const int startIndex,
         if (justification.testFlags (Justification::horizontallyJustified))
         {
             int lineStart = 0;
-            float y = glyphs [startIndex].getBaselineY();
+            float baseY = glyphs [startIndex].getBaselineY();
 
             int i;
             for (i = 0; i < num; ++i)
             {
                 const float glyphY = glyphs [startIndex + i].getBaselineY();
 
-                if (glyphY != y)
+                if (glyphY != baseY)
                 {
                     spreadOutLine (startIndex + lineStart, i - lineStart, width);
 
                     lineStart = i;
-                    y = glyphY;
+                    baseY = glyphY;
                 }
             }
 

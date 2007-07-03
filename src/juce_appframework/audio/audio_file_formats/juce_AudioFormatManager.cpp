@@ -84,7 +84,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat,
 
 void AudioFormatManager::registerBasicFormats()
 {
-#ifdef JUCE_MAC
+#if JUCE_MAC
     registerFormat (new AiffAudioFormat(), true);
     registerFormat (new WavAudioFormat(), false);
 #else

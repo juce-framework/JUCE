@@ -42,7 +42,7 @@ BEGIN_JUCE_NAMESPACE
 ImageBrush::ImageBrush (Image* const image_,
                         const int anchorX_,
                         const int anchorY_,
-                        const float opacity_)
+                        const float opacity_) throw()
    : image (image_),
      anchorX (anchorX_),
      anchorY (anchorY_),
@@ -60,31 +60,31 @@ ImageBrush::ImageBrush (Image* const image_,
     }
 }
 
-ImageBrush::~ImageBrush()
+ImageBrush::~ImageBrush() throw()
 {
 }
 
-Brush* ImageBrush::createCopy() const
+Brush* ImageBrush::createCopy() const throw()
 {
     return new ImageBrush (image, anchorX, anchorY, opacity);
 }
 
-void ImageBrush::multiplyOpacity (const float multiple)
+void ImageBrush::multiplyOpacity (const float multiple) throw()
 {
     opacity *= multiple;
 }
 
-bool ImageBrush::isInvisible() const
+bool ImageBrush::isInvisible() const throw()
 {
     return opacity == 0.0f;
 }
 
-void ImageBrush::applyTransform (const AffineTransform& /*transform*/)
+void ImageBrush::applyTransform (const AffineTransform& /*transform*/) throw()
 {
     //xxx should probably be smarter and warp the image
 }
 
-void ImageBrush::getStartXY (int& x, int& y) const
+void ImageBrush::getStartXY (int& x, int& y) const throw()
 {
     x -= anchorX;
     y -= anchorY;
@@ -109,7 +109,7 @@ void ImageBrush::getStartXY (int& x, int& y) const
 
 //==============================================================================
 void ImageBrush::paintRectangle (LowLevelGraphicsContext& context,
-                                 int x, int y, int w, int h)
+                                 int x, int y, int w, int h) throw()
 {
     context.saveState();
 
@@ -142,7 +142,7 @@ void ImageBrush::paintRectangle (LowLevelGraphicsContext& context,
 }
 
 void ImageBrush::paintPath (LowLevelGraphicsContext& context,
-                            const Path& path, const AffineTransform& transform)
+                            const Path& path, const AffineTransform& transform) throw()
 {
     if (image != 0)
     {
@@ -186,15 +186,15 @@ void ImageBrush::paintPath (LowLevelGraphicsContext& context,
 
 void ImageBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
                                     const Image& alphaChannelImage, int imageX, int imageY,
-                                    int x, int y, int w, int h)
+                                    int x, int y, int w, int h) throw()
 {
     context.saveState();
 
     if (image != 0 && context.reduceClipRegion (x, y, w, h))
     {
         const Rectangle clip (context.getClipBounds());
-        int x = clip.getX();
-        int y = clip.getY();
+        x = clip.getX();
+        y = clip.getY();
         const int right = clip.getRight();
         const int bottom = clip.getBottom();
 

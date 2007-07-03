@@ -319,7 +319,7 @@ void PlatformUtilities::setCurrentModuleInstanceHandle (void* newHandle)
 
 void PlatformUtilities::fpuReset()
 {
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
     _clearfp();
 #endif
 }

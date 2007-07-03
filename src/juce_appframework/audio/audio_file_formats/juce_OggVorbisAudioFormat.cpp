@@ -35,7 +35,7 @@
 
 #include "../../../juce_core/basics/juce_StandardHeader.h"
 
-#ifdef JUCE_MAC
+#if JUCE_MAC
   #define __MACOSX__ 1
 #endif
 

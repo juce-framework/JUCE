@@ -147,8 +147,10 @@ public:
 
     Image* decodeImage (InputStream& in)
     {
-        GIFLoader loader (in);
-        return loader.getImage();
+        GIFLoader* const loader = new GIFLoader (in);
+        Image* const im = loader->getImage();
+        delete loader;
+        return im;
     }
 
     bool writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)

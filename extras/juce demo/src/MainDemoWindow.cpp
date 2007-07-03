@@ -432,7 +432,7 @@ public:
             break;
 
         case showOpenGL:
-#ifdef JUCE_OPENGL
+#if JUCE_OPENGL
             showDemo (createOpenGLDemo(), BinaryData::opengldemo_cpp);
             currentDemoId = showOpenGL;
 #endif

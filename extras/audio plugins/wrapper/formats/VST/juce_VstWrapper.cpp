@@ -105,9 +105,10 @@ BEGIN_JUCE_NAMESPACE
   extern void juce_macDoPendingRepaintsNow();
  #elif JUCE_LINUX
   extern Display* display;
-  extern bool juce_dispatchNextMessageOnSystemQueue (bool);
+  extern bool juce_postMessageToSystemQueue (void* message);
  #endif
 END_JUCE_NAMESPACE
+
 
 //==============================================================================
 #if JUCE_WIN32
@@ -173,7 +174,7 @@ public:
         const int quitMessageId = 0xfffff321;
         Message* const m = new Message (quitMessageId, 1, 0, 0);
 
-        if (! juce_postMessageToSystemQueue (m, true))
+        if (! juce_postMessageToSystemQueue (m))
             delete m;
 
         clearSingletonInstance();
@@ -325,6 +326,7 @@ public:
         cEffect.flags |= effFlagsHasEditor;
 
         setUniqueID ((int) (JucePlugin_VSTUniqueID));
+        getAeffect()->version = (long) (JucePlugin_VersionCode);
 
 #if JucePlugin_WantsMidiInput && ! JUCE_USE_VSTSDK_2_4
         wantEvents();
@@ -541,7 +543,7 @@ public:
         if (! isProcessing)
             resume();
 
-#if JUCE_DEBUG
+#ifdef JUCE_DEBUG
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
 #endif
 

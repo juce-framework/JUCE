@@ -31,7 +31,7 @@
 
 #include "../../juce_core/basics/juce_StandardHeader.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable: 4245 4514 4100)
   #include <crtdbg.h>

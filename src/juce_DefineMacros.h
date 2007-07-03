@@ -51,7 +51,7 @@
   // on the Mac, these symbols are defined in the Mac libraries, so
   // these macros make it easier to reference them without writing out
   // the namespace every time.
-  #ifdef JUCE_MAC
+  #if JUCE_MAC
     #define Component       JUCE_NAMESPACE::Component
     #define MemoryBlock     JUCE_NAMESPACE::MemoryBlock
     #define Point           JUCE_NAMESPACE::Point

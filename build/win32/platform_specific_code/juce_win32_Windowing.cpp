@@ -282,17 +282,7 @@ public:
 
         SelectObject (hdc, hBitmap);
 
-        static uint8 needsClearing = 0;
-
-        if (needsClearing == 0)
-        {
-            if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
-                needsClearing = 2;
-            else
-                needsClearing = 1;
-        }
-
-        if (format_ == ARGB && needsClearing == 2 && clearImage)
+        if (format_ == ARGB && clearImage)
             zeromem (bitmapData, abs (h * lineStride));
 
         imageData = bitmapData - (lineStride * (h - 1));
@@ -303,11 +293,11 @@ public:
         DeleteDC (hdc);
         DeleteObject (hBitmap);
         imageData = 0; // to stop the base class freeing this
-
     }
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
-                       int x, int y, const RectangleList& maskedRegion) throw()
+                       const int x, const int y, 
+                       const RectangleList& maskedRegion) throw()
     {
         static HDRAWDIB hdd = 0;
         static bool needToCreateDrawDib = true;
@@ -371,7 +361,7 @@ public:
             {
                 for (RectangleList::Iterator i (maskedRegion); i.next();)
                 {
-                    const Rectangle& r = i.getRectangle();
+                    const Rectangle& r = *i.getRectangle();
                     ExcludeClipRect (hdc, r.getX(), r.getY(), r.getRight(), r.getBottom());
                 }
             }
@@ -388,7 +378,7 @@ public:
 
                 for (RectangleList::Iterator i (maskedRegion); i.next();)
                 {
-                    const Rectangle& r = i.getRectangle();
+                    const Rectangle& r = *i.getRectangle();
                     ExcludeClipRect (dc, r.getX(), r.getY(), r.getRight(), r.getBottom());
                 }
             }
@@ -1355,7 +1345,7 @@ private:
 
                 while (i.next())
                 {
-                    const Rectangle& r = i.getRectangle();
+                    const Rectangle& r = *i.getRectangle();
                     offscreenImage->clear (r.getX(), r.getY(), r.getWidth(), r.getHeight());
                 }
             }
@@ -2057,8 +2047,8 @@ private:
                         }
                         else
                         {
-                            MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
-                                          getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
+                            const MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
+                                                getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
 
                             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
                             {
@@ -2176,6 +2166,9 @@ private:
                     //case WM_IME_STARTCOMPOSITION;
                       //  return 0;
 
+                    case WM_GETDLGCODE:
+                        return DLGC_WANTALLKEYS;
+ 
                     default:
                         break;
                 }
@@ -2261,7 +2254,7 @@ void Desktop::setMousePosition (int x, int y)
 }
 
 //==============================================================================
-BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
+static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 {
     Array <Rectangle>* const monitorCoords = (Array <Rectangle>*) userInfo;
 
@@ -2272,12 +2265,14 @@ BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 
 void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
-    DynamicLibraryLoader user32Dll ("user32.dll");
+    /*DynamicLibraryLoader user32Dll ("user32.dll");
     DynamicLibraryImport (EnumDisplayMonitors, enumDisplayMonitors, BOOL, user32Dll,
                           (HDC hdc, LPCRECT lprcClip, MONITORENUMPROC, LPARAM))
 
     if (enumDisplayMonitors != 0)
-        enumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
+        enumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);*/
+
+    EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
 
     // make sure the first in the list is the main monitor
     for (int i = 1; i < monitorCoords.size(); ++i)
@@ -2899,6 +2894,7 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
         LPDROPFILES pDropFiles = (LPDROPFILES) GlobalLock (hDrop);
         pDropFiles->pFiles = sizeof (DROPFILES);
 
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
         pDropFiles->fWide = (SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0;
 
         if (pDropFiles->fWide)
@@ -2925,6 +2921,19 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
 
             *fname = 0;
         }
+#else
+        pDropFiles->fWide = true;
+
+        WCHAR* fname = (WCHAR*) (((char*) pDropFiles) + sizeof (DROPFILES));
+
+        for (int i = 0; i < fileNames.size(); ++i)
+        {
+            fileNames[i].copyToBuffer (fname, 2048);
+            fname += fileNames[i].length() + 1;
+        }
+
+        *fname = 0;
+#endif
 
         GlobalUnlock (hDrop);
     }
@@ -2967,6 +2976,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, (numChars + 2) * sizeof (WCHAR));
     char* d = (char*) GlobalLock (medium.hGlobal);
 
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
     if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
     {
         text.copyToBuffer ((WCHAR*) d, numChars + 1);
@@ -2976,6 +2986,10 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     {
         text.copyToBuffer (d, numChars + 1);
     }
+#else
+    text.copyToBuffer ((WCHAR*) d, numChars + 1);
+    format.cfFormat = CF_UNICODETEXT;
+#endif
 
     GlobalUnlock (medium.hGlobal);
 

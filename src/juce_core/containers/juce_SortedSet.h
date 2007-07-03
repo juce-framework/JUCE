@@ -35,7 +35,7 @@
 #include "juce_ArrayAllocationBase.h"
 #include "../threads/juce_CriticalSection.h"
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable: 4512)
 #endif
@@ -639,7 +639,7 @@ private:
     }
 };
 
-#ifdef JUCE_MSVC
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 

@@ -430,9 +430,9 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
                 int* b = *bufferChan++;
 
                 // float -> int
-                for (int i = 0; i < numToDo; ++i)
+                for (int j = numToDo; --j >= 0;)
                 {
-                    const double samp = *(const float*)b;
+                    const double samp = *(const float*) b;
 
                     if (samp <= -1.0)
                         *b++ = INT_MIN;

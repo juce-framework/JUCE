@@ -55,16 +55,16 @@ public:
 
         The colour can be changed later with the setColour() method.
     */
-    SolidColourBrush (const Colour& colour);
+    SolidColourBrush (const Colour& colour) throw();
 
     /** Creates a SolidColourBrush set to black.
 
         The colour can be changed later with the setColour() method.
     */
-    SolidColourBrush();
+    SolidColourBrush() throw();
 
     /** Destructor. */
-    ~SolidColourBrush();
+    ~SolidColourBrush() throw();
 
     //==============================================================================
     /** Returns the colour currently being used. */
@@ -74,32 +74,32 @@ public:
     void setColour (const Colour& newColour) throw()    { colour = newColour; }
 
     //==============================================================================
-    Brush* createCopy() const;
+    Brush* createCopy() const throw();
 
-    void applyTransform (const AffineTransform& transform);
+    void applyTransform (const AffineTransform& transform) throw();
 
-    bool isInvisible() const;
+    bool isInvisible() const throw();
 
-    void multiplyOpacity (const float multiple);
+    void multiplyOpacity (const float multiple) throw();
 
     void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform);
+                    const Path& path, const AffineTransform& transform) throw();
 
     void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h);
+                         int x, int y, int w, int h) throw();
 
     void paintAlphaChannel (LowLevelGraphicsContext& context,
                             const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h);
+                            int x, int y, int w, int h) throw();
 
     void paintVerticalLine (LowLevelGraphicsContext& context,
-                            int x, float y1, float y2);
+                            int x, float y1, float y2) throw();
 
     void paintHorizontalLine (LowLevelGraphicsContext& context,
-                              int y, float x1, float x2);
+                              int y, float x1, float x2) throw();
 
     void paintLine (LowLevelGraphicsContext& context,
-                    float x1, float y1, float x2, float y2);
+                    float x1, float y1, float x2, float y2) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
