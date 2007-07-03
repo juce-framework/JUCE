@@ -501,6 +501,7 @@ l    */
     juce_UseDebuggingNewOperator
 
 protected:
+    //==============================================================================
     /** This adds the items to the popup menu.
 
         By default it adds the cut/copy/paste items, but you can override this if
@@ -533,6 +534,7 @@ protected:
     */
     virtual void performPopupMenuAction (const int menuItemID);
 
+    //==============================================================================
     /** Scrolls the minimum distance needed to get the caret into view. */
     void scrollToMakeSureCursorIsVisible() throw();
 
@@ -559,13 +561,17 @@ protected:
     /** Used internally to trigger an undo or redo. */
     void doUndoRedo (const bool isRedo);
 
+    /** Can be overridden to intercept return key presses directly */
+    virtual void returnPressed();
+
+    /** Can be overridden to intercept escape key presses directly */
+    virtual void escapePressed();
+
     /** @internal */
     void handleCommandMessage (int commandId);
 
-    virtual void returnPressed();
-    virtual void escapePressed();
-
 private:
+    //==============================================================================
     Viewport* viewport;
     TextHolderComponent* textHolder;
     BorderSize borderSize;
@@ -593,7 +599,6 @@ private:
     VoidArray sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
-
     tchar passwordCharacter;
 
     enum
