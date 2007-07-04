@@ -2698,6 +2698,8 @@ private:
                                 keyCode = (tchar) ((T('0') - KeyPress::numberPad0) + kp.getKeyCode());
                             }
 
+                            SetMenuItemCommandKey (m, index, true, 255);
+
                             if (CharacterFunctions::isLetterOrDigit (keyCode)
                                  || CharacterFunctions::indexOfChar (T(",.;/\\'[]=-+_<>?{}\":"), keyCode, false) >= 0)
                             {
