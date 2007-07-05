@@ -54,6 +54,10 @@
     to determine the order), and searching the set for known values is very fast
     because it uses a binary-chop method.
 
+    Note that if you're using a class or struct as the element type, it must be
+    capable of being copied or moved with a straightforward memcpy, rather than 
+    needing construction and destruction code.
+
     To make all the set's methods thread-safe, pass in "CriticalSection" as the templated
     TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
 

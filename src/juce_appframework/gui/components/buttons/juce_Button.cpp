@@ -230,7 +230,7 @@ Button::ButtonState Button::updateState (const MouseEvent* const e) throw()
         const bool over = reallyContains (mx, my, true);
         const bool down = isMouseButtonDownAnywhere();
 
-        if ((down && (over || triggerOnMouseDown)) || isKeyDown)
+        if ((down && (over || (triggerOnMouseDown && state == buttonDown))) || isKeyDown)
             state = buttonDown;
         else if (over)
             state = buttonOver;

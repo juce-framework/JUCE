@@ -380,7 +380,7 @@ public:
         @param comparator   the comparator to use to compare the elements - see the sort method
                             for details about this object's structure
         @param newObject    the new object to insert to the array
-        @see add, sort
+        @see add, sort, indexOfSorted
     */
     template <class ElementComparator>
     void addSorted (ElementComparator& comparator,
@@ -391,6 +391,58 @@ public:
         lock.enter();
         insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
         lock.exit();
+    }
+
+    /** Finds the index of an object in the array, assuming that the array is sorted.
+
+        This will use a comparator to do a binary-chop to find the index of the given
+        element, if it exists. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator           the comparator to use to compare the elements - see the sort()
+                                    method for details about the form this object should take
+        @param objectToLookFor      the object to search for
+        @returns                    the index of the element, or -1 if it's not found
+        @see addSorted, sort
+    */
+    template <class ElementComparator>
+    int indexOfSorted (ElementComparator& comparator,
+                       const ObjectClass* const objectToLookFor) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                lock.exit();
+                return -1;
+            }
+            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
+            {
+                lock.exit();
+                return start;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    lock.exit();
+                    return -1;
+                }
+                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
     }
 
     //==============================================================================
@@ -679,7 +731,7 @@ public:
                             be important in some cases. If it's false, a faster
                             algorithm is used, but equivalent elements may be
                             rearranged.
-        @see sortArray
+        @see sortArray, indexOfSorted
     */
     template <class ElementComparator>
     void sort (ElementComparator& comparator,

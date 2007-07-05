@@ -80,7 +80,7 @@
 		84CFB0240909684B0053C22C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "/Users/jules/Library/Audio/Plug-Ins/Components";
+			dstPath = "~/Library/Audio/Plug-Ins/Components";
 			dstSubfolderSpec = 0;
 			files = (
 				84CFB029090968590053C22C /* DemoJuceAudioUnit.component in CopyFiles */,

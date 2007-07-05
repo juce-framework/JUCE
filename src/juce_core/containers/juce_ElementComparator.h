@@ -183,6 +183,8 @@ static void sortArray (ElementComparator& comparator,
                 if (--stackIndex < 0)
                     break;
 
+                jassert (stackIndex < numElementsInArray (fromStack));
+
                 firstElement = fromStack [stackIndex];
                 lastElement = toStack [stackIndex];
             }

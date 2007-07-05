@@ -46,6 +46,10 @@
     Note that when holding pointers to objects, the array doesn't take any ownership
     of the objects - for doing this, see the OwnedArray class or the ReferenceCountedArray class.
 
+    If you're using a class or struct as the element type, it must be
+    capable of being copied or moved with a straightforward memcpy, rather than 
+    needing construction and destruction code.
+
     For holding lists of strings, use the specialised class StringArray.
 
     To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
@@ -672,7 +676,7 @@ public:
 
         @param comparator           the comparator to use to compare the elements - see the sort()
                                     method for details about the form this object should take
-        @param elementToLookFor     the new element to insert to the array
+        @param elementToLookFor     the element to search for
         @returns                    the index of the element, or -1 if it's not found
         @see addSorted, sort
     */
