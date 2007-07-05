@@ -1079,10 +1079,11 @@ public:
             break; // allow other handlers in the event chain to also get a look at the events
 
         case kEventWindowClose:
-            if (! isSharedWindow)
-                handleUserClosingWindow();
+            if (isSharedWindow)
+                break;  // break to let the OS delete the window
 
-            return noErr;  // (returning a notHandledErr would cause the OS to delete the window itself)
+            handleUserClosingWindow();
+            return noErr;  // avoids letting the OS to delete the window, we'll do that ourselves.
 
         default:
             break;
@@ -2228,9 +2229,8 @@ void Desktop::getMousePosition (int& x, int& y)
 
 void Desktop::setMousePosition (int x, int y)
 {
-    CGDirectDisplayID mainDisplayID = CGMainDisplayID();
     CGPoint pos = { x, y };
-    CGDisplayMoveCursorToPoint (mainDisplayID, pos);
+    CGWarpMouseCursorPosition (pos);
 }
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
@@ -2241,46 +2241,49 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
 //==============================================================================
 void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
-    int mainMon = 0;
-    int distFrom00 = 0x7fffff;
+    int mainMonitorIndex = 0;
+    CGDirectDisplayID mainDisplayID = CGMainDisplayID();
 
-    GDHandle h = DMGetFirstScreenDevice (true);
+    CGDisplayCount count = 0;
+    CGDirectDisplayID disps [8];
 
-    while (h != 0)
+    if (CGGetActiveDisplayList (numElementsInArray (disps), disps, &count) == noErr)
     {
-        Rect rect;
-
-        GetAvailableWindowPositioningBounds (h, &rect);
-
-        const int dist = abs (rect.left) + abs (rect.top);
-        if (distFrom00 > dist)
+        for (int i = 0; i < count; ++i)
         {
-            distFrom00 = dist;
-            mainMon = monitorCoords.size();
+            if (mainDisplayID == disps[i])
+                mainMonitorIndex = monitorCoords.size();
+
+            GDHandle hGDevice;
+
+            if (clipToWorkArea 
+                 && DMGetGDeviceByDisplayID ((DisplayIDType) disps[i], &hGDevice, false) == noErr)
+            {
+                Rect rect;
+                GetAvailableWindowPositioningBounds (hGDevice, &rect);
+
+                monitorCoords.add (Rectangle (rect.left,
+                                              rect.top,
+                                              rect.right - rect.left,
+                                              rect.bottom - rect.top));
+            }
+            else
+            {
+                const CGRect r (CGDisplayBounds (disps[i]));
+
+                monitorCoords.add (Rectangle (r.origin.x,
+                                              r.origin.y,
+                                              r.size.width,
+                                              r.size.height));
+            }
         }
-
-        monitorCoords.add (Rectangle (rect.left,
-                                      rect.top,
-                                      rect.right - rect.left,
-                                      rect.bottom - rect.top));
-
-        h = DMGetNextScreenDevice (h, true);
     }
 
     // make sure the first in the list is the main monitor
-    if (mainMon > 0)
-        monitorCoords.swap (mainMon, 0);
+    if (mainMonitorIndex > 0)
+        monitorCoords.swap (mainMonitorIndex, 0);
 
-    if (monitorCoords.size() == 0)
-    {
-        BitMap screenBits;
-        Rect r = GetQDGlobalsScreenBits (&screenBits)->bounds;
-
-        monitorCoords.add (Rectangle (r.left,
-                                      r.top + GetMBarHeight(),
-                                      r.right - r.left,
-                                      r.bottom - r.top));
-    }
+    jassert (monitorCoords.size() > 0);
 
     //xxx need to register for display change callbacks
 }
