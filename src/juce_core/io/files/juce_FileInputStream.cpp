@@ -102,7 +102,7 @@ bool FileInputStream::setPosition (int64 pos)
 {
     pos = jlimit ((int64) 0, totalSize, pos);
 
-    needToSeek = currentPosition != pos;
+    needToSeek |= currentPosition != pos;
     currentPosition = pos;
 
     return true;
