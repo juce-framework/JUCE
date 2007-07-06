@@ -573,8 +573,6 @@ MidiInput::~MidiInput()
     OK (MIDIPortDisconnectSource (mpe->port, mpe->endPoint));
     OK (MIDIPortDispose (mpe->port));
     delete mpe;
-
-    activeCallbacks.minimiseStorageOverheads();
 }
 
 void MidiInput::start()

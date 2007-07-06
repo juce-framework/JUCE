@@ -844,6 +844,13 @@ public:
     static int readVariableLengthVal (const uint8* data,
                                       int& numBytesUsed) throw();
 
+    /** Based on the first byte of a short midi message, this uses a lookup table
+        to return the message length (either 1, 2, or 3 bytes).
+
+        The value passed in must be 0x80 or higher.
+    */
+    static int getMessageLengthFromFirstByte (const uint8 firstByte) throw();
+
     //==============================================================================
     /** Returns the name of a midi note number.
 

@@ -59,6 +59,29 @@ int MidiMessage::readVariableLengthVal (const uint8* data,
     return v;
 }
 
+int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
+{
+    // this method only works for valid starting bytes of a short midi message
+    jassert (firstByte >= 0x80 
+              && firstByte != 0xff 
+              && firstByte != 0xf0
+              && firstByte != 0xf7);
+
+    static const char messageLengths[] = 
+    {
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 
+    };
+
+    return messageLengths [firstByte & 0x7f];
+}
+
 //==============================================================================
 MidiMessage::MidiMessage (const uint8* const d,
                           const int dataSize,
@@ -67,12 +90,17 @@ MidiMessage::MidiMessage (const uint8* const d,
      message (0),
      size (dataSize)
 {
+    jassert (dataSize > 0);
+
     if (dataSize <= 4)
         data = (uint8*) &message;
     else
         data = (uint8*) juce_malloc (dataSize);
 
     memcpy (data, d, dataSize);
+
+    // check that the length matches the data..
+    jassert (size > 3 || getMessageLengthFromFirstByte (*d) == size);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -82,6 +110,9 @@ MidiMessage::MidiMessage (const int byte1,
      size (1)
 {
     data[0] = (uint8) byte1;
+
+    // check that the length matches the data..
+    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 1);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -93,6 +124,9 @@ MidiMessage::MidiMessage (const int byte1,
 {
     data[0] = (uint8) byte1;
     data[1] = (uint8) byte2;
+
+    // check that the length matches the data..
+    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 2);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -106,6 +140,9 @@ MidiMessage::MidiMessage (const int byte1,
     data[0] = (uint8) byte1;
     data[1] = (uint8) byte2;
     data[2] = (uint8) byte3;
+
+    // check that the length matches the data..
+    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 3);
 }
 
 MidiMessage::MidiMessage (const MidiMessage& other) throw()
@@ -201,17 +238,7 @@ MidiMessage::MidiMessage (const uint8* src,
         }
         else
         {
-            static const char messageLengths[] = {
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-
-            size = messageLengths [byte - 0x80];
+            size = getMessageLengthFromFirstByte ((uint8) byte);
             *data = (uint8) byte;
 
             if (size > 1)

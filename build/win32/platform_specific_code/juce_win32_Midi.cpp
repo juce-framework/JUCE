@@ -47,7 +47,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 static const int midiBufferSize = 1024 * 10;
 static const int numInHeaders = 32;
-static const int inBufferSize = 128;
+static const int inBufferSize = 256;
 
 class MidiInThread  : public Thread
 {
@@ -89,7 +89,7 @@ public:
     }
 
     //==============================================================================
-    void handle (const uint32 message, const uint32 timeStamp)
+    void handle (const uint32 message, const uint32 timeStamp) throw()
     {
         jassert (validityInt == 0x12345678);
         if (validityInt != 0x12345678)
@@ -99,17 +99,7 @@ public:
         if (byte < 0x80)
             return;
 
-        static const char extraDataLengths[] = {
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-        const int numBytes = extraDataLengths [byte - 0x80] + 1;
+        const int numBytes = MidiMessage::getMessageLengthFromFirstByte ((uint8) byte);
 
         const double time = timeStampToTime (timeStamp);
 
@@ -131,7 +121,7 @@ public:
         notify();
     }
 
-    void handleSysEx (MIDIHDR* hdr, const uint32 timeStamp)
+    void handleSysEx (MIDIHDR* const hdr, const uint32 timeStamp) throw()
     {
         jassert (validityInt == 0x12345678);
         if (validityInt != 0x12345678)
@@ -163,7 +153,7 @@ public:
         }
     }
 
-    void writeBlock (int i)
+    void writeBlock (const int i) throw()
     {
         hdr[i].dwBytesRecorded = 0;
         MMRESULT res = midiInPrepareHeader (hIn, &hdr[i], sizeof (MIDIHDR));
@@ -226,7 +216,7 @@ public:
         }
     }
 
-    void start()
+    void start() throw()
     {
         jassert (hIn != 0);
         if (hIn != 0 && ! isStarted)
@@ -253,7 +243,7 @@ public:
         }
     }
 
-    void stop()
+    void stop() throw()
     {
         if (isStarted)
         {
@@ -297,7 +287,7 @@ private:
     int pendingLength;
     char pending [midiBufferSize];
 
-    double timeStampToTime (uint32 timeStamp)
+    double timeStampToTime (uint32 timeStamp) throw()
     {
         timeStamp += startTime;
 
@@ -357,13 +347,14 @@ int MidiInput::getDefaultDeviceIndex()
     return 0;
 }
 
-MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
+MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const callback)
 {
     if (callback == 0)
         return 0;
 
     UINT deviceId = MIDI_MAPPER;
     int n = 0;
+    String name;
 
     const int num = midiInGetNumDevs();
 
@@ -377,6 +368,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
             if (index == n)
             {
                 deviceId = i;
+                name = String (mc.szPname, sizeof (mc.szPname));
                 break;
             }
 
@@ -384,7 +376,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
         }
     }
 
-    MidiInput* const in = new MidiInput (getDevices() [index]);
+    MidiInput* const in = new MidiInput (name);
     MidiInThread* const thread = new MidiInThread (in, callback);
 
     HMIDIIN h;
@@ -424,12 +416,12 @@ MidiInput::~MidiInput()
 
 void MidiInput::start()
 {
-    ((MidiInThread*)internal)->start();
+    ((MidiInThread*) internal)->start();
 }
 
 void MidiInput::stop()
 {
-    ((MidiInThread*)internal)->stop();
+    ((MidiInThread*) internal)->stop();
 }
 
 
@@ -515,41 +507,43 @@ MidiOutput* MidiOutput::openDevice (int index)
 
     for (i = handles.size(); --i >= 0;)
     {
-        MidiOutHandle* const han = (MidiOutHandle*) handles[i];
+        MidiOutHandle* const han = (MidiOutHandle*) handles.getUnchecked(i);
 
         if (han != 0 && han->deviceId == deviceId)
         {
             han->refCount++;
-            MidiOutput* out = new MidiOutput();
-            out->internal = (void*)han;
+
+            MidiOutput* const out = new MidiOutput();
+            out->internal = (void*) han;
             return out;
         }
     }
 
-    HMIDIOUT h = 0;
-    MMRESULT res = MMSYSERR_NOERROR + 1;
-
     for (i = 4; --i >= 0;)
     {
-        UINT devId = deviceId; // copy because this call changes the value
-        res = midiOutOpen (&h, devId, 0, 0, CALLBACK_NULL);
-        if (res != MMSYSERR_ALLOCATED)
+        HMIDIOUT h = 0;
+        MMRESULT res = midiOutOpen (&h, deviceId, 0, 0, CALLBACK_NULL);
+
+        if (res == MMSYSERR_NOERROR)
+        {
+            MidiOutHandle* const han = new MidiOutHandle();
+            han->deviceId = deviceId;
+            han->refCount = 1;
+            han->handle = h;
+            handles.add (han);
+
+            MidiOutput* const out = new MidiOutput();
+            out->internal = (void*) han;
+            return out;
+        }
+        else if (res == MMSYSERR_ALLOCATED)
+        {
+            Sleep (100);
+        }
+        else
+        {
             break;
-
-        Sleep (100);
-    }
-
-    if (res == MMSYSERR_NOERROR)
-    {
-        MidiOutHandle* const han = new MidiOutHandle();
-        han->deviceId = deviceId;
-        han->refCount = 1;
-        han->handle = h;
-        handles.add (han);
-
-        MidiOutput* const out = new MidiOutput();
-        out->internal = (void*)han;
-        return out;
+        }
     }
 
     return 0;
@@ -566,8 +560,7 @@ MidiOutput::~MidiOutput()
     if (handles.contains ((void*) h) && --(h->refCount) == 0)
     {
         midiOutClose (h->handle);
-        handles.removeValue ((void*)h);
-        handles.minimiseStorageOverheads();
+        handles.removeValue ((void*) h);
         delete h;
     }
 }
@@ -601,10 +594,10 @@ bool MidiOutput::getVolume (float& leftVol,
 void MidiOutput::setVolume (float leftVol,
                             float rightVol)
 {
-    const MidiOutHandle* const handle = (MidiOutHandle*)internal;
+    const MidiOutHandle* const handle = (MidiOutHandle*) internal;
 
     DWORD n;
-    unsigned short* nn = (unsigned short*) &n;
+    unsigned short* const nn = (unsigned short*) &n;
     nn[0] = (unsigned short) jlimit (0, 0xffff, (int)(rightVol * 0xffff));
     nn[1] = (unsigned short) jlimit (0, 0xffff, (int)(leftVol * 0xffff));
     midiOutSetVolume (handle->handle, n);
