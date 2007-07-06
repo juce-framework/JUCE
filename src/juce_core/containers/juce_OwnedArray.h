@@ -183,6 +183,8 @@ public:
     */
     int indexOf (const ObjectClass* const objectToLookFor) const throw()
     {
+        int result = -1;
+
         lock.enter();
         ObjectClass* const* e = this->elements;
 
@@ -190,15 +192,15 @@ public:
         {
             if (objectToLookFor == *e)
             {
-                lock.exit();
-                return (int) (e - this->elements);
+                result = (int) (e - this->elements);
+                break;
             }
 
             ++e;
         }
 
         lock.exit();
-        return -1;
+        return result;
     }
 
     /** Returns true if the array contains a specified object.

@@ -161,7 +161,7 @@ void Synthesiser::renderNextBlock (AudioSampleBuffer& outputBuffer,
 
     MidiBuffer::Iterator midiIterator (midiData);
     midiIterator.setNextSamplePosition (startSample);
-    MidiMessage m (0x90, 0.0);
+    MidiMessage m (0xf4, 0.0);
 
     while (numSamples > 0)
     {

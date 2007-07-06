@@ -311,6 +311,8 @@ public:
     */
     int indexOf (const ElementType elementToLookFor) const throw()
     {
+        int result = -1;
+
         lock.enter();
         const ElementType* e = this->elements;
 
@@ -318,15 +320,15 @@ public:
         {
             if (elementToLookFor == *e)
             {
-                lock.exit();
-                return (int)(e - this->elements);
+                result = (int) (e - this->elements);
+                break;
             }
 
             ++e;
         }
 
         lock.exit();
-        return -1;
+        return result;
     }
 
     /** Returns true if the array contains at least one occurrence of an object.
@@ -830,7 +832,7 @@ public:
         @param howManyToRemove   how many elements to remove from the end of the array
         @see remove, removeValue, removeRange
     */
-    void removeLast (int howManyToRemove = 1) throw()
+    void removeLast (const int howManyToRemove = 1) throw()
     {
         lock.enter();
         numUsed = jmax (0, numUsed - howManyToRemove);
