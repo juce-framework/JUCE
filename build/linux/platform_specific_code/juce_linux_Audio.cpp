@@ -35,8 +35,18 @@
 #if JUCE_ALSA
 
 #include "linuxincludes.h"
+
+//==============================================================================
+/* Got an include error here? If so, you've either not got ALSA installed, or you've
+   not got your paths set up correctly to find its header files.
+
+   If you don't have the ALSA library and don't want to build Juce with audio support, 
+   just disable the JUCE_ALSA flag in juce_Config.h
+*/
 #include <alsa/asoundlib.h>
 
+
+//==============================================================================
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
