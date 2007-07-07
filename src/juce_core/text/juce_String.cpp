@@ -1892,20 +1892,7 @@ const String String::toHexString (const int64 number) throw()
 
 const String String::toHexString (const short number) throw()
 {
-    tchar buffer[32];
-    tchar* const end = buffer + 32;
-    tchar* t = end;
-    *--t = 0;
-    unsigned short v = (unsigned short) number;
-
-    do
-    {
-        *--t = hexDigits [v & 15];
-        v >>= 4;
-
-    } while (v != 0);
-
-    return String (t, (int) (((char*) end) - (char*) t));
+    return toHexString ((int) (unsigned short) number);
 }
 
 const String String::toHexString (const unsigned char* data,
@@ -2048,7 +2035,7 @@ const String String::createStringFromData (const void* const data_,
 }
 
 //==============================================================================
-const char* String::toUTF8() const
+const char* String::toUTF8() const throw()
 {
     if (isEmpty())
     {
@@ -2074,7 +2061,7 @@ const char* String::toUTF8() const
     }
 }
 
-int String::copyToUTF8 (uint8* buffer) const
+int String::copyToUTF8 (uint8* const buffer) const throw()
 {
 #if JUCE_STRINGS_ARE_UNICODE
     int num = 0, index = 0;
@@ -2141,7 +2128,7 @@ int String::copyToUTF8 (uint8* buffer) const
 #endif
 }
 
-const String String::fromUTF8 (const uint8* buffer, int bufferSizeBytes)
+const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) throw()
 {
     if (buffer == 0)
         return empty;

@@ -78,9 +78,13 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../juce/bin"
+				GenerateManifest="false"
 				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\Release/jucedemo.pdb"
 				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="1"
 				TargetMachine="1"
 			/>
 			<Tool

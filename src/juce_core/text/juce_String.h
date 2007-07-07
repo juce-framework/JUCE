@@ -982,7 +982,7 @@ public:
                                 the method just returns the number of bytes required
                                 (including the terminating null character).
     */
-    int copyToUTF8 (uint8* destBuffer) const;
+    int copyToUTF8 (uint8* const destBuffer) const throw();
 
     /** Returns a pointer to a UTF-8 version of this string.
 
@@ -990,13 +990,14 @@ public:
         that is returned must not be stored anywhere, as it can be deleted whenever the
         string changes.
     */
-    const char* toUTF8() const;
+    const char* toUTF8() const throw();
 
     /** Creates a String from a UTF-8 encoded buffer.
 
         If the size is < 0, it'll keep reading until it hits a zero.
     */
-    static const String fromUTF8 (const uint8* utf8buffer, int bufferSizeBytes = -1);
+    static const String fromUTF8 (const uint8* const utf8buffer, 
+                                  int bufferSizeBytes = -1) throw();
 
     //==============================================================================
     /** Increases the string's internally allocated storage.

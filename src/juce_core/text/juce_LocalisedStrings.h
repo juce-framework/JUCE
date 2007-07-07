@@ -100,17 +100,17 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents);
+    LocalisedStrings (const String& fileContents) throw();
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad);
+    LocalisedStrings (const File& fileToLoad) throw();
 
     /** Destructor. */
-    ~LocalisedStrings();
+    ~LocalisedStrings() throw();
 
     //==============================================================================
     /** Selects the current set of mappings to be used by the system.
@@ -123,14 +123,14 @@ public:
 
         @see translateWithCurrentMappings
     */
-    static void setCurrentMappings (LocalisedStrings* newTranslations);
+    static void setCurrentMappings (LocalisedStrings* newTranslations) throw();
 
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
         be 0 if none has been created.
     */
-    static LocalisedStrings* getCurrentMappings();
+    static LocalisedStrings* getCurrentMappings() throw();
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -141,15 +141,25 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const String& text);
+    static const String translateWithCurrentMappings (const String& text) throw();
 
+    /** Tries to translate a string using the currently selected set of mappings.
+
+        If no mapping has been set, or if the mapping doesn't contain a translation
+        for the string, this will just return the original string.
+
+        See also the TRANS() macro, which uses this method to do its translation.
+
+        @see setCurrentMappings, getCurrentMappings
+    */
+    static const String translateWithCurrentMappings (const char* text) throw();
 
     //==============================================================================
     /** Attempts to look up a string and return its localised version.
 
         If the string isn't found in the list, the original string will be returned.
     */
-    const String translate (const String& text) const;
+    const String translate (const String& text) const throw();
 
     /** Returns the name of the language specified in the translation file.
 
@@ -179,7 +189,7 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents);
+    void loadFromText (const String& fileContents) throw();
 };
 
 

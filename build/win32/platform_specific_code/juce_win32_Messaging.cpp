@@ -55,9 +55,9 @@ extern long improbableWindowNumber; // defined in windowing.cpp
 
 //==============================================================================
 static LRESULT CALLBACK juce_MessageWndProc (HWND h,
-                                             UINT message,
-                                             WPARAM wParam,
-                                             LPARAM lParam) throw()
+                                             const UINT message,
+                                             const WPARAM wParam,
+                                             const LPARAM lParam) throw()
 {
     JUCE_TRY
     {
@@ -93,15 +93,13 @@ static LRESULT CALLBACK juce_MessageWndProc (HWND h,
                 return 0;
             }
         }
-
-        return DefWindowProc (h, message, wParam, lParam);
     }
     JUCE_CATCH_EXCEPTION
 
-    return 0;
+    return DefWindowProc (h, message, wParam, lParam);
 }
 
-bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
     MSG m;
 

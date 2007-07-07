@@ -29,9 +29,6 @@
   ==============================================================================
 */
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-
 #ifdef _MSC_VER
   #pragma warning (disable: 4514)
   #pragma warning (push)

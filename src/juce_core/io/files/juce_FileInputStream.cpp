@@ -49,9 +49,9 @@ FileInputStream::FileInputStream (const File& f)
       currentPosition (0),
       needToSeek (true)
 {
-    totalSize = file.getSize();
+    totalSize = f.getSize();
 
-    fileHandle = juce_fileOpen (file.getFullPathName(), false);
+    fileHandle = juce_fileOpen (f.getFullPathName(), false);
 }
 
 FileInputStream::~FileInputStream()
@@ -60,11 +60,6 @@ FileInputStream::~FileInputStream()
 }
 
 //==============================================================================
-const File FileInputStream::getFile() const
-{
-    return file;
-}
-
 int64 FileInputStream::getTotalLength()
 {
     return totalSize;

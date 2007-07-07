@@ -38,46 +38,45 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-LocalisedStrings::LocalisedStrings (const String& fileContents)
+LocalisedStrings::LocalisedStrings (const String& fileContents) throw()
 {
     loadFromText (fileContents);
 }
 
-LocalisedStrings::LocalisedStrings (const File& fileToLoad)
+LocalisedStrings::LocalisedStrings (const File& fileToLoad) throw()
 {
     loadFromText (fileToLoad.loadFileAsString());
 }
 
-LocalisedStrings::~LocalisedStrings()
+LocalisedStrings::~LocalisedStrings() throw()
 {
 }
 
 //==============================================================================
-const String LocalisedStrings::translate (const String& text) const
+const String LocalisedStrings::translate (const String& text) const throw()
 {
     return translations.getValue (text, text);
 }
 
-static int findCloseQuote (const String& text, int startPos)
+static int findCloseQuote (const String& text, int startPos) throw()
 {
-    bool lastCharWasSlash = false;
+    tchar lastChar = 0;
 
     for (;;)
     {
         const tchar c = text [startPos];
 
-        if (c == 0 || (c == T('"') && ! lastCharWasSlash))
+        if (c == 0 || (c == T('"') && lastChar != T('\\')))
             break;
 
-        lastCharWasSlash = (c == T('\\'));
-
+        lastChar = c;
         ++startPos;
     }
 
     return startPos;
 }
 
-static const String unescapeString (const String& s)
+static const String unescapeString (const String& s) throw()
 {
     return s.replace (T("\\\""), T("\""))
             .replace (T("\\\'"), T("\'"))
@@ -86,7 +85,7 @@ static const String unescapeString (const String& s)
             .replace (T("\\n"), T("\n"));
 }
 
-void LocalisedStrings::loadFromText (const String& fileContents)
+void LocalisedStrings::loadFromText (const String& fileContents) throw()
 {
     StringArray lines;
     lines.addLines (fileContents);
@@ -129,22 +128,20 @@ void LocalisedStrings::loadFromText (const String& fileContents)
 static CriticalSection currentMappingsLock;
 static LocalisedStrings* currentMappings = 0;
 
-void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
+void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations) throw()
 {
     const ScopedLock sl (currentMappingsLock);
 
-    if (currentMappings != 0)
-        delete currentMappings;
-
+    delete currentMappings;
     currentMappings = newTranslations;
 }
 
-LocalisedStrings* LocalisedStrings::getCurrentMappings()
+LocalisedStrings* LocalisedStrings::getCurrentMappings() throw()
 {
     return currentMappings;
 }
 
-const String LocalisedStrings::translateWithCurrentMappings (const String& text)
+const String LocalisedStrings::translateWithCurrentMappings (const String& text) throw()
 {
     const ScopedLock sl (currentMappingsLock);
 
@@ -153,5 +150,11 @@ const String LocalisedStrings::translateWithCurrentMappings (const String& text)
 
     return text;
 }
+
+const String LocalisedStrings::translateWithCurrentMappings (const char* text) throw()
+{
+    return translateWithCurrentMappings (String (text));
+}
+
 
 END_JUCE_NAMESPACE

@@ -690,7 +690,7 @@ void Button::repeatTimerCallback() throw()
 class InternalButtonRepeatTimer  : public Timer
 {
 public:
-    InternalButtonRepeatTimer (Button& owner_)
+    InternalButtonRepeatTimer (Button& owner_) throw()
         : owner (owner_)
     {
     }
