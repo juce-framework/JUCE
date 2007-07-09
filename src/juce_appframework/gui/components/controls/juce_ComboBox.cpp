@@ -64,7 +64,9 @@ ComboBox::ComboBox (const String& name)
 
 ComboBox::~ComboBox()
 {
-    jassert (! menuActive); // deleting the combo box while it's in use? Probably not a great idea.
+    if (menuActive)
+        PopupMenu::dismissAllActiveMenus();
+
     deleteAllChildren();
 }
 
@@ -517,6 +519,7 @@ void ComboBox::showPopup()
     if (! menuActive)
     {
         const int currentId = getSelectedId();
+        ComponentDeletionWatcher deletionWatcher (this);
 
         PopupMenu menu;
 
@@ -542,6 +545,10 @@ void ComboBox::showPopup()
         menuActive = true;
         const int resultId = menu.showAt (this, currentId,
                                           getWidth(), 1, itemHeight);
+
+        if (deletionWatcher.hasBeenDeleted())
+            return;
+
         menuActive = false;
 
         if (resultId != 0)
