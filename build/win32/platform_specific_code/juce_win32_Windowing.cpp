@@ -89,7 +89,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../../../src/juce_appframework/gui/graphics/geometry/juce_PathIterator.h"
 #include "../../../src/juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
-#include "juce_win32_DynamicLibraryLoader.h"
 
 
 extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.cpp
@@ -172,59 +171,61 @@ bool Desktop::canUseSemiTransparentWindows()
 #endif
 
 //==============================================================================
-static const int extendedKeyModifier    = 0x10000;
+const int extendedKeyModifier               = 0x10000;
 
-const int KeyPress::spaceKey        = VK_SPACE;
-const int KeyPress::returnKey       = VK_RETURN;
-const int KeyPress::escapeKey       = VK_ESCAPE;
-const int KeyPress::backspaceKey    = VK_BACK;
-const int KeyPress::deleteKey       = VK_DELETE  | extendedKeyModifier;
-const int KeyPress::insertKey       = VK_INSERT  | extendedKeyModifier;
-const int KeyPress::tabKey          = VK_TAB;
-const int KeyPress::leftKey         = VK_LEFT    | extendedKeyModifier;
-const int KeyPress::rightKey        = VK_RIGHT   | extendedKeyModifier;
-const int KeyPress::upKey           = VK_UP      | extendedKeyModifier;
-const int KeyPress::downKey         = VK_DOWN    | extendedKeyModifier;
-const int KeyPress::homeKey         = VK_HOME    | extendedKeyModifier;
-const int KeyPress::endKey          = VK_END     | extendedKeyModifier;
-const int KeyPress::pageUpKey       = VK_PRIOR   | extendedKeyModifier;
-const int KeyPress::pageDownKey     = VK_NEXT    | extendedKeyModifier;
-const int KeyPress::F1Key           = VK_F1      | extendedKeyModifier;
-const int KeyPress::F2Key           = VK_F2      | extendedKeyModifier;
-const int KeyPress::F3Key           = VK_F3      | extendedKeyModifier;
-const int KeyPress::F4Key           = VK_F4      | extendedKeyModifier;
-const int KeyPress::F5Key           = VK_F5      | extendedKeyModifier;
-const int KeyPress::F6Key           = VK_F6      | extendedKeyModifier;
-const int KeyPress::F7Key           = VK_F7      | extendedKeyModifier;
-const int KeyPress::F8Key           = VK_F8      | extendedKeyModifier;
-const int KeyPress::F9Key           = VK_F9      | extendedKeyModifier;
-const int KeyPress::F10Key          = VK_F10     | extendedKeyModifier;
-const int KeyPress::F11Key          = VK_F11     | extendedKeyModifier;
-const int KeyPress::F12Key          = VK_F12     | extendedKeyModifier;
-const int KeyPress::F13Key          = VK_F13     | extendedKeyModifier;
-const int KeyPress::F14Key          = VK_F14     | extendedKeyModifier;
-const int KeyPress::F15Key          = VK_F15     | extendedKeyModifier;
-const int KeyPress::F16Key          = VK_F16     | extendedKeyModifier;
-const int KeyPress::numberPad0      = VK_NUMPAD0 | extendedKeyModifier;
-const int KeyPress::numberPad1      = VK_NUMPAD1 | extendedKeyModifier;
-const int KeyPress::numberPad2      = VK_NUMPAD2 | extendedKeyModifier;
-const int KeyPress::numberPad3      = VK_NUMPAD3 | extendedKeyModifier;
-const int KeyPress::numberPad4      = VK_NUMPAD4 | extendedKeyModifier;
-const int KeyPress::numberPad5      = VK_NUMPAD5 | extendedKeyModifier;
-const int KeyPress::numberPad6      = VK_NUMPAD6 | extendedKeyModifier;
-const int KeyPress::numberPad7      = VK_NUMPAD7 | extendedKeyModifier;
-const int KeyPress::numberPad8      = VK_NUMPAD8 | extendedKeyModifier;
-const int KeyPress::numberPad9      = VK_NUMPAD9 | extendedKeyModifier;
-const int KeyPress::numberPadAdd            = VK_ADD        | extendedKeyModifier;
-const int KeyPress::numberPadSubtract       = VK_SUBTRACT   | extendedKeyModifier;
-const int KeyPress::numberPadMultiply       = VK_MULTIPLY   | extendedKeyModifier;
-const int KeyPress::numberPadDivide         = VK_DIVIDE     | extendedKeyModifier;
-const int KeyPress::numberPadSeparator      = VK_SEPARATOR  | extendedKeyModifier;
-const int KeyPress::numberPadDecimalPoint   = VK_DECIMAL    | extendedKeyModifier;
-const int KeyPress::playKey         = 0x30000;
-const int KeyPress::stopKey         = 0x30001;
-const int KeyPress::fastForwardKey  = 0x30002;
-const int KeyPress::rewindKey       = 0x30003;
+const int KeyPress::spaceKey                = VK_SPACE;
+const int KeyPress::returnKey               = VK_RETURN;
+const int KeyPress::escapeKey               = VK_ESCAPE;
+const int KeyPress::backspaceKey            = VK_BACK;
+const int KeyPress::deleteKey               = VK_DELETE         | extendedKeyModifier;
+const int KeyPress::insertKey               = VK_INSERT         | extendedKeyModifier;
+const int KeyPress::tabKey                  = VK_TAB;
+const int KeyPress::leftKey                 = VK_LEFT           | extendedKeyModifier;
+const int KeyPress::rightKey                = VK_RIGHT          | extendedKeyModifier;
+const int KeyPress::upKey                   = VK_UP             | extendedKeyModifier;
+const int KeyPress::downKey                 = VK_DOWN           | extendedKeyModifier;
+const int KeyPress::homeKey                 = VK_HOME           | extendedKeyModifier;
+const int KeyPress::endKey                  = VK_END            | extendedKeyModifier;
+const int KeyPress::pageUpKey               = VK_PRIOR          | extendedKeyModifier;
+const int KeyPress::pageDownKey             = VK_NEXT           | extendedKeyModifier;
+const int KeyPress::F1Key                   = VK_F1             | extendedKeyModifier;
+const int KeyPress::F2Key                   = VK_F2             | extendedKeyModifier;
+const int KeyPress::F3Key                   = VK_F3             | extendedKeyModifier;
+const int KeyPress::F4Key                   = VK_F4             | extendedKeyModifier;
+const int KeyPress::F5Key                   = VK_F5             | extendedKeyModifier;
+const int KeyPress::F6Key                   = VK_F6             | extendedKeyModifier;
+const int KeyPress::F7Key                   = VK_F7             | extendedKeyModifier;
+const int KeyPress::F8Key                   = VK_F8             | extendedKeyModifier;
+const int KeyPress::F9Key                   = VK_F9             | extendedKeyModifier;
+const int KeyPress::F10Key                  = VK_F10            | extendedKeyModifier;
+const int KeyPress::F11Key                  = VK_F11            | extendedKeyModifier;
+const int KeyPress::F12Key                  = VK_F12            | extendedKeyModifier;
+const int KeyPress::F13Key                  = VK_F13            | extendedKeyModifier;
+const int KeyPress::F14Key                  = VK_F14            | extendedKeyModifier;
+const int KeyPress::F15Key                  = VK_F15            | extendedKeyModifier;
+const int KeyPress::F16Key                  = VK_F16            | extendedKeyModifier;
+const int KeyPress::numberPad0              = VK_NUMPAD0        | extendedKeyModifier;
+const int KeyPress::numberPad1              = VK_NUMPAD1        | extendedKeyModifier;
+const int KeyPress::numberPad2              = VK_NUMPAD2        | extendedKeyModifier;
+const int KeyPress::numberPad3              = VK_NUMPAD3        | extendedKeyModifier;
+const int KeyPress::numberPad4              = VK_NUMPAD4        | extendedKeyModifier;
+const int KeyPress::numberPad5              = VK_NUMPAD5        | extendedKeyModifier;
+const int KeyPress::numberPad6              = VK_NUMPAD6        | extendedKeyModifier;
+const int KeyPress::numberPad7              = VK_NUMPAD7        | extendedKeyModifier;
+const int KeyPress::numberPad8              = VK_NUMPAD8        | extendedKeyModifier;
+const int KeyPress::numberPad9              = VK_NUMPAD9        | extendedKeyModifier;
+const int KeyPress::numberPadAdd            = VK_ADD            | extendedKeyModifier;
+const int KeyPress::numberPadSubtract       = VK_SUBTRACT       | extendedKeyModifier;
+const int KeyPress::numberPadMultiply       = VK_MULTIPLY       | extendedKeyModifier;
+const int KeyPress::numberPadDivide         = VK_DIVIDE         | extendedKeyModifier;
+const int KeyPress::numberPadSeparator      = VK_SEPARATOR      | extendedKeyModifier;
+const int KeyPress::numberPadDecimalPoint   = VK_DECIMAL        | extendedKeyModifier;
+const int KeyPress::numberPadEquals         = VK_OEM_NEC_EQUAL  | extendedKeyModifier;
+const int KeyPress::numberPadDelete         = VK_DELETE         | extendedKeyModifier;
+const int KeyPress::playKey                 = 0x30000;
+const int KeyPress::stopKey                 = 0x30001;
+const int KeyPress::fastForwardKey          = 0x30002;
+const int KeyPress::rewindKey               = 0x30003;
 
 
 //==============================================================================
@@ -467,7 +468,7 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
     return (GetKeyState (k) & 0x8000) != 0;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
     updateKeyModifiers();
 
@@ -2265,13 +2266,6 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 
 void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
-    /*DynamicLibraryLoader user32Dll ("user32.dll");
-    DynamicLibraryImport (EnumDisplayMonitors, enumDisplayMonitors, BOOL, user32Dll,
-                          (HDC hdc, LPCRECT lprcClip, MONITORENUMPROC, LPARAM))
-
-    if (enumDisplayMonitors != 0)
-        enumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);*/
-
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
 
     // make sure the first in the list is the main monitor
