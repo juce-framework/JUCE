@@ -334,6 +334,8 @@ bool ThreadPool::runNextJob()
 
         if (job != 0 && ! (job->isActive || job->shouldStop))
             break;
+
+        job = 0;
     }
 
     if (job != 0)
