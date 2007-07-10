@@ -208,7 +208,7 @@ void juce_setThreadPriority (void* threadHandle, int priority) throw()
     SetThreadPriority (threadHandle, pri);
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
 {
     SetThreadAffinityMask (GetCurrentThread(), affinityMask);
 }

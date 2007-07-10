@@ -50,7 +50,7 @@ static VoidArray runningThreads (4);
 static CriticalSection runningThreadsLock;
 
 //==============================================================================
-void Thread::threadEntryPoint (Thread* thread)
+void Thread::threadEntryPoint (Thread* const thread) throw()
 {
     runningThreadsLock.enter();
     runningThreads.add (thread);
@@ -106,7 +106,7 @@ Thread::~Thread()
 }
 
 //==============================================================================
-void Thread::startThread()
+void Thread::startThread() throw()
 {
     const ScopedLock sl (startStopLock);
 
@@ -120,7 +120,7 @@ void Thread::startThread()
     }
 }
 
-void Thread::startThread (const int priority)
+void Thread::startThread (const int priority) throw()
 {
     const ScopedLock sl (startStopLock);
 
@@ -146,7 +146,7 @@ void Thread::signalThreadShouldExit() throw()
     threadShouldExit_ = true;
 }
 
-bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
+bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const throw()
 {
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
     jassert (getThreadId() != getCurrentThreadId());
@@ -165,7 +165,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     return true;
 }
 
-void Thread::stopThread (const int timeOutMilliseconds)
+void Thread::stopThread (const int timeOutMilliseconds) throw()
 {
     const ScopedLock sl (startStopLock);
 
@@ -196,7 +196,7 @@ void Thread::stopThread (const int timeOutMilliseconds)
 }
 
 //==============================================================================
-void Thread::setPriority (const int priority)
+void Thread::setPriority (const int priority) throw()
 {
     const ScopedLock sl (startStopLock);
 
@@ -204,12 +204,12 @@ void Thread::setPriority (const int priority)
     juce_setThreadPriority (threadHandle_, priority);
 }
 
-void Thread::setCurrentThreadPriority (const int priority)
+void Thread::setCurrentThreadPriority (const int priority) throw()
 {
     juce_setThreadPriority (0, priority);
 }
 
-void Thread::setAffinityMask (const uint32 affinityMask)
+void Thread::setAffinityMask (const uint32 affinityMask) throw()
 {
     affinityMask_ = affinityMask;
 }
@@ -231,12 +231,12 @@ void Thread::notify() const throw()
 }
 
 //==============================================================================
-int Thread::getNumRunningThreads()
+int Thread::getNumRunningThreads() throw()
 {
     return runningThreads.size();
 }
 
-void Thread::stopAllThreads (const int timeoutInMillisecs)
+void Thread::stopAllThreads (const int timeoutInMillisecs) throw()
 {
     while (getNumRunningThreads() > 0)
     {

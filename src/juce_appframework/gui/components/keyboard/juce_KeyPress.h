@@ -231,6 +231,8 @@ public:
     static const int numberPadDivide;         /**< key-code for the divide sign on the numeric keypad. */
     static const int numberPadSeparator;      /**< key-code for the comma on the numeric keypad. */
     static const int numberPadDecimalPoint;   /**< key-code for the decimal point sign on the numeric keypad. */
+    static const int numberPadEquals;         /**< key-code for the equals key on the numeric keypad. */
+    static const int numberPadDelete;         /**< key-code for the delete key on the numeric keypad. */
 
     static const int playKey;        /**< key-code for a multimedia 'play' key, (not all keyboards will have one) */
     static const int stopKey;        /**< key-code for a multimedia 'stop' key, (not all keyboards will have one) */

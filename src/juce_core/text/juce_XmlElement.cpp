@@ -40,7 +40,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other)
+XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) throw()
     : name (other.name),
       value (other.value),
       next (0)
@@ -48,7 +48,7 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other)
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_,
-                                                const String& value_)
+                                                const String& value_) throw()
     : name (name_),
       value (value_),
       next (0)
@@ -1057,7 +1057,7 @@ XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLo
     return 0;
 }
 
-XmlElement** XmlElement::getChildElementsAsArray (const int num) const
+XmlElement** XmlElement::getChildElementsAsArray (const int num) const throw()
 {
     XmlElement** const elems = new XmlElement* [num];
 
@@ -1073,7 +1073,7 @@ XmlElement** XmlElement::getChildElementsAsArray (const int num) const
     return elems;
 }
 
-void XmlElement::reorderChildElements (XmlElement** const elems, const int num)
+void XmlElement::reorderChildElements (XmlElement** const elems, const int num) throw()
 {
     XmlElement* e = firstChildElement = elems[0];
 

@@ -207,7 +207,7 @@ void Thread::yield() throw()
     sched_yield();
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
 {
     // xxx
     jassertfalse

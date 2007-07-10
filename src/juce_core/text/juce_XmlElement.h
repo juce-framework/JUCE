@@ -657,8 +657,8 @@ private:
 
     struct XmlAttributeNode
     {
-        XmlAttributeNode (const XmlAttributeNode& other);
-        XmlAttributeNode (const String& name, const String& value);
+        XmlAttributeNode (const XmlAttributeNode& other) throw();
+        XmlAttributeNode (const String& name, const String& value) throw();
 
         String name, value;
         XmlAttributeNode* next;
@@ -673,8 +673,8 @@ private:
 
     void writeElementAsText (OutputStream& out, const int indentationLevel) const throw();
 
-    XmlElement** getChildElementsAsArray (const int) const;
-    void reorderChildElements (XmlElement** const, const int);
+    XmlElement** getChildElementsAsArray (const int) const throw();
+    void reorderChildElements (XmlElement** const, const int) throw();
 };
 
 

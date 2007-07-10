@@ -61,7 +61,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/io/files/juce_File.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "juce_win32_DynamicLibraryLoader.h"
 
 extern void juce_updateMultiMonitorInfo() throw();
 

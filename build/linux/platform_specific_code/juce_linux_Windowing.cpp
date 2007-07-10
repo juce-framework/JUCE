@@ -302,7 +302,7 @@ void ModifierKeys::updateCurrentModifiers()
     currentModifierFlags = currentModifiers;
 }
 
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime()
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
     int x, y, mouseMods;
     getMousePos (x, y, mouseMods);
@@ -3090,6 +3090,8 @@ const int KeyPress::numberPadMultiply       = (XK_KP_Multiply & 0xff)| extendedK
 const int KeyPress::numberPadDivide         = (XK_KP_Divide & 0xff)| extendedKeyModifier;
 const int KeyPress::numberPadSeparator      = (XK_KP_Separator & 0xff)| extendedKeyModifier;
 const int KeyPress::numberPadDecimalPoint   = (XK_KP_Decimal & 0xff)| extendedKeyModifier;
+const int KeyPress::numberPadEquals         = (XK_KP_Equal & 0xff)| extendedKeyModifier;
+const int KeyPress::numberPadDelete         = (XK_KP_Delete & 0xff)| extendedKeyModifier;
 const int KeyPress::playKey             = (0xffeeff00) | extendedKeyModifier;
 const int KeyPress::stopKey             = (0xffeeff01) | extendedKeyModifier;
 const int KeyPress::fastForwardKey      = (0xffeeff02) | extendedKeyModifier;

@@ -37,32 +37,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-const int ModifierKeys::shiftModifier            = 1;
-const int ModifierKeys::ctrlModifier             = 2;
-const int ModifierKeys::altModifier              = 4;
-const int ModifierKeys::leftButtonModifier       = 16;
-const int ModifierKeys::rightButtonModifier      = 32;
-const int ModifierKeys::middleButtonModifier     = 64;
-
-#if JUCE_MAC
- const int ModifierKeys::commandModifier         = 8;
- const int ModifierKeys::popupMenuClickModifier  = ModifierKeys::rightButtonModifier
-                                                    | ModifierKeys::ctrlModifier;
-#else
- const int ModifierKeys::commandModifier         = ModifierKeys::ctrlModifier;
- const int ModifierKeys::popupMenuClickModifier  = ModifierKeys::rightButtonModifier;
-#endif
-
-const int ModifierKeys::allKeyboardModifiers     = ModifierKeys::shiftModifier
-                                                    | ModifierKeys::ctrlModifier
-                                                    | ModifierKeys::altModifier
-                                                    | ModifierKeys::commandModifier;
-
-const int ModifierKeys::allMouseButtonModifiers  = ModifierKeys::leftButtonModifier
-                                                    | ModifierKeys::rightButtonModifier
-                                                    | ModifierKeys::middleButtonModifier;
-
-//==============================================================================
 ModifierKeys::ModifierKeys (const int flags_) throw()
     : flags (flags_)
 {

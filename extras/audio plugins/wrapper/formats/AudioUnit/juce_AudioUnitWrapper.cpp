@@ -760,7 +760,7 @@ public:
         // for some stupid Apple-related reason, mouse move events just don't seem to get sent
         // to the windows in an AU, so we have to bodge it here and simulate them with a
         // timer..
-        if (false && editorComp != 0)
+        if (editorComp != 0)
         {
             int x, y;
             Desktop::getInstance().getMousePosition (x, y);

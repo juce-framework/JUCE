@@ -48,7 +48,7 @@ XmlInputSource::~XmlInputSource()
 
 
 //==============================================================================
-static bool isXmlIdentifierChar_Slow (const tchar c)
+static bool isXmlIdentifierChar_Slow (const tchar c) throw()
 {
     return CharacterFunctions::isLetterOrDigit (c)
             || c == T('_')

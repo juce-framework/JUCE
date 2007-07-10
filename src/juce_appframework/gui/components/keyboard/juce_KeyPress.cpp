@@ -188,9 +188,29 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
     if (key == 0)
     {
         // see if it's a numpad key..
-        for (int i = 0; i < 10; ++i)
-            if (desc.containsWholeWordIgnoreCase (numberPadPrefix + String (i)))
-                key = numberPad0 + i;
+        if (desc.containsIgnoreCase (numberPadPrefix))
+        {
+            const tchar lastChar = desc.trimEnd().getLastCharacter();
+
+            if (lastChar >= T('0') && lastChar <= T('9'))
+                key = numberPad0 + lastChar - T('0');
+            else if (lastChar == T('+'))
+                key = numberPadAdd;
+            else if (lastChar == T('-'))
+                key = numberPadSubtract;
+            else if (lastChar == T('*'))
+                key = numberPadMultiply;
+            else if (lastChar == T('/'))
+                key = numberPadDivide;
+            else if (lastChar == T('.'))
+                key = numberPadDecimalPoint;
+            else if (lastChar == T('='))
+                key = numberPadEquals;
+            else if (desc.endsWith (T("separator")))
+                key = numberPadSeparator;
+            else if (desc.endsWith (T("delete")))
+                key = numberPadDelete;
+        }
 
         if (key == 0)
         {
@@ -208,13 +228,9 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
                                         .getHexValue32();
 
                 if (hexCode > 0)
-                {
                     key = hexCode;
-                }
                 else
-                {
                     key = CharacterFunctions::toUpperCase (desc.getLastCharacter());
-                }
             }
         }
     }
@@ -257,6 +273,20 @@ const String KeyPress::getTextDescription() const
             desc << numberPadPrefix << (keyCode - numberPad0);
         else if (keyCode >= 33 && keyCode < 176)
             desc += CharacterFunctions::toUpperCase ((tchar) keyCode);
+        else if (keyCode == numberPadAdd)
+            desc << numberPadPrefix << '+';
+        else if (keyCode == numberPadSubtract)
+            desc << numberPadPrefix << '-';
+        else if (keyCode == numberPadMultiply)
+            desc << numberPadPrefix << '*';
+        else if (keyCode == numberPadDivide)
+            desc << numberPadPrefix << '/';
+        else if (keyCode == numberPadSeparator)
+            desc << numberPadPrefix << "separator";
+        else if (keyCode == numberPadDecimalPoint)
+            desc << numberPadPrefix << '.';
+        else if (keyCode == numberPadDelete)
+            desc << numberPadPrefix << "delete";
         else
             desc << '#' << String::toHexString (keyCode);
     }

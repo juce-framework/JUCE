@@ -92,7 +92,7 @@ public:
 
         @see stopThread
     */
-    void startThread();
+    void startThread() throw();
 
     /** Starts the thread with a given priority.
 
@@ -101,7 +101,7 @@ public:
 
         @see startThread, setPriority
     */
-    void startThread (const int priority);
+    void startThread (const int priority) throw();
 
     /** Attempts to stop the thread running.
 
@@ -121,7 +121,7 @@ public:
                                     value in here will wait forever.
         @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
     */
-    void stopThread (const int timeOutMilliseconds);
+    void stopThread (const int timeOutMilliseconds) throw();
 
     //==============================================================================
     /** Returns true if the thread is currently active */
@@ -154,7 +154,7 @@ public:
                                     is less than zero, it will wait forever.
         @returns    true if the thread exits, or false if the timeout expires first.
     */
-    bool waitForThreadToExit (const int timeOutMilliseconds) const;
+    bool waitForThreadToExit (const int timeOutMilliseconds) const throw();
 
     //==============================================================================
     /** Changes the thread's priority.
@@ -162,7 +162,7 @@ public:
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
     */
-    void setPriority (const int priority);
+    void setPriority (const int priority) throw();
 
     /** Changes the priority of the caller thread.
 
@@ -170,7 +170,7 @@ public:
 
         @see setPriority
     */
-    static void setCurrentThreadPriority (const int priority);
+    static void setCurrentThreadPriority (const int priority) throw();
 
     //==============================================================================
     /** Sets the affinity mask for the thread.
@@ -180,7 +180,7 @@ public:
 
         @see setCurrentThreadAffinityMask
     */
-    void setAffinityMask (const uint32 affinityMask);
+    void setAffinityMask (const uint32 affinityMask) throw();
 
     /** Changes the affinity mask for the caller thread.
 
@@ -188,7 +188,7 @@ public:
 
         @see setAffinityMask
     */
-    static void setCurrentThreadAffinityMask (const uint32 affinityMask);
+    static void setCurrentThreadAffinityMask (const uint32 affinityMask) throw();
 
     //==============================================================================
     // this can be called from any thread that needs to pause..
@@ -248,13 +248,13 @@ public:
         @returns  the number of Thread objects known to be currently running.
         @see stopAllThreads
     */
-    static int getNumRunningThreads();
+    static int getNumRunningThreads() throw();
 
     /** Tries to stop all currently-running threads.
 
         This will attempt to stop all the threads known to be running at the moment.
     */
-    static void stopAllThreads (const int timeoutInMillisecs);
+    static void stopAllThreads (const int timeoutInMillisecs) throw();
 
 
     //==============================================================================
@@ -271,7 +271,7 @@ private:
     bool volatile threadShouldExit_;
 
     friend void JUCE_API juce_threadEntryPoint (void*);
-    static void threadEntryPoint (Thread* thread);
+    static void threadEntryPoint (Thread* thread) throw();
 
     Thread (const Thread&);
     const Thread& operator= (const Thread&);

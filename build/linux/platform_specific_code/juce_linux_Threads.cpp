@@ -133,7 +133,7 @@ void juce_setThreadPriority (void* handle, int priority) throw()
     }
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
 {
 #if SUPPORT_AFFINITIES
     cpu_set_t affinity;

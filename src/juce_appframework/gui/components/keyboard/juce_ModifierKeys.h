@@ -113,39 +113,57 @@ public:
     inline bool isAltDown() const throw()               { return (flags & altModifier) != 0; }
 
     //==============================================================================
-    // modifier bitmasks
+    /** Flags that represent the different keys. */
+    enum Flags
+    {
+        /** Shift key flag. */
+        shiftModifier                           = 1,
 
-    /** Shift key flag. */
-    static const int shiftModifier;
-    /** CTRL key flag. */
-    static const int ctrlModifier;
-    /** ALT key flag. */
-    static const int altModifier;
-    /** Left mouse button flag. */
-    static const int leftButtonModifier;
-    /** Right mouse button flag. */
-    static const int rightButtonModifier;
-    /** Middle mouse button flag. */
-    static const int middleButtonModifier;
-    /** Command key flag - on windows this is the same as the CTRL key flag. */
-    static const int commandModifier;
+        /** CTRL key flag. */
+        ctrlModifier                            = 2,
 
-    /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
-        Mac it's the same as (rightButtonModifier | ctrlModifier). */
-    static const int popupMenuClickModifier;
+        /** ALT key flag. */
+        altModifier                             = 4,
 
-    /** Represents a combination of all the shift, alt, ctrl and command key modifiers. */
-    static const int allKeyboardModifiers;
+        /** Left mouse button flag. */
+        leftButtonModifier                      = 16,
 
-    /** Represents a combination of all the mouse buttons at once. */
-    static const int allMouseButtonModifiers;
+        /** Right mouse button flag. */
+        rightButtonModifier                     = 32,
+
+        /** Middle mouse button flag. */
+        middleButtonModifier                    = 64,
+
+#if JUCE_MAC
+        /** Command key flag - on windows this is the same as the CTRL key flag. */
+        commandModifier                         = 8,
+
+        /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
+            Mac it's the same as (rightButtonModifier | ctrlModifier). */
+        popupMenuClickModifier                  = rightButtonModifier | ctrlModifier,
+#else
+        /** Command key flag - on windows this is the same as the CTRL key flag. */
+        commandModifier                         = ctrlModifier,
+
+        /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
+            Mac it's the same as (rightButtonModifier | ctrlModifier). */
+        popupMenuClickModifier                  = rightButtonModifier,
+#endif
+
+        /** Represents a combination of all the shift, alt, ctrl and command key modifiers. */
+        allKeyboardModifiers                    = shiftModifier | ctrlModifier | altModifier | commandModifier,
+
+        /** Represents a combination of all the mouse buttons at once. */
+        allMouseButtonModifiers                 = leftButtonModifier | rightButtonModifier | middleButtonModifier,
+    };
+
 
     //==============================================================================
     /** Returns the raw flags for direct testing. */
-    inline int getRawFlags() const throw()                          { return flags; }
+    inline int getRawFlags() const throw()                              { return flags; }
 
     /** Tests a combination of flags and returns true if any of them are set. */
-    inline bool testFlags (const int flagsToTest) const throw()     { return (flags & flagsToTest) != 0; }
+    inline bool testFlags (const int flagsToTest) const throw()         { return (flags & flagsToTest) != 0; }
 
     //==============================================================================
     /** Creates a ModifierKeys object to represent the last-known state of the
@@ -165,7 +183,7 @@ public:
         This is only needed in special circumstances for up-to-date modifier information
         at times when the app's event loop isn't running normally.
     */
-    static const ModifierKeys getCurrentModifiersRealtime();
+    static const ModifierKeys getCurrentModifiersRealtime() throw();
 
 
 private:
