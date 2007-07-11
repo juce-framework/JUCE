@@ -336,13 +336,13 @@ void FileBrowserComponent::selectionChanged()
     sendListenerChangeMessage();
 }
 
-void FileBrowserComponent::fileClicked (const File&, const MouseEvent&)
+void FileBrowserComponent::fileClicked (const File& f, const MouseEvent& e)
 {
     ComponentDeletionWatcher deletionWatcher (this);
 
     for (int i = listeners.size(); --i >= 0;)
     {
-        ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (file, e);
+        ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (f, e);
 
         if (deletionWatcher.hasBeenDeleted())
             return;
