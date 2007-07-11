@@ -338,6 +338,17 @@ void FileBrowserComponent::selectionChanged()
 
 void FileBrowserComponent::fileClicked (const File&, const MouseEvent&)
 {
+    ComponentDeletionWatcher deletionWatcher (this);
+
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (file, e);
+
+        if (deletionWatcher.hasBeenDeleted())
+            return;
+
+        i = jmin (i, listeners.size() - 1);
+    }
 }
 
 void FileBrowserComponent::fileDoubleClicked (const File& f)

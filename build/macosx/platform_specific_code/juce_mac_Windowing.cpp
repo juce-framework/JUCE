@@ -2581,7 +2581,7 @@ public:
             {
                 const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames [i]));
 
-                MenuRef m = createMenu (menu, menuNames [i], id);
+                MenuRef m = createMenu (menu, menuNames [i], id, i);
 
                 InsertMenu (m, 0);
                 CFRelease (m);
@@ -2599,7 +2599,7 @@ public:
         FlashMenuBar (GetMenuID (menu));
     }
 
-    void invoke (const int id, ApplicationCommandManager* commandManager, const int topLevelIndex) const
+    void invoke (const int id, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
     {
         if (currentModel != 0)
         {
@@ -2620,7 +2620,8 @@ public:
 private:
     static MenuRef createMenu (const PopupMenu menu,
                                const String& menuName,
-                               int& id)
+                               int& id,
+                               const int topLevelIndex)
     {
         MenuRef m = 0;
 
@@ -2631,7 +2632,6 @@ private:
             CFRelease (name);
 
             PopupMenu::MenuItemIterator iter (menu);
-            int topLevelIndex = 0;
 
             while (iter.next())
             {
@@ -2655,7 +2655,7 @@ private:
                 {
                     AppendMenuItemTextWithCFString (m, text, flags, id++, &index);
 
-                    MenuRef sub = createMenu (*iter.subMenu, iter.itemName, id);
+                    MenuRef sub = createMenu (*iter.subMenu, iter.itemName, id, topLevelIndex);
                     SetMenuItemHierarchicalMenu (m, index, sub);
                     CFRelease (sub);
                 }
@@ -2723,7 +2723,6 @@ private:
                 }
 
                 CFRelease (text);
-                ++topLevelIndex;
             }
         }
 

@@ -67,7 +67,8 @@ public:
 
         If a long sysex message is broken up into multiple packets, this callback is made
         for each packet that arrives until the message is finished, at which point
-        the normal handleIncomingMidiMessage() callback will be made.
+        the normal handleIncomingMidiMessage() callback will be made with the entire
+        message.
 
         The message passed in will contain the start of a sysex, but won't be finished
         with the terminating 0x7f byte.
