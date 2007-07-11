@@ -70,7 +70,7 @@ public:
     //==============================================================================
     /** There's only one dektop object, and this method will return it.
     */
-    static Desktop& JUCE_CALLTYPE getInstance();
+    static Desktop& JUCE_CALLTYPE getInstance() throw();
 
     //==============================================================================
     /** Returns a list of the positions of all the monitors available.
@@ -80,14 +80,14 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const;
+    const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const throw();
 
     /** Returns the position and size of the main monitor.
 
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle getMainMonitorArea (const bool clippedToWorkArea = true) const;
+    const Rectangle getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
 
     /** Returns the position and size of the monitor which contains this co-ordinate.
 
@@ -97,7 +97,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const;
+    const Rectangle getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
 
 
     //==============================================================================
@@ -105,24 +105,24 @@ public:
 
         The co-ordinates are relative to the top-left of the main monitor.
     */
-    static void getMousePosition (int& x, int& y);
+    static void getMousePosition (int& x, int& y) throw();
 
     /** Makes the mouse pointer jump to a given location.
 
         The co-ordinates are relative to the top-left of the main monitor.
     */
-    static void setMousePosition (int x, int y);
+    static void setMousePosition (int x, int y) throw();
 
     /** Returns the last position at which a mouse button was pressed.
     */
-    static void getLastMouseDownPosition (int& x, int& y);
+    static void getLastMouseDownPosition (int& x, int& y) throw();
 
     /** Returns the number of times the mouse button has been clicked since the
         app started.
 
         Each mouse-down event increments this number by 1.
     */
-    static int getMouseButtonClickCounter();
+    static int getMouseButtonClickCounter() throw();
 
     //==============================================================================
     /** Registers a MouseListener that will receive all mouse events that occur on
@@ -154,7 +154,7 @@ public:
 
         @see getComponent, Component::addToDesktop
     */
-    int getNumComponents() const;
+    int getNumComponents() const throw();
 
     /** Returns one of the top-level desktop window components.
 
@@ -163,7 +163,7 @@ public:
 
         @see getNumComponents, Component::addToDesktop
     */
-    Component* getComponent (const int index) const;
+    Component* getComponent (const int index) const throw();
 
     /** Finds the component at a given screen location.
 
@@ -183,10 +183,10 @@ public:
 
         (Called internally by the native code).
     */
-    void refreshMonitorSizes();
+    void refreshMonitorSizes() throw();
 
     /** True if the OS supports semitransparent windows */
-    static bool canUseSemiTransparentWindows();
+    static bool canUseSemiTransparentWindows() throw();
 
 
 private:
@@ -198,23 +198,24 @@ private:
 
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;
-    Desktop();
-    ~Desktop();
+    Desktop() throw();
+    ~Desktop() throw();
 
     Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
     int lastMouseX, lastMouseY;
 
     void timerCallback();
     void sendMouseMove();
-    void resetTimer();
-    int getNumDisplayMonitors() const;
-    const Rectangle getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const;
+    void resetTimer() throw();
 
-    void addDesktopComponent (Component* const c);
-    void removeDesktopComponent (Component* const c);
-    void componentBroughtToFront (Component* const c);
+    int getNumDisplayMonitors() const throw();
+    const Rectangle getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
 
-    void triggerFocusCallback();
+    void addDesktopComponent (Component* const c) throw();
+    void removeDesktopComponent (Component* const c) throw();
+    void componentBroughtToFront (Component* const c) throw();
+
+    void triggerFocusCallback() throw();
     void handleAsyncUpdate();
 
     Desktop (const Desktop&);

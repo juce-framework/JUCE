@@ -117,7 +117,7 @@ static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int ho
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
 static UpdateLayeredWinFunc updateLayeredWindow = 0;
 
-bool Desktop::canUseSemiTransparentWindows()
+bool Desktop::canUseSemiTransparentWindows() throw()
 {
     if (updateLayeredWindow == 0)
     {
@@ -2241,7 +2241,7 @@ bool Process::isForegroundProcess() throw()
 }
 
 //==============================================================================
-void Desktop::getMousePosition (int& x, int& y)
+void Desktop::getMousePosition (int& x, int& y) throw()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);
@@ -2249,7 +2249,7 @@ void Desktop::getMousePosition (int& x, int& y)
     y = mousePos.y;
 }
 
-void Desktop::setMousePosition (int x, int y)
+void Desktop::setMousePosition (int x, int y) throw()
 {
     SetCursorPos (x, y);
 }

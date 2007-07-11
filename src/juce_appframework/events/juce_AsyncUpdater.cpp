@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AsyncUpdater::AsyncUpdater()
+AsyncUpdater::AsyncUpdater() throw()
    : asyncMessagePending (false)
 {
     internalAsyncHandler.owner = this;
@@ -47,7 +47,7 @@ AsyncUpdater::~AsyncUpdater()
 {
 }
 
-void AsyncUpdater::triggerAsyncUpdate()
+void AsyncUpdater::triggerAsyncUpdate() throw()
 {
     if (! asyncMessagePending)
     {

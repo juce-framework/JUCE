@@ -50,7 +50,7 @@ class JUCE_API  AsyncUpdater
 public:
     //==============================================================================
     /** Creates an AsyncUpdater object. */
-    AsyncUpdater();
+    AsyncUpdater() throw();
 
     /** Destructor.
 
@@ -70,7 +70,7 @@ public:
         It's thread-safe to call this method from any number of threads without
         needing to worry about locking.
     */
-    void triggerAsyncUpdate();
+    void triggerAsyncUpdate() throw();
 
     /** This will stop any pending updates from happening.
 

@@ -45,7 +45,7 @@ extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
 //==============================================================================
 static Desktop* instance = 0;
 
-Desktop::Desktop()
+Desktop::Desktop() throw()
     : mouseListeners (2),
       desktopComponents (4),
       monitorCoordsClipped (2),
@@ -56,7 +56,7 @@ Desktop::Desktop()
     refreshMonitorSizes();
 }
 
-Desktop::~Desktop()
+Desktop::~Desktop() throw()
 {
     jassert (instance == this);
     instance = 0;
@@ -66,7 +66,7 @@ Desktop::~Desktop()
     jassert (desktopComponents.size() == 0);
 }
 
-Desktop& JUCE_CALLTYPE Desktop::getInstance()
+Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 {
     if (instance == 0)
         instance = new Desktop();
@@ -75,7 +75,7 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance()
 }
 
 //==============================================================================
-void Desktop::refreshMonitorSizes()
+void Desktop::refreshMonitorSizes() throw()
 {
     monitorCoordsClipped.clear();
     monitorCoordsUnclipped.clear();
@@ -85,18 +85,18 @@ void Desktop::refreshMonitorSizes()
               && monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
 }
 
-int Desktop::getNumDisplayMonitors() const
+int Desktop::getNumDisplayMonitors() const throw()
 {
     return monitorCoordsClipped.size();
 }
 
-const Rectangle Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const
+const Rectangle Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw()
 {
     return clippedToWorkArea ? monitorCoordsClipped [index]
                              : monitorCoordsUnclipped [index];
 }
 
-const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const
+const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWorkArea) const throw()
 {
     RectangleList rl;
 
@@ -106,12 +106,12 @@ const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWork
     return rl;
 }
 
-const Rectangle Desktop::getMainMonitorArea (const bool clippedToWorkArea) const
+const Rectangle Desktop::getMainMonitorArea (const bool clippedToWorkArea) const throw()
 {
     return getDisplayMonitorCoordinates (0, clippedToWorkArea);
 }
 
-const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool clippedToWorkArea) const
+const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool clippedToWorkArea) const throw()
 {
     for (int i = getNumDisplayMonitors(); --i > 0;)
     {
@@ -125,12 +125,12 @@ const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool cl
 }
 
 //==============================================================================
-int Desktop::getNumComponents() const
+int Desktop::getNumComponents() const throw()
 {
     return desktopComponents.size();
 }
 
-Component* Desktop::getComponent (const int index) const
+Component* Desktop::getComponent (const int index) const throw()
 {
     return (Component*) desktopComponents [index];
 }
@@ -138,38 +138,34 @@ Component* Desktop::getComponent (const int index) const
 Component* Desktop::findComponentAt (const int screenX,
                                      const int screenY) const
 {
-    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+    for (int i = desktopComponents.size(); --i >= 0;)
     {
-        const ComponentPeer* const peer = ComponentPeer::getPeer (i);
+        Component* const c = (Component*) desktopComponents.getUnchecked(i);
 
-        Component* const c = peer->getComponent();
+        int x = screenX, y = screenY;
+        c->globalPositionToRelative (x, y);
 
-        if (c != 0)
-        {
-            const int x = screenX - c->getScreenX();
-            const int y = screenY - c->getScreenY();
-
-            if (c->contains (x, y))
-                return c->getComponentAt (x, y);
-        }
+        if (c->contains (x, y))
+            return c->getComponentAt (x, y);
     }
 
     return 0;
 }
 
 //==============================================================================
-void Desktop::addDesktopComponent (Component* const c)
+void Desktop::addDesktopComponent (Component* const c) throw()
 {
+    jassert (c != 0);
     jassert (! desktopComponents.contains (c));
     desktopComponents.addIfNotAlreadyThere (c);
 }
 
-void Desktop::removeDesktopComponent (Component* const c)
+void Desktop::removeDesktopComponent (Component* const c) throw()
 {
     desktopComponents.removeValue (c);
 }
 
-void Desktop::componentBroughtToFront (Component* const c)
+void Desktop::componentBroughtToFront (Component* const c) throw()
 {
     const int index = desktopComponents.indexOf (c);
     jassert (index >= 0);
@@ -184,13 +180,13 @@ extern int juce_recentMouseDownX [4];
 extern int juce_recentMouseDownY [4];
 extern int juce_MouseClickCounter;
 
-void Desktop::getLastMouseDownPosition (int& x, int& y)
+void Desktop::getLastMouseDownPosition (int& x, int& y) throw()
 {
     x = juce_recentMouseDownX [0];
     y = juce_recentMouseDownY [0];
 }
 
-int Desktop::getMouseButtonClickCounter()
+int Desktop::getMouseButtonClickCounter() throw()
 {
     return juce_MouseClickCounter;
 }
@@ -227,7 +223,7 @@ void Desktop::removeFocusChangeListener (FocusChangeListener* const listener) th
     focusListeners.removeValue (listener);
 }
 
-void Desktop::triggerFocusCallback()
+void Desktop::triggerFocusCallback() throw()
 {
     triggerAsyncUpdate();
 }
@@ -294,7 +290,7 @@ void Desktop::sendMouseMove()
     }
 }
 
-void Desktop::resetTimer()
+void Desktop::resetTimer() throw()
 {
     if (mouseListeners.size() == 0)
         stopTimer();

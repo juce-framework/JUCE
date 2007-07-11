@@ -2186,14 +2186,14 @@ bool Process::isForegroundProcess() throw()
 }
 
 //==============================================================================
-bool Desktop::canUseSemiTransparentWindows()
+bool Desktop::canUseSemiTransparentWindows() throw()
 {
     return true;
 }
 
 
 //==============================================================================
-void Desktop::getMousePosition (int& x, int& y)
+void Desktop::getMousePosition (int& x, int& y) throw()
 {
     CGrafPtr currentPort;
     GetPort (&currentPort);
@@ -2222,7 +2222,7 @@ void Desktop::getMousePosition (int& x, int& y)
     SetPort (currentPort);
 }
 
-void Desktop::setMousePosition (int x, int y)
+void Desktop::setMousePosition (int x, int y) throw()
 {
     CGPoint pos = { x, y };
     CGWarpMouseCursorPosition (pos);

@@ -2543,18 +2543,18 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 }
 
 //==============================================================================
-bool Desktop::canUseSemiTransparentWindows()
+bool Desktop::canUseSemiTransparentWindows() throw()
 {
     return false;
 }
 
-void Desktop::getMousePosition (int& x, int& y)
+void Desktop::getMousePosition (int& x, int& y) throw()
 {
     int mouseMods;
     getMousePos (x, y, mouseMods);
 }
 
-void Desktop::setMousePosition (int x, int y)
+void Desktop::setMousePosition (int x, int y) throw()
 {
     Window root = RootWindow (display, DefaultScreen (display));
     XWarpPointer (display, None, root, 0, 0, 0, 0, x, y);
