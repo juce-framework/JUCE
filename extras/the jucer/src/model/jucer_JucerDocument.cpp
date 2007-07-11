@@ -445,7 +445,7 @@ const String JucerDocument::saveDocument (const File& file)
     String templateH, templateCpp;
 
     if (! findTemplateFiles (templateH, templateCpp))
-        return TRANS("Couldn't find the required Jucer template files - make sure the template files directory is set up correctly in the preferences box.");
+        return TRANS("Couldn't find the required Jucer template files...\n\nMake sure the template files directory is set up correctly in the preferences box.");
 
     const bool ok = writeCodeFiles (hFile, cppFile, templateH, templateCpp);
     TestComponent::reloadAll();
@@ -608,7 +608,7 @@ void JucerDocument::getPreviewFiles (String& h, String& cpp)
 {
     if (! findTemplateFiles (h, cpp))
     {
-        h = cpp = TRANS("Couldn't find the required Jucer template files - make sure the template files directory is set up correctly in the preferences box.");
+        h = cpp = TRANS("Couldn't find the required Jucer template files...\n\nMake sure the template files directory is set up correctly in the preferences box.");
     }
     else
     {

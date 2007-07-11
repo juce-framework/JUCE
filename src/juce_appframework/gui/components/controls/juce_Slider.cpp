@@ -638,6 +638,10 @@ void Slider::labelTextChanged (Label* label)
         setValue (newValue, true, true);
         sendDragEnd();
     }
+    else
+    {
+        updateText();
+    }
 }
 
 void Slider::buttonClicked (Button* button)

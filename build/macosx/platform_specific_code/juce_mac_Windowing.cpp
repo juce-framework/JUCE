@@ -1174,7 +1174,7 @@ public:
             break;
         }
 
-        return noErr;
+        return eventNotHandledErr;
     }
 
     OSStatus handleTextInputEvent (EventRef theEvent)
@@ -1279,8 +1279,8 @@ public:
 
                 updateModifiers (theEvent);
 
-                handleMouseUp (oldModifiers, x, y, time);
                 juce_currentMouseTrackingPeer = 0;
+                handleMouseUp (oldModifiers, x, y, time);
                 break;
             }
 
@@ -1967,16 +1967,17 @@ static void trackNextMouseEvent()
               || result == kMouseTrackingUserCancelled
               || result == kMouseTrackingMouseMoved)
     {
-        if (ComponentPeer::isValidPeer (juce_currentMouseTrackingPeer))
+        ComponentPeer* const oldPeer = juce_currentMouseTrackingPeer;
+        juce_currentMouseTrackingPeer = 0;
+
+        if (ComponentPeer::isValidPeer (oldPeer))
         {
             const int oldModifiers = currentModifiers;
             currentModifiers &= ~(ModifierKeys::leftButtonModifier | ModifierKeys::rightButtonModifier | ModifierKeys::middleButtonModifier);
             updateModifiers (0);
 
-            juce_currentMouseTrackingPeer->handleMouseUp (oldModifiers, x, y, getEventTime (0));
+            oldPeer->handleMouseUp (oldModifiers, x, y, getEventTime (0));
         }
-
-        juce_currentMouseTrackingPeer = 0;
     }
 }
 
@@ -2279,7 +2280,10 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     if (mainMonitorIndex > 0)
         monitorCoords.swap (mainMonitorIndex, 0);
 
-    jassert (monitorCoords.size() > 0);
+    jassert (monitorCoords.size() > 0); // xxx seems like this can happen when the screen's in power-saving mode..
+
+    if (monitorCoords.size() == 0)
+        monitorCoords.add (Rectangle (0, 0, 1024, 768));
 
     //xxx need to register for display change callbacks
 }
