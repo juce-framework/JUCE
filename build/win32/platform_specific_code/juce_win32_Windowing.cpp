@@ -1549,7 +1549,7 @@ private:
     }
 
     //==============================================================================
-    void doKeyUp (const WPARAM key)
+    bool doKeyUp (const WPARAM key)
     {
         updateKeyModifiers();
 
@@ -1573,12 +1573,13 @@ private:
                 handleModifierKeysChange();
         }
 
-        handleKeyUpOrDown();
+        return handleKeyUpOrDown();
     }
 
-    void doKeyDown (const WPARAM key)
+    bool doKeyDown (const WPARAM key)
     {
         updateKeyModifiers();
+        bool used = false;
 
         switch (key)
         {
@@ -1626,8 +1627,8 @@ private:
             case VK_F14:
             case VK_F15:
             case VK_F16:
-                handleKeyUpOrDown();
-                handleKeyPress (extendedKeyModifier | (int) key, 0);
+                used = handleKeyUpOrDown();
+                used = handleKeyPress (extendedKeyModifier | (int) key, 0) || used;
                 break;
 
             case VK_NUMPAD0:
@@ -1646,11 +1647,11 @@ private:
             case VK_DIVIDE:
             case VK_SEPARATOR:
             case VK_DECIMAL:
-                handleKeyUpOrDown();
+                used = handleKeyUpOrDown();
                 break;
 
             default:
-                handleKeyUpOrDown();
+                used = handleKeyUpOrDown();
 
                 if ((currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
                 {
@@ -1661,22 +1662,21 @@ private:
                     const UINT keyChar = MapVirtualKeyW (key, 2);
 #endif
 
-                    handleKeyPress ((int) LOWORD (keyChar), 0);
+                    used = handleKeyPress ((int) LOWORD (keyChar), 0) || used;
                 }
 
                 break;
         }
+
+        return used;
     }
 
-    void doKeyChar (int key, const LPARAM flags)
+    bool doKeyChar (int key, const LPARAM flags)
     {
         updateKeyModifiers();
 
-        if ((currentModifiers & ModifierKeys::ctrlModifier) != 0
-             && key <= 31)
-        {
-            return;
-        }
+        if ((currentModifiers & ModifierKeys::ctrlModifier) != 0 && key <= 31)
+            return false;
 
         const juce_wchar textChar = (juce_wchar) key;
         const int virtualScanCode = (flags >> 16) & 0xff;
@@ -1717,7 +1717,7 @@ private:
                 key = (int) keyChar;
         }
 
-        handleKeyPress (key, textChar);
+        return handleKeyPress (key, textChar);
     }
 
     bool doAppCommand (const LPARAM lParam)
@@ -1935,22 +1935,28 @@ private:
                     //==============================================================================
                     case WM_KEYDOWN:
                     case WM_SYSKEYDOWN:
-                        doKeyDown (wParam);
+                        if (doKeyDown (wParam))
+                            return 0;
+
                         break;
 
                     case WM_KEYUP:
                     case WM_SYSKEYUP:
-                        doKeyUp (wParam);
-                        return 0;
+                        if (doKeyUp (wParam))
+                            return 0;
+
+                        break;
+
+                    case WM_CHAR:
+                        if (doKeyChar ((int) wParam, lParam))
+                            return 0;
+
+                        break;
 
                     case WM_APPCOMMAND:
                         if (doAppCommand (lParam))
                             return TRUE;
-                        else
-                            break;
 
-                    case WM_CHAR:
-                        doKeyChar ((int) wParam, lParam);
                         break;
 
                     //==============================================================================

@@ -255,12 +255,15 @@ public:
     /** Called when a key is pressed.
 
         For keycode info, see the KeyPress class.
+        Returns true if the keystroke was used. 
     */
-    void handleKeyPress (const int keyCode,
+    bool handleKeyPress (const int keyCode,
                          const juce_wchar textCharacter);
 
-    /** Called whenever a key is pressed or released. */
-    void handleKeyUpOrDown();
+    /** Called whenever a key is pressed or released. 
+        Returns true if the keystroke was used.
+    */
+    bool handleKeyUpOrDown();
 
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();

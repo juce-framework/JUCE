@@ -1146,21 +1146,24 @@ public:
         switch (GetEventKind (theEvent))
         {
         case kEventRawKeyDown:
-            keysCurrentlyDown.addIfNotAlreadyThere ((void*) keyCode);
-            handleKeyUpOrDown();
-            lastTextCharacter = textCharacter;
-            handleKeyPress (keyCode, textCharacter);
-            break;
+            {
+                keysCurrentlyDown.addIfNotAlreadyThere ((void*) keyCode);
+                lastTextCharacter = textCharacter;
+
+                const bool used1 = handleKeyUpOrDown();
+                const bool used2 = handleKeyPress (keyCode, textCharacter);
+
+                return (used1 || used2) ? noErr : eventNotHandledErr;
+            }
 
         case kEventRawKeyUp:
             keysCurrentlyDown.removeValue ((void*) keyCode);
-            handleKeyUpOrDown();
             lastTextCharacter = 0;
-            break;
+            return handleKeyUpOrDown() ? noErr : eventNotHandledErr;
 
         case kEventRawKeyRepeat:
-            handleKeyPress (keyCode, lastTextCharacter);
-            break;
+            return handleKeyPress (keyCode, lastTextCharacter) ? noErr
+                                                               : eventNotHandledErr;
 
         case kEventRawKeyModifiersChanged:
             handleModifierKeysChange();
@@ -1182,9 +1185,7 @@ public:
         EventRef originalEvent;
         GetEventParameter (theEvent, kEventParamTextInputSendKeyboardEvent, typeEventRef, 0, sizeof (originalEvent), 0, &originalEvent);
 
-        handleKeyEvent (originalEvent, (juce_wchar) uc);
-
-        return noErr;
+        return handleKeyEvent (originalEvent, (juce_wchar) uc);
     }
 
     OSStatus handleMouseEvent (EventHandlerCallRef callRef, EventRef theEvent)

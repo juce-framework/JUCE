@@ -343,10 +343,10 @@ void ComponentPeer::sendFakeMouseMove() throw()
          && component->flags.hasHeavyweightPeerFlag
          && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
-        getBounds (component->compX_,
-                   component->compY_,
-                   component->compW_,
-                   component->compH_);
+        int realX, realY, realW, realH;
+        getBounds (realX, realY, realW, realH);
+
+        component->bounds_.setBounds (realX, realY, realW, realH);
 
         int x, y;
         component->getMouseXYRelative (x, y);
@@ -403,25 +403,23 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
 #endif
 }
 
-void ComponentPeer::handleKeyPress (const int keyCode,
+bool ComponentPeer::handleKeyPress (const int keyCode,
                                     const juce_wchar textCharacter)
 {
     updateCurrentModifiers();
 
-    if (Component::currentlyFocusedComponent->isValidComponent())
-        Component::currentlyFocusedComponent->internalKeyPress (keyCode, textCharacter);
-    else
-        component->internalKeyPress (keyCode, textCharacter);
+    return (Component::currentlyFocusedComponent->isValidComponent()
+                ? Component::currentlyFocusedComponent : component)
+              ->internalKeyPress (keyCode, textCharacter);
 }
 
-void ComponentPeer::handleKeyUpOrDown()
+bool ComponentPeer::handleKeyUpOrDown()
 {
     updateCurrentModifiers();
 
-    if (Component::currentlyFocusedComponent->isValidComponent())
-        Component::currentlyFocusedComponent->internalKeyStateChanged();
-    else
-        component->internalKeyStateChanged();
+    return (Component::currentlyFocusedComponent->isValidComponent() 
+                ? Component::currentlyFocusedComponent : component)
+              ->internalKeyStateChanged();
 }
 
 void ComponentPeer::handleModifierKeysChange()
@@ -468,15 +466,12 @@ void ComponentPeer::handleMovedOrResized()
         int realX, realY, realW, realH;
         getBounds (realX, realY, realW, realH);
 
-        const bool wasMoved   = (component->compX_ != realX || component->compY_ != realY);
-        const bool wasResized = (component->compW_ != realW || component->compH_ != realH);
+        const bool wasMoved   = (component->getX() != realX || component->getY() != realY);
+        const bool wasResized = (component->getWidth() != realW || component->getHeight() != realH);
 
         if (wasMoved || wasResized)
         {
-            component->compX_ = realX;
-            component->compY_ = realY;
-            component->compW_ = realW;
-            component->compH_ = realH;
+            component->bounds_.setBounds (realX, realY, realW, realH);
 
             if (wasResized)
                 component->repaint();

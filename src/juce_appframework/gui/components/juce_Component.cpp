@@ -113,10 +113,6 @@ static uint32 nextComponentUID = 0;
 Component::Component() throw()
   : parentComponent_ (0),
     componentUID (++nextComponentUID),
-    compX_ (0),
-    compY_ (0),
-    compW_ (0),
-    compH_ (0),
     numDeepMouseListeners (0),
     childComponentList_ (16),
     lookAndFeel_ (0),
@@ -134,10 +130,6 @@ Component::Component (const String& name) throw()
   : componentName_ (name),
     parentComponent_ (0),
     componentUID (++nextComponentUID),
-    compX_ (0),
-    compY_ (0),
-    compW_ (0),
-    compH_ (0),
     numDeepMouseListeners (0),
     childComponentList_ (16),
     lookAndFeel_ (0),
@@ -232,7 +224,7 @@ void Component::setVisible (bool shouldBeVisible)
 
         flags.visibleFlag = shouldBeVisible;
 
-        internalRepaint (0, 0, compW_, compH_);
+        internalRepaint (0, 0, getWidth(), getHeight());
 
         sendFakeMouseMove();
 
@@ -495,8 +487,7 @@ void Component::addToDesktop (int desktopWindowStyleFlags, void* nativeWindowToA
 
             Desktop::getInstance().addDesktopComponent (this);
 
-            compX_ = x;
-            compY_ = y;
+            bounds_.setPosition (x, y);
             peer->setBounds (x, y, getWidth(), getHeight(), false);
 
             peer->setVisible (isVisible());
@@ -769,55 +760,40 @@ bool Component::isAlwaysOnTop() const throw()
 }
 
 //==============================================================================
-const Rectangle Component::getBounds() const throw()
-{
-    return Rectangle (compX_, compY_, compW_, compH_);
-}
-
-int Component::getRight() const throw()
-{
-    return compX_ + compW_;
-}
-
-int Component::getBottom() const throw()
-{
-    return compY_ + compH_;
-}
-
 int Component::proportionOfWidth (const float proportion) const throw()
 {
-    return roundDoubleToInt (proportion * compW_);
+    return roundDoubleToInt (proportion * bounds_.getWidth());
 }
 
 int Component::proportionOfHeight (const float proportion) const throw()
 {
-    return roundDoubleToInt (proportion * compH_);
+    return roundDoubleToInt (proportion * bounds_.getHeight());
 }
 
 int Component::getParentWidth() const throw()
 {
-    return (parentComponent_ != 0) ? parentComponent_->compW_
+    return (parentComponent_ != 0) ? parentComponent_->getWidth()
                                    : getParentMonitorArea().getWidth();
 }
 
 int Component::getParentHeight() const throw()
 {
-    return (parentComponent_ != 0) ? parentComponent_->compH_
+    return (parentComponent_ != 0) ? parentComponent_->getHeight()
                                    : getParentMonitorArea().getHeight();
 }
 
 int Component::getScreenX() const throw()
 {
-    return (parentComponent_ != 0) ? parentComponent_->getScreenX() + compX_
+    return (parentComponent_ != 0) ? parentComponent_->getScreenX() + getX()
                                    : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenX()
-                                                                   : compX_);
+                                                                   : getX());
 }
 
 int Component::getScreenY() const throw()
 {
-    return (parentComponent_ != 0) ? parentComponent_->getScreenY() + compY_
+    return (parentComponent_ != 0) ? parentComponent_->getScreenY() + getY()
                                    : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenY()
-                                                                   : compY_);
+                                                                   : getY());
 }
 
 void Component::relativePositionToGlobal (int& x, int& y) const throw()
@@ -832,8 +808,8 @@ void Component::relativePositionToGlobal (int& x, int& y) const throw()
             break;
         }
 
-        x += c->compX_;
-        y += c->compY_;
+        x += c->getX();
+        y += c->getY();
         c = c->parentComponent_;
     }
     while (c != 0);
@@ -850,8 +826,8 @@ void Component::globalPositionToRelative (int& x, int& y) const throw()
         if (parentComponent_ != 0)
             parentComponent_->globalPositionToRelative (x, y);
 
-        x -= compX_;
-        y -= compY_;
+        x -= getX();
+        y -= getY();
     }
 }
 
@@ -872,8 +848,8 @@ void Component::relativePositionToOtherComponent (const Component* const targetC
                 break;
             }
 
-            x += c->compX_;
-            y += c->compY_;
+            x += c->getX();
+            y += c->getY();
             c = c->parentComponent_;
         }
         while (c != 0);
@@ -892,8 +868,8 @@ void Component::setBounds (int x, int y, int w, int h)
     if (w < 0) w = 0;
     if (h < 0) h = 0;
 
-    const bool wasResized  = (compW_ != w || compH_ != h);
-    const bool wasMoved    = (compX_ != x || compY_ != y);
+    const bool wasResized  = (getWidth() != w || getHeight() != h);
+    const bool wasMoved    = (getX() != x || getY() != y);
 
     if (wasMoved || wasResized)
     {
@@ -906,10 +882,7 @@ void Component::setBounds (int x, int y, int w, int h)
                 repaintParent();
         }
 
-        compX_ = x;
-        compY_ = y;
-        compW_ = w;
-        compH_ = h;
+        bounds_.setBounds (x, y, w, h);
 
         if (wasResized)
             repaint();
@@ -1045,21 +1018,21 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
 {
     // it's no good calling this method unless both the component and
     // target rectangle have a finite size.
-    jassert (compW_ > 0 && compH_ > 0 && width > 0 && height > 0);
+    jassert (getWidth() > 0 && getHeight() > 0 && width > 0 && height > 0);
 
-    if (compW_ > 0 && compH_ > 0
+    if (getWidth() > 0 && getHeight() > 0
          && width > 0 && height > 0)
     {
         int newW, newH;
 
-        if (onlyReduceInSize && compW_ <= width && compH_ <= height)
+        if (onlyReduceInSize && getWidth() <= width && getHeight() <= height)
         {
-            newW = compW_;
-            newH = compH_;
+            newW = getWidth();
+            newH = getHeight();
         }
         else
         {
-            const double imageRatio = compH_ / (double) compW_;
+            const double imageRatio = getHeight() / (double) getWidth();
             const double targetRatio = height / (double) width;
 
             if (imageRatio <= targetRatio)
@@ -1098,7 +1071,7 @@ bool Component::hitTest (int x, int y)
             Component* const c = getChildComponent (i);
 
             if (c->isVisible()
-                && c->getBounds().contains (x, y)
+                && c->bounds_.contains (x, y)
                 && c->hitTest (x - c->getX(),
                                y - c->getY()))
             {
@@ -1126,13 +1099,13 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 
 bool Component::contains (const int x, const int y)
 {
-    if (x >= 0 && y >= 0 && x < compW_ && y < compH_
+    if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()
          && hitTest (x, y))
     {
         if (parentComponent_ != 0)
         {
-            return parentComponent_->contains (x + compX_,
-                                               y + compY_);
+            return parentComponent_->contains (x + getX(),
+                                               y + getY());
         }
         else if (flags.hasHeavyweightPeerFlag)
         {
@@ -1155,8 +1128,8 @@ bool Component::reallyContains (int x, int y, const bool returnTrueIfWithinAChil
 
     while (p->parentComponent_ != 0)
     {
-        x += p->compX_;
-        y += p->compY_;
+        x += p->getX();
+        y += p->getY();
 
         p = p->parentComponent_;
     }
@@ -1169,15 +1142,15 @@ bool Component::reallyContains (int x, int y, const bool returnTrueIfWithinAChil
 Component* Component::getComponentAt (const int x, const int y)
 {
     if (flags.visibleFlag
-         && x >= 0 && y >= 0 && x < compW_ && y < compH_
+         && x >= 0 && y >= 0 && x < getWidth() && y < getHeight()
          && hitTest (x, y))
     {
         for (int i = childComponentList_.size(); --i >= 0;)
         {
             Component* const child = childComponentList_.getUnchecked(i);
 
-            Component* const c = child->getComponentAt (x - child->compX_,
-                                                        y - child->compY_);
+            Component* const c = child->getComponentAt (x - child->getX(),
+                                                        y - child->getY());
 
             if (c != 0)
                 return c;
@@ -1632,12 +1605,12 @@ void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) throw()
 void Component::repaintParent() throw()
 {
     if (flags.visibleFlag)
-        internalRepaint (0, 0, compW_, compH_);
+        internalRepaint (0, 0, getWidth(), getHeight());
 }
 
 void Component::repaint() throw()
 {
-    repaint (0, 0, compW_, compH_);
+    repaint (0, 0, getWidth(), getHeight());
 }
 
 void Component::repaint (const int x, const int y,
@@ -1661,8 +1634,8 @@ void Component::internalRepaint (int x, int y, int w, int h)
         x = 0;
     }
 
-    if (x + w > compW_)
-        w = compW_ - x;
+    if (x + w > getWidth())
+        w = getWidth() - x;
 
     if (w > 0)
     {
@@ -1672,15 +1645,15 @@ void Component::internalRepaint (int x, int y, int w, int h)
             y = 0;
         }
 
-        if (y + h > compH_)
-            h = compH_ - y;
+        if (y + h > getHeight())
+            h = getHeight() - y;
 
         if (h > 0)
         {
             if (parentComponent_ != 0)
             {
-                x += compX_;
-                y += compY_;
+                x += getX();
+                y += getY();
 
                 if (parentComponent_->flags.visibleFlag)
                     parentComponent_->internalRepaint (x, y, w, h);
@@ -1730,7 +1703,7 @@ void Component::paintEntireComponent (Graphics& originalContext)
                 if (bufferedImage_ == 0)
                 {
                     bufferedImage_ = new Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                compW_, compH_, ! flags.opaqueFlag);
+                                                getWidth(), getHeight(), ! flags.opaqueFlag);
 
                     Graphics imG (*bufferedImage_);
                     paint (imG);
@@ -1757,19 +1730,21 @@ void Component::paintEntireComponent (Graphics& originalContext)
         {
             g->saveState();
 
-            if (g->reduceClipRegion (child->getX(), child->getY(), child->getWidth(), child->getHeight()))
+            if (g->reduceClipRegion (child->getX(), child->getY(),
+                                     child->getWidth(), child->getHeight()))
             {
                 for (int j = i + 1; j < childComponentList_.size(); ++j)
                 {
-                    Component* const sibling = childComponentList_.getUnchecked (j);
+                    const Component* const sibling = childComponentList_.getUnchecked (j);
 
                     if (sibling->flags.opaqueFlag && sibling->isVisible())
-                        g->excludeClipRegion (sibling->getX(), sibling->getY(), sibling->getWidth(), sibling->getHeight());
+                        g->excludeClipRegion (sibling->getX(), sibling->getY(), 
+                                              sibling->getWidth(), sibling->getHeight());
                 }
 
                 if (! g->isClipEmpty())
                 {
-                    g->setOrigin (child->compX_, child->compY_);
+                    g->setOrigin (child->getX(), child->getY());
 
                     child->paintEntireComponent (*g);
                 }
@@ -1949,11 +1924,11 @@ void Component::colourChanged()
 //==============================================================================
 const Rectangle Component::getUnclippedArea() const
 {
-    int x = 0, y = 0, w = compW_, h = compH_;
+    int x = 0, y = 0, w = getWidth(), h = getHeight();
 
     Component* p = parentComponent_;
-    int px = compX_;
-    int py = compY_;
+    int px = getX();
+    int py = getY();
 
     while (p != 0)
     {
@@ -1977,7 +1952,7 @@ void Component::clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
 
         if (c->isVisible())
         {
-            Rectangle newClip (clipRect.getIntersection (c->getBounds()));
+            Rectangle newClip (clipRect.getIntersection (c->bounds_));
 
             if (! newClip.isEmpty())
             {
@@ -1990,10 +1965,10 @@ void Component::clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
                 }
                 else
                 {
-                    newClip.translate (-c->compX_, -c->compY_);
+                    newClip.translate (-c->getX(), -c->getY());
                     c->clipObscuredRegions (g, newClip,
-                                            c->compX_ + deltaX,
-                                            c->compY_ + deltaY);
+                                            c->getX() + deltaX,
+                                            c->getY() + deltaY);
                 }
             }
         }
@@ -2041,19 +2016,19 @@ void Component::subtractObscuredRegions (RectangleList& result,
         {
             if (c->isOpaque())
             {
-                Rectangle childBounds (c->getBounds().getIntersection (clipRect));
+                Rectangle childBounds (c->bounds_.getIntersection (clipRect));
                 childBounds.translate (deltaX, deltaY);
 
                 result.subtract (childBounds);
             }
             else
             {
-                Rectangle newClip (clipRect.getIntersection (c->getBounds()));
-                newClip.translate (-c->compX_, -c->compY_);
+                Rectangle newClip (clipRect.getIntersection (c->bounds_));
+                newClip.translate (-c->getX(), -c->getY());
 
                 c->subtractObscuredRegions (result,
-                                            c->compX_ + deltaX,
-                                            c->compY_ + deltaY,
+                                            c->getX() + deltaX,
+                                            c->getY() + deltaY,
                                             newClip,
                                             compToAvoid);
             }
@@ -3481,26 +3456,6 @@ void Component::removeKeyListener (KeyListener* const listenerToRemove) throw()
         keyListeners_->removeValue (listenerToRemove);
 }
 
-void Component::internalKeyPress (const int key, const juce_wchar textCharacter)
-{
-    const KeyPress keyPress (key,
-                             ModifierKeys::getCurrentModifiers().getRawFlags()
-                                & ModifierKeys::allKeyboardModifiers,
-                             textCharacter);
-
-    if (isCurrentlyBlockedByAnotherModalComponent())
-    {
-        Component* const currentModalComp = getCurrentlyModalComponent();
-
-        if (currentModalComp != 0)
-            currentModalComp->keyPressed (keyPress);
-    }
-    else
-    {
-        keyPressed (keyPress);
-    }
-}
-
 void Component::keyPressed (const KeyPress& key)
 {
     const ComponentDeletionWatcher deletionChecker (this);
@@ -3529,11 +3484,6 @@ void Component::keyPressed (const KeyPress& key)
     }
 }
 
-void Component::internalKeyStateChanged()
-{
-    keyStateChanged();
-}
-
 void Component::keyStateChanged()
 {
     const ComponentDeletionWatcher deletionChecker (this);
@@ -3555,17 +3505,45 @@ void Component::keyStateChanged()
     }
 }
 
-void Component::internalModifierKeysChanged()
+bool Component::internalKeyPress (const int key, const juce_wchar textCharacter)
 {
-    sendFakeMouseMove();
+    const KeyPress keyPress (key,
+                             ModifierKeys::getCurrentModifiers().getRawFlags()
+                                & ModifierKeys::allKeyboardModifiers,
+                             textCharacter);
 
-    modifierKeysChanged (ModifierKeys::getCurrentModifiers());
+    if (isCurrentlyBlockedByAnotherModalComponent())
+    {
+        Component* const currentModalComp = getCurrentlyModalComponent();
+
+        if (currentModalComp != 0)
+            currentModalComp->keyPressed (keyPress);
+    }
+    else
+    {
+        keyPressed (keyPress);
+    }
+
+    return true;
+}
+
+bool Component::internalKeyStateChanged()
+{
+    keyStateChanged();
+    return true;
 }
 
 void Component::modifierKeysChanged (const ModifierKeys& modifiers)
 {
     if (parentComponent_ != 0)
         parentComponent_->modifierKeysChanged (modifiers);
+}
+
+void Component::internalModifierKeysChanged()
+{
+    sendFakeMouseMove();
+
+    modifierKeysChanged (ModifierKeys::getCurrentModifiers());
 }
 
 //==============================================================================

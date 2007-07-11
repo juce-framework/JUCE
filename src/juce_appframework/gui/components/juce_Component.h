@@ -296,7 +296,7 @@ public:
 
         @see getScreenX
     */
-    inline int getX() const throw()                         { return compX_; }
+    inline int getX() const throw()                         { return bounds_.getX(); }
 
     /** Returns the y co-ordinate of the top of this component.
 
@@ -304,31 +304,31 @@ public:
 
         @see getScreenY
     */
-    inline int getY() const throw()                         { return compY_; }
+    inline int getY() const throw()                         { return bounds_.getY(); }
 
     /** Returns the component's width in pixels. */
-    inline int getWidth() const throw()                     { return compW_; }
+    inline int getWidth() const throw()                     { return bounds_.getWidth(); }
 
     /** Returns the component's height in pixels. */
-    inline int getHeight() const throw()                    { return compH_; }
+    inline int getHeight() const throw()                    { return bounds_.getHeight(); }
 
     /** Returns the x co-ordinate of the component's right-hand edge.
 
         This is a distance in pixels from the left edge of the component's parent.
     */
-    int getRight() const throw();
+    int getRight() const throw()                            { return bounds_.getRight(); }
 
     /** Returns the y co-ordinate of the bottom edge of this component.
 
         This is a distance in pixels from the top edge of the component's parent.
     */
-    int getBottom() const throw();
+    int getBottom() const throw()                           { return bounds_.getBottom(); }
 
     /** Returns this component's bounding box.
 
         The rectangle returned is relative to the top-left of the component's parent.
     */
-    const Rectangle getBounds() const throw();
+    const Rectangle& getBounds() const throw()              { return bounds_; }
 
     /** Returns the region of this component that's not obscured by other, opaque components.
 
@@ -1978,7 +1978,7 @@ private:
     String componentName_;
     Component* parentComponent_;
     uint32 componentUID;
-    int compX_, compY_, compW_, compH_;
+    Rectangle bounds_;
     unsigned short numDeepMouseListeners;
     Array <Component*> childComponentList_;
     LookAndFeel* lookAndFeel_;
@@ -2031,8 +2031,8 @@ private:
     void internalFocusLoss (const FocusChangeType cause);
     void internalChildFocusChange (FocusChangeType cause);
     void internalModalInputAttempt();
-    void internalKeyPress (const int key, const juce_wchar textCharacter);
-    void internalKeyStateChanged();
+    bool internalKeyPress (const int key, const juce_wchar textCharacter);
+    bool internalKeyStateChanged();
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
