@@ -1034,11 +1034,12 @@ void Slider::mouseUp (const MouseEvent&)
          && (maximum > minimum)
          && (style != IncDecButtons || incDecDragged))
     {
+        restoreMouseIfHidden();
+
         if (sendChangeOnlyOnRelease && valueOnMouseDown != currentValue)
             triggerChangeMessage (false);
 
         sendDragEnd();
-        restoreMouseIfHidden();
 
         deleteAndZero (popupDisplay);
 
