@@ -638,10 +638,8 @@ void Slider::labelTextChanged (Label* label)
         setValue (newValue, true, true);
         sendDragEnd();
     }
-    else
-    {
-        updateText();
-    }
+
+    updateText(); // force a clean-up of the text, needed in case setValue() hasn't done this.
 }
 
 void Slider::buttonClicked (Button* button)
