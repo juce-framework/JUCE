@@ -265,10 +265,31 @@ const String String::charToString (const tchar character) throw()
 }
 
 // pass in a pointer to the END of a buffer..
-static tchar* intToCharString (tchar* t, const int n)
+static tchar* int64ToCharString (tchar* t, const int64 n) throw()
 {
-    int v = abs (n);
     *--t = 0;
+    int64 v = (n >= 0) ? n : -n;
+
+    do
+    {
+        *--t = (tchar) (T('0') + (int) (v % 10));
+        v /= 10;
+
+    } while (v > 0);
+
+    if (n < 0)
+        *--t = T('-');
+
+    return t;
+}
+
+static tchar* intToCharString (tchar* t, const int n) throw()
+{
+    if (n == 0x80000000) // (would cause an overflow)
+        return int64ToCharString (t, n);
+
+    *--t = 0;
+    int v = abs (n);
 
     do
     {
@@ -283,7 +304,7 @@ static tchar* intToCharString (tchar* t, const int n)
     return t;
 }
 
-static tchar* uintToCharString (tchar* t, unsigned int v)
+static tchar* uintToCharString (tchar* t, unsigned int v) throw()
 {
     *--t = 0;
 
@@ -299,8 +320,8 @@ static tchar* uintToCharString (tchar* t, unsigned int v)
 
 String::String (const int number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
+    tchar buffer [16];
+    tchar* const end = buffer + 16;
     const tchar* const t = intToCharString (end, number);
 
     const int numChars = (int) (end - t);
@@ -310,8 +331,8 @@ String::String (const int number) throw()
 
 String::String (const unsigned int number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
+    tchar buffer [16];
+    tchar* const end = buffer + 16;
     const tchar* const t = uintToCharString (end, number);
 
     const int numChars = (int) (end - t);
@@ -321,8 +342,8 @@ String::String (const unsigned int number) throw()
 
 String::String (const short number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
+    tchar buffer [16];
+    tchar* const end = buffer + 16;
     const tchar* const t = intToCharString (end, (int) number);
 
     const int numChars = (int) (end - t);
@@ -332,8 +353,8 @@ String::String (const short number) throw()
 
 String::String (const unsigned short number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
+    tchar buffer [16];
+    tchar* const end = buffer + 16;
     const tchar* const t = uintToCharString (end, (unsigned int) number);
 
     const int numChars = (int) (end - t);
@@ -343,32 +364,19 @@ String::String (const unsigned short number) throw()
 
 String::String (const int64 number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
-    tchar* t = end;
+    tchar buffer [32];
+    tchar* const end = buffer + 32;
+    const tchar* const t = int64ToCharString (end, number);
 
-    *--t = 0;
-    int64 v = (number >= 0) ? number : -number;
-
-    do
-    {
-        *--t = (tchar)(T('0') + (int) (v % 10));
-        v /= 10;
-
-    } while (v > 0);
-
-    if (number < 0)
-        *--t = T('-');
-
-    const int len = (int) (((char*) end) - ((char*) t));
-    createInternal (len - 1);
-    memcpy (text->text, t, len);
+    const int numChars = (int) (end - t);
+    createInternal (numChars - 1);
+    memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
 String::String (const uint64 number) throw()
 {
-    tchar buffer [64];
-    tchar* const end = buffer + 64;
+    tchar buffer [32];
+    tchar* const end = buffer + 32;
     tchar* t = end;
 
     *--t = 0;
@@ -376,14 +384,14 @@ String::String (const uint64 number) throw()
 
     do
     {
-        *--t = (tchar)(T('0') + (int) (v % 10));
+        *--t = (tchar) (T('0') + (int) (v % 10));
         v /= 10;
 
     } while (v > 0);
 
-    const int len = (int) (((char*) end) - ((char*) t));
-    createInternal (len - 1);
-    memcpy (text->text, t, len);
+    const int numChars = (int) (end - t);
+    createInternal (numChars - 1);
+    memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
 // a double-to-string routine that actually uses the number of dec. places you asked for
