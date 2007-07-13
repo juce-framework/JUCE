@@ -244,6 +244,10 @@ public:
             {
                 PopupMenu::dismissAllActiveMenus();
 
+                Component* const modalComponent = Component::getCurrentlyModalComponent();
+                if (modalComponent != 0)
+                    modalComponent->exitModalState (0);
+
                 filter->editorBeingDeleted (editorComp);
                 deleteAndZero (editorComp);
                 deleteAndZero (wrapper);

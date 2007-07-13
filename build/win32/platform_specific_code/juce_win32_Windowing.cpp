@@ -420,6 +420,7 @@ long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 
 //==============================================================================
 static int currentModifiers = 0;
+static int modifiersAtLastCallback = 0;
 
 static void updateKeyModifiers() throw()
 {
@@ -1549,6 +1550,15 @@ private:
     }
 
     //==============================================================================
+    void sendModifierKeyChangeIfNeeded()
+    {
+        if (modifiersAtLastCallback != currentModifiers)
+        {
+            modifiersAtLastCallback = currentModifiers;
+            handleModifierKeysChange();
+        }
+    }
+
     bool doKeyUp (const WPARAM key)
     {
         updateKeyModifiers();
@@ -1570,7 +1580,7 @@ private:
             case VK_LMENU:
             case VK_RCONTROL:
             case VK_RMENU:
-                handleModifierKeysChange();
+                sendModifierKeyChangeIfNeeded();
         }
 
         return handleKeyUpOrDown();
@@ -1598,7 +1608,7 @@ private:
             case VK_NUMLOCK:
             case VK_SCROLL:
             case VK_APPS:
-                handleModifierKeysChange();
+                sendModifierKeyChangeIfNeeded();
                 break;
 
             case VK_LEFT:
@@ -1976,11 +1986,13 @@ private:
                             juce_repeatLastProcessPriority();
 
                         juce_CheckCurrentlyFocusedTopLevelWindow();
+                        modifiersAtLastCallback = -1;
                         return 0;
 
                     case WM_ACTIVATE:
                         if (LOWORD (wParam) == WA_ACTIVE || LOWORD (wParam) == WA_CLICKACTIVE)
                         {
+                            modifiersAtLastCallback = -1;
                             updateKeyModifiers();
 
                             if (isMinimised())

@@ -50,7 +50,7 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
-static const tchar* const emptyCharString                       = T("\0\0\0\0JUCE");
+static const char* const emptyCharString                        = "\0\0\0\0JUCE";
 static const int safeEmptyStringRefCount                        = 0x3fffffff;
 String::InternalRefCountedStringHolder String::emptyString      = { safeEmptyStringRefCount, 0, { 0 } };
 
@@ -70,6 +70,15 @@ void String::createInternal (const int numChars) throw()
     text->refCount = 1;
     text->allocatedNumChars = numChars;
     text->text[0] = 0;
+}
+
+void String::createInternal (const tchar* const t, const tchar* const textEnd) throw()
+{
+    jassert (*(textEnd - 1) == 0); // must have a null terminator
+
+    const int numChars = (int) (textEnd - t);
+    createInternal (numChars - 1);
+    memcpy (text->text, t, numChars * sizeof (tchar));
 }
 
 void String::appendInternal (const tchar* const newText,
@@ -322,55 +331,40 @@ String::String (const int number) throw()
 {
     tchar buffer [16];
     tchar* const end = buffer + 16;
-    const tchar* const t = intToCharString (end, number);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (intToCharString (end, number), end);
 }
 
 String::String (const unsigned int number) throw()
 {
     tchar buffer [16];
     tchar* const end = buffer + 16;
-    const tchar* const t = uintToCharString (end, number);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (uintToCharString (end, number), end);
 }
 
 String::String (const short number) throw()
 {
     tchar buffer [16];
     tchar* const end = buffer + 16;
-    const tchar* const t = intToCharString (end, (int) number);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (intToCharString (end, (int) number), end);
 }
 
 String::String (const unsigned short number) throw()
 {
     tchar buffer [16];
     tchar* const end = buffer + 16;
-    const tchar* const t = uintToCharString (end, (unsigned int) number);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (uintToCharString (end, (unsigned int) number), end);
 }
 
 String::String (const int64 number) throw()
 {
     tchar buffer [32];
     tchar* const end = buffer + 32;
-    const tchar* const t = int64ToCharString (end, number);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (int64ToCharString (end, number), end);
 }
 
 String::String (const uint64 number) throw()
@@ -389,9 +383,7 @@ String::String (const uint64 number) throw()
 
     } while (v > 0);
 
-    const int numChars = (int) (end - t);
-    createInternal (numChars - 1);
-    memcpy (text->text, t, numChars * sizeof (tchar));
+    createInternal (t, end);
 }
 
 // a double-to-string routine that actually uses the number of dec. places you asked for

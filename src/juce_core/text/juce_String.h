@@ -1043,6 +1043,7 @@ private:
 
     void deleteInternal() throw();
     void createInternal (const int numChars) throw();
+    void createInternal (const tchar* const text, const tchar* const textEnd) throw();
     void appendInternal (const tchar* const text, const int numExtraChars) throw();
     void doubleToStringWithDecPlaces (double n, int numDecPlaces) throw();
     void dupeInternalIfMultiplyReferenced() throw();

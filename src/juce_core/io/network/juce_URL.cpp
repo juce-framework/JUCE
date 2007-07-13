@@ -417,7 +417,7 @@ bool URL::launchInDefaultBrowser() const
     String u (toString (true));
 
     if (u.contains (T("@")) && ! u.contains (T(":")))
-        u = T("mailto:") + u;
+        u = "mailto:" + u;
 
     return juce_launchFile (u, String::empty);
 }

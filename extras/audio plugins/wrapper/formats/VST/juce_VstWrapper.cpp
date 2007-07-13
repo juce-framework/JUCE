@@ -901,15 +901,19 @@ public:
         const MessageManagerLock mml;
 #endif
 
-        Component* modalComponent = Component::getCurrentlyModalComponent();
-        if (modalComponent != 0)
-            modalComponent->exitModalState (0);
-
         if (editorComp != 0)
         {
+            Component* const modalComponent = Component::getCurrentlyModalComponent();
+            if (modalComponent != 0)
+                modalComponent->exitModalState (0);
+
             filter->editorBeingDeleted (editorComp->getEditorComp());
 
             deleteAndZero (editorComp);
+
+            // there's some kind of component currently modal, but the host
+            // is trying to delete our plugin. You should try to avoid this happening..
+            jassert (Component::getCurrentlyModalComponent() == 0);
         }
 
 #if JUCE_MAC || JUCE_LINUX
@@ -917,10 +921,6 @@ public:
 #endif
 
         recursionCheck = false;
-
-        // there's some kind of component currently modal, but the host
-        // is trying to delete our plugin. You should try to avoid this happening..
-        jassert (Component::getCurrentlyModalComponent() == 0);
     }
 
     VstIntPtr dispatcher (VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)

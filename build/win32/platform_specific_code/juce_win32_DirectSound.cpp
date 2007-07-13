@@ -208,7 +208,7 @@ static const String getDSErrorMessage (HRESULT hr)
         break;
 
     default:
-        return T("Unknown error: ") + String ((int) hr);
+        return "Unknown error: " + String ((int) hr);
     }
 
     return result;

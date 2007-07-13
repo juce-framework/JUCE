@@ -192,6 +192,8 @@ public:
 
             lock.exit();
 
+//xxx needs to figure out if blocks are broken up or not
+
             if (len == 0)
             {
                 wait (500);

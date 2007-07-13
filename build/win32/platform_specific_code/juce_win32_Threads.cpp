@@ -91,8 +91,8 @@ void CriticalSection::exit() const throw()
 
 //==============================================================================
 WaitableEvent::WaitableEvent() throw()
+    : internal (CreateEvent (0, FALSE, FALSE, 0))
 {
-    internal = CreateEvent (0, FALSE, FALSE, 0);
 }
 
 WaitableEvent::~WaitableEvent() throw()
@@ -341,19 +341,19 @@ void* Process::getProcedureEntryPoint (void* h, const String& name)
 
 
 //==============================================================================
-InterProcessLock::InterProcessLock (const String& name_)
+InterProcessLock::InterProcessLock (const String& name_) throw()
     : internal (0),
       name (name_),
       reentrancyLevel (0)
 {
 }
 
-InterProcessLock::~InterProcessLock()
+InterProcessLock::~InterProcessLock() throw()
 {
     exit();
 }
 
-bool InterProcessLock::enter (int timeOutMillisecs)
+bool InterProcessLock::enter (const int timeOutMillisecs) throw()
 {
     if (reentrancyLevel++ == 0)
     {
@@ -375,7 +375,7 @@ bool InterProcessLock::enter (int timeOutMillisecs)
     return (internal != 0);
 }
 
-void InterProcessLock::exit()
+void InterProcessLock::exit() throw()
 {
     if (--reentrancyLevel == 0 && internal != 0)
     {

@@ -181,7 +181,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 
     if (! app->moreThanOneInstanceAllowed())
     {
-        appLock = new InterProcessLock (T("juceAppLock_") + app->getApplicationName());
+        appLock = new InterProcessLock ("juceAppLock_" + app->getApplicationName());
 
         if (! appLock->enter(0))
         {

@@ -63,7 +63,7 @@
     @endcode
 */
 class JUCE_API  SplashScreen  : public Component,
-                                private Timer,
+                                public Timer,
                                 private DeletedAtShutdown
 {
 public:
@@ -132,8 +132,8 @@ public:
                const bool useDropShadow);
 
     //==============================================================================
+    /** @internal */
     void paint (Graphics& g);
-
     /** @internal */
     void timerCallback();
 

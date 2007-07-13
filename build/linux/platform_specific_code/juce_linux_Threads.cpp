@@ -240,7 +240,7 @@ bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
     bool ok = true;
     pthread_mutex_lock (&es->mutex);
 
-    if (!es->triggered)
+    if (! es->triggered)
     {
         if (timeOutMillisecs < 0)
         {
@@ -252,28 +252,31 @@ bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
             struct timeval t;
             int timeout = 0;
 
-            gettimeofday(&t,NULL);
+            gettimeofday (&t, 0);
 
             time.tv_sec  = t.tv_sec  + (timeOutMillisecs / 1000);
-            time.tv_nsec = (t.tv_usec + ((timeOutMillisecs % 1000)*1000)) * 1000;
-            while( time.tv_nsec >= 1000000000 )
+            time.tv_nsec = (t.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
+
+            while (time.tv_nsec >= 1000000000)
             {
                 time.tv_nsec -= 1000000000;
                 time.tv_sec++;
             }
 
-            while( !timeout )
+            while (! timeout)
             {
                 timeout = pthread_cond_timedwait (&es->condition, &es->mutex, &time);
-                if( !timeout )
+
+                if (! timeout)
                     // Success
                     break;
 
-                if( timeout == EINTR )
+                if (timeout == EINTR)
                     // Go round again
                     timeout = 0;
             }
         }
+
         ok = es->triggered;
     }
 
@@ -377,7 +380,7 @@ void* Process::getProcedureEntryPoint (void* libraryHandle, const String& proced
 
 
 //==============================================================================
-InterProcessLock::InterProcessLock (const String& name_)
+InterProcessLock::InterProcessLock (const String& name_) throw()
     : internal (0),
       name (name_),
       reentrancyLevel (0)
@@ -389,7 +392,7 @@ InterProcessLock::InterProcessLock (const String& name_)
     internal = (void*) open (temp.getFullPathName().toUTF8(), 'a');
 }
 
-InterProcessLock::~InterProcessLock()
+InterProcessLock::~InterProcessLock() throw()
 {
     while (reentrancyLevel > 0)
         this->exit();
@@ -401,7 +404,7 @@ InterProcessLock::~InterProcessLock()
 #endif
 }
 
-bool InterProcessLock::enter (int timeOutMillisecs)
+bool InterProcessLock::enter (const int timeOutMillisecs) throw()
 {
     if (internal == 0)
         return false;
@@ -441,7 +444,7 @@ bool InterProcessLock::enter (int timeOutMillisecs)
     return false;
 }
 
-void InterProcessLock::exit()
+void InterProcessLock::exit() throw()
 {
     if (reentrancyLevel > 0 && internal != 0)
     {
