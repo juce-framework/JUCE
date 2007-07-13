@@ -3188,6 +3188,16 @@ bool Component::isFocusContainer() const throw()
     return flags.isFocusContainerFlag;
 }
 
+int Component::getExplicitFocusOrder() const throw()
+{
+    return getComponentPropertyInt (T("_jexfo"), false, 0);
+}
+
+void Component::setExplicitFocusOrder (const int newFocusOrderIndex) throw()
+{
+    setComponentProperty (T("_jexfo"), newFocusOrderIndex);
+}
+
 KeyboardFocusTraverser* Component::createFocusTraverser()
 {
     if (flags.isFocusContainerFlag || parentComponent_ == 0)

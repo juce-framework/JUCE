@@ -156,7 +156,7 @@ void TableHeaderComponent::addColumn (const String& columnName,
     ci->minimumWidth = minimumWidth;
     ci->maximumWidth = maximumWidth;
     if (ci->maximumWidth < 0)
-        ci->maximumWidth = 0x7fffffff;
+        ci->maximumWidth = INT_MAX;
     jassert (ci->maximumWidth >= ci->minimumWidth);
     ci->propertyFlags = propertyFlags;
 

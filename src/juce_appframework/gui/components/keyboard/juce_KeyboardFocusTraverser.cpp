@@ -56,12 +56,21 @@ public:
 
     static int compareElements (const Component* const first, const Component* const second) throw()
     {
-        int diff = first->getY() - second->getY();
+        int explicitOrder1 = first->getExplicitFocusOrder();
+        if (explicitOrder1 < 0)
+            explicitOrder1 = INT_MAX / 2;
 
-        if (diff == 0)
-            diff = first->getX() - second->getX();
+        int explicitOrder2 = second->getExplicitFocusOrder();
+        if (explicitOrder2 < 0)
+            explicitOrder2 = INT_MAX / 2;
 
-        return diff;
+        if (explicitOrder1 != explicitOrder2)
+            return explicitOrder2 - explicitOrder1;
+
+        const int diff = first->getY() - second->getY();
+
+        return (diff == 0) ? first->getX() - second->getX()
+                           : diff;
     }
 };
 
@@ -94,7 +103,7 @@ static void findAllFocusableComponents (Component* const parent, Array <Componen
     }
 }
 
-static Component* getIncrementedComponent (Component* const current, const int delta)
+static Component* getIncrementedComponent (Component* const current, const int delta) throw()
 {
     Component* focusContainer = current->getParentComponent();
 
@@ -108,9 +117,11 @@ static Component* getIncrementedComponent (Component* const current, const int d
             Array <Component*> comps;
             findAllFocusableComponents (focusContainer, comps);
 
-            const int index = comps.indexOf (current);
-
-            return comps [(index + comps.size() + delta) % comps.size()];
+            if (comps.size() > 0)
+            {
+                const int index = comps.indexOf (current);
+                return comps [(index + comps.size() + delta) % comps.size()];
+            }
         }
     }
 

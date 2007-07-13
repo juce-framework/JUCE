@@ -476,7 +476,7 @@ public:
         }
 
         int replaceIndex = 0;
-        int bestLastUsageCount = 0x7fffffff;
+        int bestLastUsageCount = INT_MAX;
 
         for (i = faces.size(); --i >= 0;)
         {

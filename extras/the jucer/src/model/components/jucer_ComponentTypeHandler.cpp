@@ -154,6 +154,7 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
     e->setAttribute (T("id"), String::toHexString (getComponentId (comp)));
     e->setAttribute (T("memberName"), comp->getComponentProperty (T("memberName"), false));
     e->setAttribute (T("virtualName"), comp->getComponentProperty (T("virtualName"), false));
+    e->setAttribute (T("explicitFocusOrder"), comp->getExplicitFocusOrder());
 
     RelativePositionedRectangle pos (getComponentPosition (comp));
     pos.updateFromComponent (*comp, layout);
@@ -188,6 +189,7 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
     setComponentId (comp, xml.getStringAttribute (T("id")).getHexValue64());
     comp->setComponentProperty (T("memberName"), xml.getStringAttribute (T("memberName")));
     comp->setComponentProperty (T("virtualName"), xml.getStringAttribute (T("virtualName")));
+    comp->setExplicitFocusOrder (xml.getIntAttribute (T("explicitFocusOrder")));
 
     RelativePositionedRectangle currentPos (getComponentPosition (comp));
     currentPos.updateFromComponent (*comp, layout);
@@ -330,7 +332,6 @@ private:
 
         String newValue, oldValue;
     };
-
 };
 
 //==============================================================================
@@ -370,6 +371,58 @@ private:
     JucerDocument& document;
 };
 
+
+//==============================================================================
+class FocusOrderProperty   : public ComponentTextProperty <Component>
+{
+public:
+    FocusOrderProperty (Component* comp, JucerDocument& document)
+        : ComponentTextProperty <Component> (T("focus order"), 8, false, comp, document)
+    {
+    }
+
+    const String getText() const
+    {
+        return String (component->getExplicitFocusOrder());
+    }
+
+    void setText (const String& newText)
+    {
+        document.perform (new SetFocusOrderAction (component, *document.getComponentLayout(), newText.getIntValue()),
+                          T("Change focus order"));
+    }
+
+private:
+    class SetFocusOrderAction  : public ComponentUndoableAction <Component>
+    {
+    public:
+        SetFocusOrderAction (Component* const comp, ComponentLayout& layout, const int newOrder_)
+            : ComponentUndoableAction <Component> (comp, layout),
+              newValue (newOrder_)
+        {
+            oldValue = comp->getExplicitFocusOrder();
+        }
+
+        bool perform()
+        {
+            showCorrectTab();
+            getComponent()->setExplicitFocusOrder (newValue);
+            changed();
+            return true;
+        }
+
+        bool undo()
+        {
+            showCorrectTab();
+            getComponent()->setExplicitFocusOrder (oldValue);
+            changed();
+            return true;
+        }
+
+        int newValue, oldValue;
+    };
+};
+
 //==============================================================================
 void ComponentTypeHandler::getEditableProperties (Component* component,
                                                   JucerDocument& document,
@@ -386,6 +439,8 @@ void ComponentTypeHandler::getEditableProperties (Component* component,
 
     if (dynamic_cast <SettableTooltipClient*> (component) != 0)
         properties.add (new TooltipProperty (component, document));
+
+    properties.add (new FocusOrderProperty (component, document));
 }
 
 void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp,
@@ -530,6 +585,11 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
           << quotedString (ttc->getTooltip())
           << ");\n";
     }
+
+    if (component->getExplicitFocusOrder() > 0)
+        s << memberVariableName << "->setExplicitFocusOrder ("
+          << component->getExplicitFocusOrder()
+          << ");\n";
 
     code.constructorCode += s;
 }

@@ -998,10 +998,7 @@ public:
     */
     bool getWantsKeyboardFocus() const throw();
 
-    void setFocusContainer (const bool isFocusContainer) throw();
-
-    bool isFocusContainer() const throw();
-
+    //==============================================================================
     /** Chooses whether a click on this component automatically grabs the focus.
 
         By default this is set to true, but you might want a component which can
@@ -1016,6 +1013,7 @@ public:
     */
     bool getMouseClickGrabsKeyboardFocus() const throw();
 
+    //==============================================================================
     /** Tries to give keyboard focus to this component.
 
         When the user clicks on a component or its grabKeyboardFocus()
@@ -1049,6 +1047,13 @@ public:
     */
     bool hasKeyboardFocus (const bool trueIfChildIsFocused) const throw();
 
+    /** Returns the component that currently has the keyboard focus.
+
+        @returns the focused component, or null if nothing is focused.
+    */
+    static Component* getCurrentlyFocusedComponent() throw();
+
+    //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
 
         This will try to move focus to either the next or previous component. (This
@@ -1058,15 +1063,9 @@ public:
 
         @param moveToNext   if true, the focus will move forwards; if false, it will
                             move backwards
-        @see grabKeyboardFocus, setWantsKeyboardFocus
+        @see grabKeyboardFocus, setFocusContainer, setWantsKeyboardFocus
     */
     void moveKeyboardFocusToSibling (const bool moveToNext);
-
-    /** Returns the component that currently has the keyboard focus.
-
-        @returns the focused component, or null if nothing is focused.
-    */
-    static Component* getCurrentlyFocusedComponent() throw();
 
     /** Creates a KeyboardFocusTraverser object to use to determine the logic by
         which focus should be passed from this component.
@@ -1084,6 +1083,54 @@ public:
         delete when no longer needed.
     */
     virtual KeyboardFocusTraverser* createFocusTraverser();
+
+    /** Returns the focus order of this component, if one has been specified.
+
+        By default components don't have a focus order - in that case, this
+        will return 0. Lower numbers indicate that the component will be 
+        earlier in the focus traversal order.
+
+        To change the order, call setExplicitFocusOrder().
+
+        The focus order may be used by the KeyboardFocusTraverser class as part of
+        its algorithm for deciding the order in which components should be traversed.
+        See the KeyboardFocusTraverser class for more details on this.
+
+        @see moveKeyboardFocusToSibling, createFocusTraverser, KeyboardFocusTraverser 
+    */
+    int getExplicitFocusOrder() const throw();
+
+    /** Sets the index used in determining the order in which focusable components
+        should be traversed.
+
+        A value of 0 or less is taken to mean that no explicit order is wanted, and
+        that traversal should use other factors, like the component's position.
+
+        @see getExplicitFocusOrder, moveKeyboardFocusToSibling
+    */
+    void setExplicitFocusOrder (const int newFocusOrderIndex) throw();
+
+    /** Indicates whether this component is a parent for components that can have
+        their focus traversed.
+
+        This flag is used by the default implementation of the createFocusTraverser()
+        method, which uses the flag to find the first parent component (of the currently
+        focused one) which wants to be a focus container.
+
+        So using this method to set the flag to 'true' causes this component to
+        act as the top level within which focus is passed around.
+
+        @see isFocusContainer, createFocusTraverser, moveKeyboardFocusToSibling
+    */
+    void setFocusContainer (const bool isFocusContainer) throw();
+
+    /** Returns true if this component has been marked as a focus container.
+
+        See setFocusContainer() for more details.
+
+        @see setFocusContainer, moveKeyboardFocusToSibling, createFocusTraverser
+    */
+    bool isFocusContainer() const throw();
 
     //==============================================================================
     /** Returns true if the component (and all its parents) are enabled.

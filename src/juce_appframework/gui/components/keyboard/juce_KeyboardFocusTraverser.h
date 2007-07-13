@@ -39,11 +39,21 @@ class Component;
 /**
     Controls the order in which focus moves between components.
 
-    The default implementation of this class orders the components in a left-to-right,
-    top-to-bottom order. If you need traversal in a more customised way, you
-    can create a subclass that uses your own algorithm.
+    The default algorithm used by this class to work out the order of traversal 
+    is as follows:
+    - if two components both have an explicit focus order specified, then the
+      one with the lowest number comes first (see the Component::setExplicitFocusOrder()
+      method).
+    - any component with an explicit focus order greater than 0 comes before ones 
+      that don't have an order specified.
+    - any unspecified components are traversed in a left-to-right, then top-to-bottom 
+      order. 
+      
+    If you need traversal in a more customised way, you can create a subclass 
+    of KeyboardFocusTraverser that uses your own algorithm, and use 
+    Component::createFocusTraverser() to create it.
 
-    @see Component::createFocusTraverser()
+    @see Component::setExplicitFocusOrder, Component::createFocusTraverser
 */
 class JUCE_API  KeyboardFocusTraverser
 {

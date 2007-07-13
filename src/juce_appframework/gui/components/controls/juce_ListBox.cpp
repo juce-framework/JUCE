@@ -404,7 +404,7 @@ void ListBox::updateContent()
 
     if (selected [selected.size() - 1] >= totalItems)
     {
-        selected.removeRange (totalItems, 0x7fffffff - totalItems);
+        selected.removeRange (totalItems, INT_MAX - totalItems);
 
         if (selected.size() == 0)
             lastRowSelected = totalItems - 1;
@@ -507,7 +507,7 @@ void ListBox::deselectRow (const int row)
 void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected)
 {
     selected = setOfRowsToBeSelected;
-    selected.removeRange (totalItems, 0x7fffffff - totalItems);
+    selected.removeRange (totalItems, INT_MAX - totalItems);
 
     if (! isRowSelected (lastRowSelected))
         lastRowSelected = -1;

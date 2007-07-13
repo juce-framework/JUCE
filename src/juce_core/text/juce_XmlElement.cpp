@@ -826,7 +826,7 @@ void XmlElement::insertChildElement (XmlElement* const newNode,
             else
             {
                 if (indexToInsertAt < 0)
-                    indexToInsertAt = 0x7fffffff;
+                    indexToInsertAt = INT_MAX;
 
                 XmlElement* child = firstChildElement;
 

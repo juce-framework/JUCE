@@ -218,7 +218,7 @@ public:
     {
         ++accessCounter;
 
-        int oldestCounter = 0x7fffffff;
+        int oldestCounter = INT_MAX;
         int oldestIndex = 0;
 
         for (int i = numGlyphs; --i >= 0;)
