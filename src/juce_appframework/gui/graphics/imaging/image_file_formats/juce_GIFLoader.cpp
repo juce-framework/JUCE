@@ -57,23 +57,22 @@ GIFLoader::GIFLoader (InputStream& in)
     clearCode = end_code = 0;
 
     int imageWidth, imageHeight;
-    unsigned char colourMap[256][4];
     int transparent = -1;
 
-    if (!getSizeFromHeader (imageWidth, imageHeight))
+    if (! getSizeFromHeader (imageWidth, imageHeight))
         return;
 
     if ((imageWidth <= 0) || (imageHeight <= 0))
         return;
 
-    unsigned char buf [64];
+    unsigned char buf [16];
     if (in.read (buf, 3) != 3)
         return;
 
     int numColours = 2 << (buf[0] & 7);
 
     if ((buf[0] & 0x80) != 0)
-        readColourMap (numColours, colourMap);
+        readPalette (numColours);
 
     for (;;)
     {
@@ -81,15 +80,15 @@ GIFLoader::GIFLoader (InputStream& in)
             break;
 
         if (buf[0] == ';')
-            return;
+            break;
 
         if (buf[0] == '!')
         {
             if (input.read (buf, 1) != 1)
-                return;
+                break;
 
             if (processExtension (buf[0], transparent) < 0)
-                return;
+                break;
 
             continue;
         }
@@ -98,22 +97,21 @@ GIFLoader::GIFLoader (InputStream& in)
             continue;
 
         if (input.read (buf, 9) != 9)
-            return;
+            break;
 
-        imageWidth = makeWord (buf[4], buf[5]);
+        imageWidth  = makeWord (buf[4], buf[5]);
         imageHeight = makeWord (buf[6], buf[7]);
 
         numColours = 2 << (buf[8] & 7);
 
         if ((buf[8] & 0x80) != 0)
-            if (! readColourMap (numColours, colourMap))
-                return;
+            if (! readPalette (numColours))
+                break;
 
         image = new Image ((transparent >= 0) ? Image::ARGB : Image::RGB,
                            imageWidth, imageHeight, (transparent >= 0));
 
-        readImage (colourMap,
-                   imageWidth, imageHeight,
+        readImage (imageWidth, imageHeight,
                    (buf[8] & 0x40) != 0,
                    transparent);
 
@@ -121,7 +119,7 @@ GIFLoader::GIFLoader (InputStream& in)
     }
 }
 
-GIFLoader::~GIFLoader()
+GIFLoader::~GIFLoader() throw()
 {
 }
 
@@ -131,8 +129,8 @@ bool GIFLoader::getSizeFromHeader (int& w, int& h)
 
     if (input.read (b, 6) == 6)
     {
-        if ((strncmp ("GIF87a", (char*)b, 6) == 0)
-             || (strncmp ("GIF89a", (char*)b, 6) == 0))
+        if ((strncmp ("GIF87a", (char*) b, 6) == 0)
+             || (strncmp ("GIF89a", (char*) b, 6) == 0))
         {
             if (input.read (b, 4) == 4)
             {
@@ -146,7 +144,7 @@ bool GIFLoader::getSizeFromHeader (int& w, int& h)
     return false;
 }
 
-bool GIFLoader::readColourMap (const int numCols, unsigned char colourBuffer[256][4])
+bool GIFLoader::readPalette (const int numCols)
 {
     unsigned char rgb[4];
 
@@ -154,19 +152,16 @@ bool GIFLoader::readColourMap (const int numCols, unsigned char colourBuffer[256
     {
         input.read (rgb, 3);
 
-        if (colourBuffer)
-        {
-            colourBuffer [i][0] = rgb[0];
-            colourBuffer [i][1] = rgb[1];
-            colourBuffer [i][2] = rgb[2];
-            colourBuffer [i][3] = 0xff;
-        }
+        palette [i][0] = rgb[0];
+        palette [i][1] = rgb[1];
+        palette [i][2] = rgb[2];
+        palette [i][3] = 0xff;
     }
 
     return true;
 }
 
-int GIFLoader::readDataBlock (unsigned char* dest)
+int GIFLoader::readDataBlock (unsigned char* const dest)
 {
     unsigned char n;
 
@@ -181,7 +176,7 @@ int GIFLoader::readDataBlock (unsigned char* dest)
     return -1;
 }
 
-int GIFLoader::processExtension (int type, int& transparent)
+int GIFLoader::processExtension (const int type, int& transparent)
 {
     unsigned char b [300];
     int n = 0;
@@ -205,7 +200,7 @@ int GIFLoader::processExtension (int type, int& transparent)
     return n;
 }
 
-int GIFLoader::getCode (int codeSize, bool initialise)
+int GIFLoader::getCode (const int codeSize, const bool initialise)
 {
     if (initialise)
     {
@@ -247,7 +242,7 @@ int GIFLoader::getCode (int codeSize, bool initialise)
     return result;
 }
 
-int GIFLoader::readLZWByte (bool initialise, int inputCodeSize)
+int GIFLoader::readLZWByte (const bool initialise, const int inputCodeSize)
 {
     int code, incode, i;
 
@@ -272,7 +267,8 @@ int GIFLoader::readLZWByte (bool initialise, int inputCodeSize)
 
         for (; i < maxGifCode; ++i)
         {
-            table[0][i] = table[1][0] = 0;
+            table[0][i] = 0;
+            table[1][i] = 0;
         }
 
         sp = stack;
@@ -377,19 +373,16 @@ int GIFLoader::readLZWByte (bool initialise, int inputCodeSize)
     return code;
 }
 
-bool GIFLoader::readImage (unsigned char palette[256][4],
-                           int width, int height,
-                           int interlace, int transparent)
+bool GIFLoader::readImage (const int width, const int height,
+                           const int interlace, const int transparent)
 {
     unsigned char c;
 
-    if (input.read (&c, 1) != 1)
+    if (input.read (&c, 1) != 1
+         || readLZWByte (true, c) < 0)
         return false;
 
-    if (readLZWByte (true, c) < 0)
-        return false;
-
-    if (transparent != -1)
+    if (transparent >= 0)
     {
         palette [transparent][0] = 0;
         palette [transparent][1] = 0;
@@ -403,7 +396,7 @@ bool GIFLoader::readImage (unsigned char palette[256][4],
     int stride, pixelStride;
     uint8* const pixels = image->lockPixelDataReadWrite (0, 0, width, height, stride, pixelStride);
     uint8* p = pixels;
-    bool hasAlpha = image->hasAlphaChannel();
+    const bool hasAlpha = image->hasAlphaChannel();
 
     while ((index = readLZWByte (false, c)) >= 0)
     {
@@ -488,9 +481,5 @@ bool GIFLoader::readImage (unsigned char palette[256][4],
     return true;
 }
 
-Image* GIFLoader::getImage()
-{
-    return image;
-}
 
 END_JUCE_NAMESPACE

@@ -272,7 +272,7 @@ void MidiFile::readNextTrack (const char* data, int size)
     while (size > 0)
     {
         int bytesUsed;
-        const int delay = MidiMessage::readVariableLengthVal ((const unsigned char*)data, bytesUsed);
+        const int delay = MidiMessage::readVariableLengthVal ((const uint8*) data, bytesUsed);
         data += bytesUsed;
         size -= bytesUsed;
         time += delay;

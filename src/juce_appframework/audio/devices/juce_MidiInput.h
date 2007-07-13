@@ -149,6 +149,11 @@ public:
     */
     const String getName() const throw()                    { return name; }
 
+    /** Allows you to set a custom name for the device, in case you don't like the name
+        it was given when created.
+    */
+    void setName (const String& newName) throw()            { name = newName; }
+
     //==============================================================================
     /** Starts the device running.
 

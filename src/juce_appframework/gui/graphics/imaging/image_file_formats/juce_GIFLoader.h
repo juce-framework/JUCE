@@ -51,14 +51,15 @@ class GIFLoader
 {
 public:
     GIFLoader (InputStream& in);
-    ~GIFLoader();
+    ~GIFLoader() throw();
 
-    Image* getImage();
+    Image* getImage() const throw()         { return image; }
 
 private:
     Image* image;
     InputStream& input;
-    unsigned char buffer [300];
+    uint8 buffer [300];
+    uint8 palette [256][4];
     bool dataBlockIsZero, fresh, finished;
     int currentBit, lastBit, lastByteIndex;
     int codeSize, setCodeSize;
@@ -70,13 +71,12 @@ private:
     int *sp;
 
     bool getSizeFromHeader (int& width, int& height);
-    bool readColourMap (const int numCols, unsigned char buffer[256][4]);
+    bool readPalette (const int numCols);
     int readDataBlock (unsigned char* dest);
     int processExtension (int type, int& transparent);
     int readLZWByte (bool initialise, int input_code_size);
     int getCode (int code_size, bool initialise);
-    bool readImage (unsigned char palette[256][4],
-                    int width, int height,
+    bool readImage (int width, int height,
                     int interlace, int transparent);
 
     GIFLoader (const GIFLoader&);
