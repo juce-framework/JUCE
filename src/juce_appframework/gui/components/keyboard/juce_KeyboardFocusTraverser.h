@@ -47,7 +47,7 @@ class Component;
     - any component with an explicit focus order greater than 0 comes before ones 
       that don't have an order specified.
     - any unspecified components are traversed in a left-to-right, then top-to-bottom 
-      order. 
+      order.
       
     If you need traversal in a more customised way, you can create a subclass 
     of KeyboardFocusTraverser that uses your own algorithm, and use 

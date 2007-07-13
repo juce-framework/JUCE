@@ -13,7 +13,7 @@ Changelist for version 1.44
 - new classes DirectoryContentsDisplayComponent and FileTreeComponent, allow a view of a directory as either a list or treeview. I've added a demo of the FileTreeComponent to the treeviews section of the Juce Demo. There's also now an option in the FileBrowserComponent constructor to use a treeview.
 - small change to the strictness of the way TreeViews handle their root items. Be careful now to never delete a tree's root item until either the treeview has been deleted, or until you've removed the root from the tree using setRootItem (0). Not doing this can now cause a crash in the tree's destructor, where it expects the root to still be valid.
 - added some virtual methods to TextEditor to allow customisation of its popup menu.
-
+- added a Component::setExplicitFocusOrder() method for specifying the order in which components have their focus traversed, and added Jucer support for setting this value.
 
 ==============================================================================
 Changelist for version 1.43
