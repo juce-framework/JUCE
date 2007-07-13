@@ -73,6 +73,7 @@ public:
         e->setAttribute (T("textBoxEditable"), s->isTextBoxEditable());
         e->setAttribute (T("textBoxWidth"), s->getTextBoxWidth());
         e->setAttribute (T("textBoxHeight"), s->getTextBoxHeight());
+        e->setAttribute (T("skewFactor"), s->getSkewFactor());
 
         return e;
     }
@@ -94,6 +95,8 @@ public:
                             ! xml.getBoolAttribute (T("textBoxEditable"), true),
                             xml.getIntAttribute (T("textBoxWidth"), 80),
                             xml.getIntAttribute (T("textBoxHeight"), 20));
+
+        s->setSkewFactor (xml.getDoubleAttribute (T("skewFactor"), 1.0));
 
         return true;
     }
@@ -124,6 +127,9 @@ public:
 
         if (needsCallback (component))
             r << memberVariableName << "->addListener (this);\n";
+
+        if (s->getSkewFactor() != 1.0)
+            r << memberVariableName << "->setSkewFactor (" << s->getSkewFactor() << ");\n";
 
         r << T('\n');
         code.constructorCode += r;
@@ -168,6 +174,7 @@ public:
         properties.add (new SliderTextboxEditableProperty (s, document));
         properties.add (new SliderTextboxSizeProperty (s, document, true));
         properties.add (new SliderTextboxSizeProperty (s, document, false));
+        properties.add (new SliderSkewProperty (s, document));
 
         addColourProperties (component, document, properties);
     }
@@ -567,6 +574,62 @@ private:
             }
 
             double newState[3], oldState[3];
+        };
+    };
+
+    //==============================================================================
+    class SliderSkewProperty  : public ComponentTextProperty <Slider>
+    {
+    public:
+        SliderSkewProperty (Slider* slider, JucerDocument& document)
+            : ComponentTextProperty <Slider> (T("skew factor"), 12, false, slider, document)
+        {
+        }
+
+        void setText (const String& newText)
+        {
+            const double skew = jlimit (0.001, 1000.0, newText.getDoubleValue());
+
+            document.perform (new SliderSkewChangeAction (component, *document.getComponentLayout(), skew),
+                              T("Change Slider skew"));
+        }
+
+        const String getText() const
+        {
+            Slider* s = dynamic_cast <Slider*> (component);
+            jassert (s != 0);
+
+            return String (s->getSkewFactor());
+        }
+
+    private:
+        class SliderSkewChangeAction  : public ComponentUndoableAction <Slider>
+        {
+        public:
+            SliderSkewChangeAction (Slider* const comp, ComponentLayout& layout, const double newValue_)
+                : ComponentUndoableAction <Slider> (comp, layout)
+            {
+                newValue = newValue_;
+                oldValue = comp->getSkewFactor();
+            }
+
+            bool perform()
+            {
+                showCorrectTab();
+                getComponent()->setSkewFactor (newValue);
+                changed();
+                return true;
+            }
+
+            bool undo()
+            {
+                showCorrectTab();
+                getComponent()->setSkewFactor (oldValue);
+                changed();
+                return true;
+            }
+
+            double newValue, oldValue;
         };
     };
 

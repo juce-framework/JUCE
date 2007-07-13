@@ -186,7 +186,7 @@ public:
         To set the skew position by using a mid-point, use the setSkewFactorFromMidPoint()
         method instead.
 
-        @see setSkewFactorFromMidPoint
+        @see getSkewFactor, setSkewFactorFromMidPoint
     */
     void setSkewFactor (const double factor) throw();
 
@@ -195,9 +195,17 @@ public:
         This allows you to specify the slider value that should appear in the
         centre of the slider's visible range.
 
-        @see setSkewFactor
+        @see setSkewFactor, getSkewFactor
      */
     void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint) throw();
+
+    /** Returns the current skew factor.
+
+        See setSkewFactor for more info.
+
+        @see setSkewFactor, setSkewFactorFromMidPoint
+    */
+    double getSkewFactor() const throw()                        { return skewFactor; }
 
     //==============================================================================
     /** Used by setIncDecButtonsMode().

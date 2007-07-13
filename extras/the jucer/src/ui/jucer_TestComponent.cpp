@@ -179,6 +179,8 @@ void TestComponent::resized()
 //==============================================================================
 void TestComponent::showInDialogBox (JucerDocument& document)
 {
+    TooltipWindow tooltipWindow (0, 400);
+
     TestComponent testComp (0, document.createCopy(), true);
 
     DialogWindow::showModalDialog (T("Testing: ") + document.getClassName(),

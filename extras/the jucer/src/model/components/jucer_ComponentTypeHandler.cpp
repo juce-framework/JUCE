@@ -388,7 +388,7 @@ public:
 
     void setText (const String& newText)
     {
-        document.perform (new SetFocusOrderAction (component, *document.getComponentLayout(), newText.getIntValue()),
+        document.perform (new SetFocusOrderAction (component, *document.getComponentLayout(), jmax (0, newText.getIntValue())),
                           T("Change focus order"));
     }
 

@@ -220,6 +220,28 @@ const String makeValidCppIdentifier (String s,
             n << words[i];
     }
 
+    // make sure it's not a reserved c++ keyword..
+    static const tchar* const reservedWords[] = 
+    { 
+        T("auto"), T("const"), T("double"), T("float"), T("int"), T("short"), T("struct"),
+        T("return"), T("static"), T("union"), T("while"), T("asm"), T("dynamic_cast"),
+        T("unsigned"), T("break"), T("continue"), T("else"), T("for"), T("long"), T("signed"), 
+        T("switch"), T("void"), T("case"), T("default"), T("enum"), T("goto"), T("register"), 
+        T("sizeof"), T("typedef"), T("volatile"), T("char"), T("do"), T("extern"), T("if"), 
+        T("namespace"), T("reinterpret_cast"), T("try"), T("bool"), T("explicit"), T("new"), 
+        T("static_cast"), T("typeid"), T("catch"), T("false"), T("operator"), T("template"), 
+        T("typename"), T("class"), T("friend"), T("private"), T("this"), T("using"), T("const_cast"), 
+        T("inline"), T("public"), T("throw"), T("virtual"), T("delete"), T("mutable"), T("protected"), 
+        T("true"), T("wchar_t"), T("and"), T("bitand"), T("compl"), T("not_eq"), T("or_eq"), 
+        T("xor_eq"), T("and_eq"), T("bitor"), T("not"), T("or"), T("xor"), T("cin"), T("endl"), 
+        T("INT_MIN"), T("iomanip"), T("main"), T("npos"), T("std"), T("cout"), T("include"), 
+        T("INT_MAX"), T("iostream"), T("MAX_RAND"), T("NULL"), T("string")
+    };
+
+    for (int i = 0; i < numElementsInArray (reservedWords); ++i)
+        if (n == reservedWords[i])
+            n << '_';
+
     return n;
 }
 

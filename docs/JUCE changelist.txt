@@ -14,6 +14,7 @@ Changelist for version 1.44
 - small change to the strictness of the way TreeViews handle their root items. Be careful now to never delete a tree's root item until either the treeview has been deleted, or until you've removed the root from the tree using setRootItem (0). Not doing this can now cause a crash in the tree's destructor, where it expects the root to still be valid.
 - added some virtual methods to TextEditor to allow customisation of its popup menu.
 - added a Component::setExplicitFocusOrder() method for specifying the order in which components have their focus traversed, and added Jucer support for setting this value.
+- made slider skew factor editable in the jucer
 
 ==============================================================================
 Changelist for version 1.43
