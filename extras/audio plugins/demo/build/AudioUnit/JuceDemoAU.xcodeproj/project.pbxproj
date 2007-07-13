@@ -60,7 +60,7 @@
 		84F055040906E9EA00AEC8DB /* DemoJuceFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F055000906E9EA00AEC8DB /* DemoJuceFilter.h */; };
 		84F055260906FBCF00AEC8DB /* AUSilentTimeout.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F055250906FBCF00AEC8DB /* AUSilentTimeout.h */; };
 		84F87963093B1EDC00225D65 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F87962093B1EDC00225D65 /* AGL.framework */; };
-		84FDAFE90C15B9E200CD0087 /* libjuce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDAFBD0C15B8F100CD0087 /* libjuce.a */; };
+		84FDAFE90C15B9E200CD0087 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDAFBD0C15B8F100CD0087 /* libjucedebug.a */; };
 		A9E885EA0874B5BF00B2DFE8 /* CAThreadSafeList.h in Headers */ = {isa = PBXBuildFile; fileRef = A9E885E90874B5BF00B2DFE8 /* CAThreadSafeList.h */; };
 		F4E5DC2C0898301D00589A5A /* CAVectorUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = F4E5DC290898301D00589A5A /* CAVectorUnit.h */; };
 		F4E5DC2D0898301D00589A5A /* CAVectorUnitTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = F4E5DC2A0898301D00589A5A /* CAVectorUnitTypes.h */; };
@@ -79,8 +79,8 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		84CFB0240909684B0053C22C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "~/Library/Audio/Plug-Ins/Components";
+			buildActionMask = 12;
+			dstPath = "$HOME/Library/Audio/Plug-Ins/Components";
 			dstSubfolderSpec = 0;
 			files = (
 				84CFB029090968590053C22C /* DemoJuceAudioUnit.component in CopyFiles */,
@@ -161,7 +161,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84FDAFE90C15B9E200CD0087 /* libjuce.a in Frameworks */,
+				84FDAFE90C15B9E200CD0087 /* libjucedebug.a in Frameworks */,
 				84CFAFEB0909666C0053C22C /* AudioToolbox.framework in Frameworks */,
 				3E8BF11F079CA60300021B09 /* CoreFoundation.framework in Frameworks */,
 				3E8BF120079CA60300021B09 /* CoreServices.framework in Frameworks */,
@@ -215,7 +215,7 @@
 		84FDAFB90C15B8F100CD0087 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84FDAFBD0C15B8F100CD0087 /* libjuce.a */,
+				84FDAFBD0C15B8F100CD0087 /* libjucedebug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -439,10 +439,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		84FDAFBD0C15B8F100CD0087 /* libjuce.a */ = {
+		84FDAFBD0C15B8F100CD0087 /* libjucedebug.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libjuce.a;
+			path = libjucedebug.a;
 			remoteRef = 84FDAFBC0C15B8F100CD0087 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

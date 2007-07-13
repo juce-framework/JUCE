@@ -1153,17 +1153,25 @@ public:
                 const bool used1 = handleKeyUpOrDown();
                 const bool used2 = handleKeyPress (keyCode, textCharacter);
 
-                return (used1 || used2) ? noErr : eventNotHandledErr;
+                if (used1 || used2)
+                    return noErr;
+
+                break;
             }
 
         case kEventRawKeyUp:
             keysCurrentlyDown.removeValue ((void*) keyCode);
             lastTextCharacter = 0;
-            return handleKeyUpOrDown() ? noErr : eventNotHandledErr;
+            if (handleKeyUpOrDown())
+                return noErr;
+
+            break;
 
         case kEventRawKeyRepeat:
-            return handleKeyPress (keyCode, lastTextCharacter) ? noErr
-                                                               : eventNotHandledErr;
+            if (handleKeyPress (keyCode, lastTextCharacter))
+                return noErr;
+
+            break;
 
         case kEventRawKeyModifiersChanged:
             handleModifierKeysChange();
@@ -2275,10 +2283,10 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
             {
                 const CGRect r (CGDisplayBounds (disps[i]));
 
-                monitorCoords.add (Rectangle (r.origin.x,
-                                              r.origin.y,
-                                              r.size.width,
-                                              r.size.height));
+                monitorCoords.add (Rectangle ((int) r.origin.x,
+                                              (int) r.origin.y,
+                                              (int) r.size.width,
+                                              (int) r.size.height));
             }
         }
     }
