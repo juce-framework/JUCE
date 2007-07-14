@@ -323,13 +323,13 @@ uint32 juce_millisecondsSinceStartup() throw()
 
 double Time::getMillisecondCounterHiRes() throw()
 {
-    return getHighResolutionTicks() * (1.0 / 1000000.0);
+    return getHighResolutionTicks() * 0.001;
 }
 
 int64 Time::getHighResolutionTicks() throw()
 {
     timeval t;
-    if (gettimeofday (&t,NULL))
+    if (gettimeofday (&t, 0))
         return 0;
 
     return ((int64) t.tv_sec * (int64) 1000000) + (int64) t.tv_usec;

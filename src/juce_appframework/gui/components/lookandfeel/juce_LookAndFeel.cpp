@@ -66,6 +66,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/drawables/juce_DrawablePath.h"
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../special/juce_MidiKeyboardComponent.h"
+#include "../special/juce_ColourSelector.h"
 
 
 //==============================================================================
@@ -188,7 +189,10 @@ LookAndFeel::LookAndFeel()
         MidiKeyboardComponent::keyDownOverlayColourId,           0xffb6b600,
         MidiKeyboardComponent::textLabelColourId,                0xff000000,
         MidiKeyboardComponent::upDownButtonBackgroundColourId,   0xffd3d3d3,
-        MidiKeyboardComponent::upDownButtonArrowColourId,        0xff000000
+        MidiKeyboardComponent::upDownButtonArrowColourId,        0xff000000,
+
+        ColourSelector::backgroundColourId,         0xffe5e5e5,
+        ColourSelector::labelTextColourId,          0xff000000
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)

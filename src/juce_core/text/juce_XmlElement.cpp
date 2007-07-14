@@ -1142,11 +1142,16 @@ const String XmlElement::getChildElementAllSubText (const tchar* const childTagN
     return defaultReturnValue;
 }
 
-void XmlElement::addTextElement (const String& text) throw()
+XmlElement* XmlElement::createTextElement (const String& text) throw()
 {
     XmlElement* const e = new XmlElement ((int) 0);
     e->setAttribute (juce_xmltextContentAttributeName, text);
-    addChildElement (e);
+    return e;
+}
+
+void XmlElement::addTextElement (const String& text) throw()
+{
+    addChildElement (createTextElement (text));
 }
 
 void XmlElement::deleteAllTextElements() throw()

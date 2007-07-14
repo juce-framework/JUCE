@@ -644,6 +644,10 @@ public:
     */
     void deleteAllTextElements() throw();
 
+    /** Creates a text element that can be added to a parent element.
+    */
+    static XmlElement* createTextElement (const String& text) throw();
+
 
     //==============================================================================
     juce_UseDebuggingNewOperator

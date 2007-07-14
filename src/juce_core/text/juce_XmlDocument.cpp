@@ -475,7 +475,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
             else
             {
                 if (! outOfData)
-                    setLastError ("illegal characters found", false);
+                    setLastError ("illegal character found in " + node->getTagName() + ": '" + c + "'", false);
             }
 
             break;

@@ -100,12 +100,9 @@ bool StretchableLayoutManager::getItemLayout (const int itemIndex,
 //==============================================================================
 void StretchableLayoutManager::setTotalSize (const int newTotalSize)
 {
-    if (totalSize != newTotalSize)
-    {
-        totalSize = newTotalSize;
+    totalSize = newTotalSize;
 
-        fitComponentsIntoSpace (0, items.size(), totalSize, 0);
-    }
+    fitComponentsIntoSpace (0, items.size(), totalSize, 0);
 }
 
 int StretchableLayoutManager::getItemCurrentPosition (const int itemIndex) const

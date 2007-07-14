@@ -473,8 +473,8 @@ void ColourSelector::update()
 //==============================================================================
 void ColourSelector::paint (Graphics& g)
 {
-    g.fillAll (Colour::greyLevel (0.9f));
-
+    g.fillAll (findColour (backgroundColourId));
+        
     if ((flags & showColourAtTop) != 0)
     {
         const Colour colour (getCurrentColour());
@@ -502,7 +502,7 @@ void ColourSelector::paint (Graphics& g)
 
     if ((flags & showSliders) != 0)
     {
-        g.setColour (Colours::black);
+        g.setColour (findColour (labelTextColourId));
         g.setFont (11.0f);
 
         for (int i = 4; --i >= 0;)
