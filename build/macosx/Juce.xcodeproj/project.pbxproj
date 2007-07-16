@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		84052DE408D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84052DE208D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.cpp */; };
 		84052DE508D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 84052DE308D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.h */; };
+		8406AA5A0C4BDF90003A0D6A /* juce_MidiOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8406AA590C4BDF90003A0D6A /* juce_MidiOutput.cpp */; };
 		8406C44609642CE100C99145 /* juce_LowLevelGraphicsContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 8406C44309642CE100C99145 /* juce_LowLevelGraphicsContext.h */; };
 		8406C44709642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8406C44409642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.cpp */; settings = {COMPILER_FLAGS = "-O3"; }; };
 		8406C44809642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 8406C44509642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.h */; };
@@ -650,6 +651,7 @@
 /* Begin PBXFileReference section */
 		84052DE208D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_ToneGeneratorAudioSource.cpp; sourceTree = "<group>"; };
 		84052DE308D095D200BEC0F0 /* juce_ToneGeneratorAudioSource.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_ToneGeneratorAudioSource.h; sourceTree = "<group>"; };
+		8406AA590C4BDF90003A0D6A /* juce_MidiOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_MidiOutput.cpp; sourceTree = "<group>"; };
 		8406C44309642CE100C99145 /* juce_LowLevelGraphicsContext.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_LowLevelGraphicsContext.h; sourceTree = "<group>"; };
 		8406C44409642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_LowLevelGraphicsSoftwareRenderer.cpp; sourceTree = "<group>"; };
 		8406C44509642CE100C99145 /* juce_LowLevelGraphicsSoftwareRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_LowLevelGraphicsSoftwareRenderer.h; sourceTree = "<group>"; };
@@ -1355,6 +1357,7 @@
 				84198B0A096D8E2B0022A439 /* juce_AudioDeviceManager.cpp */,
 				84198B0B096D8E2B0022A439 /* juce_AudioDeviceManager.h */,
 				84198B0D096D8E2B0022A439 /* juce_MidiInput.h */,
+				8406AA590C4BDF90003A0D6A /* juce_MidiOutput.cpp */,
 				84198B0E096D8E2B0022A439 /* juce_MidiOutput.h */,
 			);
 			path = devices;
@@ -3114,6 +3117,7 @@
 				842D3D0E0C0D7CF200E9FFE4 /* juce_MenuBarModel.cpp in Sources */,
 				847F72DB0C2702A000CBECEC /* juce_DirectoryContentsDisplayComponent.cpp in Sources */,
 				847F72DD0C2702A000CBECEC /* juce_FileTreeComponent.cpp in Sources */,
+				8406AA5A0C4BDF90003A0D6A /* juce_MidiOutput.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

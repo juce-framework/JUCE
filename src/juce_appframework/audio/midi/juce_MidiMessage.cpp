@@ -100,7 +100,7 @@ MidiMessage::MidiMessage (const uint8* const d,
     memcpy (data, d, dataSize);
 
     // check that the length matches the data..
-    jassert (size > 3 || getMessageLengthFromFirstByte (*d) == size);
+    jassert (size > 3 || *d >= 0xf0 || getMessageLengthFromFirstByte (*d) == size);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -473,6 +473,7 @@ const MidiMessage MidiMessage::controllerEvent (const int channel,
                                                 const int controllerType,
                                                 const int value) throw()
 {
+    // the channel must be between 1 and 16 inclusive
     jassert (channel > 0 && channel <= 16);
 
     return MidiMessage (0xb0 | jlimit (0, 15, channel - 1),

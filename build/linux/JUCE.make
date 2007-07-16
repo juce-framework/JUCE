@@ -161,6 +161,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_AudioDeviceManager.o \
 	$(OBJDIR)/juce_AudioIODevice.o \
 	$(OBJDIR)/juce_AudioIODeviceType.o \
+	$(OBJDIR)/juce_MidiOutput.o \
 	$(OBJDIR)/juce_Sampler.o \
 	$(OBJDIR)/juce_Synthesiser.o \
 	$(OBJDIR)/juce_FileBasedDocument.o \
@@ -1058,6 +1059,11 @@ $(OBJDIR)/juce_AudioIODevice.o: ../../src/juce_appframework/audio/devices/juce_A
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_AudioIODeviceType.o: ../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_MidiOutput.o: ../../src/juce_appframework/audio/devices/juce_MidiOutput.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

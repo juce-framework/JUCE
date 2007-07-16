@@ -1058,6 +1058,10 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.cpp"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.h"
 							>
 						</File>

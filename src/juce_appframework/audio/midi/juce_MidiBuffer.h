@@ -50,20 +50,20 @@ class JUCE_API  MidiBuffer  : private ArrayAllocationBase <uint8>
 public:
     //==============================================================================
     /** Creates an empty MidiBuffer. */
-    MidiBuffer();
+    MidiBuffer() throw();
 
     /** Creates a copy of another MidiBuffer. */
-    MidiBuffer (const MidiBuffer& other);
+    MidiBuffer (const MidiBuffer& other) throw();
 
     /** Makes a copy of another MidiBuffer. */
-    const MidiBuffer& operator= (const MidiBuffer& other);
+    const MidiBuffer& operator= (const MidiBuffer& other) throw();
 
     /** Destructor */
-    ~MidiBuffer();
+    ~MidiBuffer() throw();
 
     //==============================================================================
     /** Removes all events from the buffer. */
-    void clear();
+    void clear() throw();
 
     /** Removes all events between two times from the buffer.
 
@@ -71,13 +71,13 @@ public:
         be removed.
     */
     void clear (const int start,
-                const int numSamples);
+                const int numSamples) throw();
 
     /** Returns true if the buffer is empty.
 
         To actually retrieve the events, use a MidiBuffer::Iterator object
     */
-    bool isEmpty() const;
+    bool isEmpty() const throw();
 
     /** Counts the number of events in the buffer.
 
@@ -85,7 +85,7 @@ public:
         the events, so you might prefer to call isEmpty() if that's all you need
         to know.
     */
-    int getNumEvents() const;
+    int getNumEvents() const throw();
 
     /** Adds an event to the buffer.
 
@@ -99,7 +99,7 @@ public:
         To retrieve events, use a MidiBuffer::Iterator object
     */
     void addEvent (const MidiMessage& midiMessage,
-                   const int sampleNumber);
+                   const int sampleNumber) throw();
 
     /** Adds an event to the buffer from raw midi data.
 
@@ -119,7 +119,7 @@ public:
     */
     void addEvent (const uint8* const rawMidiData,
                    const int maxBytesOfMidiData,
-                   const int sampleNumber);
+                   const int sampleNumber) throw();
 
     /** Adds some events from another buffer to this one.
 
@@ -138,19 +138,19 @@ public:
     void addEvents (const MidiBuffer& otherBuffer,
                     const int startSample,
                     const int numSamples,
-                    const int sampleDeltaToAdd);
+                    const int sampleDeltaToAdd) throw();
 
     /** Returns the sample number of the first event in the buffer.
 
         If the buffer's empty, this will just return 0.
     */
-    int getFirstEventTime() const;
+    int getFirstEventTime() const throw();
 
     /** Returns the sample number of the last event in the buffer.
 
         If the buffer's empty, this will just return 0.
     */
-    int getLastEventTime() const;
+    int getLastEventTime() const throw();
 
     //==============================================================================
     /**
@@ -166,16 +166,16 @@ public:
     public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
-        Iterator (const MidiBuffer& buffer);
+        Iterator (const MidiBuffer& buffer) throw();
 
         /** Destructor. */
-        ~Iterator();
+        ~Iterator() throw();
 
         //==============================================================================
         /** Repositions the iterator so that the next event retrieved will be the first
             one whose sample position is at greater than or equal to the given position.
         */
-        void setNextSamplePosition (const int samplePosition);
+        void setNextSamplePosition (const int samplePosition) throw();
 
         /** Retrieves a copy of the next event from the buffer.
 
@@ -186,7 +186,7 @@ public:
                             the end of the buffer
         */
         bool getNextEvent (MidiMessage& result,
-                           int& samplePosition);
+                           int& samplePosition) throw();
 
         /** Retrieves the next event from the buffer.
 
@@ -202,7 +202,7 @@ public:
         */
         bool getNextEvent (const uint8* &midiData,
                            int& numBytesOfMidiData,
-                           int& samplePosition);
+                           int& samplePosition) throw();
 
         //==============================================================================
         juce_UseDebuggingNewOperator
@@ -223,7 +223,7 @@ private:
     friend class MidiBuffer::Iterator;
     int bytesUsed;
 
-    uint8* findEventAfter (uint8* d, const int samplePosition) const;
+    uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
 };
 
 

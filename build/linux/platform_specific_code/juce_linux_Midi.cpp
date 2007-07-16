@@ -264,11 +264,6 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
     return newDevice;
 }
 
-MidiOutput::MidiOutput()
-    : internal (0)
-{
-}
-
 MidiOutput::~MidiOutput()
 {
     MidiOutputDevice* const device = (MidiOutputDevice*) internal;

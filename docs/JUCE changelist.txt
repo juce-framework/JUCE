@@ -15,6 +15,7 @@ Changelist for version 1.44
 - added some virtual methods to TextEditor to allow customisation of its popup menu.
 - added a Component::setExplicitFocusOrder() method for specifying the order in which components have their focus traversed, and added Jucer support for setting this value.
 - made slider skew factor editable in the jucer
+- added a background thread to the MidiOutput class, so it can be given a batch of midi events and will dispatch them itself based on their timestamps.
 
 ==============================================================================
 Changelist for version 1.43

@@ -33,7 +33,9 @@
 #define __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 #include "../../../juce_core/text/juce_StringArray.h"
+#include "../../../juce_core/threads/juce_Thread.h"
 #include "../midi/juce_MidiMessage.h"
+#include "../midi/juce_MidiBuffer.h"
 
 
 //==============================================================================
@@ -45,7 +47,7 @@
 
     @see MidiInput
 */
-class JUCE_API  MidiOutput
+class JUCE_API  MidiOutput  : private Thread
 {
 public:
     //==============================================================================
@@ -103,6 +105,7 @@ public:
     /** Sends a midi reset to the device. */
     void reset();
 
+
     //==============================================================================
     /** Returns the current volume setting for this device.  */
     bool getVolume (float& leftVol,
@@ -112,6 +115,44 @@ public:
     void setVolume (float leftVol,
                     float rightVol);
 
+    //==============================================================================
+    /** This lets you supply a block of messages that will be sent out at some point 
+        in the future.
+
+        The MidiOutput class has an internal thread that can send out timestamped 
+        messages - this appends a set of messages to its internal buffer, ready for
+        sending.
+
+        This will only work if you've already started the thread with startBackgroundThread().
+
+        A time is supplied, at which the block of messages should be sent. This time uses
+        the same time base as Time::getMillisecondCounter(), and must be in the future. 
+        
+        The samplesPerSecondForBuffer parameter indicates the number of samples per second
+        used by the MidiBuffer. Each event in a MidiBuffer has a sample position, and the
+        samplesPerSecondForBuffer value is needed to convert this sample position to a
+        real time.        
+    */
+    void sendBlockOfMessages (const MidiBuffer& buffer, 
+                              const double millisecondCounterToStartAt,
+                              double samplesPerSecondForBuffer) throw();
+
+    /** Gets rid of any midi messages that had been added by sendBlockOfMessages().
+    */
+    void clearAllPendingMessages() throw();
+
+    /** Starts up a background thread so that the device can send blocks of data.
+
+        Call this to get the device ready, before using sendBlockOfMessages().
+    */
+    void startBackgroundThread() throw();
+
+    /** Stops the background thread, and clears any pending midi events.
+
+        @see startBackgroundThread
+    */
+    void stopBackgroundThread() throw();
+
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -119,8 +160,23 @@ public:
 private:
     void* internal;
 
-    MidiOutput();
+    struct PendingMessage
+    {
+        PendingMessage (const uint8* const data, const int len, const double sampleNumber) throw();
+
+        MidiMessage message;
+        PendingMessage* next;
+
+        juce_UseDebuggingNewOperator
+    };
+
+    CriticalSection lock;
+    PendingMessage* firstMessage;
+
+    MidiOutput() throw();
     MidiOutput (const MidiOutput&);
+
+    void run();
 };
 
 

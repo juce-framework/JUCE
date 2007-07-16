@@ -551,10 +551,6 @@ MidiOutput* MidiOutput::openDevice (int index)
     return 0;
 }
 
-MidiOutput::MidiOutput()
-{
-}
-
 MidiOutput::~MidiOutput()
 {
     MidiOutHandle* const h = (MidiOutHandle*) internal;

@@ -285,10 +285,6 @@ MidiOutput* MidiOutput::openDevice (int index)
     return mo;
 }
 
-MidiOutput::MidiOutput()
-{
-}
-
 MidiOutput::~MidiOutput()
 {
     MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*)internal;
