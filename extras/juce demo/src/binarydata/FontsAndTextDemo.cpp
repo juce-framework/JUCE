@@ -78,7 +78,7 @@ public:
         italicButton->addButtonListener (this);
 
         addAndMakeVisible (sizeSlider = new Slider (T("size")));
-        sizeSlider->setRange (3.0, 50.0, 0.1);
+        sizeSlider->setRange (3.0, 150.0, 0.1);
         sizeSlider->setValue (20.0);
         sizeSlider->addListener (this);
 

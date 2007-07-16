@@ -18,7 +18,7 @@ namespace BinaryData
     const int           draganddropdemo_cppSize = 7874;
 
     extern const char*  fontsandtextdemo_cpp;
-    const int           fontsandtextdemo_cppSize = 9064;
+    const int           fontsandtextdemo_cppSize = 9065;
 
     extern const char*  icons_zip;
     const int           icons_zipSize = 83876;

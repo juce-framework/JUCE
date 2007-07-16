@@ -43,7 +43,8 @@ ThreadPoolJob::ThreadPoolJob (const String& name)
     : jobName (name),
       pool (0),
       shouldStop (false),
-      isActive (false)
+      isActive (false),
+      shouldBeDeleted (false)
 {
 }
 
@@ -360,6 +361,9 @@ bool ThreadPool::runNextJob()
                     job->pool = 0;
                     job->shouldStop = true;
                     jobs.removeValue (job);
+
+                    if (result == ThreadPoolJob::jobHasFinishedAndShouldBeDeleted)
+                        delete job;
                 }
                 else
                 {

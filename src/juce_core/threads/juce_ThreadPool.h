@@ -85,6 +85,10 @@ public:
     {
         jobHasFinished = 0,     /**< indicates that the job has finished and can be
                                      removed from the pool. */
+
+        jobHasFinishedAndShouldBeDeleted,  /**< indicates that the job has finished and that it
+                                                should be automatically deleted by the pool. */
+
         jobNeedsRunningAgain    /**< indicates that the job would like to be called
                                      again when a thread is free. */
     };
@@ -126,7 +130,6 @@ public:
     */
     void signalJobShouldExit();
 
-
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -135,7 +138,7 @@ private:
     friend class ThreadPoolThread;
     String jobName;
     ThreadPool* pool;
-    bool shouldStop, isActive;
+    bool shouldStop, isActive, shouldBeDeleted;
 };
 
 
