@@ -366,11 +366,11 @@ public:
         : Thread ("Juce ALSA"),
           sampleRate (0),
           bufferSize (0),
+          callback (0),
           deviceName (deviceName_),
           outputDevice (0),
           inputDevice (0),
           numCallbacks (0),
-          callback (0),
           totalNumInputChannels (0),
           totalNumOutputChannels (0)
     {
@@ -604,6 +604,7 @@ public:
 
     Array <int> sampleRates;
     StringArray channelNamesOut, channelNamesIn;
+    AudioIODeviceCallback* callback;
 
 private:
     //==============================================================================
@@ -612,7 +613,6 @@ private:
     ALSADevice* inputDevice;
     int numCallbacks;
 
-    AudioIODeviceCallback* callback;
     CriticalSection callbackLock;
 
     float* outputChannelData [maxNumChans];
@@ -791,12 +791,22 @@ public:
             callback = 0;
 
         internal->setCallback (callback);
+
+        if (callback != 0)
+            callback->audioDeviceAboutToStart (internal->sampleRate, 
+                                               internal->bufferSize);
+
         isStarted = (callback != 0);
     }
 
     void stop()
     {
+        AudioIODeviceCallback* const oldCallback = internal->callback;
+
         start (0);
+
+        if (oldCallback != 0)
+            oldCallback->audioDeviceStopped();
     }
 
     bool isPlaying()
