@@ -333,17 +333,19 @@ bool MessageManager::currentThreadHasLockedMessageManager() const
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock() throw()
-    : locked (true)
+    : locked (false)
 {
     if (MessageManager::instance != 0)
     {
         MessageManager::instance->messageDispatchLock.enter();
         lastLockingThreadId = MessageManager::instance->currentLockingThreadId;
         MessageManager::instance->currentLockingThreadId = Thread::getCurrentThreadId();
+        locked = true;
     }
 }
 
 MessageManagerLock::MessageManagerLock (Thread* const thread) throw()
+    : locked (false)
 {
     jassert (thread != 0);  // This will only work if you give it a valid thread!
 
@@ -360,10 +362,7 @@ MessageManagerLock::MessageManagerLock (Thread* const thread) throw()
             }
 
             if (thread != 0 && thread->threadShouldExit())
-            {
-                locked = false;
                 break;
-            }
 
             Thread::sleep (1);
         }
