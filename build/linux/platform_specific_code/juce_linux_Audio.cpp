@@ -522,7 +522,7 @@ public:
         numCallbacks = 0;
     }
 
-    void setCallback (AudioIODeviceCallback* const newCallback)
+    void setCallback (AudioIODeviceCallback* const newCallback) throw()
     {
         const ScopedLock sl (callbackLock);
         callback = newCallback;
@@ -584,7 +584,7 @@ public:
         }
     }
 
-    int getBitDepth() const
+    int getBitDepth() const throw()
     {
         if (outputDevice != 0)
             return outputDevice->bitDepth;
@@ -626,7 +626,7 @@ private:
     unsigned int minChansOut, maxChansOut;
     unsigned int minChansIn, maxChansIn;
 
-    bool failed (const int errorNum)
+    bool failed (const int errorNum) throw()
     {
         if (errorNum >= 0)
             return false;
@@ -636,7 +636,7 @@ private:
         return true;
     }
 
-    void initialiseRatesAndChannels()
+    void initialiseRatesAndChannels() throw()
     {
         sampleRates.clear();
         channelNamesOut.clear();

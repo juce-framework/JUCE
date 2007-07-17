@@ -485,9 +485,9 @@ int64 Time::getHighResolutionTicks() throw()
     // fix for a very obscure PCI hardware bug that can make the counter
     // sometimes jump forwards by a few seconds..
     static int64 hiResTicksOffset = 0;
-    const int offsetDrift = abs ((int) (newOffset - hiResTicksOffset));
+    const int64 offsetDrift = abs64 (newOffset - hiResTicksOffset);
 
-    if (offsetDrift > ((int) hiResTicksPerSecond) >> 1)
+    if (offsetDrift > (hiResTicksPerSecond >> 1))
         hiResTicksOffset = newOffset;
 
     return ticks.QuadPart + hiResTicksOffset;
