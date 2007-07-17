@@ -84,13 +84,13 @@ public:
 
         @see getBorderThickness
     */
-    void setBorderThickness (const BorderSize& newBorderSize);
+    void setBorderThickness (const BorderSize& newBorderSize) throw();
 
     /** Returns the number of pixels wide that the draggable edges of this component are.
 
         @see setBorderThickness
     */
-    const BorderSize getBorderThickness() const;
+    const BorderSize getBorderThickness() const throw();
 
 
     //==============================================================================
@@ -119,7 +119,7 @@ private:
     int originalX, originalY, originalW, originalH;
     int mouseZone;
 
-    void updateMouseZone (const MouseEvent& e);
+    void updateMouseZone (const MouseEvent& e) throw();
 
     ResizableBorderComponent (const ResizableBorderComponent&);
     const ResizableBorderComponent& operator= (const ResizableBorderComponent&);

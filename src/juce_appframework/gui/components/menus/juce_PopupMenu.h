@@ -89,20 +89,20 @@ class JUCE_API  PopupMenu
 public:
     //==============================================================================
     /** Creates an empty popup menu. */
-    PopupMenu();
+    PopupMenu() throw();
 
     /** Creates a copy of another menu. */
-    PopupMenu (const PopupMenu& other);
+    PopupMenu (const PopupMenu& other) throw();
 
     /** Destructor. */
-    ~PopupMenu();
+    ~PopupMenu() throw();
 
     /** Copies this menu from another one. */
-    const PopupMenu& operator= (const PopupMenu& other);
+    const PopupMenu& operator= (const PopupMenu& other) throw();
 
     //==============================================================================
     /** Resets the menu, removing all its items. */
-    void clear();
+    void clear() throw();
 
     /** Appends a new text item for this menu to show.
 
@@ -125,7 +125,7 @@ public:
                   const String& itemText,
                   const bool isActive = true,
                   const bool isTicked = false,
-                  const Image* const iconToUse = 0);
+                  const Image* const iconToUse = 0) throw();
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -137,7 +137,7 @@ public:
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
                          const int commandID,
-                         const String& displayName = String::empty);
+                         const String& displayName = String::empty) throw();
 
 
     /** Appends a text item with a special colour.
@@ -151,7 +151,7 @@ public:
                           const Colour& itemTextColour,
                           const bool isActive = true,
                           const bool isTicked = false,
-                          const Image* const iconToUse = 0);
+                          const Image* const iconToUse = 0) throw();
 
     /** Appends a custom menu item.
 
@@ -161,7 +161,7 @@ public:
         @see PopupMenuCustomComponent
     */
     void addCustomItem (const int itemResultId,
-                        PopupMenuCustomComponent* const customComponent);
+                        PopupMenuCustomComponent* const customComponent) throw();
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
@@ -181,7 +181,7 @@ public:
     void addCustomItem (const int itemResultId,
                         Component* customComponent,
                         int idealWidth, int idealHeight,
-                        const bool triggerMenuItemAutomaticallyWhenClicked);
+                        const bool triggerMenuItemAutomaticallyWhenClicked) throw();
 
     /** Appends a sub-menu.
 
@@ -190,7 +190,7 @@ public:
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
                      const bool isActive = true,
-                     Image* const iconToUse = 0);
+                     Image* const iconToUse = 0) throw();
 
     /** Appends a separator to the menu, to help break it up into sections.
 
@@ -199,23 +199,23 @@ public:
         one, so your code can be quite free and easy about adding these, and it'll
         always look ok.
     */
-    void addSeparator();
+    void addSeparator() throw();
 
     /** Adds a non-clickable text item to the menu.
 
         This is a bold-font items which can be used as a header to separate the items
         into named groups.
     */
-    void addSectionHeader (const String& title);
+    void addSectionHeader (const String& title) throw();
 
     /** Returns the number of items that the menu currently contains.
 
         (This doesn't count separators).
     */
-    int getNumItems() const;
+    int getNumItems() const throw();
 
     /** Returns true if the menu contains a command item that triggers the given command. */
-    bool containsCommandItem (const int commandID) const;
+    bool containsCommandItem (const int commandID) const throw();
 
 
     //==============================================================================
@@ -294,7 +294,7 @@ public:
         This can be called before show() if you need a customised menu. Be careful
         not to delete the LookAndFeel object before the menu has been deleted.
     */
-    void setLookAndFeel (LookAndFeel* const newLookAndFeel);
+    void setLookAndFeel (LookAndFeel* const newLookAndFeel) throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the menu.
@@ -386,7 +386,7 @@ private:
                   const int maximumNumColumns,
                   const int standardItemHeight,
                   const bool alignToRectangle,
-                  Component* const componentAttachedTo);
+                  Component* const componentAttachedTo) throw();
 
     friend class MenuBarComponent;
     Component* createMenuComponent (const int x, const int y, const int w, const int h,
@@ -397,7 +397,7 @@ private:
                                     const bool alignToRectangle,
                                     Component* menuBarComponent,
                                     ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* const componentAttachedTo);
+                                    Component* const componentAttachedTo) throw();
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

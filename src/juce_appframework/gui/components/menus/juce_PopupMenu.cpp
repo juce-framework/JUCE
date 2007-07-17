@@ -292,7 +292,7 @@ class PopupMenuWindow  : public Component,
 {
 public:
     //==============================================================================
-    PopupMenuWindow()
+    PopupMenuWindow() throw()
        : Component (T("menu")),
          owner (0),
          currentChild (0),
@@ -356,7 +356,7 @@ public:
                                     const int itemIdThatMustBeVisible,
                                     Component* const menuBarComponent,
                                     ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* const componentAttachedTo)
+                                    Component* const componentAttachedTo) throw()
     {
         if (menu.items.size() > 0)
         {
@@ -1313,13 +1313,13 @@ private:
 
 
 //==============================================================================
-PopupMenu::PopupMenu()
+PopupMenu::PopupMenu() throw()
     : items (8),
       lookAndFeel (0)
 {
 }
 
-PopupMenu::PopupMenu (const PopupMenu& other)
+PopupMenu::PopupMenu (const PopupMenu& other) throw()
     : items (8),
       lookAndFeel (other.lookAndFeel)
 {
@@ -1329,7 +1329,7 @@ PopupMenu::PopupMenu (const PopupMenu& other)
         items.add (new MenuItemInfo (*(const MenuItemInfo*) other.items.getUnchecked(i)));
 }
 
-const PopupMenu& PopupMenu::operator= (const PopupMenu& other)
+const PopupMenu& PopupMenu::operator= (const PopupMenu& other) throw()
 {
     if (this != &other)
     {
@@ -1345,12 +1345,12 @@ const PopupMenu& PopupMenu::operator= (const PopupMenu& other)
     return *this;
 }
 
-PopupMenu::~PopupMenu()
+PopupMenu::~PopupMenu() throw()
 {
     clear();
 }
 
-void PopupMenu::clear()
+void PopupMenu::clear() throw()
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -1365,7 +1365,7 @@ void PopupMenu::addItem (const int itemResultId,
                          const String& itemText,
                          const bool isActive,
                          const bool isTicked,
-                         const Image* const iconToUse)
+                         const Image* const iconToUse) throw()
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1383,7 +1383,7 @@ void PopupMenu::addItem (const int itemResultId,
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                 const int commandID,
-                                const String& displayName)
+                                const String& displayName) throw()
 {
     jassert (commandManager != 0 && commandID != 0);
 
@@ -1412,7 +1412,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                  const Colour& itemTextColour,
                                  const bool isActive,
                                  const bool isTicked,
-                                 const Image* const iconToUse)
+                                 const Image* const iconToUse) throw()
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1430,7 +1430,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
 
 //==============================================================================
 void PopupMenu::addCustomItem (const int itemResultId,
-                               PopupMenuCustomComponent* const customComponent)
+                               PopupMenuCustomComponent* const customComponent) throw()
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1486,7 +1486,7 @@ private:
 void PopupMenu::addCustomItem (const int itemResultId,
                                Component* customComponent,
                                int idealWidth, int idealHeight,
-                               const bool triggerMenuItemAutomaticallyWhenClicked)
+                               const bool triggerMenuItemAutomaticallyWhenClicked) throw()
 {
     addCustomItem (itemResultId,
                    new NormalComponentWrapper (customComponent,
@@ -1498,7 +1498,7 @@ void PopupMenu::addCustomItem (const int itemResultId,
 void PopupMenu::addSubMenu (const String& subMenuName,
                             const PopupMenu& subMenu,
                             const bool isActive,
-                            Image* const iconToUse)
+                            Image* const iconToUse) throw()
 {
     items.add (new MenuItemInfo (0,
                                  subMenuName,
@@ -1512,7 +1512,7 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                                  0));
 }
 
-void PopupMenu::addSeparator()
+void PopupMenu::addSeparator() throw()
 {
     items.add (new MenuItemInfo());
 }
@@ -1556,7 +1556,7 @@ public:
     juce_UseDebuggingNewOperator
 };
 
-void PopupMenu::addSectionHeader (const String& title)
+void PopupMenu::addSectionHeader (const String& title) throw()
 {
     addCustomItem (0X4734a34f, new HeaderItemComponent (title));
 }
@@ -1570,7 +1570,7 @@ Component* PopupMenu::createMenuComponent (const int x, const int y, const int w
                                            const bool alignToRectangle,
                                            Component* menuBarComponent,
                                            ApplicationCommandManager** managerOfChosenCommand,
-                                           Component* const componentAttachedTo)
+                                           Component* const componentAttachedTo) throw()
 {
     PopupMenuWindow* const pw
         = PopupMenuWindow::create (*this,
@@ -1599,7 +1599,7 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
                          const int maximumNumColumns,
                          const int standardItemHeight,
                          const bool alignToRectangle,
-                         Component* const componentAttachedTo)
+                         Component* const componentAttachedTo) throw()
 {
     Component* const prevFocused = Component::getCurrentlyFocusedComponent();
 
@@ -1728,7 +1728,7 @@ void JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus() throw()
 }
 
 //==============================================================================
-int PopupMenu::getNumItems() const
+int PopupMenu::getNumItems() const throw()
 {
     int num = 0;
 
@@ -1739,7 +1739,7 @@ int PopupMenu::getNumItems() const
     return num;
 }
 
-bool PopupMenu::containsCommandItem (const int commandID) const
+bool PopupMenu::containsCommandItem (const int commandID) const throw()
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -1755,7 +1755,7 @@ bool PopupMenu::containsCommandItem (const int commandID) const
     return false;
 }
 
-void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
+void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel) throw()
 {
     lookAndFeel = newLookAndFeel;
 }

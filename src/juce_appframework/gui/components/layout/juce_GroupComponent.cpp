@@ -52,7 +52,7 @@ GroupComponent::~GroupComponent()
 }
 
 //==============================================================================
-void GroupComponent::setText (const String& newText)
+void GroupComponent::setText (const String& newText) throw()
 {
     if (text != newText)
     {
@@ -61,7 +61,7 @@ void GroupComponent::setText (const String& newText)
     }
 }
 
-const String GroupComponent::getText() const
+const String GroupComponent::getText() const throw()
 {
     return text;
 }

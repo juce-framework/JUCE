@@ -96,7 +96,8 @@ public:
                           const File& initialFileOrDirectory,
                           const FileFilter* fileFilter,
                           FilePreviewComponent* previewComp,
-                          const bool useTreeView = false);
+                          const bool useTreeView = false,
+                          const bool filenameTextBoxIsReadOnly = false);
 
     /** Destructor. */
     ~FileBrowserComponent();

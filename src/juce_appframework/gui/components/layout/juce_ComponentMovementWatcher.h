@@ -92,8 +92,8 @@ private:
     ComponentDeletionWatcher* deletionWatcher;
 #endif
 
-    void unregister();
-    void registerWithParentComps();
+    void unregister() throw();
+    void registerWithParentComps() throw();
 
     ComponentMovementWatcher (const ComponentMovementWatcher&);
     const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);

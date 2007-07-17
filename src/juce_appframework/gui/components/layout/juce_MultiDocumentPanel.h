@@ -33,8 +33,49 @@
 #define __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 
 #include "juce_TabbedComponent.h"
-class MDIDocumentWindowInternal;
+#include "../windows/juce_DocumentWindow.h"
+class MultiDocumentPanel;
 class MDITabbedComponentInternal;
+
+
+//==============================================================================
+/**
+    This is a derivative of DocumentWindow that is used inside a MultiDocumentPanel
+    component.
+
+    It's like a normal DocumentWindow but has some extra functionality to make sure
+    everything works nicely inside a MultiDocumentPanel.
+
+    @see MultiDocumentPanel
+*/
+class JUCE_API  MultiDocumentPanelWindow  : public DocumentWindow
+{
+public:
+    //==============================================================================
+    /**
+    */
+    MultiDocumentPanelWindow (const Colour& backgroundColour);
+
+    /** Destructor. */
+    ~MultiDocumentPanelWindow();
+
+    //==============================================================================
+    /** @internal */
+    void maximiseButtonPressed();
+    /** @internal */
+    void closeButtonPressed();
+    /** @internal */
+    void activeWindowStatusChanged();
+    /** @internal */
+    void broughtToFront();
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    void updateOrder();
+    MultiDocumentPanel* getOwner() const throw();
+};
 
 
 //==============================================================================
@@ -229,6 +270,13 @@ public:
     */
     virtual bool tryToCloseDocument (Component* component) = 0;
 
+    /** Creates a new window to be used for a document.
+
+        The default implementation of this just returns a basic MultiDocumentPanelWindow object,
+        but you might want to override it to return a custom component.
+    */
+    virtual MultiDocumentPanelWindow* createNewDocumentWindow();
+
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);
@@ -248,7 +296,7 @@ private:
     Colour backgroundColour;
     int maximumNumDocuments, numDocsBeforeTabsUsed;
 
-    friend class MDIDocumentWindowInternal;
+    friend class MultiDocumentPanelWindow;
     friend class MDITabbedComponentInternal;
 
     Component* getContainerComp (Component* c) const;

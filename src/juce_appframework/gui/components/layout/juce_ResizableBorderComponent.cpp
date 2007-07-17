@@ -153,7 +153,7 @@ bool ResizableBorderComponent::hitTest (int x, int y)
             || y >= getHeight() - borderSize.getBottom();
 }
 
-void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSize)
+void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSize) throw()
 {
     if (borderSize != newBorderSize)
     {
@@ -162,12 +162,12 @@ void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSi
     }
 }
 
-const BorderSize ResizableBorderComponent::getBorderThickness() const
+const BorderSize ResizableBorderComponent::getBorderThickness() const throw()
 {
     return borderSize;
 }
 
-void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
+void ResizableBorderComponent::updateMouseZone (const MouseEvent& e) throw()
 {
     int newZone = 0;
 

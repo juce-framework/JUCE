@@ -52,49 +52,49 @@ class JUCE_API  ComponentBoundsConstrainer
 public:
     //==============================================================================
     /** When first created, the object will not impose any restrictions on the components. */
-    ComponentBoundsConstrainer();
+    ComponentBoundsConstrainer() throw();
 
     /** Destructor. */
     virtual ~ComponentBoundsConstrainer();
 
     //==============================================================================
     /** Imposes a minimum width limit. */
-    void setMinimumWidth (const int minimumWidth);
+    void setMinimumWidth (const int minimumWidth) throw();
 
     /** Returns the current minimum width. */
     int getMinimumWidth() const throw()                         { return minW; }
 
     /** Imposes a maximum width limit. */
-    void setMaximumWidth (const int maximumWidth);
+    void setMaximumWidth (const int maximumWidth) throw();
 
     /** Returns the current maximum width. */
     int getMaximumWidth() const throw()                         { return maxW; }
 
     /** Imposes a minimum height limit. */
-    void setMinimumHeight (const int minimumHeight);
+    void setMinimumHeight (const int minimumHeight) throw();
 
     /** Returns the current minimum height. */
     int getMinimumHeight() const throw()                        { return minH; }
 
     /** Imposes a maximum height limit. */
-    void setMaximumHeight (const int maximumHeight);
+    void setMaximumHeight (const int maximumHeight) throw();
 
     /** Returns the current maximum height. */
     int getMaximumHeight() const throw()                        { return maxH; }
 
     /** Imposes a minimum width and height limit. */
     void setMinimumSize (const int minimumWidth,
-                         const int minimumHeight);
+                         const int minimumHeight) throw();
 
     /** Imposes a maximum width and height limit. */
     void setMaximumSize (const int maximumWidth,
-                         const int maximumHeight);
+                         const int maximumHeight) throw();
 
     /** Set all the maximum and minimum dimensions. */
     void setSizeLimits (const int minimumWidth,
                         const int minimumHeight,
                         const int maximumWidth,
-                        const int maximumHeight);
+                        const int maximumHeight) throw();
 
     //==============================================================================
     /** Sets the amount by which the component is allowed to go off-screen.
@@ -116,7 +116,7 @@ public:
     void setMinimumOnscreenAmounts (const int minimumWhenOffTheTop,
                                     const int minimumWhenOffTheLeft,
                                     const int minimumWhenOffTheBottom,
-                                    const int minimumWhenOffTheRight);
+                                    const int minimumWhenOffTheRight) throw();
 
     //==============================================================================
     /** Specifies a width-to-height ratio that the resizer should always maintain.
@@ -126,7 +126,7 @@ public:
 
         @see setResizeLimits
     */
-    void setFixedAspectRatio (const double widthOverHeight);
+    void setFixedAspectRatio (const double widthOverHeight) throw();
 
     /** Returns the aspect ratio that was set with setFixedAspectRatio().
 

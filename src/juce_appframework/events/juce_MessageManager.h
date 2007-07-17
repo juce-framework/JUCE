@@ -36,6 +36,7 @@
 #include "../../juce_core/containers/juce_SortedSet.h"
 #include "juce_ActionListenerList.h"
 #include "juce_Timer.h"
+class Thread;
 class InternalTimerThread;
 
 
@@ -265,26 +266,74 @@ private:
 class JUCE_API MessageManagerLock
 {
 public:
-    /** Acquires a lock on the message manager.
+    //==============================================================================
+    /** Tries to acquire a lock on the message manager.
 
-        When this constuctor returns, the message manager will have finished sending the
+        If this constructor
+        When this constructor returns, the message manager will have finished processing the
         last message and will not send another message until this MessageManagerLock is
         deleted.
 
         If the current thread already has the lock, nothing will be done, so it's perfectly
         safe to create these locks recursively.
     */
-    MessageManagerLock();
+    MessageManagerLock() throw();
 
     /** Releases the current thread's lock on the message manager.
 
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    ~MessageManagerLock();
+    ~MessageManagerLock() throw();
+
+    //==============================================================================
+    /** Tries to acquire a lock on the message manager.
+
+        This does the same thing as the normal constructor, but while it's waiting to get
+        the lock, it checks the specified thread to see if it has been given the
+        Thread::signalThreadShouldExit() signal. If this happens, then it will return
+        without gaining the lock.
+
+        To find out whether the lock was successful, call lockWasGained(). If this is
+        false, your thread is being told to die, so you'd better get out of there.
+
+        If the current thread already has the lock, nothing will be done, so it's perfectly
+        safe to create these locks recursively.
+
+        E.g.
+        @code
+        void run()
+        {
+            ...
+
+            while (! threadShouldExit())
+            {
+                MessageManagerLock mml (Thread::getCurrentThread());
+
+                if (! mml.lockWasGained)
+                    return; // another thread is trying to kill us!
+
+                ..do some locked stuff here..
+            }
+
+            ..and now the MM is now unlocked..
+        }
+        @endcode
+
+    */
+    MessageManagerLock (Thread* const threadToCheckForExitSignal) throw();
+
+
+    /** Returns true if the lock was successfully acquired.
+
+        (See the constructor that takes a Thread for more info).
+    */
+    bool lockWasGained() const throw()                      { return locked; }
+
 
 private:
     int lastLockingThreadId;
+    bool locked;
 };
 
 

@@ -125,7 +125,7 @@ public:
         @see setCurrentRange
     */
     void setRangeLimits (const double minimum,
-                         const double maximum);
+                         const double maximum) throw();
 
     /** Returns the lower value that the thumb can be set to.
 

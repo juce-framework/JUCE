@@ -125,7 +125,7 @@ void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMove
         componentMovedOrResized (wasMoved, wasResized);
 }
 
-void ComponentMovementWatcher::registerWithParentComps()
+void ComponentMovementWatcher::registerWithParentComps() throw()
 {
     Component* p = component->getParentComponent();
 
@@ -137,7 +137,7 @@ void ComponentMovementWatcher::registerWithParentComps()
     }
 }
 
-void ComponentMovementWatcher::unregister()
+void ComponentMovementWatcher::unregister() throw()
 {
     for (int i = registeredParentComps.size(); --i >= 0;)
         ((Component*) registeredParentComps.getUnchecked(i))->removeComponentListener (this);

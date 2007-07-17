@@ -38,7 +38,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ComponentBoundsConstrainer::ComponentBoundsConstrainer()
+ComponentBoundsConstrainer::ComponentBoundsConstrainer() throw()
     : minW (0),
       maxW (0),
       minH (0x3fffffff),
@@ -56,27 +56,27 @@ ComponentBoundsConstrainer::~ComponentBoundsConstrainer()
 }
 
 //==============================================================================
-void ComponentBoundsConstrainer::setMinimumWidth (const int minimumWidth)
+void ComponentBoundsConstrainer::setMinimumWidth (const int minimumWidth) throw()
 {
     minW = minimumWidth;
 }
 
-void ComponentBoundsConstrainer::setMaximumWidth (const int maximumWidth)
+void ComponentBoundsConstrainer::setMaximumWidth (const int maximumWidth) throw()
 {
     maxW = maximumWidth;
 }
 
-void ComponentBoundsConstrainer::setMinimumHeight (const int minimumHeight)
+void ComponentBoundsConstrainer::setMinimumHeight (const int minimumHeight) throw()
 {
     minH = minimumHeight;
 }
 
-void ComponentBoundsConstrainer::setMaximumHeight (const int maximumHeight)
+void ComponentBoundsConstrainer::setMaximumHeight (const int maximumHeight) throw()
 {
     maxH = maximumHeight;
 }
 
-void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const int minimumHeight)
+void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const int minimumHeight) throw()
 {
     jassert (maxW >= minimumWidth);
     jassert (maxH >= minimumHeight);
@@ -92,7 +92,7 @@ void ComponentBoundsConstrainer::setMinimumSize (const int minimumWidth, const i
         maxH = minH;
 }
 
-void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const int maximumHeight)
+void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const int maximumHeight) throw()
 {
     jassert (maximumWidth >= minW);
     jassert (maximumHeight >= minH);
@@ -105,7 +105,7 @@ void ComponentBoundsConstrainer::setMaximumSize (const int maximumWidth, const i
 void ComponentBoundsConstrainer::setSizeLimits (const int minimumWidth,
                                                 const int minimumHeight,
                                                 const int maximumWidth,
-                                                const int maximumHeight)
+                                                const int maximumHeight) throw()
 {
     jassert (maximumWidth >= minimumWidth);
     jassert (maximumHeight >= minimumHeight);
@@ -121,7 +121,7 @@ void ComponentBoundsConstrainer::setSizeLimits (const int minimumWidth,
 void ComponentBoundsConstrainer::setMinimumOnscreenAmounts (const int minimumWhenOffTheTop,
                                                             const int minimumWhenOffTheLeft,
                                                             const int minimumWhenOffTheBottom,
-                                                            const int minimumWhenOffTheRight)
+                                                            const int minimumWhenOffTheRight) throw()
 {
     minOffTop = minimumWhenOffTheTop;
     minOffLeft = minimumWhenOffTheLeft;
@@ -129,7 +129,7 @@ void ComponentBoundsConstrainer::setMinimumOnscreenAmounts (const int minimumWhe
     minOffRight = minimumWhenOffTheRight;
 }
 
-void ComponentBoundsConstrainer::setFixedAspectRatio (const double widthOverHeight)
+void ComponentBoundsConstrainer::setFixedAspectRatio (const double widthOverHeight) throw()
 {
     aspectRatio = jmax (0.0, widthOverHeight);
 }

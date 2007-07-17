@@ -1683,13 +1683,13 @@ public:
                             will be ignored.
         @see ComponentListener, removeComponentListener
     */
-    void addComponentListener (ComponentListener* const newListener);
+    void addComponentListener (ComponentListener* const newListener) throw();
 
     /** Removes a component listener.
 
         @see addComponentListener
     */
-    void removeComponentListener (ComponentListener* const listenerToRemove);
+    void removeComponentListener (ComponentListener* const listenerToRemove) throw();
 
     //==============================================================================
     /** Called when files are dragged-and-dropped onto this component.

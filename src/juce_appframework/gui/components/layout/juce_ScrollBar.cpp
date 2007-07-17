@@ -119,7 +119,7 @@ ScrollBar::~ScrollBar()
 
 //==============================================================================
 void ScrollBar::setRangeLimits (const double newMinimum,
-                                const double newMaximum)
+                                const double newMaximum) throw()
 {
     minimum = newMinimum;
     maximum = newMaximum;

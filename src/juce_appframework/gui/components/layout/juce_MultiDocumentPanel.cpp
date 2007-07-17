@@ -34,71 +34,65 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MultiDocumentPanel.h"
-#include "../windows/juce_DocumentWindow.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 
 
 //==============================================================================
-class MDIDocumentWindowInternal   : public DocumentWindow
+MultiDocumentPanelWindow::MultiDocumentPanelWindow (const Colour& backgroundColour)
+    : DocumentWindow (String::empty, backgroundColour,
+                      DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
 {
-public:
-    //==============================================================================
-    MDIDocumentWindowInternal (const Colour& backgroundColour)
-        : DocumentWindow (String::empty, backgroundColour,
-                          DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
-    {
-    }
+}
 
-    ~MDIDocumentWindowInternal()
-    {
-    }
+MultiDocumentPanelWindow::~MultiDocumentPanelWindow()
+{
+}
 
-    //==============================================================================
-    void maximiseButtonPressed()
-    {
-        MultiDocumentPanel* const owner = getOwner();
+//==============================================================================
+void MultiDocumentPanelWindow::maximiseButtonPressed()
+{
+    MultiDocumentPanel* const owner = getOwner();
 
-        jassert (owner != 0);
-        if (owner != 0)
-            owner->setLayoutMode (MultiDocumentPanel::MaximisedWindowsWithTabs);
-    }
+    jassert (owner != 0); // these windows are only designed to be used inside a MultiDocumentPanel!
+    if (owner != 0)
+        owner->setLayoutMode (MultiDocumentPanel::MaximisedWindowsWithTabs);
+}
 
-    void closeButtonPressed()
-    {
-        MultiDocumentPanel* const owner = getOwner();
+void MultiDocumentPanelWindow::closeButtonPressed()
+{
+    MultiDocumentPanel* const owner = getOwner();
 
-        jassert (owner != 0);
-        if (owner != 0)
-            owner->closeDocument (getContentComponent(), true);
-    }
+    jassert (owner != 0); // these windows are only designed to be used inside a MultiDocumentPanel!
+    if (owner != 0)
+        owner->closeDocument (getContentComponent(), true);
+}
 
-    void activeWindowStatusChanged()
-    {
-        DocumentWindow::activeWindowStatusChanged();
-        updateOrder();
-    }
+void MultiDocumentPanelWindow::activeWindowStatusChanged()
+{
+    DocumentWindow::activeWindowStatusChanged();
+    updateOrder();
+}
 
-    void broughtToFront()
-    {
-        DocumentWindow::broughtToFront();
-        updateOrder();
-    }
+void MultiDocumentPanelWindow::broughtToFront()
+{
+    DocumentWindow::broughtToFront();
+    updateOrder();
+}
 
-private:
-    void updateOrder()
-    {
-        MultiDocumentPanel* const owner = getOwner();
+void MultiDocumentPanelWindow::updateOrder()
+{
+    MultiDocumentPanel* const owner = getOwner();
 
-        if (owner != 0)
-            owner->updateOrder();
-    }
+    if (owner != 0)
+        owner->updateOrder();
+}
 
-    MultiDocumentPanel* getOwner() const throw()
-    {
-        // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
-        return findParentComponentOfClass ((MultiDocumentPanel*) 0);
-    }
-};
+MultiDocumentPanel* MultiDocumentPanelWindow::getOwner() const throw()
+{
+    // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
+    return findParentComponentOfClass ((MultiDocumentPanel*) 0);
+}
+
 
 //==============================================================================
 class MDITabbedComponentInternal   : public TabbedComponent
@@ -155,9 +149,14 @@ bool MultiDocumentPanel::closeAllDocuments (const bool checkItsOkToCloseFirst)
     return true;
 }
 
+MultiDocumentPanelWindow* MultiDocumentPanel::createNewDocumentWindow()
+{
+    return new MultiDocumentPanelWindow (backgroundColour);
+}
+
 void MultiDocumentPanel::addWindow (Component* component)
 {
-    MDIDocumentWindowInternal* const dw = new MDIDocumentWindowInternal (backgroundColour);
+    MultiDocumentPanelWindow* const dw = createNewDocumentWindow();
 
     dw->setResizable (true, false);
     dw->setContentComponent (component, false, true);
@@ -258,7 +257,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+                MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
                 if (dw != 0 && dw->getContentComponent() == component)
                 {
@@ -277,7 +276,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
             {
                 for (int i = getNumChildComponents(); --i >= 0;)
                 {
-                    MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+                    MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
                     if (dw != 0)
                     {
@@ -343,7 +342,7 @@ Component* MultiDocumentPanel::getActiveDocument() const throw()
     {
         for (int i = getNumChildComponents(); --i >= 0;)
         {
-            MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+            MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
             if (dw != 0 && dw->isActiveWindow())
                 return dw->getContentComponent();
@@ -415,7 +414,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+                MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
                 if (dw != 0)
                 {
@@ -474,7 +473,7 @@ Component* MultiDocumentPanel::getContainerComp (Component* c) const
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+            MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
             if (dw != 0 && dw->getContentComponent() == c)
             {
@@ -493,7 +492,7 @@ void MultiDocumentPanel::componentNameChanged (Component&)
     {
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+            MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
             if (dw != 0)
                 dw->setName (dw->getContentComponent()->getName());
@@ -508,7 +507,7 @@ void MultiDocumentPanel::componentNameChanged (Component&)
 
 void MultiDocumentPanel::updateOrder()
 {
-    Array <Component*> oldList (components);
+    const Array <Component*> oldList (components);
 
     if (mode == FloatingWindows)
     {
@@ -516,7 +515,7 @@ void MultiDocumentPanel::updateOrder()
 
         for (int i = 0; i < getNumChildComponents(); ++i)
         {
-            MDIDocumentWindowInternal* const dw = dynamic_cast <MDIDocumentWindowInternal*> (getChildComponent (i));
+            MultiDocumentPanelWindow* const dw = dynamic_cast <MultiDocumentPanelWindow*> (getChildComponent (i));
 
             if (dw != 0)
                 components.add (dw->getContentComponent());

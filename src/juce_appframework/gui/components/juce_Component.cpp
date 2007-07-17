@@ -2103,7 +2103,7 @@ void Component::parentSizeChanged()
     // base class does nothing
 }
 
-void Component::addComponentListener (ComponentListener* const newListener)
+void Component::addComponentListener (ComponentListener* const newListener) throw()
 {
     if (componentListeners_ == 0)
         componentListeners_ = new VoidArray (4);
@@ -2111,7 +2111,7 @@ void Component::addComponentListener (ComponentListener* const newListener)
     componentListeners_->addIfNotAlreadyThere (newListener);
 }
 
-void Component::removeComponentListener (ComponentListener* const listenerToRemove)
+void Component::removeComponentListener (ComponentListener* const listenerToRemove) throw()
 {
     jassert (isValidComponent());
 

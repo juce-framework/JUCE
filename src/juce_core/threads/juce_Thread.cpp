@@ -236,6 +236,29 @@ int Thread::getNumRunningThreads() throw()
     return runningThreads.size();
 }
 
+Thread* Thread::getCurrentThread() throw()
+{
+    const int thisId = getCurrentThreadId();
+    Thread* result = 0;
+
+    runningThreadsLock.enter();
+
+    for (int i = runningThreads.size(); --i >= 0;)
+    {
+        Thread* const t = (Thread*) (runningThreads.getUnchecked(i));
+
+        if (t->threadId_ == thisId)
+        {
+            result = t;
+            break;
+        }
+    }
+
+    runningThreadsLock.exit();
+
+    return result;
+}
+
 void Thread::stopAllThreads (const int timeoutInMillisecs) throw()
 {
     while (getNumRunningThreads() > 0)

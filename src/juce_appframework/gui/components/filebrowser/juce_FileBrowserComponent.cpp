@@ -58,7 +58,8 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter,
                                             FilePreviewComponent* previewComp_,
-                                            const bool useTreeView)
+                                            const bool useTreeView,
+                                            const bool filenameTextBoxIsReadOnly)
    : directoriesOnlyFilter (0),
      mode (mode_),
      listeners (2),
@@ -124,6 +125,7 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     filenameBox->setSelectAllWhenFocused (true);
     filenameBox->setText (filename, false);
     filenameBox->addListener (this);
+    filenameBox->setReadOnly (filenameTextBoxIsReadOnly);
 
     Label* label = new Label (T("f"), (mode == chooseDirectoryMode) ? TRANS("folder:")
                                                                     : TRANS("file:"));

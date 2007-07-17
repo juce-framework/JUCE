@@ -591,7 +591,7 @@ void TreeView::keyPressed (const KeyPress& key)
     }
 }
 
-void TreeView::itemsChanged()
+void TreeView::itemsChanged() throw()
 {
     needsRecalculating = true;
     triggerAsyncUpdate();
@@ -733,7 +733,7 @@ void TreeViewItem::clearSubItems()
     }
 }
 
-void TreeViewItem::addSubItem (TreeViewItem* newItem, int insertPosition)
+void TreeViewItem::addSubItem (TreeViewItem* const newItem, const int insertPosition)
 {
     if (newItem != 0)
     {
@@ -779,7 +779,7 @@ void TreeViewItem::removeSubItem (const int index, const bool deleteItem)
         ownerView->nodeAlterationLock.exit();
 }
 
-bool TreeViewItem::isOpen() const
+bool TreeViewItem::isOpen() const throw()
 {
     if (openness == opennessDefault)
         return ownerView != 0 && ownerView->defaultOpenness;
@@ -852,7 +852,7 @@ const String TreeViewItem::getDragSourceDescription()
     return String::empty;
 }
 
-const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLeft) const
+const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLeft) const throw()
 {
     const int indentX = getIndentX();
 
@@ -870,7 +870,7 @@ const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopL
     return r;
 }
 
-void TreeViewItem::treeHasChanged() const
+void TreeViewItem::treeHasChanged() const throw()
 {
     if (ownerView != 0)
         ownerView->itemsChanged();
@@ -901,7 +901,7 @@ void TreeViewItem::updatePositions (int newY)
     }
 }
 
-TreeViewItem* TreeViewItem::getDeepestOpenParentItem()
+TreeViewItem* TreeViewItem::getDeepestOpenParentItem() throw()
 {
     TreeViewItem* result = this;
     TreeViewItem* item = this;
@@ -917,7 +917,7 @@ TreeViewItem* TreeViewItem::getDeepestOpenParentItem()
     return result;
 }
 
-void TreeViewItem::setOwnerView (TreeView* const newOwner)
+void TreeViewItem::setOwnerView (TreeView* const newOwner) throw()
 {
     ownerView = newOwner;
 
@@ -925,7 +925,7 @@ void TreeViewItem::setOwnerView (TreeView* const newOwner)
         subItems.getUnchecked(i)->setOwnerView (newOwner);
 }
 
-int TreeViewItem::getIndentX() const
+int TreeViewItem::getIndentX() const throw()
 {
     const int indentWidth = ownerView->getIndentSize();
     int x = indentWidth;
@@ -1039,7 +1039,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
     }
 }
 
-bool TreeViewItem::isLastOfSiblings() const
+bool TreeViewItem::isLastOfSiblings() const throw()
 {
     return parentItem == 0
         || parentItem->subItems.getLast() == this;
@@ -1051,7 +1051,7 @@ TreeViewItem* TreeViewItem::getTopLevelItem() throw()
                              : parentItem->getTopLevelItem();
 }
 
-int TreeViewItem::getNumRows() const
+int TreeViewItem::getNumRows() const throw()
 {
     int num = 1;
 
@@ -1064,7 +1064,7 @@ int TreeViewItem::getNumRows() const
     return num;
 }
 
-TreeViewItem* TreeViewItem::getItemOnRow (int index)
+TreeViewItem* TreeViewItem::getItemOnRow (int index) throw()
 {
     if (index == 0)
         return this;
@@ -1092,7 +1092,7 @@ TreeViewItem* TreeViewItem::getItemOnRow (int index)
     return 0;
 }
 
-TreeViewItem* TreeViewItem::findItemRecursively (int y)
+TreeViewItem* TreeViewItem::findItemRecursively (int y) throw()
 {
     if (y >= 0 && y < totalHeight)
     {
@@ -1120,7 +1120,7 @@ TreeViewItem* TreeViewItem::findItemRecursively (int y)
     return 0;
 }
 
-int TreeViewItem::countSelectedItemsRecursively() const
+int TreeViewItem::countSelectedItemsRecursively() const throw()
 {
     int total = 0;
 
@@ -1133,7 +1133,7 @@ int TreeViewItem::countSelectedItemsRecursively() const
     return total;
 }
 
-TreeViewItem* TreeViewItem::getSelectedItemWithIndex (int index)
+TreeViewItem* TreeViewItem::getSelectedItemWithIndex (int index) throw()
 {
     if (isSelected())
     {
@@ -1161,7 +1161,7 @@ TreeViewItem* TreeViewItem::getSelectedItemWithIndex (int index)
     return 0;
 }
 
-int TreeViewItem::getRowNumberInTree() const
+int TreeViewItem::getRowNumberInTree() const throw()
 {
     if (parentItem != 0 && ownerView != 0)
     {
@@ -1185,12 +1185,12 @@ int TreeViewItem::getRowNumberInTree() const
     }
 }
 
-void TreeViewItem::setLinesDrawnForSubItems (const bool drawLines)
+void TreeViewItem::setLinesDrawnForSubItems (const bool drawLines) throw()
 {
     drawLinesInside = drawLines;
 }
 
-TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const
+TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const throw()
 {
     if (recurse && isOpen() && subItems.size() > 0)
         return subItems [0];

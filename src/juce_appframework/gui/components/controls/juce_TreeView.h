@@ -90,8 +90,8 @@ public:
         @param insertPosition   the index which the new item should have when it's added. If this
                                 value is less than 0, the item will be added to the end of the list.
     */
-    void addSubItem (TreeViewItem* newItem,
-                     int insertPosition = -1);
+    void addSubItem (TreeViewItem* const newItem,
+                     const int insertPosition = -1);
 
     /** Removes one of the sub-items.
 
@@ -110,7 +110,7 @@ public:
 
     //==============================================================================
     /** True if this item is currently open in the treeview. */
-    bool isOpen() const;
+    bool isOpen() const throw();
 
     /** Opens or closes the item.
 
@@ -142,14 +142,14 @@ public:
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
     */
-    const Rectangle getItemPosition (const bool relativeToTreeViewTopLeft) const;
+    const Rectangle getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
 
     /** Sends a signal to the treeview to make it refresh itself.
 
         Call this if your items have changed and you want the tree to update to reflect
         this.
     */
-    void treeHasChanged() const;
+    void treeHasChanged() const throw();
 
     /** Returns the row number of this item in the tree.
 
@@ -157,13 +157,13 @@ public:
 
         @see TreeView::getNumRowsInTree(), TreeView::getItemOnRow()
     */
-    int getRowNumberInTree() const;
+    int getRowNumberInTree() const throw();
 
     /** Changes whether lines are drawn to connect any sub-items to this item.
 
         By default, line-drawing is turned on.
     */
-    void setLinesDrawnForSubItems (const bool shouldDrawLines);
+    void setLinesDrawnForSubItems (const bool shouldDrawLines) throw();
 
     //==============================================================================
     /** Tells the tree whether this item can potentially be opened.
@@ -343,21 +343,21 @@ private:
     friend class TreeViewContentComponent;
 
     void updatePositions (int newY);
-    int getIndentX() const;
-    void setOwnerView (TreeView* const newOwner);
+    int getIndentX() const throw();
+    void setOwnerView (TreeView* const newOwner) throw();
     void paintRecursively (Graphics& g, int width);
-    TreeViewItem* findItemRecursively (int y);
-    TreeViewItem* getDeepestOpenParentItem();
+    TreeViewItem* findItemRecursively (int y) throw();
+    TreeViewItem* getDeepestOpenParentItem() throw();
     void restoreFromXml (const XmlElement& e);
     XmlElement* createXmlOpenness() const;
-    bool isLastOfSiblings() const;
+    bool isLastOfSiblings() const throw();
     TreeViewItem* getTopLevelItem() throw();
-    int getNumRows() const;
-    TreeViewItem* getItemOnRow (int index);
+    int getNumRows() const throw();
+    TreeViewItem* getItemOnRow (int index) throw();
     void deselectAllRecursively();
-    int countSelectedItemsRecursively() const;
-    TreeViewItem* getSelectedItemWithIndex (int index);
-    TreeViewItem* getNextVisibleItem (const bool recurse) const;
+    int countSelectedItemsRecursively() const throw();
+    TreeViewItem* getSelectedItemWithIndex (int index) throw();
+    TreeViewItem* getNextVisibleItem (const bool recurse) const throw();
 
     TreeViewItem (const TreeViewItem&);
     const TreeViewItem& operator= (const TreeViewItem&);
@@ -521,6 +521,8 @@ public:
                                             include information about where the
                                             tree has been scrolled to vertically,
                                             so this can also be restored
+        @param alsoIncludeSelectionState    if this is true, the selected items will
+                                            also be stored in the state that is returned
         @see restoreOpennessState
     */
     XmlElement* getOpennessState (const bool alsoIncludeScrollPosition) const;
@@ -573,7 +575,7 @@ private:
     bool rootItemVisible : 1;
     bool multiSelectEnabled : 1;
 
-    void itemsChanged();
+    void itemsChanged() throw();
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
 
