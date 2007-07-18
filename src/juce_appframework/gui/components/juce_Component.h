@@ -1452,21 +1452,17 @@ public:
         method called. Remember that a component will only be given the focus if its
         setWantsKeyboardFocus() method has been used to enable this.
 
-        The default implementation of this method does the following:
+        If your implementation returns true, the event will be consumed and not passed
+        on to any other listeners. If it returns false, the key will be passed to any
+        KeyListeners that have been registered with this component. As soon as one of these
+        returns true, the process will stop, but if they all return false, the event will
+        be passed upwards to this component's parent, and so on.
 
-            - calls its parent's keyPressed() method, so that its parents will get a chance
-              to use any keypresses that this component isn't interested in.
-            - calls the keyPressed() methods of any KeyListeners that have registered with the
-              addKeyListener() method.
-
-        If you want to use the keypresses that reach this component and stop them being sent up to
-        the parents, override this method. Of course a component can consume some keypresses
-        selectively and then for others, just call the superclass's Component::keyPressed method
-        to pass on the unwanted ones.
+        The default implementation of this method does nothing and returns false.
 
         @see keyStateChanged, getCurrentlyFocusedComponent, addKeyListener
     */
-    virtual void keyPressed (const KeyPress& key);
+    virtual bool keyPressed (const KeyPress& key);
 
     /** Called when a key is pressed or released.
 
@@ -1475,19 +1471,20 @@ public:
         has the keyboard focus. Remember that a component will only be given the focus if
         its setWantsKeyboardFocus() method has been used to enable this.
 
+        If your implementation returns true, the event will be consumed and not passed
+        on to any other listeners. If it returns false, then any KeyListeners that have 
+        been registered with this component will have their keyStateChanged methods called. 
+        As soon as one of these returns true, the process will stop, but if they all return 
+        false, the event will be passed upwards to this component's parent, and so on.
+
+        The default implementation of this method does nothing and returns false.
+
         To find out which keys are up or down at any time, see the KeyPress::isKeyCurrentlyDown()
         method.
 
-        The default implementation of this method does the following:
-
-            - calls its parent's keyStateChanged() method, so that its parents will get a chance
-              to use any events that this component isn't interested in.
-            - calls the keyStateChanged() methods of any KeyListeners that have registered with the
-              addKeyListener() method.
-
         @see keyPressed, KeyPress, getCurrentlyFocusedComponent, addKeyListener
     */
-    virtual void keyStateChanged();
+    virtual bool keyStateChanged();
 
     /** Called when a modifier key is pressed or released.
 
@@ -1787,7 +1784,7 @@ public:
         @returns the modal component, or null if no components are modal
         @see runModalLoop, isCurrentlyModal
     */
-    static Component* getCurrentlyModalComponent() throw();
+    static Component* JUCE_CALLTYPE getCurrentlyModalComponent() throw();
 
     /** Checks whether there's a modal component somewhere that's stopping this one
         from receiving messages.
@@ -2078,8 +2075,6 @@ private:
     void internalFocusLoss (const FocusChangeType cause);
     void internalChildFocusChange (FocusChangeType cause);
     void internalModalInputAttempt();
-    bool internalKeyPress (const int key, const juce_wchar textCharacter);
-    bool internalKeyStateChanged();
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();

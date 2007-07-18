@@ -224,7 +224,7 @@ public:
     /** @internal */
     void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
     /** @internal */

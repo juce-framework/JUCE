@@ -408,18 +408,106 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 {
     updateCurrentModifiers();
 
-    return (Component::currentlyFocusedComponent->isValidComponent()
-                ? Component::currentlyFocusedComponent : component)
-              ->internalKeyPress (keyCode, textCharacter);
+    Component* target = Component::currentlyFocusedComponent->isValidComponent()
+                            ? Component::currentlyFocusedComponent 
+                            : component;
+
+    if (target->isCurrentlyBlockedByAnotherModalComponent())
+    {
+        Component* const currentModalComp = Component::getCurrentlyModalComponent();
+
+        if (currentModalComp != 0)
+            target = currentModalComp;
+    }
+
+    const KeyPress keyInfo (keyCode,
+                            ModifierKeys::getCurrentModifiers().getRawFlags()
+                               & ModifierKeys::allKeyboardModifiers,
+                            textCharacter);
+
+    bool keyWasUsed = false;
+
+    while (target != 0)
+    {
+        const ComponentDeletionWatcher deletionChecker (target);
+
+        keyWasUsed = target->keyPressed (keyInfo);
+
+        if (keyWasUsed || deletionChecker.hasBeenDeleted())
+            break;
+
+        if (target->keyListeners_ != 0)
+        {
+            for (int i = target->keyListeners_->size(); --i >= 0;)
+            {
+                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyPressed (keyInfo, target);
+
+                if (keyWasUsed || deletionChecker.hasBeenDeleted())
+                    return keyWasUsed;
+
+                i = jmin (i, target->keyListeners_->size());
+            }
+        }
+
+        if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != 0)
+        {
+            Component::getCurrentlyFocusedComponent()
+                ->moveKeyboardFocusToSibling (! keyInfo.getModifiers().isShiftDown());
+
+            keyWasUsed = true;
+            break;
+        }
+
+        target = target->parentComponent_;
+    }
+
+    return keyWasUsed;
 }
 
 bool ComponentPeer::handleKeyUpOrDown()
 {
     updateCurrentModifiers();
 
-    return (Component::currentlyFocusedComponent->isValidComponent() 
-                ? Component::currentlyFocusedComponent : component)
-              ->internalKeyStateChanged();
+    Component* target = Component::currentlyFocusedComponent->isValidComponent() 
+                            ? Component::currentlyFocusedComponent 
+                            : component;
+
+    if (target->isCurrentlyBlockedByAnotherModalComponent())
+    {
+        Component* const currentModalComp = Component::getCurrentlyModalComponent();
+
+        if (currentModalComp != 0)
+            target = currentModalComp;
+    }
+
+    bool keyWasUsed = false;
+
+    while (target != 0)
+    {
+        const ComponentDeletionWatcher deletionChecker (target);
+
+        keyWasUsed = target->keyStateChanged();
+
+        if (keyWasUsed || deletionChecker.hasBeenDeleted())
+            break;
+
+        if (target->keyListeners_ != 0)
+        {
+            for (int i = target->keyListeners_->size(); --i >= 0;)
+            {
+                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyStateChanged (target);
+
+                if (keyWasUsed || deletionChecker.hasBeenDeleted())
+                    return keyWasUsed;
+
+                i = jmin (i, target->keyListeners_->size());
+            }
+        }
+
+        target = target->parentComponent_;
+    }
+
+    return keyWasUsed;
 }
 
 void ComponentPeer::handleModifierKeysChange()

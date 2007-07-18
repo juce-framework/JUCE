@@ -385,19 +385,24 @@ void MenuBarComponent::mouseMove (const MouseEvent& e)
     }
 }
 
-void MenuBarComponent::keyPressed (const KeyPress& key)
+bool MenuBarComponent::keyPressed (const KeyPress& key)
 {
+    bool used = false;
     const int numMenus = menuNames.size();
     const int currentIndex = jlimit (0, menuNames.size() - 1, currentPopupIndex);
 
     if (key.isKeyCode (KeyPress::leftKey))
     {
         showMenu ((currentIndex + numMenus - 1) % numMenus);
+        used = true;
     }
     else if (key.isKeyCode (KeyPress::rightKey))
     {
         showMenu ((currentIndex + 1) % numMenus);
+        used = true;
     }
+
+    return used;
 }
 
 void MenuBarComponent::inputAttemptWhenModal()

@@ -484,9 +484,9 @@ l    */
     /** @internal */
     void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
-    void keyStateChanged();
+    bool keyStateChanged();
     /** @internal */
     void focusGained (FocusChangeType cause);
     /** @internal */

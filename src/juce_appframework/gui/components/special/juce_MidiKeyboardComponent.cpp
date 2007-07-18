@@ -834,7 +834,7 @@ void MidiKeyboardComponent::setKeyPressBaseOctave (const int newOctaveNumber)
     keyMappingOctave = newOctaveNumber;
 }
 
-void MidiKeyboardComponent::keyStateChanged()
+bool MidiKeyboardComponent::keyStateChanged()
 {
     bool keyPressUsed = false;
 
@@ -862,8 +862,7 @@ void MidiKeyboardComponent::keyStateChanged()
         }
     }
 
-    if (! keyPressUsed)
-        Component::keyStateChanged();
+    return keyPressUsed;
 }
 
 void MidiKeyboardComponent::focusLost (FocusChangeType)

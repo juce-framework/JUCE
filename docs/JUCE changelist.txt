@@ -6,6 +6,7 @@
 ==============================================================================
 Changelist for version 1.44
 
+- change to the keyPressed() and keyStateChanged() callbacks in Component and KeyListener. These used to be void, but they now return a bool to indicate whether the key event was needed or not. Any existing code you've got will break in the compiler, so just change it to return true if the key was used, or false to allow the event to be passed up to the next component in the chain. (This change is a better architecture than before, and was also needed so that plugins can allow unused key events to be passed on to the host application)
 - swapped the look and feel classes around, so that the basic LookAndFeel class is now what used to be the "shiny" one. The ShinyLookAndFeel class has been removed, and for that old fashioned look, I've added an OldSchoolLookAndFeel that you can use if you need the original L+F. This means that any custom looks that you were using may need to change their base class.
 - changed the MouseEvent structure so that it now contains a pointer to the event component and also the original component.
 - added a PopupMenu::dismissAllActiveMenus() method.

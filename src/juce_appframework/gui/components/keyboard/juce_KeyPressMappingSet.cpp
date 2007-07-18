@@ -336,9 +336,11 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
 }
 
 //==============================================================================
-void KeyPressMappingSet::keyPressed (const KeyPress& key,
+bool KeyPressMappingSet::keyPressed (const KeyPress& key,
                                      Component* originatingComponent)
 {
+    bool used = false;
+
     const CommandID commandID = findCommandForKeyPress (key);
 
     const ApplicationCommandInfo* const ci = commandManager->getCommandForID (commandID);
@@ -352,16 +354,20 @@ void KeyPressMappingSet::keyPressed (const KeyPress& key,
              && (info.flags & ApplicationCommandInfo::isDisabled) == 0)
         {
             invokeCommand (commandID, key, true, 0, originatingComponent);
+            used = true;
         }
         else
         {
             PlatformUtilities::beep();
         }
     }
+
+    return used;
 }
 
-void KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
+bool KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
 {
+    bool used = false;
     const uint32 now = Time::getMillisecondCounter();
 
     for (int i = mappings.size(); --i >= 0;)
@@ -411,10 +417,13 @@ void KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
                     }
 
                     invokeCommand (cm->commandID, key, isDown, millisecs, originatingComponent);
+                    used = true;
                 }
             }
         }
     }
+
+    return used;
 }
 
 void KeyPressMappingSet::globalFocusChanged (Component* focusedComponent)

@@ -282,9 +282,9 @@ int ComboBox::getSelectedItemIndex() const throw()
 }
 
 void ComboBox::setSelectedItemIndex (const int index,
-                                     const bool dontSendChangeMessage)
+                                     const bool dontSendChangeMessage) throw()
 {
-    if (getSelectedItemIndex() != index)
+    if (currentIndex != index)
     {
         if (index >= 0 && index < getNumItems())
             currentIndex = index;
@@ -299,7 +299,7 @@ void ComboBox::setSelectedItemIndex (const int index,
 }
 
 void ComboBox::setSelectedId (const int newItemId,
-                              const bool dontSendChangeMessage)
+                              const bool dontSendChangeMessage) throw()
 {
     for (int i = getNumItems(); --i >= 0;)
     {
@@ -349,7 +349,7 @@ const String ComboBox::getText() const throw()
 }
 
 void ComboBox::setText (const String& newText,
-                        const bool dontSendChangeMessage)
+                        const bool dontSendChangeMessage) throw()
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -461,38 +461,38 @@ void ComboBox::colourChanged()
 }
 
 //==============================================================================
-void ComboBox::keyPressed (const KeyPress& key)
+bool ComboBox::keyPressed (const KeyPress& key)
 {
+    bool used = false;
+
     if (key.isKeyCode (KeyPress::upKey)
         || key.isKeyCode (KeyPress::leftKey))
     {
         setSelectedItemIndex (jmax (0, currentIndex - 1));
+        used = true;
     }
     else if (key.isKeyCode (KeyPress::downKey)
               || key.isKeyCode (KeyPress::rightKey))
     {
         setSelectedItemIndex (jmin (currentIndex + 1, getNumItems() - 1));
+        used = true;
     }
     else if (key.isKeyCode (KeyPress::returnKey))
     {
         showPopup();
+        used = true;
     }
-    else
-    {
-        Component::keyPressed (key);
-    }
+
+    return used;
 }
 
-void ComboBox::keyStateChanged()
+bool ComboBox::keyStateChanged()
 {
     // only forward key events that aren't used by this component
-    if (! (KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
-          || KeyPress::isKeyCurrentlyDown (KeyPress::leftKey)
-          || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
-          || KeyPress::isKeyCurrentlyDown (KeyPress::rightKey)))
-    {
-        Component::keyStateChanged();
-    }
+    return KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::leftKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::rightKey);
 }
 
 //==============================================================================

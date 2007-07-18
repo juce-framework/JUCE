@@ -557,7 +557,7 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void colourChanged();
 

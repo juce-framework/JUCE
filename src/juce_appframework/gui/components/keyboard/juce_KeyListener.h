@@ -54,10 +54,15 @@ public:
     //==============================================================================
     /** Called to indicate that a key has been pressed.
 
+        If your implementation returns true, then the key event is considered to have
+        been consumed, and will not be passed on to any other components. If it returns
+        false, then the key will be passed to other components that might want to use it.
+
         @param key                      the keystroke, including modifier keys
         @param originatingComponent     the component that received the key event
+        @see keyStateChanged, Component::keyPressed
     */
-    virtual void keyPressed (const KeyPress& key,
+    virtual bool keyPressed (const KeyPress& key,
                              Component* originatingComponent) = 0;
 
     /** Called when any key is pressed or released.
@@ -66,10 +71,14 @@ public:
         the state of one or more keys can use KeyPress::isKeyCurrentlyDown() to
         check whether their key has changed.
 
+        If your implementation returns true, then the key event is considered to have
+        been consumed, and will not be passed on to any other components. If it returns
+        false, then the key will be passed to other components that might want to use it.
+
         @param originatingComponent     the component that received the key event
-        @see KeyPress
+        @see KeyPress, Component::keyStateChanged
     */
-    virtual void keyStateChanged (Component* originatingComponent);
+    virtual bool keyStateChanged (Component* originatingComponent);
 
 };
 

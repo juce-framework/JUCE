@@ -512,7 +512,7 @@ void TreeView::scrollToKeepItemVisible (TreeViewItem* item)
     }
 }
 
-void TreeView::keyPressed (const KeyPress& key)
+bool TreeView::keyPressed (const KeyPress& key)
 {
     if (key.isKeyCode (KeyPress::upKey))
     {
@@ -587,8 +587,10 @@ void TreeView::keyPressed (const KeyPress& key)
     }
     else
     {
-        Component::keyPressed (key);
+        return false;
     }
+
+    return true;
 }
 
 void TreeView::itemsChanged() throw()

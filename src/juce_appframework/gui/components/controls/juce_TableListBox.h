@@ -270,6 +270,12 @@ public:
     */
     const Rectangle getCellPosition (const int columnId, const int rowNumber) const;
 
+    /** Scrolls horizontally if necessary to make sure that a particular column is visible.
+
+        @see ListBox::scrollToEnsureRowIsOnscreen
+    */
+    void scrollToEnsureColumnIsOnscreen (const int columnId);
+
     //==============================================================================
     /** @internal */
     int getNumRows();

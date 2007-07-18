@@ -332,7 +332,7 @@ protected:
     /** @internal */
     void mouseDrag (const MouseEvent& e);
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void buttonClicked (Button* button);
     /** @internal */

@@ -471,7 +471,7 @@ public:
     {
     }
 
-    void keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key)
     {
         lastPress = key;
         String message (TRANS("Key: ") + owner->getDescriptionForKeyPress (key));
@@ -487,6 +487,13 @@ public:
         }
 
         setMessage (message);
+
+        return true;
+    }
+
+    bool keyStateChanged()
+    {
+        return true;
     }
 };
 

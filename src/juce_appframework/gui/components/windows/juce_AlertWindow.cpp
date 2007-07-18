@@ -565,7 +565,7 @@ void AlertWindow::mouseDrag (const MouseEvent& e)
     dragger.dragComponent (this, e);
 }
 
-void AlertWindow::keyPressed (const KeyPress& key)
+bool AlertWindow::keyPressed (const KeyPress& key)
 {
     for (int i = buttons.size(); --i >= 0;)
     {
@@ -574,20 +574,22 @@ void AlertWindow::keyPressed (const KeyPress& key)
         if (b->isRegisteredForShortcut (key))
         {
             b->triggerClick();
-            return;
+            return true;
         }
     }
 
-    if (buttons.size() == 0)
+    if (key.isKeyCode (KeyPress::escapeKey) && buttons.size() == 0)
     {
         exitModalState (0);
+        return true;
     }
-    else if (key.isKeyCode (KeyPress::returnKey)
-              && buttons.size() == 1)
+    else if (key.isKeyCode (KeyPress::returnKey) && buttons.size() == 1)
     {
-        AlertWindowTextButton* const mb = (AlertWindowTextButton*) buttons.getFirst();
-        mb->triggerClick();
+        ((AlertWindowTextButton*) buttons.getFirst())->triggerClick();
+        return true;
     }
+
+    return false;
 }
 
 void AlertWindow::lookAndFeelChanged()

@@ -325,7 +325,7 @@ static void moveOrStretch (ComponentLayout& layout, int x, int y, bool snap, boo
         layout.moveSelectedComps (x, y, snap);
 }
 
-void ComponentLayoutEditor::keyPressed (const KeyPress& key)
+bool ComponentLayoutEditor::keyPressed (const KeyPress& key)
 {
     const bool snap = key.getModifiers().isAltDown();
     const bool stretch = key.getModifiers().isShiftDown();
@@ -351,8 +351,10 @@ void ComponentLayoutEditor::keyPressed (const KeyPress& key)
     }
     else
     {
-        Component::keyPressed (key);
+        return false;
     }
+
+    return true;
 }
 
 bool ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, int y)

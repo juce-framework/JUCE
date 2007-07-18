@@ -502,9 +502,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
-    void keyStateChanged();
+    bool keyStateChanged();
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

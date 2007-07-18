@@ -212,7 +212,7 @@ public:
         @see getSelectedId, setSelectedItemIndex, setText
     */
     void setSelectedId (const int newItemId,
-                        const bool dontSendChangeMessage = false);
+                        const bool dontSendChangeMessage = false) throw();
 
     //==============================================================================
     /** Returns the index of the item that's currently shown in the box.
@@ -236,7 +236,7 @@ public:
         @see getSelectedItemIndex, setSelectedId, setText
     */
     void setSelectedItemIndex (const int newItemIndex,
-                               const bool dontSendChangeMessage = false);
+                               const bool dontSendChangeMessage = false) throw();
 
     //==============================================================================
     /** Returns the text that is currently shown in the combo-box's text field.
@@ -262,7 +262,7 @@ public:
         @see getText
     */
     void setText (const String& newText,
-                  const bool dontSendChangeMessage = false);
+                  const bool dontSendChangeMessage = false) throw();
 
     //==============================================================================
     /** Registers a listener that will be called when the box's content changes. */
@@ -366,8 +366,8 @@ private:
     void lookAndFeelChanged();
     void paint (Graphics&);
     void resized();
-    void keyStateChanged();
-    void keyPressed (const KeyPress&);
+    bool keyStateChanged();
+    bool keyPressed (const KeyPress&);
 
     void showPopup();
 

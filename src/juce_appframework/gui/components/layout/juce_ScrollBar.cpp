@@ -433,23 +433,27 @@ void ScrollBar::timerCallback()
     }
 }
 
-void ScrollBar::keyPressed (const KeyPress& key)
+bool ScrollBar::keyPressed (const KeyPress& key)
 {
-    if (isVisible())
-    {
-        if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
-            moveScrollbarInSteps (-1);
-        else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
-            moveScrollbarInSteps (1);
-        else if (key.isKeyCode (KeyPress::pageUpKey))
-            moveScrollbarInPages (-1);
-        else if (key.isKeyCode (KeyPress::pageDownKey))
-            moveScrollbarInPages (1);
-        else if (key.isKeyCode (KeyPress::homeKey))
-            scrollToTop();
-        else if (key.isKeyCode (KeyPress::endKey))
-            scrollToBottom();
-    }
+    if (! isVisible())
+        return false;
+
+    if (key.isKeyCode (KeyPress::upKey) || key.isKeyCode (KeyPress::leftKey))
+        moveScrollbarInSteps (-1);
+    else if (key.isKeyCode (KeyPress::downKey) || key.isKeyCode (KeyPress::rightKey))
+        moveScrollbarInSteps (1);
+    else if (key.isKeyCode (KeyPress::pageUpKey))
+        moveScrollbarInPages (-1);
+    else if (key.isKeyCode (KeyPress::pageDownKey))
+        moveScrollbarInPages (1);
+    else if (key.isKeyCode (KeyPress::homeKey))
+        scrollToTop();
+    else if (key.isKeyCode (KeyPress::endKey))
+        scrollToBottom();
+    else
+        return false;
+
+    return true;
 }
 
 END_JUCE_NAMESPACE

@@ -228,9 +228,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    void keyPressed (const KeyPress& key, Component* originatingComponent);
+    bool keyPressed (const KeyPress& key, Component* originatingComponent);
     /** @internal */
-    void keyStateChanged (Component* originatingComponent);
+    bool keyStateChanged (Component* originatingComponent);
     /** @internal */
     void globalFocusChanged (Component* focusedComponent);
 

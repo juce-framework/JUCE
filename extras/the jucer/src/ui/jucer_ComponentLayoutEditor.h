@@ -58,7 +58,7 @@ public:
     void mouseDown (const MouseEvent& e);
     void mouseDrag (const MouseEvent& e);
     void mouseUp (const MouseEvent& e);
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     bool filesDropped (const StringArray& filenames, int x, int y);
 
     ComponentLayout& getLayout() const throw()                  { return layout; }

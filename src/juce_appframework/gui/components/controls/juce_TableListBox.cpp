@@ -397,6 +397,26 @@ const Rectangle TableListBox::getCellPosition (const int columnId, const int row
                       headerCell.getWidth(), row.getHeight());
 }
 
+void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
+{
+    ScrollBar* const scrollbar = getHorizontalScrollBar();
+
+    if (scrollbar != 0)
+    {
+        const Rectangle pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+
+        double x = scrollbar->getCurrentRangeStart();
+        double w = scrollbar->getCurrentRangeSize();
+
+        if (pos.getX() < x)
+            x = pos.getX();
+        else if (pos.getRight() > x + w)
+            x += jmax (0.0, pos.getRight() - (x + w));
+
+        scrollbar->setCurrentRangeStart (x);
+    }
+}
+
 int TableListBox::getNumRows()
 {
     return model != 0 ? model->getNumRows() : 0;

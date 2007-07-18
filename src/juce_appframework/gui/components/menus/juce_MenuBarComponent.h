@@ -96,7 +96,7 @@ public:
     /** @internal */
     void handleCommandMessage (int commandId);
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void menuBarItemsChanged (MenuBarModel* menuBarModel);
     /** @internal */

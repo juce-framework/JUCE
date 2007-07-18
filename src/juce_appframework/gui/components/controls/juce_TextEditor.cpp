@@ -1678,13 +1678,10 @@ void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, flo
 }
 
 //==============================================================================
-void TextEditor::keyPressed (const KeyPress& key)
+bool TextEditor::keyPressed (const KeyPress& key)
 {
     if (isReadOnly() && key != KeyPress (T('c'), ModifierKeys::commandModifier, 0))
-    {
-        Component::keyPressed (key);
-        return;
-    }
+        return false;
 
     const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
 
@@ -1850,13 +1847,16 @@ void TextEditor::keyPressed (const KeyPress& key)
     }
     else
     {
-        Component::keyPressed (key);
+        return false;
     }
+
+    return true;
 }
 
-void TextEditor::keyStateChanged()
+bool TextEditor::keyStateChanged()
 {
     // (overridden to avoid forwarding key events to the parent)
+    return true;
 }
 
 //==============================================================================

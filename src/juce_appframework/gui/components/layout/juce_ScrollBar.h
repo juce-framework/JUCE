@@ -259,7 +259,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
     /** @internal */

@@ -304,7 +304,7 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrem
     return false;
 }
 
-void Viewport::keyPressed (const KeyPress& key)
+bool Viewport::keyPressed (const KeyPress& key)
 {
     const bool isUpDownKey = key.isKeyCode (KeyPress::upKey)
                                 || key.isKeyCode (KeyPress::downKey)
@@ -313,21 +313,17 @@ void Viewport::keyPressed (const KeyPress& key)
                                 || key.isKeyCode (KeyPress::homeKey)
                                 || key.isKeyCode (KeyPress::endKey);
 
+    if (verticalScrollBar->isVisible() && isUpDownKey)
+        return verticalScrollBar->keyPressed (key);
+
     const bool isLeftRightKey = key.isKeyCode (KeyPress::leftKey)
                                  || key.isKeyCode (KeyPress::rightKey);
 
-    if (verticalScrollBar->isVisible() && isUpDownKey)
-    {
-        verticalScrollBar->keyPressed (key);
-    }
-    else if (horizontalScrollBar->isVisible() && (isLeftRightKey || isUpDownKey))
-    {
-        horizontalScrollBar->keyPressed (key);
-    }
-    else
-    {
-        Component::keyPressed (key);
-    }
+    if (horizontalScrollBar->isVisible() && (isUpDownKey || isLeftRightKey))
+        return horizontalScrollBar->keyPressed (key);
+
+    return false;
 }
+
 
 END_JUCE_NAMESPACE

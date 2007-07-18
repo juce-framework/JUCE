@@ -439,11 +439,11 @@ protected:
     /** @internal */
     void mouseUp (const MouseEvent& e);
     /** @internal */
-    void keyPressed (const KeyPress& key);
+    bool keyPressed (const KeyPress& key);
     /** @internal */
-    void keyPressed (const KeyPress& key, Component* originatingComponent);
+    bool keyPressed (const KeyPress& key, Component* originatingComponent);
     /** @internal */
-    void keyStateChanged (Component* originatingComponent);
+    bool keyStateChanged (Component* originatingComponent);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

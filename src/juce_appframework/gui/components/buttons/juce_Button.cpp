@@ -601,34 +601,40 @@ bool Button::isRegisteredForShortcut (const KeyPress& key) const throw()
     return false;
 }
 
-void Button::keyStateChanged (Component*)
+bool Button::keyStateChanged (Component*)
 {
-    if (isEnabled())
-    {
-        const bool wasDown = isKeyDown;
-        isKeyDown = isShortcutPressed();
+    if (! isEnabled())
+        return false;
 
-        if (autoRepeatDelay >= 0 && (isKeyDown && !wasDown))
-            getRepeatTimer().startTimer (autoRepeatDelay);
+    const bool wasDown = isKeyDown;
+    isKeyDown = isShortcutPressed();
 
-        updateState (0);
+    if (autoRepeatDelay >= 0 && (isKeyDown && ! wasDown))
+        getRepeatTimer().startTimer (autoRepeatDelay);
 
-        if (isEnabled() && wasDown && ! isKeyDown)
-            internalClickCallback (ModifierKeys::getCurrentModifiers());
-    }
+    updateState (0);
+
+    if (isEnabled() && wasDown && ! isKeyDown)
+        internalClickCallback (ModifierKeys::getCurrentModifiers());
+
+    return isKeyDown || wasDown;
 }
 
-void Button::keyPressed (const KeyPress&, Component*)
+bool Button::keyPressed (const KeyPress&, Component*)
 {
-    // (not actually used - the key detection happens in keyStateChanged)
+    // return true to avoid forwarding events for keys that we're using as shortcuts
+    return isShortcutPressed();
 }
 
-void Button::keyPressed (const KeyPress& key)
+bool Button::keyPressed (const KeyPress& key)
 {
     if (isEnabled() && key.isKeyCode (KeyPress::returnKey))
+    {
         triggerClick();
-    else
-        Component::keyPressed (key);
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

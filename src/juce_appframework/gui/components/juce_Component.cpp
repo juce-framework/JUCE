@@ -1525,7 +1525,7 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const throw()
             && ! mc->canModalEventBeSentToComponent (this);
 }
 
-Component* Component::getCurrentlyModalComponent() throw()
+Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent() throw()
 {
     Component* const c = (Component*) modalComponentStack.getLast();
 
@@ -3466,81 +3466,14 @@ void Component::removeKeyListener (KeyListener* const listenerToRemove) throw()
         keyListeners_->removeValue (listenerToRemove);
 }
 
-void Component::keyPressed (const KeyPress& key)
+bool Component::keyPressed (const KeyPress&)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
-
-    if (key.isKeyCode (KeyPress::tabKey)
-         && getCurrentlyFocusedComponent()->isValidComponent())
-    {
-        getCurrentlyFocusedComponent()->moveKeyboardFocusToSibling (! key.getModifiers().isShiftDown());
-    }
-    else if (parentComponent_ != 0)
-    {
-        parentComponent_->keyPressed (key);
-    }
-
-    if ((! deletionChecker.hasBeenDeleted()) && keyListeners_ != 0)
-    {
-        for (int i = keyListeners_->size(); --i >= 0;)
-        {
-            ((KeyListener*) keyListeners_->getUnchecked(i))->keyPressed (key, this);
-
-            if (deletionChecker.hasBeenDeleted())
-                return;
-
-            i = jmin (i, keyListeners_->size());
-        }
-    }
+    return false;
 }
 
-void Component::keyStateChanged()
+bool Component::keyStateChanged()
 {
-    const ComponentDeletionWatcher deletionChecker (this);
-
-    if (parentComponent_ != 0)
-        parentComponent_->keyStateChanged();
-
-    if ((! deletionChecker.hasBeenDeleted()) && keyListeners_ != 0)
-    {
-        for (int i = keyListeners_->size(); --i >= 0;)
-        {
-            ((KeyListener*) keyListeners_->getUnchecked(i))->keyStateChanged (this);
-
-            if (deletionChecker.hasBeenDeleted())
-                return;
-
-            i = jmin (i, keyListeners_->size());
-        }
-    }
-}
-
-bool Component::internalKeyPress (const int key, const juce_wchar textCharacter)
-{
-    const KeyPress keyPress (key,
-                             ModifierKeys::getCurrentModifiers().getRawFlags()
-                                & ModifierKeys::allKeyboardModifiers,
-                             textCharacter);
-
-    if (isCurrentlyBlockedByAnotherModalComponent())
-    {
-        Component* const currentModalComp = getCurrentlyModalComponent();
-
-        if (currentModalComp != 0)
-            currentModalComp->keyPressed (keyPress);
-    }
-    else
-    {
-        keyPressed (keyPress);
-    }
-
-    return true;
-}
-
-bool Component::internalKeyStateChanged()
-{
-    keyStateChanged();
-    return true;
+    return false;
 }
 
 void Component::modifierKeysChanged (const ModifierKeys& modifiers)

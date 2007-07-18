@@ -552,7 +552,7 @@ public:
         lastMouseX = -1;
     }
 
-    void keyPressed (const KeyPress& key)
+    bool keyPressed (const KeyPress& key)
     {
         if (key.isKeyCode (KeyPress::downKey))
         {
@@ -607,6 +607,12 @@ public:
         {
             dismissMenu (0);
         }
+        else
+        {
+            return false;
+        }
+
+        return true;
     }
 
     void inputAttemptWhenModal()

@@ -664,7 +664,7 @@ void ListBox::scrollToEnsureRowIsOnscreen (const int row)
 }
 
 //==============================================================================
-void ListBox::keyPressed (const KeyPress& key)
+bool ListBox::keyPressed (const KeyPress& key)
 {
     const int numVisibleRows = viewport->getHeight() / getRowHeight();
 
@@ -734,22 +734,21 @@ void ListBox::keyPressed (const KeyPress& key)
     }
     else
     {
-        Component::keyPressed (key);
+        return false;
     }
+
+    return true;
 }
 
-void ListBox::keyStateChanged()
+bool ListBox::keyStateChanged()
 {
-    if (! (KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::pageUpKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::pageDownKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::homeKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::endKey)
-           || KeyPress::isKeyCurrentlyDown (KeyPress::returnKey)))
-    {
-        Component::keyStateChanged();
-    }
+    return KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::pageUpKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::pageDownKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::homeKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::endKey)
+        || KeyPress::isKeyCurrentlyDown (KeyPress::returnKey);
 }
 
 void ListBox::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
