@@ -244,7 +244,7 @@ public:
             {
                 PopupMenu::dismissAllActiveMenus();
 
-                Component* const modalComponent = Component::getCurrentlyModalComponent();
+                juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent();
                 if (modalComponent != 0)
                     modalComponent->exitModalState (0);
 
@@ -375,7 +375,7 @@ public:
 
             void resized()
             {
-                Component* const c = getChildComponent (0);
+                juce::Component* const c = getChildComponent (0);
 
                 if (c != 0)
                     c->setBounds (0, 0, getWidth(), getHeight());
@@ -407,7 +407,7 @@ public:
 #endif
 
 #if JUCE_WIN32
-            void globalFocusChanged (Component*)
+            void globalFocusChanged (juce::Component*)
             {
   #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -416,7 +416,7 @@ public:
             }
 #endif
 
-            void childBoundsChanged (Component* child)
+            void childBoundsChanged (juce::Component* child)
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
