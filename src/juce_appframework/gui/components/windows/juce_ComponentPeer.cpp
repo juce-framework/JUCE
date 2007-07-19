@@ -51,6 +51,7 @@ BEGIN_JUCE_NAMESPACE
 extern int64 juce_recentMouseDownTimes[4];
 extern int juce_recentMouseDownX [4];
 extern int juce_recentMouseDownY [4];
+extern Component* juce_recentMouseDownComponent [4];
 extern int juce_LastMousePosX;
 extern int juce_LastMousePosY;
 extern int juce_MouseClickCounter;
@@ -224,16 +225,18 @@ void ComponentPeer::handleMouseDown (int x, int y, const int64 time)
         {
             // can't set these in the mouseDownInt() method, because it's re-entrant, so do it here..
 
-            for (int i = 4; --i > 0;)
+            for (int i = numElementsInArray (juce_recentMouseDownTimes); --i > 0;)
             {
                 juce_recentMouseDownTimes [i] = juce_recentMouseDownTimes [i - 1];
                 juce_recentMouseDownX [i] = juce_recentMouseDownX [i - 1];
                 juce_recentMouseDownY [i] = juce_recentMouseDownY [i - 1];
+                juce_recentMouseDownComponent [i] = juce_recentMouseDownComponent [i - 1];
             }
 
             juce_recentMouseDownTimes[0] = time;
             juce_recentMouseDownX[0] = x;
             juce_recentMouseDownY[0] = y;
+            juce_recentMouseDownComponent[0] = Component::componentUnderMouse;
             relativePositionToGlobal (juce_recentMouseDownX[0], juce_recentMouseDownY[0]);
             juce_MouseHasMovedSignificantlySincePressed = false;
 

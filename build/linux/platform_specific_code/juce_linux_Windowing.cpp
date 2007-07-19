@@ -1067,8 +1067,7 @@ public:
 
         if (windowH != 0
             && XGetWindowAttributes (display, windowH, &atts)
-            && atts.map_state == IsViewable
-            && ! isFocused())
+            && atts.map_state == IsViewable)
         {
             XSetInputFocus (display, windowH, RevertToParent, CurrentTime);
 

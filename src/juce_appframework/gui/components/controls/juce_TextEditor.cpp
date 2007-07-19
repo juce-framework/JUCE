@@ -876,6 +876,8 @@ TextEditor::TextEditor (const String& name,
       wasFocused (false),
       caretFlashState (true),
       keepCursorOnScreen (true),
+      tabKeyUsed (false),
+      menuActive (false),
       cursorX (0),
       cursorY (0),
       cursorHeight (0),
@@ -951,7 +953,7 @@ bool TextEditor::isMultiLine() const throw()
     return multiline;
 }
 
-void TextEditor::setScrollbarsShown (bool enabled)
+void TextEditor::setScrollbarsShown (bool enabled) throw()
 {
     scrollbarVisible = enabled;
 
@@ -966,7 +968,7 @@ void TextEditor::setReadOnly (const bool shouldBeReadOnly)
     enablementChanged();
 }
 
-bool TextEditor::isReadOnly() const
+bool TextEditor::isReadOnly() const throw()
 {
     return readOnly || ! isEnabled();
 }
@@ -976,28 +978,28 @@ void TextEditor::setReturnKeyStartsNewLine (const bool shouldStartNewLine)
     returnKeyStartsNewLine = shouldStartNewLine;
 }
 
-bool TextEditor::getReturnKeyStartsNewLine() const
+void TextEditor::setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed) throw()
 {
-    return returnKeyStartsNewLine;
+    tabKeyUsed = shouldTabKeyBeUsed;
 }
 
-void TextEditor::setPopupMenuEnabled (bool b)
+void TextEditor::setPopupMenuEnabled (const bool b) throw()
 {
     popupMenuEnabled = b;
 }
 
-void TextEditor::setSelectAllWhenFocused (bool b)
+void TextEditor::setSelectAllWhenFocused (const bool b) throw()
 {
     selectAllTextWhenFocused = b;
 }
 
 //==============================================================================
-const Font TextEditor::getFont() const
+const Font TextEditor::getFont() const throw()
 {
     return currentFont;
 }
 
-void TextEditor::setFont (const Font& newFont)
+void TextEditor::setFont (const Font& newFont) throw()
 {
     currentFont = newFont;
     scrollToMakeSureCursorIsVisible();
@@ -1022,7 +1024,7 @@ void TextEditor::colourChanged()
     repaint();
 }
 
-void TextEditor::setCaretVisible (bool shouldCaretBeVisible)
+void TextEditor::setCaretVisible (const bool shouldCaretBeVisible) throw()
 {
     caretVisible = shouldCaretBeVisible;
 
@@ -1034,13 +1036,13 @@ void TextEditor::setCaretVisible (bool shouldCaretBeVisible)
 }
 
 void TextEditor::setInputRestrictions (const int maxLen,
-                                       const String& chars)
+                                       const String& chars) throw()
 {
     maxTextLength = jmax (0, maxLen);
     allowedCharacters = chars;
 }
 
-void TextEditor::setTextToShowWhenEmpty (const String& text, const Colour& colourToUse)
+void TextEditor::setTextToShowWhenEmpty (const String& text, const Colour& colourToUse) throw()
 {
     textToShowWhenEmpty = text;
     colourForTextWhenEmpty = colourToUse;
@@ -1579,7 +1581,9 @@ void TextEditor::mouseDown (const MouseEvent& e)
             PopupMenu m;
             addPopupMenuItems (m);
 
+            menuActive = true;
             const int result = m.show();
+            menuActive = false;
 
             if (result != 0)
                 performPopupMenuAction (result);
@@ -1837,8 +1841,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
         escapePressed();
     }
     else if (key.getTextCharacter() != 0
-              && ! (isReadOnly()
-                     || key.isKeyCode (KeyPress::tabKey)))
+              && (! isReadOnly())
+              && (tabKeyUsed || ! key.isKeyCode (KeyPress::tabKey)))
     {
         if (! isReadOnly())
             insertTextAtCursor (String::charToString (key.getTextCharacter()));

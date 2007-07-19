@@ -130,7 +130,20 @@ public:
 
         See setReturnKeyStartsNewLine() for more info.
     */
-    bool getReturnKeyStartsNewLine() const;
+    bool getReturnKeyStartsNewLine() const throw()                  { return returnKeyStartsNewLine; }
+
+    /** Indicates whether the tab key should be accepted and used to input a tab character,
+        or whether it gets ignored.
+
+        By default the tab key is ignored, so that it can be used to switch keyboard focus 
+        between components.
+    */
+    void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed) throw();
+
+    /** Returns true if the tab key is being used for input.
+        @see setTabKeyUsedAsCharacter
+    */
+    bool isTabKeyUsedAsCharacter() const throw()                    { return tabKeyUsed; }
 
     //==============================================================================
     /** Changes the editor to read-only mode.
@@ -146,7 +159,7 @@ public:
 
     /** Returns true if the editor is in read-only mode.
     */
-    bool isReadOnly() const;
+    bool isReadOnly() const throw();
 
     //==============================================================================
     /** Makes the caret visible or invisible.
@@ -155,7 +168,7 @@ public:
 
         @see setCaretColour, setCaretPosition
     */
-    void setCaretVisible (bool shouldBeVisible);
+    void setCaretVisible (const bool shouldBeVisible) throw();
 
     /** Returns true if the caret is enabled.
         @see setCaretVisible
@@ -171,7 +184,7 @@ public:
 
         By default the scrollbar is enabled.
     */
-    void setScrollbarsShown (bool shouldBeEnabled);
+    void setScrollbarsShown (bool shouldBeEnabled) throw();
 
     /** Returns true if scrollbars are enabled.
         @see setScrollbarsShown
@@ -204,12 +217,16 @@ l    */
         If enabled, right-clicking (or command-clicking on the Mac) will pop up a menu
         of options such as cut/copy/paste, undo/redo, etc.
     */
-    void setPopupMenuEnabled (const bool menuEnabled);
+    void setPopupMenuEnabled (const bool menuEnabled) throw();
 
     /** Returns true if the right-click menu is enabled.
         @see setPopupMenuEnabled
     */
     bool isPopupMenuEnabled() const throw()                         { return popupMenuEnabled; }
+
+    /** Returns true if a popup-menu is currently being displayed.
+    */
+    bool isPopupMenuCurrentlyActive() const throw()                 { return menuActive; }
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -256,7 +273,7 @@ l    */
 
         @see applyFontToAllText
     */
-    void setFont (const Font& newFont);
+    void setFont (const Font& newFont) throw();
 
     /** Applies a font to all the text in the editor.
 
@@ -270,7 +287,7 @@ l    */
 
         @see setFont
     */
-    const Font getFont() const;
+    const Font getFont() const throw();
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -280,7 +297,7 @@ l    */
         This is useful for boxes where you expect the user to re-enter all the
         text when they focus on the component, rather than editing what's already there.
     */
-    void setSelectAllWhenFocused (bool b);
+    void setSelectAllWhenFocused (const bool b) throw();
 
     /** Sets limits on the characters that can be entered.
 
@@ -290,7 +307,7 @@ l    */
                                     this string are allowed to be entered into the editor.
     */
     void setInputRestrictions (const int maxTextLength,
-                               const String& allowedCharacters = String::empty);
+                               const String& allowedCharacters = String::empty) throw();
 
     /** When the text editor is empty, it can be set to display a message.
 
@@ -298,7 +315,7 @@ l    */
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
+    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse) throw();
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.
@@ -587,6 +604,8 @@ private:
     bool wasFocused                 : 1;
     bool caretFlashState            : 1;
     bool keepCursorOnScreen         : 1;
+    bool tabKeyUsed                 : 1;
+    bool menuActive                 : 1;
 
     UndoManager undoManager;
     float cursorX, cursorY, cursorHeight;

@@ -60,9 +60,10 @@ static const int exitModalStateMessage  = 0x7fff0002;
 
 //==============================================================================
 // these are also used by ComponentPeer
-int64 juce_recentMouseDownTimes [4] = { 0, 0, 0, 0 };
-int juce_recentMouseDownX [4] = { 0, 0, 0, 0 };
-int juce_recentMouseDownY [4] = { 0, 0, 0, 0 };
+int64 juce_recentMouseDownTimes [4]             = { 0, 0, 0, 0 };
+int juce_recentMouseDownX [4]                   = { 0, 0, 0, 0 };
+int juce_recentMouseDownY [4]                   = { 0, 0, 0, 0 };
+Component* juce_recentMouseDownComponent [4]    = { 0, 0, 0, 0 };
 int juce_LastMousePosX = 0;
 int juce_LastMousePosY = 0;
 int juce_MouseClickCounter = 0;
@@ -77,12 +78,13 @@ static int countMouseClicks() throw()
         if (! juce_MouseHasMovedSignificantlySincePressed)
             ++numClicks;
 
-        for (int i = 1; i < 4; ++i)
+        for (int i = 1; i < numElementsInArray (juce_recentMouseDownTimes); ++i)
         {
             if (juce_recentMouseDownTimes[0] - juce_recentMouseDownTimes [i]
                     < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
                 && abs (juce_recentMouseDownX[0] - juce_recentMouseDownX[i]) < 8
-                && abs (juce_recentMouseDownY[0] - juce_recentMouseDownY[i]) < 8)
+                && abs (juce_recentMouseDownY[0] - juce_recentMouseDownY[i]) < 8
+                && juce_recentMouseDownComponent[0] == juce_recentMouseDownComponent [i])
             {
                 ++numClicks;
             }
