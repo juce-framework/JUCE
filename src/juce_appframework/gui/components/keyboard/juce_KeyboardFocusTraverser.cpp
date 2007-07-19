@@ -57,15 +57,15 @@ public:
     static int compareElements (const Component* const first, const Component* const second) throw()
     {
         int explicitOrder1 = first->getExplicitFocusOrder();
-        if (explicitOrder1 < 0)
+        if (explicitOrder1 <= 0)
             explicitOrder1 = INT_MAX / 2;
 
         int explicitOrder2 = second->getExplicitFocusOrder();
-        if (explicitOrder2 < 0)
+        if (explicitOrder2 <= 0)
             explicitOrder2 = INT_MAX / 2;
 
         if (explicitOrder1 != explicitOrder2)
-            return explicitOrder2 - explicitOrder1;
+            return explicitOrder1 - explicitOrder2;
 
         const int diff = first->getY() - second->getY();
 
