@@ -534,9 +534,14 @@ protected:
         0x7fff0000 - 0x7fff1000, so you should avoid those values for your own
         menu IDs.
 
+        If this was triggered by a mouse-click, the mouseClickEvent parameter will be
+        a pointer to the info about it, or may be null if the menu is being triggered
+        by some other means.
+
         @see performPopupMenuAction, setPopupMenuEnabled, isPopupMenuEnabled
     */
-    virtual void addPopupMenuItems (PopupMenu& menuToAddTo);
+    virtual void addPopupMenuItems (PopupMenu& menuToAddTo,
+                                    const MouseEvent* mouseClickEvent);
 
     /** This is called to perform one of the items that was shown on the popup menu.
 

@@ -1579,7 +1579,7 @@ void TextEditor::mouseDown (const MouseEvent& e)
         else
         {
             PopupMenu m;
-            addPopupMenuItems (m);
+            addPopupMenuItems (m, &e);
 
             menuActive = true;
             const int result = m.show();
@@ -1866,7 +1866,7 @@ bool TextEditor::keyStateChanged()
 //==============================================================================
 const int baseMenuItemID = 0x7fff0000;
 
-void TextEditor::addPopupMenuItems (PopupMenu& m)
+void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 {
     const bool writable = ! isReadOnly();
 
