@@ -112,7 +112,7 @@ MidiMessage::MidiMessage (const int byte1,
     data[0] = (uint8) byte1;
 
     // check that the length matches the data..
-    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 1);
+    jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 1);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -126,7 +126,7 @@ MidiMessage::MidiMessage (const int byte1,
     data[1] = (uint8) byte2;
 
     // check that the length matches the data..
-    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 2);
+    jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 2);
 }
 
 MidiMessage::MidiMessage (const int byte1,
@@ -142,7 +142,7 @@ MidiMessage::MidiMessage (const int byte1,
     data[2] = (uint8) byte3;
 
     // check that the length matches the data..
-    jassert (getMessageLengthFromFirstByte ((uint8) byte1) == 3);
+    jassert (byte1 >= 0xf0 || getMessageLengthFromFirstByte ((uint8) byte1) == 3);
 }
 
 MidiMessage::MidiMessage (const MidiMessage& other) throw()
@@ -789,7 +789,7 @@ bool MidiMessage::isKeySignatureMetaEvent() const throw()
 
 int MidiMessage::getKeySignatureNumberOfSharpsOrFlats() const throw()
 {
-    return (int)(*getMetaEventData());
+    return (int) *getMetaEventData();
 }
 
 const MidiMessage MidiMessage::endOfTrack() throw()
