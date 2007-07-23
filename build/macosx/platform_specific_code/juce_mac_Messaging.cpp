@@ -299,7 +299,7 @@ bool juce_postMessageToSystemQueue (void* message)
     return false;
 }
 
-void MessageManager::broadcastMessage (const String& value)
+void MessageManager::broadcastMessage (const String& value) throw()
 {
 }
 
