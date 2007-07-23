@@ -304,7 +304,7 @@ void PlatformUtilities::deleteRegistryKey (const String& regKeyPath)
 //==============================================================================
 static void* currentModuleHandle = 0;
 
-void* PlatformUtilities::getCurrentModuleInstanceHandle()
+void* PlatformUtilities::getCurrentModuleInstanceHandle() throw()
 {
     if (currentModuleHandle == 0)
         currentModuleHandle = GetModuleHandle (0);
@@ -312,7 +312,7 @@ void* PlatformUtilities::getCurrentModuleInstanceHandle()
     return currentModuleHandle;
 }
 
-void PlatformUtilities::setCurrentModuleInstanceHandle (void* newHandle)
+void PlatformUtilities::setCurrentModuleInstanceHandle (void* const newHandle) throw()
 {
     currentModuleHandle = newHandle;
 }

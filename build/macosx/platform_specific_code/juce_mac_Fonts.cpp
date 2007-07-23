@@ -455,7 +455,7 @@ void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
     ATSFontHelperCache::getInstance()->releaseFont (helper);
 }
 
-const StringArray Font::findAllTypefaceNames()
+const StringArray Font::findAllTypefaceNames() throw()
 {
     StringArray names;
     ATSFontIterator iter;
@@ -518,7 +518,7 @@ const StringArray Font::findAllTypefaceNames()
     return names;
 }
 
-void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
+void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans  = "Lucida Grande";
     defaultSerif = "Times New Roman";

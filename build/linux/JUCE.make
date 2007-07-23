@@ -10,12 +10,14 @@ ifeq ($(CONFIG),Debug)
   LIBDIR := ../../bin
   OBJDIR := ../../bin/intermediate_linux/Debug
   OUTDIR := ../../bin
-  CPPFLAGS := -MD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
-  CFLAGS += $(CPPFLAGS) -g -D_DEBUG -ggdb -Wall
+  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb -Wall
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR)
   LDDEPS :=
+  RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := libjuce_debug.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),Release)
@@ -23,12 +25,14 @@ ifeq ($(CONFIG),Release)
   LIBDIR := ../../bin
   OBJDIR := ../../bin/intermediate_linux/Release
   OUTDIR := ../../bin
-  CPPFLAGS := -MD -D "LINUX=1" -D "NDEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
-  CFLAGS += $(CPPFLAGS) -O2 -Wall
+  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2 -Wall
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s
   LDDEPS :=
+  RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := libjuce.a
+  BLDCMD = ar -rcs $(OUTDIR)/$(TARGET) $(OBJECTS) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
@@ -391,8 +395,15 @@ OBJECTS := \
 	$(OBJDIR)/juce_linux_Threads.o \
 	$(OBJDIR)/juce_linux_Windowing.o \
 
+MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
+  MKDIR_TYPE := posix
+endif
+ifeq (/bin/sh.exe,$(SHELL))
+  MKDIR_TYPE := posix
+endif
+ifeq ($(MKDIR_TYPE),posix)
   CMD_MKBINDIR := mkdir -p $(BINDIR)
   CMD_MKLIBDIR := mkdir -p $(LIBDIR)
   CMD_MKOUTDIR := mkdir -p $(OUTDIR)
@@ -411,12 +422,17 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 	-@$(CMD_MKBINDIR)
 	-@$(CMD_MKLIBDIR)
 	-@$(CMD_MKOUTDIR)
-	@ar -cr $@ $^
-	@ranlib $@
+	@$(BLDCMD)
 
 clean:
 	@echo Cleaning JUCE
+ifeq ($(MKDIR_TYPE),posix)
 	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+else
+	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
+	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
+	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
+endif
 
 $(OBJDIR)/juce_FileLogger.o: ../../src/juce_core/basics/juce_FileLogger.cpp
 	-@$(CMD_MKOBJDIR)

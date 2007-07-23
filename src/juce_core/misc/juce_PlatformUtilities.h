@@ -126,13 +126,13 @@ public:
         to set the correct module handle in your DllMain() function, because
         the win32 system relies on the correct instance handle when opening windows.
     */
-    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle();
+    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
 
     /** WIN32 ONLY - Sets a new module handle to be used by the library.
 
         @see getCurrentModuleInstanceHandle()
     */
-    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle);
+    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
 
 #endif
 

@@ -294,7 +294,7 @@ static tchar* int64ToCharString (tchar* t, const int64 n) throw()
 
 static tchar* intToCharString (tchar* t, const int n) throw()
 {
-    if (n == 0x80000000) // (would cause an overflow)
+    if (n == (int) 0x80000000) // (would cause an overflow)
         return int64ToCharString (t, n);
 
     *--t = 0;

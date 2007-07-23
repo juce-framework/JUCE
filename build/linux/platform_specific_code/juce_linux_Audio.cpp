@@ -40,6 +40,8 @@
 /* Got an include error here? If so, you've either not got ALSA installed, or you've
    not got your paths set up correctly to find its header files.
 
+   The package you need to install to get ASLA support is "libasound2-dev".
+
    If you don't have the ALSA library and don't want to build Juce with audio support, 
    just disable the JUCE_ALSA flag in juce_Config.h
 */

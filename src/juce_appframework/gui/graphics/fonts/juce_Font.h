@@ -190,7 +190,7 @@ public:
 
         @see getHeight, getDescent
     */
-    float getAscent() const;
+    float getAscent() const throw();
 
     /** Returns the amount that the font descends below its baseline.
 
@@ -198,7 +198,7 @@ public:
 
         @see getAscent, getHeight
     */
-    float getDescent() const;
+    float getDescent() const throw();
 
     //==============================================================================
     /** Returns the font's style flags.
@@ -291,13 +291,13 @@ public:
 
         For a more accurate floating-point result, use getStringWidthFloat().
     */
-    int getStringWidth (const String& text) const;
+    int getStringWidth (const String& text) const throw();
 
     /** Returns the total width of a string as it would be drawn using this font.
 
         @see getStringWidth
     */
-    float getStringWidthFloat (const String& text) const;
+    float getStringWidthFloat (const String& text) const throw();
 
     //==============================================================================
     /** Returns the typeface used by this font.
@@ -305,7 +305,7 @@ public:
         Note that the object returned may go out of scope if this font is deleted
         or has its style changed.
     */
-    Typeface* getTypeface() const;
+    Typeface* getTypeface() const throw();
 
     /** Creates an array of Font objects to represent all the fonts on the system.
 
@@ -314,7 +314,7 @@ public:
 
         @param results  the array to which new Font objects will be added.
     */
-    static void findFonts (OwnedArray<Font>& results);
+    static void findFonts (OwnedArray<Font>& results) throw();
 
     /** Returns a list of all the available typeface names.
 
@@ -323,7 +323,7 @@ public:
         You can use this instead of findFonts() if you only need their names, and not
         font objects.
     */
-    static const StringArray findAllTypefaceNames();
+    static const StringArray findAllTypefaceNames() throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -340,7 +340,7 @@ private:
     mutable Typeface::Ptr typeface;
 
     // platform-specific calls
-    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
+    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
 
     friend void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI();
     static void initialiseDefaultFontNames() throw();

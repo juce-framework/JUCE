@@ -33,6 +33,11 @@
 #if JUCE_BUILD_GUI_CLASSES
 
 #include "linuxincludes.h"
+
+/*  Got a build error here? You'll need to install the freetype library...
+
+    The name of the package to install is "libfreetype6-dev".
+*/
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -114,7 +119,7 @@ class FreeTypeInterface  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    FreeTypeInterface()
+    FreeTypeInterface() throw()
         : lastFace (0),
           lastBold (false),
           lastItalic (false)
@@ -152,7 +157,7 @@ public:
             enumerateFaces (fontDirs[i]);
     }
 
-    ~FreeTypeInterface()
+    ~FreeTypeInterface() throw()
     {
         if (lastFace != 0)
             FT_Done_Face (lastFace);
@@ -165,7 +170,7 @@ public:
 
     //==============================================================================
     FreeTypeFontFace* findOrCreate (const String& familyName,
-                                    const bool create = false)
+                                    const bool create = false) throw()
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getFamilyName() == familyName)
@@ -181,7 +186,7 @@ public:
     }
 
     // Enumerate all font faces available in a given directory
-    void enumerateFaces (const String& path)
+    void enumerateFaces (const String& path) throw()
     {
         File dirPath (path);
         if (path.isEmpty() || ! dirPath.isDirectory())
@@ -255,7 +260,7 @@ public:
     // Create a FreeType face object for a given font
     FT_Face createFT_Face (const String& fontName,
                            const bool bold,
-                           const bool italic)
+                           const bool italic) throw()
     {
         FT_Face face = NULL;
 
@@ -324,7 +329,7 @@ public:
         return face;
     }
 
-    void addGlyph (FT_Face face, Typeface& dest, uint32 character)
+    void addGlyph (FT_Face face, Typeface& dest, uint32 character) throw()
     {
         const unsigned int glyphIndex = FT_Get_Char_Index (face, character);
         const float height = (float) (face->ascender - face->descender);
@@ -417,7 +422,7 @@ public:
             addKerning (face, dest, character, glyphIndex);
     }
 
-    void addKerning (FT_Face face, Typeface& dest, const uint32 character, const uint32 glyphIndex)
+    void addKerning (FT_Face face, Typeface& dest, const uint32 character, const uint32 glyphIndex) throw()
     {
         const float height = (float) (face->ascender - face->descender);
 
@@ -441,7 +446,7 @@ public:
     // Add a glyph to a font
     bool addGlyphToFont (const uint32 character,
                          const tchar* fontName, bool bold, bool italic,
-                         Typeface& dest)
+                         Typeface& dest) throw()
     {
         FT_Face face = createFT_Face (fontName, bold, italic);
 
@@ -458,7 +463,7 @@ public:
     bool createTypeface (const String& fontName,
                          const bool bold, const bool italic,
                          Typeface& dest,
-                         const bool addAllGlyphs)
+                         const bool addAllGlyphs) throw()
     {
         dest.clear();
         dest.setName (fontName);
@@ -498,27 +503,27 @@ public:
     }
 
     //==============================================================================
-    void getFamilyNames (StringArray& familyNames) const
+    void getFamilyNames (StringArray& familyNames) const throw()
     {
         for (int i = 0; i < faces.size(); i++)
             familyNames.add (faces[i]->getFamilyName());
     }
 
-    void getMonospacedNames (StringArray& monoSpaced) const
+    void getMonospacedNames (StringArray& monoSpaced) const throw()
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getMonospaced())
                 monoSpaced.add (faces[i]->getFamilyName());
     }
 
-    void getSerifNames (StringArray& serif) const
+    void getSerifNames (StringArray& serif) const throw()
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getSerif())
                 serif.add (faces[i]->getFamilyName());
     }
 
-    void getSansSerifNames (StringArray& sansSerif) const
+    void getSansSerifNames (StringArray& sansSerif) const throw()
     {
         for (int i = 0; i < faces.size(); i++)
             if (! faces[i]->getSerif())
@@ -554,7 +559,7 @@ void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
         ->addGlyphToFont (character, getName(), isBold(), isItalic(), *this);
 }
 
-const StringArray Font::findAllTypefaceNames()
+const StringArray Font::findAllTypefaceNames() throw()
 {
     StringArray s;
     FreeTypeInterface::getInstance()->getFamilyNames (s);
@@ -612,7 +617,7 @@ static const String linux_getDefaultMonospacedFontName()
     return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
 }
 
-void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
+void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans = linux_getDefaultSansSerifFontName();
     defaultSerif = linux_getDefaultSerifFontName();

@@ -2083,8 +2083,8 @@ private:
     void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
     void repaintParent() throw();
     void sendFakeMouseMove() const;
-    void takeKeyboardFocus (FocusChangeType cause);
-    void grabFocusInternal (FocusChangeType cause, const bool canTryParent = true);
+    void takeKeyboardFocus (const FocusChangeType cause);
+    void grabFocusInternal (const FocusChangeType cause, const bool canTryParent = true);
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
     static void* runModalLoopCallback (void*);

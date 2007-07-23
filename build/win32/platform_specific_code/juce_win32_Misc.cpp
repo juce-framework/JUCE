@@ -68,7 +68,7 @@ void PlatformUtilities::beep()
   #pragma warning (disable : 4127)    // "Conditional expression is constant" warning
 #endif
 
-void SystemClipboard::copyTextToClipboard (const String& text)
+void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
     if (OpenClipboard (0) != 0)
     {
@@ -96,7 +96,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     }
 }
 
-const String SystemClipboard::getTextFromClipboard()
+const String SystemClipboard::getTextFromClipboard() throw()
 {
     String result;
 

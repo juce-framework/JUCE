@@ -2870,7 +2870,7 @@ void PlatformUtilities::beep()
 }
 
 //==============================================================================
-void SystemClipboard::copyTextToClipboard (const String& text)
+void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
     ClearCurrentScrap();
     ScrapRef ref;
@@ -2892,7 +2892,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     juce_free (temp);
 }
 
-const String SystemClipboard::getTextFromClipboard()
+const String SystemClipboard::getTextFromClipboard() throw()
 {
     String result;
 

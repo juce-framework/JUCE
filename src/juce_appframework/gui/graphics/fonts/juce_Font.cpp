@@ -268,7 +268,7 @@ bool Font::isUnderlined() const throw()
     return (styleFlags & underlined) != 0;
 }
 
-float Font::getAscent() const
+float Font::getAscent() const throw()
 {
     if (ascent == 0)
         ascent = getTypeface()->getAscent();
@@ -276,17 +276,17 @@ float Font::getAscent() const
     return height * ascent;
 }
 
-float Font::getDescent() const
+float Font::getDescent() const throw()
 {
     return height - getAscent();
 }
 
-int Font::getStringWidth (const String& text) const
+int Font::getStringWidth (const String& text) const throw()
 {
     return roundFloatToInt (getStringWidthFloat (text));
 }
 
-float Font::getStringWidthFloat (const String& text) const
+float Font::getStringWidthFloat (const String& text) const throw()
 {
     float x = 0.0f;
 
@@ -311,7 +311,7 @@ float Font::getStringWidthFloat (const String& text) const
     return x;
 }
 
-Typeface* Font::getTypeface() const
+Typeface* Font::getTypeface() const throw()
 {
     if (typeface == 0)
         typeface = Typeface::getTypefaceFor (*this);
@@ -319,7 +319,7 @@ Typeface* Font::getTypeface() const
     return typeface;
 }
 
-void Font::findFonts (OwnedArray<Font>& destArray)
+void Font::findFonts (OwnedArray<Font>& destArray) throw()
 {
     const StringArray names (findAllTypefaceNames());
 

@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PositionedRectangle::PositionedRectangle()
+PositionedRectangle::PositionedRectangle() throw()
     : x (0.0),
       y (0.0),
       w (0.0),
@@ -49,7 +49,7 @@ PositionedRectangle::PositionedRectangle()
 {
 }
 
-PositionedRectangle::PositionedRectangle (const PositionedRectangle& other)
+PositionedRectangle::PositionedRectangle (const PositionedRectangle& other) throw()
     : x (other.x),
       y (other.y),
       w (other.w),
@@ -61,7 +61,7 @@ PositionedRectangle::PositionedRectangle (const PositionedRectangle& other)
 {
 }
 
-const PositionedRectangle& PositionedRectangle::operator= (const PositionedRectangle& other)
+const PositionedRectangle& PositionedRectangle::operator= (const PositionedRectangle& other) throw()
 {
     if (this != &other)
     {
@@ -78,7 +78,7 @@ const PositionedRectangle& PositionedRectangle::operator= (const PositionedRecta
     return *this;
 }
 
-PositionedRectangle::~PositionedRectangle()
+PositionedRectangle::~PositionedRectangle() throw()
 {
 }
 
@@ -100,7 +100,7 @@ const bool PositionedRectangle::operator!= (const PositionedRectangle& other) co
 }
 
 //==============================================================================
-PositionedRectangle::PositionedRectangle (const String& stringVersion)
+PositionedRectangle::PositionedRectangle (const String& stringVersion) throw()
 {
     StringArray tokens;
     tokens.addTokens (stringVersion, false);
@@ -111,7 +111,7 @@ PositionedRectangle::PositionedRectangle (const String& stringVersion)
     decodeSizeString (tokens [3], hMode, h);
 }
 
-const String PositionedRectangle::toString() const
+const String PositionedRectangle::toString() const throw()
 {
     String s;
     s.preallocateStorage (12);
@@ -128,7 +128,7 @@ const String PositionedRectangle::toString() const
 }
 
 //==============================================================================
-const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) const
+const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) const throw()
 {
     jassert (! target.isEmpty());
 
@@ -142,7 +142,7 @@ const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) cons
 
 void PositionedRectangle::getRectangleDouble (const Rectangle& target,
                                               double& x_, double& y_,
-                                              double& w_, double& h_) const
+                                              double& w_, double& h_) const throw()
 {
     jassert (! target.isEmpty());
 
@@ -150,14 +150,14 @@ void PositionedRectangle::getRectangleDouble (const Rectangle& target,
     applyPosAndSize (y_, h_, y, h, yMode, hMode, target.getY(), target.getHeight());
 }
 
-void PositionedRectangle::applyToComponent (Component& comp) const
+void PositionedRectangle::applyToComponent (Component& comp) const throw()
 {
     comp.setBounds (getRectangle (Rectangle (0, 0, comp.getParentWidth(), comp.getParentHeight())));
 }
 
 //==============================================================================
 void PositionedRectangle::updateFrom (const Rectangle& rectangle,
-                                      const Rectangle& target)
+                                      const Rectangle& target) throw()
 {
     updatePosAndSize (x, w, rectangle.getX(), rectangle.getWidth(), xMode, wMode, target.getX(), target.getWidth());
     updatePosAndSize (y, h, rectangle.getY(), rectangle.getHeight(), yMode, hMode, target.getY(), target.getHeight());
@@ -165,13 +165,13 @@ void PositionedRectangle::updateFrom (const Rectangle& rectangle,
 
 void PositionedRectangle::updateFromDouble (const double newX, const double newY,
                                             const double newW, const double newH,
-                                            const Rectangle& target)
+                                            const Rectangle& target) throw()
 {
     updatePosAndSize (x, w, newX, newW, xMode, wMode, target.getX(), target.getWidth());
     updatePosAndSize (y, h, newY, newH, yMode, hMode, target.getY(), target.getHeight());
 }
 
-void PositionedRectangle::updateFromComponent (const Component& comp)
+void PositionedRectangle::updateFromComponent (const Component& comp) throw()
 {
     if (comp.getParentComponent() == 0 && ! comp.isOnDesktop())
         updateFrom (comp.getBounds(), Rectangle());
@@ -222,7 +222,7 @@ void PositionedRectangle::setModes (const AnchorPoint xAnchor,
                                     const PositionMode yMode_,
                                     const SizeMode widthMode,
                                     const SizeMode heightMode,
-                                    const Rectangle& target)
+                                    const Rectangle& target) throw()
 {
     if (xMode != (xAnchor | xMode_) || wMode != widthMode)
     {
@@ -256,7 +256,7 @@ bool PositionedRectangle::isPositionAbsolute() const throw()
 }
 
 //==============================================================================
-void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const double value) const
+void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const double value) const throw()
 {
     if ((mode & proportionOfParentSize) != 0)
     {
@@ -278,7 +278,7 @@ void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const 
         s << T('c');
 }
 
-void PositionedRectangle::addSizeDescription (String& s, const uint8 mode, const double value) const
+void PositionedRectangle::addSizeDescription (String& s, const uint8 mode, const double value) const throw()
 {
     if (mode == proportionalSize)
         s << (roundDoubleToInt (value * 100000.0) / 1000.0) << T('%');
@@ -288,7 +288,7 @@ void PositionedRectangle::addSizeDescription (String& s, const uint8 mode, const
         s << (roundDoubleToInt (value * 100.0) / 100.0);
 }
 
-void PositionedRectangle::decodePosString (const String& s, uint8& mode, double& value)
+void PositionedRectangle::decodePosString (const String& s, uint8& mode, double& value) throw()
 {
     if (s.containsChar (T('r')))
         mode = anchorAtRightOrBottom;
@@ -315,7 +315,7 @@ void PositionedRectangle::decodePosString (const String& s, uint8& mode, double&
     }
 }
 
-void PositionedRectangle::decodeSizeString (const String& s, uint8& mode, double& value)
+void PositionedRectangle::decodeSizeString (const String& s, uint8& mode, double& value) throw()
 {
     if (s.containsChar (T('%')))
     {
@@ -338,7 +338,7 @@ void PositionedRectangle::applyPosAndSize (double& xOut, double& wOut,
                                            const double x, const double w,
                                            const uint8 xMode, const uint8 wMode,
                                            const int parentPos,
-                                           const int parentSize) const
+                                           const int parentSize) const throw()
 {
     if (wMode == proportionalSize)
         wOut = roundDoubleToInt (w * parentSize);
@@ -366,7 +366,7 @@ void PositionedRectangle::updatePosAndSize (double& xOut, double& wOut,
                                             double x, const double w,
                                             const uint8 xMode, const uint8 wMode,
                                             const int parentPos,
-                                            const int parentSize) const
+                                            const int parentSize) const throw()
 {
     if (wMode == proportionalSize)
     {

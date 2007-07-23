@@ -42,6 +42,8 @@
 #include <X11/cursorfont.h>
 
 #if JUCE_USE_XINERAMA
+ /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..
+ */
  #include <X11/extensions/Xinerama.h>
 #endif
 
@@ -52,7 +54,14 @@
 #endif
 
 #if JUCE_OPENGL
- #include <X11/Xlib.h>
+ /*  Got an include error here?
+
+     If you want to install OpenGL support, the packages to get are "mesa-common-dev"
+     and "freeglut3-dev".
+
+     Alternatively, you can turn off the JUCE_OPENGL flag in juce_Config.h if you
+     want to disable it.
+ */
  #include <GL/glx.h>
 #endif
 
@@ -1048,17 +1057,10 @@ public:
     bool isFocused() const
     {
         int revert;
-        Window focus = 0;
-        XGetInputFocus (display, &focus, &revert);
+        Window focusedWindow = 0;
+        XGetInputFocus (display, &focusedWindow, &revert);
 
-        if (focus == 0 || focus == None || focus == PointerRoot)
-            return 0;
-
-        ComponentPeer* focusedPeer = 0;
-        if (XFindContext (display, (XID) focus, improbableNumber, (XPointer*) &focusedPeer) != 0)
-            focusedPeer = 0;
-
-        return this == focusedPeer;
+        return focusedWindow == windowH;
     }
 
     void grabFocus()
@@ -1067,15 +1069,11 @@ public:
 
         if (windowH != 0
             && XGetWindowAttributes (display, windowH, &atts)
-            && atts.map_state == IsViewable)
+            && atts.map_state == IsViewable
+            && ! isFocused())
         {
             XSetInputFocus (display, windowH, RevertToParent, CurrentTime);
-
-            if (! isActiveApplication)
-            {
-                isActiveApplication = true;
-                handleFocusGain();
-            }
+            isActiveApplication = true;
         }
     }
 
@@ -1408,14 +1406,18 @@ public:
             case FocusIn:
             {
                 isActiveApplication = true;
-                handleFocusGain();
+                if (isFocused())
+                    handleFocusGain();
+
                 break;
             }
 
             case FocusOut:
             {
                 isActiveApplication = false;
-                handleFocusLoss();
+                if (! isFocused())
+                    handleFocusLoss();
+
                 break;
             }
 
@@ -2918,7 +2920,7 @@ static void initClipboard (Window root, Atom* cutBuffers) throw()
 
 // Clipboard implemented currently using cut buffers
 // rather than the more powerful selection method
-void SystemClipboard::copyTextToClipboard (const String& clipText)
+void SystemClipboard::copyTextToClipboard (const String& clipText) throw()
 {
     Window root = RootWindow (display, DefaultScreen (display));
     Atom cutBuffers[8] = { XA_CUT_BUFFER0, XA_CUT_BUFFER1, XA_CUT_BUFFER2, XA_CUT_BUFFER3,
@@ -2932,7 +2934,7 @@ void SystemClipboard::copyTextToClipboard (const String& clipText)
                      clipText.length());
 }
 
-const String SystemClipboard::getTextFromClipboard()
+const String SystemClipboard::getTextFromClipboard() throw()
 {
     char* clipData;
     const int bufSize = 64;  // in words

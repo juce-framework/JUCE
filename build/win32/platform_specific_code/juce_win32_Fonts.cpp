@@ -174,7 +174,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
     return 1;
 }
 
-const StringArray Font::findAllTypefaceNames()
+const StringArray Font::findAllTypefaceNames() throw()
 {
     StringArray results;
     HDC dc = CreateCompatibleDC (0);
@@ -241,7 +241,7 @@ const StringArray Font::findAllTypefaceNames()
 
 void Font::getDefaultFontNames (String& defaultSans,
                                 String& defaultSerif,
-                                String& defaultFixed)
+                                String& defaultFixed) throw()
 {
     defaultSans  = "Verdana";
     defaultSerif = "Times";

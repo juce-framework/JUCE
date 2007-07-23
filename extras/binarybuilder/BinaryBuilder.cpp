@@ -84,9 +84,9 @@ int main (int argc, char* argv[])
 
     printf ("\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n");
 
-    if (argc != 4)
+    if (argc < 4 || argc > 5)
     {
-        printf (" Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname\n\n");
+        printf (" Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname [optional wildcard pattern]\n\n");
         printf (" BinaryBuilder will find all files in the source directory, and encode them\n");
         printf (" into two files called (targetclassname).cpp and (targetclassname).h, which it\n");
         printf (" will write into the target directory supplied.\n\n");
@@ -136,7 +136,8 @@ int main (int argc, char* argv[])
     printf ((const char*) message);
 
     OwnedArray <File> files;
-    sourceDirectory.findChildFiles (files, File::findFiles, true, "*");
+    sourceDirectory.findChildFiles (files, File::findFiles, true, 
+                                    (argc > 4) ? argv[4] : "*");
 
     if (files.size() == 0)
     {

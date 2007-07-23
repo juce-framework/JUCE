@@ -3208,7 +3208,7 @@ KeyboardFocusTraverser* Component::createFocusTraverser()
     return parentComponent_->createFocusTraverser();
 }
 
-void Component::takeKeyboardFocus (FocusChangeType cause)
+void Component::takeKeyboardFocus (const FocusChangeType cause)
 {
     // give the focus to this component
     if (currentlyFocusedComponent != this)
@@ -3264,7 +3264,7 @@ void Component::takeKeyboardFocus (FocusChangeType cause)
     }
 }
 
-void Component::grabFocusInternal (FocusChangeType cause, const bool canTryParent)
+void Component::grabFocusInternal (const FocusChangeType cause, const bool canTryParent)
 {
     if (isShowing())
     {
