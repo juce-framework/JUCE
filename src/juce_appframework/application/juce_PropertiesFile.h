@@ -85,7 +85,7 @@ public:
     */
     PropertiesFile (const File& file,
                     const int millisecondsBeforeSaving,
-                    const int options);
+                    const int options) throw();
 
     /** Destructor.
 

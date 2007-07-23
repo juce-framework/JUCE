@@ -43,7 +43,7 @@ juce_ImplementSingleton (ApplicationProperties)
 
 
 //==============================================================================
-ApplicationProperties::ApplicationProperties()
+ApplicationProperties::ApplicationProperties() throw()
     : userProps (0),
       commonProps (0),
       msBeforeSaving (3000),
@@ -62,7 +62,7 @@ void ApplicationProperties::setStorageParameters (const String& applicationName,
                                                   const String& fileNameSuffix,
                                                   const String& folderName_,
                                                   const int millisecondsBeforeSaving,
-                                                  const int propertiesFileOptions)
+                                                  const int propertiesFileOptions) throw()
 {
     appName = applicationName;
     fileSuffix = fileNameSuffix;
@@ -116,7 +116,7 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
 }
 
 //==============================================================================
-PropertiesFile* ApplicationProperties::getUserSettings()
+PropertiesFile* ApplicationProperties::getUserSettings() throw()
 {
     if (userProps == 0)
     {
@@ -138,7 +138,7 @@ PropertiesFile* ApplicationProperties::getUserSettings()
     return userProps;
 }
 
-PropertiesFile* ApplicationProperties::getCommonSettings()
+PropertiesFile* ApplicationProperties::getCommonSettings() throw()
 {
     if (commonProps == 0)
     {

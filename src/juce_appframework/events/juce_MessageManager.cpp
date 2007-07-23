@@ -201,19 +201,14 @@ bool MessageManager::runDispatchLoop()
 //==============================================================================
 void MessageManager::postQuitMessage (const bool useMaximumForce)
 {
-    if (! quitMessagePosted)
-    {
-        Message* const m = new Message (quitMessageId, (useMaximumForce) ? 1 : 0, 0, 0);
-        m->messageRecipient = 0;
+    Message* const m = new Message (quitMessageId, (useMaximumForce) ? 1 : 0, 0, 0);
+    m->messageRecipient = 0;
+    postMessageToQueue (m);
 
-        if (! juce_postMessageToSystemQueue (m))
-            delete m;
-
-        quitMessagePosted = true;
-    }
+    quitMessagePosted = true;
 }
 
-bool MessageManager::hasQuitMessageBeenPosted() const
+bool MessageManager::hasQuitMessageBeenPosted() const throw()
 {
     return quitMessagePosted;
 }
@@ -221,13 +216,11 @@ bool MessageManager::hasQuitMessageBeenPosted() const
 //==============================================================================
 void MessageManager::deliverBroadcastMessage (const String& value)
 {
-    if (broadcastListeners == 0)
-        broadcastListeners = new ActionListenerList();
-
-    broadcastListeners->sendActionMessage (value);
+    if (broadcastListeners != 0)
+        broadcastListeners->sendActionMessage (value);
 }
 
-void MessageManager::registerBroadcastListener (ActionListener* listener)
+void MessageManager::registerBroadcastListener (ActionListener* const listener) throw()
 {
     if (broadcastListeners == 0)
         broadcastListeners = new ActionListenerList();
@@ -235,24 +228,22 @@ void MessageManager::registerBroadcastListener (ActionListener* listener)
     broadcastListeners->addActionListener (listener);
 }
 
-void MessageManager::deregisterBroadcastListener (ActionListener* listener)
+void MessageManager::deregisterBroadcastListener (ActionListener* const listener) throw()
 {
-    if (broadcastListeners == 0)
-        broadcastListeners = new ActionListenerList();
-
-    broadcastListeners->removeActionListener (listener);
+    if (broadcastListeners != 0)
+        broadcastListeners->removeActionListener (listener);
 }
 
 //==============================================================================
 // This gets called occasionally by the timer thread (to save using an extra thread
 // for it).
-void MessageManager::inactivityCheckCallback()
+void MessageManager::inactivityCheckCallback() throw()
 {
     if (instance != 0)
         instance->inactivityCheckCallbackInt();
 }
 
-void MessageManager::inactivityCheckCallbackInt()
+void MessageManager::inactivityCheckCallbackInt() throw()
 {
     const unsigned int now = Time::getApproximateMillisecondCounter();
 
@@ -277,7 +268,7 @@ void MessageManager::inactivityCheckCallbackInt()
     }
 }
 
-void MessageManager::delayWaitCursor()
+void MessageManager::delayWaitCursor() throw()
 {
     if (instance != 0)
     {
@@ -291,7 +282,7 @@ void MessageManager::delayWaitCursor()
     }
 }
 
-void MessageManager::setTimeBeforeShowingWaitCursor (const int millisecs)
+void MessageManager::setTimeBeforeShowingWaitCursor (const int millisecs) throw()
 {
      // if this is a bit too small you'll get a lot of unwanted hourglass cursors..
     jassert (millisecs <= 0 || millisecs > 200);
@@ -311,22 +302,22 @@ void MessageManager::timerCallback()
     ++messageCounter;
 }
 
-int MessageManager::getTimeBeforeShowingWaitCursor() const
+int MessageManager::getTimeBeforeShowingWaitCursor() const throw()
 {
     return timeBeforeWaitCursor;
 }
 
-bool MessageManager::isThisTheMessageThread() const
+bool MessageManager::isThisTheMessageThread() const throw()
 {
     return Thread::getCurrentThreadId() == messageThreadId;
 }
 
-void MessageManager::setCurrentMessageThread (const int threadId)
+void MessageManager::setCurrentMessageThread (const int threadId) throw()
 {
     messageThreadId = threadId;
 }
 
-bool MessageManager::currentThreadHasLockedMessageManager() const
+bool MessageManager::currentThreadHasLockedMessageManager() const throw()
 {
     return Thread::getCurrentThreadId() == currentLockingThreadId;
 }

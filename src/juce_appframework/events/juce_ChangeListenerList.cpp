@@ -69,7 +69,7 @@ void ChangeListenerList::removeAllChangeListeners() throw()
     listeners.clear();
 }
 
-void ChangeListenerList::sendChangeMessage (void* objectThatHasChanged) throw()
+void ChangeListenerList::sendChangeMessage (void* const objectThatHasChanged) throw()
 {
     const ScopedLock sl (lock);
 
@@ -86,7 +86,7 @@ void ChangeListenerList::handleMessage (const Message& message)
     sendSynchronousChangeMessage (message.pointerParameter);
 }
 
-void ChangeListenerList::sendSynchronousChangeMessage (void* objectThatHasChanged)
+void ChangeListenerList::sendSynchronousChangeMessage (void* const objectThatHasChanged)
 {
     const ScopedLock sl (lock);
     messagePending = false;

@@ -40,7 +40,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PropertySet::PropertySet (const bool ignoreCaseOfKeyNames)
+PropertySet::PropertySet (const bool ignoreCaseOfKeyNames) throw()
     : properties (ignoreCaseOfKeyNames),
       ignoreCaseOfKeys (ignoreCaseOfKeyNames)
 {

@@ -162,7 +162,7 @@ static BOOL CALLBACK BroadcastEnumWindowProc (HWND hwnd, LPARAM lParam)
     return TRUE;
 }
 
-void MessageManager::broadcastMessage (const String& value)
+void MessageManager::broadcastMessage (const String& value) throw()
 {
     VoidArray windows;
     EnumWindows (&BroadcastEnumWindowProc, (LPARAM) &windows);

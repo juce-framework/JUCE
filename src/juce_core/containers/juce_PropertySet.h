@@ -55,7 +55,7 @@ public:
         @param ignoreCaseOfKeyNames         if true, the names of properties are compared in a
                                             case-insensitive way
     */
-    PropertySet (const bool ignoreCaseOfKeyNames = false);
+    PropertySet (const bool ignoreCaseOfKeyNames = false) throw();
 
     /** Destructor. */
     virtual ~PropertySet();

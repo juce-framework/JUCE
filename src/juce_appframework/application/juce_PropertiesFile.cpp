@@ -55,7 +55,7 @@ static const tchar* const propertyTagName       = T("VALUE");
 //==============================================================================
 PropertiesFile::PropertiesFile (const File& f,
                                 const int millisecondsBeforeSaving,
-                                const int options_)
+                                const int options_) throw()
     : PropertySet (ignoreCaseOfKeyNames),
       file (f),
       timerInterval (millisecondsBeforeSaving),

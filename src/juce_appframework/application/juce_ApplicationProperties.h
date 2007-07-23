@@ -68,7 +68,7 @@ public:
         Before using it, you must call setStorageParameters() to give it the info
         it needs to create the property files.
     */
-    ApplicationProperties();
+    ApplicationProperties() throw();
 
     /** Destructor.
     */
@@ -87,7 +87,7 @@ public:
                                const String& fileNameSuffix,
                                const String& folderName,
                                const int millisecondsBeforeSaving,
-                               const int propertiesFileOptions);
+                               const int propertiesFileOptions) throw();
 
     /** Tests whether the files can be successfully written to, and can show
         an error message if not.
@@ -110,7 +110,7 @@ public:
 
         @see getCommonSettings
     */
-    PropertiesFile* getUserSettings();
+    PropertiesFile* getUserSettings() throw();
 
     /** Returns the common settings file.
 
@@ -121,7 +121,7 @@ public:
 
         @see getUserSettings
     */
-    PropertiesFile* getCommonSettings();
+    PropertiesFile* getCommonSettings() throw();
 
     //==============================================================================
     /** Saves both files if they need to be saved.

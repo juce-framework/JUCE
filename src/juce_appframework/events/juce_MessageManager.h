@@ -106,14 +106,14 @@ public:
                                        void* userData);
 
     /** Returns true if the caller-thread is the message thread. */
-    bool isThisTheMessageThread() const;
+    bool isThisTheMessageThread() const throw();
 
     /** Called to tell the manager which thread is the one that's running the dispatch loop.
 
         (Best to ignore this method unless you really know what you're doing..)
         @see getCurrentMessageThread
     */
-    void setCurrentMessageThread (const int threadId);
+    void setCurrentMessageThread (const int threadId) throw();
 
     /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
 
@@ -129,7 +129,7 @@ public:
         This will be true if the caller is the message thread, because that automatically
         gains a lock while a message is being dispatched.
     */
-    bool currentThreadHasLockedMessageManager() const;
+    bool currentThreadHasLockedMessageManager() const throw();
 
     //==============================================================================
     /** Sends a message to all other JUCE applications that are running.
@@ -138,7 +138,7 @@ public:
                                 method of the broadcast listeners in the other app.
         @see registerBroadcastListener, ActionListener
     */
-    static void broadcastMessage (const String& messageText);
+    static void broadcastMessage (const String& messageText) throw();
 
     /** Registers a listener to get told about broadcast messages.
 
@@ -147,10 +147,10 @@ public:
 
         @see broadcastMessage
     */
-    void registerBroadcastListener (ActionListener* listener);
+    void registerBroadcastListener (ActionListener* listener) throw();
 
     /** Deregisters a broadcast listener. */
-    void deregisterBroadcastListener (ActionListener* listener);
+    void deregisterBroadcastListener (ActionListener* listener) throw();
 
     //==============================================================================
     /** Sets a time-limit for the app to be 'busy' before an hourglass cursor will be shown.
@@ -160,24 +160,24 @@ public:
                             Mac the system might still decide to show it after a while).
         @see MouseCursor::showWaitCursor
     */
-    void setTimeBeforeShowingWaitCursor (const int millisecs);
+    void setTimeBeforeShowingWaitCursor (const int millisecs) throw();
 
     /** Returns the time-out before the 'busy' cursor is shown when the app is busy.
 
         @see setTimeBeforeShowingWaitCursor, MouseCursor::showWaitCursor
     */
-    int getTimeBeforeShowingWaitCursor() const;
+    int getTimeBeforeShowingWaitCursor() const throw();
 
     /** Tells the message manager that the system isn't locked-up, even if the message
         loop isn't active.
 
         Used internally, this is handy when an OS enters its own modal loop.
     */
-    static void delayWaitCursor();
+    static void delayWaitCursor() throw();
 
     //==============================================================================
     /** Returns true if JUCEApplication::quit() has been called. */
-    bool hasQuitMessageBeenPosted() const;
+    bool hasQuitMessageBeenPosted() const throw();
 
     //==============================================================================
     /** @internal */
@@ -219,8 +219,8 @@ private:
     static void doPlatformSpecificShutdown();
 
     friend class InternalTimerThread;
-    static void inactivityCheckCallback();
-    void inactivityCheckCallbackInt();
+    static void inactivityCheckCallback() throw();
+    void inactivityCheckCallbackInt() throw();
 
     friend class MessageManagerLock;
     CriticalSection messageDispatchLock;

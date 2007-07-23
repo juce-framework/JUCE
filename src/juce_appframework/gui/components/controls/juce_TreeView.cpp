@@ -58,25 +58,19 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         isDragging = false;
+        needSelectionOnMouseUp = false;
 
         Rectangle pos;
         TreeViewItem* const item = findItemAt (e.y, pos);
 
         if (item != 0 && e.x >= pos.getX())
         {
-            if (item->isSelected() && owner->isMultiSelectEnabled()
-                 && (e.mods.isCommandDown() || e.mods.isCtrlDown()))
-            {
-                item->setSelected (false, false);
-            }
+            if (! owner->isMultiSelectEnabled())
+                item->setSelected (true, true);
+            else if (item->isSelected())
+                needSelectionOnMouseUp = ! e.mods.isPopupMenu();
             else
-            {
-                item->setSelected (true,
-                                   ! (owner->isMultiSelectEnabled()
-                                        && (e.mods.isCommandDown()
-                                            || e.mods.isCtrlDown()
-                                            || e.mods.isShiftDown())));
-            }
+                selectBasedOnModifiers (item, e.mods);
 
             MouseEvent e2 (e);
             e2.x -= pos.getX();
@@ -87,16 +81,22 @@ public:
 
     void mouseUp (const MouseEvent& e)
     {
-        if (e.mouseWasClicked())
-        {
-            Rectangle pos;
-            TreeViewItem* const item = findItemAt (e.y, pos);
+        Rectangle pos;
+        TreeViewItem* const item = findItemAt (e.y, pos);
 
-            if (item != 0
-                 && e.x >= pos.getX() - owner->getIndentSize()
-                 && e.x < pos.getX())
+        if (item != 0 && e.mouseWasClicked())
+        {
+            if (needSelectionOnMouseUp)
             {
-                item->setOpen (! item->isOpen());
+                selectBasedOnModifiers (item, e.mods);
+            }
+            else if (e.mouseWasClicked())
+            {
+                if (e.x >= pos.getX() - owner->getIndentSize()
+                     && e.x < pos.getX())
+                {
+                    item->setOpen (! item->isOpen());
+                }
             }
         }
     }
@@ -258,10 +258,19 @@ private:
     VoidArray rowComponentItems;
     Array <int> rowComponentIds;
     VoidArray rowComponents;
-    bool isDragging;
+    bool isDragging, needSelectionOnMouseUp;
 
     TreeViewContentComponent (const TreeViewContentComponent&);
     const TreeViewContentComponent& operator= (const TreeViewContentComponent&);
+
+    static void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
+    {
+        const bool shft = modifiers.isShiftDown();
+        const bool cmd  = modifiers.isCommandDown();
+
+        item->setSelected (shft || (! cmd) || (cmd && ! item->isSelected()), 
+                           ! (shft || cmd));
+    }
 };
 
 //==============================================================================
