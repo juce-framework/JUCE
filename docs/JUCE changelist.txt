@@ -20,6 +20,8 @@ Changelist for version 1.44
 - added MultiDocumentPanel::createNewDocumentWindow() method to allow creation of custom document windows in a MultiDocumentPanel
 - added a Thread::getCurrentThread() method
 - added an option to MessageManagerLock that can check for thread termination, to avoid deadlocks.
+- new method: PropertySet::setFallbackPropertySet()
+- some simplifications to ApplicationProperties, because of problems it was causing when there were read-only common property files.
 
 ==============================================================================
 Changelist for version 1.43

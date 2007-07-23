@@ -144,13 +144,23 @@ bool PropertiesFile::saveIfNeeded()
     return (! needsWriting) || save();
 }
 
+bool PropertiesFile::needsToBeSaved() const throw()
+{
+    const ScopedLock sl (getLock());
+
+    return needsWriting;
+}
+
+
 bool PropertiesFile::save()
 {
     const ScopedLock sl (getLock());
 
     stopTimer();
 
-    if (file == File::nonexistent || file.isDirectory())
+    if (file == File::nonexistent 
+         || file.isDirectory() 
+         || ! file.getParentDirectory().createDirectory())
         return false;
 
     if ((options & storeAsXML) != 0)
@@ -292,7 +302,9 @@ PropertiesFile* PropertiesFile::createDefaultAppPropertiesFile (const String& ap
                                                 folderName,
                                                 commonToAllUsers));
 
-    if (file == File::nonexistent || ! file.getParentDirectory().createDirectory())
+    jassert (file != File::nonexistent);
+
+    if (file == File::nonexistent)
         return 0;
 
     return new PropertiesFile (file, millisecondsBeforeSaving, propertiesFileOptions);

@@ -46,24 +46,6 @@ static const int iconWidth = 80;
 
 
 //==============================================================================
-class AlertWindowTextButton  : public TextButton
-{
-public:
-    AlertWindowTextButton (const String& text)
-        : TextButton (text, String::empty)
-    {
-        setWantsKeyboardFocus (true);
-        setMouseClickGrabsKeyboardFocus (false);
-    }
-
-    int returnValue;
-
-private:
-    AlertWindowTextButton (const AlertWindowTextButton&);
-    const AlertWindowTextButton& operator= (const AlertWindowTextButton&);
-};
-
-//==============================================================================
 class AlertWindowTextEditor  : public TextEditor
 {
 public:
@@ -89,13 +71,13 @@ public:
     void returnPressed()
     {
         // pass these up the component hierarchy to be trigger the buttons
-        Component::keyPressed (KeyPress (KeyPress::returnKey, 0, T('\n')));
+        getParentComponent()->keyPressed (KeyPress (KeyPress::returnKey, 0, T('\n')));
     }
 
     void escapePressed()
     {
         // pass these up the component hierarchy to be trigger the buttons
-        Component::keyPressed (KeyPress (KeyPress::escapeKey, 0, 0));
+        getParentComponent()->keyPressed (KeyPress (KeyPress::escapeKey, 0, 0));
     }
 
 private:
@@ -134,8 +116,6 @@ AlertWindow::AlertWindow (const String& title,
     lookAndFeelChanged();
 
     constrainer.setMinimumOnscreenAmounts (0x10000, 0x10000, 0x10000, 0x10000);
-
-    setWantsKeyboardFocus (getNumChildComponents() == 0);
 }
 
 AlertWindow::~AlertWindow()
@@ -172,12 +152,12 @@ void AlertWindow::buttonClicked (Button* button)
 {
     for (int i = 0; i < buttons.size(); i++)
     {
-        AlertWindowTextButton* const c = (AlertWindowTextButton*) buttons[i];
+        TextButton* const c = (TextButton*) buttons[i];
 
         if (button->getName() == c->getName())
         {
             if (c->getParentComponent() != 0)
-                c->getParentComponent()->exitModalState (c->returnValue);
+                c->getParentComponent()->exitModalState (c->getCommandID());
 
             break;
         }
@@ -190,9 +170,11 @@ void AlertWindow::addButton (const String& name,
                              const KeyPress& shortcutKey1,
                              const KeyPress& shortcutKey2)
 {
-    AlertWindowTextButton* const b = new AlertWindowTextButton (name);
+    TextButton* const b = new TextButton (name, String::empty);
 
-    b->returnValue = returnValue;
+    b->setWantsKeyboardFocus (true);
+    b->setMouseClickGrabsKeyboardFocus (false);
+    b->setCommandToTrigger (0, returnValue, false);
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
     b->addButtonListener (this);
@@ -286,6 +268,7 @@ public:
         setCaretVisible (false);
         setScrollbarsShown (true);
         lookAndFeelChanged();
+        setWantsKeyboardFocus (false);
 
         setFont (font);
         setText (message, false);
@@ -441,14 +424,14 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     int buttonW = 40;
     int i;
     for (i = 0; i < buttons.size(); ++i)
-        buttonW += 16 + ((const AlertWindowTextButton*) buttons[i])->getWidth();
+        buttonW += 16 + ((const TextButton*) buttons[i])->getWidth();
 
     w = jmax (buttonW, w);
 
     h += (textBoxes.size() + comboBoxes.size() + progressBars.size()) * 50;
 
     if (buttons.size() > 0)
-        h += 20 + ((AlertWindowTextButton*) buttons[0])->getHeight();
+        h += 20 + ((TextButton*) buttons[0])->getHeight();
 
     for (i = customComps.size(); --i >= 0;)
     {
@@ -499,14 +482,14 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     int totalWidth = -spacer;
 
     for (i = buttons.size(); --i >= 0;)
-        totalWidth += ((AlertWindowTextButton*) buttons[i])->getWidth() + spacer;
+        totalWidth += ((TextButton*) buttons[i])->getWidth() + spacer;
 
     int x = (w - totalWidth) / 2;
     int y = (int) (getHeight() * 0.95f);
 
     for (i = 0; i < buttons.size(); ++i)
     {
-        AlertWindowTextButton* const c = (AlertWindowTextButton*) buttons[i];
+        TextButton* const c = (TextButton*) buttons[i];
         int ny = proportionOfHeight (0.95f) - c->getHeight();
         c->setTopLeftPosition (x, ny);
         if (ny < y)
@@ -544,6 +527,8 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
             y += h + 10;
         }
     }
+
+    setWantsKeyboardFocus (getNumChildComponents() == 0);
 }
 
 bool AlertWindow::containsAnyExtraComponents() const
@@ -569,7 +554,7 @@ bool AlertWindow::keyPressed (const KeyPress& key)
 {
     for (int i = buttons.size(); --i >= 0;)
     {
-        AlertWindowTextButton* const b = (AlertWindowTextButton*) buttons[i];
+        TextButton* const b = (TextButton*) buttons[i];
 
         if (b->isRegisteredForShortcut (key))
         {
@@ -585,7 +570,7 @@ bool AlertWindow::keyPressed (const KeyPress& key)
     }
     else if (key.isKeyCode (KeyPress::returnKey) && buttons.size() == 1)
     {
-        ((AlertWindowTextButton*) buttons.getFirst())->triggerClick();
+        ((TextButton*) buttons.getFirst())->triggerClick();
         return true;
     }
 

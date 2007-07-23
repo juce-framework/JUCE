@@ -225,11 +225,15 @@ public:
         If generateTooltip is true, then the button's tooltip will be automatically
         generated based on the name of this command and its current shortcut key.
 
-        @see addShortcut
+        @see addShortcut, getCommandID
     */
     void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
                               const int commandID,
                               const bool generateTooltip);
+
+    /** Returns the command ID that was set by setCommandToTrigger().
+    */
+    int getCommandID() const throw()                { return commandID; }
 
     //==============================================================================
     /** Assigns a shortcut key to trigger the button.

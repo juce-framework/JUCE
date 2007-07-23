@@ -47,7 +47,8 @@ ApplicationProperties::ApplicationProperties() throw()
     : userProps (0),
       commonProps (0),
       msBeforeSaving (3000),
-      options (PropertiesFile::storeAsBinary)
+      options (PropertiesFile::storeAsBinary),
+      commonSettingsAreReadOnly (0)
 {
 }
 
@@ -75,9 +76,8 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
                                              const bool testCommonSettings,
                                              const bool showWarningDialogOnFailure)
 {
-    const bool userOk = (! testUserSettings) || getUserSettings()->save();
-    const bool commonOk = (! testCommonSettings)
-                            || (userProps != getCommonSettings() && getCommonSettings()->save());
+    const bool userOk    = (! testUserSettings)   || getUserSettings()->save();
+    const bool commonOk  = (! testCommonSettings) || getCommonSettings (false)->save();
 
     if (! (userOk && commonOk))
     {
@@ -85,26 +85,16 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
         {
             String filenames;
 
-            if (! userOk)
-                filenames << "\n" << getUserSettings()->getFile().getFullPathName();
+            if (userProps != 0 && ! userOk)
+                filenames << '\n' << userProps->getFile().getFullPathName();
 
-            if (! commonOk)
-            {
-                PropertiesFile* const realCommonProps 
-                    = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                      true, msBeforeSaving, options);
-
-                if (realCommonProps != 0)
-                {
-                    filenames << "\n" << realCommonProps->getFile().getFullPathName();
-                    delete realCommonProps;
-                }
-            }
+            if (commonProps != 0 && ! commonOk)
+                filenames << '\n' << commonProps->getFile().getFullPathName();
 
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          appName + TRANS(" - Unable to save settings"),
                                          TRANS("An error occurred when trying to save the application's settings file...\n\nIn order to save and restore its settings, ")
-                                         + appName + TRANS(" needs to be able to write to the following files:\n")
+                                          + appName + TRANS(" needs to be able to write to the following files:\n")
                                           + filenames
                                           + TRANS("\n\nMake sure that these files aren't read-only, and that the disk isn't full."));
         }
@@ -116,45 +106,46 @@ bool ApplicationProperties::testWriteAccess (const bool testUserSettings,
 }
 
 //==============================================================================
-PropertiesFile* ApplicationProperties::getUserSettings() throw()
+void ApplicationProperties::openFiles() throw()
 {
-    if (userProps == 0)
-    {
-        // You need to call setStorageParameters() before trying to get hold of the
-        // properties!
-        jassert (appName.isNotEmpty());
+    // You need to call setStorageParameters() before trying to get hold of the
+    // properties!
+    jassert (appName.isNotEmpty());
 
-        if (appName.isNotEmpty())
+    if (appName.isNotEmpty())
+    {
+        if (userProps == 0)
             userProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
                                                                         false, msBeforeSaving, options);
 
-        if (userProps == 0)
-        {
-            // create an emergency properties object to avoid returning a null pointer..
-            userProps = new PropertiesFile (File::nonexistent, msBeforeSaving, options);
-        }
+        if (commonProps == 0)
+            commonProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
+                                                                          true, msBeforeSaving, options);
+
+        userProps->setFallbackPropertySet (commonProps);
     }
+}
+
+PropertiesFile* ApplicationProperties::getUserSettings() throw()
+{
+    if (userProps == 0)
+        openFiles();
 
     return userProps;
 }
 
-PropertiesFile* ApplicationProperties::getCommonSettings() throw()
+PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserPropsIfReadOnly) throw()
 {
     if (commonProps == 0)
+        openFiles();
+
+    if (returnUserPropsIfReadOnly)
     {
-        // You need to call setStorageParameters() before trying to get hold of the
-        // properties!
-        jassert (appName.isNotEmpty());
-
-        if (appName.isNotEmpty())
-            commonProps = PropertiesFile::createDefaultAppPropertiesFile (appName, fileSuffix, folderName,
-                                                                          true, msBeforeSaving, options);
-
-        if (commonProps == 0 || ! commonProps->save())
-        {
-            delete commonProps;
-            commonProps = getUserSettings();
-        }
+        if (commonSettingsAreReadOnly == 0)
+            commonSettingsAreReadOnly = commonProps->save() ? -1 : 1;
+        
+        if (commonSettingsAreReadOnly > 0)
+            return userProps;
     }
 
     return commonProps;
@@ -163,17 +154,13 @@ PropertiesFile* ApplicationProperties::getCommonSettings() throw()
 bool ApplicationProperties::saveIfNeeded()
 {
     return (userProps == 0 || userProps->saveIfNeeded())
-         && (commonProps == 0 || commonProps == userProps || commonProps->saveIfNeeded());
+         && (commonProps == 0 || commonProps->saveIfNeeded());
 }
 
 void ApplicationProperties::closeFiles()
 {
-    delete userProps;
-
-    if (commonProps != userProps)
-        delete commonProps;
-
-    userProps = commonProps = 0;
+    deleteAndZero (userProps);
+    deleteAndZero (commonProps);
 }
 
 

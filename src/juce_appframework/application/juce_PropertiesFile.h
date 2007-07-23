@@ -114,6 +114,11 @@ public:
     */
     bool save();
 
+    /** Returns true if the properties have been altered since the last time they were
+        saved.
+    */
+    bool needsToBeSaved() const throw();
+
     //==============================================================================
     /** Returns the file that's being used. */
     const File getFile() const throw();

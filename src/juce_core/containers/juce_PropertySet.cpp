@@ -42,6 +42,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 PropertySet::PropertySet (const bool ignoreCaseOfKeyNames) throw()
     : properties (ignoreCaseOfKeyNames),
+      fallbackProperties (0),
       ignoreCaseOfKeys (ignoreCaseOfKeyNames)
 {
 }
@@ -51,11 +52,17 @@ PropertySet::~PropertySet()
 }
 
 const String PropertySet::getValue (const String& keyName,
-                                    const String& defaultReturnValue) const throw()
+                                    const String& defaultValue) const throw()
 {
     const ScopedLock sl (lock);
 
-    return properties.getValue (keyName, defaultReturnValue);
+    const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
+
+    if (index >= 0)
+        return properties.getAllValues() [index];
+
+    return fallbackProperties != 0 ? fallbackProperties->getValue (keyName, defaultValue)
+                                   : defaultValue;
 }
 
 int PropertySet::getIntValue (const String& keyName,
@@ -67,7 +74,8 @@ int PropertySet::getIntValue (const String& keyName,
     if (index >= 0)
         return properties.getAllValues() [index].getIntValue();
 
-    return defaultValue;
+    return fallbackProperties != 0 ? fallbackProperties->getIntValue (keyName, defaultValue)
+                                   : defaultValue;
 }
 
 double PropertySet::getDoubleValue (const String& keyName,
@@ -79,7 +87,8 @@ double PropertySet::getDoubleValue (const String& keyName,
     if (index >= 0)
         return properties.getAllValues()[index].getDoubleValue();
 
-    return defaultValue;
+    return fallbackProperties != 0 ? fallbackProperties->getDoubleValue (keyName, defaultValue)
+                                   : defaultValue;
 }
 
 bool PropertySet::getBoolValue (const String& keyName,
@@ -91,7 +100,8 @@ bool PropertySet::getBoolValue (const String& keyName,
     if (index >= 0)
         return properties.getAllValues() [index].getIntValue() != 0;
 
-    return defaultValue;
+    return fallbackProperties != 0 ? fallbackProperties->getBoolValue (keyName, defaultValue)
+                                   : defaultValue;
 }
 
 XmlElement* PropertySet::getXmlValue (const String& keyName) const
@@ -160,6 +170,12 @@ bool PropertySet::containsKey (const String& keyName) const throw()
 {
     const ScopedLock sl (lock);
     return properties.getAllKeys().contains (keyName, ignoreCaseOfKeys);
+}
+
+void PropertySet::setFallbackPropertySet (PropertySet* fallbackProperties_) throw()
+{
+    const ScopedLock sl (lock);
+    fallbackProperties = fallbackProperties_;
 }
 
 void PropertySet::propertyChanged()

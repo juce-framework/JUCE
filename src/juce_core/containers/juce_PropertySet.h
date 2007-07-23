@@ -63,6 +63,10 @@ public:
     //==============================================================================
     /** Returns one of the properties as a string.
 
+        If the value isn't found in this set, then this will look for it in a fallback
+        property set (if you've specified one with the setFallbackPropertySet() method),
+        and if it can't find one there, it'll return the default value passed-in.
+
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
@@ -71,6 +75,10 @@ public:
 
     /** Returns one of the properties as an integer.
 
+        If the value isn't found in this set, then this will look for it in a fallback
+        property set (if you've specified one with the setFallbackPropertySet() method),
+        and if it can't find one there, it'll return the default value passed-in.
+
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
@@ -78,6 +86,10 @@ public:
                      const int defaultReturnValue = 0) const throw();
 
     /** Returns one of the properties as an double.
+
+        If the value isn't found in this set, then this will look for it in a fallback
+        property set (if you've specified one with the setFallbackPropertySet() method),
+        and if it can't find one there, it'll return the default value passed-in.
 
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
@@ -90,6 +102,10 @@ public:
         The result will be true if the string found for this key name can be parsed as a non-zero
         integer.
 
+        If the value isn't found in this set, then this will look for it in a fallback
+        property set (if you've specified one with the setFallbackPropertySet() method),
+        and if it can't find one there, it'll return the default value passed-in.
+
         @param keyName              the name of the property to retrieve
         @param defaultReturnValue   a value to return if the named property doesn't actually exist
     */
@@ -100,6 +116,10 @@ public:
 
         The result will a new XMLElement object that the caller must delete. If may return 0 if the
         key isn't found, or if the entry contains an string that isn't valid XML.
+
+        If the value isn't found in this set, then this will look for it in a fallback
+        property set (if you've specified one with the setFallbackPropertySet() method),
+        and if it can't find one there, it'll return the default value passed-in.
 
         @param keyName              the name of the property to retrieve
     */
@@ -167,6 +187,25 @@ public:
     /** Returns the lock used when reading or writing to this set */
     const CriticalSection& getLock() const throw()                      { return lock; }
 
+    //==============================================================================
+    /** Sets up a second PopertySet that will be used to look up any values that aren't
+        set in this one.
+
+        If you set this up to be a pointer to a second property set, then whenever one 
+        of the getValue() methods fails to find an entry in this set, it will look up that
+        value in the fallback set, and if it finds it, it will return that.
+
+        Make sure that you don't delete the fallback set while it's still being used by
+        another set! To remove the fallback set, just call this method with a null pointer.
+
+        @see getFallbackPropertySet
+    */
+    void setFallbackPropertySet (PropertySet* fallbackProperties) throw();
+
+    /** Returns the fallback property set.
+        @see setFallbackPropertySet
+    */
+    PropertySet* getFallbackPropertySet() const throw()                 { return fallbackProperties; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -182,8 +221,9 @@ protected:
 private:
     //==============================================================================
     StringPairArray properties;
-    bool ignoreCaseOfKeys;
+    PropertySet* fallbackProperties;
     CriticalSection lock;
+    bool ignoreCaseOfKeys;
 
     PropertySet (const PropertySet&);
     const PropertySet& operator= (const PropertySet&);
