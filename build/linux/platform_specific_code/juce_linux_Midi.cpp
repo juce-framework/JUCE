@@ -131,6 +131,8 @@ static snd_seq_t* iterateDevices (const bool forInput,
             snd_seq_close (seqHandle);
     }
 
+    deviceNamesFound.appendNumbersToDuplicates (true, true);
+
     return returnedHandle;
 }
 
@@ -325,7 +327,7 @@ public:
 
             while (! threadShouldExit())
             {
-                if (poll (pfd, numPfds, 100000) > 0)
+                if (poll (pfd, numPfds, 500) > 0)
                 {
                     snd_seq_event_t* inputEvent = 0;
 
@@ -393,7 +395,7 @@ void MidiInput::start()
 
 void MidiInput::stop()
 {
-    ((MidiInputThread*) internal)->stopThread (2000);
+    ((MidiInputThread*) internal)->stopThread (3000);
 }
 
 int MidiInput::getDefaultDeviceIndex()

@@ -129,10 +129,7 @@ const StringArray AudioDeviceManager::getAvailableAudioDeviceNames() const
     StringArray names;
 
     for (int i = 0; i < availableDeviceTypes.size(); ++i)
-    {
-        availableDeviceTypes[i]->scanForDevices();
         names.addArray (availableDeviceTypes[i]->getDeviceNames (useInputNames));
-    }
 
     return names;
 }

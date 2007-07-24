@@ -528,9 +528,11 @@ void StringArray::removeDuplicates (const bool ignoreCase) throw()
     {
         const String& s = *(String*) strings.getUnchecked(i);
 
+        int nextIndex = i + 1;
+
         for (;;)
         {
-            const int nextIndex = indexOf (s, ignoreCase, i + 1);
+            nextIndex = indexOf (s, ignoreCase, nextIndex);
 
             if (nextIndex < 0)
                 break;

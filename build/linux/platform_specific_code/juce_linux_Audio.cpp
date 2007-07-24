@@ -863,7 +863,7 @@ public:
             if (cardNum < 0)
                 break;
 
-            if (snd_ctl_open (&handle, T("hw:") + String (cardNum), 0) >= 0)
+            if (snd_ctl_open (&handle, T("hw:") + String (cardNum), SND_CTL_NONBLOCK) >= 0)
             {
                 if (snd_ctl_card_info (handle, info) >= 0)
                 {
