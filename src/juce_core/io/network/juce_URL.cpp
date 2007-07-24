@@ -129,16 +129,17 @@ bool URL::isWellFormed() const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    return possibleURL.containsChar (T('.'))
-        && (! possibleURL.containsChar (T('@')))
-        && (! possibleURL.endsWithChar (T('.')))
-        && (possibleURL.startsWithIgnoreCase (T("www."))
-         || possibleURL.startsWithIgnoreCase (T("http://"))
-         || possibleURL.startsWithIgnoreCase (T("ftp://"))
-         || possibleURL.endsWithIgnoreCase (T(".com"))
-         || possibleURL.endsWithIgnoreCase (T(".net"))
-         || possibleURL.endsWithIgnoreCase (T(".org"))
-         || possibleURL.endsWithIgnoreCase (T(".co.uk")));
+    return (possibleURL.containsChar (T('.'))
+            && (! possibleURL.containsChar (T('@')))
+            && (! possibleURL.endsWithChar (T('.')))
+            && (possibleURL.startsWithIgnoreCase (T("www."))
+                || possibleURL.startsWithIgnoreCase (T("http:"))
+                || possibleURL.startsWithIgnoreCase (T("ftp:"))
+                || possibleURL.endsWithIgnoreCase (T(".com"))
+                || possibleURL.endsWithIgnoreCase (T(".net"))
+                || possibleURL.endsWithIgnoreCase (T(".org"))
+                || possibleURL.endsWithIgnoreCase (T(".co.uk")))
+        || possibleURL.startsWithIgnoreCase (T("file:")));
 }
 
 bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
