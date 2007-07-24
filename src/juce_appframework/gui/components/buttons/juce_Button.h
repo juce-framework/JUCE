@@ -332,7 +332,7 @@ public:
         LookAndFeel can choose to ignore it if it's not relevent for this type of
         button.
     */
-    void setConnectedEdges (const int connectedEdgeFlags);
+    void setConnectedEdges (const int connectedEdgeFlags) throw();
 
     /** Returns the set of flags passed into setConnectedEdges(). */
     int getConnectedEdgeFlags() const throw()                   { return connectedEdgeFlags; }
@@ -491,7 +491,7 @@ private:
     Timer& getRepeatTimer() throw();
 
     ButtonState updateState (const MouseEvent* const e) throw();
-    bool isShortcutPressed() const;
+    bool isShortcutPressed() const throw();
     void turnOffOtherButtonsInGroup (const bool sendChangeNotification);
 
     void flashButtonState() throw();

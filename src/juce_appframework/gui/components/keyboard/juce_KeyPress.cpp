@@ -94,9 +94,11 @@ bool KeyPress::operator!= (const KeyPress& other) const throw()
     return ! operator== (other);
 }
 
-bool KeyPress::isCurrentlyDown() const
+bool KeyPress::isCurrentlyDown() const throw()
 {
-    int modsMask = ModifierKeys::commandModifier | ModifierKeys::ctrlModifier | ModifierKeys::altModifier;
+    int modsMask = ModifierKeys::commandModifier 
+                    | ModifierKeys::ctrlModifier 
+                    | ModifierKeys::altModifier;
 
     if (keyCode == KeyPress::downKey
         || keyCode == KeyPress::upKey
@@ -153,7 +155,7 @@ static const KeyNameAndCode keyNameTranslations[] =
 static const tchar* const numberPadPrefix = T("numpad ");
 
 //==============================================================================
-const KeyPress KeyPress::createFromDescription (const String& desc)
+const KeyPress KeyPress::createFromDescription (const String& desc) throw()
 {
     int modifiers = 0;
 
@@ -238,7 +240,7 @@ const KeyPress KeyPress::createFromDescription (const String& desc)
     return KeyPress (key, ModifierKeys (modifiers), 0);
 }
 
-const String KeyPress::getTextDescription() const
+const String KeyPress::getTextDescription() const throw()
 {
     String desc;
 
@@ -293,5 +295,6 @@ const String KeyPress::getTextDescription() const
 
     return desc;
 }
+
 
 END_JUCE_NAMESPACE

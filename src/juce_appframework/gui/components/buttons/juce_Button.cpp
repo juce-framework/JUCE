@@ -72,9 +72,7 @@ Button::~Button()
     if (commandManagerToUse != 0)
         commandManagerToUse->removeListener (this);
 
-    if (repeatTimer != 0)
-        delete repeatTimer;
-
+    delete repeatTimer;
     clearShortcuts();
 }
 
@@ -104,7 +102,7 @@ const String Button::getTooltip()
 
         for (int i = 0; i < keyPresses.size(); ++i)
         {
-            String key (keyPresses.getUnchecked(i).getTextDescription());
+            const String key (keyPresses.getUnchecked(i).getTextDescription());
 
             if (key.length() == 1)
                 tt << " [shortcut: '" << key << "']";
@@ -118,7 +116,7 @@ const String Button::getTooltip()
     return SettableTooltipClient::getTooltip();
 }
 
-void Button::setConnectedEdges (const int connectedEdgeFlags_)
+void Button::setConnectedEdges (const int connectedEdgeFlags_) throw()
 {
     if (connectedEdgeFlags != connectedEdgeFlags_)
     {
@@ -580,7 +578,7 @@ void Button::clearShortcuts()
     parentHierarchyChanged();
 }
 
-bool Button::isShortcutPressed() const
+bool Button::isShortcutPressed() const throw()
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {

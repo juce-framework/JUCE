@@ -253,7 +253,7 @@ static bool keyDown (const int keycode) throw()
 
 static const int extendedKeyModifier = 0x10000000;
 
-bool KeyPress::isKeyCurrentlyDown (int keyCode)
+bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
     int keysym;
 

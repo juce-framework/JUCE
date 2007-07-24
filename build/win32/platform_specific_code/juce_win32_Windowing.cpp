@@ -443,7 +443,7 @@ void ModifierKeys::updateCurrentModifiers()
     currentModifierFlags = currentModifiers;
 }
 
-bool KeyPress::isKeyCurrentlyDown (int keyCode)
+bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
     SHORT k = (SHORT) keyCode;
 

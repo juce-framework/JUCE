@@ -72,7 +72,7 @@ static ComponentPeer* juce_currentMouseTrackingPeer = 0;
 //==============================================================================
 static VoidArray keysCurrentlyDown;
 
-bool KeyPress::isKeyCurrentlyDown (int keyCode)
+bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
     if (keysCurrentlyDown.contains ((void*) keyCode))
         return true;

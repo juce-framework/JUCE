@@ -143,7 +143,7 @@ public:
 
         @see getTextDescription
     */
-    static const KeyPress createFromDescription (const String& textVersion);
+    static const KeyPress createFromDescription (const String& textVersion) throw();
 
     /** Creates a textual description of the key combination.
 
@@ -152,7 +152,7 @@ public:
         To store a keypress in a file, use this method, along with createFromDescription()
         to retrieve it later.
     */
-    const String getTextDescription() const;
+    const String getTextDescription() const throw();
 
     //==============================================================================
     /** Checks whether the user is currently holding down the keys that make up this
@@ -162,14 +162,14 @@ public:
         down - e.g. if the keypress is CTRL+X and the user is actually holding CTRL+ALT+x
         then it will be false.
     */
-    bool isCurrentlyDown() const;
+    bool isCurrentlyDown() const throw();
 
     /** Checks whether a particular key is held down, irrespective of modifiers.
 
         The values for key codes can either be one of the special constants defined in
         this class, or an 8-bit character code.
     */
-    static bool isKeyCurrentlyDown (int keyCode);
+    static bool isKeyCurrentlyDown (int keyCode) throw();
 
     //==============================================================================
     // Key codes

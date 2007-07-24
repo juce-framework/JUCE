@@ -230,6 +230,24 @@ public:
                   int numSamples,
                   const float gainToApplyToSource = 1.0f) throw();
 
+    /** Adds samples from an array of floats, applying a gain ramp to them.
+
+        @param destChannel          the channel within this buffer to add the samples to
+        @param destStartSample      the start sample within this buffer's channel
+        @param source               the source data to use
+        @param numSamples           the number of samples to process
+        @param startGain            the gain to apply to the first sample (this is multiplied with
+                                    the source samples before they are added to this buffer)
+        @param endGain              the gain to apply to the final sample. The gain is linearly
+                                    interpolated between the first and last samples.
+    */
+    void addFromWithRamp (const int destChannel,
+                          const int destStartSample,
+                          const float* source,
+                          int numSamples,
+                          float startGain,
+                          float endGain) throw();
+
     /** Copies samples from another buffer to this one.
 
         @param destChannel          the channel within this buffer to copy the samples to

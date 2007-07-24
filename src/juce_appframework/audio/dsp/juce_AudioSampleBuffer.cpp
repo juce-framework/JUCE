@@ -346,6 +346,41 @@ void AudioSampleBuffer::addFrom (const int destChannel,
     }
 }
 
+void AudioSampleBuffer::addFromWithRamp (const int destChannel,
+                                         const int destStartSample,
+                                         const float* source,
+                                         int numSamples,
+                                         float startGain,
+                                         const float endGain) throw()
+{
+    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
+    jassert (source != 0);
+
+    if (startGain == endGain)
+    {
+        addFrom (destChannel,
+                 destStartSample,
+                 source,
+                 numSamples,
+                 startGain);
+    }
+    else
+    {
+        if (numSamples > 0 && (startGain != 0.0f || endGain != 0.0f))
+        {
+            const float increment = (endGain - startGain) / numSamples;
+            float* d = channels [destChannel] + destStartSample;
+
+            while (--numSamples >= 0)
+            {
+                *d++ += startGain * *source++;
+                startGain += increment;
+            }
+        }
+    }
+}
+
 void AudioSampleBuffer::copyFrom (const int destChannel,
                                   const int destStartSample,
                                   const AudioSampleBuffer& source,
