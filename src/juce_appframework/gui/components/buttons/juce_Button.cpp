@@ -620,7 +620,7 @@ bool Button::keyStateChanged (Component*)
 
 bool Button::keyPressed (const KeyPress&, Component*)
 {
-    // return true to avoid forwarding events for keys that we're using as shortcuts
+    // returning true will avoid forwarding events for keys that we're using as shortcuts
     return isShortcutPressed();
 }
 
