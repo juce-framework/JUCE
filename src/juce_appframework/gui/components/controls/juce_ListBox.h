@@ -431,10 +431,11 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId     = 0x1002800, /**< The background colour to fill the list with.
-                                                 Make this transparent if you don't want the background to be filled. */
-        outlineColourId        = 0x1002810  /**< An optional colour to use to draw a border around the list.
-                                                 Make this transparent to not have an outline. */
+        backgroundColourId      = 0x1002800, /**< The background colour to fill the list with.
+                                                  Make this transparent if you don't want the background to be filled. */
+        outlineColourId         = 0x1002810, /**< An optional colour to use to draw a border around the list.
+                                                  Make this transparent to not have an outline. */
+        textColourId            = 0x1002820  /**< The preferred colour to use for drawing text in the listbox. */
     };
 
     /** Sets the thickness of a border that will be drawn around the box.

@@ -38,6 +38,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Line.h"
 #include "../../../../juce_core/io/streams/juce_MemoryInputStream.h"
 
+// tests that some co-ords aren't NaNs
+#define CHECK_COORDS_ARE_VALID(x, y) \
+    jassert (x == x && y == y);
 
 //==============================================================================
 static const float lineMarker           = 100001.0f;
@@ -197,6 +200,8 @@ void Path::getBoundsTransformed (const AffineTransform& transform,
 void Path::startNewSubPath (const float x,
                             const float y) throw()
 {
+    CHECK_COORDS_ARE_VALID (x, y);
+
     if (numElements == 0)
     {
         pathXMin = pathXMax = x;
@@ -219,6 +224,8 @@ void Path::startNewSubPath (const float x,
 
 void Path::lineTo (const float x, const float y) throw()
 {
+    CHECK_COORDS_ARE_VALID (x, y);
+
     if (numElements == 0)
         startNewSubPath (0, 0);
 
@@ -237,6 +244,9 @@ void Path::lineTo (const float x, const float y) throw()
 void Path::quadraticTo (const float x1, const float y1,
                         const float x2, const float y2) throw()
 {
+    CHECK_COORDS_ARE_VALID (x1, y1);
+    CHECK_COORDS_ARE_VALID (x2, y2);
+
     if (numElements == 0)
         startNewSubPath (0, 0);
 
@@ -258,6 +268,10 @@ void Path::cubicTo (const float x1, const float y1,
                     const float x2, const float y2,
                     const float x3, const float y3) throw()
 {
+    CHECK_COORDS_ARE_VALID (x1, y1);
+    CHECK_COORDS_ARE_VALID (x2, y2);
+    CHECK_COORDS_ARE_VALID (x3, y3);
+
     if (numElements == 0)
         startNewSubPath (0, 0);
 

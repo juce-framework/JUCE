@@ -132,7 +132,7 @@ public:
                                           enabled, true, true, false);
 
             g.setFont (height * 0.6f);
-            g.setColour (Colours::black.withAlpha (enabled ? 1.0f : 0.6f));
+            g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
             g.drawText (item, x, 0, width - x - 2, height, Justification::centredLeft, true);
         }
     }

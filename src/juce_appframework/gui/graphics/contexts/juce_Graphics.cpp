@@ -42,6 +42,20 @@ BEGIN_JUCE_NAMESPACE
 
 static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
 
+//==============================================================================
+#define MINIMUM_COORD -0x3fffffff
+#define MAXIMUM_COORD 0x3fffffff
+
+#define ASSERT_COORDS_ARE_SENSIBLE_NUMBERS(x, y, w, h) \
+    jassert ((int) x >= MINIMUM_COORD  \
+              && (int) x <= MAXIMUM_COORD \
+              && (int) y >= MINIMUM_COORD \
+              && (int) y <= MAXIMUM_COORD \
+              && (int) w >= 0 \
+              && (int) w < MAXIMUM_COORD \
+              && (int) h >= 0 \
+              && (int) h < MAXIMUM_COORD);
+
 
 //==============================================================================
 LowLevelGraphicsContext::LowLevelGraphicsContext()
@@ -345,6 +359,9 @@ void Graphics::fillRect (int x,
                          int width,
                          int height) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     SolidColourBrush colourBrush (state->colour);
     (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush).paintRectangle (*context, x, y, width, height);
 }
@@ -362,6 +379,9 @@ void Graphics::fillRect (const float x,
                          const float width,
                          const float height) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     Path p;
     p.addRectangle (x, y, width, height);
     fillPath (p);
@@ -423,6 +443,9 @@ void Graphics::drawRect (const int x,
                          const int height,
                          const int lineThickness) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     SolidColourBrush colourBrush (state->colour);
     Brush& b = (state->brush != 0 ? *(state->brush) : (Brush&) colourBrush);
 
@@ -441,6 +464,9 @@ void Graphics::drawBevel (const int x,
                           const Colour& bottomRightColour,
                           const bool useGradient) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     if (clipRegionIntersects (x, y, width, height))
     {
         const float oldOpacity = state->colour.getFloatAlpha();
@@ -465,6 +491,9 @@ void Graphics::fillEllipse (const float x,
                             const float width,
                             const float height) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     Path p;
     p.addEllipse (x, y, width, height);
     fillPath (p);
@@ -476,6 +505,9 @@ void Graphics::drawEllipse (const float x,
                             const float height,
                             const float lineThickness) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     Path p;
     p.addEllipse (x, y, width, height);
     strokePath (p, PathStrokeType (lineThickness));
@@ -487,6 +519,9 @@ void Graphics::fillRoundedRectangle (const float x,
                                      const float height,
                                      const float cornerSize) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
     fillPath (p);
@@ -499,6 +534,9 @@ void Graphics::drawRoundedRectangle (const float x,
                                      const float cornerSize,
                                      const float lineThickness) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
     strokePath (p, PathStrokeType (lineThickness));
@@ -680,6 +718,9 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
                                 const RectanglePlacement& placementWithinTarget,
                                 const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (destX, destY, destW, destH);
+
     if (imageToDraw != 0)
     {
         const int imageW = imageToDraw->getWidth();
@@ -711,6 +752,10 @@ void Graphics::drawImage (const Image* const imageToDraw,
                           int sx, int sy, int sw, int sh,
                           const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (dx, dy, dw, dh);
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (sx, sy, sw, sh);
+
     if (imageToDraw == 0 || ! context->clipRegionIntersects  (dx, dy, dw, dh))
         return;
 

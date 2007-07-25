@@ -142,6 +142,7 @@ LookAndFeel::LookAndFeel()
 
         ListBox::backgroundColourId,                0xffffffff,
         ListBox::outlineColourId,                   standardOutlineColour,
+        ListBox::textColourId,                      0xff000000,
 
         Slider::backgroundColourId,                 0x00000000,
         Slider::thumbColourId,                      textButtonColour,

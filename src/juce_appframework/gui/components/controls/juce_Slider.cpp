@@ -1281,9 +1281,10 @@ void Slider::mouseWheelMove (const MouseEvent&, float wheelIncrementX, float whe
         const double currentPos = valueToProportionOfLength (currentValue);
         const double newValue = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
 
-        double delta = jmax (fabs (newValue - currentValue), interval);
+        double delta = (newValue != currentValue)
+                        ? jmax (fabs (newValue - currentValue), interval) : 0;
 
-        if (proportionDelta < 0)
+        if (currentValue > newValue)
             delta = -delta;
 
         sendDragStart();

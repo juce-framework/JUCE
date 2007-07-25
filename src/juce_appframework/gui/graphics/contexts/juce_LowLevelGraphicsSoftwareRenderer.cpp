@@ -49,6 +49,19 @@ BEGIN_JUCE_NAMESPACE
  #pragma warning (disable: 4714)
 #endif
 
+#define MINIMUM_COORD -0x3fffffff
+#define MAXIMUM_COORD 0x3fffffff
+
+#define ASSERT_COORDS_ARE_SENSIBLE_NUMBERS(x, y, w, h) \
+    jassert ((int) x >= MINIMUM_COORD  \
+              && (int) x <= MAXIMUM_COORD \
+              && (int) y >= MINIMUM_COORD \
+              && (int) y <= MAXIMUM_COORD \
+              && (int) w >= 0 \
+              && (int) w < MAXIMUM_COORD \
+              && (int) h >= 0 \
+              && (int) h < MAXIMUM_COORD);
+
 //==============================================================================
 static void replaceRectRGB (uint8* pixels, const int w, int h, const int stride, const Colour& colour) throw()
 {
@@ -1176,6 +1189,9 @@ bool LowLevelGraphicsSoftwareRenderer::getPathBounds (int clipX, int clipY, int 
     y = roundDoubleToInt (ty) - 1;
     w = roundDoubleToInt (tw) + 2;
     h = roundDoubleToInt (th) + 2;
+
+    // seems like this operation is using some crazy out-of-range numbers..
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, w, h);
 
     return Rectangle::intersectRectangles (x, y, w, h, clipX, clipY, clipW, clipH);
 }
