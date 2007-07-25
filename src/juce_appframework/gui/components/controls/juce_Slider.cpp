@@ -677,11 +677,11 @@ float Slider::getLinearSliderPos (const double value)
 
     if (maximum > minimum)
     {
-        if (value <= minimum)
+        if (value < minimum)
         {
             sliderPosProportional = 0.0;
         }
-        else if (value >= maximum)
+        else if (value > maximum)
         {
             sliderPosProportional = 1.0;
         }
