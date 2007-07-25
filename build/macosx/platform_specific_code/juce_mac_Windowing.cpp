@@ -31,6 +31,10 @@
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 #include <Carbon/Carbon.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/IOCFPlugIn.h>
+#include <IOKit/hid/IOHIDLib.h>
+#include <IOKit/hid/IOHIDKeys.h>
 #include <fnmatch.h>
 
 #if JUCE_OPENGL
@@ -2996,6 +3000,242 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
+
+//==============================================================================
+AppleRemoteDevice::AppleRemoteDevice()
+    : device (0),
+      queue (0),
+      remoteId (0)
+{
+}
+
+AppleRemoteDevice::~AppleRemoteDevice()
+{
+    stop();
+}
+
+static io_object_t getAppleRemoteDevice() throw()
+{
+    CFMutableDictionaryRef dict = IOServiceMatching ("AppleIRController");
+
+    io_iterator_t iter = 0;
+    io_object_t	iod = 0;
+
+    if (IOServiceGetMatchingServices (kIOMasterPortDefault, dict, &iter) == kIOReturnSuccess
+         && iter != 0)
+    {
+        iod = IOIteratorNext (iter);
+    }
+
+    IOObjectRelease (iter);
+    return iod;
+}
+
+static bool createAppleRemoteInterface (io_object_t iod, void** device) throw()
+{
+    jassert (*device == 0);
+    io_name_t classname;
+
+    if (IOObjectGetClass (iod, classname) == kIOReturnSuccess)
+    {
+        IOCFPlugInInterface** cfPlugInInterface = 0;
+        SInt32 score = 0;
+
+        if (IOCreatePlugInInterfaceForService (iod,
+                                               kIOHIDDeviceUserClientTypeID,
+                                               kIOCFPlugInInterfaceID,
+                                               &cfPlugInInterface,
+                                               &score) == kIOReturnSuccess)
+        {
+	        HRESULT hr = (*cfPlugInInterface)->QueryInterface (cfPlugInInterface,
+                                                               CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID),
+                                                               device);
+
+            (void) hr;
+
+            (*cfPlugInInterface)->Release (cfPlugInInterface);
+        }
+    }
+
+    return *device != 0;
+}
+
+bool AppleRemoteDevice::start (const bool inExclusiveMode) throw()
+{
+    if (queue != 0)
+        return true;
+
+    stop();
+
+    bool result = false;
+    io_object_t iod = getAppleRemoteDevice();
+
+    if (iod != 0)
+    {
+        if (createAppleRemoteInterface (iod, &device) && open (inExclusiveMode))
+	        result = true;
+        else
+            stop();
+
+        IOObjectRelease (iod);
+    }
+
+    return result;
+}
+
+void AppleRemoteDevice::stop() throw()
+{
+    if (queue != 0) 
+    {
+        (*(IOHIDQueueInterface**) queue)->stop ((IOHIDQueueInterface**) queue);		
+        (*(IOHIDQueueInterface**) queue)->dispose ((IOHIDQueueInterface**) queue);		
+        (*(IOHIDQueueInterface**) queue)->Release ((IOHIDQueueInterface**) queue);	
+        queue = 0;
+    }
+
+    if (device != 0) 
+    {
+	    (*(IOHIDDeviceInterface**) device)->close ((IOHIDDeviceInterface**) device);
+	    (*(IOHIDDeviceInterface**) device)->Release ((IOHIDDeviceInterface**) device);
+        device = 0;
+    }	
+}
+
+static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*) 
+{
+    if (result == kIOReturnSuccess)
+	    ((AppleRemoteDevice*) target)->handleCallbackInternal();
+}
+
+bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
+{
+#if ! MACOS_10_2_OR_EARLIER
+    Array <int> cookies;
+
+    CFArrayRef elements;
+    IOHIDDeviceInterface122** const device122 = (IOHIDDeviceInterface122**) device;
+
+    if ((*device122)->copyMatchingElements (device122, 0, &elements) != kIOReturnSuccess)
+        return false;
+
+    for (int i = 0; i < CFArrayGetCount (elements); ++i)
+    {
+        CFDictionaryRef element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements, i);
+
+        // get the cookie
+        CFTypeRef object = CFDictionaryGetValue (element, CFSTR (kIOHIDElementCookieKey));
+
+        if (object == 0 || CFGetTypeID (object) != CFNumberGetTypeID())
+            continue;
+
+        long number;
+        if (! CFNumberGetValue ((CFNumberRef) object, kCFNumberLongType, &number))
+            continue;
+
+        cookies.add ((int) number);
+    }
+	
+    CFRelease (elements);
+
+    if ((*(IOHIDDeviceInterface**) device)
+            ->open ((IOHIDDeviceInterface**) device, 
+                    openInExclusiveMode ? kIOHIDOptionsTypeSeizeDevice 
+                                        : kIOHIDOptionsTypeNone) == KERN_SUCCESS)
+    {
+	    queue = (*(IOHIDDeviceInterface**) device)->allocQueue ((IOHIDDeviceInterface**) device);
+
+	    if (queue != 0)
+        {
+		    (*(IOHIDQueueInterface**) queue)->create ((IOHIDQueueInterface**) queue, 0, 12);
+
+		    for (int i = 0; i < cookies.size(); ++i)
+            {
+			    IOHIDElementCookie cookie = (IOHIDElementCookie) cookies.getUnchecked(i);
+			    (*(IOHIDQueueInterface**) queue)->addElement ((IOHIDQueueInterface**) queue, cookie, 0);
+		    }
+
+		    CFRunLoopSourceRef eventSource;
+
+		    if ((*(IOHIDQueueInterface**) queue)
+                    ->createAsyncEventSource ((IOHIDQueueInterface**) queue, &eventSource) == KERN_SUCCESS)
+            {
+			    if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue, 
+                                                                       appleRemoteQueueCallback, this, 0) == KERN_SUCCESS)
+                {
+				    CFRunLoopAddSource (CFRunLoopGetCurrent(), eventSource, kCFRunLoopDefaultMode);
+
+				    (*(IOHIDQueueInterface**) queue)->start ((IOHIDQueueInterface**) queue);
+
+				    return true;
+			    }
+		    } 
+	    } 
+    }
+#endif
+
+    return false;
+}
+
+void AppleRemoteDevice::handleCallbackInternal()
+{
+    int totalValues = 0;
+    AbsoluteTime nullTime = { 0, 0 };
+    char cookies [12];
+    int numCookies = 0;
+
+    while (numCookies < numElementsInArray (cookies))
+    {
+        IOHIDEventStruct e;
+
+	    if ((*(IOHIDQueueInterface**) queue)->getNextEvent ((IOHIDQueueInterface**) queue, &e, nullTime, 0) != kIOReturnSuccess)
+		    break;
+
+	    if ((int) e.elementCookie == 19)
+        {
+		    remoteId = e.value;
+		    buttonPressed (switched, false);
+	    }
+        else
+        {
+		    totalValues += e.value;
+            cookies [numCookies++] = (char) (pointer_sized_int) e.elementCookie;
+	    }
+    }
+
+    cookies [numCookies++] = 0;
+
+    static const char buttonPatterns[] = 
+    {
+        14, 7, 6, 5, 14, 7, 6, 5, 0,
+        14, 8, 6, 5, 14, 8, 6, 5, 0,
+        14, 12, 11, 6, 5, 0,
+        14, 13, 11, 6, 5, 0,
+        14, 9, 6, 5, 14, 9, 6, 5, 0,
+        14, 10, 6, 5, 14, 10, 6, 5, 0,
+        14, 6, 5, 4, 2, 0,
+        14, 6, 5, 3, 2, 0,
+        14, 6, 5, 14, 6, 5, 0,
+        18, 14, 6, 5, 18, 14, 6, 5, 0,
+        19, 0
+    };
+
+    int buttonNum = (int) menuButton;
+    int i = 0;
+
+    while (i < numElementsInArray (buttonPatterns))
+    {
+        if (strcmp (cookies, buttonPatterns + i) == 0)
+        {
+            buttonPressed ((ButtonType) buttonNum, totalValues > 0);
+            break;
+        }
+
+        i += strlen (buttonPatterns + i) + 1;
+        ++buttonNum;
+    }
+}
+
 
 //==============================================================================
 #if JUCE_OPENGL

@@ -150,4 +150,88 @@ public:
 };
 
 
+#if JUCE_MAC
+
+//==============================================================================
+/**
+    A wrapper class for picking up events from an Apple IR remote control device.
+
+    To use it, just create a subclass of this class, implementing the buttonPressed()
+    callback, then call start() and stop() to start or stop receiving events.
+*/
+class JUCE_API  AppleRemoteDevice
+{
+public:
+    //==============================================================================
+    AppleRemoteDevice();
+    ~AppleRemoteDevice();
+
+    //==============================================================================
+    /** The set of buttons that may be pressed.
+        @see buttonPressed
+    */
+    enum ButtonType
+    {
+	    menuButton = 0,     /**< The menu button (if it's held for a short time). */
+	    playButton,         /**< The play button. */
+	    plusButton,         /**< The plus or volume-up button. */
+	    minusButton,        /**< The minus or volume-down button. */
+	    rightButton,	    /**< The right button (if it's held for a short time). */
+	    leftButton,	        /**< The left button (if it's held for a short time). */
+	    rightButton_Long,	/**< The right button (if it's held for a long time). */
+	    leftButton_Long,    /**< The menu button (if it's held for a long time). */
+	    menuButton_Long,    /**< The menu button (if it's held for a long time). */
+	    playButtonSleepMode,
+	    switched
+    };
+
+    //==============================================================================
+    /** Override this method to receive the callback about a button press.
+
+        The callback will happen on the application's message thread.
+
+        Some buttons trigger matching up and down events, in which the isDown parameter
+        will be true and then false. Others only send a single event when the
+        button is pressed.
+    */
+    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+
+    //==============================================================================
+    /** Starts the device running and responding to events.
+
+        Returns true if it managed to open the device.
+
+        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
+                                and will not be available to any other part of the system. If 
+                                false, it will be shared with other apps.
+        @see stop
+    */
+    bool start (const bool inExclusiveMode) throw();
+
+    /** Stops the device running.
+        @see start
+    */
+    void stop() throw();
+
+    /** Returns the ID number of the remote, if it has sent one.
+    */
+    int getRemoteId() const throw()             { return remoteId; }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void handleCallbackInternal();
+
+private:
+    void* device;
+    void* queue;
+    int remoteId;
+
+    bool open (const bool openInExclusiveMode) throw();
+};
+
+#endif
+
+
 #endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
