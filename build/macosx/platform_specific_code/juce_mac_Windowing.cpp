@@ -2240,8 +2240,8 @@ void Desktop::setMousePosition (int x, int y) throw()
 {
     // this rubbish needs to be done around the warp call, to avoid causing a 
     // bizarre glitch..
-	CGAssociateMouseAndMouseCursorPosition (false);
-	CGSetLocalEventsSuppressionInterval (0); 
+    CGAssociateMouseAndMouseCursorPosition (false);
+    CGSetLocalEventsSuppressionInterval (0); 
 
     CGPoint pos = { x, y };
     CGWarpMouseCursorPosition (pos);
@@ -3048,7 +3048,7 @@ static bool createAppleRemoteInterface (io_object_t iod, void** device) throw()
                                                &cfPlugInInterface,
                                                &score) == kIOReturnSuccess)
         {
-	        HRESULT hr = (*cfPlugInInterface)->QueryInterface (cfPlugInInterface,
+            HRESULT hr = (*cfPlugInInterface)->QueryInterface (cfPlugInInterface,
                                                                CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID),
                                                                device);
 
@@ -3074,7 +3074,7 @@ bool AppleRemoteDevice::start (const bool inExclusiveMode) throw()
     if (iod != 0)
     {
         if (createAppleRemoteInterface (iod, &device) && open (inExclusiveMode))
-	        result = true;
+            result = true;
         else
             stop();
 
@@ -3096,8 +3096,8 @@ void AppleRemoteDevice::stop() throw()
 
     if (device != 0) 
     {
-	    (*(IOHIDDeviceInterface**) device)->close ((IOHIDDeviceInterface**) device);
-	    (*(IOHIDDeviceInterface**) device)->Release ((IOHIDDeviceInterface**) device);
+        (*(IOHIDDeviceInterface**) device)->close ((IOHIDDeviceInterface**) device);
+        (*(IOHIDDeviceInterface**) device)->Release ((IOHIDDeviceInterface**) device);
         device = 0;
     }	
 }
@@ -3105,7 +3105,7 @@ void AppleRemoteDevice::stop() throw()
 static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*) 
 {
     if (result == kIOReturnSuccess)
-	    ((AppleRemoteDevice*) target)->handleCallbackInternal();
+        ((AppleRemoteDevice*) target)->handleCallbackInternal();
 }
 
 bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
@@ -3135,7 +3135,7 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
 
         cookies.add ((int) number);
     }
-	
+    
     CFRelease (elements);
 
     if ((*(IOHIDDeviceInterface**) device)
@@ -3143,34 +3143,34 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
                     openInExclusiveMode ? kIOHIDOptionsTypeSeizeDevice 
                                         : kIOHIDOptionsTypeNone) == KERN_SUCCESS)
     {
-	    queue = (*(IOHIDDeviceInterface**) device)->allocQueue ((IOHIDDeviceInterface**) device);
+        queue = (*(IOHIDDeviceInterface**) device)->allocQueue ((IOHIDDeviceInterface**) device);
 
-	    if (queue != 0)
+        if (queue != 0)
         {
-		    (*(IOHIDQueueInterface**) queue)->create ((IOHIDQueueInterface**) queue, 0, 12);
+            (*(IOHIDQueueInterface**) queue)->create ((IOHIDQueueInterface**) queue, 0, 12);
 
-		    for (int i = 0; i < cookies.size(); ++i)
+            for (int i = 0; i < cookies.size(); ++i)
             {
-			    IOHIDElementCookie cookie = (IOHIDElementCookie) cookies.getUnchecked(i);
-			    (*(IOHIDQueueInterface**) queue)->addElement ((IOHIDQueueInterface**) queue, cookie, 0);
-		    }
+                IOHIDElementCookie cookie = (IOHIDElementCookie) cookies.getUnchecked(i);
+                (*(IOHIDQueueInterface**) queue)->addElement ((IOHIDQueueInterface**) queue, cookie, 0);
+            }
 
-		    CFRunLoopSourceRef eventSource;
+            CFRunLoopSourceRef eventSource;
 
-		    if ((*(IOHIDQueueInterface**) queue)
+            if ((*(IOHIDQueueInterface**) queue)
                     ->createAsyncEventSource ((IOHIDQueueInterface**) queue, &eventSource) == KERN_SUCCESS)
             {
-			    if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue, 
+                if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue, 
                                                                        appleRemoteQueueCallback, this, 0) == KERN_SUCCESS)
                 {
-				    CFRunLoopAddSource (CFRunLoopGetCurrent(), eventSource, kCFRunLoopDefaultMode);
+                    CFRunLoopAddSource (CFRunLoopGetCurrent(), eventSource, kCFRunLoopDefaultMode);
 
-				    (*(IOHIDQueueInterface**) queue)->start ((IOHIDQueueInterface**) queue);
+                    (*(IOHIDQueueInterface**) queue)->start ((IOHIDQueueInterface**) queue);
 
-				    return true;
-			    }
-		    } 
-	    } 
+                    return true;
+                }
+            } 
+        } 
     }
 #endif
 
@@ -3188,19 +3188,19 @@ void AppleRemoteDevice::handleCallbackInternal()
     {
         IOHIDEventStruct e;
 
-	    if ((*(IOHIDQueueInterface**) queue)->getNextEvent ((IOHIDQueueInterface**) queue, &e, nullTime, 0) != kIOReturnSuccess)
-		    break;
+        if ((*(IOHIDQueueInterface**) queue)->getNextEvent ((IOHIDQueueInterface**) queue, &e, nullTime, 0) != kIOReturnSuccess)
+            break;
 
-	    if ((int) e.elementCookie == 19)
+        if ((int) e.elementCookie == 19)
         {
-		    remoteId = e.value;
-		    buttonPressed (switched, false);
-	    }
+            remoteId = e.value;
+            buttonPressed (switched, false);
+        }
         else
         {
-		    totalValues += e.value;
+            totalValues += e.value;
             cookies [numCookies++] = (char) (pointer_sized_int) e.elementCookie;
-	    }
+        }
     }
 
     cookies [numCookies++] = 0;
