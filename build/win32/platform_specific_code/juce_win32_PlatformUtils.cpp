@@ -300,6 +300,17 @@ void PlatformUtilities::deleteRegistryKey (const String& regKeyPath)
     }
 }
 
+bool juce_IsRunningInWine() throw()
+{
+    HKEY key;
+    if (RegOpenKeyEx (HKEY_CURRENT_USER, _T("Software\\Wine"), 0, KEY_READ, &key) == ERROR_SUCCESS)
+    {
+        RegCloseKey (key);
+        return true;
+    }
+
+    return false;
+}
 
 //==============================================================================
 static void* currentModuleHandle = 0;

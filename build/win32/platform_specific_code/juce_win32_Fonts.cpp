@@ -239,13 +239,25 @@ const StringArray Font::findAllTypefaceNames() throw()
     return results;
 }
 
+extern bool juce_IsRunningInWine() throw();
+
 void Font::getDefaultFontNames (String& defaultSans,
                                 String& defaultSerif,
                                 String& defaultFixed) throw()
 {
-    defaultSans  = "Verdana";
-    defaultSerif = "Times";
-    defaultFixed = "Lucida Console";
+    if (juce_IsRunningInWine())
+    {
+        // If we're running in Wine, then use fonts that might be available on Linux..
+        defaultSans  = "Bitstream Vera Sans";
+        defaultSerif = "Bitstream Vera Serif";
+        defaultFixed = "Bitstream Vera Sans Mono";
+    }
+    else
+    {
+        defaultSans  = "Verdana";
+        defaultSerif = "Times";
+        defaultFixed = "Lucida Console";
+    }
 }
 
 //==============================================================================

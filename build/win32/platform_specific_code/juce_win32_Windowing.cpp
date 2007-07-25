@@ -93,6 +93,7 @@ BEGIN_JUCE_NAMESPACE
 
 extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.cpp
 extern void juce_CheckCurrentlyFocusedTopLevelWindow() throw();  // in juce_TopLevelWindow.cpp
+extern bool juce_IsRunningInWine() throw();
 
 const int juce_windowIsSemiTransparentFlag = (1 << 31); // also in component.cpp
 
@@ -121,8 +122,11 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 {
     if (updateLayeredWindow == 0)
     {
-        HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
-        updateLayeredWindow = (UpdateLayeredWinFunc) GetProcAddress (user32Mod, "UpdateLayeredWindow");
+        if (! juce_IsRunningInWine())
+        {
+            HMODULE user32Mod = GetModuleHandle (_T("user32.dll"));
+            updateLayeredWindow = (UpdateLayeredWinFunc) GetProcAddress (user32Mod, "UpdateLayeredWindow");
+        }
     }
 
     return updateLayeredWindow != 0;
