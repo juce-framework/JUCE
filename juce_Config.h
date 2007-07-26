@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -38,7 +38,7 @@
 */
 
 //=============================================================================
-/** The name of the namespace that all Juce classes and functions will be 
+/** The name of the namespace that all Juce classes and functions will be
     put inside. If this is not defined, no namespace will be used.
 */
 #ifndef JUCE_NAMESPACE
@@ -50,7 +50,7 @@
     always use Logger::writeToLog() to write a message when an assertion happens.
 
     Enabling it will also leave this turned on in release builds. When it's disabled,
-    however, the jassert and jassertfalse macros will not be compiled in a 
+    however, the jassert and jassertfalse macros will not be compiled in a
     release build.
 
     @see jassert, jassertfalse, Logger
@@ -60,8 +60,8 @@
 #endif
 
 //=============================================================================
-/** Comment out this macro if you haven't got the Steinberg ASIO SDK, without 
-    which the ASIOAudioIODevice class can't be built. See the comments in the 
+/** Comment out this macro if you haven't got the Steinberg ASIO SDK, without
+    which the ASIOAudioIODevice class can't be built. See the comments in the
     ASIOAudioIODevice class's header file for more info about this.
 
     (This only affects a Win32 build)
@@ -77,12 +77,12 @@
 #endif
 
 //=============================================================================
-/** Comment out this macro if you don't want to enable QuickTime or if you don't 
-    have QuickTime installed. If it's not enabled, the QuickTimeWindow class will 
+/** Comment out this macro if you don't want to enable QuickTime or if you don't
+    have QuickTime installed. If it's not enabled, the QuickTimeWindow class will
     be unavailable.
 
     On Windows, if you enable this, you'll need to make sure the Apple Quicktime.dll
-    file is found on your include path. By default the Quicktime installer will have 
+    file is found on your include path. By default the Quicktime installer will have
     put this in the "/Program Files/QuickTime" folder. Only QuickTime version 7 or later
     is currently supported.
 */
@@ -91,8 +91,8 @@
 #endif
 
 //=============================================================================
-/** Comment out this macro if you don't want to enable OpenGL or if you don't 
-    have the appropriate headers and libraries available. If it's not enabled, the 
+/** Comment out this macro if you don't want to enable OpenGL or if you don't
+    have the appropriate headers and libraries available. If it's not enabled, the
     OpenGLComponent class will be unavailable.
 */
 #ifndef JUCE_OPENGL
@@ -117,7 +117,7 @@
 /** Enabling this macro means that all regions that get repainted will have a coloured
     line drawn around them.
 
-    This is handy if you're trying to optimise drawing, because it lets you easily see 
+    This is handy if you're trying to optimise drawing, because it lets you easily see
     when anything is being repainted unnecessarily.
 */
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING

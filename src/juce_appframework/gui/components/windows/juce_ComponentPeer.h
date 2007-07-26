@@ -89,7 +89,7 @@ public:
         a combination of the values in the StyleFlags enum
     */
     ComponentPeer (Component* const component,
-                   const int styleFlags);
+                   const int styleFlags) throw();
 
     /** Destructor. */
     virtual ~ComponentPeer();
@@ -182,7 +182,7 @@ public:
 
         The constrainer won't be deleted by this object, so the caller must manage its lifetime.
     */
-    void setConstrainer (ComponentBoundsConstrainer* newConstrainer);
+    void setConstrainer (ComponentBoundsConstrainer* const newConstrainer) throw();
 
     /** Returns the current constrainer, if one has been set. */
     ComponentBoundsConstrainer* getConstrainer() const throw()              { return constrainer; }
@@ -250,7 +250,7 @@ public:
     /** Called when the window loses keyboard focus. */
     void handleFocusLoss();
 
-    Component* getLastFocusedSubcomponent() const;
+    Component* getLastFocusedSubcomponent() const throw();
 
     /** Called when a key is pressed.
 
@@ -304,7 +304,7 @@ public:
 
         @see addMaskedRegion
     */
-    void clearMaskedRegion();
+    void clearMaskedRegion() throw();
 
     /** Adds a rectangle to the set of areas not to paint over.
 
@@ -315,7 +315,7 @@ public:
         The masked region is cleared each time before a paint happens, so a component
         will have to make sure it calls this every time it's painted.
     */
-    void addMaskedRegion (int x, int y, int w, int h);
+    void addMaskedRegion (int x, int y, int w, int h) throw();
 
     //==============================================================================
     /** Returns the number of currently-active peers.
@@ -347,7 +347,7 @@ protected:
     uint32 lastPaintTime;
     ComponentBoundsConstrainer* constrainer;
 
-    static void updateCurrentModifiers();
+    static void updateCurrentModifiers() throw();
 
     /** @internal */
     void handleMessage (const Message& message);

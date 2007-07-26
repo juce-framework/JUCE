@@ -142,7 +142,7 @@ static void updateModifiers (EventRef theEvent)
         currentModifiers |= ModifierKeys::commandModifier;
 }
 
-void ModifierKeys::updateCurrentModifiers()
+void ModifierKeys::updateCurrentModifiers() throw()
 {
     currentModifierFlags = currentModifiers;
 }

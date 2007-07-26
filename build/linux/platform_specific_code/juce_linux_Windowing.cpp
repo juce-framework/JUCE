@@ -306,7 +306,7 @@ static void getModifierMapping() throw()
 
 static int currentModifiers = 0;
 
-void ModifierKeys::updateCurrentModifiers()
+void ModifierKeys::updateCurrentModifiers() throw()
 {
     currentModifierFlags = currentModifiers;
 }

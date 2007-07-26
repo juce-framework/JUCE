@@ -64,7 +64,7 @@ static VoidArray heavyweightPeers (4);
 
 //==============================================================================
 ComponentPeer::ComponentPeer (Component* const component_,
-                              const int styleFlags_)
+                              const int styleFlags_) throw()
     : component (component_),
       styleFlags (styleFlags_),
       lastPaintTime (0),
@@ -110,7 +110,7 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) throw()
     return heavyweightPeers.contains (const_cast <ComponentPeer*> (peer));
 }
 
-void ComponentPeer::updateCurrentModifiers()
+void ComponentPeer::updateCurrentModifiers() throw()
 {
     ModifierKeys::updateCurrentModifiers();
 }
@@ -538,7 +538,7 @@ void ComponentPeer::handleBroughtToFront()
         component->internalBroughtToFront();
 }
 
-void ComponentPeer::setConstrainer (ComponentBoundsConstrainer* newConstrainer)
+void ComponentPeer::setConstrainer (ComponentBoundsConstrainer* const newConstrainer) throw()
 {
     constrainer = newConstrainer;
 }
@@ -628,7 +628,7 @@ void ComponentPeer::handleFocusLoss()
     }
 }
 
-Component* ComponentPeer::getLastFocusedSubcomponent() const
+Component* ComponentPeer::getLastFocusedSubcomponent() const throw()
 {
     return (component->isParentOf (lastFocusedComponent) && lastFocusedComponent->isShowing())
                 ? lastFocusedComponent
@@ -659,12 +659,12 @@ void ComponentPeer::handleUserClosingWindow()
 }
 
 //==============================================================================
-void ComponentPeer::clearMaskedRegion()
+void ComponentPeer::clearMaskedRegion() throw()
 {
     maskedRegion.clear();
 }
 
-void ComponentPeer::addMaskedRegion (int x, int y, int w, int h)
+void ComponentPeer::addMaskedRegion (int x, int y, int w, int h) throw()
 {
     maskedRegion.add (x, y, w, h);
 }

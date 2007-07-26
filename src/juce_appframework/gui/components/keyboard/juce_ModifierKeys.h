@@ -193,7 +193,7 @@ private:
     static int currentModifierFlags;
 
     friend class ComponentPeer;
-    static void updateCurrentModifiers();
+    static void updateCurrentModifiers() throw();
 };
 
 

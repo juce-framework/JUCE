@@ -442,7 +442,7 @@ static void updateKeyModifiers() throw()
         currentModifiers |= ModifierKeys::altModifier;
 }
 
-void ModifierKeys::updateCurrentModifiers()
+void ModifierKeys::updateCurrentModifiers() throw()
 {
     currentModifierFlags = currentModifiers;
 }
