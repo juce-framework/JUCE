@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -32,6 +32,11 @@
 #include "../../../../juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
+
+// N.B. these two includes are put here deliberately to avoid problems with
+// old GCCs failing on long include paths
+#include "../../../../juce_core/containers/juce_VoidArray.h"
+#include "../../../../juce_core/containers/juce_OwnedArray.h"
 
 #include "juce_KeyMappingEditorComponent.h"
 #include "../menus/juce_PopupMenu.h"

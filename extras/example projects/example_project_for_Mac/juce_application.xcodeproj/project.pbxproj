@@ -11,7 +11,7 @@
 		8407902B09E6B5BD004E7BCD /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8407902A09E6B5BD004E7BCD /* QuickTime.framework */; };
 		84F30CD108FEAAA20087E26C /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F30CD008FEAAA20087E26C /* Main.cpp */; };
 		84F30CED08FEAD7A0087E26C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F30CEC08FEAD7A0087E26C /* CoreAudio.framework */; };
-		84FDB0610C15BD5C00CD0087 /* libjuce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB05E0C15BD4500CD0087 /* libjuce.a */; };
+		84FDB0610C15BD5C00CD0087 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB05E0C15BD4500CD0087 /* libjucedebug.a */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
 /* End PBXBuildFile section */
@@ -21,7 +21,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 84F30CCA08FEAA8C0087E26C /* Juce.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libjuce.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = Juce;
 		};
 /* End PBXContainerItemProxy section */
@@ -45,7 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84FDB0610C15BD5C00CD0087 /* libjuce.a in Frameworks */,
+				84FDB0610C15BD5C00CD0087 /* libjucedebug.a in Frameworks */,
 				8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */,
 				84F30CED08FEAD7A0087E26C /* CoreAudio.framework in Frameworks */,
 				84078F3E09E6B42E004E7BCD /* AGL.framework in Frameworks */,
@@ -109,7 +109,7 @@
 		84FDB05A0C15BD4500CD0087 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84FDB05E0C15BD4500CD0087 /* libjuce.a */,
+				84FDB05E0C15BD4500CD0087 /* libjucedebug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -157,10 +157,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		84FDB05E0C15BD4500CD0087 /* libjuce.a */ = {
+		84FDB05E0C15BD4500CD0087 /* libjucedebug.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libjuce.a;
+			path = libjucedebug.a;
 			remoteRef = 84FDB05D0C15BD4500CD0087 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ static void juce_getCpuVendor (char* const v)
     memcpy (v, vendor, 16);
 }
 
-const String SystemStats::getCpuVendor()
+const String SystemStats::getCpuVendor() throw()
 {
     char v [16];
     juce_getCpuVendor (v);

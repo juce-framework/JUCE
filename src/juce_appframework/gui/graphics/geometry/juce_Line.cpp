@@ -97,28 +97,23 @@ static bool juce_lineIntersection (const float x1, const float y1,
 
             return false;
         }
-        else
-        {
-            const float along1 = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
 
-            intersectionX = x1 + along1 * dx1;
-            intersectionY = y1 + along1 * dy1;
+        const float along1 = ((y1 - y3) * dx2 - (x1 - x3) * dy2) / divisor;
 
-            if (along1 < 0 || along1 > 1.0f)
-                return false;
+        intersectionX = x1 + along1 * dx1;
+        intersectionY = y1 + along1 * dy1;
 
-            const float along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1) / divisor;
+        if (along1 < 0 || along1 > 1.0f)
+            return false;
 
-            return along2 >= 0 && along2 <= 1.0f;
-        }
+        const float along2 = ((y1 - y3) * dx1 - (x1 - x3) * dy1) / divisor;
+
+        return along2 >= 0 && along2 <= 1.0f;
     }
-    else
-    {
-        intersectionX = x2;
-        intersectionY = y2;
 
-        return true;
-    }
+    intersectionX = x2;
+    intersectionY = y2;
+    return true;
 }
 
 //==============================================================================

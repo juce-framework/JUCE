@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ void juce_closeInternetFile (void* handle)
     }
 }
 
-static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum)
+static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum) throw()
 {
     int numFound = 0;
 
@@ -262,7 +262,7 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum)
     return numFound;
 }
 
-static int getMACAddressesViaNetBios (int64* addresses, int maxNum)
+static int getMACAddressesViaNetBios (int64* addresses, int maxNum) throw()
 {
     int numFound = 0;
 
@@ -326,7 +326,7 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum)
     return numFound;
 }
 
-int SystemStats::getMACAddresses (int64* addresses, int maxNum)
+int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
 {
     int numFound = getMACAddressViaGetAdaptersInfo (addresses, maxNum);
 

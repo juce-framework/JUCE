@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -224,7 +224,7 @@ const int KeyPress::numberPadMultiply       = VK_MULTIPLY       | extendedKeyMod
 const int KeyPress::numberPadDivide         = VK_DIVIDE         | extendedKeyModifier;
 const int KeyPress::numberPadSeparator      = VK_SEPARATOR      | extendedKeyModifier;
 const int KeyPress::numberPadDecimalPoint   = VK_DECIMAL        | extendedKeyModifier;
-const int KeyPress::numberPadEquals         = VK_OEM_NEC_EQUAL  | extendedKeyModifier;
+const int KeyPress::numberPadEquals         = 0x92 /*VK_OEM_NEC_EQUAL*/  | extendedKeyModifier;
 const int KeyPress::numberPadDelete         = VK_DELETE         | extendedKeyModifier;
 const int KeyPress::playKey                 = 0x30000;
 const int KeyPress::stopKey                 = 0x30001;
@@ -301,7 +301,7 @@ public:
     }
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
-                       const int x, const int y, 
+                       const int x, const int y,
                        const RectangleList& maskedRegion) throw()
     {
         static HDRAWDIB hdd = 0;
@@ -2191,7 +2191,7 @@ private:
 
                     case WM_GETDLGCODE:
                         return DLGC_WANTALLKEYS;
- 
+
                     default:
                         break;
                 }
