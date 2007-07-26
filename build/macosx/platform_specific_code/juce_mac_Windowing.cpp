@@ -1137,7 +1137,7 @@ public:
             KeyPress::leftKey, KeyPress::rightKey, KeyPress::downKey, KeyPress::upKey, 0
         };
 
-        if (rawKey > 0 && rawKey < numElementsInArray (keyTranslations))
+        if (rawKey > 0 && rawKey < numElementsInArray (keyTranslations) && keyTranslations [rawKey] != 0)
             keyCode = keyTranslations [rawKey];
         else if (rawKey == 0 && textCharacter != 0)
             keyCode = 'a';
@@ -1446,7 +1446,8 @@ public:
 
         CGRect clip;
 
-        if (rgn != 0)
+        // (avoid doing this in plugins because of some strange redraw bugs..)
+        if (rgn != 0 && JUCEApplication::getInstance() != 0)
         {
             Rect bounds;
             GetRegionBounds (rgn, &bounds);
@@ -1458,6 +1459,8 @@ public:
         else
         {
             HIViewGetBounds (viewRef, &clip);
+            clip.origin.x = 0;
+            clip.origin.y = 0;
         }
 #else
         CGRect clip (CGContextGetClipBoundingBox (context));
