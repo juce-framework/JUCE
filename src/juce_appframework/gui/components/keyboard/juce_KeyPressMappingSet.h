@@ -113,10 +113,10 @@ public:
 
         @see ApplicationCommandManager
     */
-    KeyPressMappingSet (ApplicationCommandManager* const commandManager);
+    KeyPressMappingSet (ApplicationCommandManager* const commandManager) throw();
 
     /** Creates an copy of a KeyPressMappingSet. */
-    KeyPressMappingSet (const KeyPressMappingSet& other);
+    KeyPressMappingSet (const KeyPressMappingSet& other) throw();
 
     /** Destructor. */
     ~KeyPressMappingSet();
@@ -146,25 +146,25 @@ public:
     */
     void addKeyPress (const CommandID commandID,
                       const KeyPress& newKeyPress,
-                      int insertIndex = -1);
+                      int insertIndex = -1) throw();
 
     /** Reset all mappings to the defaults, as dictated by the ApplicationCommandManager.
 
         @see resetToDefaultMapping
     */
-    void resetToDefaultMappings();
+    void resetToDefaultMappings() throw();
 
     /** Resets all key-mappings to the defaults for a particular command.
 
         @see resetToDefaultMappings
     */
-    void resetToDefaultMapping (const CommandID commandID);
+    void resetToDefaultMapping (const CommandID commandID) throw();
 
     /** Removes all keypresses that are assigned to any commands. */
-    void clearAllKeyPresses();
+    void clearAllKeyPresses() throw();
 
     /** Removes all keypresses that are assigned to a particular command. */
-    void clearAllKeyPresses (const CommandID commandID);
+    void clearAllKeyPresses (const CommandID commandID) throw();
 
     /** Removes one of the keypresses that are assigned to a command.
 
@@ -172,22 +172,22 @@ public:
         which the keyPressIndex refers.
     */
     void removeKeyPress (const CommandID commandID,
-                         const int keyPressIndex);
+                         const int keyPressIndex) throw();
 
     /** Removes a keypress from any command that it may be assigned to.
     */
-    void removeKeyPress (const KeyPress& keypress);
+    void removeKeyPress (const KeyPress& keypress) throw();
 
     /** Returns true if the given command is linked to this key. */
     bool containsMapping (const CommandID commandID,
-                          const KeyPress& keyPress) const;
+                          const KeyPress& keyPress) const throw();
 
     //==============================================================================
     /** Looks for a command that corresponds to a keypress.
 
         @returns the UID of the command or 0 if none was found
     */
-    CommandID findCommandForKeyPress (const KeyPress& keyPress) const;
+    CommandID findCommandForKeyPress (const KeyPress& keyPress) const throw();
 
     //==============================================================================
     /** Tries to recreate the mappings from a previously stored state.

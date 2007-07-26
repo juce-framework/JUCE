@@ -68,12 +68,12 @@ JUCEApplication::~JUCEApplication()
 {
 }
 
-JUCEApplication* JUCEApplication::getInstance()
+JUCEApplication* JUCEApplication::getInstance() throw()
 {
     return appInstance;
 }
 
-bool JUCEApplication::isInitialising() const
+bool JUCEApplication::isInitialising() const throw()
 {
     return stillInitialising;
 }
@@ -155,20 +155,6 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 }
 
 //==============================================================================
-// used as a listener object later on..
-class NewAppListener  : public ActionListener
-{
-public:
-    void actionListenerCallback (const String& message)
-    {
-        if (message.startsWith (appInstance->getApplicationName() + T("/")))
-        {
-            appInstance->anotherInstanceStarted (message.fromFirstOccurrenceOf (T("/"),
-                                                 false, false));
-        }
-    }
-};
-
 int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 {
     jassert (appInstance == 0);
@@ -185,8 +171,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 
         if (! appLock->enter(0))
         {
-            MessageManager::broadcastMessage (app->getApplicationName()
-                                                + T("/") + commandLine);
+            MessageManager::broadcastMessage (app->getApplicationName() + "/" + commandLine);
 
             delete appInstance;
             appInstance = 0;
@@ -207,16 +192,14 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
         commandLine = String::empty;
 
         // register for broadcast new app messages
-        NewAppListener* const newAppListener = new NewAppListener();
-
-        MessageManager::getInstance()->registerBroadcastListener (newAppListener);
+        MessageManager::getInstance()->registerBroadcastListener (app);
 
         app->stillInitialising = false;
 
         // now loop until a quit message is received..
         useForce = MessageManager::getInstance()->runDispatchLoop();
 
-        delete newAppListener;
+        MessageManager::getInstance()->deregisterBroadcastListener (app);
 
         if (appLock != 0)
         {
@@ -297,6 +280,13 @@ int JUCEApplication::main (int argc, char* argv[],
     return JUCEApplication::main (cmd, newApp);
 }
 
+void JUCEApplication::actionListenerCallback (const String& message)
+{
+    if (message.startsWith (getApplicationName() + "/"))
+    {
+        anotherInstanceStarted (message.fromFirstOccurrenceOf (T("/"), false, false));
+    }
+}
 
 //==============================================================================
 static bool juceInitialisedGUI = false;

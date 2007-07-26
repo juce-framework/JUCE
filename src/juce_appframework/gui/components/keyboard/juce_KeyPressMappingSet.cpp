@@ -39,7 +39,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_)
+KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_) throw()
     : commandManager (commandManager_)
 {
     // A manager is needed to get the descriptions of commands, and will be called when
@@ -49,7 +49,7 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const command
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
-KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other)
+KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other) throw()
     : commandManager (other.commandManager)
 {
     Desktop::getInstance().addFocusChangeListener (this);
@@ -72,7 +72,7 @@ const Array <KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const
 
 void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                                       const KeyPress& newKeyPress,
-                                      int insertIndex)
+                                      int insertIndex) throw()
 {
     if (findCommandForKeyPress (newKeyPress) != commandID)
     {
@@ -107,7 +107,7 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
     }
 }
 
-void KeyPressMappingSet::resetToDefaultMappings()
+void KeyPressMappingSet::resetToDefaultMappings() throw()
 {
     mappings.clear();
 
@@ -125,7 +125,7 @@ void KeyPressMappingSet::resetToDefaultMappings()
     sendChangeMessage (this);
 }
 
-void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
+void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID) throw()
 {
     clearAllKeyPresses (commandID);
 
@@ -138,15 +138,16 @@ void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
     }
 }
 
-void KeyPressMappingSet::clearAllKeyPresses()
+void KeyPressMappingSet::clearAllKeyPresses() throw()
 {
     if (mappings.size() > 0)
+    {
         sendChangeMessage (this);
-
-    mappings.clear();
+        mappings.clear();
+    }
 }
 
-void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID)
+void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID) throw()
 {
     for (int i = mappings.size(); --i >= 0;)
     {
@@ -158,7 +159,7 @@ void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID)
     }
 }
 
-void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress)
+void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress) throw()
 {
     if (keypress.isValid())
     {
@@ -179,7 +180,7 @@ void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress)
 }
 
 void KeyPressMappingSet::removeKeyPress (const CommandID commandID,
-                                         const int keyPressIndex)
+                                         const int keyPressIndex) throw()
 {
     for (int i = mappings.size(); --i >= 0;)
     {
@@ -193,7 +194,7 @@ void KeyPressMappingSet::removeKeyPress (const CommandID commandID,
 }
 
 //==============================================================================
-CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) const
+CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) const throw()
 {
     for (int i = 0; i < mappings.size(); ++i)
         if (mappings.getUnchecked(i)->keypresses.contains (keyPress))
@@ -203,7 +204,7 @@ CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) 
 }
 
 bool KeyPressMappingSet::containsMapping (const CommandID commandID,
-                                          const KeyPress& keyPress) const
+                                          const KeyPress& keyPress) const throw()
 {
     for (int i = mappings.size(); --i >= 0;)
         if (mappings.getUnchecked(i)->commandID == commandID)

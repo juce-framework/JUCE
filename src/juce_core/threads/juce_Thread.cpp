@@ -259,16 +259,25 @@ Thread* Thread::getCurrentThread() throw()
     return result;
 }
 
-void Thread::stopAllThreads (const int timeoutInMillisecs) throw()
+void Thread::stopAllThreads (const int timeOutMilliseconds) throw()
 {
-    while (getNumRunningThreads() > 0)
+    runningThreadsLock.enter();
+
+    for (int i = runningThreads.size(); --i >= 0;)
+        ((Thread*) runningThreads.getUnchecked(i))->signalThreadShouldExit();
+
+    runningThreadsLock.exit();
+
+    for (;;)
     {
         runningThreadsLock.enter();
-        Thread* const r = (Thread*) runningThreads[0];
+        Thread* const t = (Thread*) runningThreads[0];
         runningThreadsLock.exit();
 
-        if (r != 0)
-            r->stopThread (timeoutInMillisecs);
+        if (t == 0)
+            break;
+
+        t->stopThread (timeOutMilliseconds);
     }
 }
 

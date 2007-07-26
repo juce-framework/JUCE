@@ -33,6 +33,7 @@
 #define __JUCE_APPLICATION_JUCEHEADER__
 
 #include "juce_ApplicationCommandTarget.h"
+#include "../events/juce_ActionListener.h"
 
 
 //==============================================================================
@@ -103,7 +104,8 @@
 
     @see MessageManager, DeletedAtShutdown
 */
-class JUCE_API  JUCEApplication  : public ApplicationCommandTarget
+class JUCE_API  JUCEApplication  : public ApplicationCommandTarget,
+                                   private ActionListener
 {
 protected:
     //==============================================================================
@@ -126,7 +128,7 @@ public:
 
     //==============================================================================
     /** Returns the global instance of the application object being run. */
-    static JUCEApplication* getInstance();
+    static JUCEApplication* getInstance() throw();
 
     //==============================================================================
     /** Called when the application starts.
@@ -154,7 +156,7 @@ public:
         This is handy for things like splash screens to know when the app's up-and-running
         properly.
     */
-    bool isInitialising() const;
+    bool isInitialising() const throw();
 
     /* Called to allow the application to clear up before exiting.
 
@@ -269,6 +271,8 @@ public:
     void getAllCommands (Array <CommandID>& commands);
     /** @internal */
     bool perform (const InvocationInfo& info);
+    /** @internal */
+    void actionListenerCallback (const String& message);
 
 private:
     //==============================================================================
