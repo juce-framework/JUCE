@@ -97,6 +97,7 @@ const int midiBufferSize = 1024;
 const OSType juceChunkType = 'juce';
 static const int bypassControlIndex = 1;
 
+
 //==============================================================================
 static float longToFloat (const long n) throw()
 {
@@ -176,6 +177,7 @@ public:
             r.top = 0;
             r.right = editorComp->getWidth();
             r.bottom = editorComp->getHeight();
+
             SetRect (&r);
         }
 
@@ -521,7 +523,9 @@ public:
 protected:
     ComponentResult GetDelaySamplesLong (long* aNumSamples)
     {
-        *aNumSamples = JucePlugin_Latency;
+        if (aNumSamples != 0)
+            *aNumSamples = JucePlugin_Latency;
+
         return noErr;
     }
 
@@ -674,10 +678,8 @@ protected:
             *size = sizeof (SFicPlugInChunkHeader) + tempFilterData.getSize();
             return noErr;
         }
-        else
-        {
-            return CEffectProcessMIDI::GetChunkSize (chunkID, size);
-        }
+
+        return CEffectProcessMIDI::GetChunkSize (chunkID, size);
     }
 
     ComponentResult GetChunk (OSType chunkID, SFicPlugInChunk* chunk)
@@ -694,10 +696,8 @@ protected:
 
             return noErr;
         }
-        else
-        {
-            return CEffectProcessMIDI::GetChunk (chunkID, chunk);
-        }
+
+        return CEffectProcessMIDI::GetChunk (chunkID, chunk);
     }
 
     ComponentResult SetChunk (OSType chunkID, SFicPlugInChunk* chunk)
@@ -804,7 +804,7 @@ protected:
             break;
         }
 
-        info.editOriginTime = fTimeCodeInfo.mFrameOffset * framesPerSec;
+        info.editOriginTime = fTimeCodeInfo.mFrameOffset / framesPerSec;
 
         return true;
     }
@@ -916,6 +916,7 @@ public:
     ~JucePlugInGroup()
     {
         shutdownJuce_GUI();
+        shutdownJuce_NonGUI();
     }
 
     //==============================================================================
@@ -1012,5 +1013,6 @@ private:
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {
+    initialiseJuce_NonGUI();
     return new JucePlugInGroup();
 }
