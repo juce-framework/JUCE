@@ -429,30 +429,25 @@ void* Component::getWindowHandle() const throw()
 }
 
 //==============================================================================
-void Component::addToDesktop (int desktopWindowStyleFlags, void* nativeWindowToAttachTo)
+void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     checkMessageManagerIsLocked
 
     if (! isOpaque())
-        desktopWindowStyleFlags |= juce_windowIsSemiTransparentFlag;
+        styleWanted |= juce_windowIsSemiTransparentFlag;
 
     int currentStyleFlags = 0;
-    ComponentBoundsConstrainer* currentConstainer = 0;
 
-    if (isOnDesktop())
-    {
-        const ComponentPeer* const peer = getPeer();
+    // don't use getPeer(), so that we only get the peer that's specifically
+    // for this comp, and not for one of its parents.
+    ComponentPeer* peer = ComponentPeer::getPeerFor (this);
 
-        if (peer != 0)
-        {
-            currentStyleFlags = peer->getStyleFlags();
-            currentConstainer = peer->getConstrainer();
-        }
-    }
+    if (peer != 0)
+        currentStyleFlags = peer->getStyleFlags();
 
-    if ((! isOnDesktop()) || desktopWindowStyleFlags != currentStyleFlags)
+    if (styleWanted != currentStyleFlags || ! flags.hasHeavyweightPeerFlag)
     {
         const ComponentDeletionWatcher deletionChecker (this);
 
@@ -467,14 +462,16 @@ void Component::addToDesktop (int desktopWindowStyleFlags, void* nativeWindowToA
         int x = 0, y = 0;
         relativePositionToGlobal (x, y);
 
-        ComponentPeer* peer = getPeer();
         bool wasFullscreen = false;
         bool wasMinimised = false;
+        ComponentBoundsConstrainer* currentConstainer = 0;
 
         if (peer != 0)
         {
             wasFullscreen = peer->isFullScreen();
             wasMinimised = peer->isMinimised();
+            currentConstainer = peer->getConstrainer();
+
             removeFromDesktop();
         }
 
@@ -485,7 +482,7 @@ void Component::addToDesktop (int desktopWindowStyleFlags, void* nativeWindowToA
         {
             flags.hasHeavyweightPeerFlag = true;
 
-            peer = createNewPeer (desktopWindowStyleFlags, nativeWindowToAttachTo);
+            peer = createNewPeer (styleWanted, nativeWindowToAttachTo);
 
             Desktop::getInstance().addDesktopComponent (this);
 
@@ -518,7 +515,7 @@ void Component::removeFromDesktop()
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     checkMessageManagerIsLocked
 
-    if (isOnDesktop())
+    if (flags.hasHeavyweightPeerFlag)
     {
         ComponentPeer* const peer = ComponentPeer::getPeerFor (this);
 
@@ -559,9 +556,9 @@ void Component::setOpaque (const bool shouldBeOpaque) throw()
     {
         flags.opaqueFlag = shouldBeOpaque;
 
-        if (isOnDesktop())
+        if (flags.hasHeavyweightPeerFlag)
         {
-            const ComponentPeer* const peer = getPeer();
+            const ComponentPeer* const peer = ComponentPeer::getPeerFor (this);
 
             if (peer != 0)
             {
@@ -880,7 +877,7 @@ void Component::setBounds (int x, int y, int w, int h)
             // send a fake mouse move to trigger enter/exit messages if needed..
             sendFakeMouseMove();
 
-            if (! isOnDesktop())
+            if (! flags.hasHeavyweightPeerFlag)
                 repaintParent();
         }
 
@@ -888,7 +885,7 @@ void Component::setBounds (int x, int y, int w, int h)
 
         if (wasResized)
             repaint();
-        else if (! isOnDesktop())
+        else if (! flags.hasHeavyweightPeerFlag)
             repaintParent();
 
         if (flags.hasHeavyweightPeerFlag)
@@ -1859,9 +1856,17 @@ void Component::sendLookAndFeelChange()
     }
 }
 
+static const String getColourPropertyName (const int colourId) throw()
+{
+    String s;
+    s.preallocateStorage (18);
+    s << T("jcclr_") << colourId;
+    return s;
+}
+
 const Colour Component::findColour (const int colourId, const bool inheritFromParent) const throw()
 {
-    const String customColour (getComponentProperty (T("jucecol_") + String::toHexString (colourId),
+    const String customColour (getComponentProperty (getColourPropertyName (colourId),
                                                      inheritFromParent,
                                                      String::empty));
 
@@ -1873,7 +1878,7 @@ const Colour Component::findColour (const int colourId, const bool inheritFromPa
 
 bool Component::isColourSpecified (const int colourId) const throw()
 {
-    return getComponentProperty (T("jucecol_") + String::toHexString (colourId),
+    return getComponentProperty (getColourPropertyName (colourId),
                                  false,
                                  String::empty).isNotEmpty();
 }
@@ -1882,14 +1887,14 @@ void Component::removeColour (const int colourId)
 {
     if (isColourSpecified (colourId))
     {
-        removeComponentProperty (T("jucecol_") + String::toHexString (colourId));
+        removeComponentProperty (getColourPropertyName (colourId));
         colourChanged();
     }
 }
 
 void Component::setColour (const int colourId, const Colour& colour)
 {
-    const String colourName (T("jucecol_") + String::toHexString (colourId));
+    const String colourName (getColourPropertyName (colourId));
     const String customColour (getComponentProperty (colourName, false, String::empty));
 
     if (customColour.isEmpty() || Colour (customColour.getIntValue()) != colour)
@@ -1908,7 +1913,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const throw()
 
         for (int i = 0; i < keys.size(); ++i)
         {
-            if (keys[i].startsWith (T("jucecol_")))
+            if (keys[i].startsWith (T("jcclr_")))
             {
                 target.setComponentProperty (keys[i],
                                              props.getAllValues() [i]);

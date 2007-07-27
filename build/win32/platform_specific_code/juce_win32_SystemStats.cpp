@@ -63,6 +63,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 
 extern void juce_updateMultiMonitorInfo() throw();
+extern void juce_initialiseThreadEvents() throw();
+
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+ extern void juce_initialiseUnicodeFileFunctions() throw();
+#endif
 
 
 //==============================================================================
@@ -83,16 +88,8 @@ void Logger::outputDebugPrintf (const tchar* format, ...) throw()
 //==============================================================================
 static int64 hiResTicksPerSecond;
 static double hiResTicksScaleFactor;
-static SYSTEM_INFO systemInfo;
 
-static struct _LogicalCpuInfo
-{
-    bool htSupported;
-    bool htAvailable;
-    int numPackages;
-    int numLogicalPerPackage;
-    unsigned long physicalAffinityMask;
-} logicalCpuInfo;
+static SYSTEM_INFO systemInfo;
 
 
 //==============================================================================
@@ -103,7 +100,7 @@ static struct _LogicalCpuInfo
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
-static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0) throw()
+/*static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0) throw()
 {
     int info [4];
     __cpuid (info, 1);
@@ -115,7 +112,7 @@ static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0) th
         *extFeatures = info[1];
 
     return info[3];
-}
+}*/
 
 const String SystemStats::getCpuVendor() throw()
 {
@@ -135,7 +132,7 @@ const String SystemStats::getCpuVendor() throw()
 //==============================================================================
 // CPU info functions using old fashioned inline asm...
 
-static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
+/*static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
 {
     unsigned int cpu = 0;
     unsigned int ext = 0;
@@ -177,7 +174,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFe
         *extFeatures = ext;
 
     return cpu;
-}
+}*/
 
 static void juce_getCpuVendor (char* const v)
 {
@@ -223,117 +220,36 @@ const String SystemStats::getCpuVendor() throw()
 }
 #endif
 
-static void initLogicalCpuInfo() throw()
-{
-    int familyModelWord, extFeaturesWord;
-    int featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
-    HANDLE hCurrentProcessHandle = GetCurrentProcess();
-
-    logicalCpuInfo.htSupported = false;
-    logicalCpuInfo.htAvailable = false;
-    logicalCpuInfo.numLogicalPerPackage = 1;
-    logicalCpuInfo.numPackages = 0;
-    logicalCpuInfo.physicalAffinityMask = 0;
-
-    DWORD_PTR processAffinity, systemAffinity;
-
-    if (! GetProcessAffinityMask (hCurrentProcessHandle, &processAffinity, &systemAffinity))
-        return;
-
-    // Checks: CPUID supported, model >= Pentium 4, Hyperthreading bit set, logical CPUs per package > 1
-    if (featuresWord == 0
-        || ((familyModelWord >> 8) & 0xf) < 15
-        || (featuresWord & (1 << 28)) == 0
-        || ((extFeaturesWord >> 16) & 0xff) < 2)
-    {
-        logicalCpuInfo.physicalAffinityMask = static_cast <unsigned long> (processAffinity);
-        return;
-    }
-
-    logicalCpuInfo.htSupported = true;
-    logicalCpuInfo.numLogicalPerPackage = (extFeaturesWord >> 16) & 0xff;
-
-    unsigned int affinityMask;
-    unsigned int physAff = 0;
-
-    unsigned char i = 1;
-    unsigned char physIdMask = 0xFF;
-    unsigned char physIdShift = 0;
-
-    unsigned char apicId;
-    unsigned char logId;
-    unsigned char physId;
-
-    while (i < logicalCpuInfo.numLogicalPerPackage)
-    {
-        i *= 2;
-        physIdMask <<= 1;
-        physIdShift++;
-    }
-
-    affinityMask = 1;
-    logicalCpuInfo.numPackages = 0;
-
-    while ((affinityMask != 0) && (affinityMask <= processAffinity))
-    {
-        if (SetProcessAffinityMask (hCurrentProcessHandle, affinityMask))
-        {
-            Sleep(0); // schedule onto correct CPU
-
-            featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
-            apicId = (unsigned char) (extFeaturesWord >> 24);
-            logId = (unsigned char) (apicId & ~physIdMask);
-            physId = (unsigned char) (apicId >> physIdShift);
-
-            if (logId != 0)
-                logicalCpuInfo.htAvailable = true;
-
-            if ((((int) logId) % logicalCpuInfo.numLogicalPerPackage) == 0)
-            {
-                // This is a physical CPU
-                physAff |= affinityMask;
-                logicalCpuInfo.numPackages++;
-            }
-        }
-
-        affinityMask = affinityMask << 1;
-    }
-
-    logicalCpuInfo.physicalAffinityMask = physAff;
-
-    SetProcessAffinityMask(hCurrentProcessHandle, processAffinity);
-}
 
 //==============================================================================
-void juce_initialiseThreadEvents() throw();
-
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
- void juce_initialiseUnicodeFileFunctions() throw();
-#endif
-
-static struct JuceCpuProps
+struct CPUFlags
 {
-    bool hasMMX : 1, hasSSE : 1, hasSSE2 : 1, has3DNow : 1;
-} juce_CpuProps;
+    bool hasMMX : 1;
+    bool hasSSE : 1;
+    bool hasSSE2 : 1;
+    bool has3DNow : 1;
+};
+
+static CPUFlags cpuFlags;
 
 bool SystemStats::hasMMX() throw()
 {
-    return juce_CpuProps.hasMMX;
+    return cpuFlags.hasMMX;
 }
 
 bool SystemStats::hasSSE() throw()
 {
-    return juce_CpuProps.hasSSE;
+    return cpuFlags.hasSSE;
 }
 
 bool SystemStats::hasSSE2() throw()
 {
-    return juce_CpuProps.hasSSE2;
+    return cpuFlags.hasSSE2;
 }
 
 bool SystemStats::has3DNow() throw()
 {
-    return juce_CpuProps.has3DNow;
+    return cpuFlags.has3DNow;
 }
 
 void SystemStats::initialiseStats() throw()
@@ -344,13 +260,13 @@ void SystemStats::initialiseStats() throw()
 
     juce_initialiseThreadEvents();
 
-    juce_CpuProps.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
-    juce_CpuProps.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
-    juce_CpuProps.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
+    cpuFlags.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
+    cpuFlags.hasSSE   = IsProcessorFeaturePresent (PF_XMMI_INSTRUCTIONS_AVAILABLE) != 0;
+    cpuFlags.hasSSE2  = IsProcessorFeaturePresent (PF_XMMI64_INSTRUCTIONS_AVAILABLE) != 0;
 #ifdef PF_AMD3D_INSTRUCTIONS_AVAILABLE
-    juce_CpuProps.has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
+    cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_AMD3D_INSTRUCTIONS_AVAILABLE) != 0;
 #else
-    juce_CpuProps.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
+    cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
 #endif
 
     LARGE_INTEGER f;
@@ -361,7 +277,6 @@ void SystemStats::initialiseStats() throw()
     String s (SystemStats::getJUCEVersion());
 
     GetSystemInfo (&systemInfo);
-    initLogicalCpuInfo();
 
 #ifdef JUCE_DEBUG
     const MMRESULT res = timeBeginPeriod (1);
@@ -445,27 +360,9 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     return (int) (mem.dwTotalPhys / (1024 * 1024)) + 1;
 }
 
-bool SystemStats::hasHyperThreading() throw()
-{
-    return logicalCpuInfo.htAvailable;
-}
-
-int SystemStats::getNumPhysicalCpus() throw()
-{
-    if (logicalCpuInfo.numPackages)
-        return logicalCpuInfo.numPackages;
-
-    return getNumLogicalCpus();
-}
-
-int SystemStats::getNumLogicalCpus() throw()
+int SystemStats::getNumCpus() throw()
 {
     return systemInfo.dwNumberOfProcessors;
-}
-
-uint32 SystemStats::getPhysicalAffinityMask() throw()
-{
-    return logicalCpuInfo.physicalAffinityMask;
 }
 
 //==============================================================================

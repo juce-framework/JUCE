@@ -156,12 +156,12 @@ DropShadower::~DropShadower()
 
 void DropShadower::deleteShadowWindows()
 {
-    int i;
-    for (i = numShadows; --i >= 0;)
-        delete shadowWindows[i];
-
     if (numShadows > 0)
     {
+        int i;
+        for (i = numShadows; --i >= 0;)
+            delete shadowWindows[i];
+
         for (i = 12; --i >= 0;)
             delete shadowImageSections[i];
 
@@ -305,22 +305,22 @@ void DropShadower::updateShadows()
         }
 
         const int x = owner->getX();
-        const int y = owner->getY();
+        const int y = owner->getY() - shadowEdge;
         const int w = owner->getWidth();
-        const int h = owner->getHeight();
+        const int h = owner->getHeight() + shadowEdge + shadowEdge;
 
         shadowWindows[0]->setBounds (x - shadowEdge,
-                                     y - shadowEdge,
+                                     y,
                                      shadowEdge,
-                                     h + shadowEdge + shadowEdge);
+                                     h);
 
         shadowWindows[1]->setBounds (x + w,
-                                     y - shadowEdge,
+                                     y,
                                      shadowEdge,
-                                     h + shadowEdge + shadowEdge);
+                                     h);
 
         shadowWindows[2]->setBounds (x,
-                                     y - shadowEdge,
+                                     y,
                                      w,
                                      shadowEdge);
 
@@ -341,7 +341,7 @@ void DropShadower::setShadowImage (Image* const src,
                                    const int w,
                                    const int h,
                                    const int sx,
-                                   const int sy)
+                                   const int sy) throw()
 {
     shadowImageSections[num] = new Image (Image::ARGB, w, h, true);
 

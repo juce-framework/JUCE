@@ -57,9 +57,11 @@ ResizableWindow::ResizableWindow (const String& name,
 {
     setBackgroundColour (backgroundColour_);
 
+    const Rectangle mainMonArea (Desktop::getInstance().getMainMonitorArea());
+
     defaultConstrainer.setSizeLimits (200, 200,
-                                      Desktop::getInstance().getMainMonitorArea().getWidth(),
-                                      Desktop::getInstance().getMainMonitorArea().getHeight());
+                                      mainMonArea.getWidth(),
+                                      mainMonArea.getHeight());
 
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
@@ -101,13 +103,10 @@ void ResizableWindow::setContentComponent (Component* const newContentComponent,
 
     if (contentComponent != newContentComponent)
     {
-        if (contentComponent != 0)
-        {
-            if (deleteOldOne)
-                delete contentComponent;
-            else
-                removeChildComponent (contentComponent);
-        }
+        if (deleteOldOne)
+            delete contentComponent;
+        else
+            removeChildComponent (contentComponent);
 
         contentComponent = newContentComponent;
 
@@ -269,18 +268,22 @@ void ResizableWindow::setResizeLimits (const int newMinimumWidth,
 
 void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer)
 {
-    constrainer = newConstrainer;
+    if (constrainer != newConstrainer)
+    {
+        constrainer = newConstrainer;
 
-    const bool shouldBeResizable = resizableCorner != 0 || resizableBorder != 0;
-    const bool useBottomRightCornerResizer = resizableCorner != 0;
+        const bool useBottomRightCornerResizer = resizableCorner != 0;
+        const bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != 0;
 
-    deleteAndZero (resizableCorner);
-    deleteAndZero (resizableBorder);
+        deleteAndZero (resizableCorner);
+        deleteAndZero (resizableBorder);
 
-    setResizable (shouldBeResizable, useBottomRightCornerResizer);
+        setResizable (shouldBeResizable, useBottomRightCornerResizer);
 
-    if (getPeer() != 0)
-        getPeer()->setConstrainer (newConstrainer);
+        ComponentPeer* const peer = getPeer();
+        if (peer != 0)
+            peer->setConstrainer (newConstrainer);
+    }
 }
 
 void ResizableWindow::setBoundsConstrained (int x, int y, int w, int h)
@@ -326,8 +329,9 @@ void ResizableWindow::lookAndFeelChanged()
     {
         Component::addToDesktop (getDesktopWindowStyleFlags());
 
-        if (getPeer() != 0)
-            getPeer()->setConstrainer (constrainer);
+        ComponentPeer* const peer = getPeer();
+        if (peer != 0)
+            peer->setConstrainer (constrainer);
     }
 }
 
@@ -394,21 +398,21 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 
 bool ResizableWindow::isMinimised() const
 {
-    ComponentPeer* const nw = getPeer();
+    ComponentPeer* const peer = getPeer();
 
-    return (nw != 0) && nw->isMinimised();
+    return (peer != 0) && peer->isMinimised();
 }
 
 void ResizableWindow::setMinimised (const bool shouldMinimise)
 {
     if (shouldMinimise != isMinimised())
     {
-        ComponentPeer* const nw = getPeer();
+        ComponentPeer* const peer = getPeer();
 
-        if (nw != 0)
+        if (peer != 0)
         {
             updateLastPos();
-            nw->setMinimised (shouldMinimise);
+            peer->setMinimised (shouldMinimise);
         }
         else
         {
@@ -441,7 +445,7 @@ const String ResizableWindow::getWindowStateAsString()
     String s;
 
     if (isFullScreen())
-        s << T("fs ");
+        s << "fs ";
 
     s << lastNonFullScreenPos.getX() << T(' ')
       << lastNonFullScreenPos.getY() << T(' ')
@@ -464,10 +468,10 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     if (tokens.size() != 4 + n)
         return false;
 
-    Rectangle r (tokens[n].getIntValue(),
-                 tokens[n + 1].getIntValue(),
-                 tokens[n + 2].getIntValue(),
-                 tokens[n + 3].getIntValue());
+    const Rectangle r (tokens[n].getIntValue(),
+                       tokens[n + 1].getIntValue(),
+                       tokens[n + 2].getIntValue(),
+                       tokens[n + 3].getIntValue());
 
     if (r.isEmpty())
         return false;

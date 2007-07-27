@@ -51,10 +51,10 @@ static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamp
               && (int) x <= MAXIMUM_COORD \
               && (int) y >= MINIMUM_COORD \
               && (int) y <= MAXIMUM_COORD \
-              && (int) w >= 0 \
-              && (int) w < MAXIMUM_COORD \
-              && (int) h >= 0 \
-              && (int) h < MAXIMUM_COORD);
+              && (int) w >= MINIMUM_COORD \
+              && (int) w <= MAXIMUM_COORD \
+              && (int) h >= MINIMUM_COORD \
+              && (int) h <= MAXIMUM_COORD);
 
 
 //==============================================================================

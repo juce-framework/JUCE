@@ -103,7 +103,7 @@ public:
 
         @see currentTimeMillis
     */
-    static const Time getCurrentTime() throw();
+    static const Time JUCE_CALLTYPE getCurrentTime() throw();
 
     /** Returns the time as a number of milliseconds.
 

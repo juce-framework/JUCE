@@ -83,7 +83,6 @@ struct CPUFlags
     bool hasSSE : 1;
     bool hasSSE2 : 1;
     bool has3DNow : 1;
-    bool hasHT : 1;
 };
 
 static CPUFlags cpuFlags;
@@ -145,7 +144,6 @@ void SystemStats::initialiseStats() throw()
             cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
             cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
             cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
-            cpuFlags.hasHT = ((features & (1 << 28)) != 0);
         }
 #endif
 
@@ -201,15 +199,6 @@ bool SystemStats::has3DNow() throw()
 #endif
 }
 
-bool SystemStats::hasHyperThreading() throw()
-{
-#if JUCE_INTEL
-    return cpuFlags.hasHT;
-#else
-    return false;
-#endif
-}
-
 const String SystemStats::getCpuVendor() throw()
 {
 #if JUCE_INTEL
@@ -226,20 +215,9 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
     return GetCPUSpeed();
 }
 
-int SystemStats::getNumPhysicalCpus() throw()
+int SystemStats::getNumCpus() throw()
 {
     return MPProcessors();
-}
-
-int SystemStats::getNumLogicalCpus() throw()
-{
-    return getNumPhysicalCpus();
-}
-
-uint32 SystemStats::getPhysicalAffinityMask() throw()
-{
-    jassertfalse
-    return 0;
 }
 
 //==============================================================================

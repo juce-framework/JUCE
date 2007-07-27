@@ -167,7 +167,7 @@ void Thread::yield() throw()
     sched_yield();
 }
 
-void Thread::sleep (int millisecs) throw()
+void JUCE_CALLTYPE Thread::sleep (int millisecs) throw()
 {
     struct timespec time;
     time.tv_sec = millisecs / 1000;

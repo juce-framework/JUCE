@@ -115,31 +115,9 @@ public:
     /** Checks whether AMD 3DNOW instructions are available. */
     static bool has3DNow() throw();
 
-    /** True if the chip has hyperthreading.
-
-        Probably only uber-geeks will care less about this.
+    /** Returns the number of CPUs.
     */
-    static bool hasHyperThreading() throw();
-
-    /** Checks whether there are multiple processors in the box.
-
-        @see getNumLogicalCpus
-    */
-    static int getNumPhysicalCpus() throw();
-
-    /** Counts the number of logical processors.
-
-        May give a different result to getNumPhysicalCpus()...
-    */
-    static int getNumLogicalCpus() throw();
-
-    /** Returns a bitmask for the physical processors.
-
-        This mask shows which of the logical processors are actually physical.
-
-        @see Thread::setAffinityMask
-    */
-    static uint32 getPhysicalAffinityMask() throw();
+    static int getNumCpus() throw();
 
     /** Returns a clock-cycle tick counter, if available.
 

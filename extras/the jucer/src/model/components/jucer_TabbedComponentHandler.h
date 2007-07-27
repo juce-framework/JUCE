@@ -1169,7 +1169,7 @@ private:
     public:
         TabMoveProperty (TabbedComponent* comp, JucerDocument& document_,
                          const int tabIndex_, const int totalNumTabs_)
-            : ButtonPropertyComponent (T("add tab"), false),
+            : ButtonPropertyComponent (T("move tab"), false),
               component (comp),
               document (document_),
               tabIndex (tabIndex_),

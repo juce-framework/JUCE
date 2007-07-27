@@ -225,7 +225,7 @@ void Thread::yield() throw()
     Sleep (0);
 }
 
-void Thread::sleep (const int millisecs) throw()
+void JUCE_CALLTYPE Thread::sleep (const int millisecs) throw()
 {
     if (millisecs >= 10)
     {

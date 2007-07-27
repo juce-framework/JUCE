@@ -213,7 +213,7 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
     jassertfalse
 }
 
-void Thread::sleep (int millisecs) throw()
+void JUCE_CALLTYPE Thread::sleep (int millisecs) throw()
 {
     struct timespec time;
     time.tv_sec = millisecs / 1000;

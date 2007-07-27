@@ -567,7 +567,7 @@ static const File juce_getSpecialFolderPath (int type) throw()
     return File::nonexistent;
 }
 
-const File File::getSpecialLocation (const SpecialLocationType type)
+const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
 {
     switch (type)
     {

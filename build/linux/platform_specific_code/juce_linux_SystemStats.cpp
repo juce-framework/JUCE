@@ -47,14 +47,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/events/juce_Timer.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 
-static struct _LogicalCpuInfo
-{
-    bool htSupported;
-    bool htAvailable;
-    int numPackages;
-    int numLogicalPerPackage;
-    uint32 physicalAffinityMask;
-} logicalCpuInfo;
 
 //==============================================================================
 static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures) throw()
@@ -80,110 +72,6 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatur
         *extFeatures = ext;
 
     return cpu;
-}
-
-void juce_initLogicalCpuInfo() throw()
-{
-    int familyModelWord, extFeaturesWord;
-    int featuresWord = getCPUIDWord (&familyModelWord, &extFeaturesWord);
-
-    logicalCpuInfo.htSupported = false;
-    logicalCpuInfo.htAvailable = false;
-    logicalCpuInfo.numLogicalPerPackage = 1;
-    logicalCpuInfo.numPackages = 0;
-    logicalCpuInfo.physicalAffinityMask = 0;
-
-#if SUPPORT_AFFINITIES
-    cpu_set_t processAffinity;
-
-    /*
-       N.B. If this line causes a compile error, then you've probably not got the latest
-       version of glibc installed.
-
-       If you don't want to update your copy of glibc and don't care about cpu affinities,
-       then you can just disable all this stuff by removing the SUPPORT_AFFINITIES macro
-       from the linuxincludes.h file.
-    */
-    if (sched_getaffinity (getpid(),
-                           sizeof (cpu_set_t),
-                           &processAffinity) != sizeof (cpu_set_t))
-    {
-        return;
-    }
-
-    // Checks: CPUID supported, model >= Pentium 4, Hyperthreading bit set, logical CPUs per package > 1
-    if (featuresWord == 0
-        || ((familyModelWord >> 8) & 0xf) < 15
-        || (featuresWord & (1 << 28)) == 0
-        || ((extFeaturesWord >> 16) & 0xff) < 2)
-    {
-        for (int i = 0; i < 64; ++i)
-            if (CPU_ISSET (i, &processAffinity))
-                logicalCpuInfo.physicalAffinityMask |= (1 << i);
-
-        return;
-    }
-
-    logicalCpuInfo.htSupported = true;
-    logicalCpuInfo.numLogicalPerPackage = (extFeaturesWord >> 16) & 0xff;
-
-    cpu_set_t affinityMask;
-    cpu_set_t physAff;
-    CPU_ZERO (&physAff);
-
-    unsigned char i = 1;
-    unsigned char physIdMask = 0xFF;
-    unsigned char physIdShift = 0;
-
-    //unsigned char apicId, logId, physId;
-
-    while (i < logicalCpuInfo.numLogicalPerPackage)
-    {
-        i *= 2;
-        physIdMask <<= 1;
-        physIdShift++;
-    }
-
-    CPU_SET (0, &affinityMask);
-    logicalCpuInfo.numPackages = 0;
-
-//xxx revisit this at some point..
-/*    while ((affinityMask != 0) && (affinityMask <= processAffinity))
-    {
-        int ret;
-        if (! sched_setaffinity (getpid(), sizeof (cpu_set_t), &affinityMask))
-        {
-            sched_yield(); // schedule onto correct CPU
-
-            featuresWord = getCPUIDWord(&familyModelWord, &extFeaturesWord);
-            apicId = (unsigned char)(extFeaturesWord >> 24);
-            logId = (unsigned char)(apicId & ~physIdMask);
-            physId = (unsigned char)(apicId >> physIdShift);
-
-            if (logId != 0)
-                logicalCpuInfo.htAvailable = true;
-
-            if ((((int)logId) % logicalCpuInfo.numLogicalPerPackage) == 0)
-            {
-                // This is a physical CPU
-                physAff |= affinityMask;
-                logicalCpuInfo.numPackages++;
-            }
-        }
-
-        affinityMask = affinityMask << 1;
-    }
-
-    sched_setaffinity (getpid(), sizeof(unsigned long), &processAffinity);
-*/
-
-    logicalCpuInfo.physicalAffinityMask = 0;
-
-    for (int i = 0; i < 64; ++i)
-        if (CPU_ISSET (i, &physAff))
-            logicalCpuInfo.physicalAffinityMask |= (1 << i);
-
-#endif
 }
 
 //==============================================================================
@@ -280,11 +168,6 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
     return (int) (speed.getFloatValue() + 0.5f);
 }
 
-bool SystemStats::hasHyperThreading() throw()
-{
-    return logicalCpuInfo.htAvailable;
-}
-
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
     struct sysinfo sysi;
@@ -360,34 +243,13 @@ int SystemStats::getPageSize() throw()
     return systemPageSize;
 }
 
-int SystemStats::getNumPhysicalCpus() throw()
-{
-    if (logicalCpuInfo.numPackages)
-        return logicalCpuInfo.numPackages;
-
-    return getNumLogicalCpus();
-}
-
-int SystemStats::getNumLogicalCpus() throw()
+int SystemStats::getNumCpus() throw()
 {
     const int lastCpu = getCpuInfo ("processor", true).getIntValue();
 
     return lastCpu + 1;
 }
 
-uint32 SystemStats::getPhysicalAffinityMask() throw()
-{
-#if SUPPORT_AFFINITIES
-    return logicalCpuInfo.physicalAffinityMask;
-#else
-    /* affinities aren't supported because either the appropriate header files weren't found,
-       or the SUPPORT_AFFINITIES macro was turned off in linuxheaders.h
-    */
-    jassertfalse
-    return 0;
-#endif
-
-}
 
 //==============================================================================
 void SystemStats::initialiseStats() throw()
@@ -396,8 +258,6 @@ void SystemStats::initialiseStats() throw()
     Process::lowerPrivilege();
 
     String s (SystemStats::getJUCEVersion());
-
-    juce_initLogicalCpuInfo();
 }
 
 void PlatformUtilities::fpuReset()

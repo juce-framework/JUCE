@@ -769,13 +769,17 @@ const String String::operator+ (const tchar characterToAppend) const throw()
 const String JUCE_PUBLIC_FUNCTION operator+ (const char* const string1,
                                              const String& string2) throw()
 {
-    return String (string1) + string2;
+    String s (string1);
+    s += string2;
+    return s;
 }
 
 const String JUCE_PUBLIC_FUNCTION operator+ (const juce_wchar* const string1,
                                              const String& string2) throw()
 {
-    return String (string1) + string2;
+    String s (string1);
+    s += string2;
+    return s;
 }
 
 //==============================================================================

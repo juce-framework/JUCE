@@ -192,10 +192,10 @@ public:
 
     //==============================================================================
     // this can be called from any thread that needs to pause..
-    static void sleep (int milliseconds) throw();
+    static void JUCE_CALLTYPE sleep (int milliseconds) throw();
 
     /** Yields the calling thread's current time-slot. */
-    static void yield() throw();
+    static void JUCE_CALLTYPE yield() throw();
 
     //==============================================================================
     /** Makes the thread wait for a notification.

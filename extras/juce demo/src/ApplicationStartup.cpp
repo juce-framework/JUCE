@@ -124,13 +124,11 @@ private:
           << T("\nOperating system: ") << SystemStats::getOperatingSystemName()
           << T("\nCPU vendor: ") << SystemStats::getCpuVendor()
           << T("\nCPU speed: ") << SystemStats::getCpuSpeedInMegaherz() << T("MHz\n")
-          << T("\nNumber of physical CPUs: ") << SystemStats::getNumPhysicalCpus()
-          << T("\nNumber of logical CPUs: ") << SystemStats::getNumLogicalCpus()
+          << T("\nNumber of CPUs: ") << SystemStats::getNumCpus()
           << T("\nCPU has MMX: ") << (SystemStats::hasMMX() ? T("yes") : T("no"))
           << T("\nCPU has SSE: ") << (SystemStats::hasSSE() ? T("yes") : T("no"))
           << T("\nCPU has SSE2: ") << (SystemStats::hasSSE2() ? T("yes") : T("no"))
           << T("\nCPU has 3DNOW: ") << (SystemStats::has3DNow() ? T("yes") : T("no"))
-          << T("\nCPU has hyperthreading: ") << (SystemStats::hasHyperThreading() ? T("yes") : T("no"))
           << T("\nMemory size: ") << SystemStats::getMemorySizeInMegabytes() << T("MB\n");
 
         int64 macAddresses[8];

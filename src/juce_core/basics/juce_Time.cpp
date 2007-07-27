@@ -241,7 +241,7 @@ int64 Time::secondsToHighResolutionTicks (const double seconds) throw()
 
 
 //==============================================================================
-const Time Time::getCurrentTime() throw()
+const Time JUCE_CALLTYPE Time::getCurrentTime() throw()
 {
     return Time (currentTimeMillis());
 }

@@ -767,7 +767,7 @@ public:
 
         @see SpecialLocationType
     */
-    static const File getSpecialLocation (const SpecialLocationType type);
+    static const File JUCE_CALLTYPE getSpecialLocation (const SpecialLocationType type);
 
     //==============================================================================
     /** Returns a temporary file in the system's temp directory.
