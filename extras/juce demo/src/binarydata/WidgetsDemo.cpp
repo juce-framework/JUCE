@@ -1024,6 +1024,85 @@ public:
     }
 };
 
+#if JUCE_MAC
+
+//==============================================================================
+/** This pops open a dialog box and waits for you to press keys on your Apple Remote,
+    which it describes in the box.
+*/
+class AppleRemoteTestWindow  : public AlertWindow,
+                               public AppleRemoteDevice
+{
+public:
+    AppleRemoteTestWindow()
+        : AlertWindow ("Apple Remote Control Test!", 
+                       "If you've got an Apple Remote, press some buttons now...", 
+                       AlertWindow::NoIcon)
+    {
+        addButton (T("done"), 0);
+
+        // (To open the device in non-exclusive mode, pass 'false' in here)..
+        if (! start (true))
+            setMessage ("Couldn't open the remote control device!");
+    }
+
+    ~AppleRemoteTestWindow()
+    {
+        stop();
+    }
+
+    void buttonPressed (const ButtonType buttonId, const bool isDown)
+    {
+        String desc;
+
+        switch (buttonId)
+        {
+        case menuButton:
+            desc = "menu button (short)";
+            break;
+        case playButton:
+            desc = "play button";
+            break;
+        case plusButton:
+            desc = "plus button";
+            break;
+        case minusButton:
+            desc = "minus button";
+            break;
+        case rightButton:
+            desc = "right button (short)";
+            break;
+        case leftButton:
+            desc = "left button (short)";
+            break;
+        case rightButton_Long:
+            desc = "right button (long)";
+            break;
+        case leftButton_Long:
+            desc = "left button (long)";
+            break;
+        case menuButton_Long:
+            desc = "menu button (long)";
+            break;
+        case playButtonSleepMode:
+            desc = "play (sleep mode)";
+            break;
+        case switched:
+            desc = "remote switched";
+            break;
+        }
+
+        if (isDown)
+            desc << " -- [down]";
+        else
+            desc << " -- [up]";
+
+        setMessage (desc);
+    }
+};
+
+#endif
+
 //==============================================================================
 const int numGroups = 4;
 
@@ -1085,67 +1164,71 @@ public:
         else if (button == menuButton)
         {
             PopupMenu m;
-            m.addItem (1, T("normal item"));
-            m.addItem (2, T("disabled item"), false);
-            m.addItem (3, T("ticked item"), true, true);
-            m.addColouredItem (4, T("coloured item"), Colours::green);
+            m.addItem (1, T("Normal item"));
+            m.addItem (2, T("Disabled item"), false);
+            m.addItem (3, T("Ticked item"), true, true);
+            m.addColouredItem (4, T("Coloured item"), Colours::green);
             m.addSeparator();
             m.addCustomItem (5, new CustomMenuComponent());
 
             m.addSeparator();
 
             PopupMenu tabsMenu;
-            tabsMenu.addItem (1001, T("show tabs at the top"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtTop);
-            tabsMenu.addItem (1002, T("show tabs at the bottom"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtBottom);
-            tabsMenu.addItem (1003, T("show tabs at the left"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtLeft);
-            tabsMenu.addItem (1004, T("show tabs at the right"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtRight);
-            m.addSubMenu (T("tab position"), tabsMenu);
+            tabsMenu.addItem (1001, T("Show tabs at the top"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtTop);
+            tabsMenu.addItem (1002, T("Show tabs at the bottom"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtBottom);
+            tabsMenu.addItem (1003, T("Show tabs at the left"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtLeft);
+            tabsMenu.addItem (1004, T("Show tabs at the right"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtRight);
+            m.addSubMenu (T("Tab position"), tabsMenu);
 
             m.addSeparator();
 
             PopupMenu dialogMenu;
-            dialogMenu.addItem (100, T("show a plain alert-window..."));
-            dialogMenu.addItem (101, T("show an alert-window with a 'warning' icon..."));
-            dialogMenu.addItem (102, T("show an alert-window with an 'info' icon..."));
-            dialogMenu.addItem (103, T("show an alert-window with a 'question' icon..."));
+            dialogMenu.addItem (100, T("Show a plain alert-window..."));
+            dialogMenu.addItem (101, T("Show an alert-window with a 'warning' icon..."));
+            dialogMenu.addItem (102, T("Show an alert-window with an 'info' icon..."));
+            dialogMenu.addItem (103, T("Show an alert-window with a 'question' icon..."));
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (110, T("show an ok/cancel alert-window..."));
+            dialogMenu.addItem (110, T("Show an ok/cancel alert-window..."));
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (111, T("show an alert-window with some extra components..."));
+            dialogMenu.addItem (111, T("Show an alert-window with some extra components..."));
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (112, T("show a ThreadWithProgressWindow demo..."));
+            dialogMenu.addItem (112, T("Show a ThreadWithProgressWindow demo..."));
 
             m.addSubMenu (T("AlertWindow demonstrations"), dialogMenu);
 
-            dialogMenu.addSeparator();
+            m.addSeparator();
 
-            m.addItem (120, T("show a colour selector demo..."));
+            m.addItem (120, T("Show a colour selector demo..."));
+            m.addSeparator();
 
-            dialogMenu.addSeparator();
+#if JUCE_MAC
+            m.addItem (140, T("Run the Apple Remote Control test..."));
+            m.addSeparator();
+#endif
 
             PopupMenu nativeFileChoosers;
-            nativeFileChoosers.addItem (121, T("'load' file browser..."));
-            nativeFileChoosers.addItem (124, T("'load' file browser with an image file preview..."));
-            nativeFileChoosers.addItem (122, T("'save' file browser..."));
-            nativeFileChoosers.addItem (123, T("choose directory file browser..."));
+            nativeFileChoosers.addItem (121, T("'Load' file browser..."));
+            nativeFileChoosers.addItem (124, T("'Load' file browser with an image file preview..."));
+            nativeFileChoosers.addItem (122, T("'Save' file browser..."));
+            nativeFileChoosers.addItem (123, T("'Choose directory' file browser..."));
 
             PopupMenu juceFileChoosers;
-            juceFileChoosers.addItem (131, T("'load' file browser..."));
-            juceFileChoosers.addItem (134, T("'load' file browser with an image file preview..."));
-            juceFileChoosers.addItem (132, T("'save' file browser..."));
-            juceFileChoosers.addItem (133, T("choose directory file browser..."));
+            juceFileChoosers.addItem (131, T("'Load' file browser..."));
+            juceFileChoosers.addItem (134, T("'Load' file browser with an image file preview..."));
+            juceFileChoosers.addItem (132, T("'Save' file browser..."));
+            juceFileChoosers.addItem (133, T("'Choose directory' file browser..."));
 
             PopupMenu fileChoosers;
             fileChoosers.addSubMenu (T("Operating system dialogs"), nativeFileChoosers);
             fileChoosers.addSubMenu (T("Juce dialogs"), juceFileChoosers);
 
-            m.addSubMenu (T("file chooser dialogs"), fileChoosers);
+            m.addSubMenu (T("File chooser dialogs"), fileChoosers);
 
             int result = m.showAt (menuButton);
 
@@ -1231,6 +1314,13 @@ public:
                     // this will run an event loop until the dialog's closeButtonPressed()
                     // method causes the loop to exit.
                     colourDialog.runModalLoop();
+                }
+                else if (result == 140)
+                {
+#if JUCE_MAC
+                    AppleRemoteTestWindow test;
+                    test.runModalLoop();
+#endif
                 }
                 else if (result >= 121 && result < 139)
                 {

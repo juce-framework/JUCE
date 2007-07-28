@@ -209,6 +209,7 @@ public:
 
         addAndMakeVisible (treeView = new TreeView());
         treeView->setRootItem (rootItem);
+        treeView->setMultiSelectEnabled (true);
 
         resized();
     }
