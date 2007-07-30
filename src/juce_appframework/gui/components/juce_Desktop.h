@@ -125,6 +125,28 @@ public:
     static int getMouseButtonClickCounter() throw();
 
     //==============================================================================
+    /** This lets you prevent the screensaver from becoming active.
+
+        Handy if you're running some sort of presentation app where having a screensaver 
+        appear would be annoying.
+
+        Pass false to disable the screensaver, and true to re-enable it.
+
+        @see isScreenSaverEnabled
+    */
+    static void setScreenSaverEnabled (const bool isEnabled) throw();
+
+    /** Returns true if the screensaver has not been turned off.
+
+        This will return the last value passed into setScreenSaverEnabled(). Note that
+        it won't tell you whether the user is actually using a screen saver, just
+        whether this app is deliberately preventing one from running.
+
+        @see setScreenSaverEnabled
+    */
+    static bool isScreenSaverEnabled() throw();
+
+    //==============================================================================
     /** Registers a MouseListener that will receive all mouse events that occur on
         any component.
 

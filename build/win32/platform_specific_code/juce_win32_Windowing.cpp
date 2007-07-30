@@ -110,6 +110,7 @@ const int juce_windowIsSemiTransparentFlag = (1 << 31); // also in component.cpp
 static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
+static bool screenSaverAllowed = true;
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw();
 #define WM_TRAYNOTIFY WM_USER + 100
@@ -2123,45 +2124,45 @@ private:
                         break;
 
                     case WM_SYSCOMMAND:
-                        if (hasTitleBar())
+                        switch (wParam & 0xfff0)
                         {
-                            switch (wParam & 0xfff0)
+                        case SC_CLOSE:
+                            if (hasTitleBar())
                             {
-                            case SC_CLOSE:
                                 PostMessage (h, WM_CLOSE, 0, 0);
                                 return 0;
+                            }
+                            break;
 
-                            case SC_KEYMENU:
-                                if (h == GetCapture())
-                                    ReleaseCapture();
-                                break;
+                        case SC_KEYMENU:
+                            if (hasTitleBar() && h == GetCapture())
+                                ReleaseCapture();
 
-                            case SC_MAXIMIZE:
-                                setFullScreen (true);
+                            break;
+
+                        case SC_MAXIMIZE:
+                            setFullScreen (true);
+                            return 0;
+
+                        case SC_MINIMIZE:
+                            if (! hasTitleBar())
+                            {
+                                setMinimised (true);
                                 return 0;
+                            }
+                            break;
 
-                            case SC_RESTORE:
+                        case SC_RESTORE:
+                            if (hasTitleBar())
+                            {
                                 if (isFullScreen())
                                 {
                                     setFullScreen (false);
                                     return 0;
                                 }
-                                break;
                             }
-                        }
-                        else
-                        {
-                            switch (wParam & 0xfff0)
+                            else
                             {
-                            case SC_MINIMIZE:
-                                setMinimised(true);
-                                return 0;
-
-                            case SC_MAXIMIZE:
-                                setFullScreen(true);
-                                return 0;
-
-                            case SC_RESTORE:
                                 if (isMinimised())
                                     setMinimised (false);
                                 else if (isFullScreen())
@@ -2169,6 +2170,15 @@ private:
 
                                 return 0;
                             }
+
+                            break;
+
+                        case SC_MONITORPOWER:
+                        case SC_SCREENSAVE:
+                            if (! screenSaverAllowed)
+                                return 0;
+
+                            break;
                         }
 
                         break;
@@ -2232,7 +2242,7 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 }
 
 //==============================================================================
-void juce_setWindowStyleBit (HWND h, int styleType, int feature, bool bitIsSet)
+void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) throw()
 {
     DWORD val = GetWindowLong (h, styleType);
 
@@ -2274,6 +2284,17 @@ void Desktop::getMousePosition (int& x, int& y) throw()
 void Desktop::setMousePosition (int x, int y) throw()
 {
     SetCursorPos (x, y);
+}
+
+//==============================================================================
+void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+{
+    screenSaverAllowed = isEnabled;
+}
+
+bool Desktop::isScreenSaverEnabled() throw()
+{
+    return screenSaverAllowed;
 }
 
 //==============================================================================
@@ -3180,21 +3201,21 @@ public:
     ULONG __stdcall AddRef()    { return ++refCount; }
     ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
 
-    HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)   { return E_NOTIMPL; }
-    HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)     { return E_NOTIMPL; }
-    HRESULT __stdcall CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)     { return E_NOTIMPL; }
+    HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
+    HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
+    HRESULT __stdcall CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)         { return E_NOTIMPL; }
     HRESULT __stdcall OpenStorage (const WCHAR*, IStorage*, DWORD, SNB, DWORD, IStorage**)  { return E_NOTIMPL; }
-    HRESULT __stdcall CopyTo (DWORD, IID const*, SNB, IStorage*)                    { return E_NOTIMPL; }
+    HRESULT __stdcall CopyTo (DWORD, IID const*, SNB, IStorage*)                            { return E_NOTIMPL; }
     HRESULT __stdcall MoveElementTo (const OLECHAR*,IStorage*, const OLECHAR*, DWORD)       { return E_NOTIMPL; }
-    HRESULT __stdcall Commit (DWORD)                                        { return E_NOTIMPL; }
-    HRESULT __stdcall Revert()                                              { return E_NOTIMPL; }
-    HRESULT __stdcall EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)    { return E_NOTIMPL; }
-    HRESULT __stdcall DestroyElement (const OLECHAR*)                       { return E_NOTIMPL; }
-    HRESULT __stdcall RenameElement (const WCHAR*, const WCHAR*)            { return E_NOTIMPL; }
+    HRESULT __stdcall Commit (DWORD)                                                        { return E_NOTIMPL; }
+    HRESULT __stdcall Revert()                                                              { return E_NOTIMPL; }
+    HRESULT __stdcall EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)                    { return E_NOTIMPL; }
+    HRESULT __stdcall DestroyElement (const OLECHAR*)                                       { return E_NOTIMPL; }
+    HRESULT __stdcall RenameElement (const WCHAR*, const WCHAR*)                            { return E_NOTIMPL; }
     HRESULT __stdcall SetElementTimes (const WCHAR*, FILETIME const*, FILETIME const*, FILETIME const*)    { return E_NOTIMPL; }
-    HRESULT __stdcall SetClass (REFCLSID)                                   { return S_OK; }
-    HRESULT __stdcall SetStateBits (DWORD, DWORD)                           { return E_NOTIMPL; }
-    HRESULT __stdcall Stat (STATSTG*, DWORD)                                { return E_NOTIMPL; }
+    HRESULT __stdcall SetClass (REFCLSID)                                                   { return S_OK; }
+    HRESULT __stdcall SetStateBits (DWORD, DWORD)                                           { return E_NOTIMPL; }
+    HRESULT __stdcall Stat (STATSTG*, DWORD)                                                { return E_NOTIMPL; }
 
     juce_UseDebuggingNewOperator
 };
@@ -3355,12 +3376,12 @@ public:
     ULONG __stdcall AddRef()    { return ++refCount; }
     ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
 
-    HRESULT __stdcall SaveObject()                              { return E_NOTIMPL; }
-    HRESULT __stdcall GetMoniker (DWORD, DWORD, IMoniker**)     { return E_NOTIMPL; }
+    HRESULT __stdcall SaveObject()                                  { return E_NOTIMPL; }
+    HRESULT __stdcall GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }
     HRESULT __stdcall GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = 0; return E_NOINTERFACE; }
-    HRESULT __stdcall ShowObject()                              { return S_OK; }
-    HRESULT __stdcall OnShowWindow (BOOL)                       { return E_NOTIMPL; }
-    HRESULT __stdcall RequestNewObjectLayout()                  { return E_NOTIMPL; }
+    HRESULT __stdcall ShowObject()                                  { return S_OK; }
+    HRESULT __stdcall OnShowWindow (BOOL)                           { return E_NOTIMPL; }
+    HRESULT __stdcall RequestNewObjectLayout()                      { return E_NOTIMPL; }
 
     juce_UseDebuggingNewOperator
 };

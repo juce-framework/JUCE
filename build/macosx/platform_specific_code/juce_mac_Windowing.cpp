@@ -2258,6 +2258,40 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 }
 
 //==============================================================================
+class ScreenSaverDefeater   : public Timer,
+                              public DeletedAtShutdown
+{
+public:
+    ScreenSaverDefeater() throw()
+    {
+        startTimer (10000);
+        timerCallback();
+    }
+
+    ~ScreenSaverDefeater()
+    {
+    }
+
+    void timerCallback()
+    {
+        UpdateSystemActivity (UsrActivity);
+    }
+};
+
+static ScreenSaverDefeater* screenSaverDefeater = 0;
+
+void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+{
+    if (screenSaverDefeater == 0)
+        screenSaverDefeater = new ScreenSaverDefeater();
+}
+
+bool Desktop::isScreenSaverEnabled() throw()
+{
+    return screenSaverDefeater == 0;
+}
+
+//==============================================================================
 void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
 {
     int mainMonitorIndex = 0;

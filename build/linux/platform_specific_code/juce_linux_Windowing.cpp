@@ -2562,6 +2562,18 @@ void Desktop::setMousePosition (int x, int y) throw()
     XWarpPointer (display, None, root, 0, 0, 0, 0, x, y);
 }
 
+
+//==============================================================================
+void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+{
+    jassertfalse // anyone know how to do this??
+}
+
+bool Desktop::isScreenSaverEnabled() throw()
+{
+    return true;
+}
+
 //==============================================================================
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
