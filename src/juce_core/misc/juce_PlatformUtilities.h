@@ -164,7 +164,7 @@ class JUCE_API  AppleRemoteDevice
 public:
     //==============================================================================
     AppleRemoteDevice();
-    ~AppleRemoteDevice();
+    virtual ~AppleRemoteDevice();
 
     //==============================================================================
     /** The set of buttons that may be pressed.
