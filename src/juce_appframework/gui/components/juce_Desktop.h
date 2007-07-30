@@ -130,7 +130,12 @@ public:
         Handy if you're running some sort of presentation app where having a screensaver 
         appear would be annoying.
 
-        Pass false to disable the screensaver, and true to re-enable it.
+        Pass false to disable the screensaver, and true to re-enable it. (Note that this 
+        won't enable a screensaver unless the user has actually set one up).
+
+        The disablement will only happen while the Juce application is the foreground 
+        process - if another task is running in front of it, then the screensaver will 
+        be unaffected.
 
         @see isScreenSaverEnabled
     */

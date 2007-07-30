@@ -2274,7 +2274,8 @@ public:
 
     void timerCallback()
     {
-        UpdateSystemActivity (UsrActivity);
+        if (Process::isForegroundProcess())
+            UpdateSystemActivity (UsrActivity);
     }
 };
 
