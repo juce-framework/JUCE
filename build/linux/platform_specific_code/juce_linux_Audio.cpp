@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -42,7 +42,7 @@
 
    The package you need to install to get ASLA support is "libasound2-dev".
 
-   If you don't have the ALSA library and don't want to build Juce with audio support, 
+   If you don't have the ALSA library and don't want to build Juce with audio support,
    just disable the JUCE_ALSA flag in juce_Config.h
 */
 #include <alsa/asoundlib.h>
@@ -795,7 +795,7 @@ public:
         internal->setCallback (callback);
 
         if (callback != 0)
-            callback->audioDeviceAboutToStart (internal->sampleRate, 
+            callback->audioDeviceAboutToStart (internal->sampleRate,
                                                internal->bufferSize);
 
         isStarted = (callback != 0);

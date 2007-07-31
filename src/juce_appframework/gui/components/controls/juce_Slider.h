@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ public:
     void setVelocityBasedMode (const bool isVelocityBased) throw();
 
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
-        
+
         These apply when you've used setVelocityBasedMode() to turn on velocity mode,
         or if you're holding down ctrl.
 

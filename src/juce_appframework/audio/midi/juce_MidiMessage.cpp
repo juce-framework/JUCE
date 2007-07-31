@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -62,12 +62,12 @@ int MidiMessage::readVariableLengthVal (const uint8* data,
 int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
 {
     // this method only works for valid starting bytes of a short midi message
-    jassert (firstByte >= 0x80 
-              && firstByte != 0xff 
+    jassert (firstByte >= 0x80
+              && firstByte != 0xff
               && firstByte != 0xf0
               && firstByte != 0xf7);
 
-    static const char messageLengths[] = 
+    static const char messageLengths[] =
     {
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -76,7 +76,7 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-        1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 
+        1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
     };
 
     return messageLengths [firstByte & 0x7f];

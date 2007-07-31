@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ public:
     /** Returns the focus order of this component, if one has been specified.
 
         By default components don't have a focus order - in that case, this
-        will return 0. Lower numbers indicate that the component will be 
+        will return 0. Lower numbers indicate that the component will be
         earlier in the focus traversal order.
 
         To change the order, call setExplicitFocusOrder().
@@ -1096,7 +1096,7 @@ public:
         its algorithm for deciding the order in which components should be traversed.
         See the KeyboardFocusTraverser class for more details on this.
 
-        @see moveKeyboardFocusToSibling, createFocusTraverser, KeyboardFocusTraverser 
+        @see moveKeyboardFocusToSibling, createFocusTraverser, KeyboardFocusTraverser
     */
     int getExplicitFocusOrder() const throw();
 
@@ -1472,9 +1472,9 @@ public:
         its setWantsKeyboardFocus() method has been used to enable this.
 
         If your implementation returns true, the event will be consumed and not passed
-        on to any other listeners. If it returns false, then any KeyListeners that have 
-        been registered with this component will have their keyStateChanged methods called. 
-        As soon as one of these returns true, the process will stop, but if they all return 
+        on to any other listeners. If it returns false, then any KeyListeners that have
+        been registered with this component will have their keyStateChanged methods called.
+        As soon as one of these returns true, the process will stop, but if they all return
         false, the event will be passed upwards to this component's parent, and so on.
 
         The default implementation of this method does nothing and returns false.

@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -996,7 +996,7 @@ public:
 
         If the size is < 0, it'll keep reading until it hits a zero.
     */
-    static const String fromUTF8 (const uint8* const utf8buffer, 
+    static const String fromUTF8 (const uint8* const utf8buffer,
                                   int bufferSizeBytes = -1) throw();
 
     //==============================================================================

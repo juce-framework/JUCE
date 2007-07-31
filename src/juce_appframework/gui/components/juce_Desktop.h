@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -127,14 +127,14 @@ public:
     //==============================================================================
     /** This lets you prevent the screensaver from becoming active.
 
-        Handy if you're running some sort of presentation app where having a screensaver 
+        Handy if you're running some sort of presentation app where having a screensaver
         appear would be annoying.
 
-        Pass false to disable the screensaver, and true to re-enable it. (Note that this 
+        Pass false to disable the screensaver, and true to re-enable it. (Note that this
         won't enable a screensaver unless the user has actually set one up).
 
-        The disablement will only happen while the Juce application is the foreground 
-        process - if another task is running in front of it, then the screensaver will 
+        The disablement will only happen while the Juce application is the foreground
+        process - if another task is running in front of it, then the screensaver will
         be unaffected.
 
         @see isScreenSaverEnabled

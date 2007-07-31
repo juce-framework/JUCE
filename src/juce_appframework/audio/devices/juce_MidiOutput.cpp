@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -46,14 +46,14 @@ MidiOutput::MidiOutput() throw()
 {
 }
 
-MidiOutput::PendingMessage::PendingMessage (const uint8* const data, 
-                                            const int len, 
+MidiOutput::PendingMessage::PendingMessage (const uint8* const data,
+                                            const int len,
                                             const double sampleNumber) throw()
     : message (data, len, sampleNumber)
 {
 }
 
-void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer, 
+void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
                                       const double millisecondCounterToStartAt,
                                       double samplesPerSecondForBuffer) throw()
 {
@@ -74,7 +74,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     {
         const double eventTime = millisecondCounterToStartAt + samplesPerSecondForBuffer * time;
 
-        PendingMessage* const m 
+        PendingMessage* const m
             = new PendingMessage (data, len, eventTime);
 
         const ScopedLock sl (lock);

@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -158,8 +158,8 @@ bool PropertiesFile::save()
 
     stopTimer();
 
-    if (file == File::nonexistent 
-         || file.isDirectory() 
+    if (file == File::nonexistent
+         || file.isDirectory()
          || ! file.getParentDirectory().createDirectory())
         return false;
 

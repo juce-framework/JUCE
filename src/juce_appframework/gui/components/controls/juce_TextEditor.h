@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ public:
     /** Indicates whether the tab key should be accepted and used to input a tab character,
         or whether it gets ignored.
 
-        By default the tab key is ignored, so that it can be used to switch keyboard focus 
+        By default the tab key is ignored, so that it can be used to switch keyboard focus
         between components.
     */
     void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed) throw();
@@ -527,7 +527,7 @@ protected:
         If you want to add your own items to the existing ones, you can override this,
         call the base class's addPopupMenuItems() method, then append your own items.
 
-        When the menu has been shown, performPopupMenuAction() will be called to 
+        When the menu has been shown, performPopupMenuAction() will be called to
         perform the item that the user has chosen.
 
         The default menu items will be added using item IDs in the range
@@ -571,7 +571,7 @@ protected:
 
     /** Counts the number of characters in the text.
 
-        This is quicker than getting the text as a string if you just need to know 
+        This is quicker than getting the text as a string if you just need to know
         the length.
     */
     int getTotalNumChars() throw();

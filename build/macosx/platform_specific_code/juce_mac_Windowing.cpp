@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1117,7 +1117,7 @@ public:
 
         static const int keyTranslations[] =
         {
-            0, 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 0xa7, 'b', 
+            0, 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 0xa7, 'b',
             'q', 'w', 'e', 'r', 'y', 't', '1', '2', '3', '4', '6', '5',
             '=', '9', '7', '-', '8', '0', ']', 'o', 'u', '[', 'i', 'p',
             KeyPress::returnKey, 'l', 'j', '\'', 'k', ';', '\\', ',', '/',
@@ -2241,15 +2241,15 @@ void Desktop::getMousePosition (int& x, int& y) throw()
 
 void Desktop::setMousePosition (int x, int y) throw()
 {
-    // this rubbish needs to be done around the warp call, to avoid causing a 
+    // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
-    CGSetLocalEventsSuppressionInterval (0); 
+    CGSetLocalEventsSuppressionInterval (0);
 
     CGPoint pos = { x, y };
     CGWarpMouseCursorPosition (pos);
 
-    CGAssociateMouseAndMouseCursorPosition (true); 
+    CGAssociateMouseAndMouseCursorPosition (true);
 }
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
@@ -2310,7 +2310,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 
             GDHandle hGDevice;
 
-            if (clipToWorkArea 
+            if (clipToWorkArea
                  && DMGetGDeviceByDisplayID ((DisplayIDType) disps[i], &hGDevice, false) == noErr)
             {
                 Rect rect;
@@ -3124,20 +3124,20 @@ bool AppleRemoteDevice::start (const bool inExclusiveMode) throw()
 
 void AppleRemoteDevice::stop() throw()
 {
-    if (queue != 0) 
+    if (queue != 0)
     {
-        (*(IOHIDQueueInterface**) queue)->stop ((IOHIDQueueInterface**) queue);		
-        (*(IOHIDQueueInterface**) queue)->dispose ((IOHIDQueueInterface**) queue);		
-        (*(IOHIDQueueInterface**) queue)->Release ((IOHIDQueueInterface**) queue);	
+        (*(IOHIDQueueInterface**) queue)->stop ((IOHIDQueueInterface**) queue);
+        (*(IOHIDQueueInterface**) queue)->dispose ((IOHIDQueueInterface**) queue);
+        (*(IOHIDQueueInterface**) queue)->Release ((IOHIDQueueInterface**) queue);
         queue = 0;
     }
 
-    if (device != 0) 
+    if (device != 0)
     {
         (*(IOHIDDeviceInterface**) device)->close ((IOHIDDeviceInterface**) device);
         (*(IOHIDDeviceInterface**) device)->Release ((IOHIDDeviceInterface**) device);
         device = 0;
-    }	
+    }
 }
 
 bool AppleRemoteDevice::isActive() const throw()
@@ -3145,7 +3145,7 @@ bool AppleRemoteDevice::isActive() const throw()
     return queue != 0;
 }
 
-static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*) 
+static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*)
 {
     if (result == kIOReturnSuccess)
         ((AppleRemoteDevice*) target)->handleCallbackInternal();
@@ -3178,12 +3178,12 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
 
         cookies.add ((int) number);
     }
-    
+
     CFRelease (elements);
 
     if ((*(IOHIDDeviceInterface**) device)
-            ->open ((IOHIDDeviceInterface**) device, 
-                    openInExclusiveMode ? kIOHIDOptionsTypeSeizeDevice 
+            ->open ((IOHIDDeviceInterface**) device,
+                    openInExclusiveMode ? kIOHIDOptionsTypeSeizeDevice
                                         : kIOHIDOptionsTypeNone) == KERN_SUCCESS)
     {
         queue = (*(IOHIDDeviceInterface**) device)->allocQueue ((IOHIDDeviceInterface**) device);
@@ -3203,7 +3203,7 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
             if ((*(IOHIDQueueInterface**) queue)
                     ->createAsyncEventSource ((IOHIDQueueInterface**) queue, &eventSource) == KERN_SUCCESS)
             {
-                if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue, 
+                if ((*(IOHIDQueueInterface**) queue)->setEventCallout ((IOHIDQueueInterface**) queue,
                                                                        appleRemoteQueueCallback, this, 0) == KERN_SUCCESS)
                 {
                     CFRunLoopAddSource (CFRunLoopGetCurrent(), eventSource, kCFRunLoopDefaultMode);
@@ -3212,8 +3212,8 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
 
                     return true;
                 }
-            } 
-        } 
+            }
+        }
     }
 #endif
 
@@ -3248,7 +3248,7 @@ void AppleRemoteDevice::handleCallbackInternal()
 
     cookies [numCookies++] = 0;
 
-    static const char buttonPatterns[] = 
+    static const char buttonPatterns[] =
     {
         14, 7, 6, 5, 14, 7, 6, 5, 0,
         14, 8, 6, 5, 14, 8, 6, 5, 0,

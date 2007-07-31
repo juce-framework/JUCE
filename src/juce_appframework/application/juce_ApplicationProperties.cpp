@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ PropertiesFile* ApplicationProperties::getCommonSettings (const bool returnUserP
     {
         if (commonSettingsAreReadOnly == 0)
             commonSettingsAreReadOnly = commonProps->save() ? -1 : 1;
-        
+
         if (commonSettingsAreReadOnly > 0)
             return userProps;
     }

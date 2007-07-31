@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -188,11 +188,11 @@ public:
         @param other                    the sequence to add from
         @param timeAdjustmentDelta      an amount to add to the timestamps of the midi events
                                         as they are read from the other sequence
-        @param firstAllowableDestTime   events will not be added if their time is earlier 
+        @param firstAllowableDestTime   events will not be added if their time is earlier
                                         than this time. (This is after their time has been adjusted
                                         by the timeAdjustmentDelta)
-        @param endOfAllowableDestTimes  events will not be added if their time is equal to 
-                                        or greater than this time. (This is after their time has 
+        @param endOfAllowableDestTimes  events will not be added if their time is equal to
+                                        or greater than this time. (This is after their time has
                                         been adjusted by the timeAdjustmentDelta)
     */
     void addSequence (const MidiMessageSequence& other,

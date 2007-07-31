@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ LookAndFeel::LookAndFeel()
     #define textHighlightColour     0x401111ee
     #define standardOutlineColour   0xb2808080
 
-    static const int standardColours[] = 
+    static const int standardColours[] =
     {
         TextButton::buttonColourId,                 textButtonColour,
         TextButton::buttonOnColourId,               0xff4444ff,
@@ -2463,7 +2463,7 @@ void LookAndFeel::drawShinyButtonShape (Graphics& g,
 
 //==============================================================================
 void LookAndFeel::drawGlassSphere (Graphics& g,
-                                   const float x, const float y, 
+                                   const float x, const float y,
                                    const float diameter,
                                    const Colour& colour,
                                    const float outlineThickness) throw()
@@ -2512,8 +2512,8 @@ void LookAndFeel::drawGlassSphere (Graphics& g,
 }
 
 //==============================================================================
-void LookAndFeel::drawGlassPointer (Graphics& g, 
-                                    const float x, const float y, 
+void LookAndFeel::drawGlassPointer (Graphics& g,
+                                    const float x, const float y,
                                     const float diameter,
                                     const Colour& colour, const float outlineThickness,
                                     const int direction) throw()
@@ -2562,7 +2562,7 @@ void LookAndFeel::drawGlassPointer (Graphics& g,
 
 //==============================================================================
 void LookAndFeel::drawGlassLozenge (Graphics& g,
-                                    const float x, const float y, 
+                                    const float x, const float y,
                                     const float width, const float height,
                                     const Colour& colour,
                                     const float outlineThickness,

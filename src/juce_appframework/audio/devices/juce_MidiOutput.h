@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -116,24 +116,24 @@ public:
                     float rightVol);
 
     //==============================================================================
-    /** This lets you supply a block of messages that will be sent out at some point 
+    /** This lets you supply a block of messages that will be sent out at some point
         in the future.
 
-        The MidiOutput class has an internal thread that can send out timestamped 
+        The MidiOutput class has an internal thread that can send out timestamped
         messages - this appends a set of messages to its internal buffer, ready for
         sending.
 
         This will only work if you've already started the thread with startBackgroundThread().
 
         A time is supplied, at which the block of messages should be sent. This time uses
-        the same time base as Time::getMillisecondCounter(), and must be in the future. 
-        
+        the same time base as Time::getMillisecondCounter(), and must be in the future.
+
         The samplesPerSecondForBuffer parameter indicates the number of samples per second
         used by the MidiBuffer. Each event in a MidiBuffer has a sample position, and the
         samplesPerSecondForBuffer value is needed to convert this sample position to a
-        real time.        
+        real time.
     */
-    void sendBlockOfMessages (const MidiBuffer& buffer, 
+    void sendBlockOfMessages (const MidiBuffer& buffer,
                               const double millisecondCounterToStartAt,
                               double samplesPerSecondForBuffer) throw();
 

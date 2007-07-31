@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -501,25 +501,25 @@ public:
     //==============================================================================
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
     static void drawGlassSphere (Graphics& g,
-                                 const float x, const float y, 
+                                 const float x, const float y,
                                  const float diameter,
-                                 const Colour& colour, 
+                                 const Colour& colour,
                                  const float outlineThickness) throw();
 
-    static void drawGlassPointer (Graphics& g, 
-                                  const float x, const float y, 
+    static void drawGlassPointer (Graphics& g,
+                                  const float x, const float y,
                                   const float diameter,
                                   const Colour& colour, const float outlineThickness,
                                   const int direction) throw();
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
-    static void drawGlassLozenge (Graphics& g, 
-                                  const float x, const float y, 
+    static void drawGlassLozenge (Graphics& g,
+                                  const float x, const float y,
                                   const float width, const float height,
-                                  const Colour& colour, 
-                                  const float outlineThickness, 
+                                  const Colour& colour,
+                                  const float outlineThickness,
                                   const float cornerSize,
-                                  const bool flatOnLeft, const bool flatOnRight, 
+                                  const bool flatOnLeft, const bool flatOnRight,
                                   const bool flatOnTop, const bool flatOnBottom) throw();
 
     //==============================================================================

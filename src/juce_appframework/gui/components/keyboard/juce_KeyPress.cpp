@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -96,8 +96,8 @@ bool KeyPress::operator!= (const KeyPress& other) const throw()
 
 bool KeyPress::isCurrentlyDown() const throw()
 {
-    int modsMask = ModifierKeys::commandModifier 
-                    | ModifierKeys::ctrlModifier 
+    int modsMask = ModifierKeys::commandModifier
+                    | ModifierKeys::ctrlModifier
                     | ModifierKeys::altModifier;
 
     if (keyCode == KeyPress::downKey

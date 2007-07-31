@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1035,8 +1035,8 @@ class AppleRemoteTestWindow  : public AlertWindow,
 {
 public:
     AppleRemoteTestWindow()
-        : AlertWindow ("Apple Remote Control Test!", 
-                       "If you've got an Apple Remote, press some buttons now...", 
+        : AlertWindow ("Apple Remote Control Test!",
+                       "If you've got an Apple Remote, press some buttons now...",
                        AlertWindow::NoIcon)
     {
         addButton (T("done"), 0);

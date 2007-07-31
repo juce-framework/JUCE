@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ public:
 
         Note that when you search the user PropertiesFile for a value that it doesn't contain,
         the common settings are used as a second-chance place to look. This is done via the
-        PropertySet::setFallbackPropertySet() method - by default the common settings are set 
+        PropertySet::setFallbackPropertySet() method - by default the common settings are set
         to the fallback for the user settings.
 
         @see getCommonSettings
@@ -122,12 +122,12 @@ public:
         The first time this is called, it will create and load the properties file.
 
         @param returnUserPropsIfReadOnly  if this is true, and the common properties file is
-                            read-only (e.g. because the user doesn't have permission to write 
-                            to shared files), then this will return the user settings instead, 
-                            (like getUserSettings() would do). This is handy if you'd like to 
+                            read-only (e.g. because the user doesn't have permission to write
+                            to shared files), then this will return the user settings instead,
+                            (like getUserSettings() would do). This is handy if you'd like to
                             write a value to the common settings, but if that's no possible,
-                            then you'd rather write to the user settings than none at all. 
-                            If returnUserPropsIfReadOnly is false, this method will always return 
+                            then you'd rather write to the user settings than none at all.
+                            If returnUserPropsIfReadOnly is false, this method will always return
                             the common settings, even if any changes to them can't be saved.
         @see getUserSettings
     */

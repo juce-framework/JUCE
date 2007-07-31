@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1208,8 +1208,8 @@ void Slider::mouseDrag (const MouseEvent& e)
                 if (speed != 0)
                 {
                     speed = 0.2 * velocityModeSensitivity
-                              * (1.0 + sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset 
-                                                                            + jmax (0.0, (double) (speed - velocityModeThreshold)) 
+                              * (1.0 + sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset
+                                                                            + jmax (0.0, (double) (speed - velocityModeThreshold))
                                                                                 / maxSpeed))));
 
                     if (mouseDiff < 0)

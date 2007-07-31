@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ static bool findCandidate (const BitArray& base,
 }
 
 //==============================================================================
-const BitArray Primes::createProbablePrime (const int bitLength, 
+const BitArray Primes::createProbablePrime (const int bitLength,
                                             const int certainty) throw()
 {
     BitArray smallSieve;
@@ -206,7 +206,7 @@ static bool passesMillerRabin (const BitArray& n, int iterations) throw()
     return true;
 }
 
-bool Primes::isProbablyPrime (const BitArray& number, 
+bool Primes::isProbablyPrime (const BitArray& number,
                               const int certainty) throw()
 {
     if (! number[0])

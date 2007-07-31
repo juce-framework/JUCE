@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -229,7 +229,7 @@
 
     This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
     for recursion or repeated instantiation. It's intended for use as a lightweight
-    version of a singleton, where you're using it in very straightforward 
+    version of a singleton, where you're using it in very straightforward
     circumstances and don't need the extra checking.
 
     Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart

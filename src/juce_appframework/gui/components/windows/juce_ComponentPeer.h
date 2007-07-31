@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -261,12 +261,12 @@ public:
     /** Called when a key is pressed.
 
         For keycode info, see the KeyPress class.
-        Returns true if the keystroke was used. 
+        Returns true if the keystroke was used.
     */
     bool handleKeyPress (const int keyCode,
                          const juce_wchar textCharacter);
 
-    /** Called whenever a key is pressed or released. 
+    /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.
     */
     bool handleKeyUpOrDown();

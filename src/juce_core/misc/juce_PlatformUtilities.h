@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -202,7 +202,7 @@ public:
         Returns true if it managed to open the device.
 
         @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
-                                and will not be available to any other part of the system. If 
+                                and will not be available to any other part of the system. If
                                 false, it will be shared with other apps.
         @see stop
     */

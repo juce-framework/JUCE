@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1915,7 +1915,7 @@ void TextEditor::performPopupMenuAction (const int menuItemID)
         doUndoRedo (true);
         break;
 
-    default: 
+    default:
         break;
     }
 }
@@ -2354,7 +2354,7 @@ int TextEditor::indexAtPosition (const float x, const float y) throw()
 //==============================================================================
 static int getCharacterCategory (const tchar character) throw()
 {
-    return CharacterFunctions::isLetterOrDigit (character) 
+    return CharacterFunctions::isLetterOrDigit (character)
                 ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
 }
 

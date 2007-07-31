@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with JUCE; if not, visit www.gnu.org/licenses or write to the
-   Free Software Foundation, Inc., 59 Temple Place, Suite 330, 
+   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
    Boston, MA 02111-1307 USA
 
   ------------------------------------------------------------------------------
@@ -1742,7 +1742,7 @@ void Component::paintEntireComponent (Graphics& originalContext)
                     const Component* const sibling = childComponentList_.getUnchecked (j);
 
                     if (sibling->flags.opaqueFlag && sibling->isVisible())
-                        g->excludeClipRegion (sibling->getX(), sibling->getY(), 
+                        g->excludeClipRegion (sibling->getX(), sibling->getY(),
                                               sibling->getWidth(), sibling->getHeight());
                 }
 
