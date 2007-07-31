@@ -284,7 +284,7 @@ int ComboBox::getSelectedItemIndex() const throw()
 void ComboBox::setSelectedItemIndex (const int index,
                                      const bool dontSendChangeMessage) throw()
 {
-    if (currentIndex != index)
+    if (currentIndex != index || label->getText() != getItemText (currentIndex))
     {
         if (index >= 0 && index < getNumItems())
             currentIndex = index;
