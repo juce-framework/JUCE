@@ -50,16 +50,16 @@ public:
 
         Initialise a pair of objects for use with the createKeyPair() method.
     */
-    RSAKey();
+    RSAKey() throw();
 
     /** Loads a key from an encoded string representation.
 
         This reloads a key from a string created by the toString() method.
     */
-    RSAKey (const String& stringRepresentation);
+    RSAKey (const String& stringRepresentation) throw();
 
     /** Destructor. */
-    ~RSAKey();
+    ~RSAKey() throw();
 
     //==============================================================================
     /** Turns the key into a string representation.
@@ -76,7 +76,7 @@ public:
 
         Returns false if the operation failed, e.g. if this object isn't a valid key.
     */
-    bool applyToValue (BitArray& value) const;
+    bool applyToValue (BitArray& value) const throw();
 
     //==============================================================================
     /** Creates a public/private key-pair.
@@ -89,7 +89,7 @@ public:
     */
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
-                               const int numBits);
+                               const int numBits) throw();
 
 
     //==============================================================================

@@ -3140,6 +3140,11 @@ void AppleRemoteDevice::stop() throw()
     }	
 }
 
+bool AppleRemoteDevice::isActive() const throw()
+{
+    return queue != 0;
+}
+
 static void appleRemoteQueueCallback (void* const target, const IOReturn result, void*, void*) 
 {
     if (result == kIOReturnSuccess)

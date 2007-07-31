@@ -53,7 +53,7 @@ public:
         for primality. A safe value might be anything over about 20-30.
     */
     static const BitArray createProbablePrime (int bitLength,
-                                               int certainty);
+                                               int certainty) throw();
 
     /** Tests a number to see if it's prime.
 
@@ -64,7 +64,7 @@ public:
         safe value might be anything over about 20-30.
     */
     static bool isProbablyPrime (const BitArray& number,
-                                 int certainty);
+                                 int certainty) throw();
 };
 
 

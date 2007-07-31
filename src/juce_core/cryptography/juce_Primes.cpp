@@ -38,34 +38,29 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static void createSmallSieve (int numBits, BitArray& result)
+static void createSmallSieve (const int numBits, BitArray& result) throw()
 {
     result.setBit (numBits);
     result.clearBit (numBits); // to enlarge the array
 
     result.setBit (0);
-    int index = 1;
+    int n = 2;
 
     do
     {
-        const int step = (index << 1) + 1;
-
-        for (int i = index + step; i < numBits; i += step)
-        {
-            jassert (i != 6);
+        for (int i = n + n; i < numBits; i += n)
             result.setBit (i);
-        }
 
-        index = result.findNextClearBit (index + 1);
+        n = result.findNextClearBit (n + 1);
     }
-    while (index < numBits);
+    while (n <= (numBits >> 1));
 }
 
 static void bigSieve (const BitArray& base,
-                      int numBits,
+                      const int numBits,
                       BitArray& result,
                       const BitArray& smallSieve,
-                      const int smallSieveSize)
+                      const int smallSieveSize) throw()
 {
     jassert (! base[0]); // must be even!
 
@@ -105,9 +100,9 @@ static void bigSieve (const BitArray& base,
 
 static bool findCandidate (const BitArray& base,
                            const BitArray& sieve,
-                           int numBits,
+                           const int numBits,
                            BitArray& result,
-                           int certainty)
+                           const int certainty) throw()
 {
     for (int i = 0; i < numBits; ++i)
     {
@@ -125,7 +120,8 @@ static bool findCandidate (const BitArray& base,
 }
 
 //==============================================================================
-const BitArray Primes::createProbablePrime (int bitLength, int certainty)
+const BitArray Primes::createProbablePrime (const int bitLength, 
+                                            const int certainty) throw()
 {
     BitArray smallSieve;
     const int smallSieveSize = 15000;
@@ -156,7 +152,7 @@ const BitArray Primes::createProbablePrime (int bitLength, int certainty)
     return BitArray();
 }
 
-static bool passesMillerRabin (const BitArray& n, int iterations)
+static bool passesMillerRabin (const BitArray& n, int iterations) throw()
 {
     const BitArray one (1);
     const BitArray two (2);
@@ -168,10 +164,28 @@ static bool passesMillerRabin (const BitArray& n, int iterations)
     const int s = d.findNextSetBit (0);
     d.shiftBits (-s);
 
+    BitArray smallPrimes;
+    int numBitsInSmallPrimes = 0;
+
+    for (;;)
+    {
+        numBitsInSmallPrimes += 256;
+        createSmallSieve (numBitsInSmallPrimes, smallPrimes);
+
+        const int numPrimesFound = numBitsInSmallPrimes - smallPrimes.countNumberOfSetBits();
+
+        if (numPrimesFound > iterations + 1)
+            break;
+    }
+
+    int smallPrime = 2;
+
     while (--iterations >= 0)
     {
-        BitArray r;
-        r.createRandomNumber (nMinusOne);
+        smallPrime = smallPrimes.findNextClearBit (smallPrime + 1);
+
+        BitArray r (smallPrime);
+        //r.createRandomNumber (nMinusOne);
         r.exponentModulo (d, n);
 
         if (! (r == one || r == nMinusOne))
@@ -192,7 +206,8 @@ static bool passesMillerRabin (const BitArray& n, int iterations)
     return true;
 }
 
-bool Primes::isProbablyPrime (const BitArray& number, int certainty)
+bool Primes::isProbablyPrime (const BitArray& number, 
+                              const int certainty) throw()
 {
     if (! number[0])
         return false;
@@ -209,6 +224,11 @@ bool Primes::isProbablyPrime (const BitArray& number, int certainty)
     }
     else
     {
+        const BitArray screen (2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23);
+
+        if (number.findGreatestCommonDivisor (screen) != BitArray (1))
+            return false;
+
         return passesMillerRabin (number, certainty);
     }
 }

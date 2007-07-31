@@ -213,6 +213,10 @@ public:
     */
     void stop() throw();
 
+    /** Returns true if the device has been started successfully.
+    */
+    bool isActive() const throw();
+
     /** Returns the ID number of the remote, if it has sent one.
     */
     int getRemoteId() const throw()             { return remoteId; }

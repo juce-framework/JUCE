@@ -39,11 +39,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-RSAKey::RSAKey()
+RSAKey::RSAKey() throw()
 {
 }
 
-RSAKey::RSAKey (const String& s)
+RSAKey::RSAKey (const String& s) throw()
 {
     if (s.containsChar (T(',')))
     {
@@ -57,7 +57,7 @@ RSAKey::RSAKey (const String& s)
     }
 }
 
-RSAKey::~RSAKey()
+RSAKey::~RSAKey() throw()
 {
 }
 
@@ -66,7 +66,7 @@ const String RSAKey::toString() const throw()
     return part1.toString (16) + T(",") + part2.toString (16);
 }
 
-bool RSAKey::applyToValue (BitArray& value) const
+bool RSAKey::applyToValue (BitArray& value) const throw()
 {
     if (part1.isEmpty() || part2.isEmpty()
          || value.compare (0) <= 0)
@@ -96,7 +96,7 @@ bool RSAKey::applyToValue (BitArray& value) const
 }
 
 static const BitArray findBestCommonDivisor (const BitArray& p,
-                                             const BitArray& q)
+                                             const BitArray& q) throw()
 {
     const BitArray one (1);
 
@@ -126,11 +126,9 @@ static const BitArray findBestCommonDivisor (const BitArray& p,
 
 void RSAKey::createKeyPair (RSAKey& publicKey,
                             RSAKey& privateKey,
-                            const int numBits)
+                            const int numBits) throw()
 {
     jassert (numBits > 16); // not much point using less than this..
-
-    const BitArray one (1);
 
     BitArray p (Primes::createProbablePrime (numBits / 2, 30));
     BitArray q (Primes::createProbablePrime (numBits - numBits / 2, 30));
@@ -138,12 +136,14 @@ void RSAKey::createKeyPair (RSAKey& publicKey,
     BitArray n (p);
     n.multiplyBy (q);   // n = pq
 
+    const BitArray one (1);
     p.subtract (one);
     q.subtract (one);
+
     BitArray m (p);
     m.multiplyBy (q);   // m = (p - 1)(q - 1)
 
-    BitArray e (findBestCommonDivisor (p, q));
+    const BitArray e (findBestCommonDivisor (p, q));
 
     BitArray d (e);
     d.inverseModulo (m);
@@ -154,5 +154,6 @@ void RSAKey::createKeyPair (RSAKey& publicKey,
     privateKey.part1 = d;
     privateKey.part2 = n;
 }
+
 
 END_JUCE_NAMESPACE
