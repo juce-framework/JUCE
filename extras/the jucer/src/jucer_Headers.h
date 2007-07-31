@@ -47,7 +47,7 @@
 
 //==============================================================================
 #define JUCER_MAJOR_VERSION  1
-#define JUCER_MINOR_VERSION  10
+#define JUCER_MINOR_VERSION  11
 
 //==============================================================================
 #include "BinaryData.h"

@@ -972,6 +972,8 @@ END_JUCE_NAMESPACE
 //==============================================================================
 #else  // if ALSA is turned off..
 
+#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"

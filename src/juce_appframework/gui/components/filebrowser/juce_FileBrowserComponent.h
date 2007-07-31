@@ -91,6 +91,8 @@ public:
                                         show previews of files that the user selects
         @param useTreeView              if this is false, the files are shown in a list; if true,
                                         they are shown in a treeview
+        @param filenameTextBoxIsReadOnly    if true, the user won't be allowed to type their own
+                                        text into the filename box.
     */
     FileBrowserComponent (FileChooserMode browserMode,
                           const File& initialFileOrDirectory,

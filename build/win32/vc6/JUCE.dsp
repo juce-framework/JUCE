@@ -512,6 +512,10 @@ SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiInput.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.h
 # End Source File
 # End Group
@@ -1798,11 +1802,11 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_LookAndFee
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_ShinyLookAndFeel.cpp
+SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_ShinyLookAndFeel.h
+SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.h
 # End Source File
 # End Group
 # Begin Group "menus"
@@ -2078,6 +2082,14 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_TopLevelWindow
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsList.cpp
 # End Source File
 # Begin Source File
@@ -2139,6 +2151,14 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilenameCo
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilePreviewComponent.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.h
 # End Source File
 # Begin Source File
 

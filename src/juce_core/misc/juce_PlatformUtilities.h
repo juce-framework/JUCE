@@ -176,9 +176,9 @@ public:
         playButton,         /**< The play button. */
         plusButton,         /**< The plus or volume-up button. */
         minusButton,        /**< The minus or volume-down button. */
-        rightButton,	    /**< The right button (if it's held for a short time). */
-        leftButton,	        /**< The left button (if it's held for a short time). */
-        rightButton_Long,	/**< The right button (if it's held for a long time). */
+        rightButton,        /**< The right button (if it's held for a short time). */
+        leftButton,         /**< The left button (if it's held for a short time). */
+        rightButton_Long,   /**< The right button (if it's held for a long time). */
         leftButton_Long,    /**< The menu button (if it's held for a long time). */
         menuButton_Long,    /**< The menu button (if it's held for a long time). */
         playButtonSleepMode,

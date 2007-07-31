@@ -49,7 +49,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures) throw()
+/*static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures) throw()
 {
     unsigned int cpu = 0;
     unsigned int ext = 0;
@@ -72,7 +72,7 @@ static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatur
         *extFeatures = ext;
 
     return cpu;
-}
+}*/
 
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()

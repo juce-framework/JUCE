@@ -521,8 +521,6 @@ public:
                                             include information about where the
                                             tree has been scrolled to vertically,
                                             so this can also be restored
-        @param alsoIncludeSelectionState    if this is true, the selected items will
-                                            also be stored in the state that is returned
         @see restoreOpennessState
     */
     XmlElement* getOpennessState (const bool alsoIncludeScrollPosition) const;

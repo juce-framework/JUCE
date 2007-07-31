@@ -445,6 +445,46 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
 END_JUCE_NAMESPACE
 
+//==============================================================================
+
+#else
+
+//==============================================================================
+// (These are just stub functions if ALSA is unavailable...)
+
+#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+
+BEGIN_JUCE_NAMESPACE
+
+#include "../../../src/juce_appframework/audio/devices/juce_MidiOutput.h"
+#include "../../../src/juce_appframework/audio/devices/juce_MidiInput.h"
+
+//==============================================================================
+const StringArray MidiOutput::getDevices()                          { return StringArray(); }
+int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
+MidiOutput* MidiOutput::openDevice (int)                            { return 0; }
+MidiOutput* MidiOutput::createNewDevice (const String&)             { return 0; }
+MidiOutput::~MidiOutput()   {}
+void MidiOutput::reset()    {}
+bool MidiOutput::getVolume (float&, float&)     { return false; }
+void MidiOutput::setVolume (float, float)       {}
+void MidiOutput::sendMessageNow (const MidiMessage&)    {}
+
+MidiInput::MidiInput (const String& name_)
+    : name (name_),
+      internal (0)
+{}
+
+MidiInput::~MidiInput() {}
+void MidiInput::start() {}
+void MidiInput::stop()  {}
+int MidiInput::getDefaultDeviceIndex()      { return 0; }
+const StringArray MidiInput::getDevices()   { return StringArray(); }
+MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return 0; }
+MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return 0; }
+
+END_JUCE_NAMESPACE
+
 #endif
 
 #endif

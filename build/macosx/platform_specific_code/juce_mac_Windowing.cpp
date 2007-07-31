@@ -3058,7 +3058,7 @@ static io_object_t getAppleRemoteDevice() throw()
     CFMutableDictionaryRef dict = IOServiceMatching ("AppleIRController");
 
     io_iterator_t iter = 0;
-    io_object_t	iod = 0;
+    io_object_t iod = 0;
 
     if (IOServiceGetMatchingServices (kIOMasterPortDefault, dict, &iter) == kIOReturnSuccess
          && iter != 0)

@@ -322,7 +322,7 @@
 				);
 				HEADER_SEARCH_PATHS = "$(SYSTEM_DEVELOPER_DIR)/Headers/FlatCarbon";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = ../../../bin;
+				LIBRARY_SEARCH_PATHS = ../../../../bin;
 				PRODUCT_NAME = jucedemo;
 				WRAPPER_EXTENSION = app;
 			};
@@ -332,6 +332,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_NDEBUG=1",
@@ -339,7 +340,8 @@
 				);
 				HEADER_SEARCH_PATHS = "$(SYSTEM_DEVELOPER_DIR)/Headers/FlatCarbon";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = ../../../bin;
+				LIBRARY_SEARCH_PATHS = ../../../../bin;
+				ONLY_LINK_ESSENTIAL_SYMBOLS = YES;
 				PRODUCT_NAME = jucedemo;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
