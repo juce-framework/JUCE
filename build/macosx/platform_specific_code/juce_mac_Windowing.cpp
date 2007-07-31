@@ -571,12 +571,12 @@ public:
     {
         if (! isSharedWindow)
         {
+            Rectangle r (lastNonFullscreenBounds);
+
             setMinimised (false);
 
             if (fullScreen != shouldBeFullScreen)
             {
-                Rectangle r (lastNonFullscreenBounds);
-
                 if (shouldBeFullScreen)
                     r = Desktop::getInstance().getMainMonitorArea();
 

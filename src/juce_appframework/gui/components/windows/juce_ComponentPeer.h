@@ -174,6 +174,12 @@ public:
     /** True if the window is currently full-screen. */
     virtual bool isFullScreen() const = 0;
 
+    /** Sets the size to restore to if fullscreen mode is turned off. */
+    void setNonFullScreenBounds (const Rectangle& newBounds) throw();
+
+    /** Returns the size to restore to if fullscreen mode is turned off. */
+    const Rectangle& getNonFullScreenBounds() const throw();
+
     /** Attempts to change the icon associated with this window.
     */
     virtual void setIcon (const Image& newIcon) = 0;

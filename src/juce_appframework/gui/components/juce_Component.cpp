@@ -465,12 +465,14 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
         bool wasFullscreen = false;
         bool wasMinimised = false;
         ComponentBoundsConstrainer* currentConstainer = 0;
+        Rectangle oldNonFullScreenBounds;
 
         if (peer != 0)
         {
             wasFullscreen = peer->isFullScreen();
             wasMinimised = peer->isMinimised();
             currentConstainer = peer->getConstrainer();
+            oldNonFullScreenBounds = peer->getNonFullScreenBounds();
 
             removeFromDesktop();
         }
@@ -492,7 +494,10 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             peer->setVisible (isVisible());
 
             if (wasFullscreen)
+            {
                 peer->setFullScreen (true);
+                peer->setNonFullScreenBounds (oldNonFullScreenBounds);
+            }
 
             if (wasMinimised)
                 peer->setMinimised (true);

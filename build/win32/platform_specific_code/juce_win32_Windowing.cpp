@@ -731,15 +731,17 @@ public:
 
             if (! fullScreen)
             {
+                const Rectangle boundsCopy (lastNonFullscreenBounds);
+
                 if (hasTitleBar())
                     ShowWindow (hwnd, SW_SHOWNORMAL);
 
-                if (! lastNonFullscreenBounds.isEmpty())
+                if (! boundsCopy.isEmpty())
                 {
-                    setBounds (lastNonFullscreenBounds.getX(),
-                               lastNonFullscreenBounds.getY(),
-                               lastNonFullscreenBounds.getWidth(),
-                               lastNonFullscreenBounds.getHeight(),
+                    setBounds (boundsCopy.getX(),
+                               boundsCopy.getY(),
+                               boundsCopy.getWidth(),
+                               boundsCopy.getHeight(),
                                false);
                 }
             }

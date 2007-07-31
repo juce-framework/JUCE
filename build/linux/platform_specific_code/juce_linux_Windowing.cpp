@@ -867,14 +867,14 @@ public:
         return minimised;
     }
 
-    void setFullScreen (bool shouldBeFullScreen)
+    void setFullScreen (const bool shouldBeFullScreen)
     {
+        Rectangle r (lastNonFullscreenBounds); // (get a copy of this before de-minimising)
+
         setMinimised (false);
 
         if (fullScreen != shouldBeFullScreen)
         {
-            Rectangle r (lastNonFullscreenBounds);
-
             if (shouldBeFullScreen)
                 r = Desktop::getInstance().getMainMonitorArea();
 

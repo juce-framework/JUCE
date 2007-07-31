@@ -643,6 +643,16 @@ void ComponentPeer::handleScreenSizeChange()
     handleMovedOrResized();
 }
 
+void ComponentPeer::setNonFullScreenBounds (const Rectangle& newBounds) throw()
+{
+    lastNonFullscreenBounds = newBounds;
+}
+
+const Rectangle& ComponentPeer::getNonFullScreenBounds() const throw()
+{
+    return lastNonFullscreenBounds;
+}
+
 //==============================================================================
 void ComponentPeer::handleFilesDropped (int x, int y, const StringArray& files)
 {

@@ -477,13 +477,22 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
         return false;
 
     lastNonFullScreenPos = r;
+
+    if (isOnDesktop())
+    {
+        ComponentPeer* const peer = getPeer();
+
+        if (peer != 0)
+            peer->setNonFullScreenBounds (r);
+    }
+
     setFullScreen (fs);
 
     if (! fs)
-        setBoundsConstrained (lastNonFullScreenPos.getX(),
-                              lastNonFullScreenPos.getY(),
-                              lastNonFullScreenPos.getWidth(),
-                              lastNonFullScreenPos.getHeight());
+        setBoundsConstrained (r.getX(),
+                              r.getY(),
+                              r.getWidth(),
+                              r.getHeight());
 
     return true;
 }
