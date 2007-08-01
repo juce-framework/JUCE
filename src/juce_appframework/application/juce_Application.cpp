@@ -60,7 +60,8 @@ static JUCEApplication* appInstance = 0;
 
 //==============================================================================
 JUCEApplication::JUCEApplication()
-    : stillInitialising (true)
+    : appReturnValue (0),
+      stillInitialising (true)
 {
 }
 
@@ -101,6 +102,11 @@ void JUCEApplication::systemRequestedQuit()
 void JUCEApplication::quit (const bool useMaximumForce)
 {
     MessageManager::getInstance()->postQuitMessage (useMaximumForce);
+}
+
+void JUCEApplication::setApplicationReturnValue (const int newReturnValue) throw()
+{
+    appReturnValue = newReturnValue;
 }
 
 //==============================================================================
@@ -218,15 +224,14 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
     }
 #endif
 
-    shutdownAppAndClearUp (useForce);
-
-    return 0;
+    return shutdownAppAndClearUp (useForce);
 }
 
-void JUCEApplication::shutdownAppAndClearUp (bool useMaximumForce)
+int JUCEApplication::shutdownAppAndClearUp (const bool useMaximumForce)
 {
     jassert (appInstance != 0);
     JUCEApplication* const app = appInstance;
+    int returnValue = 0;
 
     static bool reentrancyCheck = false;
 
@@ -254,6 +259,8 @@ void JUCEApplication::shutdownAppAndClearUp (bool useMaximumForce)
         {
             shutdownJuce_GUI();
 
+            returnValue = app->getApplicationReturnValue();
+
             appInstance = 0;
             delete app;
         }
@@ -266,6 +273,8 @@ void JUCEApplication::shutdownAppAndClearUp (bool useMaximumForce)
 
         reentrancyCheck = false;
     }
+
+    return returnValue;
 }
 
 int JUCEApplication::main (int argc, char* argv[],

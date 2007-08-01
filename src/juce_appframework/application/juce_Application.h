@@ -248,6 +248,20 @@ public:
     */
     static void quit (const bool useMaximumForce = false);
 
+    /** Sets the value that should be returned as the application's exit code when the
+        app quits.
+
+        This is the value that's returned by the main() function. Normally you'd leave this
+        as 0 unless you want to indicate an error code.
+
+        @see getApplicationReturnValue
+    */
+    void setApplicationReturnValue (const int newReturnValue) throw();
+
+    /** Returns the value that has been set as the application's exit code.
+        @see setApplicationReturnValue
+    */
+    int getApplicationReturnValue() const throw()                   { return appReturnValue; }
 
     //==============================================================================
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
@@ -276,9 +290,10 @@ public:
 
 private:
     //==============================================================================
+    int appReturnValue;
     bool stillInitialising;
 
-    static void shutdownAppAndClearUp (bool useMaximumForce);
+    static int shutdownAppAndClearUp (const bool useMaximumForce);
 };
 
 

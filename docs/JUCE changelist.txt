@@ -8,7 +8,6 @@ Changelist for version 1.44
 
 - added a method Desktop::setScreenSaverEnabled(), which lets you prevent the screen-saver from being activated - handy if your app is doing some kind of presentation. (only implemented on windows/mac - anyone know how to do this on linux?)
 - new Mac-only class: AppleRemoteDevice, which lets you grab and listen for events from your Apple remote control. (Only works if you build for 10.3 or above).
-- the default Mac build is now 10.3 compatible by default. (If anyone still needs 10.2 ppc compatibility, it still works, you just need to change the settings in the juce.xconfig file)
 - tweaks to get it working under Wine.
 - change to the keyPressed() and keyStateChanged() callbacks in Component and KeyListener. These used to be void, but they now return a bool to indicate whether the key event was needed or not. Any existing code you've got will break in the compiler, so just change it to return true if the key was used, or false to allow the event to be passed up to the next component in the chain. (This change is a better architecture than before, and was also needed so that plugins can allow unused key events to be passed on to the host application)
 - swapped the look and feel classes around, so that the basic LookAndFeel class is now what used to be the "shiny" one. The ShinyLookAndFeel class has been removed, and for that old fashioned look, I've added an OldSchoolLookAndFeel that you can use if you need the original L+F. This means that any custom looks that you were using may need to change their base class.
