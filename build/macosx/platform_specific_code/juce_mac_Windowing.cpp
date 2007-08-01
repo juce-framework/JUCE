@@ -2301,7 +2301,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     CGDisplayCount count = 0;
     CGDirectDisplayID disps [8];
 
-    if (CGGetActiveDisplayList (numElementsInArray (disps), disps, &count) == noErr)
+    if (CGGetOnlineDisplayList (numElementsInArray (disps), disps, &count) == noErr)
     {
         for (int i = 0; i < count; ++i)
         {
@@ -2337,7 +2337,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     if (mainMonitorIndex > 0)
         monitorCoords.swap (mainMonitorIndex, 0);
 
-    jassert (monitorCoords.size() > 0); // xxx seems like this can happen when the screen's in power-saving mode..
+    jassert (monitorCoords.size() > 0);
 
     if (monitorCoords.size() == 0)
         monitorCoords.add (Rectangle (0, 0, 1024, 768));
