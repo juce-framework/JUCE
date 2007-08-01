@@ -71,17 +71,17 @@ int64 Random::nextInt64() throw()
 
 bool Random::nextBool() throw()
 {
-    return (nextInt() & 1) != 0;
+    return (nextInt() & 0x80000000) != 0;
 }
 
 float Random::nextFloat() throw()
 {
-    return (nextInt() & 0x7fffffff) / (float) 0x7fffffff;
+    return ((uint32) nextInt()) / (float) 0xffffffff;
 }
 
 double Random::nextDouble() throw()
 {
-    return (nextInt() & 0x7fffffff) / (double) 0x7fffffff;
+    return ((uint32) nextInt()) / (double) 0xffffffff;
 }
 
 //==============================================================================
