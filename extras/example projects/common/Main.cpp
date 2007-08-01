@@ -26,10 +26,16 @@ public:
 
     void paint (Graphics& g)
     {
+        // clear the background with solid white
         g.fillAll (Colours::white);
 
+        // set our drawing colour to black..
         g.setColour (Colours::black);
+
+        // choose a suitably sized font
         g.setFont (20.0f, Font::bold);
+
+        // and draw the text, centred in this component
         g.drawText (T("Hello World!"),
                     0, 0, getWidth(), getHeight(),
                     Justification::centred, false);
@@ -53,6 +59,8 @@ public:
         setContentComponent (new HelloWorldContentComponent());
 
         setVisible (true);
+
+        // centre the window on the desktop with this size
         centreWithSize (400, 200);
     }
 
