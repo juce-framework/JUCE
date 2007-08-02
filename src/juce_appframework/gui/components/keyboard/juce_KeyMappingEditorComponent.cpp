@@ -141,7 +141,7 @@ public:
         }
     }
 
-    void fitToContent (int h)
+    void fitToContent (const int h) throw()
     {
         if (keyNum < 0)
         {
@@ -154,6 +154,8 @@ public:
         }
     }
 
+    juce_UseDebuggingNewOperator
+
 private:
     KeyMappingEditorComponent* const owner;
     const CommandID commandID;
@@ -164,7 +166,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingItemComponent : public Component
+class KeyMappingItemComponent  : public Component
 {
 public:
     KeyMappingItemComponent (KeyMappingEditorComponent* const owner_,
@@ -174,22 +176,22 @@ public:
     {
         setInterceptsMouseClicks (false, true);
 
-        const bool isReadOnly = owner->isCommandReadOnly (commandID);
+        const bool isReadOnly = owner_->isCommandReadOnly (commandID);
 
-        Array <KeyPress> keyPresses (owner->getMappings()->getKeyPressesAssignedToCommand (commandID));
+        const Array <KeyPress> keyPresses (owner_->getMappings()->getKeyPressesAssignedToCommand (commandID));
 
         for (int i = 0; i < jmin (maxKeys, keyPresses.size()); ++i)
         {
             KeyMappingChangeButton* const kb
-                = new KeyMappingChangeButton (owner, commandID,
-                                              owner->getDescriptionForKeyPress (keyPresses.getReference (i)), i);
+                = new KeyMappingChangeButton (owner_, commandID,
+                                              owner_->getDescriptionForKeyPress (keyPresses.getReference (i)), i);
 
             kb->setEnabled (! isReadOnly);
             addAndMakeVisible (kb);
         }
 
-        KeyMappingChangeButton* kb
-            = new KeyMappingChangeButton (owner, commandID, String::empty, -1);
+        KeyMappingChangeButton* const kb
+            = new KeyMappingChangeButton (owner_, commandID, String::empty, -1);
 
         addChildComponent (kb);
         kb->setVisible (keyPresses.size() < maxKeys && ! isReadOnly);
@@ -216,12 +218,15 @@ public:
 
         for (int i = getNumChildComponents(); --i >= 0;)
         {
-            KeyMappingChangeButton* kb = dynamic_cast <KeyMappingChangeButton*> (getChildComponent (i));
+            KeyMappingChangeButton* const kb = dynamic_cast <KeyMappingChangeButton*> (getChildComponent (i));
+
             kb->fitToContent (getHeight() - 2);
             kb->setTopRightPosition (x, 1);
             x -= kb->getWidth() + 5;
         }
     }
+
+    juce_UseDebuggingNewOperator
 
 private:
     KeyMappingEditorComponent* const owner;
@@ -246,11 +251,7 @@ public:
     {
     }
 
-    const String getUniqueName() const
-    {
-        return String ((int) commandID) + T("_id");
-    }
-
+    const String getUniqueName() const          { return String ((int) commandID) + "_id"; }
     bool mightContainSubItems()                 { return false; }
     int getItemHeight() const                   { return 20; }
 
@@ -258,6 +259,8 @@ public:
     {
         return new KeyMappingItemComponent (owner, commandID);
     }
+
+    juce_UseDebuggingNewOperator
 
 private:
     KeyMappingEditorComponent* const owner;
@@ -283,11 +286,7 @@ public:
     {
     }
 
-    const String getUniqueName() const
-    {
-        return categoryName + T("_cat");
-    }
-
+    const String getUniqueName() const          { return categoryName + "_cat"; }
     bool mightContainSubItems()                 { return true; }
     int getItemHeight() const                   { return 28; }
 
@@ -321,6 +320,8 @@ public:
             clearSubItems();
         }
     }
+
+    juce_UseDebuggingNewOperator
 
 private:
     KeyMappingEditorComponent* owner;
@@ -451,14 +452,7 @@ void KeyMappingEditorComponent::changeListenerCallback (void*)
 //==============================================================================
 class KeyEntryWindow  : public AlertWindow
 {
-    KeyMappingEditorComponent* owner;
-
-    KeyEntryWindow (const KeyEntryWindow&);
-    const KeyEntryWindow& operator= (const KeyEntryWindow&);
-
 public:
-    KeyPress lastPress;
-
     KeyEntryWindow (KeyMappingEditorComponent* const owner_)
         : AlertWindow (TRANS("New key-mapping"),
                        TRANS("Please press a key combination now..."),
@@ -467,6 +461,10 @@ public:
     {
         addButton (TRANS("ok"), 1);
         addButton (TRANS("cancel"), 0);
+
+        // (avoid return + escape keys getting processed by the buttons..)
+        for (int i = getNumChildComponents(); --i >= 0;)
+            getChildComponent (i)->setWantsKeyboardFocus (false);
 
         setWantsKeyboardFocus (true);
         grabKeyboardFocus();
@@ -485,10 +483,10 @@ public:
 
         if (previousCommand != 0)
         {
-            message << T("\n\n")
+            message << "\n\n"
                     << TRANS("(Currently assigned to \"")
                     << owner->getMappings()->getCommandManager()->getNameOfCommand (previousCommand)
-                    << T("\")");
+                    << "\")";
         }
 
         setMessage (message);
@@ -500,10 +498,20 @@ public:
     {
         return true;
     }
+
+    KeyPress lastPress;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    KeyMappingEditorComponent* owner;
+
+    KeyEntryWindow (const KeyEntryWindow&);
+    const KeyEntryWindow& operator= (const KeyEntryWindow&);
 };
 
 
-void KeyMappingEditorComponent::assignNewKey (const CommandID commandID, int index)
+void KeyMappingEditorComponent::assignNewKey (const CommandID commandID, const int index)
 {
     KeyEntryWindow entryWindow (this);
 
