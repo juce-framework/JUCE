@@ -733,9 +733,6 @@ public:
             {
                 const Rectangle boundsCopy (lastNonFullscreenBounds);
 
-                if (hasTitleBar())
-                    ShowWindow (hwnd, SW_SHOWNORMAL);
-
                 if (! boundsCopy.isEmpty())
                 {
                     setBounds (boundsCopy.getX(),
@@ -744,6 +741,9 @@ public:
                                boundsCopy.getHeight(),
                                false);
                 }
+
+                if (hasTitleBar())
+                    ShowWindow (hwnd, SW_SHOWNORMAL);
             }
             else
             {

@@ -67,13 +67,13 @@
     (This only affects a Win32 build)
 */
 #ifndef JUCE_ASIO
-//  #define JUCE_ASIO 1
+  #define JUCE_ASIO 1
 #endif
 
 /** Comment out this macro to disable building of ALSA device support on Linux.
 */
 #ifndef JUCE_ALSA
-//  #define JUCE_ALSA 1
+  #define JUCE_ALSA 1
 #endif
 
 //=============================================================================
@@ -87,7 +87,7 @@
     is currently supported.
 */
 #if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
-//  #define JUCE_QUICKTIME 1
+  #define JUCE_QUICKTIME 1
 #endif
 
 //=============================================================================
@@ -96,7 +96,7 @@
     OpenGLComponent class will be unavailable.
 */
 #ifndef JUCE_OPENGL
-//  #define JUCE_OPENGL 1
+  #define JUCE_OPENGL 1
 #endif
 
 //=============================================================================
