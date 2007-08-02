@@ -212,7 +212,7 @@ void MagnifierComponent::setScaleFactor (double newScaleFactor)
 {
     jassert (newScaleFactor > 0.0);  // hmm - unlikely to work well with a negative scale factor
 
-    newScaleFactor = jlimit (0.001, 1000.0, newScaleFactor);
+    newScaleFactor = jlimit (0.1, 1000.0, newScaleFactor);
 
     if (scaleFactor != newScaleFactor)
     {

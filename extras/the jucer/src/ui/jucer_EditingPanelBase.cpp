@@ -49,7 +49,7 @@ public:
     {
         if (e.mods.isCtrlDown() || e.mods.isAltDown())
         {
-            const double factor = (ix > 0) ? 2.0 : 0.5;
+            const double factor = (iy > 0) ? 2.0 : 0.5;
 
             panel->setZoom (panel->getZoom() * factor, e.x, e.y);
         }
