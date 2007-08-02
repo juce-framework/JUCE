@@ -98,6 +98,10 @@ public:
 
         The source can use this opportunity to initialise anything it needs to.
 
+        Note that this method could be called more than once in succession without
+        a matching call to releaseResources(), so make sure your code is robust and
+        can handle that kind of situation.
+
         @param samplesPerBlockExpected  the number of samples that the source
                                         will be expected to supply each time its
                                         getNextAudioBlock() method is called. This
@@ -117,6 +121,10 @@ public:
         This will be called when the source is no longer going to have its getNextAudioBlock()
         method called, so it should release any spare memory, etc. that it might have
         allocated during the prepareToPlay() call.
+
+        Note that there's no guarantee that prepareToPlay() will actually have been called before 
+        releaseResources(), and it may be called more than once in succession, so make sure your
+        code is robust and doesn't make any assumptions about when it will be called.
 
         @see prepareToPlay, getNextAudioBlock
     */
