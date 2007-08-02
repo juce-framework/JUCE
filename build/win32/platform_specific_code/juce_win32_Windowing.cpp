@@ -1648,16 +1648,6 @@ private:
                 used = handleKeyPress (extendedKeyModifier | (int) key, 0) || used;
                 break;
 
-            case VK_NUMPAD0:
-            case VK_NUMPAD1:
-            case VK_NUMPAD2:
-            case VK_NUMPAD3:
-            case VK_NUMPAD4:
-            case VK_NUMPAD5:
-            case VK_NUMPAD6:
-            case VK_NUMPAD7:
-            case VK_NUMPAD8:
-            case VK_NUMPAD9:
             case VK_ADD:
             case VK_SUBTRACT:
             case VK_MULTIPLY:
@@ -1692,9 +1682,6 @@ private:
     {
         updateKeyModifiers();
 
-        if ((currentModifiers & ModifierKeys::ctrlModifier) != 0 && key <= 31)
-            return false;
-
         const juce_wchar textChar = (juce_wchar) key;
         const int virtualScanCode = (flags >> 16) & 0xff;
 
@@ -1720,6 +1707,9 @@ private:
         }
         else
         {
+            if ((currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
+                return false;
+
             // convert the scan code to an unmodified character code..
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
             UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (wMapVirtualKeyW (virtualScanCode, 1), 2)
