@@ -71,7 +71,7 @@ public:
         {
             String resource (element->getDocument()->getResources()
                      .browseForResource (T("Select an image file to add as a resource"),
-                                         T("*.jpg;*.jpeg;*.png;*.gif"),
+                                         T("*.jpg;*.jpeg;*.png;*.gif;*.svg"),
                                          File::nonexistent,
                                          String::empty));
 
