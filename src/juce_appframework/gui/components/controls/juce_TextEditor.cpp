@@ -2383,7 +2383,7 @@ int TextEditor::findWordBreakBefore (const int position) const throw()
     if (position <= 0)
         return 0;
 
-    const int startOfBuffer = position - jmin (512, position);
+    const int startOfBuffer = jmax (0, position - 512);
     const String t (getTextSubstring (startOfBuffer, position));
 
     int i = position - startOfBuffer;
