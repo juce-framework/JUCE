@@ -2358,67 +2358,49 @@ static int getCharacterCategory (const tchar character) throw()
                 ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
 }
 
-int TextEditor::findWordBreakAfter (int position) const throw()
+int TextEditor::findWordBreakAfter (const int position) const throw()
 {
     const String t (getTextSubstring (position, position + 512));
     const int totalLength = t.length();
     int i = 0;
 
-    while (i < totalLength)
-    {
-        if (CharacterFunctions::isWhitespace (t [i]))
-            ++position;
-        else
-            break;
-
+    while (i < totalLength && CharacterFunctions::isWhitespace (t[i]))
         ++i;
-    }
 
-    const int type = getCharacterCategory (t [i]);
+    const int type = getCharacterCategory (t[i]);
 
-    while (i < totalLength)
-    {
-        if (type == getCharacterCategory (t [i]))
-            ++position;
-        else
-            break;
-
+    while (i < totalLength && type == getCharacterCategory (t[i]))
         ++i;
-    }
 
-    return position;
+    while (i < totalLength && CharacterFunctions::isWhitespace (t[i]))
+        ++i;
+
+    return position + i;
 }
 
-int TextEditor::findWordBreakBefore (int position) const throw()
+int TextEditor::findWordBreakBefore (const int position) const throw()
 {
-    if (position > 0)
+    if (position <= 0)
+        return 0;
+
+    const int startOfBuffer = position - jmin (512, position);
+    const String t (getTextSubstring (startOfBuffer, position));
+
+    int i = position - startOfBuffer;
+
+    while (i > 0 && CharacterFunctions::isWhitespace (t [i - 1]))
+        --i;
+
+    if (i > 0)
     {
-        const int maximumToDo = jmin (512, position);
-        const int startOfBuffer = position - maximumToDo;
-        const String t (getTextSubstring (startOfBuffer, position));
+        const int type = getCharacterCategory (t [i - 1]);
 
-        while (position > startOfBuffer)
-        {
-            if (CharacterFunctions::isWhitespace (t [position - 1 - startOfBuffer]))
-                --position;
-            else
-                break;
-        }
-
-        const int type = (position > startOfBuffer)
-                            ? getCharacterCategory (t [position - 1 - startOfBuffer]) 
-                            : 0;
-
-        while (position > startOfBuffer)
-        {
-            if (type == getCharacterCategory (t [position - 1 - startOfBuffer]))
-                --position;
-            else
-                break;
-        }
+        while (i > 0 && type == getCharacterCategory (t [i - 1]))
+            --i;
     }
 
-    return jmax (position, 0);
+    jassert (startOfBuffer + i >= 0);
+    return startOfBuffer + i;
 }
 
 

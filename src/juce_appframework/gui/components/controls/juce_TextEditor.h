@@ -665,8 +665,8 @@ private:
     int indexAtPosition (const float x,
                          const float y) throw();
 
-    int findWordBreakAfter (int position) const throw();
-    int findWordBreakBefore (int position) const throw();
+    int findWordBreakAfter (const int position) const throw();
+    int findWordBreakBefore (const int position) const throw();
 
     friend class TextHolderComponent;
     friend class TextEditorViewport;
