@@ -2405,7 +2405,9 @@ int TextEditor::findWordBreakBefore (int position) const throw()
                 break;
         }
 
-        const int type = getCharacterCategory (t [position - 1 - startOfBuffer]);
+        const int type = (position > startOfBuffer)
+                            ? getCharacterCategory (t [position - 1 - startOfBuffer]) 
+                            : 0;
 
         while (position > startOfBuffer)
         {
