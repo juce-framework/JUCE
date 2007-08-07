@@ -459,7 +459,7 @@ public:
 
     VstInt32 getVendorVersion()
     {
-        return 1000;
+        return JucePlugin_VersionCode;
     }
 
     VstPlugCategory getPlugCategory()
