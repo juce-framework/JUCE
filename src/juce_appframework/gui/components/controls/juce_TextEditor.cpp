@@ -371,6 +371,24 @@ public:
         }
     }
 
+    TextEditorIterator (const TextEditorIterator& other) throw()
+      : indexInText (other.indexInText),
+        lineY (other.lineY),
+        lineHeight (other.lineHeight),
+        maxDescent (other.maxDescent),
+        atomX (other.atomX),
+        atomRight (other.atomRight),
+        atom (other.atom),
+        currentSection (other.currentSection),
+        sections (other.sections),
+        sectionIndex (other.sectionIndex),
+        atomIndex (other.atomIndex),
+        wordWrapWidth (other.wordWrapWidth),
+        passwordCharacter (other.passwordCharacter),
+        tempAtom (other.tempAtom)
+    {
+    }
+
     ~TextEditorIterator() throw()
     {
     }
@@ -640,6 +658,26 @@ public:
         }
     }
 
+    bool getCharPosition (const int index, float& cx, float& cy, float& lineHeight_) throw()
+    {
+        while (next())
+        {
+            cy = lineY;
+
+            if (indexInText + atom->numChars > index)
+            {
+                updateLineHeight();
+                cx = indexToX (index);
+                lineHeight_ = lineHeight;
+                return true;
+            }
+        }
+
+        cx = atomX;
+        cy = lineY;
+        return false;
+    }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -656,7 +694,6 @@ private:
     const tchar passwordCharacter;
     TextAtom tempAtom;
 
-    TextEditorIterator (const TextEditorIterator&);
     const TextEditorIterator& operator= (const TextEditorIterator&);
 
     void moveToEndOfLastAtom() throw()
@@ -831,13 +868,15 @@ public:
 class TextEditorViewport  : public Viewport
 {
     TextEditor* const owner;
+    float lastWordWrapWidth;
 
     TextEditorViewport (const TextEditorViewport&);
     const TextEditorViewport& operator= (const TextEditorViewport&);
 
 public:
     TextEditorViewport (TextEditor* const owner_)
-        : owner (owner_)
+        : owner (owner_),
+          lastWordWrapWidth (0)
     {
     }
 
@@ -847,7 +886,13 @@ public:
 
     void visibleAreaChanged (int, int, int, int)
     {
-        owner->updateTextHolderSize();
+        const float wordWrapWidth = owner->getWordWrapWidth();
+
+        if (wordWrapWidth != lastWordWrapWidth)
+        {
+            lastWordWrapWidth = wordWrapWidth;
+            owner->updateTextHolderSize();
+        }
     }
 };
 
@@ -1178,23 +1223,31 @@ void TextEditor::repaintText (int textStartIndex, int textEndIndex)
     if (textStartIndex > textEndIndex && textEndIndex > 0)
         swapVariables (textStartIndex, textEndIndex);
 
-    float x, y, lh;
-    getCharPosition (textStartIndex, x, y, lh);
-    const int y1 = (int) y;
+    float x = 0, y = 0, lh = currentFont.getHeight();
 
-    int y2;
+    const float wordWrapWidth = getWordWrapWidth();
 
-    if (textEndIndex >= 0)
+    if (wordWrapWidth > 0)
     {
-        getCharPosition (textEndIndex, x, y, lh);
-        y2 = (int) (y + lh * 2.0f);
-    }
-    else
-    {
-        y2 = textHolder->getHeight();
-    }
+        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
-    textHolder->repaint (0, y1, textHolder->getWidth(), y2 - y1);
+        i.getCharPosition (textStartIndex, x, y, lh);
+
+        const int y1 = (int) y;
+        int y2;
+
+        if (textEndIndex >= 0)
+        {
+            i.getCharPosition (textEndIndex, x, y, lh);
+            y2 = (int) (y + lh * 2.0f);
+        }
+        else
+        {
+            y2 = textHolder->getHeight();
+        }
+
+        textHolder->repaint (0, y1, textHolder->getWidth(), y2 - y1);
+    }
 }
 
 //==============================================================================
@@ -1342,7 +1395,9 @@ void TextEditor::moveCursorTo (const int newPosition,
     if (isSelecting)
     {
         moveCaret (newPosition);
-        repaintText (selectionStart, selectionEnd);
+
+        const int oldSelStart = selectionStart;
+        const int oldSelEnd = selectionEnd;
 
         if (dragType == notDragging)
         {
@@ -1373,7 +1428,11 @@ void TextEditor::moveCursorTo (const int newPosition,
             }
         }
 
-        repaintText (selectionStart, selectionEnd);
+        jassert (selectionStart <= selectionEnd);
+        jassert (oldSelStart <= oldSelEnd);
+
+        repaintText (jmin (oldSelStart, selectionStart), 
+                     jmax (oldSelEnd, selectionEnd));
     }
     else
     {
@@ -1470,6 +1529,11 @@ void TextEditor::drawContent (Graphics& g)
         const Rectangle clip (g.getClipBounds());
         Colour selectedTextColour;
 
+        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+
+        while (i.lineY + 200.0 < clip.getY() && i.next())
+        {}
+
         if (selectionStart < selectionEnd)
         {
             g.setColour (findColour (highlightColourId)
@@ -1477,29 +1541,26 @@ void TextEditor::drawContent (Graphics& g)
 
             selectedTextColour = findColour (highlightedTextColourId);
 
-            TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+            TextEditorIterator i2 (i);
 
-            while (i.next() && i.lineY < clip.getBottom())
+            while (i2.next() && i2.lineY < clip.getBottom())
             {
-                if (i.lineY + getHeight() >= clip.getY())
-                    i.updateLineHeight();
+                i2.updateLineHeight();
 
-                if (i.lineY + i.lineHeight >= clip.getY()
-                     && selectionEnd >= i.indexInText
-                     && selectionStart <= i.indexInText + i.atom->numChars)
+                if (i2.lineY + i2.lineHeight >= clip.getY()
+                     && selectionEnd >= i2.indexInText
+                     && selectionStart <= i2.indexInText + i2.atom->numChars)
                 {
-                    i.drawSelection (g, selectionStart, selectionEnd);
+                    i2.drawSelection (g, selectionStart, selectionEnd);
                 }
             }
         }
 
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
         const UniformTextSection* lastSection = 0;
 
         while (i.next() && i.lineY < clip.getBottom())
         {
-            if (i.lineY + getHeight() >= clip.getY())
-                i.updateLineHeight();
+            i.updateLineHeight();
 
             if (i.lineY + i.lineHeight >= clip.getY())
             {
@@ -2295,23 +2356,10 @@ void TextEditor::getCharPosition (const int index, float& cx, float& cy, float& 
 
     if (wordWrapWidth > 0)
     {
-        TextEditorIterator i (sections, getWordWrapWidth(), passwordCharacter);
+        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
-        while (i.next())
-        {
-            cy = i.lineY;
-
-            if (i.indexInText + i.atom->numChars > index)
-            {
-                i.updateLineHeight();
-                cx = i.indexToX (index);
-                lineHeight = i.lineHeight;
-                return;
-            }
-        }
-
-        cx = i.atomX;
-        cy = i.lineY;
+        if (i.getCharPosition (index, cx, cy, lineHeight))
+            return;
     }
     else
     {
@@ -2327,7 +2375,7 @@ int TextEditor::indexAtPosition (const float x, const float y) throw()
 
     if (wordWrapWidth > 0)
     {
-        TextEditorIterator i (sections, getWordWrapWidth(), passwordCharacter);
+        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
         while (i.next())
         {
