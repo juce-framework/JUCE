@@ -91,7 +91,11 @@ void CriticalSection::exit() const throw()
 
 //==============================================================================
 WaitableEvent::WaitableEvent() throw()
+#ifdef JUCE_DEBUG
+    : internal (CreateEvent (0, FALSE, FALSE, _T("Juce WaitableEvent")))
+#else
     : internal (CreateEvent (0, FALSE, FALSE, 0))
+#endif
 {
 }
 
@@ -125,8 +129,13 @@ static unsigned int __stdcall threadEntryProc (void* userData) throw()
 
     juce_threadEntryPoint (userData);
 
-    _endthread();
+    _endthreadex(0);
     return 0;
+}
+
+void juce_CloseThreadHandle (void* handle) throw()
+{
+    CloseHandle ((HANDLE) handle);
 }
 
 void* juce_createThread (void* userData) throw()
@@ -217,7 +226,12 @@ static HANDLE sleepEvent = 0;
 
 void juce_initialiseThreadEvents() throw()
 {
-    sleepEvent = CreateEvent (0, 0, 0, 0);
+    if (sleepEvent == 0)
+#ifdef JUCE_DEBUG
+        sleepEvent = CreateEvent (0, 0, 0, _T("Juce Sleep Event"));
+#else
+        sleepEvent = CreateEvent (0, 0, 0, 0);
+#endif
 }
 
 void Thread::yield() throw()

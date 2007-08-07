@@ -44,6 +44,9 @@ void* juce_createThread (void* userData) throw();
 void juce_killThread (void* handle) throw();
 void juce_setThreadPriority (void* handle, int priority) throw();
 void juce_setCurrentThreadName (const String& name) throw();
+#if JUCE_WIN32
+void juce_CloseThreadHandle (void* handle) throw();
+#endif
 
 //==============================================================================
 static VoidArray runningThreads (4);
@@ -77,6 +80,10 @@ void Thread::threadEntryPoint (Thread* const thread) throw()
     jassert (runningThreads.contains (thread));
     runningThreads.removeValue (thread);
     runningThreadsLock.exit();
+
+#if JUCE_WIN32
+    juce_CloseThreadHandle (thread->threadHandle_);
+#endif
 
     thread->threadHandle_ = 0;
     thread->threadId_ = 0;
