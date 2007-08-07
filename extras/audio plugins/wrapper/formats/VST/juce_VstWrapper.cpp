@@ -255,7 +255,12 @@ public:
         Component* const c = getChildComponent (0);
 
         if (c != 0)
+        {
+#if JUCE_LINUX
+            const MessageManagerLock mml;
+#endif
             c->setBounds (0, 0, getWidth(), getHeight());
+        }
     }
 
     void childBoundsChanged (Component* child);
@@ -543,7 +548,7 @@ public:
         if (! isProcessing)
             resume();
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
 #endif
 
