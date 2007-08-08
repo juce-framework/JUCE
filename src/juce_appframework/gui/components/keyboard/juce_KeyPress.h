@@ -57,8 +57,8 @@ public:
     /** Creates a KeyPress for a key and some modifiers.
 
         e.g.
-        CTRL+C would be: KeyPress ('c', Modifiers::ctrlModifier)
-        SHIFT+Escape would be: KeyPress (KeyPress::escapeKey, Modifiers::shiftModifier)
+        CTRL+C would be: KeyPress ('c', ModifierKeys::ctrlModifier)
+        SHIFT+Escape would be: KeyPress (KeyPress::escapeKey, ModifierKeys::shiftModifier)
 
         @param keyCode      a code that represents the key - this value must be
                             one of special constants listed in this class, or an
@@ -110,7 +110,7 @@ public:
 
     /** Returns the key modifiers.
 
-        @see Modifiers
+        @see ModifierKeys
     */
     const ModifierKeys getModifiers() const throw()             { return mods; }
 

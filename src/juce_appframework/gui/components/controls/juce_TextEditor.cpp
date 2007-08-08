@@ -1883,7 +1883,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         moveCursorTo (getTotalNumChars(), false);
         moveCursorTo (0, true);
     }
-    else if (key.isKeyCode (KeyPress::returnKey))
+    else if (key == KeyPress::returnKey)
     {
         if (! isReadOnly())
         {
