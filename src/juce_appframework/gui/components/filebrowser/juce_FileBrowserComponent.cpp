@@ -103,7 +103,7 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
 
     fileListComponent->addListener (this);
 
-    addAndMakeVisible (currentPathBox = new ComboBox (T("path")));
+    addAndMakeVisible (currentPathBox = new ComboBox ("path"));
     currentPathBox->setEditableText (true);
 
     StringArray rootNames, rootPaths;
@@ -127,12 +127,12 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     filenameBox->addListener (this);
     filenameBox->setReadOnly (filenameTextBoxIsReadOnly);
 
-    Label* label = new Label (T("f"), (mode == chooseDirectoryMode) ? TRANS("folder:")
-                                                                    : TRANS("file:"));
+    Label* label = new Label ("f", (mode == chooseDirectoryMode) ? TRANS("folder:")
+                                                                 : TRANS("file:"));
     addAndMakeVisible (label);
     label->attachToComponent (filenameBox, true);
 
-    addAndMakeVisible (goUpButton = new DrawableButton (T("up"), DrawableButton::ImageOnButtonBackground));
+    addAndMakeVisible (goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground));
     Path arrowPath;
     arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
     DrawablePath arrowImage;

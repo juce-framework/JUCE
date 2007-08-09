@@ -746,7 +746,7 @@ public:
                             const Font& font_,
                             const Colour& colour_,
                             const int oldCaretPos_,
-                            const int newCaretPos_)
+                            const int newCaretPos_) throw()
         : owner (owner_),
           text (text_),
           insertIndex (insertIndex_),
@@ -795,7 +795,7 @@ public:
                             const int endIndex_,
                             const int oldCaretPos_,
                             const int newCaretPos_,
-                            const VoidArray& removedSections_)
+                            const VoidArray& removedSections_) throw()
         : owner (owner_),
           startIndex (startIndex_),
           endIndex (endIndex_),
@@ -1873,7 +1873,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
 
         cut();
     }
-    else if (key == KeyPress (T('c'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress (T('c'), ModifierKeys::commandModifier, 0)
+              || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
     {
         newTransaction();
         copy();
@@ -1884,7 +1885,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
         copy();
         cut();
     }
-    else if (key == KeyPress (T('v'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress (T('v'), ModifierKeys::commandModifier, 0)
+              || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
     {
         newTransaction();
         paste();
