@@ -260,6 +260,21 @@ public:
         return c;
     }
 
+    void setFont (const Font& newFont,
+                  const tchar passwordCharacter) throw()
+    {
+        if (font != newFont)
+        {
+            font = newFont;
+
+            for (int i = atoms.size(); --i >= 0;)
+            {
+                TextAtom* const atom = (TextAtom*) atoms.getUnchecked(i);
+                atom->width = newFont.getStringWidthFloat (atom->getText (passwordCharacter));
+            }
+        }
+    }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -1054,10 +1069,10 @@ void TextEditor::applyFontToAllText (const Font& newFont)
 {
     currentFont = newFont;
 
-    const String oldText (getText());
-    clearInternal (0);
-    insert (oldText, 0, newFont, findColour (textColourId), 0, caretPosition);
+    for (int i = sections.size(); --i >= 0;)
+        ((UniformTextSection*) sections.getUnchecked(i))->setFont (newFont, passwordCharacter);
 
+    coalesceSimilarSections();
     updateTextHolderSize();
     scrollToMakeSureCursorIsVisible();
     repaint();
@@ -1117,6 +1132,7 @@ void TextEditor::setScrollBarButtonVisibility (const bool buttonsVisible)
 void TextEditor::clear()
 {
     clearInternal (0);
+    updateTextHolderSize();
     undoManager.clearUndoHistory();
 }
 
@@ -2199,7 +2215,7 @@ void TextEditor::remove (const int startIndex,
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            const int nextIndex = index + ((UniformTextSection*)sections[i])->getTotalLength();
+            const int nextIndex = index + ((UniformTextSection*) sections[i])->getTotalLength();
 
             if (startIndex > index && startIndex < nextIndex)
             {
