@@ -1069,8 +1069,14 @@ void TextEditor::applyFontToAllText (const Font& newFont)
 {
     currentFont = newFont;
 
+    const Colour overallColour (findColour (textColourId));
+
     for (int i = sections.size(); --i >= 0;)
-        ((UniformTextSection*) sections.getUnchecked(i))->setFont (newFont, passwordCharacter);
+    {
+        UniformTextSection* const uts = (UniformTextSection*) sections.getUnchecked(i);
+        uts->setFont (newFont, passwordCharacter);
+        uts->colour = overallColour;
+    }
 
     coalesceSimilarSections();
     updateTextHolderSize();
@@ -1447,7 +1453,7 @@ void TextEditor::moveCursorTo (const int newPosition,
         jassert (selectionStart <= selectionEnd);
         jassert (oldSelStart <= oldSelEnd);
 
-        repaintText (jmin (oldSelStart, selectionStart), 
+        repaintText (jmin (oldSelStart, selectionStart),
                      jmax (oldSelEnd, selectionEnd));
     }
     else

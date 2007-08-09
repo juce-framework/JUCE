@@ -88,8 +88,8 @@ public:
     //==============================================================================
     /** Sets the filter up to act as a low-pass shelf filter with variable Q and gain.
 
-        The gain is a scale factor that the low frequencies are multiplied by, so values 
-        greater than 1.0 will boost the low frequencies, values less than 1.0 will 
+        The gain is a scale factor that the low frequencies are multiplied by, so values
+        greater than 1.0 will boost the low frequencies, values less than 1.0 will
         attenuate them.
     */
     void makeLowShelf (const double sampleRate,
@@ -99,8 +99,8 @@ public:
 
     /** Sets the filter up to act as a high-pass shelf filter with variable Q and gain.
 
-        The gain is a scale factor that the high frequencies are multiplied by, so values 
-        greater than 1.0 will boost the high frequencies, values less than 1.0 will 
+        The gain is a scale factor that the high frequencies are multiplied by, so values
+        greater than 1.0 will boost the high frequencies, values less than 1.0 will
         attenuate them.
     */
     void makeHighShelf (const double sampleRate,
@@ -111,8 +111,8 @@ public:
     /** Sets the filter up to act as a band pass filter centred around a
         frequency, with a variable Q and gain.
 
-        The gain is a scale factor that the centre frequencies are multiplied by, so 
-        values greater than 1.0 will boost the centre frequencies, values less than 
+        The gain is a scale factor that the centre frequencies are multiplied by, so
+        values greater than 1.0 will boost the centre frequencies, values less than
         1.0 will attenuate them.
     */
     void makeBandPass (const double sampleRate,

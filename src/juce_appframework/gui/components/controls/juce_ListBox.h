@@ -184,8 +184,10 @@ public:
 
 
     //==============================================================================
+    /** Changes the current data model to display. */
     void setModel (ListBoxModel* const newModel);
 
+    /** Returns the current list model. */
     ListBoxModel* getModel() const throw()                      { return model; }
 
 
