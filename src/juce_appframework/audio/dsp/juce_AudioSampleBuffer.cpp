@@ -145,7 +145,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
                                  const bool clearExtraSpace,
                                  const bool avoidReallocating) throw()
 {
-    jassert (numChannels > 0 && numChannels <= maxNumAudioSampleBufferChannels);
+    jassert (newNumChannels > 0 && newNumChannels <= maxNumAudioSampleBufferChannels);
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {
