@@ -321,6 +321,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_FileFilter.o \
 	$(OBJDIR)/juce_FileListComponent.o \
 	$(OBJDIR)/juce_FilenameComponent.o \
+	$(OBJDIR)/juce_FileSearchPathListComponent.o \
 	$(OBJDIR)/juce_FileTreeComponent.o \
 	$(OBJDIR)/juce_ImagePreviewComponent.o \
 	$(OBJDIR)/juce_WildcardFileFilter.o \
@@ -1855,6 +1856,11 @@ $(OBJDIR)/juce_FileListComponent.o: ../../src/juce_appframework/gui/components/f
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_FilenameComponent.o: ../../src/juce_appframework/gui/components/filebrowser/juce_FilenameComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_FileSearchPathListComponent.o: ../../src/juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

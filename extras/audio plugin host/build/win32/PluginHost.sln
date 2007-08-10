@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginHost", "PluginHost.vcproj", "{A20203D2-E1C3-48E3-89DD-401D5731DCC0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26} = {AE232C11-D91C-4CA1-B24E-8B11A52EFF26}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JUCE", "..\..\..\..\build\win32\vc8\JUCE.vcproj", "{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		DLL Debug|Win32 = DLL Debug|Win32
+		DLL Release|Win32 = DLL Release|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.Debug|Win32.Build.0 = Debug|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.DLL Debug|Win32.ActiveCfg = Debug|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.DLL Debug|Win32.Build.0 = Debug|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.DLL Release|Win32.ActiveCfg = Release|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.DLL Release|Win32.Build.0 = Release|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.Release|Win32.ActiveCfg = Release|Win32
+		{A20203D2-E1C3-48E3-89DD-401D5731DCC0}.Release|Win32.Build.0 = Release|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.Debug|Win32.Build.0 = Debug|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.DLL Debug|Win32.ActiveCfg = DLL Debug|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.DLL Debug|Win32.Build.0 = DLL Debug|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.DLL Release|Win32.ActiveCfg = DLL Release|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.DLL Release|Win32.Build.0 = DLL Release|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.Release|Win32.ActiveCfg = Release|Win32
+		{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

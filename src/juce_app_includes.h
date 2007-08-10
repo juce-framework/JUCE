@@ -569,6 +569,9 @@
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h"
 #endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.h"
+#endif
 #ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h"
 #endif

@@ -113,6 +113,7 @@ MainWindow::MainWindow()
     }
 
     addKeyListener (commandManager->getKeyMappings());
+    commandManager->addListener (this);
 
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);

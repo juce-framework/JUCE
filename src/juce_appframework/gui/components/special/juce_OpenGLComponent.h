@@ -78,6 +78,17 @@ public:
     */
     void makeCurrentContextInactive();
 
+    /** Returns true if this component is the active openGL context for the
+        current thread.
+    */
+    bool isActiveContext() const throw();
+
+    /** Returns the OpenGLComponent that is currently the active context for
+        the current thread.
+    */
+    static OpenGLComponent* getCurrentlyActiveContextComponent() throw();
+
+    //==============================================================================
     /** Flips the openGL buffers over. */
     void swapBuffers();
 

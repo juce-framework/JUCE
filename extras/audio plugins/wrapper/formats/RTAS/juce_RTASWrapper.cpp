@@ -811,6 +811,9 @@ protected:
 
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
     {
+        if (juceFilter != 0)
+            juceFilter->setParameter (index, newValue);
+
         SetControlValue (index + 2, floatToLong (newValue));
     }
 

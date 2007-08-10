@@ -175,7 +175,7 @@ class CustomMenuComponent  : public PopupMenuCustomComponent,
 
 public:
     CustomMenuComponent()
-        : blobX (0), 
+        : blobX (0),
           blobY (0)
     {
         // set off a timer to move a blob around on this component every

@@ -1937,6 +1937,15 @@ bool juce_isHIViewCreatedByJuce (HIViewRef view)
              && HIObjectIsOfClass ((HIObjectRef) view, juceHiViewClassNameCFString);
 }
 
+bool juce_isWindowCreatedByJuce (WindowRef window)
+{
+    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        if (ComponentPeer::getPeer(i)->getNativeHandle() == window)
+            return true;
+
+    return false;
+}
+
 static void trackNextMouseEvent()
 {
     UInt32 mods;
@@ -3348,6 +3357,14 @@ bool juce_makeOpenGLContextCurrent (void* context)
     OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
 
     return aglSetCurrentContext ((oc != 0) ? oc->renderContext : 0);
+}
+
+bool juce_isActiveOpenGLContext (void* context) throw()
+{
+    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+
+    jassert (oc != 0);
+    return aglGetCurrentContext() == oc->renderContext;
 }
 
 void juce_swapOpenGLBuffers (void* context)

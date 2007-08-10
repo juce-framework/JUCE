@@ -70,6 +70,7 @@ extern bool juce_makeOpenGLContextCurrent (void* context);
 extern void juce_swapOpenGLBuffers (void* context);
 extern void juce_updateOpenGLWindowPos (void* context, Component* owner, Component* topComp);
 extern void juce_repaintOpenGLWindow (void* context);
+extern bool juce_isActiveOpenGLContext (void* context) throw();
 
 static VoidArray activeGLWindows (2);
 
@@ -137,6 +138,11 @@ public:
     bool makeCurrent() const
     {
         return context != 0 && juce_makeOpenGLContextCurrent (context);
+    }
+
+    bool isActive() const throw()
+    {
+        return context != 0 && juce_isActiveOpenGLContext (context);
     }
 
     void swapBuffers() const
@@ -220,6 +226,26 @@ bool OpenGLComponent::makeCurrentContextActive()
 void OpenGLComponent::makeCurrentContextInactive()
 {
     juce_makeOpenGLContextCurrent (0);
+}
+
+bool OpenGLComponent::isActiveContext() const throw()
+{
+    const InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
+
+    return context != 0 && context->isActive();
+}
+
+OpenGLComponent* OpenGLComponent::getCurrentlyActiveContextComponent() throw()
+{
+    for (int i = activeGLWindows.size(); --i >= 0;)
+    {
+        OpenGLComponent* const component = (OpenGLComponent*) activeGLWindows.getUnchecked(i);
+
+        if (component->isActiveContext())
+            return component;
+    }
+
+    return 0;
 }
 
 void OpenGLComponent::swapBuffers()

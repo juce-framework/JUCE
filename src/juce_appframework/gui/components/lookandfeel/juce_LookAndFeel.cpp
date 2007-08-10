@@ -56,6 +56,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_TreeView.h"
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
+#include "../filebrowser/juce_FileSearchPathListComponent.h"
 #include "../layout/juce_GroupComponent.h"
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
@@ -193,7 +194,9 @@ LookAndFeel::LookAndFeel()
         MidiKeyboardComponent::upDownButtonArrowColourId,        0xff000000,
 
         ColourSelector::backgroundColourId,         0xffe5e5e5,
-        ColourSelector::labelTextColourId,          0xff000000
+        ColourSelector::labelTextColourId,          0xff000000,
+
+        FileSearchPathListComponent::backgroundColourId,    0xffffffff,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)

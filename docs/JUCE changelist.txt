@@ -6,7 +6,10 @@
 ==============================================================================
 Changelist for version 1.45
 
--
+- big new project in the "extras" folder - a basic audio plugin host! Currently it loads VSTs on PC/Mac, and lets you put them together in a filter graph, which it plays. Hosting functionality is very basic at the moment, but I'm laying down a good architecture to hopefully build out into cross-platform plugin loading.
+- audio plugins: AudioFilterBase now requires a few extra methods to be implemented by your plugin: getInputChannelName, getOutputChannelName, isInputChannelStereoPair, isOutputChannelStereoPair.
+- new class: FileSearchPathListComponent, for letting the user edit a FileSearchPath.
+
 
 ==============================================================================
 Changelist for version 1.44

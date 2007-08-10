@@ -40,6 +40,7 @@
 #include <X11/Xmd.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
+#include <X11/extensions/scrnsaver.h>
 
 #if JUCE_USE_XINERAMA
  /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..
@@ -2564,14 +2565,20 @@ void Desktop::setMousePosition (int x, int y) throw()
 
 
 //==============================================================================
+static bool screenSaverAllowed = false;
+
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
-    jassertfalse // anyone know how to do this??
+    if (screenSaverAllowed != isEnabled)
+    {
+        screenSaverAllowed = isEnabled;
+        XScreenSaverSuspend (display, ! isEnabled);
+    }
 }
 
 bool Desktop::isScreenSaverEnabled() throw()
 {
-    return true;
+    return screenSaverAllowed;
 }
 
 //==============================================================================
@@ -2895,6 +2902,14 @@ bool juce_makeOpenGLContextCurrent (void* context)
                 && XSync (display, False);
     else
         return glXMakeCurrent (display, None, 0);
+}
+
+bool juce_isActiveOpenGLContext (void* context) throw()
+{
+    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+
+    jassert (oc != 0);
+    return glXGetCurrentContext() == oc->renderContext;
 }
 
 void juce_swapOpenGLBuffers (void* context)

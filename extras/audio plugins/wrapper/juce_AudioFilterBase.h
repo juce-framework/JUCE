@@ -207,6 +207,7 @@ public:
     */
     bool JUCE_CALLTYPE getCurrentPositionInfo (CurrentPositionInfo& info);
 
+    //==============================================================================
     /** Returns the current sample rate.
 
         This can be called from your processBlock() method - it's not guaranteed
@@ -225,6 +226,7 @@ public:
     */
     int JUCE_CALLTYPE getBlockSize() const throw()                          { return blockSize; }
 
+    //==============================================================================
     /** Returns the number of input channels that the host will be sending the filter.
 
         In your JucePluginCharacteristics.h file, you specify the number of channels
@@ -252,14 +254,20 @@ public:
         The host might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    const String getInputChannelName (const int channelIndex) const;
+    virtual const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const = 0;
 
     /** Returns the name of one of the output channels, as returned by the host.
 
         The host might not supply very useful names for channels, and this might be
         something like "1", "2", "left", "right", etc.
     */
-    const String getOutputChannelName (const int channelIndex) const;
+    virtual const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const = 0;
+
+    /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
+    virtual bool JUCE_CALLTYPE isInputChannelStereoPair (int index) const = 0;
+
+    /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
+    virtual bool JUCE_CALLTYPE isOutputChannelStereoPair (int index) const = 0;
 
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
@@ -384,6 +392,12 @@ public:
     void JUCE_CALLTYPE setParameterNotifyingHost (int parameterIndex,
                                                   float newValue);
 
+    /** Returns true if the host can automate this parameter.
+
+        By default, this returns true for all parameters.
+    */
+    virtual bool isParameterAutomatable (int index) const;
+
     //==============================================================================
     /** Returns the number of preset programs the plugin supports.
 
@@ -507,6 +521,11 @@ protected:
     static XmlElement* JUCE_CALLTYPE getXmlFromBinary (const void* data,
                                                        const int sizeInBytes);
 
+    /** @internal */
+    double sampleRate;
+    /** @internal */
+    int numInputChannels, numOutputChannels, blockSize;
+
 private:
     friend class JuceVSTWrapper;
     friend class JuceAU;
@@ -517,9 +536,6 @@ private:
 
     CriticalSection callbackLock;
     bool suspended;
-    double sampleRate;
-    int blockSize, numInputChannels, numOutputChannels;
-    StringArray outputNames, inputNames;
 
     FilterNativeCallbacks* callbacks;
 

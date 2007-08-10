@@ -4146,6 +4146,14 @@
 								>
 							</File>
 							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.h"
+								>
+							</File>
+							<File
 								RelativePath="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.cpp"
 								>
 							</File>

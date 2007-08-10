@@ -646,6 +646,8 @@
 		84FC31BB09B74A5C00B75141 /* juce_WildcardFileFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC31A909B74A5C00B75141 /* juce_WildcardFileFilter.h */; };
 		84FC31BE09B74A7700B75141 /* juce_BorderSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FC31BC09B74A7700B75141 /* juce_BorderSize.cpp */; };
 		84FC31BF09B74A7700B75141 /* juce_BorderSize.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC31BD09B74A7700B75141 /* juce_BorderSize.h */; };
+		84FFAF2B0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */; };
+		84FFAF2C0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1291,6 +1293,8 @@
 		84FC31A909B74A5C00B75141 /* juce_WildcardFileFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_WildcardFileFilter.h; path = filebrowser/juce_WildcardFileFilter.h; sourceTree = "<group>"; };
 		84FC31BC09B74A7700B75141 /* juce_BorderSize.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_BorderSize.cpp; sourceTree = "<group>"; };
 		84FC31BD09B74A7700B75141 /* juce_BorderSize.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_BorderSize.h; sourceTree = "<group>"; };
+		84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileSearchPathListComponent.cpp; path = filebrowser/juce_FileSearchPathListComponent.cpp; sourceTree = "<group>"; };
+		84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_FileSearchPathListComponent.h; path = filebrowser/juce_FileSearchPathListComponent.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -2416,6 +2420,8 @@
 				84FC31A209B74A5C00B75141 /* juce_FileFilter.h */,
 				84FC31A309B74A5C00B75141 /* juce_FileListComponent.cpp */,
 				84FC31A409B74A5C00B75141 /* juce_FileListComponent.h */,
+				84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */,
+				84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */,
 				847F72D90C2702A000CBECEC /* juce_FileTreeComponent.cpp */,
 				847F72DA0C2702A000CBECEC /* juce_FileTreeComponent.h */,
 				84F1F05B0A36CE96008CCC5E /* juce_FilenameComponent.cpp */,
@@ -2722,6 +2728,7 @@
 				84F6B7550C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.h in Headers */,
 				847F72DC0C2702A000CBECEC /* juce_DirectoryContentsDisplayComponent.h in Headers */,
 				847F72DE0C2702A000CBECEC /* juce_FileTreeComponent.h in Headers */,
+				84FFAF2C0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3118,6 +3125,7 @@
 				847F72DB0C2702A000CBECEC /* juce_DirectoryContentsDisplayComponent.cpp in Sources */,
 				847F72DD0C2702A000CBECEC /* juce_FileTreeComponent.cpp in Sources */,
 				8406AA5A0C4BDF90003A0D6A /* juce_MidiOutput.cpp in Sources */,
+				84FFAF2B0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

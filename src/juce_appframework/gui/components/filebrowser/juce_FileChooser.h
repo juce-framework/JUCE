@@ -49,7 +49,7 @@
     void loadMooseFile()
     {
         FileChooser myChooser ("Please select the moose you want to load...",
-                               File (SystemStats::getUserHomeDirectory()),
+                               File::getSpecialLocation (File::userHomeDirectory),
                                "*.moose");
 
         if (myChooser.browseForFileToOpen())

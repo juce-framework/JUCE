@@ -3141,6 +3141,14 @@ bool juce_makeOpenGLContextCurrent (void* context)
         return wglMakeCurrent (0, 0) != 0;
 }
 
+bool juce_isActiveOpenGLContext (void* context) throw()
+{
+    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+
+    jassert (oc != 0);
+    return wglGetCurrentContext() == oc->renderContext;
+}
+
 void juce_swapOpenGLBuffers (void* context)
 {
     OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;

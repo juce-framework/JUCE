@@ -352,49 +352,6 @@ public:
         setInitialDelay (JucePlugin_Latency);
         programsAreChunks (true);
 
-        VstPinProperties props;
-
-        int i;
-        for (i = 0; i < filter->numInputChannels; ++i)
-        {
-            String s (i + 1);
-
-            if (getInputProperties (i, &props))
-            {
-                s = props.label;
-
-                if (s.isEmpty())
-                {
-                    if ((props.flags & kVstPinIsStereo) != 0)
-                        s = ((i & 1) == 0) ? T("left") : T("right");
-                    else
-                        s = String (i + 1);
-                }
-            }
-
-            filter->inputNames.add (s);
-        }
-
-        for (i = 0; i < filter->numOutputChannels; ++i)
-        {
-            String s (i + 1);
-
-            if (getOutputProperties (i, &props))
-            {
-                s = props.label;
-
-                if (s.isEmpty())
-                {
-                    if ((props.flags & kVstPinIsStereo) != 0)
-                        s = ((i & 1) == 0) ? T("left") : T("right");
-                    else
-                        s = String (i + 1);
-                }
-            }
-
-            filter->outputNames.add (s);
-        }
-
         activePlugins.add (this);
     }
 
@@ -511,6 +468,40 @@ public:
     bool keysRequired()
     {
         return (JucePlugin_EditorRequiresKeyboardFocus) != 0;
+    }
+
+    bool getInputProperties (VstInt32 index, VstPinProperties* properties)
+    {
+        const String name (filter->getInputChannelName ((int) index));
+
+        name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
+        name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
+
+        properties->flags = kVstPinIsActive;
+
+        if (filter->isInputChannelStereoPair ((int) index))
+            properties->flags |= kVstPinIsStereo;
+
+        properties->arrangementType = 0;
+
+        return true;
+    }
+
+    bool getOutputProperties (VstInt32 index, VstPinProperties* properties)
+    {
+        const String name (filter->getOutputChannelName ((int) index));
+
+        name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
+        name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
+
+        properties->flags = kVstPinIsActive;
+
+        if (filter->isOutputChannelStereoPair ((int) index))
+            properties->flags |= kVstPinIsStereo;
+
+        properties->arrangementType = 0;
+
+        return true;
     }
 
     //==============================================================================
@@ -787,6 +778,11 @@ public:
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
     {
         setParameterAutomated (index, newValue);
+    }
+
+    bool canParameterBeAutomated (VstInt32 index)
+    {
+        return filter->isParameterAutomatable ((int) index);
     }
 
     //==============================================================================

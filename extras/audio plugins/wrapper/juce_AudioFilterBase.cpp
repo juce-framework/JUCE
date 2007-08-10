@@ -34,14 +34,14 @@
 
 //==============================================================================
 AudioFilterBase::AudioFilterBase()
-    : suspended (false),
+    : sampleRate (0),
+      blockSize (0),
       numInputChannels (0),
       numOutputChannels (0),
+      suspended (false),
       callbacks (0),
       activeEditor (0)
 {
-    sampleRate = 0.0;
-    blockSize = 0;
 }
 
 AudioFilterBase::~AudioFilterBase()
@@ -67,6 +67,11 @@ void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
         setParameter (parameterIndex, newValue);
 }
 
+bool AudioFilterBase::isParameterAutomatable (int /*index*/) const
+{
+    return true;
+}
+
 void AudioFilterBase::suspendProcessing (const bool shouldBeSuspended)
 {
     const ScopedLock sl (callbackLock);
@@ -78,18 +83,6 @@ bool AudioFilterBase::getCurrentPositionInfo (CurrentPositionInfo& info)
 {
     return callbacks != 0
             && callbacks->getCurrentPositionInfo (info);
-}
-
-const String AudioFilterBase::getInputChannelName (const int channelIndex) const
-{
-    String s (inputNames [channelIndex]);
-    return s.isNotEmpty() ? s : String (channelIndex + 1);
-}
-
-const String AudioFilterBase::getOutputChannelName (const int channelIndex) const
-{
-    String s (outputNames [channelIndex]);
-    return s.isNotEmpty() ? s : String (channelIndex + 1);
 }
 
 //==============================================================================
@@ -112,8 +105,10 @@ AudioFilterEditor* AudioFilterBase::createEditorIfNeeded()
 
     if (ed != 0)
     {
+#if ! JUCE_PLUGIN_HOST
         // you must give your editor comp a size before returning it..
         jassert (ed->getWidth() > 0 && ed->getHeight() > 0);
+#endif
 
         const ScopedLock sl (callbackLock);
         activeEditor = ed;

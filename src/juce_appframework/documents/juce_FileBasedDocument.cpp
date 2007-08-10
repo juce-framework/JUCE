@@ -256,7 +256,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
     if (f.existsAsFile() || f.getParentDirectory().isDirectory())
         f = f.getSiblingFile (legalFilename);
     else
-        f = File::getCurrentWorkingDirectory().getChildFile (legalFilename);
+        f = File::getSpecialLocation (File::userDocumentsDirectory).getChildFile (legalFilename);
 
     f = f.withFileExtension (fileExtension)
          .getNonexistentSibling (true);
@@ -267,8 +267,11 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
     {
         setLastDocumentOpened (fc.getResult());
 
-        return saveAs (fc.getResult(),
-                       false, false, true);
+        File chosen (fc.getResult());
+        if (chosen.getFileExtension().isEmpty())
+            chosen = chosen.withFileExtension (fileExtension);
+
+        return saveAs (f, false, false, true);
     }
 
     return userCancelledSave;
