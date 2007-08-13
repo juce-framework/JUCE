@@ -650,7 +650,7 @@ int File::findChildFiles (OwnedArray<File>& results,
                           const String& wildCardPattern) const throw()
 {
     // you have to specify the type of files you're looking for!
-    jassert (whatToLookFor > 0 && whatToLookFor <= 3);
+    jassert ((whatToLookFor & (findFiles | findDirectories)) != 0);
 
     int total = 0;
 
