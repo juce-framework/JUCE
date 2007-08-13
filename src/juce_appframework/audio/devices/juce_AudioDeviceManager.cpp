@@ -370,7 +370,7 @@ void AudioDeviceManager::setOutputChannels (const BitArray& newEnabledChannels,
                                             const bool treatAsChosenDevice)
 {
     if (currentAudioDevice != 0
-         && newEnabledChannels != inputChannels)
+         && newEnabledChannels != outputChannels)
     {
         setAudioDevice (currentAudioDevice->getName(),
                         currentAudioDevice->getCurrentBufferSizeSamples(),
