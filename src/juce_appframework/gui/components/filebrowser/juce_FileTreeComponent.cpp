@@ -253,7 +253,12 @@ FileTreeComponent::~FileTreeComponent()
 //==============================================================================
 const File FileTreeComponent::getSelectedFile() const
 {
-    const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (0));
+    return getSelectedFile (0);
+}
+
+const File FileTreeComponent::getSelectedFile (const int index) const throw()
+{
+    const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index));
 
     if (item != 0)
         return item->file;

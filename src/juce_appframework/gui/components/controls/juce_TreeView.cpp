@@ -263,13 +263,37 @@ private:
     TreeViewContentComponent (const TreeViewContentComponent&);
     const TreeViewContentComponent& operator= (const TreeViewContentComponent&);
 
-    static void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
+    void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
     {
-        const bool shft = modifiers.isShiftDown();
-        const bool cmd  = modifiers.isCommandDown();
+        TreeViewItem* firstSelected = 0;
 
-        item->setSelected (shft || (! cmd) || (cmd && ! item->isSelected()),
-                           ! (shft || cmd));
+        if (modifiers.isShiftDown() && ((firstSelected = owner->getSelectedItem (0)) != 0))
+        {
+            TreeViewItem* const lastSelected = owner->getSelectedItem (owner->getNumSelectedItems() - 1);
+            jassert (lastSelected != 0);
+
+            int rowStart = firstSelected->getRowNumberInTree();
+            int rowEnd = lastSelected->getRowNumberInTree();
+            if (rowStart > rowEnd)
+                swapVariables (rowStart, rowEnd);
+
+            int ourRow = item->getRowNumberInTree();
+            int otherEnd = ourRow < rowEnd ? (ourRow < rowStart ? (rowStart - 1) 
+                                                                : rowStart)
+                                           : (rowEnd + 1);
+
+            if (ourRow > otherEnd)
+                swapVariables (ourRow, otherEnd);
+
+            for (int i = ourRow; i <= otherEnd; ++i)
+                owner->getItemOnRow (i)->setSelected (true, false);
+        }
+        else
+        {
+            const bool cmd  = modifiers.isCommandDown();
+
+            item->setSelected ((! cmd) || (! item->isSelected()), ! cmd);
+        }
     }
 };
 

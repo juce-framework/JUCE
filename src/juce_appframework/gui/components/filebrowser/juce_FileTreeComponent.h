@@ -61,7 +61,17 @@ public:
     ~FileTreeComponent();
 
     //==============================================================================
-    /** Returns the file that the user has currently selected.
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
 
         Returns File::nonexistent if none is selected.
     */
