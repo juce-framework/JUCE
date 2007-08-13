@@ -278,9 +278,7 @@ private:
                 swapVariables (rowStart, rowEnd);
 
             int ourRow = item->getRowNumberInTree();
-            int otherEnd = ourRow < rowEnd ? (ourRow < rowStart ? (rowStart - 1) 
-                                                                : rowStart)
-                                           : (rowEnd + 1);
+            int otherEnd = ourRow < rowEnd ? rowStart : rowEnd;
 
             if (ourRow > otherEnd)
                 swapVariables (ourRow, otherEnd);
