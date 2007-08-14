@@ -42,14 +42,17 @@
 
 //==============================================================================
 /**
-    Base class for plugins written using JUCE.
+    Base class for audio filters or plugins written using JUCE.
 
-    This is intended to act as a base class of plugin that is general enough to
-    be wrapped as a VST, AU, RTAS, etc.
+    This is intended to act as a base class of audio filter that is general enough to
+    be wrapped as a VST, AU, RTAS, etc, or used internally.
 
-    Derive your filter class from this base class, and implement a global function
-    called initialiseFilterInfo() which creates and returns a new instance of
-    your subclass.
+    It is also used by the plugin hosting code as the wrapper around an instance 
+    of a loaded plugin.
+
+    Derive your filter class from this base class, and if you're building a plugin,
+    you should implement a global function called initialiseFilterInfo() which creates 
+    and returns a new instance of your subclass.
 */
 class AudioFilterBase
 {
@@ -67,7 +70,7 @@ public:
     virtual ~AudioFilterBase();
 
     //==============================================================================
-    /** Called before playback starts, to let the plugin prepare itself.
+    /** Called before playback starts, to let the filter prepare itself.
 
         The sample rate is the target sample rate, and will remain constant until
         playback stops.
@@ -80,47 +83,50 @@ public:
     virtual void JUCE_CALLTYPE prepareToPlay (double sampleRate,
                                               int estimatedSamplesPerBlock) = 0;
 
-    /** Called after playback has stopped, to let the plugin free up any resources it
+    /** Called after playback has stopped, to let the filter free up any resources it
         no longer needs.
     */
     virtual void JUCE_CALLTYPE releaseResources() = 0;
 
     /** Renders the next block.
 
-        The input and output buffers will have been prepared with the number of samples
-        and channels required, and mustn't be resized. Note that these may both point to
-        the same block of memory if accumulateOutput is true. There will always be the
-        same number of samples in the input and output buffers, but the number of channels
-        may not be the same.
+        When this method is called, the buffer contains a number of channels which is
+        at least as great as the maximum number of input and output channels that
+        this filter is using. It will be filled with the filter's input data and
+        should be replaced with the filter's output.
 
-        If accumulateOutput is true, then the output buffer will contain a copy of the
-        input buffer (or may be physically the same memory - be careful!), and your filter's
-        output should be added to (or may replace) whatever samples are already in the
-        output buffer.
+        So for example if your filter has 2 input channels and 4 output channels, then
+        the buffer will contain 4 channels, the first two being filled with the
+        input data. Your filter should read these, do its processing, and replace
+        the contents of all 4 channels with its output.
 
-        If accumulateOutput is false then the contents of the output buffer are undefined
-        and MUST ALL be overwritten with your plugin's output.
+        Or if your filter has 5 inputs and 2 outputs, the buffer will have 5 channels,
+        all filled with data, and your filter should overwrite the first 2 of these 
+        with its output. But be VERY careful not to write anything to the last 3 
+        channels, as these might be mapped to memory that the host assumes is read-only!
 
-        Note that the number of samples in these buffers is NOT guaranteed to be
-        the same for every callback, and may be more or less than the estimated value
-        given to prepareToPlay(). Your code must be able to cope with variable-sized
-        blocks, or you're going to get clicks and crashes!
+        Note that if you have more outputs than inputs, then only those channels that 
+        correspond to an input channel are guaranteed to contain sensible data - e.g. 
+        in the case of 2 inputs and 4 outputs, the first two channels contain the input,
+        but the last two channels may contain garbage, so you should be careful not to 
+        let this pass through without being overwritten or cleared.
 
-        Your plugin must also not make any assumptions about the number of channels
-        supplied in the input and output buffers - there could be any number of channels
-        here, up to the maximum values specified in your JucePluginCharacteristics.h file.
-        However, the number of channels will remain constant between the prepareToPlay()
-        and releaseResources() calls.
+        Also note that the buffer may have more channels than are strictly necessary,
+        but your should only read/write from the ones that your filter is supposed to
+        be using.
 
-        If the plugin has indicated that it needs midi input, then the midiMessages
-        array will be filled with midi messages for this block. Each message's timestamp
-        will indicate the message's time, as a number of samples from the start of the
-        block.
+        The number of samples in these buffers is NOT guaranteed to be the same for every 
+        callback, and may be more or less than the estimated value given to prepareToPlay(). 
+        Your code must be able to cope with variable-sized blocks, or you're going to get 
+        clicks and crashes!
 
-        If the plugin has indicated that it produces midi output, then any messages remaining
-        in the midiMessages array will be sent to the host after the processBlock method
-        returns. This means that the plugin must be careful to clear any incoming messages
-        out of the array if it doesn't want them to be passed-on.
+        If the filter is receiving a midi input, then the midiMessages array will be filled 
+        with the midi messages for this block. Each message's timestamp will indicate the 
+        message's time, as a number of samples from the start of the block.
+
+        Any messages left in the midi buffer when this method has finished are assumed to
+        be the filter's midi output. This means that your filter should be careful to 
+        clear any incoming messages from the array if it doesn't want them to be passed-on.
 
         Be very careful about what you do in this callback - it's going to be called by
         the audio thread, so any kind of interaction with the UI is absolutely
@@ -130,9 +136,7 @@ public:
         processBlock() method to send out an asynchronous message. You could also use
         the AsyncUpdater class in a similar way.
     */
-    virtual void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& input,
-                                             AudioSampleBuffer& output,
-                                             const bool accumulateOutput,
+    virtual void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                              MidiBuffer& midiMessages) = 0;
 
     //==============================================================================
@@ -230,7 +234,7 @@ public:
     /** Returns the number of input channels that the host will be sending the filter.
 
         In your JucePluginCharacteristics.h file, you specify the number of channels
-        that your plugin would prefer to get, and this method lets you know how
+        that your filter would prefer to get, and this method lets you know how
         many the host is actually going to send.
 
         Note that this method is only valid during or after the prepareToPlay()
@@ -241,7 +245,7 @@ public:
     /** Returns the number of output channels that the host will be sending the filter.
 
         In your JucePluginCharacteristics.h file, you specify the number of channels
-        that your plugin would prefer to get, and this method lets you know how
+        that your filter would prefer to get, and this method lets you know how
         many the host is actually going to send.
 
         Note that this method is only valid during or after the prepareToPlay()
@@ -310,24 +314,27 @@ public:
     void JUCE_CALLTYPE suspendProcessing (const bool shouldBeSuspended);
 
     //==============================================================================
-    /** Creates the plugin's UI.
+    /** Creates the filter's UI.
 
-        This can return 0 if you want a UI-less plugin. Otherwise, the component should
-        be created and set to the size you want it to be before returning it.
+        This can return 0 if you want a UI-less filter, in which case the host may create
+        a generic UI that lets the user twiddle the parameters directly. 
+        
+        If you do want to pass back a component, the component should be created and set to
+        the correct size before returning it.
 
-        Remember not to do anything silly like allowing your plugin to keep a pointer to
-        the component that gets created - this may be deleted later without any warning, so
-        that pointer could become a dangler. Use the getActiveEditor() method instead.
+        Remember not to do anything silly like allowing your filter to keep a pointer to
+        the component that gets created - it could be deleted later without any warning, which
+        would make your pointer into a dangler. Use the getActiveEditor() method instead.
 
         The correct way to handle the connection between an editor component and its
-        plugin is to use something like a ChangeBroadcaster so that the editor can
+        filter is to use something like a ChangeBroadcaster so that the editor can
         register itself as a listener, and be told when a change occurs. This lets them
         safely unregister themselves when they are deleted.
 
-        Here are a few assumptions to bear in mind when writing an editor:
+        Here are a few things to bear in mind when writing an editor:
 
         - Initially there won't be an editor, until the user opens one, or they might
-          not open one at all. Your plugin mustn't rely on it being there.
+          not open one at all. Your filter mustn't rely on it being there.
         - An editor object may be deleted and a replacement one created again at any time.
         - It's safe to assume that an editor will be deleted before its filter.
     */
@@ -356,24 +363,26 @@ public:
     /** Returns the name of a particular parameter. */
     virtual const String JUCE_CALLTYPE getParameterName (int parameterIndex) = 0;
 
-    /** Called by the host to find out the value of one of the plugin's parameters.
+    /** Called by the host to find out the value of one of the filter's parameters.
 
         The host will expect the value returned to be between 0 and 1.0.
 
         This could be called quite frequently, so try to make your code efficient.
+        It's also likely to be called by non-UI threads, so the code in here should
+        be thread-aware.
     */
     virtual float JUCE_CALLTYPE getParameter (int parameterIndex) = 0;
 
     /** Returns the value of a parameter as a text string. */
     virtual const String JUCE_CALLTYPE getParameterText (int parameterIndex) = 0;
 
-    /** The host will call this method to change the value of one of the plugin's parameters.
+    /** The host will call this method to change the value of one of the filter's parameters.
 
         The host may call this at any time, including during the audio processing
-        callback, so the plugin has to process this very fast and avoid blocking.
+        callback, so the filter has to process this very fast and avoid blocking.
 
         If you want to set the value of a parameter internally, e.g. from your
-        plugin editor, then don't call this directly - instead, use the
+        editor component, then don't call this directly - instead, use the
         setParameterNotifyingHost() method, which will also send a message to
         the host telling it about the change. If the message isn't sent, the host
         won't be able to automate your parameters properly.
@@ -383,7 +392,7 @@ public:
     virtual void JUCE_CALLTYPE setParameter (int parameterIndex,
                                              float newValue) = 0;
 
-    /** Your plugin can call this when it needs to change one of its parameters.
+    /** Your filter can call this when it needs to change one of its parameters.
 
         This could happen when the editor or some other internal operation changes
         a parameter. This method will call the setParameter() method to change the
@@ -399,7 +408,7 @@ public:
     virtual bool isParameterAutomatable (int index) const;
 
     //==============================================================================
-    /** Returns the number of preset programs the plugin supports.
+    /** Returns the number of preset programs the filter supports.
 
         The value returned must be valid as soon as this object is created, and
         must not change over its lifetime.
@@ -424,9 +433,9 @@ public:
     virtual void JUCE_CALLTYPE changeProgramName (int index, const String& newName) = 0;
 
     //==============================================================================
-    /** The host will call this method when it wants to save the plugin's internal state.
+    /** The host will call this method when it wants to save the filter's internal state.
 
-        This must copy any info about the plugin's state into the block of memory provided,
+        This must copy any info about the filter's state into the block of memory provided,
         so that the host can store this and later restore it using setStateInformation().
 
         Note that there's also a getCurrentProgramStateInformation() method, which only
@@ -438,7 +447,7 @@ public:
     */
     virtual void JUCE_CALLTYPE getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData) = 0;
 
-    /** The host will call this method if it wants to save the state of just the plugin's
+    /** The host will call this method if it wants to save the state of just the filter's
         current program.
 
         Unlike getStateInformation, this should only return the current program's state.
@@ -451,7 +460,7 @@ public:
     */
     virtual void JUCE_CALLTYPE getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
 
-    /** This must restore the plugin's state from a block of data previously created
+    /** This must restore the filter's state from a block of data previously created
         using getStateInformation().
 
         Note that there's also a setCurrentProgramStateInformation() method, which tries
@@ -463,7 +472,7 @@ public:
     */
     virtual void JUCE_CALLTYPE setStateInformation (const void* data, int sizeInBytes) = 0;
 
-    /** The host will call this method if it wants to restore the state of just the plugin's
+    /** The host will call this method if it wants to restore the state of just the filter's
         current program.
 
         Not all hosts support this, and if you don't implement it, the base class
@@ -504,7 +513,7 @@ protected:
     //==============================================================================
     /** Helper function that just converts an xml element into a binary blob.
 
-        Use this in your plugin's getStateInformation() method if you want to
+        Use this in your filter's getStateInformation() method if you want to
         store its state as xml.
 
         Then use getXmlFromBinary() to reverse this operation and retrieve the XML
@@ -524,7 +533,7 @@ protected:
     /** @internal */
     double sampleRate;
     /** @internal */
-    int numInputChannels, numOutputChannels, blockSize;
+    int blockSize, numInputChannels, numOutputChannels;
 
 private:
     friend class JuceVSTWrapper;
@@ -544,7 +553,7 @@ private:
 
 //==============================================================================
 /** Somewhere in the code for an actual plugin, you need to implement this function
-    and make it create an instance of the plugin subclass that you're building.
+    and make it create an instance of the filter subclass that you're building.
 */
 extern AudioFilterBase* JUCE_CALLTYPE createPluginFilter();
 

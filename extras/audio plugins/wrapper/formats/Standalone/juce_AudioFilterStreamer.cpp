@@ -86,9 +86,16 @@ void AudioFilterStreamer::audioDeviceIOCallback (const float** inputChannelData,
         const ScopedLock sl (filter.getCallbackLock());
 
         if (filter.suspended)
+        {
             output.clear();
+        }
         else
-            filter.processBlock (input, output, false, midiBuffer);
+        {
+            for (int i = jmin (output.getNumChannels(), input.getNumChannels()); --i >= 0;)
+                output.copyFrom (i, 0, input, i, 0, numSamples);
+
+            filter.processBlock (output, midiBuffer);
+        }
     }
 
     while (numOutsWanted < numActiveOutChans)

@@ -88,9 +88,7 @@ public:
 
     void JUCE_CALLTYPE prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
     void JUCE_CALLTYPE releaseResources();
-    void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& input,
-                                     AudioSampleBuffer& output,
-                                     const bool accumulateOutput,
+    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                      MidiBuffer& midiMessages);
 
     AudioFilterEditor* JUCE_CALLTYPE createEditor();
@@ -147,8 +145,7 @@ private:
     void* midiEventsToSend;
     int numAllocatedMidiEvents;
     VstTimeInfo vstHostTime;
-    float** channelsIn;
-    float** channelsOut;
+    float** channels;
 
     ReferenceCountedObjectPtr <ModuleHandle> module;
 

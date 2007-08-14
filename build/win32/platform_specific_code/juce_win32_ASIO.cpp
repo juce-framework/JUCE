@@ -311,8 +311,8 @@ public:
         int sampleRate = roundDoubleToInt (sr);
         currentSampleRate = sampleRate;
         currentBlockSizeSamples = bufferSizeSamples;
-        currentChansOut = outputChannels;
-        currentChansIn = inputChannels;
+        currentChansOut.clear();
+        currentChansIn.clear();
 
         updateSampleRates();
 
@@ -432,6 +432,7 @@ public:
             {
                 if (inputChannels[i])
                 {
+                    currentChansIn.setBit (i);
                     info->isInput = 1;
                     info->channelNum = i;
                     info->buffers[0] = info->buffers[1] = 0;
@@ -444,6 +445,7 @@ public:
             {
                 if (outputChannels[i])
                 {
+                    currentChansOut.setBit (i);
                     info->isInput = 0;
                     info->channelNum = i;
                     info->buffers[0] = info->buffers[1] = 0;
@@ -730,6 +732,16 @@ public:
     double getCurrentSampleRate()
     {
         return currentSampleRate;
+    }
+
+    const BitArray getActiveOutputChannels() const
+    {
+        return currentChansOut;
+    }
+
+    const BitArray getActiveInputChannels() const
+    {
+        return currentChansIn;
     }
 
     int getCurrentBitDepth()

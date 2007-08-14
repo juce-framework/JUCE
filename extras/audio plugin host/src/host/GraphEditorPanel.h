@@ -89,8 +89,7 @@ private:
 
     It also manages the graph itself, and plays it.
 */
-class GraphDocumentComponent  : public Component,
-                                public ChangeListener
+class GraphDocumentComponent  : public Component
 {
 public:
     //==============================================================================
@@ -105,14 +104,13 @@ public:
 
     //==============================================================================
     void resized();
-    void changeListenerCallback (void*);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     AudioDeviceManager* deviceManager;
-    FilterGraphPlayer graphRenderer;
+    FilterGraphPlayer* graphPlayer;
 
     GraphEditorPanel* graphPanel;
     Component* keyboardComp;

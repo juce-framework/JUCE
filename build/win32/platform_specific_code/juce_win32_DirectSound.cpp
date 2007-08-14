@@ -1131,6 +1131,16 @@ public:
         return bits;
     }
 
+    const BitArray getActiveOutputChannels() const
+    {
+        return enabledOutputs;
+    }
+
+    const BitArray getActiveInputChannels() const
+    {
+        return enabledInputs;
+    }
+
     int getOutputLatencyInSamples()
     {
         return (int) (getCurrentBufferSizeSamples() * 1.5);
@@ -1205,6 +1215,7 @@ private:
     int volatile totalSamplesOut;
     int64 volatile lastBlockTime;
     double sampleRate;
+    BitArray enabledInputs, enabledOutputs;
     float** inputBuffers;
     float** outputBuffers;
 
@@ -1629,6 +1640,8 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 {
     closeDevice();
     totalSamplesOut = 0;
+    enabledInputs.clear();
+    enabledOutputs.clear();
 
     sampleRate = sampleRate_;
 
@@ -1649,16 +1662,28 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     int i;
     for (i = 0; i < numInputBuffers + 2; ++i)
     {
-        inputBuffers[i] = (inputChannels[i] && i < numInputBuffers)
-                            ? (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float))
-                            : 0;
+        if (inputChannels[i] && i < numInputBuffers)
+        {
+            inputBuffers[i] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            enabledInputs.setBit (i);
+        }
+        else
+        {
+            inputBuffers[i] = 0;
+        }
     }
 
     for (i = 0; i < numOutputBuffers + 2; ++i)
     {
-        outputBuffers[i] = (outputChannels[i] && i < numOutputBuffers)
-                            ? (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float))
-                            : 0;
+        if (outputChannels[i] && i < numOutputBuffers)
+        {
+            outputBuffers[i] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            enabledOutputs.setBit (i);
+        }
+        else
+        {
+            outputBuffers[i] = 0;
+        }
     }
 
     for (i = 0; i < numInputBuffers; ++i)

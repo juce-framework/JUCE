@@ -148,12 +148,18 @@ public:
     */
     const String& getTypeName() const throw()                       { return typeName; }
 
-    /** Returns the names of the available output channels on this device. */
+    //==============================================================================
+    /** Returns the names of all the available output channels on this device. 
+        To find out which of these are currently in use, call getActiveOutputChannels().
+    */
     virtual const StringArray getOutputChannelNames() = 0;
 
-    /** Returns the names of the available input channels on this device. */
+    /** Returns the names of all the available input channels on this device. 
+        To find out which of these are currently in use, call getActiveInputChannels().
+    */
     virtual const StringArray getInputChannelNames() = 0;
 
+    //==============================================================================
     /** Returns the number of sample-rates this device supports.
 
         To find out which rates are available on this device, use this method to
@@ -272,6 +278,18 @@ public:
         If the device isn't actually open, this value doesn't really mean much.
     */
     virtual int getCurrentBitDepth() = 0;
+
+    /** Returns a mask showing which of the available output channels are currently
+        enabled.
+        @see getOutputChannelNames
+    */
+    virtual const BitArray getActiveOutputChannels() const = 0;
+
+    /** Returns a mask showing which of the available input channels are currently
+        enabled.
+        @see getInputChannelNames
+    */
+    virtual const BitArray getActiveInputChannels() const = 0;
 
     /** Returns the device's output latency.
 

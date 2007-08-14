@@ -116,7 +116,9 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				84FFAE900C6C8A6F009F6E72 /* src */,
+				84FFAE910C6C8A6F009F6E72 /* host */,
+				84FFAE9B0C6C8A6F009F6E72 /* plugins */,
+				84FFAE9A0C6C8A6F009F6E72 /* HostStartup.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -145,17 +147,6 @@
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
 		};
-		84FFAE900C6C8A6F009F6E72 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				84FFAE910C6C8A6F009F6E72 /* host */,
-				84FFAE9A0C6C8A6F009F6E72 /* HostStartup.cpp */,
-				84FFAE9B0C6C8A6F009F6E72 /* plugins */,
-			);
-			name = src;
-			path = ../../src;
-			sourceTree = SOURCE_ROOT;
-		};
 		84FFAE910C6C8A6F009F6E72 /* host */ = {
 			isa = PBXGroup;
 			children = (
@@ -175,6 +166,7 @@
 		84FFAE9B0C6C8A6F009F6E72 /* plugins */ = {
 			isa = PBXGroup;
 			children = (
+				84FFAEA80C6C8A6F009F6E72 /* vst */,
 				84FFAE9C0C6C8A6F009F6E72 /* juce_AudioPluginFormat.cpp */,
 				84FFAE9D0C6C8A6F009F6E72 /* juce_AudioPluginFormat.h */,
 				84FFAE9E0C6C8A6F009F6E72 /* juce_AudioPluginInstance.cpp */,
@@ -187,7 +179,6 @@
 				84FFAEA50C6C8A6F009F6E72 /* juce_PluginDirectoryScanner.h */,
 				84FFAEA60C6C8A6F009F6E72 /* juce_PluginListComponent.cpp */,
 				84FFAEA70C6C8A6F009F6E72 /* juce_PluginListComponent.h */,
-				84FFAEA80C6C8A6F009F6E72 /* vst */,
 			);
 			name = plugins;
 			path = ../../src/plugins;
@@ -300,7 +291,6 @@
 		C0E91AC608A95435008D54AB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
 				COPY_PHASE_STRIP = NO;
 			};
 			name = Debug;
@@ -308,7 +298,6 @@
 		C0E91AC708A95435008D54AB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = ppc;
 				DEAD_CODE_STRIPPING = YES;
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;

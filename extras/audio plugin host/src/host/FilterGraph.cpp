@@ -99,7 +99,6 @@ FilterInGraph::FilterInGraph (FilterGraph& owner_, AudioPluginInstance* const fi
       filter (filter_),
       uid (0),
       processedAudio (1, 1),
-      inputAudio (1, 1),
       activeUI (0)
 {
     lastX = 100 + Random::getSystemRandom().nextInt (400);
@@ -137,8 +136,7 @@ void FilterInGraph::showUI()
 
 void FilterInGraph::prepareBuffers (int blockSize)
 {
-    processedAudio.setSize (jmax (1, filter->getNumOutputChannels()), blockSize);
-    inputAudio.setSize (jmax (1, filter->getNumInputChannels()), blockSize);
+    processedAudio.setSize (jmax (1, filter->getNumInputChannels(), filter->getNumOutputChannels()), blockSize);
     processedAudio.clear();
 
     processedMidi.clear();
@@ -148,11 +146,9 @@ void FilterInGraph::renderBlock (int numSamples,
                                  const ReferenceCountedArray <FilterInGraph>& filters,
                                  const OwnedArray <FilterConnection>& connections)
 {
-    processedAudio.setSize (jmax (1, filter->getNumOutputChannels()), numSamples);
-    inputAudio.setSize (jmax (1, filter->getNumInputChannels()), numSamples);
+    processedAudio.setSize (jmax (1, filter->getNumInputChannels(), filter->getNumOutputChannels()), numSamples);
 
     // this isn't particularly efficient - could do with some optimising here
-    inputAudio.clear();
     processedAudio.clear();
     processedMidi.clear();
 
@@ -174,8 +170,12 @@ void FilterInGraph::renderBlock (int numSamples,
                     }
                     else
                     {
-                        inputAudio.addFrom (fc->destChannel, 0, input->processedAudio,
-                                            fc->sourceChannel, 0, numSamples);
+                        if (fc->destChannel < filter->getNumInputChannels()
+                            && fc->sourceChannel < input->filter->getNumOutputChannels())
+                        {
+                            processedAudio.addFrom (fc->destChannel, 0, input->processedAudio,
+                                                    fc->sourceChannel, 0, numSamples);
+                        }
                     }
 
                     break;
@@ -184,7 +184,7 @@ void FilterInGraph::renderBlock (int numSamples,
         }
     }
 
-    filter->processBlock (inputAudio, processedAudio, true, processedMidi);
+    filter->processBlock (processedAudio, processedMidi);
 }
 
 XmlElement* FilterInGraph::createXml() const
@@ -481,7 +481,7 @@ bool FilterGraph::canConnect (uint32 sourceFilterUID, int sourceFilterChannel,
     return true;
 }
 
-void FilterGraph::addConnection (uint32 sourceFilterUID, int sourceChannel,
+bool FilterGraph::addConnection (uint32 sourceFilterUID, int sourceChannel,
                                  uint32 destFilterUID, int destChannel)
 {
     if (canConnect (sourceFilterUID, sourceChannel, destFilterUID, destChannel))
@@ -495,7 +495,11 @@ void FilterGraph::addConnection (uint32 sourceFilterUID, int sourceChannel,
 
         connections.add (conn);
         changed();
+
+        return true;
     }
+
+    return false;
 }
 
 void FilterGraph::removeConnection (const int index)
@@ -504,6 +508,33 @@ void FilterGraph::removeConnection (const int index)
     {
         connections.remove (index);
         changed();
+    }
+}
+
+void FilterGraph::removeIllegalConnections()
+{
+    for (int i = connections.size(); --i >= 0;)
+    {
+        const FilterConnection* const fc = connections.getUnchecked(i);
+
+        bool ok = true;
+        const FilterInGraph* const source = getFilterForUID (fc->sourceFilterID);
+
+        if (source == 0
+             || (fc->sourceChannel != midiChannelNumber && (fc->sourceChannel < 0 || fc->sourceChannel >= source->filter->getNumOutputChannels()))
+             || (fc->sourceChannel == midiChannelNumber && ! source->filter->producesMidi()))
+            ok = false;
+
+        const FilterInGraph* const dest = getFilterForUID (fc->destFilterID);
+
+        if (dest == 0
+             || (fc->destChannel != midiChannelNumber && (fc->destChannel < 0 || fc->destChannel >= dest->filter->getNumInputChannels()))
+             || (fc->destChannel == midiChannelNumber && ! dest->filter->acceptsMidi()))
+            ok = false;
+
+
+        if (! ok)
+            removeConnection (i);
     }
 }
 
@@ -575,11 +606,14 @@ void FilterGraph::restoreFromXml (const XmlElement& xml)
                        (uint32) e->getIntAttribute (T("dstFilter")),
                        e->getIntAttribute (T("dstChannel")));
     }
+
+    removeIllegalConnections();
 }
 
 //==============================================================================
-FilterGraphPlayer::FilterGraphPlayer()
-    : sampleRate (44100.0),
+FilterGraphPlayer::FilterGraphPlayer (FilterGraph& graph_)
+    : graph (graph_),
+      sampleRate (44100.0),
       blockSize (512),
       deviceManager (0),
       inputChannelData (0),
@@ -589,10 +623,12 @@ FilterGraphPlayer::FilterGraphPlayer()
 {
     setAudioDeviceManager (0);
     keyState.addListener (&messageCollector);
+    graph.addChangeListener (this);
 }
 
 FilterGraphPlayer::~FilterGraphPlayer()
 {
+    graph.removeChangeListener (this);
     keyState.removeListener (&messageCollector);
 }
 
@@ -624,53 +660,43 @@ int FilterGraphPlayer::compareElements (FilterInGraph* const first, FilterInGrap
     return firstIsInputToSecond ? -1 : 1;
 }
 
-void FilterGraphPlayer::updateFrom (FilterGraph* graphToUse)
+void FilterGraphPlayer::update()
 {
     ReferenceCountedArray <FilterInGraph> filtersBeingRemoved (filters);
 
-    if (graphToUse != 0)
+    ReferenceCountedArray <FilterInGraph> newFilters (graph.filters);
+    int i;
+    for (i = newFilters.size(); --i >= 0;)
+        if (filters.contains (newFilters.getUnchecked(i)))
+            newFilters.remove (i);
+
+    for (i = filtersBeingRemoved.size(); --i >= 0;)
+        if (graph.filters.contains (filtersBeingRemoved.getUnchecked(i)))
+            filtersBeingRemoved.remove (i);
+
+    // prepare any new filters for use..
+    for (i = 0; i < newFilters.size(); ++i)
+        newFilters.getUnchecked(i)->filter->prepareToPlay (sampleRate, blockSize);
+
+    ReferenceCountedArray <FilterInGraph> sortedFilters (graph.filters);
+    sortedFilters.sort (*this, true);
+
+    for (i = sortedFilters.size(); --i >= 0;)
     {
-        ReferenceCountedArray <FilterInGraph> newFilters (graphToUse->filters);
-        int i;
-        for (i = newFilters.size(); --i >= 0;)
-            if (filters.contains (newFilters.getUnchecked(i)))
-                newFilters.remove (i);
+        PlayerAwareFilter* const specialFilter = dynamic_cast <PlayerAwareFilter*> (sortedFilters.getUnchecked(i)->filter);
 
-        for (i = filtersBeingRemoved.size(); --i >= 0;)
-            if (graphToUse->filters.contains (filtersBeingRemoved.getUnchecked(i)))
-                filtersBeingRemoved.remove (i);
-
-        // prepare any new filters for use..
-        for (i = 0; i < newFilters.size(); ++i)
-            newFilters.getUnchecked(i)->filter->prepareToPlay (sampleRate, blockSize);
-
-        ReferenceCountedArray <FilterInGraph> sortedFilters (graphToUse->filters);
-        sortedFilters.sort (*this, true);
-
-        for (i = sortedFilters.size(); --i >= 0;)
-        {
-            PlayerAwareFilter* const specialFilter = dynamic_cast <PlayerAwareFilter*> (sortedFilters.getUnchecked(i)->filter);
-
-            if (specialFilter != 0)
-                specialFilter->setPlayer (this);
-        }
-
-        {
-            const ScopedLock sl (processLock);
-
-            filters = sortedFilters;
-            connections.clear();
-
-            for (int i = 0; i < graphToUse->connections.size(); ++i)
-                connections.add (new FilterConnection (*graphToUse->connections.getUnchecked(i)));
-        }
+        if (specialFilter != 0)
+            specialFilter->setPlayer (this);
     }
-    else
+
     {
         const ScopedLock sl (processLock);
 
-        filters.clear();
+        filters = sortedFilters;
         connections.clear();
+
+        for (int i = 0; i < graph.connections.size(); ++i)
+            connections.add (new FilterConnection (*graph.connections.getUnchecked(i)));
     }
 
     // release any old ones..
@@ -683,6 +709,11 @@ void FilterGraphPlayer::updateFrom (FilterGraph* graphToUse)
         if (specialFilter != 0)
             specialFilter->setPlayer (0);
     }
+}
+
+void FilterGraphPlayer::changeListenerCallback (void*)
+{
+    update();
 }
 
 void FilterGraphPlayer::audioDeviceIOCallback (const float** inputChannelData_,
@@ -724,9 +755,11 @@ void FilterGraphPlayer::audioDeviceAboutToStart (double sampleRate_, int numSamp
 
     for (int i = 0; i < filters.size(); ++i)
     {
-        filters.getUnchecked(i)->prepareBuffers (blockSize);
         filters.getUnchecked(i)->filter->prepareToPlay (sampleRate, blockSize);
+        filters.getUnchecked(i)->prepareBuffers (blockSize);
     }
+
+    graph.sendChangeMessage (&graph);
 }
 
 void FilterGraphPlayer::audioDeviceStopped()

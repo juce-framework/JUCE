@@ -323,6 +323,7 @@ public:
         chunkMemoryTime = 0;
         isProcessing = false;
         firstResize = true;
+        channels = 0;
 
 #if JUCE_MAC || JUCE_LINUX
         hostWindow = 0;
@@ -376,6 +377,8 @@ public:
 
         jassert (activePlugins.contains (this));
         activePlugins.removeValue (this);
+
+        juce_free (channels);
 
 #if JUCE_MAC || JUCE_LINUX
         if (activePlugins.size() == 0)
@@ -528,9 +531,24 @@ public:
 #endif
     }
 
-    void process (float** inputs, float** outputs,
-                  const VstInt32 numSamples, const bool accumulate)
+    void process (float** inputs, float** outputs, VstInt32 numSamples)
     {
+        AudioSampleBuffer temp (filter->numInputChannels, numSamples);
+        int i;
+        for (i = filter->numInputChannels; --i >= 0;)
+            memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * numSamples);
+
+        processReplacing (inputs, outputs, numSamples);
+
+        AudioSampleBuffer dest (outputs, filter->numOutputChannels, numSamples);
+
+        for (i = jmin (filter->numOutputChannels, filter->numInputChannels); --i >= 0;)
+            dest.addFrom (i, 0, temp, i, 0, numSamples);
+    }
+
+    void processReplacing (float** inputs, float** outputs, VstInt32 numSamples)
+    {
+        //process (inputs, outputs, numSamples, false);
         // if this fails, the host hasn't called resume() before processing
         jassert (isProcessing);
 
@@ -546,19 +564,36 @@ public:
         jassert (activePlugins.contains (this));
 
         {
-            const AudioSampleBuffer input (inputs, filter->numInputChannels, numSamples);
-            AudioSampleBuffer output (outputs, filter->numOutputChannels, numSamples);
-
             const ScopedLock sl (filter->getCallbackLock());
+
+            const int numIn = filter->numInputChannels;
+            const int numOut = filter->numOutputChannels;
+            const int totalChans = jmax (numIn, numOut);
 
             if (filter->suspended)
             {
-                if (! accumulate)
-                    output.clear();
+                for (int i = 0; i < numOut; ++i)
+                    zeromem (outputs [i], sizeof (float) * numSamples);
             }
             else
             {
-                filter->processBlock (input, output, accumulate, midiEvents);
+                {
+                    int i;
+                    for (i = 0; i < numOut; ++i)
+                    {
+                        channels[i] = outputs [i];
+
+                        if (i < numIn && inputs != outputs)
+                            memcpy (outputs [i], inputs[i], sizeof (float) * numSamples);
+                    }
+
+                    for (; i < numIn; ++i)
+                        channels [i] = inputs [i];
+                }
+
+                AudioSampleBuffer chans (channels, totalChans, numSamples);
+
+                filter->processBlock (chans, midiEvents);
             }
         }
 
@@ -610,20 +645,12 @@ public:
         }
     }
 
-    void process (float** inputs, float** outputs, VstInt32 numSamples)
-    {
-        process (inputs, outputs, numSamples, true);
-    }
-
-    void processReplacing (float** inputs, float** outputs, VstInt32 numSamples)
-    {
-        process (inputs, outputs, numSamples, false);
-    }
-
     //==============================================================================
     void resume()
     {
         isProcessing = true;
+        juce_free (channels);
+        channels = (float**) juce_calloc (sizeof (float*) * jmax (filter->getNumInputChannels(), filter->getNumOutputChannels()));
 
         filter->sampleRate = getSampleRate();
 
@@ -656,6 +683,8 @@ public:
         midiEvents.clear();
 
         isProcessing = false;
+        juce_free (channels);
+        channels = 0;
     }
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
@@ -766,13 +795,13 @@ public:
     void getParameterDisplay (VstInt32 index, char* text)
     {
         jassert (index >= 0 && index < filter->getNumParameters());
-        filter->getParameterText (index).copyToBuffer (text, 64);
+        filter->getParameterText (index).copyToBuffer (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
     }
 
     void getParameterName (VstInt32 index, char* text)
     {
         jassert (index >= 0 && index < filter->getNumParameters());
-        filter->getParameterName (index).copyToBuffer (text, 8);
+        filter->getParameterName (index).copyToBuffer (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
     }
 
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
@@ -1149,6 +1178,7 @@ private:
     bool isProcessing;
     bool firstResize;
     int diffW, diffH;
+    float** channels;
 
     void ensureOutgoingEventSize (int numEvents)
     {

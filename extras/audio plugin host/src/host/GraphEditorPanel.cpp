@@ -858,27 +858,22 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
 {
     addAndMakeVisible (graphPanel = new GraphEditorPanel (graph));
 
-    addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphRenderer.keyState, 
+    graphPlayer = new FilterGraphPlayer (graph);
+
+    addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphPlayer->keyState, 
                                                                  MidiKeyboardComponent::horizontalKeyboard));
 
-    graphRenderer.setAudioDeviceManager (deviceManager);
-    graphRenderer.updateFrom (&graph);
-
-    graph.addChangeListener (this);
-    deviceManager->addChangeListener (this);
+    graphPlayer->setAudioDeviceManager (deviceManager);
 
     graphPanel->updateComponents();
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
-    graph.removeChangeListener (this);
-    deviceManager->removeChangeListener (this);
-
     deleteAllChildren();
 
-    graphRenderer.updateFrom (0);
-    graphRenderer.setAudioDeviceManager (0);
+    graphPlayer->setAudioDeviceManager (0);
+    deleteAndZero (graphPlayer);
 
     graph.clear();
 }
@@ -893,9 +888,4 @@ void GraphDocumentComponent::resized()
 void GraphDocumentComponent::createNewPlugin (const PluginDescription* desc, int x, int y)
 {
     graphPanel->createNewPlugin (desc, x, y);
-}
-
-void GraphDocumentComponent::changeListenerCallback (void*)
-{
-    graphRenderer.updateFrom (&graph);
 }

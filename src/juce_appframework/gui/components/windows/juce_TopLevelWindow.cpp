@@ -289,22 +289,7 @@ void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAtt
 void TopLevelWindow::centreAroundComponent (Component* c, const int width, const int height)
 {
     if (c == 0)
-    {
-        if (c == 0)
-            c = TopLevelWindow::getActiveTopLevelWindow();
-
-        if (c == 0)
-        {
-            c = Component::getCurrentlyFocusedComponent();
-
-            if (c != 0)
-                c = c->getTopLevelComponent();
-        }
-    }
-    else
-    {
-        c = c->getTopLevelComponent();
-    }
+        c = TopLevelWindow::getActiveTopLevelWindow();
 
     if (c == 0)
     {
@@ -312,39 +297,21 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
     }
     else
     {
-        int cx = c->getWidth() / 2;
-        int cy = c->getHeight() / 2;
-        c->relativePositionToGlobal (cx, cy);
+        int x = (c->getWidth() - width) / 2;
+        int y = (c->getHeight() - height) / 2;
+        c->relativePositionToGlobal (x, y);
 
-        int x = cx - width / 2;
-        int y = cy - height / 2;
-
-        if (x <= cx
-            && y <= cy
-            && x + width >= cx + c->getWidth()
-            && y + height >= cy + c->getHeight())
-        {
-            cx = 20;
-            cy = 20;
-            c->relativePositionToGlobal (cx, cy);
-        }
+        Rectangle parentArea (c->getParentMonitorArea());
 
         if (getParentComponent() != 0)
         {
             getParentComponent()->globalPositionToRelative (x, y);
-
-            setBounds (jlimit (0, jmax (0, getParentWidth() - width), x),
-                       jlimit (0, jmax (0, getParentHeight() - height), y),
-                       width, height);
+            parentArea.setBounds (0, 0, getParentWidth(), getParentHeight());
         }
-        else
-        {
-            const Rectangle screenArea (getParentMonitorArea());
 
-            setBounds (jlimit (screenArea.getX(), jmax (screenArea.getX(), screenArea.getWidth() - width), x),
-                       jlimit (screenArea.getY(), jmax (screenArea.getY(), screenArea.getHeight() - height), y),
-                       width, height);
-        }
+        setBounds (parentArea.getX() + jlimit (0, jmax (0, parentArea.getWidth() - width), x),
+                   parentArea.getY() + jlimit (0, jmax (0, parentArea.getHeight() - height), y),
+                   width, height);
     }
 }
 

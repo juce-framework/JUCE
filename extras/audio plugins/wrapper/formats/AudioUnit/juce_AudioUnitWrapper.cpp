@@ -58,6 +58,7 @@ public:
         : AUMIDIEffectBase (component),
           juceFilter (0),
           bufferSpace (2, 16),
+          channels (0),
           prepared (false)
     {
         CreateElements();
@@ -86,6 +87,9 @@ public:
     {
         delete juceFilter;
         juceFilter = 0;
+
+        juce_free (channels);
+        channels = 0;
 
         jassert (activePlugins.contains (this));
         activePlugins.removeValue (this);
@@ -435,6 +439,10 @@ public:
 
             midiEvents.clear();
 
+            juce_free (channels);
+            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->numInputChannels,
+                                                                      juceFilter->numOutputChannels) + 4);
+
             prepared = true;
         }
     }
@@ -452,39 +460,72 @@ public:
     OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
                                  const AudioBufferList& inBuffer,
                                  AudioBufferList& outBuffer,
-                                 UInt32 inFramesToProcess)
+                                 UInt32 numSamples)
     {
         if (juceFilter != 0)
         {
             jassert (prepared);
 
-            float* inChans [64];
-            int numInChans = 0;
-            float* outChans [64];
             int numOutChans = 0;
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
+            const int numIn = juceFilter->numInputChannels;
+            const int numOut = juceFilter->numOutputChannels;
 
             unsigned int i;
+            for (i = 0; i < outBuffer.mNumberBuffers; ++i)
+            {
+                AudioBuffer& buf = outBuffer.mBuffers[i];
+
+                if (buf.mNumberChannels == 1)
+                {
+                    channels [numOutChans++] = (float*) buf.mData;
+                }
+                else
+                {
+                    needToReinterleave = true;
+
+                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numOutChans < numOut; ++subChan)
+                        channels [numOutChans++] = bufferSpace.getSampleData (nextSpareBufferChan++);
+                }
+
+                if (numOutChans >= numOut)
+                    break;
+            }
+
+            int numInChans = 0;
+
             for (i = 0; i < inBuffer.mNumberBuffers; ++i)
             {
                 const AudioBuffer& buf = inBuffer.mBuffers[i];
 
                 if (buf.mNumberChannels == 1)
                 {
-                    inChans [numInChans++] = (float*) buf.mData;
+                    if (numInChans < numOut)
+                        memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
+                    else
+                        channels [numInChans] = (float*) buf.mData;
                 }
                 else
                 {
                     // need to de-interleave..
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
+                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels && numInChans < numIn; ++subChan)
                     {
-                        float* dest = bufferSpace.getSampleData (nextSpareBufferChan++);
-                        inChans [numInChans++] = dest;
+                        float* dest;
+
+                        if (numInChans >= numOut)
+                        {
+                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            channels [numInChans++] = dest;
+                        }
+                        else
+                        {
+                            dest = channels [numInChans++];
+                        }
 
                         const float* src = ((const float*) buf.mData) + subChan;
 
-                        for (int j = inFramesToProcess; --j >= 0;)
+                        for (int j = numSamples; --j >= 0;)
                         {
                             *dest++ = *src;
                             src += buf.mNumberChannels;
@@ -492,47 +533,24 @@ public:
                     }
                 }
 
-                if (numInChans >= juceFilter->numInputChannels)
+                if (numInChans >= numIn)
                     break;
             }
 
-            const int firstBufferedOutChan = nextSpareBufferChan;
-
-            for (i = 0; i < outBuffer.mNumberBuffers; ++i)
             {
-                AudioBuffer& buf = outBuffer.mBuffers[i];
-
-                if (buf.mNumberChannels == 1)
-                {
-                    outChans [numOutChans++] = (float*) buf.mData;
-                }
-                else
-                {
-                    needToReinterleave = true;
-
-                    for (unsigned int subChan = 0; subChan < buf.mNumberChannels; ++subChan)
-                    {
-                        float* dest = bufferSpace.getSampleData (nextSpareBufferChan++);
-                        outChans [numOutChans++] = dest;
-                    }
-                }
-
-                if (numOutChans >= juceFilter->numOutputChannels)
-                    break;
-            }
-
-            const bool accumulate = false;
-
-            {
-                const AudioSampleBuffer input (inChans, numInChans, inFramesToProcess);
-                AudioSampleBuffer output (outChans, numOutChans, inFramesToProcess);
+                AudioSampleBuffer buffer (channels, jmax (numIn, numOut), numSamples);
 
                 const ScopedLock sl (juceFilter->getCallbackLock());
 
                 if (juceFilter->suspended)
-                    output.clear();
+                {
+                    for (int i = 0; i < numOut; ++i)
+                        zeromem (channels [i], sizeof (float) * numSamples);
+                }
                 else
-                    juceFilter->processBlock (input, output, accumulate, midiEvents);
+                {
+                    juceFilter->processBlock (buffer, midiEvents);
+                }
             }
 
             if (! midiEvents.isEmpty())
@@ -544,7 +562,7 @@ public:
 
                 while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
                 {
-                    jassert (midiEventPosition >= 0 && midiEventPosition < (int) inFramesToProcess);
+                    jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
 
 
 
@@ -561,7 +579,7 @@ public:
 
             if (needToReinterleave)
             {
-                nextSpareBufferChan = firstBufferedOutChan;
+                nextSpareBufferChan = 0;
 
                 for (i = 0; i < outBuffer.mNumberBuffers; ++i)
                 {
@@ -574,7 +592,7 @@ public:
                             const float* src = bufferSpace.getSampleData (nextSpareBufferChan++);
                             float* dest = ((float*) buf.mData) + subChan;
 
-                            for (int j = inFramesToProcess; --j >= 0;)
+                            for (int j = numSamples; --j >= 0;)
                             {
                                 *dest = *src++;
                                 dest += buf.mNumberChannels;
@@ -615,6 +633,7 @@ protected:
 private:
     AudioFilterBase* juceFilter;
     AudioSampleBuffer bufferSpace;
+    float** channels;
     MidiBuffer midiEvents;
     bool prepared;
     SMPTETime lastSMPTETime;

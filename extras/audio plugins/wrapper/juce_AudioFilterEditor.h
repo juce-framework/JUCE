@@ -42,7 +42,7 @@ class AudioFilterBase;
 
 //==============================================================================
 /**
-    Base class for the component that forms a plugin's GUI.
+    Base class for the component that forms a filter's GUI.
 
     Derive your editor component from this class, and create an instance of it
     by overriding the AudioFilterBase::createEditor() method.

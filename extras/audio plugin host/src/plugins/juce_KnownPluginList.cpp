@@ -135,12 +135,11 @@ bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
             return false;
     }
 
-    OwnedArray <PluginDescription> found;
-
     for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
     {
         AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
 
+        OwnedArray <PluginDescription> found;
         format->findAllTypesForFile (found, possiblePluginFile);
 
         for (int i = 0; i < found.size(); ++i)
@@ -165,7 +164,7 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (const StringArray& files,
     {
         const File f (files [i]);
 
-        if (! scanAndAddFile (f, false, typesFound))
+        if (! scanAndAddFile (f, true, typesFound))
         {
             if (f.isDirectory())
             {

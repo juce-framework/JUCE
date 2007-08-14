@@ -103,6 +103,26 @@ const String DemoJuceFilter::getParameterText (int index)
     return String::empty;
 }
 
+const String JUCE_CALLTYPE DemoJuceFilter::getInputChannelName (const int channelIndex) const
+{
+    return String (channelIndex + 1);
+}
+
+const String JUCE_CALLTYPE DemoJuceFilter::getOutputChannelName (const int channelIndex) const
+{
+    return String (channelIndex + 1);
+}
+
+bool JUCE_CALLTYPE DemoJuceFilter::isInputChannelStereoPair (int index) const
+{
+    return false;
+}
+
+bool JUCE_CALLTYPE DemoJuceFilter::isOutputChannelStereoPair (int index) const
+{
+    return false;
+}
+
 //==============================================================================
 void DemoJuceFilter::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
@@ -116,67 +136,28 @@ void DemoJuceFilter::releaseResources()
     // spare memory, etc.
 }
 
-void DemoJuceFilter::processBlock (const AudioSampleBuffer& input,
-                                   AudioSampleBuffer& output,
-                                   const bool accumulateOutput,
+void DemoJuceFilter::processBlock (AudioSampleBuffer& buffer,
                                    MidiBuffer& midiMessages)
 {
-    if (accumulateOutput)
+    // for each of our input channels, we'll attenuate its level by the
+    // amount that our volume parameter is set to.
+    for (int channel = 0; channel < getNumInputChannels(); ++channel)
     {
-        // if we're accumulating, we should add our results to the existing contents of the
-        // output buffer..
-
-        if (input.getNumChannels() > 0)
-        {
-            for (int channel = 0; channel < output.getNumChannels(); ++channel)
-            {
-                // for each output channel, add the contents of the corresponding
-                // input channel (or if there are more outputs than inputs, just
-                // keep using the last input channel)
-                output.addFrom (channel,
-                                0,
-                                input,
-                                jmin (channel, input.getNumChannels() - 1),
-                                0,
-                                input.getNumSamples(),
-                                gain);
-            }
-        }
+        buffer.applyGain (channel, 0, buffer.getNumSamples(), gain);
     }
-    else
+
+    // in case we have more outputs than inputs, we'll clear any output 
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
     {
-        // if we're not accumulating, the output buffer's contents are undefined
-        // (don't assume they're zero!) and we should overwrite it.
-
-        if (input.getNumChannels() > 0)
-        {
-            for (int channel = 0; channel < output.getNumChannels(); ++channel)
-            {
-                // for each output channel, copy the contents of the corresponding
-                // input channel (or if there are more outputs than inputs, just
-                // keep using the last input channel)
-                output.copyFrom (channel,
-                                 0,
-                                 input,
-                                 jmin (channel, input.getNumChannels() - 1),
-                                 0,
-                                 input.getNumSamples());
-            }
-
-            output.applyGain (0, output.getNumSamples(), gain);
-        }
-        else
-        {
-            // when not accumulating, you always have to put something into
-            // the output buffer, even if in this case we have no inputs to copy.
-            output.clear();
-        }
+        buffer.clear (i, 0, buffer.getNumSamples());
     }
 
     // if any midi messages come in, use them to update the keyboard state object. This
     // object sends notification to the UI component about key up/down changes
     keyboardState.processNextMidiBuffer (midiMessages,
-                                         0, output.getNumSamples(),
+                                         0, buffer.getNumSamples(),
                                          true);
 
     // have a go at getting the current time from the host, and if it's changed, tell

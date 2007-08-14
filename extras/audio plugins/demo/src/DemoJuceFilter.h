@@ -53,9 +53,7 @@ public:
     void JUCE_CALLTYPE prepareToPlay (double sampleRate, int samplesPerBlock);
     void JUCE_CALLTYPE releaseResources();
 
-	void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& input,
-                                     AudioSampleBuffer& output,
-                                     const bool accumulateOutput,
+	void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                      MidiBuffer& midiMessages);
 
     //==============================================================================
@@ -69,6 +67,11 @@ public:
 
     const String JUCE_CALLTYPE getParameterName (int index);
     const String JUCE_CALLTYPE getParameterText (int index);
+
+    const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const;
+    const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const;
+    bool JUCE_CALLTYPE isInputChannelStereoPair (int index) const;
+    bool JUCE_CALLTYPE isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
     int JUCE_CALLTYPE getNumPrograms()                                        { return 0; }

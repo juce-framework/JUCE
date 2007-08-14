@@ -399,6 +399,8 @@ public:
         error = String::empty;
         sampleRate = sampleRate_;
         bufferSize = bufferSize_;
+        currentInputChans.clear();
+        currentOutputChans.clear();
 
         numChannelsRunning = jmax (inputChannels.getHighestBit(),
                                    outputChannels.getHighestBit()) + 1;
@@ -414,7 +416,10 @@ public:
                 inputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 
                 if (inputChannels[i])
+                {
                     inputChannelDataForCallback [totalNumInputChannels++] = inputChannelData [i];
+                    currentInputChans.setBit (i);
+                }
             }
         }
 
@@ -425,7 +430,10 @@ public:
                 outputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 
                 if (outputChannels[i])
+                {
                     outputChannelDataForCallback [totalNumOutputChannels++] = outputChannelData [i];
+                    currentOutputChans.setBit (i);
+                }
             }
         }
 
@@ -603,6 +611,7 @@ public:
     String error;
     double sampleRate;
     int bufferSize;
+    BitArray currentInputChans, currentOutputChans;
 
     Array <int> sampleRates;
     StringArray channelNamesOut, channelNamesIn;
@@ -775,6 +784,16 @@ public:
     int getCurrentBitDepth()
     {
         return internal->getBitDepth();
+    }
+
+    const BitArray getActiveOutputChannels() const
+    {
+        return internal->activeOutputChans;
+    }
+
+    const BitArray getActiveInputChannels() const
+    {
+        return internal->activeInputChans;
     }
 
     int getOutputLatencyInSamples()

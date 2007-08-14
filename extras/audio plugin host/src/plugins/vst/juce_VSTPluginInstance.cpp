@@ -528,9 +528,8 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
       isPowerOn (false),
       numAllocatedMidiEvents (0),
       midiEventsToSend (0),
-      tempBuffer (2, 8),
-      channelsIn (0),
-      channelsOut (0),
+      tempBuffer (1, 1),
+      channels (0),
       module (module_)
 {
     try
@@ -618,10 +617,8 @@ VSTPluginInstance::~VSTPluginInstance()
 
     freeMidiEvents();
 
-    juce_free (channelsIn);
-    channelsIn = 0;
-    juce_free (channelsOut);
-    channelsOut = 0;
+    juce_free (channels);
+    channels = 0;
 }
 
 //==============================================================================
@@ -678,10 +675,8 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int sam
     blockSize = samplesPerBlockExpected;
     midiCollector.reset (sampleRate);
 
-    juce_free (channelsIn);
-    channelsIn = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumInputChannels() + 4));
-    juce_free (channelsOut);
-    channelsOut = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumOutputChannels() + 4));
+    juce_free (channels);
+    channels = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumOutputChannels() + 2, getNumInputChannels() + 2));
 
     vstHostTime.tempo = 120.0;
     vstHostTime.timeSigNumerator = 4;
@@ -707,7 +702,7 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int sam
         dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate);
         dispatch (effSetBlockSize, 0, jmax (16, blockSize), 0, 0);
 
-        tempBuffer.setSize (jmax (effect->numOutputs, effect->numInputs), blockSize);
+        tempBuffer.setSize (effect->numOutputs, blockSize);
 
         if (! isPowerOn)
             setPower (true);
@@ -737,18 +732,14 @@ void JUCE_CALLTYPE VSTPluginInstance::releaseResources()
     incomingMidi.clear();
 
     freeMidiEvents();
-    juce_free (channelsIn);
-    channelsIn = 0;
-    juce_free (channelsOut);
-    channelsOut = 0;
+    juce_free (channels);
+    channels = 0;
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::processBlock (const AudioSampleBuffer& input,
-                                                    AudioSampleBuffer& output,
-                                                    const bool accumulateOutput,
+void JUCE_CALLTYPE VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
                                                     MidiBuffer& midiMessages)
 {
-    const int numSamples = output.getNumSamples();
+    const int numSamples = buffer.getNumSamples();
 
     if (initialised)
     {
@@ -804,51 +795,53 @@ void JUCE_CALLTYPE VSTPluginInstance::processBlock (const AudioSampleBuffer& inp
             {}
         }
 
-        {
-            int i;
-            for (i = effect->numInputs; --i >= 0;)
-                channelsIn[i] = input.getSampleData (jmin (i, input.getNumChannels() - 1)); // xxx should use empty temp buffers if it runs out
+        int i;
+        const int maxChans = jmax (effect->numInputs, effect->numOutputs);
 
-            for (i = effect->numOutputs; --i >= 0;)
-                channelsOut[i] = output.getSampleData (jmin (i, output.getNumChannels() - 1));
-        }
+        for (i = 0; i < maxChans; ++i)
+            channels[i] = buffer.getSampleData (i);
+
+        channels [maxChans] = 0;
 
         _clearfp();
 
-        try
+        if ((effect->flags & effFlagsCanReplacing) != 0)
         {
-            if (accumulateOutput)
+            try
             {
-                effect->process (effect, channelsIn, channelsOut, numSamples);
+                effect->processReplacing (effect, channels, channels, numSamples);
             }
-            else
-            {
-                if ((effect->flags & effFlagsCanReplacing) != 0)
-                {
-                    effect->processReplacing (effect, channelsIn, channelsOut, numSamples);
-                }
-                else
-                {
-                    output.clear();
-                    effect->process (effect, channelsIn, channelsOut, numSamples);
-                }
-            }
+            catch (...)
+            {}
         }
-        catch (...)
-        {}
+        else
+        {
+            tempBuffer.setSize (effect->numOutputs, numSamples);
+            tempBuffer.clear();
+
+            float* outs [64];
+
+            for (i = effect->numOutputs; --i >= 0;)
+                outs[i] = tempBuffer.getSampleData (i);
+
+            outs [effect->numOutputs] = 0;
+
+            try
+            {
+                effect->process (effect, channels, outs, numSamples);
+            }
+            catch (...)
+            {}
+
+            for (i = effect->numOutputs; --i >= 0;)
+                buffer.copyFrom (i, 0, outs[i], numSamples);
+        }
     }
     else
     {
         // Not initialised, so just bypass..
-        if (! accumulateOutput)
-        {
-            for (int i = output.getNumChannels(); --i >= 0;)
-                output.copyFrom (i, 0,
-                                 input,
-                                 jmin (i, input.getNumChannels() - 1),
-                                 0,
-                                 numSamples);
-        }
+        for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
+            buffer.clear (i, 0, buffer.getNumSamples());
     }
 
     {

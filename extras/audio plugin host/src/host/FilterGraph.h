@@ -114,7 +114,7 @@ private:
     int lastX, lastY;
 
     MidiBuffer outputMidi;
-    AudioSampleBuffer inputAudio, processedAudio;
+    AudioSampleBuffer processedAudio;
     MidiBuffer processedMidi;
 
     void prepareBuffers (int blockSize);
@@ -149,6 +149,8 @@ public:
     void removeFilter (const uint32 filterUID);
     void disconnectFilter (const uint32 filterUID);
 
+    void removeIllegalConnections();
+
     //==============================================================================
     int getNumConnections() const throw()                               { return connections.size(); }
     FilterConnection* getConnection (const int index) const throw()     { return connections [index]; }
@@ -161,7 +163,7 @@ public:
     bool canConnect (uint32 sourceFilterUID, int sourceFilterChannel,
                      uint32 destFilterUID, int destFilterChannel) const throw();
 
-    void addConnection (uint32 sourceFilterUID, int sourceFilterChannel,
+    bool addConnection (uint32 sourceFilterUID, int sourceFilterChannel,
                         uint32 destFilterUID, int destFilterChannel);
 
     void removeConnection (const int index);
@@ -208,17 +210,16 @@ private:
     An object the
 */
 class FilterGraphPlayer   : public AudioIODeviceCallback,
-                            public MidiInputCallback
+                            public MidiInputCallback,
+                            public ChangeListener
 
 {
 public:
     //==============================================================================
-    FilterGraphPlayer();
+    FilterGraphPlayer (FilterGraph& graph);
     ~FilterGraphPlayer();
 
     //==============================================================================
-    void updateFrom (FilterGraph* graphToUse);
-
     void setAudioDeviceManager (AudioDeviceManager* dm);
     AudioDeviceManager* getAudioDeviceManager() const throw()   { return deviceManager; }
 
@@ -232,6 +233,8 @@ public:
     void audioDeviceStopped();
 
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
+
+    void changeListenerCallback (void*);
 
     //==============================================================================
     static int compareElements (FilterInGraph* const first, FilterInGraph* const second) throw();
@@ -253,6 +256,7 @@ public:
     };
 
 private:
+    FilterGraph& graph;
     CriticalSection processLock;
     double sampleRate;
     int blockSize;
@@ -260,6 +264,8 @@ private:
 
     ReferenceCountedArray <FilterInGraph> filters;
     OwnedArray <FilterConnection> connections;
+
+    void update();
 
     FilterGraphPlayer (const FilterGraphPlayer&);
     const FilterGraphPlayer& operator= (const FilterGraphPlayer&);

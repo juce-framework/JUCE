@@ -434,9 +434,9 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 void MainHostWindow::showAudioSettings()
 {
     AudioDeviceSelectorComponent audioSettingsComp (deviceManager,
-                                                    0, 2,
-                                                    0, 2,
-                                                    false);
+                                                    0, 256,
+                                                    0, 256,
+                                                    true);
 
     audioSettingsComp.setSize (500, 300);
 
@@ -449,11 +449,16 @@ void MainHostWindow::showAudioSettings()
     XmlElement* const audioState = deviceManager.createStateXml();
 
     ApplicationProperties::getInstance()->getUserSettings()
-        ->setValue (T("audioSettings"), audioState);
+        ->setValue (T("audioDeviceState"), audioState);
+
+    delete audioState;
 
     ApplicationProperties::getInstance()->getUserSettings()->saveIfNeeded();
 
-    delete audioState;
+    GraphDocumentComponent* const graphEditor = getGraphEditor();
+
+    if (graphEditor != 0)
+        graphEditor->graph.removeIllegalConnections();
 }
 
 bool MainHostWindow::filesDropped (const StringArray& files, int x, int y)

@@ -120,7 +120,8 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 public:
     //==============================================================================
     JucePlugInProcess()
-        : prepared (false),
+        : channels (0),
+          prepared (false),
           midiBufferNode (0),
           midiTransport (0),
           sampleRate (44100.0)
@@ -143,6 +144,7 @@ public:
             juceFilter->releaseResources();
 
         delete juceFilter;
+        juce_free (channels);
     }
 
     //==============================================================================
@@ -580,6 +582,10 @@ protected:
             sampleRate = gProcessGroup->GetSampleRate();
             jassert (sampleRate > 0);
 
+            juce_free (channels);
+            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(), 
+                                                                      juceFilter->getNumOutputChannels()));
+
             juceFilter->prepareToPlay (sampleRate,
                                        mRTGlobals->mHWBufferSizeInSamples);
 
@@ -632,15 +638,37 @@ protected:
 #endif
 
         {
-            const AudioSampleBuffer input (inputs, juceFilter->numInputChannels, numSamples);
-            AudioSampleBuffer output (outputs, juceFilter->numOutputChannels, numSamples);
-
             const ScopedLock sl (juceFilter->getCallbackLock());
 
+            const int numIn = juceFilter->numInputChannels;
+            const int numOut = juceFilter->numOutputChannels;
+            const int totalChans = jmax (numIn, numOut);
+
             if (juceFilter->suspended)
-                bypassBuffers (inputs, outputs, numSamples);
+            {
+                for (int i = 0; i < numOut; ++i)
+                    zeromem (outputs [i], sizeof (float) * numSamples);
+            }
             else
-                juceFilter->processBlock (input, output, false, midiEvents);
+            {
+                {
+                    int i;
+                    for (i = 0; i < numOut; ++i)
+                    {
+                        channels[i] = outputs [i];
+
+                        if (i < numIn && inputs != outputs)
+                            memcpy (outputs [i], inputs[i], sizeof (float) * numSamples);
+                    }
+
+                    for (; i < numIn; ++i)
+                        channels [i] = inputs [i];
+                }
+
+                AudioSampleBuffer chans (channels, totalChans, numSamples);
+
+                juceFilter->processBlock (chans, midiEvents);
+            }
         }
 
         if (! midiEvents.isEmpty())
@@ -826,6 +854,7 @@ private:
     DirectMidiPacket midiBuffer [midiBufferSize];
 
     juce::MemoryBlock tempFilterData;
+    float** channels;
     bool prepared;
     double sampleRate;
 

@@ -49,10 +49,10 @@ public:
     void setPlayer (FilterGraphPlayer* p)
     {
         player = p;
-        rendererChanged();
+        playerChanged();
     }
 
-    virtual void rendererChanged()                                          {}
+    virtual void playerChanged()                                            {}
 
     const String getManufacturer() const                                    { return "Raw Material Software"; }
     const String getFormatName() const                                      { return "Internal"; }
@@ -110,42 +110,36 @@ public:
     bool acceptsMidi() const                { return false; }
     bool producesMidi() const               { return false; }
 
-    void rendererChanged()
+    void playerChanged()
     {
         AudioIODevice* const dev = getAudioDevice();
 
         if (dev != 0)
-            numOutputChannels = dev->getInputChannelNames().size();
+            numOutputChannels = dev->getActiveInputChannels().countNumberOfSetBits();
     }
 
     void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
-        rendererChanged();
+        playerChanged();
     }
 
     void JUCE_CALLTYPE releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& /*input*/,
-                                     AudioSampleBuffer& output,
-                                     const bool accumulateOutput,
+    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                      MidiBuffer&)
     {
         int n = 0;
 
         for (int i = 0; i < player->totalNumInputChannels; ++i)
         {
-            if (n >= output.getNumChannels())
+            if (n >= getNumOutputChannels())
                 break;
 
             if (player->inputChannelData [i] != 0)
             {
-                if (accumulateOutput)
-                    output.addFrom (n, 0, player->inputChannelData [i], output.getNumSamples());
-                else
-                    output.copyFrom (n, 0, player->inputChannelData [i], output.getNumSamples());
-
+                buffer.copyFrom (n, 0, player->inputChannelData [i], buffer.getNumSamples());
                 ++n;
             }
         }
@@ -196,49 +190,42 @@ public:
     bool acceptsMidi() const                { return false; }
     bool producesMidi() const               { return false; }
 
-    void rendererChanged()
+    void playerChanged()
     {
         AudioIODevice* const dev = getAudioDevice();
 
         if (dev != 0)
-            numInputChannels = dev->getOutputChannelNames().size();
+            numInputChannels = dev->getActiveOutputChannels().countNumberOfSetBits();
     }
 
     void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
-        rendererChanged();
+        playerChanged();
     }
 
     void JUCE_CALLTYPE releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& input,
-                                     AudioSampleBuffer&,
-                                     const bool accumulateOutput,
+    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                      MidiBuffer&)
     {
         int n = 0;
 
         for (int i = 0; i < player->totalNumOutputChannels; ++i)
         {
-            if (n >= input.getNumChannels())
-                break;
-
-            float* dst = player->outputChannelData [i];
+            float* const dst = player->outputChannelData [i];
 
             if (dst != 0)
             {
-                const float* src = input.getSampleData (n);
-
-                if (accumulateOutput)
+                if (n >= getNumInputChannels())
                 {
-                    for (int i = input.getNumSamples(); --i >= 0;)
-                        *dst++ += *src++;
+                    zeromem (dst, sizeof (float) * buffer.getNumSamples());
                 }
                 else
                 {
-                    memcpy (dst, src, sizeof (float) * input.getNumSamples());
+                    memcpy (dst, buffer.getSampleData (n), 
+                            sizeof (float) * buffer.getNumSamples());
                 }
 
                 ++n;
@@ -290,7 +277,7 @@ public:
     bool acceptsMidi() const                { return false; }
     bool producesMidi() const               { return true; }
 
-    void rendererChanged()
+    void playerChanged()
     {
         if (player != 0)
         {
@@ -302,22 +289,18 @@ public:
 
     void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
-        rendererChanged();
+        playerChanged();
     }
 
     void JUCE_CALLTYPE releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (const AudioSampleBuffer& input,
-                                     AudioSampleBuffer&,
-                                     const bool accumulateOutput,
+    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
                                      MidiBuffer& midiBuffer)
     {
-        if (! accumulateOutput)
-            midiBuffer.clear();
-
-        midiBuffer.addEvents (player->incomingMidi, 0, input.getNumSamples(), 0);
+        midiBuffer.clear();
+        midiBuffer.addEvents (player->incomingMidi, 0, buffer.getNumSamples(), 0);
     }
 
     const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const

@@ -86,6 +86,8 @@ public:
          numInputChans (0),
          numOutputChans (0),
          callbacksAllowed (true),
+         numInputChannelInfos (0),
+         numOutputChannelInfos (0),
          inputLatency (0),
          outputLatency (0),
          callback (0),
@@ -460,6 +462,14 @@ public:
         numInputChans = jmin (numInputChans, numInputChannelInfos);
         numOutputChans = jmin (numOutputChans, numOutputChannelInfos);
 
+        activeInputChans.setRange (inChanNames.size(), 
+                                   activeInputChans.getHighestBit() + 1 - inChanNames.size(),
+                                   false);
+
+        activeOutputChans.setRange (outChanNames.size(),
+                                    activeOutputChans.getHighestBit() + 1 - outChanNames.size(),
+                                    false);
+
         if (inputDevice != 0 && error.isEmpty())
             error = inputDevice->reopen (inputChannels,
                                          outputChannels,
@@ -711,6 +721,7 @@ public:
 
     String error;
     int inputLatency, outputLatency;
+    BitArray activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array <double> sampleRates;
     Array <int> bufferSizes;
@@ -726,7 +737,6 @@ private:
     double sampleRate;
     int bufferSize;
     float* audioBuffer;
-    BitArray activeInputChans, activeOutputChans;
     int numInputChans, numOutputChans;
     bool callbacksAllowed;
 
@@ -934,23 +944,37 @@ public:
 
     int getCurrentBufferSizeSamples()
     {
-        if (internal == 0)
-            return 512;
-
-        return internal->getBufferSize();
+        return internal != 0 ? internal->getBufferSize() : 512;
     }
 
     double getCurrentSampleRate()
     {
-        if (internal == 0)
-            return 0;
-
-        return internal->getSampleRate();
+        return internal != 0 ? internal->getSampleRate() : 0;
     }
 
     int getCurrentBitDepth()
     {
         return 32;  // no way to find out, so just assume it's high..
+    }
+
+    const BitArray getActiveOutputChannels() const
+    {
+        return internal != 0 ? internal->activeOutputChans : BitArray();
+    }
+
+    const BitArray getActiveInputChannels() const
+    {
+        BitArray chans;
+
+        if (internal != 0)
+        {
+            chans = internal->activeInputChans;
+
+            if (internal->inputDevice != 0)
+                chans.orWith (internal->inputDevice->activeInputChans);
+        }
+
+        return chans;
     }
 
     int getOutputLatencyInSamples()
