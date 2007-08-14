@@ -31,6 +31,7 @@
 
 #include "FilterGraph.h"
 #include "InternalFilters.h"
+#include "../plugins/juce_GenericAudioFilterEditor.h"
 
 
 //==============================================================================
@@ -123,11 +124,11 @@ void FilterInGraph::showUI()
     {
         Component* ui = filter->createEditorIfNeeded();
 
-        if (ui != 0)
-        {
-            ui->setName (filter->getName());
-            activeUI = new PluginWindow (ui, *this);
-        }
+        if (ui == 0)
+            ui = new GenericAudioFilterEditor (filter);
+
+        ui->setName (filter->getName());
+        activeUI = new PluginWindow (ui, *this);
     }
 
     if (activeUI != 0)

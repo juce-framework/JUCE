@@ -234,6 +234,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\plugins\juce_GenericAudioFilterEditor.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\plugins\juce_GenericAudioFilterEditor.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\plugins\juce_KnownPluginList.cpp"
 					>
 				</File>

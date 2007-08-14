@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		84E5BB970C7203B70088E799 /* juce_GenericAudioFilterEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E5BB950C7203B70088E799 /* juce_GenericAudioFilterEditor.cpp */; };
 		84FFAEAC0C6C8A6F009F6E72 /* FilterGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */; };
 		84FFAEAD0C6C8A6F009F6E72 /* GraphEditorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */; };
 		84FFAEAE0C6C8A6F009F6E72 /* InternalFilters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE960C6C8A6F009F6E72 /* InternalFilters.cpp */; };
@@ -43,6 +44,8 @@
 		4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		508344B209E5C41E0093A071 /* Juce Plugin Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Juce Plugin Host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		84E5BB950C7203B70088E799 /* juce_GenericAudioFilterEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_GenericAudioFilterEditor.cpp; sourceTree = "<group>"; };
+		84E5BB960C7203B70088E799 /* juce_GenericAudioFilterEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_GenericAudioFilterEditor.h; sourceTree = "<group>"; };
 		84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FilterGraph.cpp; path = ../../src/host/FilterGraph.cpp; sourceTree = SOURCE_ROOT; };
 		84FFAE930C6C8A6F009F6E72 /* FilterGraph.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FilterGraph.h; path = ../../src/host/FilterGraph.h; sourceTree = SOURCE_ROOT; };
 		84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GraphEditorPanel.cpp; path = ../../src/host/GraphEditorPanel.cpp; sourceTree = SOURCE_ROOT; };
@@ -171,6 +174,8 @@
 				84FFAE9D0C6C8A6F009F6E72 /* juce_AudioPluginFormat.h */,
 				84FFAE9E0C6C8A6F009F6E72 /* juce_AudioPluginInstance.cpp */,
 				84FFAE9F0C6C8A6F009F6E72 /* juce_AudioPluginInstance.h */,
+				84E5BB950C7203B70088E799 /* juce_GenericAudioFilterEditor.cpp */,
+				84E5BB960C7203B70088E799 /* juce_GenericAudioFilterEditor.h */,
 				84FFAEA00C6C8A6F009F6E72 /* juce_KnownPluginList.cpp */,
 				84FFAEA10C6C8A6F009F6E72 /* juce_KnownPluginList.h */,
 				84FFAEA20C6C8A6F009F6E72 /* juce_PluginDescription.cpp */,
@@ -282,6 +287,7 @@
 				84FFAEB50C6C8A6F009F6E72 /* juce_PluginDirectoryScanner.cpp in Sources */,
 				84FFAEB60C6C8A6F009F6E72 /* juce_PluginListComponent.cpp in Sources */,
 				84FFAEB70C6C8A6F009F6E72 /* juce_VSTPluginInstance.cpp in Sources */,
+				84E5BB970C7203B70088E799 /* juce_GenericAudioFilterEditor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

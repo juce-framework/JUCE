@@ -1399,7 +1399,10 @@ private:
 //==============================================================================
 AudioFilterEditor* JUCE_CALLTYPE VSTPluginInstance::createEditor()
 {
-    return new VSTPluginWindow (*this);
+    if (hasEditor())
+        return new VSTPluginWindow (*this);
+
+    return 0;
 }
 
 
