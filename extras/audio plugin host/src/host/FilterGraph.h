@@ -87,7 +87,7 @@ public:
     uint32 uid;
 
     //==============================================================================
-    void showUI();
+    void showUI (bool useGenericUI);
 
     double getX() const throw()                     { return x; }
     double getY() const throw()                     { return y; }
@@ -111,6 +111,7 @@ private:
 
     friend class PluginWindow;
     Component* activeUI;
+    Component* activeGenericUI;
     int lastX, lastY;
 
     MidiBuffer outputMidi;

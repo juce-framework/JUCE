@@ -427,7 +427,7 @@ public:
         @see getDoubleClickReturnValue
     */
     void setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                    const double valueToSetOnDoubleClick);
+                                    const double valueToSetOnDoubleClick) throw();
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
 
@@ -436,7 +436,7 @@ public:
 
         @see setDoubleClickReturnValue
     */
-    double getDoubleClickReturnValue (bool& isEnabled) const;
+    double getDoubleClickReturnValue (bool& isEnabled) const throw();
 
     //==============================================================================
     /** Tells the slider whether to keep sending change messages while the user
@@ -447,7 +447,7 @@ public:
         will be continuously sent as they drag it while the mouse button is still
         held down.
     */
-    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease);
+    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw();
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
@@ -462,7 +462,7 @@ public:
         you'll have to add it to a parent component instead).
     */
     void setPopupDisplayEnabled (const bool isEnabled,
-                                 Component* const parentComponentToUse);
+                                 Component* const parentComponentToUse) throw();
 
     /** If this is set to true, then right-clicking on the slider will pop-up
         a menu to let the user change the way it works.
@@ -471,7 +471,13 @@ public:
         things like velocity sensitivity, and for rotary sliders, whether they
         use a linear or rotary mouse-drag to move them.
     */
-    void setPopupMenuEnabled (const bool menuEnabled);
+    void setPopupMenuEnabled (const bool menuEnabled) throw();
+
+    /** This can be used to stop the mouse scroll-wheel from moving the slider.
+
+        By default it's enabled.
+    */
+    void setScrollWheelEnabled (const bool enabled) throw();
 
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
@@ -682,7 +688,7 @@ private:
     bool editableText : 1, doubleClickToValue : 1;
     bool isVelocityBased : 1, rotaryStop : 1, incDecButtonsSideBySide : 1;
     bool sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
-    bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
+    bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1, scrollWheelEnabled : 1;
     Font font;
     Label* valueBox;
     Button* incButton;

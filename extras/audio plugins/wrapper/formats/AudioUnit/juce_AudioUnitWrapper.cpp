@@ -396,6 +396,11 @@ public:
         }
     }
 
+    void updateHostDisplay()
+    {
+        // xxx is there an AU equivalent?
+    }
+
     //==============================================================================
     ComponentResult Initialize()
     {

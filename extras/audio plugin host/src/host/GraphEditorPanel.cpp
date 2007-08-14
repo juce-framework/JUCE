@@ -145,6 +145,9 @@ public:
             PopupMenu m;
             m.addItem (1, "Delete this filter");
             m.addItem (2, "Disconnect all pins");
+            m.addSeparator();
+            m.addItem (3, "Show plugin UI");
+            m.addItem (4, "Show all parameters");
 
             const int r = m.show();
 
@@ -156,6 +159,13 @@ public:
             else if (r == 2)
             {
                 graph.disconnectFilter (filterID);
+            }
+            else if (r == 3 || r == 4)
+            {
+                const FilterInGraph::Ptr f (graph.getFilterForUID (filterID));
+
+                if (f != 0)
+                    f->showUI (r == 4);
             }
         }
     }
@@ -189,7 +199,7 @@ public:
             const FilterInGraph::Ptr f (graph.getFilterForUID (filterID));
 
             if (f != 0)
-                f->showUI();
+                f->showUI (false);
         }
         else if (! e.mouseWasClicked())
         {

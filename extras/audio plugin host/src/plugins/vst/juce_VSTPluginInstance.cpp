@@ -48,6 +48,10 @@
  #define _clearfp()
 #endif
 
+BEGIN_JUCE_NAMESPACE
+ extern void juce_callAnyTimersSynchronously();
+END_JUCE_NAMESPACE
+
 //==============================================================================
 const int fxbVersionNum = 1;
 
@@ -288,15 +292,17 @@ public:
 
     void close()
     {
+        _fpreset(); // (doesn't do any harm)
+
         if (hModule != 0)
         {
-            try
+            __try
             {
-                _fpreset(); // (doesn't do any harm)
                 FreeLibrary (hModule);
             }
-            catch (...)
-            {}
+            __finally
+            {
+            }
         }
     }
 
@@ -612,6 +618,7 @@ VSTPluginInstance::~VSTPluginInstance()
             {}
         }
 
+        module = 0;
         effect = 0;
     }
 
@@ -1409,7 +1416,9 @@ AudioFilterEditor* JUCE_CALLTYPE VSTPluginInstance::createEditor()
 //==============================================================================
 void VSTPluginInstance::handleAsyncUpdate()
 {
-    // called asynchronously to indicate that the plugin's parameters have changed..
+    // indicates that something about the plugin has changed..
+    if (callbacks != 0)
+        callbacks->updateHostDisplay();
 }
 
 //==============================================================================
@@ -1786,7 +1795,8 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
     switch (opcode)
     {
     case audioMasterAutomate:
-        // index = param num, opt = value
+        if (callbacks != 0)
+            callbacks->informHostOfParameterChange (index, opt);
         break;
 
     case audioMasterProcessEvents:
@@ -1807,14 +1817,24 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         break;
 
     case audioMasterIdle:
-        Thread::sleep (1);
-        if (! isTimerRunning())
-            startTimer (50);
-
+        if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            ++insideVSTCallback;
 #if JUCE_MAC
-        if (getActiveEditor() != 0)
-            dispatch (effEditIdle, 0, 0, 0, 0);
+            if (getActiveEditor() != 0)
+                dispatch (effEditIdle, 0, 0, 0, 0);
 #endif
+            const MessageManagerLock mml;
+
+            juce_callAnyTimersSynchronously();
+
+            handleUpdateNowIfNeeded();
+
+            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+                ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
+
+            --insideVSTCallback;
+        }
         break;
 
     case audioMasterUpdateDisplay:

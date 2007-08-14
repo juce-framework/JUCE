@@ -33,6 +33,27 @@
 #define __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
 
 #include "../../../audio plugins/wrapper/juce_AudioFilterBase.h"
+class AudioPluginInstance;
+
+
+//==============================================================================
+class AudioPluginParameterListener
+{
+public:
+    //==============================================================================
+    /** Destructor. */
+    virtual ~AudioPluginParameterListener() {}
+
+    //==============================================================================
+    /** Receives a callback when a parameter is changed. */
+    virtual void audioPluginParameterChanged (AudioPluginInstance* plugin,
+                                              int parameterIndex) = 0;
+
+    /** Called to indicate that something else in the plugin has changed, like its
+        program, number of parameters, etc.
+    */
+    virtual void audioPluginChanged (AudioPluginInstance* plugin) = 0;
+};
 
 
 //==============================================================================
@@ -55,7 +76,7 @@ public:
         Make sure that you delete any UI components that belong to this plugin before
         deleting the plugin.
     */
-    virtual ~AudioPluginInstance() {}
+    virtual ~AudioPluginInstance();
 
     //==============================================================================
     /** Returns the plugin's name. */
@@ -109,14 +130,45 @@ public:
     */
     virtual int getSamplesLatency() const = 0;
 
+
+    //==============================================================================
+    /** Adds a listener that will be called when one of this plugin's parameters changes. */
+    void addListener (AudioPluginParameterListener* const newListener) throw();
+
+    /** Removes a previously added listener. */
+    void removeListener (AudioPluginParameterListener* const listenerToRemove) throw();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
-    AudioPluginInstance() {}
+    VoidArray listeners;
+    CriticalSection changedParamLock;
+    Array <int> changedParams;
+
+    class InternalAsyncUpdater : public Timer
+    {
+    public:
+        InternalAsyncUpdater (AudioPluginInstance& owner);
+        ~InternalAsyncUpdater() {}
+
+        void timerCallback();
+
+        juce_UseDebuggingNewOperator
+
+    private:
+        AudioPluginInstance& owner;
+    };
+
+    InternalAsyncUpdater* internalAsyncUpdater;
+    void internalAsyncCallback();
+    void queueChangeMessage (const int index) throw();
+
+    AudioPluginInstance();
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
+    void JUCE_CALLTYPE updateHostDisplay();
 };
 
 

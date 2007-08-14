@@ -101,9 +101,7 @@ static uint32 lastMasterIdleCall = 0;
 BEGIN_JUCE_NAMESPACE
  extern void juce_callAnyTimersSynchronously();
 
- #if JUCE_MAC
-  extern void juce_macDoPendingRepaintsNow();
- #elif JUCE_LINUX
+ #if JUCE_LINUX
   extern Display* display;
   extern bool juce_postMessageToSystemQueue (void* message);
  #endif
@@ -807,6 +805,11 @@ public:
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
     {
         setParameterAutomated (index, newValue);
+    }
+
+    void JUCE_CALLTYPE updateHostDisplay()
+    {
+        updateDisplay();
     }
 
     bool canParameterBeAutomated (VstInt32 index)

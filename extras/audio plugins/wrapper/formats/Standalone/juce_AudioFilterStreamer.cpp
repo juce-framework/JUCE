@@ -144,6 +144,10 @@ void AudioFilterStreamer::informHostOfParameterChange (int index, float newValue
 }
 
 
+void JUCE_CALLTYPE AudioFilterStreamer::updateHostDisplay()
+{
+}
+
 
 //==============================================================================
 AudioFilterStreamingDeviceManager::AudioFilterStreamingDeviceManager()

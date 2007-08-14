@@ -128,6 +128,7 @@ Slider::Slider (const String& name)
     popupDisplayEnabled (false),
     menuEnabled (false),
     menuShown (false),
+    scrollWheelEnabled (true),
     valueBox (0),
     incButton (0),
     decButton (0),
@@ -298,13 +299,13 @@ void Slider::hideTextBox (const bool discardCurrentEditorContents)
     }
 }
 
-void Slider::setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease)
+void Slider::setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw()
 {
     sendChangeOnlyOnRelease = onlyNotifyOnRelease;
 }
 
 void Slider::setPopupDisplayEnabled (const bool enabled,
-                                     Component* const parentComponentToUse)
+                                     Component* const parentComponentToUse) throw()
 {
     popupDisplayEnabled = enabled;
     parentForPopupDisplay = parentComponentToUse;
@@ -534,13 +535,13 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
 }
 
 void Slider::setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                        const double valueToSetOnDoubleClick)
+                                        const double valueToSetOnDoubleClick) throw()
 {
     doubleClickToValue = isDoubleClickEnabled;
     doubleClickReturnValue = valueToSetOnDoubleClick;
 }
 
-double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
+double Slider::getDoubleClickReturnValue (bool& isEnabled_) const throw()
 {
     isEnabled_ = doubleClickToValue;
     return doubleClickReturnValue;
@@ -622,9 +623,14 @@ void Slider::enablementChanged()
     repaint();
 }
 
-void Slider::setPopupMenuEnabled (const bool menuEnabled_)
+void Slider::setPopupMenuEnabled (const bool menuEnabled_) throw()
 {
     menuEnabled = menuEnabled_;
+}
+
+void Slider::setScrollWheelEnabled (const bool enabled) throw()
+{
+    scrollWheelEnabled = enabled;
 }
 
 //==============================================================================
@@ -1268,28 +1274,33 @@ void Slider::mouseDoubleClick (const MouseEvent&)
     }
 }
 
-void Slider::mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY)
+void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
 {
-    if (isEnabled()
-         && (maximum > minimum)
-         && ! isMouseButtonDownAnywhere())
+    if (scrollWheelEnabled && isEnabled())
     {
-        if (valueBox != 0)
-            valueBox->hideEditor (false);
+        if (maximum > minimum && ! isMouseButtonDownAnywhere())
+        {
+            if (valueBox != 0)
+                valueBox->hideEditor (false);
 
-        const double proportionDelta = (wheelIncrementX != 0 ? -wheelIncrementX : wheelIncrementY) * 0.15f;
-        const double currentPos = valueToProportionOfLength (currentValue);
-        const double newValue = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
+            const double proportionDelta = (wheelIncrementX != 0 ? -wheelIncrementX : wheelIncrementY) * 0.15f;
+            const double currentPos = valueToProportionOfLength (currentValue);
+            const double newValue = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
 
-        double delta = (newValue != currentValue)
-                        ? jmax (fabs (newValue - currentValue), interval) : 0;
+            double delta = (newValue != currentValue)
+                            ? jmax (fabs (newValue - currentValue), interval) : 0;
 
-        if (currentValue > newValue)
-            delta = -delta;
+            if (currentValue > newValue)
+                delta = -delta;
 
-        sendDragStart();
-        setValue (snapValue (currentValue + delta, false), true, true);
-        sendDragEnd();
+            sendDragStart();
+            setValue (snapValue (currentValue + delta, false), true, true);
+            sendDragEnd();
+        }
+    }
+    else
+    {
+        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
     }
 }
 

@@ -74,6 +74,11 @@ public:
 
     ~PluginWindow()
     {
+        if (owner.activeGenericUI == this)
+            owner.activeGenericUI = 0;
+        else
+            owner.activeUI = 0;
+
         setContentComponent (0);
     }
 
@@ -85,7 +90,6 @@ public:
 
     void closeButtonPressed()
     {
-        owner.activeUI = 0;
         delete this;
     }
 
@@ -100,7 +104,8 @@ FilterInGraph::FilterInGraph (FilterGraph& owner_, AudioPluginInstance* const fi
       filter (filter_),
       uid (0),
       processedAudio (1, 1),
-      activeUI (0)
+      activeUI (0),
+      activeGenericUI (0)
 {
     lastX = 100 + Random::getSystemRandom().nextInt (400);
     lastY = 100 + Random::getSystemRandom().nextInt (400);
@@ -108,6 +113,7 @@ FilterInGraph::FilterInGraph (FilterGraph& owner_, AudioPluginInstance* const fi
 
 FilterInGraph::~FilterInGraph()
 {
+    delete activeGenericUI;
     delete activeUI;
     delete filter;
 }
@@ -118,21 +124,37 @@ void FilterInGraph::setPosition (double newX, double newY) throw()
     y = jlimit (0.0, 1.0, newY);
 }
 
-void FilterInGraph::showUI()
+void FilterInGraph::showUI (bool useGenericUI)
 {
-    if (activeUI == 0)
+    if (! useGenericUI)
     {
-        Component* ui = filter->createEditorIfNeeded();
+        if (activeUI == 0)
+        {
+            Component* ui = filter->createEditorIfNeeded();
 
-        if (ui == 0)
-            ui = new GenericAudioFilterEditor (filter);
+            if (ui == 0)
+                return showUI (true);
 
-        ui->setName (filter->getName());
-        activeUI = new PluginWindow (ui, *this);
+            ui->setName (filter->getName());
+            activeUI = new PluginWindow (ui, *this);
+        }
+
+        if (activeUI != 0)
+            activeUI->toFront (true);
     }
+    else
+    {
+        if (activeGenericUI == 0)
+        {
+            Component* ui = new GenericAudioFilterEditor (filter);
 
-    if (activeUI != 0)
-        activeUI->toFront (true);
+            ui->setName (filter->getName());
+            activeGenericUI = new PluginWindow (ui, *this);
+        }
+
+        if (activeGenericUI != 0)
+            activeGenericUI->toFront (true);
+    }
 }
 
 void FilterInGraph::prepareBuffers (int blockSize)

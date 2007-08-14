@@ -845,6 +845,11 @@ protected:
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
+    void JUCE_CALLTYPE updateHostDisplay()
+    {
+        // xxx is there an RTAS equivalent?
+    }
+
     //==============================================================================
 private:
     AudioFilterBase* juceFilter;

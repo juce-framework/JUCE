@@ -36,10 +36,56 @@
 #include "../../../audio plugins/wrapper/juce_AudioFilterBase.cpp"
 #include "../../../audio plugins/wrapper/juce_AudioFilterEditor.cpp"
 
-
-//==============================================================================
 #include "juce_AudioPluginInstance.h"
 
+
+//==============================================================================
+AudioPluginInstance::AudioPluginInstance()
+{
+    internalAsyncUpdater = new InternalAsyncUpdater (*this);
+
+    initialiseInternal (this);
+}
+
+AudioPluginInstance::~AudioPluginInstance()
+{
+    delete internalAsyncUpdater;
+}
+
+void AudioPluginInstance::addListener (AudioPluginParameterListener* const newListener) throw()
+{
+    listeners.addIfNotAlreadyThere (newListener);
+}
+
+void AudioPluginInstance::removeListener (AudioPluginParameterListener* const listenerToRemove) throw()
+{
+    listeners.removeValue (listenerToRemove);
+}
+
+void AudioPluginInstance::internalAsyncCallback()
+{
+    changedParamLock.enter();
+    Array <int> changed;
+    changed.swapWithArray (changedParams);
+    changedParamLock.exit();
+
+    for (int j = 0; j < changed.size(); ++j)
+    {
+        const int paramIndex = changed.getUnchecked (j);
+
+        for (int i = listeners.size(); --i >= 0;)
+        {
+            AudioPluginParameterListener* const l = (AudioPluginParameterListener*) listeners.getUnchecked(i);
+
+            if (paramIndex >= 0)
+                l->audioPluginParameterChanged (this, paramIndex);
+            else
+                l->audioPluginChanged (this);
+
+            i = jmin (i, listeners.size());
+        }
+    }
+}
 
 //==============================================================================
 bool JUCE_CALLTYPE AudioPluginInstance::getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
@@ -76,7 +122,34 @@ bool JUCE_CALLTYPE AudioPluginInstance::getCurrentPositionInfo (AudioFilterBase:
     return true;
 }
 
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int /*index*/, float /*newValue*/)
+void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int index, float /*newValue*/)
 {
-
+    queueChangeMessage (index);
 }
+
+void JUCE_CALLTYPE AudioPluginInstance::updateHostDisplay()
+{
+    queueChangeMessage (-1);
+}
+
+void AudioPluginInstance::queueChangeMessage (const int index) throw()
+{
+    const ScopedLock sl (changedParamLock);
+    changedParams.addIfNotAlreadyThere (index);
+
+    if (! internalAsyncUpdater->isTimerRunning())
+        internalAsyncUpdater->startTimer (1);
+}
+
+//==============================================================================
+AudioPluginInstance::InternalAsyncUpdater::InternalAsyncUpdater (AudioPluginInstance& owner_)
+    : owner (owner_)
+{
+}
+
+void AudioPluginInstance::InternalAsyncUpdater::timerCallback()
+{
+    stopTimer();
+    owner.internalAsyncCallback();
+}
+

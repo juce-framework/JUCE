@@ -407,6 +407,13 @@ public:
     */
     virtual bool isParameterAutomatable (int index) const;
 
+    /** The filter can call this when something (apart from a parameter value) has changed.
+
+        It sends a hint to the host that something like the program, number of parameters,
+        etc, has changed, and that it should update itself.
+    */
+    void JUCE_CALLTYPE updateHostDisplay();
+
     //==============================================================================
     /** Returns the number of preset programs the filter supports.
 
@@ -492,6 +499,10 @@ public:
         virtual ~FilterNativeCallbacks() {}
         virtual bool JUCE_CALLTYPE getCurrentPositionInfo (CurrentPositionInfo& info) = 0;
         virtual void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue) = 0;
+
+        /** Callback to indicate that something (other than a parameter) has changed in the 
+            filter, such as its current program, parameter list, etc. */
+        virtual void JUCE_CALLTYPE updateHostDisplay() = 0;
     };
 
 
@@ -534,6 +545,8 @@ protected:
     double sampleRate;
     /** @internal */
     int blockSize, numInputChannels, numOutputChannels;
+    /** @internal */
+    FilterNativeCallbacks* callbacks;
 
 private:
     friend class JuceVSTWrapper;
@@ -545,8 +558,6 @@ private:
 
     CriticalSection callbackLock;
     bool suspended;
-
-    FilterNativeCallbacks* callbacks;
 
     AudioFilterEditor* activeEditor;
 };

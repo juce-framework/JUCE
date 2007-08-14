@@ -271,7 +271,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
         if (chosen.getFileExtension().isEmpty())
             chosen = chosen.withFileExtension (fileExtension);
 
-        return saveAs (f, false, false, true);
+        return saveAs (chosen, false, false, true);
     }
 
     return userCancelledSave;

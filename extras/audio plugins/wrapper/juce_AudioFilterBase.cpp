@@ -38,8 +38,8 @@ AudioFilterBase::AudioFilterBase()
       blockSize (0),
       numInputChannels (0),
       numOutputChannels (0),
-      suspended (false),
       callbacks (0),
+      suspended (false),
       activeEditor (0)
 {
 }
@@ -65,6 +65,12 @@ void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
         callbacks->informHostOfParameterChange (parameterIndex, newValue);
     else
         setParameter (parameterIndex, newValue);
+}
+
+void JUCE_CALLTYPE AudioFilterBase::updateHostDisplay()
+{
+    if (callbacks != 0)
+        callbacks->updateHostDisplay();
 }
 
 bool AudioFilterBase::isParameterAutomatable (int /*index*/) const

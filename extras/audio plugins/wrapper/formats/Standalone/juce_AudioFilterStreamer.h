@@ -73,6 +73,7 @@ public:
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
+    void JUCE_CALLTYPE updateHostDisplay();
 
     juce_UseDebuggingNewOperator
 

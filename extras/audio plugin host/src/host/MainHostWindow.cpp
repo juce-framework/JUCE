@@ -127,6 +127,8 @@ MainHostWindow::MainHostWindow()
     knownPluginList.addChangeListener (this);
 
     addKeyListener (commandManager->getKeyMappings());
+
+    Process::setPriority (Process::HighPriority);
 }
 
 MainHostWindow::~MainHostWindow()

@@ -34,20 +34,24 @@
 
 
 //==============================================================================
-class FilterParameterPropertyComp   : public PropertyComponent
+class FilterParameterPropertyComp   : public PropertyComponent,
+                                      public AudioPluginParameterListener
 {
 public:
-    FilterParameterPropertyComp (AudioPluginInstance* const filter_,
+    FilterParameterPropertyComp (const String& name,
+                                 AudioPluginInstance* const filter_,
                                  const int index_)
-        : PropertyComponent (filter_->getParameterName (index_)),
+        : PropertyComponent (name),
           filter (filter_),
           index (index_)
     {
         addAndMakeVisible (slider = new PluginSlider (filter_, index_));
+        filter->addListener (this);
     }
 
     ~FilterParameterPropertyComp()
     {
+        filter->removeListener (this);
         deleteAllChildren();
     }
 
@@ -56,6 +60,16 @@ public:
         slider->setValue (filter->getParameter (index), false);
     }
 
+    void audioPluginChanged (AudioPluginInstance*)
+    {
+    }
+
+    void audioPluginParameterChanged (AudioPluginInstance*, int parameterIndex)
+    {
+        if (parameterIndex == index)
+            refresh();
+    }
+                                              
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -76,6 +90,7 @@ private:
             setRange (0.0, 1.0, 0.0);
             setSliderStyle (Slider::LinearBar);
             setTextBoxIsEditable (false);
+            setScrollWheelEnabled (false);
         }
 
         ~PluginSlider()
@@ -120,7 +135,11 @@ GenericAudioFilterEditor::GenericAudioFilterEditor (AudioPluginInstance* const f
 
     for (int i = 0; i < numParams; ++i)
     {
-        FilterParameterPropertyComp* const pc = new FilterParameterPropertyComp (filter, i);
+        String name (filter->getParameterName (i));
+        if (name.trim().isEmpty())
+            name = "Unnamed";
+
+        FilterParameterPropertyComp* const pc = new FilterParameterPropertyComp (name, filter, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }
