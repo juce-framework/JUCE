@@ -671,7 +671,7 @@ void VSTPluginInstance::initialise()
 
     updateStoredProgramNames();
 
-    wantsMidiMessages = dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) != 0;
+    wantsMidiMessages = dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0;
 }
 
 
@@ -697,7 +697,7 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int sam
     if (initialised)
     {
         wantsMidiMessages = wantsMidiMessages
-                                || (dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) != 0);
+                                || (dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0);
 
         if (wantsMidiMessages)
             ensureMidiEventSize (256);
