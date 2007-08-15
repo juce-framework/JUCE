@@ -893,16 +893,16 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
 
 //==============================================================================
-class StatusAndTooltipBar   : public Component, 
-                              private Timer
+class TooltipBar   : public Component, 
+                     private Timer
 {
 public:
-    StatusAndTooltipBar()
+    TooltipBar()
     {
         startTimer (100);
     }
 
-    ~StatusAndTooltipBar()
+    ~TooltipBar()
     {
     }
 
@@ -947,7 +947,7 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
     addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphPlayer->keyState, 
                                                                  MidiKeyboardComponent::horizontalKeyboard));
 
-    addAndMakeVisible (statusBar = new StatusAndTooltipBar());
+    addAndMakeVisible (statusBar = new TooltipBar());
 
     graphPlayer->setAudioDeviceManager (deviceManager);
 
