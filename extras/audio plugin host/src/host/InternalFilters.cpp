@@ -157,7 +157,7 @@ public:
         if (dev != 0)
             return dev->getInputChannelNames() [channelIndex];
 
-        return String (channelIndex + 1);
+        return "Input Channel " + String (channelIndex + 1);
     }
 
     bool JUCE_CALLTYPE isInputChannelStereoPair (int) const
@@ -240,7 +240,7 @@ public:
         if (dev != 0)
             return dev->getOutputChannelNames() [channelIndex];
 
-        return String (channelIndex + 1);
+        return "Output Channel " + String (channelIndex + 1);
     }
 
     const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const
@@ -315,7 +315,7 @@ public:
         if (dev != 0)
             return dev->getInputChannelNames() [channelIndex];
 
-        return String (channelIndex + 1);
+        return "Midi Input";
     }
 
     bool JUCE_CALLTYPE isInputChannelStereoPair (int) const

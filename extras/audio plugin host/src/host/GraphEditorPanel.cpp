@@ -36,7 +36,8 @@
 
 
 //==============================================================================
-class PinComponent   : public Component
+class PinComponent   : public Component,
+                       public SettableTooltipClient
 {
 public:
     PinComponent (FilterGraph& graph_,
@@ -46,6 +47,28 @@ public:
           index (index_),
           isInput (isInput_)
     {
+        FilterInGraph* const f = graph.getFilterForUID (filterID_);
+
+        if (f != 0)
+        {
+            String tip;
+
+            if (isInput)
+                tip = f->filter->getInputChannelName (index_);
+            else
+                tip = f->filter->getOutputChannelName (index_);
+
+            if (tip.isEmpty())
+            {
+                if (index_ == FilterGraph::midiChannelNumber)
+                    tip = isInput ? "Midi Input" : "Midi Output";
+                else
+                    tip = (isInput ? "Input " : "Output ") + String (index_ + 1);
+            }
+
+            setTooltip (tip);
+        }
+
         setSize (16, 16);
     }
 
@@ -349,7 +372,8 @@ private:
 };
 
 //==============================================================================
-class ConnectorComponent   : public Component
+class ConnectorComponent   : public Component,
+                             public SettableTooltipClient
 {
 public:
     ConnectorComponent (FilterGraph& graph_)
@@ -785,6 +809,8 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
 
     if (draggingConnector != 0)
     {
+        draggingConnector->setTooltip (String::empty);
+
         int x = e2.x;
         int y = e2.y;
 
@@ -812,6 +838,8 @@ void GraphEditorPanel::dragConnector (const MouseEvent& e)
             {
                 x = pin->getParentComponent()->getX() + pin->getX() + pin->getWidth() / 2;
                 y = pin->getParentComponent()->getY() + pin->getY() + pin->getHeight() / 2;
+
+                draggingConnector->setTooltip (pin->getTooltip());
             }
         }
 
@@ -826,6 +854,8 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 {
     if (draggingConnector == 0)
         return;
+
+    draggingConnector->setTooltip (String::empty);
 
     const MouseEvent e2 (e.getEventRelativeTo (this));
 
@@ -863,6 +893,50 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
 
 //==============================================================================
+class StatusAndTooltipBar   : public Component, 
+                              private Timer
+{
+public:
+    StatusAndTooltipBar()
+    {
+        startTimer (100);
+    }
+
+    ~StatusAndTooltipBar()
+    {
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setFont (getHeight() * 0.7f, Font::bold);
+        g.setColour (Colours::black);
+        g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
+    }
+
+    void timerCallback()
+    {
+        Component* const underMouse = Component::getComponentUnderMouse();
+        TooltipClient* const ttc = dynamic_cast <TooltipClient*> (underMouse);
+
+        String newTip;
+
+        if (ttc != 0 && ! (underMouse->isMouseButtonDown() || underMouse->isCurrentlyBlockedByAnotherModalComponent()))
+            newTip = ttc->getTooltip();
+
+        if (newTip != tip)
+        {
+            tip = newTip;
+            repaint();
+        }
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String tip;
+};
+
+//==============================================================================
 GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManager_)
     : deviceManager (deviceManager_)
 {
@@ -872,6 +946,8 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
 
     addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphPlayer->keyState, 
                                                                  MidiKeyboardComponent::horizontalKeyboard));
+
+    addAndMakeVisible (statusBar = new StatusAndTooltipBar());
 
     graphPlayer->setAudioDeviceManager (deviceManager);
 
@@ -891,7 +967,10 @@ GraphDocumentComponent::~GraphDocumentComponent()
 void GraphDocumentComponent::resized()
 {
     const int keysHeight = 60;
+    const int statusHeight = 20;
+
     graphPanel->setBounds (0, 0, getWidth(), getHeight() - keysHeight);
+    statusBar->setBounds (0, getHeight() - keysHeight - statusHeight, getWidth(), statusHeight);
     keyboardComp->setBounds (0, getHeight() - keysHeight, getWidth(), keysHeight);
 }
 

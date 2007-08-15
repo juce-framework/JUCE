@@ -114,6 +114,7 @@ private:
 
     GraphEditorPanel* graphPanel;
     Component* keyboardComp;
+    Component* statusBar;
 };
 
 
