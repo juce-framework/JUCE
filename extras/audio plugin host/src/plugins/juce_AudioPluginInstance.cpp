@@ -44,7 +44,7 @@ AudioPluginInstance::AudioPluginInstance()
 {
     internalAsyncUpdater = new InternalAsyncUpdater (*this);
 
-    initialiseInternal (this);
+    setHostCallbacks (this);
 }
 
 AudioPluginInstance::~AudioPluginInstance()
@@ -127,7 +127,7 @@ void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int index, 
     queueChangeMessage (index);
 }
 
-void JUCE_CALLTYPE AudioPluginInstance::updateHostDisplay()
+void JUCE_CALLTYPE AudioPluginInstance::informHostOfStateChange()
 {
     queueChangeMessage (-1);
 }

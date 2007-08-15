@@ -172,7 +172,6 @@ private:
     int getVersionNumber() const throw();
     bool hasEditor() const throw();
     bool canMono() const throw();
-    bool canReplace() const throw();
     bool isOffline() const throw();
     void setPower (const bool on);
 

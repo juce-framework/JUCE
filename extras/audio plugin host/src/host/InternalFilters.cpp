@@ -98,7 +98,7 @@ class AudioInputDeviceFilter     : public InternalFilterBase
 public:
     AudioInputDeviceFilter (const int numChannels)
     {
-        numOutputChannels = numChannels;
+        setPlayConfigDetails (0, numChannels, getSampleRate(), getBlockSize());
     }
 
     ~AudioInputDeviceFilter() {}
@@ -115,7 +115,7 @@ public:
         AudioIODevice* const dev = getAudioDevice();
 
         if (dev != 0)
-            numOutputChannels = dev->getActiveInputChannels().countNumberOfSetBits();
+            setPlayConfigDetails (0, dev->getActiveInputChannels().countNumberOfSetBits(), getSampleRate(), getBlockSize());
     }
 
     void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
@@ -178,7 +178,7 @@ class AudioOutputDeviceFilter     : public InternalFilterBase
 public:
     AudioOutputDeviceFilter (const int numChannels)
     {
-        numInputChannels = numChannels;
+        setPlayConfigDetails (numChannels, 0, getSampleRate(), getBlockSize());
     }
 
     ~AudioOutputDeviceFilter() {}
@@ -195,7 +195,7 @@ public:
         AudioIODevice* const dev = getAudioDevice();
 
         if (dev != 0)
-            numInputChannels = dev->getActiveOutputChannels().countNumberOfSetBits();
+            setPlayConfigDetails (dev->getActiveOutputChannels().countNumberOfSetBits(), 0, getSampleRate(), getBlockSize());
     }
 
     void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)

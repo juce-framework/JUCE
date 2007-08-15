@@ -114,7 +114,7 @@ static long floatToLong (const float n) throw()
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
                            public CEffectProcessRTAS,
-                           public AudioFilterBase::FilterNativeCallbacks,
+                           public AudioFilterBase::HostCallbacks,
                            public AsyncUpdater
 {
 public:
@@ -537,8 +537,8 @@ protected:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->numInputChannels = fNumInputs;
-        juceFilter->numOutputChannels = fNumOutputs;
+        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, 
+                                          juceFilter->getSampleRate(), juceFilter->getBlockSize());
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
         DefineMasterBypassControlIndex (bypassControlIndex);
@@ -572,7 +572,7 @@ protected:
 
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
 
-        juceFilter->initialiseInternal (this);
+        juceFilter->setHostCallbacks (this);
     }
 
     void handleAsyncUpdate()
@@ -585,6 +585,9 @@ protected:
             juce_free (channels);
             channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(), 
                                                                       juceFilter->getNumOutputChannels()));
+
+            juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, 
+                                              sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
             juceFilter->prepareToPlay (sampleRate,
                                        mRTGlobals->mHWBufferSizeInSamples);
@@ -640,11 +643,11 @@ protected:
         {
             const ScopedLock sl (juceFilter->getCallbackLock());
 
-            const int numIn = juceFilter->numInputChannels;
-            const int numOut = juceFilter->numOutputChannels;
+            const int numIn = juceFilter->getNumInputChannels();
+            const int numOut = juceFilter->getNumOutputChannels();
             const int totalChans = jmax (numIn, numOut);
 
-            if (juceFilter->suspended)
+            if (juceFilter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
                     zeromem (outputs [i], sizeof (float) * numSamples);
@@ -845,7 +848,7 @@ protected:
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
-    void JUCE_CALLTYPE updateHostDisplay()
+    void JUCE_CALLTYPE informHostOfStateChange()
     {
         // xxx is there an RTAS equivalent?
     }

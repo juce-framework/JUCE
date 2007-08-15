@@ -34,13 +34,13 @@
 
 //==============================================================================
 AudioFilterBase::AudioFilterBase()
-    : sampleRate (0),
+    : callbacks (0),
+      activeEditor (0),
+      sampleRate (0),
       blockSize (0),
       numInputChannels (0),
       numOutputChannels (0),
-      callbacks (0),
-      suspended (false),
-      activeEditor (0)
+      suspended (false)
 {
 }
 
@@ -51,9 +51,20 @@ AudioFilterBase::~AudioFilterBase()
     jassert (activeEditor == 0);
 }
 
-void AudioFilterBase::initialiseInternal (FilterNativeCallbacks* const callbacks_)
+void AudioFilterBase::setHostCallbacks (HostCallbacks* const callbacks_)
 {
     callbacks = callbacks_;
+}
+
+void AudioFilterBase::setPlayConfigDetails (const int numIns, 
+                                            const int numOuts, 
+                                            const double sampleRate_,
+                                            const int blockSize_) throw()
+{
+    numInputChannels = numIns;
+    numOutputChannels = numOuts;
+    sampleRate = sampleRate_;
+    blockSize = blockSize_;
 }
 
 void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
@@ -70,7 +81,7 @@ void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
 void JUCE_CALLTYPE AudioFilterBase::updateHostDisplay()
 {
     if (callbacks != 0)
-        callbacks->updateHostDisplay();
+        callbacks->informHostOfStateChange();
 }
 
 bool AudioFilterBase::isParameterAutomatable (int /*index*/) const

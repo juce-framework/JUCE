@@ -40,6 +40,7 @@
 #include "juce_AudioFilterEditor.h"
 #undef MemoryBlock
 
+
 //==============================================================================
 /**
     Base class for audio filters or plugins written using JUCE.
@@ -313,6 +314,11 @@ public:
     */
     void JUCE_CALLTYPE suspendProcessing (const bool shouldBeSuspended);
 
+    /** Returns true if processing is currently suspended.
+        @see suspendProcessing
+    */
+    bool JUCE_CALLTYPE isSuspended() const throw()                                  { return suspended; }
+
     //==============================================================================
     /** Creates the filter's UI.
 
@@ -493,16 +499,17 @@ public:
 
     //==============================================================================
     /** @internal */
-    class FilterNativeCallbacks
+    class HostCallbacks
     {
     public:
-        virtual ~FilterNativeCallbacks() {}
+        virtual ~HostCallbacks() {}
+
         virtual bool JUCE_CALLTYPE getCurrentPositionInfo (CurrentPositionInfo& info) = 0;
         virtual void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue) = 0;
 
         /** Callback to indicate that something (other than a parameter) has changed in the 
             filter, such as its current program, parameter list, etc. */
-        virtual void JUCE_CALLTYPE updateHostDisplay() = 0;
+        virtual void JUCE_CALLTYPE informHostOfStateChange() = 0;
     };
 
 
@@ -512,10 +519,17 @@ public:
     */
     void JUCE_CALLTYPE editorBeingDeleted (AudioFilterEditor* const editor);
 
-    /** Not for public use - this is called by the wrapper code to initialised the
+    /** Not for public use - this is called by the wrapper code to initialise the
         filter.
     */
-    void JUCE_CALLTYPE initialiseInternal (FilterNativeCallbacks* const);
+    void JUCE_CALLTYPE setHostCallbacks (HostCallbacks* const);
+
+    /** Not for public use - this is called by the wrapper code to initialise the
+        filter.
+    */
+    void setPlayConfigDetails (const int numIns, const int numOuts, 
+                               const double sampleRate,
+                               const int blockSize) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -542,24 +556,14 @@ protected:
                                                        const int sizeInBytes);
 
     /** @internal */
-    double sampleRate;
-    /** @internal */
-    int blockSize, numInputChannels, numOutputChannels;
-    /** @internal */
-    FilterNativeCallbacks* callbacks;
+    HostCallbacks* callbacks;
 
 private:
-    friend class JuceVSTWrapper;
-    friend class JuceAU;
-    friend class JuceAUView;
-    friend class AudioFilterEditor;
-    friend class AudioFilterStreamer;
-    friend class JucePlugInProcess;
-
-    CriticalSection callbackLock;
-    bool suspended;
-
     AudioFilterEditor* activeEditor;
+    double sampleRate;
+    int blockSize, numInputChannels, numOutputChannels;
+    bool suspended;
+    CriticalSection callbackLock;
 };
 
 //==============================================================================

@@ -40,10 +40,9 @@ AudioFilterStreamer::AudioFilterStreamer (AudioFilterBase& filterToUse)
       sampleRate (0),
       emptyBuffer (1, 32)
 {
-    filter.numInputChannels = JucePlugin_MaxNumInputChannels;
-    filter.numOutputChannels = JucePlugin_MaxNumOutputChannels;
+    filter.setPlayConfigDetails (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels, 0, 0);
 
-    filter.initialiseInternal (this);
+    filter.setHostCallbacks (this);
 }
 
 AudioFilterStreamer::~AudioFilterStreamer()
@@ -85,7 +84,7 @@ void AudioFilterStreamer::audioDeviceIOCallback (const float** inputChannelData,
     {
         const ScopedLock sl (filter.getCallbackLock());
 
-        if (filter.suspended)
+        if (filter.isSuspended())
         {
             output.clear();
         }
@@ -144,7 +143,7 @@ void AudioFilterStreamer::informHostOfParameterChange (int index, float newValue
 }
 
 
-void JUCE_CALLTYPE AudioFilterStreamer::updateHostDisplay()
+void JUCE_CALLTYPE AudioFilterStreamer::informHostOfStateChange()
 {
 }
 

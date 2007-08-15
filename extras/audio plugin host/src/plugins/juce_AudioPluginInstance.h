@@ -67,7 +67,7 @@ public:
     @see AudioFilterBase, AudioPluginFormat
 */
 class AudioPluginInstance   : public AudioFilterBase,
-                              private AudioFilterBase::FilterNativeCallbacks
+                              private AudioFilterBase::HostCallbacks
 {
 public:
     //==============================================================================
@@ -168,7 +168,7 @@ protected:
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
-    void JUCE_CALLTYPE updateHostDisplay();
+    void JUCE_CALLTYPE informHostOfStateChange();
 };
 
 

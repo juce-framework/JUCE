@@ -51,7 +51,7 @@
 */
 class AudioFilterStreamer   : public AudioIODeviceCallback,
                               public MidiInputCallback,
-                              public AudioFilterBase::FilterNativeCallbacks
+                              public AudioFilterBase::HostCallbacks
 {
 public:
     //==============================================================================
@@ -73,7 +73,7 @@ public:
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
-    void JUCE_CALLTYPE updateHostDisplay();
+    void JUCE_CALLTYPE informHostOfStateChange();
 
     juce_UseDebuggingNewOperator
 

@@ -50,7 +50,7 @@ END_JUCE_NAMESPACE
 
 //==============================================================================
 class JuceAU   : public AUMIDIEffectBase,
-                 public AudioFilterBase::FilterNativeCallbacks
+                 public AudioFilterBase::HostCallbacks
 {
 public:
     //==============================================================================
@@ -75,7 +75,7 @@ public:
         }
 
         juceFilter = createPluginFilter();
-        juceFilter->initialiseInternal (this);
+        juceFilter->setHostCallbacks (this);
 
         jassert (juceFilter != 0);
         Globals()->UseIndexedParameters (juceFilter->getNumParameters());
@@ -396,7 +396,7 @@ public:
         }
     }
 
-    void updateHostDisplay()
+    void informHostOfStateChange()
     {
         // xxx is there an AU equivalent?
     }
@@ -433,10 +433,12 @@ public:
     {
         if (juceFilter != 0)
         {
-            juceFilter->numInputChannels = GetInput(0)->GetStreamFormat().mChannelsPerFrame;
-            juceFilter->numOutputChannels = GetOutput(0)->GetStreamFormat().mChannelsPerFrame;
+            juceFilter->setPlayConfigDetails (GetInput(0)->GetStreamFormat().mChannelsPerFrame,
+                                              GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
+                                              GetSampleRate(),
+                                              GetMaxFramesPerSlice());
 
-            bufferSpace.setSize (juceFilter->numInputChannels + juceFilter->numOutputChannels,
+            bufferSpace.setSize (juceFilter->getNumInputChannels() + juceFilter->getNumOutputChannels(),
                                  GetMaxFramesPerSlice() + 32);
 
             juceFilter->prepareToPlay (GetSampleRate(),
@@ -445,8 +447,8 @@ public:
             midiEvents.clear();
 
             juce_free (channels);
-            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->numInputChannels,
-                                                                      juceFilter->numOutputChannels) + 4);
+            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(),
+                                                                      juceFilter->getNumOutputChannels()) + 4);
 
             prepared = true;
         }
@@ -474,8 +476,8 @@ public:
             int numOutChans = 0;
             int nextSpareBufferChan = 0;
             bool needToReinterleave = false;
-            const int numIn = juceFilter->numInputChannels;
-            const int numOut = juceFilter->numOutputChannels;
+            const int numIn = juceFilter->getNumInputChannels();
+            const int numOut = juceFilter->getNumOutputChannels();
 
             unsigned int i;
             for (i = 0; i < outBuffer.mNumberBuffers; ++i)
@@ -547,7 +549,7 @@ public:
 
                 const ScopedLock sl (juceFilter->getCallbackLock());
 
-                if (juceFilter->suspended)
+                if (juceFilter->isSuspended())
                 {
                     for (int i = 0; i < numOut; ++i)
                         zeromem (channels [i], sizeof (float) * numSamples);

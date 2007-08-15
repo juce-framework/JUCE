@@ -45,5 +45,5 @@ AudioFilterEditor::~AudioFilterEditor()
 {
     // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
     // filter for some reason..
-    jassert (ownerFilter->activeEditor != this);
+    jassert (ownerFilter->getActiveEditor() != this);
 }

@@ -299,7 +299,7 @@ static VoidArray activePlugins;
 */
 class JuceVSTWrapper  : public AudioEffectX,
                         private Timer,
-                        public AudioFilterBase::FilterNativeCallbacks
+                        public AudioFilterBase::HostCallbacks
 {
 public:
     //==============================================================================
@@ -310,10 +310,11 @@ public:
                        filter_->getNumParameters()),
          filter (filter_)
     {
-        filter->numInputChannels = JucePlugin_MaxNumInputChannels;
-        filter->numOutputChannels = JucePlugin_MaxNumOutputChannels;
+        filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
+                                      JucePlugin_MaxNumOutputChannels,
+                                      0, 0);
 
-        filter_->initialiseInternal (this);
+        filter_->setHostCallbacks (this);
 
         editorComp = 0;
         outgoingEvents = 0;
@@ -336,8 +337,8 @@ public:
         wantEvents();
 #endif
 
-        setNumInputs (filter->numInputChannels);
-        setNumOutputs (filter->numOutputChannels);
+        setNumInputs (filter->getNumInputChannels());
+        setNumOutputs (filter->getNumOutputChannels());
 
         canProcessReplacing (true);
 
@@ -531,16 +532,19 @@ public:
 
     void process (float** inputs, float** outputs, VstInt32 numSamples)
     {
-        AudioSampleBuffer temp (filter->numInputChannels, numSamples);
+        const int numIn = filter->getNumInputChannels();
+        const int numOut = filter->getNumOutputChannels();
+
+        AudioSampleBuffer temp (numIn, numSamples);
         int i;
-        for (i = filter->numInputChannels; --i >= 0;)
+        for (i = numIn; --i >= 0;)
             memcpy (temp.getSampleData (i), outputs[i], sizeof (float) * numSamples);
 
         processReplacing (inputs, outputs, numSamples);
 
-        AudioSampleBuffer dest (outputs, filter->numOutputChannels, numSamples);
+        AudioSampleBuffer dest (outputs, numOut, numSamples);
 
-        for (i = jmin (filter->numOutputChannels, filter->numInputChannels); --i >= 0;)
+        for (i = jmin (numIn, numOut); --i >= 0;)
             dest.addFrom (i, 0, temp, i, 0, numSamples);
     }
 
@@ -564,11 +568,11 @@ public:
         {
             const ScopedLock sl (filter->getCallbackLock());
 
-            const int numIn = filter->numInputChannels;
-            const int numOut = filter->numOutputChannels;
+            const int numIn = filter->getNumInputChannels();
+            const int numOut = filter->getNumOutputChannels();
             const int totalChans = jmax (numIn, numOut);
 
-            if (filter->suspended)
+            if (filter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
                     zeromem (outputs [i], sizeof (float) * numSamples);
@@ -650,16 +654,19 @@ public:
         juce_free (channels);
         channels = (float**) juce_calloc (sizeof (float*) * jmax (filter->getNumInputChannels(), filter->getNumOutputChannels()));
 
-        filter->sampleRate = getSampleRate();
+        double rate = getSampleRate();
+        jassert (rate > 0);
+        if (rate <= 0.0)
+            rate = 44100.0;
 
-        jassert (filter->sampleRate > 0);
-        if (filter->sampleRate <= 0)
-            filter->sampleRate = 44100.0;
+        const int blockSize = getBlockSize();
+        jassert (blockSize > 0);
 
-        filter->blockSize = getBlockSize();
-        jassert (filter->blockSize > 0);
+        filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
+                                      JucePlugin_MaxNumOutputChannels,
+                                      rate, blockSize);
 
-        filter->prepareToPlay (filter->sampleRate, filter->blockSize);
+        filter->prepareToPlay (rate, blockSize);
         midiEvents.clear();
 
         AudioEffectX::resume();
@@ -807,7 +814,7 @@ public:
         setParameterAutomated (index, newValue);
     }
 
-    void JUCE_CALLTYPE updateHostDisplay()
+    void JUCE_CALLTYPE informHostOfStateChange()
     {
         updateDisplay();
     }

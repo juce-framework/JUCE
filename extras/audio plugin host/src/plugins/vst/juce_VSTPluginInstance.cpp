@@ -640,22 +640,22 @@ void VSTPluginInstance::initialise()
     dispatch (effIdentify, 0, 0, 0, 0);
 
     {
-        char buffer [kVstMaxEffectNameLen + 8];
+        char buffer [256];
         zerostruct (buffer);
         dispatch (effGetEffectName, 0, 0, buffer, 0);
 
-        name = String (buffer);
-        if (name.trim().isEmpty())
+        name = String (buffer).trim();
+        if (name.isEmpty())
             name = module->pluginName;
     }
 
-    dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate);
-    dispatch (effSetBlockSize, 0, jmax (16, blockSize), 0, 0);
+    dispatch (effSetSampleRate, 0, 0, 0, (float) getSampleRate());
+    dispatch (effSetBlockSize, 0, jmax (32, getBlockSize()), 0, 0);
 
     dispatch (effOpen, 0, 0, 0, 0);
 
-    numOutputChannels = effect->numOutputs;
-    numInputChannels = effect->numInputs;
+    setPlayConfigDetails (effect->numInputs, effect->numOutputs, 
+                          getSampleRate(), getBlockSize());
 
     if (getNumPrograms() > 1)
         setCurrentProgram (0);
@@ -676,11 +676,13 @@ void VSTPluginInstance::initialise()
 
 
 //==============================================================================
-void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int samplesPerBlockExpected)
+void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, 
+                                                     int samplesPerBlockExpected)
 {
-    sampleRate = sampleRate_;
-    blockSize = samplesPerBlockExpected;
-    midiCollector.reset (sampleRate);
+    setPlayConfigDetails (effect->numInputs, effect->numOutputs, 
+                          sampleRate_, samplesPerBlockExpected);
+
+    midiCollector.reset (sampleRate_);
 
     juce_free (channels);
     channels = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumOutputChannels() + 2, getNumInputChannels() + 2));
@@ -688,7 +690,7 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int sam
     vstHostTime.tempo = 120.0;
     vstHostTime.timeSigNumerator = 4;
     vstHostTime.timeSigDenominator = 4;
-    vstHostTime.sampleRate = sampleRate;
+    vstHostTime.sampleRate = sampleRate_;
     vstHostTime.samplePos = 0;
     vstHostTime.flags = kVstNanosValid;  /*| kVstTransportPlaying | kVstTempoValid | kVstTimeSigValid*/;
 
@@ -706,10 +708,10 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, int sam
 
         incomingMidi.clear();
 
-        dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate);
-        dispatch (effSetBlockSize, 0, jmax (16, blockSize), 0, 0);
+        dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate_);
+        dispatch (effSetBlockSize, 0, jmax (16, samplesPerBlockExpected), 0, 0);
 
-        tempBuffer.setSize (effect->numOutputs, blockSize);
+        tempBuffer.setSize (effect->numOutputs, samplesPerBlockExpected);
 
         if (! isPowerOn)
             setPower (true);
@@ -734,7 +736,7 @@ void JUCE_CALLTYPE VSTPluginInstance::releaseResources()
         setPower (false);
     }
 
-    midiCollector.reset (sampleRate);
+    midiCollector.reset (getSampleRate());
     tempBuffer.setSize (1, 1);
     incomingMidi.clear();
 
@@ -1274,7 +1276,7 @@ private:
         checkPluginWindowSize();
 #endif
 
-        startTimer (18 + juce::Random::getSystemRandom().nextInt (5));
+        startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
         repaint();
     }
 
@@ -1417,8 +1419,7 @@ AudioFilterEditor* JUCE_CALLTYPE VSTPluginInstance::createEditor()
 void VSTPluginInstance::handleAsyncUpdate()
 {
     // indicates that something about the plugin has changed..
-    if (callbacks != 0)
-        callbacks->updateHostDisplay();
+    updateHostDisplay();
 }
 
 //==============================================================================
@@ -1547,7 +1548,7 @@ void VSTPluginInstance::setParamsInProgramBlock (fxProgram* const prog) throw()
         prog->params[i] = swapFloat (getParameter (i));
 }
 
-bool VSTPluginInstance::saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int maxSizeMB)
+bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool isFXB, int maxSizeMB)
 {
     const int numPrograms = getNumPrograms();
     const int numParams = getNumParameters();
@@ -1556,7 +1557,7 @@ bool VSTPluginInstance::saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int 
     {
         if (isFXB)
         {
-            juce::MemoryBlock chunk;
+            JUCE_NAMESPACE::MemoryBlock chunk;
             getChunkData (chunk, false, maxSizeMB);
 
             const int totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
@@ -1576,7 +1577,7 @@ bool VSTPluginInstance::saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int 
         }
         else
         {
-            juce::MemoryBlock chunk;
+            JUCE_NAMESPACE::MemoryBlock chunk;
             getChunkData (chunk, true, maxSizeMB);
 
             const int totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
@@ -1614,7 +1615,7 @@ bool VSTPluginInstance::saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int 
             set->numPrograms = swap (numPrograms);
 
             const int oldProgram = getCurrentProgram();
-            juce::MemoryBlock oldSettings;
+            JUCE_NAMESPACE::MemoryBlock oldSettings;
             createTempParameterStore (oldSettings);
 
             setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
@@ -1643,7 +1644,7 @@ bool VSTPluginInstance::saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int 
     return true;
 }
 
-void VSTPluginInstance::getChunkData (juce::MemoryBlock& mb, bool isPreset, int maxSizeMB) const
+void VSTPluginInstance::getChunkData (JUCE_NAMESPACE::MemoryBlock& mb, bool isPreset, int maxSizeMB) const
 {
     if (usesChunks())
     {
@@ -1856,10 +1857,10 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         return 1;
 
     case audioMasterGetSampleRate:
-        return (VstIntPtr) sampleRate;
+        return (VstIntPtr) getSampleRate();
 
     case audioMasterGetBlockSize:
-        return (VstIntPtr) blockSize;
+        return (VstIntPtr) getBlockSize();
 
     case audioMasterWantMidi:
         wantsMidiMessages = true;
@@ -2142,7 +2143,7 @@ bool VSTPluginInstance::isParameterAutomatable (int index) const
     return false;
 }
 
-void VSTPluginInstance::createTempParameterStore (juce::MemoryBlock& dest)
+void VSTPluginInstance::createTempParameterStore (JUCE_NAMESPACE::MemoryBlock& dest)
 {
     dest.setSize (64 + 4 * getNumParameters());
     dest.fillWith (0);
@@ -2154,7 +2155,7 @@ void VSTPluginInstance::createTempParameterStore (juce::MemoryBlock& dest)
         p[i] = getParameter(i);
 }
 
-void VSTPluginInstance::restoreFromTempParameterStore (const juce::MemoryBlock& m)
+void VSTPluginInstance::restoreFromTempParameterStore (const JUCE_NAMESPACE::MemoryBlock& m)
 {
     changeProgramName (getCurrentProgram(), (const char*) m);
 
@@ -2226,7 +2227,7 @@ void VSTPluginInstance::updateStoredProgramNames()
         if (dispatch (effGetProgramNameIndexed, 0, -1, nm, 0) == 0)
         {
             const int oldProgram = getCurrentProgram();
-            juce::MemoryBlock oldSettings;
+            JUCE_NAMESPACE::MemoryBlock oldSettings;
             createTempParameterStore (oldSettings);
 
             for (int i = 0; i < getNumPrograms(); ++i)
@@ -2343,11 +2344,6 @@ bool VSTPluginInstance::hasEditor() const throw()
 bool VSTPluginInstance::canMono() const throw()
 {
     return effect != 0 && (effect->flags & effFlagsCanMono) != 0;
-}
-
-bool VSTPluginInstance::canReplace() const throw()
-{
-    return effect != 0 && (effect->flags & effFlagsCanReplacing) != 0;
 }
 
 bool VSTPluginInstance::isOffline() const throw()
