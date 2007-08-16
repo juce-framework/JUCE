@@ -233,9 +233,11 @@ XmlElement* FilterInGraph::createXml() const
     return e;
 }
 
-FilterInGraph* FilterInGraph::createForDescription (FilterGraph& owner, const PluginDescription& desc)
+FilterInGraph* FilterInGraph::createForDescription (FilterGraph& owner, 
+                                                    const PluginDescription& desc,
+                                                    String& errorMessage)
 {
-    AudioPluginInstance* instance = desc.createInstance();
+    AudioPluginInstance* instance = desc.createInstance (errorMessage);
 
     if (instance != 0)
         return new FilterInGraph (owner, instance);
@@ -253,7 +255,8 @@ FilterInGraph* FilterInGraph::createFromXml (FilterGraph& owner, const XmlElemen
             break;
     }
 
-    FilterInGraph* const c = createForDescription (owner, pd);
+    String errorMessage;
+    FilterInGraph* const c = createForDescription (owner, pd, errorMessage);
 
     if (c == 0)
         return 0;
@@ -398,12 +401,19 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 {
     if (desc != 0)
     {
-        FilterInGraph* cf = FilterInGraph::createForDescription (*this, *desc);
+        String errorMessage;
+        FilterInGraph* cf = FilterInGraph::createForDescription (*this, *desc, errorMessage);
 
         if (cf != 0)
         {
             cf->setPosition (x, y);
             addFilter (cf);
+        }
+        else
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon, 
+                                         TRANS("Couldn't create filter"),
+                                         errorMessage);
         }
     }
 }

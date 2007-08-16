@@ -403,6 +403,10 @@ public:
         This could happen when the editor or some other internal operation changes
         a parameter. This method will call the setParameter() method to change the
         value, and will then send a message to the host telling it about the change.
+
+        Note that to make sure the host correctly handles automation, you should call 
+        the beginParameterChangeGesture() and endParameterChangeGesture() methods to 
+        tell the host when the user has started and stopped changing the parameter.
     */
     void JUCE_CALLTYPE setParameterNotifyingHost (int parameterIndex,
                                                   float newValue);
@@ -411,7 +415,26 @@ public:
 
         By default, this returns true for all parameters.
     */
-    virtual bool isParameterAutomatable (int index) const;
+    virtual bool isParameterAutomatable (int parameterIndex) const;
+
+    /** Sends a signal to the host to tell it that the user is about to start changing this
+        parameter.
+
+        This allows the host to know when a parameter is actively being held by the user, and
+        it may use this information to help it record automation.
+
+        If you call this, it must be matched by a later call to endParameterChangeGesture().
+    */
+    void beginParameterChangeGesture (int parameterIndex);
+
+    /** Tells the host that the user has finished changing this parameter.
+
+        This allows the host to know when a parameter is actively being held by the user, and
+        it may use this information to help it record automation.
+
+        A call to this method must follow a call to beginParameterChangeGesture().
+    */
+    void endParameterChangeGesture (int parameterIndex);
 
     /** The filter can call this when something (apart from a parameter value) has changed.
 
@@ -506,6 +529,8 @@ public:
 
         virtual bool JUCE_CALLTYPE getCurrentPositionInfo (CurrentPositionInfo& info) = 0;
         virtual void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue) = 0;
+        virtual void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index) = 0;
+        virtual void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index) = 0;
 
         /** Callback to indicate that something (other than a parameter) has changed in the 
             filter, such as its current program, parameter list, etc. */
@@ -517,12 +542,12 @@ public:
     /** Not for public use - this is called by the wrapper code before deleting an
         editor component.
     */
-    void JUCE_CALLTYPE editorBeingDeleted (AudioFilterEditor* const editor);
+    void JUCE_CALLTYPE editorBeingDeleted (AudioFilterEditor* const editor) throw();
 
     /** Not for public use - this is called by the wrapper code to initialise the
         filter.
     */
-    void JUCE_CALLTYPE setHostCallbacks (HostCallbacks* const);
+    void JUCE_CALLTYPE setHostCallbacks (HostCallbacks* const) throw();
 
     /** Not for public use - this is called by the wrapper code to initialise the
         filter.
@@ -564,6 +589,10 @@ private:
     int blockSize, numInputChannels, numOutputChannels;
     bool suspended;
     CriticalSection callbackLock;
+
+#ifdef JUCE_DEBUG
+    BitArray changingParams;
+#endif
 };
 
 //==============================================================================

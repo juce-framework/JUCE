@@ -49,9 +49,13 @@ AudioFilterBase::~AudioFilterBase()
     // ooh, nasty - the editor should have been deleted before the filter
     // that it refers to is deleted..
     jassert (activeEditor == 0);
+
+    // This will fail if you've called beginParameterChangeGesture() for one
+    // or more parameters without having made a corresponding call to endParameterChangeGesture...
+    jassert (changingParams.countNumberOfSetBits() == 0);
 }
 
-void AudioFilterBase::setHostCallbacks (HostCallbacks* const callbacks_)
+void AudioFilterBase::setHostCallbacks (HostCallbacks* const callbacks_) throw()
 {
     callbacks = callbacks_;
 }
@@ -76,6 +80,31 @@ void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
         callbacks->informHostOfParameterChange (parameterIndex, newValue);
     else
         setParameter (parameterIndex, newValue);
+}
+
+void AudioFilterBase::beginParameterChangeGesture (int parameterIndex)
+{
+    jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
+
+    // This means you've called beginParameterChangeGesture twice in succession without a matching
+    // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
+    jassert (! changingParams [parameterIndex]);
+
+    if (callbacks != 0)
+        callbacks->informHostOfParameterGestureBegin (parameterIndex);
+}
+
+void AudioFilterBase::endParameterChangeGesture (int parameterIndex)
+{
+    jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
+
+    // This means you've called endParameterChangeGesture without having previously called 
+    // endParameterChangeGesture. That might be fine in most hosts, but better to keep the 
+    // calls matched correctly.
+    jassert (changingParams [parameterIndex]);
+
+    if (callbacks != 0)
+        callbacks->informHostOfParameterGestureEnd (parameterIndex);
 }
 
 void JUCE_CALLTYPE AudioFilterBase::updateHostDisplay()
@@ -103,7 +132,7 @@ bool AudioFilterBase::getCurrentPositionInfo (CurrentPositionInfo& info)
 }
 
 //==============================================================================
-void AudioFilterBase::editorBeingDeleted (AudioFilterEditor* const editor)
+void AudioFilterBase::editorBeingDeleted (AudioFilterEditor* const editor) throw()
 {
     const ScopedLock sl (callbackLock);
 

@@ -848,6 +848,16 @@ protected:
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
+    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index)
+    {
+        TouchControl (index + 2);
+    }
+
+    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index)
+    {
+        ReleaseControl (index + 2);
+    }
+
     void JUCE_CALLTYPE informHostOfStateChange()
     {
         // xxx is there an RTAS equivalent?

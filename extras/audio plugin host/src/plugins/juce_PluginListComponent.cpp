@@ -135,6 +135,7 @@ void PluginListComponent::buttonClicked (Button* b)
         menu.addItem (1, TRANS("Clear list"));
         menu.addItem (5, TRANS("Remove selected plugin from list"), listBox->getNumSelectedRows() > 0);
         menu.addItem (6, TRANS("Show folder containing selected plugin"), listBox->getNumSelectedRows() > 0);
+        menu.addItem (7, TRANS("Remove any plugins whose files no longer exist"));
         menu.addSeparator();
         menu.addItem (2, TRANS("Sort alphabetically"));
         menu.addItem (3, TRANS("Sort by category"));
@@ -181,6 +182,17 @@ void PluginListComponent::buttonClicked (Button* b)
 
             if (desc != 0)
                 desc->file.getParentDirectory().startAsProcess();
+        }
+        else if (r == 7)
+        {
+            for (int i = list.getNumTypes(); --i >= 0;)
+            {
+                if (list.getType (i)->file != File::nonexistent
+                     && ! list.getType (i)->file.exists())
+                {
+                    list.removeType (i);
+                }
+            }
         }
         else if (r != 0)
         {

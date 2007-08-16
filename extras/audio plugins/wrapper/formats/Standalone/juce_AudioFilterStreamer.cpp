@@ -142,6 +142,13 @@ void AudioFilterStreamer::informHostOfParameterChange (int index, float newValue
     filter.setParameter (index, newValue);
 }
 
+void JUCE_CALLTYPE AudioFilterStreamer::informHostOfParameterGestureBegin (int index)
+{
+}
+
+void JUCE_CALLTYPE AudioFilterStreamer::informHostOfParameterGestureEnd (int index)
+{
+}
 
 void JUCE_CALLTYPE AudioFilterStreamer::informHostOfStateChange()
 {

@@ -100,7 +100,7 @@ void PluginDescription::fillInFromInstance (AudioPluginInstance& instance) throw
     isInstrument = instance.isInstrument();
 }
 
-AudioPluginInstance* PluginDescription::createInstance() const
+AudioPluginInstance* PluginDescription::createInstance (String& errorMessage) const
 {
     AudioPluginInstance* result = 0;
 
@@ -112,6 +112,14 @@ AudioPluginInstance* PluginDescription::createInstance() const
 
         if (result != 0)
             break;
+    }
+
+    if (result == 0)
+    {
+        if (file != File::nonexistent && ! file.exists())
+            errorMessage = TRANS ("This plug-in file no longer exists");
+        else
+            errorMessage = TRANS ("This plug-in failed to load correctly");
     }
 
     return result;

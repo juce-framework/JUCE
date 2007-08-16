@@ -117,9 +117,10 @@ public:
 
         The caller is responsible for deleting the object that is returned.
 
-        Returns 0 if it can't load the plugin for some reason.
+        If it can't load the plugin, it returns 0 and leaves a message in the 
+        errorMessage string.
     */
-    AudioPluginInstance* createInstance() const;
+    AudioPluginInstance* createInstance (String& errorMessage) const;
 
     //==============================================================================
     /** Creates an XML object containing these details.

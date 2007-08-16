@@ -67,6 +67,8 @@ void AudioPluginInstance::internalAsyncCallback()
     changedParamLock.enter();
     Array <int> changed;
     changed.swapWithArray (changedParams);
+    Array <float> changedValues;
+    changedValues.swapWithArray (changedParamValues);
     changedParamLock.exit();
 
     for (int j = 0; j < changed.size(); ++j)
@@ -78,9 +80,13 @@ void AudioPluginInstance::internalAsyncCallback()
             AudioPluginParameterListener* const l = (AudioPluginParameterListener*) listeners.getUnchecked(i);
 
             if (paramIndex >= 0)
-                l->audioPluginParameterChanged (this, paramIndex);
-            else
+                l->audioPluginParameterChanged (this, paramIndex, changedValues.getUnchecked(j));
+            else if (paramIndex == -1)
                 l->audioPluginChanged (this);
+            else if ((paramIndex & 0xc0000000) == 0xc0000000)
+                l->audioPluginParameterChangeGestureBegin (this, paramIndex & 0x3fffffff);
+            else if ((paramIndex & 0xc0000000) == 0x80000000)
+                l->audioPluginParameterChangeGestureEnd (this, paramIndex & 0x3fffffff);
 
             i = jmin (i, listeners.size());
         }
@@ -122,20 +128,31 @@ bool JUCE_CALLTYPE AudioPluginInstance::getCurrentPositionInfo (AudioFilterBase:
     return true;
 }
 
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int index, float /*newValue*/)
+void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int index, float newValue)
 {
-    queueChangeMessage (index);
+    queueChangeMessage (index, newValue);
+}
+
+void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterGestureBegin (int index)
+{
+    queueChangeMessage (0xc0000000 | index, 0);
+}
+
+void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterGestureEnd (int index)
+{
+    queueChangeMessage (0x80000000 | index, 0);
 }
 
 void JUCE_CALLTYPE AudioPluginInstance::informHostOfStateChange()
 {
-    queueChangeMessage (-1);
+    queueChangeMessage (-1, 0);
 }
 
-void AudioPluginInstance::queueChangeMessage (const int index) throw()
+void AudioPluginInstance::queueChangeMessage (const int index, const float value) throw()
 {
     const ScopedLock sl (changedParamLock);
-    changedParams.addIfNotAlreadyThere (index);
+    changedParams.add (index);
+    changedParamValues.add (value);
 
     if (! internalAsyncUpdater->isTimerRunning())
         internalAsyncUpdater->startTimer (1);
@@ -153,3 +170,12 @@ void AudioPluginInstance::InternalAsyncUpdater::timerCallback()
     owner.internalAsyncCallback();
 }
 
+
+//==============================================================================
+void AudioPluginParameterListener::audioPluginParameterChangeGestureBegin (AudioPluginInstance*, int)
+{
+}
+
+void AudioPluginParameterListener::audioPluginParameterChangeGestureEnd (AudioPluginInstance*, int)
+{
+}

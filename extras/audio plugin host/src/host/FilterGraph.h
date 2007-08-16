@@ -95,7 +95,10 @@ public:
 
     XmlElement* createXml() const;
 
-    static FilterInGraph* createForDescription (FilterGraph& owner, const PluginDescription& desc);
+    static FilterInGraph* createForDescription (FilterGraph& owner, 
+                                                const PluginDescription& desc,
+                                                String& errorMessage);
+
     static FilterInGraph* createFromXml (FilterGraph& owner, const XmlElement& xml);
 
     //==============================================================================

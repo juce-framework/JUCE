@@ -81,6 +81,11 @@ public:
         Globals()->UseIndexedParameters (juceFilter->getNumParameters());
 
         activePlugins.add (this);
+
+        zerostruct (auEvent);
+        auEvent.mArgument.mParameter.mAudioUnit = GetComponentInstance();
+        auEvent.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+        auEvent.mArgument.mParameter.mElement = 0;
     }
 
     ~JuceAU()
@@ -219,14 +224,27 @@ public:
                                       AudioUnitParameterID inParameterID,
                                       AudioUnitParameterInfo& outParameterInfo)
     {
-        if (inScope == kAudioUnitScope_Global && juceFilter != 0)
+        const int index = (int) inParameterID;
+
+        if (inScope == kAudioUnitScope_Global 
+             && juceFilter != 0
+             && index < juceFilter->getNumParameters())
         {
             outParameterInfo.flags = kAudioUnitParameterFlag_IsWritable
                                       | kAudioUnitParameterFlag_IsReadable
                                       | kAudioUnitParameterFlag_HasCFNameString;
 
-            outParameterInfo.name[0] = 0;
-            outParameterInfo.cfNameString = PlatformUtilities::juceStringToCFString (juceFilter->getParameterName ((int) inParameterID));
+            const String name (juceFilter->getParameterName (index));
+
+            CharacterFunctions::copy ((char*) outParameterInfo.name, 
+                                      (const char*) name.toUTF8(), 
+                                      sizeof (outParameterInfo.name) - 1);
+
+            // set whether the param is automatable (unnamed parameters aren't allowed to be automated)
+            if (name.isEmpty() || ! juceFilter->isParameterAutomatable (index))
+                outParameterInfo.flags |= kAudioUnitParameterFlag_NonRealTime;
+
+            outParameterInfo.cfNameString = PlatformUtilities::juceStringToCFString (name);
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
             outParameterInfo.defaultValue = 0.0f;
@@ -377,23 +395,35 @@ public:
         return true;
     }
 
+    void sendAUEvent (const AudioUnitEventType type, const int index) throw()
+    {
+        if (AUEventListenerNotify != 0)
+        {
+            auEvent.mEventType = type;
+            auEvent.mArgument.mParameter.mParameterID = (AudioUnitParameterID) index;
+            AUEventListenerNotify (0, 0, &auEvent);
+        }
+    }
+
     void informHostOfParameterChange (int index, float newValue)
     {
         if (juceFilter != 0)
         {
             juceFilter->setParameter (index, newValue);
-
-            if (AUEventListenerNotify != 0)
-            {
-                AudioUnitEvent e;
-                e.mEventType = kAudioUnitEvent_ParameterValueChange;
-                e.mArgument.mParameter.mAudioUnit = GetComponentInstance();
-                e.mArgument.mParameter.mParameterID = (AudioUnitParameterID) index;
-                e.mArgument.mParameter.mScope = kAudioUnitScope_Global;
-                e.mArgument.mParameter.mElement = 0;
-                AUEventListenerNotify (0, 0, &e);
-            }
+            sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
         }
+    }
+
+    void informHostOfParameterGestureBegin (int index)
+    {
+        if (juceFilter != 0)
+            sendAUEvent (kAudioUnitEvent_BeginParameterChangeGesture, index);
+    }
+
+    void informHostOfParameterGestureEnd (int index)
+    {
+        if (juceFilter != 0)
+            sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
     }
 
     void informHostOfStateChange()
@@ -645,6 +675,7 @@ private:
     bool prepared;
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
+    AudioUnitEvent auEvent;
 };
 
 

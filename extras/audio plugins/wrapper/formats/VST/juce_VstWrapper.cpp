@@ -814,6 +814,16 @@ public:
         setParameterAutomated (index, newValue);
     }
 
+    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index)
+    {
+        beginEdit (index);
+    }
+
+    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index)
+    {
+        endEdit (index);
+    }
+
     void JUCE_CALLTYPE informHostOfStateChange()
     {
         updateDisplay();

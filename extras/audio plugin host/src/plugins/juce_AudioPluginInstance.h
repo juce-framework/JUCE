@@ -47,12 +47,33 @@ public:
     //==============================================================================
     /** Receives a callback when a parameter is changed. */
     virtual void audioPluginParameterChanged (AudioPluginInstance* plugin,
-                                              int parameterIndex) = 0;
+                                              int parameterIndex,
+                                              float newValue) = 0;
 
     /** Called to indicate that something else in the plugin has changed, like its
         program, number of parameters, etc.
     */
     virtual void audioPluginChanged (AudioPluginInstance* plugin) = 0;
+
+    /** Indicates that a parameter change gesture has started.
+
+        E.g. if the user is dragging a slider, this would be called when they first 
+        press the mouse button, and audioPluginParameterChangeGestureEnd would be
+        called when they release it.
+
+        @see audioPluginParameterChangeGestureEnd
+    */
+    virtual void audioPluginParameterChangeGestureBegin (AudioPluginInstance* plugin,
+                                                         int parameterIndex);
+
+    /** Indicates that a parameter change gesture has finished.
+
+        E.g. if the user is dragging a slider, this would be called when they release 
+        the mouse button.
+        @see audioPluginParameterChangeGestureStart
+    */
+    virtual void audioPluginParameterChangeGestureEnd (AudioPluginInstance* plugin,
+                                                       int parameterIndex);
 };
 
 
@@ -145,6 +166,7 @@ protected:
     VoidArray listeners;
     CriticalSection changedParamLock;
     Array <int> changedParams;
+    Array <float> changedParamValues;
 
     class InternalAsyncUpdater : public Timer
     {
@@ -162,12 +184,14 @@ protected:
 
     InternalAsyncUpdater* internalAsyncUpdater;
     void internalAsyncCallback();
-    void queueChangeMessage (const int index) throw();
+    void queueChangeMessage (const int index, const float value) throw();
 
     AudioPluginInstance();
 
     bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
     void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
+    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index);
+    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index);
     void JUCE_CALLTYPE informHostOfStateChange();
 };
 

@@ -64,7 +64,7 @@ public:
     {
     }
 
-    void audioPluginParameterChanged (AudioPluginInstance*, int parameterIndex)
+    void audioPluginParameterChanged (AudioPluginInstance*, int parameterIndex, float)
     {
         if (parameterIndex == index)
             refresh();
