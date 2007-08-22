@@ -208,12 +208,25 @@ public:
         getViewedComponent()->deleteAllChildren();
     }
 
-    ListBoxRowComponent* getComponentForRow (const int row) const
+    ListBoxRowComponent* getComponentForRow (const int row) const throw()
     {
-        return (ListBoxRowComponent*) getViewedComponent()->getChildComponent (row % jmax (1, getViewedComponent()->getNumChildComponents()));
+        return (ListBoxRowComponent*) getViewedComponent()
+                    ->getChildComponent (row % jmax (1, getViewedComponent()->getNumChildComponents()));
     }
 
-    Component* getComponentForRowIfOnscreen (const int row) const
+    int getRowNumberOfComponent (Component* const rowComponent) const throw()
+    {
+        const int index = getIndexOfChildComponent (rowComponent);
+        const int num = getViewedComponent()->getNumChildComponents();
+
+        for (int i = num; --i >= 0;)
+            if (((firstIndex + i) % jmax (1, num)) == index)
+                return firstIndex + i;
+
+        return -1;
+    }
+
+    Component* getComponentForRowIfOnscreen (const int row) const throw()
     {
         return (row >= firstIndex && row < firstIndex + getViewedComponent()->getNumChildComponents())
                  ? getComponentForRow (row) : 0;
@@ -231,10 +244,10 @@ public:
     {
         hasUpdated = false;
 
-        int newX = getViewedComponent()->getX();
+        const int newX = getViewedComponent()->getX();
         int newY = getViewedComponent()->getY();
-        int newW = jmax (owner.minimumRowWidth, getMaximumVisibleWidth());
-        int newH = owner.totalItems * owner.getRowHeight();
+        const int newW = jmax (owner.minimumRowWidth, getMaximumVisibleWidth());
+        const int newH = owner.totalItems * owner.getRowHeight();
 
         if (newY + newH < getMaximumVisibleHeight() && newH > getMaximumVisibleHeight())
             newY = getMaximumVisibleHeight() - newH;
@@ -601,7 +614,7 @@ int ListBox::getLastRowSelected() const
 }
 
 //==============================================================================
-int ListBox::getRowContainingPosition (const int x, const int y) const
+int ListBox::getRowContainingPosition (const int x, const int y) const throw()
 {
     if (x >= 0 && x < getWidth())
     {
@@ -614,13 +627,18 @@ int ListBox::getRowContainingPosition (const int x, const int y) const
     return -1;
 }
 
-Component* ListBox::getComponentForRowNumber (const int row) const
+Component* ListBox::getComponentForRowNumber (const int row) const throw()
 {
     Component* const listRowComp = viewport->getComponentForRowIfOnscreen (row);
     return listRowComp != 0 ? listRowComp->getChildComponent (0) : 0;
 }
 
-const Rectangle ListBox::getRowPosition (const int rowNumber) const
+int ListBox::getRowNumberOfComponent (Component* const rowComponent) const throw()
+{
+    return viewport->getRowNumberOfComponent (rowComponent);
+}
+
+const Rectangle ListBox::getRowPosition (const int rowNumber) const throw()
 {
     const int rowHeight = getRowHeight();
 
@@ -644,7 +662,7 @@ double ListBox::getVerticalPosition() const
                            : 0;
 }
 
-int ListBox::getVisibleRowWidth() const
+int ListBox::getVisibleRowWidth() const throw()
 {
     return viewport->getViewWidth();
 }
@@ -800,17 +818,17 @@ void ListBox::setMinimumContentWidth (const int newMinimumWidth)
     updateContent();
 }
 
-int ListBox::getVisibleContentWidth() const
+int ListBox::getVisibleContentWidth() const throw()
 {
     return viewport->getMaximumVisibleWidth();
 }
 
-ScrollBar* ListBox::getVerticalScrollBar() const
+ScrollBar* ListBox::getVerticalScrollBar() const throw()
 {
     return viewport->getVerticalScrollBar();
 }
 
-ScrollBar* ListBox::getHorizontalScrollBar() const
+ScrollBar* ListBox::getHorizontalScrollBar() const throw()
 {
     return viewport->getHorizontalScrollBar();
 }
@@ -842,7 +860,7 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
     }
 }
 
-void ListBox::repaintRow (const int rowNumber)
+void ListBox::repaintRow (const int rowNumber) throw()
 {
     const Rectangle r (getRowPosition (rowNumber));
     repaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());

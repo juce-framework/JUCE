@@ -359,13 +359,13 @@ public:
 
         (Unlikely to be useful for most people).
     */
-    ScrollBar* getVerticalScrollBar() const;
+    ScrollBar* getVerticalScrollBar() const throw();
 
     /** Returns a pointer to the scrollbar.
 
         (Unlikely to be useful for most people).
     */
-    ScrollBar* getHorizontalScrollBar() const;
+    ScrollBar* getHorizontalScrollBar() const throw();
 
     /** Finds the row index that contains a given x,y position.
 
@@ -375,7 +375,15 @@ public:
 
         @see getComponentForRowNumber
     */
-    int getRowContainingPosition (const int x, const int y) const;
+    int getRowContainingPosition (const int x, const int y) const throw();
+
+    /** Returns the position of one of the rows, relative to the top-left of
+        the listbox.
+
+        This may be off-screen, and the range of the row number that is passed-in is
+        not checked to see if it's a valid row.
+    */
+    const Rectangle getRowPosition (const int rowNumber) const throw();
 
     /** Finds the row component for a given row in the list.
 
@@ -386,20 +394,18 @@ public:
 
         @see getRowContainingPosition
     */
-    Component* getComponentForRowNumber (const int rowNumber) const;
+    Component* getComponentForRowNumber (const int rowNumber) const throw();
 
-    /** Returns the position of one of the rows, relative to the top-left of
-        the listbox.
+    /** Returns the row number that the given component represents.
 
-        This may be off-screen, and the range of the row number that is passed-in is
-        not checked to see if it's a valid row.
+        If the component isn't one of the list's rows, this will return -1.
     */
-    const Rectangle getRowPosition (const int rowNumber) const;
+    int getRowNumberOfComponent (Component* const rowComponent) const throw();
 
     /** Returns the width of a row (which may be less than the width of this component
         if there's a scrollbar).
     */
-    int getVisibleRowWidth() const;
+    int getVisibleRowWidth() const throw();
 
     //==============================================================================
     /** Sets the height of each row in the list.
@@ -479,14 +485,14 @@ public:
     /** Returns the space currently available for the row items, taking into account
         borders, scrollbars, etc.
     */
-    int getVisibleContentWidth() const;
+    int getVisibleContentWidth() const throw();
 
     /** Repaints one of the rows.
 
         This is a lightweight alternative to calling updateContent, and just causes a
         repaint of the row's area.
     */
-    void repaintRow (const int rowNumber);
+    void repaintRow (const int rowNumber) throw();
 
     /** This fairly obscure method creates an image that just shows the currently
         selected row components.
