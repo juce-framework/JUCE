@@ -300,7 +300,7 @@ public:
         if (GetSampleRate() <= 0)
             return 0.0;
 
-        return getLatencySamples() / GetSampleRate();
+        return juceFilter->getLatencySamples() / GetSampleRate();
     }
 
     //==============================================================================
