@@ -300,7 +300,7 @@ public:
         if (GetSampleRate() <= 0)
             return 0.0;
 
-        return (JucePlugin_Latency) / GetSampleRate();
+        return getLatencySamples() / GetSampleRate();
     }
 
     //==============================================================================
@@ -435,6 +435,19 @@ public:
     ComponentResult Initialize()
     {
         AUMIDIEffectBase::Initialize();
+
+        const int numIns = GetInput(0) != 0 ? GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+        const int numOuts = GetOutput(0) != 0 ? GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+           
+        bool isValidChannelConfig = false;
+
+        for (int i = 0; i < numChannelConfigs; ++i)
+            if (numIns == channelConfigs[i][0] && numOuts == channelConfigs[i][1])
+                isValidChannelConfig = true;
+           
+        if (! isValidChannelConfig)
+            return kAudioUnitErr_FormatNotSupported;
+
         prepareToPlay();
         return noErr;
     }

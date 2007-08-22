@@ -35,8 +35,16 @@
 // at the same time as the Digi headers)
 
 #include <windows.h>
+
+#ifdef _MSC_VER
+  #pragma pack (push, 8)
+#endif
+
 #include "../../juce_AudioFilterBase.h"
-#include "../../juce_AudioFilterEditor.h"
+
+#ifdef _MSC_VER
+  #pragma pack (pop)
+#endif
 
 
 //==============================================================================

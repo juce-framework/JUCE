@@ -120,10 +120,6 @@
 #define JucePlugin_PreferredChannelConfigurations   { 1, 1 }, { 2, 2 }
 
 //==============================================================================
-/** The plugin's internal latency, as a number of samples.
-*/
-#define JucePlugin_Latency                          0
-
 /** Set this value to 1 if your plugin is a synth, or 0 if it isn't.
 */
 #define JucePlugin_IsSynth                          1

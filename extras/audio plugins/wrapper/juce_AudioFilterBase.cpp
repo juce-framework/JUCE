@@ -40,6 +40,7 @@ AudioFilterBase::AudioFilterBase()
       blockSize (0),
       numInputChannels (0),
       numOutputChannels (0),
+      latencySamples (0),
       suspended (false)
 {
 }
@@ -69,6 +70,15 @@ void AudioFilterBase::setPlayConfigDetails (const int numIns,
     numOutputChannels = numOuts;
     sampleRate = sampleRate_;
     blockSize = blockSize_;
+}
+
+void JUCE_CALLTYPE AudioFilterBase::setLatencySamples (const int newLatency)
+{
+    if (latencySamples != newLatency)
+    {
+        latencySamples = newLatency;
+        updateHostDisplay();
+    }
 }
 
 void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,

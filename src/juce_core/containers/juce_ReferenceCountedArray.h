@@ -46,9 +46,12 @@
     and takes care of incrementing and decrementing their ref counts when they
     are added and removed from the array.
 
+    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
+    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+
     @see Array, OwnedArray, StringArray
 */
-template <class ObjectClass>
+template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSection>
 class ReferenceCountedArray   : private ArrayAllocationBase <ObjectClass*>
 {
 public:
@@ -68,26 +71,32 @@ public:
     }
 
     /** Creates a copy of another array */
-    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass>& other) throw()
+    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
         : ArrayAllocationBase <ObjectClass*> (other.granularity),
           numUsed (other.numUsed)
     {
+        other.lockArray();
         this->setAllocatedSize (numUsed);
         memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
             if (this->elements[i] != 0)
                 this->elements[i]->incReferenceCount();
+
+        other.unlockArray();
     }
 
     /** Copies another array into this one.
 
         Any existing objects in this array will first be released.
     */
-    const ReferenceCountedArray<ObjectClass>& operator= (const ReferenceCountedArray<ObjectClass>& other) throw()
+    const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
     {
         if (this != &other)
         {
+            other.lockArray();
+            lock.enter();
+
             clear();
 
             this->granularity = other.granularity;
@@ -99,6 +108,9 @@ public:
             for (int i = numUsed; --i >= 0;)
                 if (this->elements[i] != 0)
                     this->elements[i]->incReferenceCount();
+
+            lock.exit();
+            other.unlockArray();
         }
 
         return *this;
@@ -120,12 +132,16 @@ public:
     */
     void clear()
     {
+        lock.enter();
+
         while (numUsed > 0)
             if (this->elements [--numUsed] != 0)
                 this->elements [numUsed]->decReferenceCount();
 
         jassert (numUsed == 0);
         this->setAllocatedSize (0);
+
+        lock.exit();
     }
 
     /** Returns the current number of objects in the array. */
@@ -144,8 +160,10 @@ public:
     */
     inline ObjectClass* operator[] (const int index) const throw()
     {
+        lock.enter();
         return (index >= 0 && index < numUsed) ? this->elements [index]
                                                : (ObjectClass*) 0;
+        lock.exit();
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -155,8 +173,10 @@ public:
     */
     inline ObjectClass* getUnchecked (const int index) const throw()
     {
+        lock.enter();
         jassert (index >= 0 && index < numUsed);
         return this->elements [index];
+        lock.exit();
     }
 
     /** Returns a pointer to the first object in the array.
@@ -166,8 +186,12 @@ public:
     */
     inline ObjectClass* getFirst() const throw()
     {
-        return (numUsed > 0) ? this->elements [0]
-                             : (ObjectClass*) 0;
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
     }
 
     /** Returns a pointer to the last object in the array.
@@ -177,8 +201,12 @@ public:
     */
     inline ObjectClass* getLast() const throw()
     {
-        return (numUsed > 0) ? this->elements [numUsed - 1]
-                             : (ObjectClass*) 0;
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
     }
 
     //==============================================================================
@@ -189,17 +217,24 @@ public:
     */
     int indexOf (const ObjectClass* const objectToLookFor) const throw()
     {
+        int result = -1;
+
+        lock.enter();
         ObjectClass** e = this->elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToLookFor == *e)
-                return (int) (e - this->elements);
+            {
+                result = (int) (e - this->elements);
+                break;
+            }
 
             ++e;
         }
 
-        return -1;
+        lock.exit();
+        return result;
     }
 
     /** Returns true if the array contains a specified object.
@@ -209,16 +244,21 @@ public:
     */
     bool contains (const ObjectClass* const objectToLookFor) const throw()
     {
+        lock.enter();
         ObjectClass** e = this->elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToLookFor == *e)
+            {
+                lock.exit();
                 return true;
+            }
 
             ++e;
         }
 
+        lock.exit();
         return false;
     }
 
@@ -231,11 +271,14 @@ public:
     */
     void add (ObjectClass* const newObject) throw()
     {
+        lock.enter();
         this->ensureAllocatedSize (numUsed + 1);
         this->elements [numUsed++] = newObject;
 
         if (newObject != 0)
             newObject->incReferenceCount();
+
+        lock.exit();
     }
 
     /** Inserts a new object into the array at the given index.
@@ -256,6 +299,7 @@ public:
     {
         if (indexToInsertAt >= 0)
         {
+            lock.enter();
             if (indexToInsertAt > numUsed)
                 indexToInsertAt = numUsed;
 
@@ -273,6 +317,7 @@ public:
                 newObject->incReferenceCount();
 
             ++numUsed;
+            lock.exit();
         }
         else
         {
@@ -289,8 +334,12 @@ public:
     */
     void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
     {
+        lock.enter();
+
         if (! contains (newObject))
             add (newObject);
+
+        lock.exit();
     }
 
     /** Replaces an object in the array with a different one.
@@ -310,6 +359,8 @@ public:
     {
         if (indexToChange >= 0)
         {
+            lock.enter();
+
             if (newObject != 0)
                 newObject->incReferenceCount();
 
@@ -325,6 +376,8 @@ public:
                 this->ensureAllocatedSize (numUsed + 1);
                 this->elements [numUsed++] = newObject;
             }
+
+            lock.exit();
         }
     }
 
@@ -337,10 +390,13 @@ public:
                                     all available elements will be copied.
         @see add
     */
-    void addArray (const ReferenceCountedArray<ObjectClass>& arrayToAddFrom,
+    void addArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& arrayToAddFrom,
                    int startIndex = 0,
                    int numElementsToAdd = -1) throw()
     {
+        arrayToAddFrom.lockArray();
+        lock.enter();
+
         if (startIndex < 0)
         {
             jassertfalse
@@ -357,6 +413,9 @@ public:
             while (--numElementsToAdd >= 0)
                 add (arrayToAddFrom.getUnchecked (startIndex++));
         }
+
+        lock.exit();
+        arrayToAddFrom.unlockArray();
     }
 
     /** Inserts a new object into the array assuming that the array is sorted.
@@ -374,7 +433,9 @@ public:
     void addSorted (ElementComparator& comparator,
                     ObjectClass* newObject) throw()
     {
+        lock.enter();
         insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        lock.exit();
     }
 
     //==============================================================================
@@ -393,6 +454,8 @@ public:
     */
     void remove (const int indexToRemove)
     {
+        lock.enter();
+
         if (indexToRemove >= 0 && indexToRemove < numUsed)
         {
             ObjectClass** const e = this->elements + indexToRemove;
@@ -409,6 +472,8 @@ public:
             if ((numUsed << 1) < this->numAllocated)
                 minimiseStorageOverheads();
         }
+
+        lock.exit();
     }
 
     /** Removes the first occurrence of a specified object from the array.
@@ -421,7 +486,9 @@ public:
     */
     void removeObject (ObjectClass* const objectToRemove)
     {
+        lock.enter();
         remove (indexOf (objectToRemove));
+        lock.exit();
     }
 
     /** Removes a range of objects from the array.
@@ -442,6 +509,8 @@ public:
     void removeRange (const int startIndex,
                       const int numberToRemove)
     {
+        lock.enter();
+
         const int start = jlimit (0, numUsed, startIndex);
         const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
 
@@ -471,6 +540,8 @@ public:
             if ((numUsed << 1) < this->numAllocated)
                 minimiseStorageOverheads();
         }
+
+        lock.exit();
     }
 
     /** Removes the last n objects from the array.
@@ -483,11 +554,15 @@ public:
     */
     void removeLast (int howManyToRemove = 1)
     {
+        lock.enter();
+
         if (howManyToRemove > numUsed)
             howManyToRemove = numUsed;
 
         while (--howManyToRemove >= 0)
             remove (numUsed - 1);
+
+        lock.exit();
     }
 
     /** Swaps a pair of objects in the array.
@@ -498,12 +573,16 @@ public:
     void swap (const int index1,
                const int index2) throw()
     {
+        lock.enter();
+
         if (index1 >= 0 && index1 < numUsed
              && index2 >= 0 && index2 < numUsed)
         {
             swapVariables (this->elements [index1],
                            this->elements [index2]);
         }
+
+        lock.exit();
     }
 
     /** Moves one of the objects to a different position.
@@ -524,6 +603,8 @@ public:
     {
         if (currentIndex != newIndex)
         {
+            lock.enter();
+
             if (currentIndex >= 0 && currentIndex < numUsed)
             {
                 if (newIndex < 0 || newIndex > numUsed - 1)
@@ -546,6 +627,8 @@ public:
 
                 this->elements [newIndex] = value;
             }
+
+            lock.exit();
         }
     }
 
@@ -554,23 +637,36 @@ public:
 
         @returns true only if the other array contains the same objects in the same order
     */
-    bool operator== (const ReferenceCountedArray<ObjectClass>& other) const throw()
+    bool operator== (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
     {
-        if (numUsed != other.numUsed)
-            return false;
+        other.lockArray();
+        lock.enter();
 
-        for (int i = numUsed; --i >= 0;)
-            if (this->elements [i] != other.elements [i])
-                return false;
+        bool result = numUsed == other.numUsed;
 
-        return true;
+        if (result)
+        {
+            for (int i = numUsed; --i >= 0;)
+            {
+                if (this->elements [i] != other.elements [i])
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        lock.exit();
+        other.unlockArray();
+
+        return result;
     }
 
     /** Compares this array to another one.
 
         @see operator==
     */
-    bool operator!= (const ReferenceCountedArray<ObjectClass>& other) const throw()
+    bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
     {
         return ! operator== (other);
     }
@@ -608,7 +704,10 @@ public:
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
+
+        lock.enter();
         sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        lock.exit();
     }
 
     //==============================================================================
@@ -620,6 +719,8 @@ public:
     */
     void minimiseStorageOverheads() throw()
     {
+        lock.enter();
+
         if (numUsed == 0)
         {
             this->setAllocatedSize (0);
@@ -631,6 +732,33 @@ public:
             if (newAllocation < this->numAllocated)
                 this->setAllocatedSize (newAllocation);
         }
+
+        lock.exit();
+    }
+
+    //==============================================================================
+    /** Locks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see unlockArray
+    */
+    void lockArray() const throw()
+    {
+        lock.enter();
+    }
+
+    /** Unlocks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see lockArray
+    */
+    void unlockArray() const throw()
+    {
+        lock.exit();
     }
 
 
@@ -639,6 +767,7 @@ public:
 
 private:
     int numUsed;
+    TypeOfCriticalSectionToUse lock;
 };
 
 

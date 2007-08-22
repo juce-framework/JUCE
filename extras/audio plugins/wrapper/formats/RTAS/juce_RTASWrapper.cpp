@@ -79,9 +79,18 @@
 #include "CPluginControl_OnOff.h"
 
 //==============================================================================
+#ifdef _MSC_VER
+  #pragma pack (push, 8)
+#endif
+
 #include "../../juce_AudioFilterBase.h"
 #include "../../juce_AudioFilterEditor.h"
 #include "../../juce_IncludeCharacteristics.h"
+
+#ifdef _MSC_VER
+  #pragma pack (pop)
+#endif
+
 #undef Component
 
 //==============================================================================
@@ -526,7 +535,7 @@ protected:
     ComponentResult GetDelaySamplesLong (long* aNumSamples)
     {
         if (aNumSamples != 0)
-            *aNumSamples = JucePlugin_Latency;
+            *aNumSamples = juceFilter != 0 ? juceFilter->getLatencySamples() : 0;
 
         return noErr;
     }

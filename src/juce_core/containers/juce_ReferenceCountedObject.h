@@ -178,10 +178,11 @@ public:
             if (newObject != 0)
                 newObject->incReferenceCount();
 
-            if (referencedObject != 0)
-                referencedObject->decReferenceCount();
-
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
             referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
         }
 
         return *this;
@@ -199,10 +200,11 @@ public:
             if (newObject != 0)
                 newObject->incReferenceCount();
 
-            if (referencedObject != 0)
-                referencedObject->decReferenceCount();
-
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
             referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
         }
 
         return *this;

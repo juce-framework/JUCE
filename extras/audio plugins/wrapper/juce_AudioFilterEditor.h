@@ -32,10 +32,6 @@
 #ifndef __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__
 #define __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__
 
-#ifdef _MSC_VER
-  #pragma pack (push, 8)
-#endif
-
 #include "../../../juce.h"
 class AudioFilterBase;
 
@@ -72,8 +68,5 @@ private:
     AudioFilterBase* const ownerFilter;
 };
 
-#ifdef _MSC_VER
-  #pragma pack (pop)
-#endif
 
 #endif   // __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__

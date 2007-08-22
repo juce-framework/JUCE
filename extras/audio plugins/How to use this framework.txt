@@ -151,27 +151,28 @@ Compiling the juce demo RTAS on the PC:
 
 - In Visual Studio, add all of this lot to your include path:
 
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\common
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\common\Platform
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\SADriver\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\DigiPublic\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\Fic\Interfaces\DAEClient
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\NewFileLibs\Cmn
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\NewFileLibs\DOA
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\PPC_H
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\common
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\common\Platform
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\SADriver\Interfaces
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\DigiPublic\Interfaces
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\Fic\Interfaces\DAEClient
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\NewFileLibs\Cmn
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\NewFileLibs\DOA
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\PPC_H
+    c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_73_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
 
 - The Visual Studio juce_RTAS project contains a folder called "libs", with "debug" and 
   "release" subdirectories - these should contain links to the Digidesign lib files
@@ -179,6 +180,12 @@ Compiling the juce demo RTAS on the PC:
   point to the correct locations according to where you've installed the SDK.
 
 - Fingers crossed, this should now compile..
+
+- IMPORTANT NOTE! If you're using MSVC2005 to build your plugin, the users will need to
+  have the Microsoft VC8 Runtime installed on their machines, otherwise the DLL will 
+  silently fail to load. You should probably add the runtime to your plugin's installer, 
+  and you can get a copy of it here:
+  http://www.microsoft.com/downloads/details.aspx?FamilyID=32bc1bee-a3f9-4c13-9c99-220b62a191ee&DisplayLang=en
 
 
 Creating a project for your own RTAS on the PC:

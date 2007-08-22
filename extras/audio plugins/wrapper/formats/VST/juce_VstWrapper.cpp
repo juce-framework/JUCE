@@ -91,7 +91,16 @@
 #endif
 
 //==============================================================================
+#ifdef _MSC_VER
+  #pragma pack (push, 8)
+#endif
+
 #include "../../juce_AudioFilterBase.h"
+
+#ifdef _MSC_VER
+  #pragma pack (pop)
+#endif
+
 #undef MemoryBlock
 
 class JuceVSTWrapper;
@@ -349,7 +358,7 @@ public:
 
         isSynth ((JucePlugin_IsSynth) != 0);
         noTail ((JucePlugin_SilenceInProducesSilenceOut) != 0);
-        setInitialDelay (JucePlugin_Latency);
+        setInitialDelay (filter->getLatencySamples());
         programsAreChunks (true);
 
         activePlugins.add (this);
@@ -668,6 +677,8 @@ public:
 
         filter->prepareToPlay (rate, blockSize);
         midiEvents.clear();
+
+        setInitialDelay (filter->getLatencySamples());
 
         AudioEffectX::resume();
 

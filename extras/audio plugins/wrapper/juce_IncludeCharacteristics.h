@@ -79,8 +79,8 @@
  #error "You need to define the JucePlugin_PreferredChannelConfigurations value in your JucePluginCharacteristics.h file!"
 #endif
 
-#ifndef JucePlugin_Latency
- #error "You need to define the JucePlugin_Latency value in your JucePluginCharacteristics.h file!"
+#ifdef JucePlugin_Latency
+ #error "JucePlugin_Latency is now deprecated - instead, call the AudioFilterBase::setLatencySamples() method if your plugin has a non-zero delay"
 #endif
 
 #ifndef JucePlugin_SilenceInProducesSilenceOut

@@ -32,10 +32,6 @@
 #ifndef __JUCE_AUDIOFILTERBASE_JUCEHEADER__
 #define __JUCE_AUDIOFILTERBASE_JUCEHEADER__
 
-#ifdef _MSC_VER
-  #pragma pack (push, 8)
-#endif
-
 #include "../../../juce.h"
 #include "juce_AudioFilterEditor.h"
 #undef MemoryBlock
@@ -273,6 +269,21 @@ public:
 
     /** Returns true if the specified channel is part of a stereo pair with its neighbour. */
     virtual bool JUCE_CALLTYPE isOutputChannelStereoPair (int index) const = 0;
+
+    /** This returns the number of samples delay that the filter imposes on the audio 
+        passing through it.
+
+        The host will call this to find the latency - the filter itself should set this value
+        by calling setLatencySamples() as soon as it can during its initialisation.
+    */
+    int JUCE_CALLTYPE getLatencySamples() const throw()                             { return latencySamples; }
+
+    /** The filter should call this to set the number of samples delay that it introduces.
+
+        The filter should call this as soon as it can during initialisation, and can call it
+        later if the value changes.
+    */
+    void JUCE_CALLTYPE setLatencySamples (const int newLatency);
 
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
@@ -586,7 +597,7 @@ protected:
 private:
     AudioFilterEditor* activeEditor;
     double sampleRate;
-    int blockSize, numInputChannels, numOutputChannels;
+    int blockSize, numInputChannels, numOutputChannels, latencySamples;
     bool suspended;
     CriticalSection callbackLock;
 
@@ -600,10 +611,6 @@ private:
     and make it create an instance of the filter subclass that you're building.
 */
 extern AudioFilterBase* JUCE_CALLTYPE createPluginFilter();
-
-#ifdef _MSC_VER
-  #pragma pack (pop)
-#endif
 
 
 #endif   // __JUCE_AUDIOFILTERBASE_JUCEHEADER__

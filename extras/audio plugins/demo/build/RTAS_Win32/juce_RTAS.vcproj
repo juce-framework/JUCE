@@ -542,7 +542,7 @@
 				Name="debug"
 				>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Debug\lib\DAE.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Debug\lib\DAE.lib"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -554,7 +554,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Debug\lib\DigiExt.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Debug\lib\DigiExt.lib"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -566,7 +566,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Debug\lib\DSI.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Debug\lib\DSI.lib"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -578,7 +578,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Debug\lib\PlugInLib.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Debug\lib\PlugInLib.lib"
 					>
 					<FileConfiguration
 						Name="Release|Win32"
@@ -594,7 +594,7 @@
 				Name="release"
 				>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Release\lib\DAE.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Release\lib\DAE.lib"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -606,7 +606,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Release\lib\DigiExt.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Release\lib\DigiExt.lib"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -618,7 +618,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Release\lib\DSI.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Release\lib\DSI.lib"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -630,7 +630,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\..\essentials\PT_711_SDK\WinBag\Release\lib\PlugInLib.lib"
+					RelativePath="..\..\..\..\..\..\..\essentials\PT_73_SDK\WinBag\Release\lib\PlugInLib.lib"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
