@@ -314,6 +314,23 @@ public:
             g.fillAll (owner.findColour (ListBox::backgroundColourId));
     }
 
+    bool keyPressed (const KeyPress& key)
+    {
+        if (key.isKeyCode (KeyPress::upKey)
+            || key.isKeyCode (KeyPress::downKey)
+            || key.isKeyCode (KeyPress::pageUpKey)
+            || key.isKeyCode (KeyPress::pageDownKey)
+            || key.isKeyCode (KeyPress::homeKey)
+            || key.isKeyCode (KeyPress::endKey))
+        {
+            // we want to avoid these keypresses going to the viewport, and instead allow
+            // them to pass up to our listbox..
+            return false;
+        }
+
+        return Viewport::keyPressed (key);
+    }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
