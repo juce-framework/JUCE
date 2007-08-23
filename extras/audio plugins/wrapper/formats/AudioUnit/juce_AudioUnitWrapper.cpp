@@ -31,6 +31,7 @@
 
 #include <AudioUnit/AudioUnit.h>
 #include "AUMIDIEffectBase.h"
+#include "MusicDeviceBase.h"
 #include "AUCarbonViewBase.h"
 #include "../../juce_AudioFilterBase.h"
 #include "../../juce_IncludeCharacteristics.h"
@@ -47,15 +48,24 @@ BEGIN_JUCE_NAMESPACE
 extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
 END_JUCE_NAMESPACE
 
+#if JucePlugin_IsSynth
+ #define JuceAUBaseClass MusicDeviceBase
+#else
+ #define JuceAUBaseClass AUMIDIEffectBase
+#endif
 
 //==============================================================================
-class JuceAU   : public AUMIDIEffectBase,
+class JuceAU   : public JuceAUBaseClass,
                  public AudioFilterBase::HostCallbacks
 {
 public:
     //==============================================================================
     JuceAU (AudioUnit component)
+#if JucePlugin_IsSynth
+        : MusicDeviceBase (component, 0, 1),
+#else
         : AUMIDIEffectBase (component),
+#endif
           juceFilter (0),
           bufferSpace (2, 16),
           channels (0),
@@ -120,7 +130,7 @@ public:
             }
         }
 
-        return AUMIDIEffectBase::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
+        return JuceAUBaseClass::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
     }
 
     ComponentResult GetProperty (AudioUnitPropertyID inID,
@@ -137,12 +147,12 @@ public:
             }
         }
 
-        return AUMIDIEffectBase::GetProperty (inID, inScope, inElement, outData);
+        return JuceAUBaseClass::GetProperty (inID, inScope, inElement, outData);
     }
 
     ComponentResult SaveState (CFPropertyListRef* outData)
     {
-        ComponentResult err = AUMIDIEffectBase::SaveState (outData);
+        ComponentResult err = JuceAUBaseClass::SaveState (outData);
 
         if (err != noErr)
             return err;
@@ -169,7 +179,7 @@ public:
 
     ComponentResult RestoreState (CFPropertyListRef inData)
     {
-        ComponentResult err = AUMIDIEffectBase::RestoreState (inData);
+        ComponentResult err = JuceAUBaseClass::RestoreState (inData);
 
         if (err != noErr)
             return err;
@@ -198,9 +208,6 @@ public:
 
     UInt32 SupportedNumChannels (const AUChannelInfo** outInfo)
     {
-        if (juceFilter == 0)
-            return 0;
-
         // You need to actually add some configurations to the JucePlugin_PreferredChannelConfigurations
         // value in your JucePluginCharacteristics.h file..
         jassert (numChannelConfigs > 0);
@@ -209,7 +216,11 @@ public:
         {
             for (int i = 0; i < numChannelConfigs; ++i)
             {
+#if JucePlugin_IsSynth
+                channelInfo[i].inChannels = 0;
+#else
                 channelInfo[i].inChannels = channelConfigs[i][0];
+#endif
                 channelInfo[i].outChannels = channelConfigs[i][1];
 
                 outInfo[i] = channelInfo + i;
@@ -292,6 +303,11 @@ public:
 
     bool SupportsTail()                         { return true; }
     Float64 GetTailTime()                       { return 0; }
+
+    Float64 GetSampleRate()
+    {
+        return GetOutput(0)->GetStreamFormat().mSampleRate;
+	}
 
     Float64 GetLatency()
     {
@@ -431,30 +447,50 @@ public:
         // xxx is there an AU equivalent?
     }
 
+    bool StreamFormatWritable (AudioUnitScope inScope, AudioUnitElement element) 
+    {
+        return ! IsInitialized();
+    }
+
+    ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&)
+    {
+        return noErr;
+    }
+
+	ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)
+    {
+        return noErr;
+    }
+
     //==============================================================================
     ComponentResult Initialize()
     {
-        AUMIDIEffectBase::Initialize();
-
+#if ! JucePlugin_IsSynth
         const int numIns = GetInput(0) != 0 ? GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
+#endif
         const int numOuts = GetOutput(0) != 0 ? GetOutput(0)->GetStreamFormat().mChannelsPerFrame : 0;
-           
+
         bool isValidChannelConfig = false;
 
         for (int i = 0; i < numChannelConfigs; ++i)
+#if JucePlugin_IsSynth
+            if (numOuts == channelConfigs[i][1])
+#else
             if (numIns == channelConfigs[i][0] && numOuts == channelConfigs[i][1])
+#endif
                 isValidChannelConfig = true;
-           
+
         if (! isValidChannelConfig)
             return kAudioUnitErr_FormatNotSupported;
 
+        JuceAUBaseClass::Initialize();
         prepareToPlay();
         return noErr;
     }
 
     void Cleanup()
     {
-        AUMIDIEffectBase::Cleanup();
+        JuceAUBaseClass::Cleanup();
 
         if (juceFilter != 0)
             juceFilter->releaseResources();
@@ -469,14 +505,18 @@ public:
         if (! prepared)
             prepareToPlay();
 
-        return AUMIDIEffectBase::Reset (inScope, inElement);
+        return JuceAUBaseClass::Reset (inScope, inElement);
     }
 
     void prepareToPlay()
     {
         if (juceFilter != 0)
         {
+#if ! JucePlugin_IsSynth
             juceFilter->setPlayConfigDetails (GetInput(0)->GetStreamFormat().mChannelsPerFrame,
+#else
+            juceFilter->setPlayConfigDetails (0,
+#endif
                                               GetOutput(0)->GetStreamFormat().mChannelsPerFrame,
                                               GetSampleRate(),
                                               GetMaxFramesPerSlice());
@@ -503,7 +543,15 @@ public:
     {
         lastSMPTETime = inTimeStamp.mSMPTETime;
 
-        return AUMIDIEffectBase::Render (ioActionFlags, inTimeStamp, nFrames);
+#if ! JucePlugin_IsSynth
+        return JuceAUBaseClass::Render (ioActionFlags, inTimeStamp, nFrames);
+#else
+        // synths can't have any inputs..
+        AudioBufferList inBuffer;
+        inBuffer.mNumberBuffers = 0;
+
+        return ProcessBufferLists (ioActionFlags, inBuffer, GetOutput(0)->GetBufferList(), nFrames);
+#endif
     }
 
 
@@ -846,8 +894,8 @@ public:
                     {
                         ComponentPeer* const peer = ComponentPeer::getPeer (i);
 
-                        const int rx = x - peer->getComponent()->getX();
-                        const int ry = y - peer->getComponent()->getY();
+                        int rx = x, ry = y;
+                        peer->getComponent()->globalPositionToRelative (rx, ry);
 
                         if (peer->contains (rx, ry, false) && peer->getComponent()->isShowing())
                         {

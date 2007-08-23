@@ -122,7 +122,7 @@
 //==============================================================================
 /** Set this value to 1 if your plugin is a synth, or 0 if it isn't.
 */
-#define JucePlugin_IsSynth                          1
+#define JucePlugin_IsSynth                          0
 
 /** Set this to 1 if your plugin needs to receive midi messages, or 0 if
     it doesn't.
@@ -190,7 +190,7 @@
     need to use kAudioUnitType_MusicEffect or kAudioUnitType_MusicDevice.
 */
 #if JucePlugin_IsSynth
-  #define JucePlugin_AUMainType             kAudioUnitType_MusicEffect
+  #define JucePlugin_AUMainType             kAudioUnitType_MusicDevice
 #else
   #define JucePlugin_AUMainType             kAudioUnitType_Effect
 #endif

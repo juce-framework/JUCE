@@ -34,6 +34,8 @@
 		844C50290C71B6E300D0082E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844C50280C71B6E300D0082E /* IOKit.framework */; };
 		845FAE5F0A5C0A6A008C94D8 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 845FAE5E0A5C0A6A008C94D8 /* juce.xcconfig */; };
 		845FAEE10A5C2696008C94D8 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 845FAEE00A5C2696008C94D8 /* QuickTime.framework */; };
+		84B4CDD10C7DD23B0083122F /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84B4CDCF0C7DD23B0083122F /* MusicDeviceBase.cpp */; };
+		84B4CDD20C7DD23B0083122F /* MusicDeviceBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84B4CDD00C7DD23B0083122F /* MusicDeviceBase.h */; };
 		84CFAEFB090964560053C22C /* AUCarbonViewDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D19AAB03175F3201CA2136 /* AUCarbonViewDispatch.cpp */; };
 		84CFAEFC090964560053C22C /* AUCarbonViewControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D19AA903175F3201CA2136 /* AUCarbonViewControl.cpp */; };
 		84CFAEFD090964560053C22C /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D19AA703175F3201CA2136 /* AUCarbonViewBase.cpp */; };
@@ -100,6 +102,8 @@
 		844C50280C71B6E300D0082E /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = IOKit.framework; sourceTree = "<group>"; };
 		845FAE5E0A5C0A6A008C94D8 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
 		845FAEE00A5C2696008C94D8 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = QuickTime.framework; sourceTree = "<group>"; };
+		84B4CDCF0C7DD23B0083122F /* MusicDeviceBase.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MusicDeviceBase.cpp; path = /Developer/Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.cpp; sourceTree = "<absolute>"; };
+		84B4CDD00C7DD23B0083122F /* MusicDeviceBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = MusicDeviceBase.h; path = /Developer/Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h; sourceTree = "<absolute>"; };
 		84EB4009090A4A2C008FAC1B /* juce_AudioUnitWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AudioUnitWrapper.cpp; path = ../../../wrapper/formats/AudioUnit/juce_AudioUnitWrapper.cpp; sourceTree = SOURCE_ROOT; };
 		84EB400A090A4A2C008FAC1B /* juce_AudioUnitWrapper.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; name = juce_AudioUnitWrapper.r; path = ../../../wrapper/formats/AudioUnit/juce_AudioUnitWrapper.r; sourceTree = SOURCE_ROOT; };
 		84EB404D090A5116008FAC1B /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
@@ -319,6 +323,8 @@
 				84F054E70906C8DD00AEC8DB /* AUMIDIEffectBase.h */,
 				F5D199FE03175E1E01CA2136 /* AUEffectBase.cpp */,
 				F5D199FF03175E1E01CA2136 /* AUEffectBase.h */,
+				84B4CDCF0C7DD23B0083122F /* MusicDeviceBase.cpp */,
+				84B4CDD00C7DD23B0083122F /* MusicDeviceBase.h */,
 			);
 			path = OtherBases;
 			sourceTree = "<group>";
@@ -393,6 +399,7 @@
 				84F055040906E9EA00AEC8DB /* DemoJuceFilter.h in Headers */,
 				84F055260906FBCF00AEC8DB /* AUSilentTimeout.h in Headers */,
 				84EB404E090A5116008FAC1B /* JucePluginCharacteristics.h in Headers */,
+				84B4CDD20C7DD23B0083122F /* MusicDeviceBase.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -503,6 +510,7 @@
 				84F055030906E9EA00AEC8DB /* DemoJuceFilter.cpp in Sources */,
 				84EB400B090A4A2C008FAC1B /* juce_AudioUnitWrapper.cpp in Sources */,
 				84EB4042090A4F5A008FAC1B /* CAVectorUnit.cpp in Sources */,
+				84B4CDD10C7DD23B0083122F /* MusicDeviceBase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
