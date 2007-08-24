@@ -94,7 +94,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Socket* volatile socket;
+    StreamingSocket* volatile socket;
 
     void run();
 

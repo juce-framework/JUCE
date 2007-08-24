@@ -83,10 +83,22 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
     }
 }
 
+#if JUCE_WIN32
+ // This is imported from the sockets code..
+ typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
+ extern juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib;
+#endif
+
 void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {
+#if JUCE_WIN32
+        // need to shut down sockets if they were used..
+        if (juce_CloseWin32SocketLib != 0)
+            (*juce_CloseWin32SocketLib)();
+#endif
+
         LocalisedStrings::setCurrentMappings (0);
         Thread::stopAllThreads (3000);
 

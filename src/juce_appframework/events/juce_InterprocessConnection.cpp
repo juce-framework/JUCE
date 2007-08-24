@@ -64,7 +64,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     disconnect();
 
     const ScopedLock sl (pipeAndSocketLock);
-    socket = new Socket();
+    socket = new StreamingSocket();
 
     if (socket->connect (hostName, portNumber, timeOutMillisecs))
     {
@@ -186,7 +186,7 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 }
 
 //==============================================================================
-void InterprocessConnection::initialiseWithSocket (Socket* const socket_)
+void InterprocessConnection::initialiseWithSocket (StreamingSocket* const socket_)
 {
     jassert (socket == 0);
     socket = socket_;
@@ -324,7 +324,7 @@ void InterprocessConnection::run()
     {
         if (socket != 0)
         {
-            const int ready = socket->isReady (0);
+            const int ready = socket->waitUntilReady (true, 0);
 
             if (ready < 0)
             {

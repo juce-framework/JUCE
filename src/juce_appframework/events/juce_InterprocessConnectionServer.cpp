@@ -53,7 +53,7 @@ bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber)
 {
     stop();
 
-    socket = new Socket();
+    socket = new StreamingSocket();
 
     if (socket->createListener (portNumber))
     {
@@ -81,7 +81,7 @@ void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != 0)
     {
-        Socket* const clientSocket = socket->waitForNextConnection();
+        StreamingSocket* const clientSocket = socket->waitForNextConnection();
 
         if (clientSocket != 0)
         {

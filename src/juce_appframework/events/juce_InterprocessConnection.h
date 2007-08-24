@@ -180,7 +180,7 @@ public:
 
 private:
     CriticalSection pipeAndSocketLock;
-    Socket* socket;
+    StreamingSocket* socket;
     NamedPipe* pipe;
     bool callbackConnectionState;
     const bool useMessageThread;
@@ -190,7 +190,7 @@ private:
     //==============================================================================
     friend class InterprocessConnectionServer;
 
-    void initialiseWithSocket (Socket* const socket_);
+    void initialiseWithSocket (StreamingSocket* const socket_);
     void initialiseWithPipe (NamedPipe* const pipe_);
 
     void handleMessage (const Message& message);
