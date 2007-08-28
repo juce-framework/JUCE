@@ -398,7 +398,17 @@ void Slider::setRange (const double newMin,
             }
         }
 
-        setValue (currentValue, false, false);
+        // keep the current values inside the new range..
+        if (style != TwoValueHorizontal && style != TwoValueVertical)
+        {
+            setValue (currentValue, false, false);
+        }
+        else
+        {
+            setMinValue (getMinValue(), false, false);
+            setMaxValue (getMaxValue(), false, false);
+        }
+
         updateText();
     }
 }
