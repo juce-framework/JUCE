@@ -540,7 +540,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected)
     selected.removeRange (totalItems, INT_MAX - totalItems);
 
     if (! isRowSelected (lastRowSelected))
-        lastRowSelected = -1;
+        lastRowSelected = getSelectedRow (0);
 
     viewport->updateContents();
 
