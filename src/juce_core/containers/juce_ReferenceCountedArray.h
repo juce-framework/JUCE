@@ -161,9 +161,10 @@ public:
     inline ObjectClass* operator[] (const int index) const throw()
     {
         lock.enter();
-        return (index >= 0 && index < numUsed) ? this->elements [index]
-                                               : (ObjectClass*) 0;
+        ObjectClass* const result = (index >= 0 && index < numUsed) ? this->elements [index]
+                                                                    : (ObjectClass*) 0;
         lock.exit();
+        return result;
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -175,8 +176,9 @@ public:
     {
         lock.enter();
         jassert (index >= 0 && index < numUsed);
-        return this->elements [index];
+        ObjectClass* const result = this->elements [index];
         lock.exit();
+        return result;
     }
 
     /** Returns a pointer to the first object in the array.
