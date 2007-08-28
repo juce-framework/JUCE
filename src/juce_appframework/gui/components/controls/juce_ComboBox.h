@@ -264,6 +264,13 @@ public:
     void setText (const String& newText,
                   const bool dontSendChangeMessage = false) throw();
 
+    /** Programmatically opens the text editor to allow the user to edit the current item.
+
+        This is the same effect as when the box is clicked-on.
+        @see Label::showEditor();
+    */
+    void showEditor();
+
     //==============================================================================
     /** Registers a listener that will be called when the box's content changes. */
     void addListener (ComboBoxListener* const listener) throw();

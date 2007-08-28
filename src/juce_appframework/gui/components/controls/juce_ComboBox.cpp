@@ -81,7 +81,7 @@ void ComboBox::setEditableText (const bool isEditable)
 
 bool ComboBox::isTextEditable() const throw()
 {
-    return label->isEditableOnDoubleClick() || label->isEditableOnSingleClick();
+    return label->isEditable();
 }
 
 void ComboBox::setJustificationType (const Justification& justification) throw()
@@ -374,6 +374,13 @@ void ComboBox::setText (const String& newText,
     }
 
     repaint();
+}
+
+void ComboBox::showEditor()
+{
+    jassert (isTextEditable()); // you probably shouldn't do this to a non-editable combo box?
+
+    label->showEditor();
 }
 
 //==============================================================================
