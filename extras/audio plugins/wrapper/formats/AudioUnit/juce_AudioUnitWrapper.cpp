@@ -247,15 +247,14 @@ public:
 
             const String name (juceFilter->getParameterName (index));
 
-            CharacterFunctions::copy ((char*) outParameterInfo.name, 
-                                      (const char*) name.toUTF8(), 
-                                      sizeof (outParameterInfo.name) - 1);
-
             // set whether the param is automatable (unnamed parameters aren't allowed to be automated)
             if (name.isEmpty() || ! juceFilter->isParameterAutomatable (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_NonRealTime;
 
-            outParameterInfo.cfNameString = PlatformUtilities::juceStringToCFString (name);
+            AUBase::FillInParameterName (outParameterInfo,
+                                         PlatformUtilities::juceStringToCFString (name),
+                                         false);
+
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = 1.0f;
             outParameterInfo.defaultValue = 0.0f;
