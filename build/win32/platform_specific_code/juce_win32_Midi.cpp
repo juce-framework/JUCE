@@ -48,6 +48,7 @@ BEGIN_JUCE_NAMESPACE
 static const int midiBufferSize = 1024 * 10;
 static const int numInHeaders = 32;
 static const int inBufferSize = 256;
+static Array <void*, CriticalSection> activeMidiThreads;
 
 class MidiInThread  : public Thread
 {
@@ -91,10 +92,6 @@ public:
     //==============================================================================
     void handle (const uint32 message, const uint32 timeStamp) throw()
     {
-        jassert (validityInt == 0x12345678);
-        if (validityInt != 0x12345678)
-            return;
-
         const int byte = message & 0xff;
         if (byte < 0x80)
             return;
@@ -123,10 +120,6 @@ public:
 
     void handleSysEx (MIDIHDR* const hdr, const uint32 timeStamp) throw()
     {
-        jassert (validityInt == 0x12345678);
-        if (validityInt != 0x12345678)
-            return;
-
         const int num = hdr->dwBytesRecorded;
 
         if (num > 0)
@@ -225,7 +218,7 @@ public:
         {
             stop();
 
-            validityInt = 0x12345678;
+            activeMidiThreads.addIfNotAlreadyThere (this);
 
             int i;
             for (i = 0; i < numInHeaders; ++i)
@@ -254,6 +247,11 @@ public:
             midiInReset (hIn);
             midiInStop (hIn);
 
+            activeMidiThreads.removeValue (this);
+
+            lock.enter();
+            lock.exit();
+
             for (int i = numInHeaders; --i >= 0;)
             {
                 if ((hdr[i].dwFlags & WHDR_DONE) != 0)
@@ -267,7 +265,7 @@ public:
             }
 
             isStarted = false;
-            validityInt = 0;
+            pendingLength = 0;
         }
     }
 
@@ -276,7 +274,6 @@ public:
     HMIDIIN hIn;
 
 private:
-    int validityInt;
     MidiInput* input;
     MidiInputCallback* callback;
     bool isStarted;
@@ -317,7 +314,7 @@ static void CALLBACK midiInCallback (HMIDIIN,
 {
     MidiInThread* const thread = (MidiInThread*) dwInstance;
 
-    if (thread != 0)
+    if (thread != 0 && activeMidiThreads.contains (thread))
     {
         if (uMsg == MIM_DATA)
             thread->handle (midiMessage, timeStamp);
