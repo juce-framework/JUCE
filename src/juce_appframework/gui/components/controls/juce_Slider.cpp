@@ -288,6 +288,14 @@ void Slider::setTextBoxIsEditable (const bool shouldBeEditable) throw()
         valueBox->setEditable (shouldBeEditable && isEnabled());
 }
 
+void Slider::showTextBox()
+{
+    jassert (editableText); // this should probably be avoided in read-only sliders.
+
+    if (valueBox != 0)
+        valueBox->showEditor();
+}
+
 void Slider::hideTextBox (const bool discardCurrentEditorContents)
 {
     if (valueBox != 0)

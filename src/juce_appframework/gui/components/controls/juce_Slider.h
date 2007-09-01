@@ -289,6 +289,13 @@ public:
     */
     bool isTextBoxEditable() const throw()                                  { return editableText; }
 
+    /** If the text-box is editable, this will give it the focus so that the user can
+        type directly into it.
+
+        This is basically the effect as the user clicking on it.
+    */
+    void showTextBox();
+
     /** If the text-box currently has focus and is being edited, this resets it and takes keyboard
         focus away from it.
 
