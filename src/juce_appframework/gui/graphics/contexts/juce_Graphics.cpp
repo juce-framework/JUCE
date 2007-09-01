@@ -455,6 +455,14 @@ void Graphics::drawRect (const int x,
     b.paintRectangle (*context, x, y + height - lineThickness, width, lineThickness);
 }
 
+void Graphics::drawRect (const Rectangle& r,
+                         const int lineThickness) const throw()
+{
+    drawRect (r.getX(), r.getY(), 
+              r.getWidth(), r.getHeight(), 
+              lineThickness);
+}
+
 void Graphics::drawBevel (const int x,
                           const int y,
                           const int width,
@@ -527,6 +535,14 @@ void Graphics::fillRoundedRectangle (const float x,
     fillPath (p);
 }
 
+void Graphics::fillRoundedRectangle (const Rectangle& r,
+                                     const float cornerSize) const throw()
+{
+    fillRoundedRectangle (r.getX(), r.getY(),
+                          r.getWidth(), r.getHeight(),
+                          cornerSize);
+}
+
 void Graphics::drawRoundedRectangle (const float x,
                                      const float y,
                                      const float width,
@@ -541,6 +557,16 @@ void Graphics::drawRoundedRectangle (const float x,
     p.addRoundedRectangle (x, y, width, height, cornerSize);
     strokePath (p, PathStrokeType (lineThickness));
 }
+
+void Graphics::drawRoundedRectangle (const Rectangle& r,
+                                     const float cornerSize,
+                                     const float lineThickness) const throw()
+{
+    drawRoundedRectangle (r.getX(), r.getY(), 
+                          r.getWidth(), r.getHeight(), 
+                          cornerSize, lineThickness);
+}
+
 
 void Graphics::drawArrow (const float startX,
                           const float startY,

@@ -275,6 +275,13 @@ public:
                                const float height,
                                const float cornerSize) const throw();
 
+    /** Uses the current colour or brush to fill a rectangle with rounded corners.
+
+        @see drawRoundedRectangle, Path::addRoundedRectangle
+    */
+    void fillRoundedRectangle (const Rectangle& rectangle,
+                               const float cornerSize) const throw();
+
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
     */
     void fillCheckerBoard (int x, int y,
@@ -297,6 +304,16 @@ public:
                    const int height,
                    const int lineThickness = 1) const throw();
 
+    /** Draws four lines to form a rectangular outline, using the current colour or brush.
+
+        The lines are drawn inside the given rectangle, and greater line thicknesses
+        extend inwards.
+
+        @see fillRect
+    */
+    void drawRect (const Rectangle& rectangle,
+                   const int lineThickness = 1) const throw();
+
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
 
         @see fillRoundedRectangle, Path::addRoundedRectangle
@@ -305,6 +322,14 @@ public:
                                const float y,
                                const float width,
                                const float height,
+                               const float cornerSize,
+                               const float lineThickness) const throw();
+
+    /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
+
+        @see fillRoundedRectangle, Path::addRoundedRectangle
+    */
+    void drawRoundedRectangle (const Rectangle& rectangle,
                                const float cornerSize,
                                const float lineThickness) const throw();
 
