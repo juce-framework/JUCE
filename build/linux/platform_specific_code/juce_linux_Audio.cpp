@@ -788,12 +788,12 @@ public:
 
     const BitArray getActiveOutputChannels() const
     {
-        return internal->activeOutputChans;
+        return internal->currentOutputChans;
     }
 
     const BitArray getActiveInputChannels() const
     {
-        return internal->activeInputChans;
+        return internal->currentInputChans;
     }
 
     int getOutputLatencyInSamples()
