@@ -88,6 +88,8 @@ public:
         This will open and display a DialogWindow containing a given component, returning
         when the user clicks its close button.
 
+        It returns the value that was returned by the dialog box's runModalLoop() call.
+
         @param dialogTitle          the dialog box's title
         @param contentComponent     the content component for the dialog box. Make sure
                                     that this has been set to the size you want it to
@@ -106,13 +108,13 @@ public:
         @param useBottomRightCornerResizer     if shouldBeResizable is true, this indicates whether
                                     to use a border or corner resizer component. See ResizableWindow::setResizable()
     */
-    static void showModalDialog (const String& dialogTitle,
-                                 Component* contentComponent,
-                                 Component* componentToCentreAround,
-                                 const Colour& backgroundColour,
-                                 const bool escapeKeyTriggersCloseButton,
-                                 const bool shouldBeResizable = false,
-                                 const bool useBottomRightCornerResizer = false);
+    static int showModalDialog (const String& dialogTitle,
+                                Component* contentComponent,
+                                Component* componentToCentreAround,
+                                const Colour& backgroundColour,
+                                const bool escapeKeyTriggersCloseButton,
+                                const bool shouldBeResizable = false,
+                                const bool useBottomRightCornerResizer = false);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

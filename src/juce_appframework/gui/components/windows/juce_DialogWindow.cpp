@@ -91,21 +91,22 @@ private:
 
 };
 
-void DialogWindow::showModalDialog (const String& dialogTitle,
-                                    Component* contentComponent,
-                                    Component* componentToCentreAround,
-                                    const Colour& colour,
-                                    const bool escapeKeyTriggersCloseButton,
-                                    const bool shouldBeResizable,
-                                    const bool useBottomRightCornerResizer)
+int DialogWindow::showModalDialog (const String& dialogTitle,
+                                   Component* contentComponent,
+                                   Component* componentToCentreAround,
+                                   const Colour& colour,
+                                   const bool escapeKeyTriggersCloseButton,
+                                   const bool shouldBeResizable,
+                                   const bool useBottomRightCornerResizer)
 {
     TempDialogWindow dw (dialogTitle, colour, escapeKeyTriggersCloseButton);
 
     dw.setContentComponent (contentComponent, true, true);
     dw.centreAroundComponent (componentToCentreAround, dw.getWidth(), dw.getHeight());
     dw.setResizable (shouldBeResizable, useBottomRightCornerResizer);
-    dw.runModalLoop();
+    const int result = dw.runModalLoop();
     dw.setContentComponent (0, false);
+    return result;
 }
 
 
