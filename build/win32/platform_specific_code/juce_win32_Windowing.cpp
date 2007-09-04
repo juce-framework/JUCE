@@ -3120,7 +3120,7 @@ public:
             wglShareLists (renderContext, contextToShareWith);
     }
 
-    ~WindowedGLContext() 
+    ~WindowedGLContext()
     {
         makeInactive();
 
@@ -3196,7 +3196,7 @@ public:
 
         PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
 
-        if (availableExtensions.contains ("WGL_ARB_pixel_format") 
+        if (availableExtensions.contains ("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB))
         {
             int attributes[64];
@@ -3302,14 +3302,14 @@ public:
     void findAlternativeOpenGLPixelFormats (OwnedArray <OpenGLPixelFormat>& results)
     {
         jassert (isActive());
-        
+
         StringArray availableExtensions;
         getWglExtensions (dc, availableExtensions);
 
         PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
         int numTypes = 0;
 
-        if (availableExtensions.contains("WGL_ARB_pixel_format") 
+        if (availableExtensions.contains("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
         {
             int attributes = WGL_NUMBER_PIXEL_FORMATS_ARB;
@@ -3349,7 +3349,7 @@ private:
     HDC dc;
 
     //==============================================================================
-    bool fillInPixelFormatDetails (const int pixelFormatIndex, 
+    bool fillInPixelFormatDetails (const int pixelFormatIndex,
                                    OpenGLPixelFormat& result,
                                    const StringArray& availableExtensions) const throw()
     {
@@ -3444,11 +3444,11 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
                                                       const OpenGLPixelFormat& pixelFormat,
                                                       const OpenGLContext* const contextToShareWith)
 {
-    WindowedGLContext* c = new WindowedGLContext (component, 
+    WindowedGLContext* c = new WindowedGLContext (component,
                                                   contextToShareWith != 0 ? (HGLRC) contextToShareWith->getRawContext() : 0);
 
     if (c->renderContext == 0 || ! c->setPixelFormat (pixelFormat))
