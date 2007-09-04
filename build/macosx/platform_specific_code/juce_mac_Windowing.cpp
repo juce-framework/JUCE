@@ -3296,7 +3296,7 @@ void AppleRemoteDevice::handleCallbackInternal()
 class WindowedGLContext     : public OpenGLContext
 {
 public:
-    WindowedGLContext (Component* const component, 
+    WindowedGLContext (Component* const component,
                        const OpenGLPixelFormat& pixelFormat_,
                        AGLContext sharedContext)
         : renderContext (0),
@@ -3350,7 +3350,7 @@ public:
         aglSetDrawable (renderContext, GetWindowPort (peer->windowRef));
     }
 
-    ~WindowedGLContext() 
+    ~WindowedGLContext()
     {
         makeInactive();
         aglSetDrawable (renderContext, 0);
@@ -3419,7 +3419,7 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
                                                       const OpenGLPixelFormat& pixelFormat,
                                                       const OpenGLContext* const contextToShareWith)
 {

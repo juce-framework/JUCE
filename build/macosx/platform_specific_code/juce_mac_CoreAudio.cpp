@@ -462,7 +462,7 @@ public:
         numInputChans = jmin (numInputChans, numInputChannelInfos);
         numOutputChans = jmin (numOutputChans, numOutputChannelInfos);
 
-        activeInputChans.setRange (inChanNames.size(), 
+        activeInputChans.setRange (inChanNames.size(),
                                    activeInputChans.getHighestBit() + 1 - inChanNames.size(),
                                    false);
 
