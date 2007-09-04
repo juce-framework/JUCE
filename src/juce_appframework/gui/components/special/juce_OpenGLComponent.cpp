@@ -29,229 +29,216 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
-
-#include "../../../../../juce_Config.h"
+#include "../../../../juce_core/basics/juce_StandardHeader.h"
 
 #if JUCE_OPENGL
 
-#ifdef _WIN32
-#include <windows.h>
-#include <gl/gl.h>
-#else
- #ifdef LINUX
-  #include <GL/glx.h>
- #else
-  #include <agl/agl.h>
- #endif
-#endif
-
-#include "../../../../juce_core/basics/juce_StandardHeader.h"
-
 BEGIN_JUCE_NAMESPACE
 
-#undef KeyPress
 #include "juce_OpenGLComponent.h"
-#include "../../graphics/geometry/juce_RectangleList.h"
-#include "../../../events/juce_Timer.h"
 #include "../layout/juce_ComponentMovementWatcher.h"
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-#endif
-
-//==============================================================================
-extern void* juce_createOpenGLContext (OpenGLComponent* component, void* sharedContext);
-extern void juce_deleteOpenGLContext (void* context);
-extern bool juce_makeOpenGLContextCurrent (void* context);
-extern void juce_swapOpenGLBuffers (void* context);
-extern void juce_updateOpenGLWindowPos (void* context, Component* owner, Component* topComp);
-extern void juce_repaintOpenGLWindow (void* context);
-extern bool juce_isActiveOpenGLContext (void* context) throw();
-
-static VoidArray activeGLWindows (2);
+#include "../../../../juce_core/threads/juce_ScopedLock.h"
 
 
 //==============================================================================
-class InternalGLContextHolder  : public ComponentMovementWatcher
+extern void juce_glViewport (const int w, const int h);
+
+
+//==============================================================================
+OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
+                                      const int alphaBits_,
+                                      const int depthBufferBits_,
+                                      const int stencilBufferBits_) throw()
+    : redBits (bitsPerRGBComponent),
+      greenBits (bitsPerRGBComponent),
+      blueBits (bitsPerRGBComponent),
+      alphaBits (alphaBits_),
+      depthBufferBits (depthBufferBits_),
+      stencilBufferBits (stencilBufferBits_),
+      accumulationBufferRedBits (0),
+      accumulationBufferGreenBits (0),
+      accumulationBufferBlueBits (0),
+      accumulationBufferAlphaBits (0),
+      fullSceneAntiAliasingNumSamples (0)
 {
-private:
-    OpenGLComponent* owner;
-    void* context;
-    InternalGLContextHolder* sharedContext;
-    bool wasShowing;
+}
 
+bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const throw()
+{
+    return memcmp (this, &other, sizeof (other)) == 0;
+}
+
+
+//==============================================================================
+class OpenGLComponentWatcher  : public ComponentMovementWatcher
+{
 public:
-    bool needToUpdateViewport;
-
     //==============================================================================
-    InternalGLContextHolder (OpenGLComponent* const owner_,
-                             InternalGLContextHolder* const sharedContext_)
+    OpenGLComponentWatcher (OpenGLComponent* const owner_)
         : ComponentMovementWatcher (owner_),
           owner (owner_),
-          context (0),
-          sharedContext (sharedContext_),
-          wasShowing (false),
-          needToUpdateViewport (true)
+          wasShowing (false)
     {
     }
 
-    ~InternalGLContextHolder()
-    {
-        release();
-    }
-
-    //==============================================================================
-    void release()
-    {
-        if (context != 0)
-        {
-            juce_deleteOpenGLContext (context);
-            context = 0;
-        }
-    }
-
-    void initialise()
-    {
-        jassert (context == 0);
-
-        if (context == 0)
-        {
-            context = juce_createOpenGLContext (owner,
-                                                sharedContext != 0 ? sharedContext->context
-                                                                   : 0);
-
-            if (context != 0)
-            {
-                componentMovedOrResized (true, true);
-
-                if (makeCurrent())
-                    owner->newOpenGLContextCreated();
-            }
-        }
-    }
-
-    //==============================================================================
-    bool makeCurrent() const
-    {
-        return context != 0 && juce_makeOpenGLContextCurrent (context);
-    }
-
-    bool isActive() const throw()
-    {
-        return context != 0 && juce_isActiveOpenGLContext (context);
-    }
-
-    void swapBuffers() const
-    {
-        if (context != 0)
-            juce_swapOpenGLBuffers (context);
-    }
-
-    void repaint() const
-    {
-        if (context != 0)
-            juce_repaintOpenGLWindow (context);
-    }
+    ~OpenGLComponentWatcher() {}
 
     //==============================================================================
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
-        if (owner->getWidth() > 0 && owner->getHeight() > 0)
-        {
-            Component* const topComp = owner->getTopLevelComponent();
-
-            if (topComp->getPeer() != 0)
-            {
-                needToUpdateViewport = true;
-
-                if (context == 0)
-                {
-                    if (owner->isShowing())
-                        initialise();
-                    else
-                        return;
-                }
-
-                if (context != 0)
-                    juce_updateOpenGLWindowPos (context, owner, topComp);
-            }
-        }
+        owner->updateContextPosition();
     }
 
     void componentPeerChanged()
     {
-        release();
-
-        if (owner->isShowing() && owner->getTopLevelComponent()->getPeer() != 0)
-            initialise();
+        const ScopedLock sl (owner->getContextLock());
+        owner->deleteContext();
+        owner->createContext();
     }
 
     void componentVisibilityChanged (Component&)
     {
-        if (wasShowing != owner->isShowing())
+        const bool isShowingNow = owner->isShowing();
+
+        if (wasShowing != isShowingNow)
         {
-            wasShowing = owner->isShowing();
-            componentMovedOrResized (true, true);
+            wasShowing = isShowingNow;
+            owner->updateContextPosition();
         }
     }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    OpenGLComponent* const owner;
+    bool wasShowing;
 };
 
 //==============================================================================
-OpenGLComponent::OpenGLComponent (OpenGLComponent* share)
+OpenGLComponent::OpenGLComponent()
+    : context (0),
+      componentToShareListsWith (0),
+      needToUpdateViewport (true)
 {
     setOpaque (true);
-    internalData = new InternalGLContextHolder (this, (InternalGLContextHolder*) (share != 0 ? share->internalData : 0));
-
-    activeGLWindows.add (this);
+    componentWatcher = new OpenGLComponentWatcher (this);
 }
 
 OpenGLComponent::~OpenGLComponent()
 {
-    activeGLWindows.removeValue ((void*) this);
+    deleteContext();
+    delete componentWatcher;
+}
 
-    InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-    delete context;
+void OpenGLComponent::createContext()
+{
+    const ScopedLock sl (contextLock);
+
+    jassert (context == 0);
+
+    if (context == 0 && isShowing() && getTopLevelComponent()->getPeer() != 0)
+    {
+        context = OpenGLContext::createContextForWindow (this, 
+                                                         preferredPixelFormat, 
+                                                         componentToShareListsWith != 0 
+                                                             ? componentToShareListsWith->context 
+                                                             : 0);
+
+        if (context != 0)
+        {
+            updateContextPosition();
+
+            if (makeCurrentContextActive())
+                newOpenGLContextCreated();
+        }
+    }
+}
+
+void OpenGLComponent::deleteContext()
+{
+    const ScopedLock sl (contextLock);
+    deleteAndZero (context);
+}
+
+void OpenGLComponent::updateContextPosition()
+{
+    needToUpdateViewport = true;
+
+    if (getWidth() > 0 && getHeight() > 0)
+    {
+        Component* const topComp = getTopLevelComponent();
+
+        if (topComp->getPeer() != 0)
+        {
+            const ScopedLock sl (contextLock);
+
+            if (context == 0)
+                createContext();
+
+            if (context != 0)
+                context->updateWindowPosition (getScreenX() - topComp->getScreenX(),
+                                               getScreenY() - topComp->getScreenY(),
+                                               getWidth(),
+                                               getHeight(),
+                                               topComp->getHeight());
+        }
+    }
+}
+
+const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
+{
+    OpenGLPixelFormat pf;
+
+    const ScopedLock sl (contextLock);
+    if (context != 0)
+        pf = context->getPixelFormat();
+
+    return pf;
+}
+
+bool OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
+{
+    if (preferredPixelFormat == formatToUse)
+        return true;
+
+    const ScopedLock sl (contextLock);
+    deleteContext();
+    preferredPixelFormat = formatToUse;
+    createContext();
+
+    return context != 0;
+}
+
+void OpenGLComponent::shareWith (OpenGLComponent* const comp)
+{
+    if (componentToShareListsWith != comp)
+    {
+        const ScopedLock sl (contextLock);
+        deleteContext();
+        componentToShareListsWith = comp;
+        createContext();
+    }
 }
 
 bool OpenGLComponent::makeCurrentContextActive()
 {
-    InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-    return context->makeCurrent();
+    return context != 0 && context->makeActive();
 }
 
 void OpenGLComponent::makeCurrentContextInactive()
 {
-    juce_makeOpenGLContextCurrent (0);
+    if (context != 0)
+        context->makeInactive();
 }
 
 bool OpenGLComponent::isActiveContext() const throw()
 {
-    const InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-
     return context != 0 && context->isActive();
-}
-
-OpenGLComponent* OpenGLComponent::getCurrentlyActiveContextComponent() throw()
-{
-    for (int i = activeGLWindows.size(); --i >= 0;)
-    {
-        OpenGLComponent* const component = (OpenGLComponent*) activeGLWindows.getUnchecked(i);
-
-        if (component->isActiveContext())
-            return component;
-    }
-
-    return 0;
 }
 
 void OpenGLComponent::swapBuffers()
 {
-    InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-
     if (context != 0)
         context->swapBuffers();
 }
@@ -273,20 +260,19 @@ void OpenGLComponent::paint (Graphics&)
 
 bool OpenGLComponent::renderAndSwapBuffers()
 {
+    const ScopedLock sl (contextLock);
+
     if (! makeCurrentContextActive())
         return false;
 
-    InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-
-    if (context->needToUpdateViewport)
+    if (needToUpdateViewport)
     {
-        context->needToUpdateViewport = false;
-        glViewport (0, 0, getWidth(), getHeight());
+        needToUpdateViewport = false;
+        juce_glViewport (getWidth(), getHeight());
     }
 
     renderOpenGL();
-
-    context->swapBuffers();
+    swapBuffers();
 
     return true;
 }
@@ -295,8 +281,8 @@ void OpenGLComponent::internalRepaint (int x, int y, int w, int h)
 {
     Component::internalRepaint (x, y, w, h);
 
-    InternalGLContextHolder* const context = (InternalGLContextHolder*) internalData;
-    context->repaint();
+    if (context != 0)
+        context->repaint();
 }
 
 

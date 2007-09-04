@@ -2795,59 +2795,70 @@ Image* juce_createIconForFile (const File& file)
 //==============================================================================
 #if JUCE_OPENGL
 
-struct OpenGLContextInfo
+
+//==============================================================================
+class WindowedGLContext     : public OpenGLContext
 {
-    Window embeddedWindow;
-    GLXContext renderContext;
-};
-
-void* juce_createOpenGLContext (OpenGLComponent* component, void* sharedContext)
-{
-    XSync (display, False);
-    jassert (component != 0);
-
-    if (component == 0)
-        return 0;
-
-    LinuxComponentPeer* const peer
-        = dynamic_cast <LinuxComponentPeer*> (component->getTopLevelComponent()->getPeer());
-
-    if (peer == 0)
-        return 0;
-
-    GLint attribList[] =
+public:
+    WindowedGLContext (Component* const component, 
+                       const OpenGLPixelFormat& pixelFormat_,
+                       GLXContext sharedContext)
+        : renderContext (0),
+          embeddedWindow (0),
+          pixelFormat (pixelFormat_)
     {
-        GLX_RGBA,
-        GLX_DOUBLEBUFFER,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8,
-        GLX_ALPHA_SIZE, 8,
-        GLX_DEPTH_SIZE, 8,
-        None
-    };
+        jassert (component != 0);
+        LinuxComponentPeer* const peer = dynamic_cast <LinuxComponentPeer*> (component->getTopLevelComponent()->getPeer());
+        if (peer == 0)
+            return;
 
-    XVisualInfo* const bestVisual = glXChooseVisual (display, DefaultScreen (display), attribList);
+        XSync (display, False);
 
-    if (bestVisual == 0)
-        return 0;
+        GLint attribs [64];
+        int n = 0;
+        attribs[n++] = GLX_RGBA;
+        attribs[n++] = GLX_DOUBLEBUFFER;
+        attribs[n++] = GLX_RED_SIZE;
+        attribs[n++] = pixelFormat.redBits;
+        attribs[n++] = GLX_GREEN_SIZE;
+        attribs[n++] = pixelFormat.greenBits;
+        attribs[n++] = GLX_BLUE_SIZE;
+        attribs[n++] = pixelFormat.blueBits;
+        attribs[n++] = GLX_ALPHA_SIZE;
+        attribs[n++] = pixelFormat.alphaBits;
+        attribs[n++] = GLX_DEPTH_SIZE;
+        attribs[n++] = pixelFormat.depthBufferBits;
+        attribs[n++] = GLX_STENCIL_SIZE;
+        attribs[n++] = pixelFormat.stencilBufferBits;
+        attribs[n++] = GLX_ACCUM_RED_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferRedBits;
+        attribs[n++] = GLX_ACCUM_GREEN_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferGreenBits;
+        attribs[n++] = GLX_ACCUM_BLUE_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferBlueBits;
+        attribs[n++] = GLX_ACCUM_ALPHA_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferAlphaBits;
 
-    OpenGLContextInfo* const oc = new OpenGLContextInfo();
+        // xxx not sure how to do fullSceneAntiAliasingNumSamples on linux..
 
-    oc->renderContext = glXCreateContext (display, bestVisual,
-                                          (sharedContext != 0) ? ((OpenGLContextInfo*) sharedContext)->renderContext
-                                                               : 0,
-                                          GL_TRUE);
+        attribs[n++] = None;
 
-    Window windowH = (Window) peer->getNativeHandle();
+        XVisualInfo* const bestVisual = glXChooseVisual (display, DefaultScreen (display), attribs);
 
-    Colormap colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
-    XSetWindowAttributes swa;
-    swa.colormap = colourMap;
-    swa.border_pixel = 0;
-    swa.event_mask = ExposureMask | StructureNotifyMask;
+        if (bestVisual == 0)
+            return;
 
-    oc->embeddedWindow = XCreateWindow (display, windowH,
+        renderContext = glXCreateContext (display, bestVisual, sharedContext, GL_TRUE);
+
+        Window windowH = (Window) peer->getNativeHandle();
+
+        Colormap colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+        XSetWindowAttributes swa;
+        swa.colormap = colourMap;
+        swa.border_pixel = 0;
+        swa.event_mask = ExposureMask | StructureNotifyMask;
+
+        embeddedWindow = XCreateWindow (display, windowH,
                                         0, 0, 1, 1, 0,
                                         bestVisual->depth,
                                         InputOutput,
@@ -2855,73 +2866,104 @@ void* juce_createOpenGLContext (OpenGLComponent* component, void* sharedContext)
                                         CWBorderPixel | CWColormap | CWEventMask,
                                         &swa);
 
-    XSaveContext (display, (XID) oc->embeddedWindow, improbableNumber, (XPointer) peer);
+        XSaveContext (display, (XID) embeddedWindow, improbableNumber, (XPointer) peer);
 
-    XMapWindow (display, oc->embeddedWindow);
-    XFreeColormap (display, colourMap);
+        XMapWindow (display, embeddedWindow);
+        XFreeColormap (display, colourMap);
 
-    XFree (bestVisual);
-    XSync (display, False);
-
-    return oc;
-}
-
-void juce_updateOpenGLWindowPos (void* context, Component* owner, Component* topComp)
-{
-    jassert (context != 0);
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    XMoveResizeWindow (display, oc->embeddedWindow,
-                       owner->getScreenX() - topComp->getScreenX(),
-                       owner->getScreenY() - topComp->getScreenY(),
-                       jmax (1, owner->getWidth()),
-                       jmax (1, owner->getHeight()));
-}
-
-void juce_deleteOpenGLContext (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
-    {
-        glXDestroyContext (display, oc->renderContext);
-
-        XUnmapWindow (display, oc->embeddedWindow);
-        XDestroyWindow (display, oc->embeddedWindow);
-
-        delete oc;
+        XFree (bestVisual);
+        XSync (display, False);
     }
-}
 
-bool juce_makeOpenGLContextCurrent (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+    ~WindowedGLContext() 
+    {
+        makeInactive();
 
-    if (oc != 0)
-        return glXMakeCurrent (display, oc->embeddedWindow, oc->renderContext)
+        glXDestroyContext (display, renderContext);
+
+        XUnmapWindow (display, embeddedWindow);
+        XDestroyWindow (display, embeddedWindow);
+    }
+
+    bool makeActive() throw()
+    {
+        jassert (renderContext != 0);
+
+        return glXMakeCurrent (display, embeddedWindow, renderContext)
                 && XSync (display, False);
-    else
-        return glXMakeCurrent (display, None, 0);
+    }
+
+    bool makeInactive() throw()
+    {
+        return (! isActive()) || glXMakeCurrent (display, None, 0);
+    }
+
+    bool isActive() const throw()
+    {
+        return glXGetCurrentContext() == renderContext;
+    }
+
+    const OpenGLPixelFormat getPixelFormat() const
+    {
+        return pixelFormat;
+    }
+
+    void* getRawContext() const throw()
+    {
+        return renderContext;
+    }
+
+    void updateWindowPosition (int x, int y, int w, int h, int)
+    {
+        XMoveResizeWindow (display, embeddedWindow,
+                           x, y, jmax (1, w), jmax (1, h));
+    }
+
+    void swapBuffers()
+    {
+        glXSwapBuffers (display, embeddedWindow);
+    }
+
+    void repaint()
+    {
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+    GLXContext renderContext;
+
+private:
+    Window embeddedWindow;
+    OpenGLPixelFormat pixelFormat;
+
+    //==============================================================================
+    WindowedGLContext (const WindowedGLContext&);
+    const WindowedGLContext& operator= (const WindowedGLContext&);
+};
+
+//==============================================================================
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+                                                      const OpenGLPixelFormat& pixelFormat,
+                                                      const OpenGLContext* const contextToShareWith)
+{
+    WindowedGLContext* c = new WindowedGLContext (component, pixelFormat,
+                                                  contextToShareWith != 0 ? (GLXContext) contextToShareWith->getRawContext() : 0);
+
+    if (c->renderContext == 0)
+        deleteAndZero (c);
+
+    return c;
 }
 
-bool juce_isActiveOpenGLContext (void* context) throw()
+void juce_glViewport (const int w, const int h)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    jassert (oc != 0);
-    return glXGetCurrentContext() == oc->renderContext;
+    glViewport (0, 0, w, h);
 }
 
-void juce_swapOpenGLBuffers (void* context)
+void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
-        glXSwapBuffers (display, oc->embeddedWindow);
-}
-
-void juce_repaintOpenGLWindow (void* context)
-{
+    results.add (new OpenGLPixelFormat()); // xxx
 }
 
 #endif

@@ -2641,6 +2641,7 @@ void MouseCursor::showInAllWindows() const throw()
 }
 
 //==============================================================================
+//==============================================================================
 class JuceDropSource   : public IDropSource
 {
     int refCount;
@@ -2970,13 +2971,13 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
     return hDrop;
 }
 
-static bool performDragDrop (FORMATETC* format, STGMEDIUM* medium, const DWORD whatToDo) throw()
+static bool performDragDrop (FORMATETC* const format, STGMEDIUM* const medium, const DWORD whatToDo) throw()
 {
     JuceDropSource* const source = new JuceDropSource();
     JuceDataObject* const data = new JuceDataObject (source, format, medium, 1);
 
     DWORD effect;
-    HRESULT res = DoDragDrop (data, source, whatToDo, &effect);
+    const HRESULT res = DoDragDrop (data, source, whatToDo, &effect);
 
     data->Release();
     source->Release();
@@ -3027,151 +3028,455 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 
 
 //==============================================================================
+//==============================================================================
 #if JUCE_OPENGL
 
-struct OpenGLContextInfo
+#define WGL_EXT_FUNCTION_INIT(extType, extFunc) \
+    ((extFunc = (extType) wglGetProcAddress (#extFunc)) != 0)
+
+typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
+typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int *piAttributes, int *piValues);
+typedef BOOL (WINAPI * PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
+
+#define WGL_NUMBER_PIXEL_FORMATS_ARB    0x2000
+#define WGL_DRAW_TO_WINDOW_ARB          0x2001
+#define WGL_ACCELERATION_ARB            0x2003
+#define WGL_SWAP_METHOD_ARB			    0x2007
+#define WGL_SUPPORT_OPENGL_ARB          0x2010
+#define WGL_PIXEL_TYPE_ARB			    0x2013
+#define WGL_DOUBLE_BUFFER_ARB           0x2011
+#define WGL_COLOR_BITS_ARB			    0x2014
+#define WGL_RED_BITS_ARB                0x2015
+#define WGL_GREEN_BITS_ARB              0x2017
+#define WGL_BLUE_BITS_ARB               0x2019
+#define WGL_ALPHA_BITS_ARB              0x201B
+#define WGL_DEPTH_BITS_ARB              0x2022
+#define WGL_STENCIL_BITS_ARB            0x2023
+#define WGL_FULL_ACCELERATION_ARB       0x2027
+#define WGL_ACCUM_RED_BITS_ARB          0x201E
+#define WGL_ACCUM_GREEN_BITS_ARB        0x201F
+#define WGL_ACCUM_BLUE_BITS_ARB         0x2020
+#define WGL_ACCUM_ALPHA_BITS_ARB        0x2021
+#define WGL_STEREO_ARB                  0x2012
+#define WGL_SAMPLE_BUFFERS_ARB          0x2041
+#define WGL_SAMPLES_ARB                 0x2042
+#define WGL_TYPE_RGBA_ARB               0x202B
+
+static void getWglExtensions (HDC dc, StringArray& result) throw()
 {
-    Win32ComponentPeer* nativeWindow;
+    PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = 0;
 
-    HDC dc;
-    HGLRC renderContext;
-};
+    if (WGL_EXT_FUNCTION_INIT (PFNWGLGETEXTENSIONSSTRINGARBPROC, wglGetExtensionsStringARB))
+        result.addTokens (String (wglGetExtensionsStringARB (dc)), false);
+    else
+        jassertfalse // If this fails, it may be because you didn't activate the openGL context
+}
 
-void* juce_createOpenGLContext (OpenGLComponent* component, void* sharedContext)
+
+//==============================================================================
+class WindowedGLContext     : public OpenGLContext
 {
-    jassert (component != 0);
-
-    Win32ComponentPeer* const peer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
-
-    if (peer == 0)
-        return 0;
-
-    OpenGLContextInfo* const oc = new OpenGLContextInfo();
-
-    oc->nativeWindow = new Win32ComponentPeer (component, 0);
-    oc->nativeWindow->dontRepaint = true;
-    oc->nativeWindow->setVisible (true);
-    HWND hwnd = (HWND) oc->nativeWindow->getNativeHandle();
-
-    SetParent (hwnd, (HWND) peer->getNativeHandle());
-    juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_CHILD, true);
-    juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_POPUP, false);
-
-    oc->dc = GetDC (hwnd);
-
-    PIXELFORMATDESCRIPTOR pfd;
-    zerostruct (pfd);
-    pfd.nSize = sizeof (pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 32;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-
-    int format = ChoosePixelFormat (oc->dc, &pfd);
-
-    if (format == 0 || ! SetPixelFormat (oc->dc, format, &pfd))
+public:
+    WindowedGLContext (Component* const component, HGLRC contextToShareWith)
+        : renderContext (0),
+          nativeWindow (0)
     {
-        // try some less ambitious formats if it fails..
-        pfd.cColorBits = 24;
-        format = ChoosePixelFormat (oc->dc, &pfd);
+        jassert (component != 0);
+        Win32ComponentPeer* const peer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
 
-        if (format == 0 || ! SetPixelFormat (oc->dc, format, &pfd))
+        nativeWindow = new Win32ComponentPeer (component, 0);
+        nativeWindow->dontRepaint = true;
+        nativeWindow->setVisible (true);
+
+        HWND hwnd = (HWND) nativeWindow->getNativeHandle();
+
+        if (peer != 0)
         {
-            pfd.cDepthBits = 16;
-            format = ChoosePixelFormat (oc->dc, &pfd);
+            SetParent (hwnd, (HWND) peer->getNativeHandle());
+            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_CHILD, true);
+            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_POPUP, false);
+        }
 
-            if (format == 0 || ! SetPixelFormat (oc->dc, format, &pfd))
+        dc = GetDC (hwnd);
+
+        // Use a default pixel format that should be supported everywhere
+        PIXELFORMATDESCRIPTOR pfd;
+        zerostruct (pfd);
+        pfd.nSize = sizeof (pfd);
+        pfd.nVersion = 1;
+        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+        pfd.iPixelType = PFD_TYPE_RGBA;
+        pfd.cColorBits = 16;
+        pfd.cDepthBits = 16;
+
+        const int format = ChoosePixelFormat (dc, &pfd);
+
+        if (format != 0)
+            SetPixelFormat (dc, format, &pfd);
+
+        renderContext = wglCreateContext (dc);
+
+        if (contextToShareWith != 0 && renderContext != 0)
+            wglShareLists (renderContext, contextToShareWith);
+    }
+
+    ~WindowedGLContext() 
+    {
+        makeInactive();
+
+        wglDeleteContext (renderContext);
+        ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
+
+        delete nativeWindow;
+    }
+
+    bool makeActive() throw()
+    {
+        jassert (renderContext != 0);
+        return wglMakeCurrent (dc, renderContext) != 0;
+    }
+
+    bool makeInactive() throw()
+    {
+        return (! isActive()) || (wglMakeCurrent (0, 0) != 0);
+    }
+
+    bool isActive() const throw()
+    {
+        return wglGetCurrentContext() == renderContext;
+    }
+
+    const OpenGLPixelFormat getPixelFormat() const
+    {
+        OpenGLPixelFormat pf;
+
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
+
+        fillInPixelFormatDetails (GetPixelFormat (dc), pf, availableExtensions);
+        return pf;
+    }
+
+    void* getRawContext() const throw()
+    {
+        return renderContext;
+    }
+
+    bool setPixelFormat (const OpenGLPixelFormat& pixelFormat)
+    {
+        jassert (renderContext != 0);
+
+        makeActive();
+
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
+
+        PIXELFORMATDESCRIPTOR pfd;
+        zerostruct (pfd);
+        pfd.nSize = sizeof (pfd);
+        pfd.nVersion = 1;
+        pfd.dwFlags = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
+        pfd.iPixelType = PFD_TYPE_RGBA;
+        pfd.iLayerType = PFD_MAIN_PLANE;
+        pfd.cColorBits = pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits;
+        pfd.cRedBits = pixelFormat.redBits;
+        pfd.cGreenBits = pixelFormat.greenBits;
+        pfd.cBlueBits = pixelFormat.blueBits;
+        pfd.cAlphaBits = pixelFormat.alphaBits;
+        pfd.cDepthBits = pixelFormat.depthBufferBits;
+        pfd.cStencilBits = pixelFormat.stencilBufferBits;
+        pfd.cAccumBits = pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
+                            + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits;
+        pfd.cAccumRedBits = pixelFormat.accumulationBufferRedBits;
+        pfd.cAccumGreenBits = pixelFormat.accumulationBufferGreenBits;
+        pfd.cAccumBlueBits = pixelFormat.accumulationBufferBlueBits;
+        pfd.cAccumAlphaBits  = pixelFormat.accumulationBufferAlphaBits;
+
+        int format = 0;
+
+        PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
+
+        if (availableExtensions.contains ("WGL_ARB_pixel_format") 
+             && WGL_EXT_FUNCTION_INIT (PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB))
+        {
+            int attributes[64];
+            int n = 0;
+
+            attributes[n++] = WGL_DRAW_TO_WINDOW_ARB;
+            attributes[n++] = GL_TRUE;
+            attributes[n++] = WGL_SUPPORT_OPENGL_ARB;
+            attributes[n++] = GL_TRUE;
+            attributes[n++] = WGL_ACCELERATION_ARB;
+            attributes[n++] = WGL_FULL_ACCELERATION_ARB;
+            attributes[n++] = WGL_DOUBLE_BUFFER_ARB;
+            attributes[n++] = GL_TRUE;
+            attributes[n++] = WGL_PIXEL_TYPE_ARB;
+            attributes[n++] = WGL_TYPE_RGBA_ARB;
+
+            attributes[n++] = WGL_COLOR_BITS_ARB;
+            attributes[n++] = pfd.cColorBits;
+            attributes[n++] = WGL_RED_BITS_ARB;
+            attributes[n++] = pixelFormat.redBits;
+            attributes[n++] = WGL_GREEN_BITS_ARB;
+            attributes[n++] = pixelFormat.greenBits;
+            attributes[n++] = WGL_BLUE_BITS_ARB;
+            attributes[n++] = pixelFormat.blueBits;
+            attributes[n++] = WGL_ALPHA_BITS_ARB;
+            attributes[n++] = pixelFormat.alphaBits;
+            attributes[n++] = WGL_DEPTH_BITS_ARB;
+            attributes[n++] = pixelFormat.depthBufferBits;
+
+            if (pixelFormat.stencilBufferBits > 0)
             {
-                pfd.cColorBits = 32;
-                format = ChoosePixelFormat (oc->dc, &pfd);
+                attributes[n++] = WGL_STENCIL_BITS_ARB;
+                attributes[n++] = pixelFormat.stencilBufferBits;
+            }
 
-                if (format == 0 || ! SetPixelFormat (oc->dc, format, &pfd))
-                {
-                    jassertfalse // can't find a suitable pixel format that works for opengl
-                }
+            attributes[n++] = WGL_ACCUM_RED_BITS_ARB;
+            attributes[n++] = pixelFormat.accumulationBufferRedBits;
+            attributes[n++] = WGL_ACCUM_GREEN_BITS_ARB;
+            attributes[n++] = pixelFormat.accumulationBufferGreenBits;
+            attributes[n++] = WGL_ACCUM_BLUE_BITS_ARB;
+            attributes[n++] = pixelFormat.accumulationBufferBlueBits;
+            attributes[n++] = WGL_ACCUM_ALPHA_BITS_ARB;
+            attributes[n++] = pixelFormat.accumulationBufferAlphaBits;
+
+            if (availableExtensions.contains ("WGL_ARB_multisample")
+                 && pixelFormat.fullSceneAntiAliasingNumSamples > 0)
+            {
+                attributes[n++] = WGL_SAMPLE_BUFFERS_ARB;
+                attributes[n++] = 1;
+                attributes[n++] = WGL_SAMPLES_ARB;
+                attributes[n++] = pixelFormat.fullSceneAntiAliasingNumSamples;
+            }
+
+            attributes[n++] = 0;
+
+            UINT formatsCount;
+            const BOOL ok = wglChoosePixelFormatARB (dc, attributes, 0, 1, &format, &formatsCount);
+            (void) ok;
+            jassert (ok);
+        }
+        else
+        {
+            format = ChoosePixelFormat (dc, &pfd);
+        }
+
+        if (format != 0)
+        {
+            makeInactive();
+
+            // Create the real context..
+            if (SetPixelFormat (dc, format, &pfd))
+            {
+                wglDeleteContext (renderContext);
+                renderContext = wglCreateContext (dc);
+
+                jassert (renderContext != 0);
+                return renderContext != 0;
+            }
+        }
+
+        return false;
+    }
+
+    void updateWindowPosition (int x, int y, int w, int h, int)
+    {
+        SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
+                      x, y, w, h,
+                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
+    }
+
+    void repaint()
+    {
+        int x, y, w, h;
+        nativeWindow->getBounds (x, y, w, h);
+        nativeWindow->repaint (0, 0, w, h);
+    }
+
+    void swapBuffers()
+    {
+        SwapBuffers (dc);
+    }
+
+    void findAlternativeOpenGLPixelFormats (OwnedArray <OpenGLPixelFormat>& results)
+    {
+        jassert (isActive());
+        
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
+
+        PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
+        int numTypes = 0;
+
+        if (availableExtensions.contains("WGL_ARB_pixel_format") 
+             && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
+        {
+            int attributes = WGL_NUMBER_PIXEL_FORMATS_ARB;
+
+            if (! wglGetPixelFormatAttribivARB (dc, 1, 0, 1, &attributes, &numTypes))
+                jassertfalse
+        }
+        else
+        {
+            numTypes = DescribePixelFormat (dc, 0, 0, 0);
+        }
+
+        OpenGLPixelFormat pf;
+
+        for (int i = 0; i < numTypes; ++i)
+        {
+            if (fillInPixelFormatDetails (i + 1, pf, availableExtensions))
+            {
+                bool alreadyListed = false;
+                for (int j = results.size(); --j >= 0;)
+                    if (pf == *results.getUnchecked(j))
+                        alreadyListed = true;
+
+                if (! alreadyListed)
+                    results.add (new OpenGLPixelFormat (pf));
             }
         }
     }
 
-    oc->renderContext = wglCreateContext (oc->dc);
+    //==============================================================================
+    juce_UseDebuggingNewOperator
 
-    if (sharedContext != 0)
-        wglShareLists (((OpenGLContextInfo*) sharedContext)->renderContext, oc->renderContext);
+    HGLRC renderContext;
 
-    return oc;
-}
+private:
+    Win32ComponentPeer* nativeWindow;
+    HDC dc;
 
-void juce_updateOpenGLWindowPos (void* context, Component* owner, Component* topComp)
-{
-    jassert (context != 0);
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    SetWindowPos ((HWND) oc->nativeWindow->getNativeHandle(), 0,
-                  owner->getScreenX() - topComp->getScreenX(),
-                  owner->getScreenY() - topComp->getScreenY(),
-                  owner->getWidth(),
-                  owner->getHeight(),
-                  SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
-}
-
-void juce_deleteOpenGLContext (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
+    //==============================================================================
+    bool fillInPixelFormatDetails (const int pixelFormatIndex, 
+                                   OpenGLPixelFormat& result,
+                                   const StringArray& availableExtensions) const throw()
     {
-        wglDeleteContext (oc->renderContext);
-        ReleaseDC ((HWND) oc->nativeWindow->getNativeHandle(), oc->dc);
+        PFNWGLGETPIXELFORMATATTRIBIVARBPROC wglGetPixelFormatAttribivARB = 0;
 
-        deleteAndZero (oc->nativeWindow);
+        if (availableExtensions.contains ("WGL_ARB_pixel_format")
+             && WGL_EXT_FUNCTION_INIT (PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB))
+        {
+            int attributes[32];
+            int numAttributes = 0;
 
-        delete oc;
+            attributes[numAttributes++] = WGL_DRAW_TO_WINDOW_ARB;
+            attributes[numAttributes++] = WGL_SUPPORT_OPENGL_ARB;
+            attributes[numAttributes++] = WGL_ACCELERATION_ARB;
+            attributes[numAttributes++] = WGL_DOUBLE_BUFFER_ARB;
+            attributes[numAttributes++] = WGL_PIXEL_TYPE_ARB;
+            attributes[numAttributes++] = WGL_RED_BITS_ARB;
+            attributes[numAttributes++] = WGL_GREEN_BITS_ARB;
+            attributes[numAttributes++] = WGL_BLUE_BITS_ARB;
+            attributes[numAttributes++] = WGL_ALPHA_BITS_ARB;
+            attributes[numAttributes++] = WGL_DEPTH_BITS_ARB;
+            attributes[numAttributes++] = WGL_STENCIL_BITS_ARB;
+            attributes[numAttributes++] = WGL_ACCUM_RED_BITS_ARB;
+            attributes[numAttributes++] = WGL_ACCUM_GREEN_BITS_ARB;
+            attributes[numAttributes++] = WGL_ACCUM_BLUE_BITS_ARB;
+            attributes[numAttributes++] = WGL_ACCUM_ALPHA_BITS_ARB;
+
+            if (availableExtensions.contains ("WGL_ARB_multisample"))
+                attributes[numAttributes++] = WGL_SAMPLES_ARB;
+
+            int values[32];
+            zeromem (values, sizeof (values));
+
+            if (wglGetPixelFormatAttribivARB (dc, pixelFormatIndex, 0, numAttributes, attributes, values))
+            {
+                int n = 0;
+                bool isValidFormat = (values[n++] == GL_TRUE);      // WGL_DRAW_TO_WINDOW_ARB
+                isValidFormat = (values[n++] == GL_TRUE) && isValidFormat;   // WGL_SUPPORT_OPENGL_ARB
+                isValidFormat = (values[n++] == WGL_FULL_ACCELERATION_ARB) && isValidFormat; // WGL_ACCELERATION_ARB
+                isValidFormat = (values[n++] == GL_TRUE) && isValidFormat;   // WGL_DOUBLE_BUFFER_ARB:
+                isValidFormat = (values[n++] == WGL_TYPE_RGBA_ARB) && isValidFormat; // WGL_PIXEL_TYPE_ARB
+                result.redBits = values[n++];           // WGL_RED_BITS_ARB
+                result.greenBits = values[n++];         // WGL_GREEN_BITS_ARB
+                result.blueBits = values[n++];          // WGL_BLUE_BITS_ARB
+                result.alphaBits = values[n++];         // WGL_ALPHA_BITS_ARB
+                result.depthBufferBits = values[n++];   // WGL_DEPTH_BITS_ARB
+                result.stencilBufferBits = values[n++]; // WGL_STENCIL_BITS_ARB
+                result.accumulationBufferRedBits = values[n++];      // WGL_ACCUM_RED_BITS_ARB
+                result.accumulationBufferGreenBits = values[n++];    // WGL_ACCUM_GREEN_BITS_ARB
+                result.accumulationBufferBlueBits = values[n++];     // WGL_ACCUM_BLUE_BITS_ARB
+                result.accumulationBufferAlphaBits = values[n++];    // WGL_ACCUM_ALPHA_BITS_ARB
+                result.fullSceneAntiAliasingNumSamples = values[n++];       // WGL_SAMPLES_ARB
+
+                return isValidFormat;
+            }
+            else
+            {
+                jassertfalse
+            }
+        }
+        else
+        {
+            PIXELFORMATDESCRIPTOR pfd;
+
+            if (DescribePixelFormat (dc, pixelFormatIndex, sizeof (pfd), &pfd))
+            {
+                result.redBits = pfd.cRedBits;
+                result.greenBits = pfd.cGreenBits;
+                result.blueBits = pfd.cBlueBits;
+                result.alphaBits = pfd.cAlphaBits;
+                result.depthBufferBits = pfd.cDepthBits;
+                result.stencilBufferBits = pfd.cStencilBits;
+                result.accumulationBufferRedBits = pfd.cAccumRedBits;
+                result.accumulationBufferGreenBits = pfd.cAccumGreenBits;
+                result.accumulationBufferBlueBits = pfd.cAccumBlueBits;
+                result.accumulationBufferAlphaBits = pfd.cAccumAlphaBits;
+                result.fullSceneAntiAliasingNumSamples = 0;
+
+                return true;
+            }
+            else
+            {
+                jassertfalse
+            }
+        }
+
+        return false;
     }
+
+    WindowedGLContext (const WindowedGLContext&);
+    const WindowedGLContext& operator= (const WindowedGLContext&);
+};
+
+//==============================================================================
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+                                                      const OpenGLPixelFormat& pixelFormat,
+                                                      const OpenGLContext* const contextToShareWith)
+{
+    WindowedGLContext* c = new WindowedGLContext (component, 
+                                                  contextToShareWith != 0 ? (HGLRC) contextToShareWith->getRawContext() : 0);
+
+    if (c->renderContext == 0 || ! c->setPixelFormat (pixelFormat))
+        deleteAndZero (c);
+
+    return c;
 }
 
-bool juce_makeOpenGLContextCurrent (void* context)
+void juce_glViewport (const int w, const int h)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
-        return wglMakeCurrent (oc->dc, oc->renderContext) != 0;
-    else
-        return wglMakeCurrent (0, 0) != 0;
+    glViewport (0, 0, w, h);
 }
 
-bool juce_isActiveOpenGLContext (void* context) throw()
+void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+    Component tempComp;
 
-    jassert (oc != 0);
-    return wglGetCurrentContext() == oc->renderContext;
-}
-
-void juce_swapOpenGLBuffers (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
-        SwapBuffers (oc->dc);
-}
-
-void juce_repaintOpenGLWindow (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
     {
-        int x, y, w, h;
-        oc->nativeWindow->getBounds (x, y, w, h);
-        oc->nativeWindow->repaint (0, 0, w, h);
+        WindowedGLContext wc (&tempComp, 0);
+        wc.makeActive();
+        wc.findAlternativeOpenGLPixelFormats (results);
     }
 }
 
 #endif
 
 
+//==============================================================================
 //==============================================================================
 class JuceIStorage   : public IStorage
 {

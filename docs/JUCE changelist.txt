@@ -14,6 +14,7 @@ Changelist for version 1.45
 - new class: FileSearchPathListComponent, for letting the user edit a FileSearchPath.
 - added a critical section option to ReferenceCountedArray
 - refactored and added features to the Socket class, replacing it with StreamableSocket (basically the same as the original class), and DatagramSocket.
+- refactored the OpenGLComponent, adding new classes OpenGLPixelFormat and OpenGLContext
 
 ==============================================================================
 Changelist for version 1.44

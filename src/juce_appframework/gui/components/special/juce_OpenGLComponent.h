@@ -37,6 +37,119 @@
 // this is used to disable OpenGL, and is defined in juce_Config.h
 #if JUCE_OPENGL || DOXYGEN
 
+class OpenGLComponentWatcher;
+
+
+//==============================================================================
+/**
+    Represents the various properties of an OpenGL bitmap format.
+
+    @see OpenGLComponent::setPixelFormat
+*/
+struct OpenGLPixelFormat
+{
+    //==============================================================================
+    /** Creates an OpenGLPixelFormat.
+
+        The default constructor just initialises the object as a simple 8-bit 
+        RGBA format.
+    */
+    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
+                       const int alphaBits = 8,
+                       const int depthBufferBits = 16,
+                       const int stencilBufferBits = 0) throw();
+
+    //==============================================================================
+    int redBits;          /**< The number of bits per pixel to use for the red channel. */
+    int greenBits;        /**< The number of bits per pixel to use for the green channel. */
+    int blueBits;         /**< The number of bits per pixel to use for the blue channel. */
+    int alphaBits;        /**< The number of bits per pixel to use for the alpha channel. */
+
+    int depthBufferBits;      /**< The number of bits per pixel to use for a depth buffer. */
+    int stencilBufferBits;    /**< The number of bits per pixel to use for a stencil buffer. */
+
+    int accumulationBufferRedBits;    /**< The number of bits per pixel to use for an accumulation buffer's red channel. */
+    int accumulationBufferGreenBits;  /**< The number of bits per pixel to use for an accumulation buffer's green channel. */
+    int accumulationBufferBlueBits;   /**< The number of bits per pixel to use for an accumulation buffer's blue channel. */
+    int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
+
+    uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
+
+    //==============================================================================
+    /** Returns a list of all the pixel formats that can be used in this system.
+    */
+    static void getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results);
+
+    //==============================================================================
+    bool operator== (const OpenGLPixelFormat&) const throw();
+
+    juce_UseDebuggingNewOperator
+};
+
+//==============================================================================
+/**
+    A base class for types of OpenGL context.
+
+    An OpenGLComponent will supply its own context for drawing in its window.
+*/
+class OpenGLContext
+{
+public:
+    //==============================================================================
+    /** Destructor. */
+    virtual ~OpenGLContext() {}
+
+    //==============================================================================
+    /** Makes this context the currently active one. */
+    virtual bool makeActive() throw() = 0;
+    /** If this context is currently active, it is disactivated. */
+    virtual bool makeInactive() throw() = 0;
+    /** Returns true if this context is currently active. */
+    virtual bool isActive() const throw() = 0;
+
+    /** Swaps the buffers (if the context can do this). */
+    virtual void swapBuffers() = 0;
+
+    //==============================================================================
+    /** Returns the pixel format being used by this context. */
+    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
+
+    /** For windowed contexts, this moves the context within the bounds of
+        its parent window.
+    */
+    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
+
+    /** For windowed contexts, this triggers a repaint of the window.
+
+        (Not relevent on all platforms).
+    */
+    virtual void repaint() = 0;
+
+    /** Returns an OS-dependent handle to the raw GL context.
+
+        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
+        a GLXContext.
+    */
+    virtual void* getRawContext() const throw() = 0;
+
+    //==============================================================================
+    /** This tries to create a context that can be used for drawing into the
+        area occupied by the specified component.
+
+        Note that you probably shouldn't use this method directly unless you know what
+        you're doing - the OpenGLComponent calls this and manages the context for you.
+    */
+    static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
+                                                  const OpenGLPixelFormat& pixelFormat, 
+                                                  const OpenGLContext* const contextToShareWith);
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+protected:
+    OpenGLContext() throw() {};
+};
+
 
 //==============================================================================
 /**
@@ -51,42 +164,28 @@ class JUCE_API  OpenGLComponent  : public Component
 public:
     //==============================================================================
     /** Creates an OpenGLComponent.
-
-        @param componentToShareContextWith  if this is another OpenGLComponent, then
-                                            the two contexts will have their OpenGL contexts
-                                            shared
     */
-    OpenGLComponent (OpenGLComponent* componentToShareContextWith = 0);
+    OpenGLComponent();
 
     /** Destructor. */
     ~OpenGLComponent();
 
     //==============================================================================
-    /** Makes this component the current openGL context.
+    /** Changes the pixel format used by this component.
 
-        You might want to use this in things like your resize() method, before calling
-        GL commands.
-
-        If this returns false, then the context isn't active, so you should avoid
-        making any calls.
+        @see OpenGLPixelFormat::getAvailablePixelFormats()
     */
-    bool makeCurrentContextActive();
+    bool setPixelFormat (const OpenGLPixelFormat& formatToUse);
 
-    /** Stops the current component being the active OpenGL context.
+    /** Returns the pixel format that this component is currently using. */
+    const OpenGLPixelFormat getPixelFormat() const;
 
-        This is the opposite of makeCurrentContextActive()
+    /** Specifies another component whose OpenGL context should be shared with
+        this one.
+
+        This is an OpenGL feature that lets two contexts share their texture data.
     */
-    void makeCurrentContextInactive();
-
-    /** Returns true if this component is the active openGL context for the
-        current thread.
-    */
-    bool isActiveContext() const throw();
-
-    /** Returns the OpenGLComponent that is currently the active context for
-        the current thread.
-    */
-    static OpenGLComponent* getCurrentlyActiveContextComponent() throw();
+    void shareWith (OpenGLComponent* const componentToShareListsWith);
 
     //==============================================================================
     /** Flips the openGL buffers over. */
@@ -116,15 +215,62 @@ public:
 
 
     //==============================================================================
+    /** Returns the context that will draw into this component.
+
+        This may return 0 if it failed to initialise properly, or if the component
+        is currently invisible. The context object may be deleted and a new one created 
+        during the life of this component - see newOpenGLContextCreated().
+    */
+    OpenGLContext* getCurrentContext() const throw();
+
+    /** Makes this component the current openGL context.
+
+        You might want to use this in things like your resize() method, before calling
+        GL commands.
+
+        If this returns false, then the context isn't active, so you should avoid
+        making any calls.
+
+        @see OpenGLContext::makeActive
+    */
+    bool makeCurrentContextActive();
+
+    /** Stops the current component being the active OpenGL context.
+
+        This is the opposite of makeCurrentContextActive()
+
+        @see OpenGLContext::makeInactive
+    */
+    void makeCurrentContextInactive();
+
+    /** Returns true if this component is the active openGL context for the
+        current thread.
+
+        @see OpenGLContext::isActive
+    */
+    bool isActiveContext() const throw();
+
+
+    //==============================================================================
     /** Calls the rendering callback, and swaps the buffers afterwards.
 
-        Called by paint(), this can be overridden if you need to decouple the rendering
-        from the paint callback and render with a different thread.
+        This is called automatically by paint() when the component needs to be rendered.
+        
+        It can be overridden if you need to decouple the rendering from the paint callback 
+        and render with a custom thread.
 
         Returns true if the operation succeeded.
     */
     virtual bool renderAndSwapBuffers();
 
+    /** This returns a critical section that can be used to lock the current context.
+
+        Because the context that is used by this component can change, e.g. when the
+        component is shown or hidden, then if you're rendering to it on a background
+        thread, this allows you to lock the context for the duration of your rendering
+        routine.
+    */
+    CriticalSection& getContextLock() throw()       { return contextLock; }
 
     //==============================================================================
     /** @internal */
@@ -133,13 +279,23 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class InternalGLContextHolder;
-    void* internalData;
+    friend class OpenGLComponentWatcher;
+    OpenGLComponentWatcher* componentWatcher;
+
+    OpenGLContext* context;
+    OpenGLComponent* componentToShareListsWith;
+
+    CriticalSection contextLock;
+    OpenGLPixelFormat preferredPixelFormat;
+    bool needToUpdateViewport;
+
+    void createContext();
+    void deleteContext();
+    void updateContextPosition();
+    void internalRepaint (int x, int y, int w, int h);
 
     OpenGLComponent (const OpenGLComponent&);
     const OpenGLComponent& operator= (const OpenGLComponent&);
-
-    void internalRepaint (int x, int y, int w, int h);
 };
 
 

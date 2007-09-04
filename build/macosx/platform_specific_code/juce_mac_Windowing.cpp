@@ -3292,92 +3292,190 @@ void AppleRemoteDevice::handleCallbackInternal()
 //==============================================================================
 #if JUCE_OPENGL
 
-struct OpenGLContextInfo
+//==============================================================================
+class WindowedGLContext     : public OpenGLContext
 {
+public:
+    WindowedGLContext (Component* const component, 
+                       const OpenGLPixelFormat& pixelFormat_,
+                       AGLContext sharedContext)
+        : renderContext (0),
+          pixelFormat (pixelFormat_)
+    {
+        jassert (component != 0);
+
+        HIViewComponentPeer* const peer = dynamic_cast <HIViewComponentPeer*> (component->getTopLevelComponent()->getPeer());
+        if (peer == 0)
+            return;
+
+        GLint attribs [64];
+        int n = 0;
+        attribs[n++] = AGL_RGBA;
+        attribs[n++] = AGL_DOUBLEBUFFER;
+        attribs[n++] = AGL_ACCELERATED;
+        attribs[n++] = AGL_RED_SIZE;
+        attribs[n++] = pixelFormat.redBits;
+        attribs[n++] = AGL_GREEN_SIZE;
+        attribs[n++] = pixelFormat.greenBits;
+        attribs[n++] = AGL_BLUE_SIZE;
+        attribs[n++] = pixelFormat.blueBits;
+        attribs[n++] = AGL_ALPHA_SIZE;
+        attribs[n++] = pixelFormat.alphaBits;
+        attribs[n++] = AGL_DEPTH_SIZE;
+        attribs[n++] = pixelFormat.depthBufferBits;
+        attribs[n++] = AGL_STENCIL_SIZE;
+        attribs[n++] = pixelFormat.stencilBufferBits;
+        attribs[n++] = AGL_ACCUM_RED_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferRedBits;
+        attribs[n++] = AGL_ACCUM_GREEN_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferGreenBits;
+        attribs[n++] = AGL_ACCUM_BLUE_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferBlueBits;
+        attribs[n++] = AGL_ACCUM_ALPHA_SIZE;
+        attribs[n++] = pixelFormat.accumulationBufferAlphaBits;
+
+        // xxx not sure how to do fullSceneAntiAliasingNumSamples..
+
+        attribs[n++] = AGL_SAMPLE_BUFFERS_ARB;
+        attribs[n++] = 1;
+        attribs[n++] = AGL_SAMPLES_ARB;
+        attribs[n++] = 4;
+        attribs[n++] = AGL_CLOSEST_POLICY;
+        attribs[n++] = AGL_NO_RECOVERY;
+        attribs[n++] = AGL_NONE;
+
+        renderContext = aglCreateContext (aglChoosePixelFormat (0, 0, attribs),
+                                          sharedContext);
+
+        aglSetDrawable (renderContext, GetWindowPort (peer->windowRef));
+    }
+
+    ~WindowedGLContext() 
+    {
+        makeInactive();
+        aglSetDrawable (renderContext, 0);
+        aglDestroyContext (renderContext);
+    }
+
+    bool makeActive() throw()
+    {
+        jassert (renderContext != 0);
+
+        return aglSetCurrentContext (renderContext);
+    }
+
+    bool makeInactive() throw()
+    {
+        return (! isActive()) || aglSetCurrentContext (0);
+    }
+
+    bool isActive() const throw()
+    {
+        return aglGetCurrentContext() == renderContext;
+    }
+
+    const OpenGLPixelFormat getPixelFormat() const
+    {
+        return pixelFormat;
+    }
+
+    void* getRawContext() const throw()
+    {
+        return renderContext;
+    }
+
+    void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
+    {
+        GLint bufferRect[4];
+        bufferRect[0] = x;
+        bufferRect[1] = outerWindowHeight - (y + h);
+        bufferRect[2] = w;
+        bufferRect[3] = h;
+
+        aglSetInteger (renderContext, AGL_BUFFER_RECT, bufferRect);
+        aglEnable (renderContext, AGL_BUFFER_RECT);
+    }
+
+    void swapBuffers()
+    {
+        aglSwapBuffers (renderContext);
+    }
+
+    void repaint()
+    {
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
     AGLContext renderContext;
+
+private:
+    OpenGLPixelFormat pixelFormat;
+
+    //==============================================================================
+    WindowedGLContext (const WindowedGLContext&);
+    const WindowedGLContext& operator= (const WindowedGLContext&);
 };
 
-void* juce_createOpenGLContext (OpenGLComponent* component, void* sharedContext)
+//==============================================================================
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+                                                      const OpenGLPixelFormat& pixelFormat,
+                                                      const OpenGLContext* const contextToShareWith)
 {
-    jassert (component != 0);
+    WindowedGLContext* c = new WindowedGLContext (component, pixelFormat,
+                                                  contextToShareWith != 0 ? (AGLContext) contextToShareWith->getRawContext() : 0);
 
-    HIViewComponentPeer* const peer = dynamic_cast <HIViewComponentPeer*> (component->getTopLevelComponent()->getPeer());
+    if (c->renderContext == 0)
+        deleteAndZero (c);
 
-    if (peer == 0)
-        return 0;
-
-    OpenGLContextInfo* const oc = new OpenGLContextInfo();
-
-    GLint attrib[] = {  AGL_RGBA, AGL_DOUBLEBUFFER,
-                        AGL_RED_SIZE, 8,
-                        AGL_ALPHA_SIZE, 8,
-                        AGL_DEPTH_SIZE, 24,
-                        AGL_CLOSEST_POLICY, AGL_NO_RECOVERY,
-                        AGL_SAMPLE_BUFFERS_ARB, 1,
-                        AGL_SAMPLES_ARB, 4,
-                        AGL_NONE };
-
-    oc->renderContext = aglCreateContext (aglChoosePixelFormat (0, 0, attrib),
-                                          (sharedContext != 0) ? ((OpenGLContextInfo*) sharedContext)->renderContext
-                                                               : 0);
-
-    aglSetDrawable (oc->renderContext,
-                    GetWindowPort (peer->windowRef));
-
-    return oc;
+    return c;
 }
 
-void juce_updateOpenGLWindowPos (void* context, Component* owner, Component* topComp)
+void juce_glViewport (const int w, const int h)
 {
-    jassert (context != 0);
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    GLint bufferRect[4];
-
-    bufferRect[0] = owner->getScreenX() - topComp->getScreenX();
-    bufferRect[1] = topComp->getHeight() - (owner->getHeight() + owner->getScreenY() - topComp->getScreenY());
-    bufferRect[2] = owner->getWidth();
-    bufferRect[3] = owner->getHeight();
-
-    aglSetInteger (oc->renderContext, AGL_BUFFER_RECT, bufferRect);
-    aglEnable (oc->renderContext, AGL_BUFFER_RECT);
+    glViewport (0, 0, w, h);
 }
 
-void juce_deleteOpenGLContext (void* context)
+static int getAGLAttribute (AGLPixelFormat p, const GLint attrib)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    aglDestroyContext (oc->renderContext);
-
-    delete oc;
+    GLint result = 0;
+    aglDescribePixelFormat (p, attrib, &result);
+    return result;
 }
 
-bool juce_makeOpenGLContextCurrent (void* context)
+void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
 {
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
+    GLint attribs [64];
+    int n = 0;
+    attribs[n++] = AGL_RGBA;
+    attribs[n++] = AGL_DOUBLEBUFFER;
+    attribs[n++] = AGL_ACCELERATED;
+    attribs[n++] = AGL_NO_RECOVERY;
+    attribs[n++] = AGL_NONE;
 
-    return aglSetCurrentContext ((oc != 0) ? oc->renderContext : 0);
+    AGLPixelFormat p = aglChoosePixelFormat (0, 0, attribs);
+
+    while (p != 0)
+    {
+        OpenGLPixelFormat* const pf = new OpenGLPixelFormat();
+        pf->redBits = getAGLAttribute (p, AGL_RED_SIZE);
+        pf->greenBits = getAGLAttribute (p, AGL_GREEN_SIZE);
+        pf->blueBits = getAGLAttribute (p, AGL_BLUE_SIZE);
+        pf->alphaBits = getAGLAttribute (p, AGL_ALPHA_SIZE);
+        pf->depthBufferBits = getAGLAttribute (p, AGL_DEPTH_SIZE);
+        pf->stencilBufferBits = getAGLAttribute (p, AGL_STENCIL_SIZE);
+        pf->accumulationBufferRedBits = getAGLAttribute (p, AGL_ACCUM_RED_SIZE);
+        pf->accumulationBufferGreenBits = getAGLAttribute (p, AGL_ACCUM_GREEN_SIZE);
+        pf->accumulationBufferBlueBits = getAGLAttribute (p, AGL_ACCUM_BLUE_SIZE);
+        pf->accumulationBufferAlphaBits = getAGLAttribute (p, AGL_ACCUM_ALPHA_SIZE);
+
+        results.add (pf);
+
+        p = aglNextPixelFormat (p);
+    }
 }
 
-bool juce_isActiveOpenGLContext (void* context) throw()
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    jassert (oc != 0);
-    return aglGetCurrentContext() == oc->renderContext;
-}
-
-void juce_swapOpenGLBuffers (void* context)
-{
-    OpenGLContextInfo* const oc = (OpenGLContextInfo*) context;
-
-    if (oc != 0)
-        aglSwapBuffers (oc->renderContext);
-}
-
-void juce_repaintOpenGLWindow (void* context)
-{
-}
 
 #endif
 
