@@ -65,7 +65,7 @@ public:
     //==============================================================================
     /** Binds the socket to the specified local port.
 
-        @returns    true on success; false may indicate that another socket is already bound 
+        @returns    true on success; false may indicate that another socket is already bound
                     on the same port
     */
     bool bindToPort (const int localPortNumber);
@@ -106,15 +106,15 @@ public:
         If the timeout is < 0, it will wait forever, or else will give up after
         the specified time.
 
-        If the socket is ready on return, this returns 1. If it times-out before 
+        If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (const bool readyForReading, 
+    int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
     /** Reads bytes from the socket (blocking).
 
-        Note that this method will block unless you have checked the socket is ready 
+        Note that this method will block unless you have checked the socket is ready
         for reading before calling it (see the waitUntilReady() method).
 
         @returns the number of bytes read, or -1 if there was an error.
@@ -123,7 +123,7 @@ public:
 
     /** Writes bytes to the socket from a buffer.
 
-        Note that this method will block unless you have checked the socket is ready 
+        Note that this method will block unless you have checked the socket is ready
         for writing before calling it (see the waitUntilReady() method).
 
         @returns the number of bytes written, or -1 if there was an error.
@@ -188,8 +188,8 @@ public:
         The localPortNumber is the port on which to bind this socket. If this value is 0,
         the port number is assigned by the operating system.
 
-        To use the socket for sending, call the connect() method. This will not immediately 
-        make a connection, but will save the destination you've provided. After this, you can 
+        To use the socket for sending, call the connect() method. This will not immediately
+        make a connection, but will save the destination you've provided. After this, you can
         call read() or write().
 
         To wait for other sockets to connect to this one, call waitForNextConnection().
@@ -202,7 +202,7 @@ public:
     //==============================================================================
     /** Binds the socket to the specified local port.
 
-        @returns    true on success; false may indicate that another socket is already bound 
+        @returns    true on success; false may indicate that another socket is already bound
                     on the same port
     */
     bool bindToPort (const int localPortNumber);
@@ -243,15 +243,15 @@ public:
         If the timeout is < 0, it will wait forever, or else will give up after
         the specified time.
 
-        If the socket is ready on return, this returns 1. If it times-out before 
+        If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (const bool readyForReading, 
+    int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
     /** Reads bytes from the socket (blocking).
 
-        Note that this method will block unless you have checked the socket is ready 
+        Note that this method will block unless you have checked the socket is ready
         for reading before calling it (see the waitUntilReady() method).
 
         @returns the number of bytes read, or -1 if there was an error.
@@ -260,7 +260,7 @@ public:
 
     /** Writes bytes to the socket from a buffer.
 
-        Note that this method will block unless you have checked the socket is ready 
+        Note that this method will block unless you have checked the socket is ready
         for writing before calling it (see the waitUntilReady() method).
 
         @returns the number of bytes written, or -1 if there was an error.
@@ -271,7 +271,7 @@ public:
     /** This waits for incoming data to be sent, and returns a socket that can be used
         to read it.
 
-        The object that gets returned is owned by the caller, and can't be used for 
+        The object that gets returned is owned by the caller, and can't be used for
         sending, but can be used to read the data.
     */
     DatagramSocket* waitForNextConnection() const;

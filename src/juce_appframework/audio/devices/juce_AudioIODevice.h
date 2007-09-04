@@ -149,12 +149,12 @@ public:
     const String& getTypeName() const throw()                       { return typeName; }
 
     //==============================================================================
-    /** Returns the names of all the available output channels on this device. 
+    /** Returns the names of all the available output channels on this device.
         To find out which of these are currently in use, call getActiveOutputChannels().
     */
     virtual const StringArray getOutputChannelNames() = 0;
 
-    /** Returns the names of all the available input channels on this device. 
+    /** Returns the names of all the available input channels on this device.
         To find out which of these are currently in use, call getActiveInputChannels().
     */
     virtual const StringArray getInputChannelNames() = 0;

@@ -114,8 +114,8 @@ static bool bindSocketToPort (const int handle, const int port) throw()
     return bind (handle, (struct sockaddr*) &servTmpAddr, sizeof (struct sockaddr_in)) >= 0;
 }
 
-static int readSocket (const int handle, 
-                       void* const destBuffer, const int maxBytesToRead, 
+static int readSocket (const int handle,
+                       void* const destBuffer, const int maxBytesToRead,
                        bool volatile& connected) throw()
 {
     int bytesRead = 0;
@@ -148,7 +148,7 @@ static int readSocket (const int handle,
     return bytesRead;
 }
 
-static int waitForReadiness (const int handle, const bool forReading, 
+static int waitForReadiness (const int handle, const bool forReading,
                              const int timeoutMsecs) throw()
 {
     struct timeval timeout;
@@ -209,7 +209,7 @@ static bool setSocketBlockingState (const int handle, const bool shouldBlock) th
         return false;
 
     if (shouldBlock)
-        socketFlags &= ~O_NONBLOCK; 
+        socketFlags &= ~O_NONBLOCK;
     else
         socketFlags |= O_NONBLOCK;
 
@@ -265,14 +265,14 @@ static bool connectSocket (int volatile& handle,
 #if JUCE_WIN32
         if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-        if (result == EINPROGRESS)   
+        if (result == EINPROGRESS)
 #endif
         {
             if (waitForReadiness (handle, false, timeOutMillisecs) != 1)
                 return false;
         }
     }
-   
+
     setSocketBlockingState (handle, true);
     resetSocketOptions (handle, false);
 
@@ -291,8 +291,8 @@ StreamingSocket::StreamingSocket()
 #endif
 }
 
-StreamingSocket::StreamingSocket (const String& hostName_, 
-                                  const int portNumber_, 
+StreamingSocket::StreamingSocket (const String& hostName_,
+                                  const int portNumber_,
                                   const int handle_)
     : hostName (hostName_),
       portNumber (portNumber_),
@@ -339,7 +339,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 }
 
 //==============================================================================
-int StreamingSocket::waitUntilReady (const bool readyForReading, 
+int StreamingSocket::waitUntilReady (const bool readyForReading,
                                      const int timeoutMsecs) const
 {
     return connected ? waitForReadiness (handle, readyForReading, timeoutMsecs)
@@ -488,7 +488,7 @@ DatagramSocket::DatagramSocket (const int localPortNumber)
     bindToPort (localPortNumber);
 }
 
-DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_, 
+DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
                                 const int handle_, const int localPortNumber)
     : hostName (hostName_),
       portNumber (portNumber_),
@@ -542,7 +542,7 @@ bool DatagramSocket::connect (const String& remoteHostName,
     hostName = remoteHostName;
     portNumber = remotePortNumber;
 
-    connected = connectSocket (handle, true, &serverAddress, 
+    connected = connectSocket (handle, true, &serverAddress,
                                remoteHostName, remotePortNumber,
                                timeOutMillisecs);
 
@@ -571,7 +571,7 @@ DatagramSocket* DatagramSocket::waitForNextConnection() const
 
         if (recvfrom (handle, buf, 0, 0, &address, &len) > 0)
         {
-            return new DatagramSocket (inet_ntoa (((struct sockaddr_in*) &address)->sin_addr), 
+            return new DatagramSocket (inet_ntoa (((struct sockaddr_in*) &address)->sin_addr),
                                        ntohs (((struct sockaddr_in*) &address)->sin_port),
                                        -1, -1);
         }
@@ -581,7 +581,7 @@ DatagramSocket* DatagramSocket::waitForNextConnection() const
 }
 
 //==============================================================================
-int DatagramSocket::waitUntilReady (const bool readyForReading, 
+int DatagramSocket::waitUntilReady (const bool readyForReading,
                                     const int timeoutMsecs) const
 {
     return connected ? waitForReadiness (handle, readyForReading, timeoutMsecs)
@@ -597,11 +597,11 @@ int DatagramSocket::read (void* destBuffer, const int maxBytesToRead)
 int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 {
     // You need to call connect() first to set the server address..
-    jassert (serverAddress != 0 && connected); 
+    jassert (serverAddress != 0 && connected);
 
-    return connected ? sendto (handle, (const char*) sourceBuffer, 
-                               numBytesToWrite, 0, 
-                               (const struct sockaddr*) serverAddress, 
+    return connected ? sendto (handle, (const char*) sourceBuffer,
+                               numBytesToWrite, 0,
+                               (const struct sockaddr*) serverAddress,
                                sizeof (struct sockaddr_in))
                      : -1;
 }
