@@ -676,7 +676,11 @@ bool CharacterFunctions::isDigit (const char character) throw()
 
 bool CharacterFunctions::isDigit (const juce_wchar character) throw()
 {
-    return isdigit (character) != 0;
+#if MACOS_10_2_OR_EARLIER
+    return isdigit ((char) character) != 0;
+#else
+    return iswdigit (character) != 0;
+#endif
 }
 
 bool CharacterFunctions::isLetter (const char character) throw()
