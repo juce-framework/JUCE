@@ -458,8 +458,8 @@ void Graphics::drawRect (const int x,
 void Graphics::drawRect (const Rectangle& r,
                          const int lineThickness) const throw()
 {
-    drawRect (r.getX(), r.getY(), 
-              r.getWidth(), r.getHeight(), 
+    drawRect (r.getX(), r.getY(),
+              r.getWidth(), r.getHeight(),
               lineThickness);
 }
 
@@ -538,8 +538,10 @@ void Graphics::fillRoundedRectangle (const float x,
 void Graphics::fillRoundedRectangle (const Rectangle& r,
                                      const float cornerSize) const throw()
 {
-    fillRoundedRectangle (r.getX(), r.getY(),
-                          r.getWidth(), r.getHeight(),
+    fillRoundedRectangle ((float) r.getX(), 
+                          (float) r.getY(),
+                          (float) r.getWidth(),
+                          (float) r.getHeight(),
                           cornerSize);
 }
 
@@ -562,8 +564,10 @@ void Graphics::drawRoundedRectangle (const Rectangle& r,
                                      const float cornerSize,
                                      const float lineThickness) const throw()
 {
-    drawRoundedRectangle (r.getX(), r.getY(), 
-                          r.getWidth(), r.getHeight(), 
+    drawRoundedRectangle ((float) r.getX(),
+                          (float) r.getY(),
+                          (float) r.getWidth(),
+                          (float) r.getHeight(),
                           cornerSize, lineThickness);
 }
 

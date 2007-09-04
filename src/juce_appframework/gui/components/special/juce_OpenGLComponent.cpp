@@ -139,10 +139,10 @@ void OpenGLComponent::createContext()
 
     if (context == 0 && isShowing() && getTopLevelComponent()->getPeer() != 0)
     {
-        context = OpenGLContext::createContextForWindow (this, 
-                                                         preferredPixelFormat, 
-                                                         componentToShareListsWith != 0 
-                                                             ? componentToShareListsWith->context 
+        context = OpenGLContext::createContextForWindow (this,
+                                                         preferredPixelFormat,
+                                                         componentToShareListsWith != 0
+                                                             ? componentToShareListsWith->context
                                                              : 0);
 
         if (context != 0)

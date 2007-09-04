@@ -51,7 +51,7 @@ struct OpenGLPixelFormat
     //==============================================================================
     /** Creates an OpenGLPixelFormat.
 
-        The default constructor just initialises the object as a simple 8-bit 
+        The default constructor just initialises the object as a simple 8-bit
         RGBA format.
     */
     OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
@@ -140,7 +140,7 @@ public:
         you're doing - the OpenGLComponent calls this and manages the context for you.
     */
     static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
-                                                  const OpenGLPixelFormat& pixelFormat, 
+                                                  const OpenGLPixelFormat& pixelFormat,
                                                   const OpenGLContext* const contextToShareWith);
 
     //==============================================================================
@@ -218,7 +218,7 @@ public:
     /** Returns the context that will draw into this component.
 
         This may return 0 if it failed to initialise properly, or if the component
-        is currently invisible. The context object may be deleted and a new one created 
+        is currently invisible. The context object may be deleted and a new one created
         during the life of this component - see newOpenGLContextCreated().
     */
     OpenGLContext* getCurrentContext() const throw();
@@ -255,8 +255,8 @@ public:
     /** Calls the rendering callback, and swaps the buffers afterwards.
 
         This is called automatically by paint() when the component needs to be rendered.
-        
-        It can be overridden if you need to decouple the rendering from the paint callback 
+
+        It can be overridden if you need to decouple the rendering from the paint callback
         and render with a custom thread.
 
         Returns true if the operation succeeded.
