@@ -922,7 +922,7 @@ private:
             return floatToLong (String (valueString).getFloatValue());
         }
 
-        Cmn_Bool IsKeyValid(long key) const     { return true; }
+        Cmn_Bool IsKeyValid (long key) const    { return true; }
 
         void GetNameOfLength (char* name, int maxLength, OSType inControllerType) const
         {
@@ -944,7 +944,10 @@ private:
             juceFilter->getParameterText (index).copyToBuffer (valueString, maxLength);
         }
 
-        Cmn_Bool IsAutomatable() const  { return true; }
+        Cmn_Bool IsAutomatable() const
+        {
+            return juceFilter->isParameterAutomatable (index);
+        }
 
     private:
         //==============================================================================
