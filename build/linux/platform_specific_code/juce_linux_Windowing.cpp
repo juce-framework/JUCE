@@ -2800,7 +2800,7 @@ Image* juce_createIconForFile (const File& file)
 class WindowedGLContext     : public OpenGLContext
 {
 public:
-    WindowedGLContext (Component* const component, 
+    WindowedGLContext (Component* const component,
                        const OpenGLPixelFormat& pixelFormat_,
                        GLXContext sharedContext)
         : renderContext (0),
@@ -2875,7 +2875,7 @@ public:
         XSync (display, False);
     }
 
-    ~WindowedGLContext() 
+    ~WindowedGLContext()
     {
         makeInactive();
 
@@ -2943,7 +2943,7 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component, 
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
                                                       const OpenGLPixelFormat& pixelFormat,
                                                       const OpenGLContext* const contextToShareWith)
 {
