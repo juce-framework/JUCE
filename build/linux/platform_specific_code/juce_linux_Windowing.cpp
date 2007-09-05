@@ -40,7 +40,7 @@
 #include <X11/Xmd.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-#include <X11/extensions/scrnsaver.h>
+#include <dlfcn.h>
 
 #if JUCE_USE_XINERAMA
  /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..
@@ -2565,14 +2565,27 @@ void Desktop::setMousePosition (int x, int y) throw()
 
 
 //==============================================================================
-static bool screenSaverAllowed = false;
+static bool screenSaverAllowed = true;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
     if (screenSaverAllowed != isEnabled)
     {
         screenSaverAllowed = isEnabled;
-        XScreenSaverSuspend (display, ! isEnabled);
+
+        typedef void (*tXScreenSaverSuspend) (Display*, Bool);
+        static tXScreenSaverSuspend xScreenSaverSuspend = 0;
+
+        if (xScreenSaverSuspend == 0)
+        {
+            void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW);
+
+            if (h != 0)
+                xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
+        }
+
+        if (xScreenSaverSuspend != 0)
+            xScreenSaverSuspend (display, ! isEnabled);
     }
 }
 

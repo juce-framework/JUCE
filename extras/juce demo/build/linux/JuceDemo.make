@@ -13,7 +13,7 @@ ifeq ($(CONFIG),Debug)
   CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -lXss -ljuce_debug
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -ljuce_debug
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include"
   TARGET := jucedemo
@@ -28,7 +28,7 @@ ifeq ($(CONFIG),Release)
   CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -lXss -ljuce
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -ljuce
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include"
   TARGET := jucedemo

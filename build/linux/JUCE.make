@@ -107,6 +107,9 @@ OBJECTS := \
 	$(OBJDIR)/juce_MidiMessage.o \
 	$(OBJDIR)/juce_MidiMessageCollector.o \
 	$(OBJDIR)/juce_MidiMessageSequence.o \
+	$(OBJDIR)/juce_AudioProcessor.o \
+	$(OBJDIR)/juce_AudioProcessorEditor.o \
+	$(OBJDIR)/juce_GenericAudioProcessorEditor.o \
 	$(OBJDIR)/juce_AiffAudioFormat.o \
 	$(OBJDIR)/juce_AudioCDReader.o \
 	$(OBJDIR)/juce_AudioFormat.o \
@@ -786,6 +789,21 @@ $(OBJDIR)/juce_MidiMessageCollector.o: ../../src/juce_appframework/audio/midi/ju
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_MidiMessageSequence.o: ../../src/juce_appframework/audio/midi/juce_MidiMessageSequence.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioProcessor.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessor.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioProcessorEditor.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorEditor.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
