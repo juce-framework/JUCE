@@ -131,7 +131,7 @@ private:
 class FilterComponent    : public Component
 {
 public:
-    FilterComponent (FilterGraph& graph_, 
+    FilterComponent (FilterGraph& graph_,
                      const uint32 filterID_)
         : graph (graph_),
           filterID (filterID_),
@@ -615,7 +615,7 @@ private:
         distanceFromStart = juce_hypot (x - (x1 - getX()), y - (y1 - getY()));
         distanceFromEnd = juce_hypot (x - (x2 - getX()), y - (y2 - getY()));
     }
-    
+
     ConnectorComponent (const ConnectorComponent&);
     const ConnectorComponent& operator= (const ConnectorComponent&);
 };
@@ -707,7 +707,7 @@ PinComponent* GraphEditorPanel::findPinAt (const int x, const int y) const
         if (fc != 0)
         {
             PinComponent* const pin
-                = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(), 
+                = dynamic_cast <PinComponent*> (fc->getComponentAt (x - fc->getX(),
                                                                     y - fc->getY()));
 
             if (pin != 0)
@@ -893,7 +893,7 @@ void GraphEditorPanel::endDraggingConnector (const MouseEvent& e)
 
 
 //==============================================================================
-class TooltipBar   : public Component, 
+class TooltipBar   : public Component,
                      private Timer
 {
 public:
@@ -944,7 +944,7 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
 
     graphPlayer = new FilterGraphPlayer (graph);
 
-    addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphPlayer->keyState, 
+    addAndMakeVisible (keyboardComp = new MidiKeyboardComponent (graphPlayer->keyState,
                                                                  MidiKeyboardComponent::horizontalKeyboard));
 
     addAndMakeVisible (statusBar = new TooltipBar());

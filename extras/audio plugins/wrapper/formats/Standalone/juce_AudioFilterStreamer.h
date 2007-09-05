@@ -32,12 +32,12 @@
 #ifndef __JUCE_AUDIOFILTERSTREAMER_JUCEHEADER__
 #define __JUCE_AUDIOFILTERSTREAMER_JUCEHEADER__
 
-#include "../../juce_AudioFilterBase.h"
+#include "../../../../../juce.h"
 
 
 //==============================================================================
 /**
-    A class that wraps an AudioFilterBase as an AudioIODeviceCallback, so its
+    A class that wraps an AudioProcessor as an AudioIODeviceCallback, so its
     output can be streamed directly to/from some audio and midi inputs and outputs.
 
     To use it, just create an instance of this for your filter, and register it
@@ -51,11 +51,11 @@
 */
 class AudioFilterStreamer   : public AudioIODeviceCallback,
                               public MidiInputCallback,
-                              public AudioFilterBase::HostCallbacks
+                              public AudioPlayHead
 {
 public:
     //==============================================================================
-    AudioFilterStreamer (AudioFilterBase& filterToUse);
+    AudioFilterStreamer (AudioProcessor& filterToUse);
     ~AudioFilterStreamer();
 
 
@@ -71,17 +71,13 @@ public:
 
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
 
-    bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info);
-    void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue);
-    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index);
-    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index);
-    void JUCE_CALLTYPE informHostOfStateChange();
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info);
 
     juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
-    AudioFilterBase& filter;
+    AudioProcessor& filter;
     bool isPlaying;
     double sampleRate;
     MidiMessageCollector midiCollector;
@@ -118,7 +114,7 @@ public:
 
         Pass in 0 to deselect the current filter.
     */
-    void setFilter (AudioFilterBase* filterToStream);
+    void setFilter (AudioProcessor* filterToStream);
 
 
     //==============================================================================

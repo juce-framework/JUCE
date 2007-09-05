@@ -1166,6 +1166,42 @@
 							>
 						</File>
 					</Filter>
+					<Filter
+						Name="processors"
+						>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioPlayHead.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="events"

@@ -86,6 +86,21 @@
 #ifndef __JUCE_IIRFILTER_JUCEHEADER__
  #include "juce_appframework/audio/dsp/juce_IIRFilter.h"
 #endif
+#ifndef __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
+ #include "juce_appframework/audio/processors/juce_AudioPlayHead.h"
+#endif
+#ifndef __JUCE_AUDIOPROCESSOR_JUCEHEADER__
+ #include "juce_appframework/audio/processors/juce_AudioProcessor.h"
+#endif
+#ifndef __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
+ #include "juce_appframework/audio/processors/juce_AudioProcessorEditor.h"
+#endif
+#ifndef __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
+ #include "juce_appframework/audio/processors/juce_AudioProcessorListener.h"
+#endif
+#ifndef __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
+ #include "juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.h"
+#endif
 #ifndef __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
  #include "juce_appframework/audio/audio_sources/juce_AudioFormatReaderSource.h"
 #endif

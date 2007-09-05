@@ -48,7 +48,7 @@
     when it's destroyed. When the filter's parameters are changed, it broadcasts
     a message and this editor responds by updating its display.
 */
-class DemoEditorComponent   : public AudioFilterEditor,
+class DemoEditorComponent   : public AudioProcessorEditor,
                               public ChangeListener,
                               public SliderListener
 {

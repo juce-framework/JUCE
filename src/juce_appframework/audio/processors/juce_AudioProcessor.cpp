@@ -29,12 +29,18 @@
   ==============================================================================
 */
 
-#include "juce_AudioFilterBase.h"
+#include "../../../juce_core/basics/juce_StandardHeader.h"
+
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_AudioProcessor.h"
+#include "../../../juce_core/threads/juce_ScopedLock.h"
+#include "../../../juce_core/text/juce_XmlDocument.h"
 
 
 //==============================================================================
-AudioFilterBase::AudioFilterBase()
-    : callbacks (0),
+AudioProcessor::AudioProcessor()
+    : playHead (0),
       activeEditor (0),
       sampleRate (0),
       blockSize (0),
@@ -45,7 +51,7 @@ AudioFilterBase::AudioFilterBase()
 {
 }
 
-AudioFilterBase::~AudioFilterBase()
+AudioProcessor::~AudioProcessor()
 {
     // ooh, nasty - the editor should have been deleted before the filter
     // that it refers to is deleted..
@@ -56,15 +62,27 @@ AudioFilterBase::~AudioFilterBase()
     jassert (changingParams.countNumberOfSetBits() == 0);
 }
 
-void AudioFilterBase::setHostCallbacks (HostCallbacks* const callbacks_) throw()
+void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead) throw()
 {
-    callbacks = callbacks_;
+    playHead = newPlayHead;
 }
 
-void AudioFilterBase::setPlayConfigDetails (const int numIns, 
-                                            const int numOuts, 
-                                            const double sampleRate_,
-                                            const int blockSize_) throw()
+void AudioProcessor::addListener (AudioProcessorListener* const newListener) throw()
+{
+    const ScopedLock sl (listenerLock);
+    listeners.addIfNotAlreadyThere (newListener);
+}
+
+void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRemove) throw()
+{
+    const ScopedLock sl (listenerLock);
+    listeners.removeValue (listenerToRemove);
+}
+
+void AudioProcessor::setPlayConfigDetails (const int numIns,
+                                           const int numOuts,
+                                           const double sampleRate_,
+                                           const int blockSize_) throw()
 {
     numInputChannels = numIns;
     numOutputChannels = numOuts;
@@ -72,7 +90,7 @@ void AudioFilterBase::setPlayConfigDetails (const int numIns,
     blockSize = blockSize_;
 }
 
-void JUCE_CALLTYPE AudioFilterBase::setLatencySamples (const int newLatency)
+void AudioProcessor::setLatencySamples (const int newLatency)
 {
     if (latencySamples != newLatency)
     {
@@ -81,18 +99,29 @@ void JUCE_CALLTYPE AudioFilterBase::setLatencySamples (const int newLatency)
     }
 }
 
-void AudioFilterBase::setParameterNotifyingHost (const int parameterIndex,
-                                                 const float newValue)
+void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
+                                                const float newValue)
+{
+    setParameter (parameterIndex, newValue);
+    sendParamChangeMessageToListeners (parameterIndex, newValue);
+}
+
+void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex, const float newValue)
 {
     jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
 
-    if (callbacks != 0)
-        callbacks->informHostOfParameterChange (parameterIndex, newValue);
-    else
-        setParameter (parameterIndex, newValue);
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        listenerLock.enter();
+        AudioProcessorListener* const l = (AudioProcessorListener*) listeners [i];
+        listenerLock.exit();
+
+        if (l != 0)
+            l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+    }
 }
 
-void AudioFilterBase::beginParameterChangeGesture (int parameterIndex)
+void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
     jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
 
@@ -100,49 +129,63 @@ void AudioFilterBase::beginParameterChangeGesture (int parameterIndex)
     // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
     jassert (! changingParams [parameterIndex]);
 
-    if (callbacks != 0)
-        callbacks->informHostOfParameterGestureBegin (parameterIndex);
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        listenerLock.enter();
+        AudioProcessorListener* const l = (AudioProcessorListener*) listeners [i];
+        listenerLock.exit();
+
+        if (l != 0)
+            l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+    }
 }
 
-void AudioFilterBase::endParameterChangeGesture (int parameterIndex)
+void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
     jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
 
-    // This means you've called endParameterChangeGesture without having previously called 
-    // endParameterChangeGesture. That might be fine in most hosts, but better to keep the 
+    // This means you've called endParameterChangeGesture without having previously called
+    // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
     // calls matched correctly.
     jassert (changingParams [parameterIndex]);
 
-    if (callbacks != 0)
-        callbacks->informHostOfParameterGestureEnd (parameterIndex);
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        listenerLock.enter();
+        AudioProcessorListener* const l = (AudioProcessorListener*) listeners [i];
+        listenerLock.exit();
+
+        if (l != 0)
+            l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+    }
 }
 
-void JUCE_CALLTYPE AudioFilterBase::updateHostDisplay()
+void AudioProcessor::updateHostDisplay()
 {
-    if (callbacks != 0)
-        callbacks->informHostOfStateChange();
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        listenerLock.enter();
+        AudioProcessorListener* const l = (AudioProcessorListener*) listeners [i];
+        listenerLock.exit();
+
+        if (l != 0)
+            l->audioProcessorChanged (this);
+    }
 }
 
-bool AudioFilterBase::isParameterAutomatable (int /*index*/) const
+bool AudioProcessor::isParameterAutomatable (int /*index*/) const
 {
     return true;
 }
 
-void AudioFilterBase::suspendProcessing (const bool shouldBeSuspended)
+void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
     const ScopedLock sl (callbackLock);
     suspended = shouldBeSuspended;
 }
 
 //==============================================================================
-bool AudioFilterBase::getCurrentPositionInfo (CurrentPositionInfo& info)
-{
-    return callbacks != 0
-            && callbacks->getCurrentPositionInfo (info);
-}
-
-//==============================================================================
-void AudioFilterBase::editorBeingDeleted (AudioFilterEditor* const editor) throw()
+void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) throw()
 {
     const ScopedLock sl (callbackLock);
 
@@ -152,19 +195,17 @@ void AudioFilterBase::editorBeingDeleted (AudioFilterEditor* const editor) throw
         activeEditor = 0;
 }
 
-AudioFilterEditor* AudioFilterBase::createEditorIfNeeded()
+AudioProcessorEditor* AudioProcessor::createEditorIfNeeded()
 {
     if (activeEditor != 0)
         return activeEditor;
 
-    AudioFilterEditor* const ed = createEditor();
+    AudioProcessorEditor* const ed = createEditor();
 
     if (ed != 0)
     {
-#if ! JUCE_PLUGIN_HOST
         // you must give your editor comp a size before returning it..
         jassert (ed->getWidth() > 0 && ed->getHeight() > 0);
-#endif
 
         const ScopedLock sl (callbackLock);
         activeEditor = ed;
@@ -174,12 +215,12 @@ AudioFilterEditor* AudioFilterBase::createEditorIfNeeded()
 }
 
 //==============================================================================
-void AudioFilterBase::getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
+void AudioProcessor::getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
 {
     getStateInformation (destData);
 }
 
-void AudioFilterBase::setCurrentProgramStateInformation (const void* data, int sizeInBytes)
+void AudioProcessor::setCurrentProgramStateInformation (const void* data, int sizeInBytes)
 {
     setStateInformation (data, sizeInBytes);
 }
@@ -188,8 +229,8 @@ void AudioFilterBase::setCurrentProgramStateInformation (const void* data, int s
 // magic number to identify memory blocks that we've stored as XML
 const uint32 magicXmlNumber = 0x21324356;
 
-void AudioFilterBase::copyXmlToBinary (const XmlElement& xml,
-                                       JUCE_NAMESPACE::MemoryBlock& destData)
+void AudioProcessor::copyXmlToBinary (const XmlElement& xml,
+                                      JUCE_NAMESPACE::MemoryBlock& destData)
 {
     const String xmlString (xml.createDocument (String::empty, true, false));
     const int stringLength = xmlString.length();
@@ -203,8 +244,8 @@ void AudioFilterBase::copyXmlToBinary (const XmlElement& xml,
     xmlString.copyToBuffer (d + 8, stringLength);
 }
 
-XmlElement* AudioFilterBase::getXmlFromBinary (const void* data,
-                                               const int sizeInBytes)
+XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
+                                              const int sizeInBytes)
 {
     if (sizeInBytes > 8
          && littleEndianInt ((const char*) data) == magicXmlNumber)
@@ -222,3 +263,15 @@ XmlElement* AudioFilterBase::getXmlFromBinary (const void* data,
 
     return 0;
 }
+
+//==============================================================================
+void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int)
+{
+}
+
+void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProcessor*, int)
+{
+}
+
+
+END_JUCE_NAMESPACE

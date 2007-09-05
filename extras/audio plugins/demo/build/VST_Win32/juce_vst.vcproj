@@ -248,29 +248,9 @@
 				Name="wrapper_code"
 				>
 				<File
-					RelativePath="..\..\..\wrapper\juce_AudioFilterBase.cpp"
+					RelativePath="..\..\..\wrapper\formats\VST\juce_VstWrapper.cpp"
 					>
 				</File>
-				<File
-					RelativePath="..\..\..\wrapper\juce_AudioFilterBase.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\wrapper\juce_AudioFilterEditor.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\..\wrapper\juce_AudioFilterEditor.h"
-					>
-				</File>
-				<Filter
-					Name="VST specific"
-					>
-					<File
-						RelativePath="..\..\..\wrapper\formats\VST\juce_VstWrapper.cpp"
-						>
-					</File>
-				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

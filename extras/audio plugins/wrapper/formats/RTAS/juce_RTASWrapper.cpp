@@ -83,8 +83,7 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../juce_AudioFilterBase.h"
-#include "../../juce_AudioFilterEditor.h"
+#include "../../../../../juce.h"
 #include "../../juce_IncludeCharacteristics.h"
 
 #ifdef _MSC_VER
@@ -92,6 +91,7 @@
 #endif
 
 #undef Component
+#undef MemoryBlock
 
 //==============================================================================
 #if JUCE_WIN32
@@ -105,6 +105,12 @@
 const int midiBufferSize = 1024;
 const OSType juceChunkType = 'juce';
 static const int bypassControlIndex = 1;
+
+//==============================================================================
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it return a new instance of the filter subclass that you're building.
+*/
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 
 //==============================================================================
@@ -123,7 +129,8 @@ static long floatToLong (const float n) throw()
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
                            public CEffectProcessRTAS,
-                           public AudioFilterBase::HostCallbacks,
+                           public AudioProcessorListener,
+                           public AudioPlayHead,
                            public AsyncUpdater
 {
 public:
@@ -161,7 +168,7 @@ public:
     {
     public:
         //==============================================================================
-        JuceCustomUIView (AudioFilterBase* const filter_)
+        JuceCustomUIView (AudioProcessor* const filter_)
             : filter (filter_),
               editorComp (0),
               wrapper (0)
@@ -247,9 +254,9 @@ public:
 
         //==============================================================================
     private:
-        AudioFilterBase* const filter;
+        AudioProcessor* const filter;
         juce::Component* wrapper;
-        AudioFilterEditor* editorComp;
+        AudioProcessorEditor* editorComp;
 
         void deleteEditorComp()
         {
@@ -268,7 +275,7 @@ public:
         }
 
         //==============================================================================
-        // A component to hold the AudioFilterEditor, and cope with some housekeeping
+        // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
         class EditorCompWrapper  : public juce::Component,
 #if JUCE_MAC
@@ -279,7 +286,7 @@ public:
         {
         public:
             EditorCompWrapper (void* const hostWindow_,
-                               AudioFilterEditor* const editorComp,
+                               AudioProcessorEditor* const editorComp,
                                JuceCustomUIView* const owner_)
                 : hostWindow (hostWindow_),
                   owner (owner_),
@@ -546,7 +553,7 @@ protected:
         SFicPlugInStemFormats stems;
         GetProcessType()->GetStemFormats (&stems);
 
-        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, 
+        juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
                                           juceFilter->getSampleRate(), juceFilter->getBlockSize());
 
         AddControl (new CPluginControl_OnOff ('bypa', "Master Bypass\nMastrByp\nMByp\nByp", false, true));
@@ -581,7 +588,8 @@ protected:
 
         midiTransport = new CEffectMIDITransport (&mMIDIWorld);
 
-        juceFilter->setHostCallbacks (this);
+        juceFilter->setPlayHead (this);
+        juceFilter->addListener (this);
     }
 
     void handleAsyncUpdate()
@@ -592,10 +600,10 @@ protected:
             jassert (sampleRate > 0);
 
             juce_free (channels);
-            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(), 
+            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(),
                                                                       juceFilter->getNumOutputChannels()));
 
-            juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs, 
+            juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
                                               sampleRate, mRTGlobals->mHWBufferSizeInSamples);
 
             juceFilter->prepareToPlay (sampleRate,
@@ -770,7 +778,7 @@ protected:
     }
 
     //==============================================================================
-    bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
     {
         // this method can only be called while the plugin is running
         jassert (prepared);
@@ -805,42 +813,42 @@ protected:
         switch (fTimeCodeInfo.mFrameRate)
         {
         case ficFrameRate_24Frame:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps24;
+            info.frameRate = AudioPlayHead::fps24;
             break;
 
         case ficFrameRate_25Frame:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps25;
+            info.frameRate = AudioPlayHead::fps25;
             framesPerSec = 25.0;
             break;
 
         case ficFrameRate_2997NonDrop:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps2997;
+            info.frameRate = AudioPlayHead::fps2997;
             framesPerSec = 29.97002997;
             break;
 
         case ficFrameRate_2997DropFrame:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps2997drop;
+            info.frameRate = AudioPlayHead::fps2997drop;
             framesPerSec = 29.97002997;
             break;
 
         case ficFrameRate_30NonDrop:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps30;
+            info.frameRate = AudioPlayHead::fps30;
             framesPerSec = 30.0;
             break;
 
         case ficFrameRate_30DropFrame:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps30drop;
+            info.frameRate = AudioPlayHead::fps30drop;
             framesPerSec = 30.0;
             break;
 
         case ficFrameRate_23976:
             // xxx not strictly true..
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fps24;
+            info.frameRate = AudioPlayHead::fps24;
             framesPerSec = 23.976;
             break;
 
         default:
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fpsUnknown;
+            info.frameRate = AudioPlayHead::fpsUnknown;
             break;
         }
 
@@ -849,38 +857,35 @@ protected:
         return true;
     }
 
-    void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
     {
-        if (juceFilter != 0)
-            juceFilter->setParameter (index, newValue);
-
         SetControlValue (index + 2, floatToLong (newValue));
     }
 
-    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index)
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)
     {
         TouchControl (index + 2);
     }
 
-    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index)
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)
     {
         ReleaseControl (index + 2);
     }
 
-    void JUCE_CALLTYPE informHostOfStateChange()
+    void audioProcessorChanged (AudioProcessor*)
     {
         // xxx is there an RTAS equivalent?
     }
 
     //==============================================================================
 private:
-    AudioFilterBase* juceFilter;
+    AudioProcessor* juceFilter;
     MidiBuffer midiEvents;
     CEffectMIDIOtherBufferedNode* midiBufferNode;
     CEffectMIDITransport* midiTransport;
     DirectMidiPacket midiBuffer [midiBufferSize];
 
-    juce::MemoryBlock tempFilterData;
+    JUCE_NAMESPACE::MemoryBlock tempFilterData;
     float** channels;
     bool prepared;
     double sampleRate;
@@ -901,7 +906,7 @@ private:
     {
     public:
         //==============================================================================
-        JucePluginControl (AudioFilterBase* const juceFilter_, const int index_)
+        JucePluginControl (AudioProcessor* const juceFilter_, const int index_)
             : juceFilter (juceFilter_),
               index (index_)
         {
@@ -951,7 +956,7 @@ private:
 
     private:
         //==============================================================================
-        AudioFilterBase* const juceFilter;
+        AudioProcessor* const juceFilter;
         const int index;
 
         JucePluginControl (const JucePluginControl&);

@@ -78,7 +78,7 @@
     channels correctly.
 
     As soon as a plugin's prepareToPlay() method is called, you can find out the actual
-    number of channels that will be used with the AudioFilterBase::getNumInputChannels()
+    number of channels that will be used with the AudioProcessor::getNumInputChannels()
     method.
 */
 #define JucePlugin_MaxNumInputChannels              2
@@ -92,7 +92,7 @@
     channels correctly.
 
     As soon as a plugin's prepareToPlay() method is called, you can find out the actual
-    number of channels that will be used with the AudioFilterBase::getNumOutputChannels()
+    number of channels that will be used with the AudioProcessor::getNumOutputChannels()
     method.
 */
 #define JucePlugin_MaxNumOutputChannels             2
@@ -114,7 +114,7 @@
 
     As soon as a plugin's prepareToPlay() method is called, you can find out the actual
     number of channels that the host has connected to the plugin by using the
-    AudioFilterBase::getNumOutputChannels() and AudioFilterBase::getNumInputChannels()
+    AudioProcessor::getNumOutputChannels() and AudioFilterBase::getNumInputChannels()
     methods.
 */
 #define JucePlugin_PreferredChannelConfigurations   { 1, 1 }, { 2, 2 }

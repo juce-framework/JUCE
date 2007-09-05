@@ -29,16 +29,17 @@
   ==============================================================================
 */
 
+#include "../../../../juce.h"
 #include "DemoJuceFilter.h"
 #include "DemoEditorComponent.h"
 
 
 //==============================================================================
 /**
-    This function must be implemented to create the actual plugin object that
-    you want to use.
+    This function must be implemented to create a new instance of your 
+    plugin object.
 */
-AudioFilterBase* JUCE_CALLTYPE createPluginFilter()
+AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new DemoJuceFilter();
 }
@@ -103,22 +104,22 @@ const String DemoJuceFilter::getParameterText (int index)
     return String::empty;
 }
 
-const String JUCE_CALLTYPE DemoJuceFilter::getInputChannelName (const int channelIndex) const
+const String DemoJuceFilter::getInputChannelName (const int channelIndex) const
 {
     return String (channelIndex + 1);
 }
 
-const String JUCE_CALLTYPE DemoJuceFilter::getOutputChannelName (const int channelIndex) const
+const String DemoJuceFilter::getOutputChannelName (const int channelIndex) const
 {
     return String (channelIndex + 1);
 }
 
-bool JUCE_CALLTYPE DemoJuceFilter::isInputChannelStereoPair (int index) const
+bool DemoJuceFilter::isInputChannelStereoPair (int index) const
 {
     return false;
 }
 
-bool JUCE_CALLTYPE DemoJuceFilter::isOutputChannelStereoPair (int index) const
+bool DemoJuceFilter::isOutputChannelStereoPair (int index) const
 {
     return false;
 }
@@ -146,7 +147,7 @@ void DemoJuceFilter::processBlock (AudioSampleBuffer& buffer,
         buffer.applyGain (channel, 0, buffer.getNumSamples(), gain);
     }
 
-    // in case we have more outputs than inputs, we'll clear any output 
+    // in case we have more outputs than inputs, we'll clear any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
     for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
@@ -162,9 +163,9 @@ void DemoJuceFilter::processBlock (AudioSampleBuffer& buffer,
 
     // have a go at getting the current time from the host, and if it's changed, tell
     // our UI to update itself.
-    CurrentPositionInfo pos;
+    AudioPlayHead::CurrentPositionInfo pos;
 
-    if (getCurrentPositionInfo (pos))
+    if (getPlayHead() != 0 && getPlayHead()->getCurrentPosition (pos))
     {
         if (memcmp (&pos, &lastPosInfo, sizeof (pos)) != 0)
         {
@@ -182,13 +183,13 @@ void DemoJuceFilter::processBlock (AudioSampleBuffer& buffer,
 }
 
 //==============================================================================
-AudioFilterEditor* DemoJuceFilter::createEditor()
+AudioProcessorEditor* DemoJuceFilter::createEditor()
 {
     return new DemoEditorComponent (this);
 }
 
 //==============================================================================
-void DemoJuceFilter::getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
+void DemoJuceFilter::getStateInformation (MemoryBlock& destData)
 {
     // you can store your parameters as binary data if you want to or if you've got
     // a load of binary to put in there, but if you're not doing anything too heavy,

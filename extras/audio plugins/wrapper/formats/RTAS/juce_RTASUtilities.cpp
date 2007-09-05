@@ -40,7 +40,7 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../juce_AudioFilterBase.h"
+#include "../../../../../juce.h"
 
 #ifdef _MSC_VER
   #pragma pack (pop)

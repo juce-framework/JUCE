@@ -66,6 +66,8 @@ package.files = { matchfiles (
     "../../src/juce_appframework/audio/dsp/*.h",
     "../../src/juce_appframework/audio/midi/*.cpp",
     "../../src/juce_appframework/audio/midi/*.h",
+    "../../src/juce_appframework/audio/processors/*.cpp",
+    "../../src/juce_appframework/audio/processors/*.h",
     "../../src/juce_appframework/audio/audio_file_formats/*.cpp",
     "../../src/juce_appframework/audio/audio_file_formats/*.h",
     "../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/*.c",

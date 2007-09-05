@@ -32,8 +32,6 @@
 #ifndef DEMOJUCEPLUGINFILTER_H
 #define DEMOJUCEPLUGINFILTER_H
 
-#include "../../wrapper/juce_AudioFilterBase.h"
-
 
 //==============================================================================
 /**
@@ -41,7 +39,7 @@
     passing through it.
 
 */
-class DemoJuceFilter  : public AudioFilterBase,
+class DemoJuceFilter  : public AudioProcessor,
                         public ChangeBroadcaster
 {
 public:
@@ -50,39 +48,39 @@ public:
     ~DemoJuceFilter();
 
     //==============================================================================
-    void JUCE_CALLTYPE prepareToPlay (double sampleRate, int samplesPerBlock);
-    void JUCE_CALLTYPE releaseResources();
+    void prepareToPlay (double sampleRate, int samplesPerBlock);
+    void releaseResources();
 
-	void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
-                                     MidiBuffer& midiMessages);
-
-    //==============================================================================
-    AudioFilterEditor* JUCE_CALLTYPE createEditor();
+	void processBlock (AudioSampleBuffer& buffer,
+                       MidiBuffer& midiMessages);
 
     //==============================================================================
-    int JUCE_CALLTYPE getNumParameters();
-
-    float JUCE_CALLTYPE getParameter (int index);
-    void JUCE_CALLTYPE setParameter (int index, float newValue);
-
-    const String JUCE_CALLTYPE getParameterName (int index);
-    const String JUCE_CALLTYPE getParameterText (int index);
-
-    const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const;
-    const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const;
-    bool JUCE_CALLTYPE isInputChannelStereoPair (int index) const;
-    bool JUCE_CALLTYPE isOutputChannelStereoPair (int index) const;
+    AudioProcessorEditor* createEditor();
 
     //==============================================================================
-    int JUCE_CALLTYPE getNumPrograms()                                        { return 0; }
-    int JUCE_CALLTYPE getCurrentProgram()                                     { return 0; }
-    void JUCE_CALLTYPE setCurrentProgram (int index)                          { }
-    const String JUCE_CALLTYPE getProgramName (int index)                     { return String::empty; }
-    void JUCE_CALLTYPE changeProgramName (int index, const String& newName)   { }
+    int getNumParameters();
+
+    float getParameter (int index);
+    void setParameter (int index, float newValue);
+
+    const String getParameterName (int index);
+    const String getParameterText (int index);
+
+    const String getInputChannelName (const int channelIndex) const;
+    const String getOutputChannelName (const int channelIndex) const;
+    bool isInputChannelStereoPair (int index) const;
+    bool isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
-    void JUCE_CALLTYPE getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
-    void JUCE_CALLTYPE setStateInformation (const void* data, int sizeInBytes);
+    int getNumPrograms()                                        { return 0; }
+    int getCurrentProgram()                                     { return 0; }
+    void setCurrentProgram (int index)                          { }
+    const String getProgramName (int index)                     { return String::empty; }
+    void changeProgramName (int index, const String& newName)   { }
+
+    //==============================================================================
+    void getStateInformation (MemoryBlock& destData);
+    void setStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
     // These properties are public so that our editor component can access them
@@ -94,7 +92,7 @@ public:
 
     // this keeps a copy of the last set of time info that was acquired during an audio
     // callback - the UI component will read this and display it.
-    AudioFilterBase::CurrentPositionInfo lastPosInfo;
+    AudioPlayHead::CurrentPositionInfo lastPosInfo;
 
     // these are used to persist the UI's size - the values are stored along with the
     // filter's other parameters, and the UI component will update them when it gets

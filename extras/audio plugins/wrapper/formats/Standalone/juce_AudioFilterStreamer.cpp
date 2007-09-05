@@ -34,7 +34,7 @@
 
 
 //==============================================================================
-AudioFilterStreamer::AudioFilterStreamer (AudioFilterBase& filterToUse)
+AudioFilterStreamer::AudioFilterStreamer (AudioProcessor& filterToUse)
     : filter (filterToUse),
       isPlaying (false),
       sampleRate (0),
@@ -42,7 +42,7 @@ AudioFilterStreamer::AudioFilterStreamer (AudioFilterBase& filterToUse)
 {
     filter.setPlayConfigDetails (JucePlugin_MaxNumInputChannels, JucePlugin_MaxNumOutputChannels, 0, 0);
 
-    filter.setHostCallbacks (this);
+    filter.setPlayHead (this);
 }
 
 AudioFilterStreamer::~AudioFilterStreamer()
@@ -132,26 +132,9 @@ void AudioFilterStreamer::handleIncomingMidiMessage (MidiInput* source, const Mi
 #endif
 }
 
-bool AudioFilterStreamer::getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
+bool AudioFilterStreamer::getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
 {
     return false;
-}
-
-void AudioFilterStreamer::informHostOfParameterChange (int index, float newValue)
-{
-    filter.setParameter (index, newValue);
-}
-
-void JUCE_CALLTYPE AudioFilterStreamer::informHostOfParameterGestureBegin (int index)
-{
-}
-
-void JUCE_CALLTYPE AudioFilterStreamer::informHostOfParameterGestureEnd (int index)
-{
-}
-
-void JUCE_CALLTYPE AudioFilterStreamer::informHostOfStateChange()
-{
 }
 
 
@@ -167,7 +150,7 @@ AudioFilterStreamingDeviceManager::~AudioFilterStreamingDeviceManager()
     clearSingletonInstance();
 }
 
-void AudioFilterStreamingDeviceManager::setFilter (AudioFilterBase* filterToStream)
+void AudioFilterStreamingDeviceManager::setFilter (AudioProcessor* filterToStream)
 {
     if (streamer != 0)
     {

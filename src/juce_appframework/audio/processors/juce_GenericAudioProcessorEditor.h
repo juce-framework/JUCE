@@ -29,28 +29,29 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GENERICFILTERUI_JUCEHEADER__
-#define __JUCE_GENERICFILTERUI_JUCEHEADER__
+#ifndef __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
+#define __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
 
-#include "juce_AudioPluginInstance.h"
+#include "juce_AudioProcessorEditor.h"
+#include "../../gui/components/properties/juce_PropertyPanel.h"
 
 
 //==============================================================================
 /**
-    A type of UI component that displays the parameters of an AudioFilterInstance as
+    A type of UI component that displays the parameters of an AudioProcessor as
     a simple list of sliders.
 
-    This can be used for showing an editor for plugins that don't supply their own
-    editor.
+    This can be used for showing an editor for a processor that doesn't supply
+    its own custom editor.
 
-    @see AudioFilterBase, AudioPluginFormat
+    @see AudioProcessor
 */
-class GenericAudioFilterEditor      : public AudioFilterEditor
+class GenericAudioProcessorEditor      : public AudioProcessorEditor
 {
 public:
     //==============================================================================
-    GenericAudioFilterEditor (AudioPluginInstance* const ownerFilter);
-    ~GenericAudioFilterEditor();
+    GenericAudioProcessorEditor (AudioProcessor* const owner);
+    ~GenericAudioProcessorEditor();
 
     //==============================================================================
     void paint (Graphics& g);
@@ -65,4 +66,4 @@ private:
 };
 
 
-#endif
+#endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__

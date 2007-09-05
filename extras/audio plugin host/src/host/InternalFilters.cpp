@@ -29,8 +29,10 @@
   ==============================================================================
 */
 
+#include "../../../../juce.h"
 #include "InternalFilters.h"
 #include "FilterGraph.h"
+
 
 //==============================================================================
 class InternalFilterBase    : public AudioPluginInstance,
@@ -52,27 +54,27 @@ public:
         playerChanged();
     }
 
-    virtual void playerChanged()                                            {}
+    virtual void playerChanged()                            {}
 
-    const String getManufacturer() const                                    { return "Raw Material Software"; }
-    const String getFormatName() const                                      { return "Internal"; }
-    const File getFile() const                                              { return File::nonexistent; }
-    int getUID() const                                                      { return getName().hashCode(); }
-    int getSamplesLatency() const                                           { return 0; }
+    const String getManufacturer() const                    { return "Raw Material Software"; }
+    const String getFormatName() const                      { return "Internal"; }
+    const File getFile() const                              { return File::nonexistent; }
+    int getUID() const                                      { return getName().hashCode(); }
+    int getSamplesLatency() const                           { return 0; }
 
-    AudioFilterEditor* JUCE_CALLTYPE createEditor()                         { return 0; }
-    int JUCE_CALLTYPE getNumParameters()                                    { return 0; }
-    const String JUCE_CALLTYPE getParameterName (int)                       { return String::empty; }
-    float JUCE_CALLTYPE getParameter (int)                                  { return 0; }
-    const String JUCE_CALLTYPE getParameterText (int)                       { return String::empty; }
-    void JUCE_CALLTYPE setParameter (int, float)                            {}
-    int JUCE_CALLTYPE getNumPrograms()                                      { return 0; }
-    int JUCE_CALLTYPE getCurrentProgram()                                   { return 0; }
-    void JUCE_CALLTYPE setCurrentProgram (int)                              {}
-    const String JUCE_CALLTYPE getProgramName (int)                         { return String::empty; }
-    void JUCE_CALLTYPE changeProgramName (int, const String&)               {}
-    void JUCE_CALLTYPE getStateInformation (JUCE_NAMESPACE::MemoryBlock&)   {}
-    void JUCE_CALLTYPE setStateInformation (const void*, int)               {}
+    AudioProcessorEditor* createEditor()                    { return 0; }
+    int getNumParameters()                                  { return 0; }
+    const String getParameterName (int)                     { return String::empty; }
+    float getParameter (int)                                { return 0; }
+    const String getParameterText (int)                     { return String::empty; }
+    void setParameter (int, float)                          {}
+    int getNumPrograms()                                    { return 0; }
+    int getCurrentProgram()                                 { return 0; }
+    void setCurrentProgram (int)                            {}
+    const String getProgramName (int)                       { return String::empty; }
+    void changeProgramName (int, const String&)             {}
+    void getStateInformation (MemoryBlock&)                 {}
+    void setStateInformation (const void*, int)             {}
 
 protected:
     FilterGraphPlayer* player;
@@ -118,17 +120,16 @@ public:
             setPlayConfigDetails (0, dev->getActiveInputChannels().countNumberOfSetBits(), getSampleRate(), getBlockSize());
     }
 
-    void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
+    void prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
         playerChanged();
     }
 
-    void JUCE_CALLTYPE releaseResources()
+    void releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
-                                     MidiBuffer&)
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
     {
         int n = 0;
 
@@ -145,12 +146,12 @@ public:
         }
     }
 
-    const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const
+    const String getInputChannelName (const int channelIndex) const
     {
         return String (channelIndex + 1);
     }
 
-    const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const
+    const String getOutputChannelName (const int channelIndex) const
     {
         AudioIODevice* const dev = getAudioDevice();
 
@@ -160,12 +161,12 @@ public:
         return "Input Channel " + String (channelIndex + 1);
     }
 
-    bool JUCE_CALLTYPE isInputChannelStereoPair (int) const
+    bool isInputChannelStereoPair (int) const
     {
         return true;
     }
 
-    bool JUCE_CALLTYPE isOutputChannelStereoPair (int) const
+    bool isOutputChannelStereoPair (int) const
     {
         return true;
     }
@@ -198,17 +199,16 @@ public:
             setPlayConfigDetails (dev->getActiveOutputChannels().countNumberOfSetBits(), 0, getSampleRate(), getBlockSize());
     }
 
-    void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
+    void prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
         playerChanged();
     }
 
-    void JUCE_CALLTYPE releaseResources()
+    void releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
-                                     MidiBuffer&)
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
     {
         int n = 0;
 
@@ -224,7 +224,7 @@ public:
                 }
                 else
                 {
-                    memcpy (dst, buffer.getSampleData (n), 
+                    memcpy (dst, buffer.getSampleData (n),
                             sizeof (float) * buffer.getNumSamples());
                 }
 
@@ -233,7 +233,7 @@ public:
         }
     }
 
-    const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const
+    const String getInputChannelName (const int channelIndex) const
     {
         AudioIODevice* const dev = getAudioDevice();
 
@@ -243,17 +243,17 @@ public:
         return "Output Channel " + String (channelIndex + 1);
     }
 
-    const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const
+    const String getOutputChannelName (const int channelIndex) const
     {
         return String (channelIndex + 1);
     }
 
-    bool JUCE_CALLTYPE isInputChannelStereoPair (int) const
+    bool isInputChannelStereoPair (int) const
     {
         return true;
     }
 
-    bool JUCE_CALLTYPE isOutputChannelStereoPair (int) const
+    bool isOutputChannelStereoPair (int) const
     {
         return true;
     }
@@ -283,32 +283,32 @@ public:
         {
             AudioDeviceManager* const dm = player->getAudioDeviceManager();
 
+            (void) dm;
             jassert (dm != 0);
         }
     }
 
-    void JUCE_CALLTYPE prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
+    void prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
     {
         playerChanged();
     }
 
-    void JUCE_CALLTYPE releaseResources()
+    void releaseResources()
     {
     }
 
-    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
-                                     MidiBuffer& midiBuffer)
+    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer)
     {
         midiBuffer.clear();
         midiBuffer.addEvents (player->incomingMidi, 0, buffer.getNumSamples(), 0);
     }
 
-    const String JUCE_CALLTYPE getInputChannelName (const int channelIndex) const
+    const String getInputChannelName (const int channelIndex) const
     {
         return String (channelIndex + 1);
     }
 
-    const String JUCE_CALLTYPE getOutputChannelName (const int channelIndex) const
+    const String getOutputChannelName (const int channelIndex) const
     {
         AudioIODevice* const dev = getAudioDevice();
 
@@ -318,12 +318,12 @@ public:
         return "Midi Input";
     }
 
-    bool JUCE_CALLTYPE isInputChannelStereoPair (int) const
+    bool isInputChannelStereoPair (int) const
     {
         return true;
     }
 
-    bool JUCE_CALLTYPE isOutputChannelStereoPair (int) const
+    bool isOutputChannelStereoPair (int) const
     {
         return true;
     }

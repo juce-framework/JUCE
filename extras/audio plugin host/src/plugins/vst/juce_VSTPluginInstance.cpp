@@ -447,7 +447,7 @@ public:
             if (resFileId != 0)
                 CloseResFile (resFileId);
         }
-        else 
+        else
 #endif
         if (bundleRef != 0)
         {
@@ -654,7 +654,7 @@ void VSTPluginInstance::initialise()
 
     dispatch (effOpen, 0, 0, 0, 0);
 
-    setPlayConfigDetails (effect->numInputs, effect->numOutputs, 
+    setPlayConfigDetails (effect->numInputs, effect->numOutputs,
                           getSampleRate(), getBlockSize());
 
     if (getNumPrograms() > 1)
@@ -672,15 +672,19 @@ void VSTPluginInstance::initialise()
     updateStoredProgramNames();
 
     wantsMidiMessages = dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0;
+
+    setLatencySamples (effect->initialDelay);
 }
 
 
 //==============================================================================
-void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_, 
-                                                     int samplesPerBlockExpected)
+void VSTPluginInstance::prepareToPlay (double sampleRate_,
+                                       int samplesPerBlockExpected)
 {
-    setPlayConfigDetails (effect->numInputs, effect->numOutputs, 
+    setPlayConfigDetails (effect->numInputs, effect->numOutputs,
                           sampleRate_, samplesPerBlockExpected);
+
+    setLatencySamples (effect->initialDelay);
 
     midiCollector.reset (sampleRate_);
 
@@ -728,7 +732,7 @@ void JUCE_CALLTYPE VSTPluginInstance::prepareToPlay (double sampleRate_,
     }
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::releaseResources()
+void VSTPluginInstance::releaseResources()
 {
     if (initialised)
     {
@@ -745,8 +749,8 @@ void JUCE_CALLTYPE VSTPluginInstance::releaseResources()
     channels = 0;
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
-                                                    MidiBuffer& midiMessages)
+void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
+                                      MidiBuffer& midiMessages)
 {
     const int numSamples = buffer.getNumSamples();
 
@@ -922,13 +926,13 @@ void VSTPluginInstance::handleMidiFromPlugin (const VstEvents* const events)
 }
 
 //==============================================================================
-class VSTPluginWindow   : public AudioFilterEditor,
+class VSTPluginWindow   : public AudioProcessorEditor,
                           public Timer
 {
 public:
     //==============================================================================
     VSTPluginWindow (VSTPluginInstance& plugin_)
-        : AudioFilterEditor (&plugin_),
+        : AudioProcessorEditor (&plugin_),
           plugin (plugin_),
           isOpen (false),
           wasShowing (false),
@@ -948,6 +952,7 @@ public:
 
         activeWindows.add (this);
 
+        setSize (1, 1);
         setOpaque (true);
         setVisible (true);
     }
@@ -1406,7 +1411,7 @@ private:
 };
 
 //==============================================================================
-AudioFilterEditor* JUCE_CALLTYPE VSTPluginInstance::createEditor()
+AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
     if (hasEditor())
         return new VSTPluginWindow (*this);
@@ -1548,7 +1553,7 @@ void VSTPluginInstance::setParamsInProgramBlock (fxProgram* const prog) throw()
         prog->params[i] = swapFloat (getParameter (i));
 }
 
-bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool isFXB, int maxSizeMB)
+bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB)
 {
     const int numPrograms = getNumPrograms();
     const int numParams = getNumParameters();
@@ -1557,7 +1562,7 @@ bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool i
     {
         if (isFXB)
         {
-            JUCE_NAMESPACE::MemoryBlock chunk;
+            MemoryBlock chunk;
             getChunkData (chunk, false, maxSizeMB);
 
             const int totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
@@ -1577,7 +1582,7 @@ bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool i
         }
         else
         {
-            JUCE_NAMESPACE::MemoryBlock chunk;
+            MemoryBlock chunk;
             getChunkData (chunk, true, maxSizeMB);
 
             const int totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
@@ -1615,7 +1620,7 @@ bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool i
             set->numPrograms = swap (numPrograms);
 
             const int oldProgram = getCurrentProgram();
-            JUCE_NAMESPACE::MemoryBlock oldSettings;
+            MemoryBlock oldSettings;
             createTempParameterStore (oldSettings);
 
             setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
@@ -1644,7 +1649,7 @@ bool VSTPluginInstance::saveToFXBFile (JUCE_NAMESPACE::MemoryBlock& dest, bool i
     return true;
 }
 
-void VSTPluginInstance::getChunkData (JUCE_NAMESPACE::MemoryBlock& mb, bool isPreset, int maxSizeMB) const
+void VSTPluginInstance::getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const
 {
     if (usesChunks())
     {
@@ -1796,8 +1801,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
     switch (opcode)
     {
     case audioMasterAutomate:
-        if (callbacks != 0)
-            callbacks->informHostOfParameterChange (index, opt);
+        sendParamChangeMessageToListeners (index, opt);
         break;
 
     case audioMasterProcessEvents:
@@ -2048,12 +2052,12 @@ const String VSTPluginInstance::getCategory() const
 }
 
 //==============================================================================
-int JUCE_CALLTYPE VSTPluginInstance::getNumParameters()
+int VSTPluginInstance::getNumParameters()
 {
     return effect != 0 ? effect->numParams : 0;
 }
 
-float JUCE_CALLTYPE VSTPluginInstance::getParameter (int index)
+float VSTPluginInstance::getParameter (int index)
 {
     if (effect != 0 && index >= 0 && index < effect->numParams)
     {
@@ -2070,7 +2074,7 @@ float JUCE_CALLTYPE VSTPluginInstance::getParameter (int index)
     return 0.0f;
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::setParameter (int index, float newValue)
+void VSTPluginInstance::setParameter (int index, float newValue)
 {
     if (effect != 0 && index >= 0 && index < effect->numParams)
     {
@@ -2087,7 +2091,7 @@ void JUCE_CALLTYPE VSTPluginInstance::setParameter (int index, float newValue)
     }
 }
 
-const String JUCE_CALLTYPE VSTPluginInstance::getParameterName (int index)
+const String VSTPluginInstance::getParameterName (int index)
 {
     if (effect != 0)
     {
@@ -2117,7 +2121,7 @@ const String VSTPluginInstance::getParameterLabel (int index) const
     return String::empty;
 }
 
-const String JUCE_CALLTYPE VSTPluginInstance::getParameterText (int index)
+const String VSTPluginInstance::getParameterText (int index)
 {
     if (effect != 0)
     {
@@ -2143,7 +2147,7 @@ bool VSTPluginInstance::isParameterAutomatable (int index) const
     return false;
 }
 
-void VSTPluginInstance::createTempParameterStore (JUCE_NAMESPACE::MemoryBlock& dest)
+void VSTPluginInstance::createTempParameterStore (MemoryBlock& dest)
 {
     dest.setSize (64 + 4 * getNumParameters());
     dest.fillWith (0);
@@ -2155,7 +2159,7 @@ void VSTPluginInstance::createTempParameterStore (JUCE_NAMESPACE::MemoryBlock& d
         p[i] = getParameter(i);
 }
 
-void VSTPluginInstance::restoreFromTempParameterStore (const JUCE_NAMESPACE::MemoryBlock& m)
+void VSTPluginInstance::restoreFromTempParameterStore (const MemoryBlock& m)
 {
     changeProgramName (getCurrentProgram(), (const char*) m);
 
@@ -2165,23 +2169,23 @@ void VSTPluginInstance::restoreFromTempParameterStore (const JUCE_NAMESPACE::Mem
 }
 
 //==============================================================================
-int JUCE_CALLTYPE VSTPluginInstance::getNumPrograms()
+int VSTPluginInstance::getNumPrograms()
 {
     return effect != 0 ? effect->numPrograms : 0;
 }
 
-int JUCE_CALLTYPE VSTPluginInstance::getCurrentProgram()
+int VSTPluginInstance::getCurrentProgram()
 {
     return dispatch (effGetProgram, 0, 0, 0, 0);
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::setCurrentProgram (int newIndex)
+void VSTPluginInstance::setCurrentProgram (int newIndex)
 {
     if (getNumPrograms() > 0 && newIndex != getCurrentProgram())
         dispatch (effSetProgram, 0, jlimit (0, getNumPrograms() - 1, newIndex), 0, 0);
 }
 
-const String JUCE_CALLTYPE VSTPluginInstance::getProgramName (int index)
+const String VSTPluginInstance::getProgramName (int index)
 {
     if (index == getCurrentProgram())
     {
@@ -2203,7 +2207,7 @@ const String JUCE_CALLTYPE VSTPluginInstance::getProgramName (int index)
     return programNames [index];
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::changeProgramName (int index, const String& newName)
+void VSTPluginInstance::changeProgramName (int index, const String& newName)
 {
     if (index == getCurrentProgram())
     {
@@ -2227,7 +2231,7 @@ void VSTPluginInstance::updateStoredProgramNames()
         if (dispatch (effGetProgramNameIndexed, 0, -1, nm, 0) == 0)
         {
             const int oldProgram = getCurrentProgram();
-            JUCE_NAMESPACE::MemoryBlock oldSettings;
+            MemoryBlock oldSettings;
             createTempParameterStore (oldSettings);
 
             for (int i = 0; i < getNumPrograms(); ++i)
@@ -2325,11 +2329,6 @@ bool VSTPluginInstance::producesMidi() const
     return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0;
 }
 
-int VSTPluginInstance::getSamplesLatency() const
-{
-    return effect != 0 ? effect->initialDelay : 0;
-}
-
 void VSTPluginInstance::setPower (const bool on)
 {
     dispatch (effMainsChanged, 0, on ? 1 : 0, 0, 0);
@@ -2365,22 +2364,22 @@ bool VSTPluginInstance::usesChunks() const throw()
 //==============================================================================
 const int defaultMaxSizeMB = 64;
 
-void JUCE_CALLTYPE VSTPluginInstance::getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
+void VSTPluginInstance::getStateInformation (MemoryBlock& destData)
 {
     saveToFXBFile (destData, true, defaultMaxSizeMB);
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData)
+void VSTPluginInstance::getCurrentProgramStateInformation (MemoryBlock& destData)
 {
     saveToFXBFile (destData, false, defaultMaxSizeMB);
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::setStateInformation (const void* data, int sizeInBytes)
+void VSTPluginInstance::setStateInformation (const void* data, int sizeInBytes)
 {
     loadFromFXBFile (data, sizeInBytes);
 }
 
-void JUCE_CALLTYPE VSTPluginInstance::setCurrentProgramStateInformation (const void* data, int sizeInBytes)
+void VSTPluginInstance::setCurrentProgramStateInformation (const void* data, int sizeInBytes)
 {
     loadFromFXBFile (data, sizeInBytes);
 }

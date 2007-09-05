@@ -95,7 +95,7 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../juce_AudioFilterBase.h"
+#include "../../../../../juce.h"
 
 #ifdef _MSC_VER
   #pragma pack (pop)
@@ -210,7 +210,7 @@ juce_ImplementSingleton (SharedMessageThread);
 #endif
 
 //==============================================================================
-// A component to hold the AudioFilterEditor, and cope with some housekeeping
+// A component to hold the AudioProcessorEditor, and cope with some housekeeping
 // chores when it changes or repaints.
 class EditorCompWrapper  : public Component,
                            public AsyncUpdater
@@ -219,7 +219,7 @@ class EditorCompWrapper  : public Component,
 
 public:
     EditorCompWrapper (JuceVSTWrapper* const wrapper_,
-                       AudioFilterEditor* const editor)
+                       AudioProcessorEditor* const editor)
         : wrapper (wrapper_)
     {
         setOpaque (true);
@@ -252,9 +252,9 @@ public:
         triggerAsyncUpdate();
     }
 
-    AudioFilterEditor* getEditorComp() const
+    AudioProcessorEditor* getEditorComp() const
     {
-        return dynamic_cast <AudioFilterEditor*> (getChildComponent (0));
+        return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
     }
 
     void resized()
@@ -304,16 +304,17 @@ static VoidArray activePlugins;
 
 //==============================================================================
 /**
-    This wraps an AudioFilterBase as an AudioEffectX...
+    This wraps an AudioProcessor as an AudioEffectX...
 */
 class JuceVSTWrapper  : public AudioEffectX,
                         private Timer,
-                        public AudioFilterBase::HostCallbacks
+                        public AudioProcessorListener,
+                        public AudioPlayHead
 {
 public:
     //==============================================================================
     JuceVSTWrapper (audioMasterCallback audioMaster,
-                    AudioFilterBase* const filter_)
+                    AudioProcessor* const filter_)
        : AudioEffectX (audioMaster,
                        filter_->getNumPrograms(),
                        filter_->getNumParameters()),
@@ -323,7 +324,8 @@ public:
                                       JucePlugin_MaxNumOutputChannels,
                                       0, 0);
 
-        filter_->setHostCallbacks (this);
+        filter_->setPlayHead (this);
+        filter_->addListener (this);
 
         editorComp = 0;
         outgoingEvents = 0;
@@ -703,7 +705,7 @@ public:
         channels = 0;
     }
 
-    bool JUCE_CALLTYPE getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
     {
         const VstTimeInfo* const ti = getTimeInfo (kVstPpqPosValid
                                                    | kVstTempoValid
@@ -746,14 +748,14 @@ public:
 
         if ((ti->flags & kVstSmpteValid) != 0)
         {
-            info.frameRate = (AudioFilterBase::CurrentPositionInfo::FrameRateType) (int) ti->smpteFrameRate;
+            info.frameRate = (AudioPlayHead::FrameRateType) (int) ti->smpteFrameRate;
 
             const double fpsDivisors[] = { 24.0, 25.0, 30.0, 30.0, 30.0, 30.0, 1.0 };
             info.editOriginTime = (ti->smpteOffset / (80.0 * fpsDivisors [(int) info.frameRate]));
         }
         else
         {
-            info.frameRate = AudioFilterBase::CurrentPositionInfo::fpsUnknown;
+            info.frameRate = AudioPlayHead::fpsUnknown;
             info.editOriginTime = 0;
         }
 
@@ -820,22 +822,22 @@ public:
         filter->getParameterName (index).copyToBuffer (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
     }
 
-    void JUCE_CALLTYPE informHostOfParameterChange (int index, float newValue)
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
     {
         setParameterAutomated (index, newValue);
     }
 
-    void JUCE_CALLTYPE informHostOfParameterGestureBegin (int index)
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)
     {
         beginEdit (index);
     }
 
-    void JUCE_CALLTYPE informHostOfParameterGestureEnd (int index)
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)
     {
         endEdit (index);
     }
 
-    void JUCE_CALLTYPE informHostOfStateChange()
+    void audioProcessorChanged (AudioProcessor*)
     {
         updateDisplay();
     }
@@ -939,7 +941,7 @@ public:
             const MessageManagerLock mml;
 #endif
 
-            AudioFilterEditor* const ed = filter->createEditorIfNeeded();
+            AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
             {
@@ -1198,7 +1200,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    AudioFilterBase* filter;
+    AudioProcessor* filter;
     juce::MemoryBlock chunkMemory;
     uint32 chunkMemoryTime;
     EditorCompWrapper* editorComp;
@@ -1275,6 +1277,13 @@ void EditorCompWrapper::handleAsyncUpdate()
 }
 
 //==============================================================================
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it create an instance of the filter subclass that you're building.
+*/
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+
+//==============================================================================
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
 #if JUCE_MAC || JUCE_LINUX
@@ -1287,7 +1296,7 @@ static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
     {
         if (audioMaster (0, audioMasterVersion, 0, 0, 0, 0) != 0)
         {
-            AudioFilterBase* const filter = createPluginFilter();
+            AudioProcessor* const filter = createPluginFilter();
 
             if (filter != 0)
             {

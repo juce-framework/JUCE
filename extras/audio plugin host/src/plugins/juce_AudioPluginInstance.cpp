@@ -31,151 +31,15 @@
 
 #define JUCE_PLUGIN_HOST 1
 
-//==============================================================================
-// (Just a quick way of getting these files into the project)
-#include "../../../audio plugins/wrapper/juce_AudioFilterBase.cpp"
-#include "../../../audio plugins/wrapper/juce_AudioFilterEditor.cpp"
-
+#include "../../../../juce.h"
 #include "juce_AudioPluginInstance.h"
 
 
 //==============================================================================
 AudioPluginInstance::AudioPluginInstance()
 {
-    internalAsyncUpdater = new InternalAsyncUpdater (*this);
-
-    setHostCallbacks (this);
 }
 
 AudioPluginInstance::~AudioPluginInstance()
-{
-    delete internalAsyncUpdater;
-}
-
-void AudioPluginInstance::addListener (AudioPluginParameterListener* const newListener) throw()
-{
-    listeners.addIfNotAlreadyThere (newListener);
-}
-
-void AudioPluginInstance::removeListener (AudioPluginParameterListener* const listenerToRemove) throw()
-{
-    listeners.removeValue (listenerToRemove);
-}
-
-void AudioPluginInstance::internalAsyncCallback()
-{
-    changedParamLock.enter();
-    Array <int> changed;
-    changed.swapWithArray (changedParams);
-    Array <float> changedValues;
-    changedValues.swapWithArray (changedParamValues);
-    changedParamLock.exit();
-
-    for (int j = 0; j < changed.size(); ++j)
-    {
-        const int paramIndex = changed.getUnchecked (j);
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            AudioPluginParameterListener* const l = (AudioPluginParameterListener*) listeners.getUnchecked(i);
-
-            if (paramIndex >= 0)
-                l->audioPluginParameterChanged (this, paramIndex, changedValues.getUnchecked(j));
-            else if (paramIndex == -1)
-                l->audioPluginChanged (this);
-            else if ((paramIndex & 0xc0000000) == 0xc0000000)
-                l->audioPluginParameterChangeGestureBegin (this, paramIndex & 0x3fffffff);
-            else if ((paramIndex & 0xc0000000) == 0x80000000)
-                l->audioPluginParameterChangeGestureEnd (this, paramIndex & 0x3fffffff);
-
-            i = jmin (i, listeners.size());
-        }
-    }
-}
-
-//==============================================================================
-bool JUCE_CALLTYPE AudioPluginInstance::getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
-{
-    info.bpm = 120.0;
-    info.timeSigNumerator = 4;
-    info.timeSigDenominator = 4;
-
-    info.timeInSeconds = 0;
-
-    /** For timecode, the position of the start of the edit, in seconds from 00:00:00:00. */
-    info.editOriginTime = 0;
-
-    /** The current play position in pulses-per-quarter-note.
-        This is the number of quarter notes since the edit start.
-    */
-    info.ppqPosition = 0;
-
-    /** The position of the start of the last bar, in pulses-per-quarter-note.
-
-        This is the number of quarter notes from the start of the edit to the
-        start of the current bar.
-
-        Note - this value may be unavailable on some hosts, e.g. Pro-Tools. If
-        it's not available, the value will be 0.
-    */
-    info.ppqPositionOfLastBarStart = 0;
-
-    info.frameRate = AudioFilterBase::CurrentPositionInfo::fpsUnknown;
-
-    info.isPlaying = false;
-    info.isRecording = false;
-
-    return true;
-}
-
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterChange (int index, float newValue)
-{
-    queueChangeMessage (index, newValue);
-}
-
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterGestureBegin (int index)
-{
-    queueChangeMessage (0xc0000000 | index, 0);
-}
-
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfParameterGestureEnd (int index)
-{
-    queueChangeMessage (0x80000000 | index, 0);
-}
-
-void JUCE_CALLTYPE AudioPluginInstance::informHostOfStateChange()
-{
-    queueChangeMessage (-1, 0);
-}
-
-void AudioPluginInstance::queueChangeMessage (const int index, const float value) throw()
-{
-    const ScopedLock sl (changedParamLock);
-    changedParams.add (index);
-    changedParamValues.add (value);
-
-    if (! internalAsyncUpdater->isTimerRunning())
-        internalAsyncUpdater->startTimer (1);
-}
-
-//==============================================================================
-AudioPluginInstance::InternalAsyncUpdater::InternalAsyncUpdater (AudioPluginInstance& owner_)
-    : owner (owner_)
-{
-}
-
-void AudioPluginInstance::InternalAsyncUpdater::timerCallback()
-{
-    stopTimer();
-    owner.internalAsyncCallback();
-}
-
-
-//==============================================================================
-void AudioPluginParameterListener::audioPluginParameterChangeGestureBegin (AudioPluginInstance*, int)
-{
-}
-
-void AudioPluginParameterListener::audioPluginParameterChangeGestureEnd (AudioPluginInstance*, int)
 {
 }

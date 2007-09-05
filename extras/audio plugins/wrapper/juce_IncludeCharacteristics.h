@@ -80,7 +80,7 @@
 #endif
 
 #ifdef JucePlugin_Latency
- #error "JucePlugin_Latency is now deprecated - instead, call the AudioFilterBase::setLatencySamples() method if your plugin has a non-zero delay"
+ #error "JucePlugin_Latency is now deprecated - instead, call the AudioProcessor::setLatencySamples() method if your plugin has a non-zero delay"
 #endif
 
 #ifndef JucePlugin_SilenceInProducesSilenceOut

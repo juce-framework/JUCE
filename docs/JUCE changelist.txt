@@ -7,10 +7,11 @@
 Changelist for version 1.45
 
 - big new project in the "extras" folder - a basic audio plugin host! Currently it loads VSTs on PC/Mac, and lets you put them together in a filter graph, which it plays. Hosting functionality is very basic at the moment, but I'm laying down a good architecture to hopefully develop into a full cross-platform plugin host.
-- audio plugins: I've simplified the processBlock() call in AudioFilterBase. It now just takes a single buffer for all input and output channels, and the accumulate parameter has gone. This will mean tweaking your plugin code, but will probably make it much less complicated.
-- audio plugins: AudioFilterBase now requires a few extra methods to be implemented by your plugin: getInputChannelName, getOutputChannelName, isInputChannelStereoPair, isOutputChannelStereoPair, getLatencySamples (which supersedes the old macro for setting the latency)
-- audio plugins: new method AudioFilterBase::updateHostDisplay() to tell the host that something about your plugin has changed and that it should refresh its display.
-- audio plugins: new methods AudioFilterBase::beginParameterChangeGesture() and endParameterChangeGesture() let you tell the host when a parameter-change action starts and finishes.
+- audio plugins: The AudioFilterBase and AudioFilterEditor classes have moved into the main juce tree, and been renamed as AudioProcessor and AudioProcessorEditor. This means you can remove these files from your plugin projects, and should search-and-replace any instances of the old names with the new ones.
+- audio plugins: the processBlock() call in AudioFilterBase has been simplified in AudioProcessor. It now just takes a single buffer for all input and output channels, and the accumulate parameter has gone. This will mean tweaking your plugin code, but will probably make it much less complicated.
+- audio plugins: AudioProcessor requires a few more methods to be implemented by your plugin than AudioFilterBase did: getInputChannelName, getOutputChannelName, isInputChannelStereoPair, isOutputChannelStereoPair, getLatencySamples (which supersedes the old macro for setting the latency). These are all quite simple to add.
+- audio plugins: new methods AudioProcessor::beginParameterChangeGesture() and endParameterChangeGesture() let you tell the host when a parameter-change action starts and finishes.
+- audio plugins: new method AudioProcessor::updateHostDisplay() to tell the host that something about your plugin has changed and that it should refresh its display.
 - new class: FileSearchPathListComponent, for letting the user edit a FileSearchPath.
 - added a critical section option to ReferenceCountedArray
 - refactored and added features to the Socket class, replacing it with StreamableSocket (basically the same as the original class), and DatagramSocket.

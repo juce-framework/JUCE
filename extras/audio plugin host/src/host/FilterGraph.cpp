@@ -29,9 +29,9 @@
   ==============================================================================
 */
 
+#include "../../../../juce.h"
 #include "FilterGraph.h"
 #include "InternalFilters.h"
-#include "../plugins/juce_GenericAudioFilterEditor.h"
 
 
 //==============================================================================
@@ -146,7 +146,7 @@ void FilterInGraph::showUI (bool useGenericUI)
     {
         if (activeGenericUI == 0)
         {
-            Component* ui = new GenericAudioFilterEditor (filter);
+            Component* ui = new GenericAudioProcessorEditor (filter);
 
             ui->setName (filter->getName());
             activeGenericUI = new PluginWindow (ui, *this);
@@ -225,7 +225,7 @@ XmlElement* FilterInGraph::createXml() const
 
     XmlElement* state = new XmlElement ("STATE");
 
-    juce::MemoryBlock m;
+    MemoryBlock m;
     filter->getStateInformation (m);
     state->addTextElement (m.toBase64Encoding());
     e->addChildElement (state);
@@ -233,7 +233,7 @@ XmlElement* FilterInGraph::createXml() const
     return e;
 }
 
-FilterInGraph* FilterInGraph::createForDescription (FilterGraph& owner, 
+FilterInGraph* FilterInGraph::createForDescription (FilterGraph& owner,
                                                     const PluginDescription& desc,
                                                     String& errorMessage)
 {
@@ -265,7 +265,7 @@ FilterInGraph* FilterInGraph::createFromXml (FilterGraph& owner, const XmlElemen
 
     if (state != 0)
     {
-        juce::MemoryBlock m;
+        MemoryBlock m;
         m.fromBase64Encoding (state->getAllSubText());
 
         c->filter->setStateInformation (m.getData(), m.getSize());
@@ -411,7 +411,7 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
         }
         else
         {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon, 
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                          TRANS("Couldn't create filter"),
                                          errorMessage);
         }

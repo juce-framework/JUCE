@@ -36,7 +36,7 @@
 #include "../plugins/juce_AudioPluginFormat.h"
 
 //==============================================================================
-/** 
+/**
     Manages the internal plugin types.
 */
 class InternalPluginFormat   : public AudioPluginFormat

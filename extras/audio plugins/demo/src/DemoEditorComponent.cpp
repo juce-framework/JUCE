@@ -29,6 +29,7 @@
   ==============================================================================
 */
 
+#include "../../../../juce.h"
 #include "DemoEditorComponent.h"
 
 //==============================================================================
@@ -71,7 +72,7 @@ static const String ppqToBarsBeatsString (const double ppq,
 
 //==============================================================================
 DemoEditorComponent::DemoEditorComponent (DemoJuceFilter* const ownerFilter)
-    : AudioFilterEditor (ownerFilter)
+    : AudioProcessorEditor (ownerFilter)
 {
     // create our gain slider..
     addAndMakeVisible (gainSlider = new Slider (T("gain")));
@@ -159,7 +160,7 @@ void DemoEditorComponent::updateParametersFromFilter()
     filter->getCallbackLock().enter();
 
     // take a local copy of the info we need while we've got the lock..
-    const AudioFilterBase::CurrentPositionInfo positionInfo (filter->lastPosInfo);
+    const AudioPlayHead::CurrentPositionInfo positionInfo (filter->lastPosInfo);
     const float newGain = filter->getParameter (0);
 
     // ..release the lock ASAP

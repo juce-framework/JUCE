@@ -29,21 +29,46 @@
   ==============================================================================
 */
 
-#include "juce_AudioFilterEditor.h"
-#include "juce_AudioFilterBase.h"
+#ifndef __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
+#define __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
+
+#include "../../gui/components/juce_Component.h"
+class AudioProcessor;
 
 
 //==============================================================================
-AudioFilterEditor::AudioFilterEditor (AudioFilterBase* const ownerFilter_)
-    : ownerFilter (ownerFilter_)
-{
-    // the filter must be valid..
-    jassert (ownerFilter != 0);
-}
+/**
+    Base class for the component that acts as the GUI for an AudioProcessor.
 
-AudioFilterEditor::~AudioFilterEditor()
+    Derive your editor component from this class, and create an instance of it
+    by overriding the AudioProcessor::createEditor() method.
+
+    @see AudioProcessor, GenericAudioProcessorEditor
+*/
+class AudioProcessorEditor  : public Component
 {
-    // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
-    // filter for some reason..
-    jassert (ownerFilter->getActiveEditor() != this);
-}
+protected:
+    //==============================================================================
+    /** Creates an editor for the specified processor.
+
+        You'll need to pass in the filter that's creating it.
+    */
+    AudioProcessorEditor (AudioProcessor* const owner);
+
+public:
+    /** Destructor. */
+    ~AudioProcessorEditor();
+
+
+    //==============================================================================
+    /** Returns a pointer to the filter that owns this editor. */
+    AudioProcessor* getOwnerFilter() const throw()         { return ownerFilter; }
+
+
+private:
+    //==============================================================================
+    AudioProcessor* const ownerFilter;
+};
+
+
+#endif   // __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__

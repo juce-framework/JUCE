@@ -29,44 +29,28 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__
-#define __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__
+#include "../../../juce_core/basics/juce_StandardHeader.h"
 
-#include "../../../juce.h"
-class AudioFilterBase;
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_AudioProcessorEditor.h"
+#include "juce_AudioProcessor.h"
 
 
 //==============================================================================
-/**
-    Base class for the component that forms a filter's GUI.
-
-    Derive your editor component from this class, and create an instance of it
-    by overriding the AudioFilterBase::createEditor() method.
-
-*/
-class AudioFilterEditor  : public Component
+AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const ownerFilter_)
+    : ownerFilter (ownerFilter_)
 {
-public:
-    //==============================================================================
-    /** Creates a filter editor.
+    // the filter must be valid..
+    jassert (ownerFilter != 0);
+}
 
-        You'll need to pass in the filter that's creating it.
-    */
-    AudioFilterEditor (AudioFilterBase* const ownerFilter);
-
-    /** Destructor. */
-    ~AudioFilterEditor();
-
-
-    //==============================================================================
-    /** Returns a pointer to the filter that owns this editor. */
-    AudioFilterBase* getOwnerFilter() const throw()         { return ownerFilter; }
+AudioProcessorEditor::~AudioProcessorEditor()
+{
+    // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
+    // filter for some reason..
+    jassert (ownerFilter->getActiveEditor() != this);
+}
 
 
-private:
-    //==============================================================================
-    AudioFilterBase* const ownerFilter;
-};
-
-
-#endif   // __JUCE_AUDIOFILTEREDITOR_JUCEHEADER__
+END_JUCE_NAMESPACE

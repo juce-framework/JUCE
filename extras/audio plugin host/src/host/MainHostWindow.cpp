@@ -154,7 +154,7 @@ void MainHostWindow::closeButtonPressed()
 
 bool MainHostWindow::tryToQuitApplication()
 {
-    if (getGraphEditor() != 0 
+    if (getGraphEditor() != 0
         && getGraphEditor()->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
     {
         JUCEApplication::quit();

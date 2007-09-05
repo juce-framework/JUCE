@@ -92,16 +92,16 @@ public:
 
             String formatDescription;
             formatDescription
-              << i << ": RGBA=(" << pixFormat->redBits 
-              << ", " << pixFormat->greenBits 
+              << i << ": RGBA=(" << pixFormat->redBits
+              << ", " << pixFormat->greenBits
               << ", " << pixFormat->blueBits
               << ", " << pixFormat->alphaBits
               << "), depth=" << pixFormat->depthBufferBits
               << ", stencil=" << pixFormat->stencilBufferBits
-              << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits 
-              << ", " << pixFormat->accumulationBufferGreenBits 
+              << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits
+              << ", " << pixFormat->accumulationBufferGreenBits
               << ", " << pixFormat->accumulationBufferBlueBits
-              << ", " << pixFormat->accumulationBufferAlphaBits 
+              << ", " << pixFormat->accumulationBufferAlphaBits
               << "), full-scene AA="
               << pixFormat->fullSceneAntiAliasingNumSamples;
 

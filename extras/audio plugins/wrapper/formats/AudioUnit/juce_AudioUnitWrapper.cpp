@@ -33,9 +33,8 @@
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #include "AUCarbonViewBase.h"
-#include "../../juce_AudioFilterBase.h"
 #include "../../juce_IncludeCharacteristics.h"
-
+#include "../../../../../juce.h"
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9
@@ -55,8 +54,16 @@ END_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it create an instance of the filter subclass that you're building.
+*/
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+
+//==============================================================================
 class JuceAU   : public JuceAUBaseClass,
-                 public AudioFilterBase::HostCallbacks
+                 public AudioProcessorListener,
+                 public AudioPlayHead
 {
 public:
     //==============================================================================
@@ -85,7 +92,8 @@ public:
         }
 
         juceFilter = createPluginFilter();
-        juceFilter->setHostCallbacks (this);
+        juceFilter->setPlayHead (this);
+        juceFilter->addListener (this);
 
         jassert (juceFilter != 0);
         Globals()->UseIndexedParameters (juceFilter->getNumParameters());
@@ -163,7 +171,7 @@ public:
 
         if (juceFilter != 0)
         {
-            JUCE_NAMESPACE::MemoryBlock state;
+            MemoryBlock state;
             juceFilter->getStateInformation (state);
 
             if (state.getSize() > 0)
@@ -237,7 +245,7 @@ public:
     {
         const int index = (int) inParameterID;
 
-        if (inScope == kAudioUnitScope_Global 
+        if (inScope == kAudioUnitScope_Global
              && juceFilter != 0
              && index < juceFilter->getNumParameters())
         {
@@ -306,7 +314,7 @@ public:
     Float64 GetSampleRate()
     {
         return GetOutput(0)->GetStreamFormat().mSampleRate;
-	}
+    }
 
     Float64 GetLatency()
     {
@@ -331,7 +339,7 @@ public:
     }
 
     //==============================================================================
-    bool getCurrentPositionInfo (AudioFilterBase::CurrentPositionInfo& info)
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
     {
         info.timeSigNumerator = 0;
         info.timeSigDenominator = 0;
@@ -344,33 +352,33 @@ public:
         switch (lastSMPTETime.mType)
         {
             case kSMPTETimeType24:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps24;
+                info.frameRate = AudioPlayHead::fps24;
                 break;
 
             case kSMPTETimeType25:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps25;
+                info.frameRate = AudioPlayHead::fps25;
                 break;
 
             case kSMPTETimeType30Drop:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps30drop;
+                info.frameRate = AudioPlayHead::fps30drop;
                 break;
 
             case kSMPTETimeType30:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps30;
+                info.frameRate = AudioPlayHead::fps30;
                 break;
 
             case kSMPTETimeType2997:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps2997;
+                info.frameRate = AudioPlayHead::fps2997;
                 break;
 
             case kSMPTETimeType2997Drop:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fps2997drop;
+                info.frameRate = AudioPlayHead::fps2997drop;
                 break;
 
             //case kSMPTETimeType60:
             //case kSMPTETimeType5994:
             default:
-                info.frameRate = AudioFilterBase::CurrentPositionInfo::fpsUnknown;
+                info.frameRate = AudioPlayHead::fpsUnknown;
                 break;
         }
 
@@ -420,33 +428,27 @@ public:
         }
     }
 
-    void informHostOfParameterChange (int index, float newValue)
+    void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
     {
-        if (juceFilter != 0)
-        {
-            juceFilter->setParameter (index, newValue);
-            sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
-        }
+        sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
     }
 
-    void informHostOfParameterGestureBegin (int index)
+    void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)
     {
-        if (juceFilter != 0)
-            sendAUEvent (kAudioUnitEvent_BeginParameterChangeGesture, index);
+        sendAUEvent (kAudioUnitEvent_BeginParameterChangeGesture, index);
     }
 
-    void informHostOfParameterGestureEnd (int index)
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)
     {
-        if (juceFilter != 0)
-            sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
+        sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
     }
 
-    void informHostOfStateChange()
+    void audioProcessorChanged (AudioProcessor*)
     {
         // xxx is there an AU equivalent?
     }
 
-    bool StreamFormatWritable (AudioUnitScope inScope, AudioUnitElement element) 
+    bool StreamFormatWritable (AudioUnitScope inScope, AudioUnitElement element)
     {
         return ! IsInitialized();
     }
@@ -456,7 +458,7 @@ public:
         return noErr;
     }
 
-	ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)
+    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)
     {
         return noErr;
     }
@@ -728,7 +730,7 @@ protected:
 
     //==============================================================================
 private:
-    AudioFilterBase* juceFilter;
+    AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
     float** channels;
     MidiBuffer midiEvents;
@@ -776,8 +778,8 @@ class JuceAUView  : public AUCarbonViewBase,
                     public MouseListener,
                     public Timer
 {
-    AudioFilterBase* juceFilter;
-    AudioFilterEditor* editorComp;
+    AudioProcessor* juceFilter;
+    AudioProcessorEditor* editorComp;
     Component* windowComp;
     bool recursive;
     int mx, my;

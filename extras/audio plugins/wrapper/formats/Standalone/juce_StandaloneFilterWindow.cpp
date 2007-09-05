@@ -32,6 +32,12 @@
 #include "juce_StandaloneFilterWindow.h"
 #include "../../juce_IncludeCharacteristics.h"
 
+//==============================================================================
+/** Somewhere in the codebase of your plugin, you need to implement this function
+    and make it create an instance of the filter subclass that you're building.
+*/
+extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
 
 //==============================================================================
 StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
@@ -141,7 +147,7 @@ void StandaloneFilterWindow::deleteFilter()
 
     if (filter != 0 && getContentComponent() != 0)
     {
-        filter->editorBeingDeleted (dynamic_cast <AudioFilterEditor*> (getContentComponent()));
+        filter->editorBeingDeleted (dynamic_cast <AudioProcessorEditor*> (getContentComponent()));
         setContentComponent (0, true);
     }
 

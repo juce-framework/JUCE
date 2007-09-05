@@ -83,7 +83,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    AudioFilterBase* filter;
+    AudioProcessor* filter;
     AudioFilterStreamingDeviceManager* deviceManager;
     Button* optionsButton;
 

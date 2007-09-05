@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VSTFORMAT_JUCEHEADER__
-#define __JUCE_VSTFORMAT_JUCEHEADER__
+#ifndef __JUCE_VSTPLUGININSTANCE_JUCEHEADER__
+#define __JUCE_VSTPLUGININSTANCE_JUCEHEADER__
 
 #include "juce_VSTPluginFormat.h"
 
@@ -81,44 +81,43 @@ public:
     int getUID() const;
     bool acceptsMidi() const;
     bool producesMidi() const;
-    int getSamplesLatency() const;
 
     //==============================================================================
-    // AudioFilterBase methods:
+    // AudioProcessor methods:
 
-    void JUCE_CALLTYPE prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
-    void JUCE_CALLTYPE releaseResources();
-    void JUCE_CALLTYPE processBlock (AudioSampleBuffer& buffer,
-                                     MidiBuffer& midiMessages);
+    void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
+    void releaseResources();
+    void processBlock (AudioSampleBuffer& buffer,
+                       MidiBuffer& midiMessages);
 
-    AudioFilterEditor* JUCE_CALLTYPE createEditor();
+    AudioProcessorEditor* createEditor();
 
-    const String JUCE_CALLTYPE getInputChannelName (const int index) const;
-    bool JUCE_CALLTYPE isInputChannelStereoPair (int index) const;
+    const String getInputChannelName (const int index) const;
+    bool isInputChannelStereoPair (int index) const;
 
-    const String JUCE_CALLTYPE getOutputChannelName (const int index) const;
-    bool JUCE_CALLTYPE isOutputChannelStereoPair (int index) const;
+    const String getOutputChannelName (const int index) const;
+    bool isOutputChannelStereoPair (int index) const;
 
     //==============================================================================
-    int JUCE_CALLTYPE getNumParameters();
-    float JUCE_CALLTYPE getParameter (int index);
-    void JUCE_CALLTYPE setParameter (int index, float newValue);
-    const String JUCE_CALLTYPE getParameterName (int index);
-    const String JUCE_CALLTYPE getParameterText (int index);
+    int getNumParameters();
+    float getParameter (int index);
+    void setParameter (int index, float newValue);
+    const String getParameterName (int index);
+    const String getParameterText (int index);
     bool isParameterAutomatable (int index) const;
 
     //==============================================================================
-    int JUCE_CALLTYPE getNumPrograms();
-    int JUCE_CALLTYPE getCurrentProgram();
-    void JUCE_CALLTYPE setCurrentProgram (int index);
-    const String JUCE_CALLTYPE getProgramName (int index);
-    void JUCE_CALLTYPE changeProgramName (int index, const String& newName);
+    int getNumPrograms();
+    int getCurrentProgram();
+    void setCurrentProgram (int index);
+    const String getProgramName (int index);
+    void changeProgramName (int index, const String& newName);
 
     //==============================================================================
-    void JUCE_CALLTYPE getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
-    void JUCE_CALLTYPE getCurrentProgramStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
-    void JUCE_CALLTYPE setStateInformation (const void* data, int sizeInBytes);
-    void JUCE_CALLTYPE setCurrentProgramStateInformation (const void* data, int sizeInBytes);
+    void getStateInformation (MemoryBlock& destData);
+    void getCurrentProgramStateInformation (MemoryBlock& destData);
+    void setStateInformation (const void* data, int sizeInBytes);
+    void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
 
     //==============================================================================
     void timerCallback();
@@ -159,15 +158,15 @@ private:
     void ensureMidiEventSize (int numEventsNeeded);
     void freeMidiEvents();
     void handleMidiFromPlugin (const VstEvents* const events);
-    void createTempParameterStore (juce::MemoryBlock& dest);
-    void restoreFromTempParameterStore (const juce::MemoryBlock& mb);
+    void createTempParameterStore (MemoryBlock& dest);
+    void restoreFromTempParameterStore (const MemoryBlock& mb);
     const String getParameterLabel (int index) const;
 
     bool usesChunks() const throw();
-    void getChunkData (juce::MemoryBlock& mb, bool isPreset, int maxSizeMB) const;
+    void getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const;
     void setChunkData (const char* data, int size, bool isPreset);
     bool loadFromFXBFile (const void* data, int numBytes);
-    bool saveToFXBFile (juce::MemoryBlock& dest, bool isFXB, int maxSizeMB);
+    bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB);
 
     int getVersionNumber() const throw();
     bool hasEditor() const throw();
@@ -180,4 +179,4 @@ private:
 
 
 
-#endif   // __JUCE_VSTFORMAT_JUCEHEADER__
+#endif   // __JUCE_VSTPLUGININSTANCE_JUCEHEADER__

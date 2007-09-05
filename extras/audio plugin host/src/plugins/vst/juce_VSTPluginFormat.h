@@ -36,7 +36,7 @@
 
 
 //==============================================================================
-/** 
+/**
     Implements a plugin format manager for VSTs.
 */
 class VSTPluginFormat   : public AudioPluginFormat

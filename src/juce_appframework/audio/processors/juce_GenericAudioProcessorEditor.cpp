@@ -29,62 +29,71 @@
   ==============================================================================
 */
 
-#include "../../../../juce.h"
-#include "juce_GenericAudioFilterEditor.h"
+#include "../../../juce_core/basics/juce_StandardHeader.h"
+
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_GenericAudioProcessorEditor.h"
+#include "juce_AudioProcessor.h"
+#include "../../gui/components/controls/juce_Slider.h"
 
 
 //==============================================================================
-class FilterParameterPropertyComp   : public PropertyComponent,
-                                      public AudioPluginParameterListener
+class ProcessorParameterPropertyComp   : public PropertyComponent,
+                                         public AudioProcessorListener,
+                                         public AsyncUpdater
 {
 public:
-    FilterParameterPropertyComp (const String& name,
-                                 AudioPluginInstance* const filter_,
-                                 const int index_)
+    ProcessorParameterPropertyComp (const String& name,
+                                    AudioProcessor* const owner_,
+                                    const int index_)
         : PropertyComponent (name),
-          filter (filter_),
+          owner (owner_),
           index (index_)
     {
-        addAndMakeVisible (slider = new PluginSlider (filter_, index_));
-        filter->addListener (this);
+        addAndMakeVisible (slider = new ParamSlider (owner_, index_));
+        owner_->addListener (this);
     }
 
-    ~FilterParameterPropertyComp()
+    ~ProcessorParameterPropertyComp()
     {
-        filter->removeListener (this);
+        owner->removeListener (this);
         deleteAllChildren();
     }
 
     void refresh()
     {
-        slider->setValue (filter->getParameter (index), false);
+        slider->setValue (owner->getParameter (index), false);
     }
 
-    void audioPluginChanged (AudioPluginInstance*)
-    {
-    }
+    void audioProcessorChanged (AudioProcessor*)  {}
 
-    void audioPluginParameterChanged (AudioPluginInstance*, int parameterIndex, float)
+    void audioProcessorParameterChanged (AudioProcessor*, int parameterIndex, float)
     {
         if (parameterIndex == index)
-            refresh();
+            triggerAsyncUpdate();
     }
-                                              
+
+    void handleAsyncUpdate()
+    {
+        refresh();
+    }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    AudioPluginInstance* const filter;
+    AudioProcessor* const owner;
     const int index;
     Slider* slider;
 
     //==============================================================================
-    class PluginSlider  : public Slider
+    class ParamSlider  : public Slider
     {
     public:
-        PluginSlider (AudioPluginInstance* const filter_, const int index_)
+        ParamSlider (AudioProcessor* const owner_, const int index_)
             : Slider (String::empty),
-              filter (filter_),
+              owner (owner_),
               index (index_)
         {
             setRange (0.0, 1.0, 0.0);
@@ -93,7 +102,7 @@ private:
             setScrollWheelEnabled (false);
         }
 
-        ~PluginSlider()
+        ~ParamSlider()
         {
         }
 
@@ -101,28 +110,28 @@ private:
         {
             const float newVal = (float) getValue();
 
-            if (filter->getParameter (index) != newVal)
-                filter->setParameter (index, newVal);
+            if (owner->getParameter (index) != newVal)
+                owner->setParameter (index, newVal);
         }
 
         const String getTextFromValue (double /*value*/)
         {
-            return filter->getParameterText (index);
+            return owner->getParameterText (index);
         }
 
         //==============================================================================
         juce_UseDebuggingNewOperator
 
     private:
-        AudioPluginInstance* const filter;
+        AudioProcessor* const owner;
         const int index;
     };
 };
 
 
 //==============================================================================
-GenericAudioFilterEditor::GenericAudioFilterEditor (AudioPluginInstance* const filter)
-    : AudioFilterEditor (filter)
+GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner)
+    : AudioProcessorEditor (owner)
 {
     setOpaque (true);
 
@@ -130,16 +139,16 @@ GenericAudioFilterEditor::GenericAudioFilterEditor (AudioPluginInstance* const f
 
     Array <PropertyComponent*> params;
 
-    const int numParams = filter->getNumParameters();
+    const int numParams = owner->getNumParameters();
     int totalHeight = 0;
 
     for (int i = 0; i < numParams; ++i)
     {
-        String name (filter->getParameterName (i));
+        String name (owner->getParameterName (i));
         if (name.trim().isEmpty())
             name = "Unnamed";
 
-        FilterParameterPropertyComp* const pc = new FilterParameterPropertyComp (name, filter, i);
+        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, owner, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }
@@ -149,17 +158,20 @@ GenericAudioFilterEditor::GenericAudioFilterEditor (AudioPluginInstance* const f
     setSize (400, jlimit (25, 400, totalHeight));
 }
 
-GenericAudioFilterEditor::~GenericAudioFilterEditor()
+GenericAudioProcessorEditor::~GenericAudioProcessorEditor()
 {
     deleteAllChildren();
 }
 
-void GenericAudioFilterEditor::paint (Graphics& g)
+void GenericAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (Colours::white);
 }
 
-void GenericAudioFilterEditor::resized()
+void GenericAudioProcessorEditor::resized()
 {
     panel->setSize (getWidth(), getHeight());
 }
+
+
+END_JUCE_NAMESPACE

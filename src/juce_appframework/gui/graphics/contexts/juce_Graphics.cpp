@@ -538,7 +538,7 @@ void Graphics::fillRoundedRectangle (const float x,
 void Graphics::fillRoundedRectangle (const Rectangle& r,
                                      const float cornerSize) const throw()
 {
-    fillRoundedRectangle ((float) r.getX(), 
+    fillRoundedRectangle ((float) r.getX(),
                           (float) r.getY(),
                           (float) r.getWidth(),
                           (float) r.getHeight(),
