@@ -434,11 +434,6 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
     {
         const ComponentDeletionWatcher deletionChecker (target);
 
-        keyWasUsed = target->keyPressed (keyInfo);
-
-        if (keyWasUsed || deletionChecker.hasBeenDeleted())
-            break;
-
         if (target->keyListeners_ != 0)
         {
             for (int i = target->keyListeners_->size(); --i >= 0;)
@@ -452,6 +447,11 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
             }
         }
 
+        keyWasUsed = target->keyPressed (keyInfo);
+
+        if (keyWasUsed || deletionChecker.hasBeenDeleted())
+            break;
+    
         if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != 0)
         {
             Component::getCurrentlyFocusedComponent()

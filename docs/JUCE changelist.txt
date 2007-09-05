@@ -16,6 +16,7 @@ Changelist for version 1.45
 - added a critical section option to ReferenceCountedArray
 - refactored and added features to the Socket class, replacing it with StreamableSocket (basically the same as the original class), and DatagramSocket.
 - refactored the OpenGLComponent, adding new classes OpenGLPixelFormat and OpenGLContext
+- A component's KeyListeners are now called before its keyPressed method, so if you want to intercept keys and stop them getting sent to the component, you can add a keylistener and comsume the events.
 
 ==============================================================================
 Changelist for version 1.44
