@@ -92,7 +92,7 @@ public:
     //==============================================================================
     bool mightContainSubItems()             { return isDirectory; }
     const String getUniqueName() const      { return file.getFullPathName(); }
-    int getItemHeight()                     { return 22; }
+    int getItemHeight() const               { return 22; }
 
     void itemOpennessChanged (bool isNowOpen)
     {

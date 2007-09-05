@@ -1356,6 +1356,56 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioPlayHead.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\synthesisers\juce_Sampler.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
