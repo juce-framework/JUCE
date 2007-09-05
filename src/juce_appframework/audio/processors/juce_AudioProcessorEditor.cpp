@@ -38,18 +38,18 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const ownerFilter_)
-    : ownerFilter (ownerFilter_)
+AudioProcessorEditor::AudioProcessorEditor (AudioProcessor* const owner_)
+    : owner (owner_)
 {
     // the filter must be valid..
-    jassert (ownerFilter != 0);
+    jassert (owner != 0);
 }
 
 AudioProcessorEditor::~AudioProcessorEditor()
 {
     // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
     // filter for some reason..
-    jassert (ownerFilter->getActiveEditor() != this);
+    jassert (owner->getActiveEditor() != this);
 }
 
 

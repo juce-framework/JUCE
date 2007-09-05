@@ -50,8 +50,6 @@ class AudioProcessorEditor  : public Component
 protected:
     //==============================================================================
     /** Creates an editor for the specified processor.
-
-        You'll need to pass in the filter that's creating it.
     */
     AudioProcessorEditor (AudioProcessor* const owner);
 
@@ -61,13 +59,13 @@ public:
 
 
     //==============================================================================
-    /** Returns a pointer to the filter that owns this editor. */
-    AudioProcessor* getOwnerFilter() const throw()         { return ownerFilter; }
+    /** Returns a pointer to the processor that this editor represents. */
+    AudioProcessor* getAudioProcessor() const throw()         { return owner; }
 
 
 private:
     //==============================================================================
-    AudioProcessor* const ownerFilter;
+    AudioProcessor* const owner;
 };
 
 

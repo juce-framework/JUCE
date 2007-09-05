@@ -92,7 +92,7 @@ private:
 
     // handy wrapper method to avoid having to cast the filter to a DemoJuceFilter
     // every time we need it..
-    DemoJuceFilter* getFilter() const throw()       { return (DemoJuceFilter*) getOwnerFilter(); }
+    DemoJuceFilter* getFilter() const throw()       { return (DemoJuceFilter*) getAudioProcessor(); }
 };
 
 
