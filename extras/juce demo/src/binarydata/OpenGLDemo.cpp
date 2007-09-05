@@ -81,6 +81,32 @@ public:
         delete im;
 
         startTimer (20);
+
+        // Just for demo purposes, let's dump a list of all the available pixel formats..
+        OwnedArray <OpenGLPixelFormat> availablePixelFormats;
+        OpenGLPixelFormat::getAvailablePixelFormats (availablePixelFormats);
+
+        for (int i = 0; i < availablePixelFormats.size(); ++i)
+        {
+            const OpenGLPixelFormat* const pixFormat = availablePixelFormats[i];
+
+            String formatDescription;
+            formatDescription
+              << i << ": RGBA=(" << pixFormat->redBits
+              << ", " << pixFormat->greenBits
+              << ", " << pixFormat->blueBits
+              << ", " << pixFormat->alphaBits
+              << "), depth=" << pixFormat->depthBufferBits
+              << ", stencil=" << pixFormat->stencilBufferBits
+              << ", accum RGBA=(" << pixFormat->accumulationBufferRedBits
+              << ", " << pixFormat->accumulationBufferGreenBits
+              << ", " << pixFormat->accumulationBufferBlueBits
+              << ", " << pixFormat->accumulationBufferAlphaBits
+              << "), full-scene AA="
+              << pixFormat->fullSceneAntiAliasingNumSamples;
+
+            Logger::outputDebugString (formatDescription);
+        }
     }
 
     ~DemoOpenGLCanvas()
