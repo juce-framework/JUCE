@@ -95,7 +95,7 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-private:
+protected:
     BitArray part1, part2;
 };
 
