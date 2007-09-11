@@ -88,6 +88,14 @@
  #include "source/common/AudioEffect.cpp"
  typedef long VstInt32;
  typedef long VstIntPtr;
+ enum Vst2StringConstants
+ {
+   kVstMaxNameLen       = 64,
+   kVstMaxLabelLen      = 64,
+   kVstMaxShortLabelLen = 8,
+   kVstMaxCategLabelLen = 24,
+   kVstMaxFileNameLen   = 100
+ }; 
 #endif
 
 //==============================================================================
