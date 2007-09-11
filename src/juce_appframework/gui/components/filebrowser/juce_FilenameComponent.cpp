@@ -95,6 +95,12 @@ void FilenameComponent::lookAndFeelChanged()
     browseButton->addButtonListener (this);
 }
 
+void FilenameComponent::setTooltip (const String& newTooltip)
+{
+    SettableTooltipClient::setTooltip (newTooltip);
+    filenameBox->setTooltip (newTooltip);
+}
+
 void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory) throw()
 {
     defaultBrowseFile = newDefaultDirectory;

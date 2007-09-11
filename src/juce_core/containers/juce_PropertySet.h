@@ -57,6 +57,14 @@ public:
     */
     PropertySet (const bool ignoreCaseOfKeyNames = false) throw();
 
+    /** Creates a copy of another PropertySet.
+    */
+    PropertySet (const PropertySet& other) throw();
+
+    /** Copies another PropertySet over this one.
+    */
+    const PropertySet& operator= (const PropertySet& other) throw();
+
     /** Destructor. */
     virtual ~PropertySet();
 
@@ -224,9 +232,6 @@ private:
     PropertySet* fallbackProperties;
     CriticalSection lock;
     bool ignoreCaseOfKeys;
-
-    PropertySet (const PropertySet&);
-    const PropertySet& operator= (const PropertySet&);
 };
 
 

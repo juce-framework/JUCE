@@ -183,6 +183,8 @@ public:
     /** Removes a previously-registered listener. */
     void removeListener (FilenameComponentListener* const listener) throw();
 
+    /** Gives the component a tooltip. */
+    void setTooltip (const String& newTooltip);
 
     //==============================================================================
     /** @internal */

@@ -47,6 +47,23 @@ PropertySet::PropertySet (const bool ignoreCaseOfKeyNames) throw()
 {
 }
 
+PropertySet::PropertySet (const PropertySet& other) throw()
+    : properties (other.properties),
+      fallbackProperties (other.fallbackProperties),
+      ignoreCaseOfKeys (other.ignoreCaseOfKeys)
+{
+}
+
+const PropertySet& PropertySet::operator= (const PropertySet& other) throw()
+{
+    properties = other.properties;
+    fallbackProperties = other.fallbackProperties;
+    ignoreCaseOfKeys = other.ignoreCaseOfKeys;
+
+    propertyChanged();
+    return *this;
+}
+
 PropertySet::~PropertySet()
 {
 }
