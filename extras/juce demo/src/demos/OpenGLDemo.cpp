@@ -52,8 +52,8 @@
  #include <GL/glut.h>
  #undef KeyPress
 #else
- #include <agl/agl.h>
- #include <glut/glut.h>
+ #include <AGL/agl.h>
+ #include <GLUT/glut.h>
 #endif
 
 #ifndef GL_BGRA_EXT

@@ -38,7 +38,7 @@
 #include <fnmatch.h>
 
 #if JUCE_OPENGL
-#include <agl/agl.h>
+#include <AGL/agl.h>
 #endif
 
 BEGIN_JUCE_NAMESPACE

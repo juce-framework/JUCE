@@ -447,7 +447,7 @@ static bool isShmAvailable() throw()
 
             shmctl (segmentInfo.shmid, IPC_RMID, 0);
 
-            untrapErrors();
+            isAvailable &= untrapErrors();
         }
     }
 
