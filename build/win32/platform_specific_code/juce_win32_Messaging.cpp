@@ -145,12 +145,21 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
                                                    void* userData)
 {
     if (MessageManager::getInstance()->isThisTheMessageThread())
+    {
         return (*callback) (userData);
+    }
     else
+    {
+        // If a thread has a MessageManagerLock and then tries to call this method, it'll
+        // deadlock because the message manager is blocked from running, and can't 
+        // call your function..
+        jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
         return (void*) SendMessage (juce_messageWindowHandle,
                                     specialCallbackId,
                                     (WPARAM) callback,
                                     (LPARAM) userData);
+    }
 }
 
 //==============================================================================
