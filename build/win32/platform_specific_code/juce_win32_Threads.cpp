@@ -91,11 +91,7 @@ void CriticalSection::exit() const throw()
 
 //==============================================================================
 WaitableEvent::WaitableEvent() throw()
-#ifdef JUCE_DEBUG
-    : internal (CreateEvent (0, FALSE, FALSE, _T("Juce WaitableEvent")))
-#else
     : internal (CreateEvent (0, FALSE, FALSE, 0))
-#endif
 {
 }
 

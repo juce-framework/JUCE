@@ -40,6 +40,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ProgressBar.h"
 #include "../juce_Desktop.h"
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
+#include "../../../events/juce_MessageManager.h"
 
 static const int titleH = 24;
 static const int iconWidth = 80;
@@ -586,20 +587,73 @@ void AlertWindow::lookAndFeelChanged()
 }
 
 //==============================================================================
+struct AlertWindowInfo
+{
+    String title, message, button1, button2, button3;
+    AlertWindow::AlertIconType iconType;
+    int numButtons;
+
+    int run() const
+    {
+        return (int) (pointer_sized_int) 
+                MessageManager::getInstance()->callFunctionOnMessageThread (showCallback, (void*) this);
+    }
+
+private:
+    int show() const
+    {
+        AlertWindow aw (title, message, iconType);
+
+        if (numButtons == 1)
+        {
+            aw.addButton (button1, 0,
+                          KeyPress (KeyPress::escapeKey, 0, 0),
+                          KeyPress (KeyPress::returnKey, 0, 0));
+        }
+        else
+        {
+            const KeyPress button1ShortCut (CharacterFunctions::toLowerCase (button1[0]), 0, 0);
+            KeyPress button2ShortCut (CharacterFunctions::toLowerCase (button2[0]), 0, 0);
+            if (button1ShortCut == button2ShortCut)
+                button2ShortCut = KeyPress();
+
+            if (numButtons == 2)
+            {
+                aw.addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
+                aw.addButton (button2, 0, KeyPress (KeyPress::escapeKey, 0, 0), button2ShortCut);
+            }
+            else
+            {
+                jassert (numButtons == 3);
+
+                aw.addButton (button1, 1, button1ShortCut);
+                aw.addButton (button2, 2, button2ShortCut);
+                aw.addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
+            }
+        }
+
+        return aw.runModalLoop();
+    }
+
+    static void* showCallback (void* userData)
+    {
+        return (void*) (pointer_sized_int) ((const AlertWindowInfo*) userData)->show();
+    }
+};
+
 void AlertWindow::showMessageBox (AlertIconType iconType,
                                   const String& title,
                                   const String& message,
                                   const String& buttonText)
 {
-    AlertWindow aw (title, message, iconType);
+    AlertWindowInfo info;
+    info.title = title;
+    info.message = message;
+    info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
+    info.iconType = iconType;
+    info.numButtons = 1;
 
-    aw.addButton (buttonText.isEmpty() ? TRANS("ok")
-                                       : buttonText,
-                  0,
-                  KeyPress (KeyPress::escapeKey, 0, 0),
-                  KeyPress (KeyPress::returnKey, 0, 0));
-
-    aw.runModalLoop();
+    info.run();
 }
 
 bool AlertWindow::showOkCancelBox (AlertIconType iconType,
@@ -608,19 +662,15 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    const String& button1Text,
                                    const String& button2Text)
 {
-    const String bt1 (button1Text.isEmpty() ? TRANS("ok")     : button1Text);
-    const String bt2 (button2Text.isEmpty() ? TRANS("cancel") : button2Text);
+    AlertWindowInfo info;
+    info.title = title;
+    info.message = message;
+    info.button1 = button1Text.isEmpty() ? TRANS("ok")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
+    info.iconType = iconType;
+    info.numButtons = 2;
 
-    const KeyPress okShortCut (CharacterFunctions::toLowerCase (bt1[0]), 0, 0);
-    KeyPress cancelShortCut (CharacterFunctions::toLowerCase (bt2[0]), 0, 0);
-    if (okShortCut == cancelShortCut)
-        cancelShortCut = KeyPress();
-
-    AlertWindow aw (title, message, iconType);
-    aw.addButton (bt1, 1, KeyPress (KeyPress::returnKey, 0, 0), okShortCut);
-    aw.addButton (bt2, 0, KeyPress (KeyPress::escapeKey, 0, 0), cancelShortCut);
-
-    return aw.runModalLoop() != 0;
+    return info.run() != 0;
 }
 
 int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
@@ -630,22 +680,16 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
                                      const String& button2Text,
                                      const String& button3Text)
 {
-    const String bt1 (button1Text.isEmpty() ? TRANS("yes")    : button1Text);
-    const String bt2 (button2Text.isEmpty() ? TRANS("no")     : button2Text);
-    const String bt3 (button3Text.isEmpty() ? TRANS("cancel") : button3Text);
+    AlertWindowInfo info;
+    info.title = title;
+    info.message = message;
+    info.button1 = button1Text.isEmpty() ? TRANS("yes")     : button1Text;
+    info.button2 = button2Text.isEmpty() ? TRANS("no")      : button2Text;
+    info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
+    info.iconType = iconType;
+    info.numButtons = 3;
 
-    const KeyPress yesShortCut (CharacterFunctions::toLowerCase (bt1[0]), 0, 0);
-    KeyPress noShortCut (CharacterFunctions::toLowerCase (bt2[0]), 0, 0);
-    if (yesShortCut == noShortCut)
-        noShortCut = KeyPress();
-
-    AlertWindow aw (title, message, iconType);
-
-    aw.addButton (bt1, 1, yesShortCut);
-    aw.addButton (bt2, 2, noShortCut);
-    aw.addButton (bt3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
-
-    return aw.runModalLoop();
+    return info.run();
 }
 
 END_JUCE_NAMESPACE
