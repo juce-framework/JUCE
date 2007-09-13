@@ -1096,14 +1096,23 @@ public:
 
     void setIcon (const Image& newIcon)
     {
-        /*XWMHints* wmHints = XAllocWMHints();
-        wmHints->flags = IconPixmapHint | IconMaskHint;
-        wmHints->icon_pixmap =
-        wmHints->icon_mask =
+        const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
+        uint32* const data = (uint32*) juce_malloc (dataSize);
 
-        XSetWMHints (display, windowH, wmHints);
-        XFree (wmHints);
-        */
+        int index = 0;
+        data[index++] = newIcon.getWidth();
+        data[index++] = newIcon.getHeight();
+
+        for (int y = 0; y < newIcon.getHeight(); ++y)
+            for (int x = 0; x < newIcon.getWidth(); ++x)
+                data[index++] = newIcon.getPixelAt (x, y).getARGB();
+
+        XChangeProperty (display, windowH,
+                         XInternAtom (display, "_NET_WM_ICON", False), 
+                         XA_CARDINAL, 32, PropModeReplace, 
+                         (unsigned char*) data, dataSize);
+
+        juce_free (data);
     }
 
     //==============================================================================
