@@ -1112,6 +1112,8 @@ public:
                          XA_CARDINAL, 32, PropModeReplace, 
                          (unsigned char*) data, dataSize);
 
+        XSync (display, False);
+
         juce_free (data);
     }
 
