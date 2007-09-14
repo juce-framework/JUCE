@@ -133,10 +133,12 @@ void Rectangle::expand (const int deltaX,
 const Rectangle Rectangle::expanded (const int deltaX,
                                      const int deltaY) const throw()
 {
+    const int nw = jmax (0, w + deltaX + deltaX);
+    const int nh = jmax (0, h + deltaY + deltaY);
+
     return Rectangle (x - deltaX,
                       y - deltaY,
-                      w + deltaX + deltaX,
-                      h + deltaY + deltaY);
+                      nw, nh);
 }
 
 void Rectangle::reduce (const int deltaX,

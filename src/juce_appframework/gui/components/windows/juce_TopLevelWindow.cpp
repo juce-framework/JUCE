@@ -309,8 +309,10 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
             parentArea.setBounds (0, 0, getParentWidth(), getParentHeight());
         }
 
-        setBounds (parentArea.getX() + jlimit (0, jmax (0, parentArea.getWidth() - width), x),
-                   parentArea.getY() + jlimit (0, jmax (0, parentArea.getHeight() - height), y),
+        parentArea.reduce (12, 12);
+
+        setBounds (jlimit (parentArea.getX(), jmax (parentArea.getX(), parentArea.getRight() - width), x),
+                   jlimit (parentArea.getY(), jmax (parentArea.getY(), parentArea.getBottom() - height), y),
                    width, height);
     }
 }
