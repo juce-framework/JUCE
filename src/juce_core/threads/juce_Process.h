@@ -94,6 +94,11 @@ public:
     static void lowerPrivilege();
 
     //==============================================================================
+    /** Returns true if this process is being hosted by a debugger.
+    */
+    static bool isRunningUnderDebugger() throw();
+
+    //==============================================================================
     /** Loads a dynamically-linked library into the process's address space.
 
         @param pathOrFilename   the platform-dependent name and search path

@@ -190,6 +190,10 @@
   //==============================================================================
   // Assertions..
 
+  BEGIN_JUCE_NAMESPACE
+    extern bool juce_isRunningUnderDebugger() throw();
+  END_JUCE_NAMESPACE
+
   #if JUCE_MSVC || DOXYGEN
 
     #if JUCE_USE_INTRINSICS
@@ -202,7 +206,7 @@
 
           @see jassert()
       */
-      #define jassertfalse              { juce_LogCurrentAssertion; __debugbreak(); }
+      #define jassertfalse              { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) __debugbreak(); }
     #else
       /** This will always cause an assertion failure.
 
@@ -210,12 +214,12 @@
 
           @see jassert()
       */
-      #define jassertfalse              { juce_LogCurrentAssertion; __asm int 3 }
+      #define jassertfalse              { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) { __asm int 3 } }
     #endif
   #elif defined (JUCE_MAC)
-    #define jassertfalse                { juce_LogCurrentAssertion; Debugger(); }
+    #define jassertfalse                { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) Debugger(); }
   #elif defined (JUCE_GCC) || defined (JUCE_LINUX)
-    #define jassertfalse                { juce_LogCurrentAssertion; asm("int $3"); }
+    #define jassertfalse                { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) asm("int $3"); }
   #endif
 
   //==============================================================================

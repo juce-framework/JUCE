@@ -54,12 +54,20 @@
 //==============================================================================
 #include "../../../juce_Config.h"
 
+//==============================================================================
+#ifdef JUCE_NAMESPACE
+  #define BEGIN_JUCE_NAMESPACE    namespace JUCE_NAMESPACE {
+  #define END_JUCE_NAMESPACE      }
+#else
+  #define BEGIN_JUCE_NAMESPACE
+  #define END_JUCE_NAMESPACE
+#endif
+
+//==============================================================================
 // This sets up the JUCE_WIN32, JUCE_MAC, or JUCE_LINUX macros
 #include "juce_PlatformDefs.h"
 
-//==============================================================================
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
-
 #if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable: 4514 4245 4100)
@@ -91,15 +99,6 @@
 
 #if JUCE_MSVC
   #pragma warning (pop)
-#endif
-
-//==============================================================================
-#ifdef JUCE_NAMESPACE
-  #define BEGIN_JUCE_NAMESPACE    namespace JUCE_NAMESPACE {
-  #define END_JUCE_NAMESPACE      }
-#else
-  #define BEGIN_JUCE_NAMESPACE
-  #define END_JUCE_NAMESPACE
 #endif
 
 //==============================================================================

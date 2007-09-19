@@ -33,6 +33,8 @@
 #include <pthread.h>
 #include <sched.h>
 #include <sys/file.h>
+#include <sys/types.h>
+#include <sys/ptrace.h>
 #include <Carbon/Carbon.h>
 
 BEGIN_JUCE_NAMESPACE
@@ -223,6 +225,26 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs) throw()
 
 
 //==============================================================================
+bool juce_isRunningUnderDebugger() throw()
+{
+    static char testResult = 0;
+
+    if (testResult == 0)
+    {
+        testResult = (ptrace (PT_TRACE_ME, 0, 0, 0) < 0) ? 1 : -1;
+
+        if (testResult < 0)
+            ptrace (PT_DETACH, 0, (caddr_t) 1, 0);
+    }
+
+    return testResult > 0;
+}
+
+bool Process::isRunningUnderDebugger() throw()
+{
+    return juce_isRunningUnderDebugger();
+}
+
 void Process::raisePrivilege()
 {
     jassertfalse

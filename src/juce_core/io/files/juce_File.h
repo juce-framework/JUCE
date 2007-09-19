@@ -182,7 +182,7 @@ public:
                                         be relative to. If this is actually a file rather than
                                         a directory, its parent directory will be used instead.
                                         If it doesn't exist, it's assumed to be a directory.
-        @see getChildFile
+        @see getChildFile, isAbsolutePath
     */
     const String getRelativePathFrom (const File& directoryToBeRelativeTo) const throw();
 
@@ -833,6 +833,10 @@ public:
     /** Indicates whether filenames are case-sensitive on the current operating system.
     */
     static bool areFileNamesCaseSensitive();
+
+    /** Returns true if the string seems to be a fully-specified absolute path.
+    */
+    static bool isAbsolutePath (const String& path) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

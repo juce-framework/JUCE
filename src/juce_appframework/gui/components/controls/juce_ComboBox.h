@@ -343,6 +343,22 @@ public:
     void handleAsyncUpdate();
     /** @internal */
     const String getTooltip()                                       { return label->getTooltip(); }
+    /** @internal */
+    void mouseDown (const MouseEvent&);
+    /** @internal */
+    void mouseDrag (const MouseEvent&);
+    /** @internal */
+    void mouseUp (const MouseEvent&);
+    /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
+    void paint (Graphics&);
+    /** @internal */
+    void resized();
+    /** @internal */
+    bool keyStateChanged();
+    /** @internal */
+    bool keyPressed (const KeyPress&);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -366,15 +382,6 @@ private:
     SortedSet <void*> listeners;
     Label* label;
     String textWhenNothingSelected, noChoicesMessage;
-
-    void mouseDown (const MouseEvent&);
-    void mouseDrag (const MouseEvent&);
-    void mouseUp (const MouseEvent&);
-    void lookAndFeelChanged();
-    void paint (Graphics&);
-    void resized();
-    bool keyStateChanged();
-    bool keyPressed (const KeyPress&);
 
     void showPopup();
 

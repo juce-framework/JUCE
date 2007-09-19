@@ -35,12 +35,31 @@
  #include <windows.h>
  #include <float.h>
  #pragma warning (disable : 4312)
+#elif defined LINUX
+ #include <float.h>
+ #include <sys/time.h>
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
+ #include <X11/Xatom.h>
+ #undef Font
+ #undef KeyPress
+ #undef Drawable
+ #undef Time
+ class VSTPluginWindow;
 #else
  #include <Carbon/Carbon.h>
 #endif
 
 #include "../../../../../juce.h"
 #include "juce_VSTPluginInstance.h"
+
+#if JUCE_LINUX 
+ #define Font JUCE_NAMESPACE::Font
+ #define KeyPress JUCE_NAMESPACE::KeyPress
+ #define Drawable JUCE_NAMESPACE::Drawable
+ #define Time JUCE_NAMESPACE::Time
+#endif
+
 #include "../juce_PluginDescription.h"
 
 #if ! JUCE_WIN32
@@ -174,6 +193,117 @@ static void* NewCFMFromMachO (void* const machofp) throw()
 #endif
 
 //==============================================================================
+#if JUCE_LINUX
+
+BEGIN_JUCE_NAMESPACE
+  extern Display* display;
+  extern XContext improbableNumber;
+END_JUCE_NAMESPACE
+
+typedef void (*EventProcPtr) (XEvent* ev);
+
+static bool xErrorTriggered;
+
+static int temporaryErrorHandler (Display*, XErrorEvent*)
+{
+    xErrorTriggered = true;
+    return 0;
+}
+
+static int getPropertyFromXWindow (Window handle, Atom atom)
+{
+    XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
+    xErrorTriggered = false;
+
+    int userSize;
+    unsigned long bytes, userCount;
+    unsigned char* data;
+    Atom userType;
+
+    XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+                        &userType,  &userSize, &userCount, &bytes, &data);
+
+    XSetErrorHandler (oldErrorHandler);
+
+    return (userCount == 1 && ! xErrorTriggered) ? *(int*) data 
+                                                 : 0;
+}
+
+static Window getChildWindow (Window windowToCheck)
+{
+    Window rootWindow, parentWindow;
+    Window* childWindows;
+    unsigned int numChildren;
+
+    XQueryTree (display,
+                windowToCheck,
+                &rootWindow,
+                &parentWindow,
+                &childWindows,
+                &numChildren);
+
+    if (numChildren > 0)
+        return childWindows [0];
+
+    return 0;
+}
+
+static void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) throw()
+{
+    if (e.mods.isLeftButtonDown())
+    {
+        ev.xbutton.button = Button1;
+        ev.xbutton.state |= Button1Mask;
+    }
+    else if (e.mods.isRightButtonDown())
+    {
+        ev.xbutton.button = Button3;
+        ev.xbutton.state |= Button3Mask;
+    }
+    else if (e.mods.isMiddleButtonDown())
+    {
+        ev.xbutton.button = Button2;
+        ev.xbutton.state |= Button2Mask;
+    }
+}
+
+static void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) throw()
+{
+    if (e.mods.isLeftButtonDown())
+        ev.xmotion.state |= Button1Mask;
+    else if (e.mods.isRightButtonDown())
+        ev.xmotion.state |= Button3Mask;
+    else if (e.mods.isMiddleButtonDown())
+        ev.xmotion.state |= Button2Mask;
+}
+
+static void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) throw()
+{
+    if (e.mods.isLeftButtonDown())
+        ev.xcrossing.state |= Button1Mask;
+    else if (e.mods.isRightButtonDown())
+        ev.xcrossing.state |= Button3Mask;
+    else if (e.mods.isMiddleButtonDown())
+        ev.xcrossing.state |= Button2Mask;
+}
+
+static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) throw()
+{
+    if (increment < 0)
+    {
+        ev.xbutton.button = Button5;
+        ev.xbutton.state |= Button5Mask;
+    }
+    else if (increment > 0)
+    {
+        ev.xbutton.button = Button4;
+        ev.xbutton.state |= Button4Mask;
+    }
+}
+
+#endif
+
+//==============================================================================
 static VoidArray activeModules;
 
 //==============================================================================
@@ -217,9 +347,9 @@ public:
     ModuleHandle (const File& file_)
         : file (file_),
           moduleMain (0),
-#if JUCE_WIN32
+#if JUCE_WIN32 || JUCE_LINUX
           hModule (0)
-#else
+#elif JUCE_MAC
           fragId (0),
           resHandle (0),
           bundleRef (0),
@@ -228,9 +358,9 @@ public:
     {
         activeModules.add (this);
 
-#if JUCE_WIN32
+#if JUCE_WIN32 || JUCE_LINUX
         fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
-#else
+#elif JUCE_MAC
         PlatformUtilities::makeFSSpecFromPath (&parentDirFSSpec, file_.getParentDirectory().getFullPathName());
 #endif
     }
@@ -246,27 +376,13 @@ public:
     juce_UseDebuggingNewOperator
 
     //==============================================================================
-#if JUCE_WIN32
-    HMODULE hModule;
+#if JUCE_WIN32 || JUCE_LINUX
+    void* hModule;
     String fullParentDirectoryPathName;
-
-    static HMODULE loadDLL (const TCHAR* filename) throw()
-    {
-        HMODULE h = 0;
-
-        __try
-        {
-            h = LoadLibrary (filename);
-        }
-        __finally
-        {
-        }
-
-        return h;
-    }
 
     bool open()
     {
+#if JUCE_WIN32
         static bool timePeriodSet = false;
 
         if (! timePeriodSet)
@@ -274,18 +390,16 @@ public:
             timePeriodSet = true;
             timeBeginPeriod (2);
         }
+#endif
 
         pluginName = file.getFileNameWithoutExtension();
 
-        hModule = loadDLL (file.getFullPathName());
+        hModule = Process::loadDynamicLibrary (file.getFullPathName());
 
-        if (hModule == 0)
-            return false;
-
-        moduleMain = (MainCall) GetProcAddress (hModule, "VSTPluginMain");
+        moduleMain = (MainCall) Process::getProcedureEntryPoint (hModule, "VSTPluginMain");
 
         if (moduleMain == 0)
-            moduleMain = (MainCall) GetProcAddress (hModule, "main");
+            moduleMain = (MainCall) Process::getProcedureEntryPoint (hModule, "main");
 
         return moduleMain != 0;
     }
@@ -294,16 +408,7 @@ public:
     {
         _fpreset(); // (doesn't do any harm)
 
-        if (hModule != 0)
-        {
-            __try
-            {
-                FreeLibrary (hModule);
-            }
-            __finally
-            {
-            }
-        }
+        Process::freeDynamicLibrary (hModule);
     }
 
     void closeEffect (AEffect* eff)
@@ -758,7 +863,11 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
     {
 #if JUCE_WIN32
         vstHostTime.nanoSeconds = timeGetTime() * 1000000.0;
-#else
+#elif JUCE_LINUX
+        timeval micro;
+        gettimeofday (&micro, 0);
+        vstHostTime.nanoSeconds = micro.tv_usec * 1000.0;
+#elif JUCE_MAC
         UnsignedWide micro;
         Microseconds (&micro);
         vstHostTime.nanoSeconds = micro.lo * 1000.0;
@@ -944,6 +1053,9 @@ public:
 #if JUCE_WIN32
         sizeCheckCount = 0;
         pluginHWND = 0;
+#elif JUCE_LINUX
+        pluginWindow = None;
+        pluginProc = None;
 #else
         pluginViewRef = 0;
 #endif
@@ -1014,9 +1126,16 @@ public:
             {
                 repaint();
             }
-#else
+#elif JUCE_WIN32
             if (pluginHWND != 0)
                 MoveWindow (pluginHWND, x, y, getWidth(), getHeight(), TRUE);
+#elif JUCE_LINUX
+            if (pluginWindow != 0)
+            {
+                XResizeWindow (display, pluginWindow, getWidth(), getHeight());
+                XMoveWindow (display, pluginWindow, x, y);
+                XMapRaised (display, pluginWindow);
+            }
 #endif
 
             recursiveResize = false;
@@ -1072,6 +1191,23 @@ public:
 
 #if JUCE_MAC
                 dispatch (effEditDraw, 0, 0, 0, 0);
+#elif JUCE_LINUX
+                if (pluginWindow != 0)
+                {
+                    const Rectangle clip (g.getClipBounds());
+
+                    XEvent ev;
+                    zerostruct (ev);
+                    ev.xexpose.type = Expose;
+                    ev.xexpose.display = display;
+                    ev.xexpose.window = pluginWindow;
+                    ev.xexpose.x = clip.getX();
+                    ev.xexpose.y = clip.getY();
+                    ev.xexpose.width = clip.getWidth();
+                    ev.xexpose.height = clip.getHeight();
+
+                    sendEventToChild (&ev);
+                }
 #endif
             }
         }
@@ -1123,6 +1259,29 @@ public:
         {
             PostEvent (::mouseDown, 0);
         }
+#elif JUCE_LINUX
+
+        if (pluginWindow == 0)
+            return;
+
+        toFront (true);
+
+        XEvent ev;
+        zerostruct (ev);
+        ev.xbutton.display = display;
+        ev.xbutton.type = ButtonPress;
+        ev.xbutton.window = pluginWindow;
+        ev.xbutton.root = RootWindow (display, DefaultScreen (display));
+        ev.xbutton.time = CurrentTime;
+        ev.xbutton.x = e.x;
+        ev.xbutton.y = e.y;
+        ev.xbutton.x_root = e.getScreenX();
+        ev.xbutton.y_root = e.getScreenY();
+
+        translateJuceToXButtonModifiers (e, ev);
+
+        sendEventToChild (&ev);
+
 #else
         (void) e;
 
@@ -1152,9 +1311,12 @@ private:
     HWND pluginHWND;
     void* originalWndProc;
     int sizeCheckCount;
-#else
+#elif JUCE_MAC
     HIViewRef pluginViewRef;
     WindowRef pluginWindowRef;
+#elif JUCE_LINUX
+    Window pluginWindow;
+    EventProcPtr pluginProc;
 #endif
 
     //==============================================================================
@@ -1231,7 +1393,7 @@ private:
                 }
             }
         }
-#else
+#elif JUCE_MAC
         HIViewRef root = HIViewGetRoot ((WindowRef) getWindowHandle());
         HIViewFindByID (root, kHIViewWindowContentID, &root);
         pluginViewRef = HIViewGetFirstSubview (root);
@@ -1269,6 +1431,30 @@ private:
                 h = 150;
             }
         }
+
+#elif JUCE_LINUX
+        pluginWindow = getChildWindow ((Window) getWindowHandle());
+
+        if (pluginWindow != 0)
+            pluginProc = (EventProcPtr) getPropertyFromXWindow (pluginWindow,
+                                                                XInternAtom (display, "_XEventProc", False));
+
+        int w = 250, h = 150;
+
+        if (rect != 0)
+        {
+            w = rect->right - rect->left;
+            h = rect->bottom - rect->top;
+
+            if (w == 0 || h == 0)
+            {
+                w = 250;
+                h = 150;
+            }
+        }
+        
+        if (pluginWindow != 0)
+            XMapRaised (display, pluginWindow);
 #endif
 
         // double-check it's not too tiny
@@ -1310,10 +1496,14 @@ private:
                 DestroyWindow (pluginHWND);
 
             pluginHWND = 0;
-#else
+#elif JUCE_MAC
             dispatch (effEditSleep, 0, 0, 0, 0);
             pluginViewRef = 0;
             stopTimer();
+#elif JUCE_LINUX
+            stopTimer();
+            pluginWindow = 0;
+            pluginProc = 0;
 #endif
         }
     }
@@ -1408,6 +1598,168 @@ private:
         return DefWindowProc (hW, message, wParam, lParam);
     }
 #endif
+
+#if JUCE_LINUX
+    //==============================================================================
+    // overload mouse/keyboard events to forward them to the plugin's inner window..
+    void sendEventToChild (XEvent* event)
+    {
+        if (pluginProc != 0)
+        {
+            // if the plugin publishes an event procedure, pass the event directly..
+            pluginProc (event);
+        }
+        else if (pluginWindow != 0)
+        {
+            // if the plugin has a window, then send the event to the window so that 
+            // its message thread will pick it up..
+            XSendEvent (display, pluginWindow, False, 0L, event);
+            XFlush (display);
+        }
+    }
+
+    void mouseEnter (const MouseEvent& e)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xcrossing.display = display;
+            ev.xcrossing.type = EnterNotify;
+            ev.xcrossing.window = pluginWindow;
+            ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
+            ev.xcrossing.time = CurrentTime;
+            ev.xcrossing.x = e.x;
+            ev.xcrossing.y = e.y;
+            ev.xcrossing.x_root = e.getScreenX();
+            ev.xcrossing.y_root = e.getScreenY();
+            ev.xcrossing.mode = NotifyNormal; // NotifyGrab, NotifyUngrab
+            ev.xcrossing.detail = NotifyAncestor; // NotifyVirtual, NotifyInferior, NotifyNonlinear,NotifyNonlinearVirtual
+
+            translateJuceToXCrossingModifiers (e, ev);
+
+            sendEventToChild (&ev);
+        }
+    }
+
+    void mouseExit (const MouseEvent& e)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xcrossing.display = display;
+            ev.xcrossing.type = LeaveNotify;
+            ev.xcrossing.window = pluginWindow;
+            ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
+            ev.xcrossing.time = CurrentTime;
+            ev.xcrossing.x = e.x;
+            ev.xcrossing.y = e.y;
+            ev.xcrossing.x_root = e.getScreenX();
+            ev.xcrossing.y_root = e.getScreenY();
+            ev.xcrossing.mode = NotifyNormal; // NotifyGrab, NotifyUngrab
+            ev.xcrossing.detail = NotifyAncestor; // NotifyVirtual, NotifyInferior, NotifyNonlinear,NotifyNonlinearVirtual
+            ev.xcrossing.focus = hasKeyboardFocus (true); // TODO - yes ?
+
+            translateJuceToXCrossingModifiers (e, ev);
+
+            sendEventToChild (&ev);
+        }
+    }
+
+    void mouseMove (const MouseEvent& e)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xmotion.display = display;
+            ev.xmotion.type = MotionNotify;
+            ev.xmotion.window = pluginWindow;
+            ev.xmotion.root = RootWindow (display, DefaultScreen (display));
+            ev.xmotion.time = CurrentTime;
+            ev.xmotion.is_hint = NotifyNormal;
+            ev.xmotion.x = e.x;
+            ev.xmotion.y = e.y;
+            ev.xmotion.x_root = e.getScreenX();
+            ev.xmotion.y_root = e.getScreenY();
+
+            sendEventToChild (&ev);
+        }
+    }
+
+    void mouseDrag (const MouseEvent& e)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xmotion.display = display;
+            ev.xmotion.type = MotionNotify;
+            ev.xmotion.window = pluginWindow;
+            ev.xmotion.root = RootWindow (display, DefaultScreen (display));
+            ev.xmotion.time = CurrentTime;
+            ev.xmotion.x = e.x ;
+            ev.xmotion.y = e.y;
+            ev.xmotion.x_root = e.getScreenX();
+            ev.xmotion.y_root = e.getScreenY();
+            ev.xmotion.is_hint = NotifyNormal;
+
+            translateJuceToXMotionModifiers (e, ev);
+            sendEventToChild (&ev);
+        }
+    }
+
+    void mouseUp (const MouseEvent& e)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xbutton.display = display;
+            ev.xbutton.type = ButtonRelease;
+            ev.xbutton.window = pluginWindow;
+            ev.xbutton.root = RootWindow (display, DefaultScreen (display));
+            ev.xbutton.time = CurrentTime;
+            ev.xbutton.x = e.x;
+            ev.xbutton.y = e.y;
+            ev.xbutton.x_root = e.getScreenX();
+            ev.xbutton.y_root = e.getScreenY();
+
+            translateJuceToXButtonModifiers (e, ev);
+            sendEventToChild (&ev);
+        }
+    }
+
+    void mouseWheelMove (const MouseEvent& e,
+                         float incrementX,
+                         float incrementY)
+    {
+        if (pluginWindow != 0)
+        {
+            XEvent ev;
+            zerostruct (ev);
+            ev.xbutton.display = display;
+            ev.xbutton.type = ButtonPress;
+            ev.xbutton.window = pluginWindow;
+            ev.xbutton.root = RootWindow (display, DefaultScreen (display));
+            ev.xbutton.time = CurrentTime;
+            ev.xbutton.x = e.x;
+            ev.xbutton.y = e.y;
+            ev.xbutton.x_root = e.getScreenX();
+            ev.xbutton.y_root = e.getScreenY();
+
+            translateJuceToXMouseWheelModifiers (e, incrementY, ev);
+            sendEventToChild (&ev);
+
+            // TODO - put a usleep here ?
+
+            ev.xbutton.type = ButtonRelease;
+            sendEventToChild (&ev);
+        }
+    }
+#endif
+
 };
 
 //==============================================================================
@@ -2533,9 +2885,12 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const File& f)
 #endif
 
     return false;
-#else
+#elif JUCE_WIN32
     return f.existsAsFile()
             && f.hasFileExtension (T(".dll"));
+#elif JUCE_LINUX
+    return f.existsAsFile()
+            && f.hasFileExtension (T(".so"));
 #endif
 }
 
@@ -2543,9 +2898,11 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
 #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-#else
+#elif JUCE_WIN32
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
     return FileSearchPath (programFiles + "\\Steinberg\\VstPlugins");
+#elif JUCE_LINUX
+    return FileSearchPath ("/usr/lib/vst");
 #endif
 }

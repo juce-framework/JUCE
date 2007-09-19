@@ -32,6 +32,8 @@
 #include "linuxincludes.h"
 #include <dlfcn.h>
 #include <sys/file.h>
+#include <sys/types.h>
+#include <sys/ptrace.h> 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
@@ -337,6 +339,26 @@ void Process::setPriority (ProcessPriority prior)
 void Process::terminate()
 {
     exit (0);
+}
+
+bool juce_isRunningUnderDebugger() throw()
+{
+    static char testResult = 0;
+
+    if (testResult == 0)
+    {
+        testResult = (ptrace (PTRACE_TRACEME, 0, 0, 0) < 0) ? 1 : -1;
+
+        if (testResult < 0)
+            ptrace (PTRACE_DETACH, 0, (caddr_t) 1, 0);
+    }
+
+    return testResult > 0;
+}
+
+bool Process::isRunningUnderDebugger() throw()
+{
+    return juce_isRunningUnderDebugger();
 }
 
 void Process::raisePrivilege()

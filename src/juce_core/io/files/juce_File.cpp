@@ -439,15 +439,19 @@ bool File::isAChildOf (const File& potentialParent) const throw()
 }
 
 //==============================================================================
+bool File::isAbsolutePath (const String& path) throw()
+{
+    return path.startsWithChar (T('/')) || path.startsWithChar (T('\\'))
+#if JUCE_WIN32
+            || (path.isNotEmpty() && ((const String&) path)[1] == T(':'));
+#else
+            || path.startsWithChar (T('~'));
+#endif
+}
+
 const File File::getChildFile (String relativePath) const throw()
 {
-    if (relativePath.startsWithChar (T('/'))
-        || relativePath.startsWithChar (T('\\'))
-#if JUCE_WIN32
-        || (relativePath.isNotEmpty() && ((const String&) relativePath)[1] == T(':')))
-#else
-        || relativePath.startsWithChar (T('~')))
-#endif
+    if (isAbsolutePath (relativePath))
     {
         // the path is really absolute..
         return File (relativePath);
