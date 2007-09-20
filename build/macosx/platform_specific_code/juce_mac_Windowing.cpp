@@ -3401,6 +3401,18 @@ public:
         aglSwapBuffers (renderContext);
     }
 
+    bool setSwapInterval (const int numFramesPerSwap)
+    {
+        return aglSetInteger (renderContext, AGL_SWAP_INTERVAL, &numFramesPerSwap);
+    }
+
+    int getSwapInterval() const
+    {
+        GLint numFrames = 0;
+        aglGetInteger (renderContext, AGL_SWAP_INTERVAL, &numFrames);
+        return numFrames;
+    }
+
     void repaint()
     {
     }

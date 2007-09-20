@@ -93,7 +93,6 @@ public:
     {
         const ScopedLock sl (owner->getContextLock());
         owner->deleteContext();
-        owner->createContext();
     }
 
     void componentVisibilityChanged (Component&)
@@ -131,30 +130,6 @@ OpenGLComponent::~OpenGLComponent()
     delete componentWatcher;
 }
 
-void OpenGLComponent::createContext()
-{
-    const ScopedLock sl (contextLock);
-
-    jassert (context == 0);
-
-    if (context == 0 && isShowing() && getTopLevelComponent()->getPeer() != 0)
-    {
-        context = OpenGLContext::createContextForWindow (this,
-                                                         preferredPixelFormat,
-                                                         componentToShareListsWith != 0
-                                                             ? componentToShareListsWith->context
-                                                             : 0);
-
-        if (context != 0)
-        {
-            updateContextPosition();
-
-            if (makeCurrentContextActive())
-                newOpenGLContextCreated();
-        }
-    }
-}
-
 void OpenGLComponent::deleteContext()
 {
     const ScopedLock sl (contextLock);
@@ -172,9 +147,6 @@ void OpenGLComponent::updateContextPosition()
         if (topComp->getPeer() != 0)
         {
             const ScopedLock sl (contextLock);
-
-            if (context == 0)
-                createContext();
 
             if (context != 0)
                 context->updateWindowPosition (getScreenX() - topComp->getScreenX(),
@@ -197,17 +169,14 @@ const OpenGLPixelFormat OpenGLComponent::getPixelFormat() const
     return pf;
 }
 
-bool OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
+void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
 {
-    if (preferredPixelFormat == formatToUse)
-        return true;
-
-    const ScopedLock sl (contextLock);
-    deleteContext();
-    preferredPixelFormat = formatToUse;
-    createContext();
-
-    return context != 0;
+    if (! (preferredPixelFormat == formatToUse))
+    {
+        const ScopedLock sl (contextLock);
+        deleteContext();
+        preferredPixelFormat = formatToUse;
+    }
 }
 
 void OpenGLComponent::shareWith (OpenGLComponent* const comp)
@@ -217,12 +186,33 @@ void OpenGLComponent::shareWith (OpenGLComponent* const comp)
         const ScopedLock sl (contextLock);
         deleteContext();
         componentToShareListsWith = comp;
-        createContext();
     }
 }
 
 bool OpenGLComponent::makeCurrentContextActive()
 {
+    if (context == 0)
+    {
+        const ScopedLock sl (contextLock);
+
+        if (isShowing() && getTopLevelComponent()->getPeer() != 0)
+        {
+            context = OpenGLContext::createContextForWindow (this,
+                                                             preferredPixelFormat,
+                                                             componentToShareListsWith != 0
+                                                                 ? componentToShareListsWith->context
+                                                                 : 0);
+
+            if (context != 0)
+            {
+                updateContextPosition();
+
+                if (context->makeActive())
+                    newOpenGLContextCreated();
+            }
+        }
+    }
+
     return context != 0 && context->makeActive();
 }
 

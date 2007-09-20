@@ -3037,6 +3037,8 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 typedef const char* (WINAPI* PFNWGLGETEXTENSIONSSTRINGARBPROC) (HDC hdc);
 typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC) (HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes, const int *piAttributes, int *piValues);
 typedef BOOL (WINAPI * PFNWGLCHOOSEPIXELFORMATARBPROC) (HDC hdc, const int* piAttribIList, const FLOAT *pfAttribFList, UINT nMaxFormats, int *piFormats, UINT *nNumFormats);
+typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
+typedef int (WINAPI * PFNWGLGETSWAPINTERVALEXTPROC) (void);
 
 #define WGL_NUMBER_PIXEL_FORMATS_ARB    0x2000
 #define WGL_DRAW_TO_WINDOW_ARB          0x2001
@@ -3297,6 +3299,32 @@ public:
     void swapBuffers()
     {
         SwapBuffers (dc);
+    }
+
+    bool setSwapInterval (const int numFramesPerSwap)
+    {
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
+
+        PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = 0;
+
+        return availableExtensions.contains ("WGL_EXT_swap_control")
+                && WGL_EXT_FUNCTION_INIT (PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT)
+                && wglSwapIntervalEXT (numFramesPerSwap) != FALSE;
+    }
+
+    int getSwapInterval() const
+    {
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
+
+        PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = 0;
+
+        if (availableExtensions.contains ("WGL_EXT_swap_control") 
+             && WGL_EXT_FUNCTION_INIT (PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT))
+            return wglGetSwapIntervalEXT();
+
+        return 0;
     }
 
     void findAlternativeOpenGLPixelFormats (OwnedArray <OpenGLPixelFormat>& results)

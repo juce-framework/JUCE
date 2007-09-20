@@ -110,6 +110,21 @@ public:
     /** Swaps the buffers (if the context can do this). */
     virtual void swapBuffers() = 0;
 
+    /** Sets whether the context checks the vertical sync before swapping.
+
+        The value is the number of frames to allow between buffer-swapping. This is 
+        fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
+        and greater numbers indicate that it should swap less often.
+
+        Returns true if it sets the value successfully.
+    */
+    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
+
+    /** Returns the current swap-sync interval.
+        See setSwapInterval() for info about the value returned.
+    */
+    virtual int getSwapInterval() const = 0;
+
     //==============================================================================
     /** Returns the pixel format being used by this context. */
     virtual const OpenGLPixelFormat getPixelFormat() const = 0;
@@ -175,7 +190,7 @@ public:
 
         @see OpenGLPixelFormat::getAvailablePixelFormats()
     */
-    bool setPixelFormat (const OpenGLPixelFormat& formatToUse);
+    void setPixelFormat (const OpenGLPixelFormat& formatToUse);
 
     /** Returns the pixel format that this component is currently using. */
     const OpenGLPixelFormat getPixelFormat() const;
@@ -207,6 +222,13 @@ public:
         You can use this callback as an opportunity to set up things like textures
         that your context needs.
 
+        New contexts are created on-demand by the makeCurrentContextActive() method - so
+        if the context is deleted, e.g. by changing the pixel format or window, no context 
+        will be created until the next call to makeCurrentContextActive(), which will
+        synchronously create one and call this method. This means that if you're using
+        a non-GUI thread for rendering, you can make sure this method is be called by 
+        your renderer thread.
+
         When this callback happens, the context will already have been made current
         using the makeCurrentContextActive() method, so there's no need to call it
         again in your code.
@@ -217,9 +239,11 @@ public:
     //==============================================================================
     /** Returns the context that will draw into this component.
 
-        This may return 0 if it failed to initialise properly, or if the component
-        is currently invisible. The context object may be deleted and a new one created
-        during the life of this component - see newOpenGLContextCreated().
+        This may return 0 if the component is currently invisible or hasn't currently
+        got a context. The context object can be deleted and a new one created during 
+        the lifetime of this component, and there may be times when it doesn't have one.
+
+        @see newOpenGLContextCreated()
     */
     OpenGLContext* getCurrentContext() const throw();
 
@@ -230,6 +254,10 @@ public:
 
         If this returns false, then the context isn't active, so you should avoid
         making any calls.
+
+        This call may actually create a context if one isn't currently initialised. If 
+        it does this, it will also synchronously call the newOpenGLContextCreated() 
+        method to let you initialise it as necessary.
 
         @see OpenGLContext::makeActive
     */
@@ -289,7 +317,6 @@ private:
     OpenGLPixelFormat preferredPixelFormat;
     bool needToUpdateViewport;
 
-    void createContext();
     void deleteContext();
     void updateContextPosition();
     void internalRepaint (int x, int y, int w, int h);

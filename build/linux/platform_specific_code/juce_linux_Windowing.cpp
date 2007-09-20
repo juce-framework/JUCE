@@ -2948,6 +2948,18 @@ public:
         glXSwapBuffers (display, embeddedWindow);
     }
 
+    bool setSwapInterval (const int numFramesPerSwap)
+    {
+        // xxx needs doing..
+        return false;
+    }
+
+    int getSwapInterval() const
+    {
+        // xxx needs doing..
+        return 0;
+    }
+
     void repaint()
     {
     }
