@@ -2482,7 +2482,7 @@ void juce_windowMessageReceive (XEvent* event)
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /*clipToWorkArea*/) throw()
 {
 #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
@@ -2518,8 +2518,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     if (monitorCoords.size() == 0)
 #endif
     {
-        Atom hints = clipToWorkArea ? XInternAtom (display, "_NET_WORKAREA", True)
-                                    : None;
+        Atom hints = XInternAtom (display, "_NET_WORKAREA", True);
 
         if (hints != None)
         {
@@ -2909,7 +2908,7 @@ public:
         XDestroyWindow (display, embeddedWindow);
     }
 
-    bool makeActive() throw()
+    bool makeActive() const throw()
     {
         jassert (renderContext != 0);
 
@@ -2917,7 +2916,7 @@ public:
                 && XSync (display, False);
     }
 
-    bool makeInactive() throw()
+    bool makeInactive() const throw()
     {
         return (! isActive()) || glXMakeCurrent (display, None, 0);
     }
@@ -2997,7 +2996,8 @@ void juce_glViewport (const int w, const int h)
     glViewport (0, 0, w, h);
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
+                                                  OwnedArray <OpenGLPixelFormat>& results)
 {
     results.add (new OpenGLPixelFormat()); // xxx
 }

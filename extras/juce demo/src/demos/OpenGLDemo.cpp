@@ -84,7 +84,7 @@ public:
 
         // Just for demo purposes, let's dump a list of all the available pixel formats..
         OwnedArray <OpenGLPixelFormat> availablePixelFormats;
-        OpenGLPixelFormat::getAvailablePixelFormats (availablePixelFormats);
+        OpenGLPixelFormat::getAvailablePixelFormats (this, availablePixelFormats);
 
         for (int i = 0; i < availablePixelFormats.size(); ++i)
         {

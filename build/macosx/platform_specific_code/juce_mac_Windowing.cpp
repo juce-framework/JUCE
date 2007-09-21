@@ -3357,14 +3357,14 @@ public:
         aglDestroyContext (renderContext);
     }
 
-    bool makeActive() throw()
+    bool makeActive() const throw()
     {
         jassert (renderContext != 0);
 
         return aglSetCurrentContext (renderContext);
     }
 
-    bool makeInactive() throw()
+    bool makeInactive() const throw()
     {
         return (! isActive()) || aglSetCurrentContext (0);
     }
@@ -3456,7 +3456,8 @@ static int getAGLAttribute (AGLPixelFormat p, const GLint attrib)
     return result;
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
+                                                  OwnedArray <OpenGLPixelFormat>& results)
 {
     GLint attribs [64];
     int n = 0;

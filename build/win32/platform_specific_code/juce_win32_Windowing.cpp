@@ -3079,27 +3079,17 @@ static void getWglExtensions (HDC dc, StringArray& result) throw()
 class WindowedGLContext     : public OpenGLContext
 {
 public:
-    WindowedGLContext (Component* const component, HGLRC contextToShareWith)
+    WindowedGLContext (Component* const component_, 
+                       HGLRC contextToShareWith,
+                       const OpenGLPixelFormat& pixelFormat)
         : renderContext (0),
-          nativeWindow (0)
+          nativeWindow (0),
+          dc (0),
+          component (component_)
     {
         jassert (component != 0);
-        Win32ComponentPeer* const peer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
 
-        nativeWindow = new Win32ComponentPeer (component, 0);
-        nativeWindow->dontRepaint = true;
-        nativeWindow->setVisible (true);
-
-        HWND hwnd = (HWND) nativeWindow->getNativeHandle();
-
-        if (peer != 0)
-        {
-            SetParent (hwnd, (HWND) peer->getNativeHandle());
-            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_CHILD, true);
-            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_POPUP, false);
-        }
-
-        dc = GetDC (hwnd);
+        createNativeWindow();
 
         // Use a default pixel format that should be supported everywhere
         PIXELFORMATDESCRIPTOR pfd;
@@ -3108,7 +3098,7 @@ public:
         pfd.nVersion = 1;
         pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
         pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 16;
+        pfd.cColorBits = 24;
         pfd.cDepthBits = 16;
 
         const int format = ChoosePixelFormat (dc, &pfd);
@@ -3117,6 +3107,9 @@ public:
             SetPixelFormat (dc, format, &pfd);
 
         renderContext = wglCreateContext (dc);
+        makeActive();
+
+        setPixelFormat (pixelFormat);
 
         if (contextToShareWith != 0 && renderContext != 0)
             wglShareLists (renderContext, contextToShareWith);
@@ -3127,18 +3120,18 @@ public:
         makeInactive();
 
         wglDeleteContext (renderContext);
-        ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
 
+        ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
         delete nativeWindow;
     }
 
-    bool makeActive() throw()
+    bool makeActive() const throw()
     {
         jassert (renderContext != 0);
         return wglMakeCurrent (dc, renderContext) != 0;
     }
 
-    bool makeInactive() throw()
+    bool makeInactive() const throw()
     {
         return (! isActive()) || (wglMakeCurrent (0, 0) != 0);
     }
@@ -3152,6 +3145,7 @@ public:
     {
         OpenGLPixelFormat pf;
 
+        makeActive();
         StringArray availableExtensions;
         getWglExtensions (dc, availableExtensions);
 
@@ -3166,12 +3160,7 @@ public:
 
     bool setPixelFormat (const OpenGLPixelFormat& pixelFormat)
     {
-        jassert (renderContext != 0);
-
         makeActive();
-
-        StringArray availableExtensions;
-        getWglExtensions (dc, availableExtensions);
 
         PIXELFORMATDESCRIPTOR pfd;
         zerostruct (pfd);
@@ -3197,6 +3186,9 @@ public:
         int format = 0;
 
         PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = 0;
+
+        StringArray availableExtensions;
+        getWglExtensions (dc, availableExtensions);
 
         if (availableExtensions.contains ("WGL_ARB_pixel_format")
              && WGL_EXT_FUNCTION_INIT (PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB))
@@ -3268,7 +3260,14 @@ public:
         {
             makeInactive();
 
-            // Create the real context..
+            // win32 can't change the pixel format of a window, so need to delete the
+            // old one and create a new one..
+            jassert (nativeWindow != 0);
+            ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
+            delete nativeWindow;
+
+            createNativeWindow();
+
             if (SetPixelFormat (dc, format, &pfd))
             {
                 wglDeleteContext (renderContext);
@@ -3303,6 +3302,8 @@ public:
 
     bool setSwapInterval (const int numFramesPerSwap)
     {
+        makeActive();
+
         StringArray availableExtensions;
         getWglExtensions (dc, availableExtensions);
 
@@ -3315,6 +3316,8 @@ public:
 
     int getSwapInterval() const
     {
+        makeActive();
+
         StringArray availableExtensions;
         getWglExtensions (dc, availableExtensions);
 
@@ -3374,9 +3377,30 @@ public:
 
 private:
     Win32ComponentPeer* nativeWindow;
+    Component* const component;
     HDC dc;
 
     //==============================================================================
+    void createNativeWindow()
+    {
+        nativeWindow = new Win32ComponentPeer (component, 0);
+        nativeWindow->dontRepaint = true;
+        nativeWindow->setVisible (true);
+
+        HWND hwnd = (HWND) nativeWindow->getNativeHandle();
+
+        Win32ComponentPeer* const peer = dynamic_cast <Win32ComponentPeer*> (component->getTopLevelComponent()->getPeer());
+
+        if (peer != 0)
+        {
+            SetParent (hwnd, (HWND) peer->getNativeHandle());
+            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_CHILD, true);
+            juce_setWindowStyleBit (hwnd, GWL_STYLE, WS_POPUP, false);
+        }
+
+        dc = GetDC (hwnd);
+    }
+
     bool fillInPixelFormatDetails (const int pixelFormatIndex,
                                    OpenGLPixelFormat& result,
                                    const StringArray& availableExtensions) const throw()
@@ -3477,9 +3501,10 @@ OpenGLContext* OpenGLContext::createContextForWindow (Component* const component
                                                       const OpenGLContext* const contextToShareWith)
 {
     WindowedGLContext* c = new WindowedGLContext (component,
-                                                  contextToShareWith != 0 ? (HGLRC) contextToShareWith->getRawContext() : 0);
+                                                  contextToShareWith != 0 ? (HGLRC) contextToShareWith->getRawContext() : 0,
+                                                  pixelFormat);
 
-    if (c->renderContext == 0 || ! c->setPixelFormat (pixelFormat))
+    if (c->renderContext == 0)
         deleteAndZero (c);
 
     return c;
@@ -3490,12 +3515,13 @@ void juce_glViewport (const int w, const int h)
     glViewport (0, 0, w, h);
 }
 
-void OpenGLPixelFormat::getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results)
+void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
+                                                  OwnedArray <OpenGLPixelFormat>& results)
 {
     Component tempComp;
 
     {
-        WindowedGLContext wc (&tempComp, 0);
+        WindowedGLContext wc (component, 0, OpenGLPixelFormat (8, 8, 16, 0));
         wc.makeActive();
         wc.findAlternativeOpenGLPixelFormats (results);
     }

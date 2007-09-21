@@ -77,8 +77,12 @@ struct OpenGLPixelFormat
 
     //==============================================================================
     /** Returns a list of all the pixel formats that can be used in this system.
+
+        A reference component is needed in case there are multiple screens with different
+        capabilities - in which case, the one that the component is on will be used.
     */
-    static void getAvailablePixelFormats (OwnedArray <OpenGLPixelFormat>& results);
+    static void getAvailablePixelFormats (Component* component,
+                                          OwnedArray <OpenGLPixelFormat>& results);
 
     //==============================================================================
     bool operator== (const OpenGLPixelFormat&) const throw();
@@ -101,9 +105,9 @@ public:
 
     //==============================================================================
     /** Makes this context the currently active one. */
-    virtual bool makeActive() throw() = 0;
+    virtual bool makeActive() const throw() = 0;
     /** If this context is currently active, it is disactivated. */
-    virtual bool makeInactive() throw() = 0;
+    virtual bool makeInactive() const throw() = 0;
     /** Returns true if this context is currently active. */
     virtual bool isActive() const throw() = 0;
 
