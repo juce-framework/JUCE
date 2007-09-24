@@ -81,7 +81,7 @@ OpenGLContext::~OpenGLContext()
     knownContexts.removeValue (this);
 }
 
-OpenGLContext* OpenGLContext::getCurrentContext() throw()
+OpenGLContext* OpenGLContext::getCurrentContext()
 {
     for (int i = knownContexts.size(); --i >= 0;)
     {

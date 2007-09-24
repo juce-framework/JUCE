@@ -168,7 +168,7 @@ public:
 
         Returns 0 if there isn't an active context.
     */
-    static OpenGLContext* getCurrentContext() throw();
+    static OpenGLContext* getCurrentContext();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
