@@ -101,7 +101,7 @@ class OpenGLContext
 public:
     //==============================================================================
     /** Destructor. */
-    virtual ~OpenGLContext() {}
+    virtual ~OpenGLContext();
 
     //==============================================================================
     /** Makes this context the currently active one. */
@@ -162,11 +162,19 @@ public:
                                                   const OpenGLPixelFormat& pixelFormat,
                                                   const OpenGLContext* const contextToShareWith);
 
+
+    //==============================================================================
+    /** Returns the context that's currently in active use by the calling thread.
+
+        Returns 0 if there isn't an active context.
+    */
+    static OpenGLContext* getCurrentContext() throw();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
-    OpenGLContext() throw() {};
+    OpenGLContext() throw();
 };
 
 

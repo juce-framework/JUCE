@@ -299,12 +299,12 @@ void Process::setPriority (ProcessPriority prior)
     }
 }
 
-bool juce_isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
 {
     return IsDebuggerPresent() != FALSE;
 }
 
-bool Process::isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger() throw()
 {
     return juce_isRunningUnderDebugger();
 }

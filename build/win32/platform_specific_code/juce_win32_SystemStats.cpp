@@ -89,8 +89,6 @@ void Logger::outputDebugPrintf (const tchar* format, ...) throw()
 static int64 hiResTicksPerSecond;
 static double hiResTicksScaleFactor;
 
-static SYSTEM_INFO systemInfo;
-
 
 //==============================================================================
 #if JUCE_USE_INTRINSICS
@@ -276,8 +274,6 @@ void SystemStats::initialiseStats() throw()
 
     String s (SystemStats::getJUCEVersion());
 
-    GetSystemInfo (&systemInfo);
-
 #ifdef JUCE_DEBUG
     const MMRESULT res = timeBeginPeriod (1);
     jassert (res == TIMERR_NOERROR);
@@ -362,6 +358,9 @@ int SystemStats::getMemorySizeInMegabytes() throw()
 
 int SystemStats::getNumCpus() throw()
 {
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo (&systemInfo);
+
     return systemInfo.dwNumberOfProcessors;
 }
 
@@ -488,6 +487,9 @@ bool Time::setSystemTimeToThisTime() const throw()
 
 int SystemStats::getPageSize() throw()
 {
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo (&systemInfo);
+
     return systemInfo.dwPageSize;
 }
 

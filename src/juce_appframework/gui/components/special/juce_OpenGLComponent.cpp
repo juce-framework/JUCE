@@ -68,6 +68,32 @@ bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const throw(
     return memcmp (this, &other, sizeof (other)) == 0;
 }
 
+//==============================================================================
+static VoidArray knownContexts;
+
+OpenGLContext::OpenGLContext() throw()
+{
+    knownContexts.add (this);
+}
+
+OpenGLContext::~OpenGLContext()
+{
+    knownContexts.removeValue (this);
+}
+
+OpenGLContext* OpenGLContext::getCurrentContext() throw()
+{
+    for (int i = knownContexts.size(); --i >= 0;)
+    {
+        OpenGLContext* const oglc = (OpenGLContext*) knownContexts.getUnchecked(i);
+
+        if (oglc->isActive())
+            return oglc;
+    }
+
+    return 0;
+}
+
 
 //==============================================================================
 class OpenGLComponentWatcher  : public ComponentMovementWatcher

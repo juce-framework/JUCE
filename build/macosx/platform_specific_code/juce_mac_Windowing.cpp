@@ -650,7 +650,7 @@ public:
             {
                 ProcessSerialNumber psn;
                 GetCurrentProcess (&psn);
-                SetFrontProcess (&psn);
+                SetFrontProcessWithOptions (&psn, kSetFrontProcessFrontWindowOnly);
             }
 
             if (IsValidWindowPtr (windowRef))
@@ -1231,7 +1231,7 @@ public:
                 {
                     ProcessSerialNumber psn;
                     GetCurrentProcess (&psn);
-                    SetFrontProcess (&psn);
+                    SetFrontProcessWithOptions (&psn, kSetFrontProcessFrontWindowOnly);
 
                     toFront (true);
                 }
@@ -3403,7 +3403,7 @@ public:
 
     bool setSwapInterval (const int numFramesPerSwap)
     {
-        return aglSetInteger (renderContext, AGL_SWAP_INTERVAL, &numFramesPerSwap);
+        return aglSetInteger (renderContext, AGL_SWAP_INTERVAL, (const GLint*) &numFramesPerSwap);
     }
 
     int getSwapInterval() const

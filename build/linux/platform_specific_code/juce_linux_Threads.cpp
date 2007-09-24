@@ -341,7 +341,7 @@ void Process::terminate()
     exit (0);
 }
 
-bool juce_isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
 {
     static char testResult = 0;
 
@@ -356,7 +356,7 @@ bool juce_isRunningUnderDebugger() throw()
     return testResult > 0;
 }
 
-bool Process::isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger() throw()
 {
     return juce_isRunningUnderDebugger();
 }

@@ -155,6 +155,13 @@
   #error unknown compiler
 #endif
 
+/** This macro defines the C calling convention used as the standard for Juce calls. */
+#if JUCE_MSVC
+  #define JUCE_CALLTYPE             __stdcall
+#else
+  #define JUCE_CALLTYPE
+#endif
+
 //==============================================================================
 // Debugging and assertion macros
 
@@ -191,7 +198,7 @@
   // Assertions..
 
   BEGIN_JUCE_NAMESPACE
-    extern bool juce_isRunningUnderDebugger() throw();
+    extern bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
   END_JUCE_NAMESPACE
 
   #if JUCE_MSVC || DOXYGEN

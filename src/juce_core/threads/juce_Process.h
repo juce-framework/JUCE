@@ -96,7 +96,7 @@ public:
     //==============================================================================
     /** Returns true if this process is being hosted by a debugger.
     */
-    static bool isRunningUnderDebugger() throw();
+    static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
 
     //==============================================================================
     /** Loads a dynamically-linked library into the process's address space.

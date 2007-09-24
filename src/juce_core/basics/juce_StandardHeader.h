@@ -118,13 +118,6 @@
   #define JUCE_API
 #endif
 
-/** This macro defines the C calling convention used as the standard for Juce calls. */
-#if JUCE_MSVC
-  #define JUCE_CALLTYPE             __stdcall
-#else
-  #define JUCE_CALLTYPE
-#endif
-
 /** This macro is added to all juce public function declarations. */
 #define JUCE_PUBLIC_FUNCTION        JUCE_API JUCE_CALLTYPE
 
