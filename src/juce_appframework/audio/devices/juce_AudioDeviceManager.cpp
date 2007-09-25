@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioDeviceManager.h"
 #include "../../gui/components/juce_Desktop.h"
+#include "../../../juce_core/text/juce_LocalisedStrings.h"
 
 
 //==============================================================================
@@ -49,6 +50,7 @@ AudioDeviceManager::AudioDeviceManager()
       enabledMidiInputs (4),
       midiCallbacks (4),
       midiCallbackDevices (4),
+      defaultMidiOutput (0),
       cpuUsageMs (0),
       timeToCpuScale (0)
 {
@@ -92,13 +94,19 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                       e->hasAttribute (T("audioDeviceOutChans")) ? &outs : 0,
                                       true));
 
+        StringArray enabledMidiIns;
         forEachXmlChildElementWithTagName (*e, c, T("MIDIINPUT"))
-        {
-            setMidiInputEnabled (c->getStringAttribute (T("name")), true);
-        }
+            enabledMidiIns.add (c->getStringAttribute (T("name")));
+
+        const StringArray allMidiIns (MidiInput::getDevices());
+
+        for (int i = allMidiIns.size(); --i >= 0;)
+            setMidiInputEnabled (allMidiIns[i], enabledMidiIns.contains (allMidiIns[i]));
 
         if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
             initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, false);
+
+        setDefaultMidiOutput (e->getStringAttribute (T("defaultMidiOutput")));
 
         return error;
     }
@@ -167,7 +175,7 @@ void AudioDeviceManager::addDeviceNamesToComboBox (ComboBox& combo) const
         combo.addSeparator();
     }
 
-    combo.addItem ("<< no audio device >>", -1);
+    combo.addItem (TRANS("<< no audio device >>"), -1);
 }
 
 const String AudioDeviceManager::getCurrentAudioDeviceName() const
@@ -262,32 +270,7 @@ const String AudioDeviceManager::setAudioDevice (const String& deviceNameToUse,
     }
 
     if (treatAsChosenDevice && error.isEmpty())
-    {
-        delete lastExplicitSettings;
-
-        lastExplicitSettings = new XmlElement (T("DEVICESETUP"));
-
-        lastExplicitSettings->setAttribute (T("audioDeviceName"), getCurrentAudioDeviceName());
-
-        if (currentAudioDevice != 0)
-        {
-            lastExplicitSettings->setAttribute (T("audioDeviceRate"), currentAudioDevice->getCurrentSampleRate());
-
-            if (currentAudioDevice->getDefaultBufferSize() != currentAudioDevice->getCurrentBufferSizeSamples())
-                lastExplicitSettings->setAttribute (T("audioDeviceBufferSize"), currentAudioDevice->getCurrentBufferSizeSamples());
-
-            lastExplicitSettings->setAttribute (T("audioDeviceInChans"), inputChannels.toString (2));
-            lastExplicitSettings->setAttribute (T("audioDeviceOutChans"), outputChannels.toString (2));
-        }
-
-        for (int i = 0; i < enabledMidiInputs.size(); ++i)
-        {
-            XmlElement* m = new XmlElement (T("MIDIINPUT"));
-            m->setAttribute (T("name"), enabledMidiInputs[i]->getName());
-
-            lastExplicitSettings->addChildElement (m);
-        }
-    }
+        updateXml();
 
     return error;
 }
@@ -378,6 +361,37 @@ void AudioDeviceManager::setOutputChannels (const BitArray& newEnabledChannels,
                         0, &newEnabledChannels,
                         treatAsChosenDevice);
     }
+}
+
+void AudioDeviceManager::updateXml()
+{
+    delete lastExplicitSettings;
+
+    lastExplicitSettings = new XmlElement (T("DEVICESETUP"));
+
+    lastExplicitSettings->setAttribute (T("audioDeviceName"), getCurrentAudioDeviceName());
+
+    if (currentAudioDevice != 0)
+    {
+        lastExplicitSettings->setAttribute (T("audioDeviceRate"), currentAudioDevice->getCurrentSampleRate());
+
+        if (currentAudioDevice->getDefaultBufferSize() != currentAudioDevice->getCurrentBufferSizeSamples())
+            lastExplicitSettings->setAttribute (T("audioDeviceBufferSize"), currentAudioDevice->getCurrentBufferSizeSamples());
+
+        lastExplicitSettings->setAttribute (T("audioDeviceInChans"), inputChannels.toString (2));
+        lastExplicitSettings->setAttribute (T("audioDeviceOutChans"), outputChannels.toString (2));
+    }
+
+    for (int i = 0; i < enabledMidiInputs.size(); ++i)
+    {
+        XmlElement* const m = new XmlElement (T("MIDIINPUT"));
+        m->setAttribute (T("name"), enabledMidiInputs[i]->getName());
+
+        lastExplicitSettings->addChildElement (m);
+    }
+
+    if (defaultMidiOutputName.isNotEmpty())
+        lastExplicitSettings->setAttribute (T("defaultMidiOutput"), defaultMidiOutputName);
 }
 
 //==============================================================================
@@ -488,6 +502,7 @@ void AudioDeviceManager::setMidiInputEnabled (const String& name,
                     enabledMidiInputs.remove (i);
         }
 
+        updateXml();
         sendChangeMessage (this);
     }
 }
@@ -556,6 +571,22 @@ void AudioDeviceManager::handleIncomingMidiMessageInt (MidiInput* source,
             if (md == source || (md == 0 && isDefaultSource))
                 midiCallbacks.getUnchecked(i)->handleIncomingMidiMessage (source, message);
         }
+    }
+}
+
+//==============================================================================
+void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
+{
+    if (defaultMidiOutputName != deviceName)
+    {
+        deleteAndZero (defaultMidiOutput);
+        defaultMidiOutputName = deviceName;
+
+        if (deviceName.isNotEmpty())
+            defaultMidiOutput = MidiOutput::openDevice (MidiOutput::getDevices().indexOf (deviceName));
+
+        updateXml();
+        sendChangeMessage (this);
     }
 }
 

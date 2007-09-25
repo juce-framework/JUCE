@@ -438,9 +438,9 @@ void MainHostWindow::showAudioSettings()
     AudioDeviceSelectorComponent audioSettingsComp (deviceManager,
                                                     0, 256,
                                                     0, 256,
-                                                    true);
+                                                    true, true);
 
-    audioSettingsComp.setSize (500, 300);
+    audioSettingsComp.setSize (500, 350);
 
     DialogWindow::showModalDialog (T("Audio Settings"),
                                    &audioSettingsComp,

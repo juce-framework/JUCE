@@ -257,13 +257,13 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                             const int maxInputChannels_,
                                                             const int minOutputChannels_,
                                                             const int maxOutputChannels_,
-                                                            const bool showMidiOptions_)
+                                                            const bool showMidiInputOptions,
+                                                            const bool showMidiOutputSelector)
     : deviceManager (deviceManager_),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
       maxInputChannels (maxInputChannels_),
-      showMidiOptions (showMidiOptions_),
       sampleRateDropDown (0),
       inputChansBox (0),
       inputsLabel (0),
@@ -290,7 +290,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     Label* label = new Label ("l1", TRANS ("audio device:"));
     label->attachToComponent (audioDeviceDropDown, true);
 
-    if (showMidiOptions)
+    if (showMidiInputOptions)
     {
         addAndMakeVisible (midiInputsList
                             = new AudioDeviceSelectorComponentListBox (deviceManager,
@@ -308,6 +308,20 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         midiInputsLabel = 0;
     }
 
+    if (showMidiOutputSelector)
+    {
+        addAndMakeVisible (midiOutputSelector = new ComboBox (String::empty));
+        midiOutputSelector->addListener (this);
+
+        midiOutputLabel = new Label ("lm", TRANS("Midi Output:"));
+        midiOutputLabel->attachToComponent (midiOutputSelector, true);
+    }
+    else
+    {
+        midiOutputSelector = 0;
+        midiOutputLabel = 0;
+    }
+
     deviceManager_.addChangeListener (this);
     changeListenerCallback (0);
 }
@@ -320,12 +334,12 @@ AudioDeviceSelectorComponent::~AudioDeviceSelectorComponent()
 
 void AudioDeviceSelectorComponent::resized()
 {
-    int lx = proportionOfWidth (0.35f);
-    int w = proportionOfWidth (0.55f);
-    int y = 15;
+    const int lx = proportionOfWidth (0.35f);
+    const int w = proportionOfWidth (0.55f);
     const int h = 24;
     const int space = 6;
     const int dh = h + space;
+    int y = 15;
 
     audioDeviceDropDown->setBounds (lx, y, w, h);
     y += dh;
@@ -370,6 +384,9 @@ void AudioDeviceSelectorComponent::resized()
         box->setBounds (lx, y, w, bh);
         y += bh + space;
     }
+
+    if (midiOutputSelector != 0)
+        midiOutputSelector->setBounds (lx, y, w, h);
 }
 
 void AudioDeviceSelectorComponent::buttonClicked (Button*)
@@ -419,6 +436,10 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
             audioDeviceDropDown->setText (deviceManager.getCurrentAudioDeviceName(), true);
         else
             audioDeviceDropDown->setSelectedId (-1, true);
+    }
+    else if (comboBoxThatHasChanged == midiOutputSelector)
+    {
+        deviceManager.setDefaultMidiOutput (midiOutputSelector->getText());
     }
     else if (audioDevice != 0)
     {
@@ -528,16 +549,36 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
             inputsLabel = new Label ("l4", TRANS ("active input channels:"));
             inputsLabel->attachToComponent (inputChansBox, true);
         }
-
-        if (midiInputsList != 0)
-        {
-            midiInputsList->updateContent();
-            midiInputsList->repaint();
-        }
     }
     else
     {
         audioDeviceDropDown->setSelectedId (-1, true);
+    }
+
+    if (midiInputsList != 0)
+    {
+        midiInputsList->updateContent();
+        midiInputsList->repaint();
+    }
+
+    if (midiOutputSelector != 0)
+    {
+        midiOutputSelector->clear();
+
+        const StringArray midiOuts (MidiOutput::getDevices());
+
+        midiOutputSelector->addItem (TRANS("<< no audio device >>"), -1);
+        midiOutputSelector->addSeparator();
+
+        for (int i = 0; i < midiOuts.size(); ++i)
+            midiOutputSelector->addItem (midiOuts[i], i + 1);
+
+        int current = -1;
+
+        if (deviceManager.getDefaultMidiOutput() != 0)
+            current = 1 + midiOuts.indexOf (deviceManager.getDefaultMidiOutputName());
+
+        midiOutputSelector->setSelectedId (current, true);
     }
 
     resized();

@@ -243,7 +243,7 @@ void StandaloneFilterWindow::showAudioSettingsDialog()
                                                filter->getNumInputChannels(),
                                                filter->getNumOutputChannels(),
                                                filter->getNumOutputChannels(),
-                                               true);
+                                               true, false);
 
     selectorComp.setSize (500, 350);
 

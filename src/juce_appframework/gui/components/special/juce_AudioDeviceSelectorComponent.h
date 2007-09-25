@@ -64,15 +64,16 @@ public:
         @param maxAudioInputChannels    the maximum number of audio input channels that the application needs
         @param minAudioOutputChannels   the minimum number of audio output channels that the application needs
         @param maxAudioOutputChannels   the maximum number of audio output channels that the application needs
-        @param showMidiOptions          if true, the component will allow the user to select which midi inputs are
-                                        enabled.
+        @param showMidiInputOptions     if true, the component will allow the user to select which midi inputs are enabled
+        @param showMidiOutputSelector   if true, the component will let the user choose a default midi output device
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
                                   const int minAudioInputChannels,
                                   const int maxAudioInputChannels,
                                   const int minAudioOutputChannels,
                                   const int maxAudioOutputChannels,
-                                  const bool showMidiOptions);
+                                  const bool showMidiInputOptions,
+                                  const bool showMidiOutputSelector);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -95,7 +96,6 @@ private:
     AudioDeviceManager& deviceManager;
     ComboBox* audioDeviceDropDown;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
-    const bool showMidiOptions;
 
     ComboBox* sampleRateDropDown;
     AudioDeviceSelectorComponentListBox* inputChansBox;
@@ -108,6 +108,8 @@ private:
     Button* launchUIButton;
     AudioDeviceSelectorComponentListBox* midiInputsList;
     Label* midiInputsLabel;
+    ComboBox* midiOutputSelector;
+    Label* midiOutputLabel;
 
     AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
     const AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);

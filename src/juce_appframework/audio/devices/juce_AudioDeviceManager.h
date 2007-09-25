@@ -301,6 +301,36 @@ public:
     */
     void removeMidiInputCallback (MidiInputCallback* callback);
 
+    //==============================================================================
+    /** Sets a midi output device to use as the default.
+
+        The list of devices can be obtained with the MidiOutput::getDevices() method.
+
+        The specified device will be opened automatically and can be retrieved with the
+        getDefaultMidiOutput() method.
+
+        Pass in an empty string to deselect all devices. For the default device, you 
+        can use MidiOutput::getDevices() [MidiOutput::getDefaultDeviceIndex()].
+
+        @see getDefaultMidiOutput, getDefaultMidiOutputName
+    */
+    void setDefaultMidiOutput (const String& deviceName);
+
+    /** Returns the name of the default midi output.
+
+        @see setDefaultMidiOutput, getDefaultMidiOutput
+    */
+    const String getDefaultMidiOutputName() const throw()           { return defaultMidiOutputName; }
+
+    /** Returns the current default midi output device.
+
+        If no device has been selected, or the device can't be opened, this will 
+        return 0.
+
+        @see getDefaultMidiOutputName
+    */
+    MidiOutput* getDefaultMidiOutput() const throw()                { return defaultMidiOutput; }
+
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -320,6 +350,8 @@ private:
     OwnedArray <MidiInput> enabledMidiInputs;
     Array <MidiInputCallback*> midiCallbacks;
     Array <MidiInput*> midiCallbackDevices;
+    String defaultMidiOutputName;
+    MidiOutput* defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
     double cpuUsageMs, timeToCpuScale;
@@ -361,6 +393,8 @@ private:
     const String restartDevice (int blockSizeToUse, double sampleRateToUse,
                                 const BitArray& ins, const BitArray& outs);
     void stopDevice();
+
+    void updateXml();
 
     AudioDeviceManager (const AudioDeviceManager&);
     const AudioDeviceManager& operator= (const AudioDeviceManager&);

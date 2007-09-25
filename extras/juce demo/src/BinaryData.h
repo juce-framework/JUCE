@@ -6,7 +6,7 @@
 namespace BinaryData
 {
     extern const char*  audiodemo_cpp;
-    const int           audiodemo_cppSize = 23461;
+    const int           audiodemo_cppSize = 23530;
 
     extern const char*  cello_wav;
     const int           cello_wavSize = 46348;
@@ -30,7 +30,7 @@ namespace BinaryData
     const int           juce_pngSize = 15290;
 
     extern const char*  opengldemo_cpp;
-    const int           opengldemo_cppSize = 9765;
+    const int           opengldemo_cppSize = 9771;
 
     extern const char*  pathsandtransformsdemo_cpp;
     const int           pathsandtransformsdemo_cppSize = 14231;
