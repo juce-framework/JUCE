@@ -215,7 +215,7 @@ Image* BinaryResources::getImageFromCache (const String& name) const
     return 0;
 }
 
-void BinaryResources::loadFromCpp (const String& cppFile)
+void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cppFile)
 {
     StringArray cpp;
     cpp.addLines (cppFile);
@@ -233,7 +233,7 @@ void BinaryResources::loadFromCpp (const String& cppFile)
 
             const String resourceName (tokens[0]);
             const int size = tokens[1].getIntValue();
-            const String originalFileName (tokens[2].unquoted());
+            const String originalFileName (cppFileLocation.getSiblingFile (tokens[2].unquoted()).getFullPathName());
 
             jassert (resourceName.isNotEmpty() && size > 0);
 
@@ -302,7 +302,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             const MemoryBlock& mb = resources[i]->data;
 
             defs << "// JUCER_RESOURCE: " << name << ", " << mb.getSize()
-                 << ", \"" << resources[i]->originalFilename << "\"\n";
+                << ", \"" << File (resources[i]->originalFilename).getRelativePathFrom (code.document->getFile()) << "\"\n";
 
             String line1;
             line1 << "static const unsigned char resource_"

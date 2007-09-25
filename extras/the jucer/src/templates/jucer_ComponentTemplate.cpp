@@ -9,7 +9,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.10
+  Jucer version: 1.11
 
   ------------------------------------------------------------------------------
 

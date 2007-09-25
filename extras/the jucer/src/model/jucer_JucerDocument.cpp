@@ -420,7 +420,7 @@ const String JucerDocument::loadDocument (const File& file)
 
     const String cppFileString (cppFile.loadFileAsString());
 
-    resources.loadFromCpp (cppFileString);
+    resources.loadFromCpp (file, cppFileString);
 
     XmlElement* const xml = pullMetaDataFromCppFile (cppFileString);
 

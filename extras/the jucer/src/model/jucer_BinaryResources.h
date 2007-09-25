@@ -49,7 +49,7 @@ public:
 
     const BinaryResources& operator= (const BinaryResources& other);
 
-    void loadFromCpp (const String& cpp);
+    void loadFromCpp (const File& cppFileLocation, const String& cpp);
 
     //==============================================================================
     struct BinaryResource
