@@ -1011,6 +1011,8 @@ void Slider::mouseDown (const MouseEvent& e)
                 }
             }
 
+            minMaxDiff = valueMax - valueMin;
+
             mouseXWhenLastDragged = e.x;
             mouseYWhenLastDragged = e.y;
             lastAngle = rotaryStart + (rotaryEnd - rotaryStart)
@@ -1086,13 +1088,14 @@ void Slider::restoreMouseIfHidden()
 
         c->enableUnboundedMouseMovement (false);
 
-        int x = getWidth() / 2;
-        int y = getHeight() / 2;
+        const double pos = (sliderBeingDragged == 2) ? getMaxValue()
+                                                     : ((sliderBeingDragged == 1) ? getMinValue() 
+                                                                                  : currentValue);
 
-        if (isHorizontal())
-            x = (int) getLinearSliderPos (currentValue);
-        else if (isVertical())
-            y = (int) getLinearSliderPos (currentValue);
+        const int pixelPos = (int) getLinearSliderPos (pos);
+
+        int x = isHorizontal() ? pixelPos : (getWidth() / 2);
+        int y = isVertical()   ? pixelPos : (getHeight() / 2);
 
         relativePositionToGlobal (x, y);
         Desktop::setMousePosition (x, y);
@@ -1185,7 +1188,7 @@ void Slider::mouseDrag (const MouseEvent& e)
                     return;
             }
 
-            if (isVelocityBased == e.mods.isAnyModifierKeyDown()
+            if (isVelocityBased == (e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier))
                 || ((maximum - minimum) / sliderRegionSize < interval))
             {
                 const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
@@ -1263,14 +1266,24 @@ void Slider::mouseDrag (const MouseEvent& e)
         else if (sliderBeingDragged == 1)
         {
             setMinValue (snapValue (valueWhenLastDragged, true),
-                          ! sendChangeOnlyOnRelease, false);
+                         ! sendChangeOnlyOnRelease, false);
+
+            if (e.mods.isShiftDown())
+                setMaxValue (getMinValue() + minMaxDiff, false);
+            else
+                minMaxDiff = valueMax - valueMin;
         }
         else
         {
             jassert (sliderBeingDragged == 2);
 
             setMaxValue (snapValue (valueWhenLastDragged, true),
-                          ! sendChangeOnlyOnRelease, false);
+                         ! sendChangeOnlyOnRelease, false);
+
+            if (e.mods.isShiftDown())
+                setMinValue (getMaxValue() - minMaxDiff, false);
+            else
+                minMaxDiff = valueMax - valueMin;
         }
 
         mouseXWhenLastDragged = e.x;

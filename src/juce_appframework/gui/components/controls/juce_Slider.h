@@ -677,7 +677,7 @@ private:
     double currentValue, valueMin, valueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
-    double velocityModeSensitivity, velocityModeOffset;
+    double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
     int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
