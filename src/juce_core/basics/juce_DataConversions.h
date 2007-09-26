@@ -86,20 +86,23 @@ inline uint64 swapByteOrder (const uint64 value) throw()
   inline uint16     swapIfBigEndian (const uint16 v) throw()             { return v; }
   /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
   inline uint32     swapIfBigEndian (const uint32 v) throw()             { return v; }
+  /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
+  inline uint64     swapIfBigEndian (const uint64 v) throw()             { return v; }
+
   /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
   inline uint16     swapIfLittleEndian (const uint16 v) throw()          { return swapByteOrder (v); }
   /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
   inline uint32     swapIfLittleEndian (const uint32 v) throw()          { return swapByteOrder (v); }
+  /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
+  inline uint64     swapIfLittleEndian (const uint64 v) throw()          { return swapByteOrder (v); }
 
   /** Turns 4 bytes into a little-endian integer. */
   inline uint32     littleEndianInt (const char* const bytes) throw()    { return *(uint32*) bytes; }
-
   /** Turns 2 bytes into a little-endian integer. */
   inline uint16     littleEndianShort (const char* const bytes) throw()  { return *(uint16*) bytes; }
 
   /** Turns 4 bytes into a big-endian integer. */
   inline uint32     bigEndianInt (const char* const bytes) throw()       { return swapByteOrder (*(uint32*) bytes); }
-
   /** Turns 2 bytes into a big-endian integer. */
   inline uint16     bigEndianShort (const char* const bytes) throw()     { return swapByteOrder (*(uint16*) bytes); }
 
@@ -108,20 +111,23 @@ inline uint64 swapByteOrder (const uint64 value) throw()
   inline uint16     swapIfBigEndian (const uint16 v) throw()             { return swapByteOrder (v); }
   /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
   inline uint32     swapIfBigEndian (const uint32 v) throw()             { return swapByteOrder (v); }
+  /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
+  inline uint64     swapIfBigEndian (const uint64 v) throw()             { return swapByteOrder (v); }
+
   /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
   inline uint16     swapIfLittleEndian (const uint16 v) throw()          { return v; }
   /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
   inline uint32     swapIfLittleEndian (const uint32 v) throw()          { return v; }
+  /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
+  inline uint64     swapIfLittleEndian (const uint64 v) throw()          { return v; }
 
   /** Turns 4 bytes into a little-endian integer. */
   inline uint32     littleEndianInt (const char* const bytes) throw()    { return swapByteOrder (*(uint32*) bytes); }
-
   /** Turns 2 bytes into a little-endian integer. */
   inline uint16     littleEndianShort (const char* const bytes) throw()  { return swapByteOrder (*(uint16*) bytes); }
 
   /** Turns 4 bytes into a big-endian integer. */
   inline uint32     bigEndianInt (const char* const bytes) throw()       { return *(uint32*) bytes; }
-
   /** Turns 2 bytes into a big-endian integer. */
   inline uint16     bigEndianShort (const char* const bytes) throw()     { return *(uint16*) bytes; }
 #endif
