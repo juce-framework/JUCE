@@ -42,6 +42,7 @@
 */
 class ComponentLayoutEditor  : public Component,
                                public ChangeListener,
+                               public FileDragAndDropTarget,
                                public LassoSource <Component*>
 {
 public:
@@ -59,7 +60,9 @@ public:
     void mouseDrag (const MouseEvent& e);
     void mouseUp (const MouseEvent& e);
     bool keyPressed (const KeyPress& key);
-    bool filesDropped (const StringArray& filenames, int x, int y);
+
+    bool isInterestedInFileDrag (const StringArray& files);
+    void filesDropped (const StringArray& filenames, int x, int y);
 
     ComponentLayout& getLayout() const throw()                  { return layout; }
 

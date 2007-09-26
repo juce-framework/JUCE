@@ -36,7 +36,7 @@
 
 //==============================================================================
 /**
-    This function must be implemented to create a new instance of your 
+    This function must be implemented to create a new instance of your
     plugin object.
 */
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

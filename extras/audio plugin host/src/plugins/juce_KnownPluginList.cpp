@@ -120,14 +120,12 @@ bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
         {
             const PluginDescription* const d = types.getUnchecked(i);
 
-            if (d->file == possiblePluginFile
-                 && d->lastFileModTime != possiblePluginFile.getLastModificationTime())
+            if (d->file == possiblePluginFile)
             {
-                needsRescanning = true;
-            }
-            else
-            {
-                typesFound.add (new PluginDescription (*d));
+                if (d->lastFileModTime != possiblePluginFile.getLastModificationTime())
+                    needsRescanning = true;
+                else
+                    typesFound.add (new PluginDescription (*d));
             }
         }
 

@@ -41,7 +41,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/basics/juce_Time.h"
 #include "../../../../juce_core/basics/juce_Random.h"
 #include "../layout/juce_ComponentBoundsConstrainer.h"
-
+#include "../mouse/juce_FileDragAndDropTarget.h"
 
 //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
 
@@ -70,6 +70,8 @@ ComponentPeer::ComponentPeer (Component* const component_,
       lastPaintTime (0),
       constrainer (0),
       lastFocusedComponent (0),
+      dragAndDropTargetComponent (0),
+      lastDragAndDropCompUnderMouse (0),
       fakeMouseMessageSent (false),
       isWindowMinimised (false)
 {
@@ -79,6 +81,7 @@ ComponentPeer::ComponentPeer (Component* const component_,
 ComponentPeer::~ComponentPeer()
 {
     heavyweightPeers.removeValue (this);
+    delete dragAndDropTargetComponent;
 }
 
 //==============================================================================
@@ -451,7 +454,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
         if (keyWasUsed || deletionChecker.hasBeenDeleted())
             break;
-    
+
         if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != 0)
         {
             Component::getCurrentlyFocusedComponent()
@@ -654,13 +657,111 @@ const Rectangle& ComponentPeer::getNonFullScreenBounds() const throw()
 }
 
 //==============================================================================
-void ComponentPeer::handleFilesDropped (int x, int y, const StringArray& files)
+static FileDragAndDropTarget* findDragAndDropTarget (Component* c,
+                                                     const StringArray& files,
+                                                     FileDragAndDropTarget* const lastOne)
+{
+    while (c != 0)
+    {
+        FileDragAndDropTarget* const t = dynamic_cast <FileDragAndDropTarget*> (c);
+
+        if (t != 0 && (t == lastOne || t->isInterestedInFileDrag (files)))
+            return t;
+
+        c = c->getParentComponent();
+    }
+
+    return 0;
+}
+
+void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
 {
     updateCurrentModifiers();
 
-    component->internalFilesDropped (x, y, files);
+    FileDragAndDropTarget* lastTarget = 0;
+
+    if (dragAndDropTargetComponent != 0 && ! dragAndDropTargetComponent->hasBeenDeleted())
+        lastTarget = const_cast <FileDragAndDropTarget*> (dynamic_cast <const FileDragAndDropTarget*> (dragAndDropTargetComponent->getComponent()));
+
+    FileDragAndDropTarget* newTarget = 0;
+
+    Component* const compUnderMouse = component->getComponentAt (x, y);
+
+    if (compUnderMouse != lastDragAndDropCompUnderMouse)
+    {
+        lastDragAndDropCompUnderMouse = compUnderMouse;
+        newTarget = findDragAndDropTarget (compUnderMouse, files, lastTarget);
+
+        if (newTarget != lastTarget)
+        {
+            if (lastTarget != 0)
+                lastTarget->fileDragExit (files);
+
+            deleteAndZero (dragAndDropTargetComponent);
+
+            if (newTarget != 0)
+            {
+                Component* const targetComp = dynamic_cast <Component*> (newTarget);
+                int mx = x, my = y;
+                component->relativePositionToOtherComponent (targetComp, mx, my);
+
+                dragAndDropTargetComponent = new ComponentDeletionWatcher (dynamic_cast <Component*> (newTarget));
+                newTarget->fileDragEnter (files, mx, my);
+            }
+        }
+    }
+    else
+    {
+        newTarget = lastTarget;
+    }
+
+    if (newTarget != 0)
+    {
+        Component* const targetComp = dynamic_cast <Component*> (newTarget);
+        component->relativePositionToOtherComponent (targetComp, x, y);
+
+        newTarget->fileDragMove (files, x, y);
+    }
 }
 
+void ComponentPeer::handleFileDragExit (const StringArray& files)
+{
+    handleFileDragMove (files, -1, -1);
+
+    jassert (dragAndDropTargetComponent == 0);
+    lastDragAndDropCompUnderMouse = 0;
+}
+
+void ComponentPeer::handleFileDragDrop (const StringArray& files, int x, int y)
+{
+    handleFileDragMove (files, x, y);
+
+    if (dragAndDropTargetComponent != 0 && ! dragAndDropTargetComponent->hasBeenDeleted())
+    {
+        FileDragAndDropTarget* const target = const_cast <FileDragAndDropTarget*> (dynamic_cast <const FileDragAndDropTarget*> (dragAndDropTargetComponent->getComponent()));
+
+        deleteAndZero (dragAndDropTargetComponent);
+        lastDragAndDropCompUnderMouse = 0;
+
+        if (target != 0)
+        {
+            Component* const targetComp = dynamic_cast <Component*> (target);
+
+            if (targetComp->isCurrentlyBlockedByAnotherModalComponent())
+            {
+                targetComp->internalModalInputAttempt();
+
+                if (targetComp->isCurrentlyBlockedByAnotherModalComponent())
+                    return;
+            }
+
+            component->relativePositionToOtherComponent (targetComp, x, y);
+            target->filesDropped (files, x, y);
+        }
+    }
+}
+
+//==============================================================================
 void ComponentPeer::handleUserClosingWindow()
 {
     updateCurrentModifiers();

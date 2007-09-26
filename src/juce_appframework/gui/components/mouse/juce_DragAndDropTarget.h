@@ -44,10 +44,10 @@
     DragAndDropContainer component.
 
     Note: If all that you need to do is to respond to files being drag-and-dropped from
-    the operating system onto your component, you don't need any of these classes: you can do this
-    simply by overriding Component::filesDropped().
+    the operating system onto your component, you don't need any of these classes: instead
+    see the FileDragAndDropTarget class.
 
-    @see DragAndDropContainer
+    @see DragAndDropContainer, FileDragAndDropTarget
 */
 class JUCE_API  DragAndDropTarget
 {
@@ -118,6 +118,9 @@ public:
 
         When the user drops an item this get called, and you can use the description to
         work out whether your object wants to deal with it or not.
+
+        Note that after this is called, the itemDragExit method may not be called, so you should
+        clean up in here if there's anything you need to do when the drag finishes.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
         @param sourceComponent      the component passed into DragAndDropContainer::startDragging()

@@ -54,7 +54,7 @@
 // these are in the windows SDK, but need to be repeated here for GCC..
 #ifndef GET_APPCOMMAND_LPARAM
   #define FAPPCOMMAND_MASK                  0xF000
-  #define GET_APPCOMMAND_LPARAM(lParam)     ((short) (HIWORD(lParam) & ~FAPPCOMMAND_MASK))
+  #define GET_APPCOMMAND_LPARAM(lParam)     ((short) (HIWORD (lParam) & ~FAPPCOMMAND_MASK))
   #define APPCOMMAND_MEDIA_NEXTTRACK        11
   #define APPCOMMAND_MEDIA_PREVIOUSTRACK    12
   #define APPCOMMAND_MEDIA_STOP             13
@@ -520,8 +520,9 @@ public:
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
+          currentWindowIcon (0),
           taskBarIcon (0),
-          currentWindowIcon (0)
+          dropTarget (0)
     {
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
         juce_initialiseUnicodeWindowFunctions();
@@ -560,6 +561,12 @@ public:
 
         if (currentWindowIcon != 0)
             DestroyIcon (currentWindowIcon);
+
+        if (dropTarget != 0)
+        {
+            dropTarget->Release();
+            dropTarget = 0;
+        }
     }
 
     //==============================================================================
@@ -945,6 +952,7 @@ private:
     BorderSize windowBorder;
     HICON currentWindowIcon;
     NOTIFYICONDATA* taskBarIcon;
+    IDropTarget* dropTarget;
 
     //==============================================================================
     class TemporaryImage    : public Timer
@@ -1153,7 +1161,10 @@ private:
             SetWindowLongPtr (hwnd, 8, (LONG_PTR) this);
             SetWindowLongPtr (hwnd, GWLP_USERDATA, improbableWindowNumber);
 
-            DragAcceptFiles (hwnd, TRUE);
+            if (dropTarget == 0)
+                dropTarget = new JuceDropTarget (this);
+
+            RegisterDragDrop (hwnd, dropTarget);
 
             updateBorderSize();
 
@@ -1169,6 +1180,7 @@ private:
 
     static void* destroyWindowCallback (void* handle)
     {
+        RevokeDragDrop ((HWND) handle);
         DestroyWindow ((HWND) handle);
         return 0;
     }
@@ -1765,41 +1777,131 @@ private:
     }
 
     //==============================================================================
-    void doDroppedFiles (HDROP hdrop)
+    class JuceDropTarget    : public IDropTarget
     {
-        POINT p;
-        DragQueryPoint (hdrop, &p);
-
-        const int numFiles = DragQueryFile (hdrop, 0xffffffff, 0, 0);
-        StringArray files;
-
-        const int size = sizeof (WCHAR) * MAX_PATH * 2 + 8;
-        char* const name = (char*) juce_calloc (size);
-
-        for (int i = 0; i < numFiles; ++i)
+    public:
+        JuceDropTarget (Win32ComponentPeer* const owner_)
+            : owner (owner_),
+              refCount (1)
         {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-            if (wDragQueryFileW != 0)
-            {
-                wDragQueryFileW (hdrop, i, (LPWSTR) name, MAX_PATH);
-                files.add ((LPWSTR) name);
-            }
-            else
-            {
-                DragQueryFile (hdrop, i, (LPSTR) name, MAX_PATH);
-                files.add ((LPSTR) name);
-            }
-#else
-            DragQueryFileW (hdrop, i, (LPWSTR) name, MAX_PATH);
-            files.add ((LPWSTR) name);
-#endif
         }
 
-        juce_free (name);
-        DragFinish (hdrop);
+        virtual ~JuceDropTarget()
+        {
+            jassert (refCount == 0);
+        }
 
-        handleFilesDropped (p.x, p.y, files);
-    }
+        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        {
+            if (id == IID_IUnknown || id == IID_IDropTarget)
+            {
+                AddRef();
+                *result = this;
+                return S_OK;
+            }
+
+            *result = 0;
+            return E_NOINTERFACE;
+        }
+
+        ULONG __stdcall AddRef()    { return ++refCount; }
+        ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
+
+        HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        {
+            updateFileList (pDataObject);
+            int x = mousePos.x, y = mousePos.y;
+            owner->globalPositionToRelative (x, y);
+            owner->handleFileDragMove (files, x, y);
+            *pdwEffect = DROPEFFECT_COPY;
+            return S_OK;
+        }
+
+        HRESULT __stdcall DragLeave()
+        {
+            owner->handleFileDragExit (files);
+            return S_OK;
+        }
+
+        HRESULT __stdcall DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        {
+            int x = mousePos.x, y = mousePos.y;
+            owner->globalPositionToRelative (x, y);
+            owner->handleFileDragMove (files, x, y);
+            *pdwEffect = DROPEFFECT_COPY;
+            return S_OK;
+        }
+
+        HRESULT __stdcall Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        {
+            updateFileList (pDataObject);
+            int x = mousePos.x, y = mousePos.y;
+            owner->globalPositionToRelative (x, y);
+            owner->handleFileDragDrop (files, x, y);
+            *pdwEffect = DROPEFFECT_COPY;
+            return S_OK;
+        }
+
+    private:
+        Win32ComponentPeer* const owner;
+        int refCount;
+        StringArray files;
+
+        void updateFileList (IDataObject* const pDataObject)
+        {
+            files.clear();
+
+            FORMATETC format = { CF_HDROP, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
+            STGMEDIUM medium = { TYMED_HGLOBAL, { 0 }, 0 };
+
+            if (pDataObject->GetData (&format, &medium) == S_OK)
+            {
+                const SIZE_T totalLen = GlobalSize (medium.hGlobal);
+                const LPDROPFILES pDropFiles = (const LPDROPFILES) GlobalLock (medium.hGlobal);
+                unsigned int i = 0;
+
+                if (pDropFiles->fWide)
+                {
+                    const WCHAR* const fname = (WCHAR*) (((const char*) pDropFiles) + sizeof (DROPFILES));
+
+                    for (;;)
+                    {
+                        unsigned int len = 0;
+                        while (i + len < totalLen && fname [i + len] != 0)
+                            ++len;
+
+                        if (len == 0)
+                            break;
+
+                        files.add (String (fname + i, len));
+                        i += len + 1;
+                    }
+                }
+                else
+                {
+                    const char* const fname = ((const char*) pDropFiles) + sizeof (DROPFILES);
+
+                    for (;;)
+                    {
+                        unsigned int len = 0;
+                        while (i + len < totalLen && fname [i + len] != 0)
+                            ++len;
+
+                        if (len == 0)
+                            break;
+
+                        files.add (String (fname + i, len));
+                        i += len + 1;
+                    }
+                }
+
+                GlobalUnlock (medium.hGlobal);
+            }
+        }
+
+        JuceDropTarget (const JuceDropTarget&);
+        const JuceDropTarget& operator= (const JuceDropTarget&);
+    };
 
     void doSettingChange()
     {
@@ -2045,10 +2147,6 @@ private:
                         return 0;
 
                     //==============================================================================
-                    case WM_DROPFILES:
-                        doDroppedFiles ((HDROP) wParam);
-                        break;
-
                     case WM_TRAYNOTIFY:
                         if (component->isCurrentlyBlockedByAnotherModalComponent())
                         {
@@ -2693,28 +2791,10 @@ public:
 
 class JuceEnumFormatEtc   : public IEnumFORMATETC
 {
-private:
-    int refCount;
-    FORMATETC* formats;
-    int numFormats, index;
-
-    static void copyFormatEtc (FORMATETC& dest, FORMATETC& source)
-    {
-        dest = source;
-
-        if (source.ptd != 0)
-        {
-            dest.ptd = (DVTARGETDEVICE*) CoTaskMemAlloc (sizeof (DVTARGETDEVICE));
-            *(dest.ptd) = *(source.ptd);
-        }
-    }
-
 public:
-    JuceEnumFormatEtc (FORMATETC* const formats_,
-                       const int numFormats_)
+    JuceEnumFormatEtc (const FORMATETC* const format_)
         : refCount (1),
-          formats (formats_),
-          numFormats (numFormats_),
+          format (format_),
           index (0)
     {
     }
@@ -2745,7 +2825,7 @@ public:
         if (result == 0)
             return E_POINTER;
 
-        JuceEnumFormatEtc* const newOne = new JuceEnumFormatEtc (formats, numFormats);
+        JuceEnumFormatEtc* const newOne = new JuceEnumFormatEtc (format);
         newOne->index = index;
 
         *result = newOne;
@@ -2756,25 +2836,26 @@ public:
     {
         if (pceltFetched != 0)
             *pceltFetched = 0;
-
-        if (celt <= 0 || lpFormatEtc == 0 || index >= numFormats
-             || (pceltFetched == 0 && celt != 1))
+        else if (celt != 1)
             return S_FALSE;
 
-        int numDone = 0;
+        if (index == 0 && celt > 0 && lpFormatEtc != 0)
+        {
+            copyFormatEtc (lpFormatEtc [0], *format);
+            ++index;
 
-        while (index < numFormats && numDone < (int) celt)
-            copyFormatEtc (lpFormatEtc [numDone++], formats [index++]);
+            if (pceltFetched != 0)
+                *pceltFetched = 1;
 
-        if (pceltFetched != 0)
-            *pceltFetched = numDone;
+            return S_OK;
+        }
 
-        return (numDone != 0) ? S_OK : S_FALSE;
+        return S_FALSE;
     }
 
     HRESULT __stdcall Skip (ULONG celt)
     {
-        if (index + (int) celt >= numFormats)
+        if (index + (int) celt >= 1)
             return S_FALSE;
 
         index += celt;
@@ -2786,42 +2867,45 @@ public:
         index = 0;
         return S_OK;
     }
+
+private:
+    int refCount;
+    const FORMATETC* const format;
+    int index;
+
+    static void copyFormatEtc (FORMATETC& dest, const FORMATETC& source)
+    {
+        dest = source;
+
+        if (source.ptd != 0)
+        {
+            dest.ptd = (DVTARGETDEVICE*) CoTaskMemAlloc (sizeof (DVTARGETDEVICE));
+            *(dest.ptd) = *(source.ptd);
+        }
+    }
+
+    JuceEnumFormatEtc (const JuceEnumFormatEtc&);
+    const JuceEnumFormatEtc& operator= (const JuceEnumFormatEtc&);
 };
 
 class JuceDataObject  : public IDataObject
 {
+    JuceDropSource* const dropSource;
+    const FORMATETC* const format;
+    const STGMEDIUM* const medium;
     int refCount;
-    JuceDropSource* dropSource;
 
-    FORMATETC* formats;
-    STGMEDIUM* mediums;
-    int numFormats;
-
-    int indexOfFormat (const FORMATETC* const f) const
-    {
-        for (int i = 0; i < numFormats; ++i)
-        {
-            if (f->tymed == formats[i].tymed
-                && f->cfFormat == formats[i].cfFormat
-                && f->dwAspect == formats[i].dwAspect)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
+    JuceDataObject (const JuceDataObject&);
+    const JuceDataObject& operator= (const JuceDataObject&);
 
 public:
     JuceDataObject (JuceDropSource* const dropSource_,
-                    FORMATETC* const formats_,
-                    STGMEDIUM* const mediums_,
-                    const int numFormats_)
-        : refCount (1),
-          dropSource (dropSource_),
-          formats (formats_),
-          mediums (mediums_),
-          numFormats (numFormats_)
+                    const FORMATETC* const format_,
+                    const STGMEDIUM* const medium_)
+        : dropSource (dropSource_),
+          format (format_),
+          medium (medium_),
+          refCount (1)
     {
     }
 
@@ -2848,22 +2932,22 @@ public:
 
     HRESULT __stdcall GetData (FORMATETC __RPC_FAR* pFormatEtc, STGMEDIUM __RPC_FAR* pMedium)
     {
-        const int i = indexOfFormat (pFormatEtc);
-
-        if (i >= 0)
+        if (pFormatEtc->tymed == format->tymed
+             && pFormatEtc->cfFormat == format->cfFormat
+             && pFormatEtc->dwAspect == format->dwAspect)
         {
-            pMedium->tymed = formats[i].tymed;
+            pMedium->tymed = format->tymed;
             pMedium->pUnkForRelease = 0;
 
-            if (formats[i].tymed == TYMED_HGLOBAL)
+            if (format->tymed == TYMED_HGLOBAL)
             {
-                const SIZE_T len = GlobalSize (mediums[i].hGlobal);
-                void* const src = GlobalLock (mediums[i].hGlobal);
+                const SIZE_T len = GlobalSize (medium->hGlobal);
+                void* const src = GlobalLock (medium->hGlobal);
                 void* const dst = GlobalAlloc (GMEM_FIXED, len);
 
                 memcpy (dst, src, len);
 
-                GlobalUnlock (mediums[i].hGlobal);
+                GlobalUnlock (medium->hGlobal);
 
                 pMedium->hGlobal = dst;
                 return S_OK;
@@ -2873,12 +2957,17 @@ public:
         return DV_E_FORMATETC;
     }
 
-    HRESULT __stdcall QueryGetData (FORMATETC __RPC_FAR* result)
+    HRESULT __stdcall QueryGetData (FORMATETC __RPC_FAR* f)
     {
-        if (result == 0)
+        if (f == 0)
             return E_INVALIDARG;
 
-        return (indexOfFormat (result) >= 0) ? S_OK : DV_E_FORMATETC;
+        if (f->tymed == format->tymed
+              && f->cfFormat == format->cfFormat
+              && f->dwAspect == format->dwAspect)
+            return S_OK;
+
+        return DV_E_FORMATETC;
     }
 
     HRESULT __stdcall GetCanonicalFormatEtc (FORMATETC __RPC_FAR*, FORMATETC __RPC_FAR* pFormatEtcOut)
@@ -2894,7 +2983,7 @@ public:
 
         if (direction == DATADIR_GET)
         {
-            *result = new JuceEnumFormatEtc (formats, numFormats);
+            *result = new JuceEnumFormatEtc (format);
             return S_OK;
         }
 
@@ -2974,7 +3063,7 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
 static bool performDragDrop (FORMATETC* const format, STGMEDIUM* const medium, const DWORD whatToDo) throw()
 {
     JuceDropSource* const source = new JuceDropSource();
-    JuceDataObject* const data = new JuceDataObject (source, format, medium, 1);
+    JuceDataObject* const data = new JuceDataObject (source, format, medium);
 
     DWORD effect;
     const HRESULT res = DoDragDrop (data, source, whatToDo, &effect);
@@ -3043,11 +3132,11 @@ typedef int (WINAPI * PFNWGLGETSWAPINTERVALEXTPROC) (void);
 #define WGL_NUMBER_PIXEL_FORMATS_ARB    0x2000
 #define WGL_DRAW_TO_WINDOW_ARB          0x2001
 #define WGL_ACCELERATION_ARB            0x2003
-#define WGL_SWAP_METHOD_ARB			    0x2007
+#define WGL_SWAP_METHOD_ARB             0x2007
 #define WGL_SUPPORT_OPENGL_ARB          0x2010
-#define WGL_PIXEL_TYPE_ARB			    0x2013
+#define WGL_PIXEL_TYPE_ARB              0x2013
 #define WGL_DOUBLE_BUFFER_ARB           0x2011
-#define WGL_COLOR_BITS_ARB			    0x2014
+#define WGL_COLOR_BITS_ARB              0x2014
 #define WGL_RED_BITS_ARB                0x2015
 #define WGL_GREEN_BITS_ARB              0x2017
 #define WGL_BLUE_BITS_ARB               0x2019
@@ -3079,7 +3168,7 @@ static void getWglExtensions (HDC dc, StringArray& result) throw()
 class WindowedGLContext     : public OpenGLContext
 {
 public:
-    WindowedGLContext (Component* const component_, 
+    WindowedGLContext (Component* const component_,
                        HGLRC contextToShareWith,
                        const OpenGLPixelFormat& pixelFormat)
         : renderContext (0),
@@ -3323,7 +3412,7 @@ public:
 
         PFNWGLGETSWAPINTERVALEXTPROC wglGetSwapIntervalEXT = 0;
 
-        if (availableExtensions.contains ("WGL_EXT_swap_control") 
+        if (availableExtensions.contains ("WGL_EXT_swap_control")
              && WGL_EXT_FUNCTION_INIT (PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT))
             return wglGetSwapIntervalEXT();
 

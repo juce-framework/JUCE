@@ -53,7 +53,7 @@
 #include "../../../../../juce.h"
 #include "juce_VSTPluginInstance.h"
 
-#if JUCE_LINUX 
+#if JUCE_LINUX
  #define Font JUCE_NAMESPACE::Font
  #define KeyPress JUCE_NAMESPACE::KeyPress
  #define Drawable JUCE_NAMESPACE::Drawable
@@ -225,7 +225,7 @@ static int getPropertyFromXWindow (Window handle, Atom atom)
 
     XSetErrorHandler (oldErrorHandler);
 
-    return (userCount == 1 && ! xErrorTriggered) ? *(int*) data 
+    return (userCount == 1 && ! xErrorTriggered) ? *(int*) data
                                                  : 0;
 }
 
@@ -1452,7 +1452,7 @@ private:
                 h = 150;
             }
         }
-        
+
         if (pluginWindow != 0)
             XMapRaised (display, pluginWindow);
 #endif
@@ -1611,7 +1611,7 @@ private:
         }
         else if (pluginWindow != 0)
         {
-            // if the plugin has a window, then send the event to the window so that 
+            // if the plugin has a window, then send the event to the window so that
             // its message thread will pick it up..
             XSendEvent (display, pluginWindow, False, 0L, event);
             XFlush (display);

@@ -66,7 +66,9 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    bool filesDropped (const StringArray& files, int x, int y);
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
     /** @internal */
     int getNumRows();
     /** @internal */

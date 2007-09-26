@@ -33,7 +33,7 @@
 #include <dlfcn.h>
 #include <sys/file.h>
 #include <sys/types.h>
-#include <sys/ptrace.h> 
+#include <sys/ptrace.h>
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE

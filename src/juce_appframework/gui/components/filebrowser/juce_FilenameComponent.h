@@ -36,6 +36,7 @@
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../buttons/juce_TextButton.h"
 #include "../../../../juce_core/io/files/juce_File.h"
+#include "../mouse/juce_FileDragAndDropTarget.h"
 class FilenameComponent;
 
 
@@ -75,6 +76,7 @@ public:
 */
 class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,
+                                     public FileDragAndDropTarget,
                                      private AsyncUpdater,
                                      private ButtonListener,
                                      private ComboBoxListener
@@ -188,11 +190,19 @@ public:
 
     //==============================================================================
     /** @internal */
+    void paintOverChildren (Graphics& g);
+    /** @internal */
     void resized();
     /** @internal */
     void lookAndFeelChanged();
     /** @internal */
-    bool filesDropped (const StringArray& filenames, int mouseX, int mouseY);
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragEnter (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragExit (const StringArray& files);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -203,7 +213,7 @@ private:
     String lastFilename;
     Button* browseButton;
     int maxRecentFiles;
-    bool isDir, isSaving;
+    bool isDir, isSaving, isFileDragOver;
     String wildcard, enforcedSuffix, browseButtonText;
     SortedSet <void*> listeners;
     File defaultBrowseFile;

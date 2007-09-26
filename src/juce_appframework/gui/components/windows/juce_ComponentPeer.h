@@ -39,6 +39,7 @@ class Graphics;
 #include "../../../../juce_core/text/juce_StringArray.h"
 #include "../../graphics/geometry/juce_RectangleList.h"
 class ComponentBoundsConstrainer;
+class ComponentDeletionWatcher;
 
 
 //==============================================================================
@@ -300,7 +301,9 @@ public:
 
     void handleUserClosingWindow();
 
-    void handleFilesDropped (int x, int y, const StringArray& files);
+    void handleFileDragMove (const StringArray& files, int x, int y);
+    void handleFileDragExit (const StringArray& files);
+    void handleFileDragDrop (const StringArray& files, int x, int y);
 
     //==============================================================================
     /** Resets the masking region.
@@ -361,10 +364,14 @@ protected:
 private:
     //==============================================================================
     Component* lastFocusedComponent;
+    ComponentDeletionWatcher* dragAndDropTargetComponent;
+    Component* lastDragAndDropCompUnderMouse;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
     friend class Component;
     static ComponentPeer* getPeerFor (const Component* const component) throw();
+
+    void setLastDragDropTarget (Component* comp);
 
     ComponentPeer (const ComponentPeer&);
     const ComponentPeer& operator= (const ComponentPeer&);

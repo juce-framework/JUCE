@@ -286,9 +286,20 @@ SelectedItemSet <PaintElement*>& PaintRoutineEditor::getLassoSelection()
     return graphics.getSelectedElements();
 }
 
-bool PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int y)
+bool PaintRoutineEditor::isInterestedInFileDrag (const StringArray& files)
 {
-    File f (filenames [0]);
+    const File f (files [0]);
+
+    return f.hasFileExtension ("jpg")
+        || f.hasFileExtension ("jpeg")
+        || f.hasFileExtension ("png")
+        || f.hasFileExtension ("gif")
+        || f.hasFileExtension ("svg");
+}
+
+void PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int y)
+{
+    const File f (filenames [0]);
 
     if (f.existsAsFile())
     {
@@ -305,10 +316,6 @@ bool PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int 
                                   jlimit (10, getHeight() - 10, y));
 
             document.getUndoManager().beginNewTransaction();
-
-            return true;
         }
     }
-
-    return false;
 }

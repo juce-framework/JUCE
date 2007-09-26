@@ -463,26 +463,47 @@ void MainHostWindow::showAudioSettings()
         graphEditor->graph.removeIllegalConnections();
 }
 
-bool MainHostWindow::filesDropped (const StringArray& files, int x, int y)
+bool MainHostWindow::isInterestedInFileDrag (const StringArray&)
+{
+    return true;
+}
+
+void MainHostWindow::fileDragEnter (const StringArray&, int, int)
+{
+}
+
+void MainHostWindow::fileDragMove (const StringArray&, int, int)
+{
+}
+
+void MainHostWindow::fileDragExit (const StringArray&)
+{
+}
+
+void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 {
     if (files.size() == 1 && File (files[0]).hasFileExtension (filenameSuffix))
     {
         GraphDocumentComponent* const graphEditor = getGraphEditor();
 
-        if (graphEditor == 0)
-            return false;
-
-        return graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk
-                && graphEditor->graph.loadFrom (File (files[0]), true);
+        if (graphEditor != 0
+             && graphEditor->graph.saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+        {
+            graphEditor->graph.loadFrom (File (files[0]), true);
+        }
     }
+    else
+    {
+        OwnedArray <PluginDescription> typesFound;
+        knownPluginList.scanAndAddDragAndDroppedFiles (files, typesFound);
 
-    OwnedArray <PluginDescription> typesFound;
-    knownPluginList.scanAndAddDragAndDroppedFiles (files, typesFound);
+        GraphDocumentComponent* const graphEditor = getGraphEditor();
+        if (graphEditor != 0)
+            relativePositionToOtherComponent (graphEditor, x, y);
 
-    for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-        createPlugin (typesFound.getUnchecked(i), x, y);
-
-    return typesFound.size() > 0;
+        for (int i = 0; i < jmin (5, typesFound.size()); ++i)
+            createPlugin (typesFound.getUnchecked(i), x, y);
+    }
 }
 
 GraphDocumentComponent* MainHostWindow::getGraphEditor() const

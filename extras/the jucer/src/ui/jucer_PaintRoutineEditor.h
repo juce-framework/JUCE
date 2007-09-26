@@ -43,7 +43,8 @@ class JucerDocumentHolder;
 */
 class PaintRoutineEditor  : public Component,
                             public ChangeListener,
-                            public LassoSource <PaintElement*>
+                            public LassoSource <PaintElement*>,
+                            public FileDragAndDropTarget
 {
 public:
     //==============================================================================
@@ -68,7 +69,8 @@ public:
 
     SelectedItemSet <PaintElement*>& getLassoSelection();
 
-    bool filesDropped (const StringArray& filenames, int x, int y);
+    bool isInterestedInFileDrag (const StringArray& files);
+    void filesDropped (const StringArray& filenames, int x, int y);
 
     const Rectangle getComponentArea() const;
 

@@ -52,6 +52,7 @@ FilenameComponent::FilenameComponent (const String& name,
       maxRecentFiles (30),
       isDir (isDirectory),
       isSaving (isForSaving),
+      isFileDragOver (false),
       wildcard (fileBrowserWildcard),
       enforcedSuffix (enforcedSuffix_)
 {
@@ -73,6 +74,15 @@ FilenameComponent::~FilenameComponent()
 }
 
 //==============================================================================
+void FilenameComponent::paintOverChildren (Graphics& g)
+{
+    if (isFileDragOver)
+    {
+        g.setColour (Colours::red.withAlpha (0.2f));
+        g.drawRect (0, 0, getWidth(), getHeight(), 3);
+    }
+}
+
 void FilenameComponent::resized()
 {
     getLookAndFeel().layoutFilenameComponent (*this, filenameBox, browseButton);
@@ -126,14 +136,32 @@ void FilenameComponent::comboBoxChanged (ComboBox*)
     setCurrentFile (getCurrentFile(), true);
 }
 
-bool FilenameComponent::filesDropped (const StringArray& filenames, int, int)
+bool FilenameComponent::isInterestedInFileDrag (const StringArray&)
 {
+    return true;
+}
+
+void FilenameComponent::filesDropped (const StringArray& filenames, int, int)
+{
+    isFileDragOver = false;
+    repaint();
+
     const File f (filenames[0]);
 
     if (f.exists() && (f.isDirectory() == isDir))
         setCurrentFile (f, true);
+}
 
-    return true;
+void FilenameComponent::fileDragEnter (const StringArray&, int, int)
+{
+    isFileDragOver = true;
+    repaint();
+}
+
+void FilenameComponent::fileDragExit (const StringArray&)
+{
+    isFileDragOver = false;
+    repaint();
 }
 
 //==============================================================================

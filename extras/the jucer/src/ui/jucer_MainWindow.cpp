@@ -201,18 +201,28 @@ bool MainWindow::openFile (const File& file)
     return newDoc != 0;
 }
 
-bool MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mouseY)
+bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
     for (int i = filenames.size(); --i >= 0;)
     {
         const File f (filenames[i]);
 
         if (f.hasFileExtension (T(".cpp")))
-            if (openFile (f))
-                return true;
+            return true;
     }
 
     return false;
+}
+
+void MainWindow::filesDropped (const StringArray& filenames, int mouseX, int mouseY)
+{
+    for (int i = filenames.size(); --i >= 0;)
+    {
+        const File f (filenames[i]);
+
+        if (f.hasFileExtension (T(".cpp")) && openFile (f))
+            break;
+    }
 }
 
 void MainWindow::activeWindowStatusChanged()

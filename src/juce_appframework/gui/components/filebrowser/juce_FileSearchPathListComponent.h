@@ -34,6 +34,7 @@
 
 #include "../controls/juce_ListBox.h"
 #include "../buttons/juce_Button.h"
+#include "../mouse/juce_FileDragAndDropTarget.h"
 #include "../../../../juce_core/io/files/juce_FileSearchPath.h"
 
 
@@ -46,6 +47,7 @@
 */
 class JUCE_API  FileSearchPathListComponent  : public Component,
                                                public SettableTooltipClient,
+                                               public FileDragAndDropTarget,
                                                private ButtonListener,
                                                private ListBoxModel
 {
@@ -103,7 +105,9 @@ public:
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
-    bool filesDropped (const StringArray& filenames, int mouseX, int mouseY);
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
     /** @internal */
     void buttonClicked (Button* button);
 

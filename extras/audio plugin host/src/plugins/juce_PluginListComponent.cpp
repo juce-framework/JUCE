@@ -201,12 +201,15 @@ void PluginListComponent::buttonClicked (Button* b)
     }
 }
 
-bool PluginListComponent::filesDropped (const StringArray& files, int, int)
+bool PluginListComponent::isInterestedInFileDrag (const StringArray& files)
+{
+    return true;
+}
+
+void PluginListComponent::filesDropped (const StringArray& files, int, int)
 {
     OwnedArray <PluginDescription> typesFound;
     list.scanAndAddDragAndDroppedFiles (files, typesFound);
-
-    return typesFound.size() > 0;
 }
 
 void PluginListComponent::scanFor (AudioPluginFormat* format)

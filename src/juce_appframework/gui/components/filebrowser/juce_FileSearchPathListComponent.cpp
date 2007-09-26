@@ -202,10 +202,13 @@ void FileSearchPathListComponent::resized()
     changeButton->setTopRightPosition (upButton->getX() - 8, buttonY);
 }
 
-bool FileSearchPathListComponent::filesDropped (const StringArray& filenames, int /*mouseX*/, int mouseY)
+bool FileSearchPathListComponent::isInterestedInFileDrag (const StringArray&)
 {
-    bool usedAny = false;
+    return true;
+}
 
+void FileSearchPathListComponent::filesDropped (const StringArray& filenames, int, int mouseY)
+{
     for (int i = filenames.size(); --i >= 0;)
     {
         const File f (filenames[i]);
@@ -215,11 +218,8 @@ bool FileSearchPathListComponent::filesDropped (const StringArray& filenames, in
             const int row = listBox->getRowContainingPosition (0, mouseY - listBox->getY());
             path.add (f, row);
             changed();
-            usedAny = true;
         }
     }
-
-    return usedAny;
 }
 
 void FileSearchPathListComponent::buttonClicked (Button* button)

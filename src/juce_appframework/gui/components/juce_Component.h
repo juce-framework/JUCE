@@ -1689,22 +1689,6 @@ public:
     void removeComponentListener (ComponentListener* const listenerToRemove) throw();
 
     //==============================================================================
-    /** Called when files are dragged-and-dropped onto this component.
-
-        If the component isn't interested in the files, it should return false, to indicate
-        that its parent can be offered the files instead.
-
-        @param filenames    a list of the filenames of the files that were dropped
-        @param mouseX       x co-ordinate of the mouse when they were dropped, (relative to this
-                            component's top-left)
-        @param mouseY       y co-ordinate of the mouse when they were dropped, (relative to this
-                            component's top-left)
-    */
-    virtual bool filesDropped (const StringArray& filenames,
-                               int mouseX,
-                               int mouseY);
-
-    //==============================================================================
     /** Dispatches a numbered message to this component.
 
         This is a quick and cheap way of allowing simple asynchronous messages to
@@ -2078,7 +2062,6 @@ private:
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
-    void internalFilesDropped (const int x, const int y, const StringArray& files);
     void internalUpdateMouseCursor (const bool forcedUpdate) throw();
     void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
     void repaintParent() throw();
@@ -2098,6 +2081,13 @@ private:
     // how much of the component is not off the edges of its parents
     const Rectangle getUnclippedArea() const;
     void sendVisibilityChangeMessage();
+
+    //==============================================================================
+    // This is included here just to cause a compile error if your code is still handling
+    // drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
+    // class, which is easy (just make your class inherit from FileDragAndDropTarget, and
+    // implement its methods instead of this Component method).
+    virtual void filesDropped (const StringArray&, int, int) {}
 
     // components aren't allowed to have copy constructors, as this would mess up parent
     // hierarchies. You might need to give your subclasses a private dummy constructor like

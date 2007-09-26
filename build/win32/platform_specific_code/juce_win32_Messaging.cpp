@@ -151,7 +151,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
     else
     {
         // If a thread has a MessageManagerLock and then tries to call this method, it'll
-        // deadlock because the message manager is blocked from running, and can't 
+        // deadlock because the message manager is blocked from running, and can't
         // call your function..
         jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 

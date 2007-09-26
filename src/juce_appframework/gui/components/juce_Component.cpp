@@ -3502,38 +3502,6 @@ void Component::internalModifierKeysChanged()
 }
 
 //==============================================================================
-bool Component::filesDropped (const StringArray&, int, int)
-{
-    // base class returns false to let the message get passed up to its parent
-    return false;
-}
-
-void Component::internalFilesDropped (const int x,
-                                      const int y,
-                                      const StringArray& files)
-{
-    if (isCurrentlyBlockedByAnotherModalComponent())
-    {
-        internalModalInputAttempt();
-
-        if (isCurrentlyBlockedByAnotherModalComponent())
-            return;
-    }
-
-    Component* c = getComponentAt (x, y);
-
-    while (c->isValidComponent())
-    {
-        int rx = x, ry = y;
-        relativePositionToOtherComponent (c, rx, ry);
-
-        if (c->filesDropped (files, rx, ry))
-            break;
-
-        c = c->getParentComponent();
-    }
-}
-
 ComponentPeer* Component::getPeer() const throw()
 {
     if (flags.hasHeavyweightPeerFlag)

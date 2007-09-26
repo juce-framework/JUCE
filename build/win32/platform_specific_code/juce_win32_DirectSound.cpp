@@ -147,7 +147,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/containers/juce_OwnedArray.h"
 #include "../../../src/juce_core/text/juce_LocalisedStrings.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
+
 
 static const String getDSErrorMessage (HRESULT hr)
 {

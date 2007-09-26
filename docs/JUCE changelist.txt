@@ -13,6 +13,7 @@ Changelist for version 1.45
 - audio plugins: new methods AudioProcessor::beginParameterChangeGesture() and endParameterChangeGesture() let you tell the host when a parameter-change action starts and finishes.
 - audio plugins: new method AudioProcessor::updateHostDisplay() to tell the host that something about your plugin has changed and that it should refresh its display.
 - new class: FileSearchPathListComponent, for letting the user edit a FileSearchPath.
+- new class: FileDragAndDropTarget, which replaces the old method Component::filesDropped. To use it, just make your component inherit from FileDragAndDropTarget, and it'll receive external file drops. This provides more functionality than the old method, allowing you to track the drag enter/exit/movements as well as just reacting to the drop itself.
 - added a critical section option to ReferenceCountedArray
 - refactored and added features to the Socket class, replacing it with StreamableSocket (basically the same as the original class), and DatagramSocket.
 - refactored the OpenGLComponent, adding new classes OpenGLPixelFormat and OpenGLContext

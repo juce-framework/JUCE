@@ -42,7 +42,8 @@ class MultiDocHolder;
 */
 class MainWindow  : public DocumentWindow,
                     public MenuBarModel,
-                    public ApplicationCommandTarget
+                    public ApplicationCommandTarget,
+                    public FileDragAndDropTarget
 {
 public:
     //==============================================================================
@@ -59,7 +60,9 @@ public:
     bool closeDocument (JucerDocumentHolder* designHolder);
     bool closeAllDocuments();
 
-    bool filesDropped (const StringArray& filenames, int mouseX, int mouseY);
+    bool isInterestedInFileDrag (const StringArray& files);
+    void filesDropped (const StringArray& filenames, int mouseX, int mouseY);
+
     void activeWindowStatusChanged();
 
     //==============================================================================

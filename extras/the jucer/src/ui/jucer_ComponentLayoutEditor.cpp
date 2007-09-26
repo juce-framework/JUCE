@@ -357,9 +357,15 @@ bool ComponentLayoutEditor::keyPressed (const KeyPress& key)
     return true;
 }
 
-bool ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, int y)
+bool ComponentLayoutEditor::isInterestedInFileDrag (const StringArray& filenames)
 {
-    File f (filenames [0]);
+    const File f (filenames [0]);
+    return f.hasFileExtension (T(".cpp"));
+}
+
+void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, int y)
+{
+    const File f (filenames [0]);
 
     if (f.hasFileExtension (T(".cpp")))
     {
@@ -385,12 +391,8 @@ bool ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, i
             }
 
             layout.getDocument()->getUndoManager().beginNewTransaction();
-
-            return true;
         }
     }
-
-    return false;
 }
 
 ComponentOverlayComponent* ComponentLayoutEditor::getOverlayCompFor (Component* compToFind) const

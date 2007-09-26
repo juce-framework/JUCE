@@ -577,7 +577,7 @@ public:
             AudioDeviceSelectorComponent audioSettingsComp (audioDeviceManager,
                                                             0, 1,
                                                             2, 2,
-                                                            true, 
+                                                            true,
                                                             false);
 
             // ...and show it in a DialogWindow...

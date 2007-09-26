@@ -595,7 +595,7 @@ struct AlertWindowInfo
 
     int run() const
     {
-        return (int) (pointer_sized_int) 
+        return (int) (pointer_sized_int)
                 MessageManager::getInstance()->callFunctionOnMessageThread (showCallback, (void*) this);
     }
 

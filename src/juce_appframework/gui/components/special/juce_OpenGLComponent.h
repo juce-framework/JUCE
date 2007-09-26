@@ -116,7 +116,7 @@ public:
 
     /** Sets whether the context checks the vertical sync before swapping.
 
-        The value is the number of frames to allow between buffer-swapping. This is 
+        The value is the number of frames to allow between buffer-swapping. This is
         fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
         and greater numbers indicate that it should swap less often.
 
@@ -235,10 +235,10 @@ public:
         that your context needs.
 
         New contexts are created on-demand by the makeCurrentContextActive() method - so
-        if the context is deleted, e.g. by changing the pixel format or window, no context 
+        if the context is deleted, e.g. by changing the pixel format or window, no context
         will be created until the next call to makeCurrentContextActive(), which will
         synchronously create one and call this method. This means that if you're using
-        a non-GUI thread for rendering, you can make sure this method is be called by 
+        a non-GUI thread for rendering, you can make sure this method is be called by
         your renderer thread.
 
         When this callback happens, the context will already have been made current
@@ -252,7 +252,7 @@ public:
     /** Returns the context that will draw into this component.
 
         This may return 0 if the component is currently invisible or hasn't currently
-        got a context. The context object can be deleted and a new one created during 
+        got a context. The context object can be deleted and a new one created during
         the lifetime of this component, and there may be times when it doesn't have one.
 
         @see newOpenGLContextCreated()
@@ -267,8 +267,8 @@ public:
         If this returns false, then the context isn't active, so you should avoid
         making any calls.
 
-        This call may actually create a context if one isn't currently initialised. If 
-        it does this, it will also synchronously call the newOpenGLContextCreated() 
+        This call may actually create a context if one isn't currently initialised. If
+        it does this, it will also synchronously call the newOpenGLContextCreated()
         method to let you initialise it as necessary.
 
         @see OpenGLContext::makeActive

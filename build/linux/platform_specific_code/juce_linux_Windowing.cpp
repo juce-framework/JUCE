@@ -1108,8 +1108,8 @@ public:
                 data[index++] = newIcon.getPixelAt (x, y).getARGB();
 
         XChangeProperty (display, windowH,
-                         XInternAtom (display, "_NET_WM_ICON", False), 
-                         XA_CARDINAL, 32, PropModeReplace, 
+                         XInternAtom (display, "_NET_WM_ICON", False),
+                         XA_CARDINAL, 32, PropModeReplace,
                          (unsigned char*) data, dataSize);
 
         XSync (display, False);
@@ -1542,7 +1542,7 @@ public:
 
             case ClientMessage:
             {
-                XClientMessageEvent* clientMsg = (XClientMessageEvent*) &event->xclient;
+                const XClientMessageEvent* const clientMsg = (const XClientMessageEvent*) &event->xclient;
 
                 if (clientMsg->message_type == wm_Protocols && clientMsg->format == 32)
                 {
@@ -1592,12 +1592,12 @@ public:
                 break;
             }
 
-            case SelectionClear:
-            case SelectionRequest:
-                break;
-
             case SelectionNotify:
                 handleDragAndDropSelection (event);
+                break;
+
+            case SelectionClear:
+            case SelectionRequest:
                 break;
 
             default:
@@ -2219,6 +2219,7 @@ private:
     //==============================================================================
     void resetDragAndDrop()
     {
+        dragAndDropFiles.clear();
         lastDropX = lastDropY = -1;
         dragAndDropCurrentMimeType = 0;
         dragAndDropSourceWindow = 0;
@@ -2242,8 +2243,6 @@ private:
         zerostruct (msg);
         msg.message_type = XA_XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
-        //msg.data.l[2] = (0 << 16) + 0;
-        //msg.data.l[3] = (0 << 16) + 0;
         msg.data.l[4] = dropAction;
 
         sendDragAndDropMessage (msg);
@@ -2270,7 +2269,11 @@ private:
         if ((clientMsg->data.l[1] & 1) == 0)
         {
             sendDragAndDropLeave();
-            return;
+
+            if (dragAndDropFiles.size() > 0)
+                handleFileDragExit (dragAndDropFiles);
+
+            dragAndDropFiles.clear();
         }
     }
 
@@ -2303,83 +2306,33 @@ private:
             }
 
             sendDragAndDropStatus (true, targetAction);
+
+            if (dragAndDropFiles.size() == 0)
+                updateDraggedFileList (clientMsg);
+
+            if (dragAndDropFiles.size() > 0)
+                handleFileDragMove (dragAndDropFiles, dropX, dropY);
         }
     }
 
     void handleDragAndDropDrop (const XClientMessageEvent* const clientMsg)
     {
-        if (dragAndDropSourceWindow != None
-             && dragAndDropCurrentMimeType != 0)
-        {
-            dragAndDropTimestamp = clientMsg->data.l[2];
+        if (dragAndDropFiles.size() == 0)
+            updateDraggedFileList (clientMsg);
 
-            XConvertSelection (display,
-                               XA_XdndSelection,
-                               dragAndDropCurrentMimeType,
-                               XA_JXSelectionWindowProperty,
-                               windowH,
-                               dragAndDropTimestamp);
-        }
-    }
-
-    void handleDragAndDropSelection (const XEvent* const evt)
-    {
-        StringArray files;
-
-        if (evt->xselection.property != 0)
-        {
-            StringArray lines;
-
-            {
-                MemoryBlock dropData;
-
-                for (;;)
-                {
-                    Atom actual;
-                    uint8* data = 0;
-                    unsigned long count = 0, remaining = 0;
-                    int format = 0;
-
-                    if (XGetWindowProperty (display, evt->xany.window, evt->xselection.property,
-                                            dropData.getSize() / 4, 65536, 1, AnyPropertyType, &actual,
-                                            &format, &count, &remaining, &data) == Success)
-                    {
-                        dropData.append (data, count * format / 8);
-                        XFree (data);
-
-                        if (remaining == 0)
-                            break;
-                    }
-                    else
-                    {
-                        XFree (data);
-                        break;
-                    }
-                }
-
-                lines.addLines (dropData.toString());
-            }
-
-            for (int i = 0; i < lines.size(); ++i)
-            {
-                const String filename (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf (T("file://"), false, true)));
-
-                if (filename.isNotEmpty())
-                    files.add (filename);
-            }
-        }
-
+        const StringArray files (dragAndDropFiles);
         const int lastX = lastDropX, lastY = lastDropY;
 
         sendDragAndDropFinish();
         resetDragAndDrop();
 
         if (files.size() > 0)
-            handleFilesDropped (lastX, lastY, files);
+            handleFileDragDrop (files, lastX, lastY);
     }
 
     void handleDragAndDropEnter (const XClientMessageEvent* const clientMsg)
     {
+        dragAndDropFiles.clear();
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
@@ -2432,8 +2385,75 @@ private:
             for (int j = 0; j < numElementsInArray (allowedMimeTypeAtoms); ++j)
                 if (srcMimeTypeAtomList[i] == allowedMimeTypeAtoms[j])
                     dragAndDropCurrentMimeType = allowedMimeTypeAtoms[j];
+
+        handleDragAndDropPosition (clientMsg);
     }
 
+    void handleDragAndDropSelection (const XEvent* const evt)
+    {
+        dragAndDropFiles.clear();
+
+        if (evt->xselection.property != 0)
+        {
+            StringArray lines;
+
+            {
+                MemoryBlock dropData;
+
+                for (;;)
+                {
+                    Atom actual;
+                    uint8* data = 0;
+                    unsigned long count = 0, remaining = 0;
+                    int format = 0;
+
+                    if (XGetWindowProperty (display, evt->xany.window, evt->xselection.property,
+                                            dropData.getSize() / 4, 65536, 1, AnyPropertyType, &actual,
+                                            &format, &count, &remaining, &data) == Success)
+                    {
+                        dropData.append (data, count * format / 8);
+                        XFree (data);
+
+                        if (remaining == 0)
+                            break;
+                    }
+                    else
+                    {
+                        XFree (data);
+                        break;
+                    }
+                }
+
+                lines.addLines (dropData.toString());
+            }
+
+            for (int i = 0; i < lines.size(); ++i)
+                dragAndDropFiles.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf (T("file://"), false, true)));
+
+            dragAndDropFiles.trim();
+            dragAndDropFiles.removeEmptyStrings();
+        }
+    }
+
+    void updateDraggedFileList (const XClientMessageEvent* const clientMsg)
+    {
+        dragAndDropFiles.clear();
+
+        if (dragAndDropSourceWindow != None
+             && dragAndDropCurrentMimeType != 0)
+        {
+            dragAndDropTimestamp = clientMsg->data.l[2];
+
+            XConvertSelection (display,
+                               XA_XdndSelection,
+                               dragAndDropCurrentMimeType,
+                               XA_JXSelectionWindowProperty,
+                               windowH,
+                               dragAndDropTimestamp);
+        }
+    }
+
+    StringArray dragAndDropFiles;
     int dragAndDropTimestamp, lastDropX, lastDropY;
 
     Atom XA_OtherMime, dragAndDropCurrentMimeType;

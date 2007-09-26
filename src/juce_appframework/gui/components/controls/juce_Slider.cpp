@@ -1089,7 +1089,7 @@ void Slider::restoreMouseIfHidden()
         c->enableUnboundedMouseMovement (false);
 
         const double pos = (sliderBeingDragged == 2) ? getMaxValue()
-                                                     : ((sliderBeingDragged == 1) ? getMinValue() 
+                                                     : ((sliderBeingDragged == 1) ? getMinValue()
                                                                                   : currentValue);
 
         const int pixelPos = (int) getLinearSliderPos (pos);

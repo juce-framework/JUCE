@@ -431,6 +431,9 @@
 #ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
  #include "juce_appframework/gui/components/mouse/juce_DragAndDropTarget.h"
 #endif
+#ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+ #include "juce_appframework/gui/components/mouse/juce_FileDragAndDropTarget.h"
+#endif
 #ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/mouse/juce_LassoComponent.h"
 #endif

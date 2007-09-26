@@ -835,6 +835,7 @@ public:
 private:
     EventHandlerRef eventHandlerRef;
     bool fullScreen, isSharedWindow, isCompositingWindow;
+    StringArray dragAndDropFiles;
 
     //==============================================================================
     class RepaintManager : public Timer
@@ -996,106 +997,6 @@ public:
     }
 
     //==============================================================================
-    OSStatus handleWindowClassEvent (EventRef theEvent)
-    {
-        switch (GetEventKind (theEvent))
-        {
-        case kEventWindowBoundsChanged:
-            resizeViewToFitWindow();
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowBoundsChanging:
-            if ((styleFlags & (windowIsResizable | windowHasTitleBar)) == (windowIsResizable | windowHasTitleBar))
-            {
-                UInt32 atts = 0;
-                GetEventParameter (theEvent, kEventParamAttributes, typeUInt32,
-                                   0, sizeof (UInt32), 0, &atts);
-
-                if ((atts & (kWindowBoundsChangeUserDrag | kWindowBoundsChangeUserResize)) != 0)
-                {
-                    if (component->isCurrentlyBlockedByAnotherModalComponent())
-                    {
-                        Component* const modal = Component::getCurrentlyModalComponent();
-                        if (modal != 0)
-                            modal->inputAttemptWhenModal();
-                    }
-
-                    if ((atts & kWindowBoundsChangeUserResize) != 0
-                         && constrainer != 0 && ! isSharedWindow)
-                    {
-                        Rect current;
-                        GetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
-                                           0, sizeof (Rect), 0, &current);
-
-                        int x = current.left;
-                        int y = current.top;
-                        int w = current.right - current.left;
-                        int h = current.bottom - current.top;
-
-                        const Rectangle currentRect (getComponent()->getBounds());
-
-                        constrainer->checkBounds (x, y, w, h, currentRect,
-                                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                  y != currentRect.getY() && y + h == currentRect.getBottom(),
-                                                  x != currentRect.getX() && x + w == currentRect.getRight(),
-                                                  y == currentRect.getY() && y + h != currentRect.getBottom(),
-                                                  x == currentRect.getX() && x + w != currentRect.getRight());
-
-                        current.left = x;
-                        current.top = y;
-                        current.right = x + w;
-                        current.bottom = y + h;
-
-                        SetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
-                                           sizeof (Rect), &current);
-
-                        return noErr;
-                    }
-                }
-            }
-            break;
-
-        case kEventWindowFocusAcquired:
-            keysCurrentlyDown.clear();
-
-            if ((! isSharedWindow) || HIViewSubtreeContainsFocus (viewRef))
-                viewFocusGain();
-
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowFocusRelinquish:
-            keysCurrentlyDown.clear();
-            viewFocusLoss();
-
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowCollapsed:
-            minimisedWindows.addIfNotAlreadyThere (windowRef);
-            handleMovedOrResized();
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowExpanded:
-            minimisedWindows.removeValue (windowRef);
-            handleMovedOrResized();
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowShown:
-            break; // allow other handlers in the event chain to also get a look at the events
-
-        case kEventWindowClose:
-            if (isSharedWindow)
-                break;  // break to let the OS delete the window
-
-            handleUserClosingWindow();
-            return noErr;  // avoids letting the OS to delete the window, we'll do that ourselves.
-
-        default:
-            break;
-        }
-
-        return eventNotHandledErr;
-    }
-
     OSStatus handleKeyEvent (EventRef theEvent, juce_wchar textCharacter)
     {
         updateModifiers (theEvent);
@@ -1200,6 +1101,7 @@ public:
         return handleKeyEvent (originalEvent, (juce_wchar) uc);
     }
 
+    //==============================================================================
     OSStatus handleMouseEvent (EventHandlerCallRef callRef, EventRef theEvent)
     {
         MouseCheckTimer::getInstance()->moved (this);
@@ -1318,19 +1220,57 @@ public:
         return noErr;
     }
 
-    OSStatus handleDragAndDrop (EventRef theEvent)
+    //==============================================================================
+    void doDragDropEnter (EventRef theEvent)
     {
+        updateDragAndDropFileList (theEvent);
+
+        if (dragAndDropFiles.size() > 0)
+        {
+            int x, y;
+            component->getMouseXYRelative (x, y);
+            handleFileDragMove (dragAndDropFiles, x, y);
+        }
+    }
+
+    void doDragDropMove (EventRef theEvent)
+    {
+        if (dragAndDropFiles.size() > 0)
+        {
+            int x, y;
+            component->getMouseXYRelative (x, y);
+            handleFileDragMove (dragAndDropFiles, x, y);
+        }
+    }
+
+    void doDragDropExit (EventRef theEvent)
+    {
+        if (dragAndDropFiles.size() > 0)
+            handleFileDragExit (dragAndDropFiles);
+    }
+
+    void doDragDrop (EventRef theEvent)
+    {
+        updateDragAndDropFileList (theEvent);
+
+        if (dragAndDropFiles.size() > 0)
+        {
+            int x, y;
+            component->getMouseXYRelative (x, y);
+            handleFileDragDrop (dragAndDropFiles, x, y);
+        }
+    }
+
+    void updateDragAndDropFileList (EventRef theEvent)
+    {
+        dragAndDropFiles.clear();
+
         DragRef dragRef;
         if (GetEventParameter (theEvent, kEventParamDragRef, typeDragRef, 0, sizeof (dragRef), 0, &dragRef) == noErr)
         {
-            int mx, my;
-            component->getMouseXYRelative (mx, my);
-
             UInt16 numItems = 0;
             if (CountDragItems (dragRef, &numItems) == noErr)
             {
-                StringArray filenames;
-
                 for (int i = 0; i < (int) numItems; ++i)
                 {
                     DragItemRef ref;
@@ -1354,7 +1294,7 @@ public:
                                     const String path (PlatformUtilities::makePathFromFSRef (&fsref));
 
                                     if (path.isNotEmpty())
-                                        filenames.add (path);
+                                        dragAndDropFiles.add (path);
                                 }
                             }
 
@@ -1363,17 +1303,13 @@ public:
                     }
                 }
 
-                filenames.trim();
-                filenames.removeEmptyStrings();
-
-                if (filenames.size() > 0)
-                    handleFilesDropped (mx, my, filenames);
+                dragAndDropFiles.trim();
+                dragAndDropFiles.removeEmptyStrings();
             }
         }
-
-        return noErr;
     }
 
+    //==============================================================================
     void resizeViewToFitWindow()
     {
         HIRect r;
@@ -1403,6 +1339,7 @@ public:
 #endif
     }
 
+    //==============================================================================
     OSStatus hiViewDraw (EventRef theEvent)
     {
         CGContextRef context = 0;
@@ -1500,16 +1437,103 @@ public:
         return noErr;
     }
 
-    static pascal OSStatus handleWindowEvent (EventHandlerCallRef callRef, EventRef theEvent, void* userData)
+    //==============================================================================
+    OSStatus handleWindowClassEvent (EventRef theEvent)
     {
-        MessageManager::delayWaitCursor();
+        switch (GetEventKind (theEvent))
+        {
+        case kEventWindowBoundsChanged:
+            resizeViewToFitWindow();
+            break; // allow other handlers in the event chain to also get a look at the events
 
-        HIViewComponentPeer* const peer = (HIViewComponentPeer*) userData;
+        case kEventWindowBoundsChanging:
+            if ((styleFlags & (windowIsResizable | windowHasTitleBar)) == (windowIsResizable | windowHasTitleBar))
+            {
+                UInt32 atts = 0;
+                GetEventParameter (theEvent, kEventParamAttributes, typeUInt32,
+                                   0, sizeof (UInt32), 0, &atts);
 
-        const MessageManagerLock messLock;
+                if ((atts & (kWindowBoundsChangeUserDrag | kWindowBoundsChangeUserResize)) != 0)
+                {
+                    if (component->isCurrentlyBlockedByAnotherModalComponent())
+                    {
+                        Component* const modal = Component::getCurrentlyModalComponent();
+                        if (modal != 0)
+                            modal->inputAttemptWhenModal();
+                    }
 
-        if (ComponentPeer::isValidPeer (peer))
-            return peer->handleWindowEventForPeer (callRef, theEvent);
+                    if ((atts & kWindowBoundsChangeUserResize) != 0
+                         && constrainer != 0 && ! isSharedWindow)
+                    {
+                        Rect current;
+                        GetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
+                                           0, sizeof (Rect), 0, &current);
+
+                        int x = current.left;
+                        int y = current.top;
+                        int w = current.right - current.left;
+                        int h = current.bottom - current.top;
+
+                        const Rectangle currentRect (getComponent()->getBounds());
+
+                        constrainer->checkBounds (x, y, w, h, currentRect,
+                                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                                  y != currentRect.getY() && y + h == currentRect.getBottom(),
+                                                  x != currentRect.getX() && x + w == currentRect.getRight(),
+                                                  y == currentRect.getY() && y + h != currentRect.getBottom(),
+                                                  x == currentRect.getX() && x + w != currentRect.getRight());
+
+                        current.left = x;
+                        current.top = y;
+                        current.right = x + w;
+                        current.bottom = y + h;
+
+                        SetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
+                                           sizeof (Rect), &current);
+
+                        return noErr;
+                    }
+                }
+            }
+            break;
+
+        case kEventWindowFocusAcquired:
+            keysCurrentlyDown.clear();
+
+            if ((! isSharedWindow) || HIViewSubtreeContainsFocus (viewRef))
+                viewFocusGain();
+
+            break; // allow other handlers in the event chain to also get a look at the events
+
+        case kEventWindowFocusRelinquish:
+            keysCurrentlyDown.clear();
+            viewFocusLoss();
+
+            break; // allow other handlers in the event chain to also get a look at the events
+
+        case kEventWindowCollapsed:
+            minimisedWindows.addIfNotAlreadyThere (windowRef);
+            handleMovedOrResized();
+            break; // allow other handlers in the event chain to also get a look at the events
+
+        case kEventWindowExpanded:
+            minimisedWindows.removeValue (windowRef);
+            handleMovedOrResized();
+            break; // allow other handlers in the event chain to also get a look at the events
+
+        case kEventWindowShown:
+            break; // allow other handlers in the event chain to also get a look at the events
+
+        case kEventWindowClose:
+            if (isSharedWindow)
+                break;  // break to let the OS delete the window
+
+            handleUserClosingWindow();
+            return noErr;  // avoids letting the OS to delete the window, we'll do that ourselves.
+
+        default:
+            break;
+        }
 
         return eventNotHandledErr;
     }
@@ -1579,6 +1603,21 @@ public:
         return eventNotHandledErr;
     }
 
+    static pascal OSStatus handleWindowEvent (EventHandlerCallRef callRef, EventRef theEvent, void* userData)
+    {
+        MessageManager::delayWaitCursor();
+
+        HIViewComponentPeer* const peer = (HIViewComponentPeer*) userData;
+
+        const MessageManagerLock messLock;
+
+        if (ComponentPeer::isValidPeer (peer))
+            return peer->handleWindowEventForPeer (callRef, theEvent);
+
+        return eventNotHandledErr;
+    }
+
+    //==============================================================================
     static pascal OSStatus hiViewEventHandler (EventHandlerCallRef myHandler, EventRef theEvent, void* userData)
     {
         MessageManager::delayWaitCursor();
@@ -1674,14 +1713,22 @@ public:
 #endif
                     Boolean accept = true;
                     SetEventParameter (theEvent, kEventParamControlWouldAcceptDrop, typeBoolean, sizeof (accept), &accept);
+
+                    peer->doDragDropEnter (theEvent);
                     return noErr;
                 }
 
                 case kEventControlDragWithin:
+                    peer->doDragDropMove (theEvent);
+                    return noErr;
+
+				case kEventControlDragLeave:
+                    peer->doDragDropExit (theEvent);
                     return noErr;
 
                 case kEventControlDragReceive:
-                    return peer->handleDragAndDrop (theEvent);
+                    peer->doDragDrop (theEvent);
+                    return noErr;
 
                 case kEventControlOwningWindowChanged:
                     return peer->ownerWindowChanged (theEvent);
@@ -1718,6 +1765,7 @@ public:
         return eventNotHandledErr;
     }
 
+    //==============================================================================
     WindowRef createNewWindow (const int windowStyleFlags)
     {
         jassert (windowRef == 0);
@@ -1894,6 +1942,7 @@ public:
                 { kEventClassControl, kEventControlSetFocusPart },
                 { kEventClassControl, kEventControlHitTest },
                 { kEventClassControl, kEventControlDragEnter },
+                { kEventClassControl, kEventControlDragLeave },
                 { kEventClassControl, kEventControlDragWithin },
                 { kEventClassControl, kEventControlDragReceive },
                 { kEventClassControl, kEventControlOwningWindowChanged }
@@ -1931,6 +1980,7 @@ public:
     }
 };
 
+//==============================================================================
 bool juce_isHIViewCreatedByJuce (HIViewRef view)
 {
     return juceHiViewClassNameCFString != 0

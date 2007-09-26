@@ -1071,7 +1071,7 @@ const String File::getRelativePathFrom (const File& dir)  const throw()
          || (commonBitLength == 1 && thisPath [1] == File::separator)
          || (commonBitLength <= 3 && thisPath [1] == T(':')))
 #else
-    if (commonBitLength <= 0 
+    if (commonBitLength <= 0
          || (commonBitLength == 1 && thisPath [1] == File::separator))
 #endif
         return fullPath;

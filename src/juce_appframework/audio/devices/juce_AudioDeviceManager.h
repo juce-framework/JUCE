@@ -309,7 +309,7 @@ public:
         The specified device will be opened automatically and can be retrieved with the
         getDefaultMidiOutput() method.
 
-        Pass in an empty string to deselect all devices. For the default device, you 
+        Pass in an empty string to deselect all devices. For the default device, you
         can use MidiOutput::getDevices() [MidiOutput::getDefaultDeviceIndex()].
 
         @see getDefaultMidiOutput, getDefaultMidiOutputName
@@ -324,7 +324,7 @@ public:
 
     /** Returns the current default midi output device.
 
-        If no device has been selected, or the device can't be opened, this will 
+        If no device has been selected, or the device can't be opened, this will
         return 0.
 
         @see getDefaultMidiOutputName

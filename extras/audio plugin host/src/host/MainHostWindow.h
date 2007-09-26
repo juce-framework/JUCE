@@ -57,7 +57,8 @@ extern ApplicationCommandManager* commandManager;
 class MainHostWindow    : public DocumentWindow,
                           public MenuBarModel,
                           public ApplicationCommandTarget,
-                          public ChangeListener
+                          public ChangeListener,
+                          public FileDragAndDropTarget
 {
 public:
     //==============================================================================
@@ -67,7 +68,12 @@ public:
     //==============================================================================
     void closeButtonPressed();
     void changeListenerCallback (void*);
-    bool filesDropped (const StringArray& filenames, int x, int y);
+
+    bool isInterestedInFileDrag (const StringArray& files);
+    void fileDragEnter (const StringArray& files, int, int);
+    void fileDragMove (const StringArray& files, int, int);
+    void fileDragExit (const StringArray& files);
+    void filesDropped (const StringArray& files, int, int);
 
     const StringArray getMenuBarNames();
     const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);

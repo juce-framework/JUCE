@@ -654,6 +654,7 @@
 		84FC31BB09B74A5C00B75141 /* juce_WildcardFileFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC31A909B74A5C00B75141 /* juce_WildcardFileFilter.h */; };
 		84FC31BE09B74A7700B75141 /* juce_BorderSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FC31BC09B74A7700B75141 /* juce_BorderSize.cpp */; };
 		84FC31BF09B74A7700B75141 /* juce_BorderSize.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FC31BD09B74A7700B75141 /* juce_BorderSize.h */; };
+		84FED3C90CAA96DA00003997 /* juce_FileDragAndDropTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FED3C80CAA96DA00003997 /* juce_FileDragAndDropTarget.h */; };
 		84FFAF2B0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */; };
 		84FFAF2C0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */; };
 /* End PBXBuildFile section */
@@ -1309,6 +1310,7 @@
 		84FC31A909B74A5C00B75141 /* juce_WildcardFileFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_WildcardFileFilter.h; path = filebrowser/juce_WildcardFileFilter.h; sourceTree = "<group>"; };
 		84FC31BC09B74A7700B75141 /* juce_BorderSize.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_BorderSize.cpp; sourceTree = "<group>"; };
 		84FC31BD09B74A7700B75141 /* juce_BorderSize.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_BorderSize.h; sourceTree = "<group>"; };
+		84FED3C80CAA96DA00003997 /* juce_FileDragAndDropTarget.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_FileDragAndDropTarget.h; sourceTree = "<group>"; };
 		84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileSearchPathListComponent.cpp; path = filebrowser/juce_FileSearchPathListComponent.cpp; sourceTree = "<group>"; };
 		84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_FileSearchPathListComponent.h; path = filebrowser/juce_FileSearchPathListComponent.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1785,6 +1787,7 @@
 				84A488D408A22E4900752A2B /* juce_DragAndDropContainer.cpp */,
 				84A488D508A22E4900752A2B /* juce_DragAndDropContainer.h */,
 				84A488D608A22E4900752A2B /* juce_DragAndDropTarget.h */,
+				84FED3C80CAA96DA00003997 /* juce_FileDragAndDropTarget.h */,
 				84F593B009855693008153BA /* juce_LassoComponent.h */,
 				84A488D708A22E4900752A2B /* juce_MouseCursor.cpp */,
 				84A488D808A22E4900752A2B /* juce_MouseCursor.h */,
@@ -2766,6 +2769,7 @@
 				84BC4E2D0C8DD38C00FA249B /* juce_AudioProcessorEditor.h in Headers */,
 				84BC4E2E0C8DD38C00FA249B /* juce_AudioProcessorListener.h in Headers */,
 				84BC4E300C8DD38C00FA249B /* juce_GenericAudioProcessorEditor.h in Headers */,
+				84FED3C90CAA96DA00003997 /* juce_FileDragAndDropTarget.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
