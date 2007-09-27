@@ -63,23 +63,54 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 static void millisToLocal (const int64 millis, struct tm& result) throw()
 {
-    time_t now = (time_t) (millis / 1000);
+    const int64 seconds = millis / 1000;
+ 
+    if (seconds < literal64bit (86400) || seconds >= literal64bit (2145916800))
+    {
+        // use extended maths for dates beyond 1970 to 2037..
+        const int timeZoneAdjustment = 86400 - (int) (Time (1970, 0, 2, 0, 0).toMilliseconds() / 1000);
+        const int64 jdm = seconds + timeZoneAdjustment + literal64bit (210866803200);
+
+        const int days = (int) (jdm / literal64bit (86400));
+        const int a = 32044 + days;
+        const int b = (4 * a + 3) / 146097;
+        const int c = a - (b * 146097) / 4;
+        const int d = (4 * c + 3) / 1461;
+        const int e = c - (d * 1461) / 4;
+        const int m = (5 * e + 2) / 153;
+
+        result.tm_mday  = e - (153 * m + 2) / 5 + 1;
+        result.tm_mon   = m + 2 - 12 * (m / 10);
+        result.tm_year  = b * 100 + d - 6700 + (m / 10);
+        result.tm_wday  = (days + 1) % 7;
+        result.tm_yday  = -1;
+
+        int t = (int) (jdm % literal64bit (86400));
+        result.tm_hour  = t / 3600;
+        t %= 3600;
+        result.tm_min   = t / 60;
+        result.tm_sec   = t % 60;
+        result.tm_isdst = -1;
+    }
+    else
+    {
+        time_t now = (time_t) (seconds);
 
 #if JUCE_WIN32
   #ifdef USE_NEW_SECURE_TIME_FNS
-    if (now >= 0 && now <= 0x793406fff)
-        localtime_s (&result, &now);
-    else
-        zeromem (&result, sizeof (result));
+        if (now >= 0 && now <= 0x793406fff)
+            localtime_s (&result, &now);
+        else
+            zeromem (&result, sizeof (result));
   #else
-    result = *localtime (&now);
+        result = *localtime (&now);
   #endif
 #else
-    // more thread-safe
-    localtime_r (&now, &result);
+        // more thread-safe
+        localtime_r (&now, &result);
 #endif
+    }
 }
-
 
 //==============================================================================
 Time::Time() throw()
@@ -105,24 +136,41 @@ Time::Time (const int year,
             const int seconds,
             const int milliseconds) throw()
 {
-    struct tm t;
-
     jassert (year > 100); // year must be a 4-digit version
 
-    t.tm_year   = year - 1900;
-    t.tm_mon    = month;
-    t.tm_mday   = day;
-    t.tm_hour   = hours;
-    t.tm_min    = minutes;
-    t.tm_sec    = seconds;
-    t.tm_isdst  = -1;
+    if (year < 1971 || year >= 2038)
+    {
+        // use extended maths for dates beyond 1970 to 2037..
+        const int timeZoneAdjustment = 86400 - (int) (Time (1970, 0, 2, 0, 0).toMilliseconds() / 1000);
+        const int a = (13 - month) / 12;
+        const int y = year + 6700 - a;
+        const int jd = day + (153 * (month + 12 * a - 2) + 2) / 5 
+                           + (y * 365) + (y /  4) - (y / 100) + (y / 400)
+                           - 32045;
 
-    millisSinceEpoch = 1000 * (int64) mktime (&t);
+        const int64 s = jd * literal64bit (86400) - literal64bit (210866803200);
 
-    if (millisSinceEpoch < 0)
-        millisSinceEpoch = 0;
+        millisSinceEpoch = 1000 * (s + (hours * 3600 + minutes * 60 + seconds - timeZoneAdjustment))
+                             + milliseconds;
+    }
     else
-        millisSinceEpoch += milliseconds;
+    {
+        struct tm t;
+        t.tm_year   = year - 1900;
+        t.tm_mon    = month;
+        t.tm_mday   = day;
+        t.tm_hour   = hours;
+        t.tm_min    = minutes;
+        t.tm_sec    = seconds;
+        t.tm_isdst  = -1;
+
+        millisSinceEpoch = 1000 * (int64) mktime (&t);
+
+        if (millisSinceEpoch < 0)
+            millisSinceEpoch = 0;
+        else
+            millisSinceEpoch += milliseconds;
+    }
 }
 
 Time::~Time() throw()
@@ -368,19 +416,25 @@ bool Time::isAfternoon() const throw()
     return getHours() >= 12;
 }
 
+static int extendedModulo (const int64 value, const int modulo) throw()
+{
+    return (int) (value >= 0 ? (value % modulo)
+                             : (value - ((value / modulo) + 1) * modulo));
+}
+
 int Time::getMinutes() const throw()
 {
-    return (int) ((millisSinceEpoch / 60000) % 60);
+    return extendedModulo (millisSinceEpoch / 60000, 60);
 }
 
 int Time::getSeconds() const throw()
 {
-    return (int) ((millisSinceEpoch / 1000) % 60);
+    return extendedModulo (millisSinceEpoch / 1000, 60);
 }
 
 int Time::getMilliseconds() const throw()
 {
-    return (int) (millisSinceEpoch % 1000);
+    return extendedModulo (millisSinceEpoch, 1000);
 }
 
 bool Time::isDaylightSavingTime() const throw()
