@@ -90,9 +90,11 @@ public:
     }
 
     //==============================================================================
-    bool mightContainSubItems()             { return isDirectory; }
-    const String getUniqueName() const      { return file.getFullPathName(); }
-    int getItemHeight() const               { return 22; }
+    bool mightContainSubItems()                 { return isDirectory; }
+    const String getUniqueName() const          { return file.getFullPathName(); }
+    int getItemHeight() const                   { return 22; }
+
+    const String getDragSourceDescription()     { return owner.getDragAndDropDescription(); }
 
     void itemOpennessChanged (bool isNowOpen)
     {
@@ -271,5 +273,9 @@ void FileTreeComponent::scrollToTop()
     getViewport()->getVerticalScrollBar()->setCurrentRangeStart (0);
 }
 
+void FileTreeComponent::setDragAndDropDescription (const String& description) throw()
+{
+    dragAndDropDescription = description;
+}
 
 END_JUCE_NAMESPACE

@@ -80,10 +80,23 @@ public:
     /** Scrolls the list to the top. */
     void scrollToTop();
 
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
+    String dragAndDropDescription;
+
     FileTreeComponent (const FileTreeComponent&);
     const FileTreeComponent& operator= (const FileTreeComponent&);
 };
