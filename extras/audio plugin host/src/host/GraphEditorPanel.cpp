@@ -449,8 +449,8 @@ public:
 
         const Rectangle newBounds ((int) jmin (x1, x2) - 4,
                                    (int) jmin (y1, y2) - 4,
-                                   (int) abs (x1 - x2) + 8,
-                                   (int) abs (y1 - y2) + 8);
+                                   (int) fabsf (x1 - x2) + 8,
+                                   (int) fabsf (y1 - y2) + 8);
 
         if (newBounds != getBounds())
             setBounds (newBounds);
