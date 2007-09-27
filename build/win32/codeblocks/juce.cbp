@@ -2431,6 +2431,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\gui\components\mouse\juce_FileDragAndDropTarget.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\components\mouse\juce_LassoComponent.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>

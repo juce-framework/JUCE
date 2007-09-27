@@ -27,7 +27,7 @@
 <a href="#buildvc6">Building with VC6</a> -
 <a href="#buildvc7">Building with VC7</a> -
 <a href="#buildxcode">Building with XCode</a> -
-<a href="#builddevcpp">Building with Dev-Cpp</a> -
+<a href="#buildcodeblocks">Building with Code::Blocks</a> -
 <a href="#buildlinux">Building on Linux</a> -
 </p>
 
@@ -206,31 +206,32 @@ In future there may be other frameworks that you'll need to link with to support
 </li>
 </ol>
 
-<h3><a name="builddevcpp"></a>Creating a JUCE application with Dev-C++</h3>
+<h3><a name="buildcodeblocks"></a>Creating a JUCE application with Code::Blocks and MinGW</h3>
 <ol>
-<li>open <code>\juce\build\win32\devcpp\juce.dev</code></li>
-<li>You may need to install the Platform SDK from Microsoft, and add <pre>C:\Program Files\Microsoft Platform SDK\Include</pre>
-at the <strong>end</strong> of your include path to get some of the more recent header files.</li>
-<li>Compile! It should produce a library file called <code>juce/bin/libjuce.a</code></li>
+<li>open the Juce project: <code>juce/build/win32/codeblocks/juce.cbp</code></li>
+<li>open the demo app project: <code>juce/extras/juce demo/build/win32_codeblocks/JuceDemo.cbp</code></li>
+<li>Build first the "Juce Library" project, and then the "Juce Demo App" project. If your
+build environment is set up correctly, these should just work and the demo app should run.
 </ol>
 
-<p>Then, to create and build an application:</p>
+<p>To create your own application:</p>
 <ol>
 <li>Create a new project, as a "win32 GUI".</li>
-<li>Remove <code>main.cpp</code></li>
-<li>Either copy the example main.cpp from the MSVC juce example project, or write your own based
+<li>Either copy the example main.cpp from the Juce example project, or write your own based
 around the <code>JUCEApplication</code> class</li>
-<li>In your project settings (alt-P), you'll need to adjust the linker's options so that it links the following libraries:
-<pre>libjuce.a (this will be in your juce/bin/ directory)
+<li>In your project's build settings, you'll need to make sure the linker uses the following libraries:
+<pre>libjuce.a or libjucedebug.a (these should be created in the juce/bin/codeblocks directory)
+libshell32.a
+libole32.a
+libvfw32.a
+libwinmm.a
 libwininet.a
 libdsound.a
-libole32.a
-libwinmm.a
-libgdi32.a
+libwsock32.a
+libopengl32.a
+libglu32.a
 libuuid.a
-libshell32.a
-libvfw32.a
-librpcrt4.a (these are all in the Dev-C++ libraries folder)</pre>
+librpcrt4.a (these are all in the MinGW libraries folder)</pre>
 </li>
 </ol>
 

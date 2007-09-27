@@ -23,6 +23,17 @@
 				</Compiler>
 				<Linker>
 					<Add library="libjucedebug.a"/>
+					<Add library="libshell32.a"/>
+					<Add library="libole32.a"/>
+					<Add library="libvfw32.a"/>
+					<Add library="libwinmm.a"/>
+					<Add library="libwininet.a"/>
+					<Add library="libdsound.a"/>
+					<Add library="libwsock32.a"/>
+					<Add library="libopengl32.a"/>
+					<Add library="libglu32.a"/>
+					<Add library="libuuid.a"/>
+					<Add library="librpcrt4.a"/>
 					<Add directory="..\..\..\..\bin\codeblocks"/>
 				</Linker>
 			</Target>
@@ -41,6 +52,17 @@
 				<Linker>
 					<Add option="-s"/>
 					<Add library="libjuce.a"/>
+					<Add library="libshell32.a"/>
+					<Add library="libole32.a"/>
+					<Add library="libvfw32.a"/>
+					<Add library="libwinmm.a"/>
+					<Add library="libwininet.a"/>
+					<Add library="libdsound.a"/>
+					<Add library="libwsock32.a"/>
+					<Add library="libopengl32.a"/>
+					<Add library="libglu32.a"/>
+					<Add library="libuuid.a"/>
+					<Add library="librpcrt4.a"/>
 					<Add directory="..\..\..\..\bin\codeblocks\"/>
 				</Linker>
 			</Target>
