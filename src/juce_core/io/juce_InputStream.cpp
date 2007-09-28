@@ -115,22 +115,22 @@ int InputStream::readCompressedInt()
 
 int64 InputStream::readInt64()
 {
-    const int temp1 = readInt();
-    int64 temp = readInt();
-    temp <<= 32;
-    temp |= temp1 & (int64) 0xffffffff;
-
-    return temp;
+    char temp [8];
+   
+    if (read (temp, 8) == 8)
+        return (int64) swapIfBigEndian (*(uint64*)temp);
+    else
+        return 0;
 }
 
 int64 InputStream::readInt64BigEndian()
 {
-    int64 temp = readIntBigEndian();
-    const int temp2 = readIntBigEndian();
-    temp <<= 32;
-    temp |= temp2 & (int64) 0xffffffff;
-
-    return temp;
+    char temp [8];
+   
+    if (read (temp, 8) == 8)
+        return (int64) swapIfLittleEndian (*(uint64*)temp);
+    else
+        return 0;
 }
 
 float InputStream::readFloat()

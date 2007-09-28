@@ -97,14 +97,14 @@ void OutputStream::writeCompressedInt (int value)
 
 void OutputStream::writeInt64 (int64 value)
 {
-    writeInt ((int) (value & 0xffffffff));
-    writeInt ((int) (value >> 32));
+    const uint64 v = swapIfBigEndian ((uint64) value);
+    write (&v, 8);
 }
 
 void OutputStream::writeInt64BigEndian (int64 value)
 {
-    writeInt ((int) (value >> 32));
-    writeInt ((int) (value & 0xffffffff));
+    const uint64 v = swapIfLittleEndian ((uint64) value);
+    write (&v, 8);
 }
 
 void OutputStream::writeFloat (float value)
