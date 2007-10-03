@@ -95,13 +95,13 @@
 #define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
 \
     static classname* _singletonInstance;  \
-    static CriticalSection _singletonLock; \
+    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
 \
     static classname* getInstance() \
     { \
         if (_singletonInstance == 0) \
         {\
-            const ScopedLock sl (_singletonLock); \
+            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
 \
             if (_singletonInstance == 0) \
             { \
@@ -132,7 +132,7 @@
 \
     static void deleteInstance() \
     { \
-        const ScopedLock sl (_singletonLock); \
+        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
         if (_singletonInstance != 0) \
         { \
             classname* const old = _singletonInstance; \
@@ -157,7 +157,7 @@
 #define juce_ImplementSingleton(classname) \
 \
     classname* classname::_singletonInstance = 0; \
-    CriticalSection classname::_singletonLock;
+    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
 
 
 //==============================================================================
