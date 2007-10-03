@@ -201,33 +201,42 @@
     extern bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
   END_JUCE_NAMESPACE
 
-  #if JUCE_MSVC || DOXYGEN
+  #if JUCE_WIN32 || DOXYGEN
 
     #if JUCE_USE_INTRINSICS
       #pragma intrinsic (__debugbreak)
 
-      /** This will always cause an assertion failure.
-
-          It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled
-          in juce_Config.h).
-
+      /** This will try to break the debugger if one is currently hosting this app.
           @see jassert()
       */
-      #define jassertfalse              { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) __debugbreak(); }
+      #define juce_breakDebugger            __debugbreak();
+
+    #elif JUCE_GCC
+      /** This will try to break the debugger if one is currently hosting this app.
+          @see jassert()
+      */
+      #define juce_breakDebugger            asm("int $3");
     #else
-      /** This will always cause an assertion failure.
-
-          This is only compiled in a debug build.
-
+      /** This will try to break the debugger if one is currently hosting this app.
           @see jassert()
       */
-      #define jassertfalse              { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) { __asm int 3 } }
+      #define juce_breakDebugger            { __asm int 3 }
     #endif
-  #elif defined (JUCE_MAC)
-    #define jassertfalse                { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) Debugger(); }
-  #elif defined (JUCE_GCC) || defined (JUCE_LINUX)
-    #define jassertfalse                { juce_LogCurrentAssertion; if (juce_isRunningUnderDebugger()) asm("int $3"); }
+  #elif JUCE_MAC
+    #define juce_breakDebugger              Debugger();
+  #elif JUCE_LINUX
+    #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif
+
+  //==============================================================================
+  /** This will always cause an assertion failure.
+
+      It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled
+      in juce_Config.h).
+
+      @see jassert()
+  */
+  #define jassertfalse                  { juce_LogCurrentAssertion; if (JUCE_NAMESPACE::juce_isRunningUnderDebugger()) juce_breakDebugger; }
 
   //==============================================================================
   /** Platform-independent assertion macro.
