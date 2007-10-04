@@ -1971,6 +1971,7 @@ private:
         XA_OtherMime = XA_MimeTextPlain;  //  xxx why??
         allowedMimeTypeAtoms [0] = XA_MimeTextPlain;
         allowedMimeTypeAtoms [1] = XA_OtherMime;
+        allowedMimeTypeAtoms [2] = XA_MimeTextUriList;
 
         allowedActions [0] = XA_XdndActionMove;
         allowedActions [1] = XA_XdndActionCopy;
@@ -2460,7 +2461,7 @@ private:
     Window dragAndDropSourceWindow;
 
     Atom allowedActions [5];
-    Atom allowedMimeTypeAtoms [2];
+    Atom allowedMimeTypeAtoms [3];
     Array <Atom> srcMimeTypeAtomList;
 };
 
