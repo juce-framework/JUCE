@@ -95,7 +95,7 @@
    kVstMaxShortLabelLen = 8,
    kVstMaxCategLabelLen = 24,
    kVstMaxFileNameLen   = 100
- }; 
+ };
 #endif
 
 //==============================================================================
@@ -155,8 +155,8 @@ static HWND findMDIParentOf (HWND w)
         RECT parentPos;
         GetWindowRect (parent, &parentPos);
 
-        int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
-        int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
+        const int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
+        const int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
 
         if (dw > 100 || dh > 100)
             break;
@@ -328,6 +328,19 @@ public:
                        filter_->getNumParameters()),
          filter (filter_)
     {
+        editorComp = 0;
+        outgoingEvents = 0;
+        outgoingEventSize = 0;
+        chunkMemoryTime = 0;
+        isProcessing = false;
+        firstResize = true;
+        hasShutdown = false;
+        channels = 0;
+
+#if JUCE_MAC || JUCE_LINUX
+        hostWindow = 0;
+#endif
+
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
                                       JucePlugin_MaxNumOutputChannels,
                                       0, 0);
@@ -335,22 +348,10 @@ public:
         filter_->setPlayHead (this);
         filter_->addListener (this);
 
-        editorComp = 0;
-        outgoingEvents = 0;
-        outgoingEventSize = 0;
-        chunkMemoryTime = 0;
-        isProcessing = false;
-        firstResize = true;
-        channels = 0;
-
-#if JUCE_MAC || JUCE_LINUX
-        hostWindow = 0;
-#endif
-
         cEffect.flags |= effFlagsHasEditor;
+        cEffect.version = (long) (JucePlugin_VersionCode);
 
         setUniqueID ((int) (JucePlugin_VSTUniqueID));
-        getAeffect()->version = (long) (JucePlugin_VersionCode);
 
 #if JucePlugin_WantsMidiInput && ! JUCE_USE_VSTSDK_2_4
         wantEvents();
@@ -379,6 +380,8 @@ public:
         stopTimer();
         deleteEditor();
 
+        hasShutdown = true;
+
         delete filter;
         filter = 0;
 
@@ -393,12 +396,13 @@ public:
 
         jassert (editorComp == 0);
 
+        juce_free (channels);
+        channels = 0;
+        deleteTempChannels();
+
         jassert (activePlugins.contains (this));
         activePlugins.removeValue (this);
 
-        juce_free (channels);
-
-#if JUCE_MAC || JUCE_LINUX
         if (activePlugins.size() == 0)
         {
 #if JUCE_LINUX
@@ -406,7 +410,6 @@ public:
 #endif
             shutdownJuce_GUI();
         }
-#endif
     }
 
     void open()
@@ -474,11 +477,8 @@ public:
             result = -1;
 #endif
         }
-        else if (strcmp (text, "receiveVstTimeInfo") == 0)
-        {
-            result = 1;
-        }
-        else if (strcmp (text, "conformsToWindowRules") == 0)
+        else if (strcmp (text, "receiveVstTimeInfo") == 0
+                 || strcmp (text, "conformsToWindowRules") == 0)
         {
             result = 1;
         }
@@ -493,6 +493,9 @@ public:
 
     bool getInputProperties (VstInt32 index, VstPinProperties* properties)
     {
+        if (filter == 0 || index >= filter->getNumInputChannels())
+            return false;
+
         const String name (filter->getInputChannelName ((int) index));
 
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
@@ -510,6 +513,9 @@ public:
 
     bool getOutputProperties (VstInt32 index, VstPinProperties* properties)
     {
+        if (filter == 0 || index >= filter->getNumOutputChannels())
+            return false;
+
         const String name (filter->getOutputChannelName ((int) index));
 
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
@@ -569,7 +575,6 @@ public:
 
     void processReplacing (float** inputs, float** outputs, VstInt32 numSamples)
     {
-        //process (inputs, outputs, numSamples, false);
         // if this fails, the host hasn't called resume() before processing
         jassert (isProcessing);
 
@@ -589,12 +594,11 @@ public:
 
             const int numIn = filter->getNumInputChannels();
             const int numOut = filter->getNumOutputChannels();
-            const int totalChans = jmax (numIn, numOut);
 
             if (filter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
-                    zeromem (outputs [i], sizeof (float) * numSamples);
+                    zeromem (outputs[i], sizeof (float) * numSamples);
             }
             else
             {
@@ -602,17 +606,25 @@ public:
                     int i;
                     for (i = 0; i < numOut; ++i)
                     {
-                        channels[i] = outputs [i];
+                        // if some output channels are disabled, the host may pass the same dummy buffer
+                        // pointer for all of these outputs - and that means that we'd be copying all our
+                        // input channels into the same place... so in this case, we use an internal dummy
+                        // buffer which has enough channels for each input.
+                        float* chan = (float*) tempChannels.getUnchecked(i);
+                        if (chan == 0)
+                            chan = outputs[i];
 
-                        if (i < numIn && inputs != outputs)
-                            memcpy (outputs [i], inputs[i], sizeof (float) * numSamples);
+                        if (i < numIn && chan != inputs[i])
+                            memcpy (chan, inputs[i], sizeof (float) * numSamples);
+
+                        channels[i] = chan;
                     }
 
                     for (; i < numIn; ++i)
-                        channels [i] = inputs [i];
+                        channels[i] = inputs[i];
                 }
 
-                AudioSampleBuffer chans (channels, totalChans, numSamples);
+                AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
 
                 filter->processBlock (chans, midiEvents);
             }
@@ -669,9 +681,12 @@ public:
     //==============================================================================
     void resume()
     {
+        if (filter == 0)
+            return;
+
         isProcessing = true;
         juce_free (channels);
-        channels = (float**) juce_calloc (sizeof (float*) * jmax (filter->getNumInputChannels(), filter->getNumOutputChannels()));
+        channels = (float**) juce_calloc (sizeof (float*) * (filter->getNumInputChannels() + filter->getNumOutputChannels()));
 
         double rate = getSampleRate();
         jassert (rate > 0);
@@ -684,6 +699,14 @@ public:
         filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
                                       JucePlugin_MaxNumOutputChannels,
                                       rate, blockSize);
+
+        deleteTempChannels();
+
+        // any inputs where the output channel is disabled will need our own internal dummy
+        // buffer, because we can't rely on the host to supply different buffers for each channel
+        for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i)
+            if (! isOutputConnected (i))
+                tempChannels.set (i, juce_malloc (sizeof (float) * blockSize * 2));
 
         filter->prepareToPlay (rate, blockSize);
         midiEvents.clear();
@@ -703,6 +726,9 @@ public:
 
     void suspend()
     {
+        if (filter == 0)
+            return;
+
         AudioEffectX::suspend();
 
         filter->releaseResources();
@@ -711,6 +737,8 @@ public:
         isProcessing = false;
         juce_free (channels);
         channels = 0;
+
+        deleteTempChannels();
     }
 
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info)
@@ -756,10 +784,57 @@ public:
 
         if ((ti->flags & kVstSmpteValid) != 0)
         {
-            info.frameRate = (AudioPlayHead::FrameRateType) (int) ti->smpteFrameRate;
+            AudioPlayHead::FrameRateType rate = AudioPlayHead::fpsUnknown;
+            double fps = 1.0;
 
-            const double fpsDivisors[] = { 24.0, 25.0, 30.0, 30.0, 30.0, 30.0, 1.0 };
-            info.editOriginTime = (ti->smpteOffset / (80.0 * fpsDivisors [(int) info.frameRate]));
+            switch (info.frameRate)
+            {
+            case kVstSmpte24fps:
+                rate = AudioPlayHead::fps24;
+                fps = 24.0; 
+                break;
+
+            case kVstSmpte25fps:
+                rate = AudioPlayHead::fps25;
+                fps = 25.0;
+                break;
+
+            case kVstSmpte2997fps:
+                rate = AudioPlayHead::fps2997;
+                fps = 29.97;
+                break;
+
+            case kVstSmpte30fps:
+                rate = AudioPlayHead::fps30;
+                fps = 30.0; 
+                break;
+
+            case kVstSmpte2997dfps: 
+                rate = AudioPlayHead::fps2997drop;
+                fps = 29.97; 
+                break;
+
+            case kVstSmpte30dfps:
+                rate = AudioPlayHead::fps30drop;
+                fps = 30.0; 
+                break;
+
+            case kVstSmpteFilm16mm:
+            case kVstSmpteFilm35mm:
+                fps = 24.0; 
+                break;
+
+            case kVstSmpte239fps:       fps = 23.976; break;
+            case kVstSmpte249fps:       fps = 24.976; break;
+            case kVstSmpte599fps:       fps = 59.94; break;
+            case kVstSmpte60fps:        fps = 60; break;
+
+            default:
+                jassertfalse // unknown frame-rate..
+            }
+
+            info.frameRate = rate;
+            info.editOriginTime = ti->smpteOffset / (80.0 * fps);
         }
         else
         {
@@ -776,27 +851,30 @@ public:
     //==============================================================================
     VstInt32 getProgram()
     {
-        return filter->getCurrentProgram();
+        return filter != 0 ? filter->getCurrentProgram() : 0;
     }
 
     void setProgram (VstInt32 program)
     {
-        filter->setCurrentProgram (program);
+        if (filter != 0)
+            filter->setCurrentProgram (program);
     }
 
     void setProgramName (char* name)
     {
-        filter->changeProgramName (filter->getCurrentProgram(), name);
+        if (filter != 0)
+            filter->changeProgramName (filter->getCurrentProgram(), name);
     }
 
     void getProgramName (char* name)
     {
-        filter->getProgramName (filter->getCurrentProgram()).copyToBuffer (name, 24);
+        if (filter != 0)
+            filter->getProgramName (filter->getCurrentProgram()).copyToBuffer (name, 24);
     }
 
     bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text)
     {
-        if (index >= 0 && index < filter->getNumPrograms())
+        if (index >= 0 && filter != 0 && index < filter->getNumPrograms())
         {
             filter->getProgramName (index).copyToBuffer (text, 24);
             return true;
@@ -808,26 +886,38 @@ public:
     //==============================================================================
     float getParameter (VstInt32 index)
     {
+        if (filter == 0)
+            return 0.0f;
+
         jassert (index >= 0 && index < filter->getNumParameters());
         return filter->getParameter (index);
     }
 
     void setParameter (VstInt32 index, float value)
     {
-        jassert (index >= 0 && index < filter->getNumParameters());
-        filter->setParameter (index, value);
+        if (filter != 0)
+        {
+            jassert (index >= 0 && index < filter->getNumParameters());
+            filter->setParameter (index, value);
+        }
     }
 
     void getParameterDisplay (VstInt32 index, char* text)
     {
-        jassert (index >= 0 && index < filter->getNumParameters());
-        filter->getParameterText (index).copyToBuffer (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        if (filter != 0)
+        {
+            jassert (index >= 0 && index < filter->getNumParameters());
+            filter->getParameterText (index).copyToBuffer (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        }
     }
 
     void getParameterName (VstInt32 index, char* text)
     {
-        jassert (index >= 0 && index < filter->getNumParameters());
-        filter->getParameterName (index).copyToBuffer (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        if (filter != 0)
+        {
+            jassert (index >= 0 && index < filter->getNumParameters());
+            filter->getParameterName (index).copyToBuffer (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
+        }
     }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
@@ -852,12 +942,15 @@ public:
 
     bool canParameterBeAutomated (VstInt32 index)
     {
-        return filter->isParameterAutomatable ((int) index);
+        return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
     //==============================================================================
     VstInt32 getChunk (void** data, bool onlyStoreCurrentProgramData)
     {
+        if (filter == 0)
+            return 0;
+
         chunkMemory.setSize (0);
         if (onlyStoreCurrentProgramData)
             filter->getCurrentProgramStateInformation (chunkMemory);
@@ -875,6 +968,9 @@ public:
 
     VstInt32 setChunk (void* data, VstInt32 byteSize, bool onlyRestoreCurrentProgramData)
     {
+        if (filter == 0)
+            return 0;
+
         chunkMemory.setSize (0);
         chunkMemoryTime = 0;
 
@@ -923,26 +1019,27 @@ public:
     void doIdleCallback()
     {
         // (wavelab calls this on a separate thread and causes a deadlock)..
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        if (MessageManager::getInstance()->isThisTheMessageThread() 
+             && ! recursionCheck)
         {
-            if (! recursionCheck)
-            {
-                const MessageManagerLock mml;
+            const MessageManagerLock mml;
 
-                recursionCheck = true;
+            recursionCheck = true;
 
-                juce_callAnyTimersSynchronously();
+            juce_callAnyTimersSynchronously();
 
-                for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                    ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
+            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+                ComponentPeer::getPeer (i)->performAnyPendingRepaintsNow();
 
-                recursionCheck = false;
-            }
+            recursionCheck = false;
         }
     }
 
     void createEditorComp()
     {
+        if (hasShutdown || filter == 0)
+            return;
+
         if (editorComp == 0)
         {
 #if JUCE_LINUX
@@ -996,6 +1093,9 @@ public:
 
     VstIntPtr dispatcher (VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
     {
+        if (hasShutdown)
+            return 0;
+
         if (opCode == effEditIdle)
         {
             doIdleCallback();
@@ -1218,8 +1318,22 @@ private:
     int outgoingEventSize;
     bool isProcessing;
     bool firstResize;
+    bool hasShutdown;
     int diffW, diffH;
     float** channels;
+    VoidArray tempChannels; // see note in processReplacing()
+
+    void deleteTempChannels()
+    {
+        int i;
+        for (i = tempChannels.size(); --i >= 0;)
+            juce_free (tempChannels.getUnchecked(i));
+
+        tempChannels.clear();
+
+        if (filter != 0)
+            tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
+    }
 
     void ensureOutgoingEventSize (int numEvents)
     {
@@ -1294,9 +1408,7 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 //==============================================================================
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
-#if JUCE_MAC || JUCE_LINUX
     initialiseJuce_GUI();
-#endif
 
     MessageManager::getInstance()->setTimeBeforeShowingWaitCursor (0);
 
@@ -1375,14 +1487,7 @@ extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
 BOOL WINAPI DllMain (HINSTANCE instance, DWORD dwReason, LPVOID)
 {
     if (dwReason == DLL_PROCESS_ATTACH)
-    {
         PlatformUtilities::setCurrentModuleInstanceHandle (instance);
-        initialiseJuce_GUI();
-    }
-    else if (dwReason == DLL_PROCESS_DETACH)
-    {
-        shutdownJuce_GUI();
-    }
 
     return TRUE;
 }

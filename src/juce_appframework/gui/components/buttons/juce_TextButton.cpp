@@ -59,22 +59,9 @@ void TextButton::paintButton (Graphics& g,
                                            isMouseOverButton,
                                            isButtonDown);
 
-    const int yIndent = jmin (4, proportionOfHeight (0.3f));
-    const int cornerSize = jmin (getHeight(), getWidth()) / 2;
-
-    g.setFont (getFont());
-    g.setColour (findColour (textColourId).withMultipliedAlpha (isEnabled() ? 1.0f : 0.5f));
-
-    const int fontHeight = roundFloatToInt (g.getCurrentFont().getHeight() * 0.6f);
-    const int leftIndent  = jmin (fontHeight, 2 + cornerSize / (isConnectedOnLeft() ? 4 : 2));
-    const int rightIndent = jmin (fontHeight, 2 + cornerSize / (isConnectedOnRight() ? 4 : 2));
-
-    g.drawFittedText (getButtonText(),
-                      leftIndent,
-                      yIndent,
-                      getWidth() - leftIndent - rightIndent,
-                      getHeight() - yIndent * 2,
-                      Justification::centred, 2);
+    getLookAndFeel().drawButtonText (g, *this,
+                                     isMouseOverButton,
+                                     isButtonDown);
 }
 
 void TextButton::colourChanged()

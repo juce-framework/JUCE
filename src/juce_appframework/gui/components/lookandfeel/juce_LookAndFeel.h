@@ -38,6 +38,7 @@
 #include "../layout/juce_TabbedComponent.h"
 
 class ToggleButton;
+class TextButton;
 class AlertWindow;
 class TextLayout;
 class ScrollBar;
@@ -130,6 +131,11 @@ public:
                                        bool isMouseOverButton,
                                        bool isButtonDown);
 
+    /** Draws the text for a TextButton. */
+    virtual void drawButtonText (Graphics& g, 
+                                 TextButton& button,
+                                 bool isMouseOverButton,
+                                 bool isButtonDown);
 
     /** Draws the contents of a standard ToggleButton. */
     virtual void drawToggleButton (Graphics& g,

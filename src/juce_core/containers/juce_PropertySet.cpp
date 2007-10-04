@@ -137,8 +137,13 @@ void PropertySet::setValue (const String& keyName,
     {
         const ScopedLock sl (lock);
 
-        properties.set (keyName, value);
-        propertyChanged();
+        const int index = properties.getAllKeys().indexOf (keyName, ignoreCaseOfKeys);
+
+        if (index < 0 || properties.getAllValues() [index] != value)
+        {
+            properties.set (keyName, value);
+            propertyChanged();
+        }
     }
 }
 
