@@ -277,7 +277,6 @@ OBJECTS := \
 	$(OBJDIR)/transupp.o \
 	$(OBJDIR)/png.o \
 	$(OBJDIR)/pngerror.o \
-	$(OBJDIR)/pnggccrd.o \
 	$(OBJDIR)/pngget.o \
 	$(OBJDIR)/pngmem.o \
 	$(OBJDIR)/pngpread.o \
@@ -287,7 +286,6 @@ OBJECTS := \
 	$(OBJDIR)/pngrutil.o \
 	$(OBJDIR)/pngset.o \
 	$(OBJDIR)/pngtrans.o \
-	$(OBJDIR)/pngvcrd.o \
 	$(OBJDIR)/pngwio.o \
 	$(OBJDIR)/pngwrite.o \
 	$(OBJDIR)/pngwtran.o \
@@ -1643,11 +1641,6 @@ $(OBJDIR)/pngerror.o: ../../src/juce_appframework/gui/graphics/imaging/image_fil
 	@echo $(notdir $<)
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
-$(OBJDIR)/pnggccrd.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pnggccrd.c
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CC) $(CFLAGS) -o $@ -c $<
-
 $(OBJDIR)/pngget.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngget.c
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1689,11 +1682,6 @@ $(OBJDIR)/pngset.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJDIR)/pngtrans.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngtrans.c
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CC) $(CFLAGS) -o $@ -c $<
-
-$(OBJDIR)/pngvcrd.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/pnglib/pngvcrd.c
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CC) $(CFLAGS) -o $@ -c $<

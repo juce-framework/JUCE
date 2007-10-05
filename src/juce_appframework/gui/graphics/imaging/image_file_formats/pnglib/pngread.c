@@ -1,9 +1,9 @@
 
 /* pngread.c - read a PNG file
  *
- * libpng 1.2.8 - December 3, 2004
+ * Last changed in libpng 1.2.20 September 7, 2007
  * For conditions of distribution and use, see copyright notice in png.h
- * Copyright (c) 1998-2004 Glenn Randers-Pehrson
+ * Copyright (c) 1998-2007 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
@@ -13,6 +13,8 @@
 
 #define PNG_INTERNAL
 #include "png.h"
+
+#if defined(PNG_READ_SUPPORTED)
 
 /* Create a PNG structure for reading, and allocate any memory needed. */
 png_structp PNGAPI
@@ -52,12 +54,6 @@ png_create_read_struct_2(png_const_charp user_png_ver, png_voidp error_ptr,
 #endif
    if (png_ptr == NULL)
       return (NULL);
-
-#if !defined(PNG_1_0_X)
-#ifdef PNG_ASSEMBLER_CODE_SUPPORTED
-   png_init_mmx_flags(png_ptr);   /* 1.2.0 addition */
-#endif
-#endif /* PNG_1_0_X */
 
    /* added at libpng-1.2.6 */
 #ifdef PNG_SET_USER_LIMITS_SUPPORTED
@@ -115,11 +111,13 @@ png_create_read_struct_2(png_const_charp user_png_ver, png_voidp error_ptr,
         char msg[80];
         if (user_png_ver)
         {
-          sprintf(msg, "Application was compiled with png.h from libpng-%.20s",
+          png_snprintf(msg, 80,
+             "Application was compiled with png.h from libpng-%.20s",
              user_png_ver);
           png_warning(png_ptr, msg);
         }
-        sprintf(msg, "Application  is  running with png.c from libpng-%.20s",
+        png_snprintf(msg, 80,
+             "Application  is  running with png.c from libpng-%.20s",
            png_libpng_ver);
         png_warning(png_ptr, msg);
 #endif
@@ -169,10 +167,10 @@ png_create_read_struct_2(png_const_charp user_png_ver, png_voidp error_ptr,
    return (png_ptr);
 }
 
+#if defined(PNG_1_0_X) || defined(PNG_1_2_X)
 /* Initialize PNG structure for reading, and allocate any memory needed.
    This interface is deprecated in favour of the png_create_read_struct(),
-   and it will eventually disappear. */
-#if defined(PNG_1_0_X) || defined (PNG_1_2_X)
+   and it will disappear as of libpng-1.3.0. */
 #undef png_read_init
 void PNGAPI
 png_read_init(png_structp png_ptr)
@@ -180,13 +178,13 @@ png_read_init(png_structp png_ptr)
    /* We only come here via pre-1.0.7-compiled applications */
    png_read_init_2(png_ptr, "1.0.6 or earlier", 0, 0);
 }
-#endif
 
 void PNGAPI
 png_read_init_2(png_structp png_ptr, png_const_charp user_png_ver,
    png_size_t png_struct_size, png_size_t png_info_size)
 {
    /* We only come here via pre-1.0.12-compiled applications */
+   if(png_ptr == NULL) return;
 #if !defined(PNG_NO_STDIO) && !defined(_WIN32_WCE)
    if(png_sizeof(png_struct) > png_struct_size ||
       png_sizeof(png_info) > png_info_size)
@@ -195,11 +193,13 @@ png_read_init_2(png_structp png_ptr, png_const_charp user_png_ver,
       png_ptr->warning_fn=NULL;
       if (user_png_ver)
       {
-        sprintf(msg, "Application was compiled with png.h from libpng-%.20s",
+        png_snprintf(msg, 80,
+           "Application was compiled with png.h from libpng-%.20s",
            user_png_ver);
         png_warning(png_ptr, msg);
       }
-      sprintf(msg, "Application  is  running with png.c from libpng-%.20s",
+      png_snprintf(msg, 80,
+         "Application  is  running with png.c from libpng-%.20s",
          png_libpng_ver);
       png_warning(png_ptr, msg);
    }
@@ -224,6 +224,7 @@ png_read_init_2(png_structp png_ptr, png_const_charp user_png_ver,
      }
    png_read_init_3(&png_ptr, user_png_ver, png_struct_size);
 }
+#endif /* PNG_1_0_X || PNG_1_2_X */
 
 void PNGAPI
 png_read_init_3(png_structpp ptr_ptr, png_const_charp user_png_ver,
@@ -236,6 +237,8 @@ png_read_init_3(png_structpp ptr_ptr, png_const_charp user_png_ver,
    int i=0;
 
    png_structp png_ptr=*ptr_ptr;
+
+   if(png_ptr == NULL) return;
 
    do
    {
@@ -315,6 +318,7 @@ png_read_init_3(png_structpp ptr_ptr, png_const_charp user_png_ver,
 void PNGAPI
 png_read_info(png_structp png_ptr, png_infop info_ptr)
 {
+   if(png_ptr == NULL) return;
    png_debug(1, "in png_read_info\n");
    /* If we haven't checked all of the PNG signature bytes, do so now. */
    if (png_ptr->sig_bytes < 8)
@@ -340,60 +344,60 @@ png_read_info(png_structp png_ptr, png_infop info_ptr)
    for(;;)
    {
 #ifdef PNG_USE_LOCAL_ARRAYS
-      PNG_IHDR;
-      PNG_IDAT;
-      PNG_IEND;
-      PNG_PLTE;
+      PNG_CONST PNG_IHDR;
+      PNG_CONST PNG_IDAT;
+      PNG_CONST PNG_IEND;
+      PNG_CONST PNG_PLTE;
 #if defined(PNG_READ_bKGD_SUPPORTED)
-      PNG_bKGD;
+      PNG_CONST PNG_bKGD;
 #endif
 #if defined(PNG_READ_cHRM_SUPPORTED)
-      PNG_cHRM;
+      PNG_CONST PNG_cHRM;
 #endif
 #if defined(PNG_READ_gAMA_SUPPORTED)
-      PNG_gAMA;
+      PNG_CONST PNG_gAMA;
 #endif
 #if defined(PNG_READ_hIST_SUPPORTED)
-      PNG_hIST;
+      PNG_CONST PNG_hIST;
 #endif
 #if defined(PNG_READ_iCCP_SUPPORTED)
-      PNG_iCCP;
+      PNG_CONST PNG_iCCP;
 #endif
 #if defined(PNG_READ_iTXt_SUPPORTED)
-      PNG_iTXt;
+      PNG_CONST PNG_iTXt;
 #endif
 #if defined(PNG_READ_oFFs_SUPPORTED)
-      PNG_oFFs;
+      PNG_CONST PNG_oFFs;
 #endif
 #if defined(PNG_READ_pCAL_SUPPORTED)
-      PNG_pCAL;
+      PNG_CONST PNG_pCAL;
 #endif
 #if defined(PNG_READ_pHYs_SUPPORTED)
-      PNG_pHYs;
+      PNG_CONST PNG_pHYs;
 #endif
 #if defined(PNG_READ_sBIT_SUPPORTED)
-      PNG_sBIT;
+      PNG_CONST PNG_sBIT;
 #endif
 #if defined(PNG_READ_sCAL_SUPPORTED)
-      PNG_sCAL;
+      PNG_CONST PNG_sCAL;
 #endif
 #if defined(PNG_READ_sPLT_SUPPORTED)
-      PNG_sPLT;
+      PNG_CONST PNG_sPLT;
 #endif
 #if defined(PNG_READ_sRGB_SUPPORTED)
-      PNG_sRGB;
+      PNG_CONST PNG_sRGB;
 #endif
 #if defined(PNG_READ_tEXt_SUPPORTED)
-      PNG_tEXt;
+      PNG_CONST PNG_tEXt;
 #endif
 #if defined(PNG_READ_tIME_SUPPORTED)
-      PNG_tIME;
+      PNG_CONST PNG_tIME;
 #endif
 #if defined(PNG_READ_tRNS_SUPPORTED)
-      PNG_tRNS;
+      PNG_CONST PNG_tRNS;
 #endif
 #if defined(PNG_READ_zTXt_SUPPORTED)
-      PNG_zTXt;
+      PNG_CONST PNG_zTXt;
 #endif
 #endif /* PNG_USE_LOCAL_ARRAYS */
       png_byte chunk_length[4];
@@ -411,6 +415,10 @@ png_read_info(png_structp png_ptr, png_infop info_ptr)
       /* This should be a binary subdivision search or a hash for
        * matching the chunk name rather than a linear search.
        */
+      if (!png_memcmp(png_ptr->chunk_name, png_IDAT, 4))
+        if(png_ptr->mode & PNG_AFTER_IDAT)
+          png_ptr->mode |= PNG_HAVE_CHUNK_AFTER_IDAT;
+
       if (!png_memcmp(png_ptr->chunk_name, png_IHDR, 4))
          png_handle_IHDR(png_ptr, info_ptr, length);
       else if (!png_memcmp(png_ptr->chunk_name, png_IEND, 4))
@@ -527,6 +535,7 @@ void PNGAPI
 png_read_update_info(png_structp png_ptr, png_infop info_ptr)
 {
    png_debug(1, "in png_read_update_info\n");
+   if(png_ptr == NULL) return;
    if (!(png_ptr->flags & PNG_FLAG_ROW_INIT))
       png_read_start_row(png_ptr);
    else
@@ -545,6 +554,7 @@ void PNGAPI
 png_start_read_image(png_structp png_ptr)
 {
    png_debug(1, "in png_start_read_image\n");
+   if(png_ptr == NULL) return;
    if (!(png_ptr->flags & PNG_FLAG_ROW_INIT))
       png_read_start_row(png_ptr);
 }
@@ -555,11 +565,13 @@ void PNGAPI
 png_read_row(png_structp png_ptr, png_bytep row, png_bytep dsp_row)
 {
 #ifdef PNG_USE_LOCAL_ARRAYS
-   PNG_IDAT;
-   const int png_pass_dsp_mask[7] = {0xff, 0x0f, 0xff, 0x33, 0xff, 0x55, 0xff};
-   const int png_pass_mask[7] = {0x80, 0x08, 0x88, 0x22, 0xaa, 0x55, 0xff};
+   PNG_CONST PNG_IDAT;
+   PNG_CONST int png_pass_dsp_mask[7] = {0xff, 0x0f, 0xff, 0x33, 0xff, 0x55,
+     0xff};
+   PNG_CONST int png_pass_mask[7] = {0x80, 0x08, 0x88, 0x22, 0xaa, 0x55, 0xff};
 #endif
    int ret;
+   if(png_ptr == NULL) return;
    png_debug2(1, "in png_read_row (row %lu, pass %d)\n",
       png_ptr->row_number, png_ptr->pass);
    if (!(png_ptr->flags & PNG_FLAG_ROW_INIT))
@@ -806,7 +818,7 @@ png_read_row(png_structp png_ptr, png_bytep row, png_bytep dsp_row)
  * not called png_set_interlace_handling(), the display_row buffer will
  * be ignored, so pass NULL to it.
  *
- * [*] png_handle_alpha() does not exist yet, as of libpng version 1.2.8
+ * [*] png_handle_alpha() does not exist yet, as of this version of libpng
  */
 
 void PNGAPI
@@ -818,6 +830,7 @@ png_read_rows(png_structp png_ptr, png_bytepp row,
    png_bytepp dp;
 
    png_debug(1, "in png_read_rows\n");
+   if(png_ptr == NULL) return;
    rp = row;
    dp = display_row;
    if (rp != NULL && dp != NULL)
@@ -856,7 +869,7 @@ png_read_rows(png_structp png_ptr, png_bytepp row,
  * only call this function once.  If you desire to have an image for
  * each pass of a interlaced image, use png_read_rows() instead.
  *
- * [*] png_handle_alpha() does not exist yet, as of libpng version 1.2.8
+ * [*] png_handle_alpha() does not exist yet, as of this version of libpng
  */
 void PNGAPI
 png_read_image(png_structp png_ptr, png_bytepp image)
@@ -866,6 +879,7 @@ png_read_image(png_structp png_ptr, png_bytepp image)
    png_bytepp rp;
 
    png_debug(1, "in png_read_image\n");
+   if(png_ptr == NULL) return;
 
 #ifdef PNG_READ_INTERLACING_SUPPORTED
    pass = png_set_interlace_handling(png_ptr);
@@ -904,65 +918,66 @@ png_read_end(png_structp png_ptr, png_infop info_ptr)
    png_uint_32 length;
 
    png_debug(1, "in png_read_end\n");
+   if(png_ptr == NULL) return;
    png_crc_finish(png_ptr, 0); /* Finish off CRC from last IDAT chunk */
 
    do
    {
 #ifdef PNG_USE_LOCAL_ARRAYS
-      PNG_IHDR;
-      PNG_IDAT;
-      PNG_IEND;
-      PNG_PLTE;
+      PNG_CONST PNG_IHDR;
+      PNG_CONST PNG_IDAT;
+      PNG_CONST PNG_IEND;
+      PNG_CONST PNG_PLTE;
 #if defined(PNG_READ_bKGD_SUPPORTED)
-      PNG_bKGD;
+      PNG_CONST PNG_bKGD;
 #endif
 #if defined(PNG_READ_cHRM_SUPPORTED)
-      PNG_cHRM;
+      PNG_CONST PNG_cHRM;
 #endif
 #if defined(PNG_READ_gAMA_SUPPORTED)
-      PNG_gAMA;
+      PNG_CONST PNG_gAMA;
 #endif
 #if defined(PNG_READ_hIST_SUPPORTED)
-      PNG_hIST;
+      PNG_CONST PNG_hIST;
 #endif
 #if defined(PNG_READ_iCCP_SUPPORTED)
-      PNG_iCCP;
+      PNG_CONST PNG_iCCP;
 #endif
 #if defined(PNG_READ_iTXt_SUPPORTED)
-      PNG_iTXt;
+      PNG_CONST PNG_iTXt;
 #endif
 #if defined(PNG_READ_oFFs_SUPPORTED)
-      PNG_oFFs;
+      PNG_CONST PNG_oFFs;
 #endif
 #if defined(PNG_READ_pCAL_SUPPORTED)
-      PNG_pCAL;
+      PNG_CONST PNG_pCAL;
 #endif
 #if defined(PNG_READ_pHYs_SUPPORTED)
-      PNG_pHYs;
+      PNG_CONST PNG_pHYs;
 #endif
 #if defined(PNG_READ_sBIT_SUPPORTED)
-      PNG_sBIT;
+      PNG_CONST PNG_sBIT;
 #endif
 #if defined(PNG_READ_sCAL_SUPPORTED)
-      PNG_sCAL;
+      PNG_CONST PNG_sCAL;
 #endif
 #if defined(PNG_READ_sPLT_SUPPORTED)
-      PNG_sPLT;
+      PNG_CONST PNG_sPLT;
 #endif
 #if defined(PNG_READ_sRGB_SUPPORTED)
-      PNG_sRGB;
+      PNG_CONST PNG_sRGB;
 #endif
 #if defined(PNG_READ_tEXt_SUPPORTED)
-      PNG_tEXt;
+      PNG_CONST PNG_tEXt;
 #endif
 #if defined(PNG_READ_tIME_SUPPORTED)
-      PNG_tIME;
+      PNG_CONST PNG_tIME;
 #endif
 #if defined(PNG_READ_tRNS_SUPPORTED)
-      PNG_tRNS;
+      PNG_CONST PNG_tRNS;
 #endif
 #if defined(PNG_READ_zTXt_SUPPORTED)
-      PNG_zTXt;
+      PNG_CONST PNG_zTXt;
 #endif
 #endif /* PNG_USE_LOCAL_ARRAYS */
 
@@ -983,11 +998,9 @@ png_read_end(png_structp png_ptr, png_infop info_ptr)
       {
          if (!png_memcmp(png_ptr->chunk_name, png_IDAT, 4))
          {
-            if (length > 0 || png_ptr->mode & PNG_AFTER_IDAT)
+            if ((length > 0) || (png_ptr->mode & PNG_HAVE_CHUNK_AFTER_IDAT))
                png_error(png_ptr, "Too many IDAT's found");
          }
-         else
-            png_ptr->mode |= PNG_AFTER_IDAT;
          png_handle_unknown(png_ptr, info_ptr, length);
          if (!png_memcmp(png_ptr->chunk_name, png_PLTE, 4))
             png_ptr->mode |= PNG_HAVE_PLTE;
@@ -998,7 +1011,7 @@ png_read_end(png_structp png_ptr, png_infop info_ptr)
          /* Zero length IDATs are legal after the last IDAT has been
           * read, but not after other chunks have been read.
           */
-         if (length > 0 || png_ptr->mode & PNG_AFTER_IDAT)
+         if ((length > 0) || (png_ptr->mode & PNG_HAVE_CHUNK_AFTER_IDAT))
             png_error(png_ptr, "Too many IDAT's found");
          png_crc_finish(png_ptr, length);
       }
@@ -1296,6 +1309,7 @@ png_read_destroy(png_structp png_ptr, png_infop info_ptr, png_infop end_info_ptr
 void PNGAPI
 png_set_read_status_fn(png_structp png_ptr, png_read_status_ptr read_row_fn)
 {
+   if(png_ptr == NULL) return;
    png_ptr->read_row_fn = read_row_fn;
 }
 
@@ -1309,6 +1323,7 @@ png_read_png(png_structp png_ptr, png_infop info_ptr,
 {
    int row;
 
+   if(png_ptr == NULL) return;
 #if defined(PNG_READ_INVERT_ALPHA_SUPPORTED)
    /* invert the alpha channel from opacity to transparency
     */
@@ -1448,9 +1463,10 @@ png_read_png(png_structp png_ptr, png_infop info_ptr,
    /* read rest of file, and get additional chunks in info_ptr - REQUIRED */
    png_read_end(png_ptr, info_ptr);
 
-   if(transforms == 0 || params == NULL)
-      /* quiet compiler warnings */ return;
+   transforms = transforms; /* quiet compiler warnings */
+   params = params;
 
 }
-#endif
+#endif /* PNG_INFO_IMAGE_SUPPORTED */
 #endif /* PNG_NO_SEQUENTIAL_READ_SUPPORTED */
+#endif /* PNG_READ_SUPPORTED */

@@ -1,9 +1,9 @@
 
 /* pngerror.c - stub functions for i/o and memory allocation
  *
- * libpng version 1.2.8 - December 3, 2004
+ * Last changed in libpng 1.2.20 October 4, 2007
  * For conditions of distribution and use, see copyright notice in png.h
- * Copyright (c) 1998-2004 Glenn Randers-Pehrson
+ * Copyright (c) 1998-2007 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
@@ -16,50 +16,58 @@
 #define PNG_INTERNAL
 #include "png.h"
 
+#if defined(PNG_READ_SUPPORTED) || defined(PNG_WRITE_SUPPORTED)
 static void /* PRIVATE */
 png_default_error PNGARG((png_structp png_ptr,
   png_const_charp error_message));
+#ifndef PNG_NO_WARNINGS
 static void /* PRIVATE */
 png_default_warning PNGARG((png_structp png_ptr,
   png_const_charp warning_message));
+#endif /* PNG_NO_WARNINGS */
 
 /* This function is called whenever there is a fatal error.  This function
  * should not be changed.  If there is a need to handle errors differently,
  * you should supply a replacement error function and use png_set_error_fn()
  * to replace the error function at run-time.
  */
+#ifndef PNG_NO_ERROR_TEXT
 void PNGAPI
-png_error_nostring(png_structp png_ptr, png_const_charp error_message)
+png_error(png_structp png_ptr, png_const_charp error_message)
 {
 #ifdef PNG_ERROR_NUMBERS_SUPPORTED
    char msg[16];
-   if (png_ptr->flags&(PNG_FLAG_STRIP_ERROR_NUMBERS|PNG_FLAG_STRIP_ERROR_TEXT))
+   if (png_ptr != NULL)
    {
-     if (*error_message == '#')
+     if (png_ptr->flags&
+       (PNG_FLAG_STRIP_ERROR_NUMBERS|PNG_FLAG_STRIP_ERROR_TEXT))
      {
-         int offset;
-         for (offset=1; offset<15; offset++)
-            if (*(error_message+offset) == ' ')
-                break;
-         if (png_ptr->flags&PNG_FLAG_STRIP_ERROR_TEXT)
-         {
-            int i;
-            for (i=0; i<offset-1; i++)
-               msg[i]=error_message[i+1];
-            msg[i]='\0';
-            error_message=msg;
-         }
-         else
-            error_message+=offset;
-     }
-     else
-     {
-         if (png_ptr->flags&PNG_FLAG_STRIP_ERROR_TEXT)
-         {
-            msg[0]='0';
-            msg[1]='\0';
-            error_message=msg;
-         }
+       if (*error_message == '#')
+       {
+           int offset;
+           for (offset=1; offset<15; offset++)
+              if (*(error_message+offset) == ' ')
+                  break;
+           if (png_ptr->flags&PNG_FLAG_STRIP_ERROR_TEXT)
+           {
+              int i;
+              for (i=0; i<offset-1; i++)
+                 msg[i]=error_message[i+1];
+              msg[i]='\0';
+              error_message=msg;
+           }
+           else
+              error_message+=offset;
+       }
+       else
+       {
+           if (png_ptr->flags&PNG_FLAG_STRIP_ERROR_TEXT)
+           {
+              msg[0]='0';
+              msg[1]='\0';
+              error_message=msg;
+           }
+       }
      }
    }
 #endif
@@ -70,32 +78,51 @@ png_error_nostring(png_structp png_ptr, png_const_charp error_message)
       use the default handler, which will not return. */
    png_default_error(png_ptr, error_message);
 }
+#else
+void PNGAPI
+png_err(png_structp png_ptr)
+{
+   if (png_ptr != NULL && png_ptr->error_fn != NULL)
+      (*(png_ptr->error_fn))(png_ptr, '\0');
 
+   /* If the custom handler doesn't exist, or if it returns,
+      use the default handler, which will not return. */
+   png_default_error(png_ptr, '\0');
+}
+#endif /* PNG_NO_ERROR_TEXT */
+
+#ifndef PNG_NO_WARNINGS
 /* This function is called whenever there is a non-fatal error.  This function
  * should not be changed.  If there is a need to handle warnings differently,
  * you should supply a replacement warning function and use
  * png_set_error_fn() to replace the warning function at run-time.
  */
 void PNGAPI
-png_warning_nostring(png_structp png_ptr, png_const_charp warning_message)
+png_warning(png_structp png_ptr, png_const_charp warning_message)
 {
    int offset = 0;
-#ifdef PNG_ERROR_NUMBERS_SUPPORTED
-   if (png_ptr->flags&(PNG_FLAG_STRIP_ERROR_NUMBERS|PNG_FLAG_STRIP_ERROR_TEXT))
-#endif
+   if (png_ptr != NULL)
    {
-     if (*warning_message == '#')
+#ifdef PNG_ERROR_NUMBERS_SUPPORTED
+   if (png_ptr->flags&
+     (PNG_FLAG_STRIP_ERROR_NUMBERS|PNG_FLAG_STRIP_ERROR_TEXT))
+#endif
      {
-         for (offset=1; offset<15; offset++)
-            if (*(warning_message+offset) == ' ')
-                break;
+       if (*warning_message == '#')
+       {
+           for (offset=1; offset<15; offset++)
+              if (*(warning_message+offset) == ' ')
+                  break;
+       }
      }
+     if (png_ptr != NULL && png_ptr->warning_fn != NULL)
+        (*(png_ptr->warning_fn))(png_ptr, warning_message+offset);
    }
-   if (png_ptr != NULL && png_ptr->warning_fn != NULL)
-      (*(png_ptr->warning_fn))(png_ptr, warning_message+offset);
    else
       png_default_warning(png_ptr, warning_message+offset);
 }
+#endif /* PNG_NO_WARNINGS */
+
 
 /* These utilities are used internally to build an error message that relates
  * to the current chunk.  The chunk name comes from png_ptr->chunk_name,
@@ -109,6 +136,7 @@ static PNG_CONST char png_digit[16] = {
    'A', 'B', 'C', 'D', 'E', 'F'
 };
 
+#if !defined(PNG_NO_WARNINGS) || !defined(PNG_NO_ERROR_TEXT)
 static void /* PRIVATE */
 png_format_buffer(png_structp png_ptr, png_charp buffer, png_const_charp
    error_message)
@@ -142,21 +170,37 @@ png_format_buffer(png_structp png_ptr, png_charp buffer, png_const_charp
    }
 }
 
+#ifdef PNG_READ_SUPPORTED
 void PNGAPI
-png_chunk_error_nostring(png_structp png_ptr, png_const_charp error_message)
+png_chunk_error(png_structp png_ptr, png_const_charp error_message)
 {
    char msg[18+64];
-   png_format_buffer(png_ptr, msg, error_message);
-   png_error(png_ptr, msg);
+   if (png_ptr == NULL)
+     png_error(png_ptr, error_message);
+   else
+   {
+     png_format_buffer(png_ptr, msg, error_message);
+     png_error(png_ptr, msg);
+   }
 }
+#endif /* PNG_READ_SUPPORTED */
+#endif /* !defined(PNG_NO_WARNINGS) || !defined(PNG_NO_ERROR_TEXT) */
 
+#ifndef PNG_NO_WARNINGS
 void PNGAPI
-png_chunk_warning_nostring(png_structp png_ptr, png_const_charp warning_message)
+png_chunk_warning(png_structp png_ptr, png_const_charp warning_message)
 {
    char msg[18+64];
-   png_format_buffer(png_ptr, msg, warning_message);
-   png_warning(png_ptr, msg);
+   if (png_ptr == NULL)
+     png_warning(png_ptr, warning_message);
+   else
+   {
+     png_format_buffer(png_ptr, msg, warning_message);
+     png_warning(png_ptr, msg);
+   }
 }
+#endif /* PNG_NO_WARNINGS */
+
 
 /* This is the default error handling function.  Note that replacements for
  * this function MUST NOT RETURN, or the program will likely crash.  This
@@ -193,27 +237,27 @@ png_default_error(png_structp png_ptr, png_const_charp error_message)
 #endif
 
 #ifdef PNG_SETJMP_SUPPORTED
+   if (png_ptr)
+   {
 #  ifdef USE_FAR_KEYWORD
    {
       jmp_buf jmpbuf;
-      png_memcpy(jmpbuf,png_ptr->jmpbuf,png_sizeof(jmp_buf));
+      png_memcpy(jmpbuf, png_ptr->jmpbuf, png_sizeof(jmp_buf));
       longjmp(jmpbuf, 1);
    }
 #  else
    longjmp(png_ptr->jmpbuf, 1);
-# endif
+#  endif
+   }
 #else
-   /* make compiler happy */ ;
-   if (png_ptr)
    PNG_ABORT();
 #endif
 #ifdef PNG_NO_CONSOLE_IO
-   /* make compiler happy */ ;
-   if (&error_message != NULL)
-      return;
+   error_message = error_message; /* make compiler happy */
 #endif
 }
 
+#ifndef PNG_NO_WARNINGS
 /* This function is called when there is a warning, but the library thinks
  * it can continue anyway.  Replacement functions don't have to do anything
  * here if you don't want them to.  In the default configuration, png_ptr is
@@ -247,14 +291,11 @@ png_default_warning(png_structp png_ptr, png_const_charp warning_message)
 #  endif
      fprintf(stderr, "libpng warning: %s\n", warning_message);
 #else
-   /* make compiler happy */ ;
-   if (warning_message)
-     return;
+   warning_message = warning_message; /* make compiler happy */
 #endif
-   /* make compiler happy */ ;
-   if (png_ptr)
-      return;
+   png_ptr = png_ptr; /* make compiler happy */
 }
+#endif /* PNG_NO_WARNINGS */
 
 /* This function is called when the application wants to use another method
  * of handling errors and warnings.  Note that the error function MUST NOT
@@ -265,6 +306,8 @@ void PNGAPI
 png_set_error_fn(png_structp png_ptr, png_voidp error_ptr,
    png_error_ptr error_fn, png_error_ptr warning_fn)
 {
+   if (png_ptr == NULL)
+      return;
    png_ptr->error_ptr = error_ptr;
    png_ptr->error_fn = error_fn;
    png_ptr->warning_fn = warning_fn;
@@ -278,6 +321,8 @@ png_set_error_fn(png_structp png_ptr, png_voidp error_ptr,
 png_voidp PNGAPI
 png_get_error_ptr(png_structp png_ptr)
 {
+   if (png_ptr == NULL)
+      return NULL;
    return ((png_voidp)png_ptr->error_ptr);
 }
 
@@ -293,3 +338,4 @@ png_set_strip_error_numbers(png_structp png_ptr, png_uint_32 strip_mode)
    }
 }
 #endif
+#endif /* PNG_READ_SUPPORTED || PNG_WRITE_SUPPORTED */

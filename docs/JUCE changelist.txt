@@ -19,6 +19,7 @@ Changelist for version 1.45
 - refactored the OpenGLComponent, adding new classes OpenGLPixelFormat and OpenGLContext
 - A component's KeyListeners are now called before its keyPressed method, so if you want to intercept keys and stop them getting sent to the component, you can add a keylistener and comsume the events.
 - added an option to choose a Midi output device to the AudioDeviceManager and AudioDeviceSelectorComponent
+- updated the included version of libpng
 
 ==============================================================================
 Changelist for version 1.44

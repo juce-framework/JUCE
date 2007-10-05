@@ -3184,10 +3184,6 @@
 										>
 									</File>
 									<File
-										RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pnggccrd.c"
-										>
-									</File>
-									<File
 										RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngget.c"
 										>
 									</File>
@@ -3221,10 +3217,6 @@
 									</File>
 									<File
 										RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngtrans.c"
-										>
-									</File>
-									<File
-										RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngvcrd.c"
 										>
 									</File>
 									<File

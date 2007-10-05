@@ -38,7 +38,7 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      1
-#define JUCE_MINOR_VERSION      44
+#define JUCE_MINOR_VERSION      45
 
 /** Current Juce version number.
 
@@ -91,6 +91,10 @@
 
 #if JUCE_MAC && ! MACOS_10_3_OR_EARLIER
   #include <libkern/OSAtomic.h>
+#endif
+
+#if JUCE_LINUX
+  #include <signal.h>
 #endif
 
 #if JUCE_MSVC && JUCE_DEBUG

@@ -1,9 +1,9 @@
 
 /* pngwtran.c - transforms the data in a row for PNG writers
  *
- * libpng version 1.2.8 - December 3, 2004
+ * Last changed in libpng 1.2.9 April 14, 2006
  * For conditions of distribution and use, see copyright notice in png.h
- * Copyright (c) 1998-2004 Glenn Randers-Pehrson
+ * Copyright (c) 1998-2006 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  */
@@ -60,13 +60,13 @@ png_do_write_transformations(png_structp png_ptr)
       png_do_shift(&(png_ptr->row_info), png_ptr->row_buf + 1,
          &(png_ptr->shift));
 #endif
-#if defined(PNG_WRITE_INVERT_ALPHA_SUPPORTED)
-   if (png_ptr->transformations & PNG_INVERT_ALPHA)
-      png_do_write_invert_alpha(&(png_ptr->row_info), png_ptr->row_buf + 1);
-#endif
 #if defined(PNG_WRITE_SWAP_ALPHA_SUPPORTED)
    if (png_ptr->transformations & PNG_SWAP_ALPHA)
       png_do_write_swap_alpha(&(png_ptr->row_info), png_ptr->row_buf + 1);
+#endif
+#if defined(PNG_WRITE_INVERT_ALPHA_SUPPORTED)
+   if (png_ptr->transformations & PNG_INVERT_ALPHA)
+      png_do_write_invert_alpha(&(png_ptr->row_info), png_ptr->row_buf + 1);
 #endif
 #if defined(PNG_WRITE_BGR_SUPPORTED)
    if (png_ptr->transformations & PNG_BGR)
@@ -439,9 +439,12 @@ png_do_write_invert_alpha(png_row_infop row_info, png_bytep row)
             png_uint_32 row_width = row_info->width;
             for (i = 0, sp = dp = row; i < row_width; i++)
             {
+               /* does nothing
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
+               */
+               sp+=3; dp = sp;
                *(dp++) = (png_byte)(255 - *(sp++));
             }
          }
@@ -454,12 +457,15 @@ png_do_write_invert_alpha(png_row_infop row_info, png_bytep row)
 
             for (i = 0, sp = dp = row; i < row_width; i++)
             {
+               /* does nothing
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
+               */
+               sp+=6; dp = sp;
                *(dp++) = (png_byte)(255 - *(sp++));
                *(dp++) = (png_byte)(255 - *(sp++));
             }
@@ -489,8 +495,11 @@ png_do_write_invert_alpha(png_row_infop row_info, png_bytep row)
 
             for (i = 0, sp = dp = row; i < row_width; i++)
             {
+               /* does nothing
                *(dp++) = *(sp++);
                *(dp++) = *(sp++);
+               */
+               sp+=2; dp = sp;
                *(dp++) = (png_byte)(255 - *(sp++));
                *(dp++) = (png_byte)(255 - *(sp++));
             }
