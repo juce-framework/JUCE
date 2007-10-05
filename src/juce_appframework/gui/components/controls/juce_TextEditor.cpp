@@ -217,6 +217,7 @@ public:
     const String getAllText() const throw()
     {
         String s;
+        s.preallocateStorage (getTotalLength());
 
         for (int i = 0; i < atoms.size(); ++i)
             s += getAtom(i)->atomText;
@@ -294,8 +295,7 @@ private:
 
         while (i < len)
         {
-            const int start = i;
-            int end = i;
+            int start = i;
 
             // create a whitespace atom unless it starts with non-ws
             if (CharacterFunctions::isWhitespace (text[i])
@@ -309,41 +309,34 @@ private:
                 {
                     ++i;
                 }
-
-                end = i;
             }
             else
             {
                 if (text[i] == T('\r'))
                 {
                     ++i;
-                    end = i;
 
                     if ((i < len) && (text[i] == T('\n')))
+                    {
+                        ++start;
                         ++i;
-
+                    }
                 }
                 else if (text[i] == T('\n'))
                 {
                     ++i;
-                    end = i;
-
-                    if ((i < len) && (text[i] == T('\r')))
-                        ++i;
                 }
                 else
                 {
                     while ((i < len) && ! CharacterFunctions::isWhitespace (text[i]))
                         ++i;
-
-                    end = i;
                 }
             }
 
             TextAtom* const atom = new TextAtom();
-            atom->atomText = textToParse.substring (start, end);
+            atom->atomText = textToParse.substring (start, i);
             atom->width = font.getStringWidthFloat (atom->getText (passwordCharacter));
-            atom->numChars = (uint16) (end - start);
+            atom->numChars = (uint16) (i - start);
 
             atoms.add (atom);
         }
@@ -1483,6 +1476,8 @@ void TextEditor::insertTextAtCursor (String newText)
 
     if (! isMultiLine())
         newText = newText.replaceCharacters (T("\r\n"), T("  "));
+    else
+        newText = newText.replace (T("\r\n"), T("\n"));
 
     const int newCaretPos = selectionStart + newText.length();
     const int insertIndex = selectionStart;
