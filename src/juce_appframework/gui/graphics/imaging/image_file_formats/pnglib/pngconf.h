@@ -27,6 +27,14 @@
 #define PNG_NO_WARNINGS 1
 #define PNG_NO_ERROR_TEXT 1
 #define PNG_NO_ERROR_NUMBERS 1
+#define PNG_NO_USER_MEM 1
+#define PNG_NO_READ_iCCP 1
+#define PNG_NO_READ_UNKNOWN_CHUNKS 1
+#define PNG_NO_READ_USER_CHUNKS 1
+#define PNG_NO_READ_iTXt 1
+#define PNG_NO_READ_sCAL 1
+#define PNG_NO_READ_sPLT 1
+
 #define png_error(a, b)
 #define png_warning(a, b)
 #define png_chunk_error(a, b)

@@ -690,7 +690,7 @@ png_set_iCCP(png_structp png_ptr, png_infop info_ptr,
       png_warning(png_ptr, "Insufficient memory to process iCCP chunk.");
       return;
    }
-   png_strncpy(new_iccp_name, name, png_strlen(new_iccp_name)+1);
+   png_strncpy(new_iccp_name, name, png_strlen(name)+1);
    new_iccp_profile = (png_charp)png_malloc_warn(png_ptr, proflen);
    if (new_iccp_profile == NULL)
    {
