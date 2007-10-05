@@ -19,6 +19,21 @@
 
 #define PNG_1_2_X
 
+//==============================================================================
+// These are some Juce config settings that should remove any unnecessary code bloat..
+
+#define PNG_NO_STDIO 1
+#define PNG_DEBUG 0
+#define PNG_NO_WARNINGS 1
+#define PNG_NO_ERROR_TEXT 1
+#define PNG_NO_ERROR_NUMBERS 1
+#define png_error(a, b)
+#define png_warning(a, b)
+#define png_chunk_error(a, b)
+#define png_chunk_warning(a, b)
+
+//==============================================================================
+
 /* 
  * PNG_USER_CONFIG has to be defined on the compiler command line. This
  * includes the resource compiler for Windows DLL configurations.
