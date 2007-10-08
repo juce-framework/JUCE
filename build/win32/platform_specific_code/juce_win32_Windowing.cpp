@@ -3201,7 +3201,7 @@ public:
         setPixelFormat (pixelFormat);
 
         if (contextToShareWith != 0 && renderContext != 0)
-            wglShareLists (renderContext, contextToShareWith);
+            wglShareLists (contextToShareWith, renderContext);
     }
 
     ~WindowedGLContext()
