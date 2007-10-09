@@ -209,6 +209,10 @@ public:
                 callbackNeeded = true;
                 postMessage (new Message());
 
+                // sometimes, our message could get discarded by the OS (particularly when running as an RTAS when the app has a modal loop),
+                // so this is how long to wait before assuming the message has been lost and trying again.
+                const uint32 messageDeliveryTimeout = now + 2000;
+
                 while (callbackNeeded)
                 {
                     wait (4);
@@ -223,6 +227,9 @@ public:
                         lastMessageManagerCallback = now;
                         MessageManager::inactivityCheckCallback();
                     }
+
+                    if (now > messageDeliveryTimeout)
+                        break;
                 }
             }
             else
@@ -232,7 +239,7 @@ public:
                 wait (jlimit (1, 50, timeUntilFirstTimer));
             }
 
-            if (now - lastMessageManagerCallback > 200)
+            if (now > lastMessageManagerCallback + 200)
             {
                 lastMessageManagerCallback = now;
                 MessageManager::inactivityCheckCallback();

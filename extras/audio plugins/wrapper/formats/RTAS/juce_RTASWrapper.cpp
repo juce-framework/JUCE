@@ -126,6 +126,8 @@ static long floatToLong (const float n) throw()
                                      n * (double) 0xffffffff - (double) 0x80000000));
 }
 
+static int numInstances = 0;
+
 //==============================================================================
 class JucePlugInProcess  : public CEffectProcessMIDI,
                            public CEffectProcessRTAS,
@@ -146,6 +148,8 @@ public:
         jassert (juceFilter != 0);
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
+        
+        ++numInstances;
     }
 
     ~JucePlugInProcess()
@@ -161,6 +165,9 @@ public:
 
         delete juceFilter;
         juce_free (channels);
+
+        if (--numInstances == 0)
+            shutdownJuce_GUI();
     }
 
     //==============================================================================
@@ -220,7 +227,7 @@ public:
             }
         }
 
-        void DrawContents (Rect* r)
+        void DrawContents (Rect*)
         {
             if (wrapper != 0)
             {
@@ -385,7 +392,7 @@ public:
 #endif
             }
 
-            void paint (Graphics& g)
+            void paint (Graphics&)
             {
 #if JUCE_MAC
                 if (forcedRepaintTimer != 0)

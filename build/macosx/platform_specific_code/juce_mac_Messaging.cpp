@@ -229,9 +229,11 @@ void MessageManager::doPlatformSpecificInitialisation()
     {
         initialised = true;
 
+#if MACOS_10_3_OR_EARLIER
         // work-around for a bug in MacOS 10.2..
         ProcessSerialNumber junkPSN;
         (void) GetCurrentProcess (&junkPSN);
+#endif
 
         mainQueue = GetMainEventQueue();
 
