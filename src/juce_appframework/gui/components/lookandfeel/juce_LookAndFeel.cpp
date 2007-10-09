@@ -308,7 +308,7 @@ void LookAndFeel::drawButtonBackground (Graphics& g,
                       button.isConnectedOnBottom());
 }
 
-void LookAndFeel::drawButtonText (Graphics& g, TextButton& button, 
+void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
                                   bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
     g.setFont (button.getFont());

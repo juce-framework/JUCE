@@ -64,7 +64,7 @@ BEGIN_JUCE_NAMESPACE
 static void millisToLocal (const int64 millis, struct tm& result) throw()
 {
     const int64 seconds = millis / 1000;
- 
+
     if (seconds < literal64bit (86400) || seconds >= literal64bit (2145916800))
     {
         // use extended maths for dates beyond 1970 to 2037..
@@ -144,7 +144,7 @@ Time::Time (const int year,
         const int timeZoneAdjustment = 31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000);
         const int a = (13 - month) / 12;
         const int y = year + 4800 - a;
-        const int jd = day + (153 * (month + 12 * a - 2) + 2) / 5 
+        const int jd = day + (153 * (month + 12 * a - 2) + 2) / 5
                            + (y * 365) + (y /  4) - (y / 100) + (y / 400)
                            - 32045;
 

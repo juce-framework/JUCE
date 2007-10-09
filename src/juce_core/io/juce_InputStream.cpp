@@ -116,7 +116,7 @@ int InputStream::readCompressedInt()
 int64 InputStream::readInt64()
 {
     char temp [8];
-   
+
     if (read (temp, 8) == 8)
         return (int64) swapIfBigEndian (*(uint64*)temp);
     else
@@ -126,7 +126,7 @@ int64 InputStream::readInt64()
 int64 InputStream::readInt64BigEndian()
 {
     char temp [8];
-   
+
     if (read (temp, 8) == 8)
         return (int64) swapIfLittleEndian (*(uint64*)temp);
     else

@@ -1722,7 +1722,7 @@ public:
                     peer->doDragDropMove (theEvent);
                     return noErr;
 
-				case kEventControlDragLeave:
+                case kEventControlDragLeave:
                     peer->doDragDropExit (theEvent);
                     return noErr;
 

@@ -148,7 +148,7 @@ public:
         jassert (juceFilter != 0);
 
         AddChunk (juceChunkType, "Juce Audio Plugin Data");
-        
+
         ++numInstances;
     }
 

@@ -791,7 +791,7 @@ public:
             {
             case kVstSmpte24fps:
                 rate = AudioPlayHead::fps24;
-                fps = 24.0; 
+                fps = 24.0;
                 break;
 
             case kVstSmpte25fps:
@@ -806,22 +806,22 @@ public:
 
             case kVstSmpte30fps:
                 rate = AudioPlayHead::fps30;
-                fps = 30.0; 
+                fps = 30.0;
                 break;
 
-            case kVstSmpte2997dfps: 
+            case kVstSmpte2997dfps:
                 rate = AudioPlayHead::fps2997drop;
-                fps = 29.97; 
+                fps = 29.97;
                 break;
 
             case kVstSmpte30dfps:
                 rate = AudioPlayHead::fps30drop;
-                fps = 30.0; 
+                fps = 30.0;
                 break;
 
             case kVstSmpteFilm16mm:
             case kVstSmpteFilm35mm:
-                fps = 24.0; 
+                fps = 24.0;
                 break;
 
             case kVstSmpte239fps:       fps = 23.976; break;
@@ -1019,7 +1019,7 @@ public:
     void doIdleCallback()
     {
         // (wavelab calls this on a separate thread and causes a deadlock)..
-        if (MessageManager::getInstance()->isThisTheMessageThread() 
+        if (MessageManager::getInstance()->isThisTheMessageThread()
              && ! recursionCheck)
         {
             const MessageManagerLock mml;

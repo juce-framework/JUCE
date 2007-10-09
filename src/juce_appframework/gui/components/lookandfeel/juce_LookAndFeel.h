@@ -132,7 +132,7 @@ public:
                                        bool isButtonDown);
 
     /** Draws the text for a TextButton. */
-    virtual void drawButtonText (Graphics& g, 
+    virtual void drawButtonText (Graphics& g,
                                  TextButton& button,
                                  bool isMouseOverButton,
                                  bool isButtonDown);
