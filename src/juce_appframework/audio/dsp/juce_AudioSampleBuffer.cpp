@@ -117,8 +117,10 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
     {
         setSize (other.getNumChannels(), other.getNumSamples(), false, false, false);
 
-        const int totalBytes = numChannels * size * sizeof (float);
-        memcpy (allocatedData, other.allocatedData, totalBytes);
+        const int numBytes = size * sizeof (float);
+
+        for (int i = 0; i < numChannels; ++i)
+            memcpy (channels[i], other.channels[i], numBytes);
     }
 
     return *this;
@@ -126,8 +128,7 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
 
 AudioSampleBuffer::~AudioSampleBuffer() throw()
 {
-    if (allocatedData != 0)
-        juce_free (allocatedData);
+    juce_free (allocatedData);
 }
 
 float* AudioSampleBuffer::getSampleData (const int channelNumber,
@@ -165,8 +166,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
                         sizeToCopy);
             }
 
-            if (allocatedData != 0)
-                juce_free (allocatedData);
+            juce_free (allocatedData);
 
             allocatedData = newData;
             allocatedBytes = newTotalBytes;
@@ -180,8 +180,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             }
             else
             {
-                if (allocatedData != 0)
-                    juce_free (allocatedData);
+                juce_free (allocatedData);
 
                 allocatedData = (clearExtraSpace) ? (float*) juce_calloc (newTotalBytes)
                                                   : (float*) juce_malloc (newTotalBytes);

@@ -619,6 +619,42 @@ SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_IIRFilter.cpp
 SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_IIRFilter.h
 # End Source File
 # End Group
+# Begin Group "processors"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioPlayHead.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "events"
 
@@ -1245,10 +1281,6 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pn
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pnggccrd.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngget.c
 # End Source File
 # Begin Source File
@@ -1282,10 +1314,6 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pn
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngtrans.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngvcrd.c
 # End Source File
 # Begin Source File
 
@@ -1866,6 +1894,10 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_DragAndDropTarge
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_FileDragAndDropTarget.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_LassoComponent.h
 # End Source File
 # Begin Source File
@@ -2151,6 +2183,14 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilenameCo
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilePreviewComponent.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.h
 # End Source File
 # Begin Source File
 

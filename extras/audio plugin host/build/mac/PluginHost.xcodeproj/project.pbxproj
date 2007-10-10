@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8411682E0CBBEE0500232E45 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8411682D0CBBEE0500232E45 /* OpenGL.framework */; };
 		84FFAEAC0C6C8A6F009F6E72 /* FilterGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */; };
 		84FFAEAD0C6C8A6F009F6E72 /* GraphEditorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */; };
 		84FFAEAE0C6C8A6F009F6E72 /* InternalFilters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE960C6C8A6F009F6E72 /* InternalFilters.cpp */; };
@@ -42,7 +43,8 @@
 		20286C33FDCF999611CA2CEA /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
-		508344B209E5C41E0093A071 /* Juce Plugin Host.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Juce Plugin Host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		508344B209E5C41E0093A071 /* Juce Plugin Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Juce Plugin Host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8411682D0CBBEE0500232E45 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FilterGraph.cpp; path = ../../src/host/FilterGraph.cpp; sourceTree = SOURCE_ROOT; };
 		84FFAE930C6C8A6F009F6E72 /* FilterGraph.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FilterGraph.h; path = ../../src/host/FilterGraph.h; sourceTree = SOURCE_ROOT; };
 		84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GraphEditorPanel.cpp; path = ../../src/host/GraphEditorPanel.cpp; sourceTree = SOURCE_ROOT; };
@@ -88,6 +90,7 @@
 				84FFAF060C6C8ED5009F6E72 /* IOKit.framework in Frameworks */,
 				84FFAF080C6C8ED5009F6E72 /* QuickTime.framework in Frameworks */,
 				84FFAF150C6C8EE8009F6E72 /* AGL.framework in Frameworks */,
+				8411682E0CBBEE0500232E45 /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +137,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				8411682D0CBBEE0500232E45 /* OpenGL.framework */,
 				84FFAF140C6C8EE8009F6E72 /* AGL.framework */,
 				84FFAEFF0C6C8ED5009F6E72 /* CoreAudio.framework */,
 				84FFAF000C6C8ED5009F6E72 /* CoreMIDI.framework */,
