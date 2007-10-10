@@ -109,12 +109,16 @@ void OutputStream::writeInt64BigEndian (int64 value)
 
 void OutputStream::writeFloat (float value)
 {
-    writeInt (*(int*) &value);
+    union { int asInt; float asFloat; } n;
+    n.asFloat = value;
+    writeInt (n.asInt);
 }
 
 void OutputStream::writeDouble (double value)
 {
-    writeInt64 (*(int64*) &value);
+    union { int64 asInt; double asDouble; } n;
+    n.asDouble = value;
+    writeInt64 (n.asInt);
 }
 
 void OutputStream::writeString (const String& text)

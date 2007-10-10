@@ -715,15 +715,15 @@ public:
 
     static LinuxComponentPeer* getPeerFor (Window windowHandle) throw()
     {
-        LinuxComponentPeer* peer = 0;
+        XPointer peer = 0;
 
-        if (! XFindContext (display, (XID) windowHandle, improbableNumber, (XPointer*) &peer))
+        if (! XFindContext (display, (XID) windowHandle, improbableNumber, &peer))
         {
-            if (peer != 0 && ! peer->isValidMessageListener())
+            if (peer != 0 && ! ((LinuxComponentPeer*) peer)->isValidMessageListener())
                 peer = 0;
         }
 
-        return peer;
+        return (LinuxComponentPeer*) peer;
     }
 
     void setVisible (bool shouldBeVisible)
@@ -847,19 +847,19 @@ public:
     {
         bool minimised = false;
 
-        CARD32* stateProp;
+        unsigned char* stateProp;
         unsigned long nitems, bytesLeft;
         Atom actualType;
         int actualFormat;
 
         if (XGetWindowProperty (display, windowH, wm_State, 0, 64, False,
                                 wm_State, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                (unsigned char**) &stateProp) == Success
+                                &stateProp) == Success
             && actualType == wm_State
             && actualFormat == 32
             && nitems > 0)
         {
-            if (stateProp[0] == IconicState)
+            if (((CARD32*) stateProp)[0] == IconicState)
                 minimised = true;
 
             XFree (stateProp);
@@ -2177,20 +2177,22 @@ private:
 
             if (hints != None)
             {
-                CARD32* sizes = 0;
+                unsigned char* data = 0;
                 unsigned long nitems, bytesLeft;
                 Atom actualType;
                 int actualFormat;
 
                 if (XGetWindowProperty (display, windowH, hints, 0, 4, False,
                                         XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                        (unsigned char**) &sizes) == Success)
+                                        &data) == Success)
                 {
+                    const CARD32* const sizes = (const CARD32*) data;
+
                     if (actualFormat == 32)
                         windowBorder = BorderSize ((int) sizes[2], (int) sizes[0],
                                                    (int) sizes[3], (int) sizes[1]);
 
-                    XFree (sizes);
+                    XFree (data);
                 }
             }
         }
@@ -2352,21 +2354,25 @@ private:
             Atom actual;
             int format;
             unsigned long count = 0, remaining = 0;
-            Atom* types = 0;
+            unsigned char* data = 0;
 
             XGetWindowProperty (display, dragAndDropSourceWindow, XA_XdndTypeList,
                                 0, 0x8000000L, False, XA_ATOM, &actual, &format,
-                                &count, &remaining, (unsigned char**) &types);
+                                &count, &remaining, &data);
 
-            if (actual == XA_ATOM && format == 32 && count != 0)
+            if (data != 0)
             {
-                for (unsigned int i = 0; i < count; ++i)
-                    if (types[i] != None)
-                        srcMimeTypeAtomList.add (types[i]);
-            }
+                if (actual == XA_ATOM && format == 32 && count != 0)
+                {
+                    const Atom* const types = (const Atom*) data;
 
-            if (types != 0)
-                XFree (types);
+                    for (unsigned int i = 0; i < count; ++i)
+                        if (types[i] != None)
+                            srcMimeTypeAtomList.add (types[i]);
+                }
+
+                XFree (data);
+            }
         }
 
         if (srcMimeTypeAtomList.size() == 0)
@@ -2552,17 +2558,19 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
                 unsigned long nitems, bytesLeft;
                 Atom actualType;
                 int actualFormat;
-                long* position = 0;
+                unsigned char* data = 0;
 
                 if (XGetWindowProperty (display, root, hints, 0, 4, False,
                                         XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                        (unsigned char**) &position) == Success)
+                                        &data) == Success)
                 {
+                    const long* const position = (const long*) data;
+
                     if (actualType == XA_CARDINAL && actualFormat == 32 && nitems == 4)
                         monitorCoords.add (Rectangle (position[0], position[1],
                                                       position[2], position[3]));
 
-                    XFree (position);
+                    XFree (data);
                 }
             }
         }
@@ -3062,13 +3070,9 @@ void SystemClipboard::copyTextToClipboard (const String& clipText) throw()
 
 const String SystemClipboard::getTextFromClipboard() throw()
 {
-    char* clipData;
     const int bufSize = 64;  // in words
-    int actualFormat;
-    int byteOffset = 0;
-    unsigned long bytesLeft, nitems;
-    Atom actualType;
     String returnData;
+    int byteOffset = 0;
 
     Window root = RootWindow (display, DefaultScreen (display));
 
@@ -3077,20 +3081,34 @@ const String SystemClipboard::getTextFromClipboard() throw()
 
     initClipboard (root, cutBuffers);
 
-    do
+    for (;;)
     {
+        unsigned long bytesLeft = 0, nitems = 0;
+        unsigned char* clipData = 0;
+        int actualFormat = 0;
+        Atom actualType;
+
         if (XGetWindowProperty (display, root, cutBuffers[0], byteOffset >> 2, bufSize,
                                 False, XA_STRING, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                (unsigned char**) &clipData) != Success
-            || actualType != XA_STRING
-            || actualFormat != 8)
-            return String();
+                                &clipData) == Success)
+        {
+            if (actualType == XA_STRING && actualFormat == 8)
+            {
+                byteOffset += nitems;
+                returnData += String ((const char*) clipData, nitems);
+            }
+            else
+            {
+                bytesLeft = 0;
+            }
 
-        byteOffset += nitems;
-        returnData += String(clipData, nitems);
-        XFree (clipData);
+            if (clipData != 0)
+                XFree (clipData);
+        }
+
+        if (bytesLeft == 0)
+            break;
     }
-    while (bytesLeft);
 
     return returnData;
 }

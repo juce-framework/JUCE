@@ -3644,11 +3644,6 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pnggccrd.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngget.c">
 			<Option compilerVar="CC"/>
 			<Option target="Debug"/>
@@ -3690,11 +3685,6 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngtrans.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngvcrd.c">
 			<Option compilerVar="CC"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
