@@ -52,11 +52,11 @@ public:
                                                       ApplicationProperties::getInstance()->getUserSettings()), true, true);
 
         setResizable (true, false);
-        setVisible (true);
         setResizeLimits (300, 400, 800, 1500);
         setTopLeftPosition (60, 60);
 
         restoreWindowStateFromString (ApplicationProperties::getInstance()->getUserSettings()->getValue ("listWindowPos"));
+        setVisible (true);
     }
 
     ~PluginListWindow()

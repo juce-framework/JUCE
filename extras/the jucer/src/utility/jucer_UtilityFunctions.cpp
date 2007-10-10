@@ -238,7 +238,7 @@ const String makeValidCppIdentifier (String s,
         T("INT_MAX"), T("iostream"), T("MAX_RAND"), T("NULL"), T("string")
     };
 
-    for (int i = 0; i < numElementsInArray (reservedWords); ++i)
+    for (i = 0; i < numElementsInArray (reservedWords); ++i)
         if (n == reservedWords[i])
             n << '_';
 
