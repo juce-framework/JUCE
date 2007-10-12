@@ -721,7 +721,7 @@ public:
         // any inputs where the output channel is disabled will need our own internal dummy
         // buffer, because we can't rely on the host to supply different buffers for each channel
         for (int i = 0; i < JucePlugin_MaxNumOutputChannels; ++i)
-            if (! isOutputConnected (i))
+            if (! isOutputConnected2 (i))
                 tempChannels.set (i, juce_malloc (sizeof (float) * blockSize * 2));
 
         filter->prepareToPlay (rate, blockSize);
@@ -1382,6 +1382,17 @@ private:
         zeromem (host, sizeof (host));
         getHostProductString (host);
         return host;
+    }
+
+    // this is a dupe of the method in AudioEffect, because some SDKs
+    // don't seem to include it..
+    bool isOutputConnected2 (VstInt32 output)
+    {
+        VstInt32 ret = 0;
+        if (audioMaster)
+            ret = (VstInt32) audioMaster (&cEffect, audioMasterPinConnected, output, 1, 0, 0);
+
+        return ret ? false : true;
     }
 
 #if JUCE_MAC
