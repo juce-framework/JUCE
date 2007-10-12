@@ -96,6 +96,22 @@
    kVstMaxCategLabelLen = 24,
    kVstMaxFileNameLen   = 100
  };
+
+ enum VstSmpteFrameRate
+ {
+	kVstSmpte24fps    = 0,		///< 24 fps
+	kVstSmpte25fps    = 1,		///< 25 fps
+	kVstSmpte2997fps  = 2,		///< 29.97 fps
+	kVstSmpte30fps    = 3,		///< 30 fps
+	kVstSmpte2997dfps = 4,		///< 29.97 drop
+	kVstSmpte30dfps   = 5,		///< 30 drop
+	kVstSmpteFilm16mm = 6, 		///< Film 16mm
+	kVstSmpteFilm35mm = 7, 		///< Film 35mm
+	kVstSmpte239fps   = 10,		///< HDTV: 23.976 fps
+	kVstSmpte249fps   = 11,		///< HDTV: 24.976 fps
+	kVstSmpte599fps   = 12,		///< HDTV: 59.94 fps
+	kVstSmpte60fps    = 13		///< HDTV: 60 fps
+ };
 #endif
 
 //==============================================================================
@@ -787,7 +803,7 @@ public:
             AudioPlayHead::FrameRateType rate = AudioPlayHead::fpsUnknown;
             double fps = 1.0;
 
-            switch (info.frameRate)
+            switch (ti->smpteFrameRate)
             {
             case kVstSmpte24fps:
                 rate = AudioPlayHead::fps24;
@@ -874,7 +890,7 @@ public:
 
     bool getProgramNameIndexed (VstInt32 category, VstInt32 index, char* text)
     {
-        if (index >= 0 && filter != 0 && index < filter->getNumPrograms())
+        if (filter != 0 && ((unsigned int) index) < (unsigned int) filter->getNumPrograms())
         {
             filter->getProgramName (index).copyToBuffer (text, 24);
             return true;
@@ -889,7 +905,7 @@ public:
         if (filter == 0)
             return 0.0f;
 
-        jassert (index >= 0 && index < filter->getNumParameters());
+        jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
         return filter->getParameter (index);
     }
 
@@ -897,7 +913,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (index >= 0 && index < filter->getNumParameters());
+            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
             filter->setParameter (index, value);
         }
     }
@@ -906,7 +922,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (index >= 0 && index < filter->getNumParameters());
+            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
             filter->getParameterText (index).copyToBuffer (text, 24); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
@@ -915,7 +931,7 @@ public:
     {
         if (filter != 0)
         {
-            jassert (index >= 0 && index < filter->getNumParameters());
+            jassert (((unsigned int) index) < (unsigned int) filter->getNumParameters());
             filter->getParameterName (index).copyToBuffer (text, 16); // length should technically be kVstMaxParamStrLen, which is 8, but hosts will normally allow a bit more.
         }
     }
