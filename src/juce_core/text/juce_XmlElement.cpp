@@ -830,7 +830,7 @@ void XmlElement::insertChildElement (XmlElement* const newNode,
 
                 XmlElement* child = firstChildElement;
 
-                while (child->nextElement != 0 && --indexToInsertAt >= 0)
+                while (child->nextElement != 0 && --indexToInsertAt > 0)
                     child = child->nextElement;
 
                 newNode->nextElement = child->nextElement;
