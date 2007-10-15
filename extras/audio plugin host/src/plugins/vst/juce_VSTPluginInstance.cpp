@@ -2411,7 +2411,7 @@ int VSTPluginInstance::getNumParameters()
 
 float VSTPluginInstance::getParameter (int index)
 {
-    if (effect != 0 && index >= 0 && index < effect->numParams)
+    if (effect != 0 && ((unsigned int) index) < (unsigned int) effect->numParams)
     {
         try
         {
@@ -2428,7 +2428,7 @@ float VSTPluginInstance::getParameter (int index)
 
 void VSTPluginInstance::setParameter (int index, float newValue)
 {
-    if (effect != 0 && index >= 0 && index < effect->numParams)
+    if (effect != 0 && ((unsigned int) index) < (unsigned int) effect->numParams)
     {
         try
         {

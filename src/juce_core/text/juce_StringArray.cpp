@@ -128,7 +128,7 @@ void StringArray::clear() throw()
 
 const String& StringArray::operator[] (const int index) const throw()
 {
-    if (index >= 0 && index < strings.size())
+    if (((unsigned int) index) < (unsigned int) strings.size())
         return *(const String*) (strings.getUnchecked (index));
 
     return String::empty;

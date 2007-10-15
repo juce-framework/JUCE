@@ -124,8 +124,9 @@ public:
     inline ObjectClass* operator[] (const int index) const throw()
     {
         lock.enter();
-        ObjectClass* const result = (index >= 0 && index < numUsed) ? this->elements [index]
-                                                                    : (ObjectClass*) 0;
+        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
+                                            ? this->elements [index]
+                                            : (ObjectClass*) 0;
         lock.exit();
 
         return result;
@@ -139,7 +140,7 @@ public:
     inline ObjectClass* getUnchecked (const int index) const throw()
     {
         lock.enter();
-        jassert (index >= 0 && index < numUsed);
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
         ObjectClass* const result = this->elements [index];
         lock.exit();
 
@@ -464,7 +465,7 @@ public:
         lock.enter();
         ObjectClass* toDelete = 0;
 
-        if (indexToRemove >= 0 && indexToRemove < numUsed)
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
             ObjectClass** const e = this->elements + indexToRemove;
 
@@ -598,8 +599,8 @@ public:
     {
         lock.enter();
 
-        if (index1 >= 0 && index1 < numUsed
-             && index2 >= 0 && index2 < numUsed)
+        if (((unsigned int) index1) < (unsigned int) numUsed
+             && ((unsigned int) index2) < (unsigned int) numUsed)
         {
             swapVariables (this->elements [index1],
                            this->elements [index2]);
@@ -628,9 +629,9 @@ public:
         {
             lock.enter();
 
-            if (currentIndex >= 0 && currentIndex < numUsed)
+            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
             {
-                if (newIndex < 0 || newIndex >= numUsed)
+                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
                     newIndex = numUsed - 1;
 
                 ObjectClass* const value = this->elements [currentIndex];

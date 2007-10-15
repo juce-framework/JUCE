@@ -221,6 +221,9 @@
 #ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
  #include "juce_core/threads/juce_ScopedReadLock.h"
 #endif
+#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
+ #include "juce_core/threads/juce_ScopedTryLock.h"
+#endif
 #ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
  #include "juce_core/threads/juce_ScopedWriteLock.h"
 #endif

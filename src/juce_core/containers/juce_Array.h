@@ -231,8 +231,9 @@ public:
     inline ElementType operator[] (const int index) const throw()
     {
         lock.enter();
-        const ElementType result = (index >= 0 && index < numUsed) ? this->elements [index]
-                                                                   : ElementType();
+        const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
+                                        ? this->elements [index]
+                                        : ElementType();
         lock.exit();
 
         return result;
@@ -250,7 +251,7 @@ public:
     inline ElementType getUnchecked (const int index) const throw()
     {
         lock.enter();
-        jassert (index >= 0 && index < numUsed);
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
         const ElementType result = this->elements [index];
         lock.exit();
 
@@ -268,7 +269,7 @@ public:
     */
     inline ElementType& getReference (const int index) const throw()
     {
-        jassert (index >= 0 && index < numUsed);
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
         return this->elements [index];
     }
 
@@ -405,11 +406,8 @@ public:
         lock.enter();
         this->ensureAllocatedSize (numUsed + 1);
 
-        if (indexToInsertAt >= 0)
+        if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
         {
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
-
             ElementType* const insertPos = this->elements + indexToInsertAt;
             const int numberToMove = numUsed - indexToInsertAt;
 
@@ -447,7 +445,7 @@ public:
             lock.enter();
             this->ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
 
-            if (indexToInsertAt >= 0 && indexToInsertAt < numUsed)
+            if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
             {
                 ElementType* insertPos = this->elements + indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
@@ -489,7 +487,7 @@ public:
             lock.enter();
             this->ensureAllocatedSize (numUsed + numberOfElements);
 
-            if (indexToInsertAt >= 0 && indexToInsertAt < numUsed)
+            if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
             {
                 ElementType* insertPos = this->elements + indexToInsertAt;
                 const int numberToMove = numUsed - indexToInsertAt;
@@ -573,7 +571,7 @@ public:
                        const ElementType newValue) throw()
     {
         lock.enter();
-        jassert (indexToChange >= 0 && indexToChange < numUsed);
+        jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
         this->elements [indexToChange] = newValue;
         lock.exit();
     }
@@ -737,7 +735,7 @@ public:
     {
         lock.enter();
 
-        if (indexToRemove >= 0 && indexToRemove < numUsed)
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
             --numUsed;
 
@@ -916,8 +914,8 @@ public:
     {
         lock.enter();
 
-        if (index1 >= 0 && index1 < numUsed
-            && index2 >= 0 && index2 < numUsed)
+        if (((unsigned int) index1) < (unsigned int) numUsed
+            && ((unsigned int) index2) < (unsigned int) numUsed)
         {
             swapVariables (this->elements [index1],
                            this->elements [index2]);
@@ -947,9 +945,9 @@ public:
         {
             lock.enter();
 
-            if (currentIndex >= 0 && currentIndex < numUsed)
+            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
             {
-                if (newIndex < 0 || newIndex > numUsed - 1)
+                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
                     newIndex = numUsed - 1;
 
                 const ElementType value = this->elements [currentIndex];

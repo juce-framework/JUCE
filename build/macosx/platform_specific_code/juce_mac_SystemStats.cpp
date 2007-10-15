@@ -126,6 +126,16 @@ const String SystemStats::getOperatingSystemName() throw()
     return T("Mac OS X");
 }
 
+bool SystemStats::isOperatingSystem64Bit() throw()
+{
+#if JUCE_64BIT
+    return true;
+#else
+    //xxx not sure how to find this out?..
+    return false;
+#endif
+}
+
 //==============================================================================
 void SystemStats::initialiseStats() throw()
 {

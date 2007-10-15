@@ -160,7 +160,7 @@ public:
                    Type& startValue,
                    Type& numValues) const throw()
     {
-        if (rangeIndex >= 0 && rangeIndex < getNumRanges())
+        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
         {
             startValue = values [rangeIndex << 1];
             numValues = values [(rangeIndex << 1) + 1] - startValue;

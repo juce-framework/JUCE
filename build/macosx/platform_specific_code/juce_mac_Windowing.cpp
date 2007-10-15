@@ -594,8 +594,8 @@ public:
 
     bool contains (int x, int y, bool trueIfInAChildWindow) const
     {
-        if (x < 0 || y < 0
-            || x >= component->getWidth() || y >= component->getHeight()
+        if (((unsigned int) x) >= (unsigned int) component->getWidth() 
+            || ((unsigned int) y) >= (unsigned int) component->getHeight()
             || ! IsValidWindowPtr (windowRef))
             return false;
 

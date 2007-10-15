@@ -661,7 +661,7 @@ public:
 
                 while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
                 {
-                    jassert (midiEventPosition >= 0 && midiEventPosition < (int) numSamples);
+                    jassert (((unsigned int) midiEventPosition) < (unsigned int) numSamples);
 
 
 

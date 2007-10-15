@@ -110,7 +110,7 @@ void AudioProcessor::setParameterNotifyingHost (const int parameterIndex,
 
 void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex, const float newValue)
 {
-    jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
+    jassert (((unsigned int) parameterIndex) < (unsigned int) getNumParameters());
 
     for (int i = listeners.size(); --i >= 0;)
     {
@@ -125,7 +125,7 @@ void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex
 
 void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
-    jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
+    jassert (((unsigned int) parameterIndex) < (unsigned int) getNumParameters());
 
 #ifdef JUCE_DEBUG
     // This means you've called beginParameterChangeGesture twice in succession without a matching
@@ -146,7 +146,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 
 void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
-    jassert (parameterIndex >= 0 && parameterIndex < getNumParameters());
+    jassert (((unsigned int) parameterIndex) < (unsigned int) getNumParameters());
 
 #ifdef JUCE_DEBUG
     // This means you've called endParameterChangeGesture without having previously called

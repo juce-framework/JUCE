@@ -216,8 +216,9 @@ public:
     inline ElementType operator[] (const int index) const throw()
     {
         lock.enter();
-        const ElementType result = (index >= 0 && index < numUsed) ? this->elements [index]
-                                                                   : (ElementType)0;
+        const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
+                                        ? this->elements [index]
+                                        : (ElementType)0;
         lock.exit();
 
         return result;
@@ -234,7 +235,7 @@ public:
     inline ElementType getUnchecked (const int index) const throw()
     {
         lock.enter();
-        jassert (index >= 0 && index < numUsed);
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
         const ElementType result = this->elements [index];
         lock.exit();
 
@@ -471,7 +472,7 @@ public:
     {
         lock.enter();
 
-        if (indexToRemove >= 0 && indexToRemove < numUsed)
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
             --numUsed;
 

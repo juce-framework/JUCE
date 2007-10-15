@@ -92,14 +92,15 @@ bool TabBarButton::hitTest (int mx, int my)
     if (owner->getOrientation() == TabbedButtonBar::TabsAtLeft
          || owner->getOrientation() == TabbedButtonBar::TabsAtRight)
     {
-        if (mx >= 0 && mx < getWidth()
-             && my >= y + overlapPixels && my < y + h - overlapPixels)
+        if (((unsigned int) mx) < (unsigned int) getWidth()
+             && my >= y + overlapPixels
+             && my < y + h - overlapPixels)
             return true;
     }
     else
     {
         if (mx >= x + overlapPixels && mx < x + w - overlapPixels
-             && my >= 0 && my < getHeight())
+             && ((unsigned int) my) < (unsigned int) getHeight())
             return true;
     }
 
@@ -233,7 +234,7 @@ void TabbedButtonBar::addTab (const String& tabName,
 
     if (tabName.isNotEmpty())
     {
-        if (insertIndex < 0 || insertIndex > tabs.size())
+        if (((unsigned int) insertIndex) > (unsigned int) tabs.size())
             insertIndex = tabs.size();
 
         for (int i = tabs.size(); --i >= insertIndex;)
@@ -262,7 +263,7 @@ void TabbedButtonBar::addTab (const String& tabName,
 void TabbedButtonBar::setTabName (const int tabIndex,
                                   const String& newName)
 {
-    if (tabIndex >= 0 && tabIndex < tabs.size()
+    if (((unsigned int) tabIndex) < (unsigned int) tabs.size()
          && tabs[tabIndex] != newName)
     {
         tabs.set (tabIndex, newName);
@@ -278,7 +279,7 @@ void TabbedButtonBar::setTabName (const int tabIndex,
 
 void TabbedButtonBar::removeTab (const int tabIndex)
 {
-    if (tabIndex >= 0 && tabIndex < tabs.size())
+    if (((unsigned int) tabIndex) < (unsigned int) tabs.size())
     {
         const int oldTabIndex = currentTabIndex;
         if (currentTabIndex == tabIndex)
@@ -328,7 +329,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex)
 {
     if (currentTabIndex != newIndex)
     {
-        if (newIndex < 0 || newIndex >= tabs.size())
+        if (((unsigned int) newIndex) >= (unsigned int) tabs.size())
             newIndex = -1;
 
         currentTabIndex = newIndex;
@@ -505,7 +506,8 @@ const Colour TabbedButtonBar::getTabBackgroundColour (const int tabIndex)
 
 void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& newColour)
 {
-    if (tabIndex >= 0 && tabIndex < tabColours.size() && tabColours [tabIndex] != newColour)
+    if (((unsigned int) tabIndex) < (unsigned int) tabColours.size()
+         && tabColours [tabIndex] != newColour)
     {
         tabColours.set (tabIndex, newColour);
         repaint();

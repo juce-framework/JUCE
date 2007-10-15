@@ -229,7 +229,8 @@ const Colour Image::getPixelAt (const int x, const int y) const
 {
     Colour c;
 
-    if (x >= 0 && x < imageWidth && y >= 0 && y < imageHeight)
+    if (((unsigned int) x) < (unsigned int) imageWidth
+         && ((unsigned int) y) < (unsigned int) imageHeight)
     {
         int ls, ps;
         const uint8* const pixels = lockPixelDataReadOnly (x, y, 1, 1, ls, ps);
@@ -254,7 +255,8 @@ const Colour Image::getPixelAt (const int x, const int y) const
 void Image::setPixelAt (const int x, const int y,
                         const Colour& colour)
 {
-    if (x >= 0 && x < imageWidth && y >= 0 && y < imageHeight)
+    if (((unsigned int) x) < (unsigned int) imageWidth
+         && ((unsigned int) y) < (unsigned int) imageHeight)
     {
         int ls, ps;
         uint8* const pixels = lockPixelDataReadWrite (x, y, 1, 1, ls, ps);
@@ -274,7 +276,9 @@ void Image::setPixelAt (const int x, const int y,
 void Image::multiplyAlphaAt (const int x, const int y,
                              const float multiplier)
 {
-    if (x >= 0 && x < imageWidth && y >= 0 && y < imageHeight && hasAlphaChannel())
+    if (((unsigned int) x) < (unsigned int) imageWidth
+         && ((unsigned int) y) < (unsigned int) imageHeight
+         && hasAlphaChannel())
     {
         int ls, ps;
         uint8* const pixels = lockPixelDataReadWrite (x, y, 1, 1, ls, ps);

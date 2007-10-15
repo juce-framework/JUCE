@@ -5784,6 +5784,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\..\src\juce_core\threads\juce_ScopedTryLock.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\src\juce_core\threads\juce_ScopedWriteLock.h"
 						>
 					</File>

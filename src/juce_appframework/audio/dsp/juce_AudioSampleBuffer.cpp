@@ -64,7 +64,7 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
                                       const int numChannels_,
                                       const int numSamples) throw()
 {
-    jassert (numChannels_ >= 0 && numChannels_ <= maxNumAudioSampleBufferChannels);
+    jassert (((unsigned int) numChannels_) <= (unsigned int) maxNumAudioSampleBufferChannels);
 
     numChannels = numChannels_;
     size = numSamples;
@@ -134,8 +134,8 @@ AudioSampleBuffer::~AudioSampleBuffer() throw()
 float* AudioSampleBuffer::getSampleData (const int channelNumber,
                                          const int sampleOffset) const throw()
 {
-    jassert (channelNumber >= 0 && channelNumber < numChannels);
-    jassert (sampleOffset >= 0 && sampleOffset < size);
+    jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+    jassert (((unsigned int) sampleOffset) < (unsigned int) size);
 
     return channels [channelNumber] + sampleOffset;
 }
@@ -211,8 +211,7 @@ void AudioSampleBuffer::clear() throw()
 void AudioSampleBuffer::clear (const int startSample,
                                const int numSamples) throw()
 {
-    jassert (startSample >= 0);
-    jassert (startSample + numSamples <= size);
+    jassert (startSample >= 0 && startSample + numSamples <= size);
 
     for (int i = 0; i < numChannels; ++i)
         zeromem (channels [i] + startSample, numSamples * sizeof (float));
@@ -222,7 +221,7 @@ void AudioSampleBuffer::clear (const int channel,
                                const int startSample,
                                const int numSamples) throw()
 {
-    jassert (channel >= 0 && channel < numChannels);
+    jassert (((unsigned int) channel) < (unsigned int) numChannels);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     zeromem (channels [channel] + startSample, numSamples * sizeof (float));
@@ -233,7 +232,7 @@ void AudioSampleBuffer::applyGain (const int channel,
                                    int numSamples,
                                    const float gain) throw()
 {
-    jassert (channel >= 0 && channel < numChannels);
+    jassert (((unsigned int) channel) < (unsigned int) numChannels);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     if (gain != 1.0f)
@@ -264,7 +263,7 @@ void AudioSampleBuffer::applyGainRamp (const int channel,
     }
     else
     {
-        jassert (channel >= 0 && channel < numChannels);
+        jassert (((unsigned int) channel) < (unsigned int) numChannels);
         jassert (startSample >= 0 && startSample + numSamples <= size);
 
         const float increment = (endGain - startGain) / numSamples;
@@ -295,9 +294,9 @@ void AudioSampleBuffer::addFrom (const int destChannel,
                                  const float gain) throw()
 {
     jassert (&source != this);
-    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
-    jassert (sourceChannel >= 0 && sourceChannel < source.numChannels);
+    jassert (((unsigned int) sourceChannel) < (unsigned int) source.numChannels);
     jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
     if (gain != 0.0f && numSamples > 0)
@@ -324,7 +323,7 @@ void AudioSampleBuffer::addFrom (const int destChannel,
                                  int numSamples,
                                  const float gain) throw()
 {
-    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (source != 0);
 
@@ -352,7 +351,7 @@ void AudioSampleBuffer::addFromWithRamp (const int destChannel,
                                          float startGain,
                                          const float endGain) throw()
 {
-    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (source != 0);
 
@@ -388,9 +387,9 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
                                   int numSamples) throw()
 {
     jassert (&source != this);
-    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
-    jassert (sourceChannel >= 0 && sourceChannel < source.numChannels);
+    jassert (((unsigned int) sourceChannel) < (unsigned int) source.numChannels);
     jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
     if (numSamples > 0)
@@ -406,7 +405,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
                                   const float* source,
                                   int numSamples) throw()
 {
-    jassert (destChannel >= 0 && destChannel < numChannels);
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (source != 0);
 
@@ -424,7 +423,7 @@ void AudioSampleBuffer::findMinMax (const int channel,
                                     float& minVal,
                                     float& maxVal) const throw()
 {
-    jassert (channel >= 0 && channel < numChannels);
+    jassert (((unsigned int) channel) < (unsigned int) numChannels);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     if (numSamples <= 0)
@@ -459,7 +458,7 @@ float AudioSampleBuffer::getMagnitude (const int channel,
                                        const int startSample,
                                        const int numSamples) const throw()
 {
-    jassert (channel >= 0 && channel < numChannels);
+    jassert (((unsigned int) channel) < (unsigned int) numChannels);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     float mn, mx;
@@ -483,7 +482,7 @@ float AudioSampleBuffer::getRMSLevel (const int channel,
                                       const int startSample,
                                       const int numSamples) const throw()
 {
-    jassert (channel >= 0 && channel < numChannels);
+    jassert (((unsigned int) channel) < (unsigned int) numChannels);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     if (numSamples <= 0 || channel < 0 || channel >= numChannels)

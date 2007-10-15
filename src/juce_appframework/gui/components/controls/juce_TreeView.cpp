@@ -802,7 +802,7 @@ void TreeViewItem::removeSubItem (const int index, const bool deleteItem)
     if (ownerView != 0)
         ownerView->nodeAlterationLock.enter();
 
-    if (index >= 0 && index < subItems.size())
+    if (((unsigned int) index) < (unsigned int) subItems.size())
     {
         subItems.remove (index, deleteItem);
         treeHasChanged();
@@ -1127,7 +1127,7 @@ TreeViewItem* TreeViewItem::getItemOnRow (int index) throw()
 
 TreeViewItem* TreeViewItem::findItemRecursively (int y) throw()
 {
-    if (y >= 0 && y < totalHeight)
+    if (((unsigned int) y) < (unsigned int) totalHeight)
     {
         const int h = itemHeight;
 

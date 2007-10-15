@@ -61,8 +61,8 @@ void ImageConvolutionKernel::setKernelValue (const int x,
                                              const int y,
                                              const float value) throw()
 {
-    if (x >= 0 && x < size
-         && y >= 0 && y < size)
+    if (((unsigned int) x) < (unsigned int) size
+         && ((unsigned int) y) < (unsigned int) size)
     {
         values[x][y] = value;
     }

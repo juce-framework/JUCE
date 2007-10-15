@@ -348,6 +348,23 @@ const String SystemStats::getOperatingSystemName() throw()
     return name;
 }
 
+bool SystemStats::isOperatingSystem64Bit() throw()
+{
+#ifdef _WIN64
+    return true;
+#else
+    typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle ("kernel32"), "IsWow64Process");
+
+    BOOL isWow64 = FALSE;
+
+    return (fnIsWow64Process != 0) 
+            && fnIsWow64Process (GetCurrentProcess(), &isWow64)
+            && (isWow64 != FALSE);
+#endif 
+}
+
 //==============================================================================
 int SystemStats::getMemorySizeInMegabytes() throw()
 {

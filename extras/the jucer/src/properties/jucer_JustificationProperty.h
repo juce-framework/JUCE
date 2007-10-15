@@ -85,7 +85,7 @@ public:
                               Justification::bottomLeft,
                               Justification::bottomRight };
 
-        if (newIndex >= 0 && newIndex < numElementsInArray (types)
+        if (((unsigned int) newIndex) < (unsigned int) numElementsInArray (types)
              && types [newIndex] != getJustification().getFlags())
         {
             setJustification (Justification (types [newIndex]));

@@ -73,10 +73,10 @@ void RectangleList::clear() throw()
 
 const Rectangle RectangleList::getRectangle (const int index) const throw()
 {
-    if (index >= 0 && index < rects.size())
+    if (((unsigned int) index) < (unsigned int) rects.size())
         return rects.getReference (index);
-    else
-        return Rectangle();
+
+    return Rectangle();
 }
 
 bool RectangleList::isEmpty() const throw()

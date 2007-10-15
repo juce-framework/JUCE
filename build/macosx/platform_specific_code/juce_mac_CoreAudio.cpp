@@ -396,7 +396,7 @@ public:
 
             if (types != 0)
             {
-                if (index >= 0 && index < num)
+                if (((unsigned int) index) < num)
                 {
                     OSType id = types[index];
                     AudioDeviceSetProperty (deviceID, 0, 0, input, kAudioDevicePropertyDataSource, sizeof (id), &id);

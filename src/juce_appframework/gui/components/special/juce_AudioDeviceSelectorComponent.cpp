@@ -103,7 +103,7 @@ public:
                            int width, int height,
                            bool rowIsSelected)
     {
-        if (row >= 0 && row < items.size())
+        if (((unsigned int) row) < (unsigned int) items.size())
         {
             if (rowIsSelected)
                 g.fillAll (findColour (TextEditor::highlightColourId)
@@ -190,7 +190,7 @@ private:
 
     void flipEnablement (const int row)
     {
-        if (row >= 0 && row < items.size())
+        if (((unsigned int) row) < (unsigned int) items.size())
         {
             AudioIODevice* const audioDevice = deviceManager.getCurrentAudioDevice();
 

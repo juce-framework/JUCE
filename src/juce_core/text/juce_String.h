@@ -477,7 +477,7 @@ public:
 
         No checks are made to see if the index is within a valid range, so be careful!
     */
-    inline const tchar& operator[] (const int index) const throw()  { jassert (index >= 0 && index <= length()); return text->text [index]; }
+    inline const tchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
 
     /** Returns a character from the string such that it can also be altered.
 

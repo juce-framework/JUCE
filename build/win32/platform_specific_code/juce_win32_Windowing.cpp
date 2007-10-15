@@ -1429,9 +1429,8 @@ private:
         }
         else if (! isDragging)
         {
-            if (x >= 0 && y >= 0
-                && x < component->getWidth()
-                && y < component->getHeight())
+            if (((unsigned int) x) < (unsigned int) component->getWidth()
+                 && ((unsigned int) y) < (unsigned int) component->getHeight())
             {
                 RECT r;
                 GetWindowRect (hwnd, &r);

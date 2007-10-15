@@ -160,7 +160,7 @@ bool BitArray::operator!= (const BitArray& other) const throw()
 
 bool BitArray::operator[] (const int bit) const throw()
 {
-    return (bit >= 0 && bit <= highestBit)
+    return (((unsigned int) bit) <= (unsigned int) highestBit)
              && ((values [bit >> 5] & (1 << (bit & 31))) != 0);
 }
 
@@ -211,7 +211,7 @@ void BitArray::setBit (const int bit,
 
 void BitArray::clearBit (const int bit) throw()
 {
-    if (bit >= 0 && bit <= highestBit)
+    if (((unsigned int) bit) <= (unsigned int) highestBit)
         values [bit >> 5] &= ~(1 << (bit & 31));
 }
 
@@ -922,7 +922,7 @@ void BitArray::parseString (const String& text,
             const tchar c = *t++;
             const int digit = CharacterFunctions::getHexDigitValue (c);
 
-            if (digit >= 0 && digit < base)
+            if (((unsigned int) digit) < (unsigned int) base)
             {
                 shiftBits (bits);
                 add (digit);

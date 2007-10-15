@@ -357,10 +357,8 @@ void ComponentPeer::sendFakeMouseMove() throw()
         int x, y;
         component->getMouseXYRelative (x, y);
 
-        if (x >= 0
-             && y >= 0
-             && x < component->getWidth()
-             && y < component->getHeight()
+        if (((unsigned int) x) < (unsigned int) component->getWidth()
+             && ((unsigned int) y) < (unsigned int) component->getHeight()
              && contains (x, y, false))
         {
             postMessage (new Message (fakeMouseMoveMessage, x, y, 0));

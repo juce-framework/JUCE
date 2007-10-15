@@ -156,7 +156,7 @@ int MenuBarComponent::getItemAt (const int x, const int y)
 
 void MenuBarComponent::repaintMenuItem (int index)
 {
-    if (index >= 0 && index < xPositions.size())
+    if (((unsigned int) index) < (unsigned int) xPositions.size())
     {
         const int x1 = xPositions [index];
         const int x2 = xPositions [index + 1];
@@ -223,7 +223,7 @@ void MenuBarComponent::showMenu (int index)
             indexToShowAgain = -1;
             repaint();
 
-            if (itemUnderMouse >= 0 && itemUnderMouse < menuNames.size())
+            if (((unsigned int) itemUnderMouse) < (unsigned int) menuNames.size())
             {
                 PopupMenu m (model->getMenuForIndex (itemUnderMouse,
                                                      menuNames [itemUnderMouse]));
@@ -268,7 +268,7 @@ void MenuBarComponent::showMenu (int index)
                 repaint();
                 itemUnderMouse = indexToShowAgain;
 
-                if (itemUnderMouse < 0 || itemUnderMouse >= menuNames.size())
+                if (((unsigned int) itemUnderMouse) >= (unsigned int) menuNames.size())
                     break;
             }
             else

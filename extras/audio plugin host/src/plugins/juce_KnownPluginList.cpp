@@ -307,5 +307,5 @@ int KnownPluginList::getIndexChosenByMenu (const int menuResultCode) const
 {
     const int i = menuResultCode - menuIdBase;
 
-    return (i >= 0 && i < types.size()) ? i : -1;
+    return (((unsigned int) i) < (unsigned int) types.size()) ? i : -1;
 }

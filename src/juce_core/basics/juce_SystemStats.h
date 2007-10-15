@@ -87,6 +87,10 @@ public:
     */
     static const String getOperatingSystemName() throw();
 
+    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
+    */
+    static bool isOperatingSystem64Bit() throw();
+
     //==============================================================================
     // CPU and memory information..
 

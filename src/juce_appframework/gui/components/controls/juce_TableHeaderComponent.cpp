@@ -212,7 +212,7 @@ void TableHeaderComponent::setColumnWidth (const int columnId, const int newWidt
         {
             const int index = getIndexOfColumnId (columnId, true) + 1;
 
-            if (index >= 0 && index < numColumns)
+            if (((unsigned int) index) < (unsigned int) numColumns)
             {
                 const int x = getColumnPosition (index).getX();
 
@@ -879,7 +879,7 @@ void TableHeaderComponent::handleAsyncUpdate()
 
 int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const throw()
 {
-    if (mouseX >= 0 && mouseX < getWidth())
+    if (((unsigned int) mouseX) < (unsigned int) getWidth())
     {
         const int draggableDistance = 3;
         int x = 0;

@@ -435,7 +435,7 @@ void GlyphArrangement::ensureNumGlyphsAllocated (const int minGlyphs) throw()
 
 void GlyphArrangement::incGlyphRefCount (const int i) const throw()
 {
-    jassert (i >= 0 && i < numGlyphs);
+    jassert (((unsigned int) i) < (unsigned int) numGlyphs);
 
     if (glyphs[i].glyphInfo != 0 && glyphs[i].glyphInfo->getTypeface() != 0)
         glyphs[i].glyphInfo->getTypeface()->incReferenceCount();
@@ -457,7 +457,7 @@ void GlyphArrangement::clear() throw()
 
 PositionedGlyph& GlyphArrangement::getGlyph (const int index) const throw()
 {
-    jassert (index >= 0 && index < numGlyphs);
+    jassert (((unsigned int) index) < (unsigned int) numGlyphs);
 
     return glyphs [index];
 }
@@ -966,7 +966,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num,
 
         while (--num >= 0)
         {
-            jassert (startIndex >= 0 && startIndex <= numGlyphs);
+            jassert (((unsigned int) startIndex) <= (unsigned int) numGlyphs);
             glyphs [startIndex++].moveBy (dx, dy);
         }
     }
@@ -986,7 +986,7 @@ void GlyphArrangement::stretchRangeOfGlyphs (int startIndex, int num,
 
         while (--num >= 0)
         {
-            jassert (startIndex >= 0 && startIndex <= numGlyphs);
+            jassert (((unsigned int) startIndex) <= (unsigned int) numGlyphs);
             PositionedGlyph& pg = glyphs[startIndex++];
 
             pg.x = xAnchor + (pg.x - xAnchor) * horizontalScaleFactor;

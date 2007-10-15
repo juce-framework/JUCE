@@ -100,6 +100,16 @@ const String SystemStats::getOperatingSystemName() throw()
     return T("Linux");
 }
 
+bool SystemStats::isOperatingSystem64Bit() throw()
+{
+#if JUCE_64BIT
+    return true;
+#else
+    //xxx not sure how to find this out?..
+    return false;
+#endif
+}
+
 static const String getCpuInfo (const char* key, bool lastOne = false) throw()
 {
     String info;

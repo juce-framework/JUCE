@@ -423,7 +423,7 @@ public:
                 {
                     const int y = minY - mw->windowPos.getY();
                     mw->ensureItemIsVisible (itemIdThatMustBeVisible,
-                                             (y >= 0 && y < mw->windowPos.getHeight()) ? y : -1);
+                                             (((unsigned int) y) < (unsigned int) mw->windowPos.getHeight()) ? y : -1);
                 }
 
                 mw->resizeToBestWindowPos();
@@ -696,7 +696,7 @@ public:
         bool overScrollArea = false;
 
         if (isScrolling()
-             && (isOver || (isDown && x >= 0 && x < getWidth()))
+             && (isOver || (isDown && ((unsigned int) x) < (unsigned int) getWidth()))
              && ((isScrollZoneActive (false) && y < scrollZone)
                   || (isScrollZoneActive (true) && y > getHeight() - scrollZone)))
         {

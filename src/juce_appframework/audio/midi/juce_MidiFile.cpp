@@ -74,7 +74,7 @@ int MidiFile::getNumTracks() const throw()
 
 const MidiMessageSequence* MidiFile::getTrack (const int index) const throw()
 {
-    return (index >= 0 && index < numTracks) ? tracks[index] : 0;
+    return (((unsigned int) index) < (unsigned int) numTracks) ? tracks[index] : 0;
 }
 
 void MidiFile::addTrack (const MidiMessageSequence& trackSequence) throw()

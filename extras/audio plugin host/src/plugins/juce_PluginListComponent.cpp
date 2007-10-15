@@ -201,7 +201,7 @@ void PluginListComponent::buttonClicked (Button* b)
     }
 }
 
-bool PluginListComponent::isInterestedInFileDrag (const StringArray& files)
+bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)
 {
     return true;
 }

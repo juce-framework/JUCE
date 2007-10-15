@@ -150,7 +150,7 @@ void FileSearchPathListComponent::paintListBoxItem (int rowNumber, Graphics& g, 
 
 void FileSearchPathListComponent::deleteKeyPressed (int row)
 {
-    if (row >= 0 && row < path.getNumPaths())
+    if (((unsigned int) row) < (unsigned int) path.getNumPaths())
     {
         path.remove (row);
         changed();
@@ -263,7 +263,7 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
     }
     else if (button == downButton)
     {
-        if (currentRow >= 0 && currentRow < path.getNumPaths()-1)
+        if (currentRow >= 0 && currentRow < path.getNumPaths() - 1)
         {
             const File f (path[currentRow]);
             path.remove (currentRow);

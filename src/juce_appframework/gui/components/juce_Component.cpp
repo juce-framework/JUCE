@@ -1103,7 +1103,8 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 
 bool Component::contains (const int x, const int y)
 {
-    if (x >= 0 && y >= 0 && x < getWidth() && y < getHeight()
+    if (((unsigned int) x) < (unsigned int) getWidth() 
+        && ((unsigned int) y) < (unsigned int) getHeight()
          && hitTest (x, y))
     {
         if (parentComponent_ != 0)
@@ -1146,7 +1147,8 @@ bool Component::reallyContains (int x, int y, const bool returnTrueIfWithinAChil
 Component* Component::getComponentAt (const int x, const int y)
 {
     if (flags.visibleFlag
-         && x >= 0 && y >= 0 && x < getWidth() && y < getHeight()
+         && ((unsigned int) x) < (unsigned int) getWidth() 
+         && ((unsigned int) y) < (unsigned int) getHeight()
          && hitTest (x, y))
     {
         for (int i = childComponentList_.size(); --i >= 0;)

@@ -113,9 +113,8 @@ public:
 
     bool contains (int x, int y, bool) const
     {
-        return x >= 0 && y >= 0
-            && x < magnifierComp->getWidth()
-            && y < magnifierComp->getHeight();
+        return ((unsigned int) x) < (unsigned int) magnifierComp->getWidth()
+                && ((unsigned int) y) < (unsigned int) magnifierComp->getHeight();
     }
 
     void repaint (int x, int y, int w, int h)

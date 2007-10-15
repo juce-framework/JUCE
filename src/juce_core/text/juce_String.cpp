@@ -1431,7 +1431,7 @@ const String String::replaceCharacters (const String& charactersToReplace,
     {
         const int index = charactersToReplace.indexOfChar (*t);
 
-        if (index >= 0 && index < len2)
+        if (((unsigned int) index) < (unsigned int) len2)
             *t = charactersToInsertInstead [index];
 
         ++t;
@@ -1508,7 +1508,7 @@ const String String::toLowerCase() const throw()
 //==============================================================================
 tchar& String::operator[] (const int index) throw()
 {
-    jassert (index >= 0 && index <= length());
+    jassert (((unsigned int) index) <= (unsigned int) length());
 
     dupeInternalIfMultiplyReferenced();
 
