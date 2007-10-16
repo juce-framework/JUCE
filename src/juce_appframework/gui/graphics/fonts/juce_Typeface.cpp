@@ -277,57 +277,53 @@ const Path* Typeface::getOutlineForGlyph (const juce_wchar character) throw()
 
 const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character) throw()
 {
-    if (character > 0 && character < 128 && lookupTable [character] > 0)
-        return (const TypefaceGlyphInfo*) glyphs [(int)lookupTable [character]];
-
-    const TypefaceGlyphInfo* glyph = 0;
+    if (((unsigned int) character) < 128 && lookupTable [character] > 0)
+        return (const TypefaceGlyphInfo*) glyphs [(int) lookupTable [character]];
 
     for (int i = 0; i < glyphs.size(); ++i)
     {
-        const TypefaceGlyphInfo* const g = (TypefaceGlyphInfo*) glyphs.getUnchecked(i);
+        const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) glyphs.getUnchecked(i);
 
         if (g->character == character)
-        {
-            glyph = g;
-            break;
-        }
+            return g;
     }
 
-    if (glyph == 0)
+    if (! isFullyPopulated)
     {
-        if (! isFullyPopulated)
+        findAndAddSystemGlyph (character);
+
+        for (int i = 0; i < glyphs.size(); ++i)
         {
-            findAndAddSystemGlyph (character);
+            const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) glyphs.getUnchecked(i);
 
-            for (int i = 0; i < glyphs.size(); ++i)
-            {
-                const TypefaceGlyphInfo* const g = (TypefaceGlyphInfo*) glyphs.getUnchecked(i);
-
-                if (g->character == character)
-                {
-                    glyph = g;
-                    break;
-                }
-            }
-        }
-
-        if (glyph == 0)
-        {
-            if (CharacterFunctions::isWhitespace (character) && character != L' ')
-                glyph = getGlyph (L' ');
-            else if (character != defaultCharacter)
-                glyph = getGlyph (defaultCharacter);
+            if (g->character == character)
+                return g;
         }
     }
 
-    return glyph;
+    if (CharacterFunctions::isWhitespace (character) && character != L' ')
+        return getGlyph (L' ');
+    else if (character != defaultCharacter)
+        return getGlyph (defaultCharacter);
+
+    return 0;
 }
 
 void Typeface::addGlyph (const juce_wchar character,
                          const Path& path,
                          const float horizontalSpacing) throw()
 {
-    if (character > 0 && character < 128)
+#ifdef JUCE_DEBUG
+    for (int i = 0; i < glyphs.size(); ++i)
+    {
+        const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) glyphs.getUnchecked(i);
+
+        if (g->character == character)
+            jassertfalse;
+    }
+#endif
+
+    if (((unsigned int) character) < 128)
         lookupTable [character] = (short) glyphs.size();
 
     glyphs.add (new TypefaceGlyphInfo (character,

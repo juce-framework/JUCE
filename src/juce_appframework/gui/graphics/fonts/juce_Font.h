@@ -33,7 +33,6 @@
 #define __JUCE_FONT_JUCEHEADER__
 
 #include "juce_Typeface.h"
-#include "../geometry/juce_Path.h"
 #include "../../../../juce_core/text/juce_StringArray.h"
 #include "../../../../juce_core/containers/juce_ReferenceCountedObject.h"
 #include "../../../../juce_core/containers/juce_OwnedArray.h"

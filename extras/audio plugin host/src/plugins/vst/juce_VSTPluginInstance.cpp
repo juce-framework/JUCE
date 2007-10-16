@@ -173,11 +173,10 @@ static Array <VSTPluginWindow*> activeWindows;
 
 //==============================================================================
 #if JUCE_MAC
-namespace JUCE_NAMESPACE
-{
-    extern bool juce_isHIViewCreatedByJuce (HIViewRef view);
-    extern bool juce_isWindowCreatedByJuce (WindowRef window);
-}
+BEGIN_JUCE_NAMESPACE
+  extern bool juce_isHIViewCreatedByJuce (HIViewRef view);
+  extern bool juce_isWindowCreatedByJuce (WindowRef window);
+END_JUCE_NAMESPACE
 
 #if JUCE_PPC
 static void* NewCFMFromMachO (void* const machofp) throw()
@@ -791,8 +790,6 @@ void VSTPluginInstance::prepareToPlay (double sampleRate_,
 
     setLatencySamples (effect->initialDelay);
 
-    midiCollector.reset (sampleRate_);
-
     juce_free (channels);
     channels = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumOutputChannels() + 2, getNumInputChannels() + 2));
 
@@ -845,7 +842,6 @@ void VSTPluginInstance::releaseResources()
         setPower (false);
     }
 
-    midiCollector.reset (getSampleRate());
     tempBuffer.setSize (1, 1);
     incomingMidi.clear();
 
@@ -1076,7 +1072,7 @@ public:
         closePluginWindow();
 
         activeWindows.removeValue (this);
-        plugin.editorBeingDeleted  (this);
+        plugin.editorBeingDeleted (this);
     }
 
     //==============================================================================

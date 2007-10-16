@@ -57,7 +57,7 @@ struct fxProgram;
 
 //==============================================================================
 /**
-    An instance of a plugin, created by a VSTPluginType.
+    An instance of a plugin, created by a VSTPluginFormat.
 
 */
 class VSTPluginInstance     : public AudioPluginInstance,
@@ -128,7 +128,6 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class VSTPluginType;
     friend class VSTPluginWindow;
     friend class VSTPluginFormat;
 
@@ -137,7 +136,6 @@ private:
     CriticalSection lock;
     bool wantsMidiMessages, initialised, isPowerOn;
     mutable StringArray programNames;
-    MidiMessageCollector midiCollector;
     AudioSampleBuffer tempBuffer;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
