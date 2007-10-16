@@ -63,15 +63,38 @@ AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
 AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
                                       const int numChannels_,
                                       const int numSamples) throw()
+    : numChannels (numChannels_),
+      size (numSamples),
+      allocatedBytes (0),
+      allocatedData (0)
 {
     jassert (((unsigned int) numChannels_) <= (unsigned int) maxNumAudioSampleBufferChannels);
 
+    for (int i = 0; i < numChannels_; ++i)
+    {
+        // you have to pass in the same number of valid pointers as numChannels
+        jassert (dataToReferTo[i] != 0);
+
+        channels[i] = dataToReferTo[i];
+    }
+
+    channels [numChannels_] = 0;
+}
+
+void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
+                                          const int numChannels_,
+                                          const int numSamples) throw()
+{
+    jassert (((unsigned int) numChannels_) <= (unsigned int) maxNumAudioSampleBufferChannels);
+
+    juce_free (allocatedData);
+    allocatedData = 0;
+    allocatedBytes = 0;
+
     numChannels = numChannels_;
     size = numSamples;
-    allocatedBytes = 0;
-    allocatedData = 0;
 
-    for (int i = numChannels_; --i >= 0;)
+    for (int i = 0; i < numChannels_; ++i)
     {
         // you have to pass in the same number of valid pointers as numChannels
         jassert (dataToReferTo[i] != 0);

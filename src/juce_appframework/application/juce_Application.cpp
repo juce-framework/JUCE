@@ -292,9 +292,7 @@ int JUCEApplication::main (int argc, char* argv[],
 void JUCEApplication::actionListenerCallback (const String& message)
 {
     if (message.startsWith (getApplicationName() + "/"))
-    {
-        anotherInstanceStarted (message.fromFirstOccurrenceOf (T("/"), false, false));
-    }
+        anotherInstanceStarted (message.substring (getApplicationName().length() + 1));
 }
 
 //==============================================================================
