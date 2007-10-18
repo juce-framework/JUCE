@@ -604,6 +604,8 @@ public:
                         memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
                     else
                         channels [numInChans] = (float*) buf.mData;
+
+                    ++numInChans;
                 }
                 else
                 {
