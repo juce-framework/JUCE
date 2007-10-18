@@ -600,7 +600,7 @@ public:
 
                 if (buf.mNumberChannels == 1)
                 {
-                    if (numInChans < numOut)
+                    if (numInChans < numOutChans)
                         memcpy (channels [numInChans], (const float*) buf.mData, sizeof (float) * numSamples);
                     else
                         channels [numInChans] = (float*) buf.mData;
@@ -614,14 +614,14 @@ public:
                     {
                         float* dest;
 
-                        if (numInChans >= numOut)
+                        if (numInChans < numOutChans)
                         {
-                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
-                            channels [numInChans++] = dest;
+                            dest = channels [numInChans++];
                         }
                         else
                         {
-                            dest = channels [numInChans++];
+                            dest = bufferSpace.getSampleData (nextSpareBufferChan++);
+                            channels [numInChans++] = dest;
                         }
 
                         const float* src = ((const float*) buf.mData) + subChan;
