@@ -1288,6 +1288,12 @@ void Slider::mouseDrag (const MouseEvent& e)
 
         mouseXWhenLastDragged = e.x;
         mouseYWhenLastDragged = e.y;
+
+        // (repainting synchronously makes the sliders feel a bit snappier..)
+        ComponentPeer* const peer = getPeer();
+
+        if (peer != 0)
+            peer->performAnyPendingRepaintsNow();
     }
 }
 

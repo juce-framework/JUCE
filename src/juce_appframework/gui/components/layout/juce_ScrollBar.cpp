@@ -376,7 +376,6 @@ void ScrollBar::mouseDown (const MouseEvent& e)
         isDraggingThumb = (thumbAreaSize > getLookAndFeel().getMinimumScrollbarThumbSize (*this))
                             && (thumbAreaSize > thumbSize);
     }
-
 }
 
 void ScrollBar::mouseDrag (const MouseEvent& e)
@@ -388,6 +387,12 @@ void ScrollBar::mouseDrag (const MouseEvent& e)
         setCurrentRangeStart (dragStartRange
                                 + deltaPixels * ((maximum - minimum) - rangeSize)
                                     / (thumbAreaSize - thumbSize));
+
+        // (repainting synchronously makes it feel a bit snappier..)
+        ComponentPeer* const peer = getPeer();
+
+        if (peer != 0)
+            peer->performAnyPendingRepaintsNow();
     }
     else
     {
