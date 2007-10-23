@@ -160,7 +160,7 @@ bool BitArray::operator!= (const BitArray& other) const throw()
 
 bool BitArray::operator[] (const int bit) const throw()
 {
-    return (((unsigned int) bit) <= (unsigned int) highestBit)
+    return bit >= 0 && bit <= highestBit
              && ((values [bit >> 5] & (1 << (bit & 31))) != 0);
 }
 
@@ -211,7 +211,7 @@ void BitArray::setBit (const int bit,
 
 void BitArray::clearBit (const int bit) throw()
 {
-    if (((unsigned int) bit) <= (unsigned int) highestBit)
+    if (bit >= 0 && bit <= highestBit)
         values [bit >> 5] &= ~(1 << (bit & 31));
 }
 
@@ -342,7 +342,7 @@ void BitArray::add (const BitArray& other) throw()
         if (i < other.numValues)
             remainder += other.values[i];
 
-        values[i] = (unsigned int)remainder;
+        values[i] = (unsigned int) remainder;
         remainder >>= 32;
     }
 
@@ -390,13 +390,13 @@ void BitArray::subtract (const BitArray& other) throw()
 
         if (values[i] >= amountToSubtract)
         {
-            values[i] = (unsigned int)(values[i] - amountToSubtract);
+            values[i] = (unsigned int) (values[i] - amountToSubtract);
             amountToSubtract = 0;
         }
         else
         {
-            const int64 n = ((int64)values[i] + (((int64)1) << 32)) - amountToSubtract;
-            values[i] = (unsigned int)n;
+            const int64 n = ((int64) values[i] + (((int64) 1) << 32)) - amountToSubtract;
+            values[i] = (unsigned int) n;
             amountToSubtract = 1;
         }
     }
