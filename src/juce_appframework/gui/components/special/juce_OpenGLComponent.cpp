@@ -143,7 +143,7 @@ private:
 //==============================================================================
 OpenGLComponent::OpenGLComponent()
     : context (0),
-      componentToShareListsWith (0),
+      contextToShareListsWith (0),
       needToUpdateViewport (true)
 {
     setOpaque (true);
@@ -205,13 +205,13 @@ void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
     }
 }
 
-void OpenGLComponent::shareWith (OpenGLComponent* const comp)
+void OpenGLComponent::shareWith (OpenGLContext* context)
 {
-    if (componentToShareListsWith != comp)
+    if (contextToShareListsWith != context)
     {
         const ScopedLock sl (contextLock);
         deleteContext();
-        componentToShareListsWith = comp;
+        contextToShareListsWith = context;
     }
 }
 
@@ -225,9 +225,7 @@ bool OpenGLComponent::makeCurrentContextActive()
         {
             context = OpenGLContext::createContextForWindow (this,
                                                              preferredPixelFormat,
-                                                             componentToShareListsWith != 0
-                                                                 ? componentToShareListsWith->context
-                                                                 : 0);
+                                                             contextToShareListsWith);
 
             if (context != 0)
             {

@@ -207,12 +207,18 @@ public:
     /** Returns the pixel format that this component is currently using. */
     const OpenGLPixelFormat getPixelFormat() const;
 
-    /** Specifies another component whose OpenGL context should be shared with
-        this one.
+    /** Specifies an OpenGL context which should be shared with the one that this
+        component is using.
 
         This is an OpenGL feature that lets two contexts share their texture data.
+
+        Note that this pointer is stored by the component, and when the component
+        needs to recreate its internal context for some reason, the same context
+        will be used again to share lists. So if you pass a context in here,
+        don't delete the context while this component is still using it! You can
+        call shareWith (0) to stop this component from sharing with it.
     */
-    void shareWith (OpenGLComponent* const componentToShareListsWith);
+    void shareWith (OpenGLContext* contextToShareListsWith);
 
     //==============================================================================
     /** Flips the openGL buffers over. */
@@ -323,7 +329,7 @@ private:
     OpenGLComponentWatcher* componentWatcher;
 
     OpenGLContext* context;
-    OpenGLComponent* componentToShareListsWith;
+    OpenGLContext* contextToShareListsWith;
 
     CriticalSection contextLock;
     OpenGLPixelFormat preferredPixelFormat;

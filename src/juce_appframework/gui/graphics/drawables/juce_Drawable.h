@@ -75,7 +75,8 @@ public:
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
-        This is basically a quick way of saying:
+        The co-ordinates passed-in are used to translate the object relative to its own
+        origin before drawing it - this is basically a quick way of saying:
 
         @code
         draw (g, AffineTransform::translation (x, y)).
@@ -109,10 +110,14 @@ public:
 
     //==============================================================================
     /** Returns the smallest rectangle that can contain this Drawable object.
+
+        Co-ordinates are relative to the object's own origin.
     */
     virtual void getBounds (float& x, float& y, float& width, float& height) const = 0;
 
     /** Returns true if the given point is somewhere inside this Drawable.
+
+        Co-ordinates are relative to the object's own origin.
     */
     virtual bool hitTest (float x, float y) const = 0;
 
