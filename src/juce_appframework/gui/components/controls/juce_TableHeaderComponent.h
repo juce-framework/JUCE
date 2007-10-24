@@ -220,7 +220,11 @@ public:
     /** Changes the column which is the sort column.
 
         This can cause an asynchronous callback to the tableSortOrderChanged() method of any registered listeners.
-        @see getSortColumnId, isSortedForwards
+
+        If this method doesn't actually change the column ID, then no re-sort will take place (you can
+        call reSortTable() to force a re-sort to happen if you've modified the table's contents).
+
+        @see getSortColumnId, isSortedForwards, reSortTable
     */
     void setSortColumnId (const int columnId, const bool sortForwards);
 
@@ -234,6 +238,16 @@ public:
         @see setSortColumnId
     */
     bool isSortedForwards() const throw();
+
+    /** Triggers a re-sort of the table according to the current sort-column.
+
+        If you modifiy the table's contents, you can call this to signal that the table needs
+        to be re-sorted.
+
+        (This doesn't do any sorting synchronously - it just asynchronously sends a call to the
+        tableSortOrderChanged() method of any listeners).
+    */
+    void reSortTable();
 
     //==============================================================================
     /** Returns the total width of all the visible columns in the table.

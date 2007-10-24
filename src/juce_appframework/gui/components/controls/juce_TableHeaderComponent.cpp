@@ -409,9 +409,7 @@ void TableHeaderComponent::setSortColumnId (const int columnId, const bool sortF
         if (ci != 0)
             ci->propertyFlags |= (sortForwards ? sortedForwards : sortedBackwards);
 
-        sortChanged = true;
-        repaint();
-        triggerAsyncUpdate();
+        reSortTable();
     }
 }
 
@@ -431,6 +429,13 @@ bool TableHeaderComponent::isSortedForwards() const throw()
             return (columns.getUnchecked(i)->propertyFlags & sortedForwards) != 0;
 
     return true;
+}
+
+void TableHeaderComponent::reSortTable()
+{
+    sortChanged = true;
+    repaint();
+    triggerAsyncUpdate();
 }
 
 //==============================================================================
