@@ -370,17 +370,17 @@ const File File::getSpecialLocation (const SpecialLocationType type)
                 homeDir = pw->pw_dir;
         }
 
-        return File (String (homeDir));
+        return File (String::fromUTF8 ((const uint8*) homeDir));
     }
 
     case userDocumentsDirectory:
+    case userMusicDirectory:
+    case userMoviesDirectory:
+    case userApplicationDataDirectory:
         return File ("~");
 
     case userDesktopDirectory:
         return File ("~/Desktop");
-
-    case userApplicationDataDirectory:
-        return File ("~");
 
     case commonApplicationDataDirectory:
         return File ("/var");

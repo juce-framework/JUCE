@@ -569,23 +569,38 @@ static const File juce_getSpecialFolderPath (int type) throw()
 
 const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType type)
 {
+    int csidlType = 0;
+
     switch (type)
     {
     case userHomeDirectory:
     case userDocumentsDirectory:
-        return juce_getSpecialFolderPath (CSIDL_PERSONAL);
+        csidlType = CSIDL_PERSONAL;
+        break;
 
     case userDesktopDirectory:
-        return juce_getSpecialFolderPath (CSIDL_DESKTOP);
+        csidlType = CSIDL_DESKTOP;
+        break;
 
     case userApplicationDataDirectory:
-        return juce_getSpecialFolderPath (CSIDL_APPDATA);
+        csidlType = CSIDL_APPDATA;
+        break;
 
     case commonApplicationDataDirectory:
-        return juce_getSpecialFolderPath (CSIDL_COMMON_APPDATA);
+        csidlType = CSIDL_COMMON_APPDATA;
+        break;
 
     case globalApplicationsDirectory:
-        return juce_getSpecialFolderPath (CSIDL_PROGRAM_FILES);
+        csidlType = CSIDL_PROGRAM_FILES;
+        break;
+
+    case userMusicDirectory:
+        csidlType = CSIDL_MYMUSIC;
+        break;
+
+    case userMoviesDirectory:
+        csidlType = CSIDL_MYVIDEO;
+        break;
 
     case tempDirectory:
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
@@ -643,10 +658,10 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
 
     default:
         jassertfalse // unknown type?
-        break;
+        return File::nonexistent;
     }
 
-    return File::nonexistent;
+    return juce_getSpecialFolderPath (csidlType);
 }
 
 

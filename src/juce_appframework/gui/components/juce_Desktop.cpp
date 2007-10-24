@@ -77,12 +77,26 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 //==============================================================================
 void Desktop::refreshMonitorSizes() throw()
 {
+    const Array <Rectangle> oldClipped (monitorCoordsClipped);
+    const Array <Rectangle> oldUnclipped (monitorCoordsUnclipped);
+
     monitorCoordsClipped.clear();
     monitorCoordsUnclipped.clear();
     juce_updateMultiMonitorInfo (monitorCoordsClipped, true);
     juce_updateMultiMonitorInfo (monitorCoordsUnclipped, false);
     jassert (monitorCoordsClipped.size() > 0
               && monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
+
+    if (oldClipped != monitorCoordsClipped 
+         || oldUnclipped != monitorCoordsUnclipped)
+    {
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+        {
+            ComponentPeer* const p = ComponentPeer::getPeer (i);
+            if (p != 0)
+                p->handleScreenSizeChange();
+        }
+    }
 }
 
 int Desktop::getNumDisplayMonitors() const throw()

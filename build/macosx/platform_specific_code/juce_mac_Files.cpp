@@ -612,36 +612,49 @@ bool File::isOnHardDisk() const throw()
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
+    const char* resultPath = 0;
+
     switch (type)
     {
     case userHomeDirectory:
-    {
-        const char* homeDir = getenv ("HOME");
+        resultPath = getenv ("HOME");
 
-        if (homeDir == 0)
+        if (resultPath == 0)
         {
             struct passwd* const pw = getpwuid (getuid());
             if (pw != 0)
-                homeDir = pw->pw_dir;
+                resultPath = pw->pw_dir;
         }
 
-        return File (PlatformUtilities::convertToPrecomposedUnicode (homeDir));
-    }
+        break;
 
     case userDocumentsDirectory:
-        return File ("~/Documents");
+        resultPath = "~/Documents";
+        break;
 
     case userDesktopDirectory:
-        return File ("~/Desktop");
+        resultPath = "~/Desktop";
+        break;
 
     case userApplicationDataDirectory:
-        return File ("~/Library");
+        resultPath = "~/Library";
+        break;
 
     case commonApplicationDataDirectory:
-        return File ("/Library");
+        resultPath = "/Library";
+        break;
 
     case globalApplicationsDirectory:
-        return File ("/Applications");
+        resultPath = "/Applications";
+        break;
+
+    case userMusicDirectory:
+        resultPath = "~/Music";
+        break;
+
+    case userMoviesDirectory:
+        resultPath = "~/Movies";
+        break;
 
     case tempDirectory:
     {
@@ -667,6 +680,9 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         jassertfalse // unknown type?
         break;
     }
+
+    if (resultPath != 0)
+        return File (PlatformUtilities::convertToPrecomposedUnicode (resultPath));
 
     return File::nonexistent;
 }

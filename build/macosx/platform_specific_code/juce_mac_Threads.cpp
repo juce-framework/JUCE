@@ -142,7 +142,7 @@ void WaitableEvent::signal() const throw()
 
     pthread_mutex_lock (&es->mutex);
     es->triggered = true;
-    pthread_cond_signal (&es->condition);
+    pthread_cond_broadcast (&es->condition);
     pthread_mutex_unlock (&es->mutex);
 }
 

@@ -2191,7 +2191,6 @@ private:
                     case WM_DISPLAYCHANGE:
                         InvalidateRect (h, 0, 0);
                         createPaletteIfNeeded = true;
-                        handleScreenSizeChange();
                         // intentional fall-through...
                     case WM_SETTINGCHANGE:  // note the fall-through in the previous case!
                         doSettingChange();

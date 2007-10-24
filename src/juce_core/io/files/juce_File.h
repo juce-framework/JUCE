@@ -759,7 +759,15 @@ public:
             So on windows, this would be something like "c:\program files", on the
             Mac "/Applications", or "/usr" on linux.
         */
-        globalApplicationsDirectory
+        globalApplicationsDirectory,
+
+        /** The most likely place where a user might store their music files.
+        */
+        userMusicDirectory,
+
+        /** The most likely place where a user might store their movie files.
+        */
+        userMoviesDirectory,
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or

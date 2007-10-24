@@ -236,9 +236,6 @@ public:
 class MouseCheckTimer  : private Timer,
                          private DeletedAtShutdown
 {
-    HIViewComponentPeer* lastPeerUnderMouse;
-    int lastX, lastY;
-
 public:
     MouseCheckTimer()
         : lastX (0),
@@ -246,10 +243,19 @@ public:
     {
         lastPeerUnderMouse = 0;
         resetMouseMoveChecker();
+
+#if ! MACOS_10_2_OR_EARLIER
+        // Just putting this in here because it's a convenient object that'll get deleted at shutdown
+        CGDisplayRegisterReconfigurationCallback (&displayChangeCallback, 0);
+#endif
     }
 
     ~MouseCheckTimer()
     {
+#if ! MACOS_10_2_OR_EARLIER
+        CGDisplayRemoveReconfigurationCallback (&displayChangeCallback, 0);
+#endif
+
         clearSingletonInstance();
     }
 
@@ -272,6 +278,17 @@ public:
     }
 
     void timerCallback();
+
+private:
+    HIViewComponentPeer* lastPeerUnderMouse;
+    int lastX, lastY;
+
+#if ! MACOS_10_2_OR_EARLIER
+    static void displayChangeCallback (CGDirectDisplayID, CGDisplayChangeSummaryFlags flags, void*)
+    {
+        Desktop::getInstance().refreshMonitorSizes();
+    }
+#endif
 };
 
 juce_ImplementSingleton_SingleThreaded (MouseCheckTimer)
@@ -2400,8 +2417,6 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 
     if (monitorCoords.size() == 0)
         monitorCoords.add (Rectangle (0, 0, 1024, 768));
-
-    //xxx need to register for display change callbacks
 }
 
 //==============================================================================
