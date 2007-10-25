@@ -47,26 +47,8 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
     directoriesToSearch.removeRedundantPaths();
 
     for (int j = 0; j < directoriesToSearch.getNumPaths(); ++j)
-    {
-        DirectoryIterator iter (directoriesToSearch[j], recursive, "*", File::findFilesAndDirectories);
-
-        while (iter.next())
-        {
-            const File f (iter.getFile());
-
-            for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
-            {
-                AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
-
-                if (format->fileMightContainThisPluginType (f))
-                {
-                    filesToScan.add (new File (f));
-                    break;
-                }
-            }
-        }
-    }
-
+        recursiveFileSearch (directoriesToSearch [j], recursive);
+    
     // If any plugins have crashed recently when being loaded, move them to the
     // end of the list to give the others a chance to load correctly..
     const StringArray crashedPlugins (getDeadMansPedalFile());
@@ -78,6 +60,34 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
         for (int j = filesToScan.size(); --j >= 0;)
             if (f == *filesToScan.getUnchecked (j))
                 filesToScan.move (j, -1);
+    }
+}
+
+void PluginDirectoryScanner::recursiveFileSearch (const File& dir, const bool recursive)
+{
+    // avoid allowing the dir iterator to be recursive, because we want to avoid letting it delve inside
+    // .component or .vst directories.
+    DirectoryIterator iter (dir, false, "*", File::findFilesAndDirectories);
+
+    while (iter.next())
+    {
+        const File f (iter.getFile());
+        bool isPlugin = false;
+
+        for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
+        {
+            AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
+
+            if (format->fileMightContainThisPluginType (f))
+            {
+                isPlugin = true;
+                filesToScan.add (new File (f));
+                break;
+            }
+        }
+
+        if (recursive && (! isPlugin) && f.isDirectory())
+            recursiveFileSearch (f, true);
     }
 }
 

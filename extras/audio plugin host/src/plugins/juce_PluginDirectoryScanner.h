@@ -108,6 +108,7 @@ private:
     int nextIndex;
     float progress;
 
+    void recursiveFileSearch (const File& dir, const bool recursive);
     const StringArray getDeadMansPedalFile() throw();
     void setDeadMansPedalFile (const StringArray& newContents) throw();
 };
