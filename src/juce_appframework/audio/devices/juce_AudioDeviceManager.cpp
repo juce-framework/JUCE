@@ -63,6 +63,7 @@ AudioDeviceManager::~AudioDeviceManager()
 {
     stopDevice();
     deleteAndZero (currentAudioDevice);
+    deleteAndZero (defaultMidiOutput);
     delete lastExplicitSettings;
 }
 

@@ -478,6 +478,8 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
 
     if (currentDevice != 0)
     {
+        audioDeviceDropDown->setText (currentDevice->getName(), true);
+
         // sample rate
         addAndMakeVisible (sampleRateDropDown = new ComboBox ("samplerate"));
         sampleRateLabel = new Label ("l2", TRANS ("sample rate:"));
