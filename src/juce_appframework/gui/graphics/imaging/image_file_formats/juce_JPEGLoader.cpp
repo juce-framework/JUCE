@@ -54,23 +54,22 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static void silentErrorCallback1 (j_common_ptr)
-{
-}
+struct JPEGDecodingFailure {};
 
-static void silentErrorCallback2 (j_common_ptr, int)
+static void fatalErrorHandler (j_common_ptr)
 {
-}
+    throw JPEGDecodingFailure();
+} 
 
-static void silentErrorCallback3 (j_common_ptr, char*)
-{
-}
+static void silentErrorCallback1 (j_common_ptr)         {}
+static void silentErrorCallback2 (j_common_ptr, int)    {}
+static void silentErrorCallback3 (j_common_ptr, char*)  {}
 
 static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
 {
     zerostruct (err);
 
-    err.error_exit = silentErrorCallback1;
+    err.error_exit = fatalErrorHandler;
     err.emit_message = silentErrorCallback2;
     err.output_message = silentErrorCallback1;
     err.format_message = silentErrorCallback3;
@@ -124,47 +123,52 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
         jpegDecompStruct.src->next_input_byte   = (const unsigned char*) mb.getData();
         jpegDecompStruct.src->bytes_in_buffer   = mb.getSize();
 
-        jpeg_read_header (&jpegDecompStruct, TRUE);
-
-        jpeg_calc_output_dimensions (&jpegDecompStruct);
-
-        const int width = jpegDecompStruct.output_width;
-        const int height = jpegDecompStruct.output_height;
-
-        jpegDecompStruct.out_color_space = JCS_RGB;
-
-        JSAMPARRAY buffer
-            = (*jpegDecompStruct.mem->alloc_sarray) ((j_common_ptr) &jpegDecompStruct,
-                                                     JPOOL_IMAGE,
-                                                     width * 3, 1);
-
-        if (jpeg_start_decompress (&jpegDecompStruct))
+        try
         {
-            image = new Image (Image::RGB, width, height, false);
+            jpeg_read_header (&jpegDecompStruct, TRUE);
 
-            for (int y = 0; y < height; ++y)
+            jpeg_calc_output_dimensions (&jpegDecompStruct);
+
+            const int width = jpegDecompStruct.output_width;
+            const int height = jpegDecompStruct.output_height;
+
+            jpegDecompStruct.out_color_space = JCS_RGB;
+
+            JSAMPARRAY buffer
+                = (*jpegDecompStruct.mem->alloc_sarray) ((j_common_ptr) &jpegDecompStruct,
+                                                         JPOOL_IMAGE,
+                                                         width * 3, 1);
+
+            if (jpeg_start_decompress (&jpegDecompStruct))
             {
-                jpeg_read_scanlines (&jpegDecompStruct, buffer, 1);
+                image = new Image (Image::RGB, width, height, false);
 
-                int stride, pixelStride;
-                uint8* pixels = image->lockPixelDataReadWrite (0, y, width, 1, stride, pixelStride);
-                const uint8* src = *buffer;
-                uint8* dest = pixels;
-
-                for (int i = width; --i >= 0;)
+                for (int y = 0; y < height; ++y)
                 {
-                    ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
-                    dest += pixelStride;
-                    src += 3;
+                    jpeg_read_scanlines (&jpegDecompStruct, buffer, 1);
+
+                    int stride, pixelStride;
+                    uint8* pixels = image->lockPixelDataReadWrite (0, y, width, 1, stride, pixelStride);
+                    const uint8* src = *buffer;
+                    uint8* dest = pixels;
+
+                    for (int i = width; --i >= 0;)
+                    {
+                        ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
+                        dest += pixelStride;
+                        src += 3;
+                    }
+
+                    image->releasePixelDataReadWrite (pixels);
                 }
 
-                image->releasePixelDataReadWrite (pixels);
+                jpeg_finish_decompress (&jpegDecompStruct);
             }
 
-            jpeg_finish_decompress (&jpegDecompStruct);
+            jpeg_destroy_decompress (&jpegDecompStruct);
         }
-
-        jpeg_destroy_decompress (&jpegDecompStruct);
+        catch (...)
+        {}
     }
 
     return image;
