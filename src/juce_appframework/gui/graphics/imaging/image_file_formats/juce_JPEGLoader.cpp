@@ -85,6 +85,8 @@ static void dummyCallback1 (j_decompress_ptr) throw()
 static void jpegSkip (j_decompress_ptr decompStruct, long num) throw()
 {
     decompStruct->src->next_input_byte += num;
+
+    num = jmin (num, (int) decompStruct->src->bytes_in_buffer);
     decompStruct->src->bytes_in_buffer -= num;
 }
 
