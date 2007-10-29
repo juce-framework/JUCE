@@ -1051,7 +1051,7 @@ public:
 
         @returns the focused component, or null if nothing is focused.
     */
-    static Component* getCurrentlyFocusedComponent() throw();
+    static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() throw();
 
     //==============================================================================
     /** Tries to move the keyboard focus to one of this component's siblings.
@@ -1573,7 +1573,7 @@ public:
 
         @see isMouseButtonDown, ModifierKeys
     */
-    static bool isMouseButtonDownAnywhere() throw();
+    static bool JUCE_CALLTYPE isMouseButtonDownAnywhere() throw();
 
     /** Returns the mouse's current position, relative to this component.
 
@@ -1586,7 +1586,7 @@ public:
         @returns the component or 0 if there isn't one.
         @see contains, getComponentAt
     */
-    static Component* getComponentUnderMouse() throw();
+    static Component* JUCE_CALLTYPE getComponentUnderMouse() throw();
 
     /** Allows the mouse to move beyond the edges of the screen.
 

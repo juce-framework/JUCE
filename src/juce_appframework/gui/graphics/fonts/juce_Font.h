@@ -325,6 +325,18 @@ public:
     static const StringArray findAllTypefaceNames() throw();
 
     //==============================================================================
+    /** Returns the name of the typeface to be used for rendering glyphs that aren't found
+        in the requested typeface.
+    */
+    static const String getFallbackFontName() throw();
+
+    /** Sets the (platform-specific) name of the typeface to use to find glyphs that aren't
+        available in whatever font you're trying to use.
+    */
+    static void setFallbackFontName (const String& name) throw();
+
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:

@@ -42,7 +42,7 @@ static const float minFontHeight = 0.1f;
 static const float maxFontHeight = 10000.0f;
 static const float defaultFontHeight = 14.0f;
 
-static String defaultSans, defaultSerif, defaultFixed;
+static String defaultSans, defaultSerif, defaultFixed, fallbackFont;
 
 
 //==============================================================================
@@ -168,6 +168,7 @@ void clearUpDefaultFontNames() throw() // called at shutdown by code in Typface
     defaultSans   = String::empty;
     defaultSerif  = String::empty;
     defaultFixed  = String::empty;
+    fallbackFont  = String::empty;
 }
 
 const String Font::getDefaultSansSerifFontName() throw()
@@ -188,6 +189,16 @@ const String Font::getDefaultMonospacedFontName() throw()
 void Font::setDefaultSansSerifFontName (const String& name) throw()
 {
     defaultSans = name;
+}
+
+const String Font::getFallbackFontName() throw()
+{
+    return fallbackFont;
+}
+
+void Font::setFallbackFontName (const String& name) throw()
+{
+    fallbackFont = name;
 }
 
 //==============================================================================

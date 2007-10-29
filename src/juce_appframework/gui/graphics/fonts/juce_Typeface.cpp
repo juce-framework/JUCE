@@ -302,9 +302,19 @@ const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character) throw()
     }
 
     if (CharacterFunctions::isWhitespace (character) && character != L' ')
+    {
         return getGlyph (L' ');
+    }
     else if (character != defaultCharacter)
+    {
+        const Font fallbackFont (Font::getFallbackFontName(), 10, 0);
+        Typeface* const fallbackTypeface = fallbackFont.getTypeface();
+
+        if (fallbackTypeface != 0 && fallbackTypeface != this)
+            return fallbackTypeface->getGlyph (character);
+
         return getGlyph (defaultCharacter);
+    }
 
     return 0;
 }

@@ -3371,7 +3371,7 @@ bool Component::hasKeyboardFocus (const bool trueIfChildIsFocused) const throw()
             || (trueIfChildIsFocused && isParentOf (currentlyFocusedComponent));
 }
 
-Component* Component::getCurrentlyFocusedComponent() throw()
+Component* JUCE_CALLTYPE Component::getCurrentlyFocusedComponent() throw()
 {
     return currentlyFocusedComponent;
 }
@@ -3403,7 +3403,7 @@ bool Component::isMouseOverOrDragging() const throw()
     return flags.mouseOverFlag || flags.draggingFlag;
 }
 
-bool Component::isMouseButtonDownAnywhere() throw()
+bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
 {
     return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 }
@@ -3450,7 +3450,7 @@ void Component::enableUnboundedMouseMovement (bool enable,
     }
 }
 
-Component* Component::getComponentUnderMouse() throw()
+Component* JUCE_CALLTYPE Component::getComponentUnderMouse() throw()
 {
     return componentUnderMouse;
 }
