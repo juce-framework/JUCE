@@ -46,7 +46,7 @@
 
     @see AudioProcessor
 */
-class GenericAudioProcessorEditor      : public AudioProcessorEditor
+class JUCE_API  GenericAudioProcessorEditor      : public AudioProcessorEditor
 {
 public:
     //==============================================================================
