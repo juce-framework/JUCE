@@ -196,9 +196,16 @@ void PluginListComponent::buttonClicked (Button* b)
         }
         else if (r != 0)
         {
-            scanFor (AudioPluginFormatManager::getInstance()->getFormat (r - 10));
+            typeToScan = r - 10;
+            startTimer (1);
         }
     }
+}
+
+void PluginListComponent::timerCallback()
+{
+    stopTimer();
+    scanFor (AudioPluginFormatManager::getInstance()->getFormat (typeToScan));
 }
 
 bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)
@@ -272,5 +279,18 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
             break;
 
         progress = scanner.getProgress();
+    }
+
+    if (scanner.getFailedFiles().size() > 0)
+    {
+        StringArray shortNames;
+
+        for (int i = 0; i < scanner.getFailedFiles().size(); ++i)
+            shortNames.add (File (scanner.getFailedFiles()[i]).getFileName());
+
+        AlertWindow::showMessageBox (AlertWindow::InfoIcon,
+                                     TRANS("Scan complete"),
+                                     TRANS("Note that the following files appeared to be plugin files, but failed to load correctly:\n\n")
+                                        + shortNames.joinIntoString (", "));
     }
 }

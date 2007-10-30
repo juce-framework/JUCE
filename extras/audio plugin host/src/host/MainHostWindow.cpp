@@ -233,6 +233,7 @@ const PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const St
         sortTypeMenu.addItem (201, "List plugins in alphabetical order", true, pluginSortMethod == KnownPluginList::sortAlphabetically);
         sortTypeMenu.addItem (202, "List plugins by category", true, pluginSortMethod == KnownPluginList::sortByCategory);
         sortTypeMenu.addItem (203, "List plugins by manufacturer", true, pluginSortMethod == KnownPluginList::sortByManufacturer);
+        sortTypeMenu.addItem (204, "List plugins based on the directory structure", true, pluginSortMethod == KnownPluginList::sortByFileSystemLocation);
         menu.addSubMenu ("Plugin menu type", sortTypeMenu);
 
         menu.addSeparator();
@@ -273,6 +274,8 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
             pluginSortMethod = KnownPluginList::sortByCategory;
         else if (menuItemID == 203)
             pluginSortMethod = KnownPluginList::sortByManufacturer;
+        else if (menuItemID == 204)
+            pluginSortMethod = KnownPluginList::sortByFileSystemLocation;
 
         ApplicationProperties::getInstance()->getUserSettings()
            ->setValue (T("pluginSortMethod"), (int) pluginSortMethod);

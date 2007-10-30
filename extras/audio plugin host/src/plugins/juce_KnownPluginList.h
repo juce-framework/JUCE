@@ -116,7 +116,8 @@ public:
         defaultOrder = 0,
         sortAlphabetically,
         sortByCategory,
-        sortByManufacturer
+        sortByManufacturer,
+        sortByFileSystemLocation
     };
 
     //==============================================================================

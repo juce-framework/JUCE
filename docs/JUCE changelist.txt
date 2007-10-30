@@ -7,6 +7,8 @@
 Changelist for version 1.46
 
 - new class: ScopedTryLock
+- added AudioUnit support to the audio hosting code
+
 
 ==============================================================================
 Changelist for version 1.45

@@ -199,6 +199,8 @@ public:
             diff = first->category.compareLexicographically (second->category);
         else if (method == KnownPluginList::sortByManufacturer)
             diff = first->manufacturerName.compareLexicographically (second->manufacturerName);
+        else if (method == KnownPluginList::sortByFileSystemLocation)
+            diff = first->file.getParentDirectory().getFullPathName().compare (second->file.getParentDirectory().getFullPathName());
 
         if (diff == 0)
             diff = first->name.compareLexicographically (second->name);
@@ -249,6 +251,103 @@ void KnownPluginList::recreateFromXml (const XmlElement& xml)
 //==============================================================================
 const int menuIdBase = 0x324503f4;
 
+// This is used to turn a bunch of paths into a nested menu structure.
+struct PluginFilesystemTree
+{
+private:
+    String folder;
+    OwnedArray <PluginFilesystemTree> subFolders;
+    Array <PluginDescription*> plugins;
+
+    void addPlugin (PluginDescription* const pd, const String& path)
+    {
+        if (path.isEmpty())
+        {
+            plugins.add (pd);
+        }
+        else
+        {
+            const String firstSubFolder (path.upToFirstOccurrenceOf (T("/"), false, false));
+            const String remainingPath (path.fromFirstOccurrenceOf (T("/"), false, false));
+
+            for (int i = subFolders.size(); --i >= 0;)
+            {
+                if (subFolders.getUnchecked(i)->folder.equalsIgnoreCase (firstSubFolder))
+                {
+                    subFolders.getUnchecked(i)->addPlugin (pd, remainingPath);
+                    return;
+                }
+            }
+
+            PluginFilesystemTree* const newFolder = new PluginFilesystemTree();
+            newFolder->folder = firstSubFolder;
+            subFolders.add (newFolder);
+
+            newFolder->addPlugin (pd, remainingPath);
+        }
+    }
+
+    // removes any deeply nested folders that don't contain any actual plugins
+    void optimise()
+    {
+        for (int i = subFolders.size(); --i >= 0;)
+        {
+            PluginFilesystemTree* const sub = subFolders.getUnchecked(i);
+
+            sub->optimise();
+
+            if (sub->plugins.size() == 0)
+            {
+                for (int j = 0; j < sub->subFolders.size(); ++j)
+                    subFolders.add (sub->subFolders.getUnchecked(j));
+
+                sub->subFolders.clear (false);
+                subFolders.remove (i);
+            }
+        }
+    }
+
+public:
+    void buildTree (const Array <PluginDescription*>& allPlugins)
+    {
+        for (int i = 0; i < allPlugins.size(); ++i)
+        {
+            String path (allPlugins.getUnchecked(i)->file.getParentDirectory().getFullPathName());
+
+            if (path.substring (1, 2) == T(":"))
+                path = path.substring (2);
+
+            path = path.replaceCharacter (T('\\'), T('/'));
+
+            addPlugin (allPlugins.getUnchecked(i), path);
+        }
+
+        optimise();
+    }
+
+    void addToMenu (PopupMenu& m, const OwnedArray <PluginDescription>& allPlugins) const
+    {
+        int i;
+        for (i = 0; i < subFolders.size(); ++i)
+        {
+            const PluginFilesystemTree* const sub = subFolders.getUnchecked(i);
+
+            PopupMenu subMenu;
+            sub->addToMenu (subMenu, allPlugins);
+            m.addSubMenu (sub->folder, subMenu);
+        }
+
+        for (i = 0; i < plugins.size(); ++i)
+        {
+            PluginDescription* const plugin = plugins.getUnchecked(i);
+
+            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, 
+                       plugin->name, true, false);
+        }
+    }
+};
+
+//==============================================================================
 void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) const
 {
     Array <PluginDescription*> sorted;
@@ -262,7 +361,7 @@ void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) c
     }
 
     if (sortMethod == sortByCategory
-         || sortMethod == KnownPluginList::sortByManufacturer)
+         || sortMethod == sortByManufacturer)
     {
         String lastSubMenuName;
         PopupMenu sub;
@@ -292,6 +391,12 @@ void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) c
 
         if (sub.getNumItems() > 0)
             menu.addSubMenu (lastSubMenuName, sub);
+    }
+    else if (sortMethod == sortByFileSystemLocation)
+    {
+        PluginFilesystemTree root;
+        root.buildTree (sorted);
+        root.addToMenu (menu, types);
     }
     else
     {

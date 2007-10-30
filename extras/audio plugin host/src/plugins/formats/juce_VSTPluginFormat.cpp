@@ -887,7 +887,10 @@ void VSTPluginInstance::initialise()
 
     dispatch (effIdentify, 0, 0, 0, 0);
 
-    {
+    // this code would ask the plugin for its name, but so few plugins
+    // actually bother implementing this correctly, that it's better to
+    // just ignore it and use the file name instead.
+/*    {
         char buffer [256];
         zerostruct (buffer);
         dispatch (effGetEffectName, 0, 0, buffer, 0);
@@ -896,9 +899,13 @@ void VSTPluginInstance::initialise()
         if (name.isEmpty())
             name = module->pluginName;
     }
+*/
 
-    dispatch (effSetSampleRate, 0, 0, 0, (float) getSampleRate());
-    dispatch (effSetBlockSize, 0, jmax (32, getBlockSize()), 0, 0);
+    if (getSampleRate() > 0)
+        dispatch (effSetSampleRate, 0, 0, 0, (float) getSampleRate());
+
+    if (getBlockSize() > 0)
+        dispatch (effSetBlockSize, 0, jmax (32, getBlockSize()), 0, 0);
 
     dispatch (effOpen, 0, 0, 0, 0);
 
@@ -961,7 +968,7 @@ void VSTPluginInstance::prepareToPlay (double sampleRate_,
         dispatch (effSetSampleRate, 0, 0, 0, (float) sampleRate_);
         dispatch (effSetBlockSize, 0, jmax (16, samplesPerBlockExpected), 0, 0);
 
-        tempBuffer.setSize (effect->numOutputs, samplesPerBlockExpected);
+        tempBuffer.setSize (jmax (1, effect->numOutputs), samplesPerBlockExpected);
 
         if (! isPowerOn)
             setPower (true);
@@ -2266,7 +2273,7 @@ static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt3
         return 1;
 
     case audioMasterGetVendorVersion:
-        return 1;
+        return 0x0101;
     case audioMasterGetVendorString:
     case audioMasterGetProductString:
         JUCEApplication::getInstance()

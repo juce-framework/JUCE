@@ -97,6 +97,10 @@ public:
     */
     float getProgress() const                                       { return progress; }
 
+    /** This returns a list of all the filenames of things that looked like being
+        a plugin file, but which failed to open for some reason.
+    */
+    const StringArray& getFailedFiles() const throw()               { return failedFiles; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -105,6 +109,7 @@ private:
     KnownPluginList& list;
     OwnedArray <File> filesToScan;
     File deadMansPedalFile;
+    StringArray failedFiles;
     int nextIndex;
     float progress;
 

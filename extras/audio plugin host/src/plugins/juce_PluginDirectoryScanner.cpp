@@ -129,6 +129,9 @@ bool PluginDirectoryScanner::scanNextFile (const bool dontRescanIfAlreadyInList)
             // Managed to load without crashing, so remove it from the dead-man's-pedal..
             crashedPlugins.removeString (file->getFullPathName());
             setDeadMansPedalFile (crashedPlugins);
+
+            if (typesFound.size() == 0)
+                failedFiles.add (file->getFullPathName());
         }
 
         ++nextIndex;

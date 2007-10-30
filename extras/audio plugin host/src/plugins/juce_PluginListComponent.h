@@ -44,7 +44,8 @@
 class PluginListComponent   : public Component,
                               public ListBoxModel,
                               public ChangeListener,
-                              public ButtonListener
+                              public ButtonListener,
+                              public Timer
 {
 public:
     //==============================================================================
@@ -79,6 +80,8 @@ public:
     void buttonClicked (Button* b);
     /** @internal */
     void changeListenerCallback (void*);
+    /** @internal */
+    void timerCallback();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -89,6 +92,7 @@ private:
     ListBox* listBox;
     TextButton* optionsButton;
     PropertiesFile* propertiesToUse;
+    int typeToScan;
 
     void scanFor (AudioPluginFormat* format);
 };
