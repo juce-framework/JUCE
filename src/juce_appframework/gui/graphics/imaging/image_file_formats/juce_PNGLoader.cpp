@@ -135,7 +135,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         for (y = (int) height; --y >= 0;)
             rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
 
-        bool crashed = true;
+        bool crashed = false;
 
         try
         {
@@ -144,7 +144,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         }
         catch (...)
         {
-            crashed = false;
+            crashed = true;
         }
 
         juce_free (rows);
