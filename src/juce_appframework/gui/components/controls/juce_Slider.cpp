@@ -1139,7 +1139,7 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                 if (rotaryStop && ! e.mouseWasClicked())
                 {
-                    if (fabs (angle - lastAngle) > double_Pi * 1.5)
+                    if (fabs (angle - lastAngle) > double_Pi)
                     {
                         if (angle >= lastAngle)
                             angle -= double_Pi * 2.0;
