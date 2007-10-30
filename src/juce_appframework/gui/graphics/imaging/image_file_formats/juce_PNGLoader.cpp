@@ -84,7 +84,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
             return 0;
         }
 
-        png_set_error_fn (pngReadStruct, pngErrorCallback, pngErrorCallback, pngErrorCallback);
+        png_set_error_fn (pngReadStruct, 0, pngErrorCallback, pngErrorCallback);
 
         // read the header..
         png_set_read_fn (pngReadStruct, &in, pngReadCallback);
