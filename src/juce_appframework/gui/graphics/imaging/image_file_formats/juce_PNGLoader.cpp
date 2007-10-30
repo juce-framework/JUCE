@@ -57,6 +57,13 @@ static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size
     in->read (data, (int) length);
 }
 
+struct PNGErrorStruct {};
+
+static void pngErrorCallback (png_structp, png_const_charp)
+{
+    throw PNGErrorStruct();
+}
+
 //==============================================================================
 Image* juce_loadPNGImageFromStream (InputStream& in) throw()
 {
@@ -77,17 +84,28 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
             return 0;
         }
 
+        png_set_error_fn (pngReadStruct, pngErrorCallback, pngErrorCallback, pngErrorCallback);
+
         // read the header..
         png_set_read_fn (pngReadStruct, &in, pngReadCallback);
-        png_read_info (pngReadStruct, pngInfoStruct);
 
         png_uint_32 width, height;
         int bitDepth, colorType, interlaceType;
 
-        png_get_IHDR (pngReadStruct, pngInfoStruct,
-                      &width, &height,
-                      &bitDepth, &colorType,
-                      &interlaceType, 0, 0);
+        try
+        {
+            png_read_info (pngReadStruct, pngInfoStruct);
+
+            png_get_IHDR (pngReadStruct, pngInfoStruct,
+                          &width, &height,
+                          &bitDepth, &colorType,
+                          &interlaceType, 0, 0);
+        }
+        catch (...)
+        {
+            png_destroy_read_struct (&pngReadStruct, 0, 0);
+            return 0;
+        }
 
         if (bitDepth == 16)
             png_set_strip_16 (pngReadStruct);
@@ -117,12 +135,23 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         for (y = (int) height; --y >= 0;)
             rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
 
-        png_read_image (pngReadStruct, rows);
+        bool crashed = true;
+
+        try
+        {
+            png_read_image (pngReadStruct, rows);
+            png_read_end (pngReadStruct, pngInfoStruct);
+        }
+        catch (...)
+        {
+            crashed = false;
+        }
 
         juce_free (rows);
-
-        png_read_end (pngReadStruct, pngInfoStruct);
         png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
+
+        if (crashed)
+            return 0;
 
         // now convert the data to a juce image format..
         image = new Image (hasAlphaChan ? Image::ARGB : Image::RGB,
