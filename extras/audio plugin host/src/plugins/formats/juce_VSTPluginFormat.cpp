@@ -1340,7 +1340,16 @@ public:
                                        getWidth(), getHeight());
 
 #if JUCE_MAC
-                dispatch (effEditDraw, 0, 0, 0, 0);
+                if (pluginViewRef == 0)
+                {
+                    ERect r;
+                    r.left = getScreenX() - peer->getScreenX();
+                    r.right = r.left + getWidth();
+                    r.top = getScreenY() - peer->getScreenY();
+                    r.bottom = r.top + getHeight();
+
+                    dispatch (effEditDraw, 0, 0, &r, 0);
+                }
 #elif JUCE_LINUX
                 if (pluginWindow != 0)
                 {
