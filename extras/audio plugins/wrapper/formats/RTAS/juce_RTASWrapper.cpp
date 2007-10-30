@@ -77,6 +77,7 @@
 #include "CEffectTypeRTAS.h"
 #include "CPluginControl.h"
 #include "CPluginControl_OnOff.h"
+#include "FicProcessTokens.h"
 
 //==============================================================================
 #ifdef _MSC_VER
@@ -171,12 +172,15 @@ public:
     }
 
     //==============================================================================
-    class JuceCustomUIView  : public CCustomView
+    class JuceCustomUIView  : public CCustomView,
+                              public Timer
     {
     public:
         //==============================================================================
-        JuceCustomUIView (AudioProcessor* const filter_)
+        JuceCustomUIView (AudioProcessor* const filter_,
+                          JucePlugInProcess* const process_)
             : filter (filter_),
+              process (process_),
               editorComp (0),
               wrapper (0)
         {
@@ -197,13 +201,30 @@ public:
                 jassert (editorComp != 0);
             }
 
+            Rect oldRect;
+            GetRect (&oldRect);
+
             Rect r;
             r.left = 0;
             r.top = 0;
             r.right = editorComp->getWidth();
             r.bottom = editorComp->getHeight();
-
             SetRect (&r);
+
+            if ((oldRect.right != r.right) || (oldRect.bottom != r.bottom))
+                startTimer (50);
+        }
+
+        void timerCallback()
+        {
+            if (! JUCE_NAMESPACE::Component::isMouseButtonDownAnywhere())
+            {
+                stopTimer();
+
+                // Send a token to the host to tell it about the resize
+                SSetProcessWindowResizeToken token (process->fRootNameId, process->fRootNameId);
+                FicSDSDispatchToken (&token);
+            }
         }
 
         void attachToWindow (GrafPtr port)
@@ -262,6 +283,7 @@ public:
         //==============================================================================
     private:
         AudioProcessor* const filter;
+        JucePlugInProcess* const process;
         juce::Component* wrapper;
         AudioProcessorEditor* editorComp;
 
@@ -450,6 +472,7 @@ public:
 
 #if JUCE_WIN32
                 resizeHostWindow (hostWindow, titleW, titleH, this);
+                owner->updateSize();
 #else
                 Rect r;
                 GetWindowBounds ((WindowRef) hostWindow, kWindowContentRgn, &r);
@@ -533,7 +556,7 @@ public:
 
     CPlugInView* CreateCPlugInView()
     {
-        return new JuceCustomUIView (juceFilter);
+        return new JuceCustomUIView (juceFilter, this);
     }
 
     void SetViewPort (GrafPtr port)
