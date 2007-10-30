@@ -266,18 +266,22 @@
 					>
 				</File>
 				<Filter
-					Name="vst"
+					Name="formats"
 					>
 					<File
-						RelativePath="..\..\src\plugins\vst\juce_VSTPluginFormat.h"
+						RelativePath="..\..\src\plugins\formats\juce_AudioUnitPluginFormat.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\plugins\vst\juce_VSTPluginInstance.cpp"
+						RelativePath="..\..\src\plugins\formats\juce_AudioUnitPluginFormat.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\src\plugins\vst\juce_VSTPluginInstance.h"
+						RelativePath="..\..\src\plugins\formats\juce_VSTPluginFormat.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\plugins\formats\juce_VSTPluginFormat.h"
 						>
 					</File>
 				</Filter>

@@ -35,6 +35,10 @@
 #include "juce_AudioPluginInstance.h"
 class PluginDescription;
 
+// XXX temporary place for these flags...
+#define JUCE_PLUGINHOST_VST 1
+#define JUCE_PLUGINHOST_AU 1
+
 
 //==============================================================================
 /**

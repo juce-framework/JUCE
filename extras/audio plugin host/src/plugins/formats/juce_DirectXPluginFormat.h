@@ -29,25 +29,30 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
+#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__xy
+#define __JUCE_VSTPLUGINFORMAT_JUCEHEADER__xy
 
 #include "../juce_AudioPluginFormat.h"
+
+#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+
+
+//   Sorry, this file is just a placeholder at the moment!...
 
 
 //==============================================================================
 /**
-    Implements a plugin format manager for VSTs.
+    Implements a plugin format manager for DirectX plugins.
 */
-class VSTPluginFormat   : public AudioPluginFormat
+class DirectXPluginFormat   : public AudioPluginFormat
 {
 public:
     //==============================================================================
-    VSTPluginFormat();
-    ~VSTPluginFormat();
+    DirectXPluginFormat();
+    ~DirectXPluginFormat();
 
     //==============================================================================
-    const String getName() const                { return "VST"; }
+    const String getName() const                { return "DirectX"; }
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const File& file);
@@ -57,5 +62,6 @@ public:
     juce_UseDebuggingNewOperator
 };
 
+#endif
 
 #endif   // __JUCE_VSTPLUGINFORMAT_JUCEHEADER__

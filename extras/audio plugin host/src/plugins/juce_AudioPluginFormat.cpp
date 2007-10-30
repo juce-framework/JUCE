@@ -31,7 +31,11 @@
 
 #include "../../../../juce.h"
 #include "juce_AudioPluginFormat.h"
-#include "vst/juce_VSTPluginFormat.h"
+
+#include "formats/juce_VSTPluginFormat.h"
+#include "formats/juce_AudioUnitPluginFormat.h"
+#include "formats/juce_DirectXPluginFormat.h"
+#include "formats/juce_LADSPAPluginFormat.h"
 
 
 //==============================================================================
@@ -51,10 +55,40 @@ void AudioPluginFormatManager::addDefaultFormats()
 #ifdef JUCE_DEBUG
     // you should only call this method once!
     for (int i = formats.size(); --i >= 0;)
+    {
+  #if JUCE_PLUGINHOST_VST
         jassert (dynamic_cast <VSTPluginFormat*> (formats[i]) == 0);
+  #endif
+
+  #if JUCE_PLUGINHOST_AU && JUCE_MAC
+        jassert (dynamic_cast <AudioUnitPluginFormat*> (formats[i]) == 0);
+  #endif
+
+  #if JUCE_PLUGINHOST_DX && JUCE_WIN32
+        jassert (dynamic_cast <DirectXPluginFormat*> (formats[i]) == 0);
+  #endif
+
+  #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+        jassert (dynamic_cast <LADSPAPluginFormat*> (formats[i]) == 0);
+  #endif
+    }
 #endif
 
+#if JUCE_PLUGINHOST_VST
     formats.add (new VSTPluginFormat());
+#endif
+
+#if JUCE_PLUGINHOST_AU && JUCE_MAC
+    formats.add (new AudioUnitPluginFormat());
+#endif
+
+#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+    formats.add (new DirectXPluginFormat());
+#endif
+
+#if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+    formats.add (new LADSPAPluginFormat());
+#endif
 }
 
 int AudioPluginFormatManager::getNumFormats() throw()

@@ -157,10 +157,10 @@ public:
 
     //==============================================================================
     int getNumConnections() const throw()                               { return connections.size(); }
-    FilterConnection* getConnection (const int index) const throw()     { return connections [index]; }
+    const FilterConnection* getConnection (const int index) const throw()     { return connections [index]; }
 
-    FilterConnection* getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
-                                            uint32 destFilterUID, int destFilterChannel) const throw();
+    const FilterConnection* getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
+                                                  uint32 destFilterUID, int destFilterChannel) const throw();
 
     bool isAnInputTo (const uint32 possibleInput, const uint32 possibleDestination) const throw();
 
@@ -211,7 +211,7 @@ private:
 
 //==============================================================================
 /**
-    An object the
+
 */
 class FilterGraphPlayer   : public AudioIODeviceCallback,
                             public MidiInputCallback,

@@ -47,7 +47,7 @@ public:
           index (index_),
           isInput (isInput_)
     {
-        FilterInGraph* const f = graph.getFilterForUID (filterID_);
+        const FilterInGraph* const f = graph.getFilterForUID (filterID_);
 
         if (f != 0)
         {
@@ -185,7 +185,7 @@ public:
             }
             else if (r == 3 || r == 4)
             {
-                const FilterInGraph::Ptr f (graph.getFilterForUID (filterID));
+                FilterInGraph* const f = graph.getFilterForUID (filterID);
 
                 if (f != 0)
                     f->showUI (r == 4);
@@ -771,7 +771,7 @@ void GraphEditorPanel::updateComponents()
 
     for (i = graph.getNumConnections(); --i >= 0;)
     {
-        FilterConnection* const c = graph.getConnection (i);
+        const FilterConnection* const c = graph.getConnection (i);
 
         if (getComponentForConnection (*c) == 0)
         {

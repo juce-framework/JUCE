@@ -141,7 +141,6 @@
 		84677D080917AB5F0086D5D9 /* jdpostct.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD40917AB5F0086D5D9 /* jdpostct.c */; };
 		84677D090917AB5F0086D5D9 /* jdsample.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD50917AB5F0086D5D9 /* jdsample.c */; };
 		84677D0A0917AB5F0086D5D9 /* jdtrans.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD60917AB5F0086D5D9 /* jdtrans.c */; };
-		84677D0B0917AB5F0086D5D9 /* jerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD70917AB5F0086D5D9 /* jerror.c */; };
 		84677D0C0917AB5F0086D5D9 /* jfdctflt.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD80917AB5F0086D5D9 /* jfdctflt.c */; };
 		84677D0D0917AB5F0086D5D9 /* jfdctfst.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CD90917AB5F0086D5D9 /* jfdctfst.c */; };
 		84677D0E0917AB5F0086D5D9 /* jfdctint.c in Sources */ = {isa = PBXBuildFile; fileRef = 84677CDA0917AB5F0086D5D9 /* jfdctint.c */; };
@@ -797,7 +796,6 @@
 		84677CD40917AB5F0086D5D9 /* jdpostct.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jdpostct.c; sourceTree = "<group>"; };
 		84677CD50917AB5F0086D5D9 /* jdsample.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jdsample.c; sourceTree = "<group>"; };
 		84677CD60917AB5F0086D5D9 /* jdtrans.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jdtrans.c; sourceTree = "<group>"; };
-		84677CD70917AB5F0086D5D9 /* jerror.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jerror.c; sourceTree = "<group>"; };
 		84677CD80917AB5F0086D5D9 /* jfdctflt.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jfdctflt.c; sourceTree = "<group>"; };
 		84677CD90917AB5F0086D5D9 /* jfdctfst.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jfdctfst.c; sourceTree = "<group>"; };
 		84677CDA0917AB5F0086D5D9 /* jfdctint.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = jfdctint.c; sourceTree = "<group>"; };
@@ -1313,7 +1311,7 @@
 		84FED3C80CAA96DA00003997 /* juce_FileDragAndDropTarget.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_FileDragAndDropTarget.h; sourceTree = "<group>"; };
 		84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileSearchPathListComponent.cpp; path = filebrowser/juce_FileSearchPathListComponent.cpp; sourceTree = "<group>"; };
 		84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_FileSearchPathListComponent.h; path = filebrowser/juce_FileSearchPathListComponent.h; sourceTree = "<group>"; };
-		D2AAC046055464E500DB518D /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC046055464E500DB518D /* libjuce.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjuce.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1353,7 +1351,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC046055464E500DB518D /* libjucedebug.a */,
+				D2AAC046055464E500DB518D /* libjuce.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2069,7 +2067,6 @@
 				84677CD40917AB5F0086D5D9 /* jdpostct.c */,
 				84677CD50917AB5F0086D5D9 /* jdsample.c */,
 				84677CD60917AB5F0086D5D9 /* jdtrans.c */,
-				84677CD70917AB5F0086D5D9 /* jerror.c */,
 				84677CD80917AB5F0086D5D9 /* jfdctflt.c */,
 				84677CD90917AB5F0086D5D9 /* jfdctfst.c */,
 				84677CDA0917AB5F0086D5D9 /* jfdctint.c */,
@@ -2790,7 +2787,7 @@
 			);
 			name = Juce;
 			productName = Juce;
-			productReference = D2AAC046055464E500DB518D /* libjucedebug.a */;
+			productReference = D2AAC046055464E500DB518D /* libjuce.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -3037,7 +3034,6 @@
 				84677D080917AB5F0086D5D9 /* jdpostct.c in Sources */,
 				84677D090917AB5F0086D5D9 /* jdsample.c in Sources */,
 				84677D0A0917AB5F0086D5D9 /* jdtrans.c in Sources */,
-				84677D0B0917AB5F0086D5D9 /* jerror.c in Sources */,
 				84677D0C0917AB5F0086D5D9 /* jfdctflt.c in Sources */,
 				84677D0D0917AB5F0086D5D9 /* jfdctfst.c in Sources */,
 				84677D0E0917AB5F0086D5D9 /* jfdctint.c in Sources */,

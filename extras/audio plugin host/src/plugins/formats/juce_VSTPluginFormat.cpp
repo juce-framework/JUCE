@@ -29,13 +29,19 @@
   ==============================================================================
 */
 
+#ifndef JUCE_PLUGINHOST_VST  // xxx temporary..
+  #define JUCE_PLUGINHOST_VST 1
+#endif
+
+#if JUCE_PLUGINHOST_VST
+
 #ifdef _WIN32
  #define _WIN32_WINNT 0x500
  #define STRICT
  #include <windows.h>
  #include <float.h>
  #pragma warning (disable : 4312)
-#elif defined LINUX
+#elif defined (LINUX)
  #include <float.h>
  #include <sys/time.h>
  #include <X11/Xlib.h>
@@ -45,19 +51,38 @@
  #undef KeyPress
  #undef Drawable
  #undef Time
- class VSTPluginWindow;
 #else
  #include <Carbon/Carbon.h>
 #endif
 
+//==============================================================================
 #include "../../../../../juce.h"
-#include "juce_VSTPluginInstance.h"
+#include "juce_VSTPluginFormat.h"
 
+//==============================================================================
+#undef PRAGMA_ALIGN_SUPPORTED
+#define VST_FORCE_DEPRECATED 0
+
+#ifdef _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable: 4996)
+#endif
+
+/* Obviously you're going to need the Steinberg vstsdk2.4 folder in
+   your include path if you want to add VST support...
+*/
+#include "pluginterfaces/vst2.x/aeffectx.h"
+
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif
+
+//==============================================================================
 #if JUCE_LINUX
- #define Font JUCE_NAMESPACE::Font
- #define KeyPress JUCE_NAMESPACE::KeyPress
- #define Drawable JUCE_NAMESPACE::Drawable
- #define Time JUCE_NAMESPACE::Time
+ #define Font       JUCE_NAMESPACE::Font
+ #define KeyPress   JUCE_NAMESPACE::KeyPress
+ #define Drawable   JUCE_NAMESPACE::Drawable
+ #define Time       JUCE_NAMESPACE::Time
 #endif
 
 #include "../juce_PluginDescription.h"
@@ -71,10 +96,10 @@ BEGIN_JUCE_NAMESPACE
  extern void juce_callAnyTimersSynchronously();
 END_JUCE_NAMESPACE
 
+
 //==============================================================================
 const int fxbVersionNum = 1;
 
-//==============================================================================
 struct fxProgram
 {
     long chunkMagic;        // 'CcnK'
@@ -157,7 +182,7 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 static int shellUIDToCreate = 0;
 static int insideVSTCallback = 0;
 
-static Array <VSTPluginWindow*> activeWindows;
+class VSTPluginWindow;
 
 //==============================================================================
 // Change this to disable logging of various VST activities
@@ -429,8 +454,9 @@ public:
 
         if (file.hasFileExtension (T(".vst")))
         {
-            CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) (const char*) filename,
-                                                                    filename.length(), file.isDirectory());
+            const char* const utf8 = filename.toUTF8();
+            CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
+                                                                    strlen (utf8), file.isDirectory());
 
             if (url != 0)
             {
@@ -629,6 +655,124 @@ public:
 #endif
 };
 
+
+//==============================================================================
+/**
+    An instance of a plugin, created by a VSTPluginFormat.
+
+*/
+class VSTPluginInstance     : public AudioPluginInstance,
+                              private Timer,
+                              private AsyncUpdater
+{
+public:
+    //==============================================================================
+    ~VSTPluginInstance();
+
+    //==============================================================================
+    // AudioPluginInstance methods:
+
+    const String getName() const            { return name; }
+    const String getManufacturer() const;
+    const String getVersion() const;
+    bool isInstrument() const               { return effect != 0 && (effect->flags & effFlagsIsSynth) != 0; }
+    const String getCategory() const;
+    const String getFormatName() const      { return "VST"; }
+    const File getFile() const              { return module->file; }
+    int getUID() const;
+    bool acceptsMidi() const                { return wantsMidiMessages; }
+    bool producesMidi() const               { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
+
+    //==============================================================================
+    // AudioProcessor methods:
+
+    void prepareToPlay (double sampleRate, int estimatedSamplesPerBlock);
+    void releaseResources();
+    void processBlock (AudioSampleBuffer& buffer,
+                       MidiBuffer& midiMessages);
+
+    AudioProcessorEditor* createEditor();
+
+    const String getInputChannelName (const int index) const;
+    bool isInputChannelStereoPair (int index) const;
+
+    const String getOutputChannelName (const int index) const;
+    bool isOutputChannelStereoPair (int index) const;
+
+    //==============================================================================
+    int getNumParameters()                              { return effect != 0 ? effect->numParams : 0; }
+    float getParameter (int index);
+    void setParameter (int index, float newValue);
+    const String getParameterName (int index);
+    const String getParameterText (int index);
+    bool isParameterAutomatable (int index) const;
+
+    //==============================================================================
+    int getNumPrograms()                                { return effect != 0 ? effect->numPrograms : 0; }
+    int getCurrentProgram()                             { return dispatch (effGetProgram, 0, 0, 0, 0); }
+    void setCurrentProgram (int index);
+    const String getProgramName (int index);
+    void changeProgramName (int index, const String& newName);
+
+    //==============================================================================
+    void getStateInformation (MemoryBlock& destData);
+    void getCurrentProgramStateInformation (MemoryBlock& destData);
+    void setStateInformation (const void* data, int sizeInBytes);
+    void setCurrentProgramStateInformation (const void* data, int sizeInBytes);
+
+    //==============================================================================
+    void timerCallback();
+    void handleAsyncUpdate();
+    VstIntPtr handleCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt);
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class VSTPluginWindow;
+    friend class VSTPluginFormat;
+
+    AEffect* effect;
+    String name;
+    CriticalSection lock;
+    bool wantsMidiMessages, initialised, isPowerOn;
+    mutable StringArray programNames;
+    AudioSampleBuffer tempBuffer;
+    CriticalSection midiInLock;
+    MidiBuffer incomingMidi;
+    void* midiEventsToSend;
+    int numAllocatedMidiEvents;
+    VstTimeInfo vstHostTime;
+    float** channels;
+
+    ReferenceCountedObjectPtr <ModuleHandle> module;
+
+    //==============================================================================
+    int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt) const;
+    bool restoreProgramSettings (const fxProgram* const prog);
+    const String getCurrentProgramName();
+    void setParamsInProgramBlock (fxProgram* const prog) throw();
+    void updateStoredProgramNames();
+    void initialise();
+    void ensureMidiEventSize (int numEventsNeeded);
+    void freeMidiEvents();
+    void handleMidiFromPlugin (const VstEvents* const events);
+    void createTempParameterStore (MemoryBlock& dest);
+    void restoreFromTempParameterStore (const MemoryBlock& mb);
+    const String getParameterLabel (int index) const;
+
+    bool usesChunks() const throw()         { return effect != 0 && (effect->flags & effFlagsProgramChunks) != 0; }
+    void getChunkData (MemoryBlock& mb, bool isPreset, int maxSizeMB) const;
+    void setChunkData (const char* data, int size, bool isPreset);
+    bool loadFromFXBFile (const void* data, int numBytes);
+    bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB);
+
+    int getVersionNumber() const throw()    { return effect != 0 ? effect->version : 0; }
+    bool hasEditor() const throw()          { return effect != 0 && (effect->flags & effFlagsHasEditor) != 0; }
+    void setPower (const bool on);
+
+    VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module);
+};
 
 //==============================================================================
 VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHandle>& module_)
@@ -1029,6 +1173,9 @@ void VSTPluginInstance::handleMidiFromPlugin (const VstEvents* const events)
         }
     }
 }
+
+//==============================================================================
+static Array <VSTPluginWindow*> activeWindows;
 
 //==============================================================================
 class VSTPluginWindow   : public AudioProcessorEditor,
@@ -2281,11 +2428,6 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 }
 
 //==============================================================================
-const String VSTPluginInstance::getName() const
-{
-    return name;
-}
-
 const String VSTPluginInstance::getManufacturer() const
 {
     char buffer [kVstMaxVendorStrLen + 8];
@@ -2323,21 +2465,6 @@ const String VSTPluginInstance::getVersion() const
     }
 
     return s;
-}
-
-int VSTPluginInstance::getVersionNumber() const throw()
-{
-    return effect != 0 ? effect->version : 0;
-}
-
-const String VSTPluginInstance::getFormatName() const
-{
-    return "VST";
-}
-
-const File VSTPluginInstance::getFile() const
-{
-    return module->file;
 }
 
 int VSTPluginInstance::getUID() const
@@ -2400,11 +2527,6 @@ const String VSTPluginInstance::getCategory() const
 }
 
 //==============================================================================
-int VSTPluginInstance::getNumParameters()
-{
-    return effect != 0 ? effect->numParams : 0;
-}
-
 float VSTPluginInstance::getParameter (int index)
 {
     if (effect != 0 && ((unsigned int) index) < (unsigned int) effect->numParams)
@@ -2517,16 +2639,6 @@ void VSTPluginInstance::restoreFromTempParameterStore (const MemoryBlock& m)
 }
 
 //==============================================================================
-int VSTPluginInstance::getNumPrograms()
-{
-    return effect != 0 ? effect->numPrograms : 0;
-}
-
-int VSTPluginInstance::getCurrentProgram()
-{
-    return dispatch (effGetProgram, 0, 0, 0, 0);
-}
-
 void VSTPluginInstance::setCurrentProgram (int newIndex)
 {
     if (getNumPrograms() > 0 && newIndex != getCurrentProgram())
@@ -2667,47 +2779,11 @@ bool VSTPluginInstance::isOutputChannelStereoPair (int index) const
 }
 
 //==============================================================================
-bool VSTPluginInstance::acceptsMidi() const
-{
-    return wantsMidiMessages;
-}
-
-bool VSTPluginInstance::producesMidi() const
-{
-    return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0;
-}
-
 void VSTPluginInstance::setPower (const bool on)
 {
     dispatch (effMainsChanged, 0, on ? 1 : 0, 0, 0);
     isPowerOn = on;
 }
-
-bool VSTPluginInstance::hasEditor() const throw()
-{
-    return effect != 0 && (effect->flags & effFlagsHasEditor) != 0;
-}
-
-bool VSTPluginInstance::canMono() const throw()
-{
-    return effect != 0 && (effect->flags & effFlagsCanMono) != 0;
-}
-
-bool VSTPluginInstance::isOffline() const throw()
-{
-    return dispatch (effCanDo, 0, 0, (void*) "offline", 0) > 0;
-}
-
-bool VSTPluginInstance::isInstrument() const
-{
-    return effect != 0 && (effect->flags & effFlagsIsSynth) != 0;
-}
-
-bool VSTPluginInstance::usesChunks() const throw()
-{
-    return effect != 0 && (effect->flags & effFlagsProgramChunks) != 0;
-}
-
 
 //==============================================================================
 const int defaultMaxSizeMB = 64;
@@ -2902,3 +2978,5 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     return FileSearchPath ("/usr/lib/vst");
 #endif
 }
+
+#endif

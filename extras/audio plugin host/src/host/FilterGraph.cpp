@@ -420,14 +420,15 @@ void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
 
 void FilterGraph::removeFilter (const uint32 uid)
 {
-    FilterInGraph* const filter = getFilterForUID (uid);
+    disconnectFilter (uid);
 
-    if (filter != 0)
+    for (int i = filters.size(); --i >= 0;)
     {
-        disconnectFilter (uid);
-
-        filters.removeObject (filter);
-        changed();
+        if (filters.getUnchecked(i)->uid == uid)
+        {
+            filters.remove (i);
+            changed();
+        }
     }
 }
 
@@ -466,8 +467,8 @@ bool FilterGraph::isAnInputTo (const uint32 possibleInput, const uint32 possible
     return isAnInputTo (possibleInput, possibleDestination, filters.size() + 1);
 }
 
-FilterConnection* FilterGraph::getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
-                                                     uint32 destFilterUID, int destFilterChannel) const throw()
+const FilterConnection* FilterGraph::getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
+                                                           uint32 destFilterUID, int destFilterChannel) const throw()
 {
     for (int i = connections.size(); --i >= 0;)
     {
