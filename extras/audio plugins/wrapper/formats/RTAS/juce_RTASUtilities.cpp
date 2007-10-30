@@ -69,7 +69,7 @@ void JUCE_CALLTYPE attachSubWindow (void* hostWindow,
     SetWindowLong (plugWnd, GWL_STYLE, val);
 
     val = GetWindowLong ((HWND) hostWindow, GWL_STYLE);
-    SetWindowLong ((HWND) hostWindow, GWL_STYLE, val | WS_CLIPCHILDREN); 
+    SetWindowLong ((HWND) hostWindow, GWL_STYLE, val | WS_CLIPCHILDREN);
 }
 
 void JUCE_CALLTYPE resizeHostWindow (void* hostWindow,

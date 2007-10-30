@@ -940,7 +940,7 @@ public:
     {
         jassert (x >= 0 && y >= 0 && x < ww && y < wh); // should only be called for points that are actually inside the bounds
 
-        if (((unsigned int) x) >= (unsigned int) ww 
+        if (((unsigned int) x) >= (unsigned int) ww
              || ((unsigned int) y) >= (unsigned int) wh)
             return false;
 

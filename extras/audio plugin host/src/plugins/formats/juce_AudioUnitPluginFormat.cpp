@@ -132,7 +132,7 @@ private:
     File file;
     CriticalSection lock;
     bool initialised, wantsMidiMessages, wasPlaying;
-    
+
     AudioBufferList* outputBufferList;
     AudioTimeStamp timeStamp;
     AudioSampleBuffer* currentBuffer;
@@ -143,7 +143,7 @@ private:
     //==============================================================================
     bool getComponentDescFromFile (const File& file);
     void initialise();
-    
+
     //==============================================================================
     OSStatus renderGetInput (AudioUnitRenderActionFlags* ioActionFlags,
                              const AudioTimeStamp* inTimeStamp,
@@ -182,9 +182,9 @@ private:
                     ->getMusicalTimeLocation (outDeltaSampleOffsetToNextBeat, outTimeSig_Numerator,
                                               outTimeSig_Denominator, outCurrentMeasureDownBeat);
     }
-    
+
     static OSStatus getTransportStateCallback (void* inHostUserData, Boolean* outIsPlaying, Boolean* outTransportStateChanged,
-                                               Float64* outCurrentSampleInTimeLine, Boolean* outIsCycling, 
+                                               Float64* outCurrentSampleInTimeLine, Boolean* outIsCycling,
                                                Float64* outCycleStartBeat, Float64* outCycleEndBeat)
     {
         return ((AudioUnitPluginInstance*) inHostUserData)
@@ -192,16 +192,16 @@ private:
                                          outCurrentSampleInTimeLine, outIsCycling,
                                          outCycleStartBeat, outCycleEndBeat);
     }
-    
+
     //==============================================================================
     void getNumChannels (int& numIns, int& numOuts)
     {
         numIns = 0;
         numOuts = 0;
-    
+
         AUChannelInfo supportedChannels [128];
         UInt32 supportedChannelsSize = sizeof (supportedChannels);
-        
+
         if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportedNumChannels, kAudioUnitScope_Global,
                                   0, supportedChannels, &supportedChannelsSize) == noErr
             && supportedChannelsSize > 0)
@@ -214,7 +214,7 @@ private:
         }
         else
         {
-                // (this really means the plugin will take any number of ins/outs as long 
+                // (this really means the plugin will take any number of ins/outs as long
                 // as they are the same)
             numIns = numOuts = 2;
         }
@@ -238,7 +238,7 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const File& file_)
         ++insideCallback;
 
         log (T("Opening AU: ") + file.getFullPathName());
-        
+
         if (getComponentDescFromFile (file))
         {
             ComponentRecord* const comp = FindNextComponent (0, &componentDesc);
@@ -274,17 +274,17 @@ AudioUnitPluginInstance::~AudioUnitPluginInstance()
             audioUnit = 0;
         }
     }
-    
+
     juce_free (outputBufferList);
 }
 
 bool AudioUnitPluginInstance::getComponentDescFromFile (const File& file)
 {
     zerostruct (componentDesc);
-    
+
     if (! file.hasFileExtension (T(".component")))
         return false;
-    
+
     const String filename (file.getFullPathName());
     const char* const utf8 = filename.toUTF8();
     CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
@@ -293,19 +293,19 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const File& file)
     {
         CFBundleRef bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
         CFRelease (url);
-        
+
         if (bundleRef != 0)
         {
             CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleName"));
-            
+
             if (name != 0 && CFGetTypeID (name) == CFStringGetTypeID())
                 pluginName = PlatformUtilities::cfStringToJuceString ((CFStringRef) name);
 
             if (pluginName.isEmpty())
                 pluginName = file.getFileNameWithoutExtension();
-            
+
             CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef, CFSTR("CFBundleVersion"));
-            
+
             if (versionString != 0 && CFGetTypeID (versionString) == CFStringGetTypeID())
                 version = PlatformUtilities::cfStringToJuceString ((CFStringRef) versionString);
 
@@ -316,7 +316,7 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const File& file)
 
             short resFileId = CFBundleOpenBundleResourceMap (bundleRef);
             UseResFile (resFileId);
-            
+
             for (int i = 1; i <= Count1Resources ('thng'); ++i)
             {
                 Handle h = Get1IndResource ('thng', i);
@@ -337,17 +337,17 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const File& file)
                         componentDesc.componentManufacturer = types[2];
                         break;
                     }
-                    
+
                     HUnlock (h);
                     ReleaseResource (h);
                 }
             }
-            
+
             CFBundleCloseBundleResourceMap (bundleRef, resFileId);
             CFRelease (bundleRef);
         }
     }
-    
+
     return componentDesc.componentType != 0 && componentDesc.componentSubType != 0;
 }
 
@@ -393,14 +393,14 @@ void AudioUnitPluginInstance::initialise()
         info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
         info.transportStateProc = getTransportStateCallback;
 
-        AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks, kAudioUnitScope_Global, 
+        AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks, kAudioUnitScope_Global,
                               0, &info, sizeof (info));
     }
 
     int numIns, numOuts;
     getNumChannels (numIns, numOuts);
     setPlayConfigDetails (numIns, numOuts, 0, 0);
-        
+
     initialised = AudioUnitInitialize (audioUnit) == noErr;
 
     setLatencySamples (0);
@@ -442,14 +442,14 @@ void AudioUnitPluginInstance::prepareToPlay (double sampleRate_,
         stream.mBitsPerChannel = 32;
         stream.mChannelsPerFrame = numIns;
 
-        OSStatus err = AudioUnitSetProperty (audioUnit, 
+        OSStatus err = AudioUnitSetProperty (audioUnit,
                                              kAudioUnitProperty_StreamFormat,
                                              kAudioUnitScope_Input,
                                              0, &stream, sizeof (stream));
 
         stream.mChannelsPerFrame = numOuts;
 
-        err = AudioUnitSetProperty (audioUnit, 
+        err = AudioUnitSetProperty (audioUnit,
                                     kAudioUnitProperty_StreamFormat,
                                     kAudioUnitScope_Output,
                                     0, &stream, sizeof (stream));
@@ -465,7 +465,7 @@ void AudioUnitPluginInstance::prepareToPlay (double sampleRate_,
         timeStamp.mSampleTime = 0;
         timeStamp.mHostTime = AudioGetCurrentHostTime();
         timeStamp.mFlags = kAudioTimeStampSampleTimeValid | kAudioTimeStampHostTimeValid;
-        
+
         currentBuffer = 0;
         wasPlaying = false;
     }
@@ -478,7 +478,7 @@ void AudioUnitPluginInstance::releaseResources()
         AudioUnitReset (audioUnit, kAudioUnitScope_Input, 0);
         AudioUnitReset (audioUnit, kAudioUnitScope_Output, 0);
         AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
-        
+
         juce_free (outputBufferList);
         outputBufferList = 0;
         currentBuffer = 0;
@@ -491,7 +491,7 @@ OSStatus AudioUnitPluginInstance::renderGetInput (AudioUnitRenderActionFlags* io
                                                   UInt32 inNumberFrames,
                                                   AudioBufferList* ioData) const
 {
-    if (inBusNumber == 0 
+    if (inBusNumber == 0
          && currentBuffer != 0)
     {
         jassert (inNumberFrames == currentBuffer->getNumSamples()); // if this ever happens, might need to add extra handling
@@ -522,7 +522,7 @@ void AudioUnitPluginInstance::processBlock (AudioSampleBuffer& buffer,
     if (initialised)
     {
         AudioUnitRenderActionFlags flags = 0;
-        
+
         timeStamp.mHostTime = AudioGetCurrentHostTime();
 
         for (int i = getNumOutputChannels(); --i >= 0;)
@@ -542,13 +542,13 @@ void AudioUnitPluginInstance::processBlock (AudioSampleBuffer& buffer,
             while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
             {
                 if (midiEventSize <= 3)
-                    MusicDeviceMIDIEvent (audioUnit, 
+                    MusicDeviceMIDIEvent (audioUnit,
                                           midiEventData[0], midiEventData[1], midiEventData[2],
                                           midiEventPosition);
                 else
                     MusicDeviceSysEx (audioUnit, midiEventData, midiEventSize);
             }
-            
+
             midiMessages.clear();
         }
 
@@ -581,7 +581,7 @@ OSStatus AudioUnitPluginInstance::getBeatAndTempo (Float64* outCurrentBeat, Floa
         *outCurrentBeat = 0;
         *outCurrentTempo = 120.0;
     }
-    
+
     return noErr;
 }
 
@@ -592,7 +592,7 @@ OSStatus AudioUnitPluginInstance::getMusicalTimeLocation (UInt32* outDeltaSample
 {
     AudioPlayHead* const ph = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result;
-    
+
     if (ph != 0 && ph->getCurrentPosition (result))
     {
         *outTimeSig_Numerator = result.timeSigNumerator;
@@ -608,7 +608,7 @@ OSStatus AudioUnitPluginInstance::getMusicalTimeLocation (UInt32* outDeltaSample
         *outTimeSig_Denominator = 4;
         *outCurrentMeasureDownBeat = 0;
     }
-    
+
     return noErr;
 }
 
@@ -621,7 +621,7 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
 {
     AudioPlayHead* const ph = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result;
-    
+
     if (ph != 0 && ph->getCurrentPosition (result))
     {
         *outIsPlaying = result.isPlaying;
@@ -641,7 +641,7 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
         *outCycleStartBeat = 0;
         *outCycleEndBeat = 0;
     }
-    
+
     return noErr;
 }
 
@@ -677,7 +677,7 @@ public:
         UInt32 viewListSize = sizeof (viewList);
         AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList, kAudioUnitScope_Global,
                               0, &viewList, &viewListSize);
-        
+
         componentRecord = FindNextComponent (0, &viewList[0]);
     }
 
@@ -753,7 +753,7 @@ public:
             HIViewGetBounds (pluginViewRef, &bounds);
             const int w = jmax (32, (int) bounds.size.width);
             const int h = jmax (32, (int) bounds.size.height);
-            
+
             if (w != getWidth() || h != getHeight())
             {
                 setSize (w, h);
@@ -828,14 +828,14 @@ private:
         pluginWantsKeys = true; //xxx any way to find this out? Does it matter?
 
         viewComponent = (AudioUnitCarbonView) OpenComponent (componentRecord);
-        
+
         if (viewComponent != 0)
         {
-            Float32Point pos = { getScreenX() - getTopLevelComponent()->getScreenX(), 
+            Float32Point pos = { getScreenX() - getTopLevelComponent()->getScreenX(),
                                  getScreenY() - getTopLevelComponent()->getScreenY() };
             Float32Point size = { 250, 200 };
 
-            AudioUnitCarbonViewCreate (viewComponent, 
+            AudioUnitCarbonViewCreate (viewComponent,
                                        plugin.audioUnit,
                                        (WindowRef) getWindowHandle(),
                                        HIViewGetRoot ((WindowRef) getWindowHandle()),
@@ -901,7 +901,7 @@ private:
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
     AudioUnitPluginWindow* w = new AudioUnitPluginWindow (*this);
-    
+
     if (! w->isValid())
         deleteAndZero (w);
 
@@ -945,27 +945,27 @@ int AudioUnitPluginInstance::getNumParameters()
 float AudioUnitPluginInstance::getParameter (int index)
 {
     const ScopedLock sl (lock);
-    
+
     Float32 value = 0.0f;
 
     if (audioUnit != 0 && ((unsigned int) index) < (unsigned int) parameterIds.size())
     {
-        AudioUnitGetParameter (audioUnit, 
+        AudioUnitGetParameter (audioUnit,
                                (UInt32) parameterIds.getUnchecked (index),
                                kAudioUnitScope_Global, 0,
                                &value);
     }
-    
+
     return value;
 }
 
 void AudioUnitPluginInstance::setParameter (int index, float newValue)
 {
     const ScopedLock sl (lock);
-    
+
     if (audioUnit != 0 && ((unsigned int) index) < (unsigned int) parameterIds.size())
     {
-        AudioUnitSetParameter (audioUnit, 
+        AudioUnitSetParameter (audioUnit,
                                (UInt32) parameterIds.getUnchecked (index),
                                kAudioUnitScope_Global, 0,
                                newValue, 0);
@@ -977,10 +977,10 @@ const String AudioUnitPluginInstance::getParameterName (int index)
     AudioUnitParameterInfo info;
     zerostruct (info);
     UInt32 sz = sizeof (info);
-    
+
     String name;
 
-    if (AudioUnitGetProperty (audioUnit, 
+    if (AudioUnitGetProperty (audioUnit,
                               kAudioUnitProperty_ParameterInfo,
                               kAudioUnitScope_Global,
                               parameterIds [index], &info, &sz) == noErr)
@@ -1003,8 +1003,8 @@ bool AudioUnitPluginInstance::isParameterAutomatable (int index) const
 {
     AudioUnitParameterInfo info;
     UInt32 sz = sizeof (info);
-    
-    if (AudioUnitGetProperty (audioUnit, 
+
+    if (AudioUnitGetProperty (audioUnit,
                               kAudioUnitProperty_ParameterInfo,
                               kAudioUnitScope_Global,
                               parameterIds [index], &info, &sz) == noErr)
@@ -1022,7 +1022,7 @@ int AudioUnitPluginInstance::getNumPrograms()
     UInt32 sz = sizeof (CFArrayRef);
     int num = 0;
 
-    if (AudioUnitGetProperty (audioUnit, 
+    if (AudioUnitGetProperty (audioUnit,
                               kAudioUnitProperty_FactoryPresets,
                               kAudioUnitScope_Global,
                               0, &presets, &sz) == noErr)
@@ -1039,8 +1039,8 @@ int AudioUnitPluginInstance::getCurrentProgram()
     AUPreset current;
     current.presetNumber = 0;
     UInt32 sz = sizeof (AUPreset);
-    
-    AudioUnitGetProperty (audioUnit, 
+
+    AudioUnitGetProperty (audioUnit,
                           kAudioUnitProperty_FactoryPresets,
                           kAudioUnitScope_Global,
                           0, &current, &sz);
@@ -1054,7 +1054,7 @@ void AudioUnitPluginInstance::setCurrentProgram (int newIndex)
     current.presetNumber = newIndex;
     current.presetName = 0;
 
-    AudioUnitSetProperty (audioUnit, 
+    AudioUnitSetProperty (audioUnit,
                           kAudioUnitProperty_FactoryPresets,
                           kAudioUnitScope_Global,
                           0, &current, sizeof (AUPreset));
@@ -1065,8 +1065,8 @@ const String AudioUnitPluginInstance::getProgramName (int index)
     String s;
     CFArrayRef presets;
     UInt32 sz = sizeof (CFArrayRef);
-    
-    if (AudioUnitGetProperty (audioUnit, 
+
+    if (AudioUnitGetProperty (audioUnit,
                               kAudioUnitProperty_FactoryPresets,
                               kAudioUnitScope_Global,
                               0, &presets, &sz) == noErr)
@@ -1084,7 +1084,7 @@ const String AudioUnitPluginInstance::getProgramName (int index)
 
         CFRelease (presets);
     }
-    
+
     return s;
 }
 
@@ -1137,8 +1137,8 @@ void AudioUnitPluginInstance::getCurrentProgramStateInformation (MemoryBlock& de
 {
     CFPropertyListRef propertyList = 0;
     UInt32 sz = sizeof (CFPropertyListRef);
-    
-    if (AudioUnitGetProperty (audioUnit, 
+
+    if (AudioUnitGetProperty (audioUnit,
                               kAudioUnitProperty_ClassInfo,
                               kAudioUnitScope_Global,
                               0, &propertyList, &sz) == noErr)
@@ -1183,7 +1183,7 @@ void AudioUnitPluginInstance::setCurrentProgramStateInformation (const void* dat
     CFRelease (stream);
 
     if (propertyList != 0)
-        AudioUnitSetProperty (audioUnit, 
+        AudioUnitSetProperty (audioUnit,
                               kAudioUnitProperty_ClassInfo,
                               kAudioUnitScope_Global,
                               0, &propertyList, sizeof (propertyList));

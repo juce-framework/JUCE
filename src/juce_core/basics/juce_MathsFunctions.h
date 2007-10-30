@@ -162,8 +162,8 @@ inline double jmin (const double a, const double b, const double c, const double
 //==============================================================================
 /** Constrains a value to keep it within a given range.
 
-    This will check that the specified value lies between the lower and upper bounds 
-    specified, and if not, will return the nearest value that would be in-range. Effectively, 
+    This will check that the specified value lies between the lower and upper bounds
+    specified, and if not, will return the nearest value that would be in-range. Effectively,
     it's like calling jmax (lowerLimit, jmin (upperLimit, value)).
 
     Note that it expects that lowerLimit <= upperLimit. If this isn't true,

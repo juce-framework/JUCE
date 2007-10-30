@@ -48,7 +48,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
 
     for (int j = 0; j < directoriesToSearch.getNumPaths(); ++j)
         recursiveFileSearch (directoriesToSearch [j], recursive);
-    
+
     // If any plugins have crashed recently when being loaded, move them to the
     // end of the list to give the others a chance to load correctly..
     const StringArray crashedPlugins (getDeadMansPedalFile());

@@ -99,18 +99,18 @@
 
  enum VstSmpteFrameRate
  {
-	kVstSmpte24fps    = 0,		///< 24 fps
-	kVstSmpte25fps    = 1,		///< 25 fps
-	kVstSmpte2997fps  = 2,		///< 29.97 fps
-	kVstSmpte30fps    = 3,		///< 30 fps
-	kVstSmpte2997dfps = 4,		///< 29.97 drop
-	kVstSmpte30dfps   = 5,		///< 30 drop
-	kVstSmpteFilm16mm = 6, 		///< Film 16mm
-	kVstSmpteFilm35mm = 7, 		///< Film 35mm
-	kVstSmpte239fps   = 10,		///< HDTV: 23.976 fps
-	kVstSmpte249fps   = 11,		///< HDTV: 24.976 fps
-	kVstSmpte599fps   = 12,		///< HDTV: 59.94 fps
-	kVstSmpte60fps    = 13		///< HDTV: 60 fps
+    kVstSmpte24fps    = 0,  ///< 24 fps
+    kVstSmpte25fps    = 1,  ///< 25 fps
+    kVstSmpte2997fps  = 2,  ///< 29.97 fps
+    kVstSmpte30fps    = 3,  ///< 30 fps
+    kVstSmpte2997dfps = 4,  ///< 29.97 drop
+    kVstSmpte30dfps   = 5,  ///< 30 drop
+    kVstSmpteFilm16mm = 6,  ///< Film 16mm
+    kVstSmpteFilm35mm = 7,  ///< Film 35mm
+    kVstSmpte239fps   = 10, ///< HDTV: 23.976 fps
+    kVstSmpte249fps   = 11, ///< HDTV: 24.976 fps
+    kVstSmpte599fps   = 12, ///< HDTV: 59.94 fps
+    kVstSmpte60fps    = 13  ///< HDTV: 60 fps
  };
 #endif
 
@@ -976,7 +976,7 @@ public:
         return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
-    bool setSpeakerArrangement (VstSpeakerArrangement* /*pluginInput*/, 
+    bool setSpeakerArrangement (VstSpeakerArrangement* /*pluginInput*/,
                                 VstSpeakerArrangement* /*pluginOutput*/)
     {
         // if this method isn't implemented, nuendo4 + cubase4 crash when you've got multiple channels..

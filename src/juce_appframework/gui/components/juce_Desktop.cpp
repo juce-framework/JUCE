@@ -87,7 +87,7 @@ void Desktop::refreshMonitorSizes() throw()
     jassert (monitorCoordsClipped.size() > 0
               && monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
 
-    if (oldClipped != monitorCoordsClipped 
+    if (oldClipped != monitorCoordsClipped
          || oldUnclipped != monitorCoordsUnclipped)
     {
         for (int i = ComponentPeer::getNumPeers(); --i >= 0;)

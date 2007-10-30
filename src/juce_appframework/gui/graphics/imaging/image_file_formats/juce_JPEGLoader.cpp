@@ -59,7 +59,7 @@ struct JPEGDecodingFailure {};
 static void fatalErrorHandler (j_common_ptr)
 {
     throw JPEGDecodingFailure();
-} 
+}
 
 static void silentErrorCallback1 (j_common_ptr)         {}
 static void silentErrorCallback2 (j_common_ptr, int)    {}

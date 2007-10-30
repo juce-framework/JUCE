@@ -359,10 +359,10 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 
     BOOL isWow64 = FALSE;
 
-    return (fnIsWow64Process != 0) 
+    return (fnIsWow64Process != 0)
             && fnIsWow64Process (GetCurrentProcess(), &isWow64)
             && (isWow64 != FALSE);
-#endif 
+#endif
 }
 
 //==============================================================================

@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__xy
-#define __JUCE_VSTPLUGINFORMAT_JUCEHEADER__xy
+#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+#define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 
 #include "../juce_AudioPluginFormat.h"
 
@@ -64,4 +64,4 @@ public:
 
 #endif
 
-#endif   // __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
+#endif   // __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
