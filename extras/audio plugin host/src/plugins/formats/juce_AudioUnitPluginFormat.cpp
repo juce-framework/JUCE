@@ -33,6 +33,7 @@
 
 #include <Carbon/Carbon.h>
 #include <AudioToolbox/AudioToolbox.h>
+#include <AudioUnit/AudioUnitCarbonView.h>
 
 #include "../../../../../juce.h"
 #include "juce_AudioUnitPluginFormat.h"
@@ -45,6 +46,10 @@ BEGIN_JUCE_NAMESPACE
  extern bool juce_isHIViewCreatedByJuce (HIViewRef view);
  extern bool juce_isWindowCreatedByJuce (WindowRef window);
 END_JUCE_NAMESPACE
+
+#if MACOS_10_3_OR_EARLIER
+ #define kAudioUnitType_Generator 'augn'
+#endif
 
 // Change this to disable logging of various activities
 #ifndef AU_LOGGING

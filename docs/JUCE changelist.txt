@@ -8,7 +8,8 @@ Changelist for version 1.46
 
 - new class: ScopedTryLock
 - added AudioUnit support to the audio hosting code
-
+- any top-level components will now have their parentSizeChanged() method called when the screen res is changed (not on linux yet though..)
+- 
 
 ==============================================================================
 Changelist for version 1.45

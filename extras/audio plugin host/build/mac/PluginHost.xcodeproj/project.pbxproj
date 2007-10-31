@@ -11,6 +11,7 @@
 		840A4D4B0CD774A000445927 /* juce_VSTPluginFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 840A4D480CD774A000445927 /* juce_VSTPluginFormat.cpp */; };
 		8411682E0CBBEE0500232E45 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8411682D0CBBEE0500232E45 /* OpenGL.framework */; };
 		84CF14390CD6367800A8D756 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84CF14380CD6367800A8D756 /* AudioUnit.framework */; };
+		84FC4CD90CD8894600850651 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 84FC4CD80CD8894600850651 /* juce.xcconfig */; };
 		84FFAEAC0C6C8A6F009F6E72 /* FilterGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */; };
 		84FFAEAD0C6C8A6F009F6E72 /* GraphEditorPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */; };
 		84FFAEAE0C6C8A6F009F6E72 /* InternalFilters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAE960C6C8A6F009F6E72 /* InternalFilters.cpp */; };
@@ -22,7 +23,7 @@
 		84FFAEB40C6C8A6F009F6E72 /* juce_PluginDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAEA20C6C8A6F009F6E72 /* juce_PluginDescription.cpp */; };
 		84FFAEB50C6C8A6F009F6E72 /* juce_PluginDirectoryScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAEA40C6C8A6F009F6E72 /* juce_PluginDirectoryScanner.cpp */; };
 		84FFAEB60C6C8A6F009F6E72 /* juce_PluginListComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FFAEA60C6C8A6F009F6E72 /* juce_PluginListComponent.cpp */; };
-		84FFAEFE0C6C8E80009F6E72 /* libjuce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFAEFC0C6C8E76009F6E72 /* libjuce.a */; };
+		84FFAEFE0C6C8E80009F6E72 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFAEFC0C6C8E76009F6E72 /* libjucedebug.a */; };
 		84FFAF040C6C8ED5009F6E72 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFAEFF0C6C8ED5009F6E72 /* CoreAudio.framework */; };
 		84FFAF050C6C8ED5009F6E72 /* CoreMIDI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFAF000C6C8ED5009F6E72 /* CoreMIDI.framework */; };
 		84FFAF060C6C8ED5009F6E72 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFAF010C6C8ED5009F6E72 /* IOKit.framework */; };
@@ -52,6 +53,7 @@
 		840A4D490CD774A000445927 /* juce_VSTPluginFormat.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_VSTPluginFormat.h; path = formats/juce_VSTPluginFormat.h; sourceTree = "<group>"; };
 		8411682D0CBBEE0500232E45 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		84CF14380CD6367800A8D756 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
+		84FC4CD80CD8894600850651 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
 		84FFAE920C6C8A6F009F6E72 /* FilterGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FilterGraph.cpp; path = ../../src/host/FilterGraph.cpp; sourceTree = SOURCE_ROOT; };
 		84FFAE930C6C8A6F009F6E72 /* FilterGraph.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FilterGraph.h; path = ../../src/host/FilterGraph.h; sourceTree = SOURCE_ROOT; };
 		84FFAE940C6C8A6F009F6E72 /* GraphEditorPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GraphEditorPanel.cpp; path = ../../src/host/GraphEditorPanel.cpp; sourceTree = SOURCE_ROOT; };
@@ -87,7 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84FFAEFE0C6C8E80009F6E72 /* libjuce.a in Frameworks */,
+				84FFAEFE0C6C8E80009F6E72 /* libjucedebug.a in Frameworks */,
 				8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */,
 				84FFAF040C6C8ED5009F6E72 /* CoreAudio.framework in Frameworks */,
 				84FFAF050C6C8ED5009F6E72 /* CoreMIDI.framework in Frameworks */,
@@ -124,6 +126,7 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				84FC4CD80CD8894600850651 /* juce.xcconfig */,
 				84FFAE910C6C8A6F009F6E72 /* host */,
 				84FFAE9B0C6C8A6F009F6E72 /* plugins */,
 				84FFAE9A0C6C8A6F009F6E72 /* HostStartup.cpp */,
@@ -208,7 +211,7 @@
 		84FFAEF80C6C8E76009F6E72 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84FFAEFC0C6C8E76009F6E72 /* libjuce.a */,
+				84FFAEFC0C6C8E76009F6E72 /* libjucedebug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -256,10 +259,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		84FFAEFC0C6C8E76009F6E72 /* libjuce.a */ = {
+		84FFAEFC0C6C8E76009F6E72 /* libjucedebug.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libjuce.a;
+			path = libjucedebug.a;
 			remoteRef = 84FFAEFB0C6C8E76009F6E72 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -270,6 +273,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84FC4CD90CD8894600850651 /* juce.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,11 +321,8 @@
 		};
 		C0E91ACA08A95435008D54AB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84FC4CD80CD8894600850651 /* juce.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Juce Plugin Host";
@@ -332,11 +333,8 @@
 		};
 		C0E91ACB08A95435008D54AB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 84FC4CD80CD8894600850651 /* juce.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
 				PRODUCT_NAME = "Juce Plugin Host";
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "~/stuff/vstsdk2.4 $(inherited)";
