@@ -243,7 +243,8 @@ static bool connectSocket (int volatile& handle,
     servTmpAddr.sin_addr = targetAddress;
     servTmpAddr.sin_port = htons ((uint16) portNumber);
 
-    handle = (int) socket (AF_INET, isDatagram ? SOCK_DGRAM : SOCK_STREAM, 0);
+    if (handle < 0) 
+        handle = (int) socket (AF_INET, isDatagram ? SOCK_DGRAM : SOCK_STREAM, 0);
 
     if (handle < 0)
         return false;
@@ -485,6 +486,7 @@ DatagramSocket::DatagramSocket (const int localPortNumber)
     initWin32Sockets();
 #endif
 
+    handle = (int) socket (AF_INET, SOCK_DGRAM, 0);
     bindToPort (localPortNumber);
 }
 
