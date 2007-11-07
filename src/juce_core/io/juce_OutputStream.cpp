@@ -114,11 +114,25 @@ void OutputStream::writeFloat (float value)
     writeInt (n.asInt);
 }
 
+void OutputStream::writeFloatBigEndian (float value)
+{
+    union { int asInt; float asFloat; } n;
+    n.asFloat = value;
+    writeIntBigEndian (n.asInt);
+}
+
 void OutputStream::writeDouble (double value)
 {
     union { int64 asInt; double asDouble; } n;
     n.asDouble = value;
     writeInt64 (n.asInt);
+}
+
+void OutputStream::writeDoubleBigEndian (double value)
+{
+    union { int64 asInt; double asDouble; } n;
+    n.asDouble = value;
+    writeInt64BigEndian (n.asInt);
 }
 
 void OutputStream::writeString (const String& text)

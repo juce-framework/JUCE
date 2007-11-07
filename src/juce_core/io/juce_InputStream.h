@@ -176,6 +176,16 @@ public:
     */
     virtual float readFloat();
 
+    /** Reads four bytes as a 32-bit floating point value.
+
+        The raw 32-bit encoding of the float is read from the stream as a big-endian int.
+
+        If the stream is exhausted partway through reading the bytes, this will return zero.
+
+        @see OutputStream::writeFloatBigEndian, readDoubleBigEndian
+    */
+    virtual float readFloatBigEndian();
+
     /** Reads eight bytes as a 64-bit floating point value.
 
         The raw 64-bit encoding of the double is read from the stream as a little-endian int64.
@@ -185,6 +195,16 @@ public:
         @see OutputStream::writeDouble, readFloat
     */
     virtual double readDouble();
+
+    /** Reads eight bytes as a 64-bit floating point value.
+
+        The raw 64-bit encoding of the double is read from the stream as a big-endian int64.
+
+        If the stream is exhausted partway through reading the bytes, this will return zero.
+
+        @see OutputStream::writeDoubleBigEndian, readFloatBigEndian
+    */
+    virtual double readDoubleBigEndian();
 
     /** Reads an encoded 32-bit number from the stream using a space-saving compressed format.
 

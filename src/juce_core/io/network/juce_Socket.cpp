@@ -243,7 +243,7 @@ static bool connectSocket (int volatile& handle,
     servTmpAddr.sin_addr = targetAddress;
     servTmpAddr.sin_port = htons ((uint16) portNumber);
 
-    if (handle < 0) 
+    if (handle < 0)
         handle = (int) socket (AF_INET, isDatagram ? SOCK_DGRAM : SOCK_STREAM, 0);
 
     if (handle < 0)

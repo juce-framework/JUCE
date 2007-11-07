@@ -140,10 +140,24 @@ float InputStream::readFloat()
     return n.asFloat;
 }
 
+float InputStream::readFloatBigEndian()
+{
+    union { int asInt; float asFloat; } n;
+    n.asInt = readIntBigEndian();
+    return n.asFloat;
+}
+
 double InputStream::readDouble()
 {
     union { int64 asInt; double asDouble; } n;
     n.asInt = readInt64();
+    return n.asDouble;
+}
+
+double InputStream::readDoubleBigEndian()
+{
+    union { int64 asInt; double asDouble; } n;
+    n.asInt = readInt64BigEndian();
     return n.asDouble;
 }
 

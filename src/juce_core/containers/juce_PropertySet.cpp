@@ -68,6 +68,17 @@ PropertySet::~PropertySet()
 {
 }
 
+void PropertySet::clear()
+{
+    const ScopedLock sl (lock);
+
+    if (properties.size() > 0)
+    {
+        properties.clear();
+        propertyChanged();
+    }
+}
+
 const String PropertySet::getValue (const String& keyName,
                                     const String& defaultValue) const throw()
 {
@@ -198,6 +209,43 @@ void PropertySet::setFallbackPropertySet (PropertySet* fallbackProperties_) thro
 {
     const ScopedLock sl (lock);
     fallbackProperties = fallbackProperties_;
+}
+
+XmlElement* PropertySet::createXml (const String& nodeName) const throw()
+{
+    const ScopedLock sl (lock);
+    XmlElement* const xml = new XmlElement (nodeName);
+
+    for (int i = 0; i < properties.getAllKeys().size(); ++i)
+    {
+        XmlElement* const e = new XmlElement (T("VALUE"));
+
+        e->setAttribute (T("name"), properties.getAllKeys()[i]);
+        e->setAttribute (T("val"), properties.getAllValues()[i]);
+
+        xml->addChildElement (e);
+    }
+
+    return xml;
+}
+
+void PropertySet::restoreFromXml (const XmlElement& xml) throw()
+{
+    const ScopedLock sl (lock);
+    clear();
+
+    forEachXmlChildElementWithTagName (xml, e, T("VALUE"))
+    {
+        if (e->hasAttribute (T("name"))
+             && e->hasAttribute (T("val")))
+        {
+            properties.set (e->getStringAttribute (T("name")),
+                            e->getStringAttribute (T("val")));
+        }
+    }
+
+    if (properties.size() > 0)
+        propertyChanged();
 }
 
 void PropertySet::propertyChanged()

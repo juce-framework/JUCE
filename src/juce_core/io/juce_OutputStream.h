@@ -150,6 +150,14 @@ public:
     */
     virtual void writeFloat (float value);
 
+    /** Writes a 32-bit floating point value to the stream.
+
+        The binary 32-bit encoding of the float is written as a big-endian int.
+
+        @see InputStream::readFloatBigEndian
+    */
+    virtual void writeFloatBigEndian (float value);
+
     /** Writes a 64-bit floating point value to the stream.
 
         The eight raw bytes of the double value are written out as a little-endian 64-bit int.
@@ -157,6 +165,14 @@ public:
         @see InputStream::readDouble
     */
     virtual void writeDouble (double value);
+
+    /** Writes a 64-bit floating point value to the stream.
+
+        The eight raw bytes of the double value are written out as a big-endian 64-bit int.
+
+        @see InputStream::readDoubleBigEndian
+    */
+    virtual void writeDoubleBigEndian (double value);
 
     /** Writes a condensed encoding of a 32-bit integer.
 
