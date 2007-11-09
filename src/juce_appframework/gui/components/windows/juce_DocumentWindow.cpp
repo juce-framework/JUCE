@@ -309,6 +309,11 @@ void DocumentWindow::lookAndFeelChanged()
     ResizableWindow::lookAndFeelChanged();
 }
 
+void DocumentWindow::parentHierarchyChanged()
+{
+    lookAndFeelChanged();
+}
+
 void DocumentWindow::activeWindowStatusChanged()
 {
     ResizableWindow::activeWindowStatusChanged();

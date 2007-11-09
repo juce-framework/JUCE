@@ -230,6 +230,8 @@ public:
     void activeWindowStatusChanged();
     /** @internal */
     int getDesktopWindowStyleFlags() const;
+    /** @internal */
+    void parentHierarchyChanged();
 
 
     //==============================================================================

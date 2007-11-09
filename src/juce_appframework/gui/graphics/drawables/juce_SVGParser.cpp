@@ -64,6 +64,8 @@ public:
 
         DrawableComposite* const drawable = new DrawableComposite();
 
+        drawable->setName (xml.getStringAttribute (T("id")));
+
         SVGState newState (*this);
 
         if (xml.hasAttribute (T("transform")))
@@ -194,6 +196,8 @@ private:
     DrawableComposite* parseGroupElement (const XmlElement& xml)
     {
         DrawableComposite* const drawable = new DrawableComposite();
+
+        drawable->setName (xml.getStringAttribute (T("id")));
 
         if (xml.hasAttribute (T("transform")))
         {

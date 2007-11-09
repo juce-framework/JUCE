@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_FileLogger.h"
 #include "../io/files/juce_FileOutputStream.h"
+#include "../io/files/juce_FileInputStream.h"
 #include "../threads/juce_ScopedLock.h"
 #include "../basics/juce_SystemStats.h"
 
@@ -98,17 +99,35 @@ void FileLogger::trimFileSize (int maxFileSizeBytes) const
 
         if (fileSize > maxFileSizeBytes)
         {
-            const String content (logFile.loadFileAsString());
+            FileInputStream* const in = logFile.createInputStream();
+            jassert (in != 0);
 
-            int newStart = (int) (fileSize - maxFileSizeBytes);
+            if (in != 0)
+            {
+                in->setPosition (fileSize - maxFileSizeBytes);
+                String content;
 
-            while (newStart < fileSize
-                    && content[newStart] != '\n'
-                    && content[newStart] != '\r')
-                ++newStart;
+                {
+                    MemoryBlock contentToSave;
+                    contentToSave.setSize (maxFileSizeBytes + 4);
+                    contentToSave.fillWith (0);
 
-            logFile.deleteFile();
-            logFile.appendText (content.substring (newStart), false, false);
+                    in->read (contentToSave.getData(), maxFileSizeBytes);
+                    delete in;
+
+                    content = contentToSave.toString();
+                }
+
+                int newStart = 0;
+
+                while (newStart < fileSize
+                        && content[newStart] != '\n'
+                        && content[newStart] != '\r')
+                    ++newStart;
+
+                logFile.deleteFile();
+                logFile.appendText (content.substring (newStart), false, false);
+            }
         }
     }
 }

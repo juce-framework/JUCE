@@ -122,6 +122,15 @@ public:
     virtual bool hitTest (float x, float y) const = 0;
 
     //==============================================================================
+    /** Returns the name given to this drawable.
+        @see setName
+    */
+    const String& getName() const throw()               { return name; }
+
+    /** Assigns a name to this drawable. */
+    void setName (const String& newName) throw()        { name = newName; }
+
+    //==============================================================================
     /** Tries to turn some kind of image file into a drawable.
 
         The data could be an image that the ImageFileFormat class understands, or it
@@ -161,6 +170,8 @@ public:
 private:
     Drawable (const Drawable&);
     const Drawable& operator= (const Drawable&);
+
+    String name;
 };
 
 
