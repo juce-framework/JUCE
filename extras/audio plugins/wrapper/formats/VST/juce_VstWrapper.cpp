@@ -352,14 +352,14 @@ public:
         firstResize = true;
         hasShutdown = false;
         channels = 0;
+        numInChans = JucePlugin_MaxNumInputChannels;
+        numOutChans = JucePlugin_MaxNumOutputChannels;
 
 #if JUCE_MAC || JUCE_LINUX
         hostWindow = 0;
 #endif
 
-        filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                      JucePlugin_MaxNumOutputChannels,
-                                      0, 0);
+        filter->setPlayConfigDetails (numInChans, numOutChans, 0, 0);
 
         filter_->setPlayHead (this);
         filter_->addListener (this);
@@ -373,8 +373,8 @@ public:
         wantEvents();
 #endif
 
-        setNumInputs (filter->getNumInputChannels());
-        setNumOutputs (filter->getNumOutputChannels());
+        setNumInputs (numInChans);
+        setNumOutputs (numOutChans);
 
         canProcessReplacing (true);
 
@@ -573,8 +573,8 @@ public:
 
     void process (float** inputs, float** outputs, VstInt32 numSamples)
     {
-        const int numIn = filter->getNumInputChannels();
-        const int numOut = filter->getNumOutputChannels();
+        const int numIn = numInChans;
+        const int numOut = numOutChans;
 
         AudioSampleBuffer temp (numIn, numSamples);
         int i;
@@ -608,8 +608,8 @@ public:
         {
             const ScopedLock sl (filter->getCallbackLock());
 
-            const int numIn = filter->getNumInputChannels();
-            const int numOut = filter->getNumOutputChannels();
+            const int numIn = numInChans;
+            const int numOut = numOutChans;
 
             if (filter->isSuspended())
             {
@@ -716,6 +716,9 @@ public:
     }
 
     //==============================================================================
+	VstInt32 startProcess () { return 0; }
+	VstInt32 stopProcess () { return 0;}
+
     void resume()
     {
         if (filter == 0)
@@ -723,7 +726,7 @@ public:
 
         isProcessing = true;
         juce_free (channels);
-        channels = (float**) juce_calloc (sizeof (float*) * (filter->getNumInputChannels() + filter->getNumOutputChannels()));
+        channels = (float**) juce_calloc (sizeof (float*) * (numInChans + numOutChans));
 
         double rate = getSampleRate();
         jassert (rate > 0);
@@ -733,8 +736,7 @@ public:
         const int blockSize = getBlockSize();
         jassert (blockSize > 0);
 
-        filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
-                                      JucePlugin_MaxNumOutputChannels,
+        filter->setPlayConfigDetails (numInChans, numOutChans,
                                       rate, blockSize);
 
         deleteTempChannels();
@@ -976,10 +978,18 @@ public:
         return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
-    bool setSpeakerArrangement (VstSpeakerArrangement* /*pluginInput*/,
-                                VstSpeakerArrangement* /*pluginOutput*/)
+    bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
+                                VstSpeakerArrangement* pluginOutput)
     {
         // if this method isn't implemented, nuendo4 + cubase4 crash when you've got multiple channels..
+
+        numInChans = pluginInput->numChannels;
+        numOutChans = pluginOutput->numChannels;
+
+        filter->setPlayConfigDetails (numInChans, numOutChans,
+                                      filter->getSampleRate(),
+                                      filter->getBlockSize());
+
         return true;
     }
 
@@ -1358,6 +1368,7 @@ private:
     bool firstResize;
     bool hasShutdown;
     int diffW, diffH;
+    int numInChans, numOutChans;
     float** channels;
     VoidArray tempChannels; // see note in processReplacing()
     bool hasCreatedTempChannels;
@@ -1491,14 +1502,19 @@ extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMas
 // Linux startup code..
 #elif JUCE_LINUX
 
-extern "C" AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
-
-extern "C" AEffect* main_plugin (audioMasterCallback audioMaster)
+extern "C" AEffect* VSTPluginMain (audioMasterCallback audioMaster)
 {
     initialiseJuce_GUI();
     SharedMessageThread::getInstance();
 
     return pluginEntryPoint (audioMaster);
+}
+
+extern "C" AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
+
+extern "C" AEffect* main_plugin (audioMasterCallback audioMaster)
+{
+    return VSTPluginMain (audioMaster);
 }
 
 __attribute__((constructor)) void myPluginInit()
