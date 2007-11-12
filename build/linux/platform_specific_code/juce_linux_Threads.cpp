@@ -347,13 +347,16 @@ bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
 
     if (testResult == 0)
     {
-        testResult = (ptrace (PTRACE_TRACEME, 0, 0, 0) < 0) ? 1 : -1;
+        testResult = (char) ptrace (PT_TRACE_ME, 0, 0, 0);
 
-        if (testResult < 0)
-            ptrace (PTRACE_DETACH, 0, (caddr_t) 1, 0);
+        if (testResult >= 0)
+        {
+            ptrace (PT_DETACH, 0, (caddr_t) 1, 0);
+            testResult = 1;
+        }
     }
 
-    return testResult > 0;
+    return testResult < 0;
 }
 
 bool JUCE_CALLTYPE Process::isRunningUnderDebugger() throw()
