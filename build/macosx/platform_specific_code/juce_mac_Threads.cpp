@@ -34,7 +34,7 @@
 #include <sched.h>
 #include <sys/file.h>
 #include <sys/types.h>
-#include <sys/ptrace.h>
+#include <sys/sysctl.h>
 #include <Carbon/Carbon.h>
 
 BEGIN_JUCE_NAMESPACE
@@ -231,10 +231,11 @@ bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
 
     if (testResult == 0)
     {
-        testResult = (ptrace (PT_TRACE_ME, 0, 0, 0) < 0) ? 1 : -1;
-
-        if (testResult < 0)
-            ptrace (PT_DETACH, 0, (caddr_t) 1, 0);
+        struct kinfo_proc info;
+        int m[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+        size_t sz = sizeof (info);
+        sysctl (m, 4, &info, &sz, 0, 0);
+        testResult = (info.kp_proc.p_flag & P_TRACED) == P_TRACED ? 1 : -1;
     }
 
     return testResult > 0;
