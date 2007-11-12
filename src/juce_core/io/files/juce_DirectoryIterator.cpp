@@ -54,7 +54,8 @@ DirectoryIterator::DirectoryIterator (const File& directory,
     subIterator (0)
 {
     // you have to specify the type of files you're looking for!
-    jassert (whatToLookFor > 0 && whatToLookFor <= 3);
+    jassert ((whatToLookFor_ & (File::findFiles | File::findDirectories)) != 0);
+    jassert (whatToLookFor_ > 0 && whatToLookFor_ <= 7);
 
     String path (directory.getFullPathName());
     if (! path.endsWithChar (File::separator))
