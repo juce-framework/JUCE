@@ -40,8 +40,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ComponentBoundsConstrainer::ComponentBoundsConstrainer() throw()
     : minW (0),
-      maxW (0),
-      minH (0x3fffffff),
+      maxW (0x3fffffff),
+      minH (0),
       maxH (0x3fffffff),
       minOffTop (0),
       minOffLeft (0),
