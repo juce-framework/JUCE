@@ -870,7 +870,7 @@ private:
         const Rectangle mon (Desktop::getInstance()
                                 .getMonitorAreaContaining ((minX + maxX) / 2,
                                                            (minY + maxY) / 2,
-                                                           false));
+                                                           true));
 
         int x, y, widthToUse, heightToUse;
         layoutMenuItems (mon.getWidth() - 24, widthToUse, heightToUse);
@@ -1038,7 +1038,7 @@ private:
                     const Rectangle mon (Desktop::getInstance()
                                          .getMonitorAreaContaining (windowPos.getX(),
                                                                     windowPos.getY(),
-                                                                    false));
+                                                                    true));
 
                     int deltaY = wantedY - currentY;
 
