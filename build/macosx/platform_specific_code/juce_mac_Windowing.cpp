@@ -1027,38 +1027,50 @@ public:
         UInt32 rawKey = 0;
         GetEventParameter (theEvent, kEventParamKeyCode, typeUInt32, 0, sizeof (UInt32), 0, &rawKey);
 
-        if ((currentModifiers & ModifierKeys::ctrlModifier) != 0)
+        if ((currentModifiers & ModifierKeys::ctrlModifier) != 0
+             && keyCode >= 1 && keyCode <= 26)
         {
-            if (keyCode >= 1 && keyCode <= 26)
-                keyCode += ('A' - 1);
+            keyCode += ('A' - 1);
+        }
+        else
+        {
+            static const int keyTranslations[] =
+            {
+                0, 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 0xa7, 'b',
+                'q', 'w', 'e', 'r', 'y', 't', '1', '2', '3', '4', '6', '5',
+                '=', '9', '7', '-', '8', '0', ']', 'o', 'u', '[', 'i', 'p',
+                KeyPress::returnKey, 'l', 'j', '\'', 'k', ';', '\\', ',', '/',
+                'n', 'm', '.', 0, KeyPress::spaceKey, '`', KeyPress::backspaceKey, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, KeyPress::numberPadDecimalPoint,
+                0, KeyPress::numberPadMultiply, 0, KeyPress::numberPadAdd,
+                0, KeyPress::numberPadDelete, 0, 0, 0, KeyPress::numberPadDivide, KeyPress::returnKey,
+                0, KeyPress::numberPadSubtract, 0, 0, KeyPress::numberPadEquals, KeyPress::numberPad0,
+                KeyPress::numberPad1, KeyPress::numberPad2, KeyPress::numberPad3,
+                KeyPress::numberPad4, KeyPress::numberPad5, KeyPress::numberPad6,
+                KeyPress::numberPad7, 0, KeyPress::numberPad8, KeyPress::numberPad9,
+                0, 0, 0, KeyPress::F5Key, KeyPress::F6Key, KeyPress::F7Key, KeyPress::F3Key,
+                KeyPress::F8Key, KeyPress::F9Key, 0, KeyPress::F11Key, 0, KeyPress::F13Key,
+                KeyPress::F16Key, KeyPress::F14Key, 0, KeyPress::F10Key, 0, KeyPress::F12Key,
+                0, KeyPress::F15Key, 0, KeyPress::homeKey, KeyPress::pageUpKey, 0, KeyPress::F4Key,
+                KeyPress::endKey, KeyPress::F2Key, KeyPress::pageDownKey, KeyPress::F1Key,
+                KeyPress::leftKey, KeyPress::rightKey, KeyPress::downKey, KeyPress::upKey, 0
+            };
+
+            if (((unsigned int) rawKey) < (unsigned int) numElementsInArray (keyTranslations) 
+                 && keyTranslations [rawKey] != 0)
+            {
+                keyCode = keyTranslations [rawKey];
+            }
+
+            if ((rawKey == 0 && textCharacter != 0)
+                || (CharacterFunctions::isLetterOrDigit ((juce_wchar) keyCode) 
+                     && CharacterFunctions::isLetterOrDigit (textCharacter))) // correction for azerty-type layouts..
+            {
+                keyCode = CharacterFunctions::toLowerCase (textCharacter);
+            }
         }
 
-        static const int keyTranslations[] =
-        {
-            0, 's', 'd', 'f', 'h', 'g', 'z', 'x', 'c', 'v', 0xa7, 'b',
-            'q', 'w', 'e', 'r', 'y', 't', '1', '2', '3', '4', '6', '5',
-            '=', '9', '7', '-', '8', '0', ']', 'o', 'u', '[', 'i', 'p',
-            KeyPress::returnKey, 'l', 'j', '\'', 'k', ';', '\\', ',', '/',
-            'n', 'm', '.', 0, KeyPress::spaceKey, '`', KeyPress::backspaceKey, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, KeyPress::numberPadDecimalPoint,
-            0, KeyPress::numberPadMultiply, 0, KeyPress::numberPadAdd,
-            0, KeyPress::numberPadDelete, 0, 0, 0, KeyPress::numberPadDivide, KeyPress::returnKey,
-            0, KeyPress::numberPadSubtract, 0, 0, KeyPress::numberPadEquals, KeyPress::numberPad0,
-            KeyPress::numberPad1, KeyPress::numberPad2, KeyPress::numberPad3,
-            KeyPress::numberPad4, KeyPress::numberPad5, KeyPress::numberPad6,
-            KeyPress::numberPad7, 0, KeyPress::numberPad8, KeyPress::numberPad9,
-            0, 0, 0, KeyPress::F5Key, KeyPress::F6Key, KeyPress::F7Key, KeyPress::F3Key,
-            KeyPress::F8Key, KeyPress::F9Key, 0, KeyPress::F11Key, 0, KeyPress::F13Key,
-            KeyPress::F16Key, KeyPress::F14Key, 0, KeyPress::F10Key, 0, KeyPress::F12Key,
-            0, KeyPress::F15Key, 0, KeyPress::homeKey, KeyPress::pageUpKey, 0, KeyPress::F4Key,
-            KeyPress::endKey, KeyPress::F2Key, KeyPress::pageDownKey, KeyPress::F1Key,
-            KeyPress::leftKey, KeyPress::rightKey, KeyPress::downKey, KeyPress::upKey, 0
-        };
-
-        if (rawKey > 0 && rawKey < numElementsInArray (keyTranslations) && keyTranslations [rawKey] != 0)
-            keyCode = keyTranslations [rawKey];
-        else if (rawKey == 0 && textCharacter != 0)
-            keyCode = 'a';
+DBG (String ((int) rawKey) + " " + String ((int) keyCode) + " " + String::charToString (textCharacter) + " " + String ((int) currentModifiers));
 
         if ((currentModifiers & (ModifierKeys::commandModifier | ModifierKeys::ctrlModifier)) != 0)
             textCharacter = 0;
