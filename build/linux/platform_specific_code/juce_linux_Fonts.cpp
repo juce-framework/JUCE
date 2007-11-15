@@ -553,9 +553,9 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
         ->createTypeface (fontName, bold, italic, *this, addAllGlyphsToFont);
 }
 
-void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
+bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
-    FreeTypeInterface::getInstance()
+    return FreeTypeInterface::getInstance()
         ->addGlyphToFont (character, getName(), isBold(), isItalic(), *this);
 }
 

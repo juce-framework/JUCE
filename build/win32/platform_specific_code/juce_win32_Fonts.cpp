@@ -48,6 +48,7 @@ BEGIN_JUCE_NAMESPACE
     UNICODE_FUNCTION (GetKerningPairsW, DWORD, (HDC, DWORD, LPKERNINGPAIR))
     UNICODE_FUNCTION (EnumFontFamiliesExW, int, (HDC, LPLOGFONTW, FONTENUMPROCW, LPARAM, DWORD))
     UNICODE_FUNCTION (CreateFontIndirectW, HFONT, (CONST LOGFONTW *));
+    UNICODE_FUNCTION (GetGlyphIndicesW, DWORD, (HDC, LPCWSTR, int, LPWORD, DWORD));
 
     static void juce_initialiseUnicodeFileFontFunctions()
     {
@@ -65,6 +66,7 @@ BEGIN_JUCE_NAMESPACE
                 UNICODE_FUNCTION_LOAD (GetKerningPairsW)
                 UNICODE_FUNCTION_LOAD (EnumFontFamiliesExW)
                 UNICODE_FUNCTION_LOAD (CreateFontIndirectW)
+                UNICODE_FUNCTION_LOAD (GetGlyphIndicesW)
             }
         }
     }
@@ -466,7 +468,7 @@ juce_ImplementSingleton_SingleThreaded (FontDCHolder);
 
 
 //==============================================================================
-static void addGlyphToTypeface (HDC dc,
+static bool addGlyphToTypeface (HDC dc,
                                 juce_wchar character,
                                 Typeface& dest,
                                 bool addKerning)
@@ -478,6 +480,18 @@ static void addGlyphToTypeface (HDC dc,
     BOOL ok = false;
 
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
+    if (wGetGlyphIndicesW != 0)
+    {
+        const WCHAR charToTest[] = { (WCHAR)character, 0 };
+        WORD index = 0;
+
+        if (wGetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR 
+             && index < 0)
+        {
+            return false;
+        }
+    }
+
     if (wGetTextMetricsW != 0)
     {
         TEXTMETRICW tm;
@@ -493,6 +507,17 @@ static void addGlyphToTypeface (HDC dc,
         height = (float) tm.tmHeight;
     }
 #else
+    {
+        const WCHAR charToTest[] = { (WCHAR)character, 0 };
+        WORD index = 0;
+
+        if (GetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR 
+             && index < 0)
+        {
+            return false;
+        }
+    }
+
     TEXTMETRICW tm;
     ok = GetTextMetricsW (dc, &tm);
 
@@ -502,7 +527,7 @@ static void addGlyphToTypeface (HDC dc,
     if (! ok)
     {
         dest.addGlyph (character, destShape, 0);
-        return;
+        return true;
     }
 
     const float scaleX = 1.0f / height;
@@ -620,13 +645,15 @@ static void addGlyphToTypeface (HDC dc,
             }
         }
     }
+
+    return true;
 }
 
 //==============================================================================
-void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
+bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
     HDC dc = FontDCHolder::getInstance()->loadFont (getName(), isBold(), isItalic(), 0);
-    addGlyphToTypeface (dc, character, *this, true);
+    return addGlyphToTypeface (dc, character, *this, true);
 }
 
 /*Image* Typeface::renderGlyphToImage (juce_wchar character, float& topLeftX, float& topLeftY)

@@ -96,30 +96,9 @@ bool KeyPress::operator!= (const KeyPress& other) const throw()
 
 bool KeyPress::isCurrentlyDown() const throw()
 {
-    int modsMask = ModifierKeys::commandModifier
-                    | ModifierKeys::ctrlModifier
-                    | ModifierKeys::altModifier;
-
-    if (keyCode == KeyPress::downKey
-        || keyCode == KeyPress::upKey
-        || keyCode == KeyPress::leftKey
-        || keyCode == KeyPress::rightKey
-        || keyCode == KeyPress::deleteKey
-        || keyCode == KeyPress::backspaceKey
-        || keyCode == KeyPress::returnKey
-        || keyCode == KeyPress::escapeKey
-        || keyCode == KeyPress::homeKey
-        || keyCode == KeyPress::endKey
-        || keyCode == KeyPress::pageUpKey
-        || keyCode == KeyPress::pageDownKey
-        || (keyCode >= KeyPress::F1Key && keyCode <= KeyPress::F16Key))
-    {
-        modsMask |= ModifierKeys::shiftModifier;
-    }
-
     return isKeyCurrentlyDown (keyCode)
-            && (ModifierKeys::getCurrentModifiers().getRawFlags() & modsMask)
-                  == (mods.getRawFlags() & modsMask);
+            && (ModifierKeys::getCurrentModifiers().getRawFlags() & ModifierKeys::allKeyboardModifiers)
+                  == (mods.getRawFlags() & ModifierKeys::allKeyboardModifiers);
 }
 
 //==============================================================================

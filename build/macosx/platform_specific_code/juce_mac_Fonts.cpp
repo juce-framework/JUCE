@@ -414,13 +414,14 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
     ATSFontHelperCache::getInstance()->releaseFont (helper);
 }
 
-void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
+bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
     ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
                                     ->getFont (getName(), isBold(), isItalic());
 
     Path path;
     float width;
+    bool foundOne = false;
 
     if (helper->getPathAndKerning (character, T('I'), &path, width, 0, 0))
     {
@@ -450,9 +451,12 @@ void Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
                     addKerningPair (g->getCharacter(), character, kerning);
             }
         }
+        
+        foundOne = true;
     }
 
     ATSFontHelperCache::getInstance()->releaseFont (helper);
+    return foundOne;
 }
 
 const StringArray Font::findAllTypefaceNames() throw()

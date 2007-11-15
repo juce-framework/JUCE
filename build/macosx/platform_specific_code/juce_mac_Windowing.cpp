@@ -1070,8 +1070,6 @@ public:
             }
         }
 
-DBG (String ((int) rawKey) + " " + String ((int) keyCode) + " " + String::charToString (textCharacter) + " " + String ((int) currentModifiers));
-
         if ((currentModifiers & (ModifierKeys::commandModifier | ModifierKeys::ctrlModifier)) != 0)
             textCharacter = 0;
 
@@ -2824,7 +2822,7 @@ private:
 
                         if (keyPresses.size() > 0)
                         {
-                            const KeyPress& kp = keyPresses.getUnchecked(0);
+                            const KeyPress& kp = keyPresses.getReference(0);
                             int mods = 0;
 
                             if (kp.getModifiers().isShiftDown())

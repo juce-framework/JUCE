@@ -44,6 +44,15 @@
 #endif
 #include <shlobj.h>
 
+#ifndef CSIDL_MYMUSIC
+ #define CSIDL_MYMUSIC 0x000d
+#endif
+
+#ifndef CSIDL_MYVIDEO
+ #define CSIDL_MYVIDEO 0x000e
+#endif
+
+
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/io/files/juce_File.h"
@@ -81,6 +90,9 @@ UNICODE_FUNCTION (FindNextFileW, BOOL, (HANDLE, LPWIN32_FIND_DATAW))
 
 void juce_initialiseUnicodeFileFunctions() throw()
 {
+    static_jassert (CSIDL_MYMUSIC == 0x000d);
+    static_jassert (CSIDL_MYVIDEO == 0x000e);
+
     if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
     {
         HMODULE h = GetModuleHandleA ("kernel32.dll");

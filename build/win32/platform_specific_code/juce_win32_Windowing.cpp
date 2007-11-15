@@ -138,6 +138,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
     UNICODE_FUNCTION (SetWindowTextW, BOOL, (HWND, LPCWSTR))
     UNICODE_FUNCTION (DragQueryFileW, UINT, (HDROP, UINT, LPWSTR, UINT))
     UNICODE_FUNCTION (MapVirtualKeyW, UINT, (UINT, UINT))
+    UNICODE_FUNCTION (ToUnicode, int, (UINT, UINT, const PBYTE, LPWSTR, int, UINT))
     UNICODE_FUNCTION (RegisterClassExW, ATOM, (CONST WNDCLASSEXW*))
     UNICODE_FUNCTION (CreateWindowExW, HWND, (DWORD, LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID))
     UNICODE_FUNCTION (DefWindowProcW, LRESULT, (HWND, UINT, WPARAM, LPARAM))
@@ -155,6 +156,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
                 HMODULE h = LoadLibraryA ("user32.dll");
                 UNICODE_FUNCTION_LOAD (SetWindowTextW)
                 UNICODE_FUNCTION_LOAD (MapVirtualKeyW)
+                UNICODE_FUNCTION_LOAD (ToUnicode)
                 UNICODE_FUNCTION_LOAD (RegisterClassExW)
                 UNICODE_FUNCTION_LOAD (CreateWindowExW)
                 UNICODE_FUNCTION_LOAD (DefWindowProcW)
@@ -1693,7 +1695,7 @@ private:
     {
         updateKeyModifiers();
 
-        const juce_wchar textChar = (juce_wchar) key;
+        juce_wchar textChar = (juce_wchar) key;
         const int virtualScanCode = (flags >> 16) & 0xff;
 
         if (key >= '0' && key <= '9')
@@ -1723,10 +1725,35 @@ private:
 
             // convert the scan code to an unmodified character code..
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
-            UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (wMapVirtualKeyW (virtualScanCode, 1), 2)
-                                                : MapVirtualKey (MapVirtualKey (virtualScanCode, 1), 2);
+            const UINT virtualKey = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (virtualScanCode, 1)
+                                                         : MapVirtualKey (virtualScanCode, 1);
+
+            UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (virtualKey, 2)
+                                                : MapVirtualKey (virtualKey, 2);
+
+            if (wToUnicode != 0)
+            {
+                BYTE keyState[256];
+                GetKeyboardState (keyState);
+                WCHAR unicodeChar[32];
+                const DWORD converted = wToUnicode (virtualKey, virtualScanCode, keyState, 
+                                                    unicodeChar, 32, 0);
+                if (converted > 0)
+                    textChar = unicodeChar[0];
+            }
 #else
-            UINT keyChar = MapVirtualKeyW (MapVirtualKeyW (virtualScanCode, 1), 2);
+            const UINT virtualKey = MapVirtualKeyW (virtualScanCode, 1);
+            UINT keyChar = MapVirtualKeyW (virtualKey, 2);
+
+            {
+                BYTE keyState[256];
+                GetKeyboardState (keyState);
+                WCHAR unicodeChar[32];
+                const DWORD converted = ToUnicode (virtualKey, virtualScanCode, keyState, 
+                                                   unicodeChar, 32, 0);
+                if (converted > 0)
+                    textChar = unicodeChar[0];
+            }
 #endif
 
             keyChar = LOWORD (keyChar);

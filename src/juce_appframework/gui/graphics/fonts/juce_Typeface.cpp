@@ -288,10 +288,9 @@ const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character) throw()
             return g;
     }
 
-    if (! isFullyPopulated)
+    if ((! isFullyPopulated) 
+         && findAndAddSystemGlyph (character))
     {
-        findAndAddSystemGlyph (character);
-
         for (int i = 0; i < glyphs.size(); ++i)
         {
             const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) glyphs.getUnchecked(i);

@@ -295,7 +295,7 @@ private:
                                             bool addAllGlyphsToFont) throw();
 
     // platform-specific routine to look up and add a glyph to this typeface
-    void findAndAddSystemGlyph (juce_wchar character) throw();
+    bool findAndAddSystemGlyph (juce_wchar character) throw();
 
     void updateHashCode() throw();
 };
