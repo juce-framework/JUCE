@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_KeyPressMappingSet.h"
 #include "../../../../juce_core/basics/juce_Time.h"
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
+#include "../lookandfeel/juce_LookAndFeel.h"
 
 
 //==============================================================================

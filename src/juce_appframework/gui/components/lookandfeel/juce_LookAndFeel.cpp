@@ -68,6 +68,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../special/juce_MidiKeyboardComponent.h"
 #include "../special/juce_ColourSelector.h"
+#include "../../../../juce_core/misc/juce_PlatformUtilities.h"
 
 
 //==============================================================================
