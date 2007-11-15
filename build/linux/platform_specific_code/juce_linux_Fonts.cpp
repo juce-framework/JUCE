@@ -329,7 +329,7 @@ public:
         return face;
     }
 
-    void addGlyph (FT_Face face, Typeface& dest, uint32 character) throw()
+    bool addGlyph (FT_Face face, Typeface& dest, uint32 character) throw()
     {
         const unsigned int glyphIndex = FT_Get_Char_Index (face, character);
         const float height = (float) (face->ascender - face->descender);
@@ -345,7 +345,7 @@ public:
                                               | FT_LOAD_IGNORE_TRANSFORM) != 0
               || face->glyph->format != ft_glyph_format_outline)
         {
-            return;
+            return false;
         }
 
         const FT_Outline* const outline = &face->glyph->outline;
@@ -391,22 +391,20 @@ public:
                 }
                 else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Cubic)
                 {
-                    if (p > endPoint-1)
-                        return;
+                    if (p >= endPoint)
+                        return false;
 
                     const int next1 = p + 1;
                     const int next2 = (p == (endPoint - 1)) ? startPoint : p + 2;
 
-                    float x2 = CONVERTX (points [next1]);
-                    float y2 = CONVERTY (points [next1]);
-                    float x3 = CONVERTX (points [next2]);
-                    float y3 = CONVERTY (points [next2]);
+                    const float x2 = CONVERTX (points [next1]);
+                    const float y2 = CONVERTY (points [next1]);
+                    const float x3 = CONVERTX (points [next2]);
+                    const float y3 = CONVERTY (points [next2]);
 
-                    if (FT_CURVE_TAG(tags[next1]) != FT_Curve_Tag_Cubic)
-                        return;
-
-                    if (FT_CURVE_TAG(tags[next2]) != FT_Curve_Tag_On)
-                        return;
+                    if (FT_CURVE_TAG (tags[next1]) != FT_Curve_Tag_Cubic 
+                         || FT_CURVE_TAG (tags[next2]) != FT_Curve_Tag_On)
+                        return false;
 
                     destShape.cubicTo (x, y, x2, y2, x3, y3);
                     p += 2;
@@ -420,6 +418,8 @@ public:
 
         if ((face->face_flags & FT_FACE_FLAG_KERNING) != 0)
             addKerning (face, dest, character, glyphIndex);
+
+        return true;
     }
 
     void addKerning (FT_Face face, Typeface& dest, const uint32 character, const uint32 glyphIndex) throw()
@@ -451,10 +451,7 @@ public:
         FT_Face face = createFT_Face (fontName, bold, italic);
 
         if (face != 0)
-        {
-            addGlyph (face, dest, character);
-            return true;
-        }
+            return addGlyph (face, dest, character);
 
         return false;
     }
