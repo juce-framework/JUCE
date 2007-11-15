@@ -2138,7 +2138,7 @@ void Component::inputAttemptWhenModal()
 {
     getTopLevelComponent()->toFront (true);
 
-    PlatformUtilities::beep();
+    getLookAndFeel().playAlertSound();
 }
 
 bool Component::canModalEventBeSentToComponent (const Component*)

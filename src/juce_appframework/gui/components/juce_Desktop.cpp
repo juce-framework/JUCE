@@ -127,15 +127,23 @@ const Rectangle Desktop::getMainMonitorArea (const bool clippedToWorkArea) const
 
 const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool clippedToWorkArea) const throw()
 {
+    Rectangle best (getMainMonitorArea (clippedToWorkArea));
+    double bestDistance = 1.0e10;
+
     for (int i = getNumDisplayMonitors(); --i > 0;)
     {
         const Rectangle rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
+        const double distance = juce_hypot ((double) (rect.getCentreX() - cx), 
+                                            (double) (rect.getCentreY() - cy));
 
-        if (rect.contains (cx, cy))
-            return rect;
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            best = rect;
+        }
     }
 
-    return getMainMonitorArea (clippedToWorkArea);
+    return best;
 }
 
 //==============================================================================

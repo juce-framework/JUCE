@@ -359,7 +359,8 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key,
         }
         else
         {
-            PlatformUtilities::beep();
+            if (originatingComponent != 0)
+                originatingComponent->getLookAndFeel().playAlertSound();
         }
     }
 

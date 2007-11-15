@@ -2395,6 +2395,13 @@ Image* LookAndFeel::getDefaultDocumentFileImage()
     return ImageCache::getFromMemory (fileicon_png, sizeof (fileicon_png));
 }
 
+
+//==============================================================================
+void LookAndFeel::playAlertSound()
+{
+    PlatformUtilities::beep();
+}
+
 //==============================================================================
 static void createRoundedPath (Path& p,
                                const float x, const float y,

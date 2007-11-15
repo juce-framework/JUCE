@@ -868,7 +868,7 @@ static void transformedImageRender (Image& destImage,
                                     const int destClipX, const int destClipY,
                                     const int destClipW, const int destClipH,
                                     const int srcClipX, const int srcClipY,
-                                    const int srcClipRight, const int srcClipBottom,
+                                    const int srcClipWidth, const int srcClipHeight,
                                     double srcX, double srcY,
                                     const double lineDX, const double lineDY,
                                     const double pixelDX, const double pixelDY,
@@ -883,7 +883,7 @@ static void transformedImageRender (Image& destImage,
     uint8* const destPixels = destImage.lockPixelDataReadWrite (destClipX, destClipY, destClipW, destClipH, destStride, destPixelStride);
 
     int srcStride, srcPixelStride;
-    const uint8* const srcPixels = sourceImage.lockPixelDataReadOnly (srcClipX, srcClipY, srcClipRight - srcClipX, srcClipBottom - srcClipY, srcStride, srcPixelStride);
+    const uint8* const srcPixels = sourceImage.lockPixelDataReadOnly (srcClipX, srcClipY, srcClipWidth, srcClipHeight, srcStride, srcPixelStride);
 
     if (quality == Graphics::lowResamplingQuality) // nearest-neighbour..
     {
@@ -896,15 +896,18 @@ static void transformedImageRender (Image& destImage,
 
             for (int x = 0; x < destClipW; ++x)
             {
-                const int ix = roundDoubleToInt (floor (sx));
-                const int iy = roundDoubleToInt (floor (sy));
+                const int ix = roundDoubleToInt (floor (sx)) - srcClipX;
 
-                if (ix >= srcClipX && iy >= srcClipY
-                     && ix < srcClipRight && iy < srcClipBottom)
+                if (((unsigned int) ix) < (unsigned int) srcClipWidth)
                 {
-                    const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * (iy - srcClipY) + srcPixelStride * (ix - srcClipX));
+                    const int iy = roundDoubleToInt (floor (sy)) - srcClipY;
 
-                    dest->blend (*src, alpha);
+                    if (((unsigned int) iy) < (unsigned int) srcClipHeight)
+                    {
+                        const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
+
+                        dest->blend (*src, alpha);
+                    }
                 }
 
                 ++dest;
@@ -930,42 +933,34 @@ static void transformedImageRender (Image& destImage,
             {
                 const double fx = floor (sx);
                 const double fy = floor (sy);
-                int ix = roundDoubleToInt (fx);
-                int iy = roundDoubleToInt (fy);
+                const int ix = roundDoubleToInt (fx) - srcClipX;
+                const int iy = roundDoubleToInt (fy) - srcClipY;
 
-                if (ix < srcClipRight && iy < srcClipBottom)
+                if (ix < srcClipWidth && iy < srcClipHeight)
                 {
-                    const SrcPixelType* src = (const SrcPixelType*) (srcPixels + srcStride * (iy - srcClipY) + srcPixelStride * (ix - srcClipX));
+                    const SrcPixelType* src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
 
                     SrcPixelType p1 (0);
                     const int dx = roundDoubleToInt ((sx - fx) * 255.0);
 
-                    if (iy >= srcClipY)
+                    if (iy >= 0)
                     {
-                        if (ix >= srcClipX)
+                        if (ix >= 0)
                             p1 = src[0];
 
-                        ++ix;
-
-                        if (ix >= srcClipX && ix < srcClipRight)
+                        if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
                             p1.tween (src[1], dx);
-
-                        --ix;
                     }
 
-                    ++iy;
-
-                    if (iy >= srcClipY && iy < srcClipBottom)
+                    if (((unsigned int) (iy + 1)) < (unsigned int) srcClipHeight)
                     {
                         SrcPixelType p2 (0);
                         src = (const SrcPixelType*) (((const uint8*) src) + srcStride);
 
-                        if (ix >= srcClipX)
+                        if (ix >= 0)
                             p2 = src[0];
 
-                        ++ix;
-
-                        if (ix >= srcClipX && ix < srcClipRight)
+                        if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
                             p2.tween (src[1], dx);
 
                         p1.tween (p2, roundDoubleToInt ((sy - fy) * 255.0));
@@ -1808,9 +1803,6 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             1 + roundDoubleToInt (imW),
                                             1 + roundDoubleToInt (imH)))
         {
-            const int srcClipRight  = srcClipX + srcClipW;
-            const int srcClipBottom = srcClipY + srcClipH;
-
             const uint8 alpha = (uint8) jlimit (0, 0xff, roundDoubleToInt (opacity * 256.0f));
 
             float srcX1 = (float) destClipX;
@@ -1836,7 +1828,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                 {
                     transformedImageRender (image, sourceImage,
                                             destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipRight, srcClipBottom,
+                                            srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
                                             alpha, quality, (PixelARGB*)0, (PixelARGB*)0);
                 }
@@ -1844,7 +1836,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                 {
                     transformedImageRender (image, sourceImage,
                                             destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipRight, srcClipBottom,
+                                            srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
                                             alpha, quality, (PixelARGB*)0, (PixelRGB*)0);
                 }
@@ -1859,7 +1851,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                 {
                     transformedImageRender (image, sourceImage,
                                             destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipRight, srcClipBottom,
+                                            srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
                                             alpha, quality, (PixelRGB*)0, (PixelARGB*)0);
                 }
@@ -1867,7 +1859,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                 {
                     transformedImageRender (image, sourceImage,
                                             destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipRight, srcClipBottom,
+                                            srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
                                             alpha, quality, (PixelRGB*)0, (PixelRGB*)0);
                 }
@@ -1977,8 +1969,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawVerticalLine (int clipX, int c
 {
     jassert (top <= bottom);
 
-    if (x >= clipX
-         && x < clipX + clipW
+    if (((unsigned int) (x - clipX)) < (unsigned int) clipW
          && top < clipY + clipH
          && bottom > clipY
          && clipW > 0)
@@ -2010,8 +2001,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawHorizontalLine (int clipX, int
 {
     jassert (left <= right);
 
-    if (y >= clipY
-         && y < clipY + clipH
+    if (((unsigned int) (y - clipY)) < (unsigned int) clipH
          && left < clipX + clipW
          && right > clipX
          && clipW > 0)

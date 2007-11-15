@@ -842,7 +842,7 @@ bool MidiKeyboardComponent::keyStateChanged()
     {
         const int note = 12 * keyMappingOctave + keyPressNotes.getUnchecked (i);
 
-        if (keyPresses.getUnchecked (i).isCurrentlyDown())
+        if (keyPresses.getReference(i).isCurrentlyDown())
         {
             if (! keysPressed [note])
             {

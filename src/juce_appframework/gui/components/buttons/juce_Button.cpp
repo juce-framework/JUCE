@@ -102,7 +102,7 @@ const String Button::getTooltip()
 
         for (int i = 0; i < keyPresses.size(); ++i)
         {
-            const String key (keyPresses.getUnchecked(i).getTextDescription());
+            const String key (keyPresses.getReference(i).getTextDescription());
 
             if (key.length() == 1)
                 tt << " [shortcut: '" << key << "']";
@@ -583,7 +583,7 @@ bool Button::isShortcutPressed() const throw()
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
         for (int i = shortcuts.size(); --i >= 0;)
-            if (shortcuts.getUnchecked(i).isCurrentlyDown())
+            if (shortcuts.getReference(i).isCurrentlyDown())
                 return true;
     }
 
@@ -593,7 +593,7 @@ bool Button::isShortcutPressed() const throw()
 bool Button::isRegisteredForShortcut (const KeyPress& key) const throw()
 {
     for (int i = shortcuts.size(); --i >= 0;)
-        if (key == shortcuts.getUnchecked(i))
+        if (key == shortcuts.getReference(i))
             return true;
 
     return false;

@@ -112,7 +112,7 @@ public:
 
             for (int i = 0; i < keyPresses.size(); ++i)
             {
-                const String key (keyPresses.getUnchecked(i).getTextDescription());
+                const String key (keyPresses.getReference(i).getTextDescription());
 
                 if (shortcutKey.isNotEmpty())
                     shortcutKey << ", ";

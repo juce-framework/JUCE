@@ -503,6 +503,10 @@ public:
 
     virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
 
+    //==============================================================================
+    /**
+    */
+    virtual void playAlertSound();
 
     //==============================================================================
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */

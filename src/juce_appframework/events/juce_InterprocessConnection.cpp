@@ -52,6 +52,7 @@ InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThr
 
 InterprocessConnection::~InterprocessConnection()
 {
+    callbackConnectionState = false;
     disconnect();
 }
 

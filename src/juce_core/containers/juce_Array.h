@@ -269,8 +269,11 @@ public:
     */
     inline ElementType& getReference (const int index) const throw()
     {
+        lock.enter();
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        return this->elements [index];
+        ElementType& result = this->elements [index];
+        lock.exit();
+        return result;
     }
 
     /** Returns the first element in the array, or 0 if the array is empty.

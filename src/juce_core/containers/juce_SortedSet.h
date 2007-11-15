@@ -218,7 +218,7 @@ public:
         lock.enter();
         const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
                                         ? this->elements [index]
-                                        : (ElementType)0;
+                                        : (ElementType) 0;
         lock.exit();
 
         return result;
