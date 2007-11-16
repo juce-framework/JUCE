@@ -120,6 +120,8 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code) const;
 
+    void perform (UndoableAction* action, const String& actionName);
+
 private:
     JucerDocument* document;
     OwnedArray <Component> components;
@@ -127,8 +129,6 @@ private:
     int nextCompUID;
 
     const String getUnusedMemberName (String nameRoot, Component* comp) const;
-
-    void perform (UndoableAction* action, const String& actionName);
 
     friend class FrontBackCompAction;
     friend class DeleteCompAction;

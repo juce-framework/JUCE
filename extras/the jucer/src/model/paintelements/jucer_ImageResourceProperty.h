@@ -43,20 +43,45 @@ class ImageResourceProperty    : public ChoicePropertyComponent,
                                  private ChangeListener
 {
 public:
-    ImageResourceProperty (ElementType* const element_, const String& name)
+    ImageResourceProperty (JucerDocument& document_, 
+                           ElementType* const element_, 
+                           const String& name,
+                           const bool allowChoiceOfNoResource_)
         : ChoicePropertyComponent (name),
-          element (element_)
+          element (element_),
+          document (document_),
+          allowChoiceOfNoResource (allowChoiceOfNoResource_)
     {
         choices.add (T("-- create a new image resource -- "));
         choices.add (String::empty);
-        choices.addArray (element_->getDocument()->getResources().getResourceNames());
+        if (allowChoiceOfNoResource_)
+            choices.add (T("<< none >>"));
+        choices.addArray (document_.getResources().getResourceNames());
 
-        element_->getDocument()->addChangeListener (this);
+        document_.addChangeListener (this);
+    }
+
+    ImageResourceProperty (ElementType* const element_, 
+                           const String& name,
+                           const bool allowChoiceOfNoResource_ = false)
+        : ChoicePropertyComponent (name),
+          element (element_),
+          document (*element_->getDocument()),
+          allowChoiceOfNoResource (allowChoiceOfNoResource_)
+    {
+        choices.add (T("-- create a new image resource -- "));
+        choices.add (String::empty);
+        if (allowChoiceOfNoResource_)
+            choices.add (T("<< none >>"));
+
+        choices.addArray (document.getResources().getResourceNames());
+
+        document.addChangeListener (this);
     }
 
     ~ImageResourceProperty()
     {
-        element->getDocument()->removeChangeListener (this);
+        document.removeChangeListener (this);
     }
 
     //==============================================================================
@@ -69,7 +94,7 @@ public:
     {
         if (newIndex == 0)
         {
-            String resource (element->getDocument()->getResources()
+            String resource (document.getResources()
                      .browseForResource (T("Select an image file to add as a resource"),
                                          T("*.jpg;*.jpeg;*.png;*.gif;*.svg"),
                                          File::nonexistent,
@@ -80,7 +105,10 @@ public:
         }
         else
         {
-            setResource (choices [newIndex]);
+            if (choices[newIndex] == T("<< none >>") && allowChoiceOfNoResource)
+                setResource (String::empty);
+            else
+                setResource (choices [newIndex]);
         }
     }
 
@@ -99,6 +127,8 @@ public:
 
 protected:
     ElementType* const element;
+    JucerDocument& document;
+    const bool allowChoiceOfNoResource;
 };
 
 

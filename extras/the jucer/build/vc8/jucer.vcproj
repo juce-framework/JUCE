@@ -316,6 +316,10 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\src\model\paintelements\jucer_ColouredElement.cpp"
+						>
+					</File>
+					<File
 						RelativePath="..\..\src\model\components\jucer_ComboBoxHandler.h"
 						>
 					</File>
@@ -387,10 +391,6 @@
 				<Filter
 					Name="paintelements"
 					>
-					<File
-						RelativePath="..\..\src\model\paintelements\jucer_ColouredElement.cpp"
-						>
-					</File>
 					<File
 						RelativePath="..\..\src\model\paintelements\jucer_ColouredElement.h"
 						>
