@@ -174,6 +174,10 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const throw()
 
 void Thread::stopThread (const int timeOutMilliseconds) throw()
 {
+    // agh! You can't stop the thread that's calling this method! How on earth
+    // would that work??
+    jassert (getCurrentThreadId() != getThreadId());
+
     const ScopedLock sl (startStopLock);
 
     if (isThreadRunning())

@@ -606,7 +606,7 @@ public:
                       x - windowBorder.getLeft(),
                       y - windowBorder.getTop(),
                       0, 0,
-                      SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
+                      SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
     }
 
     void repaintNowIfTransparent()
@@ -634,7 +634,7 @@ public:
         SetWindowPos (hwnd, 0, 0, 0,
                       w + windowBorder.getLeftAndRight(),
                       h + windowBorder.getTopAndBottom(),
-                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
+                      SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
         updateBorderSize();
 
@@ -651,7 +651,7 @@ public:
                       y - windowBorder.getTop(),
                       w + windowBorder.getLeftAndRight(),
                       h + windowBorder.getTopAndBottom(),
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
+                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
         updateBorderSize();
 
@@ -3399,7 +3399,7 @@ public:
     {
         SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
                       x, y, w, h,
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING);
+                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
     }
 
     void repaint()
