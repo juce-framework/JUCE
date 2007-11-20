@@ -302,7 +302,16 @@ const TypefaceGlyphInfo* Typeface::getGlyph (const juce_wchar character) throw()
 
     if (CharacterFunctions::isWhitespace (character) && character != L' ')
     {
-        return getGlyph (L' ');
+        const TypefaceGlyphInfo* spaceGlyph = getGlyph (L' ');
+
+        if (spaceGlyph != 0)
+        {
+            // Add a copy of the empty glyph, mapped onto this character
+            addGlyph (character, spaceGlyph->getPath(), spaceGlyph->getHorizontalSpacing (0));
+            spaceGlyph = (const TypefaceGlyphInfo*) glyphs [(int) lookupTable [character]];
+        }
+
+        return spaceGlyph;
     }
     else if (character != defaultCharacter)
     {
