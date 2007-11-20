@@ -131,6 +131,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
     // This means you've called beginParameterChangeGesture twice in succession without a matching
     // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
     jassert (! changingParams [parameterIndex]);
+    changingParams.setBit (parameterIndex);
 #endif
 
     for (int i = listeners.size(); --i >= 0;)
@@ -153,6 +154,7 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
     // endParameterChangeGesture. That might be fine in most hosts, but better to keep the
     // calls matched correctly.
     jassert (changingParams [parameterIndex]);
+    changingParams.clearBit (parameterIndex);
 #endif
 
     for (int i = listeners.size(); --i >= 0;)
