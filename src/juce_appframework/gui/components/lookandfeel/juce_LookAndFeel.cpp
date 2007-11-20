@@ -1121,6 +1121,11 @@ const Font LookAndFeel::getComboBoxFont (ComboBox& box)
     return f;
 }
 
+Label* LookAndFeel::createComboBoxTextBox (ComboBox& box)
+{
+    return new Label (String::empty, String::empty);
+}
+
 //==============================================================================
 void LookAndFeel::drawLinearSlider (Graphics& g,
                                     int x, int y,

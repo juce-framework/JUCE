@@ -51,12 +51,6 @@ ComboBox::ComboBox (const String& name)
       label (0)
 {
     noChoicesMessage = TRANS("(no choices)");
-
-    addAndMakeVisible (label = new Label (String::empty, String::empty));
-    label->addListener (this);
-    label->addMouseListener (this, false);
-
-    setEditableText (false);
     setRepaintsOnMouseActivity (true);
 
     lookAndFeelChanged();
@@ -453,13 +447,33 @@ void ComboBox::lookAndFeelChanged()
 {
     repaint();
 
-    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+    Label* const newLabel = getLookAndFeel().createComboBoxTextBox (*this);
 
-    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    if (label != 0)
+    {
+        newLabel->setEditable (label->isEditable());
+        newLabel->setJustificationType (label->getJustificationType());
+        newLabel->setTooltip (label->getTooltip());
+        newLabel->setText (label->getText(), false);
+    }
+
+    delete label;
+    label = newLabel;
+
+    addAndMakeVisible (newLabel);
+
+    newLabel->addListener (this);
+    newLabel->addMouseListener (this, false);
+
+    newLabel->setColour (Label::backgroundColourId, Colours::transparentBlack);
+    newLabel->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+
+    newLabel->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
+    newLabel->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+    newLabel->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
+    newLabel->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+
+    resized();
 }
 
 void ComboBox::colourChanged()

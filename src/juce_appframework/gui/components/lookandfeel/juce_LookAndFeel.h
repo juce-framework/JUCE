@@ -326,6 +326,8 @@ public:
 
     virtual const Font getComboBoxFont (ComboBox& box);
 
+    virtual Label* createComboBoxTextBox (ComboBox& box);
+
     //==============================================================================
     virtual void drawLinearSlider (Graphics& g,
                                    int x, int y,

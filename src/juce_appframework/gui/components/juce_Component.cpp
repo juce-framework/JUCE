@@ -875,6 +875,11 @@ void Component::setBounds (int x, int y, int w, int h)
     const bool wasResized  = (getWidth() != w || getHeight() != h);
     const bool wasMoved    = (getX() != x || getY() != y);
 
+#ifdef JUCE_DEBUG
+    // It's a very bad idea to try to resize a component during its paint() method!
+    jassert (! (flags.isInsidePaintCall && wasResized));
+#endif
+
     if (wasMoved || wasResized)
     {
         if (flags.visibleFlag)
@@ -1680,6 +1685,10 @@ void Component::paintEntireComponent (Graphics& originalContext)
 {
     jassert (! originalContext.isClipEmpty());
 
+#ifdef JUCE_DEBUG
+    flags.isInsidePaintCall = true;
+#endif
+
     Graphics* g = &originalContext;
     Image* effectImage = 0;
 
@@ -1775,6 +1784,10 @@ void Component::paintEntireComponent (Graphics& originalContext)
         effect_->applyEffect (*effectImage, originalContext);
         delete effectImage;
     }
+
+#ifdef JUCE_DEBUG
+    flags.isInsidePaintCall = false;
+#endif
 }
 
 //==============================================================================
