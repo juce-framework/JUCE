@@ -1761,6 +1761,26 @@ bool PopupMenu::containsCommandItem (const int commandID) const throw()
     return false;
 }
 
+bool PopupMenu::containsAnyActiveItems() const throw()
+{
+    for (int i = items.size(); --i >= 0;)
+    {
+        const MenuItemInfo* const mi = (const MenuItemInfo*) items.getUnchecked (i);
+
+        if (mi->subMenu != 0)
+        {
+            if (mi->subMenu->containsAnyActiveItems())
+                return true;
+        }
+        else if (mi->active)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel) throw()
 {
     lookAndFeel = newLookAndFeel;

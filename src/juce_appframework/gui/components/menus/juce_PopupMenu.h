@@ -217,6 +217,8 @@ public:
     /** Returns true if the menu contains a command item that triggers the given command. */
     bool containsCommandItem (const int commandID) const throw();
 
+    /** Returns true if the menu contains any items that can be used. */
+    bool containsAnyActiveItems() const throw();
 
     //==============================================================================
     /** Displays the menu and waits for the user to pick something.

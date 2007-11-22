@@ -1121,7 +1121,7 @@ const Font LookAndFeel::getComboBoxFont (ComboBox& box)
     return f;
 }
 
-Label* LookAndFeel::createComboBoxTextBox (ComboBox& box)
+Label* LookAndFeel::createComboBoxTextBox (ComboBox&)
 {
     return new Label (String::empty, String::empty);
 }

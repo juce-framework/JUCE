@@ -443,6 +443,9 @@ static void updateKeyModifiers() throw()
 
     if ((GetKeyState (VK_MENU) & 0x8000) != 0)
         currentModifiers |= ModifierKeys::altModifier;
+
+    if ((GetKeyState (VK_RMENU) & 0x8000) != 0)
+        currentModifiers &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier); 
 }
 
 void ModifierKeys::updateCurrentModifiers() throw()
