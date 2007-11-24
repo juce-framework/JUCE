@@ -222,6 +222,8 @@ public:
 
         if (outInfo != 0)
         {
+            *outInfo = channelInfo;
+
             for (int i = 0; i < numChannelConfigs; ++i)
             {
 #if JucePlugin_IsSynth
@@ -230,8 +232,6 @@ public:
                 channelInfo[i].inChannels = channelConfigs[i][0];
 #endif
                 channelInfo[i].outChannels = channelConfigs[i][1];
-
-                outInfo[i] = channelInfo + i;
             }
         }
 
