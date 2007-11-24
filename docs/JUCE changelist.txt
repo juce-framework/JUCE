@@ -6,10 +6,11 @@
 ==============================================================================
 Changelist for version 1.46
 
+- Mac: the project now requires at least XCode V2.5
 - new class: ScopedTryLock
 - added AudioUnit support to the audio hosting code
 - any top-level components will now have their parentSizeChanged() method called when the screen res is changed (not on linux yet though..)
-- 
+- jucer: added support for ImageButtons
 
 ==============================================================================
 Changelist for version 1.45
