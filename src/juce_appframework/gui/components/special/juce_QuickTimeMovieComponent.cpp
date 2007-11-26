@@ -534,6 +534,10 @@ void QuickTimeMovieComponent::assignMovieToWindow()
 
         MacSetPort (savedPort);
     }
+    else
+    {
+        SetMovieGWorld (id->movie, 0, 0);
+    }
 
     reentrant = false;
 }

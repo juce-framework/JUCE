@@ -133,6 +133,10 @@ const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool cl
     for (int i = getNumDisplayMonitors(); --i > 0;)
     {
         const Rectangle rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
+
+        if (rect.contains (cx, cy))
+            return rect;
+
         const double distance = juce_hypot ((double) (rect.getCentreX() - cx), 
                                             (double) (rect.getCentreY() - cy));
 
