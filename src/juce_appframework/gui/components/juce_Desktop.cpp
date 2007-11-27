@@ -130,7 +130,7 @@ const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool cl
     Rectangle best (getMainMonitorArea (clippedToWorkArea));
     double bestDistance = 1.0e10;
 
-    for (int i = getNumDisplayMonitors(); --i > 0;)
+    for (int i = getNumDisplayMonitors(); --i >= 0;)
     {
         const Rectangle rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
 
