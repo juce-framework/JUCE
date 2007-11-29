@@ -91,6 +91,7 @@ void ThreadWithProgressWindow::timerCallback()
     if (! isThreadRunning())
     {
         // thread has finished normally..
+        alertWindow.exitModalState (0);
         alertWindow.setVisible (false);
     }
     else

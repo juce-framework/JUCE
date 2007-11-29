@@ -534,7 +534,8 @@ void ListBox::deselectRow (const int row)
     }
 }
 
-void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected)
+void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
+                               const bool sendNotificationEventToModel)
 {
     selected = setOfRowsToBeSelected;
     selected.removeRange (totalItems, INT_MAX - totalItems);
@@ -544,7 +545,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected)
 
     viewport->updateContents();
 
-    if (model != 0)
+    if ((model != 0) && sendNotificationEventToModel)
         model->selectedRowsChanged (lastRowSelected);
 }
 

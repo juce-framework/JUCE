@@ -278,9 +278,13 @@ public:
 
     /** Sets the rows that should be selected, based on an explicit set of ranges.
 
+        If sendNotificationEventToModel is true, the ListBoxModel::selectedRowsChanged()
+        method will be called. If it's false, no notification will be sent to the model.
+
         @see getSelectedRows
     */
-    void setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected);
+    void setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
+                          const bool sendNotificationEventToModel = true);
 
     /** Checks whether a row is selected.
     */
