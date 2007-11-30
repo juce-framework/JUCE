@@ -279,6 +279,10 @@ void MidiFile::readNextTrack (const char* data, int size)
 
         int messSize = 0;
         const MidiMessage mm ((const uint8*) data, size, messSize, lastStatusByte, time);
+
+        if (messSize <= 0)
+            break;
+
         size -= messSize;
         data += messSize;
 
