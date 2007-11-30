@@ -151,7 +151,7 @@ public:
                         Image* dragImage = owner.createSnapshotOfSelectedRows();
                         dragImage->multiplyAllAlphas (0.6f);
 
-                        dragContainer->startDragging (dragDescription, &owner, dragImage);
+                        dragContainer->startDragging (dragDescription, &owner, dragImage, true);
                     }
                     else
                     {
