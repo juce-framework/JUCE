@@ -319,7 +319,7 @@ public:
     {
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f = (ATSFontHelper*) cache[i];
+            ATSFontHelper* const f = (ATSFontHelper*) cache.getUnchecked(i);
             delete f;
         }
 
@@ -354,7 +354,7 @@ public:
     {
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f2 = (ATSFontHelper*) cache[i];
+            ATSFontHelper* const f2 = (ATSFontHelper*) cache.getUnchecked(i);
 
             if (f == f2)
             {
@@ -370,18 +370,21 @@ public:
 
     void timerCallback()
     {
+        stopTimer();
+
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f = (ATSFontHelper*) cache[i];
+            ATSFontHelper* const f = (ATSFontHelper*) cache.getUnchecked(i);
 
-            if (f->refCount > 0)
+            if (f->refCount == 0)
             {
-                stopTimer();
-                return;
+                cache.remove (i);
+                delete f;
             }
         }
 
-        delete this;
+        if (cache.size() == 0)
+            delete this;
     }
 
     juce_DeclareSingleton_SingleThreaded_Minimal (ATSFontHelperCache)
