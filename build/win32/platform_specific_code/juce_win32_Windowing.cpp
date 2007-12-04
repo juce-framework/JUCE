@@ -788,8 +788,8 @@ public:
         GetWindowRect (hwnd, &r);
 
         POINT p;
-        p.x = x + r.left;
-        p.y = y + r.top;
+        p.x = x + r.left + windowBorder.getLeft();
+        p.y = y + r.top + windowBorder.getTop();
 
         HWND w = WindowFromPoint (p);
 
