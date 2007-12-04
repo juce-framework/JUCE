@@ -398,6 +398,9 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
                                                   bool italic,
                                                   bool addAllGlyphsToFont) throw()
 {
+    // This method is only safe to be called from the normal UI thread..
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
     ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
                                     ->getFont (fontName, bold, italic);
 
@@ -419,6 +422,9 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
 
 bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 {
+    // This method is only safe to be called from the normal UI thread..
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
     ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
                                     ->getFont (getName(), isBold(), isItalic());
 
