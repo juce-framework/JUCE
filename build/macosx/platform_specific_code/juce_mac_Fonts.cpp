@@ -37,6 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
 #include "../../../src/juce_appframework/events/juce_Timer.h"
+#include "../../../src/juce_appframework/events/juce_MessageManager.h"
 #include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
 #include "../../../src/juce_core/basics/juce_Singleton.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
