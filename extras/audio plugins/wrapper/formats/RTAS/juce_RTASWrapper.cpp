@@ -1075,6 +1075,9 @@ private:
     {
         switch (numChans)
         {
+        case 0:
+            return ePlugIn_StemFormat_Generic;
+
         case 1:
             return ePlugIn_StemFormat_Mono;
 

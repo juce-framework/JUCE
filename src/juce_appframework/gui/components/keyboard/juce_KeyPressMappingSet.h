@@ -66,8 +66,8 @@
 
             // first, make sure the command manager has registered all the commands that its
             // targets can perform..
-            myCommandManager->registerCommandsForTarget (myCommandTarget1);
-            myCommandManager->registerCommandsForTarget (myCommandTarget2);
+            myCommandManager->registerAllCommandsForTarget (myCommandTarget1);
+            myCommandManager->registerAllCommandsForTarget (myCommandTarget2);
 
             // this will use the command manager to initialise the KeyPressMappingSet with
             // the default keypresses that were specified when the targets added their commands

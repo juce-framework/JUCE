@@ -190,6 +190,10 @@ bool ApplicationCommandManager::invokeDirectly (const CommandID commandID, const
 
 bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::InvocationInfo& info_, const bool asynchronously)
 {
+    // This call isn't thread-safe for use from a non-UI thread without locking the message
+    // manager first..
+    checkMessageManagerIsLocked
+
     ApplicationCommandTarget* const target = getFirstCommandTarget (info_.commandID);
 
     if (target == 0)

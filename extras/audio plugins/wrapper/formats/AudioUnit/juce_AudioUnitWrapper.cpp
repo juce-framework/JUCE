@@ -453,19 +453,16 @@ public:
         return ! IsInitialized();
     }
 
-    ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&)
-    {
-        return noErr;
-    }
-
-    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)
-    {
-        return noErr;
-    }
+    // (these two slightly different versions are because the definition changed between 10.4 and 10.5)
+    ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&) { return noErr; }
+    ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID*, UInt32, const MusicDeviceNoteParams&) { return noErr; }
+    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)   { return noErr; }
 
     //==============================================================================
     ComponentResult Initialize()
     {
+        SetMaxFramesPerSlice (16384);
+
 #if ! JucePlugin_IsSynth
         const int numIns = GetInput(0) != 0 ? GetInput(0)->GetStreamFormat().mChannelsPerFrame : 0;
 #endif

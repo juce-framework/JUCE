@@ -1268,7 +1268,7 @@ void String::vprintf (const tchar* const pf, va_list& args) throw()
 
     deleteInternal();
 
-    for (;;)
+    do
     {
         const int num = CharacterFunctions::vprintf (buf, bufSize - 1, pf, args);
 
@@ -1291,6 +1291,8 @@ void String::vprintf (const tchar* const pf, va_list& args) throw()
         bufSize += 256;
         buf = (tchar*) juce_malloc (bufSize * sizeof (tchar));
     }
+    while (bufSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly 
+                              // returns -1 because of an error rather than because it needs more space.
 
     if (buf != stackBuf)
         juce_free (buf);

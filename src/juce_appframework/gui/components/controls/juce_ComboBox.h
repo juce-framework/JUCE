@@ -52,7 +52,7 @@ public:
     /** Destructor. */
     virtual ~ComboBoxListener() {}
 
-    /** Called when a Label's text has changed.
+    /** Called when a ComboBox has its selected item changed.
     */
     virtual void comboBoxChanged (ComboBox* comboBoxThatHasChanged) = 0;
 };

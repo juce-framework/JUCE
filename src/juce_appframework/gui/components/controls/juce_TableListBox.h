@@ -155,7 +155,7 @@ public:
 
         @see ListBox::selectedRowsChanged()
     */
-    virtual void selectedRowsChanged (int lastRowselected);
+    virtual void selectedRowsChanged (int lastRowSelected);
 
     /** Override this to be informed when the delete key is pressed.
 

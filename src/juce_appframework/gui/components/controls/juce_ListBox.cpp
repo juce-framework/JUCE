@@ -435,12 +435,7 @@ void ListBox::updateContent()
     if (selected [selected.size() - 1] >= totalItems)
     {
         selected.removeRange (totalItems, INT_MAX - totalItems);
-
-        if (selected.size() == 0)
-            lastRowSelected = totalItems - 1;
-        else if (lastRowSelected >= totalItems)
-            lastRowSelected = getSelectedRow (0);
-
+        lastRowSelected = getSelectedRow (0);
         selectionChanged = true;
     }
 
