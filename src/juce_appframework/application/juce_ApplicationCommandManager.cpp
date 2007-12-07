@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/components/keyboard/juce_KeyPressMappingSet.h"
 #include "../gui/components/windows/juce_ResizableWindow.h"
 #include "../gui/components/juce_Desktop.h"
+#include "../events/juce_MessageManager.h"
 
 
 //==============================================================================
@@ -192,7 +193,7 @@ bool ApplicationCommandManager::invoke (const ApplicationCommandTarget::Invocati
 {
     // This call isn't thread-safe for use from a non-UI thread without locking the message
     // manager first..
-    checkMessageManagerIsLocked
+    jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
     ApplicationCommandTarget* const target = getFirstCommandTarget (info_.commandID);
 
