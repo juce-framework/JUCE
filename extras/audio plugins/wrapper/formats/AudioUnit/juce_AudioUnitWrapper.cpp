@@ -727,7 +727,50 @@ protected:
         return noErr;
     }
 
-    //==============================================================================
+   //==============================================================================
+    ComponentResult GetPresets (CFArrayRef* outData) const
+    {
+        if (outData != 0)
+        {
+            const int numPrograms = juceFilter->getNumPrograms();
+            presetsArray.ensureSize (sizeof (AUPreset) * numPrograms, true);
+            AUPreset* const presets = (AUPreset*) presetsArray.getData();
+
+            CFMutableArrayRef presetsArray = CFArrayCreateMutable (0, numPrograms, 0);
+
+            for (int i = 0; i < numPrograms; ++i)
+            {
+                presets[i].presetNumber = i;
+                presets[i].presetName = PlatformUtilities::juceStringToCFString (juceFilter->getProgramName (i));
+                
+                CFArrayAppendValue (presetsArray, presets + i);
+            }
+
+            *outData = (CFArrayRef) presetsArray;
+        }
+
+        return noErr;
+    }
+
+    OSStatus NewFactoryPresetSet (const AUPreset& inNewFactoryPreset)
+    {
+        const int numPrograms = juceFilter->getNumPrograms();
+        const SInt32 chosenPresetNumber = (int) inNewFactoryPreset.presetNumber;
+
+        if (chosenPresetNumber >= numPrograms)
+            return kAudioUnitErr_InvalidProperty;
+
+        AUPreset chosenPreset;
+        chosenPreset.presetNumber = chosenPresetNumber;
+        chosenPreset.presetName = PlatformUtilities::juceStringToCFString (juceFilter->getProgramName (chosenPresetNumber));
+
+        juceFilter->setCurrentProgram (chosenPresetNumber);
+        SetAFactoryPresetAsCurrent (chosenPreset);
+
+        return noErr;
+    } 
+
+   //==============================================================================
 private:
     AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
@@ -737,6 +780,7 @@ private:
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
+    MemoryBlock presetsArray;
 };
 
 
