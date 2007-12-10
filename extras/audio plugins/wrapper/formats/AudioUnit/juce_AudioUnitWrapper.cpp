@@ -780,7 +780,7 @@ private:
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
-    MemoryBlock presetsArray;
+    mutable MemoryBlock presetsArray;
 };
 
 
