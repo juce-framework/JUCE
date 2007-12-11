@@ -270,7 +270,10 @@ static bool connectSocket (int volatile& handle,
 #endif
         {
             if (waitForReadiness (handle, false, timeOutMillisecs) != 1)
+            {
+                setSocketBlockingState (handle, true);
                 return false;
+            }
         }
     }
 

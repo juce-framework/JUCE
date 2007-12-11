@@ -250,7 +250,10 @@ void Component::setVisible (bool shouldBeVisible)
 
             jassert (peer != 0);
             if (peer != 0)
+            {
                 peer->setVisible (shouldBeVisible);
+                internalHierarchyChanged();
+            }
         }
     }
 }
@@ -876,8 +879,8 @@ void Component::setBounds (int x, int y, int w, int h)
     const bool wasMoved    = (getX() != x || getY() != y);
 
 #ifdef JUCE_DEBUG
-    // It's a very bad idea to try to resize a component during its paint() method!
-    jassert (! (flags.isInsidePaintCall && wasResized));
+    // It's a very bad idea to try to resize a window during its paint() method!
+    jassert (! (flags.isInsidePaintCall && wasResized && isOnDesktop()));
 #endif
 
     if (wasMoved || wasResized)

@@ -219,9 +219,19 @@ public:
         String s;
         s.preallocateStorage (getTotalLength());
 
-        for (int i = 0; i < atoms.size(); ++i)
-            s += getAtom(i)->atomText;
+        tchar* endOfString = (tchar*) &(s[0]);
 
+        for (int i = 0; i < atoms.size(); ++i)
+        {
+            const TextAtom* const atom = getAtom(i);
+
+            memcpy (endOfString, &(atom->atomText[0]), atom->numChars * sizeof (tchar));
+            endOfString += atom->numChars;
+        }
+
+        *endOfString = 0;
+
+        jassert ((endOfString - (tchar*) &(s[0])) <= getTotalLength());
         return s;
     }
 
