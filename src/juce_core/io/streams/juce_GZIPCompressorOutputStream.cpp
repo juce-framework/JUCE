@@ -51,7 +51,7 @@ private:
 public:
     bool finished, shouldFinish;
 
-    GZIPCompressorHelper (const int compressionLevel)
+    GZIPCompressorHelper (const int compressionLevel, const bool nowrap)
         : data (0),
           dataSize (0),
           compLevel (compressionLevel),
@@ -61,8 +61,6 @@ public:
           shouldFinish (false)
     {
         stream = (z_stream*) juce_calloc (sizeof (z_stream));
-
-        bool nowrap = false;
 
         if (deflateInit2 (stream,
                           compLevel,
@@ -136,14 +134,15 @@ const int bufferSize = 32768;
 
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
-                                                        const bool deleteDestStream_)
+                                                        const bool deleteDestStream_,
+                                                        const bool noWrap)
   : destStream (destStream_),
     deleteDestStream (deleteDestStream_)
 {
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
 
-    helper = new GZIPCompressorHelper (compressionLevel);
+    helper = new GZIPCompressorHelper (compressionLevel, noWrap);
 
     buffer = (uint8*) juce_malloc (bufferSize);
 }

@@ -55,10 +55,13 @@ public:
                                                 indicates that a default compression level should be used.
         @param deleteDestStreamWhenDestroyed    whether or not to delete the destStream object when
                                                 this stream is destroyed
+        @param noWrap                           this is used internally by the ZipFile class
+                                                and should be ignored by user applications
     */
     GZIPCompressorOutputStream (OutputStream* const destStream,
                                 int compressionLevel = 0,
-                                const bool deleteDestStreamWhenDestroyed = false);
+                                const bool deleteDestStreamWhenDestroyed = false,
+                                const bool noWrap = false);
 
     /** Destructor. */
     ~GZIPCompressorOutputStream();
