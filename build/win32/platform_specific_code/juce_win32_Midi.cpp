@@ -306,20 +306,20 @@ private:
     const MidiInThread& operator= (const MidiInThread&);
 };
 
-static void CALLBACK midiInCallback (HMIDIIN,
-                                     UINT uMsg,
-                                     DWORD dwInstance,
-                                     DWORD midiMessage,
-                                     DWORD timeStamp)
+static void CALLBACK midiInCallback (HMIDIIN, 
+                                     UINT uMsg, 
+                                     DWORD_PTR dwInstance, 
+                                     DWORD_PTR midiMessage, 
+                                     DWORD_PTR timeStamp)
 {
     MidiInThread* const thread = (MidiInThread*) dwInstance;
 
     if (thread != 0 && activeMidiThreads.contains (thread))
     {
         if (uMsg == MIM_DATA)
-            thread->handle (midiMessage, timeStamp);
+            thread->handle ((uint32) midiMessage, (uint32) timeStamp);
         else if (uMsg == MIM_LONGDATA)
-            thread->handleSysEx ((MIDIHDR*) midiMessage, timeStamp);
+            thread->handleSysEx ((MIDIHDR*) midiMessage, (uint32) timeStamp);
     }
 }
 
