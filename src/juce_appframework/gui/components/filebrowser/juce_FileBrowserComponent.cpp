@@ -132,14 +132,8 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     addAndMakeVisible (label);
     label->attachToComponent (filenameBox, true);
 
-    addAndMakeVisible (goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground));
-    Path arrowPath;
-    arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
-    DrawablePath arrowImage;
-    arrowImage.setSolidFill (Colours::black.withAlpha (0.4f));
-    arrowImage.setPath (arrowPath);
+    addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
 
-    goUpButton->setImages (&arrowImage);
     goUpButton->addButtonListener (this);
     goUpButton->setTooltip (TRANS ("go up to parent directory"));
 
@@ -275,33 +269,10 @@ FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const throw()
 //==============================================================================
 void FileBrowserComponent::resized()
 {
-    const int x = 8;
-    int w = getWidth() - x - x;
-
-    if (previewComp != 0)
-    {
-        const int previewWidth = w / 3;
-        previewComp->setBounds (x + w - previewWidth, 0, previewWidth, getHeight());
-
-        w -= previewWidth + 4;
-    }
-
-    int y = 4;
-
-    const int controlsHeight = 22;
-    const int bottomSectionHeight = controlsHeight + 8;
-    const int upButtonWidth = 50;
-
-    currentPathBox->setBounds (x, y, w - upButtonWidth - 6, controlsHeight);
-    goUpButton->setBounds (x + w - upButtonWidth, y, upButtonWidth, controlsHeight);
-
-    y += controlsHeight + 4;
-
-    Component* const listAsComp = dynamic_cast <Component*> (fileListComponent);
-    listAsComp->setBounds (x, y, w, getHeight() - y - bottomSectionHeight);
-
-    y = listAsComp->getBottom() + 4;
-    filenameBox->setBounds (x + 50, y, w - 50, controlsHeight);
+    getLookAndFeel()
+        .layoutFileBrowserComponent (*this, fileListComponent,
+                                     previewComp, currentPathBox,
+                                     filenameBox, goUpButton);
 }
 
 //==============================================================================

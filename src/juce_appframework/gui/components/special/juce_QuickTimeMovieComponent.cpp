@@ -230,6 +230,12 @@ double QuickTimeMovieComponent::getPosition() const
     return 0.0;
 }
 
+void QuickTimeMovieComponent::setSpeed (const float newSpeed)
+{
+    if (qtMovie != 0)
+        qtMovie->PutRate (newSpeed);
+}
+
 void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 {
     if (qtMovie != 0)
@@ -601,6 +607,14 @@ double QuickTimeMovieComponent::getPosition() const
     }
 
     return 0.0;
+}
+
+void QuickTimeMovieComponent::setSpeed (const float newSpeed)
+{
+    InternalData* const id = (InternalData*) internal;
+
+    if (id->movie != 0)
+        SetMovieRate (id->movie, (Fixed) (newSpeed * (Fixed) 0x00010000L));
 }
 
 double QuickTimeMovieComponent::getMovieDuration() const

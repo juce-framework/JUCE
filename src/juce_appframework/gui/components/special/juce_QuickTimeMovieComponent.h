@@ -137,6 +137,13 @@ public:
     /** Returns the current play position of the movie. */
     double getPosition() const;
 
+    /** Changes the movie playback rate. 
+    
+        A value of 1 is normal speed, greater values play it proportionately faster, 
+        smaller values play it slower.
+    */
+    void setSpeed (const float newSpeed);
+
     /** Changes the movie's playback volume.
 
         @param newVolume    the volume in the range 0 (silent) to 1.0 (full)

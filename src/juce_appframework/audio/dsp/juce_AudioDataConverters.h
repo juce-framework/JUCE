@@ -43,30 +43,30 @@ class JUCE_API  AudioDataConverters
 {
 public:
     //==============================================================================
-    static void convertFloatToInt16LE (const float* source, void* dest, int numSamples);
-    static void convertFloatToInt16BE (const float* source, void* dest, int numSamples);
+    static void convertFloatToInt16LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 2);
+    static void convertFloatToInt16BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 2);
 
-    static void convertFloatToInt24LE (const float* source, void* dest, int numSamples);
-    static void convertFloatToInt24BE (const float* source, void* dest, int numSamples);
+    static void convertFloatToInt24LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 3);
+    static void convertFloatToInt24BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 3);
 
-    static void convertFloatToInt32LE (const float* source, void* dest, int numSamples);
-    static void convertFloatToInt32BE (const float* source, void* dest, int numSamples);
+    static void convertFloatToInt32LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
+    static void convertFloatToInt32BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
 
-    static void convertFloatToFloat32LE (const float* source, void* dest, int numSamples);
-    static void convertFloatToFloat32BE (const float* source, void* dest, int numSamples);
+    static void convertFloatToFloat32LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
+    static void convertFloatToFloat32BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
 
     //==============================================================================
-    static void convertInt16LEToFloat (const void* source, float* dest, int numSamples);
-    static void convertInt16BEToFloat (const void* source, float* dest, int numSamples);
+    static void convertInt16LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 2);
+    static void convertInt16BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 2);
 
-    static void convertInt24LEToFloat (const void* source, float* dest, int numSamples);
-    static void convertInt24BEToFloat (const void* source, float* dest, int numSamples);
+    static void convertInt24LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 3);
+    static void convertInt24BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 3);
 
-    static void convertInt32LEToFloat (const void* source, float* dest, int numSamples);
-    static void convertInt32BEToFloat (const void* source, float* dest, int numSamples);
+    static void convertInt32LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
+    static void convertInt32BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
 
-    static void convertFloat32LEToFloat (const void* source, float* dest, int numSamples);
-    static void convertFloat32BEToFloat (const void* source, float* dest, int numSamples);
+    static void convertFloat32LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
+    static void convertFloat32BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
 
     //==============================================================================
     enum DataFormat

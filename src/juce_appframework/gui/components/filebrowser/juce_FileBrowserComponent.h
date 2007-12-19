@@ -200,7 +200,7 @@ private:
     FilePreviewComponent* previewComp;
     ComboBox* currentPathBox;
     TextEditor* filenameBox;
-    DrawableButton* goUpButton;
+    Button* goUpButton;
 
     TimeSliceThread thread;
 

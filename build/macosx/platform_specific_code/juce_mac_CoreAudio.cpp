@@ -982,7 +982,10 @@ public:
         if (internal == 0)
             return 0;
 
-        return internal->outputLatency;
+        // this seems like a good guess at getting the latency right - comparing
+        // this with a round-trip measurement, it gets it to within a few millisecs
+        // for the built-in mac soundcard
+        return internal->outputLatency + internal->getBufferSize() * 2;
     }
 
     int getInputLatencyInSamples()
@@ -990,7 +993,7 @@ public:
         if (internal == 0)
             return 0;
 
-        return internal->inputLatency;
+        return internal->inputLatency + internal->getBufferSize() * 2;
     }
 
     void start (AudioIODeviceCallback* callback)
@@ -1129,7 +1132,9 @@ public:
         return namesCopy;
     }
 
-    const String getDefaultDeviceName (const bool preferInputNames) const
+    const String getDefaultDeviceName (const bool preferInputNames,
+                                       const int numInputChannelsNeeded, 
+                                       const int numOutputChannelsNeeded) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1138,7 +1143,10 @@ public:
         AudioDeviceID deviceID;
         UInt32 size = sizeof (deviceID);
 
-        if (AudioHardwareGetProperty (preferInputNames ? kAudioHardwarePropertyDefaultInputDevice
+        // if they're asking for any input channels at all, use the default input, so we 
+        // get the built-in mic rather than the built-in output with no inputs..
+        if (AudioHardwareGetProperty (numInputChannelsNeeded > 0
+                                                       ? kAudioHardwarePropertyDefaultInputDevice
                                                        : kAudioHardwarePropertyDefaultOutputDevice,
                                       &size, &deviceID) == noErr)
         {

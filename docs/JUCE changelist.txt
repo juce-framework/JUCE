@@ -11,6 +11,7 @@ Changelist for version 1.46
 - added AudioUnit support to the audio hosting code
 - any top-level components will now have their parentSizeChanged() method called when the screen res is changed (not on linux yet though..)
 - jucer: added support for ImageButtons
+- audio devices - a few tweaks to the various audio drivers to try to make the best possible guess at the input and output latencies that they introduce
 
 ==============================================================================
 Changelist for version 1.45

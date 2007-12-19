@@ -58,6 +58,9 @@ class Toolbar;
 class ToolbarItemComponent;
 class PopupMenu;
 class ProgressBar;
+class FileBrowserComponent;
+class DirectoryContentsDisplayComponent;
+class FilePreviewComponent;
 
 
 //==============================================================================
@@ -262,6 +265,15 @@ public:
                                      const bool isDirectory,
                                      const bool isItemSelected);
 
+    virtual Button* createFileBrowserGoUpButton();
+
+    virtual void layoutFileBrowserComponent (FileBrowserComponent& browserComp,
+                                             DirectoryContentsDisplayComponent* fileListComponent,
+                                             FilePreviewComponent* previewComp,
+                                             ComboBox* currentPathBox,
+                                             TextEditor* filenameBox,
+                                             Button* goUpButton);
+
     //==============================================================================
     virtual void drawBubble (Graphics& g,
                              float tipX, float tipY,
@@ -449,6 +461,7 @@ public:
                                     const bool isFrontTab);
 
     virtual int getTabButtonOverlap (int tabDepth);
+    virtual int getTabButtonSpaceAroundImage();
 
     virtual int getTabButtonBestWidth (int tabIndex,
                                        const String& text,

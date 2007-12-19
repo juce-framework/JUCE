@@ -381,6 +381,9 @@ private:
     friend class MenuItemIterator;
     VoidArray items;
     LookAndFeel* lookAndFeel;
+    bool separatorPending;
+
+    void addSeparatorIfPending();
 
     int showMenu (const int x, const int y, const int w, const int h,
                   const int itemIdThatMustBeVisible,

@@ -57,6 +57,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
 #include "../filebrowser/juce_FileSearchPathListComponent.h"
+#include "../filebrowser/juce_FileBrowserComponent.h" 
 #include "../layout/juce_GroupComponent.h"
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
@@ -1790,6 +1791,11 @@ int LookAndFeel::getTabButtonOverlap (int tabDepth)
     return 1 + tabDepth / 3;
 }
 
+int LookAndFeel::getTabButtonSpaceAroundImage()
+{
+    return 4;
+}
+
 void LookAndFeel::createTabButtonShape (Path& p,
                                         int width, int height,
                                         int /*tabIndex*/,
@@ -2321,6 +2327,58 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
                           Justification::centredLeft, 1);
 
     }
+}
+
+Button* LookAndFeel::createFileBrowserGoUpButton()
+{
+    DrawableButton* goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
+   
+    Path arrowPath;
+    arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
+
+    DrawablePath arrowImage;
+    arrowImage.setSolidFill (Colours::black.withAlpha (0.4f));
+    arrowImage.setPath (arrowPath);
+
+    goUpButton->setImages (&arrowImage);
+
+    return goUpButton;
+}
+
+void LookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& browserComp,
+                                              DirectoryContentsDisplayComponent* fileListComponent,
+                                              FilePreviewComponent* previewComp,
+                                              ComboBox* currentPathBox,
+                                              TextEditor* filenameBox,
+                                              Button* goUpButton)
+{
+    const int x = 8;
+    int w = browserComp.getWidth() - x - x;
+
+    if (previewComp != 0)
+    {
+        const int previewWidth = w / 3;
+        previewComp->setBounds (x + w - previewWidth, 0, previewWidth, browserComp.getHeight());
+
+        w -= previewWidth + 4;
+    }
+
+    int y = 4;
+
+    const int controlsHeight = 22;
+    const int bottomSectionHeight = controlsHeight + 8;
+    const int upButtonWidth = 50;
+
+    currentPathBox->setBounds (x, y, w - upButtonWidth - 6, controlsHeight);
+    goUpButton->setBounds (x + w - upButtonWidth, y, upButtonWidth, controlsHeight);
+
+    y += controlsHeight + 4;
+
+    Component* const listAsComp = dynamic_cast <Component*> (fileListComponent);
+    listAsComp->setBounds (x, y, w, browserComp.getHeight() - y - bottomSectionHeight);
+
+    y = listAsComp->getBottom() + 4;
+    filenameBox->setBounds (x + 50, y, w - 50, controlsHeight);
 }
 
 Image* LookAndFeel::getDefaultFolderImage()

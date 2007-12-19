@@ -118,7 +118,9 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
         String defaultDevice;
 
         if (availableDeviceTypes [0] != 0)
-            defaultDevice = availableDeviceTypes[0]->getDefaultDeviceName (numOutputChannelsNeeded == 0);
+            defaultDevice = availableDeviceTypes[0]->getDefaultDeviceName (numOutputChannelsNeeded == 0,
+                                                                           numInputChannelsNeeded, 
+                                                                           numOutputChannelsNeeded);
 
         return setAudioDevice (defaultDevice, 0, 0, 0, 0, false);
     }

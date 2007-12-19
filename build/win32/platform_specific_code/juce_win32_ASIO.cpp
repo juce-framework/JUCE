@@ -751,12 +751,12 @@ public:
 
     int getOutputLatencyInSamples()
     {
-        return outputLatency;
+        return outputLatency + currentBlockSizeSamples / 4;
     }
 
     int getInputLatencyInSamples()
     {
-        return inputLatency;
+        return inputLatency + currentBlockSizeSamples / 4;
     }
 
     void start (AudioIODeviceCallback* callback)
@@ -1809,7 +1809,9 @@ public:
         return deviceNames;
     }
 
-    const String getDefaultDeviceName (const bool /*preferInputNames*/) const
+    const String getDefaultDeviceName (const bool /*preferInputNames*/,
+                                       const int /*numInputChannelsNeeded*/,
+                                       const int /*numOutputChannelsNeeded*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

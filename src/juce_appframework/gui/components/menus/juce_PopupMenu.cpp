@@ -361,7 +361,6 @@ public:
         if (menu.items.size() > 0)
         {
             int totalItems = 0;
-            bool lastItemWasSeparator = true;
 
             PopupMenuWindow* const mw = new PopupMenuWindow();
             mw->setLookAndFeel (menu.lookAndFeel);
@@ -375,30 +374,8 @@ public:
             {
                 MenuItemInfo* const item = (MenuItemInfo*) menu.items.getUnchecked(i);
 
-                if (item->isSeparator)
-                {
-                    if (! lastItemWasSeparator)
-                    {
-                        // check it's not one of the last separators..
-                        for (int j = i + 1; j < menu.items.size(); ++j)
-                        {
-                            if (! ((MenuItemInfo*) menu.items.getUnchecked (j))->isSeparator)
-                            {
-                                mw->addItem (*item);
-                                ++totalItems;
-
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    mw->addItem (*item);
-                    ++totalItems;
-                }
-
-                lastItemWasSeparator = item->isSeparator;
+                mw->addItem (*item);
+                ++totalItems;
             }
 
             if (totalItems == 0)
@@ -1321,13 +1298,15 @@ private:
 //==============================================================================
 PopupMenu::PopupMenu() throw()
     : items (8),
-      lookAndFeel (0)
+      lookAndFeel (0),
+      separatorPending (false)
 {
 }
 
 PopupMenu::PopupMenu (const PopupMenu& other) throw()
     : items (8),
-      lookAndFeel (other.lookAndFeel)
+      lookAndFeel (other.lookAndFeel),
+      separatorPending (false)
 {
     items.ensureStorageAllocated (other.items.size());
 
@@ -1365,6 +1344,18 @@ void PopupMenu::clear() throw()
     }
 
     items.clear();
+    separatorPending = false;
+}
+
+void PopupMenu::addSeparatorIfPending()
+{
+    if (separatorPending)
+    {
+        separatorPending = false;
+
+        if (items.size() > 0)
+            items.add (new MenuItemInfo());
+    }
 }
 
 void PopupMenu::addItem (const int itemResultId,
@@ -1376,6 +1367,8 @@ void PopupMenu::addItem (const int itemResultId,
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
+
+    addSeparatorIfPending();
 
     items.add (new MenuItemInfo (itemResultId,
                                  itemText,
@@ -1399,6 +1392,8 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
     {
         ApplicationCommandInfo info (*registeredInfo);
         ApplicationCommandTarget* const target = commandManager->getTargetForCommand (commandID, info);
+
+        addSeparatorIfPending();
 
         items.add (new MenuItemInfo (commandID,
                                      displayName.isNotEmpty() ? displayName
@@ -1424,6 +1419,8 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
 
+    addSeparatorIfPending();
+
     items.add (new MenuItemInfo (itemResultId,
                                  itemText,
                                  isActive,
@@ -1441,6 +1438,8 @@ void PopupMenu::addCustomItem (const int itemResultId,
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
                                     // for an item..
+
+    addSeparatorIfPending();
 
     items.add (new MenuItemInfo (itemResultId,
                                  String::empty,
@@ -1506,6 +1505,8 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                             const bool isActive,
                             Image* const iconToUse) throw()
 {
+    addSeparatorIfPending();
+
     items.add (new MenuItemInfo (0,
                                  subMenuName,
                                  isActive && (subMenu.getNumItems() > 0),
@@ -1520,7 +1521,7 @@ void PopupMenu::addSubMenu (const String& subMenuName,
 
 void PopupMenu::addSeparator() throw()
 {
-    items.add (new MenuItemInfo());
+    separatorPending = true;
 }
 
 

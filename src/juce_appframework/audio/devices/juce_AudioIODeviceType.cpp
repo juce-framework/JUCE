@@ -49,10 +49,15 @@ AudioIODeviceType::~AudioIODeviceType()
 //==============================================================================
 extern AudioIODeviceType* juce_createDefaultAudioIODeviceType();
 
-#if JUCE_ASIO && JUCE_WIN32
+#if JUCE_WIN32 && JUCE_ASIO
   extern AudioIODeviceType* juce_createASIOAudioIODeviceType();
 #endif
 
+#if JUCE_WIN32 && JUCE_WDM_AUDIO
+  extern AudioIODeviceType* juce_createWDMAudioIODeviceType();
+#endif
+
+//==============================================================================
 void AudioIODeviceType::createDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
     AudioIODeviceType* const defaultDeviceType = juce_createDefaultAudioIODeviceType();
@@ -60,8 +65,12 @@ void AudioIODeviceType::createDeviceTypes (OwnedArray <AudioIODeviceType>& list)
     if (defaultDeviceType != 0)
         list.add (defaultDeviceType);
 
-#if JUCE_ASIO && JUCE_WIN32
+#if JUCE_WIN32 && JUCE_ASIO
     list.add (juce_createASIOAudioIODeviceType());
+#endif
+
+#if JUCE_WIN32 && JUCE_WDM_AUDIO
+    list.add (juce_createWDMAudioIODeviceType());
 #endif
 }
 

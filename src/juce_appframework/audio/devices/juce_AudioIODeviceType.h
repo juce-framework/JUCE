@@ -117,8 +117,14 @@ public:
         @param preferInputNames     only really used by DirectSound where devices are split up
                                     into inputs and outputs, this indicates whether to use
                                     the input or output name to refer to a pair of devices.
+        @param numInputChannelsNeeded   the number of input channels the user is expecting to need - this
+                                        may be used to help decide which device would be most suitable
+        @param numOutputChannelsNeeded  the number of output channels the user is expecting to need - this
+                                        may be used to help decide which device would be most suitable
     */
-    virtual const String getDefaultDeviceName (const bool preferInputNames = false) const = 0;
+    virtual const String getDefaultDeviceName (const bool preferInputNames,
+                                               const int numInputChannelsNeeded, 
+                                               const int numOutputChannelsNeeded) const = 0;
 
     /** Creates one of the devices of this type.
 

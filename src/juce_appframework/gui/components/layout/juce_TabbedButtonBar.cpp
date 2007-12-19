@@ -39,8 +39,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-const int spaceAroundImage = 4;
-
 TabBarButton::TabBarButton (const String& name,
                             TabbedButtonBar* const owner_,
                             const int index)
@@ -127,6 +125,8 @@ void TabBarButton::getActiveArea (int& x, int& y, int& w, int& h)
     y = 0;
     int r = getWidth();
     int b = getHeight();
+
+    const int spaceAroundImage = getLookAndFeel().getTabButtonSpaceAroundImage();
 
     if (owner->getOrientation() != TabbedButtonBar::TabsAtLeft)
         r -= spaceAroundImage;
@@ -377,7 +377,8 @@ void TabbedButtonBar::resized()
     if (orientation == TabsAtTop || orientation == TabsAtBottom)
         swapVariables (depth, length);
 
-    const int overlap = getLookAndFeel().getTabButtonOverlap (depth) + spaceAroundImage * 2;
+    const int overlap = getLookAndFeel().getTabButtonOverlap (depth) 
+                            + getLookAndFeel().getTabButtonSpaceAroundImage() * 2;
 
     int i, totalLength = overlap;
     int numVisibleButtons = tabs.size();
