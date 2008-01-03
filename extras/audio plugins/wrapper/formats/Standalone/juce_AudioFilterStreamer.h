@@ -66,7 +66,7 @@ public:
                                 int totalNumOutputChannels,
                                 int numSamples);
 
-    void audioDeviceAboutToStart (double sampleRate, int numSamplesPerBlock);
+    void audioDeviceAboutToStart (AudioIODevice* device);
     void audioDeviceStopped();
 
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);

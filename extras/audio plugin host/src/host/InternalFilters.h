@@ -33,7 +33,7 @@
 #define __JUCE_MAINHOSTWINDOW_JUCEHEADER__xxxxx
 
 #include "FilterGraph.h"
-#include "../plugins/juce_AudioPluginFormat.h"
+
 
 //==============================================================================
 /**

@@ -77,14 +77,24 @@ public:
     //==============================================================================
     // AudioPluginInstance methods:
 
+    void fillInPluginDescription (PluginDescription& desc) const
+    {
+        desc.name = pluginName;
+        desc.file = file;
+        desc.uid = ((int) componentDesc.componentType)
+                    ^ ((int) componentDesc.componentSubType)
+                    ^ ((int) componentDesc.componentManufacturer);
+        desc.lastFileModTime = file.getLastModificationTime();
+        desc.pluginFormatName = "AudioUnit";
+        desc.category = getCategory();
+        desc.manufacturerName = manufacturer;
+        desc.version = version;
+        desc.numInputChannels = getNumInputChannels();
+        desc.numOutputChannels = getNumOutputChannels();
+        desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
+    }
+
     const String getName() const                { return pluginName; }
-    const String getManufacturer() const        { return manufacturer; }
-    const String getVersion() const             { return version; }
-    bool isInstrument() const                   { return componentDesc.componentType == kAudioUnitType_MusicDevice; }
-    const String getCategory() const;
-    const String getFormatName() const          { return "AudioUnit"; }
-    const File getFile() const                  { return file; }
-    int getUID() const                          { return file.hashCode(); }
     bool acceptsMidi() const                    { return wantsMidiMessages; }
     bool producesMidi() const                   { return false; }
 
@@ -224,6 +234,8 @@ private:
             numIns = numOuts = 2;
         }
     }
+
+    const String getCategory() const;
 
     //==============================================================================
     AudioUnitPluginInstance (const File& file);
@@ -1221,7 +1233,7 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
 
     try
     {
-        desc.fillInFromInstance (*instance);
+        instance->fillInPluginDescription (desc);
 
         results.add (new PluginDescription (desc));
     }

@@ -101,15 +101,14 @@ void AudioFilterStreamer::audioDeviceIOCallback (const float** inputChannelData,
         zeromem (outChans[numOutsWanted++], sizeof (float) * numSamples);
 }
 
-void AudioFilterStreamer::audioDeviceAboutToStart (double sampleRate_,
-                                                   int numSamplesPerBlock)
+void AudioFilterStreamer::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    sampleRate = sampleRate_;
+    sampleRate = device->getCurrentSampleRate();
 
     isPlaying = true;
 
     emptyBuffer.setSize (1 + filter.getNumOutputChannels(),
-                         jmax (2048, numSamplesPerBlock * 2));
+                         jmax (2048, device->getCurrentBlockSizeSamples() * 2));
     emptyBuffer.clear();
 
     midiCollector.reset (sampleRate);

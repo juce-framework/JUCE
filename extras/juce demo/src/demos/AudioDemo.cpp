@@ -342,7 +342,7 @@ public:
         }
     }
 
-    void audioDeviceAboutToStart (double sampleRate, int numSamplesPerBlock)
+    void audioDeviceAboutToStart (AudioIODevice*)
     {
         zeromem (circularBuffer, sizeof (float) * bufferSize);
     }
@@ -504,10 +504,10 @@ public:
         waveformComponent->audioDeviceIOCallback (inputChannelData, totalNumInputChannels, outputChannelData, totalNumOutputChannels, numSamples);
     }
 
-    void audioDeviceAboutToStart (double sampleRate, int numSamplesPerBlock)
+    void audioDeviceAboutToStart (AudioIODevice* device)
     {
-        audioSourcePlayer.audioDeviceAboutToStart (sampleRate, numSamplesPerBlock);
-        waveformComponent->audioDeviceAboutToStart (sampleRate, numSamplesPerBlock);
+        audioSourcePlayer.audioDeviceAboutToStart (device);
+        waveformComponent->audioDeviceAboutToStart (device);
     }
 
     void audioDeviceStopped()

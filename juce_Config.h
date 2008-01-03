@@ -137,6 +137,16 @@
   #define JUCE_USE_XSHM 1
 #endif
 
+//=============================================================================
+/** Enabling this builds support for VST audio plugins.
+    @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
+*/
+#define JUCE_PLUGINHOST_VST 1
+
+/** Enabling this builds support for AudioUnit audio plugins.
+    @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
+*/
+#define JUCE_PLUGINHOST_AU 1
 
 //=============================================================================
 /** Disabling this will avoid linking to any UI code. This is handy for

@@ -20,6 +20,22 @@
 		84099CA10AE52BD000B2A05D /* juce_Synthesiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84099C9D0AE52BD000B2A05D /* juce_Synthesiser.cpp */; };
 		84099CA20AE52BD000B2A05D /* juce_Synthesiser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84099C9E0AE52BD000B2A05D /* juce_Synthesiser.h */; };
 		840F80BC092B399D005E7B4E /* juce.h in Headers */ = {isa = PBXBuildFile; fileRef = 840F80BB092B399D005E7B4E /* juce.h */; };
+		8416EB750D1999620094A433 /* bitbuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB650D1999610094A433 /* bitbuffer.c */; };
+		8416EB760D1999620094A433 /* bitmath.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB660D1999610094A433 /* bitmath.c */; };
+		8416EB770D1999620094A433 /* bitreader.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB670D1999610094A433 /* bitreader.c */; };
+		8416EB780D1999620094A433 /* bitwriter.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB680D1999610094A433 /* bitwriter.c */; };
+		8416EB790D1999620094A433 /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB690D1999610094A433 /* cpu.c */; };
+		8416EB7A0D1999620094A433 /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6A0D1999610094A433 /* crc.c */; };
+		8416EB7B0D1999620094A433 /* fixed.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6B0D1999610094A433 /* fixed.c */; };
+		8416EB7C0D1999620094A433 /* float.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6C0D1999610094A433 /* float.c */; };
+		8416EB7D0D1999620094A433 /* format.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6D0D1999610094A433 /* format.c */; };
+		8416EB7E0D1999620094A433 /* lpc_flac.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6E0D1999610094A433 /* lpc_flac.c */; };
+		8416EB7F0D1999620094A433 /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB6F0D1999620094A433 /* md5.c */; };
+		8416EB800D1999620094A433 /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB700D1999620094A433 /* memory.c */; };
+		8416EB810D1999620094A433 /* stream_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB710D1999620094A433 /* stream_decoder.c */; };
+		8416EB820D1999620094A433 /* stream_encoder_framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB720D1999620094A433 /* stream_encoder_framing.c */; };
+		8416EB830D1999620094A433 /* stream_encoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB730D1999620094A433 /* stream_encoder.c */; };
+		8416EB840D1999620094A433 /* window_flac.c in Sources */ = {isa = PBXBuildFile; fileRef = 8416EB740D1999620094A433 /* window_flac.c */; };
 		8417EE530A6E7A280058E04E /* juce_TableHeaderComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8417EE4F0A6E7A270058E04E /* juce_TableHeaderComponent.cpp */; };
 		8417EE540A6E7A280058E04E /* juce_TableHeaderComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 8417EE500A6E7A270058E04E /* juce_TableHeaderComponent.h */; };
 		8417EE550A6E7A280058E04E /* juce_TableListBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8417EE510A6E7A280058E04E /* juce_TableListBox.cpp */; };
@@ -571,20 +587,6 @@
 		84F593AE09855679008153BA /* juce_DocumentWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F593AC09855679008153BA /* juce_DocumentWindow.cpp */; };
 		84F593AF09855679008153BA /* juce_DocumentWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F593AD09855679008153BA /* juce_DocumentWindow.h */; };
 		84F593B109855693008153BA /* juce_LassoComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F593B009855693008153BA /* juce_LassoComponent.h */; };
-		84F690EF0B3444E500ABAE1C /* bitbuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E10B3444E500ABAE1C /* bitbuffer.c */; };
-		84F690F00B3444E500ABAE1C /* bitmath.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E20B3444E500ABAE1C /* bitmath.c */; };
-		84F690F10B3444E500ABAE1C /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E30B3444E500ABAE1C /* cpu.c */; };
-		84F690F20B3444E500ABAE1C /* crc.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E40B3444E500ABAE1C /* crc.c */; };
-		84F690F30B3444E500ABAE1C /* fixed.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E50B3444E500ABAE1C /* fixed.c */; };
-		84F690F40B3444E500ABAE1C /* float.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E60B3444E500ABAE1C /* float.c */; };
-		84F690F50B3444E500ABAE1C /* format.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E70B3444E500ABAE1C /* format.c */; };
-		84F690F60B3444E500ABAE1C /* lpc_flac.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E80B3444E500ABAE1C /* lpc_flac.c */; };
-		84F690F70B3444E500ABAE1C /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690E90B3444E500ABAE1C /* md5.c */; };
-		84F690F80B3444E500ABAE1C /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690EA0B3444E500ABAE1C /* memory.c */; };
-		84F690F90B3444E500ABAE1C /* stream_decoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690EB0B3444E500ABAE1C /* stream_decoder.c */; };
-		84F690FA0B3444E500ABAE1C /* stream_encoder_framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690EC0B3444E500ABAE1C /* stream_encoder_framing.c */; };
-		84F690FB0B3444E500ABAE1C /* stream_encoder.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690ED0B3444E500ABAE1C /* stream_encoder.c */; };
-		84F690FC0B3444E500ABAE1C /* window_flac.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690EE0B3444E500ABAE1C /* window_flac.c */; };
 		84F690FF0B3444F800ABAE1C /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690FD0B3444F800ABAE1C /* bitwise.c */; };
 		84F691000B3444F800ABAE1C /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F690FE0B3444F800ABAE1C /* framing.c */; };
 		84F691170B34453600ABAE1C /* analysis.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F691010B34453600ABAE1C /* analysis.c */; };
@@ -672,6 +674,22 @@
 		84099C9D0AE52BD000B2A05D /* juce_Synthesiser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_Synthesiser.cpp; sourceTree = "<group>"; };
 		84099C9E0AE52BD000B2A05D /* juce_Synthesiser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_Synthesiser.h; sourceTree = "<group>"; };
 		840F80BB092B399D005E7B4E /* juce.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce.h; path = ../../juce.h; sourceTree = SOURCE_ROOT; };
+		8416EB650D1999610094A433 /* bitbuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitbuffer.c; path = flac/libFLAC/bitbuffer.c; sourceTree = "<group>"; };
+		8416EB660D1999610094A433 /* bitmath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitmath.c; path = flac/libFLAC/bitmath.c; sourceTree = "<group>"; };
+		8416EB670D1999610094A433 /* bitreader.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitreader.c; path = flac/libFLAC/bitreader.c; sourceTree = "<group>"; };
+		8416EB680D1999610094A433 /* bitwriter.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitwriter.c; path = flac/libFLAC/bitwriter.c; sourceTree = "<group>"; };
+		8416EB690D1999610094A433 /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = cpu.c; path = flac/libFLAC/cpu.c; sourceTree = "<group>"; };
+		8416EB6A0D1999610094A433 /* crc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = crc.c; path = flac/libFLAC/crc.c; sourceTree = "<group>"; };
+		8416EB6B0D1999610094A433 /* fixed.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = fixed.c; path = flac/libFLAC/fixed.c; sourceTree = "<group>"; };
+		8416EB6C0D1999610094A433 /* float.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = float.c; path = flac/libFLAC/float.c; sourceTree = "<group>"; };
+		8416EB6D0D1999610094A433 /* format.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = format.c; path = flac/libFLAC/format.c; sourceTree = "<group>"; };
+		8416EB6E0D1999610094A433 /* lpc_flac.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = lpc_flac.c; path = flac/libFLAC/lpc_flac.c; sourceTree = "<group>"; };
+		8416EB6F0D1999620094A433 /* md5.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = md5.c; path = flac/libFLAC/md5.c; sourceTree = "<group>"; };
+		8416EB700D1999620094A433 /* memory.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = memory.c; path = flac/libFLAC/memory.c; sourceTree = "<group>"; };
+		8416EB710D1999620094A433 /* stream_decoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_decoder.c; path = flac/libFLAC/stream_decoder.c; sourceTree = "<group>"; };
+		8416EB720D1999620094A433 /* stream_encoder_framing.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_encoder_framing.c; path = flac/libFLAC/stream_encoder_framing.c; sourceTree = "<group>"; };
+		8416EB730D1999620094A433 /* stream_encoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_encoder.c; path = flac/libFLAC/stream_encoder.c; sourceTree = "<group>"; };
+		8416EB740D1999620094A433 /* window_flac.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = window_flac.c; path = flac/libFLAC/window_flac.c; sourceTree = "<group>"; };
 		8417EE4F0A6E7A270058E04E /* juce_TableHeaderComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_TableHeaderComponent.cpp; sourceTree = "<group>"; };
 		8417EE500A6E7A270058E04E /* juce_TableHeaderComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_TableHeaderComponent.h; sourceTree = "<group>"; };
 		8417EE510A6E7A280058E04E /* juce_TableListBox.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_TableListBox.cpp; sourceTree = "<group>"; };
@@ -1226,20 +1244,6 @@
 		84F593AC09855679008153BA /* juce_DocumentWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_DocumentWindow.cpp; sourceTree = "<group>"; };
 		84F593AD09855679008153BA /* juce_DocumentWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_DocumentWindow.h; sourceTree = "<group>"; };
 		84F593B009855693008153BA /* juce_LassoComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_LassoComponent.h; sourceTree = "<group>"; };
-		84F690E10B3444E500ABAE1C /* bitbuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitbuffer.c; path = flac/libFLAC/bitbuffer.c; sourceTree = "<group>"; };
-		84F690E20B3444E500ABAE1C /* bitmath.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitmath.c; path = flac/libFLAC/bitmath.c; sourceTree = "<group>"; };
-		84F690E30B3444E500ABAE1C /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = cpu.c; path = flac/libFLAC/cpu.c; sourceTree = "<group>"; };
-		84F690E40B3444E500ABAE1C /* crc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = crc.c; path = flac/libFLAC/crc.c; sourceTree = "<group>"; };
-		84F690E50B3444E500ABAE1C /* fixed.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = fixed.c; path = flac/libFLAC/fixed.c; sourceTree = "<group>"; };
-		84F690E60B3444E500ABAE1C /* float.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = float.c; path = flac/libFLAC/float.c; sourceTree = "<group>"; };
-		84F690E70B3444E500ABAE1C /* format.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = format.c; path = flac/libFLAC/format.c; sourceTree = "<group>"; };
-		84F690E80B3444E500ABAE1C /* lpc_flac.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = lpc_flac.c; path = flac/libFLAC/lpc_flac.c; sourceTree = "<group>"; };
-		84F690E90B3444E500ABAE1C /* md5.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = md5.c; path = flac/libFLAC/md5.c; sourceTree = "<group>"; };
-		84F690EA0B3444E500ABAE1C /* memory.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = memory.c; path = flac/libFLAC/memory.c; sourceTree = "<group>"; };
-		84F690EB0B3444E500ABAE1C /* stream_decoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_decoder.c; path = flac/libFLAC/stream_decoder.c; sourceTree = "<group>"; };
-		84F690EC0B3444E500ABAE1C /* stream_encoder_framing.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_encoder_framing.c; path = flac/libFLAC/stream_encoder_framing.c; sourceTree = "<group>"; };
-		84F690ED0B3444E500ABAE1C /* stream_encoder.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = stream_encoder.c; path = flac/libFLAC/stream_encoder.c; sourceTree = "<group>"; };
-		84F690EE0B3444E500ABAE1C /* window_flac.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = window_flac.c; path = flac/libFLAC/window_flac.c; sourceTree = "<group>"; };
 		84F690FD0B3444F800ABAE1C /* bitwise.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = bitwise.c; path = oggvorbis/bitwise.c; sourceTree = "<group>"; };
 		84F690FE0B3444F800ABAE1C /* framing.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = framing.c; path = oggvorbis/framing.c; sourceTree = "<group>"; };
 		84F691010B34453600ABAE1C /* analysis.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = analysis.c; path = "oggvorbis/libvorbis-1.1.2/lib/analysis.c"; sourceTree = "<group>"; };
@@ -2364,20 +2368,22 @@
 		84F690DC0B3444A500ABAE1C /* flac */ = {
 			isa = PBXGroup;
 			children = (
-				84F690E10B3444E500ABAE1C /* bitbuffer.c */,
-				84F690E20B3444E500ABAE1C /* bitmath.c */,
-				84F690E30B3444E500ABAE1C /* cpu.c */,
-				84F690E40B3444E500ABAE1C /* crc.c */,
-				84F690E50B3444E500ABAE1C /* fixed.c */,
-				84F690E60B3444E500ABAE1C /* float.c */,
-				84F690E70B3444E500ABAE1C /* format.c */,
-				84F690E80B3444E500ABAE1C /* lpc_flac.c */,
-				84F690E90B3444E500ABAE1C /* md5.c */,
-				84F690EA0B3444E500ABAE1C /* memory.c */,
-				84F690EB0B3444E500ABAE1C /* stream_decoder.c */,
-				84F690EC0B3444E500ABAE1C /* stream_encoder_framing.c */,
-				84F690ED0B3444E500ABAE1C /* stream_encoder.c */,
-				84F690EE0B3444E500ABAE1C /* window_flac.c */,
+				8416EB650D1999610094A433 /* bitbuffer.c */,
+				8416EB660D1999610094A433 /* bitmath.c */,
+				8416EB670D1999610094A433 /* bitreader.c */,
+				8416EB680D1999610094A433 /* bitwriter.c */,
+				8416EB690D1999610094A433 /* cpu.c */,
+				8416EB6A0D1999610094A433 /* crc.c */,
+				8416EB6B0D1999610094A433 /* fixed.c */,
+				8416EB6C0D1999610094A433 /* float.c */,
+				8416EB6D0D1999610094A433 /* format.c */,
+				8416EB6E0D1999610094A433 /* lpc_flac.c */,
+				8416EB6F0D1999620094A433 /* md5.c */,
+				8416EB700D1999620094A433 /* memory.c */,
+				8416EB710D1999620094A433 /* stream_decoder.c */,
+				8416EB720D1999620094A433 /* stream_encoder_framing.c */,
+				8416EB730D1999620094A433 /* stream_encoder.c */,
+				8416EB740D1999620094A433 /* window_flac.c */,
 			);
 			name = flac;
 			sourceTree = "<group>";
@@ -3119,20 +3125,6 @@
 				841E06370AF8CE75005E6FCC /* juce_AudioSampleBuffer.cpp in Sources */,
 				841E06390AF8CE75005E6FCC /* juce_IIRFilter.cpp in Sources */,
 				84F525000B32A8D500597B73 /* juce_ApplicationProperties.cpp in Sources */,
-				84F690EF0B3444E500ABAE1C /* bitbuffer.c in Sources */,
-				84F690F00B3444E500ABAE1C /* bitmath.c in Sources */,
-				84F690F10B3444E500ABAE1C /* cpu.c in Sources */,
-				84F690F20B3444E500ABAE1C /* crc.c in Sources */,
-				84F690F30B3444E500ABAE1C /* fixed.c in Sources */,
-				84F690F40B3444E500ABAE1C /* float.c in Sources */,
-				84F690F50B3444E500ABAE1C /* format.c in Sources */,
-				84F690F60B3444E500ABAE1C /* lpc_flac.c in Sources */,
-				84F690F70B3444E500ABAE1C /* md5.c in Sources */,
-				84F690F80B3444E500ABAE1C /* memory.c in Sources */,
-				84F690F90B3444E500ABAE1C /* stream_decoder.c in Sources */,
-				84F690FA0B3444E500ABAE1C /* stream_encoder_framing.c in Sources */,
-				84F690FB0B3444E500ABAE1C /* stream_encoder.c in Sources */,
-				84F690FC0B3444E500ABAE1C /* window_flac.c in Sources */,
 				84F690FF0B3444F800ABAE1C /* bitwise.c in Sources */,
 				84F691000B3444F800ABAE1C /* framing.c in Sources */,
 				84F691170B34453600ABAE1C /* analysis.c in Sources */,
@@ -3166,6 +3158,22 @@
 				84BC4E2A0C8DD38C00FA249B /* juce_AudioProcessor.cpp in Sources */,
 				84BC4E2C0C8DD38C00FA249B /* juce_AudioProcessorEditor.cpp in Sources */,
 				84BC4E2F0C8DD38C00FA249B /* juce_GenericAudioProcessorEditor.cpp in Sources */,
+				8416EB750D1999620094A433 /* bitbuffer.c in Sources */,
+				8416EB760D1999620094A433 /* bitmath.c in Sources */,
+				8416EB770D1999620094A433 /* bitreader.c in Sources */,
+				8416EB780D1999620094A433 /* bitwriter.c in Sources */,
+				8416EB790D1999620094A433 /* cpu.c in Sources */,
+				8416EB7A0D1999620094A433 /* crc.c in Sources */,
+				8416EB7B0D1999620094A433 /* fixed.c in Sources */,
+				8416EB7C0D1999620094A433 /* float.c in Sources */,
+				8416EB7D0D1999620094A433 /* format.c in Sources */,
+				8416EB7E0D1999620094A433 /* lpc_flac.c in Sources */,
+				8416EB7F0D1999620094A433 /* md5.c in Sources */,
+				8416EB800D1999620094A433 /* memory.c in Sources */,
+				8416EB810D1999620094A433 /* stream_decoder.c in Sources */,
+				8416EB820D1999620094A433 /* stream_encoder_framing.c in Sources */,
+				8416EB830D1999620094A433 /* stream_encoder.c in Sources */,
+				8416EB840D1999620094A433 /* window_flac.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

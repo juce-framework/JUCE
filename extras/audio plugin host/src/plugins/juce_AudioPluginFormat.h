@@ -146,6 +146,19 @@ public:
     */
     void addFormat (AudioPluginFormat* const format) throw();
 
+
+    //==============================================================================
+    /** Tries to load the type for this description, by trying all the formats
+        that this manager knows about.
+
+        The caller is responsible for deleting the object that is returned.
+
+        If it can't load the plugin, it returns 0 and leaves a message in the
+        errorMessage string.
+    */
+    AudioPluginInstance* createInstance (const PluginDescription& description,
+                                         String& errorMessage) const;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

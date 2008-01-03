@@ -32,7 +32,7 @@
 #include "../../../../juce.h"
 #include "MainHostWindow.h"
 #include "InternalFilters.h"
-#include "../plugins/juce_PluginListComponent.h"
+
 
 //==============================================================================
 class PluginListWindow  : public DocumentWindow
@@ -85,6 +85,13 @@ MainHostWindow::MainHostWindow()
     : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(), Colours::lightgrey,
                       DocumentWindow::allButtons)
 {
+    XmlElement* const savedAudioState = ApplicationProperties::getInstance()->getUserSettings()
+                                            ->getXmlValue (T("audioDeviceState"));
+
+    deviceManager.initialise (256, 256, savedAudioState, true);
+
+    delete savedAudioState;
+
     setResizable (true, false);
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (800, 600);
@@ -103,13 +110,6 @@ MainHostWindow::MainHostWindow()
 
     InternalPluginFormat internalFormat;
     internalFormat.getAllTypes (internalTypes);
-
-    XmlElement* const savedAudioState = ApplicationProperties::getInstance()->getUserSettings()
-                                            ->getXmlValue (T("audioDeviceState"));
-
-    deviceManager.initialise (256, 256, savedAudioState, true);
-
-    delete savedAudioState;
 
     XmlElement* const savedPluginList = ApplicationProperties::getInstance()
                                           ->getUserSettings()

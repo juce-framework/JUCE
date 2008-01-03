@@ -85,6 +85,8 @@ public:
 
         Note that this might not be unique between formats, e.g. a VST and some
         other format might actually have the same id.
+
+        @see createIdentifierString
     */
     int uid;
 
@@ -112,17 +114,6 @@ public:
     void fillInFromInstance (AudioPluginInstance& instance) throw();
 
     //==============================================================================
-    /** Tries to load the type for this description, by trying all the formats
-        available in the AudioPluginFormat.
-
-        The caller is responsible for deleting the object that is returned.
-
-        If it can't load the plugin, it returns 0 and leaves a message in the
-        errorMessage string.
-    */
-    AudioPluginInstance* createInstance (String& errorMessage) const;
-
-    //==============================================================================
     /** Creates an XML object containing these details.
 
         @see loadFromXml
@@ -135,6 +126,16 @@ public:
         Returns true if the XML was a valid plugin description.
     */
     bool loadFromXml (const XmlElement& xml);
+
+    //==============================================================================
+    /** Returns a string that can be saved and used to uniquely identify the
+        plugin again.
+
+        This contains less info than the XML encoding, and is independent of the
+        plugin's file location, so can be used to store a plugin ID for use
+        across different machines.
+    */
+    const String createIdentifierString() const throw();
 
 
     //==============================================================================

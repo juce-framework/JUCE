@@ -705,11 +705,15 @@
 							Name="flac"
 							>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitbuffer.c"
+								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitmath.c"
 								>
 							</File>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitmath.c"
+								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitreader.c"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitwriter.c"
 								>
 							</File>
 							<File
@@ -730,10 +734,6 @@
 							</File>
 							<File
 								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\format.c"
-								>
-							</File>
-							<File
-								RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\juce_FlacHeader.h"
 								>
 							</File>
 							<File
@@ -1190,7 +1190,23 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.h"
 							>
 						</File>
 						<File
@@ -1201,6 +1217,94 @@
 							RelativePath="..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h"
 							>
 						</File>
+					</Filter>
+					<Filter
+						Name="plugins"
+						>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.h"
+							>
+						</File>
+						<Filter
+							Name="formats"
+							>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.h"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_LADSPAPluginFormat.h"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.cpp"
+								>
+							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.h"
+								>
+							</File>
+						</Filter>
 					</Filter>
 				</Filter>
 				<Filter

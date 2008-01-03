@@ -105,3 +105,27 @@ void AudioPluginFormatManager::addFormat (AudioPluginFormat* const format) throw
 {
     formats.add (format);
 }
+
+AudioPluginInstance* AudioPluginFormatManager::createInstance (const PluginDescription& description,
+                                                               String& errorMessage) const
+{
+    AudioPluginInstance* result = 0;
+
+    for (int i = 0; i < formats.size(); ++i)
+    {
+        result = formats.getUnchecked(i)->createInstanceFromDescription (*this);
+
+        if (result != 0)
+            break;
+    }
+
+    if (result == 0)
+    {
+        if (file != File::nonexistent && ! file.exists())
+            errorMessage = TRANS ("This plug-in file no longer exists");
+        else
+            errorMessage = TRANS ("This plug-in failed to load correctly");
+    }
+
+    return result;
+}

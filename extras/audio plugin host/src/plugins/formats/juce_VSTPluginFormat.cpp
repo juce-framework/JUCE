@@ -672,13 +672,28 @@ public:
     //==============================================================================
     // AudioPluginInstance methods:
 
-    const String getName() const            { return name; }
-    const String getManufacturer() const;
-    const String getVersion() const;
-    bool isInstrument() const               { return effect != 0 && (effect->flags & effFlagsIsSynth) != 0; }
-    const String getCategory() const;
-    const String getFormatName() const      { return "VST"; }
-    const File getFile() const              { return module->file; }
+    void fillInPluginDescription (PluginDescription& desc) const
+    {
+        desc.name = name;
+        desc.file = module->file;
+        desc.uid = getUID();
+        desc.lastFileModTime = file.getLastModificationTime();
+        desc.pluginFormatName = "VST";
+        desc.category = getCategory();
+
+        {
+            char buffer [kVstMaxVendorStrLen + 8];
+            zerostruct (buffer);
+            dispatch (effGetVendorString, 0, 0, buffer, 0);
+            desc.manufacturerName = buffer;
+        }
+
+        desc.version = getVersion();
+        desc.numInputChannels = instance.getNumInputChannels();
+        desc.numOutputChannels = instance.getNumOutputChannels();
+        desc.isInstrument = (effect != 0 && (effect->flags & effFlagsIsSynth) != 0);
+    }
+
     int getUID() const;
     bool acceptsMidi() const                { return wantsMidiMessages; }
     bool producesMidi() const               { return dispatch (effCanDo, 0, 0, (void*) "sendVstMidiEvent", 0) > 0; }
@@ -768,6 +783,9 @@ private:
     bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB);
 
     int getVersionNumber() const throw()    { return effect != 0 ? effect->version : 0; }
+    const String getVersion() const throw();
+    const String getCategory() const throw();
+
     bool hasEditor() const throw()          { return effect != 0 && (effect->flags & effFlagsHasEditor) != 0; }
     void setPower (const bool on);
 
@@ -2444,15 +2462,7 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 }
 
 //==============================================================================
-const String VSTPluginInstance::getManufacturer() const
-{
-    char buffer [kVstMaxVendorStrLen + 8];
-    zerostruct (buffer);
-    dispatch (effGetVendorString, 0, 0, buffer, 0);
-    return buffer;
-}
-
-const String VSTPluginInstance::getVersion() const
+const String VSTPluginInstance::getVersion() const throw()
 {
     int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
 
@@ -2493,7 +2503,7 @@ int VSTPluginInstance::getUID() const
     return uid;
 }
 
-const String VSTPluginInstance::getCategory() const
+const String VSTPluginInstance::getCategory() const throw()
 {
     const char* result = 0;
 
@@ -2856,7 +2866,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
             UseResFile (instance->module->resFileId);
 #endif
 
-        desc.fillInFromInstance (*instance);
+        instance->fillInPluginDescription (desc);
 
         VstPlugCategory category = (VstPlugCategory) instance->dispatch (effGetPlugCategory, 0, 0, 0, 0);
 

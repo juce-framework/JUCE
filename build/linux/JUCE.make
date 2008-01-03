@@ -109,6 +109,8 @@ OBJECTS := \
 	$(OBJDIR)/juce_MidiMessageSequence.o \
 	$(OBJDIR)/juce_AudioProcessor.o \
 	$(OBJDIR)/juce_AudioProcessorEditor.o \
+	$(OBJDIR)/juce_AudioProcessorGraph.o \
+	$(OBJDIR)/juce_AudioProcessorPlayer.o \
 	$(OBJDIR)/juce_GenericAudioProcessorEditor.o \
 	$(OBJDIR)/juce_AiffAudioFormat.o \
 	$(OBJDIR)/juce_AudioCDReader.o \
@@ -120,6 +122,8 @@ OBJECTS := \
 	$(OBJDIR)/juce_WavAudioFormat.o \
 	$(OBJDIR)/bitbuffer.o \
 	$(OBJDIR)/bitmath.o \
+	$(OBJDIR)/bitreader.o \
+	$(OBJDIR)/bitwriter.o \
 	$(OBJDIR)/cpu.o \
 	$(OBJDIR)/crc.o \
 	$(OBJDIR)/fixed.o \
@@ -801,6 +805,16 @@ $(OBJDIR)/juce_AudioProcessorEditor.o: ../../src/juce_appframework/audio/process
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/juce_AudioProcessorGraph.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorGraph.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioProcessorPlayer.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorPlayer.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -852,6 +866,16 @@ $(OBJDIR)/bitbuffer.o: ../../src/juce_appframework/audio/audio_file_formats/flac
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJDIR)/bitmath.o: ../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/bitmath.c
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)/bitreader.o: ../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/bitreader.c
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)/bitwriter.o: ../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/bitwriter.c
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CC) $(CFLAGS) -o $@ -c $<

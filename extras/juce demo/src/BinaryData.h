@@ -15,7 +15,7 @@ namespace BinaryData
     const int           demo_table_data_xmlSize = 5239;
 
     extern const char*  draganddropdemo_cpp;
-    const int           draganddropdemo_cppSize = 7873;
+    const int           draganddropdemo_cppSize = 7937;
 
     extern const char*  fontsandtextdemo_cpp;
     const int           fontsandtextdemo_cppSize = 9064;

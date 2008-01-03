@@ -60,6 +60,15 @@ PluginDescription* KnownPluginList::getTypeForFile (const File& file) const thro
     return 0;
 }
 
+PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& identifierString) const throw()
+{
+    for (int i = 0; i < types.size(); ++i)
+        if (types.getUnchecked(i)->createIdentifierString() == identifierString)
+            return types.getUnchecked(i);
+
+    return 0;
+}
+
 bool KnownPluginList::addType (const PluginDescription& type)
 {
     for (int i = types.size(); --i >= 0;)
@@ -341,7 +350,7 @@ public:
         {
             PluginDescription* const plugin = plugins.getUnchecked(i);
 
-            m.addItem (allPlugins.indexOf (plugin) + menuIdBase, 
+            m.addItem (allPlugins.indexOf (plugin) + menuIdBase,
                        plugin->name, true, false);
         }
     }

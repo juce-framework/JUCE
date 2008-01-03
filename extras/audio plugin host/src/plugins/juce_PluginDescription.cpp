@@ -85,44 +85,11 @@ bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
             && uid == other.uid;
 }
 
-void PluginDescription::fillInFromInstance (AudioPluginInstance& instance) throw()
+const String PluginDescription::createIdentifierString() const throw()
 {
-    name = instance.getName();
-    file = instance.getFile();
-    uid = instance.getUID();
-    lastFileModTime = file.getLastModificationTime();
-    pluginFormatName = instance.getFormatName();
-    category = instance.getCategory();
-    manufacturerName = instance.getManufacturer();
-    version = instance.getVersion();
-    numInputChannels = instance.getNumInputChannels();
-    numOutputChannels = instance.getNumOutputChannels();
-    isInstrument = instance.isInstrument();
-}
-
-AudioPluginInstance* PluginDescription::createInstance (String& errorMessage) const
-{
-    AudioPluginInstance* result = 0;
-
-    for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
-    {
-        AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
-
-        result = format->createInstanceFromDescription (*this);
-
-        if (result != 0)
-            break;
-    }
-
-    if (result == 0)
-    {
-        if (file != File::nonexistent && ! file.exists())
-            errorMessage = TRANS ("This plug-in file no longer exists");
-        else
-            errorMessage = TRANS ("This plug-in failed to load correctly");
-    }
-
-    return result;
+    return pluginFormatName
+            + T("/") + pluginName
+            + T("/") + String::toHexString (file.getFileName().hashCode());
 }
 
 XmlElement* PluginDescription::createXml() const

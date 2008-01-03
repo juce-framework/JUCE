@@ -74,6 +74,13 @@ public:
     */
     PluginDescription* getTypeForFile (const File& file) const throw();
 
+    /** Looks for a type in the list which matches a plugin type ID.
+
+        The identifierString parameter must have been created by
+        PluginDescription::createIdentifierString().
+    */
+    PluginDescription* getTypeForIdentifierString (const String& identifierString) const throw();
+
     /** Adds a type manually from its description. */
     bool addType (const PluginDescription& type);
 

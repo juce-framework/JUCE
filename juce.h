@@ -169,6 +169,7 @@ END_JUCE_NAMESPACE
       #pragma comment(lib, "ole32.lib")
       #pragma comment(lib, "advapi32.lib")
       #pragma comment(lib, "ws2_32.lib")
+      #pragma comment(lib, "SetupAPI.Lib")
       //#pragma comment(lib, "gdiplus.lib")
 
       #if JUCE_OPENGL

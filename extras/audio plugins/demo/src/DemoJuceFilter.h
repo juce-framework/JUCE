@@ -71,6 +71,9 @@ public:
     bool isInputChannelStereoPair (int index) const;
     bool isOutputChannelStereoPair (int index) const;
 
+    bool acceptsMidi() const;
+    bool producesMidi() const;
+
     //==============================================================================
     int getNumPrograms()                                        { return 0; }
     int getCurrentProgram()                                     { return 0; }

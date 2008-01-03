@@ -152,7 +152,8 @@ public:
     }
 
     //==============================================================================
-    bool isInterestedInDragSource (const String& sourceDescription)
+    bool isInterestedInDragSource (const String& sourceDescription,
+                                   Component* sourceComponent)
     {
         // normally you'd check the sourceDescription value to see if it's the
         // sort of object that you're interested in before returning true, but for

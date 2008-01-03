@@ -124,6 +124,16 @@ bool DemoJuceFilter::isOutputChannelStereoPair (int index) const
     return false;
 }
 
+bool DemoJuceFilter::acceptsMidi() const
+{
+    return true;
+}
+
+bool DemoJuceFilter::producesMidi() const
+{
+    return true;
+}
+
 //==============================================================================
 void DemoJuceFilter::prepareToPlay (double sampleRate, int samplesPerBlock)
 {

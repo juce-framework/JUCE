@@ -70,6 +70,11 @@ public:
     virtual ~AudioProcessor();
 
     //==============================================================================
+    /** Returns the name of this processor.
+    */
+    virtual const String getName() const = 0;
+
+    //==============================================================================
     /** Called before playback starts, to let the filter prepare itself.
 
         The sample rate is the target sample rate, and will remain constant until
@@ -228,6 +233,12 @@ public:
         later if the value changes.
     */
     void setLatencySamples (const int newLatency);
+
+    /** Returns true if the processor wants midi messages. */
+    virtual bool acceptsMidi() const = 0;
+
+    /** Returns true if the processor produces midi messages. */
+    virtual bool producesMidi() const = 0;
 
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
@@ -535,6 +546,9 @@ private:
 #ifdef JUCE_DEBUG
     BitArray changingParams;
 #endif
+
+    AudioProcessor (const AudioProcessor&);
+    const AudioProcessor& operator= (const AudioProcessor&);
 };
 
 

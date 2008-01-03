@@ -32,7 +32,6 @@
 #ifndef __JUCE_FILTERGRAPHEDITOR_JUCEHEADER__
 #define __JUCE_FILTERGRAPHEDITOR_JUCEHEADER__
 
-#include "../plugins/juce_KnownPluginList.h"
 #include "FilterGraph.h"
 
 class FilterComponent;
@@ -57,7 +56,7 @@ public:
     void createNewPlugin (const PluginDescription* desc, int x, int y);
 
     FilterComponent* getComponentForFilter (const uint32 filterID) const;
-    ConnectorComponent* getComponentForConnection (const FilterConnection& conn) const;
+    ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection& conn) const;
     PinComponent* findPinAt (const int x, const int y) const;
 
     void resized();
@@ -110,12 +109,39 @@ public:
 
 private:
     AudioDeviceManager* deviceManager;
-    FilterGraphPlayer* graphPlayer;
+    AudioProcessorPlayer graphPlayer;
+    MidiKeyboardState keyState;
 
     GraphEditorPanel* graphPanel;
     Component* keyboardComp;
     Component* statusBar;
 };
 
+//==============================================================================
+/** A desktop window containing a plugin's UI.
+*/
+class PluginWindow  : public DocumentWindow
+{
+    PluginWindow (Component* const uiComp,
+                  AudioProcessorGraph::Node* owner_,
+                  const bool isGeneric_);
+
+public:
+    static PluginWindow* getWindowFor (AudioProcessorGraph::Node* node, 
+                                       bool useGenericView);
+
+    static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
+
+    static void closeAllCurrentlyOpenWindows();
+
+    ~PluginWindow();
+
+    void moved();
+    void closeButtonPressed();
+
+private:
+    AudioProcessorGraph::Node* owner;
+    bool isGeneric;
+};
 
 #endif

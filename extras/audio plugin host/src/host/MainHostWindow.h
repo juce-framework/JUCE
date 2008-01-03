@@ -34,7 +34,6 @@
 
 #include "FilterGraph.h"
 #include "GraphEditorPanel.h"
-#include "../plugins/juce_KnownPluginList.h"
 
 
 //==============================================================================

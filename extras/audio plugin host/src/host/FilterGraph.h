@@ -32,12 +32,8 @@
 #ifndef __JUCE_FILTERGRAPH_JUCEHEADER__
 #define __JUCE_FILTERGRAPH_JUCEHEADER__
 
-#include "../plugins/juce_AudioPluginInstance.h"
-#include "../plugins/juce_PluginDescription.h"
-
 class FilterInGraph;
 class FilterGraph;
-class FilterGraphPlayer;
 
 const char* const filenameSuffix = ".filtergraph";
 const char* const filenameWildcard = "*.filtergraph";
@@ -75,7 +71,7 @@ private:
 /**
     Represents one of the filters in a FilterGraph.
 */
-class FilterInGraph   : public ReferenceCountedObject
+/*class FilterInGraph   : public ReferenceCountedObject
 {
 public:
     //==============================================================================
@@ -129,7 +125,7 @@ private:
     FilterInGraph (const FilterInGraph&);
     const FilterInGraph& operator= (const FilterInGraph&);
 };
-
+*/
 
 //==============================================================================
 /**
@@ -143,11 +139,12 @@ public:
     ~FilterGraph();
 
     //==============================================================================
-    int getNumFilters() const throw()                                           { return filters.size(); }
-    FilterInGraph* getFilter (const int index) const throw()          { return filters [index]; }
-    FilterInGraph* getFilterForUID (const uint32 uid) const throw();
+    AudioProcessorGraph& getGraph() throw()         { return graph; }
 
-    void addFilter (const FilterInGraph::Ptr& newFilter);
+    int getNumFilters() const throw();
+    const AudioProcessorGraph::Node::Ptr getNode (const int index) const throw();
+    const AudioProcessorGraph::Node::Ptr getNodeForId (const uint32 uid) const throw();
+
     void addFilter (const PluginDescription* desc, double x, double y);
 
     void removeFilter (const uint32 filterUID);
@@ -155,14 +152,15 @@ public:
 
     void removeIllegalConnections();
 
+    void setNodePosition (const int nodeId, double x, double y);
+    void getNodePosition (const int nodeId, double& x, double& y) const;
+
     //==============================================================================
-    int getNumConnections() const throw()                               { return connections.size(); }
-    const FilterConnection* getConnection (const int index) const throw()     { return connections [index]; }
+    int getNumConnections() const throw();
+    const AudioProcessorGraph::Connection* getConnection (const int index) const throw();
 
-    const FilterConnection* getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
-                                                  uint32 destFilterUID, int destFilterChannel) const throw();
-
-    bool isAnInputTo (const uint32 possibleInput, const uint32 possibleDestination) const throw();
+    const AudioProcessorGraph::Connection* getConnectionBetween (uint32 sourceFilterUID, int sourceFilterChannel,
+                                                                 uint32 destFilterUID, int destFilterChannel) const throw();
 
     bool canConnect (uint32 sourceFilterUID, int sourceFilterChannel,
                      uint32 destFilterUID, int destFilterChannel) const throw();
@@ -176,6 +174,9 @@ public:
                            uint32 destFilterUID, int destFilterChannel);
 
     void clear();
+
+
+    //==============================================================================
 
     XmlElement* createXml() const;
     void restoreFromXml (const XmlElement& xml);
@@ -195,14 +196,17 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class FilterGraphPlayer;
-    ReferenceCountedArray <FilterInGraph> filters;
-    OwnedArray <FilterConnection> connections;
+    //friend class FilterGraphPlayer;
+    //ReferenceCountedArray <FilterInGraph> filters;
+    //OwnedArray <FilterConnection> connections;
+
+    AudioProcessorGraph graph;
+    AudioProcessorPlayer player;
 
     uint32 lastUID;
     uint32 getNextUID() throw();
 
-    bool isAnInputTo (const uint32 possibleInput, const uint32 possibleDestination, int recursionCheck) const throw();
+    void createNodeFromXml (const XmlElement& xml);
 
     FilterGraph (const FilterGraph&);
     const FilterGraph& operator= (const FilterGraph&);
@@ -213,7 +217,7 @@ private:
 /**
 
 */
-class FilterGraphPlayer   : public AudioIODeviceCallback,
+/*class FilterGraphPlayer   : public AudioIODeviceCallback,
                             public MidiInputCallback,
                             public ChangeListener
 
@@ -274,6 +278,6 @@ private:
     FilterGraphPlayer (const FilterGraphPlayer&);
     const FilterGraphPlayer& operator= (const FilterGraphPlayer&);
 };
-
+*/
 
 #endif
