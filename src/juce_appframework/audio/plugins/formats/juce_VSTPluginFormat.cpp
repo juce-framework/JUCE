@@ -29,9 +29,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_PLUGINHOST_VST  // xxx temporary..
-  #define JUCE_PLUGINHOST_VST 1
-#endif
+#include "../../../../../juce_Config.h"
 
 #if JUCE_PLUGINHOST_VST
 
@@ -3012,6 +3010,7 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 #endif
 }
 
+END_JUCE_NAMESPACE
+
 #endif
 
-END_JUCE_NAMESPACE

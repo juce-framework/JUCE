@@ -29,7 +29,9 @@
   ==============================================================================
 */
 
-#if ! (defined (LINUX) || defined (_WIN32))
+#include "../../../../../juce_Config.h"
+
+#if JUCE_PLUGINHOST_AU && (! (defined (LINUX) || defined (_WIN32)))
 
 #include <Carbon/Carbon.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -42,7 +44,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AudioUnitPluginFormat.h"
 #include "../juce_PluginDescription.h"
 
-#if JUCE_PLUGINHOST_AU && JUCE_MAC
+#if JUCE_MAC
 
 extern void juce_callAnyTimersSynchronously();
 extern bool juce_isHIViewCreatedByJuce (HIViewRef view);
