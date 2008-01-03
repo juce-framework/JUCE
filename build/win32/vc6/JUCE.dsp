@@ -167,11 +167,15 @@ SOURCE=..\..\..\src\juce_appframework\application\juce_SystemClipboard.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitbuffer.c
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitmath.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitmath.c
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitreader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitwriter.c
 # End Source File
 # Begin Source File
 
@@ -653,6 +657,94 @@ SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcesso
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h
+# End Source File
+# End Group
+# Begin Group "plugins"
+
+# PROP Default_Filter ""
+# Begin Group "formats"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_LADSPAPluginFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.h
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.h
 # End Source File
 # End Group
 # End Group
