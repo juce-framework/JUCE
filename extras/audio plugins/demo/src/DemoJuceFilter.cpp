@@ -62,6 +62,11 @@ DemoJuceFilter::~DemoJuceFilter()
 }
 
 //==============================================================================
+const String DemoJuceFilter::getName() const
+{
+    return "Juce Demo Filter";
+}
+
 int DemoJuceFilter::getNumParameters()
 {
     return 1;

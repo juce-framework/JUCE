@@ -58,6 +58,8 @@ public:
     AudioProcessorEditor* createEditor();
 
     //==============================================================================
+    const String getName() const;
+
     int getNumParameters();
 
     float getParameter (int index);
