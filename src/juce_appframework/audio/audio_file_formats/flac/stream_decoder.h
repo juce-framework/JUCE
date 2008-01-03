@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006 Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -739,7 +739,7 @@ typedef void (*FLAC__StreamDecoderErrorCallback)(const FLAC__StreamDecoder *deco
  * \retval FLAC__StreamDecoder*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__StreamDecoder *FLAC__stream_decoder_new();
+FLAC_API FLAC__StreamDecoder *FLAC__stream_decoder_new(void);
 
 /** Free a decoder instance.  Deletes the object pointed to by \a decoder.
  *

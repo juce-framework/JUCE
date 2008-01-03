@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006  Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -45,14 +45,14 @@
  *	FLAC__lpc_window_data()
  *	--------------------------------------------------------------------
  *	Applies the given window to the data.
- *  @@@ asm optimize
+ *  OPT: asm implementation
  *
  *	IN in[0,data_len-1]
  *	IN window[0,data_len-1]
  *	OUT out[0,lag-1]
  *	IN data_len
  */
-void FLAC__lpc_window_data(const FLAC__real in[], const FLAC__real window[], FLAC__real out[], unsigned data_len);
+void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], unsigned data_len);
 
 /*
  *	FLAC__lpc_compute_autocorrelation()

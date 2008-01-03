@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2004,2005,2006  Josh Coalson
+ * Copyright (C) 2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -286,7 +286,7 @@ FLAC__uint32 FLAC__fixedpoint_log2(FLAC__uint32 x, unsigned fracbits, unsigned p
 
 	if(x < ONE)
 		return 0;
-
+	
 	if(precision > LOG2_LOOKUP_PRECISION)
 		precision = LOG2_LOOKUP_PRECISION;
 

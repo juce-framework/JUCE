@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006 Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -111,6 +111,9 @@
  * individual functions.  You can see different views of the individual
  * functions through the links in top bar across this page.
  *
+ * If you prefer a more hands-on approach, you can jump right to some
+ * <A HREF="../documentation_example_code.html">example code</A>.
+ *
  * \section porting_guide Porting Guide
  *
  * Starting with FLAC 1.1.3 a \link porting Porting Guide \endlink
@@ -141,6 +144,11 @@
  * encoder, and no metadata interface, you can remove the stream encoder
  * and the metadata interface, which will greatly reduce the size of the
  * library.
+ *
+ * Also, there are several places in the libFLAC code with comments marked
+ * with "OPT:" where a #define can be changed to enable code that might be
+ * faster on a specific platform.  Experimenting with these can yield faster
+ * binaries.
  */
 
 /** \defgroup porting Porting Guide for New Versions
@@ -313,6 +321,39 @@
  * The \a bytes parameter to FLAC__StreamDecoderReadCallback,
  * FLAC__StreamEncoderReadCallback, and FLAC__StreamEncoderWriteCallback
  * is now \c size_t instead of \c unsigned.
+ */
+
+/** \defgroup porting_1_1_3_to_1_1_4 Porting from FLAC 1.1.3 to 1.1.4
+ *  \ingroup porting
+ *
+ *  \brief
+ *  This module describes porting from FLAC 1.1.3 to FLAC 1.1.4.
+ *
+ * There were no changes to any of the interfaces from 1.1.3 to 1.1.4.
+ * There was a slight change in the implementation of
+ * FLAC__stream_encoder_set_metadata(); the function now makes a copy
+ * of the \a metadata array of pointers so the client no longer needs
+ * to maintain it after the call.  The objects themselves that are
+ * pointed to by the array are still not copied though and must be
+ * maintained until the call to FLAC__stream_encoder_finish().
+ */
+
+/** \defgroup porting_1_1_4_to_1_2_0 Porting from FLAC 1.1.4 to 1.2.0
+ *  \ingroup porting
+ *
+ *  \brief
+ *  This module describes porting from FLAC 1.1.4 to FLAC 1.2.0.
+ *
+ * There were only very minor changes to the interfaces from 1.1.4 to 1.2.0.
+ * In libFLAC, \c FLAC__format_sample_rate_is_subset() was added.
+ * In libFLAC++, \c FLAC::Decoder::Stream::get_decode_position() was added.
+ *
+ * Finally, value of the constant \c FLAC__FRAME_HEADER_RESERVED_LEN
+ * has changed to reflect the conversion of one of the reserved bits
+ * into active use.  It used to be \c 2 and now is \c 1.  However the
+ * FLAC frame header length has not changed, so to skip the proper
+ * number of bits, use \c FLAC__FRAME_HEADER_RESERVED_LEN +
+ * \c FLAC__FRAME_HEADER_BLOCKING_STRATEGY_LEN
  */
 
 /** \defgroup flac FLAC C API

@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2006  Josh Coalson
+ * Copyright (C) 2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,7 +31,6 @@
 
 #include "juce_FlacHeader.h"
 #if JUCE_USE_FLAC
-
 
 #if HAVE_CONFIG_H
 #  include <config.h>

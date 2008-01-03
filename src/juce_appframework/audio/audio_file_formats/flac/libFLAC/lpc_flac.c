@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006  Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -53,7 +53,11 @@
 #define M_LN2 0.69314718055994530942
 #endif
 
-void FLAC__lpc_window_data(const FLAC__real in[], const FLAC__real window[], FLAC__real out[], unsigned data_len)
+/* OPT: #undef'ing this may improve the speed on some architectures */
+#define FLAC__LPC_UNROLLED_FILTER_LOOPS
+
+
+void FLAC__lpc_window_data(const FLAC__int32 in[], const FLAC__real window[], FLAC__real out[], unsigned data_len)
 {
 	unsigned i;
 	for(i = 0; i < data_len; i++)
@@ -145,7 +149,7 @@ void FLAC__lpc_compute_lp_coefficients(const FLAC__real autoc[], unsigned *max_o
 			lp_coeff[i][j] = (FLAC__real)(-lpc[j]); /* negate FIR filter coeff to get predictor coeff */
 		error[i] = err;
 
-		/*@@@@@@ see SF bug #1601812 http://sourceforge.net/tracker/index.php?func=detail&aid=1601812&group_id=13478&atid=113478 */
+		/* see SF bug #1601812 http://sourceforge.net/tracker/index.php?func=detail&aid=1601812&group_id=13478&atid=113478 */
 		if(err == 0.0) {
 			*max_order = i+1;
 			return;
@@ -156,10 +160,8 @@ void FLAC__lpc_compute_lp_coefficients(const FLAC__real autoc[], unsigned *max_o
 int FLAC__lpc_quantize_coefficients(const FLAC__real lp_coeff[], unsigned order, unsigned precision, FLAC__int32 qlp_coeff[], int *shift)
 {
 	unsigned i;
-	FLAC__double d, cmax = -1e32;
+	FLAC__double cmax;
 	FLAC__int32 qmax, qmin;
-	const int max_shiftlimit = (1 << (FLAC__SUBFRAME_LPC_QLP_SHIFT_LEN-1)) - 1;
-	const int min_shiftlimit = -max_shiftlimit - 1;
 
 	FLAC__ASSERT(precision > 0);
 	FLAC__ASSERT(precision >= FLAC__MIN_QLP_COEFF_PRECISION);
@@ -170,77 +172,104 @@ int FLAC__lpc_quantize_coefficients(const FLAC__real lp_coeff[], unsigned order,
 	qmin = -qmax;
 	qmax--;
 
+	/* calc cmax = max( |lp_coeff[i]| ) */
+	cmax = 0.0;
 	for(i = 0; i < order; i++) {
-		if(lp_coeff[i] == 0.0)
-			continue;
-		d = fabs(lp_coeff[i]);
+		const FLAC__double d = fabs(lp_coeff[i]);
 		if(d > cmax)
 			cmax = d;
 	}
-redo_it:
+
 	if(cmax <= 0.0) {
 		/* => coefficients are all 0, which means our constant-detect didn't work */
 		return 2;
 	}
 	else {
+		const int max_shiftlimit = (1 << (FLAC__SUBFRAME_LPC_QLP_SHIFT_LEN-1)) - 1;
+		const int min_shiftlimit = -max_shiftlimit - 1;
 		int log2cmax;
 
 		(void)frexp(cmax, &log2cmax);
 		log2cmax--;
 		*shift = (int)precision - log2cmax - 1;
 
-		if(*shift < min_shiftlimit || *shift > max_shiftlimit) {
-#if 0
-			/*@@@ this does not seem to help at all, but was not extensively tested either: */
-			if(*shift > max_shiftlimit)
-				*shift = max_shiftlimit;
-			else
-#endif
-				return 1;
-		}
+		if(*shift > max_shiftlimit)
+			*shift = max_shiftlimit;
+		else if(*shift < min_shiftlimit)
+			return 1;
 	}
 
 	if(*shift >= 0) {
+		FLAC__double error = 0.0;
+		FLAC__int32 q;
 		for(i = 0; i < order; i++) {
-			qlp_coeff[i] = (FLAC__int32)floor((FLAC__double)lp_coeff[i] * (FLAC__double)(1 << *shift));
-
-			/* double-check the result */
-			if(qlp_coeff[i] > qmax || qlp_coeff[i] < qmin) {
-#ifdef FLAC__OVERFLOW_DETECT
-				fprintf(stderr,"FLAC__lpc_quantize_coefficients: compensating for overflow, qlp_coeff[%u]=%d, lp_coeff[%u]=%f, cmax=%f, precision=%u, shift=%d, q=%f, f(q)=%f\n", i, qlp_coeff[i], i, lp_coeff[i], cmax, precision, *shift, (FLAC__double)lp_coeff[i] * (FLAC__double)(1 << *shift), floor((FLAC__double)lp_coeff[i] * (FLAC__double)(1 << *shift)));
+			error += lp_coeff[i] * (1 << *shift);
+#if 1 /* unfortunately lround() is C99 */
+			if(error >= 0.0)
+				q = (FLAC__int32)(error + 0.5);
+			else
+				q = (FLAC__int32)(error - 0.5);
+#else
+			q = lround(error);
 #endif
-				cmax *= 2.0;
-				goto redo_it;
-			}
+#ifdef FLAC__OVERFLOW_DETECT
+			if(q > qmax+1) /* we expect q==qmax+1 occasionally due to rounding */
+				fprintf(stderr,"FLAC__lpc_quantize_coefficients: quantizer overflow: q>qmax %d>%d shift=%d cmax=%f precision=%u lpc[%u]=%f\n",q,qmax,*shift,cmax,precision+1,i,lp_coeff[i]);
+			else if(q < qmin)
+				fprintf(stderr,"FLAC__lpc_quantize_coefficients: quantizer overflow: q<qmin %d<%d shift=%d cmax=%f precision=%u lpc[%u]=%f\n",q,qmin,*shift,cmax,precision+1,i,lp_coeff[i]);
+#endif
+			if(q > qmax)
+				q = qmax;
+			else if(q < qmin)
+				q = qmin;
+			error -= q;
+			qlp_coeff[i] = q;
 		}
 	}
-	else { /* (*shift < 0) */
+	/* negative shift is very rare but due to design flaw, negative shift is
+	 * a NOP in the decoder, so it must be handled specially by scaling down
+	 * coeffs
+	 */
+	else {
 		const int nshift = -(*shift);
+		FLAC__double error = 0.0;
+		FLAC__int32 q;
 #ifdef DEBUG
-		fprintf(stderr,"FLAC__lpc_quantize_coefficients: negative shift = %d\n", *shift);
+		fprintf(stderr,"FLAC__lpc_quantize_coefficients: negative shift=%d order=%u cmax=%f\n", *shift, order, cmax);
 #endif
 		for(i = 0; i < order; i++) {
-			qlp_coeff[i] = (FLAC__int32)floor((FLAC__double)lp_coeff[i] / (FLAC__double)(1 << nshift));
-
-			/* double-check the result */
-			if(qlp_coeff[i] > qmax || qlp_coeff[i] < qmin) {
-#ifdef FLAC__OVERFLOW_DETECT
-				fprintf(stderr,"FLAC__lpc_quantize_coefficients: compensating for overflow, qlp_coeff[%u]=%d, lp_coeff[%u]=%f, cmax=%f, precision=%u, shift=%d, q=%f, f(q)=%f\n", i, qlp_coeff[i], i, lp_coeff[i], cmax, precision, *shift, (FLAC__double)lp_coeff[i] / (FLAC__double)(1 << nshift), floor((FLAC__double)lp_coeff[i] / (FLAC__double)(1 << nshift)));
+			error += lp_coeff[i] / (1 << nshift);
+#if 1 /* unfortunately lround() is C99 */
+			if(error >= 0.0)
+				q = (FLAC__int32)(error + 0.5);
+			else
+				q = (FLAC__int32)(error - 0.5);
+#else
+			q = lround(error);
 #endif
-				cmax *= 2.0;
-				goto redo_it;
-			}
+#ifdef FLAC__OVERFLOW_DETECT
+			if(q > qmax+1) /* we expect q==qmax+1 occasionally due to rounding */
+				fprintf(stderr,"FLAC__lpc_quantize_coefficients: quantizer overflow: q>qmax %d>%d shift=%d cmax=%f precision=%u lpc[%u]=%f\n",q,qmax,*shift,cmax,precision+1,i,lp_coeff[i]);
+			else if(q < qmin)
+				fprintf(stderr,"FLAC__lpc_quantize_coefficients: quantizer overflow: q<qmin %d<%d shift=%d cmax=%f precision=%u lpc[%u]=%f\n",q,qmin,*shift,cmax,precision+1,i,lp_coeff[i]);
+#endif
+			if(q > qmax)
+				q = qmax;
+			else if(q < qmin)
+				q = qmin;
+			error -= q;
+			qlp_coeff[i] = q;
 		}
+		*shift = 0;
 	}
 
 	return 0;
 }
 
 void FLAC__lpc_compute_residual_from_qlp_coefficients(const FLAC__int32 *data, unsigned data_len, const FLAC__int32 qlp_coeff[], unsigned order, int lp_quantization, FLAC__int32 residual[])
+#if defined(FLAC__OVERFLOW_DETECT) || !defined(FLAC__LPC_UNROLLED_FILTER_LOOPS)
 {
-#ifdef FLAC__OVERFLOW_DETECT
 	FLAC__int64 sumo;
-#endif
 	unsigned i, j;
 	FLAC__int32 sum;
 	const FLAC__int32 *history;
@@ -254,14 +283,11 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients(const FLAC__int32 *data, u
 	FLAC__ASSERT(order > 0);
 
 	for(i = 0; i < data_len; i++) {
-#ifdef FLAC__OVERFLOW_DETECT
 		sumo = 0;
-#endif
 		sum = 0;
 		history = data;
 		for(j = 0; j < order; j++) {
 			sum += qlp_coeff[j] * (*(--history));
-#ifdef FLAC__OVERFLOW_DETECT
 			sumo += (FLAC__int64)qlp_coeff[j] * (FLAC__int64)(*history);
 #if defined _MSC_VER
 			if(sumo > 2147483647I64 || sumo < -2147483648I64)
@@ -269,7 +295,6 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients(const FLAC__int32 *data, u
 #else
 			if(sumo > 2147483647ll || sumo < -2147483648ll)
 				fprintf(stderr,"FLAC__lpc_compute_residual_from_qlp_coefficients: OVERFLOW, i=%u, j=%u, c=%d, d=%d, sumo=%lld\n",i,j,qlp_coeff[j],*history,(long long)sumo);
-#endif
 #endif
 		}
 		*(residual++) = *(data++) - (sum >> lp_quantization);
@@ -284,8 +309,231 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients(const FLAC__int32 *data, u
 	}
 	*/
 }
+#else /* fully unrolled version for normal use */
+{
+	int i;
+	FLAC__int32 sum;
+
+	FLAC__ASSERT(order > 0);
+	FLAC__ASSERT(order <= 32);
+
+	/*
+	 * We do unique versions up to 12th order since that's the subset limit.
+	 * Also they are roughly ordered to match frequency of occurrence to
+	 * minimize branching.
+	 */
+	if(order <= 12) {
+		if(order > 8) {
+			if(order > 10) {
+				if(order == 12) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[11] * data[i-12];
+						sum += qlp_coeff[10] * data[i-11];
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 11 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[10] * data[i-11];
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 10) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 9 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else if(order > 4) {
+			if(order > 6) {
+				if(order == 8) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 7 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 6) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 5 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else {
+			if(order > 2) {
+				if(order == 4) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 3 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 2) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						residual[i] = data[i] - (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 1 */
+					for(i = 0; i < (int)data_len; i++)
+						residual[i] = data[i] - ((qlp_coeff[0] * data[i-1]) >> lp_quantization);
+				}
+			}
+		}
+	}
+	else { /* order > 12 */
+		for(i = 0; i < (int)data_len; i++) {
+			sum = 0;
+			switch(order) {
+				case 32: sum += qlp_coeff[31] * data[i-32];
+				case 31: sum += qlp_coeff[30] * data[i-31];
+				case 30: sum += qlp_coeff[29] * data[i-30];
+				case 29: sum += qlp_coeff[28] * data[i-29];
+				case 28: sum += qlp_coeff[27] * data[i-28];
+				case 27: sum += qlp_coeff[26] * data[i-27];
+				case 26: sum += qlp_coeff[25] * data[i-26];
+				case 25: sum += qlp_coeff[24] * data[i-25];
+				case 24: sum += qlp_coeff[23] * data[i-24];
+				case 23: sum += qlp_coeff[22] * data[i-23];
+				case 22: sum += qlp_coeff[21] * data[i-22];
+				case 21: sum += qlp_coeff[20] * data[i-21];
+				case 20: sum += qlp_coeff[19] * data[i-20];
+				case 19: sum += qlp_coeff[18] * data[i-19];
+				case 18: sum += qlp_coeff[17] * data[i-18];
+				case 17: sum += qlp_coeff[16] * data[i-17];
+				case 16: sum += qlp_coeff[15] * data[i-16];
+				case 15: sum += qlp_coeff[14] * data[i-15];
+				case 14: sum += qlp_coeff[13] * data[i-14];
+				case 13: sum += qlp_coeff[12] * data[i-13];
+				         sum += qlp_coeff[11] * data[i-12];
+				         sum += qlp_coeff[10] * data[i-11];
+				         sum += qlp_coeff[ 9] * data[i-10];
+				         sum += qlp_coeff[ 8] * data[i- 9];
+				         sum += qlp_coeff[ 7] * data[i- 8];
+				         sum += qlp_coeff[ 6] * data[i- 7];
+				         sum += qlp_coeff[ 5] * data[i- 6];
+				         sum += qlp_coeff[ 4] * data[i- 5];
+				         sum += qlp_coeff[ 3] * data[i- 4];
+				         sum += qlp_coeff[ 2] * data[i- 3];
+				         sum += qlp_coeff[ 1] * data[i- 2];
+				         sum += qlp_coeff[ 0] * data[i- 1];
+			}
+			residual[i] = data[i] - (sum >> lp_quantization);
+		}
+	}
+}
+#endif
 
 void FLAC__lpc_compute_residual_from_qlp_coefficients_wide(const FLAC__int32 *data, unsigned data_len, const FLAC__int32 qlp_coeff[], unsigned order, int lp_quantization, FLAC__int32 residual[])
+#if defined(FLAC__OVERFLOW_DETECT) || !defined(FLAC__LPC_UNROLLED_FILTER_LOOPS)
 {
 	unsigned i, j;
 	FLAC__int64 sum;
@@ -304,27 +552,254 @@ void FLAC__lpc_compute_residual_from_qlp_coefficients_wide(const FLAC__int32 *da
 		history = data;
 		for(j = 0; j < order; j++)
 			sum += (FLAC__int64)qlp_coeff[j] * (FLAC__int64)(*(--history));
-#ifdef FLAC__OVERFLOW_DETECT
 		if(FLAC__bitmath_silog2_wide(sum >> lp_quantization) > 32) {
+#if defined _MSC_VER
+			fprintf(stderr,"FLAC__lpc_compute_residual_from_qlp_coefficients_wide: OVERFLOW, i=%u, sum=%I64d\n", i, sum >> lp_quantization);
+#else
 			fprintf(stderr,"FLAC__lpc_compute_residual_from_qlp_coefficients_wide: OVERFLOW, i=%u, sum=%lld\n", i, (long long)(sum >> lp_quantization));
+#endif
 			break;
 		}
 		if(FLAC__bitmath_silog2_wide((FLAC__int64)(*data) - (sum >> lp_quantization)) > 32) {
+#if defined _MSC_VER
+			fprintf(stderr,"FLAC__lpc_compute_residual_from_qlp_coefficients_wide: OVERFLOW, i=%u, data=%d, sum=%I64d, residual=%I64d\n", i, *data, sum >> lp_quantization, (FLAC__int64)(*data) - (sum >> lp_quantization));
+#else
 			fprintf(stderr,"FLAC__lpc_compute_residual_from_qlp_coefficients_wide: OVERFLOW, i=%u, data=%d, sum=%lld, residual=%lld\n", i, *data, (long long)(sum >> lp_quantization), (long long)((FLAC__int64)(*data) - (sum >> lp_quantization)));
+#endif
 			break;
 		}
-#endif
 		*(residual++) = *(data++) - (FLAC__int32)(sum >> lp_quantization);
 	}
 }
+#else /* fully unrolled version for normal use */
+{
+	int i;
+	FLAC__int64 sum;
+
+	FLAC__ASSERT(order > 0);
+	FLAC__ASSERT(order <= 32);
+
+	/*
+	 * We do unique versions up to 12th order since that's the subset limit.
+	 * Also they are roughly ordered to match frequency of occurrence to
+	 * minimize branching.
+	 */
+	if(order <= 12) {
+		if(order > 8) {
+			if(order > 10) {
+				if(order == 12) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[11] * (FLAC__int64)data[i-12];
+						sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 11 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 10) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 9 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else if(order > 4) {
+			if(order > 6) {
+				if(order == 8) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 7 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 6) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 5 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else {
+			if(order > 2) {
+				if(order == 4) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 3 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 2) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 1 */
+					for(i = 0; i < (int)data_len; i++)
+						residual[i] = data[i] - (FLAC__int32)((qlp_coeff[0] * (FLAC__int64)data[i-1]) >> lp_quantization);
+				}
+			}
+		}
+	}
+	else { /* order > 12 */
+		for(i = 0; i < (int)data_len; i++) {
+			sum = 0;
+			switch(order) {
+				case 32: sum += qlp_coeff[31] * (FLAC__int64)data[i-32];
+				case 31: sum += qlp_coeff[30] * (FLAC__int64)data[i-31];
+				case 30: sum += qlp_coeff[29] * (FLAC__int64)data[i-30];
+				case 29: sum += qlp_coeff[28] * (FLAC__int64)data[i-29];
+				case 28: sum += qlp_coeff[27] * (FLAC__int64)data[i-28];
+				case 27: sum += qlp_coeff[26] * (FLAC__int64)data[i-27];
+				case 26: sum += qlp_coeff[25] * (FLAC__int64)data[i-26];
+				case 25: sum += qlp_coeff[24] * (FLAC__int64)data[i-25];
+				case 24: sum += qlp_coeff[23] * (FLAC__int64)data[i-24];
+				case 23: sum += qlp_coeff[22] * (FLAC__int64)data[i-23];
+				case 22: sum += qlp_coeff[21] * (FLAC__int64)data[i-22];
+				case 21: sum += qlp_coeff[20] * (FLAC__int64)data[i-21];
+				case 20: sum += qlp_coeff[19] * (FLAC__int64)data[i-20];
+				case 19: sum += qlp_coeff[18] * (FLAC__int64)data[i-19];
+				case 18: sum += qlp_coeff[17] * (FLAC__int64)data[i-18];
+				case 17: sum += qlp_coeff[16] * (FLAC__int64)data[i-17];
+				case 16: sum += qlp_coeff[15] * (FLAC__int64)data[i-16];
+				case 15: sum += qlp_coeff[14] * (FLAC__int64)data[i-15];
+				case 14: sum += qlp_coeff[13] * (FLAC__int64)data[i-14];
+				case 13: sum += qlp_coeff[12] * (FLAC__int64)data[i-13];
+				         sum += qlp_coeff[11] * (FLAC__int64)data[i-12];
+				         sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+				         sum += qlp_coeff[ 9] * (FLAC__int64)data[i-10];
+				         sum += qlp_coeff[ 8] * (FLAC__int64)data[i- 9];
+				         sum += qlp_coeff[ 7] * (FLAC__int64)data[i- 8];
+				         sum += qlp_coeff[ 6] * (FLAC__int64)data[i- 7];
+				         sum += qlp_coeff[ 5] * (FLAC__int64)data[i- 6];
+				         sum += qlp_coeff[ 4] * (FLAC__int64)data[i- 5];
+				         sum += qlp_coeff[ 3] * (FLAC__int64)data[i- 4];
+				         sum += qlp_coeff[ 2] * (FLAC__int64)data[i- 3];
+				         sum += qlp_coeff[ 1] * (FLAC__int64)data[i- 2];
+				         sum += qlp_coeff[ 0] * (FLAC__int64)data[i- 1];
+			}
+			residual[i] = data[i] - (FLAC__int32)(sum >> lp_quantization);
+		}
+	}
+}
+#endif
 
 #endif /* !defined FLAC__INTEGER_ONLY_LIBRARY */
 
 void FLAC__lpc_restore_signal(const FLAC__int32 residual[], unsigned data_len, const FLAC__int32 qlp_coeff[], unsigned order, int lp_quantization, FLAC__int32 data[])
+#if defined(FLAC__OVERFLOW_DETECT) || !defined(FLAC__LPC_UNROLLED_FILTER_LOOPS)
 {
-#ifdef FLAC__OVERFLOW_DETECT
 	FLAC__int64 sumo;
-#endif
 	unsigned i, j;
 	FLAC__int32 sum;
 	const FLAC__int32 *r = residual, *history;
@@ -338,14 +813,11 @@ void FLAC__lpc_restore_signal(const FLAC__int32 residual[], unsigned data_len, c
 	FLAC__ASSERT(order > 0);
 
 	for(i = 0; i < data_len; i++) {
-#ifdef FLAC__OVERFLOW_DETECT
 		sumo = 0;
-#endif
 		sum = 0;
 		history = data;
 		for(j = 0; j < order; j++) {
 			sum += qlp_coeff[j] * (*(--history));
-#ifdef FLAC__OVERFLOW_DETECT
 			sumo += (FLAC__int64)qlp_coeff[j] * (FLAC__int64)(*history);
 #if defined _MSC_VER
 			if(sumo > 2147483647I64 || sumo < -2147483648I64)
@@ -353,7 +825,6 @@ void FLAC__lpc_restore_signal(const FLAC__int32 residual[], unsigned data_len, c
 #else
 			if(sumo > 2147483647ll || sumo < -2147483648ll)
 				fprintf(stderr,"FLAC__lpc_restore_signal: OVERFLOW, i=%u, j=%u, c=%d, d=%d, sumo=%lld\n",i,j,qlp_coeff[j],*history,(long long)sumo);
-#endif
 #endif
 		}
 		*(data++) = *(r++) + (sum >> lp_quantization);
@@ -368,8 +839,231 @@ void FLAC__lpc_restore_signal(const FLAC__int32 residual[], unsigned data_len, c
 	}
 	*/
 }
+#else /* fully unrolled version for normal use */
+{
+	int i;
+	FLAC__int32 sum;
+
+	FLAC__ASSERT(order > 0);
+	FLAC__ASSERT(order <= 32);
+
+	/*
+	 * We do unique versions up to 12th order since that's the subset limit.
+	 * Also they are roughly ordered to match frequency of occurrence to
+	 * minimize branching.
+	 */
+	if(order <= 12) {
+		if(order > 8) {
+			if(order > 10) {
+				if(order == 12) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[11] * data[i-12];
+						sum += qlp_coeff[10] * data[i-11];
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 11 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[10] * data[i-11];
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 10) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[9] * data[i-10];
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 9 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[8] * data[i-9];
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else if(order > 4) {
+			if(order > 6) {
+				if(order == 8) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[7] * data[i-8];
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 7 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[6] * data[i-7];
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 6) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[5] * data[i-6];
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 5 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[4] * data[i-5];
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else {
+			if(order > 2) {
+				if(order == 4) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[3] * data[i-4];
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 3 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[2] * data[i-3];
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 2) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[1] * data[i-2];
+						sum += qlp_coeff[0] * data[i-1];
+						data[i] = residual[i] + (sum >> lp_quantization);
+					}
+				}
+				else { /* order == 1 */
+					for(i = 0; i < (int)data_len; i++)
+						data[i] = residual[i] + ((qlp_coeff[0] * data[i-1]) >> lp_quantization);
+				}
+			}
+		}
+	}
+	else { /* order > 12 */
+		for(i = 0; i < (int)data_len; i++) {
+			sum = 0;
+			switch(order) {
+				case 32: sum += qlp_coeff[31] * data[i-32];
+				case 31: sum += qlp_coeff[30] * data[i-31];
+				case 30: sum += qlp_coeff[29] * data[i-30];
+				case 29: sum += qlp_coeff[28] * data[i-29];
+				case 28: sum += qlp_coeff[27] * data[i-28];
+				case 27: sum += qlp_coeff[26] * data[i-27];
+				case 26: sum += qlp_coeff[25] * data[i-26];
+				case 25: sum += qlp_coeff[24] * data[i-25];
+				case 24: sum += qlp_coeff[23] * data[i-24];
+				case 23: sum += qlp_coeff[22] * data[i-23];
+				case 22: sum += qlp_coeff[21] * data[i-22];
+				case 21: sum += qlp_coeff[20] * data[i-21];
+				case 20: sum += qlp_coeff[19] * data[i-20];
+				case 19: sum += qlp_coeff[18] * data[i-19];
+				case 18: sum += qlp_coeff[17] * data[i-18];
+				case 17: sum += qlp_coeff[16] * data[i-17];
+				case 16: sum += qlp_coeff[15] * data[i-16];
+				case 15: sum += qlp_coeff[14] * data[i-15];
+				case 14: sum += qlp_coeff[13] * data[i-14];
+				case 13: sum += qlp_coeff[12] * data[i-13];
+				         sum += qlp_coeff[11] * data[i-12];
+				         sum += qlp_coeff[10] * data[i-11];
+				         sum += qlp_coeff[ 9] * data[i-10];
+				         sum += qlp_coeff[ 8] * data[i- 9];
+				         sum += qlp_coeff[ 7] * data[i- 8];
+				         sum += qlp_coeff[ 6] * data[i- 7];
+				         sum += qlp_coeff[ 5] * data[i- 6];
+				         sum += qlp_coeff[ 4] * data[i- 5];
+				         sum += qlp_coeff[ 3] * data[i- 4];
+				         sum += qlp_coeff[ 2] * data[i- 3];
+				         sum += qlp_coeff[ 1] * data[i- 2];
+				         sum += qlp_coeff[ 0] * data[i- 1];
+			}
+			data[i] = residual[i] + (sum >> lp_quantization);
+		}
+	}
+}
+#endif
 
 void FLAC__lpc_restore_signal_wide(const FLAC__int32 residual[], unsigned data_len, const FLAC__int32 qlp_coeff[], unsigned order, int lp_quantization, FLAC__int32 data[])
+#if defined(FLAC__OVERFLOW_DETECT) || !defined(FLAC__LPC_UNROLLED_FILTER_LOOPS)
 {
 	unsigned i, j;
 	FLAC__int64 sum;
@@ -388,19 +1082,247 @@ void FLAC__lpc_restore_signal_wide(const FLAC__int32 residual[], unsigned data_l
 		history = data;
 		for(j = 0; j < order; j++)
 			sum += (FLAC__int64)qlp_coeff[j] * (FLAC__int64)(*(--history));
-#ifdef FLAC__OVERFLOW_DETECT
 		if(FLAC__bitmath_silog2_wide(sum >> lp_quantization) > 32) {
+#ifdef _MSC_VER
+			fprintf(stderr,"FLAC__lpc_restore_signal_wide: OVERFLOW, i=%u, sum=%I64d\n", i, sum >> lp_quantization);
+#else
 			fprintf(stderr,"FLAC__lpc_restore_signal_wide: OVERFLOW, i=%u, sum=%lld\n", i, (long long)(sum >> lp_quantization));
+#endif
 			break;
 		}
 		if(FLAC__bitmath_silog2_wide((FLAC__int64)(*r) + (sum >> lp_quantization)) > 32) {
+#ifdef _MSC_VER
+			fprintf(stderr,"FLAC__lpc_restore_signal_wide: OVERFLOW, i=%u, residual=%d, sum=%I64d, data=%I64d\n", i, *r, sum >> lp_quantization, (FLAC__int64)(*r) + (sum >> lp_quantization));
+#else
 			fprintf(stderr,"FLAC__lpc_restore_signal_wide: OVERFLOW, i=%u, residual=%d, sum=%lld, data=%lld\n", i, *r, (long long)(sum >> lp_quantization), (long long)((FLAC__int64)(*r) + (sum >> lp_quantization)));
+#endif
 			break;
 		}
-#endif
 		*(data++) = *(r++) + (FLAC__int32)(sum >> lp_quantization);
 	}
 }
+#else /* fully unrolled version for normal use */
+{
+	int i;
+	FLAC__int64 sum;
+
+	FLAC__ASSERT(order > 0);
+	FLAC__ASSERT(order <= 32);
+
+	/*
+	 * We do unique versions up to 12th order since that's the subset limit.
+	 * Also they are roughly ordered to match frequency of occurrence to
+	 * minimize branching.
+	 */
+	if(order <= 12) {
+		if(order > 8) {
+			if(order > 10) {
+				if(order == 12) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[11] * (FLAC__int64)data[i-12];
+						sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 11 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 10) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[9] * (FLAC__int64)data[i-10];
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 9 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[8] * (FLAC__int64)data[i-9];
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else if(order > 4) {
+			if(order > 6) {
+				if(order == 8) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[7] * (FLAC__int64)data[i-8];
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 7 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[6] * (FLAC__int64)data[i-7];
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 6) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[5] * (FLAC__int64)data[i-6];
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 5 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[4] * (FLAC__int64)data[i-5];
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+		}
+		else {
+			if(order > 2) {
+				if(order == 4) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[3] * (FLAC__int64)data[i-4];
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 3 */
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[2] * (FLAC__int64)data[i-3];
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+			}
+			else {
+				if(order == 2) {
+					for(i = 0; i < (int)data_len; i++) {
+						sum = 0;
+						sum += qlp_coeff[1] * (FLAC__int64)data[i-2];
+						sum += qlp_coeff[0] * (FLAC__int64)data[i-1];
+						data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+					}
+				}
+				else { /* order == 1 */
+					for(i = 0; i < (int)data_len; i++)
+						data[i] = residual[i] + (FLAC__int32)((qlp_coeff[0] * (FLAC__int64)data[i-1]) >> lp_quantization);
+				}
+			}
+		}
+	}
+	else { /* order > 12 */
+		for(i = 0; i < (int)data_len; i++) {
+			sum = 0;
+			switch(order) {
+				case 32: sum += qlp_coeff[31] * (FLAC__int64)data[i-32];
+				case 31: sum += qlp_coeff[30] * (FLAC__int64)data[i-31];
+				case 30: sum += qlp_coeff[29] * (FLAC__int64)data[i-30];
+				case 29: sum += qlp_coeff[28] * (FLAC__int64)data[i-29];
+				case 28: sum += qlp_coeff[27] * (FLAC__int64)data[i-28];
+				case 27: sum += qlp_coeff[26] * (FLAC__int64)data[i-27];
+				case 26: sum += qlp_coeff[25] * (FLAC__int64)data[i-26];
+				case 25: sum += qlp_coeff[24] * (FLAC__int64)data[i-25];
+				case 24: sum += qlp_coeff[23] * (FLAC__int64)data[i-24];
+				case 23: sum += qlp_coeff[22] * (FLAC__int64)data[i-23];
+				case 22: sum += qlp_coeff[21] * (FLAC__int64)data[i-22];
+				case 21: sum += qlp_coeff[20] * (FLAC__int64)data[i-21];
+				case 20: sum += qlp_coeff[19] * (FLAC__int64)data[i-20];
+				case 19: sum += qlp_coeff[18] * (FLAC__int64)data[i-19];
+				case 18: sum += qlp_coeff[17] * (FLAC__int64)data[i-18];
+				case 17: sum += qlp_coeff[16] * (FLAC__int64)data[i-17];
+				case 16: sum += qlp_coeff[15] * (FLAC__int64)data[i-16];
+				case 15: sum += qlp_coeff[14] * (FLAC__int64)data[i-15];
+				case 14: sum += qlp_coeff[13] * (FLAC__int64)data[i-14];
+				case 13: sum += qlp_coeff[12] * (FLAC__int64)data[i-13];
+				         sum += qlp_coeff[11] * (FLAC__int64)data[i-12];
+				         sum += qlp_coeff[10] * (FLAC__int64)data[i-11];
+				         sum += qlp_coeff[ 9] * (FLAC__int64)data[i-10];
+				         sum += qlp_coeff[ 8] * (FLAC__int64)data[i- 9];
+				         sum += qlp_coeff[ 7] * (FLAC__int64)data[i- 8];
+				         sum += qlp_coeff[ 6] * (FLAC__int64)data[i- 7];
+				         sum += qlp_coeff[ 5] * (FLAC__int64)data[i- 6];
+				         sum += qlp_coeff[ 4] * (FLAC__int64)data[i- 5];
+				         sum += qlp_coeff[ 3] * (FLAC__int64)data[i- 4];
+				         sum += qlp_coeff[ 2] * (FLAC__int64)data[i- 3];
+				         sum += qlp_coeff[ 1] * (FLAC__int64)data[i- 2];
+				         sum += qlp_coeff[ 0] * (FLAC__int64)data[i- 1];
+			}
+			data[i] = residual[i] + (FLAC__int32)(sum >> lp_quantization);
+		}
+	}
+}
+#endif
 
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 
@@ -457,6 +1379,5 @@ unsigned FLAC__lpc_compute_best_order(const FLAC__double lpc_error[], unsigned m
 }
 
 #endif /* !defined FLAC__INTEGER_ONLY_LIBRARY */
-
 
 #endif

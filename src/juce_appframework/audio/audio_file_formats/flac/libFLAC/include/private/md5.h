@@ -1,3 +1,6 @@
+#ifndef FLAC__PRIVATE__MD5_H
+#define FLAC__PRIVATE__MD5_H
+
 /*
  * This is the header file for the MD5 message-digest algorithm.
  * The algorithm is due to Ron Rivest.  This code was
@@ -20,29 +23,22 @@
  * Still in the public domain.
  *
  * Josh Coalson: made some changes to integrate with libFLAC.
- * Still in the public domain.
+ * Still in the public domain, with no warranty.
  */
-
-#ifndef FLAC__PRIVATE__MD5_H
-#define FLAC__PRIVATE__MD5_H
-
-#define md5byte unsigned char
 
 #include "../../../ordinals.h"
 
-struct FLAC__MD5Context {
+typedef struct {
+	FLAC__uint32 in[16];
 	FLAC__uint32 buf[4];
 	FLAC__uint32 bytes[2];
-	FLAC__uint32 in[16];
 	FLAC__byte *internal_buf;
-	unsigned capacity;
-};
+	size_t capacity;
+} FLAC__MD5Context;
 
-void FLAC__MD5Init(struct FLAC__MD5Context *context);
-void FLAC__MD5Update(struct FLAC__MD5Context *context, md5byte const *buf, unsigned len);
-void FLAC__MD5Final(md5byte digest[16], struct FLAC__MD5Context *context);
-void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16]);
+void FLAC__MD5Init(FLAC__MD5Context *context);
+void FLAC__MD5Final(FLAC__byte digest[16], FLAC__MD5Context *context);
 
-FLAC__bool FLAC__MD5Accumulate(struct FLAC__MD5Context *ctx, const FLAC__int32 * const signal[], unsigned channels, unsigned samples, unsigned bytes_per_sample);
+FLAC__bool FLAC__MD5Accumulate(FLAC__MD5Context *ctx, const FLAC__int32 * const signal[], unsigned channels, unsigned samples, unsigned bytes_per_sample);
 
-#endif /* !MD5_H */
+#endif

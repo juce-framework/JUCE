@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2001,2002,2003,2004,2005,2006 Josh Coalson
+ * Copyright (C) 2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,7 @@
 #ifndef FLAC__METADATA_H
 #define FLAC__METADATA_H
 
+#include <sys/types.h> /* for off_t */
 #include "export.h"
 #include "callback.h"
 #include "format.h"
@@ -360,7 +361,7 @@ extern FLAC_API const char * const FLAC__Metadata_SimpleIteratorStatusString[];
  * \retval FLAC__Metadata_SimpleIterator*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__Metadata_SimpleIterator *FLAC__metadata_simple_iterator_new();
+FLAC_API FLAC__Metadata_SimpleIterator *FLAC__metadata_simple_iterator_new(void);
 
 /** Free an iterator instance.  Deletes the object pointed to by \a iterator.
  *
@@ -443,6 +444,35 @@ FLAC_API FLAC__bool FLAC__metadata_simple_iterator_next(FLAC__Metadata_SimpleIte
  */
 FLAC_API FLAC__bool FLAC__metadata_simple_iterator_prev(FLAC__Metadata_SimpleIterator *iterator);
 
+/** Returns a flag telling if the current metadata block is the last.
+ *
+ * \param iterator  A pointer to an existing initialized iterator.
+ * \assert
+ *    \code iterator != NULL \endcode
+ *    \a iterator has been successfully initialized with
+ *    FLAC__metadata_simple_iterator_init()
+ * \retval FLAC__bool
+ *    \c true if the current metadata block is the last in the file,
+ *    else \c false.
+ */
+FLAC_API FLAC__bool FLAC__metadata_simple_iterator_is_last(const FLAC__Metadata_SimpleIterator *iterator);
+
+/** Get the offset of the metadata block at the current position.  This
+ *  avoids reading the actual block data which can save time for large
+ *  blocks.
+ *
+ * \param iterator  A pointer to an existing initialized iterator.
+ * \assert
+ *    \code iterator != NULL \endcode
+ *    \a iterator has been successfully initialized with
+ *    FLAC__metadata_simple_iterator_init()
+ * \retval off_t
+ *    The offset of the metadata block at the current iterator position.
+ *    This is the byte offset relative to the beginning of the file of
+ *    the current metadata block's header.
+ */
+FLAC_API off_t FLAC__metadata_simple_iterator_get_block_offset(const FLAC__Metadata_SimpleIterator *iterator);
+
 /** Get the type of the metadata block at the current position.  This
  *  avoids reading the actual block data which can save time for large
  *  blocks.
@@ -455,8 +485,49 @@ FLAC_API FLAC__bool FLAC__metadata_simple_iterator_prev(FLAC__Metadata_SimpleIte
  * \retval FLAC__MetadataType
  *    The type of the metadata block at the current iterator position.
  */
-
 FLAC_API FLAC__MetadataType FLAC__metadata_simple_iterator_get_block_type(const FLAC__Metadata_SimpleIterator *iterator);
+
+/** Get the length of the metadata block at the current position.  This
+ *  avoids reading the actual block data which can save time for large
+ *  blocks.
+ *
+ * \param iterator  A pointer to an existing initialized iterator.
+ * \assert
+ *    \code iterator != NULL \endcode
+ *    \a iterator has been successfully initialized with
+ *    FLAC__metadata_simple_iterator_init()
+ * \retval unsigned
+ *    The length of the metadata block at the current iterator position.
+ *    The is same length as that in the
+ *    <a href="http://flac.sourceforge.net/format.html#metadata_block_header">metadata block header</a>,
+ *    i.e. the length of the metadata body that follows the header.
+ */
+FLAC_API unsigned FLAC__metadata_simple_iterator_get_block_length(const FLAC__Metadata_SimpleIterator *iterator);
+
+/** Get the application ID of the \c APPLICATION block at the current
+ *  position.  This avoids reading the actual block data which can save
+ *  time for large blocks.
+ *
+ * \param iterator  A pointer to an existing initialized iterator.
+ * \param id        A pointer to a buffer of at least \c 4 bytes where
+ *                  the ID will be stored.
+ * \assert
+ *    \code iterator != NULL \endcode
+ *    \code id != NULL \endcode
+ *    \a iterator has been successfully initialized with
+ *    FLAC__metadata_simple_iterator_init()
+ * \retval FLAC__bool
+ *    \c true if the ID was successfully read, else \c false, in which
+ *    case you should check FLAC__metadata_simple_iterator_status() to
+ *    find out why.  If the status is
+ *    \c FLAC__METADATA_SIMPLE_ITERATOR_STATUS_ILLEGAL_INPUT, then the
+ *    current metadata block is not an \c APPLICATION block.  Otherwise
+ *    if the status is
+ *    \c FLAC__METADATA_SIMPLE_ITERATOR_STATUS_READ_ERROR or
+ *    \c FLAC__METADATA_SIMPLE_ITERATOR_STATUS_SEEK_ERROR, an I/O error
+ *    occurred and the iterator can no longer be used.
+ */
+FLAC_API FLAC__bool FLAC__metadata_simple_iterator_get_application_id(FLAC__Metadata_SimpleIterator *iterator, FLAC__byte *id);
 
 /** Get the metadata block at the current position.  You can modify the
  *  block but must use FLAC__metadata_simple_iterator_set_block() to
@@ -471,7 +542,8 @@ FLAC_API FLAC__MetadataType FLAC__metadata_simple_iterator_get_block_type(const 
  *    \a iterator has been successfully initialized with
  *    FLAC__metadata_simple_iterator_init()
  * \retval FLAC__StreamMetadata*
- *    The current metadata block.
+ *    The current metadata block, or \c NULL if there was a memory
+ *    allocation error.
  */
 FLAC_API FLAC__StreamMetadata *FLAC__metadata_simple_iterator_get_block(FLAC__Metadata_SimpleIterator *iterator);
 
@@ -691,7 +763,7 @@ typedef enum {
 	FLAC__METADATA_CHAIN_STATUS_READ_WRITE_MISMATCH,
 	/**< FLAC__metadata_chain_write() was called on a chain read by
 	 *   FLAC__metadata_chain_read_with_callbacks()/FLAC__metadata_chain_read_ogg_with_callbacks(),
-	 *   or
+	 *   or 
 	 *   FLAC__metadata_chain_write_with_callbacks()/FLAC__metadata_chain_write_with_callbacks_and_tempfile()
 	 *   was called on a chain read by
 	 *   FLAC__metadata_chain_read()/FLAC__metadata_chain_read_ogg().
@@ -723,7 +795,7 @@ extern FLAC_API const char * const FLAC__Metadata_ChainStatusString[];
  * \retval FLAC__Metadata_Chain*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__Metadata_Chain *FLAC__metadata_chain_new();
+FLAC_API FLAC__Metadata_Chain *FLAC__metadata_chain_new(void);
 
 /** Free a chain instance.  Deletes the object pointed to by \a chain.
  *
@@ -759,7 +831,6 @@ FLAC_API FLAC__Metadata_ChainStatus FLAC__metadata_chain_status(FLAC__Metadata_C
  */
 FLAC_API FLAC__bool FLAC__metadata_chain_read(FLAC__Metadata_Chain *chain, const char *filename);
 
-/*@@@@ add to unit tests*/
 /** Read all metadata from an Ogg FLAC file into the chain.
  *
  * \note Ogg FLAC metadata data writing is not supported yet and
@@ -799,7 +870,6 @@ FLAC_API FLAC__bool FLAC__metadata_chain_read_ogg(FLAC__Metadata_Chain *chain, c
  */
 FLAC_API FLAC__bool FLAC__metadata_chain_read_with_callbacks(FLAC__Metadata_Chain *chain, FLAC__IOHandle handle, FLAC__IOCallbacks callbacks);
 
-/*@@@@ add to unit tests*/
 /** Read all metadata from an Ogg FLAC stream into the chain via I/O callbacks.
  *
  *  The \a handle need only be open for reading, but must be seekable.
@@ -1017,7 +1087,7 @@ FLAC_API void FLAC__metadata_chain_sort_padding(FLAC__Metadata_Chain *chain);
  * \retval FLAC__Metadata_Iterator*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__Metadata_Iterator *FLAC__metadata_iterator_new();
+FLAC_API FLAC__Metadata_Iterator *FLAC__metadata_iterator_new(void);
 
 /** Free an iterator instance.  Deletes the object pointed to by \a iterator.
  *
@@ -1772,7 +1842,7 @@ FLAC_API int FLAC__metadata_object_vorbiscomment_remove_entries_matching(FLAC__S
  * \retval FLAC__StreamMetadata_CueSheet_Track*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__StreamMetadata_CueSheet_Track *FLAC__metadata_object_cuesheet_track_new();
+FLAC_API FLAC__StreamMetadata_CueSheet_Track *FLAC__metadata_object_cuesheet_track_new(void);
 
 /** Create a copy of an existing CUESHEET track object.
  *
@@ -2000,7 +2070,6 @@ FLAC_API FLAC__bool FLAC__metadata_object_cuesheet_delete_track(FLAC__StreamMeta
  */
 FLAC_API FLAC__bool FLAC__metadata_object_cuesheet_is_legal(const FLAC__StreamMetadata *object, FLAC__bool check_cd_da_subset, const char **violation);
 
-/* @@@@ add to unit tests */
 /** Calculate and return the CDDB/freedb ID for a cue sheet.  The function
  *  assumes the cue sheet corresponds to a CD; the result is undefined
  *  if the cuesheet's is_cd bit is not set.

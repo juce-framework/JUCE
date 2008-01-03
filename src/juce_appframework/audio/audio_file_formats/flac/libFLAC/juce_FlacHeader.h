@@ -35,8 +35,14 @@
 
 #include "../../../../../../juce_Config.h"
 
+#define VERSION "1.2.1"
+
 #define FLAC__NO_DLL 1
 
 #ifdef _MSC_VER
-  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206)
+  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312)
+#endif
+
+#if ! (defined (_WIN32) || defined (_WIN64) || defined (LINUX))
+ #define FLAC__SYS_DARWIN 1
 #endif

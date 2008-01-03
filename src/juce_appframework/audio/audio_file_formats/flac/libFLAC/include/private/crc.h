@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006  Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,10 +48,14 @@ FLAC__uint8 FLAC__crc8(const FLAC__byte *data, unsigned len);
 ** polynomial = x^16 + x^15 + x^2 + x^0
 ** init = 0
 */
-extern FLAC__uint16 FLAC__crc16_table[256];
-#define FLAC__CRC16_UPDATE(data, crc) (crc) = ((crc)<<8) ^ FLAC__crc16_table[((crc)>>8) ^ (data)];
-void FLAC__crc16_update(const FLAC__byte data, FLAC__uint16 *crc);
-void FLAC__crc16_update_block(const FLAC__byte *data, unsigned len, FLAC__uint16 *crc);
-FLAC__uint16 FLAC__crc16(const FLAC__byte *data, unsigned len);
+extern unsigned FLAC__crc16_table[256];
+
+#define FLAC__CRC16_UPDATE(data, crc) (((((crc)<<8) & 0xffff) ^ FLAC__crc16_table[((crc)>>8) ^ (data)]))
+/* this alternate may be faster on some systems/compilers */
+#if 0
+#define FLAC__CRC16_UPDATE(data, crc) ((((crc)<<8) ^ FLAC__crc16_table[((crc)>>8) ^ (data)]) & 0xffff)
+#endif
+
+unsigned FLAC__crc16(const FLAC__byte *data, unsigned len);
 
 #endif

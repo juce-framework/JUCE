@@ -1,5 +1,5 @@
 /* libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2000,2001,2002,2003,2004,2005,2006 Josh Coalson
+ * Copyright (C) 2000,2001,2002,2003,2004,2005,2006,2007  Josh Coalson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -172,7 +172,7 @@ extern "C" {
  * - Channel separate, through FLAC__stream_encoder_process() - The client
  *   will pass an array of pointers to buffers, one for each channel, to
  *   the encoder, each of the same length.  The samples need not be
- *   block-aligned.
+ *   block-aligned, but each channel should have the same number of samples.
  * - Channel interleaved, through
  *   FLAC__stream_encoder_process_interleaved() - The client will pass a single
  *   pointer to data that is channel-interleaved (i.e. channel0_sample0,
@@ -180,6 +180,11 @@ extern "C" {
  *   Again, the samples need not be block-aligned but they must be
  *   sample-aligned, i.e. the first value should be channel0_sample0 and
  *   the last value channelN_sampleM.
+ *
+ * Note that for either process call, each sample in the buffers should be a
+ * signed integer, right-justified to the resolution set by
+ * FLAC__stream_encoder_set_bits_per_sample().  For example, if the resolution
+ * is 16 bits per sample, the samples should all be in the range [-32768,32767].
  *
  * When the client is finished encoding data, it calls
  * FLAC__stream_encoder_finish(), which causes the encoder to encode any
@@ -685,7 +690,7 @@ typedef void (*FLAC__StreamEncoderProgressCallback)(const FLAC__StreamEncoder *e
  * \retval FLAC__StreamEncoder*
  *    \c NULL if there was an error allocating memory, else the new instance.
  */
-FLAC_API FLAC__StreamEncoder *FLAC__stream_encoder_new();
+FLAC_API FLAC__StreamEncoder *FLAC__stream_encoder_new(void);
 
 /** Free an encoder instance.  Deletes the object pointed to by \a encoder.
  *
@@ -837,13 +842,13 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_sample_rate(FLAC__StreamEncoder *en
  *  <td>max residual partition order<td>
  *  <td>rice parameter search dist<td>
  * </tr>
- * <tr>  <td><b>0</b><td>  <td>false<td>  <td>false<td>  <td>tukey(0.5)<td>  <td>0<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>2<td>  <td>2<td>  <td>0<td>  </tr>
- * <tr>  <td><b>1</b><td>  <td>true<td>   <td>true<td>   <td>tukey(0.5)<td>  <td>0<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>2<td>  <td>2<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>0</b><td>  <td>false<td>  <td>false<td>  <td>tukey(0.5)<td>  <td>0<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>3<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>1</b><td>  <td>true<td>   <td>true<td>   <td>tukey(0.5)<td>  <td>0<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>3<td>  <td>0<td>  </tr>
  * <tr>  <td><b>2</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>0<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>3<td>  <td>0<td>  </tr>
- * <tr>  <td><b>3</b><td>  <td>false<td>  <td>false<td>  <td>tukey(0.5)<td>  <td>6<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>3<td>  <td>3<td>  <td>0<td>  </tr>
- * <tr>  <td><b>4</b><td>  <td>true<td>   <td>true<td>   <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>3<td>  <td>3<td>  <td>0<td>  </tr>
- * <tr>  <td><b>5</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>3<td>  <td>3<td>  <td>0<td>  </tr>
- * <tr>  <td><b>6</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>4<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>3</b><td>  <td>false<td>  <td>false<td>  <td>tukey(0.5)<td>  <td>6<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>4<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>4</b><td>  <td>true<td>   <td>true<td>   <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>4<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>5</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>5<td>  <td>0<td>  </tr>
+ * <tr>  <td><b>6</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>false<td>  <td>0<td>  <td>6<td>  <td>0<td>  </tr>
  * <tr>  <td><b>7</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>8<td>   <td>0<td>  <td>false<td>  <td>false<td>  <td>true<td>   <td>0<td>  <td>6<td>  <td>0<td>  </tr>
  * <tr>  <td><b>8</b><td>  <td>true<td>   <td>false<td>  <td>tukey(0.5)<td>  <td>12<td>  <td>0<td>  <td>false<td>  <td>false<td>  <td>true<td>   <td>0<td>  <td>6<td>  <td>0<td>  </tr>
  * </table>
@@ -903,7 +908,6 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_do_mid_side_stereo(FLAC__StreamEnco
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_loose_mid_side_stereo(FLAC__StreamEncoder *encoder, FLAC__bool value);
 
-/* @@@@add to unit tests*/
 /** Sets the apodization function(s) the encoder will use when windowing
  *  audio data for LPC analysis.
  *
@@ -1099,12 +1103,12 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_total_samples_estimate(FLAC__Stream
  *  the encoder may need to change the \a is_last flag inside them, and
  *  in some cases update seek point offsets.  Otherwise, the encoder will
  *  not modify or free the blocks.  It is up to the caller to free the
- *  metadata blocks after encoding.
+ *  metadata blocks after encoding finishes.
  *
  * \note
- * The encoder stores only the \a metadata pointer; the passed-in array
- * must survive at least until after FLAC__stream_encoder_init_*() returns.
- * Do not modify the array or free the blocks until then.
+ * The encoder stores only copies of the pointers in the \a metadata array;
+ * the metadata blocks themselves must survive at least until after
+ * FLAC__stream_encoder_finish() returns.  Do not free the blocks until then.
  *
  * \note
  * The STREAMINFO block is always written and no STREAMINFO block may
@@ -1700,7 +1704,11 @@ FLAC_API FLAC__bool FLAC__stream_encoder_finish(FLAC__StreamEncoder *encoder);
  *  This version allows you to supply the input data via an array of
  *  pointers, each pointer pointing to an array of \a samples samples
  *  representing one channel.  The samples need not be block-aligned,
- *  but each channel should have the same number of samples.
+ *  but each channel should have the same number of samples.  Each sample
+ *  should be a signed integer, right-justified to the resolution set by
+ *  FLAC__stream_encoder_set_bits_per_sample().  For example, if the
+ *  resolution is 16 bits per sample, the samples should all be in the
+ *  range [-32768,32767].
  *
  *  For applications where channel order is important, channels must
  *  follow the order as described in the
@@ -1725,7 +1733,11 @@ FLAC_API FLAC__bool FLAC__stream_encoder_process(FLAC__StreamEncoder *encoder, c
  *  channel1_sample0, ... , channelN_sample0, channel0_sample1, ...).
  *  The samples need not be block-aligned but they must be
  *  sample-aligned, i.e. the first value should be channel0_sample0
- *  and the last value channelN_sampleM.
+ *  and the last value channelN_sampleM.  Each sample should be a signed
+ *  integer, right-justified to the resolution set by
+ *  FLAC__stream_encoder_set_bits_per_sample().  For example, if the
+ *  resolution is 16 bits per sample, the samples should all be in the
+ *  range [-32768,32767].
  *
  *  For applications where channel order is important, channels must
  *  follow the order as described in the
