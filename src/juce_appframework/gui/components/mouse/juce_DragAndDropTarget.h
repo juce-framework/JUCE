@@ -62,7 +62,8 @@ public:
         @returns                    true if this component wants to receive the other callbacks regarging this
                                     type of object; if it returns false, no other callbacks will be made.
     */
-    virtual bool isInterestedInDragSource (const String& sourceDescription) = 0;
+    virtual bool isInterestedInDragSource (const String& sourceDescription,
+                                           Component* sourceComponent) = 0;
 
     /** Callback to indicate that something is being dragged over this component.
 

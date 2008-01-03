@@ -131,8 +131,10 @@ const int bufferSize = 32768;
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sourceStream_,
                                                           const bool deleteSourceWhenDestroyed_,
-                                                          const bool noWrap_)
+                                                          const bool noWrap_,
+                                                          const int64 uncompressedStreamLength_)
   : sourceStream (sourceStream_),
+    uncompressedStreamLength (uncompressedStreamLength_),
     deleteSourceWhenDestroyed (deleteSourceWhenDestroyed_),
     noWrap (noWrap_),
     isEof (false),
@@ -150,13 +152,13 @@ GZIPDecompressorInputStream::~GZIPDecompressorInputStream()
     if (deleteSourceWhenDestroyed)
         delete sourceStream;
 
-    GZIPDecompressHelper* const h = (GZIPDecompressHelper*)helper;
+    GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
     delete h;
 }
 
 int64 GZIPDecompressorInputStream::getTotalLength()
 {
-    return -1; // unknown..
+    return uncompressedStreamLength;
 }
 
 int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)

@@ -68,13 +68,20 @@ forcedinline uint32 swapByteOrder (uint32 n) throw()
 /** Swaps the byte-order of a 16-bit short. */
 inline uint16 swapByteOrder (const uint16 n) throw()
 {
+#if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
+    // Win32 intrinsics version..
+    return (uint16) _byteswap_ushort (n2);
+#else
     return (uint16) ((n << 8) | (n >> 8));
+#endif
 }
 
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
 #if JUCE_MAC
     return CFSwapInt64 (value);
+#elif JUCE_USE_INTRINSICS
+    return _byteswap_uint64 (value);
 #else
     return (((int64) swapByteOrder ((uint32) value)) << 32)
             | swapByteOrder ((uint32) (value >> 32));

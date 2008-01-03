@@ -116,7 +116,7 @@ public:
             if (over != 0
                  && over->isValidComponent()
                  && source->isValidComponent()
-                 && currentlyOver->isInterestedInDragSource (dragDesc))
+                 && currentlyOver->isInterestedInDragSource (dragDesc, source))
             {
                 currentlyOver->itemDragExit (dragDesc, source);
             }
@@ -163,7 +163,7 @@ public:
         {
             DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit);
 
-            if (ddt != 0 && ddt->isInterestedInDragSource (dragDesc))
+            if (ddt != 0 && ddt->isInterestedInDragSource (dragDesc, source))
             {
                 relX = screenX;
                 relY = screenY;
@@ -255,7 +255,7 @@ public:
                 if (over != 0
                      && over->isValidComponent()
                      && ! (sourceWatcher->hasBeenDeleted())
-                     && currentlyOver->isInterestedInDragSource (dragDesc))
+                     && currentlyOver->isInterestedInDragSource (dragDesc, source))
                 {
                     currentlyOver->itemDragExit (dragDesc, source);
                 }
@@ -263,12 +263,12 @@ public:
                 currentlyOver = ddt;
 
                 if (currentlyOver != 0
-                     && currentlyOver->isInterestedInDragSource (dragDesc))
+                     && currentlyOver->isInterestedInDragSource (dragDesc, source))
                     currentlyOver->itemDragEnter (dragDesc, source, relX, relY);
             }
 
             if (currentlyOver != 0
-                 && currentlyOver->isInterestedInDragSource (dragDesc))
+                 && currentlyOver->isInterestedInDragSource (dragDesc, source))
                 currentlyOver->itemDragMove (dragDesc, source, relX, relY);
 
             if (currentlyOver == 0

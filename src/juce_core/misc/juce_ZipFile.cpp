@@ -197,7 +197,8 @@ InputStream* ZipFile::createStreamForEntry (const int index)
 
         if (zei->compressed)
         {
-            stream = new GZIPDecompressorInputStream (stream, true, true);
+            stream = new GZIPDecompressorInputStream (stream, true, true, 
+                                                      zei->entry.uncompressedSize);
 
             // (much faster to unzip in big blocks using a buffer..)
             stream = new BufferedInputStream (stream, 32768, true);

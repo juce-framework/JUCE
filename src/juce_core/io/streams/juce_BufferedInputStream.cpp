@@ -52,7 +52,7 @@ BufferedInputStream::BufferedInputStream (InputStream* const source_,
     if (sourceSize >= 0)
         bufferSize = jmin (jmax (32, sourceSize), bufferSize);
 
-    bufferStart = position + 1;
+    bufferStart = position;
     buffer = (char*) juce_malloc (bufferSize);
 }
 
@@ -136,18 +136,20 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
     else
     {
         int bytesRead = 0;
-        char* d = (char*) destBuffer;
 
-        while (bytesRead < maxBytesToRead)
+        while (maxBytesToRead > 0)
         {
             ensureBuffered();
 
             if (isExhausted())
                 break;
 
-            *d++ = buffer [position - bufferStart];
-            ++position;
-            ++bytesRead;
+			const int bytesAvailable = jmin (maxBytesToRead, (int) (lastReadPos - position));
+			memcpy (destBuffer, buffer + (position - bufferStart), bytesAvailable);
+			maxBytesToRead -= bytesAvailable;
+			bytesRead += bytesAvailable;
+			position += bytesAvailable;
+			destBuffer = (void*) (((char*) destBuffer) + bytesAvailable);
         }
 
         return bytesRead;

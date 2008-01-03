@@ -1261,7 +1261,7 @@ void Slider::mouseDrag (const MouseEvent& e)
         if (sliderBeingDragged == 0)
         {
             setValue (snapValue (valueWhenLastDragged, true),
-                      ! sendChangeOnlyOnRelease, false);
+                      ! sendChangeOnlyOnRelease, true);
         }
         else if (sliderBeingDragged == 1)
         {

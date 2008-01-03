@@ -597,7 +597,8 @@ void Toolbar::buttonClicked (Button*)
 }
 
 //==============================================================================
-bool Toolbar::isInterestedInDragSource (const String& sourceDescription)
+bool Toolbar::isInterestedInDragSource (const String& sourceDescription,
+                                        Component* /*sourceComponent*/)
 {
     return sourceDescription == toolbarDragDescriptor && isEditingActive;
 }

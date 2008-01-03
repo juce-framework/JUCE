@@ -56,10 +56,14 @@ public:
                                             when this object is destroyed
         @param noWrap                       this is used internally by the ZipFile class
                                             and should be ignored by user applications
+        @param uncompressedStreamLength     if the creator knows the length that the
+                                            uncompressed stream will be, then it can supply this
+                                            value, which will be returned by getTotalLength()
     */
     GZIPDecompressorInputStream (InputStream* const sourceStream,
                                  const bool deleteSourceWhenDestroyed,
-                                 const bool noWrap = false);
+                                 const bool noWrap = false,
+                                 const int64 uncompressedStreamLength = -1);
 
     /** Destructor. */
     ~GZIPDecompressorInputStream();
@@ -77,6 +81,7 @@ public:
 
 private:
     InputStream* const sourceStream;
+    const int64 uncompressedStreamLength;
     const bool deleteSourceWhenDestroyed, noWrap;
     bool isEof;
     int activeBufferSize;

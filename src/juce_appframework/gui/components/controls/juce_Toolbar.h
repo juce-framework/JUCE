@@ -285,7 +285,7 @@ public:
     /** @internal */
     void mouseDown (const MouseEvent&);
     /** @internal */
-    bool isInterestedInDragSource (const String&);
+    bool isInterestedInDragSource (const String&, Component*);
     /** @internal */
     void itemDragMove (const String&, Component*, int, int);
     /** @internal */
