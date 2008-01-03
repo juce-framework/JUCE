@@ -163,14 +163,14 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
     }
 }
 
-void AudioSourcePlayer::audioDeviceAboutToStart (double sampleRate_, int blockSize)
+void AudioSourcePlayer::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    sampleRate = sampleRate_;
-    bufferSize = blockSize;
+    sampleRate = device->getCurrentSampleRate();
+    bufferSize = device->getCurrentBufferSizeSamples();
     zeromem (channels, sizeof (channels));
 
     if (source != 0)
-        source->prepareToPlay (blockSize, sampleRate_);
+        source->prepareToPlay (bufferSize, sampleRate);
 }
 
 void AudioSourcePlayer::audioDeviceStopped()

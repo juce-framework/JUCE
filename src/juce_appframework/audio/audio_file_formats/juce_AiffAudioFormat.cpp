@@ -102,8 +102,8 @@ public:
                              || (byte0 == 0x40 && sampleRateBytes[1] > 0x1C))
                             break;
 
-                        unsigned int sampRate = bigEndianInt ((char*)sampleRateBytes + 2);
-                        sampRate >>= (16414 - bigEndianShort ((char*)sampleRateBytes));
+                        unsigned int sampRate = bigEndianInt ((char*) sampleRateBytes + 2);
+                        sampRate >>= (16414 - bigEndianShort ((char*) sampleRateBytes));
                         sampleRate = (int)sampRate;
 
                         if (length <= 18)

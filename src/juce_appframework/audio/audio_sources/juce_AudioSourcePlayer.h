@@ -90,7 +90,7 @@ public:
                                 int numSamples);
 
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceAboutToStart (double sampleRate, int blockSize);
+    void audioDeviceAboutToStart (AudioIODevice* device);
 
     /** Implementation of the AudioIODeviceCallback method. */
     void audioDeviceStopped();
