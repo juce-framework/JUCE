@@ -1162,7 +1162,7 @@ public:
                 return;
             }
 
-            call->audioDeviceAboutToStart (sampleRate, bufferSizeSamples);
+            call->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (startStopLock);
             callback = call;

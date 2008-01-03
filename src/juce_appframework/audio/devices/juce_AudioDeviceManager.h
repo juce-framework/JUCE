@@ -369,7 +369,7 @@ private:
                                     int totalNumOutputChannels,
                                     int numSamples);
 
-        void audioDeviceAboutToStart (double sampleRate, int blockSize);
+        void audioDeviceAboutToStart (AudioIODevice*);
 
         void audioDeviceStopped();
 
@@ -385,7 +385,7 @@ private:
                                    float** outputChannelData,
                                    int totalNumOutputChannels,
                                    int numSamples);
-    void audioDeviceAboutToStartInt (double sampleRate, int blockSize);
+    void audioDeviceAboutToStartInt (AudioIODevice* const device);
     void audioDeviceStoppedInt();
 
     void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);

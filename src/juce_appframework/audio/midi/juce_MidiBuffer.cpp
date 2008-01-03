@@ -53,9 +53,14 @@ MidiBuffer::MidiBuffer (const MidiBuffer& other) throw()
 
 const MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
 {
-    bytesUsed = other.bytesUsed;
-    ensureAllocatedSize (bytesUsed);
-    memcpy (elements, other.elements, bytesUsed);
+    if (this != &other)
+    {
+        bytesUsed = other.bytesUsed;
+        ensureAllocatedSize (bytesUsed);
+
+        if (bytesUsed > 0)
+            memcpy (elements, other.elements, bytesUsed);
+    }
 
     return *this;
 }

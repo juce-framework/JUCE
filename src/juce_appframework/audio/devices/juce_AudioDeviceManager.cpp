@@ -414,8 +414,7 @@ void AudioDeviceManager::setAudioCallback (AudioIODeviceCallback* newCallback)
                 lastCallback->audioDeviceStopped();
 
             if (newCallback != 0)
-                newCallback->audioDeviceAboutToStart (currentAudioDevice->getCurrentSampleRate(),
-                                                      currentAudioDevice->getCurrentBufferSizeSamples());
+                newCallback->audioDeviceAboutToStart (currentAudioDevice);
         }
 
         currentCallback = newCallback;
@@ -446,9 +445,12 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
     }
 }
 
-void AudioDeviceManager::audioDeviceAboutToStartInt (double sampleRate, int blockSize)
+void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
 {
     cpuUsageMs = 0;
+
+    const double sampleRate = device->getCurrentSampleRate();
+    const int blockSize = device->getCurrentBufferSizeSamples();
 
     if (sampleRate > 0.0 && blockSize > 0)
     {
@@ -457,7 +459,7 @@ void AudioDeviceManager::audioDeviceAboutToStartInt (double sampleRate, int bloc
     }
 
     if (currentCallback != 0)
-        currentCallback->audioDeviceAboutToStart (sampleRate, blockSize);
+        currentCallback->audioDeviceAboutToStart (device);
 
     sendChangeMessage (this);
 }
@@ -603,9 +605,9 @@ void AudioDeviceManager::CallbackHandler::audioDeviceIOCallback (const float** i
     owner->audioDeviceIOCallbackInt (inputChannelData, totalNumInputChannels, outputChannelData, totalNumOutputChannels, numSamples);
 }
 
-void AudioDeviceManager::CallbackHandler::audioDeviceAboutToStart (double sampleRate, int blockSize)
+void AudioDeviceManager::CallbackHandler::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    owner->audioDeviceAboutToStartInt (sampleRate, blockSize);
+    owner->audioDeviceAboutToStartInt (device);
 }
 
 void AudioDeviceManager::CallbackHandler::audioDeviceStopped()

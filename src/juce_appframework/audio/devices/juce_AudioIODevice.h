@@ -35,6 +35,7 @@
 #include "../../../juce_core/text/juce_StringArray.h"
 #include "../../../juce_core/containers/juce_BitArray.h"
 #include "../../../juce_core/containers/juce_OwnedArray.h"
+class AudioIODevice;
 
 
 //==============================================================================
@@ -103,13 +104,15 @@ public:
         callback has just been added to an audio device, or after the device has been
         restarted because of a sample-rate or block-size change.
 
-        @param sampleRate           the sample rate it's going to use
-        @param numSamplesPerBlock   the intended block size - this isn't a guaranteed
-                                    figure; see the notes about numSamples in the
-                                    audioDeviceIOCallback() method.
+        You can use this opportunity to find out the sample rate and block size
+        that the device is going to use by calling the AudioIODevice::getCurrentSampleRate()
+        and AudioIODevice::getCurrentBufferSizeSamples() on the supplied pointer.
+
+        @param device       the audio IO device that will be used to drive the callback.
+                            Note that if you're going to store this this pointer, it is 
+                            only valid until the next time that audioDeviceStopped is called.
     */
-    virtual void audioDeviceAboutToStart (double sampleRate,
-                                          int numSamplesPerBlock) = 0;
+    virtual void audioDeviceAboutToStart (AudioIODevice* device) = 0;
 
     /** Called to indicate that the device has stopped.
     */

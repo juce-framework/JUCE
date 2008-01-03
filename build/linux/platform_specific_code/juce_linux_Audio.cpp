@@ -814,8 +814,7 @@ public:
         internal->setCallback (callback);
 
         if (callback != 0)
-            callback->audioDeviceAboutToStart (internal->sampleRate,
-                                               internal->bufferSize);
+            callback->audioDeviceAboutToStart (this);
 
         isStarted = (callback != 0);
     }

@@ -316,7 +316,7 @@ void AudioSampleBuffer::addFrom (const int destChannel,
                                  int numSamples,
                                  const float gain) throw()
 {
-    jassert (&source != this);
+    jassert (&source != this || sourceChannel != destChannel);
     jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (((unsigned int) sourceChannel) < (unsigned int) source.numChannels);
@@ -409,7 +409,7 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
                                   const int sourceStartSample,
                                   int numSamples) throw()
 {
-    jassert (&source != this);
+    jassert (&source != this || sourceChannel != destChannel);
     jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (((unsigned int) sourceChannel) < (unsigned int) source.numChannels);

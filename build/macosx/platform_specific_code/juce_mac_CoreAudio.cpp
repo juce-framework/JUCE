@@ -1001,8 +1001,7 @@ public:
         if (internal != 0 && ! isStarted)
         {
             if (callback != 0)
-                callback->audioDeviceAboutToStart (getCurrentSampleRate(),
-                                                   getCurrentBufferSizeSamples());
+                callback->audioDeviceAboutToStart (this);
 
             isStarted = true;
             internal->start (callback);

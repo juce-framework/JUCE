@@ -763,7 +763,7 @@ public:
     {
         if (callback != 0)
         {
-            callback->audioDeviceAboutToStart (currentSampleRate, currentBlockSizeSamples);
+            callback->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (callbackLock);
             currentCallback = callback;
