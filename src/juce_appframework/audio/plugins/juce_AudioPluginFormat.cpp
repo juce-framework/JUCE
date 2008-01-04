@@ -41,7 +41,7 @@ AudioPluginFormat::AudioPluginFormat() throw()
 {
 }
 
-AudioPluginFormat::~AudioPluginFormat() throw()
+AudioPluginFormat::~AudioPluginFormat()
 {
 }
 

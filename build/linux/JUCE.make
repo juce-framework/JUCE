@@ -112,6 +112,15 @@ OBJECTS := \
 	$(OBJDIR)/juce_AudioProcessorGraph.o \
 	$(OBJDIR)/juce_AudioProcessorPlayer.o \
 	$(OBJDIR)/juce_GenericAudioProcessorEditor.o \
+	$(OBJDIR)/juce_AudioPluginFormat.o \
+	$(OBJDIR)/juce_AudioPluginFormatManager.o \
+	$(OBJDIR)/juce_AudioPluginInstance.o \
+	$(OBJDIR)/juce_KnownPluginList.o \
+	$(OBJDIR)/juce_PluginDescription.o \
+	$(OBJDIR)/juce_PluginDirectoryScanner.o \
+	$(OBJDIR)/juce_PluginListComponent.o \
+	$(OBJDIR)/juce_AudioUnitPluginFormat.o \
+	$(OBJDIR)/juce_VSTPluginFormat.o \
 	$(OBJDIR)/juce_AiffAudioFormat.o \
 	$(OBJDIR)/juce_AudioCDReader.o \
 	$(OBJDIR)/juce_AudioFormat.o \
@@ -120,7 +129,6 @@ OBJECTS := \
 	$(OBJDIR)/juce_FlacAudioFormat.o \
 	$(OBJDIR)/juce_OggVorbisAudioFormat.o \
 	$(OBJDIR)/juce_WavAudioFormat.o \
-	$(OBJDIR)/bitbuffer.o \
 	$(OBJDIR)/bitmath.o \
 	$(OBJDIR)/bitreader.o \
 	$(OBJDIR)/bitwriter.o \
@@ -820,6 +828,51 @@ $(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/juce_appframework/audio/
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/juce_AudioPluginFormat.o: ../../src/juce_appframework/audio/plugins/juce_AudioPluginFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioPluginFormatManager.o: ../../src/juce_appframework/audio/plugins/juce_AudioPluginFormatManager.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioPluginInstance.o: ../../src/juce_appframework/audio/plugins/juce_AudioPluginInstance.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_KnownPluginList.o: ../../src/juce_appframework/audio/plugins/juce_KnownPluginList.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_PluginDescription.o: ../../src/juce_appframework/audio/plugins/juce_PluginDescription.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_PluginDirectoryScanner.o: ../../src/juce_appframework/audio/plugins/juce_PluginDirectoryScanner.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_PluginListComponent.o: ../../src/juce_appframework/audio/plugins/juce_PluginListComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioUnitPluginFormat.o: ../../src/juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_VSTPluginFormat.o: ../../src/juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/juce_AiffAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -859,11 +912,6 @@ $(OBJDIR)/juce_WavAudioFormat.o: ../../src/juce_appframework/audio/audio_file_fo
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/bitbuffer.o: ../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/bitbuffer.c
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(OBJDIR)/bitmath.o: ../../src/juce_appframework/audio/audio_file_formats/flac/libFLAC/bitmath.c
 	-@$(CMD_MKOBJDIR)

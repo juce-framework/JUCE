@@ -877,7 +877,8 @@ bool juce_launchFile (const String& fileName,
 
     if (fileName.startsWithIgnoreCase (T("http:"))
         || fileName.startsWithIgnoreCase (T("https:"))
-        || fileName.startsWithIgnoreCase (T("ftp:")))
+        || fileName.startsWithIgnoreCase (T("ftp:"))
+        || fileName.startsWithIgnoreCase (T("file:")))
     {
         CFStringRef urlString = PlatformUtilities::juceStringToCFString (fileName);
 

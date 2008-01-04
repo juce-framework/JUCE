@@ -43,6 +43,10 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioUnitPluginFormat.h"
 #include "../juce_PluginDescription.h"
+#include "../../../../juce_core/threads/juce_ScopedLock.h"
+#include "../../../../juce_appframework/events/juce_Timer.h"
+#include "../../../../juce_core/misc/juce_PlatformUtilities.h"
+#include "../../../../juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
 
 #if JUCE_MAC
 
@@ -92,11 +96,12 @@ public:
         desc.category = getCategory();
         desc.manufacturerName = manufacturer;
         desc.version = version;
-        desc.numInputChannels = instance.getNumInputChannels();
-        desc.numOutputChannels = instance.getNumOutputChannels();
+        desc.numInputChannels = getNumInputChannels();
+        desc.numOutputChannels = getNumOutputChannels();
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
     }
 
+    const String getName() const                { return pluginName; }
     bool acceptsMidi() const                    { return wantsMidiMessages; }
     bool producesMidi() const                   { return false; }
 
@@ -1235,8 +1240,7 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
 
     try
     {
-        desc.fillInFromInstance (*instance);
-
+        instance->fillInPluginDescription (desc);
         results.add (new PluginDescription (desc));
     }
     catch (...)

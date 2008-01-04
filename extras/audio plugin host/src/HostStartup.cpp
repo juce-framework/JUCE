@@ -34,7 +34,7 @@
 #include "host/InternalFilters.h"
 
 #if ! JUCE_PLUGINHOST_VST
- #error If you're building the audio plugin host, you probably want to enable VST support in juce_Config.h
+ #error "If you're building the audio plugin host, you probably want to enable VST support in juce_Config.h"
 #endif
 
 

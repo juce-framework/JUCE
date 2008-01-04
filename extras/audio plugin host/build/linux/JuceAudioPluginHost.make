@@ -41,13 +41,6 @@ OBJECTS := \
 	$(OBJDIR)/GraphEditorPanel.o \
 	$(OBJDIR)/InternalFilters.o \
 	$(OBJDIR)/MainHostWindow.o \
-	$(OBJDIR)/juce_AudioPluginFormat.o \
-	$(OBJDIR)/juce_AudioPluginInstance.o \
-	$(OBJDIR)/juce_KnownPluginList.o \
-	$(OBJDIR)/juce_PluginDescription.o \
-	$(OBJDIR)/juce_PluginDirectoryScanner.o \
-	$(OBJDIR)/juce_PluginListComponent.o \
-	$(OBJDIR)/juce_VSTPluginInstance.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -109,41 +102,6 @@ $(OBJDIR)/InternalFilters.o: ../../src/host/InternalFilters.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/MainHostWindow.o: ../../src/host/MainHostWindow.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_AudioPluginFormat.o: ../../src/plugins/juce_AudioPluginFormat.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_AudioPluginInstance.o: ../../src/plugins/juce_AudioPluginInstance.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_KnownPluginList.o: ../../src/plugins/juce_KnownPluginList.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_PluginDescription.o: ../../src/plugins/juce_PluginDescription.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_PluginDirectoryScanner.o: ../../src/plugins/juce_PluginDirectoryScanner.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_PluginListComponent.o: ../../src/plugins/juce_PluginListComponent.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_VSTPluginInstance.o: ../../src/plugins/vst/juce_VSTPluginInstance.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

@@ -67,7 +67,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../events/juce_MessageManager.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../application/juce_Application.h"
-
+#include "../../../../juce_core/misc/juce_PlatformUtilities.h"
 
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
@@ -185,10 +185,6 @@ struct fxProgramSet
 typedef AEffect* (*MainCall) (audioMasterCallback);
 
 static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
-
-#if JUCE_PPC
- static void* audioMasterCoerced = 0;
-#endif
 
 static int shellUIDToCreate = 0;
 static int insideVSTCallback = 0;
