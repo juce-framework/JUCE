@@ -108,12 +108,13 @@ void AudioFilterStreamer::audioDeviceAboutToStart (AudioIODevice* device)
     isPlaying = true;
 
     emptyBuffer.setSize (1 + filter.getNumOutputChannels(),
-                         jmax (2048, device->getCurrentBlockSizeSamples() * 2));
+                         jmax (2048, device->getCurrentBufferSizeSamples() * 2));
     emptyBuffer.clear();
 
     midiCollector.reset (sampleRate);
 
-    filter.prepareToPlay (sampleRate, numSamplesPerBlock);
+    filter.prepareToPlay (device->getCurrentSampleRate(),
+                          device->getCurrentBufferSizeSamples());
 }
 
 void AudioFilterStreamer::audioDeviceStopped()
