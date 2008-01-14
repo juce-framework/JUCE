@@ -178,15 +178,31 @@ static int waitForReadiness (const int handle, const bool forReading,
     if (select (handle + 1, prset, pwset, 0, timeoutp) < 0)
         return -1;
 #else
-    int result;
-    while ((result = select (handle + 1, prset, pwset, 0, timeoutp)) < 0
-            && errno == EINTR)
     {
-    }
+        int result;
+        while ((result = select (handle + 1, prset, pwset, 0, timeoutp)) < 0
+                && errno == EINTR)
+        {
+        }
 
-    if (result < 0)
-        return -1;
+        if (result < 0)
+            return -1;
+    }
 #endif
+
+    {
+        int opt;
+
+#if defined (JUCE_LINUX) || (defined (JUCE_MAC) && ! MACOS_10_2_OR_EARLIER)
+        socklen_t len = sizeof (opt);
+#else
+        int len = sizeof (opt);
+#endif
+
+        if (getsockopt (handle, SOL_SOCKET, SO_ERROR, (char*) &opt, &len) < 0
+             || opt != 0)
+            return -1;
+    }
 
     if ((forReading && FD_ISSET (handle, &rset))
          || ((! forReading) && FD_ISSET (handle, &wset)))
@@ -266,7 +282,7 @@ static bool connectSocket (int volatile& handle,
 #if JUCE_WIN32
         if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-        if (result == EINPROGRESS)
+        if (errno == EINPROGRESS)
 #endif
         {
             if (waitForReadiness (handle, false, timeOutMillisecs) != 1)
