@@ -1128,6 +1128,137 @@ Label* LookAndFeel::createComboBoxTextBox (ComboBox&)
 }
 
 //==============================================================================
+void LookAndFeel::drawLinearSliderBackground (Graphics& g,
+                                              int x, int y,
+                                              int width, int height,
+                                              float /*sliderPos*/,
+                                              float /*minSliderPos*/,
+                                              float /*maxSliderPos*/,
+                                              const Slider::SliderStyle /*style*/,
+                                              Slider& slider)
+{
+    const float sliderRadius = (float) getSliderThumbRadius (slider);
+
+    const Colour trackColour (slider.findColour (Slider::trackColourId));
+    const Colour gradCol1 (trackColour.overlaidWith (Colours::black.withAlpha (slider.isEnabled() ? 0.25f : 0.13f)));
+    const Colour gradCol2 (trackColour.overlaidWith (Colour (0x14000000)));
+    Path indent;
+
+    if (slider.isHorizontal())
+    {
+        const float iy = y + height * 0.5f - sliderRadius * 0.5f;
+        const float ih = sliderRadius;
+
+        GradientBrush gb (gradCol1, 0.0f, iy,
+                          gradCol2, 0.0f, iy + ih, false);
+        g.setBrush (&gb);
+
+        indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
+                                    width + sliderRadius, ih,
+                                    5.0f);
+        g.fillPath (indent);
+    }
+    else
+    {
+        const float ix = x + width * 0.5f - sliderRadius * 0.5f;
+        const float iw = sliderRadius;
+
+        GradientBrush gb (gradCol1, ix, 0.0f,
+                          gradCol2, ix + iw, 0.0f, false);
+        g.setBrush (&gb);
+
+        indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
+                                    iw, height + sliderRadius,
+                                    5.0f);
+        g.fillPath (indent);
+    }
+
+    g.setColour (Colour (0x4c000000));
+    g.strokePath (indent, PathStrokeType (0.5f));
+}
+
+void LookAndFeel::drawLinearSliderThumb (Graphics& g,
+                                         int x, int y,
+                                         int width, int height,
+                                         float sliderPos,
+                                         float minSliderPos,
+                                         float maxSliderPos,
+                                         const Slider::SliderStyle style,
+                                         Slider& slider)
+{
+    const float sliderRadius = (float) getSliderThumbRadius (slider);
+
+    Colour knobColour (createBaseColour (slider.findColour (Slider::thumbColourId),
+                                         slider.hasKeyboardFocus (false) && slider.isEnabled(),
+                                         slider.isMouseOverOrDragging() && slider.isEnabled(),
+                                         slider.isMouseButtonDown() && slider.isEnabled()));
+
+    const float outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
+
+    if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
+    {
+        float kx, ky;
+
+        if (style == Slider::LinearVertical)
+        {
+            kx = x + width * 0.5f;
+            ky = sliderPos;
+        }
+        else
+        {
+            kx = sliderPos;
+            ky = y + height * 0.5f;
+        }
+
+        drawGlassSphere (g,
+                         kx - sliderRadius,
+                         ky - sliderRadius,
+                         sliderRadius * 2.0f,
+                         knobColour, outlineThickness);
+    }
+    else
+    {
+        if (style == Slider::ThreeValueVertical)
+        {
+            drawGlassSphere (g, x + width * 0.5f - sliderRadius,
+                             sliderPos - sliderRadius,
+                             sliderRadius * 2.0f,
+                             knobColour, outlineThickness);
+        }
+        else if (style == Slider::ThreeValueHorizontal)
+        {
+            drawGlassSphere (g,sliderPos - sliderRadius,
+                             y + height * 0.5f - sliderRadius,
+                             sliderRadius * 2.0f,
+                             knobColour, outlineThickness);
+        }
+
+        if (style == Slider::TwoValueVertical || style == Slider::ThreeValueVertical)
+        {
+            const float sr = jmin (sliderRadius, width * 0.4f);
+
+            drawGlassPointer (g, jmax (0.0f, x + width * 0.5f - sliderRadius * 2.0f),
+                              minSliderPos - sliderRadius,
+                              sliderRadius * 2.0f, knobColour, outlineThickness, 1);
+
+            drawGlassPointer (g, jmin (x + width - sliderRadius * 2.0f, x + width * 0.5f), maxSliderPos - sr,
+                              sliderRadius * 2.0f, knobColour, outlineThickness, 3);
+        }
+        else if (style == Slider::TwoValueHorizontal || style == Slider::ThreeValueHorizontal)
+        {
+            const float sr = jmin (sliderRadius, height * 0.4f);
+
+            drawGlassPointer (g, minSliderPos - sr,
+                              jmax (0.0f, y + height * 0.5f - sliderRadius * 2.0f),
+                              sliderRadius * 2.0f, knobColour, outlineThickness, 2);
+
+            drawGlassPointer (g, maxSliderPos - sliderRadius,
+                              jmin (y + height - sliderRadius * 2.0f, y + height * 0.5f),
+                              sliderRadius * 2.0f, knobColour, outlineThickness, 4);
+        }
+    }
+}
+
 void LookAndFeel::drawLinearSlider (Graphics& g,
                                     int x, int y,
                                     int width, int height,
@@ -1139,14 +1270,15 @@ void LookAndFeel::drawLinearSlider (Graphics& g,
 {
     g.fillAll (slider.findColour (Slider::backgroundColourId));
 
-    const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
-
     if (style == Slider::LinearBar)
     {
+        const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+
         Colour baseColour (createBaseColour (slider.findColour (Slider::thumbColourId)
                                                    .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f),
                                              false,
-                                             isMouseOver, isMouseOver || slider.isMouseButtonDown()));
+                                             isMouseOver, 
+                                             isMouseOver || slider.isMouseButtonDown()));
 
         drawShinyButtonShape (g,
                               (float) x, (float) y, sliderPos - (float) x, (float) height, 0.0f,
@@ -1156,114 +1288,8 @@ void LookAndFeel::drawLinearSlider (Graphics& g,
     }
     else
     {
-        const float sliderRadius = (float) getSliderThumbRadius (slider);
-
-        const Colour trackColour (slider.findColour (Slider::trackColourId));
-        const Colour gradCol1 (trackColour.overlaidWith (Colours::black.withAlpha (slider.isEnabled() ? 0.25f : 0.13f)));
-        const Colour gradCol2 (trackColour.overlaidWith (Colour (0x14000000)));
-        Path indent;
-
-        if (slider.isHorizontal())
-        {
-            const float iy = y + height * 0.5f - sliderRadius * 0.5f;
-            const float ih = sliderRadius;
-
-            GradientBrush gb (gradCol1, 0.0f, iy,
-                              gradCol2, 0.0f, iy + ih, false);
-            g.setBrush (&gb);
-
-            indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
-                                        width + sliderRadius, ih,
-                                        5.0f);
-            g.fillPath (indent);
-        }
-        else
-        {
-            const float ix = x + width * 0.5f - sliderRadius * 0.5f;
-            const float iw = sliderRadius;
-
-            GradientBrush gb (gradCol1, ix, 0.0f,
-                              gradCol2, ix + iw, 0.0f, false);
-            g.setBrush (&gb);
-
-            indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
-                                        iw, height + sliderRadius,
-                                        5.0f);
-            g.fillPath (indent);
-        }
-
-        g.setColour (Colour (0x4c000000));
-        g.strokePath (indent, PathStrokeType (0.5f));
-
-        Colour knobColour (createBaseColour (slider.findColour (Slider::thumbColourId),
-                                             slider.hasKeyboardFocus (false) && slider.isEnabled(),
-                                             isMouseOver,
-                                             slider.isMouseButtonDown() && slider.isEnabled()));
-
-        const float outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
-
-        if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
-        {
-            float kx, ky;
-
-            if (style == Slider::LinearVertical)
-            {
-                kx = x + width * 0.5f;
-                ky = sliderPos;
-            }
-            else
-            {
-                kx = sliderPos;
-                ky = y + height * 0.5f;
-            }
-
-            drawGlassSphere (g,
-                             kx - sliderRadius,
-                             ky - sliderRadius,
-                             sliderRadius * 2.0f,
-                             knobColour, outlineThickness);
-        }
-        else
-        {
-            if (style == Slider::ThreeValueVertical)
-            {
-                drawGlassSphere (g, x + width * 0.5f - sliderRadius,
-                                 sliderPos - sliderRadius,
-                                 sliderRadius * 2.0f,
-                                 knobColour, outlineThickness);
-            }
-            else if (style == Slider::ThreeValueHorizontal)
-            {
-                drawGlassSphere (g,sliderPos - sliderRadius,
-                                 y + height * 0.5f - sliderRadius,
-                                 sliderRadius * 2.0f,
-                                 knobColour, outlineThickness);
-            }
-
-            if (style == Slider::TwoValueVertical || style == Slider::ThreeValueVertical)
-            {
-                const float sr = jmin (sliderRadius, width * 0.4f);
-
-                drawGlassPointer (g, jmax (0.0f, x + width * 0.5f - sliderRadius * 2.0f),
-                                  minSliderPos - sliderRadius,
-                                  sliderRadius * 2.0f, knobColour, outlineThickness, 1);
-
-                drawGlassPointer (g, jmin (x + width - sliderRadius * 2.0f, x + width * 0.5f), maxSliderPos - sr,
-                                  sliderRadius * 2.0f, knobColour, outlineThickness, 3);
-            }
-            else if (style == Slider::TwoValueHorizontal || style == Slider::ThreeValueHorizontal)
-            {
-                const float sr = jmin (sliderRadius, height * 0.4f);
-
-                drawGlassPointer (g, minSliderPos - sr,
-                                  jmax (0.0f, y + height * 0.5f - sliderRadius * 2.0f),
-                                  sliderRadius * 2.0f, knobColour, outlineThickness, 2);
-
-                drawGlassPointer (g, maxSliderPos - sliderRadius,
-                                  jmin (y + height - sliderRadius * 2.0f, y + height * 0.5f),
-                                  sliderRadius * 2.0f, knobColour, outlineThickness, 4);
-            }
-        }
+        drawLinearSliderBackground (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+        drawLinearSliderThumb (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
     }
 }
 

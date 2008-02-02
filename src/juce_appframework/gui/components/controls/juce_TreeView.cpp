@@ -1005,7 +1005,9 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
             if (parentItem != 0 && parentItem->drawLinesInside)
                 g.drawLine (x, 0, x, isLastOfSiblings() ? halfH : (float) itemHeight);
 
-            if (parentItem == 0 || parentItem->drawLinesInside)
+
+            if ((parentItem != 0 && parentItem->drawLinesInside)
+                 || (parentItem == 0 && drawLinesInside))
                 g.drawLine (x, halfH, x + indentWidth / 2, halfH);
         }
 

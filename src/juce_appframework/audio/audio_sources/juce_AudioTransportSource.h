@@ -102,6 +102,10 @@ public:
     */
     double getCurrentPosition() const;
 
+    /** Returns true if the player has stopped because its input stream ran out of data.
+    */
+    bool hasStreamFinished() const throw()              { return inputStreamEOF; }
+
     //==============================================================================
     /** Starts playing (if a source has been selected).
 
@@ -173,7 +177,7 @@ private:
     bool volatile playing, stopped;
     double sampleRate, sourceSampleRate, speed;
     int blockSize, readAheadBufferSize;
-    bool isPrepared;
+    bool isPrepared, inputStreamEOF;
 
     AudioTransportSource (const AudioTransportSource&);
     const AudioTransportSource& operator= (const AudioTransportSource&);

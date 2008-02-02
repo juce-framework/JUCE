@@ -70,7 +70,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 {
 #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
     // Win32 intrinsics version..
-    return (uint16) _byteswap_ushort (n2);
+    return (uint16) _byteswap_ushort (n);
 #else
     return (uint16) ((n << 8) | (n >> 8));
 #endif

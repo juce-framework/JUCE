@@ -599,7 +599,7 @@ void ListBox::selectRowsBasedOnModifierKeys (const int row,
     {
         selectRangeOfRows (lastRowSelected, row);
     }
-    else
+    else if ((! mods.isPopupMenu()) || ! isRowSelected (row))
     {
         selectRowInternal (row, false, true, true);
     }

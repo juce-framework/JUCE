@@ -63,6 +63,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h"
 #include "../../../src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.h"
 #include "../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h"
+#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
 
 #undef Point
 
@@ -1119,13 +1120,21 @@ public:
 
     OSStatus handleTextInputEvent (EventRef theEvent)
     {
-        UniChar uc;
-        GetEventParameter (theEvent, kEventParamTextInputSendText, typeUnicodeText, 0, sizeof (uc), 0, &uc);
+        UInt32 numBytesRequired = 0;
+        GetEventParameter (theEvent, kEventParamTextInputSendText, typeUnicodeText, 0, 0, &numBytesRequired, 0);
+
+        MemoryBlock buffer (numBytesRequired, true);
+        UniChar* const uc = (UniChar*) buffer.getData();
+        GetEventParameter (theEvent, kEventParamTextInputSendText, typeUnicodeText, 0, numBytesRequired, &numBytesRequired, uc);
 
         EventRef originalEvent;
         GetEventParameter (theEvent, kEventParamTextInputSendKeyboardEvent, typeEventRef, 0, sizeof (originalEvent), 0, &originalEvent);
 
-        return handleKeyEvent (originalEvent, (juce_wchar) uc);
+        OSStatus res = noErr;
+        for (int i = 0; i < numBytesRequired / sizeof (UniChar); ++i)
+            res = handleKeyEvent (originalEvent, (juce_wchar) uc[i]);
+        
+        return res;
     }
 
     //==============================================================================

@@ -1510,9 +1510,9 @@ extern "C" AEffect* VSTPluginMain (audioMasterCallback audioMaster)
     return pluginEntryPoint (audioMaster);
 }
 
-extern "C" AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
+extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster) asm ("main");
 
-extern "C" AEffect* main_plugin (audioMasterCallback audioMaster)
+extern "C" __attribute__ ((visibility("default"))) AEffect* main_plugin (audioMasterCallback audioMaster)
 {
     return VSTPluginMain (audioMaster);
 }

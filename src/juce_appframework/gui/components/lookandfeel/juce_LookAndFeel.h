@@ -350,6 +350,24 @@ public:
                                    const Slider::SliderStyle style,
                                    Slider& slider);
 
+    virtual void drawLinearSliderBackground (Graphics& g,
+                                             int x, int y,
+                                             int width, int height,
+                                             float sliderPos,
+                                             float minSliderPos,
+                                             float maxSliderPos,
+                                             const Slider::SliderStyle style,
+                                             Slider& slider);
+
+    virtual void drawLinearSliderThumb (Graphics& g,
+                                        int x, int y,
+                                        int width, int height,
+                                        float sliderPos,
+                                        float minSliderPos,
+                                        float maxSliderPos,
+                                        const Slider::SliderStyle style,
+                                        Slider& slider);
+
     virtual int getSliderThumbRadius (Slider& slider);
 
     virtual void drawRotarySlider (Graphics& g,

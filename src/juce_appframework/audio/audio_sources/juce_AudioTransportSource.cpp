@@ -53,7 +53,8 @@ AudioTransportSource::AudioTransportSource()
       speed (1.0),
       blockSize (128),
       readAheadBufferSize (0),
-      isPrepared (false)
+      isPrepared (false),
+      inputStreamEOF (false)
 {
 }
 
@@ -152,6 +153,7 @@ void AudioTransportSource::start()
         callbackLock.enter();
         playing = true;
         stopped = false;
+        inputStreamEOF = false;
         callbackLock.exit();
 
         sendChangeMessage (this);
@@ -269,6 +271,8 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 {
     const ScopedLock sl (callbackLock);
 
+    inputStreamEOF = false;
+
     if (masterSource != 0 && ! stopped)
     {
         masterSource->getNextAudioBlock (info);
@@ -284,6 +288,7 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
              && ! positionableSource->isLooping())
         {
             playing = false;
+            inputStreamEOF = true;
             sendChangeMessage (this);
         }
 

@@ -285,6 +285,9 @@ public:
     /** Returns the number of voices that have been added. */
     int getNumVoices() const throw()                                { return voices.size(); }
 
+    /** Returns one of the voices that have been added. */
+    SynthesiserVoice* getVoice (const int index) const throw();
+
     /** Adds a new voice to the synth.
 
         All the voices should be the same class of object and are treated equally.

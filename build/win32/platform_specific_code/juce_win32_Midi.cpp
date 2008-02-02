@@ -602,7 +602,8 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     const MidiOutHandle* const handle = (const MidiOutHandle*) internal;
 
-    if (message.getRawDataSize() > 3)
+    if (message.getRawDataSize() > 3 
+         || message.isSysEx())
     {
         MIDIHDR h;
         zerostruct (h);

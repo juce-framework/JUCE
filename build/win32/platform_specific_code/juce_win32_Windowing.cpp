@@ -745,6 +745,9 @@ public:
             {
                 const Rectangle boundsCopy (lastNonFullscreenBounds);
 
+                if (hasTitleBar())
+                    ShowWindow (hwnd, SW_SHOWNORMAL);
+
                 if (! boundsCopy.isEmpty())
                 {
                     setBounds (boundsCopy.getX(),
@@ -753,9 +756,6 @@ public:
                                boundsCopy.getHeight(),
                                false);
                 }
-
-                if (hasTitleBar())
-                    ShowWindow (hwnd, SW_SHOWNORMAL);
             }
             else
             {
@@ -2190,8 +2190,13 @@ private:
                         }
                         else
                         {
-                            const MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
-                                                getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
+                            MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
+                                          getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
+
+                            if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
+                                e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::leftButtonModifier);
+                            else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
+                                e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::rightButtonModifier);
 
                             if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
                             {

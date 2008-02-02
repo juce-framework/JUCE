@@ -76,7 +76,7 @@ public:
         message.
 
         The message passed in will contain the start of a sysex, but won't be finished
-        with the terminating 0x7f byte.
+        with the terminating 0xf7 byte.
     */
     virtual void handlePartialSysexMessage (MidiInput* source,
                                             const uint8* messageData,

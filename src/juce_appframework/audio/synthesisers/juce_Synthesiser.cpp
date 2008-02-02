@@ -92,6 +92,12 @@ Synthesiser::~Synthesiser()
 }
 
 //==============================================================================
+SynthesiserVoice* Synthesiser::getVoice (const int index) const throw()
+{
+    const ScopedLock sl (lock);
+    return voices [index];
+}
+
 void Synthesiser::clearVoices()
 {
     const ScopedLock sl (lock);
