@@ -809,7 +809,7 @@ void Slider::resized()
     if (textBoxPos == TextBoxLeft || textBoxPos == TextBoxRight)
         minXSpace = 30;
     else
-        minYSpace = 30;
+        minYSpace = 15;
 
     const int tbw = jmax (0, jmin (textBoxWidth, getWidth() - minXSpace));
     const int tbh = jmax (0, jmin (textBoxHeight, getHeight() - minYSpace));
