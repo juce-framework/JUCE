@@ -147,8 +147,13 @@ private:
     friend class ZipInputStream;
     CriticalSection lock;
     InputStream* source;
-    bool deleteStreamWhenDestroyed;
+    File sourceFile;
+    bool isFromCustomStream, deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
+
+#ifdef JUCE_DEBUG
+    int numOpenStreams;
+#endif
 
     void init();
     int findEndOfZipEntryTable();

@@ -73,10 +73,28 @@ public:
             headerSize = 30 + littleEndianShort (buffer + 26)
                             + littleEndianShort (buffer + 28);
         }
+
+        if (! file_.isFromCustomStream)
+        {
+            source = file_.sourceFile.createInputStream();
+        }
+        else
+        {
+            source = 0;
+#ifdef JUCE_DEBUG
+            file_.numOpenStreams++;
+#endif
+        }
     }
 
     ~ZipInputStream() throw()
     {
+#ifdef JUCE_DEBUG
+        if (source == 0)
+            file.numOpenStreams--;
+#endif
+
+        delete source;
     }
 
     int64 getTotalLength() throw()
@@ -90,11 +108,20 @@ public:
             return 0;
 
         howMany = (int) jmin ((int64) howMany, zipEntryInfo.compressedSize - pos);
+        int num;
 
-        const ScopedLock sl (file.lock);
+        if (source != 0)
+        {
+            source->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            num = source->read (buffer, howMany);
+        }
+        else
+        {
+            const ScopedLock sl (file.lock);
 
-        file.source->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
-        const int num = file.source->read (buffer, howMany);
+            file.source->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            num = file.source->read (buffer, howMany);
+        }
 
         pos += num;
         return num;
@@ -120,9 +147,10 @@ public:
 private:
     //==============================================================================
     ZipFile& file;
-    ZipEntryInfo& zipEntryInfo;
+    ZipEntryInfo zipEntryInfo;
     int64 pos;
     int headerSize;
+    InputStream* source;
 
     ZipInputStream (const ZipInputStream&);
     const ZipInputStream& operator= (const ZipInputStream&);
@@ -133,13 +161,22 @@ private:
 ZipFile::ZipFile (InputStream* const source_,
                   const bool deleteStreamWhenDestroyed_) throw()
    : source (source_),
+     isFromCustomStream (true),
      deleteStreamWhenDestroyed (deleteStreamWhenDestroyed_)
+#ifdef JUCE_DEBUG
+     , numOpenStreams (0)
+#endif
 {
     init();
 }
 
 ZipFile::ZipFile (const File& file)
-    : deleteStreamWhenDestroyed (true)
+    : sourceFile (file),
+      isFromCustomStream (false),
+      deleteStreamWhenDestroyed (true)
+#ifdef JUCE_DEBUG
+      , numOpenStreams (0)
+#endif
 {
     source = file.createInputStream();
     init();
@@ -149,12 +186,21 @@ ZipFile::~ZipFile() throw()
 {
     for (int i = entries.size(); --i >= 0;)
     {
-        ZipEntryInfo* const zei = (ZipEntryInfo*)(entries [i]);
+        ZipEntryInfo* const zei = (ZipEntryInfo*) entries [i];
         delete zei;
     }
 
     if (deleteStreamWhenDestroyed && (source != 0))
         delete source;
+
+#ifdef JUCE_DEBUG
+    // If you hit this assertion, it means you've created a stream to read 
+    // one of the items in the zipfile, but you've forgotten to delete that 
+    // stream object before deleting the file.. Streams can't be kept open 
+    // after the file is deleted because they need to share the input
+    // stream that the file uses to read itself.
+    jassert (numOpenStreams == 0);
+#endif
 }
 
 //==============================================================================
@@ -165,7 +211,7 @@ int ZipFile::getNumEntries() const throw()
 
 const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const throw()
 {
-    ZipEntryInfo* const zei = (ZipEntryInfo*)(entries [index]);
+    ZipEntryInfo* const zei = (ZipEntryInfo*) entries [index];
 
     return (zei != 0) ? &(zei->entry)
                       : 0;
@@ -187,7 +233,7 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const throw(
 
 InputStream* ZipFile::createStreamForEntry (const int index)
 {
-    ZipEntryInfo* const zei = (ZipEntryInfo*) (entries[index]);
+    ZipEntryInfo* const zei = (ZipEntryInfo*) entries[index];
 
     InputStream* stream = 0;
 

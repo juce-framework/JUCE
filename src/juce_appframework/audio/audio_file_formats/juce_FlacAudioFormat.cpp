@@ -78,7 +78,7 @@ public:
         {
             FLAC__stream_decoder_process_until_end_of_metadata (decoder);
 
-            if (lengthInSamples == 0)
+            if (lengthInSamples == 0 && sampleRate > 0)
             {
                 // the length hasn't been stored in the metadata, so we'll need to
                 // work it out the length the hard way, by scanning the whole file..

@@ -125,7 +125,8 @@ public:
             lines.addLines (responseHeader);
 
             statusCode = responseHeader.fromFirstOccurrenceOf (T(" "), false, false)
-                                .substring (4).getIntValue();
+                                .substring (0, 3).getIntValue();
+
 
             //int contentLength = findHeaderItem (lines, T("Content-Length:")).getIntValue();
             //bool isChunked = findHeaderItem (lines, T("Transfer-Encoding:")).equalsIgnoreCase ("chunked");

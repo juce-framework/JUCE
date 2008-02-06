@@ -285,7 +285,7 @@ void JucerDocument::getOptionalMethods (StringArray& baseClasses,
     addMethod ("Component", "void", "lookAndFeelChanged()", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "bool", "hitTest (int x, int y)", "return true;", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "broughtToFront()", "", baseClasses, returnValues, methods, initialContents);
-    addMethod ("Component", "bool", "filesDropped (const StringArray& filenames, int mouseX, int mouseY)", "return false;", baseClasses, returnValues, methods, initialContents);
+    addMethod ("Component", "void", "filesDropped (const StringArray& filenames, int mouseX, int mouseY)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "handleCommandMessage (int commandId)", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "childrenChanged()", "", baseClasses, returnValues, methods, initialContents);
     addMethod ("Component", "void", "enablementChanged()", "", baseClasses, returnValues, methods, initialContents);

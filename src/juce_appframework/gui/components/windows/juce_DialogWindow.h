@@ -90,6 +90,16 @@ public:
 
         It returns the value that was returned by the dialog box's runModalLoop() call.
 
+        To close the dialog programatically, you should call exitModalState (returnValue) on
+        the DialogWindow that is created. To find a pointer to this window from your
+        contentComponent, you can do something like this:
+        @code 
+        Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
+
+        if (dw != 0)
+            dw->exitModalState (1234);
+        @endcode
+
         @param dialogTitle          the dialog box's title
         @param contentComponent     the content component for the dialog box. Make sure
                                     that this has been set to the size you want it to

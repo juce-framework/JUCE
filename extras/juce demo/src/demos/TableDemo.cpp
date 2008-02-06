@@ -71,6 +71,8 @@ public:
 
         // un-comment this line to have a go of stretch-to-fit mode
         // table->getHeader()->setStretchToFitActive (true);
+
+        table->setMultipleSelectionEnabled (true);
     }
 
     ~TableDemoComponent()
