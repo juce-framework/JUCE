@@ -43,8 +43,8 @@ class ImageResourceProperty    : public ChoicePropertyComponent,
                                  private ChangeListener
 {
 public:
-    ImageResourceProperty (JucerDocument& document_, 
-                           ElementType* const element_, 
+    ImageResourceProperty (JucerDocument& document_,
+                           ElementType* const element_,
                            const String& name,
                            const bool allowChoiceOfNoResource_)
         : ChoicePropertyComponent (name),
@@ -61,7 +61,7 @@ public:
         document_.addChangeListener (this);
     }
 
-    ImageResourceProperty (ElementType* const element_, 
+    ImageResourceProperty (ElementType* const element_,
                            const String& name,
                            const bool allowChoiceOfNoResource_ = false)
         : ChoicePropertyComponent (name),

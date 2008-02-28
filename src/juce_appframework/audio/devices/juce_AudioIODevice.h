@@ -109,7 +109,7 @@ public:
         and AudioIODevice::getCurrentBufferSizeSamples() on the supplied pointer.
 
         @param device       the audio IO device that will be used to drive the callback.
-                            Note that if you're going to store this this pointer, it is 
+                            Note that if you're going to store this this pointer, it is
                             only valid until the next time that audioDeviceStopped is called.
     */
     virtual void audioDeviceAboutToStart (AudioIODevice* device) = 0;

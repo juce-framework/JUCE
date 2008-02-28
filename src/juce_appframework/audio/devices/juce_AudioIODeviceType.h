@@ -123,7 +123,7 @@ public:
                                         may be used to help decide which device would be most suitable
     */
     virtual const String getDefaultDeviceName (const bool preferInputNames,
-                                               const int numInputChannelsNeeded, 
+                                               const int numInputChannelsNeeded,
                                                const int numOutputChannelsNeeded) const = 0;
 
     /** Creates one of the devices of this type.

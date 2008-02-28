@@ -640,6 +640,17 @@ int ListBox::getRowContainingPosition (const int x, const int y) const throw()
     return -1;
 }
 
+int ListBox::getInsertionIndexForPosition (const int x, const int y) const throw()
+{
+    if (((unsigned int) x) < (unsigned int) getWidth())
+    {
+        const int row = (viewport->getViewPositionY() + y + rowHeight / 2 - viewport->getY()) / rowHeight;
+        return jlimit (0, totalItems, row);
+    }
+
+    return -1;
+}
+
 Component* ListBox::getComponentForRowNumber (const int row) const throw()
 {
     Component* const listRowComp = viewport->getComponentForRowIfOnscreen (row);

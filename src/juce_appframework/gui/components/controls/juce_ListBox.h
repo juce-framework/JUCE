@@ -381,6 +381,21 @@ public:
     */
     int getRowContainingPosition (const int x, const int y) const throw();
 
+    /** Finds a row index that would be the most suitable place to insert a new
+        item for a given position.
+
+        This is useful when the user is e.g. dragging and dropping onto the listbox, 
+        because it lets you easily choose the best position to insert the item that 
+        they drop, based on where they drop it.
+
+        If the position is out of range, this will return -1. If the position is
+        beyond the end of the list, it will return getNumRows() to indicate the end
+        of the list.
+
+        @see getComponentForRowNumber
+    */
+    int getInsertionIndexForPosition (const int x, const int y) const throw();
+
     /** Returns the position of one of the rows, relative to the top-left of
         the listbox.
 

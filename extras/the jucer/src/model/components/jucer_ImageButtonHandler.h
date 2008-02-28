@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_TEXTBUTTONHANDLER_JUCEHEADER__x
-#define __JUCER_TEXTBUTTONHANDLER_JUCEHEADER__x
+#ifndef __JUCER_IMAGEBUTTONHANDLER_JUCEHEADER__
+#define __JUCER_IMAGEBUTTONHANDLER_JUCEHEADER__
 
 #include "jucer_ButtonHandler.h"
 #include "../../properties/jucer_ComponentColourProperty.h"
@@ -209,7 +209,7 @@ public:
     public:
         SetImageResourceAction (ImageButton* const button,
                                 ComponentLayout& layout_,
-                                const ImageRole role_, 
+                                const ImageRole role_,
                                 const String& newResource_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
               newResource (newResource_),
@@ -349,7 +349,7 @@ public:
     public:
         SetImageOpacityAction (ImageButton* const button,
                                ComponentLayout& layout_,
-                               const ImageRole role_, 
+                               const ImageRole role_,
                                const float newState_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
               role (role_),
@@ -401,7 +401,7 @@ public:
     class ImageButtonOpacityProperty    : public SliderPropertyComponent
     {
     public:
-        ImageButtonOpacityProperty (ComponentLayout& layout_, ImageButton* const owner_, 
+        ImageButtonOpacityProperty (ComponentLayout& layout_, ImageButton* const owner_,
                                     const String& name, const ImageRole role_)
             : SliderPropertyComponent (name, 0.0, 1.0, 0.0),
               owner (owner_),
@@ -433,7 +433,7 @@ public:
     public:
         SetImageColourAction (ImageButton* const button,
                               ComponentLayout& layout_,
-                              const ImageRole role_, 
+                              const ImageRole role_,
                               const Colour& newState_)
             : ComponentUndoableAction <ImageButton> (button, layout_),
               role (role_),
@@ -486,7 +486,7 @@ public:
                                          public ChangeListener
     {
     public:
-        ImageButtonColourProperty (ComponentLayout& layout_, ImageButton* const owner_, 
+        ImageButtonColourProperty (ComponentLayout& layout_, ImageButton* const owner_,
                                    const String& name, const ImageRole role_)
             : ColourPropertyComponent (name, false),
               owner (owner_),
@@ -532,7 +532,7 @@ public:
         Image* over = document.getResources().getImageFromCache (getImageResource (ib, overImage));
         Image* down = document.getResources().getImageFromCache (getImageResource (ib, downImage));
 
-        ib->setImages (false, true, doesImageKeepProportions (ib), 
+        ib->setImages (false, true, doesImageKeepProportions (ib),
                        norm,
                        getImageOpacity (ib, normalImage),
                        getImageColour (ib, normalImage),
@@ -551,4 +551,4 @@ private:
 };
 
 
-#endif   // __JUCER_TEXTBUTTONHANDLER_JUCEHEADER__
+#endif   // __JUCER_IMAGEBUTTONHANDLER_JUCEHEADER__

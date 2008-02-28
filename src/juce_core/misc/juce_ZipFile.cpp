@@ -194,9 +194,9 @@ ZipFile::~ZipFile() throw()
         delete source;
 
 #ifdef JUCE_DEBUG
-    // If you hit this assertion, it means you've created a stream to read 
-    // one of the items in the zipfile, but you've forgotten to delete that 
-    // stream object before deleting the file.. Streams can't be kept open 
+    // If you hit this assertion, it means you've created a stream to read
+    // one of the items in the zipfile, but you've forgotten to delete that
+    // stream object before deleting the file.. Streams can't be kept open
     // after the file is deleted because they need to share the input
     // stream that the file uses to read itself.
     jassert (numOpenStreams == 0);
@@ -243,7 +243,7 @@ InputStream* ZipFile::createStreamForEntry (const int index)
 
         if (zei->compressed)
         {
-            stream = new GZIPDecompressorInputStream (stream, true, true, 
+            stream = new GZIPDecompressorInputStream (stream, true, true,
                                                       zei->entry.uncompressedSize);
 
             // (much faster to unzip in big blocks using a buffer..)

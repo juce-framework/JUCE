@@ -48,7 +48,7 @@
 #include <netinet/in.h> /* for ntohl() */
 #endif
 #if 0 /* UNUSED */
-#include "private/bitmath.h"
+#include "include/private/bitmath.h"
 #endif
 #include "include/private/bitwriter.h"
 #include "include/private/crc.h"

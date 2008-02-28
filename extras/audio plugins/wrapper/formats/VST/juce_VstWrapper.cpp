@@ -134,6 +134,10 @@ static uint32 lastMasterIdleCall = 0;
 BEGIN_JUCE_NAMESPACE
  extern void juce_callAnyTimersSynchronously();
 
+ #if JUCE_MAC
+  extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
+ #endif
+
  #if JUCE_LINUX
   extern Display* display;
   extern bool juce_postMessageToSystemQueue (void* message);
@@ -351,6 +355,7 @@ public:
         isProcessing = false;
         firstResize = true;
         hasShutdown = false;
+        firstProcessCallback = true;
         channels = 0;
         numInChans = JucePlugin_MaxNumInputChannels;
         numOutChans = JucePlugin_MaxNumOutputChannels;
@@ -591,13 +596,25 @@ public:
 
     void processReplacing (float** inputs, float** outputs, VstInt32 numSamples)
     {
-        // if this fails, the host hasn't called resume() before processing
-        jassert (isProcessing);
+        if (firstProcessCallback)
+        {
+            firstProcessCallback = false;
 
-        // (tragically, some hosts actually need this, although it's stupid to have
-        //  to do it here..)
-        if (! isProcessing)
-            resume();
+            // if this fails, the host hasn't called resume() before processing
+            jassert (isProcessing);
+
+            // (tragically, some hosts actually need this, although it's stupid to have
+            //  to do it here..)
+            if (! isProcessing)
+                resume();
+
+            filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
+
+#if JUCE_WIN32
+            if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL)
+                filter->setNonRealtime (true);
+#endif
+        }
 
 #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
@@ -716,8 +733,8 @@ public:
     }
 
     //==============================================================================
-	VstInt32 startProcess () { return 0; }
-	VstInt32 stopProcess () { return 0;}
+    VstInt32 startProcess () { return 0; }
+    VstInt32 stopProcess () { return 0;}
 
     void resume()
     {
@@ -735,6 +752,10 @@ public:
 
         const int blockSize = getBlockSize();
         jassert (blockSize > 0);
+
+        firstProcessCallback = true;
+
+        filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
 
         filter->setPlayConfigDetails (numInChans, numOutChans,
                                       rate, blockSize);
@@ -1367,6 +1388,7 @@ private:
     bool isProcessing;
     bool firstResize;
     bool hasShutdown;
+    bool firstProcessCallback;
     int diffW, diffH;
     int numInChans, numOutChans;
     float** channels;
@@ -1461,6 +1483,10 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
     initialiseJuce_GUI();
+
+#if JUCE_MAC && defined (JucePlugin_CFBundleIdentifier)
+    juce_setCurrentExecutableFileNameFromBundleId (JucePlugin_CFBundleIdentifier);
+#endif
 
     MessageManager::getInstance()->setTimeBeforeShowingWaitCursor (0);
 

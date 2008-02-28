@@ -377,7 +377,7 @@ void TabbedButtonBar::resized()
     if (orientation == TabsAtTop || orientation == TabsAtBottom)
         swapVariables (depth, length);
 
-    const int overlap = getLookAndFeel().getTabButtonOverlap (depth) 
+    const int overlap = getLookAndFeel().getTabButtonOverlap (depth)
                             + getLookAndFeel().getTabButtonSpaceAroundImage() * 2;
 
     int i, totalLength = overlap;

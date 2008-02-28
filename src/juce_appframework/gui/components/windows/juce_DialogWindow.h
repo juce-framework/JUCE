@@ -93,7 +93,7 @@ public:
         To close the dialog programatically, you should call exitModalState (returnValue) on
         the DialogWindow that is created. To find a pointer to this window from your
         contentComponent, you can do something like this:
-        @code 
+        @code
         Dialogwindow* dw = contentComponent->findParentComponentOfClass ((DialogWindow*) 0);
 
         if (dw != 0)

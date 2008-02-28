@@ -266,6 +266,8 @@ void TopLevelWindow::recreateDesktopWindow()
     }
 }
 
+const int juce_windowIsSemiTransparentFlag = (1 << 31); // duplicated in native windowing code
+
 void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo)
 {
     /* It's not recommended to change the desktop window flags directly for a TopLevelWindow,
@@ -277,7 +279,8 @@ void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAtt
        method, then add or remove whatever flags are necessary from this value before returning it.
     */
 
-    jassert (windowStyleFlags == getDesktopWindowStyleFlags());
+    jassert ((windowStyleFlags & ~juce_windowIsSemiTransparentFlag)
+                == (getDesktopWindowStyleFlags() & ~juce_windowIsSemiTransparentFlag));
 
     Component::addToDesktop (windowStyleFlags, nativeWindowToAttachTo);
 

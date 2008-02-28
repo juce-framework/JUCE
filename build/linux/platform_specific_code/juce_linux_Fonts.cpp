@@ -402,7 +402,7 @@ public:
                     const float x3 = CONVERTX (points [next2]);
                     const float y3 = CONVERTY (points [next2]);
 
-                    if (FT_CURVE_TAG (tags[next1]) != FT_Curve_Tag_Cubic 
+                    if (FT_CURVE_TAG (tags[next1]) != FT_Curve_Tag_Cubic
                          || FT_CURVE_TAG (tags[next2]) != FT_Curve_Tag_On)
                         return false;
 

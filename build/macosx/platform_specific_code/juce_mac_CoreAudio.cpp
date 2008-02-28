@@ -1132,7 +1132,7 @@ public:
     }
 
     const String getDefaultDeviceName (const bool preferInputNames,
-                                       const int numInputChannelsNeeded, 
+                                       const int numInputChannelsNeeded,
                                        const int numOutputChannelsNeeded) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
@@ -1142,7 +1142,7 @@ public:
         AudioDeviceID deviceID;
         UInt32 size = sizeof (deviceID);
 
-        // if they're asking for any input channels at all, use the default input, so we 
+        // if they're asking for any input channels at all, use the default input, so we
         // get the built-in mic rather than the built-in output with no inputs..
         if (AudioHardwareGetProperty (numInputChannelsNeeded > 0
                                                        ? kAudioHardwarePropertyDefaultInputDevice

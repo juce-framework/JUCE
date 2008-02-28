@@ -137,7 +137,7 @@ const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool cl
         if (rect.contains (cx, cy))
             return rect;
 
-        const double distance = juce_hypot ((double) (rect.getCentreX() - cx), 
+        const double distance = juce_hypot ((double) (rect.getCentreX() - cx),
                                             (double) (rect.getCentreY() - cy));
 
         if (distance < bestDistance)

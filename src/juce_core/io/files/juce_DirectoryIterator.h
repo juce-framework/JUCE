@@ -44,7 +44,7 @@
 
     If you may be finding a large number of files, this is better than
     using File::findChildFiles() because it doesn't block while it finds them
-    all, and this is more mempry-efficient.
+    all, and this is more memory-efficient.
 
     It can also guess how far it's got using a wildly inaccurate algorithm.
 */

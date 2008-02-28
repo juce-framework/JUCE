@@ -932,7 +932,7 @@ public:
     }
 
     const String getDefaultDeviceName (const bool /*preferInputNames*/,
-                                       const int /*numInputChannelsNeeded*/, 
+                                       const int /*numInputChannelsNeeded*/,
                                        const int /*numOutputChannelsNeeded*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this

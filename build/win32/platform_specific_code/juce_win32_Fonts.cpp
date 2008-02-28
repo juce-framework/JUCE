@@ -485,7 +485,7 @@ static bool addGlyphToTypeface (HDC dc,
         const WCHAR charToTest[] = { (WCHAR)character, 0 };
         WORD index = 0;
 
-        if (wGetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR 
+        if (wGetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
              && index == 0xffff)
         {
             return false;
@@ -511,7 +511,7 @@ static bool addGlyphToTypeface (HDC dc,
         const WCHAR charToTest[] = { (WCHAR)character, 0 };
         WORD index = 0;
 
-        if (GetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR 
+        if (GetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
              && index == 0xffff)
         {
             return false;

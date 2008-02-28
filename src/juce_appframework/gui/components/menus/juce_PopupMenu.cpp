@@ -856,7 +856,7 @@ private:
         {
             x = minX;
 
-            const int spaceUnder = mon.getHeight() - maxY;
+            const int spaceUnder = mon.getHeight() - (maxY - mon.getY());
             const int spaceOver = minY - mon.getY();
 
             if (heightToUse < spaceUnder - 30 || spaceUnder >= spaceOver)

@@ -306,10 +306,10 @@ private:
     const MidiInThread& operator= (const MidiInThread&);
 };
 
-static void CALLBACK midiInCallback (HMIDIIN, 
-                                     UINT uMsg, 
-                                     DWORD_PTR dwInstance, 
-                                     DWORD_PTR midiMessage, 
+static void CALLBACK midiInCallback (HMIDIIN,
+                                     UINT uMsg,
+                                     DWORD_PTR dwInstance,
+                                     DWORD_PTR midiMessage,
                                      DWORD_PTR timeStamp)
 {
     MidiInThread* const thread = (MidiInThread*) dwInstance;
@@ -602,7 +602,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     const MidiOutHandle* const handle = (const MidiOutHandle*) internal;
 
-    if (message.getRawDataSize() > 3 
+    if (message.getRawDataSize() > 3
          || message.isSysEx())
     {
         MIDIHDR h;

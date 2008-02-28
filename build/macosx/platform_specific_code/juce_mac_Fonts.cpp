@@ -461,7 +461,7 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
                     addKerningPair (g->getCharacter(), character, kerning);
             }
         }
-        
+
         foundOne = true;
     }
 

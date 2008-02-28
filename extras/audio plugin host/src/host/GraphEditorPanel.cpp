@@ -71,7 +71,7 @@ void PluginWindow::closeAllCurrentlyOpenWindows()
         delete activePluginWindows.getUnchecked(i);
 }
 
-PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node, 
+PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
                                           bool useGenericView)
 {
     for (int i = activePluginWindows.size(); --i >= 0;)
@@ -92,7 +92,7 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node,
     if (useGenericView)
     {
         ui = new GenericAudioProcessorEditor (node->processor);
-    } 
+    }
 
     if (ui != 0)
     {
@@ -297,7 +297,7 @@ public:
             if (getParentComponent() != 0)
                 getParentComponent()->globalPositionToRelative (x, y);
 
-            graph.setNodePosition (filterID, 
+            graph.setNodePosition (filterID,
                                    (x + getWidth() / 2) / (double) getParentWidth(),
                                    (y + getHeight() / 2) / (double) getParentHeight());
 

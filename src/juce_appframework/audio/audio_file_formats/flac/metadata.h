@@ -763,7 +763,7 @@ typedef enum {
 	FLAC__METADATA_CHAIN_STATUS_READ_WRITE_MISMATCH,
 	/**< FLAC__metadata_chain_write() was called on a chain read by
 	 *   FLAC__metadata_chain_read_with_callbacks()/FLAC__metadata_chain_read_ogg_with_callbacks(),
-	 *   or 
+	 *   or
 	 *   FLAC__metadata_chain_write_with_callbacks()/FLAC__metadata_chain_write_with_callbacks_and_tempfile()
 	 *   was called on a chain read by
 	 *   FLAC__metadata_chain_read()/FLAC__metadata_chain_read_ogg().

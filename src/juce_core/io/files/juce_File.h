@@ -444,6 +444,9 @@ public:
         If the target file already exists, this will attempt to delete it first, and
         will fail if this can't be done.
 
+        Note that the destination file isn't the directory to put it in, it's the actual
+        filename that you want the new file to have.
+
         @returns    true if the operation succeeds
     */
     bool moveFileTo (const File& targetLocation) const throw();

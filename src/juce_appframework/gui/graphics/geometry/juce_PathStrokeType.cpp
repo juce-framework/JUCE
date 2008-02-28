@@ -506,7 +506,7 @@ void PathStrokeType::createStrokedPath (Path& destPath,
 
         const float hypotSquared = dx*dx + dy*dy;
 
-        if (it.closesSubPath || hypotSquared > minSegmentLength)
+        if (it.closesSubPath || hypotSquared > minSegmentLength || it.isLastInSubpath())
         {
             const float len = sqrtf (hypotSquared);
 

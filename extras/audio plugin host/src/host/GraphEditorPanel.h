@@ -127,7 +127,7 @@ class PluginWindow  : public DocumentWindow
                   const bool isGeneric_);
 
 public:
-    static PluginWindow* getWindowFor (AudioProcessorGraph::Node* node, 
+    static PluginWindow* getWindowFor (AudioProcessorGraph::Node* node,
                                        bool useGenericView);
 
     static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);

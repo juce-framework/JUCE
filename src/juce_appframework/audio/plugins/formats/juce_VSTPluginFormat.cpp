@@ -81,7 +81,7 @@ BEGIN_JUCE_NAMESPACE
 /*  Obviously you're going to need the Steinberg vstsdk2.4 folder in
     your include path if you want to add VST support.
 
-    If you're not interested in VSTs, you can disable them by changing the 
+    If you're not interested in VSTs, you can disable them by changing the
     JUCE_PLUGINHOST_VST flag in juce_Config.h
 */
 #include "pluginterfaces/vst2.x/aeffectx.h"
@@ -3012,4 +3012,3 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 END_JUCE_NAMESPACE
 
 #endif
-

@@ -680,19 +680,23 @@ public:
     {
         while (next())
         {
-            cy = lineY;
-
-            if (indexInText + atom->numChars > index)
+            if (indexInText + atom->numChars >= index)
             {
                 updateLineHeight();
-                cx = indexToX (index);
-                lineHeight_ = lineHeight;
-                return true;
+
+                if (indexInText + atom->numChars > index)
+                {
+                    cx = indexToX (index);
+                    cy = lineY;
+                    lineHeight_ = lineHeight;
+                    return true;
+                }
             }
         }
 
         cx = atomX;
         cy = lineY;
+        lineHeight_ = lineHeight;
         return false;
     }
 
@@ -2387,15 +2391,13 @@ void TextEditor::getCharPosition (const int index, float& cx, float& cy, float& 
     {
         TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
-        if (i.getCharPosition (index, cx, cy, lineHeight))
-            return;
+        i.getCharPosition (index, cx, cy, lineHeight);
     }
     else
     {
         cx = cy = 0;
+        lineHeight = currentFont.getHeight();
     }
-
-    lineHeight = currentFont.getHeight();
 }
 
 int TextEditor::indexAtPosition (const float x, const float y) throw()
