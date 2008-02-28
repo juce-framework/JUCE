@@ -33,6 +33,7 @@
   #pragma warning (disable: 4514)
   #pragma warning (push)
 #endif
+#include <locale>
 
 #include "../basics/juce_StandardHeader.h"
 
@@ -53,6 +54,12 @@ BEGIN_JUCE_NAMESPACE
 static const char* const emptyCharString                        = "\0\0\0\0JUCE";
 static const int safeEmptyStringRefCount                        = 0x3fffffff;
 String::InternalRefCountedStringHolder String::emptyString      = { safeEmptyStringRefCount, 0, { 0 } };
+static tchar decimalPoint                                       = T('.');
+
+void juce_initialiseStrings()
+{
+    decimalPoint = String::fromUTF8 ((const uint8*) localeconv()->decimal_point) [0];
+}
 
 //==============================================================================
 void String::deleteInternal() throw()
@@ -405,7 +412,7 @@ void String::doubleToStringWithDecPlaces (double n, int numDecPlaces) throw()
         while (numDecPlaces >= 0 || v > 0)
         {
             if (numDecPlaces == 0)
-                *--t = T('.');
+                *--t = decimalPoint;
 
             *--t = (tchar) (T('0') + (v % 10));
 
@@ -1291,7 +1298,7 @@ void String::vprintf (const tchar* const pf, va_list& args) throw()
         bufSize += 256;
         buf = (tchar*) juce_malloc (bufSize * sizeof (tchar));
     }
-    while (bufSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly 
+    while (bufSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly
                               // returns -1 because of an error rather than because it needs more space.
 
     if (buf != stackBuf)

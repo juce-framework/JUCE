@@ -72,6 +72,7 @@ const tchar* File::separatorString  = T("\\");
 //==============================================================================
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
 UNICODE_FUNCTION (GetFileAttributesW, DWORD, (LPCWSTR))
+UNICODE_FUNCTION (GetFileAttributesExW, BOOL, (LPCWSTR, GET_FILEEX_INFO_LEVELS, LPVOID))
 UNICODE_FUNCTION (SetFileAttributesW, BOOL, (LPCWSTR, DWORD))
 UNICODE_FUNCTION (RemoveDirectoryW, BOOL, (LPCWSTR))
 UNICODE_FUNCTION (DeleteFileW, BOOL, (LPCWSTR))
@@ -98,6 +99,7 @@ void juce_initialiseUnicodeFileFunctions() throw()
         HMODULE h = GetModuleHandleA ("kernel32.dll");
 
         UNICODE_FUNCTION_LOAD (GetFileAttributesW)
+        UNICODE_FUNCTION_LOAD (GetFileAttributesExW)
         UNICODE_FUNCTION_LOAD (SetFileAttributesW)
         UNICODE_FUNCTION_LOAD (RemoveDirectoryW)
         UNICODE_FUNCTION_LOAD (DeleteFileW)
@@ -133,8 +135,8 @@ bool juce_fileExists (const String& fileName,
     const DWORD attr = GetFileAttributesW (fileName);
 #endif
 
-    return (dontCountDirectories) ? ((attr & FILE_ATTRIBUTE_DIRECTORY) == 0)
-                                  : (attr != 0xffffffff);
+    return dontCountDirectories ? ((attr & FILE_ATTRIBUTE_DIRECTORY) == 0)
+                                : (attr != 0xffffffff);
 }
 
 bool juce_isDirectory (const String& fileName) throw()
@@ -346,16 +348,17 @@ void juce_fileFlush (void* handle) throw()
 
 int64 juce_getFileSize (const String& fileName) throw()
 {
-    void* const handle = juce_fileOpen (fileName, false);
+    WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-    if (handle != 0)
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+    if (wGetFileAttributesExW != 0 ? wGetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes)
+                                   : GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
+#else
+    if (GetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes))
+#endif
     {
-        LARGE_INTEGER li;
-        li.LowPart = GetFileSize (handle, (LPDWORD) &li.HighPart);
-        juce_fileClose (handle);
-
-        if (li.LowPart != INVALID_FILE_SIZE || GetLastError() != NO_ERROR)
-            return li.QuadPart;
+        return (((int64) attributes.nFileSizeHigh) << 32)
+                 | attributes.nFileSizeLow;
     }
 
     return 0;
@@ -388,21 +391,23 @@ void juce_getFileTimes (const String& fileName,
                         int64& accessTime,
                         int64& creationTime) throw()
 {
-    creationTime = accessTime = modificationTime = 0;
-    void* const h = juce_fileOpen (fileName, false);
+    WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-    if (h != 0)
+
+#if JUCE_ENABLE_WIN98_COMPATIBILITY
+    if (wGetFileAttributesExW != 0 ? wGetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes)
+                                   : GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
+#else
+    if (GetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes))
+#endif
     {
-        FILETIME m, a, c;
-
-        if (GetFileTime ((HANDLE) h, &c, &a, &m))
-        {
-            creationTime = fileTimeToTime (&c);
-            accessTime = fileTimeToTime (&a);
-            modificationTime = fileTimeToTime (&m);
-        }
-
-        juce_fileClose (h);
+        modificationTime = fileTimeToTime (&attributes.ftLastWriteTime);
+        creationTime = fileTimeToTime (&attributes.ftCreationTime);
+        accessTime = fileTimeToTime (&attributes.ftLastAccessTime);
+    }
+    else
+    {
+        creationTime = accessTime = modificationTime = 0;
     }
 }
 

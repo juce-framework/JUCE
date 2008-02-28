@@ -136,6 +136,12 @@ public:
                 outDataSize = sizeof (void*);
                 return noErr;
             }
+            else if (inID == kAudioUnitProperty_OfflineRender)
+            {
+                outWritable = true;
+                outDataSize = sizeof (UInt32);
+                return noErr;
+            }
         }
 
         return JuceAUBaseClass::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
@@ -150,12 +156,34 @@ public:
         {
             if (inID == juceFilterObjectPropertyID)
             {
-                *((void**) outData) = (void*) juceFilter;
+                *(void**) outData = (void*) juceFilter;
+                return noErr;
+            }
+            else if (inID == kAudioUnitProperty_OfflineRender)
+            {
+                *(UInt32*) outData = (juceFilter != 0 && juceFilter->isNonRealtime()) ? 1 : 0;
                 return noErr;
             }
         }
 
         return JuceAUBaseClass::GetProperty (inID, inScope, inElement, outData);
+    }
+
+    ComponentResult SetProperty (AudioUnitPropertyID inID,
+                                 AudioUnitScope inScope,
+                                 AudioUnitElement inElement,
+                                 const void * inData,
+                                 UInt32 inDataSize)
+    {
+        if (inScope == kAudioUnitScope_Global && inID == kAudioUnitProperty_OfflineRender)
+        {
+            if (juceFilter != 0)
+                juceFilter->setNonRealtime ((*(UInt32*) inData) != 0);
+
+            return noErr;
+        }
+
+        return MusicDeviceBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
     }
 
     ComponentResult SaveState (CFPropertyListRef* outData)
@@ -176,7 +204,7 @@ public:
 
             if (state.getSize() > 0)
             {
-                CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const uint8*) state, state.getSize());
+                CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), state.getSize());
                 CFDictionarySetValue (dict, CFSTR("jucePluginState"), ourState);
                 CFRelease (ourState);
             }
@@ -740,7 +768,7 @@ protected:
             {
                 presets[i].presetNumber = i;
                 presets[i].presetName = PlatformUtilities::juceStringToCFString (juceFilter->getProgramName (i));
-                
+
                 CFArrayAppendValue (presetsArray, presets + i);
             }
 
@@ -766,7 +794,7 @@ protected:
         SetAFactoryPresetAsCurrent (chosenPreset);
 
         return noErr;
-    } 
+    }
 
    //==============================================================================
 private:

@@ -445,7 +445,7 @@ static void updateKeyModifiers() throw()
         currentModifiers |= ModifierKeys::altModifier;
 
     if ((GetKeyState (VK_RMENU) & 0x8000) != 0)
-        currentModifiers &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier); 
+        currentModifiers &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
 }
 
 void ModifierKeys::updateCurrentModifiers() throw()
@@ -1739,7 +1739,7 @@ private:
                 BYTE keyState[256];
                 GetKeyboardState (keyState);
                 WCHAR unicodeChar[32];
-                const DWORD converted = wToUnicode (virtualKey, virtualScanCode, keyState, 
+                const DWORD converted = wToUnicode (virtualKey, virtualScanCode, keyState,
                                                     unicodeChar, 32, 0);
                 if (converted > 0)
                     textChar = unicodeChar[0];
@@ -1752,7 +1752,7 @@ private:
                 BYTE keyState[256];
                 GetKeyboardState (keyState);
                 WCHAR unicodeChar[32];
-                const DWORD converted = ToUnicode (virtualKey, virtualScanCode, keyState, 
+                const DWORD converted = ToUnicode (virtualKey, virtualScanCode, keyState,
                                                    unicodeChar, 32, 0);
                 if (converted > 0)
                     textChar = unicodeChar[0];
