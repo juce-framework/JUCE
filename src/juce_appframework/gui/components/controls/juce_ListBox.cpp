@@ -350,7 +350,6 @@ ListBox::ListBox (const String& name, ListBoxModel* const model_)
       totalItems (0),
       rowHeight (22),
       minimumRowWidth (0),
-      scrollBarSize (18),
       outlineThickness (0),
       lastRowSelected (-1),
       mouseMoveSelects (false),
@@ -422,6 +421,11 @@ void ListBox::resized()
 void ListBox::visibilityChanged()
 {
     viewport->updateVisibleArea (true);
+}
+
+Viewport* ListBox::getViewPort() const throw()
+{
+    return viewport;
 }
 
 //==============================================================================

@@ -116,6 +116,14 @@ public:
     /** Shows or hides the scrollbar's buttons. */
     void setButtonVisibility (const bool buttonsAreVisible);
 
+    /** Tells the scrollbar whether to make itself invisible when not needed.
+
+        The default behaviour is for a scrollbar to become invisible when the thumb
+        fills the whole of its range (i.e. when it can't be moved). Setting this
+        value to false forces the bar to always be visible.
+    */
+    void setAutoHide (const bool shouldHideWhenFullRange);
+
     //==============================================================================
     /** Sets the minimum and maximum values that the bar will move between.
 
@@ -287,7 +295,7 @@ private:
     int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
     int dragStartMousePos, lastMousePos;
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
-    bool vertical, isDraggingThumb;
+    bool vertical, isDraggingThumb, alwaysVisible;
     Button* upButton;
     Button* downButton;
     SortedSet <void*> listeners;

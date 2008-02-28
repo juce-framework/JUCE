@@ -527,6 +527,13 @@ public:
     */
     Image* createSnapshotOfSelectedRows();
 
+    /** Returns the viewport that this ListBox uses.
+
+        You may need to use this to change parameters such as whether scrollbars
+        are shown, etc.
+    */
+    Viewport* getViewPort() const throw();
+
 
     //==============================================================================
     /** @internal */
@@ -562,7 +569,7 @@ private:
     ListViewport* viewport;
     Component* headerComponent;
     int totalItems, rowHeight, minimumRowWidth;
-    int scrollBarSize, outlineThickness;
+    int outlineThickness;
     int lastMouseX, lastMouseY, lastRowSelected;
     bool mouseMoveSelects, multipleSelection, hasDoneInitialUpdate;
     SparseSet <int> selected;
