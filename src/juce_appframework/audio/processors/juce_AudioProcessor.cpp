@@ -47,7 +47,8 @@ AudioProcessor::AudioProcessor()
       numInputChannels (0),
       numOutputChannels (0),
       latencySamples (0),
-      suspended (false)
+      suspended (false),
+      nonRealtime (false)
 {
 }
 
@@ -90,6 +91,11 @@ void AudioProcessor::setPlayConfigDetails (const int numIns,
     numOutputChannels = numOuts;
     sampleRate = sampleRate_;
     blockSize = blockSize_;
+}
+
+void AudioProcessor::setNonRealtime (const bool nonRealtime_) throw()
+{
+    nonRealtime = nonRealtime_;
 }
 
 void AudioProcessor::setLatencySamples (const int newLatency)

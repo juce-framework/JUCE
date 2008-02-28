@@ -53,7 +53,7 @@ public:
         Some subclasses might want to do things like call flush() during their
         destructors.
     */
-    virtual ~OutputStream() {}
+    virtual ~OutputStream();
 
     //==============================================================================
     /** If the stream is using a buffer, this will ensure it gets written
@@ -253,7 +253,7 @@ public:
 
 protected:
     //==============================================================================
-    OutputStream() throw()  {}
+    OutputStream() throw();
 };
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__

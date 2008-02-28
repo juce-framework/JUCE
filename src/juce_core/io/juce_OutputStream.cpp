@@ -35,7 +35,45 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_OutputStream.h"
+#include "../threads/juce_CriticalSection.h"
+#include "../containers/juce_VoidArray.h"
 
+
+//==============================================================================
+#if JUCE_DEBUG
+static CriticalSection activeStreamLock;
+static VoidArray activeStreams;
+
+void juce_CheckForDanglingStreams()
+{
+    /* 
+        It's always a bad idea to leak any object, but if you're leaking output
+        streams, then there's a good chance that you're failing to flush a file
+        to disk properly, which could result in corrupted data and other similar
+        nastiness..
+    */
+    jassert (activeStreams.size() == 0);
+};
+#endif
+
+//==============================================================================
+OutputStream::OutputStream() throw()
+{
+#if JUCE_DEBUG
+    activeStreamLock.enter();
+    activeStreams.add (this);
+    activeStreamLock.exit();
+#endif
+}
+
+OutputStream::~OutputStream()
+{
+#if JUCE_DEBUG
+    activeStreamLock.enter();
+    activeStreams.removeValue (this);
+    activeStreamLock.exit();
+#endif
+}
 
 //==============================================================================
 void OutputStream::writeBool (bool b)

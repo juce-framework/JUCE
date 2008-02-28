@@ -46,10 +46,10 @@
     and play back the result.
 
     Processors can be added to the graph as "nodes" using addNode(), and once
-    added, you can connect any of their input or output channels to other 
+    added, you can connect any of their input or output channels to other
     nodes using addConnection().
 
-    To play back a graph through an audio device, you might want to use an 
+    To play back a graph through an audio device, you might want to use an
     AudioProcessorPlayer object.
 */
 class JUCE_API  AudioProcessorGraph   : public AudioProcessor,
@@ -134,7 +134,7 @@ public:
         */
         uint32 sourceNodeId;
 
-        /** The index of the output channel of the source node from which this 
+        /** The index of the output channel of the source node from which this
             connection takes its data.
 
             If this value is the special number AudioProcessorGraph::midiChannelIndex, then
@@ -148,7 +148,7 @@ public:
         */
         uint32 destNodeId;
 
-        /** The index of the input channel of the destination node to which this 
+        /** The index of the input channel of the destination node to which this
             connection delivers its data.
 
             If this value is the special number AudioProcessorGraph::midiChannelIndex, then
@@ -164,7 +164,7 @@ public:
     };
 
     //==============================================================================
-    /** Deletes all nodes and connections from this graph. 
+    /** Deletes all nodes and connections from this graph.
 
         Any processor objects in the graph will be deleted.
     */
@@ -173,15 +173,15 @@ public:
     /** Returns the number of nodes in the graph. */
     int getNumNodes() const throw()                                 { return nodes.size(); }
 
-    /** Returns a pointer to one of the nodes in the graph. 
-    
+    /** Returns a pointer to one of the nodes in the graph.
+
         This will return 0 if the index is out of range.
         @see getNodeForId
     */
     Node* getNode (const int index) const throw()                   { return nodes [index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
-    
+
         If no such node was found, this returns 0.
         @see getNode
     */
@@ -223,8 +223,8 @@ public:
                                             const uint32 destNodeId,
                                             const int destChannelIndex) const throw();
 
-    /** Returns true if there is a connection between any of the channels of 
-        two specified nodes. 
+    /** Returns true if there is a connection between any of the channels of
+        two specified nodes.
     */
     bool isConnected (const uint32 possibleSourceNodeId,
                       const uint32 possibleDestNodeId) const throw();
@@ -242,7 +242,7 @@ public:
     bool addConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
                         const uint32 destNodeId, const int destChannelIndex);
 
-    /** Deletes the connection with the specified index. 
+    /** Deletes the connection with the specified index.
 
         Returns true if a connection was actually deleted.
     */
@@ -261,7 +261,7 @@ public:
 
     /** Performs a sanity checks of all the connections.
 
-        This might be useful if some of the processors are doing things like changing 
+        This might be useful if some of the processors are doing things like changing
         their channel counts, which could render some connections obsolete.
     */
     bool removeIllegalConnections();
@@ -279,9 +279,9 @@ public:
     /** A special type of AudioProcessor that can live inside an AudioProcessorGraph
         in order to use the audio that comes into and out of the graph itself.
 
-        If you create an AudioGraphIOProcessor in "input" mode, it will act as a 
-        node in the graph which delivers the audio that is coming into the parent 
-        graph. This allows you to stream the data to other nodes and process the 
+        If you create an AudioGraphIOProcessor in "input" mode, it will act as a
+        node in the graph which delivers the audio that is coming into the parent
+        graph. This allows you to stream the data to other nodes and process the
         incoming audio.
 
         Likewise, one of these in "output" mode can be sent data which it will add to
@@ -296,16 +296,16 @@ public:
         */
         enum IODeviceType
         {
-            audioInputNode,     /**< In this mode, the processor has output channels  
+            audioInputNode,     /**< In this mode, the processor has output channels
                                      representing all the audio input channels that are
                                      coming into its parent audio graph. */
-            audioOutputNode,    /**< In this mode, the processor has input channels  
+            audioOutputNode,    /**< In this mode, the processor has input channels
                                      representing all the audio output channels that are
                                      going out of its parent audio graph. */
-            midiInputNode,      /**< In this mode, the processor has a midi output which 
+            midiInputNode,      /**< In this mode, the processor has a midi output which
                                      delivers the same midi data that is arriving at its
                                      parent graph. */
-            midiOutputNode      /**< In this mode, the processor has a midi input and 
+            midiOutputNode      /**< In this mode, the processor has a midi input and
                                      any data sent to it will be passed out of the parent
                                      graph. */
         };
@@ -428,8 +428,8 @@ private:
     void clearRenderingSequence();
     void buildRenderingSequence();
 
-    bool isAnInputTo (const uint32 possibleInputId, 
-                      const uint32 possibleDestinationId, 
+    bool isAnInputTo (const uint32 possibleInputId,
+                      const uint32 possibleDestinationId,
                       const int recursionCheck) const throw();
 
     AudioProcessorGraph (const AudioProcessorGraph&);

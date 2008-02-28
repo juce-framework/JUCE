@@ -283,7 +283,27 @@ public:
     /** Returns true if processing is currently suspended.
         @see suspendProcessing
     */
-    bool isSuspended() const throw()                                  { return suspended; }
+    bool isSuspended() const throw()                                    { return suspended; }
+
+    //==============================================================================
+    /** Returns true if the processor is being run in an offline mode for rendering.
+
+        If the processor is being run live on realtime signals, this returns false.
+        If the mode is unknown, this will assume it's realtime and return false.
+
+        This value may be unreliable until the prepareToPlay() method has been called,
+        and could change each time prepareToPlay() is called.
+
+        @see setNonRealtime()
+    */
+    bool isNonRealtime() const throw()                                  { return nonRealtime; }
+
+    /** Called by the host to tell this processor whether it's being used in a non-realime
+        capacity for offline rendering or bouncing.
+
+        Whatever value is passed-in will be
+    */
+    void setNonRealtime (const bool isNonRealtime) throw();
 
     //==============================================================================
     /** Creates the filter's UI.
@@ -540,7 +560,7 @@ private:
     AudioProcessorEditor* activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;
-    bool suspended;
+    bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
 
 #ifdef JUCE_DEBUG

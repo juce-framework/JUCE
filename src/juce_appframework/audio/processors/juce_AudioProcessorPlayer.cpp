@@ -43,7 +43,7 @@ AudioProcessorPlayer::AudioProcessorPlayer()
       sampleRate (0),
       blockSize (0),
       isPrepared (false),
-      numInputChans (0), 
+      numInputChans (0),
       numOutputChans (0),
       tempBuffer (1, 1)
 {
@@ -61,7 +61,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
     {
         if (processorToPlay != 0 && sampleRate > 0 && blockSize > 0)
         {
-            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans, 
+            processorToPlay->setPlayConfigDetails (numInputChans, numOutputChans,
                                                    sampleRate, blockSize);
 
             processorToPlay->prepareToPlay (sampleRate, blockSize);

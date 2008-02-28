@@ -75,7 +75,7 @@ public:
     AudioProcessor* getCurrentProcessor() const throw()             { return processor; }
 
     /** Returns a midi message collector that you can pass midi messages to if you
-        want them to be injected into the midi stream that is being sent to the 
+        want them to be injected into the midi stream that is being sent to the
         processor.
     */
     MidiMessageCollector& getMidiMessageCollector() throw()         { return messageCollector; }
