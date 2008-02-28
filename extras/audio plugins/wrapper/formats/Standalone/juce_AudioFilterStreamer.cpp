@@ -121,7 +121,7 @@ void AudioFilterStreamer::audioDeviceStopped()
 {
     isPlaying = false;
     filter.releaseResources();
-    midiCollector.reset (sampleRate);
+    midiCollector.reset (sampleRate > 0 ? sampleRate : 44100.0);
     emptyBuffer.setSize (1, 32);
 }
 

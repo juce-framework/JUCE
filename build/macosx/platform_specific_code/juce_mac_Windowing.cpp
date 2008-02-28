@@ -1057,14 +1057,14 @@ public:
                 KeyPress::leftKey, KeyPress::rightKey, KeyPress::downKey, KeyPress::upKey, 0
             };
 
-            if (((unsigned int) rawKey) < (unsigned int) numElementsInArray (keyTranslations) 
+            if (((unsigned int) rawKey) < (unsigned int) numElementsInArray (keyTranslations)
                  && keyTranslations [rawKey] != 0)
             {
                 keyCode = keyTranslations [rawKey];
             }
 
             if ((rawKey == 0 && textCharacter != 0)
-                || (CharacterFunctions::isLetterOrDigit ((juce_wchar) keyCode) 
+                || (CharacterFunctions::isLetterOrDigit ((juce_wchar) keyCode)
                      && CharacterFunctions::isLetterOrDigit (textCharacter))) // correction for azerty-type layouts..
             {
                 keyCode = CharacterFunctions::toLowerCase (textCharacter);
@@ -1133,7 +1133,7 @@ public:
         OSStatus res = noErr;
         for (int i = 0; i < numBytesRequired / sizeof (UniChar); ++i)
             res = handleKeyEvent (originalEvent, (juce_wchar) uc[i]);
-        
+
         return res;
     }
 
@@ -2750,8 +2750,11 @@ public:
         MenuItemIndex index = 0;
         GetIndMenuItemWithCommandID (0, info.commandID, 1, &menu, &index);
 
-        FlashMenuBar (GetMenuID (menu));
-        FlashMenuBar (GetMenuID (menu));
+        if (menu != 0)
+        {
+            FlashMenuBar (GetMenuID (menu));
+            FlashMenuBar (GetMenuID (menu));
+        }
     }
 
     void invoke (const int id, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
