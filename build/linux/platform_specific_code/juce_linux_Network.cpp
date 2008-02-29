@@ -44,16 +44,30 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/text/juce_StringArray.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "../../../src/juce_core/containers/juce_MemoryBlock.h"
+#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+#include "../../../src/juce_core/io/network/juce_URL.h"
 
 // we'll borrow the mac's socket-based http streaming code..
 #include "../../macosx/platform_specific_code/juce_mac_HTTPStream.h"
 
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     // xxx todo
     return 0;
 }
+
+
+bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
+                                                    const String& emailSubject,
+                                                    const String& bodyText,
+                                                    const StringArray& filesToAttach)
+{
+    jassertfalse    // xxx todo
+
+    return false;
+}
+
 
 END_JUCE_NAMESPACE

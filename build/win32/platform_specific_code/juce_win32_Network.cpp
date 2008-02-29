@@ -38,6 +38,7 @@
 #include <wininet.h>
 #include <nb30.h>
 #include <iphlpapi.h>
+#include <mapi.h>
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
@@ -46,6 +47,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_win32_DynamicLibraryLoader.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "../../../src/juce_core/containers/juce_MemoryBlock.h"
+#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+#include "../../../src/juce_core/io/network/juce_URL.h"
 
 #ifndef INTERNET_FLAG_NEED_FILE
   #define INTERNET_FLAG_NEED_FILE 0x00000010
@@ -72,11 +75,16 @@ struct ConnectionAndRequestStruct
 static HINTERNET sessionHandle = 0;
 
 void* juce_openInternetFile (const String& url,
-                             const String& postText,
-                             const bool isPost)
+                             const String& headers,
+                             const MemoryBlock& postData,
+                             const bool isPost,
+                             URL::OpenStreamProgressCallback* callback,
+                             void* callbackContext)
 {
     if (sessionHandle == 0)
-        sessionHandle = InternetOpen (_T("juce"), INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
+        sessionHandle = InternetOpen (_T("juce"),
+                                      INTERNET_OPEN_TYPE_PRECONFIG,
+                                      0, 0, 0);
 
     if (sessionHandle != 0)
     {
@@ -92,9 +100,7 @@ void* juce_openInternetFile (const String& url,
         uc.lpszUrlPath = file;
         uc.lpszHostName = server;
 
-        if (InternetCrackUrl (url, 0,
-                              ICU_ESCAPE | ICU_DECODE,
-                              &uc))
+        if (InternetCrackUrl (url, 0, ICU_ESCAPE | ICU_DECODE, &uc))
         {
             const bool isFtp = url.startsWithIgnoreCase (T("ftp:"));
 
@@ -102,8 +108,8 @@ void* juce_openInternetFile (const String& url,
                                                     uc.lpszHostName,
                                                     uc.nPort,
                                                     _T(""), _T(""),
-                                                    (isFtp) ? INTERNET_SERVICE_FTP
-                                                            : INTERNET_SERVICE_HTTP,
+                                                    isFtp ? INTERNET_SERVICE_FTP
+                                                          : INTERNET_SERVICE_HTTP,
                                                     0, 0);
 
             if (connection != 0)
@@ -129,24 +135,52 @@ void* juce_openInternetFile (const String& url,
                                                          isPost ? _T("POST")
                                                                 : _T("GET"),
                                                          uc.lpszUrlPath,
-                                                         0, 0,
-                                                         mimeTypes,
-                                                         INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
+                                                         0, 0, mimeTypes,
+                                                         INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE,
+                                                         0);
 
                     if (request != 0)
                     {
-                        // (this header is needed to make webservers process a POST request correctly)
-                        const String hdr ("Content-Type: application/x-www-form-urlencoded");
+                        INTERNET_BUFFERS buffers;
+                        zerostruct (buffers);
+                        buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
+                        buffers.lpcszHeader = (const char*) headers;
+                        buffers.dwHeadersLength = headers.length();
+                        buffers.dwBufferTotal = (DWORD) postData.getSize();
+                        ConnectionAndRequestStruct* result = 0;
 
-                        if (HttpSendRequest (request,
-                                             hdr, hdr.length(),
-                                             (void*) (const char*) postText,
-                                             postText.length()))
+                        if (HttpSendRequestEx (request, &buffers, 0, HSR_INITIATE, 0))
                         {
-                            ConnectionAndRequestStruct* const result = new ConnectionAndRequestStruct();
-                            result->connection = connection;
-                            result->request = request;
-                            return result;
+                            int bytesSent = 0;
+
+                            for (;;)
+                            {
+                                const int bytesToDo = jmin (1024, postData.getSize() - bytesSent);
+                                DWORD bytesDone = 0;
+
+                                if (bytesToDo > 0
+                                     && ! InternetWriteFile (request,
+                                                             ((const char*) postData.getData()) + bytesSent,
+                                                             bytesToDo, &bytesDone))
+                                {
+                                    break;
+                                }
+
+                                if (bytesToDo == 0 || (int) bytesDone < bytesToDo)
+                                {
+                                    result = new ConnectionAndRequestStruct();
+                                    result->connection = connection;
+                                    result->request = request;
+
+                                    HttpEndRequest (request, 0, 0, 0);
+                                    return result;
+                                }
+
+                                bytesSent += bytesDone;
+
+                                if (callback != 0 && ! callback (callbackContext, bytesSent, postData.getSize()))
+                                    break;
+                            }
                         }
 
                         InternetCloseHandle (request);
@@ -222,7 +256,8 @@ void juce_closeInternetFile (void* handle)
     }
 }
 
-static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum) throw()
+//==============================================================================
+static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     int numFound = 0;
 
@@ -251,6 +286,9 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum) throw(
                 for (unsigned int i = 0; i < adapter->AddressLength; ++i)
                     mac = (mac << 8) | adapter->Address[i];
 
+                if (littleEndian)
+                    mac = (int64) swapByteOrder ((uint64) mac);
+
                 if (numFound < maxNum && mac != 0)
                     addresses [numFound++] = mac;
 
@@ -262,7 +300,7 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum) throw(
     return numFound;
 }
 
-static int getMACAddressesViaNetBios (int64* addresses, int maxNum) throw()
+static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     int numFound = 0;
 
@@ -315,6 +353,9 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum) throw()
                         for (unsigned int i = 0; i < 6; ++i)
                             mac = (mac << 8) | astat.adapt.adapter_address[i];
 
+                        if (littleEndian)
+                            mac = (int64) swapByteOrder ((uint64) mac);
+
                         if (numFound < maxNum && mac != 0)
                             addresses [numFound++] = mac;
                     }
@@ -326,14 +367,62 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum) throw()
     return numFound;
 }
 
-int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
-    int numFound = getMACAddressViaGetAdaptersInfo (addresses, maxNum);
+    int numFound = getMACAddressViaGetAdaptersInfo (addresses, maxNum, littleEndian);
 
     if (numFound == 0)
-        numFound = getMACAddressesViaNetBios (addresses, maxNum);
+        numFound = getMACAddressesViaNetBios (addresses, maxNum, littleEndian);
 
     return numFound;
 }
+
+//==============================================================================
+typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, FLAGS, ULONG);
+
+bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
+                                                    const String& emailSubject,
+                                                    const String& bodyText,
+                                                    const StringArray& filesToAttach)
+{
+    HMODULE h = LoadLibraryA ("MAPI32.dll");
+
+    MAPISendMailType mapiSendMail = (MAPISendMailType) GetProcAddress (h, "MAPISendMail");
+    bool ok = false;
+
+    if (mapiSendMail != 0)
+    {
+        MapiMessage message;
+        zerostruct (message);
+        message.lpszSubject = (LPTSTR) (LPCTSTR) emailSubject;
+        message.lpszNoteText = (LPTSTR) (LPCTSTR) bodyText;
+
+        MapiRecipDesc recip;
+        zerostruct (recip);
+        recip.ulRecipClass = MAPI_TO;
+        recip.lpszName = (LPTSTR) (LPCTSTR) targetEmailAddress;
+        message.nRecipCount = 1;
+        message.lpRecips = &recip;
+
+        MemoryBlock mb (sizeof (MapiFileDesc) * filesToAttach.size());
+        mb.fillWith (0);
+        MapiFileDesc* files = (MapiFileDesc*) mb.getData();
+
+        message.nFileCount = filesToAttach.size();
+        message.lpFiles = files;
+
+        for (int i = 0; i < filesToAttach.size(); ++i)
+        {
+            files[i].nPosition = (ULONG) -1;
+            files[i].lpszPathName = (LPTSTR) (LPCTSTR) filesToAttach [i];
+        }
+
+        ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG, 0) == SUCCESS_SUCCESS);
+    }
+
+    FreeLibrary (h);
+    return ok;
+}
+
 
 END_JUCE_NAMESPACE

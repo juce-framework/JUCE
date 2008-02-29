@@ -40,6 +40,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Atomic.h"
 #include "../threads/juce_Thread.h"
 #include "../text/juce_LocalisedStrings.h"
+void juce_initialiseStrings();
 
 
 //==============================================================================
@@ -78,6 +79,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
         juceInitialisedNonGUI = true;
 
         DBG (SystemStats::getJUCEVersion());
+        juce_initialiseStrings();
         SystemStats::initialiseStats();
         Random::getSystemRandom().setSeed (Time::currentTimeMillis());
     }
@@ -87,6 +89,10 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
  // This is imported from the sockets code..
  typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
  extern juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib;
+#endif
+
+#if JUCE_DEBUG
+  extern void juce_CheckForDanglingStreams();
 #endif
 
 void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
@@ -101,6 +107,10 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 
         LocalisedStrings::setCurrentMappings (0);
         Thread::stopAllThreads (3000);
+
+#if JUCE_DEBUG
+        juce_CheckForDanglingStreams();
+#endif
 
         juceInitialisedNonGUI = false;
     }

@@ -50,6 +50,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "../../../src/juce_core/containers/juce_MemoryBlock.h"
 #include "../../../src/juce_core/text/juce_StringArray.h"
+#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+#include "../../../src/juce_core/io/network/juce_URL.h"
 #include "juce_mac_HTTPStream.h"
 
 
@@ -84,7 +86,7 @@ static bool GetEthernetIterator (io_iterator_t* matchingServices) throw()
     return false;
 }
 
-int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     int numResults = 0;
     io_iterator_t it;
@@ -115,6 +117,9 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
                     for (int i = 6; --i >= 0;)
                         a = (a << 8) | addr[i];
 
+                    if (! littleEndian)
+                        a = (int64) swapByteOrder ((uint64) a);
+
                     if (numResults < maxNum)
                     {
                         *addresses++ = a;
@@ -133,5 +138,54 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum) throw()
 
     return numResults;
 }
+
+
+//==============================================================================
+bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
+                                                    const String& emailSubject,
+                                                    const String& bodyText,
+                                                    const StringArray& filesToAttach)
+{
+    String script;
+    script << "tell application \"Mail\"\r\n"
+              "set newMessage to make new outgoing message with properties {subject:\""
+           << emailSubject
+           << "\", content:\""
+           << bodyText
+           << "\" & return & return}\r\n"
+              "tell newMessage\r\n"
+              "set visible to true\r\n"
+              "set sender to \"sdfsdfsdfewf\"\r\n"
+              "make new to recipient at end of to recipients with properties {address:\""
+           << targetEmailAddress 
+           << "\"}\r\n";
+    
+    for (int i = 0; i < filesToAttach.size(); ++i)
+    {
+        script << "tell content\r\n"
+                  "make new attachment with properties {file name:\""
+               << filesToAttach[i] 
+               << "\"} at after the last paragraph\r\n"
+                  "end tell\r\n";
+    }
+
+    script << "end tell\r\n"
+              "end tell\r\n";
+
+    DBG (script);
+    ComponentInstance comp = OpenDefaultComponent (kOSAComponentType, kOSAGenericScriptingComponentSubtype);
+    
+    OSAID resultID;
+    AEDesc source;
+    AECreateDesc (typeUTF8Text, (Ptr) script.toUTF8(), strlen (script.toUTF8()), &source);
+    OSAError err = OSACompileExecute (comp, &source, 
+                                      kOSANullScript, kOSAModeNull,
+                                      &resultID);
+    AEDisposeDesc (&source);
+    CloseComponent (comp);
+
+    return false;
+}
+
 
 END_JUCE_NAMESPACE

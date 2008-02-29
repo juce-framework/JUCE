@@ -141,7 +141,7 @@
 /** Enabling this builds support for VST audio plugins.
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
-#define JUCE_PLUGINHOST_VST 1
+//#define JUCE_PLUGINHOST_VST 1
 
 /** Enabling this builds support for AudioUnit audio plugins.
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST

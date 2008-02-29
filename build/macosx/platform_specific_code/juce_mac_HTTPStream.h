@@ -58,7 +58,8 @@ public:
 
     //==============================================================================
     bool open (const String& url,
-               const String& optionalPostText,
+               const String& headers,
+               const MemoryBlock& postData,
                const bool isPost)
     {
         closeSocket();
@@ -101,15 +102,14 @@ public:
         if (! proxyURL.startsWithIgnoreCase (T("http://")))
             proxyURL = String::empty;
 
-        const String requestHeader (createRequestHeader (hostName, hostPath,
-                                                         proxyURL, url,
-                                                         hostPort, optionalPostText,
-                                                         isPost));
+        const MemoryBlock requestHeader (createRequestHeader (hostName, hostPath,
+                                                              proxyURL, url,
+                                                              hostPort,
+                                                              headers, postData,
+                                                              isPost));
 
-        const char* const utf8Header = (const char*) requestHeader.toUTF8();
-        const int headerLen = strlen (utf8Header);
-
-        if (! send (socketHandle, utf8Header, headerLen, 0) == headerLen)
+        if (send (socketHandle, requestHeader.getData(), requestHeader.getSize(), 0)
+              != requestHeader.getSize())
         {
             closeSocket();
             return false;
@@ -140,7 +140,7 @@ public:
                     location = T("http://") + location;
 
                 if (levelsOfRedirection++ < 3)
-                    return open (location, optionalPostText, isPost);
+                    return open (location, headers, postData, isPost);
             }
             else
             {
@@ -191,13 +191,14 @@ private:
         socketHandle = -1;
     }
 
-    const String createRequestHeader (const String& hostName,
-                                      const String& hostPath,
-                                      const String& proxyURL,
-                                      const String& originalURL,
-                                      const int hostPort,
-                                      const String& optionalPostText,
-                                      const bool isPost)
+    const MemoryBlock createRequestHeader (const String& hostName,
+                                           const String& hostPath,
+                                           const String& proxyURL,
+                                           const String& originalURL,
+                                           const int hostPort,
+                                           const String& headers,
+                                           const MemoryBlock& postData,
+                                           const bool isPost)
     {
         String header (isPost ? "POST " : "GET ");
 
@@ -212,7 +213,7 @@ private:
             int proxyPort;
 
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
-                return String::empty;
+                return MemoryBlock();
 
             header << originalURL << " HTTP/1.1\r\nHost: "
                    << proxyName << ':' << proxyPort;
@@ -226,20 +227,14 @@ private:
 
         header << "\r\nUser-Agent: JUCE/"
                << JUCE_MAJOR_VERSION << '.' << JUCE_MINOR_VERSION
-               << "\r\nConnection: Close\r\n";
+               << "\r\nConnection: Close\r\n"
+               << headers << "\r\n";
 
-        if (isPost && optionalPostText.isNotEmpty())
-        {
-            const char* const postTextUTF8 = (const char*) optionalPostText.toUTF8();
+        MemoryBlock mb;
+        mb.append (header.toUTF8(), (int) strlen (header.toUTF8()));
+        mb.append (postData.getData(), postData.getSize());
 
-            header << "Content-type: application/x-www-form-urlencoded\r\nContent-length: "
-                   << (int) strlen (postTextUTF8) << "\r\n\r\n"
-                   << optionalPostText;
-        }
-
-        header << "\r\n";
-        //DBG (header);
-        return header;
+        return mb;
     }
 
     const String readResponse()
@@ -341,12 +336,15 @@ bool juce_isOnLine()
 }
 
 void* juce_openInternetFile (const String& url,
-                             const String& optionalPostText,
-                             const bool isPost)
+                             const String& headers,
+                             const MemoryBlock& postData,
+                             const bool isPost,
+                             URL::OpenStreamProgressCallback* callback,
+                             void* callbackContext)
 {
     JUCE_HTTPSocketStream* const s = new JUCE_HTTPSocketStream();
 
-    if (s->open (url, optionalPostText, isPost))
+    if (s->open (url, headers, postData, isPost))
         return s;
 
     delete s;

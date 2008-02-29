@@ -87,6 +87,18 @@ public:
     const URL withParameter (const String& parameterName,
                              const String& parameterValue) const;
 
+    /** Returns a copy of this URl, with a file-upload type parameter added to it.
+
+        When performing a POST where one of your parameters is a binary file, this
+        lets you specify the file.
+
+        Note that the filename is stored, but the file itself won't actually be read
+        until this URL is later used to create a network input stream.
+    */
+    const URL withFileToUpload (const String& parameterName,
+                                const File& fileToUpload,
+                                const String& mimeType) const;
+
     /** Returns a set of all the parameters encoded into the url.
 
         E.g. for the url "www.fish.com?type=haddock&amount=some+fish", this array would
@@ -96,7 +108,18 @@ public:
 
         @see getNamedParameter, withParameter
     */
-    const StringPairArray& getParameters() const;
+    const StringPairArray& getParameters() const throw();
+
+    /** Returns the set of files that should be uploaded as part of a POST operation.
+
+        This is the set of files that were added to the URL with the withFileToUpload()
+        method.
+    */
+    const StringPairArray& getFilesToUpload() const throw();
+
+    /** Returns the set of mime types associated with each of the upload files.
+    */
+    const StringPairArray& getMimeTypesOfUploadFiles() const throw();
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -119,21 +142,28 @@ public:
     static bool isProbablyAnEmailAddress (const String& possibleEmailAddress);
 
     //==============================================================================
+    /** This callback function can be used by the createInputStream() method.
+
+        It allows your app to receive progress updates during a lengthy POST operation. If you
+        want to continue the operation, this should return true, or false to abort.
+    */
+    typedef bool (OpenStreamProgressCallback) (void* context, int bytesSent, int totalBytes);
+
     /** Attempts to open a stream that can read from this URL.
 
         @param usePostCommand   if true, it will try to do use a http 'POST' to pass
                                 the paramters, otherwise it'll encode them into the
                                 URL and do a 'GET'.
+        @param progressCallback if this is non-zero, it lets you supply a callback function
+                                to keep track of the operation's progress. This can be useful
+                                for lengthy POST operations, so that you can provide user feedback.
+        @param progressCallbackContext  if a callback is specified, this value will be passed to
+                                the function
     */
-    InputStream* createInputStream (const bool usePostCommand) const;
+    InputStream* createInputStream (const bool usePostCommand,
+                                    OpenStreamProgressCallback* const progressCallback = 0,
+                                    void* const progressCallbackContext = 0) const;
 
-    /** Attempts to open a stream to read from this URL using a http POST command.
-
-        Normally you'd use the createInputStream (true) method instead of this, as
-        this will pass the given block of text instead of any parameters
-        that were added to the this URL with the withParameter() method.
-    */
-    InputStream* createPostInputStream (const String& postText) const;
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -206,9 +236,7 @@ public:
 
 private:
     String url;
-    StringPairArray parameters;
-
-    const String getMangledParameters() const;
+    StringPairArray parameters, filesToUpload, mimeTypes;
 };
 
 

@@ -47,6 +47,11 @@ public:
     /** Plays the operating system's default alert 'beep' sound. */
     static void beep();
 
+    static bool launchEmailWithAttachments (const String& targetEmailAddress,
+                                            const String& emailSubject,
+                                            const String& bodyText,
+                                            const StringArray& filesToAttach);
+
 #if JUCE_MAC || DOXYGEN
     //==============================================================================
     /** MAC ONLY - Turns a String into a pascal string. */

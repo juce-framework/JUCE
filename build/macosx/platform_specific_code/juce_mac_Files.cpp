@@ -471,38 +471,38 @@ void juce_createDirectory (const String& fileName) throw()
 void* juce_fileOpen (const String& fileName, bool forWriting) throw()
 {
     const char* const fileNameUTF8 = fileName.toUTF8();
-    const char* mode = "rb";
+    int flags = O_RDONLY;
 
     if (forWriting)
     {
         if (juce_fileExists (fileName, false))
         {
-            FILE* const f = fopen (fileNameUTF8, "r+b");
+            const int f = open (fileNameUTF8, O_RDWR, 00644);
 
-            if (f != 0)
-                fseek (f, 0, SEEK_END);
+            if (f != -1)
+                lseek (f, 0, SEEK_END);
 
             return (void*) f;
         }
         else
         {
-            mode = "w+b";
+            flags = O_RDWR + O_CREAT;
         }
     }
 
-    return (void*) fopen (fileNameUTF8, mode);
+    return (void*) open (fileNameUTF8, flags, 00644);
 }
 
 void juce_fileClose (void* handle) throw()
 {
     if (handle != 0)
-        fclose ((FILE*) handle);
+        close ((int) handle);
 }
 
 int juce_fileRead (void* handle, void* buffer, int size) throw()
 {
     if (handle != 0)
-        return fread (buffer, 1, size, (FILE*) handle);
+        return read ((int) handle, buffer, size);
 
     return 0;
 }
@@ -510,14 +510,14 @@ int juce_fileRead (void* handle, void* buffer, int size) throw()
 int juce_fileWrite (void* handle, const void* buffer, int size) throw()
 {
     if (handle != 0)
-        return fwrite (buffer, 1, size, (FILE*) handle);
+        return write ((int) handle, buffer, size);
 
     return 0;
 }
 
 int64 juce_fileSetPosition (void* handle, int64 pos) throw()
 {
-    if (handle != 0 && fseek ((FILE*) handle, pos, SEEK_SET) == 0)
+    if (handle != 0 && lseek ((int) handle, pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -526,7 +526,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos) throw()
 int64 juce_fileGetPosition (void* handle) throw()
 {
     if (handle != 0)
-        return ftell ((FILE*) handle);
+        return lseek ((int) handle, 0, SEEK_CUR);
     else
         return -1;
 }
@@ -534,7 +534,7 @@ int64 juce_fileGetPosition (void* handle) throw()
 void juce_fileFlush (void* handle) throw()
 {
     if (handle != 0)
-        fflush ((FILE*) handle);
+        fsync ((int) handle);
 }
 
 const StringArray juce_getFileSystemRoots() throw()

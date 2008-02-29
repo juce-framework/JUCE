@@ -21,7 +21,7 @@ package.config["Debug"].defines         = { "LINUX=1", "DEBUG=1", "_DEBUG=1" };
 package.config["Debug"].buildoptions    = { "-D_DEBUG -ggdb -Wall" }
 
 package.config["Release"].defines       = { "LINUX=1", "NDEBUG=1" };
-package.config["Release"].buildoptions  = { "-Wall" }
+package.config["Release"].buildoptions  = { "-O2 -Wall -fvisibility=hidden" }
 
 
 package.includepaths = { 

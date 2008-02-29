@@ -152,9 +152,21 @@ public:
 
         @param  addresses   an array into which the MAC addresses should be copied
         @param  maxNum      the number of elements in this array
+        @param littleEndian the endianness of the numbers to return. Note that
+                            the default values of this parameter are different on
+                            Mac/PC to avoid breaking old software that was written
+                            before this parameter was added (when the two systems
+                            defaulted to using different endiannesses). In newer
+                            software you probably want to specify an explicit value
+                            for this.
         @returns            the number of MAC addresses that were found
     */
-    static int getMACAddresses (int64* addresses, int maxNum) throw();
+    static int getMACAddresses (int64* addresses, int maxNum,
+#if JUCE_MAC
+                                const bool littleEndian = true) throw();
+#else
+                                const bool littleEndian = false) throw();
+#endif
 
 
     //==============================================================================

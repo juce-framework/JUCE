@@ -1495,7 +1495,29 @@ public:
                     {
                         Component* const modal = Component::getCurrentlyModalComponent();
                         if (modal != 0)
-                            modal->inputAttemptWhenModal();
+                        {
+                            static uint32 lastDragTime = 0;
+                            const uint32 now = Time::currentTimeMillis();
+
+                            if (now > lastDragTime + 1000)
+                            {
+                                lastDragTime = now;
+                                modal->inputAttemptWhenModal();
+                            }
+
+                            const Rectangle currentRect (getComponent()->getBounds());
+                            Rect current;
+                            current.left = currentRect.getX();
+                            current.top = currentRect.getY();
+                            current.right = currentRect.getRight();
+                            current.bottom = currentRect.getBottom();
+
+                            // stop the window getting dragged..
+                            SetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
+                                               sizeof (Rect), &current);
+                            
+                            return noErr;
+                        }
                     }
 
                     if ((atts & kWindowBoundsChangeUserResize) != 0

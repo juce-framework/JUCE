@@ -57,7 +57,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
 #include "../filebrowser/juce_FileSearchPathListComponent.h"
-#include "../filebrowser/juce_FileBrowserComponent.h" 
+#include "../filebrowser/juce_FileBrowserComponent.h"
 #include "../layout/juce_GroupComponent.h"
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
@@ -814,6 +814,9 @@ void LookAndFeel::getIdealPopupMenuItemSize (const String& text,
     {
         Font font (getPopupMenuFont());
 
+        if (standardMenuItemHeight > 0 && font.getHeight() > standardMenuItemHeight / 1.3f)
+            font.setHeight (standardMenuItemHeight / 1.3f);
+
         idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : roundFloatToInt (font.getHeight() * 1.3f);
         idealWidth = font.getStringWidth (text) + idealHeight * 2;
     }
@@ -1137,7 +1140,7 @@ void LookAndFeel::drawLinearSliderBackground (Graphics& g,
                                               const Slider::SliderStyle /*style*/,
                                               Slider& slider)
 {
-    const float sliderRadius = (float) getSliderThumbRadius (slider);
+    const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
     const Colour trackColour (slider.findColour (Slider::trackColourId));
     const Colour gradCol1 (trackColour.overlaidWith (Colours::black.withAlpha (slider.isEnabled() ? 0.25f : 0.13f)));
@@ -1186,7 +1189,7 @@ void LookAndFeel::drawLinearSliderThumb (Graphics& g,
                                          const Slider::SliderStyle style,
                                          Slider& slider)
 {
-    const float sliderRadius = (float) getSliderThumbRadius (slider);
+    const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
     Colour knobColour (createBaseColour (slider.findColour (Slider::thumbColourId),
                                          slider.hasKeyboardFocus (false) && slider.isEnabled(),
@@ -1277,7 +1280,7 @@ void LookAndFeel::drawLinearSlider (Graphics& g,
         Colour baseColour (createBaseColour (slider.findColour (Slider::thumbColourId)
                                                    .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f),
                                              false,
-                                             isMouseOver, 
+                                             isMouseOver,
                                              isMouseOver || slider.isMouseButtonDown()));
 
         drawShinyButtonShape (g,
@@ -1297,7 +1300,7 @@ int LookAndFeel::getSliderThumbRadius (Slider& slider)
 {
     return jmin (7,
                  slider.getHeight() / 2,
-                 slider.getWidth() / 2);
+                 slider.getWidth() / 2) + 2;
 }
 
 void LookAndFeel::drawRotarySlider (Graphics& g,
@@ -2358,7 +2361,7 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
 Button* LookAndFeel::createFileBrowserGoUpButton()
 {
     DrawableButton* goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
-   
+
     Path arrowPath;
     arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
 

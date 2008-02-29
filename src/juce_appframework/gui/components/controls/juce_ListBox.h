@@ -402,7 +402,8 @@ public:
         This may be off-screen, and the range of the row number that is passed-in is
         not checked to see if it's a valid row.
     */
-    const Rectangle getRowPosition (const int rowNumber) const throw();
+    const Rectangle getRowPosition (const int rowNumber,
+                                    const bool relativeToComponentTopLeft) const throw();
 
     /** Finds the row component for a given row in the list.
 

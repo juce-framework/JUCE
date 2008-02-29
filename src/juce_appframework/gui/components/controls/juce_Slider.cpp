@@ -598,7 +598,7 @@ double Slider::getValueFromText (const String& text)
     while (t.startsWithChar (T('+')))
         t = t.substring (1).trimStart();
 
-    return t.initialSectionContainingOnly (T("0123456789.-"))
+    return t.initialSectionContainingOnly (T("0123456789.,-"))
             .getDoubleValue();
 }
 
@@ -847,7 +847,7 @@ void Slider::resized()
         }
     }
 
-    const int indent = getLookAndFeel().getSliderThumbRadius (*this) + 2;
+    const int indent = getLookAndFeel().getSliderThumbRadius (*this);
 
     if (style == LinearBar)
     {

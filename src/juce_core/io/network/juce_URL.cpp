@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_URL.h"
+#include "../../basics/juce_Random.h"
 #include "../../text/juce_XmlDocument.h"
 
 
@@ -79,7 +80,9 @@ URL::URL (const String& url_)
 
 URL::URL (const URL& other)
     : url (other.url),
-      parameters (other.parameters)
+      parameters (other.parameters),
+      filesToUpload (other.filesToUpload),
+      mimeTypes (other.mimeTypes)
 {
 }
 
@@ -87,6 +90,8 @@ const URL& URL::operator= (const URL& other)
 {
     url = other.url;
     parameters = other.parameters;
+    filesToUpload = other.filesToUpload;
+    mimeTypes = other.mimeTypes;
 
     return *this;
 }
@@ -95,7 +100,7 @@ URL::~URL() throw()
 {
 }
 
-const String URL::getMangledParameters() const
+static const String getMangledParameters (const StringPairArray& parameters)
 {
     String p;
 
@@ -104,9 +109,9 @@ const String URL::getMangledParameters() const
         if (i > 0)
             p += T("&");
 
-        p << addEscapeChars (parameters.getAllKeys() [i])
+        p << URL::addEscapeChars (parameters.getAllKeys() [i])
           << T("=")
-          << addEscapeChars (parameters.getAllValues() [i]);
+          << URL::addEscapeChars (parameters.getAllValues() [i]);
     }
 
     return p;
@@ -115,7 +120,7 @@ const String URL::getMangledParameters() const
 const String URL::toString (const bool includeGetParameters) const
 {
     if (includeGetParameters && parameters.size() > 0)
-        return url + T("?") + getMangledParameters();
+        return url + T("?") + getMangledParameters (parameters);
     else
         return url;
 }
@@ -153,8 +158,12 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 
 //==============================================================================
 void* juce_openInternetFile (const String& url,
-                             const String& optionalPostText,
-                             const bool isPost);
+                             const String& headers,
+                             const MemoryBlock& optionalPostData,
+                             const bool isPost,
+                             URL::OpenStreamProgressCallback* callback,
+                             void* callbackContext);
+
 void juce_closeInternetFile (void* handle);
 int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
 int juce_seekInInternetFile (void* handle, int newPosition);
@@ -164,23 +173,25 @@ int juce_getStatusCodeFor (void* handle);
 //==============================================================================
 class WebInputStream  : public InputStream
 {
-    String url, postText;
-    int64 position;
-    bool finished, isPost;
-    void* handle;
-
 public:
     //==============================================================================
-    WebInputStream (const String& url_,
-                    const String& postText_,
-                    const bool isPost_)
-      : url (url_),
-        postText (postText_),
-        position (0),
+    WebInputStream (const URL& url,
+                    const bool isPost_,
+                    URL::OpenStreamProgressCallback* const progressCallback_,
+                    void* const progressCallbackContext_)
+      : position (0),
         finished (false),
-        isPost (isPost_)
+        isPost (isPost_),
+        progressCallback (progressCallback_),
+        progressCallbackContext (progressCallbackContext_)
     {
-        handle = juce_openInternetFile (url, postText, isPost);
+        server = url.toString (! isPost);
+
+        if (isPost_)
+            createHeadersAndPostData (url);
+
+        handle = juce_openInternetFile (server, headers, postData, isPost,
+                                        progressCallback_, progressCallbackContext_);
     }
 
     ~WebInputStream()
@@ -188,7 +199,7 @@ public:
         juce_closeInternetFile (handle);
     }
 
-    bool isError() const
+    bool isError() const throw()
     {
         return handle == 0;
     }
@@ -253,7 +264,8 @@ public:
                     position = 0;
                     finished = false;
 
-                    handle = juce_openInternetFile (url, postText, isPost);
+                    handle = juce_openInternetFile (server, headers, postData, isPost,
+                                                    progressCallback, progressCallbackContext);
                 }
 
                 skipNextBytes (wantedPos - position);
@@ -262,26 +274,105 @@ public:
 
         return true;
     }
-};
 
-InputStream* URL::createInputStream (const bool usePostCommand) const
-{
-    WebInputStream* wi
-        = (usePostCommand) ? new WebInputStream (url, getMangledParameters(), true)
-                           : new WebInputStream (toString (true), String::empty, false);
+    //==============================================================================
+    juce_UseDebuggingNewOperator
 
-    if (wi->isError())
+private:
+    String server, headers;
+    MemoryBlock postData;
+    int64 position;
+    bool finished;
+    const bool isPost;
+    void* handle;
+    URL::OpenStreamProgressCallback* const progressCallback;
+    void* const progressCallbackContext;
+
+    void createHeadersAndPostData (const URL& url)
     {
-        delete wi;
-        wi = 0;
+        if (url.getFilesToUpload().size() > 0)
+        {
+            // need to upload some files, so do it as multi-part...
+            String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
+
+            headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
+
+            appendUTF8ToPostData ("--" + boundary);
+
+            int i;
+            for (i = 0; i < url.getParameters().size(); ++i)
+            {
+                String s;
+                s << "\r\nContent-Disposition: form-data; name=\""
+                  << url.getParameters().getAllKeys() [i]
+                  << "\"\r\n\r\n"
+                  << url.getParameters().getAllValues() [i]
+                  << "\r\n--"
+                  << boundary;
+
+                appendUTF8ToPostData (s);
+            }
+
+            for (i = 0; i < url.getFilesToUpload().size(); ++i)
+            {
+                const File f (url.getFilesToUpload().getAllValues() [i]);
+                const String paramName (url.getFilesToUpload().getAllKeys() [i]);
+
+                String s;
+                s << "\r\nContent-Disposition: form-data; name=\""
+                  << paramName
+                  << "\"; filename=\""
+                  << f.getFileName()
+                  << "\"\r\n";
+
+                const String mimeType (url.getMimeTypesOfUploadFiles()
+                                          .getValue (paramName, String::empty));
+
+                if (mimeType.isNotEmpty())
+                    s << "Content-Type: " << mimeType << "\r\n";
+
+                s << "Content-Transfer-Encoding: binary\r\n\r\n";
+
+                appendUTF8ToPostData (s);
+
+                f.loadFileAsData (postData);
+
+                s = "\r\n--" + boundary;
+
+                appendUTF8ToPostData (s);
+            }
+
+            appendUTF8ToPostData ("--\r\n");
+        }
+        else
+        {
+            // just a short text attachment, so use simple url encoding..
+            const String params (getMangledParameters (url.getParameters()));
+
+            headers = "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
+                        + String ((int) strlen (params.toUTF8()))
+                        + "\r\n";
+
+            appendUTF8ToPostData (params);
+        }
     }
 
-    return wi;
-}
+    void appendUTF8ToPostData (const String& text) throw()
+    {
+        postData.append (text.toUTF8(),
+                         (int) strlen (text.toUTF8()));
+    }
 
-InputStream* URL::createPostInputStream (const String& postText) const
+    WebInputStream (const WebInputStream&);
+    const WebInputStream& operator= (const WebInputStream&);
+};
+
+InputStream* URL::createInputStream (const bool usePostCommand,
+                                     OpenStreamProgressCallback* const progressCallback,
+                                     void* const progressCallbackContext) const
 {
-    WebInputStream* wi = new WebInputStream (url, postText, true);
+    WebInputStream* wi = new WebInputStream (*this, usePostCommand,
+                                             progressCallback, progressCallbackContext);
 
     if (wi->isError())
     {
@@ -338,9 +429,29 @@ const URL URL::withParameter (const String& parameterName,
     return u;
 }
 
-const StringPairArray& URL::getParameters() const
+const URL URL::withFileToUpload (const String& parameterName,
+                                 const File& fileToUpload,
+                                 const String& mimeType) const
+{
+    URL u (*this);
+    u.filesToUpload.set (parameterName, fileToUpload.getFullPathName());
+    u.mimeTypes.set (parameterName, mimeType);
+    return u;
+}
+
+const StringPairArray& URL::getParameters() const throw()
 {
     return parameters;
+}
+
+const StringPairArray& URL::getFilesToUpload() const throw()
+{
+    return filesToUpload;
+}
+
+const StringPairArray& URL::getMimeTypesOfUploadFiles() const throw()
+{
+    return mimeTypes;
 }
 
 //==============================================================================

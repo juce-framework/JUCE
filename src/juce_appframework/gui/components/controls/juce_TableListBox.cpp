@@ -388,10 +388,16 @@ bool TableListBox::isAutoSizeMenuOptionShown() const throw()
     return autoSizeOptionsShown;
 }
 
-const Rectangle TableListBox::getCellPosition (const int columnId, const int rowNumber) const
+const Rectangle TableListBox::getCellPosition (const int columnId, 
+                                               const int rowNumber,
+                                               const bool relativeToComponentTopLeft) const
 {
-    const Rectangle headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
-    const Rectangle row (getRowPosition (rowNumber));
+    Rectangle headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+
+    if (relativeToComponentTopLeft)
+        headerCell.translate (header->getX(), 0);
+
+    const Rectangle row (getRowPosition (rowNumber, relativeToComponentTopLeft));
 
     return Rectangle (headerCell.getX(), row.getY(),
                       headerCell.getWidth(), row.getHeight());
@@ -406,7 +412,7 @@ void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
         const Rectangle pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
         double x = scrollbar->getCurrentRangeStart();
-        double w = scrollbar->getCurrentRangeSize();
+        const double w = scrollbar->getCurrentRangeSize();
 
         if (pos.getX() < x)
             x = pos.getX();
