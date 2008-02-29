@@ -132,7 +132,7 @@ private:
           << T("\nMemory size: ") << SystemStats::getMemorySizeInMegabytes() << T("MB\n");
 
         int64 macAddresses[8];
-        const int numAddresses = SystemStats::getMACAddresses (macAddresses, 8);
+        const int numAddresses = SystemStats::getMACAddresses (macAddresses, 8, false);
 
         for (int i = 0; i < numAddresses; ++i)
         {

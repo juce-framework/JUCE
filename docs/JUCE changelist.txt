@@ -19,6 +19,7 @@ Changelist for version 1.46
 - updated to include the latest version of Flac (1.2.1)
 - added a parameter to DragAndDropTarget::isInterestedInDragSource(). This ma
 - changed the parameters to AudioIODeviceCallback::audioDeviceAboutToStart(), so that it now just supplies a pointer to the device. If you need to, you can still find out the sample rate and block size by asking the device for them.
+- changes to the URL class to allow file uploading
 
 ==============================================================================
 Changelist for version 1.45
