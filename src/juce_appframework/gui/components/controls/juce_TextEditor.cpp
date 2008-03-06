@@ -2387,7 +2387,7 @@ void TextEditor::getCharPosition (const int index, float& cx, float& cy, float& 
 {
     const float wordWrapWidth = getWordWrapWidth();
 
-    if (wordWrapWidth > 0)
+    if (wordWrapWidth > 0 && sections.size() > 0)
     {
         TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
