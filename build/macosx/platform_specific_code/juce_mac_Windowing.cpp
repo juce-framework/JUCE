@@ -1515,7 +1515,7 @@ public:
                             // stop the window getting dragged..
                             SetEventParameter (theEvent, kEventParamCurrentBounds, typeQDRectangle,
                                                sizeof (Rect), &current);
-                            
+
                             return noErr;
                         }
                     }

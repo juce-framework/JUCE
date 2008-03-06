@@ -155,10 +155,10 @@ inline void bigEndian24BitToChars (const int value, char* const destBytes) throw
 
     This is faster than using the normal c++ cast to convert a double to an int, and
     it will round the value to the nearest integer, rather than rounding it down
-    like the normal cast does. 
-    
-    Note that this routine gets its speed at the expense of some accuracy, and when 
-    rounding values whose floating point component is exactly 0.5, odd numbers and 
+    like the normal cast does.
+
+    Note that this routine gets its speed at the expense of some accuracy, and when
+    rounding values whose floating point component is exactly 0.5, odd numbers and
     even numbers will be rounded up or down differently. For a more accurate conversion,
     see roundDoubleToIntAccurate().
 */
@@ -190,8 +190,8 @@ inline int roundDoubleToIntAccurate (const double value) throw()
     it will round the value to the nearest integer, rather than rounding it down
     like the normal cast does.
 
-    Note that this routine gets its speed at the expense of some accuracy, and when 
-    rounding values whose floating point component is exactly 0.5, odd numbers and 
+    Note that this routine gets its speed at the expense of some accuracy, and when
+    rounding values whose floating point component is exactly 0.5, odd numbers and
     even numbers will be rounded up or down differently.
 */
 inline int roundFloatToInt (const float value) throw()

@@ -388,7 +388,7 @@ bool TableListBox::isAutoSizeMenuOptionShown() const throw()
     return autoSizeOptionsShown;
 }
 
-const Rectangle TableListBox::getCellPosition (const int columnId, 
+const Rectangle TableListBox::getCellPosition (const int columnId,
                                                const int rowNumber,
                                                const bool relativeToComponentTopLeft) const
 {

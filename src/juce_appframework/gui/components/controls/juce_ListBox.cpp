@@ -666,7 +666,7 @@ int ListBox::getRowNumberOfComponent (Component* const rowComponent) const throw
     return viewport->getRowNumberOfComponent (rowComponent);
 }
 
-const Rectangle ListBox::getRowPosition (const int rowNumber, 
+const Rectangle ListBox::getRowPosition (const int rowNumber,
                                          const bool relativeToComponentTopLeft) const throw()
 {
     const int rowHeight = getRowHeight();
@@ -675,7 +675,7 @@ const Rectangle ListBox::getRowPosition (const int rowNumber,
     if (relativeToComponentTopLeft)
         y -= viewport->getViewPositionY();
 
-    return Rectangle (viewport->getX(), y, 
+    return Rectangle (viewport->getX(), y,
                       viewport->getViewedComponent()->getWidth(), rowHeight);
 }
 

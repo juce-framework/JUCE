@@ -417,7 +417,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
             files[i].lpszPathName = (LPTSTR) (LPCTSTR) filesToAttach [i];
         }
 
-        ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG, 0) == SUCCESS_SUCCESS);
+        ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS);
     }
 
     FreeLibrary (h);

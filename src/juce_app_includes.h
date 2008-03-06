@@ -197,6 +197,9 @@
 #ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h"
 #endif
+#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
+#endif
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
 #endif
@@ -214,6 +217,12 @@
 #endif
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.h"
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_AudioThumbnail.h"
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_AudioThumbnailCache.h"
 #endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h"

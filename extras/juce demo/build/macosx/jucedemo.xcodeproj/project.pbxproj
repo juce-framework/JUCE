@@ -32,7 +32,7 @@
 		84EAE2F309DAAF0B00288D0A /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EAE2F109DAAF0B00288D0A /* AGL.framework */; };
 		84EAE2F409DAAF0B00288D0A /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EAE2F209DAAF0B00288D0A /* OpenGL.framework */; };
 		84F8DB0B099CA8DD00E911ED /* QuickTimeDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F8DB0A099CA8DD00E911ED /* QuickTimeDemo.cpp */; };
-		84FDB0950C15BDDD00CD0087 /* libjuce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB0940C15BDCE00CD0087 /* libjuce.a */; };
+		84FDB0950C15BDDD00CD0087 /* libjucedebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FDB0940C15BDCE00CD0087 /* libjucedebug.a */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
 /* End PBXBuildFile section */
@@ -77,7 +77,7 @@
 		84EAE2F909DAAF2F00288D0A /* Juce.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Juce.xcodeproj; path = ../../../../build/macosx/Juce.xcodeproj; sourceTree = SOURCE_ROOT; };
 		84F8DB0A099CA8DD00E911ED /* QuickTimeDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = QuickTimeDemo.cpp; sourceTree = "<group>"; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D0C4E970486CD37000505A6 /* jucedemo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = jucedemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D0C4E970486CD37000505A6 /* jucedemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jucedemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,7 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84FDB0950C15BDDD00CD0087 /* libjuce.a in Frameworks */,
+				84FDB0950C15BDDD00CD0087 /* libjucedebug.a in Frameworks */,
 				8D0C4E920486CD37000505A6 /* Carbon.framework in Frameworks */,
 				84C49F2606C0F3200066071B /* CoreAudio.framework in Frameworks */,
 				84C4A41106C0F9A00066071B /* IOKit.framework in Frameworks */,
@@ -181,7 +181,7 @@
 		84FDB0900C15BDCE00CD0087 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84FDB0940C15BDCE00CD0087 /* libjuce.a */,
+				84FDB0940C15BDCE00CD0087 /* libjucedebug.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -228,6 +228,7 @@
 		20286C28FDCF999611CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 84CFBCCF085F14F000C52F85 /* Build configuration list for PBXProject "jucedemo" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			mainGroup = 20286C29FDCF999611CA2CEA /* jucedemo */;
 			projectDirPath = "";
@@ -237,6 +238,7 @@
 					ProjectRef = 84EAE2F909DAAF2F00288D0A /* Juce.xcodeproj */;
 				},
 			);
+			projectRoot = "";
 			targets = (
 				8D0C4E890486CD37000505A6 /* jucedemo */,
 			);
@@ -244,10 +246,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		84FDB0940C15BDCE00CD0087 /* libjuce.a */ = {
+		84FDB0940C15BDCE00CD0087 /* libjucedebug.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libjuce.a;
+			path = libjucedebug.a;
 			remoteRef = 84FDB0930C15BDCE00CD0087 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

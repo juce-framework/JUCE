@@ -35,39 +35,7 @@
 #include "juce_XmlElement.h"
 #include "juce_StringArray.h"
 #include "../io/files/juce_File.h"
-#include "../io/juce_InputStream.h"
-
-
-//==============================================================================
-/**
-    Used by the XmlDocument class to find a document's associated files.
-
-    Because an XML document might need to reference other files for its
-    external DTDs, this class can be used to create input streams for
-    these files.
-
-    @see XmlDocument
-*/
-class JUCE_API  XmlInputSource
-{
-protected:
-    /** Creates a default source that can read from files. */
-    XmlInputSource() throw();
-
-public:
-    /** Destructor. */
-    virtual ~XmlInputSource();
-
-    /** Returns a new InputStream to read a required file.
-
-        @param filename     the partial filename of a file that needs to be read,
-                            or an empty string to open the root document that the
-                            source refers to
-        @returns            an inputstream that the caller will delete, or 0 if
-                            the filename isn't found.
-    */
-    virtual InputStream* createInputStreamFor (const String& filename) = 0;
-};
+#include "../io/streams/juce_InputSource.h"
 
 
 //==============================================================================
@@ -150,9 +118,9 @@ public:
 
         The object that is passed-in will be deleted automatically when no longer needed.
 
-        @see XmlInputSource
+        @see InputSource
     */
-    void setInputSource (XmlInputSource* const newSource) throw();
+    void setInputSource (InputSource* const newSource) throw();
 
 
     //==============================================================================
@@ -167,7 +135,7 @@ private:
     String lastError, dtdText;
     StringArray tokenisedDTD;
     bool needToLoadDTD;
-    XmlInputSource* inputSource;
+    InputSource* inputSource;
 
     void setLastError (const String& desc, const bool carryOn) throw();
     void skipHeader() throw();

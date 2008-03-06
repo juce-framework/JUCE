@@ -20,6 +20,10 @@ Changelist for version 1.46
 - added a parameter to DragAndDropTarget::isInterestedInDragSource(). This ma
 - changed the parameters to AudioIODeviceCallback::audioDeviceAboutToStart(), so that it now just supplies a pointer to the device. If you need to, you can still find out the sample rate and block size by asking the device for them.
 - changes to the URL class to allow file uploading
+- new method: PlatformUtilities::launchEmailWithAttachments
+- new classes: AudioThumbnail and AudioThumbnailCache, which allow easy rendering of low-res waveform previews
+- new classes: InputSource and FileInputSource. These encapsulate some kind of resource, and also replace the XmlInputSource class.
+
 
 ==============================================================================
 Changelist for version 1.45

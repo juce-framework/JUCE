@@ -34,17 +34,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_XmlDocument.h"
-#include "../io/files/juce_FileInputStream.h"
-
-
-//==============================================================================
-XmlInputSource::XmlInputSource() throw()
-{
-}
-
-XmlInputSource::~XmlInputSource()
-{
-}
+#include "../io/streams/juce_FileInputSource.h"
 
 
 //==============================================================================
@@ -59,34 +49,6 @@ static bool isXmlIdentifierChar_Slow (const tchar c) throw()
 
 #define isXmlIdentifierChar(c) \
     ((c > 0 && c <= 127) ? identifierLookupTable [(int) c] : isXmlIdentifierChar_Slow (c))
-
-//==============================================================================
-class FileInputSource  : public XmlInputSource
-{
-public:
-    FileInputSource (const File& file_) throw()
-        : file (file_)
-    {
-    }
-
-    ~FileInputSource()
-    {
-    }
-
-    InputStream* createInputStreamFor (const String& filename)
-    {
-        if (filename.isEmpty())
-            return file.createInputStream();
-        else
-            return file.getSiblingFile (filename).createInputStream();
-    }
-
-private:
-    const File file;
-
-    FileInputSource (const FileInputSource&);
-    const FileInputSource& operator= (const FileInputSource&);
-};
 
 
 //==============================================================================
@@ -106,7 +68,7 @@ XmlDocument::~XmlDocument() throw()
     delete inputSource;
 }
 
-void XmlDocument::setInputSource (XmlInputSource* const newSource) throw()
+void XmlDocument::setInputSource (InputSource* const newSource) throw()
 {
     if (inputSource != newSource)
     {
@@ -121,7 +83,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 
     if (textToParse.isEmpty() && inputSource != 0)
     {
-        InputStream* const in = inputSource->createInputStreamFor (String::empty);
+        InputStream* const in = inputSource->createInputStream();
 
         if (in != 0)
         {

@@ -157,14 +157,14 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
               "set visible to true\r\n"
               "set sender to \"sdfsdfsdfewf\"\r\n"
               "make new to recipient at end of to recipients with properties {address:\""
-           << targetEmailAddress 
+           << targetEmailAddress
            << "\"}\r\n";
-    
+
     for (int i = 0; i < filesToAttach.size(); ++i)
     {
         script << "tell content\r\n"
                   "make new attachment with properties {file name:\""
-               << filesToAttach[i] 
+               << filesToAttach[i]
                << "\"} at after the last paragraph\r\n"
                   "end tell\r\n";
     }
@@ -174,11 +174,11 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
 
     DBG (script);
     ComponentInstance comp = OpenDefaultComponent (kOSAComponentType, kOSAGenericScriptingComponentSubtype);
-    
+
     OSAID resultID;
     AEDesc source;
     AECreateDesc (typeUTF8Text, (Ptr) script.toUTF8(), strlen (script.toUTF8()), &source);
-    OSAError err = OSACompileExecute (comp, &source, 
+    OSAError err = OSACompileExecute (comp, &source,
                                       kOSANullScript, kOSAModeNull,
                                       &resultID);
     AEDisposeDesc (&source);

@@ -36,13 +36,18 @@
 
 #include "win32_headers.h"
 #include <stddef.h>
+#include <imapi.h>
+#include <imapierror.h>
+
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
+#include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
 #include "../../../src/juce_appframework/events/juce_Timer.h"
 #include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
+#include "../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.h"
 
 #ifdef _MSC_VER
   #pragma warning (pop)
@@ -2107,5 +2112,382 @@ void AudioCDReader::ejectDisk()
 {
     ((CDDeviceWrapper*) handle)->cdH->openDrawer (true);
 }
+
+
+//==============================================================================
+static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
+{
+    CoInitialize (0);
+
+    IDiscMaster* dm;
+    IDiscRecorder* result = 0;
+
+    if (SUCCEEDED (CoCreateInstance (CLSID_MSDiscMasterObj, 0,
+                                     CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER,
+                                     IID_IDiscMaster,
+                                     (void**) &dm)))
+    {
+        if (SUCCEEDED (dm->Open()))
+        {
+            IEnumDiscRecorders* drEnum = 0;
+
+            if (SUCCEEDED (dm->EnumDiscRecorders (&drEnum)))
+            {
+                IDiscRecorder* dr = 0;
+                DWORD dummy;
+                int index = 0;
+
+                while (drEnum->Next (1, &dr, &dummy) == S_OK)
+                {
+                    if (indexToOpen == index)
+                    {
+                        result = dr;
+                        break;
+                    }
+                    else if (list != 0)
+                    {
+                        BSTR path;
+
+                        if (SUCCEEDED (dr->GetPath (&path)))
+                            list->add ((const WCHAR*) path);
+                    }
+
+                    ++index;
+                    dr->Release();
+                }
+
+                drEnum->Release();
+            }
+
+            /*if (redbookFormat != 0)
+            {
+                IEnumDiscMasterFormats* mfEnum;
+
+                if (SUCCEEDED (dm->EnumDiscMasterFormats (&mfEnum)))
+                {
+                    IID formatIID;
+                    DWORD dummy;
+
+                    while (mfEnum->Next (1, &formatIID, &dummy) == S_OK)
+                    {
+                    }
+
+                    mfEnum->Release();
+                }
+
+                redbookFormat
+            }*/
+
+            if (master == 0)
+                dm->Close();
+        }
+
+        if (master != 0)
+            *master = dm;
+        else
+            dm->Release();
+    }
+
+    return result;
+}
+
+const StringArray AudioCDBurner::findAvailableDevices()
+{
+    StringArray devs;
+    enumCDBurners (&devs, -1, 0);
+    return devs;
+}
+
+AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
+{
+    AudioCDBurner* b = new AudioCDBurner (deviceIndex);
+
+    if (b->internal == 0)
+        deleteAndZero (b);
+
+    return b;
+}
+
+class CDBurnerInfo  : public IDiscMasterProgressEvents
+{
+public:
+    CDBurnerInfo()
+        : refCount (1),
+          progress (0),
+          shouldCancel (false),
+          listener (0)
+    {
+    }
+
+    ~CDBurnerInfo()
+    {
+    }
+
+    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+    {
+        if (result == 0)
+            return E_POINTER;
+
+        if (id == IID_IUnknown || id == IID_IDiscMasterProgressEvents)
+        {
+            AddRef();
+            *result = this;
+            return S_OK;
+        }
+
+        *result = 0;
+        return E_NOINTERFACE;
+    }
+
+    ULONG __stdcall AddRef()    { return ++refCount; }
+    ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
+
+    HRESULT __stdcall QueryCancel (boolean* pbCancel)
+    {
+        if (listener != 0 && ! shouldCancel)
+            shouldCancel = listener->audioCDBurnProgress (progress);
+
+        *pbCancel = shouldCancel;
+
+        return S_OK;
+    }
+
+    HRESULT __stdcall NotifyBlockProgress (long nCompleted, long nTotal)
+    {
+        progress = nCompleted / (float) nTotal;
+        shouldCancel = listener != 0 && listener->audioCDBurnProgress (progress);
+
+        return E_NOTIMPL;
+    }
+
+    HRESULT __stdcall NotifyPnPActivity (void)                              { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyAddProgress (long /*nCompletedSteps*/, long /*nTotalSteps*/)    { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyTrackProgress (long /*nCurrentTrack*/, long /*nTotalTracks*/)   { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyPreparingBurn (long /*nEstimatedSeconds*/)      { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyClosingDisc (long /*nEstimatedSeconds*/)        { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
+    HRESULT __stdcall NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
+
+    IDiscMaster* discMaster;
+    IDiscRecorder* discRecorder;
+    IRedbookDiscMaster* redbook;
+    AudioCDBurner::BurnProgressListener* listener;
+    float progress;
+    bool shouldCancel;
+
+private:
+    int refCount;
+};
+
+AudioCDBurner::AudioCDBurner (const int deviceIndex)
+    : internal (0)
+{
+    IDiscMaster* discMaster;
+    IDiscRecorder* dr = enumCDBurners (0, deviceIndex, &discMaster);
+
+    if (dr != 0)
+    {
+        IRedbookDiscMaster* redbook;
+        HRESULT hr = discMaster->SetActiveDiscMasterFormat (IID_IRedbookDiscMaster, (void**) &redbook);
+
+        hr = discMaster->SetActiveDiscRecorder (dr);
+
+        CDBurnerInfo* const info = new CDBurnerInfo();
+        internal = info;
+
+        info->discMaster = discMaster;
+        info->discRecorder = dr;
+        info->redbook = redbook;
+    }
+}
+
+AudioCDBurner::~AudioCDBurner()
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+
+    if (info != 0)
+    {
+        info->discRecorder->Close();
+        info->redbook->Release();
+        info->discRecorder->Release();
+        info->discMaster->Release();
+
+        info->Release();
+    }
+}
+
+bool AudioCDBurner::isDiskPresent() const
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+
+    HRESULT hr = info->discRecorder->OpenExclusive();
+
+    long type, flags;
+    hr = info->discRecorder->QueryMediaType (&type, &flags);
+
+    info->discRecorder->Close();
+    return hr == S_OK && type != 0 && (flags & MEDIA_WRITABLE) != 0;
+}
+
+int AudioCDBurner::getNumAvailableAudioBlocks() const
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+    long blocksFree = 0;
+    info->redbook->GetAvailableAudioTrackBlocks (&blocksFree);
+    return blocksFree;
+}
+
+const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
+                                  const bool ejectDiscAfterwards)
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+
+    info->listener = listener;
+    info->progress = 0;
+    info->shouldCancel = false;
+
+    UINT cookie;
+    HRESULT hr = info->discMaster->ProgressAdvise (info, &cookie);
+
+    hr = info->discMaster->RecordDisc (FALSE, // set this to TRUE to make it do a fake burn, without actually writing to the disc
+                                       ejectDiscAfterwards);
+
+    String error;
+    if (hr != S_OK)
+    {
+        const char* e = "Couldn't open or write to the CD device";
+
+        if (hr == IMAPI_E_USERABORT)
+            e = "User cancelled the write operation";
+        else if (hr == IMAPI_E_MEDIUM_NOTPRESENT || hr == IMAPI_E_TRACKOPEN)
+            e = "No Disk present";
+
+        error = e;
+    }
+
+    info->discMaster->ProgressUnadvise (cookie);
+    info->listener = 0;
+
+    return error;
+}
+
+bool AudioCDBurner::addAudioTrack (AudioFormatReader& source, int numSamples)
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+
+    long bytesPerBlock;
+    HRESULT hr = info->redbook->GetAudioBlockSize (&bytesPerBlock);
+
+    const int samplesPerBlock = bytesPerBlock / 4;
+    bool ok = true;
+
+    hr = info->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
+
+    byte* const buffer = (byte*) juce_malloc (bytesPerBlock);
+
+    int* sourceBuffers[2];
+    sourceBuffers[0] = (int*) juce_malloc (samplesPerBlock * 4);
+    sourceBuffers[1] = (int*) juce_malloc (samplesPerBlock * 4);
+
+    int samplesDone = 0;
+
+    for (;;)
+    {
+        zeromem (buffer, bytesPerBlock);
+
+        if (! source.read (sourceBuffers, samplesDone, samplesPerBlock))
+        {
+            ok = false;
+            break;
+        }
+
+        short* destBuffer = (short*) buffer;
+
+        for (int j = 0; j < samplesPerBlock; ++j)
+        {
+            *destBuffer++ = (short) (sourceBuffers [0][j] >> 16);
+            *destBuffer++ = (short) (sourceBuffers [jmin (1, source.numChannels - 1)][j] >> 16);
+        }
+
+        hr = info->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
+
+        if (hr != S_OK)
+        {
+            ok = false;
+            break;
+        }
+
+        samplesDone += samplesPerBlock;
+
+        if (samplesDone >= numSamples)
+            break;
+    }
+
+    juce_free (sourceBuffers[0]);
+    juce_free (sourceBuffers[1]);
+    juce_free (buffer);
+
+    hr = info->redbook->CloseAudioTrack();
+
+    return ok && hr == S_OK;
+}
+
+bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
+{
+    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+
+    long bytesPerBlock;
+    HRESULT hr = info->redbook->GetAudioBlockSize (&bytesPerBlock);
+
+    const int samplesPerBlock = bytesPerBlock / 4;
+    bool ok = true;
+
+    hr = info->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
+
+    byte* const buffer = (byte*) juce_malloc (bytesPerBlock);
+
+    AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
+    int samplesDone = 0;
+
+    source.prepareToPlay (samplesPerBlock, 44100.0);
+
+    while (ok)
+    {
+        {
+            AudioSourceChannelInfo info;
+            info.buffer = &sourceBuffer;
+            info.numSamples = samplesPerBlock;
+            info.startSample = 0;
+            sourceBuffer.clear();
+
+            source.getNextAudioBlock (info);
+        }
+
+        zeromem (buffer, bytesPerBlock);
+
+        AudioDataConverters::convertFloatToInt16LE (sourceBuffer.getSampleData (0, 0),
+                                                    buffer, samplesPerBlock, 4);
+
+        AudioDataConverters::convertFloatToInt16LE (sourceBuffer.getSampleData (1, 0),
+                                                    buffer + 2, samplesPerBlock, 4);
+
+        hr = info->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
+
+        if (hr != S_OK)
+            ok = false;
+
+        samplesDone += samplesPerBlock;
+
+        if (samplesDone >= numSamples)
+            break;
+    }
+
+    juce_free (buffer);
+
+    hr = info->redbook->CloseAudioTrack();
+
+    return ok && hr == S_OK;
+}
+
 
 END_JUCE_NAMESPACE

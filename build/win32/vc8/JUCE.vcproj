@@ -534,6 +534,10 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioCDBurner.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioCDReader.h"
 							>
 						</File>
@@ -639,6 +643,22 @@
 						</File>
 						<File
 							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioSubsectionReader.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.h"
 							>
 						</File>
 						<File
@@ -5243,6 +5263,14 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\juce_core\io\streams\juce_FileInputSource.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_core\io\streams\juce_FileInputSource.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\juce_core\io\streams\juce_GZIPCompressorOutputStream.cpp"
 							>
 							<FileConfiguration
@@ -5328,6 +5356,10 @@
 						</File>
 						<File
 							RelativePath="..\..\..\src\juce_core\io\streams\juce_GZIPDecompressorInputStream.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_core\io\streams\juce_InputSource.h"
 							>
 						</File>
 						<File

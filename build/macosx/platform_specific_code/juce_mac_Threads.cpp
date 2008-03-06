@@ -235,7 +235,7 @@ bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
         int m[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
         size_t sz = sizeof (info);
         sysctl (m, 4, &info, &sz, 0, 0);
-        testResult = (info.kp_proc.p_flag & P_TRACED) == P_TRACED ? 1 : -1;
+        testResult = ((info.kp_proc.p_flag & P_TRACED) != 0) ? 1 : -1;
     }
 
     return testResult > 0;

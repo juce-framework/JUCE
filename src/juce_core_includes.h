@@ -155,11 +155,17 @@
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_BufferedInputStream.h"
 #endif
+#ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
+ #include "juce_core/io/streams/juce_FileInputSource.h"
+#endif
 #ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_GZIPCompressorOutputStream.h"
 #endif
 #ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_GZIPDecompressorInputStream.h"
+#endif
+#ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
+ #include "juce_core/io/streams/juce_InputSource.h"
 #endif
 #ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_MemoryInputStream.h"
