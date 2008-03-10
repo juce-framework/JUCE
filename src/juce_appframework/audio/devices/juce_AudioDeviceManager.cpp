@@ -105,7 +105,7 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
             setMidiInputEnabled (allMidiIns[i], enabledMidiIns.contains (allMidiIns[i]));
 
         if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
-            initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, false);
+            error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, false);
 
         setDefaultMidiOutput (e->getStringAttribute (T("defaultMidiOutput")));
 

@@ -142,6 +142,7 @@ LookAndFeel::LookAndFeel()
 
         ComboBox::textColourId,                     0xff000000,
         ComboBox::backgroundColourId,               0xffffffff,
+        ComboBox::arrowColourId,                    0x99000000,
 
         ListBox::backgroundColourId,                0xffffffff,
         ListBox::outlineColourId,                   standardOutlineColour,
@@ -1114,15 +1115,14 @@ void LookAndFeel::drawComboBox (Graphics& g, int width, int height,
                        buttonX + buttonW * (1.0f - arrowX), buttonY + buttonH * 0.55f,
                        buttonX + buttonW * arrowX,          buttonY + buttonH * 0.55f);
 
-        g.setColour (Colour (0x99000000));
+        g.setColour (box.findColour (ComboBox::arrowColourId));
         g.fillPath (p);
     }
 }
 
 const Font LookAndFeel::getComboBoxFont (ComboBox& box)
 {
-    const Font f (jmin (15.0f, box.getHeight() * 0.85f));
-    return f;
+    return Font (jmin (15.0f, box.getHeight() * 0.85f));
 }
 
 Label* LookAndFeel::createComboBoxTextBox (ComboBox&)
