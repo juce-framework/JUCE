@@ -50,24 +50,16 @@ ResizableWindow::ResizableWindow (const String& name,
       contentComponent (0),
       resizeToFitContent (false),
       fullscreen (false),
-      constrainer (&defaultConstrainer)
+      constrainer (0)
 #ifdef JUCE_DEBUG
       , hasBeenResized (false)
 #endif
 {
     setBackgroundColour (backgroundColour_);
 
-    const Rectangle mainMonArea (Desktop::getInstance().getMainMonitorArea());
-
-    defaultConstrainer.setSizeLimits (200, 200,
-                                      mainMonArea.getWidth(),
-                                      mainMonArea.getHeight());
-
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
-    lastNonFullScreenPos.setBounds (50, 50,
-                                    defaultConstrainer.getMinimumWidth(),
-                                    defaultConstrainer.getMinimumHeight());
+    lastNonFullScreenPos.setBounds (50, 50, 256, 256);
 
     if (addToDesktop_)
         Component::addToDesktop (getDesktopWindowStyleFlags());
@@ -258,7 +250,10 @@ void ResizableWindow::setResizeLimits (const int newMinimumWidth,
                                        const int newMaximumHeight) throw()
 {
     // if you've set up a custom constrainer then these settings won't have any effect..
-    jassert (constrainer == &defaultConstrainer);
+    jassert (constrainer == &defaultConstrainer || constrainer == 0);
+
+    if (constrainer == 0)
+        setConstrainer (&defaultConstrainer);
 
     defaultConstrainer.setSizeLimits (newMinimumWidth, newMinimumHeight,
                                       newMaximumWidth, newMaximumHeight);

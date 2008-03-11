@@ -60,6 +60,8 @@ DocumentWindow::DocumentWindow (const String& title,
 {
     zeromem (titleBarButtons, sizeof (titleBarButtons));
 
+    setResizeLimits (128, 128, 32768, 32768);
+
     lookAndFeelChanged();
 }
 
