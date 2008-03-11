@@ -1,17 +1,17 @@
 ARCHS = ppc i386
 
 // For 10.2 (and later) compatibility, use these values:
-GCC_VERSION_ppc = 3.3
-MACOSX_DEPLOYMENT_TARGET = 10.4
-MACOSX_DEPLOYMENT_TARGET_ppc = 10.2
-OTHER_LD_FLAGS_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3/libstdc++.a
-SDKROOT_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.2.8.sdk
+//GCC_VERSION_ppc = 3.3
+//MACOSX_DEPLOYMENT_TARGET = 10.4
+//MACOSX_DEPLOYMENT_TARGET_ppc = 10.2
+//OTHER_LD_FLAGS_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3/libstdc++.a
+//SDKROOT_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.2.8.sdk
 
 //  For 10.3 (and later) compatibility, use these instead:
-// MACOSX_DEPLOYMENT_TARGET = 10.4
-// MACOSX_DEPLOYMENT_TARGET_ppc = 10.3
-// SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk
-// SDKROOT_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.3.9.sdk
+ MACOSX_DEPLOYMENT_TARGET = 10.4
+ MACOSX_DEPLOYMENT_TARGET_ppc = 10.3
+ SDKROOT = $(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk
+ SDKROOT_ppc = $(DEVELOPER_SDK_DIR)/MacOSX10.3.9.sdk
 
 //  For 10.4 (and later) compatibility, use these instead:
 // MACOSX_DEPLOYMENT_TARGET = 10.4
