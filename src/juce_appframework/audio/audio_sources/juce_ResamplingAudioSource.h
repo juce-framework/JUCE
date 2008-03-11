@@ -33,7 +33,7 @@
 #define __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
 
 #include "juce_AudioSource.h"
-
+#include "../../../juce_core/threads/juce_CriticalSection.h"
 
 //==============================================================================
 /**
@@ -89,6 +89,7 @@ private:
     int bufferPos, sampsInBuffer;
     double subSampleOffset;
     double coefficients[6];
+    CriticalSection ratioLock;
 
     void setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6);
     void createLowPass (const double proportionalRate);
