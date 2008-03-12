@@ -344,7 +344,8 @@ private:
             }
 
             TextAtom* const atom = new TextAtom();
-            atom->atomText = textToParse.substring (start, i);
+            atom->atomText = String (text + start, i - start);
+
             atom->width = font.getStringWidthFloat (atom->getText (passwordCharacter));
             atom->numChars = (uint16) (i - start);
 

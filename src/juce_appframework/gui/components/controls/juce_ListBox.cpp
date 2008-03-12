@@ -423,7 +423,7 @@ void ListBox::visibilityChanged()
     viewport->updateVisibleArea (true);
 }
 
-Viewport* ListBox::getViewPort() const throw()
+Viewport* ListBox::getViewport() const throw()
 {
     return viewport;
 }

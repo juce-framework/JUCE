@@ -533,7 +533,7 @@ public:
         You may need to use this to change parameters such as whether scrollbars
         are shown, etc.
     */
-    Viewport* getViewPort() const throw();
+    Viewport* getViewport() const throw();
 
 
     //==============================================================================
