@@ -682,25 +682,39 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
 
                     if (newIndex > 0)
                     {
-                        const int leftOfPrevious = getColumnPosition (newIndex - 1).getX();
-                        const int rightOfCurrent = getColumnPosition (newIndex).getRight();
+                        // if the previous column isn't draggable, we can't move our column
+                        // past it, because that'd change the undraggable column's position..
+                        const ColumnInfo* const previous = columns.getUnchecked (newIndex - 1);
 
-                        if (abs (dragOverlayComp->getX() - leftOfPrevious)
-                             < abs (dragOverlayComp->getRight() - rightOfCurrent))
+                        if ((previous->propertyFlags & draggable) != 0)
                         {
-                            --newIndex;
+                            const int leftOfPrevious = getColumnPosition (newIndex - 1).getX();
+                            const int rightOfCurrent = getColumnPosition (newIndex).getRight();
+
+                            if (abs (dragOverlayComp->getX() - leftOfPrevious)
+                                < abs (dragOverlayComp->getRight() - rightOfCurrent))
+                            {
+                                --newIndex;
+                            }
                         }
                     }
 
                     if (newIndex < columns.size() - 1)
                     {
-                        const int leftOfCurrent = getColumnPosition (newIndex).getX();
-                        const int rightOfNext = getColumnPosition (newIndex + 1).getRight();
+                        // if the next column isn't draggable, we can't move our column
+                        // past it, because that'd change the undraggable column's position..
+                        const ColumnInfo* const nextCol = columns.getUnchecked (newIndex + 1);
 
-                        if (abs (dragOverlayComp->getX() - leftOfCurrent)
-                             > abs (dragOverlayComp->getRight() - rightOfNext))
+                        if ((nextCol->propertyFlags & draggable) != 0)
                         {
-                            ++newIndex;
+                            const int leftOfCurrent = getColumnPosition (newIndex).getX();
+                            const int rightOfNext = getColumnPosition (newIndex + 1).getRight();
+
+                            if (abs (dragOverlayComp->getX() - leftOfCurrent)
+                                > abs (dragOverlayComp->getRight() - rightOfNext))
+                            {
+                                ++newIndex;
+                            }
                         }
                     }
 

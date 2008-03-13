@@ -681,8 +681,8 @@ void JucerDocumentHolder::addComponent (const int index)
             document->getUndoManager().beginNewTransaction (T("Add new ") + ObjectTypes::componentTypeHandlers [index]->getTypeName());
 
             const int randomness = jmin (80, area.getWidth() / 2, area.getHeight() / 2);
-            int x = area.getX() + area.getWidth() / 2 + Random::getSystemRandom().nextInt (randomness) - randomness / 2;
-            int y = area.getY() + area.getHeight() / 2 + Random::getSystemRandom().nextInt (randomness) - randomness / 2;
+            int x = area.getWidth() / 2 + Random::getSystemRandom().nextInt (randomness) - randomness / 2;
+            int y = area.getHeight() / 2 + Random::getSystemRandom().nextInt (randomness) - randomness / 2;
             x = document->snapPosition (x);
             y = document->snapPosition (y);
 

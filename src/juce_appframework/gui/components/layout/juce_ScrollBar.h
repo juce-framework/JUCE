@@ -255,7 +255,8 @@ public:
     enum ColourIds
     {
         backgroundColourId          = 0x1000300,    /**< The background colour of the scrollbar. */
-        thumbColourId               = 0x1000400     /**< A base colour to use for the thumb. The look and feel will probably use variations on this colour. */
+        thumbColourId               = 0x1000400,    /**< A base colour to use for the thumb. The look and feel will probably use variations on this colour. */
+        trackColourId               = 0x1000401     /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
     };
 
     //==============================================================================

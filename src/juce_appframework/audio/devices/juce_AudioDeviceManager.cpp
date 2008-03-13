@@ -443,6 +443,12 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         const double filterAmount = 0.2;
         cpuUsageMs += filterAmount * (msTaken - cpuUsageMs);
     }
+    else
+    {
+        for (int i = 0; i < totalNumOutputChannels; ++i)
+            if (outputChannelData [i] != 0)
+                zeromem (outputChannelData[i], sizeof (float) * numSamples);
+    }
 }
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)

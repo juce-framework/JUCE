@@ -130,6 +130,7 @@ LookAndFeel::LookAndFeel()
 
         ScrollBar::backgroundColourId,              0x00000000,
         ScrollBar::thumbColourId,                   0xffffffff,
+        ScrollBar::trackColourId,                   0xffffffff,
 
         TreeView::linesColourId,                    0x4c000000,
         TreeView::backgroundColourId,               0x00000000,
@@ -622,7 +623,7 @@ void LookAndFeel::drawScrollbar (Graphics& g,
         gy2 = y + height * 0.7f;
     }
 
-    const Colour thumbColour (scrollbar.findColour (ScrollBar::thumbColourId));
+    const Colour thumbColour (scrollbar.findColour (ScrollBar::trackColourId));
 
     GradientBrush gb (thumbColour.overlaidWith (Colour (0x44000000)),
                       gx1, gy1,
