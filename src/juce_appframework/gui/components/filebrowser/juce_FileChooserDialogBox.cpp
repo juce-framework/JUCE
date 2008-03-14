@@ -69,7 +69,7 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     setContentComponent (content);
 
     setResizable (true, true);
-    getConstrainer()->setSizeLimits (300, 300, 1200, 1000);
+    setResizeLimits (300, 300, 1200, 1000);
 
     content->chooserComponent->addListener (this);
 }
