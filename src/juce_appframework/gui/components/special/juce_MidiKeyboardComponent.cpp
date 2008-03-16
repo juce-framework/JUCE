@@ -280,14 +280,32 @@ int MidiKeyboardComponent::xyToNote (int x, int y)
 
 int MidiKeyboardComponent::remappedXYToNote (int x, int y) const
 {
-    const int noteX = x % roundFloatToInt (keyWidth * 7.0f);
-    const int octaveStart = 12 * ((x - noteX) / roundFloatToInt (keyWidth * 7.0f));
-
     if (y < blackNoteLength)
     {
-        for (int i = 0; i < 5; ++i)
+        for (int octaveStart = 12 * (rangeStart / 12); octaveStart < rangeEnd; octaveStart += 12)
         {
-            const int note = rangeStart + octaveStart + blackNotes [i];
+            for (int i = 0; i < 5; ++i)
+            {
+                const int note = octaveStart + blackNotes [i];
+
+                if (note >= rangeStart && note <= rangeEnd)
+                {
+                    int kx, kw;
+                    getKeyPos (note, kx, kw);
+                    kx += xOffset;
+
+                    if (x >= kx && x < kx + kw)
+                        return note;
+                }
+            }
+        }
+    }
+
+    for (int octaveStart = 12 * (rangeStart / 12); octaveStart < rangeEnd; octaveStart += 12)
+    {
+        for (int i = 0; i < 7; ++i)
+        {
+            const int note = octaveStart + whiteNotes [i];
 
             if (note >= rangeStart && note <= rangeEnd)
             {
@@ -298,21 +316,6 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y) const
                 if (x >= kx && x < kx + kw)
                     return note;
             }
-        }
-    }
-
-    for (int i = 0; i < 7; ++i)
-    {
-        const int note = rangeStart + octaveStart + whiteNotes [i];
-
-        if (note >= rangeStart && note <= rangeEnd)
-        {
-            int kx, kw;
-            getKeyPos (note, kx, kw);
-            kx += xOffset;
-
-            if (x >= kx && x < kx + kw)
-                return note;
         }
     }
 
