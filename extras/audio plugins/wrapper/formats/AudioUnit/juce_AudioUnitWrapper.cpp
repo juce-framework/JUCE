@@ -58,7 +58,7 @@ END_JUCE_NAMESPACE
     and make it create an instance of the filter subclass that you're building.
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
+class JuceAUView;
 
 //==============================================================================
 class JuceAU   : public JuceAUBaseClass,
@@ -73,6 +73,7 @@ public:
 #else
         : AUMIDIEffectBase (component),
 #endif
+          currentView (0),
           juceFilter (0),
           bufferSpace (2, 16),
           channels (0),
@@ -133,7 +134,7 @@ public:
             if (inID == juceFilterObjectPropertyID)
             {
                 outWritable = false;
-                outDataSize = sizeof (void*);
+                outDataSize = sizeof (void*) * 2;
                 return noErr;
             }
             else if (inID == kAudioUnitProperty_OfflineRender)
@@ -156,7 +157,8 @@ public:
         {
             if (inID == juceFilterObjectPropertyID)
             {
-                *(void**) outData = (void*) juceFilter;
+                ((void**) outData)[0] = (void*) juceFilter;
+                ((void**) outData)[1] = (void*) this;
                 return noErr;
             }
             else if (inID == kAudioUnitProperty_OfflineRender)
@@ -172,7 +174,7 @@ public:
     ComponentResult SetProperty (AudioUnitPropertyID inID,
                                  AudioUnitScope inScope,
                                  AudioUnitElement inElement,
-                                 const void * inData,
+                                 const void* inData,
                                  UInt32 inDataSize)
     {
         if (inScope == kAudioUnitScope_Global && inID == kAudioUnitProperty_OfflineRender)
@@ -183,7 +185,7 @@ public:
             return noErr;
         }
 
-        return MusicDeviceBase::SetProperty (inID, inScope, inElement, inData, inDataSize);
+        return JuceAUBaseClass::SetProperty (inID, inScope, inElement, inData, inDataSize);
     }
 
     ComponentResult SaveState (CFPropertyListRef* outData)
@@ -231,7 +233,7 @@ public:
                 if (data != 0)
                 {
                     const int numBytes = (int) CFDataGetLength (data);
-                    const uint8* const rawBytes = CFDataGetBytePtr (data);
+                    const JUCE_NAMESPACE::uint8* const rawBytes = CFDataGetBytePtr (data);
 
                     if (numBytes > 0)
                         juceFilter->setCurrentProgramStateInformation (rawBytes, numBytes);
@@ -456,6 +458,9 @@ public:
         }
     }
 
+    // (can only be called immediately after sendAUEvent)
+    void sendOldFashionedGestureEvent (const AudioUnitCarbonViewEventID gestureType);
+
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue)
     {
         sendAUEvent (kAudioUnitEvent_ParameterValueChange, index);
@@ -464,11 +469,13 @@ public:
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index)
     {
         sendAUEvent (kAudioUnitEvent_BeginParameterChangeGesture, index);
+        sendOldFashionedGestureEvent (kAudioUnitCarbonViewEvent_MouseDownInControl);
     }
 
     void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index)
     {
         sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
+        sendOldFashionedGestureEvent (kAudioUnitCarbonViewEvent_MouseUpInControl);
     }
 
     void audioProcessorChanged (AudioProcessor*)
@@ -680,7 +687,7 @@ public:
             if (! midiEvents.isEmpty())
             {
 #if JucePlugin_ProducesMidiOutput
-                const uint8* midiEventData;
+                const JUCE_NAMESPACE::uint8* midiEventData;
                 int midiEventSize, midiEventPosition;
                 MidiBuffer::Iterator i (midiEvents);
 
@@ -742,7 +749,7 @@ protected:
                               long inStartFrame)
     {
 #if JucePlugin_WantsMidiInput
-        uint8 data [4];
+        JUCE_NAMESPACE::uint8 data [4];
         data[0] = nStatus | inChannel;
         data[1] = inData1;
         data[2] = inData2;
@@ -753,7 +760,7 @@ protected:
         return noErr;
     }
 
-   //==============================================================================
+    //==============================================================================
     ComponentResult GetPresets (CFArrayRef* outData) const
     {
         if (outData != 0)
@@ -796,7 +803,10 @@ protected:
         return noErr;
     }
 
-   //==============================================================================
+    //==============================================================================
+public:
+    JuceAUView* currentView;
+                                              
 private:
     AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
@@ -852,6 +862,7 @@ class JuceAUView  : public AUCarbonViewBase,
     Component* windowComp;
     bool recursive;
     int mx, my;
+    JuceAU* owner;
 
 public:
     JuceAUView (AudioUnitCarbonView auview)
@@ -861,12 +872,16 @@ public:
         windowComp (0),
         recursive (false),
         mx (0),
-        my (0)
+        my (0),
+        owner (0)
     {
     }
 
     ~JuceAUView()
     {
+        if (owner->currentView == this)
+            owner->currentView = 0;
+
         deleteUI();
     }
 
@@ -874,14 +889,20 @@ public:
     {
         if (juceFilter == 0)
         {
-            UInt32 propertySize = sizeof (&juceFilter);
+            void* pointers[2];
+            UInt32 propertySize = sizeof (pointers);
 
             AudioUnitGetProperty (GetEditAudioUnit(),
                                   juceFilterObjectPropertyID,
                                   kAudioUnitScope_Global,
                                   0,
-                                  &juceFilter,
+                                  pointers,
                                   &propertySize);
+
+            juceFilter = (AudioProcessor*) pointers[0];
+            
+            owner = (JuceAU*) pointers[1];
+            owner->currentView = this;
         }
 
         if (juceFilter != 0)
@@ -984,6 +1005,9 @@ public:
         startTimer (20);
     }
 
+    AudioUnitCarbonViewEventListener getEventListener() const throw()   { return mEventListener; }
+    void* getEventListenerUserData() const throw()  { return mEventListenerUserData; }
+
 private:
     void deleteUI()
     {
@@ -1000,6 +1024,16 @@ private:
         deleteAndZero (windowComp);
     }
 };
+
+void JuceAU::sendOldFashionedGestureEvent (const AudioUnitCarbonViewEventID gestureType)
+{
+    if (currentView != 0 && currentView->getEventListener() != 0)
+    {
+        (*currentView->getEventListener()) (currentView->getEventListenerUserData(), currentView->GetComponentInstance(),
+                                            &(auEvent.mArgument.mParameter), gestureType, 0);
+    }
+}
+
 
 //==============================================================================
 #define JUCE_COMPONENT_ENTRYX(Class, Name, Suffix) \
