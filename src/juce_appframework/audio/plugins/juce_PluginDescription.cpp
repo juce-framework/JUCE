@@ -57,9 +57,9 @@ PluginDescription::PluginDescription (const PluginDescription& other) throw()
       manufacturerName (other.manufacturerName),
       version (other.version),
       file (other.file),
+      lastFileModTime (other.lastFileModTime),
       uid (other.uid),
       isInstrument (other.isInstrument),
-      lastFileModTime (other.lastFileModTime),
       numInputChannels (other.numInputChannels),
       numOutputChannels (other.numOutputChannels)
 {

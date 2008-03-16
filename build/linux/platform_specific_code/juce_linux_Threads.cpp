@@ -40,11 +40,16 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/threads/juce_CriticalSection.h"
 #include "../../../src/juce_core/threads/juce_WaitableEvent.h"
-#include "../../../src/juce_core/threads/juce_InterProcessLock.h"
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_core/threads/juce_Process.h"
 #include "../../../src/juce_core/io/files/juce_File.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+
+//==============================================================================
+/*
+    Note that a lot of methods that you'd expect to find in this file actually
+    live in juce_posix_SharedCode.cpp!
+*/
 
 #ifndef CPU_ISSET
   #undef SUPPORT_AFFINITIES
@@ -169,143 +174,6 @@ void Thread::yield() throw()
     sched_yield();
 }
 
-void JUCE_CALLTYPE Thread::sleep (int millisecs) throw()
-{
-    struct timespec time;
-    time.tv_sec = millisecs / 1000;
-    time.tv_nsec = (millisecs % 1000) * 1000000;
-    nanosleep (&time, 0);
-}
-
-//==============================================================================
-CriticalSection::CriticalSection() throw()
-{
-    pthread_mutexattr_t atts;
-    pthread_mutexattr_init (&atts);
-    pthread_mutexattr_settype (&atts, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init (&internal, &atts);
-}
-
-CriticalSection::~CriticalSection() throw()
-{
-    pthread_mutex_destroy (&internal);
-}
-
-void CriticalSection::enter() const throw()
-{
-    pthread_mutex_lock (&internal);
-}
-
-bool CriticalSection::tryEnter() const throw()
-{
-    return pthread_mutex_trylock (&internal) == 0;
-}
-
-void CriticalSection::exit() const throw()
-{
-    pthread_mutex_unlock (&internal);
-}
-
-//==============================================================================
-struct EventStruct
-{
-    pthread_cond_t condition;
-    pthread_mutex_t mutex;
-    bool triggered;
-};
-
-WaitableEvent::WaitableEvent() throw()
-{
-    EventStruct* const es = new EventStruct();
-    es->triggered = false;
-
-    pthread_cond_init (&es->condition, 0);
-    pthread_mutex_init (&es->mutex, 0);
-
-    internal = es;
-}
-
-WaitableEvent::~WaitableEvent() throw()
-{
-    EventStruct* const es = (EventStruct*)internal;
-
-    pthread_cond_destroy (&es->condition);
-    pthread_mutex_destroy (&es->mutex);
-
-    delete es;
-}
-
-bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
-{
-    EventStruct* const es = (EventStruct*)internal;
-
-    bool ok = true;
-    pthread_mutex_lock (&es->mutex);
-
-    if (! es->triggered)
-    {
-        if (timeOutMillisecs < 0)
-        {
-            pthread_cond_wait (&es->condition, &es->mutex);
-        }
-        else
-        {
-            struct timespec time;
-            struct timeval t;
-            int timeout = 0;
-
-            gettimeofday (&t, 0);
-
-            time.tv_sec  = t.tv_sec  + (timeOutMillisecs / 1000);
-            time.tv_nsec = (t.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
-
-            while (time.tv_nsec >= 1000000000)
-            {
-                time.tv_nsec -= 1000000000;
-                time.tv_sec++;
-            }
-
-            while (! timeout)
-            {
-                timeout = pthread_cond_timedwait (&es->condition, &es->mutex, &time);
-
-                if (! timeout)
-                    // Success
-                    break;
-
-                if (timeout == EINTR)
-                    // Go round again
-                    timeout = 0;
-            }
-        }
-
-        ok = es->triggered;
-    }
-
-    es->triggered = false;
-
-    pthread_mutex_unlock (&es->mutex);
-    return ok;
-}
-
-void WaitableEvent::signal() const throw()
-{
-    EventStruct* const es = (EventStruct*)internal;
-
-    pthread_mutex_lock (&es->mutex);
-    es->triggered = true;
-    pthread_cond_broadcast (&es->condition);
-    pthread_mutex_unlock (&es->mutex);
-}
-
-void WaitableEvent::reset() const throw()
-{
-    EventStruct* const es = (EventStruct*)internal;
-
-    pthread_mutex_lock (&es->mutex);
-    es->triggered = false;
-    pthread_mutex_unlock (&es->mutex);
-}
 
 //==============================================================================
 // sets the process to 0=low priority, 1=normal, 2=high, 3=realtime
@@ -402,84 +270,6 @@ void* Process::getProcedureEntryPoint (void* libraryHandle, const String& proced
     return dlsym (libraryHandle, (const char*) procedureName);
 }
 #endif
-
-
-//==============================================================================
-InterProcessLock::InterProcessLock (const String& name_) throw()
-    : internal (0),
-      name (name_),
-      reentrancyLevel (0)
-{
-    const File tempDir (File::getSpecialLocation (File::tempDirectory));
-    const File temp (tempDir.getChildFile (name));
-    temp.create();
-
-    internal = (void*) open (temp.getFullPathName().toUTF8(), 'a');
-}
-
-InterProcessLock::~InterProcessLock() throw()
-{
-    while (reentrancyLevel > 0)
-        this->exit();
-
-#if JUCE_64BIT
-    close ((long long) internal);
-#else
-    close ((int) internal);
-#endif
-}
-
-bool InterProcessLock::enter (const int timeOutMillisecs) throw()
-{
-    if (internal == 0)
-        return false;
-
-    if (reentrancyLevel != 0)
-        return true;
-
-    if (timeOutMillisecs <= 0)
-    {
-        if (flock ((long) internal,
-                   timeOutMillisecs < 0 ? LOCK_EX
-                                        : (LOCK_EX | LOCK_NB)) == 0)
-        {
-            ++reentrancyLevel;
-            return true;
-        }
-    }
-    else
-    {
-        const int64 endTime = Time::currentTimeMillis() + timeOutMillisecs;
-
-        for (;;)
-        {
-            if (flock ((long) internal, LOCK_EX | LOCK_NB) == 0)
-            {
-                ++reentrancyLevel;
-                return true;
-            }
-
-            if (Time::currentTimeMillis() >= endTime)
-                break;
-
-            Thread::sleep (10);
-        }
-    }
-
-    return false;
-}
-
-void InterProcessLock::exit() throw()
-{
-    if (reentrancyLevel > 0 && internal != 0)
-    {
-        --reentrancyLevel;
-
-        const int result = flock ((long) internal, LOCK_UN);
-        (void) result;
-        jassert (result == 0);
-    }
-}
 
 
 END_JUCE_NAMESPACE

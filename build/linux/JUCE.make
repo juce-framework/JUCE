@@ -26,7 +26,7 @@ ifeq ($(CONFIG),Release)
   OBJDIR := ../../bin/intermediate_linux/Release
   OUTDIR := ../../bin
   CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "../../" -I "/usr/include" -I "/usr/include/freetype2"
-  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2 -Wall
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2 -O2 -Wall -fvisibility=hidden
   CXXFLAGS := $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s
   LDDEPS :=
@@ -60,6 +60,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_Socket.o \
 	$(OBJDIR)/juce_URL.o \
 	$(OBJDIR)/juce_BufferedInputStream.o \
+	$(OBJDIR)/juce_FileInputSource.o \
 	$(OBJDIR)/juce_GZIPCompressorOutputStream.o \
 	$(OBJDIR)/juce_GZIPDecompressorInputStream.o \
 	$(OBJDIR)/juce_MemoryInputStream.o \
@@ -126,6 +127,8 @@ OBJECTS := \
 	$(OBJDIR)/juce_AudioFormat.o \
 	$(OBJDIR)/juce_AudioFormatManager.o \
 	$(OBJDIR)/juce_AudioSubsectionReader.o \
+	$(OBJDIR)/juce_AudioThumbnail.o \
+	$(OBJDIR)/juce_AudioThumbnailCache.o \
 	$(OBJDIR)/juce_FlacAudioFormat.o \
 	$(OBJDIR)/juce_OggVorbisAudioFormat.o \
 	$(OBJDIR)/juce_WavAudioFormat.o \
@@ -568,6 +571,11 @@ $(OBJDIR)/juce_BufferedInputStream.o: ../../src/juce_core/io/streams/juce_Buffer
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/juce_FileInputSource.o: ../../src/juce_core/io/streams/juce_FileInputSource.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/juce_GZIPCompressorOutputStream.o: ../../src/juce_core/io/streams/juce_GZIPCompressorOutputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -894,6 +902,16 @@ $(OBJDIR)/juce_AudioFormatManager.o: ../../src/juce_appframework/audio/audio_fil
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_AudioSubsectionReader.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioThumbnail.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioThumbnail.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_AudioThumbnailCache.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioThumbnailCache.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

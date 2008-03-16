@@ -50,12 +50,18 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../src/juce_core/io/files/juce_NamedPipe.h"
+#include "../../../src/juce_core/threads/juce_InterProcessLock.h"
+#include "../../../src/juce_core/threads/juce_Thread.h"
+
+//==============================================================================
+/*
+    Note that a lot of methods that you'd expect to find in this file actually
+    live in juce_posix_SharedCode.cpp!
+*/
+#include "juce_posix_SharedCode.cpp"
 
 
 //==============================================================================
-const tchar File::separator = T('/');
-const tchar* File::separatorString = T("/");
-
 static File executableFile;
 
 
@@ -193,54 +199,6 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 }
 
 //==============================================================================
-static bool juce_stat (const String& fileName, struct stat& info) throw()
-{
-    return fileName.isNotEmpty()
-            && (stat (fileName.toUTF8(), &info) == 0);
-}
-
-//==============================================================================
-bool juce_isDirectory (const String& fileName) throw()
-{
-    if (fileName.isEmpty())
-        return true;
-
-    struct stat info;
-
-    return juce_stat (fileName, info)
-            && ((info.st_mode & S_IFDIR) != 0);
-}
-
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories) throw()
-{
-    if (fileName.isEmpty())
-        return false;
-
-    const char* const fileNameUTF8 = fileName.toUTF8();
-    bool exists = access (fileNameUTF8, F_OK) == 0;
-
-    if (exists && dontCountDirectories)
-    {
-        struct stat info;
-        const int res = stat (fileNameUTF8, &info);
-
-        if (res == 0 && (info.st_mode & S_IFDIR) != 0)
-            exists = false;
-    }
-
-    return exists;
-}
-
-int64 juce_getFileSize (const String& fileName) throw()
-{
-    struct stat info;
-
-    if (juce_stat (fileName, info))
-        return info.st_size;
-
-    return 0;
-}
-
 const unsigned int macTimeToUnixTimeDiff = 0x7c25be90;
 
 static uint64 utcDateTimeToUnixTime (const UTCDateTime& d) throw()
@@ -328,11 +286,6 @@ bool juce_setFileTimes (const String& fileName,
     return false;
 }
 
-bool juce_canWriteToFile (const String& fileName) throw()
-{
-    return access (fileName.toUTF8(), W_OK) == 0;
-}
-
 bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
 {
     const char* const fileNameUTF8 = fileName.toUTF8();
@@ -356,16 +309,6 @@ bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
     }
 
     return ok;
-}
-
-bool juce_deleteFile (const String& fileName) throw()
-{
-    const char* const fileNameUTF8 = fileName.toUTF8();
-
-    if (juce_isDirectory (fileName))
-        return rmdir (fileNameUTF8) == 0;
-    else
-        return remove (fileNameUTF8) == 0;
 }
 
 bool juce_copyFile (const String& src, const String& dst) throw()
@@ -446,136 +389,11 @@ bool juce_copyFile (const String& src, const String& dst) throw()
     return false;
 }
 
-bool juce_moveFile (const String& source, const String& dest) throw()
-{
-    if (rename (source.toUTF8(), dest.toUTF8()) == 0)
-        return true;
-
-    if (juce_canWriteToFile (source)
-         && juce_copyFile (source, dest))
-    {
-        if (juce_deleteFile (source))
-            return true;
-
-        juce_deleteFile (dest);
-    }
-
-    return false;
-}
-
-void juce_createDirectory (const String& fileName) throw()
-{
-    mkdir (fileName.toUTF8(), 0777);
-}
-
-void* juce_fileOpen (const String& fileName, bool forWriting) throw()
-{
-    const char* const fileNameUTF8 = fileName.toUTF8();
-    int flags = O_RDONLY;
-
-    if (forWriting)
-    {
-        if (juce_fileExists (fileName, false))
-        {
-            const int f = open (fileNameUTF8, O_RDWR, 00644);
-
-            if (f != -1)
-                lseek (f, 0, SEEK_END);
-
-            return (void*) f;
-        }
-        else
-        {
-            flags = O_RDWR + O_CREAT;
-        }
-    }
-
-    return (void*) open (fileNameUTF8, flags, 00644);
-}
-
-void juce_fileClose (void* handle) throw()
-{
-    if (handle != 0)
-        close ((int) handle);
-}
-
-int juce_fileRead (void* handle, void* buffer, int size) throw()
-{
-    if (handle != 0)
-        return read ((int) handle, buffer, size);
-
-    return 0;
-}
-
-int juce_fileWrite (void* handle, const void* buffer, int size) throw()
-{
-    if (handle != 0)
-        return write ((int) handle, buffer, size);
-
-    return 0;
-}
-
-int64 juce_fileSetPosition (void* handle, int64 pos) throw()
-{
-    if (handle != 0 && lseek ((int) handle, pos, SEEK_SET) == pos)
-        return pos;
-
-    return -1;
-}
-
-int64 juce_fileGetPosition (void* handle) throw()
-{
-    if (handle != 0)
-        return lseek ((int) handle, 0, SEEK_CUR);
-    else
-        return -1;
-}
-
-void juce_fileFlush (void* handle) throw()
-{
-    if (handle != 0)
-        fsync ((int) handle);
-}
-
 const StringArray juce_getFileSystemRoots() throw()
 {
     StringArray s;
     s.add (T("/"));
     return s;
-}
-
-const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSerialNumber) throw()
-{
-    volumeSerialNumber = 0;
-    return String::empty;
-}
-
-// if this file doesn't exist, find a parent of it that does..
-static bool doStatFS (const File* file, struct statfs& result) throw()
-{
-    File f (*file);
-
-    for (int i = 5; --i >= 0;)
-    {
-        if (f.exists())
-            break;
-
-        f = f.getParentDirectory();
-    }
-
-    return statfs (f.getFullPathName().toUTF8(), &result) == 0;
-}
-
-int64 File::getBytesFreeOnVolume() const throw()
-{
-    int64 free_space = 0;
-
-    struct statfs buf;
-    if (doStatFS (this, buf))
-        // Note: this returns space available to non-super user
-        free_space = (int64) buf.f_bsize * (int64) buf.f_bavail;
-
-    return free_space;
 }
 
 //==============================================================================
@@ -608,6 +426,7 @@ bool File::isOnHardDisk() const throw()
 
     return ! (isOnCDRomDrive() || isFileOnDriveType (this, (const char**) nonHDTypes));
 }
+
 
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)

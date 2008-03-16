@@ -57,48 +57,22 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/io/network/juce_URL.h"
 #include "../../../src/juce_core/io/files/juce_NamedPipe.h"
+#include "../../../src/juce_core/threads/juce_InterProcessLock.h"
+#include "../../../src/juce_core/threads/juce_Thread.h"
 
+//==============================================================================
+/*
+    Note that a lot of methods that you'd expect to find in this file actually
+    live in juce_posix_SharedCode.cpp!
+*/
+#include "../../macosx/platform_specific_code/juce_posix_SharedCode.cpp"
+
+
+//==============================================================================
 static File executableFile;
 
 
 //==============================================================================
-bool juce_isDirectory (const String& fileName) throw()
-{
-    if (fileName.isEmpty())
-        return true;
-
-    struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
-    if (res == 0)
-        return (info.st_mode & S_IFDIR) != 0;
-
-    return false;
-}
-
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories) throw()
-{
-    if (fileName.isEmpty())
-        return false;
-
-    bool exists = access (fileName.toUTF8(), F_OK) == 0;
-
-    if (exists && dontCountDirectories && juce_isDirectory (fileName))
-        exists = false;
-
-    return exists;
-}
-
-int64 juce_getFileSize (const String& fileName) throw()
-{
-    struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
-
-    if (res == 0)
-        return info.st_size;
-
-    return 0;
-}
-
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
@@ -112,10 +86,6 @@ void juce_getFileTimes (const String& fileName,
     const int res = stat (fileName.toUTF8(), &info);
     if (res == 0)
     {
-        /*
-         * Note: On Linux the st_ctime field is defined as last change time
-         * rather than creation.
-         */
         modificationTime = (int64) info.st_mtime * 1000;
         accessTime = (int64) info.st_atime * 1000;
         creationTime = (int64) info.st_ctime * 1000;
@@ -134,11 +104,6 @@ bool juce_setFileTimes (const String& fileName,
     return utime (fileName.toUTF8(), &times) == 0;
 }
 
-bool juce_canWriteToFile (const String& fileName) throw()
-{
-    return access (fileName.toUTF8(), W_OK) == 0;
-}
-
 bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
 {
     struct stat info;
@@ -155,14 +120,6 @@ bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
         info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
 
     return chmod (fileName.toUTF8(), info.st_mode) == 0;
-}
-
-bool juce_deleteFile (const String& fileName) throw()
-{
-    if (juce_isDirectory (fileName))
-        return rmdir (fileName.toUTF8()) == 0;
-    else
-        return remove (fileName.toUTF8()) == 0;
 }
 
 bool juce_copyFile (const String& s, const String& d) throw()
@@ -196,97 +153,6 @@ bool juce_copyFile (const String& s, const String& d) throw()
     return ok;
 }
 
-bool juce_moveFile (const String& source, const String& dest) throw()
-{
-    if (rename (source.toUTF8(), dest.toUTF8()) == 0)
-        return true;
-
-    if (! juce_canWriteToFile (source))
-        return false;
-
-    if (juce_copyFile (source, dest))
-    {
-        if (juce_deleteFile (source))
-            return true;
-
-        juce_deleteFile (dest);
-    }
-
-    return false;
-}
-
-void juce_createDirectory (const String& fileName) throw()
-{
-    mkdir (fileName.toUTF8(), 0777);
-}
-
-void* juce_fileOpen (const String& fileName, bool forWriting) throw()
-{
-    const char* mode = "rb";
-
-    if (forWriting)
-    {
-        if (juce_fileExists (fileName, false))
-        {
-            FILE* f = fopen (fileName.toUTF8(), "r+b");
-            if (f != 0)
-                fseek (f, 0, SEEK_END);
-
-            return (void*) f;
-        }
-        else
-        {
-            mode = "w+b";
-        }
-    }
-
-    return (void*)fopen (fileName.toUTF8(), mode);
-}
-
-void juce_fileClose (void* handle) throw()
-{
-    if (handle != 0)
-        fclose ((FILE*) handle);
-}
-
-int juce_fileRead (void* handle, void* buffer, int size) throw()
-{
-    if (handle != 0)
-        return fread (buffer, 1, size, (FILE*) handle);
-
-    return 0;
-}
-
-int juce_fileWrite (void* handle, const void* buffer, int size) throw()
-{
-    if (handle != 0)
-        return fwrite (buffer, 1, size, (FILE*) handle);
-
-    return 0;
-}
-
-int64 juce_fileSetPosition (void* handle, int64 pos) throw()
-{
-    if (handle != 0 && fseek ((FILE*) handle, (long) pos, SEEK_SET) == 0)
-        return pos;
-
-    return -1;
-}
-
-int64 juce_fileGetPosition (void* handle) throw()
-{
-    if (handle != 0)
-        return ftell ((FILE*) handle);
-    else
-        return -1;
-}
-
-void juce_fileFlush (void* handle) throw()
-{
-    if (handle != 0)
-        fflush ((FILE*) handle);
-}
-
 const StringArray juce_getFileSystemRoots() throw()
 {
     StringArray s;
@@ -294,28 +160,7 @@ const StringArray juce_getFileSystemRoots() throw()
     return s;
 }
 
-const String juce_getVolumeLabel (const String& filenameOnVolume,
-                                  int& volumeSerialNumber) throw()
-{
-    // There is no equivalent on Linux
-    volumeSerialNumber = 0;
-    return String::empty;
-}
-
-int64 File::getBytesFreeOnVolume() const throw()
-{
-    struct statfs buf;
-    int64 free_space = 0;
-
-    if (statfs (getFullPathName().toUTF8(), &buf) == 0)
-    {
-        // Note: this returns space available to non-super user
-        free_space = (int64) buf.f_bsize * (int64) buf.f_bavail;
-    }
-
-    return free_space;
-}
-
+//==============================================================================
 bool File::isOnCDRomDrive() const throw()
 {
     struct statfs buf;
@@ -352,7 +197,6 @@ bool File::isOnHardDisk() const throw()
     // Assume so if this fails for some reason
     return true;
 }
-
 
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)
@@ -438,10 +282,6 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 {
     return chdir (getFullPathName().toUTF8()) == 0;
 }
-
-//==============================================================================
-const tchar File::separator = T('/');
-const tchar* File::separatorString = T("/");
 
 //==============================================================================
 struct FindFileStruct

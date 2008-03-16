@@ -23,7 +23,8 @@ Changelist for version 1.46
 - new method: PlatformUtilities::launchEmailWithAttachments
 - new classes: AudioThumbnail and AudioThumbnailCache, which allow easy rendering of low-res waveform previews
 - new classes: InputSource and FileInputSource. These encapsulate some kind of resource, and also replace the XmlInputSource class.
-
+- moved some of the posix code that was the same in the mac and linux builds into a single, shared file
+- fixed InterprocessLock on mac/linux so that it can't get stuck when an app quits unexpectedly
 
 ==============================================================================
 Changelist for version 1.45
