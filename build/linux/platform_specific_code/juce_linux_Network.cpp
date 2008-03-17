@@ -34,8 +34,10 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <linux/if.h> 
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
@@ -54,8 +56,40 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
-    // xxx todo
-    return 0;
+    int numResults = 0;
+
+    const int s = socket (AF_INET, SOCK_DGRAM, 0);
+    if (s != -1)
+    {
+        char buf [1024];
+        struct ifconf ifc;
+        ifc.ifc_len = sizeof (buf);
+        ifc.ifc_buf = buf;
+        ioctl (s, SIOCGIFCONF, &ifc);
+
+        for (unsigned int i = 0; i < ifc.ifc_len / sizeof (struct ifreq); ++i)
+        {
+            struct ifreq ifr;
+            strcpy (ifr.ifr_name, ifc.ifc_req[i].ifr_name);
+
+            if (ioctl (s, SIOCGIFFLAGS, &ifr) == 0
+                 && (ifr.ifr_flags & IFF_LOOPBACK) == 0
+                 && ioctl (s, SIOCGIFHWADDR, &ifr) == 0
+                 && numResults < maxNum)
+            {
+                int64 a = 0;
+                for (int j = 6; --j >= 0;)
+                    a = (a << 8) | ifr.ifr_hwaddr.sa_data[j];
+
+                *addresses++ = a;
+                ++numResults;
+            }
+        }
+
+        close (s);
+    }
+
+    return numResults;
 }
 
 
