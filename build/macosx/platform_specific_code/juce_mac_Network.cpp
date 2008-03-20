@@ -181,6 +181,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     OSAError err = OSACompileExecute (comp, &source,
                                       kOSANullScript, kOSAModeNull,
                                       &resultID);
+    (void) err;
     AEDisposeDesc (&source);
     CloseComponent (comp);
 

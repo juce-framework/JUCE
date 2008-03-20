@@ -806,7 +806,7 @@ protected:
     //==============================================================================
 public:
     JuceAUView* currentView;
-                                              
+
 private:
     AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
@@ -900,7 +900,7 @@ public:
                                   &propertySize);
 
             juceFilter = (AudioProcessor*) pointers[0];
-            
+
             owner = (JuceAU*) pointers[1];
             owner->currentView = this;
         }

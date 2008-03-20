@@ -29,8 +29,7 @@
   ==============================================================================
 */
 
-
-/* 
+/*
     This file contains posix routines that are common to both the Linux and Mac builds.
 
     It gets included directly in the cpp files for these platforms.
@@ -432,7 +431,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs) throw()
 
         if (errno != EINTR)
         {
-            if (timeOutMillisecs == 0 
+            if (timeOutMillisecs == 0
                  || (timeOutMillisecs > 0 && Time::currentTimeMillis() >= endTime))
                 break;
 
@@ -463,4 +462,3 @@ void InterProcessLock::exit() throw()
         }
     }
 }
-

@@ -79,10 +79,10 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
 
         const ScopedLock sl (lock);
 
-        if (firstMessage == 0)
+        if (firstMessage == 0 || firstMessage->message.getTimeStamp() > eventTime)
         {
+            m->next = firstMessage;
             firstMessage = m;
-            m->next = 0;
         }
         else
         {

@@ -37,7 +37,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
-#include <linux/if.h> 
+#include <linux/if.h>
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 

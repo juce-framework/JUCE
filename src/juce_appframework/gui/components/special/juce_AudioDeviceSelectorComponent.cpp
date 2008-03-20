@@ -428,8 +428,8 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
                 if (deviceManager.getInputChannels().countNumberOfSetBits() > 0
                       && deviceManager.getOutputChannels().countNumberOfSetBits() > 0)
                 {
-                    // in DSound, some machines lose their primary input device when a mic 
-                    // is removed, and this also buggers up our attempt at opening an output 
+                    // in DSound, some machines lose their primary input device when a mic
+                    // is removed, and this also buggers up our attempt at opening an output
                     // device, so this is a workaround that doesn't fail in that case.
                     BitArray noInputs;
                     error = deviceManager.setAudioDevice (audioDeviceDropDown->getText(),

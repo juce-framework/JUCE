@@ -25,6 +25,7 @@ Changelist for version 1.46
 - new classes: InputSource and FileInputSource. These encapsulate some kind of resource, and also replace the XmlInputSource class.
 - moved some of the posix code that was the same in the mac and linux builds into a single, shared file
 - fixed InterprocessLock on mac/linux so that it can't get stuck when an app quits unexpectedly
+- added an option to splash screens to close themselves when the mouse is clicked
 
 ==============================================================================
 Changelist for version 1.45

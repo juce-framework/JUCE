@@ -99,11 +99,14 @@ public:
                                 disappearing, but if initialisation is very quick, this lets
                                 you make sure that people get a good look at your splash.
         @param useDropShadow    if true, the window will have a drop shadow
+        @param removeOnMouseClick   if true, the window will go away as soon as the user clicks
+                                the mouse (anywhere)
     */
     void show (const String& title,
                Image* const backgroundImage,
                const int minimumTimeToDisplayFor,
-               const bool useDropShadow);
+               const bool useDropShadow,
+               const bool removeOnMouseClick = true);
 
     /** Creates a SplashScreen object with a specified size.
 
@@ -124,12 +127,15 @@ public:
                                 disappearing, but if initialisation is very quick, this lets
                                 you make sure that people get a good look at your splash.
         @param useDropShadow    if true, the window will have a drop shadow
+        @param removeOnMouseClick   if true, the window will go away as soon as the user clicks
+                                the mouse (anywhere)
     */
     void show (const String& title,
                const int width,
                const int height,
                const int minimumTimeToDisplayFor,
-               const bool useDropShadow);
+               const bool useDropShadow,
+               const bool removeOnMouseClick = true);
 
     //==============================================================================
     /** @internal */
@@ -143,6 +149,7 @@ public:
 private:
     Image* backgroundImage;
     Time earliestTimeToDelete;
+    int originalClickCounter;
     bool isImageInCache;
 
     SplashScreen (const SplashScreen&);

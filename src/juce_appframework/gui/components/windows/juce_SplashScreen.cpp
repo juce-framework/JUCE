@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_SplashScreen.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
+#include "../juce_Desktop.h"
 
 
 //==============================================================================
@@ -58,7 +59,8 @@ SplashScreen::~SplashScreen()
 void SplashScreen::show (const String& title,
                          Image* const backgroundImage_,
                          const int minimumTimeToDisplayFor,
-                         const bool useDropShadow)
+                         const bool useDropShadow,
+                         const bool removeOnMouseClick)
 {
     backgroundImage = backgroundImage_;
 
@@ -74,7 +76,8 @@ void SplashScreen::show (const String& title,
               backgroundImage_->getWidth(),
               backgroundImage_->getHeight(),
               minimumTimeToDisplayFor,
-              useDropShadow);
+              useDropShadow,
+              removeOnMouseClick);
     }
 }
 
@@ -82,7 +85,8 @@ void SplashScreen::show (const String& title,
                          const int width,
                          const int height,
                          const int minimumTimeToDisplayFor,
-                         const bool useDropShadow)
+                         const bool useDropShadow,
+                         const bool removeOnMouseClick)
 {
     setName (title);
     setAlwaysOnTop (true);
@@ -97,8 +101,13 @@ void SplashScreen::show (const String& title,
 
     repaint();
 
+    originalClickCounter = removeOnMouseClick
+                                ? Desktop::getMouseButtonClickCounter()
+                                : INT_MAX;
+
     earliestTimeToDelete = Time::getCurrentTime() + RelativeTime::milliseconds (minimumTimeToDisplayFor);
-    startTimer (200);
+
+    startTimer (50);
 }
 
 //==============================================================================
@@ -116,7 +125,8 @@ void SplashScreen::paint (Graphics& g)
 
 void SplashScreen::timerCallback()
 {
-    if (Time::getCurrentTime() > earliestTimeToDelete)
+    if (Time::getCurrentTime() > earliestTimeToDelete
+         || Desktop::getMouseButtonClickCounter() > originalClickCounter)
     {
         delete this;
     }
