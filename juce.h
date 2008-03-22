@@ -176,6 +176,11 @@ END_JUCE_NAMESPACE
         #pragma comment(lib, "OpenGL32.Lib")
         #pragma comment(lib, "GlU32.Lib")
       #endif
+
+      #if JUCE_QUICKTIME_AUDIOFORMAT
+        #pragma comment (lib, "QTMLClient.lib")
+      #endif
+
     #endif
   #endif
 

@@ -678,6 +678,14 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioFormat.cpp"
 							>
 							<FileConfiguration

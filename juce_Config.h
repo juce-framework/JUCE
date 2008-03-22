@@ -90,6 +90,13 @@
   #define JUCE_QUICKTIME 1
 #endif
 
+/** This lets you enable the QuickTimeAudioFormat class.
+    If you're using this on win32, you'll need to have installed the QuickTime SDK.
+*/
+#if ! (defined (JUCE_QUICKTIME_AUDIOFORMAT) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
+//  #define JUCE_QUICKTIME_AUDIOFORMAT 1
+#endif
+
 //=============================================================================
 /** Comment out this macro if you don't want to enable OpenGL or if you don't
     have the appropriate headers and libraries available. If it's not enabled, the

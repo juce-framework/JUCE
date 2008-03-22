@@ -230,6 +230,9 @@
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
 #endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
+#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h"
 #endif

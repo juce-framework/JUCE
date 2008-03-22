@@ -97,6 +97,8 @@
 		8440CD3E0ACD0FFC0086FFD7 /* juce_ComponentMovementWatcher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8440CD3C0ACD0FFC0086FFD7 /* juce_ComponentMovementWatcher.cpp */; };
 		8440CD3F0ACD0FFC0086FFD7 /* juce_ComponentMovementWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 8440CD3D0ACD0FFC0086FFD7 /* juce_ComponentMovementWatcher.h */; };
 		8440CD620ACD112E0086FFD7 /* juce_SliderListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 8440CD610ACD112E0086FFD7 /* juce_SliderListener.h */; };
+		84581EEA0D9148C500AE1A4C /* juce_QuickTimeAudioFormat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84581EE80D9148C500AE1A4C /* juce_QuickTimeAudioFormat.cpp */; };
+		84581EEB0D9148C500AE1A4C /* juce_QuickTimeAudioFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 84581EE90D9148C500AE1A4C /* juce_QuickTimeAudioFormat.h */; };
 		846034DE09CB374E00E255CF /* juce_InterprocessConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 846034DA09CB374E00E255CF /* juce_InterprocessConnection.cpp */; };
 		846034DF09CB374E00E255CF /* juce_InterprocessConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 846034DB09CB374E00E255CF /* juce_InterprocessConnection.h */; };
 		846034E009CB374E00E255CF /* juce_InterprocessConnectionServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 846034DC09CB374E00E255CF /* juce_InterprocessConnectionServer.cpp */; };
@@ -782,6 +784,8 @@
 		8440CD610ACD112E0086FFD7 /* juce_SliderListener.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_SliderListener.h; sourceTree = "<group>"; };
 		8456EC6508A2A6C80087C412 /* juce_Config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_Config.h; path = ../../juce_Config.h; sourceTree = SOURCE_ROOT; };
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
+		84581EE80D9148C500AE1A4C /* juce_QuickTimeAudioFormat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_QuickTimeAudioFormat.cpp; sourceTree = "<group>"; };
+		84581EE90D9148C500AE1A4C /* juce_QuickTimeAudioFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_QuickTimeAudioFormat.h; sourceTree = "<group>"; };
 		846034DA09CB374E00E255CF /* juce_InterprocessConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_InterprocessConnection.cpp; sourceTree = "<group>"; };
 		846034DB09CB374E00E255CF /* juce_InterprocessConnection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_InterprocessConnection.h; sourceTree = "<group>"; };
 		846034DC09CB374E00E255CF /* juce_InterprocessConnectionServer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_InterprocessConnectionServer.cpp; sourceTree = "<group>"; };
@@ -1630,6 +1634,8 @@
 				8495BB890D8067B2001D9C0B /* juce_AudioThumbnail.h */,
 				8495BB8A0D8067B2001D9C0B /* juce_AudioThumbnailCache.cpp */,
 				8495BB8B0D8067B2001D9C0B /* juce_AudioThumbnailCache.h */,
+				84581EE80D9148C500AE1A4C /* juce_QuickTimeAudioFormat.cpp */,
+				84581EE90D9148C500AE1A4C /* juce_QuickTimeAudioFormat.h */,
 				84A4884708A22E4900752A2B /* juce_WavAudioFormat.cpp */,
 				84A4884808A22E4900752A2B /* juce_WavAudioFormat.h */,
 			);
@@ -2890,6 +2896,7 @@
 				8495BB8F0D8067B2001D9C0B /* juce_AudioThumbnailCache.h in Headers */,
 				8495BB950D806BDA001D9C0B /* juce_FileInputSource.h in Headers */,
 				8495BB960D806BDA001D9C0B /* juce_InputSource.h in Headers */,
+				84581EEB0D9148C500AE1A4C /* juce_QuickTimeAudioFormat.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3304,6 +3311,7 @@
 				8495BB8C0D8067B2001D9C0B /* juce_AudioThumbnail.cpp in Sources */,
 				8495BB8E0D8067B2001D9C0B /* juce_AudioThumbnailCache.cpp in Sources */,
 				8495BB940D806BDA001D9C0B /* juce_FileInputSource.cpp in Sources */,
+				84581EEA0D9148C500AE1A4C /* juce_QuickTimeAudioFormat.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
