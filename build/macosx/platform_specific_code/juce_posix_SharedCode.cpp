@@ -389,8 +389,13 @@ InterProcessLock::InterProcessLock (const String& name_) throw()
       name (name_),
       reentrancyLevel (0)
 {
-    const File tempDir (File::getSpecialLocation (File::tempDirectory));
-    const File temp (tempDir.getChildFile (name));
+#if JUCE_MAC
+    // (don't use getSpecialLocation() to avoid the temp folder being different for each app)
+    const File temp (File (T("~/Library/Caches/Juce")).getChildFile (name));
+#else
+    const File temp (File::getSpecialLocation (File::tempDirectory).getChildFile (name));
+#endif
+
     temp.create();
 
     internal = (void*) open (temp.getFullPathName().toUTF8(), O_RDWR);
