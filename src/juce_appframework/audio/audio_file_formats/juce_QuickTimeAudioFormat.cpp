@@ -64,6 +64,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../../../juce_core/threads/juce_Thread.h"
 #include "../../../juce_core/io/files/juce_FileInputStream.h"
+#include "../../../juce_core/io/network/juce_URL.h"
 
 #define qtFormatName    TRANS("QuickTime file")
 static const tchar* const extensions[] =    { T(".mov"), T(".mp3"), 0 };
@@ -377,7 +378,11 @@ private:
 
         if (fin != 0)
         {
-            CFStringRef pathString = juceStringToCFString (T("file://") + fin->getFile().getFullPathName().replaceCharacter (T('\\'), T('/')));
+            String path (fin->getFile().getFullPathName().replaceCharacter (T('\\'), T('/')));
+            if (path.startsWithChar (T('/')))
+                path = path.substring (1);
+
+            CFStringRef pathString = juceStringToCFString (T("file://") + URL::addEscapeChars (path));
             CFURLRef urlRef = CFURLCreateWithString (kCFAllocatorDefault, pathString, 0);
 	        CFRelease (pathString);
 
