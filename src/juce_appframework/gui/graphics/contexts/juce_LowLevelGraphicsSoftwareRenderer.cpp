@@ -938,33 +938,34 @@ static void transformedImageRender (Image& destImage,
 
                 if (ix < srcClipWidth && iy < srcClipHeight)
                 {
-                    const SrcPixelType* src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
+                    PixelARGB p1 (0), p2 (0), p3 (0), p4 (0);
 
-                    SrcPixelType p1 (0);
-                    const int dx = roundDoubleToInt ((sx - fx) * 255.0);
+                    const SrcPixelType* src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
 
                     if (iy >= 0)
                     {
                         if (ix >= 0)
-                            p1 = src[0];
+                            p1.set (src[0]);
 
                         if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
-                            p1.tween (src[1], dx);
+                            p2.set (src[1]);
                     }
 
                     if (((unsigned int) (iy + 1)) < (unsigned int) srcClipHeight)
                     {
-                        SrcPixelType p2 (0);
                         src = (const SrcPixelType*) (((const uint8*) src) + srcStride);
 
                         if (ix >= 0)
-                            p2 = src[0];
+                            p3.set (src[0]);
 
                         if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
-                            p2.tween (src[1], dx);
-
-                        p1.tween (p2, roundDoubleToInt ((sy - fy) * 255.0));
+                            p4.set (src[1]);
                     }
+
+                    const int dx = roundDoubleToInt ((sx - fx) * 255.0);
+                    p1.tween (p2, dx);
+                    p3.tween (p4, dx);
+                    p1.tween (p3, roundDoubleToInt ((sy - fy) * 255.0));
 
                     if (p1.getAlpha() > 0)
                         dest->blend (p1, alpha);

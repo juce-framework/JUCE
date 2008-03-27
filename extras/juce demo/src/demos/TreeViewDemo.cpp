@@ -155,10 +155,13 @@ public:
         rootItem = new TreeViewDemoItem (treeXml);
         rootItem->setOpen (true);
 
-        OwnedArray <File> roots;
-        File::findFileSystemRoots (roots);
+        // find the root of the user's home drive, and set that as our root..
+        File folder (File::getSpecialLocation (File::userHomeDirectory));
+        while (folder.getParentDirectory() != folder)
+            folder = folder.getParentDirectory();
+
         directoryList = new DirectoryContentsList (0, thread);
-        directoryList->setDirectory (*roots[0], true, true);
+        directoryList->setDirectory (folder, true, true);
         thread.startThread (3);
 
         addAndMakeVisible (typeButton = new TextButton (T("Type of treeview...")));

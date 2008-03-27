@@ -2346,7 +2346,7 @@ const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
     info->progress = 0;
     info->shouldCancel = false;
 
-    UINT cookie;
+    UINT_PTR cookie;
     HRESULT hr = info->discMaster->ProgressAdvise (info, &cookie);
 
     hr = info->discMaster->RecordDisc (FALSE, // set this to TRUE to make it do a fake burn, without actually writing to the disc
