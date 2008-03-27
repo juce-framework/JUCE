@@ -144,7 +144,7 @@ void* juce_openInternetFile (const String& url,
                         INTERNET_BUFFERS buffers;
                         zerostruct (buffers);
                         buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
-                        buffers.lpcszHeader = (const char*) headers;
+                        buffers.lpcszHeader = (LPCTSTR) headers;
                         buffers.dwHeadersLength = headers.length();
                         buffers.dwBufferTotal = (DWORD) postData.getSize();
                         ConnectionAndRequestStruct* result = 0;
@@ -394,13 +394,13 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     {
         MapiMessage message;
         zerostruct (message);
-        message.lpszSubject = (LPTSTR) (LPCTSTR) emailSubject;
-        message.lpszNoteText = (LPTSTR) (LPCTSTR) bodyText;
+        message.lpszSubject = (LPSTR) (LPCSTR) emailSubject;
+        message.lpszNoteText = (LPSTR) (LPCSTR) bodyText;
 
         MapiRecipDesc recip;
         zerostruct (recip);
         recip.ulRecipClass = MAPI_TO;
-        recip.lpszName = (LPTSTR) (LPCTSTR) targetEmailAddress;
+        recip.lpszName = (LPSTR) (LPCSTR) targetEmailAddress;
         message.nRecipCount = 1;
         message.lpRecips = &recip;
 
@@ -414,7 +414,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
         for (int i = 0; i < filesToAttach.size(); ++i)
         {
             files[i].nPosition = (ULONG) -1;
-            files[i].lpszPathName = (LPTSTR) (LPCTSTR) filesToAttach [i];
+            files[i].lpszPathName = (LPSTR) (LPCSTR) filesToAttach [i];
         }
 
         ok = (mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS);
