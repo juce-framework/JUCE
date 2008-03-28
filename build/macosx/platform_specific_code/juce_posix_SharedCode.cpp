@@ -299,13 +299,13 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
 void juce_fileClose (void* handle) throw()
 {
     if (handle != 0)
-        close ((int) handle);
+        close ((int) (pointer_sized_int) handle);
 }
 
 int juce_fileRead (void* handle, void* buffer, int size) throw()
 {
     if (handle != 0)
-        return read ((int) handle, buffer, size);
+        return read ((int) (pointer_sized_int) handle, buffer, size);
 
     return 0;
 }
@@ -313,14 +313,14 @@ int juce_fileRead (void* handle, void* buffer, int size) throw()
 int juce_fileWrite (void* handle, const void* buffer, int size) throw()
 {
     if (handle != 0)
-        return write ((int) handle, buffer, size);
+        return write ((int) (pointer_sized_int) handle, buffer, size);
 
     return 0;
 }
 
 int64 juce_fileSetPosition (void* handle, int64 pos) throw()
 {
-    if (handle != 0 && lseek ((int) handle, pos, SEEK_SET) == pos)
+    if (handle != 0 && lseek ((int) (pointer_sized_int) handle, pos, SEEK_SET) == pos)
         return pos;
 
     return -1;
@@ -329,7 +329,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos) throw()
 int64 juce_fileGetPosition (void* handle) throw()
 {
     if (handle != 0)
-        return lseek ((int) handle, 0, SEEK_CUR);
+        return lseek ((int) (pointer_sized_int) handle, 0, SEEK_CUR);
     else
         return -1;
 }
@@ -337,7 +337,7 @@ int64 juce_fileGetPosition (void* handle) throw()
 void juce_fileFlush (void* handle) throw()
 {
     if (handle != 0)
-        fsync ((int) handle);
+        fsync ((int) (pointer_sized_int) handle);
 }
 
 //==============================================================================

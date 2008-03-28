@@ -374,25 +374,27 @@ private:
         zeromem (props, sizeof (props));
         int prop = 0;
 
-        FileInputStream* fin = dynamic_cast <FileInputStream*> (input);
+        DataReferenceRecord dr;
+        props[prop].propClass = kQTPropertyClass_DataLocation;
+        props[prop].propID = kQTDataLocationPropertyID_DataReference;
+        props[prop].propValueSize = sizeof (dr);
+        props[prop].propValueAddress = (void*) &dr;
+        ++prop;
+
+        FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);
 
         if (fin != 0)
         {
-            String path (fin->getFile().getFullPathName().replaceCharacter (T('\\'), T('/')));
-            if (path.startsWithChar (T('/')))
-                path = path.substring (1);
+            CFStringRef filePath = juceStringToCFString (fin->getFile().getFullPathName());
 
-            CFStringRef pathString = juceStringToCFString (T("file://") + URL::addEscapeChars (path));
-            CFURLRef urlRef = CFURLCreateWithString (kCFAllocatorDefault, pathString, 0);
-	        CFRelease (pathString);
+            QTNewDataReferenceFromFullPathCFString (filePath, (QTPathStyle) kQTNativeDefaultPathStyle, 0, 
+                                                    &dr.dataRef, &dr.dataRefType);
 
-            props[prop].propClass = kQTPropertyClass_DataLocation;
-            props[prop].propID = kQTDataLocationPropertyID_CFURL;
-            props[prop].propValueSize = sizeof (urlRef);
-            props[prop].propValueAddress = &urlRef;
-            ++prop;
 
             ok = openMovie (props, prop);
+
+            DisposeHandle (dr.dataRef);
+            CFRelease (filePath);
         }
         else
         {
@@ -414,7 +416,7 @@ private:
 
             for (int i = 0; i < numElementsInArray (suffixesToTry) && ! ok; ++i)
             {
-                Handle dataRef = createHandleDataRef (dataHandle, suffixesToTry [i]);
+                dr.dataRef = createHandleDataRef (dataHandle, suffixesToTry [i]);
 
                 /*  // this fails for some bizarre reason - it can be bodged to work with
                     // movies, but can't seem to do it for other file types..
@@ -430,18 +432,10 @@ private:
                 props[prop].propValueAddress = (void*) &procInfo;
                 ++prop; */
 
-                DataReferenceRecord dr;
-                dr.dataRef = dataRef;
                 dr.dataRefType = HandleDataHandlerSubType;
-                props[prop].propClass = kQTPropertyClass_DataLocation;
-                props[prop].propID = kQTDataLocationPropertyID_DataReference;
-                props[prop].propValueSize = sizeof (dr);
-                props[prop].propValueAddress = (void*) &dr;
-                ++prop;
-
                 ok = openMovie (props, prop);
 
-                DisposeHandle (dataRef);
+                DisposeHandle (dr.dataRef);
             }
 
             DisposeHandle (dataHandle);
@@ -459,6 +453,12 @@ private:
         props[prop].propValueAddress = &trueBool;
         ++prop;
 
+        props[prop].propClass = kQTPropertyClass_MovieInstantiation;
+        props[prop].propID = kQTMovieInstantiationPropertyID_AsyncOK;
+        props[prop].propValueSize = sizeof (trueBool);
+        props[prop].propValueAddress = &trueBool;
+        ++prop;
+
         Boolean isActive = true;
         props[prop].propClass = kQTPropertyClass_NewMovieProperty;
         props[prop].propID = kQTNewMoviePropertyID_Active;
@@ -472,7 +472,10 @@ private:
         MacSetPort (0);
 #endif
 
-        return NewMovieFromProperties (prop, props, 0, 0, &movie) == noErr;
+        jassert (prop <= 5);
+        OSStatus err = NewMovieFromProperties (prop, props, 0, 0, &movie);
+        
+        return err == noErr;
     }
 
     //==============================================================================
