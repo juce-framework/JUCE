@@ -2661,7 +2661,7 @@ void VSTPluginInstance::createTempParameterStore (MemoryBlock& dest)
 
 void VSTPluginInstance::restoreFromTempParameterStore (const MemoryBlock& m)
 {
-    changeProgramName (getCurrentProgram(), (const char*) m);
+    changeProgramName (getCurrentProgram(), (const char*) m.getData());
 
     float* p = (float*) (((char*) m.getData()) + 64);
     for (int i = 0; i < getNumParameters(); ++i)

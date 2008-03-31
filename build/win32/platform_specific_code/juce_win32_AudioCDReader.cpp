@@ -36,8 +36,16 @@
 
 #include "win32_headers.h"
 #include <stddef.h>
-#include <imapi.h>
-#include <imapierror.h>
+
+#include "../../../juce_Config.h"
+
+#if JUCE_USE_CDBURNER
+ // you'll need the Platform SDK for these headers - if you don't have it and don't
+ // need to use CD-burning, then you might just want to disable the JUCE_USE_CDBURNER
+ // flag in juce_Config.h to avoid these includes.
+ #include <imapi.h>
+ #include <imapierror.h>
+#endif
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
@@ -2114,6 +2122,8 @@ void AudioCDReader::ejectDisk()
 }
 
 
+#if JUCE_USE_CDBURNER
+
 //==============================================================================
 static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
 {
@@ -2489,5 +2499,6 @@ bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
     return ok && hr == S_OK;
 }
 
+#endif
 
 END_JUCE_NAMESPACE

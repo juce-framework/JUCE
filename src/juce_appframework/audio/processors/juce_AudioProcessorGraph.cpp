@@ -1213,6 +1213,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
     }
 
     case audioInputNode:
+    {
         for (int i = jmin (graph->currentAudioIOBuffer->getNumChannels(),
                            buffer.getNumChannels()); --i >= 0;)
         {
@@ -1220,6 +1221,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
         }
 
         break;
+    }
 
     case midiOutputNode:
         graph->currentMidiIOBuffer->addEvents (midiMessages, 0, buffer.getNumSamples(), 0);

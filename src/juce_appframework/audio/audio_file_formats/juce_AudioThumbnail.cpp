@@ -387,7 +387,7 @@ void AudioThumbnail::refillCache (const int numSamples,
     {
         startTimer (timeBeforeDeletingReader);
 
-        char* cacheData = (char*) cachedLevels;
+        char* cacheData = (char*) cachedLevels.getData();
         int sample = roundDoubleToInt (startTime * d->sampleRate);
 
         for (int i = numSamples; --i >= 0;)
@@ -426,7 +426,7 @@ void AudioThumbnail::refillCache (const int numSamples,
         for (int channelNum = 0; channelNum < 2; ++channelNum)
         {
             char* const data = getChannelData (channelNum);
-            char* cacheData = ((char*) cachedLevels) + channelNum * 2;
+            char* cacheData = ((char*) cachedLevels.getData()) + channelNum * 2;
 
             const double timeToThumbSampleFactor = d->sampleRate / (double) d->samplesPerThumbSample;
 
@@ -509,7 +509,7 @@ void AudioThumbnail::drawChannel (Graphics& g,
         w -= skipLeft;
         x += skipLeft;
 
-        const char* cacheData = ((const char*) cachedLevels)
+        const char* cacheData = ((const char*) cachedLevels.getData())
                                    + (channelNum << 1)
                                    + skipLeft * (numChannelsCached << 1);
 

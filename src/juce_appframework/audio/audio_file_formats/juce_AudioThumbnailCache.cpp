@@ -66,7 +66,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
     {
         if (thumbs[i]->hash == hashCode)
         {
-            MemoryInputStream in ((const char*) thumbs[i]->data,
+            MemoryInputStream in ((const char*) thumbs[i]->data.getData(),
                                   thumbs[i]->data.getSize(),
                                   false);
 

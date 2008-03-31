@@ -121,6 +121,14 @@
 #endif
 
 //=============================================================================
+/** This flag lets you enable support for CD-burning. You might want to disable
+    it to build without the MS SDK under windows.
+*/
+#ifndef JUCE_USE_CDBURNER
+  #define JUCE_USE_CDBURNER 1
+#endif
+
+//=============================================================================
 /** Enabling this macro means that all regions that get repainted will have a coloured
     line drawn around them.
 

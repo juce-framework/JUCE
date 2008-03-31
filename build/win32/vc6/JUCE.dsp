@@ -384,6 +384,22 @@ SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioSubsect
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_FlacAudioFormat.cpp
 # End Source File
 # Begin Source File
@@ -397,6 +413,14 @@ SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_OggVorbisAud
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_OggVorbisAudioFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.h
 # End Source File
 # Begin Source File
 
@@ -648,7 +672,23 @@ SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.h
 # End Source File
 # Begin Source File
 
@@ -2760,6 +2800,18 @@ SOURCE=..\..\..\src\juce_core\io\streams\juce_SubregionStream.h
 # End Group
 # Begin Source File
 
+SOURCE=..\..\..\src\juce_core\io\streams\juce_FileInputSource.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_core\io\streams\juce_FileInputSource.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_core\io\streams\juce_InputSource.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\juce_core\io\juce_InputStream.cpp
 # End Source File
 # Begin Source File
@@ -2901,6 +2953,18 @@ SOURCE=..\..\..\src\juce_core\threads\juce_ReadWriteLock.h
 # Begin Source File
 
 SOURCE=..\..\..\src\juce_core\threads\juce_ScopedLock.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_core\threads\juce_ScopedReadLock.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_core\threads\juce_ScopedTryLock.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\juce_core\threads\juce_ScopedWriteLock.h
 # End Source File
 # Begin Source File
 
