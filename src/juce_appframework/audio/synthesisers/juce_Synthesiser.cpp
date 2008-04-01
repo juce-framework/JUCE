@@ -237,22 +237,30 @@ void Synthesiser::noteOn (const int midiChannel,
         SynthesiserSound* const sound = sounds.getUnchecked(i);
 
         if (sound->appliesToNote (midiNoteNumber)
-            && sound->appliesToChannel (midiChannel))
+             && sound->appliesToChannel (midiChannel))
         {
-            SynthesiserVoice* const voice = findFreeVoice (sound, shouldStealNotes);
-
-            if (voice != 0)
-            {
-                voice->startNote (midiNoteNumber,
-                                  velocity,
-                                  sound,
-                                  lastPitchWheelValues [midiChannel - 1]);
-
-                voice->currentlyPlayingNote = midiNoteNumber;
-                voice->noteOnTime = ++lastNoteOnCounter;
-                voice->currentlyPlayingSound = sound;
-            }
+            startVoice (findFreeVoice (sound, shouldStealNotes),
+                        sound, midiChannel, midiNoteNumber, velocity);
         }
+    }
+}
+
+void Synthesiser::startVoice (SynthesiserVoice* const voice,
+                              SynthesiserSound* const sound,
+                              const int midiChannel,
+                              const int midiNoteNumber,
+                              const float velocity)
+{
+    if (voice != 0 && sound != 0)
+    {
+        voice->startNote (midiNoteNumber,
+                          velocity,
+                          sound,
+                          lastPitchWheelValues [midiChannel - 1]);
+
+        voice->currentlyPlayingNote = midiNoteNumber;
+        voice->noteOnTime = ++lastNoteOnCounter;
+        voice->currentlyPlayingSound = sound;
     }
 }
 

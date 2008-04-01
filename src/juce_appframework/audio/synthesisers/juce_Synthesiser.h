@@ -230,6 +230,7 @@ protected:
     */
     void clearCurrentNote();
 
+
 private:
     //==============================================================================
     friend class Synthesiser;
@@ -329,6 +330,11 @@ public:
         depend on the implementation of this method.
     */
     void setNoteStealingEnabled (const bool shouldStealNotes);
+
+    /** Returns true if note-stealing is enabled.
+        @see setNoteStealingEnabled 
+    */
+    bool isNoteStealingEnabled() const throw()                      { return shouldStealNotes; }
 
     //==============================================================================
     /** Triggers a note-on event.
@@ -457,6 +463,16 @@ protected:
     virtual SynthesiserVoice* findFreeVoice (SynthesiserSound* soundToPlay,
                                              const bool stealIfNoneAvailable) const;
 
+    /** Starts a specified voice playing a particular sound.
+
+        You'll probably never need to call this, it's used internally by noteOn(), but 
+        may be needed by subclasses for custom behaviours.
+    */
+    void startVoice (SynthesiserVoice* const voice,
+                     SynthesiserSound* const sound,
+                     const int midiChannel,
+                     const int midiNoteNumber,
+                     const float velocity);
 
     /** xxx Temporary method here to cause a compiler error - note the new parameters for this method. */
     int findFreeVoice (const bool) const { return 0; }
