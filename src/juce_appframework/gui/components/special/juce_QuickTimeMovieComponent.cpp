@@ -40,6 +40,21 @@
 #ifdef _WIN32
  #include <windows.h>
 
+ #ifdef _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4100)
+ #endif
+
+ #include <Movies.h>
+ #include <QTML.h>
+ #include <QuickTimeComponents.h>
+ #include <MediaHandlers.h>
+ #include <ImageCodec.h>
+
+ #ifdef _MSC_VER
+   #pragma warning (pop)
+ #endif
+
  // If you've got QuickTime 7 installed, then these COM objects should be found in
  // the "\Program Files\Quicktime" directory. You'll need to add this directory to
  // your include search path to make these import statements work.
@@ -51,6 +66,8 @@
 #else
  #include <Carbon/Carbon.h>
  #include <QuickTime/Movies.h>
+ #include <QuickTime/QuickTimeComponents.h>
+ #include <QuickTime/MediaHandlers.h>
 #endif
 
 #include "../../../../juce_core/basics/juce_StandardHeader.h"
@@ -58,16 +75,49 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_QuickTimeMovieComponent.h"
+#include "../../../../juce_core/io/files/juce_FileInputStream.h"
+
+bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 
 //==============================================================================
-#if JUCE_WIN32
-
 struct QTMovieCompInternal
 {
+    QTMovieCompInternal()
+        : dataHandle (0)
+    {
+#if JUCE_MAC
+        movie = 0;
+        controller = 0;
+#endif
+    }
+
+    ~QTMovieCompInternal()
+    {
+        clearHandle();
+    }
+
+#if JUCE_MAC
+    Movie movie;
+    MovieController controller;
+#else
     IQTControlPtr qtControlInternal;
     IQTMoviePtr qtMovieInternal;
+#endif
+
+    Handle dataHandle;
+
+    void clearHandle()
+    {
+        if (dataHandle != 0)
+        {
+            DisposeHandle (dataHandle);
+            dataHandle = 0;
+        }
+    }
 };
+
+#if JUCE_WIN32
 
 #define qtControl  (((QTMovieCompInternal*) internal)->qtControlInternal)
 #define qtMovie    (((QTMovieCompInternal*) internal)->qtMovieInternal)
@@ -122,10 +172,10 @@ bool QuickTimeMovieComponent::isControlCreated() const
     return isControlOpen();
 }
 
-bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
+bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
                                          const bool isControllerVisible)
 {
-    movieFile = movieFile_;
+    movieFile = File::nonexistent;
     movieLoaded = false;
     qtMovie = 0;
     controllerVisible = isControllerVisible;
@@ -135,24 +185,36 @@ bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
     {
         if (qtControl != 0)
         {
-            qtControl->PutURL ((const WCHAR*) movieFile_.getFullPathName());
-            qtMovie = qtControl->GetMovie();
+            qtControl->Put_MovieHandle (0);
+            ((QTMovieCompInternal*) internal)->clearHandle();
 
-            if (qtMovie != 0)
-                qtMovie->PutMovieControllerType (isControllerVisible ? qtMovieControllerTypeStandard
-                                                                     : qtMovieControllerTypeNone);
+            Movie movie;
+            if (juce_OpenQuickTimeMovieFromStream (movieStream, movie, ((QTMovieCompInternal*) internal)->dataHandle))
+            {
+                qtControl->Put_MovieHandle ((long) (pointer_sized_int) movie);
+
+                qtMovie = qtControl->GetMovie();
+
+                if (qtMovie != 0)
+                    qtMovie->PutMovieControllerType (isControllerVisible ? qtMovieControllerTypeStandard
+                                                                         : qtMovieControllerTypeNone);
+            }
+
+            if (movie == 0)
+                ((QTMovieCompInternal*) internal)->clearHandle();
         }
 
         movieLoaded = (qtMovie != 0);
-        return movieLoaded;
     }
     else
     {
         // You're trying to open a movie when the control hasn't yet been created, probably because
         // you've not yet added this component to a Window and made the whole component hierarchy visible.
         jassertfalse
-        return false;
     }
+
+    delete movieStream;
+    return movieLoaded;
 }
 
 void QuickTimeMovieComponent::closeMovie()
@@ -163,7 +225,10 @@ void QuickTimeMovieComponent::closeMovie()
     qtMovie = 0;
 
     if (qtControl != 0)
-        qtControl->PutURL (L"");
+        qtControl->Put_MovieHandle (0);
+        //qtControl->PutURL (L"");
+
+    ((QTMovieCompInternal*) internal)->clearHandle();
 }
 
 const File QuickTimeMovieComponent::getCurrentMovieFile() const
@@ -328,24 +393,13 @@ void OfferMouseClickToQuickTime (WindowRef window,
 }
 
 //==============================================================================
-struct InternalData
-{
-    Movie movie;
-    MovieController controller;
-};
-
-//==============================================================================
 QuickTimeMovieComponent::QuickTimeMovieComponent()
-    : internal (new InternalData()),
+    : internal (new QTMovieCompInternal()),
       associatedWindow (0),
       controllerVisible (false),
       controllerAssignedToWindow (false),
       reentrant (false)
 {
-    InternalData* const id = (InternalData*) internal;
-    id->movie = 0;
-    id->controller = 0;
-
     if (! hasLoadedQT)
     {
         hasLoadedQT = true;
@@ -364,7 +418,7 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
 
     activeQTWindows.removeValue ((void*) this);
 
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
     delete id;
 
     if (activeQTWindows.size() == 0 && isQTAvailable)
@@ -376,13 +430,14 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
     }
 }
 
-bool QuickTimeMovieComponent::loadMovie (const File& f,
+bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
                                          const bool controllerVisible_)
 {
-    if (! (isQTAvailable && f.existsAsFile()))
+    if (! isQTAvailable)
         return false;
 
     closeMovie();
+    movieFile = File::nonexistent;
 
     if (getPeer() == 0)
     {
@@ -394,45 +449,30 @@ bool QuickTimeMovieComponent::loadMovie (const File& f,
 
     controllerVisible = controllerVisible_;
 
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     GrafPtr savedPort;
     GetPort (&savedPort);
     bool result = false;
 
-    FSSpec fsSpec;
-
-    PlatformUtilities::makeFSSpecFromPath (&fsSpec, f.getFullPathName());
-
-    short refNum = -1;
-    OSErr err;
-
-    if ((err = OpenMovieFile (&fsSpec, &refNum, fsRdWrPerm)) == noErr
-         || (err = OpenMovieFile (&fsSpec, &refNum, fsRdPerm)) == noErr)
+    if (juce_OpenQuickTimeMovieFromStream (movieStream, id->movie, id->dataHandle))
     {
         id->controller = 0;
 
-        short resID = 0;
+        void* window = getWindowHandle();
 
-        if (NewMovieFromFile (&id->movie, refNum, &resID, 0, newMovieActive, 0) == noErr
-             && id->movie != 0)
-        {
-            void* window = getWindowHandle();
+        if (window != associatedWindow && window != 0)
+            associatedWindow = window;
 
-            if (window != associatedWindow && window != 0)
-                associatedWindow = window;
+        assignMovieToWindow();
 
-            assignMovieToWindow();
+        SetMovieActive (id->movie, true);
+        SetMovieProgressProc (id->movie, (MovieProgressUPP) -1, 0);
 
-            SetMovieActive (id->movie, true);
-            SetMovieProgressProc (id->movie, (MovieProgressUPP) -1, 0);
+        startTimer (1000 / 50); // this needs to be quite a high frequency for smooth playback
+        result = true;
 
-            movieFile = f;
-            startTimer (1000 / 50); // this needs to be quite a high frequency for smooth playback
-            result = true;
-
-            repaint();
-        }
+        repaint();
     }
 
     MacSetPort (savedPort);
@@ -444,7 +484,7 @@ void QuickTimeMovieComponent::closeMovie()
 {
     stop();
 
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->controller != 0)
     {
@@ -458,13 +498,15 @@ void QuickTimeMovieComponent::closeMovie()
         id->movie = 0;
     }
 
+    id->clearHandle();
+
     stopTimer();
     movieFile = File::nonexistent;
 }
 
 bool QuickTimeMovieComponent::isMovieOpen() const
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
     return id->movie != 0 && id->controller != 0;
 }
 
@@ -488,7 +530,7 @@ void QuickTimeMovieComponent::assignMovieToWindow()
 
     reentrant = true;
 
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
     if (id->controller != 0)
     {
         DisposeMovieController (id->controller);
@@ -550,7 +592,7 @@ void QuickTimeMovieComponent::assignMovieToWindow()
 
 void QuickTimeMovieComponent::play()
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         StartMovie (id->movie);
@@ -558,7 +600,7 @@ void QuickTimeMovieComponent::play()
 
 void QuickTimeMovieComponent::stop()
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         StopMovie (id->movie);
@@ -566,14 +608,14 @@ void QuickTimeMovieComponent::stop()
 
 bool QuickTimeMovieComponent::isPlaying() const
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     return id->movie != 0 && GetMovieRate (id->movie) != 0;
 }
 
 void QuickTimeMovieComponent::setPosition (const double seconds)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->controller != 0)
     {
@@ -595,7 +637,7 @@ void QuickTimeMovieComponent::setPosition (const double seconds)
 
 double QuickTimeMovieComponent::getPosition() const
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
     {
@@ -611,7 +653,7 @@ double QuickTimeMovieComponent::getPosition() const
 
 void QuickTimeMovieComponent::setSpeed (const float newSpeed)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         SetMovieRate (id->movie, (Fixed) (newSpeed * (Fixed) 0x00010000L));
@@ -619,7 +661,7 @@ void QuickTimeMovieComponent::setSpeed (const float newSpeed)
 
 double QuickTimeMovieComponent::getMovieDuration() const
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         return GetMovieDuration (id->movie) / (double) GetMovieTimeScale (id->movie);
@@ -629,7 +671,7 @@ double QuickTimeMovieComponent::getMovieDuration() const
 
 void QuickTimeMovieComponent::setLooping (const bool shouldLoop)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
     looping = shouldLoop;
 
     if (id->controller != 0)
@@ -643,7 +685,7 @@ bool QuickTimeMovieComponent::isLooping() const
 
 void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         SetMovieVolume (id->movie, jlimit ((short) 0, (short) 0x100, (short) (newVolume * 0x0100)));
@@ -651,7 +693,7 @@ void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 
 float QuickTimeMovieComponent::getMovieVolume() const
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
         return jmax (0.0f, GetMovieVolume (id->movie) / (float) 0x0100);
@@ -664,7 +706,7 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
     width = 0;
     height = 0;
 
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie != 0)
     {
@@ -677,7 +719,7 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
 
 void QuickTimeMovieComponent::paint (Graphics& g)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->movie == 0 || id->controller == 0)
     {
@@ -720,7 +762,7 @@ void QuickTimeMovieComponent::moved()
 
 void QuickTimeMovieComponent::resized()
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->controller != 0 && isShowing())
     {
@@ -767,7 +809,7 @@ void QuickTimeMovieComponent::visibilityChanged()
 
 void QuickTimeMovieComponent::timerCallback()
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->controller != 0)
     {
@@ -800,7 +842,7 @@ void QuickTimeMovieComponent::parentHierarchyChanged()
 
 void QuickTimeMovieComponent::handleMCEvent (void* ev)
 {
-    InternalData* const id = (InternalData*) internal;
+    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
 
     if (id->controller != 0 && isShowing())
     {
@@ -832,6 +874,177 @@ void QuickTimeMovieComponent::handleMCEvent (void* ev)
 
 //==============================================================================
 // (methods common to both platforms..)
+
+static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
+{
+    Handle dataRef = 0;
+    OSStatus err = PtrToHand (&dataHandle, &dataRef, sizeof (Handle));
+    if (err == noErr)
+    {
+        Str255 suffix;
+#if JUCE_WIN32
+        strcpy_s ((char*) suffix, 128, fileName);
+#else
+        strcpy ((char*) suffix, fileName);
+#endif
+        StringPtr name = suffix;
+        err = PtrAndHand (name, dataRef, name[0] + 1);
+
+        if (err == noErr)
+        {
+            long atoms[3];
+            atoms[0] = EndianU32_NtoB (3 * sizeof (long));
+            atoms[1] = EndianU32_NtoB (kDataRefExtensionMacOSFileType);
+            atoms[2] = EndianU32_NtoB (MovieFileType);
+
+            err = PtrAndHand (atoms, dataRef, 3 * sizeof (long));
+
+            if (err == noErr)
+                return dataRef;
+        }
+
+        DisposeHandle (dataRef);
+    }
+
+    return 0;
+}
+
+static CFStringRef juceStringToCFString (const String& s)
+{
+    const int len = s.length();
+    const juce_wchar* const t = (const juce_wchar*) s;
+
+    UniChar* temp = (UniChar*) juce_malloc (sizeof (UniChar) * len + 4);
+
+    for (int i = 0; i <= len; ++i)
+        temp[i] = t[i];
+
+    CFStringRef result = CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
+    juce_free (temp);
+
+    return result;
+}
+
+static bool openMovie (QTNewMoviePropertyElement* props, int prop, Movie& movie)
+{
+    Boolean trueBool = true;
+    props[prop].propClass = kQTPropertyClass_MovieInstantiation;
+    props[prop].propID = kQTMovieInstantiationPropertyID_DontResolveDataRefs;
+    props[prop].propValueSize = sizeof (trueBool);
+    props[prop].propValueAddress = &trueBool;
+    ++prop;
+
+    props[prop].propClass = kQTPropertyClass_MovieInstantiation;
+    props[prop].propID = kQTMovieInstantiationPropertyID_AsyncOK;
+    props[prop].propValueSize = sizeof (trueBool);
+    props[prop].propValueAddress = &trueBool;
+    ++prop;
+
+    Boolean isActive = true;
+    props[prop].propClass = kQTPropertyClass_NewMovieProperty;
+    props[prop].propID = kQTNewMoviePropertyID_Active;
+    props[prop].propValueSize = sizeof (isActive);
+    props[prop].propValueAddress = &isActive;
+    ++prop;
+
+#if JUCE_MAC
+    SetPort (0);
+#else
+    MacSetPort (0);
+#endif
+
+    jassert (prop <= 5);
+    OSStatus err = NewMovieFromProperties (prop, props, 0, 0, &movie);
+    
+    return err == noErr;
+}
+
+bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle)
+{
+    if (input == 0)
+        return false;
+
+    dataHandle = 0;
+    bool ok = false;
+
+    QTNewMoviePropertyElement props[5];
+    zeromem (props, sizeof (props));
+    int prop = 0;
+
+    DataReferenceRecord dr;
+    props[prop].propClass = kQTPropertyClass_DataLocation;
+    props[prop].propID = kQTDataLocationPropertyID_DataReference;
+    props[prop].propValueSize = sizeof (dr);
+    props[prop].propValueAddress = (void*) &dr;
+    ++prop;
+
+    FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);
+
+    if (fin != 0)
+    {
+        CFStringRef filePath = juceStringToCFString (fin->getFile().getFullPathName());
+
+        QTNewDataReferenceFromFullPathCFString (filePath, (QTPathStyle) kQTNativeDefaultPathStyle, 0, 
+                                                &dr.dataRef, &dr.dataRefType);
+
+
+        ok = openMovie (props, prop, movie);
+
+        DisposeHandle (dr.dataRef);
+        CFRelease (filePath);
+    }
+    else
+    {
+        // sanity-check because this currently needs to load the whole stream into memory..
+        jassert (input->getTotalLength() < 50 * 1024 * 1024);
+
+        dataHandle = NewHandle ((Size) input->getTotalLength());
+        HLock (dataHandle);
+        // read the entire stream into memory - this is a pain, but can't get it to work
+        // properly using a custom callback to supply the data.
+        input->read (*dataHandle, (int) input->getTotalLength());
+        HUnlock (dataHandle);
+
+        // different types to get QT to try. (We should really be a bit smarter here by
+        // working out in advance which one the stream contains, rather than just trying
+        // each one)
+        const char* const suffixesToTry[] = { "\04.mov", "\04.mp3", 
+                                              "\04.avi", "\04.m4a" };
+
+        for (int i = 0; i < numElementsInArray (suffixesToTry) && ! ok; ++i)
+        {
+            /*  // this fails for some bizarre reason - it can be bodged to work with
+                // movies, but can't seem to do it for other file types..
+            QTNewMovieUserProcRecord procInfo;
+            procInfo.getMovieUserProc = NewGetMovieUPP (readMovieStreamProc);
+            procInfo.getMovieUserProcRefcon = this;
+            procInfo.defaultDataRef.dataRef = dataRef;
+            procInfo.defaultDataRef.dataRefType = HandleDataHandlerSubType;
+
+            props[prop].propClass = kQTPropertyClass_DataLocation;
+            props[prop].propID = kQTDataLocationPropertyID_MovieUserProc;
+            props[prop].propValueSize = sizeof (procInfo);
+            props[prop].propValueAddress = (void*) &procInfo;
+            ++prop; */
+
+            dr.dataRef = createHandleDataRef (dataHandle, suffixesToTry [i]);
+            dr.dataRefType = HandleDataHandlerSubType;
+            ok = openMovie (props, prop, movie);
+
+            DisposeHandle (dr.dataRef);
+        }
+    }
+
+    return ok;
+}
+
+bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
+                                         const bool isControllerVisible)
+{
+    const bool ok = loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible);
+    movieFile = movieFile_;
+    return ok;
+}
 
 void QuickTimeMovieComponent::goToStart()
 {

@@ -33,7 +33,7 @@
 #define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 
 #include "juce_AudioFormat.h"
-#if JUCE_QUICKTIME_AUDIOFORMAT
+#if JUCE_QUICKTIME
 
 
 //==============================================================================

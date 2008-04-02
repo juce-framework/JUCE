@@ -78,24 +78,18 @@
 
 //=============================================================================
 /** Comment out this macro if you don't want to enable QuickTime or if you don't
-    have QuickTime installed. If it's not enabled, the QuickTimeWindow class will
-    be unavailable.
+    have the SDK installed. 
+    
+    If this flag is not enabled, the QuickTimeMovieComponent and QuickTimeAudioFormat 
+    classes will be unavailable.
 
-    On Windows, if you enable this, you'll need to make sure the Apple Quicktime.dll
-    file is found on your include path. By default the Quicktime installer will have
-    put this in the "/Program Files/QuickTime" folder. Only QuickTime version 7 or later
-    is currently supported.
+    On Windows, if you enable this, you'll need to have the QuickTime SDK
+    installed, and its header files will need to be on your include path.
 */
 #if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
   #define JUCE_QUICKTIME 1
 #endif
 
-/** This lets you enable the QuickTimeAudioFormat class.
-    If you're using this on win32, you'll need to have installed the QuickTime SDK.
-*/
-#if ! (defined (JUCE_QUICKTIME_AUDIOFORMAT) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
-//  #define JUCE_QUICKTIME_AUDIOFORMAT 1
-#endif
 
 //=============================================================================
 /** Comment out this macro if you don't want to enable OpenGL or if you don't

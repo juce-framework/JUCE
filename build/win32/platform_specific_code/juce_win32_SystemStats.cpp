@@ -54,7 +54,7 @@
     #pragma comment(lib, "GlU32.Lib")
   #endif
 
-  #if JUCE_QUICKTIME_AUDIOFORMAT
+  #if JUCE_QUICKTIME
     #pragma comment(lib, "QTMLClient.lib")
   #endif
 #endif

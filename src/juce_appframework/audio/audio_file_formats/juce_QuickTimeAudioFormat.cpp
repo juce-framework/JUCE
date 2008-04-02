@@ -31,7 +31,7 @@
 
 #include "../../../../juce_Config.h"
 
-#if JUCE_QUICKTIME_AUDIOFORMAT
+#if JUCE_QUICKTIME
 
 #if ! defined (_WIN32)
  #include <Quicktime/Movies.h>
@@ -63,8 +63,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_QuickTimeAudioFormat.h"
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../../../juce_core/threads/juce_Thread.h"
-#include "../../../juce_core/io/files/juce_FileInputStream.h"
 #include "../../../juce_core/io/network/juce_URL.h"
+
+bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 #define qtFormatName    TRANS("QuickTime file")
 static const tchar* const extensions[] =    { T(".mov"), T(".mp3"), 0 };
@@ -80,7 +81,8 @@ public:
           trackNum (trackNum_),
           extractor (0),
           lastSampleRead (0),
-          lastThreadId (0)
+          lastThreadId (0),
+          dataHandle (0)
     {
         bufferList = (AudioBufferList*) juce_calloc (256);
 
@@ -95,7 +97,9 @@ public:
         EnterMoviesOnThread (0);
 #endif
 
-        if (! openMovie (input_))
+        bool opened = juce_OpenQuickTimeMovieFromStream (input_, movie, dataHandle);
+
+        if (! opened)
             return;
 
         {
@@ -169,8 +173,8 @@ public:
             return;
 
         inputStreamDesc.mFormatFlags = kAudioFormatFlagIsSignedInteger
-                                                    | kAudioFormatFlagIsPacked
-                                                    | kAudioFormatFlagsNativeEndian;
+                                        | kAudioFormatFlagIsPacked
+                                        | kAudioFormatFlagsNativeEndian;
         inputStreamDesc.mBitsPerChannel = sizeof (SInt16) * 8;
         inputStreamDesc.mChannelsPerFrame = jmin (2, inputStreamDesc.mChannelsPerFrame);
         inputStreamDesc.mBytesPerFrame = sizeof (SInt16) * inputStreamDesc.mChannelsPerFrame;
@@ -209,6 +213,9 @@ public:
 
     ~QTAudioReader()
     {
+        if (dataHandle != 0)
+            DisposeHandle (dataHandle);
+
         if (extractor != 0)
         {
             MovieAudioExtractionEnd (extractor);
@@ -302,6 +309,7 @@ private:
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
     AudioBufferList* bufferList;
+    Handle dataHandle;
 
     /*OSErr readMovieStream (long offset, long size, void* dataPtr)
     {
@@ -314,169 +322,6 @@ private:
     {
         return ((QTAudioReader*) userRef)->readMovieStream (offset, size, dataPtr);
     }*/
-
-    static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
-    {
-        Handle dataRef = 0;
-        OSStatus err = PtrToHand (&dataHandle, &dataRef, sizeof (Handle));
-        if (err == noErr)
-        {
-            Str255 suffix;
-#if JUCE_WIN32
-            strcpy_s ((char*) suffix, 128, fileName);
-#else
-            strcpy ((char*) suffix, fileName);
-#endif
-            StringPtr name = suffix;
-            err = PtrAndHand (name, dataRef, name[0]+1);
-
-            if (err == noErr)
-            {
-                long atoms[3];
-                atoms[0] = EndianU32_NtoB (3 * sizeof (long));
-                atoms[1] = EndianU32_NtoB (kDataRefExtensionMacOSFileType);
-                atoms[2] = EndianU32_NtoB (MovieFileType);
-
-                err = PtrAndHand (atoms, dataRef, 3 * sizeof (long));
-
-                if (err == noErr)
-                    return dataRef;
-            }
-
-            DisposeHandle (dataRef);
-        }
-
-        return 0;
-    }
-
-    static CFStringRef juceStringToCFString (const String& s)
-    {
-        const int len = s.length();
-        const juce_wchar* const t = (const juce_wchar*) s;
-
-        UniChar* temp = (UniChar*) juce_malloc (sizeof (UniChar) * len + 4);
-
-        for (int i = 0; i <= len; ++i)
-            temp[i] = t[i];
-
-        CFStringRef result = CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
-        juce_free (temp);
-
-        return result;
-    }
-
-    //==============================================================================
-    bool openMovie (InputStream* const input)
-    {
-        bool ok = false;
-
-        QTNewMoviePropertyElement props[5];
-        zeromem (props, sizeof (props));
-        int prop = 0;
-
-        DataReferenceRecord dr;
-        props[prop].propClass = kQTPropertyClass_DataLocation;
-        props[prop].propID = kQTDataLocationPropertyID_DataReference;
-        props[prop].propValueSize = sizeof (dr);
-        props[prop].propValueAddress = (void*) &dr;
-        ++prop;
-
-        FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);
-
-        if (fin != 0)
-        {
-            CFStringRef filePath = juceStringToCFString (fin->getFile().getFullPathName());
-
-            QTNewDataReferenceFromFullPathCFString (filePath, (QTPathStyle) kQTNativeDefaultPathStyle, 0, 
-                                                    &dr.dataRef, &dr.dataRefType);
-
-
-            ok = openMovie (props, prop);
-
-            DisposeHandle (dr.dataRef);
-            CFRelease (filePath);
-        }
-        else
-        {
-            // sanity-check because this currently needs to load the whole stream into memory..
-            jassert (input->getTotalLength() < 50 * 1024 * 1024);
-
-            Handle dataHandle = NewHandle ((Size) input->getTotalLength());
-            HLock (dataHandle);
-            // read the entire stream into memory - this is a pain, but can't get it to work
-            // properly using a custom callback to supply the data.
-            input->read (*dataHandle, (int) input->getTotalLength());
-            HUnlock (dataHandle);
-
-            // different types to get QT to try. (We should really be a bit smarter here by
-            // working out in advance which one the stream contains, rather than just trying
-            // each one)
-            const char* const suffixesToTry[] = { "\04.mov", "\04.mp3", 
-                                                  "\04.avi", "\04.m4a" };
-
-            for (int i = 0; i < numElementsInArray (suffixesToTry) && ! ok; ++i)
-            {
-                dr.dataRef = createHandleDataRef (dataHandle, suffixesToTry [i]);
-
-                /*  // this fails for some bizarre reason - it can be bodged to work with
-                    // movies, but can't seem to do it for other file types..
-                QTNewMovieUserProcRecord procInfo;
-                procInfo.getMovieUserProc = NewGetMovieUPP (readMovieStreamProc);
-                procInfo.getMovieUserProcRefcon = this;
-                procInfo.defaultDataRef.dataRef = dataRef;
-                procInfo.defaultDataRef.dataRefType = HandleDataHandlerSubType;
-
-                props[prop].propClass = kQTPropertyClass_DataLocation;
-                props[prop].propID = kQTDataLocationPropertyID_MovieUserProc;
-                props[prop].propValueSize = sizeof (procInfo);
-                props[prop].propValueAddress = (void*) &procInfo;
-                ++prop; */
-
-                dr.dataRefType = HandleDataHandlerSubType;
-                ok = openMovie (props, prop);
-
-                DisposeHandle (dr.dataRef);
-            }
-
-            DisposeHandle (dataHandle);
-        }
-
-        return ok;
-    }
-
-    bool openMovie (QTNewMoviePropertyElement* props, int prop)
-    {
-        Boolean trueBool = true;
-        props[prop].propClass = kQTPropertyClass_MovieInstantiation;
-        props[prop].propID = kQTMovieInstantiationPropertyID_DontResolveDataRefs;
-        props[prop].propValueSize = sizeof (trueBool);
-        props[prop].propValueAddress = &trueBool;
-        ++prop;
-
-        props[prop].propClass = kQTPropertyClass_MovieInstantiation;
-        props[prop].propID = kQTMovieInstantiationPropertyID_AsyncOK;
-        props[prop].propValueSize = sizeof (trueBool);
-        props[prop].propValueAddress = &trueBool;
-        ++prop;
-
-        Boolean isActive = true;
-        props[prop].propClass = kQTPropertyClass_NewMovieProperty;
-        props[prop].propID = kQTNewMoviePropertyID_Active;
-        props[prop].propValueSize = sizeof (isActive);
-        props[prop].propValueAddress = &isActive;
-        ++prop;
-
-#if JUCE_MAC
-        SetPort (0);
-#else
-        MacSetPort (0);
-#endif
-
-        jassert (prop <= 5);
-        OSStatus err = NewMovieFromProperties (prop, props, 0, 0, &movie);
-        
-        return err == noErr;
-    }
 
     //==============================================================================
     void checkThreadIsAttached()

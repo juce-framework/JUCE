@@ -85,6 +85,9 @@ public:
     bool loadMovie (const File& movieFile,
                     const bool isControllerVisible);
 
+    bool loadMovie (InputStream* movieStream,
+                    const bool isControllerVisible);
+
     /** Closes the movie, if one is open. */
     void closeMovie();
 
@@ -137,9 +140,9 @@ public:
     /** Returns the current play position of the movie. */
     double getPosition() const;
 
-    /** Changes the movie playback rate. 
-    
-        A value of 1 is normal speed, greater values play it proportionately faster, 
+    /** Changes the movie playback rate.
+
+        A value of 1 is normal speed, greater values play it proportionately faster,
         smaller values play it slower.
     */
     void setSpeed (const float newSpeed);
@@ -191,7 +194,7 @@ public:
     /** @internal */
     void resized();
 #endif
-
+    
     juce_UseDebuggingNewOperator
 
 private:
