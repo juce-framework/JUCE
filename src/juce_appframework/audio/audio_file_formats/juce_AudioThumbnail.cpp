@@ -98,12 +98,7 @@ AudioThumbnail::~AudioThumbnail()
 void AudioThumbnail::setSource (InputSource* const newSource)
 {
     cache.removeThumbnail (this);
-    stopTimer();
-
-    {
-        const ScopedLock sl (readerLock);
-        deleteAndZero (reader);
-    }
+    timerCallback(); // stops the timer and deletes the reader
 
     delete source;
     source = newSource;
@@ -202,6 +197,7 @@ void AudioThumbnail::clear()
     d->sampleRate = 0;
 
     numSamplesCached = 0;
+    cacheNeedsRefilling = true;
 }
 
 void AudioThumbnail::loadFrom (InputStream& input)
@@ -221,6 +217,7 @@ void AudioThumbnail::loadFrom (InputStream& input)
     }
 
     numSamplesCached = 0;
+    cacheNeedsRefilling = true;
 }
 
 void AudioThumbnail::saveTo (OutputStream& output) const
@@ -264,7 +261,7 @@ bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& reader)
         d->numFinishedSamples += numToDo;
     }
 
-    numSamplesCached = 0; // zap the cache
+    cacheNeedsRefilling = true;
     return (d->numFinishedSamples < d->totalSamples);
 }
 
@@ -362,13 +359,15 @@ void AudioThumbnail::refillCache (const int numSamples,
          || d->sampleRate <= 0)
     {
         numSamplesCached = 0;
+        cacheNeedsRefilling = true;
         return;
     }
 
     if (numSamples == numSamplesCached
         && numChannelsCached == d->numChannels
         && startTime == cachedStart
-        && timePerPixel == cachedTimePerPixel)
+        && timePerPixel == cachedTimePerPixel
+        && ! cacheNeedsRefilling)
     {
         return;
     }
@@ -383,6 +382,8 @@ void AudioThumbnail::refillCache (const int numSamples,
     const bool needExtraDetail = (timePerPixel * d->sampleRate <= d->samplesPerThumbSample);
 
     const ScopedLock sl (readerLock);
+
+    cacheNeedsRefilling = false;
 
     if (needExtraDetail && reader == 0)
         reader = createReader();
@@ -427,7 +428,7 @@ void AudioThumbnail::refillCache (const int numSamples,
     }
     else
     {
-        for (int channelNum = 0; channelNum < 2; ++channelNum)
+        for (int channelNum = 0; channelNum < numChannelsCached; ++channelNum)
         {
             char* const data = getChannelData (channelNum);
             char* cacheData = ((char*) cachedLevels.getData()) + channelNum * 2;
