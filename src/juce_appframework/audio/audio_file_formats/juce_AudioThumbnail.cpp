@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_AudioThumbnail.h"
 #include "juce_AudioThumbnailCache.h"
 
-const int timeBeforeDeletingReader = 1000;
+const int timeBeforeDeletingReader = 2000;
 
 
 //==============================================================================
@@ -98,30 +98,34 @@ AudioThumbnail::~AudioThumbnail()
 void AudioThumbnail::setSource (InputSource* const newSource)
 {
     cache.removeThumbnail (this);
+    stopTimer();
+
+    {
+        const ScopedLock sl (readerLock);
+        deleteAndZero (reader);
+    }
 
     delete source;
     source = newSource;
 
-    {
-        const ScopedLock sl (readerLock);
-
-        deleteAndZero (reader);
-        reader = createReader();
-    }
-
     clear();
 
-    if (reader != 0)
+    if (! (cache.loadThumb (*this, newSource->hashCode()) 
+           && isFullyLoaded()))
     {
-        startTimer (timeBeforeDeletingReader);
+        {
+            const ScopedLock sl (readerLock);
+            reader = createReader();
+        }
 
-        initialiseFromAudioFile (*reader);
-
-        cache.loadThumb (*this, newSource->hashCode());
-
-        if (! isFullyLoaded())
+        if (reader != 0)
+        {
+            initialiseFromAudioFile (*reader);
             cache.addThumbnail (this);
+        }
     }
+
+    sendChangeMessage (this);
 }
 
 bool AudioThumbnail::useTimeSlice()
@@ -143,7 +147,7 @@ bool AudioThumbnail::useTimeSlice()
     if (reader != 0)
     {
         readNextBlockFromAudioFile (*reader);
-        startTimer (timeBeforeDeletingReader);
+        stopTimer();
 
         sendChangeMessage (this);
 

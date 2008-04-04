@@ -75,8 +75,8 @@ public:
 
     //==============================================================================
     virtual void drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                  int x, int y, int w, int h,
-                                  float progress);
+                                  int width, int height,
+                                  double progress, const String& textToShow);
 
     //==============================================================================
     virtual void drawScrollbarButton (Graphics& g,

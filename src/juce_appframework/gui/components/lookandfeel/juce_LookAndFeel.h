@@ -168,11 +168,15 @@ public:
 
     /** Draws a progress bar.
 
+        If the progress value is less than 0 or greater than 1.0, this should draw a spinning
+        bar that fills the whole space (i.e. to say that the app is still busy but the progress 
+        isn't known). It can use the current time as a basis for playing an animation.
+
         (Used by progress bars in AlertWindow).
     */
     virtual void drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                  int x, int y, int w, int h,
-                                  float progress);
+                                  int width, int height,
+                                  double progress, const String& textToShow);
 
     //==============================================================================
     /** Draws one of the buttons on a scrollbar.
@@ -577,6 +581,7 @@ protected:
     virtual int drawTickBox (Graphics&, int, int, int, int, bool, const bool, const bool, const bool) { return 0; }
 
     virtual int drawProgressBar (Graphics&, int, int, int, int, float) { return 0; }
+    virtual int drawProgressBar (Graphics&, ProgressBar&, int, int, int, int, float) { return 0; }
 
     virtual void getTabButtonBestWidth (int, const String&, int) {}
 

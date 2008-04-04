@@ -63,6 +63,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Desktop.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../graphics/brushes/juce_GradientBrush.h"
+#include "../../graphics/brushes/juce_ImageBrush.h"
 #include "../../graphics/fonts/juce_GlyphArrangement.h"
 #include "../../graphics/drawables/juce_DrawableComposite.h"
 #include "../../graphics/drawables/juce_DrawablePath.h"
@@ -163,7 +164,7 @@ LookAndFeel::LookAndFeel()
         AlertWindow::textColourId,                  0xff000000,
         AlertWindow::outlineColourId,               0xff666666,
 
-        ProgressBar::backgroundColourId,            0xffffffff,
+        ProgressBar::backgroundColourId,            0xffeeeeee,
         ProgressBar::foregroundColourId,            0xffaaaaee,
 
         TooltipWindow::backgroundColourId,          0xffeeeebb,
@@ -509,24 +510,64 @@ int LookAndFeel::getAlertBoxWindowFlags()
 }
 
 void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                   int x, int y, int w, int h,
-                                   float progress)
+                                   int width, int height,
+                                   double progress, const String& textToShow)
 {
     const Colour background (progressBar.findColour (ProgressBar::backgroundColourId));
+    const Colour foreground (progressBar.findColour (ProgressBar::foregroundColourId));
+
     g.fillAll (background);
 
-    g.setColour (background.contrasting (0.2f));
-    g.drawRect (x, y, w, h);
+    if (progress >= 0.0f && progress < 1.0f)
+    {
+        drawGlassLozenge (g, 1.0f, 1.0f,
+                          (float) jlimit (0.0, width - 2.0, progress * (width - 2.0)),
+                          (float) (height - 2),
+                          foreground,
+                          0.5f, 0.0f,
+                          true, true, true, true);
+    }
+    else
+    {
+        // spinning bar..
+        g.setColour (foreground);
 
-    drawGlassLozenge (g,
-                      (float) (x + 1),
-                      (float) (y + 1),
-                      jlimit (0.0f, w - 2.0f, progress * (w - 2.0f)),
-                      (float) (h - 2),
-                      progressBar.findColour (ProgressBar::foregroundColourId),
-                      0.5f,
-                      0.0f,
-                      true, true, true, true);
+        const int stripeWidth = height * 2;
+        const int position = (Time::getMillisecondCounter() / 15) % stripeWidth;
+
+        Path p;
+
+        for (float x = (float) (stripeWidth - position); x < width + stripeWidth; x += stripeWidth)
+            p.addQuadrilateral (x, 0.0f, 
+                                x + stripeWidth * 0.5f, 0.0f, 
+                                x, (float) height,
+                                x - stripeWidth * 0.5f, (float) height);
+
+        Image im (Image::ARGB, width, height, true);
+
+        {
+            Graphics g (im);
+            drawGlassLozenge (g, 1.0f, 1.0f,
+                              (float) (width - 2),
+                              (float) (height - 2),
+                              foreground,
+                              0.5f, 0.0f,
+                              true, true, true, true);
+        }
+
+        ImageBrush ib (&im, 0, 0, 0.85f);
+        g.setBrush (&ib);
+
+        g.fillPath (p);
+    }
+
+    if (textToShow.isNotEmpty())
+    {
+        g.setColour (Colour::contrasting (background, foreground));
+        g.setFont (height * 0.6f);
+
+        g.drawText (textToShow, 0, 0, width, height, Justification::centred, false);
+    }
 }
 
 void LookAndFeel::drawScrollbarButton (Graphics& g,

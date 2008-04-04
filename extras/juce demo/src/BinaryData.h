@@ -6,7 +6,7 @@
 namespace BinaryData
 {
     extern const char*  audiodemo_cpp;
-    const int           audiodemo_cppSize = 23529;
+    const int           audiodemo_cppSize = 23434;
 
     extern const char*  cello_wav;
     const int           cello_wavSize = 46348;
@@ -42,7 +42,7 @@ namespace BinaryData
     const int           readme__what_this_directory_is_for_txtSize = 259;
 
     extern const char*  tabledemo_cpp;
-    const int           tabledemo_cppSize = 12327;
+    const int           tabledemo_cppSize = 12381;
 
     extern const char*  threadingdemo_cpp;
     const int           threadingdemo_cppSize = 10047;
@@ -51,10 +51,10 @@ namespace BinaryData
     const int           treedemo_xmlSize = 1126;
 
     extern const char*  treeviewdemo_cpp;
-    const int           treeviewdemo_cppSize = 7534;
+    const int           treeviewdemo_cppSize = 7715;
 
     extern const char*  widgetsdemo_cpp;
-    const int           widgetsdemo_cppSize = 51573;
+    const int           widgetsdemo_cppSize = 53388;
 
 };
 

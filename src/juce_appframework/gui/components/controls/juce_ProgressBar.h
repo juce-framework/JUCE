@@ -78,6 +78,13 @@ public:
     */
     void setPercentageDisplay (const bool shouldDisplayPercentage);
 
+    /** Gives the progress bar a string to display inside it.
+
+        If you call this, it will turn off the percentage display.
+        @see setPercentageDisplay
+    */
+    void setTextToDisplay (const String& text);
+
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the bar.
@@ -111,6 +118,7 @@ private:
     double& progress;
     double currentValue;
     bool displayPercentage;
+    String displayedMessage, currentMessage;
 
     void timerCallback();
 

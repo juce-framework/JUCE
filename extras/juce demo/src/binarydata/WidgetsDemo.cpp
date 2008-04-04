@@ -979,6 +979,10 @@ public:
 
     void run()
     {
+        setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
+        setStatusMessage (T("Preparing to do some stuff..."));
+        wait (2000);
+
         const int thingsToDo = 10;
 
         for (int i = 0; i < thingsToDo; ++i)
@@ -991,10 +995,14 @@ public:
             // this will update the progress bar on the dialog box
             setProgress (i / (double) thingsToDo);
 
-            wait (500);
-
             setStatusMessage (String (thingsToDo - i) + T(" things left to do..."));
+
+            wait (500);
         }
+
+        setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
+        setStatusMessage (T("Finishing off the last few bits and pieces!"));
+        wait (3000);
     }
 };
 

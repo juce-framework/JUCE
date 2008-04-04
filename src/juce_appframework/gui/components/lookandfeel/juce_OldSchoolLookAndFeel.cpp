@@ -184,17 +184,33 @@ void OldSchoolLookAndFeel::drawToggleButton (Graphics& g,
 }
 
 void OldSchoolLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
-                                            int x, int y, int w, int h,
-                                            float progress)
+                                            int width, int height,
+                                            double progress, const String& textToShow)
 {
-    g.fillAll (progressBar.findColour (ProgressBar::backgroundColourId));
+    if (progress < 0 || progress >= 1.0)
+    {
+        LookAndFeel::drawProgressBar (g, progressBar, width, height, progress, textToShow);
+    }
+    else
+    {
+        const Colour background (progressBar.findColour (ProgressBar::backgroundColourId));
+        const Colour foreground (progressBar.findColour (ProgressBar::foregroundColourId));
 
-    g.setColour (progressBar.findColour (ProgressBar::foregroundColourId));
+        g.fillAll (background);
+        g.setColour (foreground);
 
-    g.fillRect (x + 1,
-                y + 1,
-                jlimit (0, w - 2, roundFloatToInt (progress * (w - 2))),
-                h - 2);
+        g.fillRect (1, 1,
+                    jlimit (0, width - 2, roundDoubleToInt (progress * (width - 2))),
+                    height - 2);
+
+        if (textToShow.isNotEmpty())
+        {
+            g.setColour (Colour::contrasting (background, foreground));
+            g.setFont (height * 0.6f);
+
+            g.drawText (textToShow, 0, 0, width, height, Justification::centred, false);
+        }
+    }
 }
 
 void OldSchoolLookAndFeel::drawScrollbarButton (Graphics& g,

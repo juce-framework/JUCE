@@ -56,6 +56,12 @@ void ProgressBar::setPercentageDisplay (const bool shouldDisplayPercentage)
     repaint();
 }
 
+void ProgressBar::setTextToDisplay (const String& text)
+{
+    displayPercentage = false;
+    displayedMessage = text;
+}
+
 void ProgressBar::lookAndFeelChanged()
 {
     setOpaque (findColour (backgroundColourId).isOpaque());
@@ -68,23 +74,21 @@ void ProgressBar::colourChanged()
 
 void ProgressBar::paint (Graphics& g)
 {
-    getLookAndFeel().drawProgressBar (g, *this,
-                                      0, 0,
-                                      getWidth(),
-                                      getHeight(),
-                                      (float) currentValue);
+    String text;
 
     if (displayPercentage)
     {
-        String percent;
-        percent << roundDoubleToInt (currentValue * 100.0) << T("%");
-
-        g.setColour (Colour::contrasting (findColour (foregroundColourId),
-                                          findColour (backgroundColourId)));
-        g.setFont (getHeight() * 0.6f);
-
-        g.drawText (percent, 0, 0, getWidth(), getHeight(), Justification::centred, false);
+        if (currentValue >= 0 && currentValue <= 1.0)
+            text << roundDoubleToInt (currentValue * 100.0) << T("%");
     }
+    else
+    {
+        text = displayedMessage;
+    }
+
+    getLookAndFeel().drawProgressBar (g, *this,
+                                      getWidth(), getHeight(),
+                                      currentValue, text);
 }
 
 void ProgressBar::visibilityChanged()
@@ -99,18 +103,19 @@ void ProgressBar::timerCallback()
 {
     double newProgress = progress;
 
-    if (newProgress < 0)
-        newProgress = 0;
-
-    if (newProgress > 1.0)
-        newProgress = 1.0;
-
-    if (currentValue != newProgress)
+    if (currentValue != newProgress 
+         || newProgress < 0 || newProgress >= 1.0
+         || currentMessage != displayedMessage)
     {
-        if (currentValue < newProgress)
+        if (currentValue < newProgress 
+             && newProgress >= 0 && newProgress < 1.0
+             && currentValue >= 0 && newProgress < 1.0)
+        {
             newProgress = jmin (currentValue + 0.02, newProgress);
+        }
 
         currentValue = newProgress;
+        currentMessage = displayedMessage;
         repaint();
     }
 }
