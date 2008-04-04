@@ -166,6 +166,7 @@ private:
 
     int numChannelsCached, numSamplesCached;
     double cachedStart, cachedTimePerPixel;
+    bool cacheNeedsRefilling;
 
     void clear();
 
