@@ -193,6 +193,8 @@ void Viewport::updateVisibleRegion()
 
         if (horizontalScrollBar->isVisible())
         {
+            horizontalScrollBar->setCurrentRange (newVX, getMaximumVisibleWidth());
+
             horizontalScrollBar
                 ->setBounds (0, getMaximumVisibleHeight(),
                              getMaximumVisibleWidth(), getScrollBarThickness());

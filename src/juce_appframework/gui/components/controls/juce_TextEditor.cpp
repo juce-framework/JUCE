@@ -453,19 +453,51 @@ public:
             moveToEndOfLastAtom();
             return false;
         }
-        else if (atomIndex >= currentSection->getNumAtoms())
+        else if (atomIndex >= currentSection->getNumAtoms() - 1)
         {
-            if (++sectionIndex >= sections.size())
+            if (atomIndex >= currentSection->getNumAtoms())
             {
-                moveToEndOfLastAtom();
-                return false;
+                if (++sectionIndex >= sections.size())
+                {
+                    moveToEndOfLastAtom();
+                    return false;
+                }
+
+                atomIndex = 0;
+                currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
+
+                lineHeight = jmax (lineHeight, currentSection->font.getHeight());
+                maxDescent = jmax (maxDescent, currentSection->font.getDescent());
             }
+            else
+            {
+                const TextAtom* const lastAtom = currentSection->getAtom (atomIndex);
 
-            atomIndex = 0;
-            currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
+                if (! lastAtom->isWhitespace())
+                {
+                    // handle the case where the last atom in a section is actually part of the same
+                    // word as the first atom of the next section...
+                    float right = atomRight + lastAtom->width;
 
-            lineHeight = jmax (lineHeight, currentSection->font.getHeight());
-            maxDescent = jmax (maxDescent, currentSection->font.getDescent());
+                    for (int section = sectionIndex + 1; section < sections.size(); ++section)
+                    {
+                        const UniformTextSection* const s = (const UniformTextSection*) sections.getUnchecked (section);
+
+                        if (s->getNumAtoms() == 0)
+                            break;
+
+                        const TextAtom* const nextAtom = s->getAtom (0);
+
+                        if (nextAtom->isWhitespace())
+                            break;
+
+                        right += nextAtom->width;
+                    }
+
+                    if (SHOULD_WRAP (right, wordWrapWidth))
+                        return wrapCurrentAtom();
+                }
+            }
         }
 
         if (atom != 0)
@@ -493,29 +525,35 @@ public:
             }
             else
             {
-                atomRight = atom->width;
-
-                if (SHOULD_WRAP (atomRight, wordWrapWidth))  // atom too big to fit on a line, so break it up..
-                {
-                    tempAtom = *atom;
-                    tempAtom.width = 0;
-                    tempAtom.numChars = 0;
-                    atom = &tempAtom;
-
-                    if (atomX > 0)
-                    {
-                        atomX = 0;
-                        lineY += lineHeight;
-                    }
-
-                    return next();
-                }
-
-                atomX = 0;
-                lineY += lineHeight;
+                return wrapCurrentAtom();
             }
         }
 
+        return true;
+    }
+
+    bool wrapCurrentAtom() throw()
+    {
+        atomRight = atom->width;
+
+        if (SHOULD_WRAP (atomRight, wordWrapWidth))  // atom too big to fit on a line, so break it up..
+        {
+            tempAtom = *atom;
+            tempAtom.width = 0;
+            tempAtom.numChars = 0;
+            atom = &tempAtom;
+
+            if (atomX > 0)
+            {
+                atomX = 0;
+                lineY += lineHeight;
+            }
+
+            return next();
+        }
+
+        atomX = 0;
+        lineY += lineHeight;
         return true;
     }
 
@@ -2141,6 +2179,9 @@ void TextEditor::insert (const String& text,
         }
         else
         {
+            repaintText (insertIndex, -1); // must do this before and after changing the data, in case 
+                                           // a line gets moved due to word wrap
+
             int index = 0;
             int nextIndex = 0;
 

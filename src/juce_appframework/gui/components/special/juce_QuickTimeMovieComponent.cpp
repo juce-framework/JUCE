@@ -45,6 +45,12 @@
   #pragma warning (disable : 4100)
  #endif
 
+ /* If you've got an include error here, you probably need to install the QuickTime SDK and
+    add its header directory to your include path.
+
+    Alternatively, if you don't need any QuickTime services, just turn off the JUC_QUICKTIME
+    flag in juce_Config.h
+ */
  #include <Movies.h>
  #include <QTML.h>
  #include <QuickTimeComponents.h>
