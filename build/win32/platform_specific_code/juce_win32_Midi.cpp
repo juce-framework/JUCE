@@ -331,10 +331,10 @@ const StringArray MidiInput::getDevices()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIINCAPSW mc;
+        MIDIINCAPS mc;
         zerostruct (mc);
 
-        if (midiInGetDevCapsW (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
+        if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
             s.add (String (mc.szPname, sizeof (mc.szPname)));
     }
 
@@ -359,10 +359,10 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIINCAPSW mc;
+        MIDIINCAPS mc;
         zerostruct (mc);
 
-        if (midiInGetDevCapsW (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
+        if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
             if (index == n)
             {
@@ -444,10 +444,10 @@ const StringArray MidiOutput::getDevices()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIOUTCAPSW mc;
+        MIDIOUTCAPS mc;
         zerostruct (mc);
 
-        if (midiOutGetDevCapsW (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
+        if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
             s.add (String (mc.szPname, sizeof (mc.szPname)));
     }
 
@@ -461,10 +461,10 @@ int MidiOutput::getDefaultDeviceIndex()
 
     for (int i = 0; i < num; ++i)
     {
-        MIDIOUTCAPSW mc;
+        MIDIOUTCAPS mc;
         zerostruct (mc);
 
-        if (midiOutGetDevCapsW (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
+        if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
             if ((mc.wTechnology & MOD_MAPPER) != 0)
                 return n;
@@ -484,10 +484,10 @@ MidiOutput* MidiOutput::openDevice (int index)
 
     for (i = 0; i < num; ++i)
     {
-        MIDIOUTCAPSW mc;
+        MIDIOUTCAPS mc;
         zerostruct (mc);
 
-        if (midiOutGetDevCapsW (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
+        if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
         {
             // use the microsoft sw synth as a default - best not to allow deviceId
             // to be MIDI_MAPPER, or else device sharing breaks

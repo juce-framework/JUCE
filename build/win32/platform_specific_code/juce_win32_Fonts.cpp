@@ -42,55 +42,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    UNICODE_FUNCTION (GetGlyphOutlineW, DWORD, (HDC, UINT, UINT, LPGLYPHMETRICS, DWORD, LPVOID, CONST MAT2*))
-    UNICODE_FUNCTION (GetTextMetricsW, BOOL, (HDC, LPTEXTMETRICW))
-    UNICODE_FUNCTION (GetKerningPairsW, DWORD, (HDC, DWORD, LPKERNINGPAIR))
-    UNICODE_FUNCTION (EnumFontFamiliesExW, int, (HDC, LPLOGFONTW, FONTENUMPROCW, LPARAM, DWORD))
-    UNICODE_FUNCTION (CreateFontIndirectW, HFONT, (CONST LOGFONTW *));
-    UNICODE_FUNCTION (GetGlyphIndicesW, DWORD, (HDC, LPCWSTR, int, LPWORD, DWORD));
-
-    static void juce_initialiseUnicodeFileFontFunctions()
-    {
-        static bool initialised = false;
-
-        if (! initialised)
-        {
-            initialised = true;
-
-            if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
-            {
-                HMODULE h = LoadLibraryA ("gdi32.dll");
-                UNICODE_FUNCTION_LOAD (GetGlyphOutlineW)
-                UNICODE_FUNCTION_LOAD (GetTextMetricsW)
-                UNICODE_FUNCTION_LOAD (GetKerningPairsW)
-                UNICODE_FUNCTION_LOAD (EnumFontFamiliesExW)
-                UNICODE_FUNCTION_LOAD (CreateFontIndirectW)
-                UNICODE_FUNCTION_LOAD (GetGlyphIndicesW)
-            }
-        }
-    }
-#endif
-
-
-//==============================================================================
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-static int CALLBACK fontEnum2 (ENUMLOGFONTEX* lpelfe,
-                               NEWTEXTMETRICEX*,
-                               int type,
-                               LPARAM lParam)
-{
-    if (lpelfe != 0 && type == TRUETYPE_FONTTYPE)
-    {
-        const String fontName (lpelfe->elfLogFont.lfFaceName);
-
-        ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters (T("@")));
-    }
-
-    return 1;
-}
-#endif
-
 static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
                                 NEWTEXTMETRICEXW*,
                                 int type,
@@ -105,39 +56,6 @@ static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
 
     return 1;
 }
-
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-static int CALLBACK fontEnum1 (ENUMLOGFONTEX* lpelfe,
-                               NEWTEXTMETRICEX*,
-                               int type,
-                               LPARAM lParam)
-{
-    if (lpelfe != 0
-        && ((type & (DEVICE_FONTTYPE | RASTER_FONTTYPE)) == 0))
-    {
-        LOGFONT lf;
-        zerostruct (lf);
-
-        lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
-        lf.lfQuality = DEFAULT_QUALITY;
-        lf.lfCharSet = DEFAULT_CHARSET;
-        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        lf.lfPitchAndFamily = FF_DONTCARE;
-
-        const String fontName (lpelfe->elfLogFont.lfFaceName);
-        fontName.copyToBuffer (lf.lfFaceName, LF_FACESIZE - 1);
-
-        HDC dc = CreateCompatibleDC (0);
-        EnumFontFamiliesEx (dc, &lf,
-                            (FONTENUMPROC) &fontEnum2,
-                            lParam, 0);
-        DeleteDC (dc);
-    }
-
-    return 1;
-}
-#endif
 
 static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
                                 NEWTEXTMETRICEXW*,
@@ -161,15 +79,9 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
         fontName.copyToBuffer (lf.lfFaceName, LF_FACESIZE - 1);
 
         HDC dc = CreateCompatibleDC (0);
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        wEnumFontFamiliesExW (dc, &lf,
-                              (FONTENUMPROCW) &wfontEnum2,
-                              lParam, 0);
-#else
-        EnumFontFamiliesExW (dc, &lf,
-                             (FONTENUMPROCW) &wfontEnum2,
-                             lParam, 0);
-#endif
+        EnumFontFamiliesEx (dc, &lf,
+                            (FONTENUMPROCW) &wfontEnum2,
+                            lParam, 0);
         DeleteDC (dc);
     }
 
@@ -181,27 +93,8 @@ const StringArray Font::findAllTypefaceNames() throw()
     StringArray results;
     HDC dc = CreateCompatibleDC (0);
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wEnumFontFamiliesExW != 0)
     {
         LOGFONTW lf;
-        zerostruct (lf);
-
-        lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
-        lf.lfQuality = DEFAULT_QUALITY;
-        lf.lfCharSet = DEFAULT_CHARSET;
-        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        lf.lfPitchAndFamily = FF_DONTCARE;
-        lf.lfFaceName[0] = 0;
-
-        wEnumFontFamiliesExW (dc, &lf,
-                              (FONTENUMPROCW) &wfontEnum1,
-                              (LPARAM) &results, 0);
-    }
-    else
-    {
-        LOGFONT lf;
         zerostruct (lf);
 
         lf.lfWeight = FW_DONTCARE;
@@ -213,27 +106,9 @@ const StringArray Font::findAllTypefaceNames() throw()
         lf.lfFaceName[0] = 0;
 
         EnumFontFamiliesEx (dc, &lf,
-                            (FONTENUMPROC) &fontEnum1,
+                            (FONTENUMPROCW) &wfontEnum1,
                             (LPARAM) &results, 0);
     }
-#else
-    {
-        LOGFONTW lf;
-        zerostruct (lf);
-
-        lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
-        lf.lfQuality = DEFAULT_QUALITY;
-        lf.lfCharSet = DEFAULT_CHARSET;
-        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        lf.lfPitchAndFamily = FF_DONTCARE;
-        lf.lfFaceName[0] = 0;
-
-        EnumFontFamiliesExW (dc, &lf,
-                             (FONTENUMPROCW) &wfontEnum1,
-                             (LPARAM) &results, 0);
-    }
-#endif
 
     DeleteDC (dc);
 
@@ -287,9 +162,6 @@ public:
           italic (false),
           size (0)
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        juce_initialiseUnicodeFileFontFunctions();
-#endif
     }
 
     ~FontDCHolder() throw()
@@ -334,44 +206,6 @@ public:
             SetMapperFlags (dc, 0);
             SetMapMode (dc, MM_TEXT);
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-            LOGFONT lf;
-            LOGFONTW lfw;
-            HFONT standardSizedFont = 0;
-
-            if (wCreateFontIndirectW != 0)
-            {
-                zerostruct (lfw);
-
-                lfw.lfCharSet = DEFAULT_CHARSET;
-                lfw.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-                lfw.lfOutPrecision = OUT_OUTLINE_PRECIS;
-                lfw.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-                lfw.lfQuality = PROOF_QUALITY;
-                lfw.lfItalic = (BYTE) (italic ? TRUE : FALSE);
-                lfw.lfWeight = bold ? FW_BOLD : FW_NORMAL;
-                fontName.copyToBuffer (lfw.lfFaceName, LF_FACESIZE - 1);
-
-                lfw.lfHeight = size > 0 ? size : -256;
-                standardSizedFont = wCreateFontIndirectW (&lfw);
-            }
-            else
-            {
-                zerostruct (lf);
-
-                lf.lfCharSet = DEFAULT_CHARSET;
-                lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-                lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
-                lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-                lf.lfQuality = PROOF_QUALITY;
-                lf.lfItalic = (BYTE) (italic ? TRUE : FALSE);
-                lf.lfWeight = bold ? FW_BOLD : FW_NORMAL;
-                fontName.copyToBuffer (lf.lfFaceName, LF_FACESIZE - 1);
-
-                lf.lfHeight = size > 0 ? size : -256;
-                standardSizedFont = CreateFontIndirect (&lf);
-            }
-#else
             LOGFONTW lfw;
             zerostruct (lfw);
 
@@ -385,8 +219,7 @@ public:
             fontName.copyToBuffer (lfw.lfFaceName, LF_FACESIZE - 1);
 
             lfw.lfHeight = size > 0 ? size : -256;
-            HFONT standardSizedFont = CreateFontIndirectW (&lfw);
-#endif
+            HFONT standardSizedFont = CreateFontIndirect (&lfw);
 
             if (standardSizedFont != 0)
             {
@@ -399,21 +232,8 @@ public:
                         OUTLINETEXTMETRIC otm;
                         if (GetOutlineTextMetrics (dc, sizeof (otm), &otm) != 0)
                         {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-                            if (wCreateFontIndirectW != 0)
-                            {
-                                lfw.lfHeight = -(int) otm.otmEMSquare;
-                                fontH = wCreateFontIndirectW (&lfw);
-                            }
-                            else
-                            {
-                                lf.lfHeight = -(int) otm.otmEMSquare;
-                                fontH = CreateFontIndirect (&lf);
-                            }
-#else
                             lfw.lfHeight = -(int) otm.otmEMSquare;
-                            fontH = CreateFontIndirectW (&lfw);
-#endif
+                            fontH = CreateFontIndirect (&lfw);
 
                             SelectObject (dc, fontH);
                             DeleteObject (standardSizedFont);
@@ -439,24 +259,9 @@ public:
     {
         if (kps == 0)
         {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-            if (wGetKerningPairsW != 0)
-            {
-                numKPs = wGetKerningPairsW (dc, 0, 0);
-                kps = (KERNINGPAIR*) juce_calloc (sizeof (KERNINGPAIR) * numKPs);
-                wGetKerningPairsW (dc, numKPs, kps);
-            }
-            else
-            {
-                numKPs = GetKerningPairs (dc, 0, 0);
-                kps = (KERNINGPAIR*) juce_calloc (sizeof (KERNINGPAIR) * numKPs);
-                GetKerningPairs (dc, numKPs, kps);
-            }
-#else
-            numKPs = GetKerningPairsW (dc, 0, 0);
+            numKPs = GetKerningPairs (dc, 0, 0);
             kps = (KERNINGPAIR*) juce_calloc (sizeof (KERNINGPAIR) * numKPs);
-            GetKerningPairsW (dc, numKPs, kps);
-#endif
+            GetKerningPairs (dc, numKPs, kps);
         }
 
         numKPs_ = numKPs;
@@ -479,50 +284,21 @@ static bool addGlyphToTypeface (HDC dc,
     float height;
     BOOL ok = false;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetGlyphIndicesW != 0)
     {
-        const WCHAR charToTest[] = { (WCHAR)character, 0 };
+        const WCHAR charToTest[] = { (WCHAR) character, 0 };
         WORD index = 0;
 
-        if (wGetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
+        if (GetGlyphIndices (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
              && index == 0xffff)
         {
             return false;
         }
     }
 
-    if (wGetTextMetricsW != 0)
-    {
-        TEXTMETRICW tm;
-        ok = wGetTextMetricsW (dc, &tm);
-
-        height = (float) tm.tmHeight;
-    }
-    else
-    {
-        TEXTMETRIC tm;
-        ok = GetTextMetrics (dc, &tm);
-
-        height = (float) tm.tmHeight;
-    }
-#else
-    {
-        const WCHAR charToTest[] = { (WCHAR)character, 0 };
-        WORD index = 0;
-
-        if (GetGlyphIndicesW (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
-             && index == 0xffff)
-        {
-            return false;
-        }
-    }
-
-    TEXTMETRICW tm;
-    ok = GetTextMetricsW (dc, &tm);
+    TEXTMETRIC tm;
+    ok = GetTextMetrics (dc, &tm);
 
     height = (float) tm.tmHeight;
-#endif
 
     if (! ok)
     {
@@ -534,35 +310,15 @@ static bool addGlyphToTypeface (HDC dc,
     const float scaleY = -1.0f / height;
     static const MAT2 identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
 
-    int bufSize;
-
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetGlyphOutlineW != 0)
-        bufSize = wGetGlyphOutlineW (dc, character, GGO_NATIVE,
-                                     &gm, 0, 0, &identityMatrix);
-    else
-        bufSize = GetGlyphOutline (dc, character, GGO_NATIVE,
-                                   &gm, 0, 0, &identityMatrix);
-#else
-    bufSize = GetGlyphOutlineW (dc, character, GGO_NATIVE,
-                                &gm, 0, 0, &identityMatrix);
-#endif
+    const int bufSize = GetGlyphOutline (dc, character, GGO_NATIVE,
+                                          &gm, 0, 0, &identityMatrix);
 
     if (bufSize > 0)
     {
         char* const data = (char*) juce_malloc (bufSize);
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wGetGlyphOutlineW != 0)
-            wGetGlyphOutlineW (dc, character, GGO_NATIVE, &gm,
-                               bufSize, data, &identityMatrix);
-        else
-            GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
-                             bufSize, data, &identityMatrix);
-#else
-        GetGlyphOutlineW (dc, character, GGO_NATIVE, &gm,
-                          bufSize, data, &identityMatrix);
-#endif
+        GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
+                         bufSize, data, &identityMatrix);
 
         const TTPOLYGONHEADER* pheader = (TTPOLYGONHEADER*) data;
 
@@ -717,20 +473,6 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
     float height;
     int firstChar, lastChar;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetTextMetricsW != 0)
-    {
-        TEXTMETRICW tm;
-        wGetTextMetricsW (dc, &tm);
-
-        height = (float) tm.tmHeight;
-        firstChar = tm.tmFirstChar;
-        lastChar = tm.tmLastChar;
-
-        setAscent (tm.tmAscent / height);
-        setDefaultCharacter (tm.tmDefaultChar);
-    }
-    else
     {
         TEXTMETRIC tm;
         GetTextMetrics (dc, &tm);
@@ -742,19 +484,6 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
         setAscent (tm.tmAscent / height);
         setDefaultCharacter (tm.tmDefaultChar);
     }
-#else
-    {
-        TEXTMETRICW tm;
-        GetTextMetricsW (dc, &tm);
-
-        height = (float) tm.tmHeight;
-        firstChar = tm.tmFirstChar;
-        lastChar = tm.tmLastChar;
-
-        setAscent (tm.tmAscent / height);
-        setDefaultCharacter (tm.tmDefaultChar);
-    }
-#endif
 
     setName (fontName);
     setBold (bold);

@@ -134,48 +134,8 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 }
 
 //==============================================================================
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    UNICODE_FUNCTION (SetWindowTextW, BOOL, (HWND, LPCWSTR))
-    UNICODE_FUNCTION (DragQueryFileW, UINT, (HDROP, UINT, LPWSTR, UINT))
-    UNICODE_FUNCTION (MapVirtualKeyW, UINT, (UINT, UINT))
-    UNICODE_FUNCTION (ToUnicode, int, (UINT, UINT, const PBYTE, LPWSTR, int, UINT))
-    UNICODE_FUNCTION (RegisterClassExW, ATOM, (CONST WNDCLASSEXW*))
-    UNICODE_FUNCTION (CreateWindowExW, HWND, (DWORD, LPCWSTR, LPCWSTR, DWORD, int, int, int, int, HWND, HMENU, HINSTANCE, LPVOID))
-    UNICODE_FUNCTION (DefWindowProcW, LRESULT, (HWND, UINT, WPARAM, LPARAM))
-
-    void juce_initialiseUnicodeWindowFunctions()
-    {
-        static bool initialised = false;
-
-        if (! initialised)
-        {
-            initialised = true;
-
-            if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
-            {
-                HMODULE h = LoadLibraryA ("user32.dll");
-                UNICODE_FUNCTION_LOAD (SetWindowTextW)
-                UNICODE_FUNCTION_LOAD (MapVirtualKeyW)
-                UNICODE_FUNCTION_LOAD (ToUnicode)
-                UNICODE_FUNCTION_LOAD (RegisterClassExW)
-                UNICODE_FUNCTION_LOAD (CreateWindowExW)
-                UNICODE_FUNCTION_LOAD (DefWindowProcW)
-
-                if (wDefWindowProcW == 0)
-                    wDefWindowProcW = & DefWindowProcA;
-
-                h = LoadLibraryA ("shell32.dll");
-                UNICODE_FUNCTION_LOAD (DragQueryFileW)
-            }
-        }
-    }
-
-    #undef DefWindowProc
-    #define DefWindowProc wDefWindowProcW
-#else
-    #undef DefWindowProc
-    #define DefWindowProc DefWindowProcW
-#endif
+#undef DefWindowProc
+#define DefWindowProc DefWindowProcW
 
 //==============================================================================
 const int extendedKeyModifier               = 0x10000;
@@ -529,10 +489,6 @@ public:
           taskBarIcon (0),
           dropTarget (0)
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        juce_initialiseUnicodeWindowFunctions();
-#endif
-
         MessageManager::getInstance()
            ->callFunctionOnMessageThread (&createWindowCallback, (void*) this);
 
@@ -592,14 +548,7 @@ public:
 
     void setTitle (const String& title)
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wSetWindowTextW != 0)
-            wSetWindowTextW (hwnd, title);
-        else
-            SetWindowText (hwnd, title);
-#else
-        SetWindowTextW (hwnd, title);
-#endif
+        SetWindowText (hwnd, title);
     }
 
     void setPosition (int x, int y)
@@ -762,7 +711,7 @@ public:
                 if (hasTitleBar())
                     ShowWindow (hwnd, SW_SHOWMAXIMIZED);
                 else
-                    SendMessage (hwnd, WM_SETTINGCHANGE, 0, 0);
+                    SendMessageW (hwnd, WM_SETTINGCHANGE, 0, 0);
             }
 
             if (! deletionChecker.hasBeenDeleted())
@@ -1024,47 +973,7 @@ private:
             GetModuleFileName (moduleHandle, moduleFile, 1024);
             WORD iconNum = 0;
 
-    #if JUCE_ENABLE_WIN98_COMPATIBILITY
-            if (wRegisterClassExW != 0)
-            {
-                WNDCLASSEXW wcex;
-                wcex.cbSize         = sizeof (wcex);
-                wcex.style          = CS_OWNDC;
-                wcex.lpfnWndProc    = (WNDPROC) windowProc;
-                wcex.lpszClassName  = windowClassName;
-                wcex.cbClsExtra     = 0;
-                wcex.cbWndExtra     = 32;
-                wcex.hInstance      = moduleHandle;
-                wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-                iconNum = 1;
-                wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-                wcex.hCursor        = 0;
-                wcex.hbrBackground  = 0;
-                wcex.lpszMenuName   = 0;
-
-                wRegisterClassExW (&wcex);
-            }
-            else
-            {
-                WNDCLASSEX wcex;
-                wcex.cbSize         = sizeof (wcex);
-                wcex.style          = CS_OWNDC;
-                wcex.lpfnWndProc    = (WNDPROC) windowProc;
-                wcex.lpszClassName  = windowClassName;
-                wcex.cbClsExtra     = 0;
-                wcex.cbWndExtra     = 32;
-                wcex.hInstance      = moduleHandle;
-                wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-                iconNum = 1;
-                wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
-                wcex.hCursor        = 0;
-                wcex.hbrBackground  = 0;
-                wcex.lpszMenuName   = 0;
-
-                RegisterClassEx (&wcex);
-            }
-    #else
-            WNDCLASSEXW wcex;
+            WNDCLASSEX wcex;
             wcex.cbSize         = sizeof (wcex);
             wcex.style          = CS_OWNDC;
             wcex.lpfnWndProc    = (WNDPROC) windowProc;
@@ -1079,8 +988,7 @@ private:
             wcex.hbrBackground  = 0;
             wcex.lpszMenuName   = 0;
 
-            RegisterClassExW (&wcex);
-    #endif
+            RegisterClassEx (&wcex);
         }
 
         ~WindowClassHolder()
@@ -1149,16 +1057,7 @@ private:
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        const WindowClassHolder* const windowClassHolder = WindowClassHolder::getInstance();
-
-        if (wCreateWindowExW != 0)
-            hwnd = wCreateWindowExW (exstyle, windowClassHolder->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
-        else
-            hwnd = CreateWindowEx (exstyle, windowClassHolder->windowClassName, _T(""), type, 0, 0, 0, 0, 0, 0, 0, 0);
-#else
-        hwnd = CreateWindowExW (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
-#endif
+        hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->windowClassName, L"", type, 0, 0, 0, 0, 0, 0, 0, 0);
 
         if (hwnd != 0)
         {
@@ -1684,13 +1583,7 @@ private:
                         // if there isn't a WM_CHAR or WM_DEADCHAR message pending, we need to
                         // manually generate the key-press event that matches this key-down.
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-                        const UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (key, 2)
-                                                                  : MapVirtualKey (key, 2);
-#else
-                        const UINT keyChar = MapVirtualKeyW (key, 2);
-#endif
-
+                        const UINT keyChar = MapVirtualKey (key, 2);
                         used = handleKeyPress ((int) LOWORD (keyChar), 0) || used;
                     }
                 }
@@ -1732,49 +1625,8 @@ private:
         else
         {
             // convert the scan code to an unmodified character code..
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-            const UINT virtualKey = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (virtualScanCode, 1)
-                                                         : MapVirtualKey (virtualScanCode, 1);
-
-            UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (virtualKey, 2)
-                                                : MapVirtualKey (virtualKey, 2);
-
-            if (wToUnicode != 0)
-            {
-                BYTE keyState[256];
-                GetKeyboardState (keyState);
-                WCHAR unicodeChar[32];
-                const DWORD converted = wToUnicode (virtualKey, virtualScanCode, keyState,
-                                                    unicodeChar, 32, 0);
-                if (converted > 0)
-                {
-                    // ahem.. can't actually remember why this section of code was originall here, 
-                    // so if you see this assertion, please let me know what you were doing at
-                    // the time!
-                    jassert (textChar == unicodeChar[0]);
-  //                  textChar = unicodeChar[0];
-                }
-            }
-#else
-            const UINT virtualKey = MapVirtualKeyW (virtualScanCode, 1);
-            UINT keyChar = MapVirtualKeyW (virtualKey, 2);
-
-            {
-                BYTE keyState[256];
-                GetKeyboardState (keyState);
-                WCHAR unicodeChar[32];
-                const DWORD converted = ToUnicode (virtualKey, virtualScanCode, keyState,
-                                                   unicodeChar, 32, 0);
-                if (converted > 0)
-                {
-                    // ahem.. can't actually remember why this section of code was originall here, 
-                    // so if you see this assertion, please let me know what you were doing at
-                    // the time!
-                    jassert (textChar == unicodeChar[0]);
-//                    textChar = unicodeChar[0];
-                }
-            }
-#endif
+            const UINT virtualKey = MapVirtualKey (virtualScanCode, 1);
+            UINT keyChar = MapVirtualKey (virtualKey, 2);
 
             keyChar = LOWORD (keyChar);
 
@@ -3067,34 +2919,6 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
         LPDROPFILES pDropFiles = (LPDROPFILES) GlobalLock (hDrop);
         pDropFiles->pFiles = sizeof (DROPFILES);
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        pDropFiles->fWide = (SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0;
-
-        if (pDropFiles->fWide)
-        {
-            WCHAR* fname = (WCHAR*) (((char*) pDropFiles) + sizeof (DROPFILES));
-
-            for (int i = 0; i < fileNames.size(); ++i)
-            {
-                fileNames[i].copyToBuffer (fname, 2048);
-                fname += fileNames[i].length() + 1;
-            }
-
-            *fname = 0;
-        }
-        else
-        {
-            char* fname = ((char*) pDropFiles) + sizeof (DROPFILES);
-
-            for (int i = 0; i < fileNames.size(); ++i)
-            {
-                fileNames[i].copyToBuffer (fname, 2048);
-                fname += fileNames[i].length() + 1;
-            }
-
-            *fname = 0;
-        }
-#else
         pDropFiles->fWide = true;
 
         WCHAR* fname = (WCHAR*) (((char*) pDropFiles) + sizeof (DROPFILES));
@@ -3106,7 +2930,6 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
         }
 
         *fname = 0;
-#endif
 
         GlobalUnlock (hDrop);
     }
@@ -3149,20 +2972,8 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, (numChars + 2) * sizeof (WCHAR));
     char* d = (char*) GlobalLock (medium.hGlobal);
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
-    {
-        text.copyToBuffer ((WCHAR*) d, numChars + 1);
-        format.cfFormat = CF_UNICODETEXT;
-    }
-    else
-    {
-        text.copyToBuffer (d, numChars + 1);
-    }
-#else
     text.copyToBuffer ((WCHAR*) d, numChars + 1);
     format.cfFormat = CF_UNICODETEXT;
-#endif
 
     GlobalUnlock (medium.hGlobal);
 
@@ -4033,12 +3844,20 @@ static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wPar
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
             case WM_RBUTTONUP:
+            case WM_LBUTTONDBLCLK:
+            case WM_MBUTTONDBLCLK:
+            case WM_RBUTTONDBLCLK:
                 if (ax->isShowing())
                 {
                     ComponentPeer* const peer = ax->getPeer();
 
                     if (peer != 0)
+                    {
                         offerActiveXMouseEventToPeer (peer, hwnd, message, lParam);
+
+                        if (! ax->areMouseEventsAllowed())
+                            return 0;
+                    }
                 }
                 break;
 
@@ -4055,7 +3874,8 @@ static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wPar
 
 ActiveXControlComponent::ActiveXControlComponent()
     : originalWndProc (0),
-      control (0)
+      control (0),
+      mouseEventsAllowed (true)
 {
     activeXComps.add (this);
 }
@@ -4167,6 +3987,11 @@ void ActiveXControlComponent::setControlVisible (const bool shouldBeVisible) con
 
     if (hwnd != 0)
         ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
+}
+
+void ActiveXControlComponent::setMouseEventsAllowed (const bool eventsCanReachControl)
+{
+    mouseEventsAllowed = eventsCanReachControl;
 }
 
 

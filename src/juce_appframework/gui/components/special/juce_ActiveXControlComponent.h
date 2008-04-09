@@ -105,6 +105,13 @@ public:
     */
     void* queryInterface (const void* iid) const;
 
+    /** Set this to false to stop mouse events being allowed through to the control.
+    */
+    void setMouseEventsAllowed (const bool eventsCanReachControl);
+
+    /** Returns true if mouse events are allowed to get through to the control.
+    */
+    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
 
     //==============================================================================
     /** @internal */
@@ -117,6 +124,7 @@ public:
 private:
     friend class ActiveXControlData;
     void* control;
+    bool mouseEventsAllowed;
 
     ActiveXControlComponent (const ActiveXControlComponent&);
     const ActiveXControlComponent& operator= (const ActiveXControlComponent&);

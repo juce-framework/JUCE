@@ -69,57 +69,6 @@ BEGIN_JUCE_NAMESPACE
 const tchar  File::separator        = T('\\');
 const tchar* File::separatorString  = T("\\");
 
-//==============================================================================
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-UNICODE_FUNCTION (GetFileAttributesW, DWORD, (LPCWSTR))
-UNICODE_FUNCTION (GetFileAttributesExW, BOOL, (LPCWSTR, GET_FILEEX_INFO_LEVELS, LPVOID))
-UNICODE_FUNCTION (SetFileAttributesW, BOOL, (LPCWSTR, DWORD))
-UNICODE_FUNCTION (RemoveDirectoryW, BOOL, (LPCWSTR))
-UNICODE_FUNCTION (DeleteFileW, BOOL, (LPCWSTR))
-UNICODE_FUNCTION (MoveFileW, BOOL, (LPCWSTR, LPCWSTR))
-UNICODE_FUNCTION (CopyFileW, BOOL, (LPCWSTR, LPCWSTR, BOOL))
-UNICODE_FUNCTION (CreateDirectoryW, BOOL, (LPCWSTR, LPSECURITY_ATTRIBUTES))
-UNICODE_FUNCTION (CreateFileW, HANDLE, (LPCWSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE))
-UNICODE_FUNCTION (CreateNamedPipeW, HANDLE, (LPCWSTR, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, LPSECURITY_ATTRIBUTES))
-UNICODE_FUNCTION (GetTempPathW, DWORD, (DWORD, LPCWSTR))
-UNICODE_FUNCTION (SHGetSpecialFolderPathW, BOOL, (HWND, LPCWSTR, int, BOOL))
-UNICODE_FUNCTION (GetModuleFileNameW, DWORD, (HMODULE, LPCWSTR, DWORD))
-UNICODE_FUNCTION (GetCurrentDirectoryW, DWORD, (DWORD, LPCWSTR))
-UNICODE_FUNCTION (SetCurrentDirectoryW, BOOL, (LPCWSTR))
-UNICODE_FUNCTION (FindFirstFileW, HANDLE, (LPCWSTR, LPWIN32_FIND_DATAW))
-UNICODE_FUNCTION (FindNextFileW, BOOL, (HANDLE, LPWIN32_FIND_DATAW))
-
-void juce_initialiseUnicodeFileFunctions() throw()
-{
-    static_jassert (CSIDL_MYMUSIC == 0x000d);
-    static_jassert (CSIDL_MYVIDEO == 0x000e);
-
-    if ((SystemStats::getOperatingSystemType() & SystemStats::WindowsNT) != 0)
-    {
-        HMODULE h = GetModuleHandleA ("kernel32.dll");
-
-        UNICODE_FUNCTION_LOAD (GetFileAttributesW)
-        UNICODE_FUNCTION_LOAD (GetFileAttributesExW)
-        UNICODE_FUNCTION_LOAD (SetFileAttributesW)
-        UNICODE_FUNCTION_LOAD (RemoveDirectoryW)
-        UNICODE_FUNCTION_LOAD (DeleteFileW)
-        UNICODE_FUNCTION_LOAD (MoveFileW)
-        UNICODE_FUNCTION_LOAD (CopyFileW)
-        UNICODE_FUNCTION_LOAD (CreateDirectoryW)
-        UNICODE_FUNCTION_LOAD (CreateFileW)
-        UNICODE_FUNCTION_LOAD (CreateNamedPipeW)
-        UNICODE_FUNCTION_LOAD (GetTempPathW)
-        UNICODE_FUNCTION_LOAD (GetModuleFileNameW)
-        UNICODE_FUNCTION_LOAD (GetCurrentDirectoryW)
-        UNICODE_FUNCTION_LOAD (SetCurrentDirectoryW)
-        UNICODE_FUNCTION_LOAD (FindFirstFileW)
-        UNICODE_FUNCTION_LOAD (FindNextFileW)
-
-        h = LoadLibraryA ("shell32.dll");
-        UNICODE_FUNCTION_LOAD (SHGetSpecialFolderPathW)
-    }
-}
-#endif
 
 //==============================================================================
 bool juce_fileExists (const String& fileName,
@@ -128,12 +77,7 @@ bool juce_fileExists (const String& fileName,
     if (fileName.isEmpty())
         return false;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    const DWORD attr = (wGetFileAttributesW != 0) ? wGetFileAttributesW (fileName)
-                                                  : GetFileAttributes (fileName);
-#else
-    const DWORD attr = GetFileAttributesW (fileName);
-#endif
+    const DWORD attr = GetFileAttributes (fileName);
 
     return dontCountDirectories ? ((attr & FILE_ATTRIBUTE_DIRECTORY) == 0)
                                 : (attr != 0xffffffff);
@@ -141,12 +85,7 @@ bool juce_fileExists (const String& fileName,
 
 bool juce_isDirectory (const String& fileName) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    const DWORD attr = (wGetFileAttributesW != 0) ? wGetFileAttributesW (fileName)
-                                                  : GetFileAttributes (fileName);
-#else
-    const DWORD attr = GetFileAttributesW (fileName);
-#endif
+    const DWORD attr = GetFileAttributes (fileName);
 
     return (attr != 0xffffffff)
              && ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0);
@@ -154,12 +93,7 @@ bool juce_isDirectory (const String& fileName) throw()
 
 bool juce_canWriteToFile (const String& fileName) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    const DWORD attr = (wGetFileAttributesW != 0) ? wGetFileAttributesW (fileName)
-                                                  : GetFileAttributes (fileName);
-#else
-    const DWORD attr = GetFileAttributesW (fileName);
-#endif
+    const DWORD attr = GetFileAttributes (fileName);
 
     return ((attr & FILE_ATTRIBUTE_READONLY) == 0);
 }
@@ -167,12 +101,7 @@ bool juce_canWriteToFile (const String& fileName) throw()
 bool juce_setFileReadOnly (const String& fileName,
                            bool isReadOnly)
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    DWORD attr = (wGetFileAttributesW != 0) ? wGetFileAttributesW (fileName)
-                                            : GetFileAttributes (fileName);
-#else
-    DWORD attr = GetFileAttributesW (fileName);
-#endif
+    DWORD attr = GetFileAttributes (fileName);
 
     if (attr == 0xffffffff)
         return false;
@@ -185,66 +114,33 @@ bool juce_setFileReadOnly (const String& fileName,
     else
         attr &= ~FILE_ATTRIBUTE_READONLY;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wSetFileAttributesW != 0)
-        return wSetFileAttributesW (fileName, attr) != FALSE;
-
     return SetFileAttributes (fileName, attr) != FALSE;
-#else
-    return SetFileAttributesW (fileName, attr) != FALSE;
-#endif
 }
 
 //==============================================================================
 bool juce_deleteFile (const String& fileName) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
     if (juce_isDirectory (fileName))
-        return (wRemoveDirectoryW != 0) ? wRemoveDirectoryW (fileName) != 0
-                                        : RemoveDirectory (fileName) != 0;
-    else
-        return (wDeleteFileW != 0) ? wDeleteFileW (fileName) != 0
-                                   : DeleteFile (fileName) != 0;
-#else
-    if (juce_isDirectory (fileName))
-        return RemoveDirectoryW (fileName) != 0;
+        return RemoveDirectory (fileName) != 0;
 
-    return DeleteFileW (fileName) != 0;
-#endif
+    return DeleteFile (fileName) != 0;
 }
 
 bool juce_moveFile (const String& source, const String& dest) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    return (wMoveFileW != 0) ? wMoveFileW (source, dest) != 0
-                             : MoveFile (source, dest) != 0;
-#else
-    return MoveFileW (source, dest) != 0;
-#endif
+    return MoveFile (source, dest) != 0;
 }
 
 bool juce_copyFile (const String& source, const String& dest) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    return (wCopyFileW != 0) ? wCopyFileW (source, dest, false) != 0
-                             : CopyFile (source, dest, false) != 0;
-#else
-    return CopyFileW (source, dest, false) != 0;
-#endif
+    return CopyFile (source, dest, false) != 0;
 }
 
 void juce_createDirectory (const String& fileName) throw()
 {
     if (! juce_fileExists (fileName, true))
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wCreateDirectoryW != 0)
-            wCreateDirectoryW (fileName, 0);
-        else
-            CreateDirectory (fileName, 0);
-#else
-        CreateDirectoryW (fileName, 0);
-#endif
+        CreateDirectory (fileName, 0);
     }
 }
 
@@ -256,17 +152,8 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
 
     if (forWriting)
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wCreateFileW != 0)
-            h = wCreateFileW (fileName, GENERIC_WRITE, FILE_SHARE_READ, 0,
-                              OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-        else
-            h = CreateFile (fileName, GENERIC_WRITE, FILE_SHARE_READ, 0,
-                            OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-#else
-        h = CreateFileW (fileName, GENERIC_WRITE, FILE_SHARE_READ, 0,
-                         OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-#endif
+        h = CreateFile (fileName, GENERIC_WRITE, FILE_SHARE_READ, 0,
+                        OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 
         if (h != INVALID_HANDLE_VALUE)
             SetFilePointer (h, 0, 0, FILE_END);
@@ -275,17 +162,8 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
     }
     else
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wCreateFileW != 0)
-            h = wCreateFileW (fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
-                              OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
-        else
-            h = CreateFile (fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
-                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
-#else
-        h = CreateFileW (fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
-                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
-#endif
+        h = CreateFile (fileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
 
         if (h == INVALID_HANDLE_VALUE)
             h = 0;
@@ -350,12 +228,7 @@ int64 juce_getFileSize (const String& fileName) throw()
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetFileAttributesExW != 0 ? wGetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes)
-                                   : GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
-#else
-    if (GetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes))
-#endif
+    if (GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
     {
         return (((int64) attributes.nFileSizeHigh) << 32)
                  | attributes.nFileSizeLow;
@@ -394,12 +267,7 @@ void juce_getFileTimes (const String& fileName,
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetFileAttributesExW != 0 ? wGetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes)
-                                   : GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
-#else
-    if (GetFileAttributesExW (fileName, GetFileExInfoStandard, &attributes))
-#endif
+    if (GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
     {
         modificationTime = fileTimeToTime (&attributes.ftLastWriteTime);
         creationTime = fileTimeToTime (&attributes.ftCreationTime);
@@ -559,27 +427,10 @@ bool File::isOnRemovableDrive() const throw()
 
 static const File juce_getSpecialFolderPath (int type) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wSHGetSpecialFolderPathW != 0)
-    {
-        WCHAR path [MAX_PATH_CHARS];
-
-        if (wSHGetSpecialFolderPathW (0, path, type, 0))
-            return File (String (path));
-    }
-    else
-    {
-        TCHAR path [MAX_PATH_CHARS];
-
-        if (SHGetSpecialFolderPath (0, path, type, 0))
-            return File (String (path));
-    }
-#else
     WCHAR path [MAX_PATH_CHARS];
 
-    if (SHGetSpecialFolderPathW (0, path, type, 0))
+    if (SHGetSpecialFolderPath (0, path, type, 0))
         return File (String (path));
-#endif
 
     return File::nonexistent;
 }
@@ -620,56 +471,22 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
         break;
 
     case tempDirectory:
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wGetTempPathW != 0)
         {
             WCHAR dest [2048];
-            dest[0] = 0;
-            wGetTempPathW (2048, dest);
-            return File (String (dest));
-        }
-        else
-        {
-            TCHAR dest [2048];
             dest[0] = 0;
             GetTempPath (2048, dest);
             return File (String (dest));
         }
-#else
-        {
-            WCHAR dest [2048];
-            dest[0] = 0;
-            GetTempPathW (2048, dest);
-            return File (String (dest));
-        }
-#endif
 
     case currentExecutableFile:
     case currentApplicationFile:
         {
             HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-            if (wGetModuleFileNameW != 0)
-            {
-                WCHAR dest [MAX_PATH_CHARS];
-                dest[0] = 0;
-                wGetModuleFileNameW (moduleHandle, dest, MAX_PATH_CHARS);
-                return File (String (dest));
-            }
-            else
-            {
-                TCHAR dest [MAX_PATH_CHARS];
-                dest[0] = 0;
-                GetModuleFileName (moduleHandle, dest, MAX_PATH_CHARS);
-                return File (String (dest));
-            }
-#else
             WCHAR dest [MAX_PATH_CHARS];
             dest[0] = 0;
-            GetModuleFileNameW (moduleHandle, dest, MAX_PATH_CHARS);
+            GetModuleFileName (moduleHandle, dest, MAX_PATH_CHARS);
             return File (String (dest));
-#endif
         }
         break;
 
@@ -690,37 +507,15 @@ void juce_setCurrentExecutableFileName (const String&) throw()
 //==============================================================================
 const File File::getCurrentWorkingDirectory() throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wGetCurrentDirectoryW != 0)
-    {
-        WCHAR dest [MAX_PATH_CHARS];
-        dest[0] = 0;
-        wGetCurrentDirectoryW (MAX_PATH_CHARS, dest);
-        return File (String (dest));
-    }
-    else
-    {
-        TCHAR dest [MAX_PATH_CHARS];
-        dest[0] = 0;
-        GetCurrentDirectory (MAX_PATH_CHARS, dest);
-        return File (String (dest));
-    }
-#else
     WCHAR dest [MAX_PATH_CHARS];
     dest[0] = 0;
-    GetCurrentDirectoryW (MAX_PATH_CHARS, dest);
+    GetCurrentDirectory (MAX_PATH_CHARS, dest);
     return File (String (dest));
-#endif
 }
 
 bool File::setAsCurrentWorkingDirectory() const throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    return (wSetCurrentDirectoryW != 0) ? wSetCurrentDirectoryW (getFullPathName()) != FALSE
-                                        : SetCurrentDirectory (getFullPathName()) != FALSE;
-#else
-    return SetCurrentDirectoryW (getFullPathName()) != FALSE;
-#endif
+    return SetCurrentDirectory (getFullPathName()) != FALSE;
 }
 
 //==============================================================================
@@ -763,39 +558,15 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
     wc += wildCard;
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wFindFirstFileW != 0)
-    {
-        WIN32_FIND_DATAW findData;
-        HANDLE h = wFindFirstFileW (wc, &findData);
-
-        if (h != INVALID_HANDLE_VALUE)
-        {
-            getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
-            return h;
-        }
-    }
-    else
-    {
-        WIN32_FIND_DATA findData;
-        HANDLE h = FindFirstFile (wc, &findData);
-
-        if (h != INVALID_HANDLE_VALUE)
-        {
-            getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
-            return h;
-        }
-    }
-#else
-    WIN32_FIND_DATAW findData;
-    HANDLE h = FindFirstFileW (wc, &findData);
+    WIN32_FIND_DATA findData;
+    HANDLE h = FindFirstFile (wc, &findData);
 
     if (h != INVALID_HANDLE_VALUE)
     {
-        getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
+        getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize, 
+                         modTime, creationTime, isReadOnly);
         return h;
     }
-#endif
 
     firstResult = String::empty;
     return 0;
@@ -805,36 +576,14 @@ bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDir, bool* isHidden, int64* fileSize,
                         Time* modTime, Time* creationTime, bool* isReadOnly) throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    if (wFindNextFileW != 0)
-    {
-        WIN32_FIND_DATAW findData;
+    WIN32_FIND_DATA findData;
 
-        if (handle != 0 && wFindNextFileW ((HANDLE) handle, &findData) != 0)
-        {
-            getFindFileInfo (findData, resultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
-            return true;
-        }
-    }
-    else
+    if (handle != 0 && FindNextFile ((HANDLE) handle, &findData) != 0)
     {
-        WIN32_FIND_DATA findData;
-
-        if (handle != 0 && FindNextFile ((HANDLE) handle, &findData) != 0)
-        {
-            getFindFileInfo (findData, resultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
-            return true;
-        }
-    }
-#else
-    WIN32_FIND_DATAW findData;
-
-    if (handle != 0 && FindNextFileW ((HANDLE) handle, &findData) != 0)
-    {
-        getFindFileInfo (findData, resultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
+        getFindFileInfo (findData, resultFile, isDir, isHidden, fileSize,
+                         modTime, creationTime, isReadOnly);
         return true;
     }
-#endif
 
     resultFile = String::empty;
     return false;
@@ -956,31 +705,13 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
 
     if (createPipe)
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wCreateNamedPipeW != 0)
-            intern->pipeH = wCreateNamedPipeW (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                               1, 64, 64, 0, NULL);
-        else
-            intern->pipeH = CreateNamedPipe (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                             1, 64, 64, 0, NULL);
-#else
-        intern->pipeH = CreateNamedPipeW (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                          1, 64, 64, 0, NULL);
-#endif
+        intern->pipeH = CreateNamedPipe (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
+                                         1, 64, 64, 0, NULL);
     }
     else
     {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-        if (wCreateFileW != 0)
-            intern->pipeH = wCreateFileW (file, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
-                                          FILE_FLAG_OVERLAPPED, 0);
-        else
-            intern->pipeH = CreateFile (file, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
-                                        FILE_FLAG_OVERLAPPED, 0);
-#else
-        intern->pipeH = CreateFileW (file, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
-                                     FILE_FLAG_OVERLAPPED, 0);
-#endif
+        intern->pipeH = CreateFile (file, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
+                                    FILE_FLAG_OVERLAPPED, 0);
     }
 
     if (intern->pipeH != INVALID_HANDLE_VALUE)

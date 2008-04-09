@@ -69,10 +69,6 @@ BEGIN_JUCE_NAMESPACE
 extern void juce_updateMultiMonitorInfo() throw();
 extern void juce_initialiseThreadEvents() throw();
 
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
- extern void juce_initialiseUnicodeFileFunctions() throw();
-#endif
-
 
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
@@ -256,10 +252,6 @@ bool SystemStats::has3DNow() throw()
 
 void SystemStats::initialiseStats() throw()
 {
-#if JUCE_ENABLE_WIN98_COMPATIBILITY
-    juce_initialiseUnicodeFileFunctions();
-#endif
-
     juce_initialiseThreadEvents();
 
     cpuFlags.hasMMX   = IsProcessorFeaturePresent (PF_MMX_INSTRUCTIONS_AVAILABLE) != 0;
@@ -359,7 +351,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #else
     typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
-    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle ("kernel32"), "IsWow64Process");
+    LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (L"kernel32"), "IsWow64Process");
 
     BOOL isWow64 = FALSE;
 

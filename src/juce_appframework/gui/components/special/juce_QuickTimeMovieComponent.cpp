@@ -134,6 +134,7 @@ QuickTimeMovieComponent::QuickTimeMovieComponent()
       controllerVisible (true)
 {
     internal = new QTMovieCompInternal();
+    setMouseEventsAllowed (false);
 }
 
 QuickTimeMovieComponent::~QuickTimeMovieComponent()
@@ -232,7 +233,6 @@ void QuickTimeMovieComponent::closeMovie()
 
     if (qtControl != 0)
         qtControl->Put_MovieHandle (0);
-        //qtControl->PutURL (L"");
 
     ((QTMovieCompInternal*) internal)->clearHandle();
 }

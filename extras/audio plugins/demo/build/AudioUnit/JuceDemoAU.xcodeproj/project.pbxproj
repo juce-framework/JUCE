@@ -32,7 +32,6 @@
 		84581F990D917FC700AE1A4C /* AUScopeElement.h in Headers */ = {isa = PBXBuildFile; fileRef = 84581F8C0D917FC700AE1A4C /* AUScopeElement.h */; };
 		84581F9A0D917FC700AE1A4C /* ComponentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84581F8D0D917FC700AE1A4C /* ComponentBase.cpp */; };
 		84581F9B0D917FC700AE1A4C /* ComponentBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84581F8E0D917FC700AE1A4C /* ComponentBase.h */; };
-		845FAE5F0A5C0A6A008C94D8 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 845FAE5E0A5C0A6A008C94D8 /* juce.xcconfig */; };
 		845FAEE10A5C2696008C94D8 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 845FAEE00A5C2696008C94D8 /* QuickTime.framework */; };
 		84B4CDD10C7DD23B0083122F /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84B4CDCF0C7DD23B0083122F /* MusicDeviceBase.cpp */; };
 		84B4CDD20C7DD23B0083122F /* MusicDeviceBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84B4CDD00C7DD23B0083122F /* MusicDeviceBase.h */; };
@@ -48,7 +47,6 @@
 		84EB400C090A4A2C008FAC1B /* juce_AudioUnitWrapper.r in Rez */ = {isa = PBXBuildFile; fileRef = 84EB400A090A4A2C008FAC1B /* juce_AudioUnitWrapper.r */; };
 		84EB4042090A4F5A008FAC1B /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4E5DC280898301D00589A5A /* CAVectorUnit.cpp */; };
 		84EB404E090A5116008FAC1B /* JucePluginCharacteristics.h in Headers */ = {isa = PBXBuildFile; fileRef = 84EB404D090A5116008FAC1B /* JucePluginCharacteristics.h */; };
-		84F0521E090674BB00AEC8DB /* Info-JuceAU.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84F05215090674BB00AEC8DB /* Info-JuceAU.plist */; };
 		84F0548F090687F600AEC8DB /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F0548E090687F600AEC8DB /* CoreAudio.framework */; };
 		84F054E80906C8DD00AEC8DB /* AUMIDIBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F054E40906C8DD00AEC8DB /* AUMIDIBase.cpp */; };
 		84F054E90906C8DD00AEC8DB /* AUMIDIBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F054E50906C8DD00AEC8DB /* AUMIDIBase.h */; };
@@ -454,8 +452,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84F0521E090674BB00AEC8DB /* Info-JuceAU.plist in Resources */,
-				845FAE5F0A5C0A6A008C94D8 /* juce.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
