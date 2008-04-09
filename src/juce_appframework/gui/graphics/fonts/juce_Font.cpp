@@ -152,6 +152,7 @@ bool Font::operator!= (const Font& other) const throw()
 void Font::setTypefaceName (const String& faceName) throw()
 {
     typefaceName = faceName;
+    typeface = 0;
     ascent = 0;
 }
 

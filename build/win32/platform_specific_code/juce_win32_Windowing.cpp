@@ -1676,16 +1676,23 @@ private:
             default:
                 used = handleKeyUpOrDown();
 
-                if ((currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
                 {
+                    MSG msg;
+
+                    if (! PeekMessage (&msg, hwnd, WM_CHAR, WM_DEADCHAR, PM_NOREMOVE))
+                    {
+                        // if there isn't a WM_CHAR or WM_DEADCHAR message pending, we need to
+                        // manually generate the key-press event that matches this key-down.
+
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
-                    const UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (key, 2)
-                                                              : MapVirtualKey (key, 2);
+                        const UINT keyChar = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (key, 2)
+                                                                  : MapVirtualKey (key, 2);
 #else
-                    const UINT keyChar = MapVirtualKeyW (key, 2);
+                        const UINT keyChar = MapVirtualKeyW (key, 2);
 #endif
 
-                    used = handleKeyPress ((int) LOWORD (keyChar), 0) || used;
+                        used = handleKeyPress ((int) LOWORD (keyChar), 0) || used;
+                    }
                 }
 
                 break;
@@ -1699,6 +1706,7 @@ private:
         updateKeyModifiers();
 
         juce_wchar textChar = (juce_wchar) key;
+
         const int virtualScanCode = (flags >> 16) & 0xff;
 
         if (key >= '0' && key <= '9')
@@ -1723,9 +1731,6 @@ private:
         }
         else
         {
-            if ((currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
-                return false;
-
             // convert the scan code to an unmodified character code..
 #if JUCE_ENABLE_WIN98_COMPATIBILITY
             const UINT virtualKey = wMapVirtualKeyW != 0 ? wMapVirtualKeyW (virtualScanCode, 1)
@@ -1742,7 +1747,13 @@ private:
                 const DWORD converted = wToUnicode (virtualKey, virtualScanCode, keyState,
                                                     unicodeChar, 32, 0);
                 if (converted > 0)
-                    textChar = unicodeChar[0];
+                {
+                    // ahem.. can't actually remember why this section of code was originall here, 
+                    // so if you see this assertion, please let me know what you were doing at
+                    // the time!
+                    jassert (textChar == unicodeChar[0]);
+  //                  textChar = unicodeChar[0];
+                }
             }
 #else
             const UINT virtualKey = MapVirtualKeyW (virtualScanCode, 1);
@@ -1755,7 +1766,13 @@ private:
                 const DWORD converted = ToUnicode (virtualKey, virtualScanCode, keyState,
                                                    unicodeChar, 32, 0);
                 if (converted > 0)
-                    textChar = unicodeChar[0];
+                {
+                    // ahem.. can't actually remember why this section of code was originall here, 
+                    // so if you see this assertion, please let me know what you were doing at
+                    // the time!
+                    jassert (textChar == unicodeChar[0]);
+//                    textChar = unicodeChar[0];
+                }
             }
 #endif
 
@@ -1763,6 +1780,10 @@ private:
 
             if (keyChar != 0)
                 key = (int) keyChar;
+
+            // avoid sending junk text characters for some control-key combinations
+            if (textChar < ' ' && (currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
+                textChar = 0;
         }
 
         return handleKeyPress (key, textChar);

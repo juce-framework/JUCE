@@ -1825,40 +1825,32 @@ bool TextEditor::keyPressed (const KeyPress& key)
     {
         newTransaction();
 
+        int newPos;
+
         if (isMultiLine() && key.isKeyCode (KeyPress::upKey))
-        {
-            moveCursorTo (indexAtPosition (cursorX, cursorY - 1),
-                          key.getModifiers().isShiftDown());
-        }
+            newPos = indexAtPosition (cursorX, cursorY - 1);
         else if (moveInWholeWordSteps)
-        {
-            moveCursorTo (findWordBreakBefore (getCaretPosition()),
-                          key.getModifiers().isShiftDown());
-        }
+            newPos = findWordBreakBefore (getCaretPosition());
         else
-        {
-            moveCursorTo (getCaretPosition() - 1, key.getModifiers().isShiftDown());
-        }
+            newPos = getCaretPosition() - 1;
+
+        moveCursorTo (newPos, key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::rightKey)
               || key.isKeyCode (KeyPress::downKey))
     {
         newTransaction();
 
-        if (key.isKeyCode (KeyPress::downKey) && isMultiLine())
-        {
-            moveCursorTo (indexAtPosition (cursorX, cursorY + cursorHeight + 1),
-                          key.getModifiers().isShiftDown());
-        }
+        int newPos;
+
+        if (isMultiLine() && key.isKeyCode (KeyPress::downKey))
+            newPos = indexAtPosition (cursorX, cursorY + cursorHeight + 1);
         else if (moveInWholeWordSteps)
-        {
-            moveCursorTo (findWordBreakAfter (getCaretPosition()),
-                          key.getModifiers().isShiftDown());
-        }
+            newPos = findWordBreakAfter (getCaretPosition());
         else
-        {
-            moveCursorTo (getCaretPosition() + 1, key.getModifiers().isShiftDown());
-        }
+            newPos = getCaretPosition() + 1;
+
+        moveCursorTo (newPos, key.getModifiers().isShiftDown());
     }
     else if (key.isKeyCode (KeyPress::pageDownKey) && isMultiLine())
     {
@@ -1957,15 +1949,12 @@ bool TextEditor::keyPressed (const KeyPress& key)
     }
     else if (key == KeyPress::returnKey)
     {
-        if (! isReadOnly())
-        {
-            newTransaction();
+        newTransaction();
 
-            if (returnKeyStartsNewLine)
-                insertTextAtCursor (T("\n"));
-            else
-                returnPressed();
-        }
+        if (returnKeyStartsNewLine)
+            insertTextAtCursor (T("\n"));
+        else
+            returnPressed();
     }
     else if (key.isKeyCode (KeyPress::escapeKey))
     {
@@ -1973,12 +1962,10 @@ bool TextEditor::keyPressed (const KeyPress& key)
         moveCursorTo (getCaretPosition(), false);
         escapePressed();
     }
-    else if (key.getTextCharacter() != 0
-              && (! isReadOnly())
-              && (tabKeyUsed || ! key.isKeyCode (KeyPress::tabKey)))
+    else if (key.getTextCharacter() >= ' '
+              || (tabKeyUsed && (key.getTextCharacter() == '\t')))
     {
-        if (! isReadOnly())
-            insertTextAtCursor (String::charToString (key.getTextCharacter()));
+        insertTextAtCursor (String::charToString (key.getTextCharacter()));
 
         lastTransactionTime = Time::getApproximateMillisecondCounter();
     }
