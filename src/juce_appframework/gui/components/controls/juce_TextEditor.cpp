@@ -492,10 +492,10 @@ public:
                             break;
 
                         right += nextAtom->width;
-                    }
 
-                    if (SHOULD_WRAP (right, wordWrapWidth))
-                        return wrapCurrentAtom();
+                        if (atom != 0 && SHOULD_WRAP (right, wordWrapWidth))
+                            return wrapCurrentAtom();
+                    }
                 }
             }
         }
