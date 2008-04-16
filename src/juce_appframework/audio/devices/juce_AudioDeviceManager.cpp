@@ -72,7 +72,8 @@ AudioDeviceManager::~AudioDeviceManager()
 const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                              const int numOutputChannelsNeeded,
                                              const XmlElement* const e,
-                                             const bool selectDefaultDeviceOnFailure)
+                                             const bool selectDefaultDeviceOnFailure,
+                                             const String& preferredDefaultDeviceName)
 {
     if (listNeedsScanning)
         refreshDeviceList();
@@ -105,7 +106,8 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
             setMidiInputEnabled (allMidiIns[i], enabledMidiIns.contains (allMidiIns[i]));
 
         if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
-            error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, false);
+            error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, 
+                                false, preferredDefaultDeviceName);
 
         setDefaultMidiOutput (e->getStringAttribute (T("defaultMidiOutput")));
 
@@ -117,7 +119,24 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
         String defaultDevice;
 
-        if (availableDeviceTypes [0] != 0)
+        if (preferredDefaultDeviceName.isNotEmpty())
+        {
+            for (int i = 0; i < availableDeviceTypes.size(); ++i)
+            {
+                const StringArray devs (availableDeviceTypes.getUnchecked(i)->getDeviceNames());
+
+                for (int j = 0; j < devs.size(); ++j)
+                {
+                    if (devs[j].matchesWildcard (preferredDefaultDeviceName, true))
+                    {
+                        defaultDevice = devs[j];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (defaultDevice.isEmpty() && availableDeviceTypes [0] != 0)
             defaultDevice = availableDeviceTypes[0]->getDefaultDeviceName (numOutputChannelsNeeded == 0,
                                                                            numInputChannelsNeeded,
                                                                            numOutputChannelsNeeded);

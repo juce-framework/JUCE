@@ -1974,6 +1974,8 @@ public:
                 isCompositingWindow = HIViewIsCompositingEnabled (viewRef);
 #endif
 
+                SetAutomaticControlDragTrackingEnabledForWindow (newWindow, true);
+
                 MouseCheckTimer::getInstance()->resetMouseMoveChecker();
             }
         }

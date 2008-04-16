@@ -85,6 +85,9 @@ BEGIN_JUCE_NAMESPACE
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
+static bool hasLoadedQT = false;
+static bool isQTAvailable = false;
+
 
 //==============================================================================
 struct QTMovieCompInternal
@@ -146,6 +149,19 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
 
     delete internal;
     internal = 0;
+}
+
+bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
+{
+    if (! hasLoadedQT)
+    {
+        hasLoadedQT = true;
+
+        isQTAvailable = (InitializeQTML (0) == noErr)
+                           && (EnterMovies() == noErr);
+    }
+
+    return isQTAvailable;
 }
 
 //==============================================================================
@@ -364,8 +380,6 @@ void QuickTimeMovieComponent::paint (Graphics& g)
 #include "../../../events/juce_MessageManager.h"
 #include "../../graphics/geometry/juce_RectangleList.h"
 
-static bool isQTAvailable = false;
-static bool hasLoadedQT = false;
 static VoidArray activeQTWindows (2);
 
 struct MacClickEventData
@@ -434,6 +448,17 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
 
         ExitMovies();
     }
+}
+
+bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
+{
+    if (! hasLoadedQT)
+    {
+        hasLoadedQT = true;
+        isQTAvailable = EnterMovies() == noErr;
+    }
+
+    return isQTAvailable;
 }
 
 bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,

@@ -109,12 +109,19 @@ public:
                                             fails to open, then a default device will be used
                                             instead. If false, then on failure, no device is
                                             opened.
+        @param preferredDefaultDeviceName   if this is not empty, and there's a device with this 
+                                            name, then that will be used as the default device
+                                            (assuming that there wasn't one specified in the XML).
+                                            The string can actually be a simple wildcard, containing "*"
+                                            and "?" characters
+                                            
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
     const String initialise (const int numInputChannelsNeeded,
                              const int numOutputChannelsNeeded,
                              const XmlElement* const savedState,
-                             const bool selectDefaultDeviceOnFailure);
+                             const bool selectDefaultDeviceOnFailure,
+                             const String& preferredDefaultDeviceName = String::empty);
 
     /** Returns some XML representing the current state of the manager.
 

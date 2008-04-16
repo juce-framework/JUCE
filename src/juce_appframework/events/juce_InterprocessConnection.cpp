@@ -153,6 +153,23 @@ bool InterprocessConnection::isConnected() const
             && isThreadRunning();
 }
 
+const String InterprocessConnection::getConnectedHostName() const
+{
+    if (pipe != 0)
+    {
+        return "localhost";
+    }
+    else if (socket != 0)
+    { 
+        if (! socket->isLocal())
+            return socket->getHostName();
+    
+        return "localhost";
+    }
+
+    return String::empty;
+}
+
 //==============================================================================
 bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 {

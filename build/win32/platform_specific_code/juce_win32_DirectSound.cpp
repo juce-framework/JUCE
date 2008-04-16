@@ -1264,6 +1264,12 @@ private:
         if (threadShouldExit())
             return;
 
+        // boost our priority while opening the devices to try to get better sync between them
+        const int oldThreadPri = GetThreadPriority (GetCurrentThread());
+        const int oldProcPri = GetPriorityClass (GetCurrentProcess());
+        SetThreadPriority (GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+        SetPriorityClass (GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+
         for (i = outChans.size(); --i >= 0;)
         {
             DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
@@ -1278,18 +1284,21 @@ private:
                 in->open();
         }
 
-        if (threadShouldExit())
-            return;
+        if (! threadShouldExit())
+        {
+            sleep (5);
 
-        sleep (5);
+            for (i = 0; i < numOutputBuffers; ++i)
+                if (outChans[i] != 0)
+                    outChans[i]->synchronisePosition();
 
-        for (i = 0; i < numOutputBuffers; ++i)
-            if (outChans[i] != 0)
-                outChans[i]->synchronisePosition();
+            for (i = 0; i < numInputBuffers; ++i)
+                if (inChans[i] != 0)
+                    inChans[i]->synchronisePosition();
+        }
 
-        for (i = 0; i < numInputBuffers; ++i)
-            if (inChans[i] != 0)
-                inChans[i]->synchronisePosition();
+        SetThreadPriority (GetCurrentThread(), oldThreadPri);
+        SetPriorityClass (GetCurrentProcess(), oldProcPri);
     }
 
 public:
@@ -1707,6 +1716,12 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 
     String error;
 
+    // boost our priority while opening the devices to try to get better sync between them
+    const int oldThreadPri = GetThreadPriority (GetCurrentThread());
+    const int oldProcPri = GetPriorityClass (GetCurrentProcess());
+    SetThreadPriority (GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+    SetPriorityClass (GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+
     for (i = 0; i < numOutputBuffers; ++i)
     {
         if (outChans[i] != 0)
@@ -1740,28 +1755,32 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
         }
     }
 
-    if (error.isNotEmpty())
+    if (error.isEmpty())
+    {
+        totalSamplesOut = 0;
+
+        for (i = 0; i < numOutputBuffers; ++i)
+            if (outChans[i] != 0)
+                outChans[i]->synchronisePosition();
+
+        for (i = 0; i < numInputBuffers; ++i)
+            if (inChans[i] != 0)
+                inChans[i]->synchronisePosition();
+
+        startThread (9);
+        sleep (10);
+
+        notify();
+    }
+    else
     {
         log (error);
-        return error;
     }
 
-    totalSamplesOut = 0;
+    SetThreadPriority (GetCurrentThread(), oldThreadPri);
+    SetPriorityClass (GetCurrentProcess(), oldProcPri);
 
-    startThread (9);
-    sleep (10);
-
-    for (i = 0; i < numOutputBuffers; ++i)
-        if (outChans[i] != 0)
-            outChans[i]->synchronisePosition();
-
-    for (i = 0; i < numInputBuffers; ++i)
-        if (inChans[i] != 0)
-            inChans[i]->synchronisePosition();
-
-    notify();
-
-    return String::empty;
+    return error;
 }
 
 

@@ -70,6 +70,10 @@ public:
     /** Destructor. */
     ~QuickTimeMovieComponent();
 
+    /** Returns true if QT is installed and working on this machine.
+    */
+    static bool isQuickTimeAvailable() throw();
+
     //==============================================================================
     /** Tries to load a QuickTime movie into the player.
 

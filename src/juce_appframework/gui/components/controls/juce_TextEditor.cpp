@@ -448,6 +448,8 @@ public:
             }
         }
 
+        bool forceNewLine = false;
+
         if (sectionIndex >= sections.size())
         {
             moveToEndOfLastAtom();
@@ -478,6 +480,8 @@ public:
                     // handle the case where the last atom in a section is actually part of the same
                     // word as the first atom of the next section...
                     float right = atomRight + lastAtom->width;
+                    float lineHeight2 = lineHeight;
+                    float maxDescent2 = maxDescent;
 
                     for (int section = sectionIndex + 1; section < sections.size(); ++section)
                     {
@@ -493,8 +497,20 @@ public:
 
                         right += nextAtom->width;
 
-                        if (atom != 0 && SHOULD_WRAP (right, wordWrapWidth))
-                            return wrapCurrentAtom();
+                        lineHeight2 = jmax (lineHeight2, s->font.getHeight());
+                        maxDescent2 = jmax (maxDescent2, s->font.getDescent());
+
+                        if (SHOULD_WRAP (right, wordWrapWidth))
+                        {
+                            lineHeight = lineHeight2;
+                            maxDescent = maxDescent2;
+
+                            forceNewLine = true;
+                            break;
+                        }
+
+                        if (s->getNumAtoms() > 1)
+                            break;
                     }
                 }
             }
@@ -516,7 +532,7 @@ public:
         atomRight = atomX + atom->width;
         ++atomIndex;
 
-        if (SHOULD_WRAP (atomRight, wordWrapWidth))
+        if (SHOULD_WRAP (atomRight, wordWrapWidth) || forceNewLine)
         {
             if (atom->isWhitespace())
             {

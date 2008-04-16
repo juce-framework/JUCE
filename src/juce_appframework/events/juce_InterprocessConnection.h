@@ -132,6 +132,18 @@ public:
     /** True if a socket or pipe is currently active. */
     bool isConnected() const;
 
+    /** Returns the socket that this connection is using (or null if it uses a pipe). */
+    StreamingSocket* getSocket() const throw()                  { return socket; }
+
+    /** Returns the pipe that this connection is using (or null if it uses a socket). */
+    NamedPipe* getPipe() const throw()                          { return pipe; }
+
+    /** Returns the name of the machine at the other end of this connection.
+    
+        This will return an empty string if the other machine isn't known for 
+        some reason.
+    */
+    const String getConnectedHostName() const;
 
     //==============================================================================
     /** Tries to send a message to the other end of this connection.

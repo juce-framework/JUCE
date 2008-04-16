@@ -122,6 +122,7 @@ Slider::Slider (const String& name)
     editableText (true),
     doubleClickToValue (false),
     isVelocityBased (false),
+    userKeyOverridesVelocity (true),
     rotaryStop (true),
     incDecButtonsSideBySide (false),
     sendChangeOnlyOnRelease (false),
@@ -227,7 +228,8 @@ void Slider::setVelocityBasedMode (const bool velBased) throw()
 
 void Slider::setVelocityModeParameters (const double sensitivity,
                                         const int threshold,
-                                        const double offset) throw()
+                                        const double offset,
+                                        const bool userCanPressKeyToSwapMode) throw()
 {
     jassert (threshold >= 0);
     jassert (sensitivity > 0);
@@ -236,6 +238,7 @@ void Slider::setVelocityModeParameters (const double sensitivity,
     velocityModeSensitivity = sensitivity;
     velocityModeOffset = offset;
     velocityModeThreshold = threshold;
+    userKeyOverridesVelocity = userCanPressKeyToSwapMode;
 }
 
 void Slider::setSkewFactor (const double factor) throw()
@@ -1188,7 +1191,9 @@ void Slider::mouseDrag (const MouseEvent& e)
                     return;
             }
 
-            if (isVelocityBased == (e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier))
+
+            if ((isVelocityBased == (userKeyOverridesVelocity ? false
+                                                              : (e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier))))
                 || ((maximum - minimum) / sliderRegionSize < interval))
             {
                 const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;

@@ -170,7 +170,8 @@ public:
     */
     void setVelocityModeParameters (const double sensitivity = 1.0,
                                     const int threshold = 1.0,
-                                    const double offset = 0.0) throw();
+                                    const double offset = 0.0,
+                                    const bool userCanPressKeyToSwapMode = true) throw();
 
     //==============================================================================
     /** Sets up a skew factor to alter the way values are distributed.
@@ -693,9 +694,10 @@ private:
     IncDecButtonMode incDecButtonMode;
 
     bool editableText : 1, doubleClickToValue : 1;
-    bool isVelocityBased : 1, rotaryStop : 1, incDecButtonsSideBySide : 1;
-    bool sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
-    bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1, scrollWheelEnabled : 1;
+    bool isVelocityBased : 1, userKeyOverridesVelocity : 1, rotaryStop : 1;
+    bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
+    bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
+    bool scrollWheelEnabled : 1;
     Font font;
     Label* valueBox;
     Button* incButton;
