@@ -2048,6 +2048,10 @@ private:
                         handleUserClosingWindow();
                         return 0;
 
+                    case WM_QUIT:
+                        JUCEApplication::quit();
+                        return 0;
+
                     //==============================================================================
                     case WM_TRAYNOTIFY:
                         if (component->isCurrentlyBlockedByAnotherModalComponent())
