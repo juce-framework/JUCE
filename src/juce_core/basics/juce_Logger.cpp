@@ -67,7 +67,7 @@ void Logger::writeToLog (const String& message)
 }
 
 #if JUCE_LOG_ASSERTIONS
-void juce_LogAssertion (const char* filename, const int lineNum) throw()
+void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw()
 {
     String m ("JUCE Assertion failure in ");
     m << filename << ", line " << lineNum;

@@ -130,6 +130,7 @@ Slider::Slider (const String& name)
     menuEnabled (false),
     menuShown (false),
     scrollWheelEnabled (true),
+    snapsToMousePos (true),
     valueBox (0),
     incButton (0),
     decButton (0),
@@ -313,6 +314,11 @@ void Slider::hideTextBox (const bool discardCurrentEditorContents)
 void Slider::setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw()
 {
     sendChangeOnlyOnRelease = onlyNotifyOnRelease;
+}
+
+void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse) throw()
+{
+    snapsToMousePos = shouldSnapToMouse;
 }
 
 void Slider::setPopupDisplayEnabled (const bool enabled,
@@ -1200,10 +1206,15 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                 double scaledMousePos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
 
-                if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag
-                     || style == IncDecButtons)
+                if (style == RotaryHorizontalDrag 
+                    || style == RotaryVerticalDrag
+                    || style == IncDecButtons
+                    || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar)
+                        && ! snapsToMousePos))
                 {
                     const int mouseDiff = (style == RotaryHorizontalDrag
+                                             || style == LinearHorizontal
+                                             || style == LinearBar
                                              || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
                                             ? e.getDistanceFromDragStartX()
                                             : -e.getDistanceFromDragStartY();

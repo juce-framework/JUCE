@@ -457,6 +457,17 @@ public:
     */
     void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw();
 
+    /** This lets you change whether the slider thumb jumps to the mouse position
+        when you click.
+
+        By default, this is true. If it's false, then the slider moves with relative
+        motion when you drag it.
+
+        This only applies to linear bars, and won't affect two- or three- value
+        sliders.
+    */
+    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse) throw();
+
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
 
@@ -697,7 +708,7 @@ private:
     bool isVelocityBased : 1, userKeyOverridesVelocity : 1, rotaryStop : 1;
     bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
     bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
-    bool scrollWheelEnabled : 1;
+    bool scrollWheelEnabled : 1, snapsToMousePos : 1;
     Font font;
     Label* valueBox;
     Button* incButton;

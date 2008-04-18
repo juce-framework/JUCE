@@ -197,10 +197,6 @@
   //==============================================================================
   // Assertions..
 
-  BEGIN_JUCE_NAMESPACE
-    extern bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
-  END_JUCE_NAMESPACE
-
   #if JUCE_WIN32 || DOXYGEN
 
     #if JUCE_USE_INTRINSICS

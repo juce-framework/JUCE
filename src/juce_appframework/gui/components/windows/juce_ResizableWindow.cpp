@@ -463,13 +463,17 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     if (tokens.size() != 4 + n)
         return false;
 
-    const Rectangle r (tokens[n].getIntValue(),
-                       tokens[n + 1].getIntValue(),
-                       tokens[n + 2].getIntValue(),
-                       tokens[n + 3].getIntValue());
+    Rectangle r (tokens[n].getIntValue(),
+                 tokens[n + 1].getIntValue(),
+                 tokens[n + 2].getIntValue(),
+                 tokens[n + 3].getIntValue());
 
     if (r.isEmpty())
         return false;
+
+    const Rectangle screen (Desktop::getInstance().getMonitorAreaContaining (r.getX(), r.getY()));
+
+    r = r.getIntersection (screen);
 
     lastNonFullScreenPos = r;
 

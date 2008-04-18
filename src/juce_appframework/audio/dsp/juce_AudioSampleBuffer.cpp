@@ -530,6 +530,7 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
                                              const bool useLeftChan,
                                              const bool useRightChan) throw()
 {
+    jassert (reader != 0);
     jassert (startSample >= 0 && startSample + numSamples <= size);
 
     if (numSamples > 0)
