@@ -89,7 +89,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../../../src/juce_appframework/gui/graphics/geometry/juce_PathIterator.h"
 #include "../../../src/juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
-
+#include "../../../src/juce_appframework/application/juce_Application.h"
 
 extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.cpp
 extern void juce_CheckCurrentlyFocusedTopLevelWindow() throw();  // in juce_TopLevelWindow.cpp
