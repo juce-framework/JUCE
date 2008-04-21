@@ -1198,8 +1198,8 @@ void Slider::mouseDrag (const MouseEvent& e)
             }
 
 
-            if ((isVelocityBased == (userKeyOverridesVelocity ? false
-                                                              : (e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier))))
+            if ((isVelocityBased == (userKeyOverridesVelocity ? (! e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier)
+                                                              : false)))
                 || ((maximum - minimum) / sliderRegionSize < interval))
             {
                 const int mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.x : e.y;
