@@ -175,7 +175,7 @@ private:
     CriticalSection callbackLock;
     float volatile gain, lastGain;
     bool volatile playing, stopped;
-    double sampleRate, sourceSampleRate, speed;
+    double sampleRate, sourceSampleRate;
     int blockSize, readAheadBufferSize;
     bool isPrepared, inputStreamEOF;
 

@@ -50,7 +50,6 @@ AudioTransportSource::AudioTransportSource()
       stopped (true),
       sampleRate (44100.0),
       sourceSampleRate (0.0),
-      speed (1.0),
       blockSize (128),
       readAheadBufferSize (0),
       isPrepared (false),
@@ -71,20 +70,10 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 {
     if (source == newSource)
     {
-        if (source == 0
-            || (readAheadBufferSize_ == readAheadBufferSize
-                  && sourceSampleRate == sourceSampleRateToCorrectFor))
-        {
-            deleteAndZero (resamplerSource);
-            deleteAndZero (bufferingSource);
-            masterSource = 0;
-            positionableSource = 0;
+        if (source == 0)
             return;
-        }
-        else
-        {
-            setSource (0, 0, 0); // deselect and reselect to avoid releasing resources wrongly
-        }
+
+        setSource (0, 0, 0); // deselect and reselect to avoid releasing resources wrongly
     }
 
     readAheadBufferSize = readAheadBufferSize_;
@@ -281,7 +270,10 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
         {
             // just stopped playing, so fade out the last block..
             for (int i = info.buffer->getNumChannels(); --i >= 0;)
-                info.buffer->applyGainRamp (i, 0, jmin (256, info.numSamples), 1.0f, 0.0f);
+                info.buffer->applyGainRamp (i, info.startSample, jmin (256, info.numSamples), 1.0f, 0.0f);
+
+            if (info.numSamples > 256)
+                info.buffer->clear (info.startSample + 256, info.numSamples - 256);
         }
 
         if (positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
