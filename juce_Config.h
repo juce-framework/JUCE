@@ -46,6 +46,15 @@
 #endif
 
 //=============================================================================
+/** Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and project settings,
+    but if you define this value, you can override this can force it to be true or
+    false.
+*/
+#ifndef JUCE_FORCE_DEBUG
+  //#define JUCE_FORCE_DEBUG 1
+#endif
+
+//=============================================================================
 /** If this flag is enabled, the the jassert and jassertfalse macros will
     always use Logger::writeToLog() to write a message when an assertion happens.
 

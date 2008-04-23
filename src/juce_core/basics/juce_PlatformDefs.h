@@ -139,6 +139,14 @@
   #define JUCE_INTEL 1
 #endif
 
+//==============================================================================
+#ifdef JUCE_FORCE_DEBUG
+  #undef JUCE_DEBUG
+
+  #if JUCE_FORCE_DEBUG
+    #define JUCE_DEBUG 1
+  #endif
+#endif
 
 //==============================================================================
 // Compiler type macros.

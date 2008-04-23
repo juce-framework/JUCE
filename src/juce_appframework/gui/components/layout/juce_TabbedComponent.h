@@ -72,7 +72,7 @@ public:
 
         @see setOrientation, TabbedButtonBar::getOrientation
     */
-    const TabbedButtonBar::Orientation getOrientation() const throw();
+    TabbedButtonBar::Orientation getOrientation() const throw();
 
     /** Specifies how many pixels wide or high the tab-bar should be.
 

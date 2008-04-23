@@ -234,7 +234,7 @@ public:
 
         if (failed (snd_pcm_sw_params_current (handle, swParams))
             || failed (snd_pcm_sw_params_set_silence_threshold (handle, swParams, 0))
-            || failed (snd_pcm_sw_params_set_silence_size (handle, swParams, INT_MAX))
+            || failed (snd_pcm_sw_params_set_silence_size (handle, swParams, 0))
             || failed (snd_pcm_sw_params_set_start_threshold (handle, swParams, samplesPerPeriod))
             || failed (snd_pcm_sw_params_set_stop_threshold (handle, swParams, INT_MAX))
             || failed (snd_pcm_sw_params (handle, swParams)))

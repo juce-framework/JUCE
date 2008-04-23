@@ -1387,14 +1387,17 @@ const String String::replace (const tchar* const stringToReplace,
                               const tchar* const stringToInsert,
                               const bool ignoreCase) const throw()
 {
+    const int stringToReplaceLen = CharacterFunctions::length (stringToReplace);
+    const int stringToInsertLen = CharacterFunctions::length (stringToInsert);
+
     int i = 0;
     String result (*this);
 
     while ((i = (ignoreCase ? result.indexOfIgnoreCase (i, stringToReplace)
                             : result.indexOf (i, stringToReplace))) >= 0)
     {
-        result = result.replaceSection (i, CharacterFunctions::length (stringToReplace), stringToInsert);
-        i += CharacterFunctions::length (stringToInsert);
+        result = result.replaceSection (i, stringToReplaceLen, stringToInsert);
+        i += stringToInsertLen;
     }
 
     return result;

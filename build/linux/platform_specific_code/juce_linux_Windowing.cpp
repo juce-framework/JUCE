@@ -524,7 +524,7 @@ public:
             if (format_ == ARGB && clearImage)
                 zeromem (imageData, h * lineStride);
 
-            xImage = new XImage();
+            xImage = (XImage*) juce_calloc (sizeof (XImage));
 
             xImage->width = w;
             xImage->height = h;

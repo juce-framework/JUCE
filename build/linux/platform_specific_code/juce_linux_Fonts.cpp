@@ -365,11 +365,29 @@ public:
 
                 if (p == startPoint)
                 {
-                    destShape.startNewSubPath (x, y);
+                    if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
+                    {
+                        float x2 = CONVERTX (points [endPoint]);
+                        float y2 = CONVERTY (points [endPoint]);
+
+                        if (FT_CURVE_TAG (tags[endPoint]) != FT_Curve_Tag_On)
+                        {
+                            x2 = (x + x2) * 0.5f;
+                            y2 = (y + y2) * 0.5f;
+                        }
+
+                        destShape.startNewSubPath (x2, y2);
+                    }
+                    else 
+                    {
+                        destShape.startNewSubPath (x, y);
+                    }
                 }
-                else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_On)
+
+                if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_On)
                 {
-                    destShape.lineTo (x, y);
+                    if (p != startPoint)
+                        destShape.lineTo (x, y);
                 }
                 else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                 {

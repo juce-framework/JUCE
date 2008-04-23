@@ -107,7 +107,7 @@ void TabbedComponent::setOrientation (const TabbedButtonBar::Orientation orienta
     resized();
 }
 
-const TabbedButtonBar::Orientation TabbedComponent::getOrientation() const throw()
+TabbedButtonBar::Orientation TabbedComponent::getOrientation() const throw()
 {
     return tabs->getOrientation();
 }
