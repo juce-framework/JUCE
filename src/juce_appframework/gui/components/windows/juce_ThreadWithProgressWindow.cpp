@@ -42,7 +42,8 @@ BEGIN_JUCE_NAMESPACE
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
-                                                    const int timeOutMsWhenCancelling_)
+                                                    const int timeOutMsWhenCancelling_,
+                                                    const String& cancelButtonText)
   : Thread ("Juce Progress Window"),
     progress (0.0),
     alertWindow (title, String::empty, AlertWindow::NoIcon),
@@ -52,7 +53,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
         alertWindow.addProgressBarComponent (progress);
 
     if (hasCancelButton)
-        alertWindow.addButton (TRANS("cancel"), 1);
+        alertWindow.addButton (cancelButtonText, 1);
 }
 
 ThreadWithProgressWindow::~ThreadWithProgressWindow()

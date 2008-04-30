@@ -349,10 +349,13 @@ void ComponentPeer::sendFakeMouseMove() throw()
          && component->flags.hasHeavyweightPeerFlag
          && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
-        int realX, realY, realW, realH;
-        getBounds (realX, realY, realW, realH);
+        if (! isMinimised())
+        {
+            int realX, realY, realW, realH;
+            getBounds (realX, realY, realW, realH);
 
-        component->bounds_.setBounds (realX, realY, realW, realH);
+            component->bounds_.setBounds (realX, realY, realW, realH);
+        }
 
         int x, y;
         component->getMouseXYRelative (x, y);

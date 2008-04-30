@@ -248,9 +248,8 @@ public:
     virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus);
 
     //==============================================================================
-    virtual void drawTextEditorOutline (Graphics& g,
-                                        int width, int height,
-                                        TextEditor& textEditor);
+    virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
+    virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
 
     //==============================================================================
     // these return an image from the ImageCache, so use ImageCache::release() to free it

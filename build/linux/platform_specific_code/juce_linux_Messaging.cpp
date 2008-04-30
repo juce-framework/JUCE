@@ -155,6 +155,16 @@ static void sig_handler (int sig)
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
+    // Initialise xlib for multiple thread support
+    if (! XInitThreads())
+    {
+        // This is fatal!  Print error and closedown
+        Logger::outputDebugString ("Failed to initialise xlib thread support.");
+
+        if (juce_isRunningAsApplication())
+            Process::terminate();
+    }
+
     // This is called if the client/server connection is broken
     XSetIOErrorHandler (ioErrorHandler);
 
@@ -178,16 +188,6 @@ void MessageManager::doPlatformSpecificInitialisation()
     sigaction (SIGSEGV, &saction, NULL);
     sigaction (SIGSYS, &saction, NULL);
 #endif
-
-    // Initialise xlib for multiple thread support
-    if (! XInitThreads())
-    {
-        // This is fatal!  Print error and closedown
-        Logger::outputDebugString ("Failed to initialise xlib thread support.");
-
-        if (juce_isRunningAsApplication())
-            Process::terminate();
-    }
 
     String displayName (getenv ("DISPLAY"));
     if (displayName.isEmpty())

@@ -74,7 +74,7 @@ BEGIN_JUCE_NAMESPACE
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
 #define qtFormatName    TRANS("QuickTime file")
-static const tchar* const extensions[] =    { T(".mov"), T(".mp3"), 0 };
+static const tchar* const extensions[] =    { T(".mov"), T(".mp3"), T(".mp4"), 0 };
 
 //==============================================================================
 class QTAudioReader     : public AudioFormatReader

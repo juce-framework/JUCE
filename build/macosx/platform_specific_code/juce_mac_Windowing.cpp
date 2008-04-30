@@ -839,7 +839,8 @@ public:
                 }
             }
 #else
-            HIViewRender (viewRef);
+            if (HIViewGetNeedsDisplay (viewRef) || repainter->isRepaintNeeded())
+                HIViewRender (viewRef);
 #endif
         }
     }
@@ -879,6 +880,11 @@ public:
         void repaint (int x, int y, int w, int h)
         {
             regionsNeedingRepaint.add (x, y, w, h);
+        }
+
+        bool isRepaintNeeded() const throw()
+        {
+            return ! regionsNeedingRepaint.isEmpty();
         }
 
         void repaintAnyRemainingRegions()

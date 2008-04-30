@@ -67,7 +67,7 @@ struct TextAtom
     const String getTrimmedText (const tchar passwordCharacter) const throw()
     {
         if (passwordCharacter == 0)
-            return atomText;
+            return atomText.substring (0, numChars);
         else if (isNewLine())
             return String::empty;
         else
@@ -235,30 +235,61 @@ public:
         return s;
     }
 
-    const String getTextSubstring (const int startCharacter,
-                                   const int endCharacter) const throw()
-    {
-        String s;
-        int index = 0;
+   const String getTextSubstring (const int startCharacter,
+                                  const int endCharacter) const throw()
+   {
+       int index = 0;
+       int totalLen = 0;
+       int i;
 
-        for (int i = 0; i < atoms.size(); ++i)
-        {
-            const TextAtom* const atom = getAtom (i);
-            const int nextIndex = index + atom->numChars;
+       for (i = 0; i < atoms.size(); ++i)
+       {
+           const TextAtom* const atom = getAtom (i);
+           const int nextIndex = index + atom->numChars;
 
-            if (startCharacter < nextIndex)
-            {
-                if (endCharacter <= index)
-                    break;
+           if (startCharacter < nextIndex)
+           {
+               if (endCharacter <= index)
+                   break;
 
-                const int start = jmax (index, startCharacter);
-                s += atom->atomText.substring (start - index, endCharacter - index);
-            }
+               const int start = jmax (0, startCharacter - index);
+               const int end = jmin (endCharacter - index, atom->numChars);
+               jassert (end >= start);
 
-            index = nextIndex;
-        }
+               totalLen += end - start;
+           }
 
-        return s;
+           index = nextIndex;
+       }
+
+       String s;
+       s.preallocateStorage (totalLen + 1);
+       tchar* psz = (tchar*) (const tchar*) s;
+
+       index = 0;
+
+       for (i = 0; i < atoms.size(); ++i)
+       {
+           const TextAtom* const atom = getAtom (i);
+           const int nextIndex = index + atom->numChars;
+
+           if (startCharacter < nextIndex)
+           {
+               if (endCharacter <= index)
+                   break;
+
+               const int start = jmax (0, startCharacter - index);
+               const int len = jmin (endCharacter - index, atom->numChars) - start;
+
+               memcpy (psz, ((const tchar*) atom->atomText) + start, len * sizeof (tchar));
+               psz += len;
+               *psz = 0;
+           }
+
+           index = nextIndex;
+       }
+
+       return s;
     }
 
     int getTotalLength() const throw()
@@ -1667,7 +1698,7 @@ void TextEditor::drawContent (Graphics& g)
 
 void TextEditor::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
+    getLookAndFeel().fillTextEditorBackground (g, getWidth(), getHeight(), *this);
 }
 
 void TextEditor::paintOverChildren (Graphics& g)

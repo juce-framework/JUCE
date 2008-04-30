@@ -114,7 +114,8 @@ public:
     ThreadWithProgressWindow (const String& windowTitle,
                               const bool hasProgressBar,
                               const bool hasCancelButton,
-                              const int timeOutMsWhenCancelling = 10000);
+                              const int timeOutMsWhenCancelling = 10000,
+                              const String& cancelButtonText = T("Cancel"));
 
     /** Destructor. */
     ~ThreadWithProgressWindow();
