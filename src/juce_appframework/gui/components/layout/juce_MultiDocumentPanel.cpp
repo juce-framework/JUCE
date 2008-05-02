@@ -161,6 +161,7 @@ void MultiDocumentPanel::addWindow (Component* component)
     dw->setResizable (true, false);
     dw->setContentComponent (component, false, true);
     dw->setName (component->getName());
+    dw->setBackgroundColour (component->getComponentPropertyColour (T("mdiDocumentBkg_"), false, backgroundColour));
 
     int x = 4;
     Component* const topComp = getChildComponent (getNumChildComponents() - 1);
@@ -181,6 +182,10 @@ bool MultiDocumentPanel::addDocument (Component* const component,
                                       const Colour& backgroundColour,
                                       const bool deleteWhenRemoved)
 {
+    // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
+    // with a frame-within-a-frame! Just pass in the bare content component.
+    jassert (dynamic_cast <ResizableWindow*> (component) == 0);
+
     if (component == 0 || (maximumNumDocuments > 0 && components.size() >= maximumNumDocuments))
         return false;
 

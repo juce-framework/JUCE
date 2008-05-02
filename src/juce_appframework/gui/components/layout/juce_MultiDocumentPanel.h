@@ -132,6 +132,10 @@ public:
         this will fail and return false. (If it does fail, the component passed-in will not be
         deleted, even if deleteWhenRemoved was set to true).
 
+        The MultiDocumentPanel will deal with creating a window border to go around your component,
+        so just pass in the bare content component here, no need to give it a ResizableWindow
+        or DocumentWindow.
+
         @param component            the component to add
         @param backgroundColour     the background colour to use to fill the component's
                                     window or tab

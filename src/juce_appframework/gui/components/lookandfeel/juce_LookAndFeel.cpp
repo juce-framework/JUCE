@@ -1083,7 +1083,8 @@ void LookAndFeel::drawMenuBarItem (Graphics& g,
 }
 
 //==============================================================================
-void LookAndFeel::fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor)
+void LookAndFeel::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, 
+                                            TextEditor& textEditor)
 {
     g.fillAll (textEditor.findColour (TextEditor::backgroundColourId));
 }
