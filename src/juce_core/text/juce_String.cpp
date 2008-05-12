@@ -993,8 +993,12 @@ int String::indexOfAnyOf (const tchar* const charactersToLookFor,
     const tchar* t = text->text + jmax (0, startIndex);
 
     while (*t != 0)
-        if (CharacterFunctions::indexOfChar (charactersToLookFor, *t++, ignoreCase) >= 0)
+    {
+        if (CharacterFunctions::indexOfChar (charactersToLookFor, *t, ignoreCase) >= 0)
             return (int) (t - text->text);
+
+        ++t;
+    }
 
     return -1;
 }

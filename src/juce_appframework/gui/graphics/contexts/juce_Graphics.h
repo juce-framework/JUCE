@@ -311,6 +311,19 @@ public:
 
         @see fillRect
     */
+    void drawRect (const float x,
+                   const float y,
+                   const float width,
+                   const float height,
+                   const float lineThickness = 1.0f) const throw();
+
+    /** Draws four lines to form a rectangular outline, using the current colour or brush.
+
+        The lines are drawn inside the given rectangle, and greater line thicknesses
+        extend inwards.
+
+        @see fillRect
+    */
     void drawRect (const Rectangle& rectangle,
                    const int lineThickness = 1) const throw();
 

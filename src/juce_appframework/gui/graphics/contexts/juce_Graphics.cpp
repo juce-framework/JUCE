@@ -455,6 +455,23 @@ void Graphics::drawRect (const int x,
     b.paintRectangle (*context, x, y + height - lineThickness, width, lineThickness);
 }
 
+void Graphics::drawRect (const float x,
+                         const float y,
+                         const float width,
+                         const float height,
+                         const float lineThickness) const throw()
+{
+    // passing in a silly number can cause maths problems in rendering!
+    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+
+    Path p;
+    p.addRectangle (x, y, width, lineThickness);
+    p.addRectangle (x, y + lineThickness, lineThickness, height - lineThickness * 2.0f);
+    p.addRectangle (x + width - lineThickness, y + lineThickness, lineThickness, height - lineThickness * 2.0f);
+    p.addRectangle (x, y + height - lineThickness, width, lineThickness);
+    fillPath (p);
+}
+
 void Graphics::drawRect (const Rectangle& r,
                          const int lineThickness) const throw()
 {

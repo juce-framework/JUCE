@@ -187,19 +187,40 @@ void StretchableLayoutManager::layOutComponents (Component** const components,
 
             if (c != 0)
             {
-                if (resizeOtherDimension)
+                if (i == numComponents - 1)
                 {
-                    if (vertically)
-                        c->setBounds (x, pos, w, layout->currentSize);
+                    // if it's the last item, crop it to exactly fit the available space..
+                    if (resizeOtherDimension)
+                    {
+                        if (vertically)
+                            c->setBounds (x, pos, w, jmax (layout->currentSize, h - pos));
+                        else
+                            c->setBounds (pos, y, jmax (layout->currentSize, w - pos), h);
+                    }
                     else
-                        c->setBounds (pos, y, layout->currentSize, h);
+                    {
+                        if (vertically)
+                            c->setBounds (c->getX(), pos, c->getWidth(), jmax (layout->currentSize, h - pos));
+                        else
+                            c->setBounds (pos, c->getY(), jmax (layout->currentSize, w - pos), c->getHeight());
+                    }
                 }
                 else
                 {
-                    if (vertically)
-                        c->setBounds (c->getX(), pos, c->getWidth(), layout->currentSize);
+                    if (resizeOtherDimension)
+                    {
+                        if (vertically)
+                            c->setBounds (x, pos, w, layout->currentSize);
+                        else
+                            c->setBounds (pos, y, layout->currentSize, h);
+                    }
                     else
-                        c->setBounds (pos, c->getY(), layout->currentSize, c->getHeight());
+                    {
+                        if (vertically)
+                            c->setBounds (c->getX(), pos, c->getWidth(), layout->currentSize);
+                        else
+                            c->setBounds (pos, c->getY(), layout->currentSize, c->getHeight());
+                    }
                 }
             }
 
