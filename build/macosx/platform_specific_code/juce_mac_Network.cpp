@@ -149,9 +149,9 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     String script;
     script << "tell application \"Mail\"\r\n"
               "set newMessage to make new outgoing message with properties {subject:\""
-           << emailSubject
+           << emailSubject.replace (T("\""), T("\\\""))
            << "\", content:\""
-           << bodyText
+           << bodyText.replace (T("\""), T("\\\""))
            << "\" & return & return}\r\n"
               "tell newMessage\r\n"
               "set visible to true\r\n"
@@ -164,7 +164,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     {
         script << "tell content\r\n"
                   "make new attachment with properties {file name:\""
-               << filesToAttach[i]
+               << filesToAttach[i].replace (T("\""), T("\\\""))
                << "\"} at after the last paragraph\r\n"
                   "end tell\r\n";
     }
