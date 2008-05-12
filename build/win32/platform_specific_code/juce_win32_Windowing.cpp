@@ -2067,6 +2067,8 @@ private:
                         }
                         else
                         {
+                            const int oldModifiers = currentModifiers;
+
                             MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
                                           getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
 
@@ -2083,11 +2085,19 @@ private:
                                 component->mouseDown (e);
                             }
                             else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
+                            {
+                                e.mods = ModifierKeys (oldModifiers);
                                 component->mouseUp (e);
+                            }
                             else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+                            {
+                                e.mods = ModifierKeys (oldModifiers);
                                 component->mouseDoubleClick (e);
+                            }
                             else if (lParam == WM_MOUSEMOVE)
+                            {
                                 component->mouseMove (e);
+                            }
                         }
 
                         break;
