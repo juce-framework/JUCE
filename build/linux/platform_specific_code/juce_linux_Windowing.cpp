@@ -859,7 +859,7 @@ public:
             && actualFormat == 32
             && nitems > 0)
         {
-            if (((CARD32*) stateProp)[0] == IconicState)
+            if (((unsigned long*) stateProp)[0] == IconicState)
                 minimised = true;
 
             XFree (stateProp);
@@ -1652,7 +1652,7 @@ public:
         }
 
         // For older KDE's ...
-        int atomData = 1;
+        long atomData = 1;
         Atom trayAtom = XInternAtom (display, "KWM_DOCKWINDOW", false);
         XChangeProperty (display, windowH, trayAtom, trayAtom, 32, PropModeReplace, (unsigned char*) &atomData, 1);
 
@@ -1811,14 +1811,15 @@ private:
         {
             typedef struct
             {
-                CARD32 flags;
-                CARD32 functions;
-                CARD32 decorations;
+                unsigned long flags;
+                unsigned long functions;
+                unsigned long decorations;
                 INT32 input_mode;
-                CARD32 status;
+                unsigned long status;
             } MotifWmHints;
 
             MotifWmHints motifHints;
+            zerostruct (motifHints);
             motifHints.flags = 2; /* MWM_HINTS_DECORATIONS */
             motifHints.decorations = 0;
 
@@ -1850,7 +1851,7 @@ private:
 
         if (hints != None)
         {
-            Atom netHints [2];
+            long netHints [2];
             netHints[0] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
 
             if ((styleFlags & windowIsTemporary) != 0)
@@ -1871,14 +1872,15 @@ private:
         {
             typedef struct
             {
-                CARD32 flags;
-                CARD32 functions;
-                CARD32 decorations;
+                unsigned long flags;
+                unsigned long functions;
+                unsigned long decorations;
                 INT32 input_mode;
-                CARD32 status;
+                unsigned long status;
             } MotifWmHints;
 
             MotifWmHints motifHints;
+            zerostruct (motifHints);
 
             motifHints.flags = 1 | 2; /* MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS */
             motifHints.decorations = 2 /* MWM_DECOR_BORDER */ | 8 /* MWM_DECOR_TITLE */ | 16; /* MWM_DECOR_MENU */
@@ -1913,7 +1915,7 @@ private:
 
         if (hints != None)
         {
-            Atom netHints [6];
+            long netHints [6];
             int num = 0;
 
             netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_RESIZE", (styleFlags & windowIsResizable) ? True : False);
@@ -2081,7 +2083,7 @@ private:
         XChangeProperty (display, wndH, XA_XdndActionDescription, XA_STRING, 8, PropModeReplace,
                          (const unsigned char*) "", 0);
 
-        uint32 dndVersion = ourDndVersion;
+        unsigned long dndVersion = ourDndVersion;
         XChangeProperty (display, wndH, XA_XdndAware, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) &dndVersion, 1);
 
@@ -2187,7 +2189,7 @@ private:
                                         XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
                                         &data) == Success)
                 {
-                    const CARD32* const sizes = (const CARD32*) data;
+                    const unsigned long* const sizes = (const CARD32*) data;
 
                     if (actualFormat == 32)
                         windowBorder = BorderSize ((int) sizes[2], (int) sizes[0],
@@ -2365,7 +2367,7 @@ private:
             {
                 if (actual == XA_ATOM && format == 32 && count != 0)
                 {
-                    const Atom* const types = (const Atom*) data;
+                    const unsigned long* const types = (const unsigned long*) data;
 
                     for (unsigned int i = 0; i < count; ++i)
                         if (types[i] != None)
@@ -2467,8 +2469,8 @@ private:
     Atom XA_OtherMime, dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
 
-    Atom allowedActions [5];
-    Atom allowedMimeTypeAtoms [3];
+    unsigned long allowedActions [5];
+    unsigned long allowedMimeTypeAtoms [3];
     Array <Atom> srcMimeTypeAtomList;
 };
 
