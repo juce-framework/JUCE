@@ -32,7 +32,6 @@
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 #import <Cocoa/Cocoa.h>
-#import <CoreFoundation/CoreFoundation.h>
 #import <IOKit/IOKitLib.h>
 #import <IOKit/network/IOEthernetInterface.h>
 #import <IOKit/network/IONetworkInterface.h>
@@ -192,10 +191,10 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     NSAppleScript* s = [[NSAppleScript alloc]
                             initWithSource: [NSString stringWithUTF8String: (const char*) script.toUTF8()]];
     NSDictionary* error = 0;
-    [s executeAndReturnError: &error];
+    const bool ok = [s executeAndReturnError: &error] != nil;
     [s release];
 
-    return false;
+    return ok;
 }
 
 

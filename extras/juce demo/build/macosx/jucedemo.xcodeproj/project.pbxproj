@@ -12,6 +12,7 @@
 		842A97B8081060FB0059DBCC /* DragAndDropDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 842A97B6081060FB0059DBCC /* DragAndDropDemo.cpp */; };
 		842A97B9081060FB0059DBCC /* OpenGLDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 842A97B7081060FB0059DBCC /* OpenGLDemo.cpp */; };
 		846929270A49DDE100314975 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 846929260A49DDE100314975 /* juce.xcconfig */; };
+		848DE90A0DDDA682002E5D55 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848DE9090DDDA682002E5D55 /* Cocoa.framework */; };
 		849E1BF706C15C330002E024 /* BinaryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 849E1BF506C15C330002E024 /* BinaryData.cpp */; };
 		849E1BF806C15C330002E024 /* BinaryData.h in Headers */ = {isa = PBXBuildFile; fileRef = 849E1BF606C15C330002E024 /* BinaryData.h */; };
 		84A06BA809CAD661006A43BD /* InterprocessCommsDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A06BA709CAD661006A43BD /* InterprocessCommsDemo.cpp */; };
@@ -55,6 +56,7 @@
 		842A97B6081060FB0059DBCC /* DragAndDropDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DragAndDropDemo.cpp; sourceTree = "<group>"; };
 		842A97B7081060FB0059DBCC /* OpenGLDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OpenGLDemo.cpp; sourceTree = "<group>"; };
 		846929260A49DDE100314975 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
+		848DE9090DDDA682002E5D55 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		849E1BF506C15C330002E024 /* BinaryData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../src/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		849E1BF606C15C330002E024 /* BinaryData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../src/BinaryData.h; sourceTree = SOURCE_ROOT; };
 		84A06BA709CAD661006A43BD /* InterprocessCommsDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = InterprocessCommsDemo.cpp; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				84E8209909729D760097675B /* CoreMIDI.framework in Frameworks */,
 				84EAE2F309DAAF0B00288D0A /* AGL.framework in Frameworks */,
 				84EAE2F409DAAF0B00288D0A /* OpenGL.framework in Frameworks */,
+				848DE90A0DDDA682002E5D55 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,8 +114,8 @@
 		20286C29FDCF999611CA2CEA /* jucedemo */ = {
 			isa = PBXGroup;
 			children = (
+				841084950DB3759400AB8583 /* Build settings */,
 				20286C2AFDCF999611CA2CEA /* Sources */,
-				846929260A49DDE100314975 /* juce.xcconfig */,
 				20286C2CFDCF999611CA2CEA /* Resources */,
 				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
 				195DF8CFFE9D517E11CA2CBB /* Products */,
@@ -146,6 +149,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				848DE9090DDDA682002E5D55 /* Cocoa.framework */,
 				84EAE2F909DAAF2F00288D0A /* Juce.xcodeproj */,
 				84EAE2F109DAAF0B00288D0A /* AGL.framework */,
 				84EAE2F209DAAF0B00288D0A /* OpenGL.framework */,
@@ -157,6 +161,14 @@
 				84E8209809729D760097675B /* CoreMIDI.framework */,
 			);
 			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		841084950DB3759400AB8583 /* Build settings */ = {
+			isa = PBXGroup;
+			children = (
+				846929260A49DDE100314975 /* juce.xcconfig */,
+			);
+			name = "Build settings";
 			sourceTree = "<group>";
 		};
 		84C49E4B06C0EE8C0066071B /* demos */ = {
