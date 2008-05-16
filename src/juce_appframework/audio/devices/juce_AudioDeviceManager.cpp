@@ -106,7 +106,7 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
             setMidiInputEnabled (allMidiIns[i], enabledMidiIns.contains (allMidiIns[i]));
 
         if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
-            error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0, 
+            error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0,
                                 false, preferredDefaultDeviceName);
 
         setDefaultMidiOutput (e->getStringAttribute (T("defaultMidiOutput")));
@@ -355,6 +355,44 @@ void AudioDeviceManager::stopDevice()
 {
     if (currentAudioDevice != 0)
         currentAudioDevice->stop();
+}
+
+void AudioDeviceManager::closeAudioDevice()
+{
+    if (currentAudioDevice != 0)
+    {
+        lastRunningDevice = currentAudioDevice->getName();
+        lastRunningBlockSize = currentAudioDevice->getCurrentBufferSizeSamples();
+        lastRunningSampleRate = currentAudioDevice->getCurrentSampleRate();
+        lastRunningIns = inputChannels;
+        lastRunningOuts = outputChannels;
+
+        stopDevice();
+
+        setAudioDevice (String::empty, 0, 0, 0, 0, false);
+    }
+}
+
+void AudioDeviceManager::restartLastAudioDevice()
+{
+    if (currentAudioDevice == 0)
+    {
+        if (lastRunningDevice.isEmpty())
+        {
+            // This method will only reload the last device that was running
+            // before closeAudioDevice() was called - you need to actually open
+            // one first, with setAudioDevice().
+            jassertfalse
+            return;
+        }
+
+        setAudioDevice (lastRunningDevice,
+                        lastRunningBlockSize,
+                        lastRunningSampleRate,
+                        &lastRunningIns,
+                        &lastRunningOuts,
+                        false);
+    }
 }
 
 void AudioDeviceManager::setInputChannels (const BitArray& newEnabledChannels,

@@ -109,12 +109,12 @@ public:
                                             fails to open, then a default device will be used
                                             instead. If false, then on failure, no device is
                                             opened.
-        @param preferredDefaultDeviceName   if this is not empty, and there's a device with this 
+        @param preferredDefaultDeviceName   if this is not empty, and there's a device with this
                                             name, then that will be used as the default device
                                             (assuming that there wasn't one specified in the XML).
                                             The string can actually be a simple wildcard, containing "*"
                                             and "?" characters
-                                            
+
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
     const String initialise (const int numInputChannelsNeeded,
@@ -194,6 +194,23 @@ public:
                                  const BitArray* inputChans,
                                  const BitArray* outputChans,
                                  const bool treatAsChosenDevice);
+
+    /** Closes the currently-open device.
+
+        You can call restartLastAudioDevice() later to reopen it in the same state
+        that it was just in.
+    */
+    void closeAudioDevice();
+
+    /** Tries to reload the last audio device that was running.
+
+        Note that this only reloads the last device that was running before
+        closeAudioDevice() was called - it doesn't reload any kind of saved-state,
+        and can only be called after a device has been opened with SetAudioDevice().
+
+        If a device is already open, this call will do nothing.
+    */
+    void restartLastAudioDevice();
 
     /** Returns the name of the currently selected audio device.
 
@@ -384,6 +401,10 @@ private:
     };
 
     CallbackHandler callbackHandler;
+    String lastRunningDevice;
+    int lastRunningBlockSize;
+    double lastRunningSampleRate;
+    BitArray lastRunningIns, lastRunningOuts;
 
     friend class CallbackHandler;
 
