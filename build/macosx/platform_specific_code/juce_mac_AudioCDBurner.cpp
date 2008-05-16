@@ -29,48 +29,82 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+/*#include "../../../src/juce_core/basics/juce_StandardHeader.h"
 #include <Carbon/Carbon.h>
+
+extern "C"
+{
+    int juce_findDiskBurnerDevices (const char** devices);
+    void* juce_openDiskBurnerDevice (int deviceIndex);
+    void juce_deleteDiskBurnerDevice (void* diskBurnerDevice);
+    bool juce_isDiskPresentInDevice (void* diskBurnerDevice);
+    int juce_getNumAvailableAudioBlocks (void* diskBurnerDevice);
+    typedef bool (*diskBurnCallback) (void* userRef, float progress);
+    void juce_performBurn (void* diskBurnerDevice, diskBurnCallback callback);
+}
 
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
 
-
 //==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
     : internal (0)
 {
+    internal = juce_openDiskBurnerDevice (deviceIndex);
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
+    if (internal != 0)
+        juce_deleteDiskBurnerDevice (internal);
 }
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    return 0;
+    AudioCDBurner* b = new AudioCDBurner (deviceIndex);
+
+    if (b->internal == 0)
+        deleteAndZero (b);
+
+    return b;
 }
 
 const StringArray AudioCDBurner::findAvailableDevices()
 {
+    int num = juce_findDiskBurnerDevices (0);
+    char** names = (char**) juce_calloc (sizeof (char*) * num);
+    for (int i = num; --i >= 0;)
+        names[i] = (char*) juce_calloc (2048);
+
+    juce_findDiskBurnerDevices ((const char**) names);
+
     StringArray s;
+
+    for (int i = num; --i >= 0;)
+    {
+        s.add (String::fromUTF8 ((juce::uint8*) names[i]));
+        juce_free (names[i]);
+    }
 
     return s;
 }
 
 bool AudioCDBurner::isDiskPresent() const
 {
-    return false;
+    return juce_isDiskPresentInDevice (internal);
 }
 
 int AudioCDBurner::getNumAvailableAudioBlocks() const
 {
-    return 0;
+    return juce_getNumAvailableAudioBlocks (internal);
 }
 
 bool AudioCDBurner::addAudioTrack (AudioFormatReader& source, int numSamples)
 {
+    juce_BeginAudioTrack (internal);
+    juce_AddSamplesToAudioTrack (internal, samples, num);
+    juce_EndAudioTrack (internal);
     return false;
 }
 
@@ -85,4 +119,4 @@ const String AudioCDBurner::burn (BurnProgressListener* listener,
     return String::empty;
 }
 
-END_JUCE_NAMESPACE
+END_JUCE_NAMESPACE*/

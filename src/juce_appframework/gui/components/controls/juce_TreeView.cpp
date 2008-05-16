@@ -627,8 +627,8 @@ bool TreeView::keyPressed (const KeyPress& key)
 void TreeView::itemsChanged() throw()
 {
     needsRecalculating = true;
-    triggerAsyncUpdate();
     repaint();
+    triggerAsyncUpdate();
 }
 
 void TreeView::handleAsyncUpdate()

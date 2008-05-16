@@ -34,7 +34,6 @@
 
 // (This file gets included by the mac + linux networking code)
 
-
 //==============================================================================
 /** A HTTP input stream that uses sockets.
 */
@@ -60,7 +59,9 @@ public:
     bool open (const String& url,
                const String& headers,
                const MemoryBlock& postData,
-               const bool isPost)
+               const bool isPost,
+               URL::OpenStreamProgressCallback* callback,
+               void* callbackContext)
     {
         closeSocket();
 
@@ -91,6 +92,10 @@ public:
         setsockopt (socketHandle, SOL_SOCKET, SO_RCVBUF, (char*) &receiveBufferSize, sizeof (receiveBufferSize));
         setsockopt (socketHandle, SOL_SOCKET, SO_KEEPALIVE, 0, 0);
 
+#if JUCE_MAC
+        setsockopt (socketHandle, SOL_SOCKET, SO_NOSIGPIPE, 0, 0);
+#endif
+
         if (connect (socketHandle, (struct sockaddr*) &address, sizeof (address)) == -1)
         {
             closeSocket();
@@ -108,11 +113,28 @@ public:
                                                               headers, postData,
                                                               isPost));
 
-        if (send (socketHandle, requestHeader.getData(), requestHeader.getSize(), 0)
-              != requestHeader.getSize())
+        int totalHeaderSent = 0;
+
+        while (totalHeaderSent < requestHeader.getSize())
         {
-            closeSocket();
-            return false;
+            const int numToSend = jmin (1024, requestHeader.getSize() - totalHeaderSent);
+
+            if (send (socketHandle, 
+                      ((const char*) requestHeader.getData()) + totalHeaderSent,
+                      numToSend, 0)
+                  != numToSend)
+            {
+                closeSocket();
+                return false;
+            }
+
+            totalHeaderSent += numToSend;
+
+            if (callback != 0 && ! callback (callbackContext, totalHeaderSent, requestHeader.getSize()))
+            {
+                closeSocket();
+                return false;
+            }
         }
 
         const String responseHeader (readResponse());
@@ -140,7 +162,7 @@ public:
                     location = T("http://") + location;
 
                 if (levelsOfRedirection++ < 3)
-                    return open (location, headers, postData, isPost);
+                    return open (location, headers, postData, isPost, callback, callbackContext);
             }
             else
             {
@@ -204,7 +226,7 @@ private:
 
         if (proxyURL.isEmpty())
         {
-            header << hostPath << " HTTP/1.1\r\nHost: "
+            header << hostPath << " HTTP/1.0\r\nHost: "
                    << hostName << ':' << hostPort;
         }
         else
@@ -215,7 +237,7 @@ private:
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
                 return MemoryBlock();
 
-            header << originalURL << " HTTP/1.1\r\nHost: "
+            header << originalURL << " HTTP/1.0\r\nHost: "
                    << proxyName << ':' << proxyPort;
 
             /* xxx needs finishing
@@ -227,7 +249,8 @@ private:
 
         header << "\r\nUser-Agent: JUCE/"
                << JUCE_MAJOR_VERSION << '.' << JUCE_MINOR_VERSION
-               << "\r\nConnection: Close\r\n"
+               << "\r\nConnection: Close\r\nContent-Length: "
+               << postData.getSize() << "\r\n"
                << headers << "\r\n";
 
         MemoryBlock mb;
@@ -328,7 +351,6 @@ private:
     }
 };
 
-
 //==============================================================================
 bool juce_isOnLine()
 {
@@ -344,7 +366,8 @@ void* juce_openInternetFile (const String& url,
 {
     JUCE_HTTPSocketStream* const s = new JUCE_HTTPSocketStream();
 
-    if (s->open (url, headers, postData, isPost))
+    if (s->open (url, headers, postData, isPost, 
+                 callback, callbackContext))
         return s;
 
     delete s;
@@ -357,16 +380,6 @@ void juce_closeInternetFile (void* handle)
 
     if (s != 0)
         delete s;
-}
-
-int juce_getStatusCodeFor (void* handle)
-{
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
-
-    if (s != 0)
-        return s->statusCode;
-
-    return 0;
 }
 
 int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)

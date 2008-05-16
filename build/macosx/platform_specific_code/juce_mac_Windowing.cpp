@@ -191,8 +191,8 @@ public:
         CMProfileRef prof;
         CMGetSystemProfile (&prof);
         colourspace = CGColorSpaceCreateWithPlatformColorSpace (prof);
-
         provider = CGDataProviderCreateWithData (0, imageData, h * lineStride, 0);
+        CMCloseProfile (prof);
     }
 
     MacBitmapImage::~MacBitmapImage()
@@ -806,10 +806,18 @@ public:
                 Rect w;
                 GetWindowBounds (windowRef, windowRegionToUse, &w);
 
-                RgnHandle rgn = NewRgn();
-                SetRectRgn (rgn, 0, 0, w.right - w.left, w.bottom - w.top);
-                UpdateControls (windowRef, rgn);
-                DisposeRgn (rgn);
+                const int offsetInWindowX = component->getScreenX() - getScreenX();
+                const int offsetInWindowY = component->getScreenY() - getScreenY();
+
+                for (RectangleList::Iterator i (repainter->getRegionsNeedingRepaint()); i.next();)
+                {
+                    const Rectangle& r = *i.getRectangle();
+                    w.left = offsetInWindowX + r.getX();
+                    w.top = offsetInWindowY + r.getY();
+                    w.right = offsetInWindowX + r.getRight();
+                    w.bottom = offsetInWindowY + r.getBottom();
+                    InvalWindowRect (windowRef, &w);
+                }
             }
             else
             {

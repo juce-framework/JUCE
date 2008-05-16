@@ -427,6 +427,25 @@ bool File::isOnHardDisk() const throw()
     return ! (isOnCDRomDrive() || isFileOnDriveType (this, (const char**) nonHDTypes));
 }
 
+static bool juce_isHiddenFile (const String& path) throw()
+{
+    FSRef ref;
+    if (! PlatformUtilities::makeFSRefFromPath (&ref, path))
+        return false;
+
+    FSCatalogInfo info;
+    FSGetCatalogInfo (&ref, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo, &info, 0, 0, 0);
+
+    if ((info.nodeFlags & kFSNodeIsDirectoryBit) != 0)
+        return (((FolderInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
+
+    return (((FileInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
+}
+
+bool File::isHidden() const throw()
+{
+    return juce_isHiddenFile (getFullPathName());
+}
 
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)
@@ -583,7 +602,8 @@ struct FindFileStruct
                         *isDir = path.isEmpty() || (statOk && ((info.st_mode & S_IFDIR) != 0));
 
                     if (isHidden != 0)
-                        *isHidden = (de->d_name[0] == '.');
+                        *isHidden = (de->d_name[0] == '.')
+                                      || juce_isHiddenFile (path);
 
                     if (fileSize != 0)
                         *fileSize = statOk ? info.st_size : 0;

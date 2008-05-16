@@ -181,13 +181,13 @@ void ComboBox::changeItemText (const int itemId,
         item->name = newText;
 }
 
-void ComboBox::clear()
+void ComboBox::clear (const bool dontSendChangeMessage)
 {
     items.clear();
     separatorPending = false;
 
     if (! label->isEditable())
-        setSelectedItemIndex (-1);
+        setSelectedItemIndex (-1, dontSendChangeMessage);
 }
 
 //==============================================================================

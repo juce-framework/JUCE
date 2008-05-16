@@ -167,7 +167,6 @@ void* juce_openInternetFile (const String& url,
 void juce_closeInternetFile (void* handle);
 int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
 int juce_seekInInternetFile (void* handle, int newPosition);
-int juce_getStatusCodeFor (void* handle);
 
 
 //==============================================================================
@@ -202,11 +201,6 @@ public:
     bool isError() const throw()
     {
         return handle == 0;
-    }
-
-    int getErrorCode() const
-    {
-        return juce_getStatusCodeFor (handle);
     }
 
     //==============================================================================

@@ -76,8 +76,8 @@ static void swapEndiannessIfNeeded (AudioThumbnailDataFormat* const d)
 AudioThumbnail::AudioThumbnail (const int orginalSamplesPerThumbnailSample_,
                                 AudioFormatManager& formatManagerToUse_,
                                 AudioThumbnailCache& cacheToUse)
-    : cache (cacheToUse),
-      formatManagerToUse (formatManagerToUse_),
+    : formatManagerToUse (formatManagerToUse_),
+      cache (cacheToUse),
       source (0),
       reader (0),
       orginalSamplesPerThumbnailSample (orginalSamplesPerThumbnailSample_)

@@ -131,6 +131,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_AudioThumbnailCache.o \
 	$(OBJDIR)/juce_FlacAudioFormat.o \
 	$(OBJDIR)/juce_OggVorbisAudioFormat.o \
+	$(OBJDIR)/juce_QuickTimeAudioFormat.o \
 	$(OBJDIR)/juce_WavAudioFormat.o \
 	$(OBJDIR)/bitmath.o \
 	$(OBJDIR)/bitreader.o \
@@ -922,6 +923,11 @@ $(OBJDIR)/juce_FlacAudioFormat.o: ../../src/juce_appframework/audio/audio_file_f
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_OggVorbisAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_QuickTimeAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

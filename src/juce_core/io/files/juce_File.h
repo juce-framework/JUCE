@@ -346,6 +346,12 @@ public:
     bool setReadOnly (const bool shouldBeReadOnly,
                       const bool applyRecursively = false) const throw();
 
+    /** Returns true if this file is a hidden or system file. 
+
+        The criteria for deciding whether a file is hidden are platform-dependent.
+    */
+    bool isHidden() const throw();
+
     //==============================================================================
     /** Returns the last modification time of this file.
 

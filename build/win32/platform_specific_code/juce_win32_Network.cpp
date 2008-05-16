@@ -225,26 +225,6 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     }
 }
 
-int juce_getStatusCodeFor (void* handle)
-{
-    DWORD result = 404;
-    const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
-
-    if (crs != 0)
-    {
-        DWORD index = 0;
-        DWORD size = sizeof (result);
-
-        HttpQueryInfo (crs->request,
-                       HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER,
-                       &result,
-                       &size,
-                       &index);
-    }
-
-    return (int) result;
-}
-
 void juce_closeInternetFile (void* handle)
 {
     if (handle != 0)

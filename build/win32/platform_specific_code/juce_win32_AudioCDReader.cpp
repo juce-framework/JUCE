@@ -2348,7 +2348,8 @@ int AudioCDBurner::getNumAvailableAudioBlocks() const
 }
 
 const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
-                                  const bool ejectDiscAfterwards)
+                                  const bool ejectDiscAfterwards,
+                                  const bool performFakeBurnForTesting)
 {
     CDBurnerInfo* const info = (CDBurnerInfo*) internal;
 
@@ -2359,7 +2360,7 @@ const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
     UINT_PTR cookie;
     HRESULT hr = info->discMaster->ProgressAdvise (info, &cookie);
 
-    hr = info->discMaster->RecordDisc (FALSE, // set this to TRUE to make it do a fake burn, without actually writing to the disc
+    hr = info->discMaster->RecordDisc (performFakeBurnForTesting,
                                        ejectDiscAfterwards);
 
     String error;
@@ -2381,69 +2382,11 @@ const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
     return error;
 }
 
-bool AudioCDBurner::addAudioTrack (AudioFormatReader& source, int numSamples)
+bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
 {
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+    if (source == 0)
+        return false;
 
-    long bytesPerBlock;
-    HRESULT hr = info->redbook->GetAudioBlockSize (&bytesPerBlock);
-
-    const int samplesPerBlock = bytesPerBlock / 4;
-    bool ok = true;
-
-    hr = info->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
-
-    byte* const buffer = (byte*) juce_malloc (bytesPerBlock);
-
-    int* sourceBuffers[2];
-    sourceBuffers[0] = (int*) juce_malloc (samplesPerBlock * 4);
-    sourceBuffers[1] = (int*) juce_malloc (samplesPerBlock * 4);
-
-    int samplesDone = 0;
-
-    for (;;)
-    {
-        zeromem (buffer, bytesPerBlock);
-
-        if (! source.read (sourceBuffers, samplesDone, samplesPerBlock))
-        {
-            ok = false;
-            break;
-        }
-
-        short* destBuffer = (short*) buffer;
-
-        for (int j = 0; j < samplesPerBlock; ++j)
-        {
-            *destBuffer++ = (short) (sourceBuffers [0][j] >> 16);
-            *destBuffer++ = (short) (sourceBuffers [jmin (1, source.numChannels - 1)][j] >> 16);
-        }
-
-        hr = info->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
-
-        if (hr != S_OK)
-        {
-            ok = false;
-            break;
-        }
-
-        samplesDone += samplesPerBlock;
-
-        if (samplesDone >= numSamples)
-            break;
-    }
-
-    juce_free (sourceBuffers[0]);
-    juce_free (sourceBuffers[1]);
-    juce_free (buffer);
-
-    hr = info->redbook->CloseAudioTrack();
-
-    return ok && hr == S_OK;
-}
-
-bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
-{
     CDBurnerInfo* const info = (CDBurnerInfo*) internal;
 
     long bytesPerBlock;
@@ -2459,7 +2402,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
     AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
     int samplesDone = 0;
 
-    source.prepareToPlay (samplesPerBlock, 44100.0);
+    source->prepareToPlay (samplesPerBlock, 44100.0);
 
     while (ok)
     {
@@ -2470,7 +2413,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
             info.startSample = 0;
             sourceBuffer.clear();
 
-            source.getNextAudioBlock (info);
+            source->getNextAudioBlock (info);
         }
 
         zeromem (buffer, bytesPerBlock);
@@ -2495,6 +2438,8 @@ bool AudioCDBurner::addAudioTrack (AudioSource& source, int numSamples)
     juce_free (buffer);
 
     hr = info->redbook->CloseAudioTrack();
+
+    delete source;
 
     return ok && hr == S_OK;
 }

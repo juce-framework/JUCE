@@ -198,6 +198,11 @@ bool File::isOnHardDisk() const throw()
     return true;
 }
 
+bool File::isHidden() const throw()
+{
+    return getFileName().startsWithChar (T('.'));
+}
+
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)
 {

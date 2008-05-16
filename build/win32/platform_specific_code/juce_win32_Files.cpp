@@ -117,6 +117,11 @@ bool juce_setFileReadOnly (const String& fileName,
     return SetFileAttributes (fileName, attr) != FALSE;
 }
 
+bool File::isHidden() const throw()
+{
+    return (GetFileAttributes (getFullPathName()) & FILE_ATTRIBUTE_HIDDEN) != 0;
+}
+
 //==============================================================================
 bool juce_deleteFile (const String& fileName) throw()
 {

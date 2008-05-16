@@ -164,9 +164,12 @@ public:
 
     /** Removes all the items from the drop-down list.
 
+        If this call causes the content to be cleared, then a change-message
+        will be broadcast unless dontSendChangeMessage is true.
+
         @see addItem, removeItem, getNumItems
     */
-    void clear();
+    void clear (const bool dontSendChangeMessage = false);
 
     /** Returns the number of items that have been added to the list.
 

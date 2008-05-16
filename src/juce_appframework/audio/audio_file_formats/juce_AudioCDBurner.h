@@ -43,18 +43,41 @@ class AudioCDBurner
 {
 public:
     //==============================================================================
+    /** Returns a list of available optical drives.
+
+        Use openDevice() to open one of the items from this list.
+    */
     static const StringArray findAvailableDevices();
+
+    /** Tries to open one of the optical drives.
+
+        The deviceIndex is an index into the array returned by findAvailableDevices().
+    */
     static AudioCDBurner* openDevice (const int deviceIndex);
 
+    /** Destructor. */
     ~AudioCDBurner();
 
     //==============================================================================
+    /** Returns true if there's a writable disk in the drive.
+    */
     bool isDiskPresent() const;
 
+    /** Returns the number of free blocks on the disk.
+
+        There are 75 blocks per second, at 44100Hz.
+    */
     int getNumAvailableAudioBlocks() const;
 
-    bool addAudioTrack (AudioFormatReader& source, int numSamples);
-    bool addAudioTrack (AudioSource& source, int numSamples);
+    /** Adds a track to be written.
+
+        The source passed-in here will be kept by this object, and it will
+        be used and deleted at some point in the future, either during the 
+        burn() method or when this AudioCDBurner object is deleted. Your caller
+        method shouldn't keep a reference to it or use it again after passing
+        it in here.
+    */
+    bool addAudioTrack (AudioSource* source, int numSamples);
 
     /**
 
@@ -74,7 +97,8 @@ public:
     };
 
     const String burn (BurnProgressListener* listener,
-                       const bool ejectDiscAfterwards);
+                       const bool ejectDiscAfterwards,
+                       const bool peformFakeBurnForTesting);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
