@@ -4157,6 +4157,10 @@
 								RelativePath="..\..\..\src\juce_appframework\gui\components\special\juce_SystemTrayIconComponent.h"
 								>
 							</File>
+							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\components\special\juce_WebBrowserComponent.h"
+								>
+							</File>
 						</Filter>
 						<Filter
 							Name="windows"
@@ -6278,6 +6282,10 @@
 				</File>
 				<File
 					RelativePath="..\platform_specific_code\juce_win32_Threads.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\platform_specific_code\juce_win32_WebBrowserComponent.cpp"
 					>
 				</File>
 				<File

@@ -713,6 +713,9 @@
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h"
 #endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
+#endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
  #include "juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
 #endif

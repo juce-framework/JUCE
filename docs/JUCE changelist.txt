@@ -9,6 +9,7 @@ Changelist for version 1.46
 - new class: AudioProcessorGraph: This allows AudioProcessors to be efficiently wired together and run as a graph. I've converted the plugin host demo to now use this instead of its own graph rendering code.
 - new class: AudioProcessorPlayer: This allows an audio i/o device to stream through an AudioProcessor (or an AudioProcessorGraph).
 - new class QuickTimeAudioFormat, which uses QuickTime to implement an AudioFormat that can read .mov files and other formats that QT supports (e.g. mp3, aac, etc)
+- new class: WebBrowserComponent, for embedding a web browser in your app
 - AudioProcessor now has a few more pure virtual methods that you'll need to implement: acceptsMidi(), producesMidi() and getName()
 - moved all the audio plugin hosting classes into the main juce tree
 - Mac: the project now requires at least XCode V2.5

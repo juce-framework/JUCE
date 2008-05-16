@@ -411,6 +411,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_linux_Network.o \
 	$(OBJDIR)/juce_linux_SystemStats.o \
 	$(OBJDIR)/juce_linux_Threads.o \
+	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
 	$(OBJDIR)/juce_linux_Windowing.o \
 
 MKDIR_TYPE := msdos
@@ -2323,6 +2324,11 @@ $(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStat
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
