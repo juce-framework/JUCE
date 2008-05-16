@@ -139,8 +139,8 @@ public:
     NamedPipe* getPipe() const throw()                          { return pipe; }
 
     /** Returns the name of the machine at the other end of this connection.
-    
-        This will return an empty string if the other machine isn't known for 
+
+        This will return an empty string if the other machine isn't known for
         some reason.
     */
     const String getConnectedHostName() const;

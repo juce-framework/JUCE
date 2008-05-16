@@ -198,7 +198,7 @@ public:
     /** @internal */
     void resized();
 #endif
-    
+
     juce_UseDebuggingNewOperator
 
 private:

@@ -986,7 +986,7 @@ static bool openMovie (QTNewMoviePropertyElement* props, int prop, Movie& movie)
 
     jassert (prop <= 5);
     OSStatus err = NewMovieFromProperties (prop, props, 0, 0, &movie);
-    
+
     return err == noErr;
 }
 
@@ -1015,7 +1015,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
     {
         CFStringRef filePath = juceStringToCFString (fin->getFile().getFullPathName());
 
-        QTNewDataReferenceFromFullPathCFString (filePath, (QTPathStyle) kQTNativeDefaultPathStyle, 0, 
+        QTNewDataReferenceFromFullPathCFString (filePath, (QTPathStyle) kQTNativeDefaultPathStyle, 0,
                                                 &dr.dataRef, &dr.dataRefType);
 
 
@@ -1039,7 +1039,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
         // different types to get QT to try. (We should really be a bit smarter here by
         // working out in advance which one the stream contains, rather than just trying
         // each one)
-        const char* const suffixesToTry[] = { "\04.mov", "\04.mp3", 
+        const char* const suffixesToTry[] = { "\04.mov", "\04.mp3",
                                               "\04.avi", "\04.m4a" };
 
         for (int i = 0; i < numElementsInArray (suffixesToTry) && ! ok; ++i)

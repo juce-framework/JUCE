@@ -332,7 +332,7 @@ public:
     void setNoteStealingEnabled (const bool shouldStealNotes);
 
     /** Returns true if note-stealing is enabled.
-        @see setNoteStealingEnabled 
+        @see setNoteStealingEnabled
     */
     bool isNoteStealingEnabled() const throw()                      { return shouldStealNotes; }
 
@@ -465,7 +465,7 @@ protected:
 
     /** Starts a specified voice playing a particular sound.
 
-        You'll probably never need to call this, it's used internally by noteOn(), but 
+        You'll probably never need to call this, it's used internally by noteOn(), but
         may be needed by subclasses for custom behaviours.
     */
     void startVoice (SynthesiserVoice* const voice,

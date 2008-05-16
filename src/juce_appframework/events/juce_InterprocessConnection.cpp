@@ -160,10 +160,10 @@ const String InterprocessConnection::getConnectedHostName() const
         return "localhost";
     }
     else if (socket != 0)
-    { 
+    {
         if (! socket->isLocal())
             return socket->getHostName();
-    
+
         return "localhost";
     }
 

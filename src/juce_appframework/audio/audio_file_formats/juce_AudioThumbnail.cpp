@@ -105,7 +105,7 @@ void AudioThumbnail::setSource (InputSource* const newSource)
 
     clear();
 
-    if (! (cache.loadThumb (*this, newSource->hashCode()) 
+    if (! (cache.loadThumb (*this, newSource->hashCode())
            && isFullyLoaded()))
     {
         {

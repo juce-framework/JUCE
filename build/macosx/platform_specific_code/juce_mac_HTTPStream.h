@@ -119,7 +119,7 @@ public:
         {
             const int numToSend = jmin (1024, requestHeader.getSize() - totalHeaderSent);
 
-            if (send (socketHandle, 
+            if (send (socketHandle,
                       ((const char*) requestHeader.getData()) + totalHeaderSent,
                       numToSend, 0)
                   != numToSend)
@@ -366,7 +366,7 @@ void* juce_openInternetFile (const String& url,
 {
     JUCE_HTTPSocketStream* const s = new JUCE_HTTPSocketStream();
 
-    if (s->open (url, headers, postData, isPost, 
+    if (s->open (url, headers, postData, isPost,
                  callback, callbackContext))
         return s;
 

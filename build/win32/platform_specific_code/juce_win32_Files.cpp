@@ -568,7 +568,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
     if (h != INVALID_HANDLE_VALUE)
     {
-        getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize, 
+        getFindFileInfo (findData, firstResult, isDir, isHidden, fileSize,
                          modTime, creationTime, isReadOnly);
         return h;
     }

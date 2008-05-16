@@ -103,11 +103,11 @@ void ProgressBar::timerCallback()
 {
     double newProgress = progress;
 
-    if (currentValue != newProgress 
+    if (currentValue != newProgress
          || newProgress < 0 || newProgress >= 1.0
          || currentMessage != displayedMessage)
     {
-        if (currentValue < newProgress 
+        if (currentValue < newProgress
              && newProgress >= 0 && newProgress < 1.0
              && currentValue >= 0 && newProgress < 1.0)
         {

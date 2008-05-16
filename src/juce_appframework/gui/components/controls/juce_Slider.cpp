@@ -1206,7 +1206,7 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                 double scaledMousePos = (mousePos - sliderRegionStart) / (double) sliderRegionSize;
 
-                if (style == RotaryHorizontalDrag 
+                if (style == RotaryHorizontalDrag
                     || style == RotaryVerticalDrag
                     || style == IncDecButtons
                     || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar)

@@ -2213,7 +2213,7 @@ void TextEditor::insert (const String& text,
         }
         else
         {
-            repaintText (insertIndex, -1); // must do this before and after changing the data, in case 
+            repaintText (insertIndex, -1); // must do this before and after changing the data, in case
                                            // a line gets moved due to word wrap
 
             int index = 0;

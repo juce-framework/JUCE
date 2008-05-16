@@ -139,7 +139,7 @@ public:
 
         samplesPerFrame = (int) (GetMediaDecodeDuration (media) / GetMediaSampleCount (media));
 
-        trackUnitsPerFrame = GetMovieTimeScale (movie) * samplesPerFrame 
+        trackUnitsPerFrame = GetMovieTimeScale (movie) * samplesPerFrame
                                 / GetMediaTimeScale (media);
 
         OSStatus err = MovieAudioExtractionBegin (movie, 0, &extractor);

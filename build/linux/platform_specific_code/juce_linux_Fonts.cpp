@@ -378,7 +378,7 @@ public:
 
                         destShape.startNewSubPath (x2, y2);
                     }
-                    else 
+                    else
                     {
                         destShape.startNewSubPath (x, y);
                     }

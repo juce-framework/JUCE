@@ -72,7 +72,7 @@ public:
     /** Adds a track to be written.
 
         The source passed-in here will be kept by this object, and it will
-        be used and deleted at some point in the future, either during the 
+        be used and deleted at some point in the future, either during the
         burn() method or when this AudioCDBurner object is deleted. Your caller
         method shouldn't keep a reference to it or use it again after passing
         it in here.
