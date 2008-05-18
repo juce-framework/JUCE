@@ -39,8 +39,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#define formatName                          TRANS("WAV file")
-static const tchar* const extensions[] =    { T(".wav"), T(".bwf"), 0 };
+#define wavFormatName                          TRANS("WAV file")
+static const tchar* const wavExtensions[] =    { T(".wav"), T(".bwf"), 0 };
 
 
 //==============================================================================
@@ -156,6 +156,7 @@ struct BWAVChunk
 
 #undef PACKED
 
+#undef chunkName
 #define chunkName(a) ((int) littleEndianInt(a))
 
 //==============================================================================
@@ -170,7 +171,7 @@ class WavAudioFormatReader  : public AudioFormatReader
 public:
     //==============================================================================
     WavAudioFormatReader (InputStream* const in)
-        : AudioFormatReader (in, formatName),
+        : AudioFormatReader (in, wavFormatName),
           dataLength (0)
     {
         if (input->readInt() == chunkName ("RIFF"))
@@ -543,7 +544,7 @@ public:
                           const int bits,
                           const StringPairArray& metadataValues)
         : AudioFormatWriter (out,
-                             formatName,
+                             wavFormatName,
                              sampleRate,
                              numChannels_,
                              bits),
@@ -686,7 +687,7 @@ public:
 
 //==============================================================================
 WavAudioFormat::WavAudioFormat()
-    : AudioFormat (formatName, (const tchar**) extensions)
+    : AudioFormat (wavFormatName, (const tchar**) wavExtensions)
 {
 }
 

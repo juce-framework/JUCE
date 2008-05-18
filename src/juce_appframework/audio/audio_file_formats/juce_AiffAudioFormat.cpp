@@ -39,11 +39,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
 
 
+#undef chunkName
 #define chunkName(a) (int)littleEndianInt(a)
 
 //==============================================================================
-#define formatName                          TRANS("AIFF file")
-static const tchar* const extensions[] =    { T(".aiff"), T(".aif"), 0 };
+#define aiffFormatName                          TRANS("AIFF file")
+static const tchar* const aiffExtensions[] =    { T(".aiff"), T(".aif"), 0 };
 
 
 //==============================================================================
@@ -56,7 +57,7 @@ public:
 
     //==============================================================================
     AiffAudioFormatReader (InputStream* in)
-        : AudioFormatReader (in, formatName)
+        : AudioFormatReader (in, aiffFormatName)
     {
         if (input->readInt() == chunkName ("FORM"))
         {
@@ -624,7 +625,7 @@ public:
                            const unsigned int chans,
                            const int bits)
         : AudioFormatWriter (out,
-                             formatName,
+                             aiffFormatName,
                              sampleRate,
                              chans,
                              bits),
@@ -767,7 +768,7 @@ public:
 
 //==============================================================================
 AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (formatName, (const tchar**) extensions)
+    : AudioFormat (aiffFormatName, (const tchar**) aiffExtensions)
 {
 }
 
