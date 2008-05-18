@@ -463,18 +463,18 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
 
     if (pe != 0)
     {
-        int64 id;
+        int64 compId;
 
         if (whichDimension == 0)
-            id = pe->getPosition().relativeToX;
+            compId = pe->getPosition().relativeToX;
         else if (whichDimension == 1)
-            id = pe->getPosition().relativeToY;
+            compId = pe->getPosition().relativeToY;
         else if (whichDimension == 2)
-            id = pe->getPosition().relativeToW;
+            compId = pe->getPosition().relativeToW;
         else
-            id = pe->getPosition().relativeToH;
+            compId = pe->getPosition().relativeToH;
 
-        return findComponentWithId (id);
+        return findComponentWithcompId (id);
     }
     else
     {
@@ -495,7 +495,7 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
     if (compToBeRelativeTo != getComponentRelativePosTarget (comp, whichDimension)
          && (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp)))
     {
-        const int64 id = ComponentTypeHandler::getComponentId (compToBeRelativeTo);
+        const int64 compId = ComponentTypeHandler::getComponentId (compToBeRelativeTo);
 
         Rectangle oldBounds (comp->getBounds());
         RelativePositionedRectangle pos;
@@ -511,13 +511,13 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
         }
 
         if (whichDimension == 0)
-            pos.relativeToX = id;
+            pos.relativeToX = compId;
         else if (whichDimension == 1)
-            pos.relativeToY = id;
+            pos.relativeToY = compId;
         else if (whichDimension == 2)
-            pos.relativeToW = id;
+            pos.relativeToW = compId;
         else if (whichDimension == 3)
-            pos.relativeToH = id;
+            pos.relativeToH = compId;
 
         if (pe != 0)
         {

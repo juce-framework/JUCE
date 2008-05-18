@@ -41,7 +41,7 @@ static const unsigned int mask8B[]=
 
 void oggpack_writeinit(oggpack_buffer *b){
   memset(b,0,sizeof(*b));
-  b->ptr=b->buffer=_ogg_malloc(BUFFER_INCREMENT);
+  b->ptr=b->buffer=(unsigned char*) _ogg_malloc(BUFFER_INCREMENT);
   b->buffer[0]='\0';
   b->storage=BUFFER_INCREMENT;
 }
@@ -71,7 +71,7 @@ void oggpackB_writetrunc(oggpack_buffer *b,long bits){
 /* Takes only up to 32 bits. */
 void oggpack_write(oggpack_buffer *b,unsigned long value,int bits){
   if(b->endbyte+4>=b->storage){
-    b->buffer=_ogg_realloc(b->buffer,b->storage+BUFFER_INCREMENT);
+    b->buffer=(unsigned char*) _ogg_realloc(b->buffer,b->storage+BUFFER_INCREMENT);
     b->storage+=BUFFER_INCREMENT;
     b->ptr=b->buffer+b->endbyte;
   }
@@ -105,7 +105,7 @@ void oggpack_write(oggpack_buffer *b,unsigned long value,int bits){
 /* Takes only up to 32 bits. */
 void oggpackB_write(oggpack_buffer *b,unsigned long value,int bits){
   if(b->endbyte+4>=b->storage){
-    b->buffer=_ogg_realloc(b->buffer,b->storage+BUFFER_INCREMENT);
+    b->buffer=(unsigned char*) _ogg_realloc(b->buffer,b->storage+BUFFER_INCREMENT);
     b->storage+=BUFFER_INCREMENT;
     b->ptr=b->buffer+b->endbyte;
   }
@@ -169,7 +169,7 @@ static void oggpack_writecopy_helper(oggpack_buffer *b,
     /* aligned block copy */
     if(b->endbyte+bytes+1>=b->storage){
       b->storage=b->endbyte+bytes+BUFFER_INCREMENT;
-      b->buffer=_ogg_realloc(b->buffer,b->storage);
+      b->buffer=(unsigned char*) _ogg_realloc(b->buffer,b->storage);
       b->ptr=b->buffer+b->endbyte;
     }
 

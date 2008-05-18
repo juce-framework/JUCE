@@ -32,7 +32,7 @@
 typedef struct {
   unsigned int EOBRUN;			/* remaining EOBs in EOBRUN */
   int last_dc_val[MAX_COMPS_IN_SCAN];	/* last DC coef for each component */
-} savable_state;
+} savable_state3;
 
 /* This macro is to work around compilers with missing or broken
  * structure assignment.  You'll need to fix this code if you have
@@ -60,7 +60,7 @@ typedef struct {
    * In case of suspension, we exit WITHOUT updating them.
    */
   bitread_perm_state bitstate;	/* Bit buffer at start of MCU */
-  savable_state saved;		/* Other state at start of MCU */
+  savable_state3 saved;		/* Other state at start of MCU */
 
   /* These fields are NOT loaded into local working state. */
   unsigned int restarts_to_go;	/* MCUs left in this restart interval */
@@ -71,7 +71,7 @@ typedef struct {
   d_derived_tbl * ac_derived_tbl; /* active table during an AC scan */
 } phuff_entropy_decoder;
 
-typedef phuff_entropy_decoder * phuff_entropy_ptr;
+typedef phuff_entropy_decoder * phuff_entropy_ptr2;
 
 /* Forward declarations */
 METHODDEF(boolean) decode_mcu_DC_first JPP((j_decompress_ptr cinfo,
@@ -91,7 +91,7 @@ METHODDEF(boolean) decode_mcu_AC_refine JPP((j_decompress_ptr cinfo,
 METHODDEF(void)
 start_pass_phuff_decoder (j_decompress_ptr cinfo)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   boolean is_DC_band, bad;
   int ci, coefi, tbl;
   int *coef_bit_ptr;
@@ -194,40 +194,14 @@ start_pass_phuff_decoder (j_decompress_ptr cinfo)
 
 
 /*
- * Figure F.12: extend sign bit.
- * On some machines, a shift and add will be faster than a table lookup.
- */
-
-#ifdef AVOID_TABLES
-
-#define HUFF_EXTEND(x,s)  ((x) < (1<<((s)-1)) ? (x) + (((-1)<<(s)) + 1) : (x))
-
-#else
-
-#define HUFF_EXTEND(x,s)  ((x) < extend_test[s] ? (x) + extend_offset[s] : (x))
-
-static const int extend_test[16] =   /* entry n is 2**(n-1) */
-  { 0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
-    0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000 };
-
-static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
-  { 0, ((-1)<<1) + 1, ((-1)<<2) + 1, ((-1)<<3) + 1, ((-1)<<4) + 1,
-    ((-1)<<5) + 1, ((-1)<<6) + 1, ((-1)<<7) + 1, ((-1)<<8) + 1,
-    ((-1)<<9) + 1, ((-1)<<10) + 1, ((-1)<<11) + 1, ((-1)<<12) + 1,
-    ((-1)<<13) + 1, ((-1)<<14) + 1, ((-1)<<15) + 1 };
-
-#endif /* AVOID_TABLES */
-
-
-/*
  * Check for a restart marker & resynchronize decoder.
  * Returns FALSE if must suspend.
  */
 
 LOCAL(boolean)
-process_restart (j_decompress_ptr cinfo)
+process_restartp (j_decompress_ptr cinfo)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   int ci;
 
   /* Throw away any unused bits remaining in bit buffer; */
@@ -285,20 +259,20 @@ process_restart (j_decompress_ptr cinfo)
 METHODDEF(boolean)
 decode_mcu_DC_first (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   int Al = cinfo->Al;
   register int s, r;
   int blkn, ci;
   JBLOCKROW block;
   BITREAD_STATE_VARS;
-  savable_state state;
+  savable_state3 state;
   d_derived_tbl * tbl;
   jpeg_component_info * compptr;
 
   /* Process restart marker if needed; may have to suspend */
   if (cinfo->restart_interval) {
     if (entropy->restarts_to_go == 0)
-      if (! process_restart(cinfo))
+      if (! process_restartp(cinfo))
 	return FALSE;
   }
 
@@ -356,7 +330,7 @@ decode_mcu_DC_first (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 METHODDEF(boolean)
 decode_mcu_AC_first (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   int Se = cinfo->Se;
   int Al = cinfo->Al;
   register int s, k, r;
@@ -368,7 +342,7 @@ decode_mcu_AC_first (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Process restart marker if needed; may have to suspend */
   if (cinfo->restart_interval) {
     if (entropy->restarts_to_go == 0)
-      if (! process_restart(cinfo))
+      if (! process_restartp(cinfo))
 	return FALSE;
   }
 
@@ -441,7 +415,7 @@ decode_mcu_AC_first (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 METHODDEF(boolean)
 decode_mcu_DC_refine (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   int p1 = 1 << cinfo->Al;	/* 1 in the bit position being coded */
   int blkn;
   JBLOCKROW block;
@@ -450,7 +424,7 @@ decode_mcu_DC_refine (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Process restart marker if needed; may have to suspend */
   if (cinfo->restart_interval) {
     if (entropy->restarts_to_go == 0)
-      if (! process_restart(cinfo))
+      if (! process_restartp(cinfo))
 	return FALSE;
   }
 
@@ -490,7 +464,7 @@ decode_mcu_DC_refine (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 METHODDEF(boolean)
 decode_mcu_AC_refine (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 {
-  phuff_entropy_ptr entropy = (phuff_entropy_ptr) cinfo->entropy;
+  phuff_entropy_ptr2 entropy = (phuff_entropy_ptr2) cinfo->entropy;
   int Se = cinfo->Se;
   int p1 = 1 << cinfo->Al;	/* 1 in the bit position being coded */
   int m1 = (-1) << cinfo->Al;	/* -1 in the bit position being coded */
@@ -506,7 +480,7 @@ decode_mcu_AC_refine (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Process restart marker if needed; may have to suspend */
   if (cinfo->restart_interval) {
     if (entropy->restarts_to_go == 0)
-      if (! process_restart(cinfo))
+      if (! process_restartp(cinfo))
 	return FALSE;
   }
 
@@ -640,11 +614,11 @@ undoit:
 GLOBAL(void)
 jinit_phuff_decoder (j_decompress_ptr cinfo)
 {
-  phuff_entropy_ptr entropy;
+  phuff_entropy_ptr2 entropy;
   int *coef_bit_ptr;
   int ci, i;
 
-  entropy = (phuff_entropy_ptr)
+  entropy = (phuff_entropy_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
 				SIZEOF(phuff_entropy_decoder));
   cinfo->entropy = (struct jpeg_entropy_decoder *) entropy;

@@ -230,7 +230,7 @@ void TableHeaderComponent::setColumnWidth (const int columnId, const int newWidt
 }
 
 //==============================================================================
-int TableHeaderComponent::getIndexOfColumnId (const int id, const bool onlyCountVisibleColumns) const throw()
+int TableHeaderComponent::getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const throw()
 {
     int n = 0;
 
@@ -238,7 +238,7 @@ int TableHeaderComponent::getIndexOfColumnId (const int id, const bool onlyCount
     {
         if ((! onlyCountVisibleColumns) || columns.getUnchecked(i)->isVisible())
         {
-            if (columns.getUnchecked(i)->id == id)
+            if (columns.getUnchecked(i)->id == columnId)
                 return n;
 
             ++n;
@@ -474,15 +474,15 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
     {
         forEachXmlChildElement (*storedXml, col)
         {
-            const int id = col->getIntAttribute (T("id"));
+            const int tabId = col->getIntAttribute (T("id"));
 
-            ColumnInfo* const ci = getInfoForId (id);
+            ColumnInfo* const ci = getInfoForId (tabId);
 
             if (ci != 0)
             {
                 columns.move (columns.indexOf (ci), index);
                 ci->width = col->getIntAttribute (T("width"));
-                setColumnVisible (id, col->getBoolAttribute (T("visible")));
+                setColumnVisible (tabId, col->getBoolAttribute (T("visible")));
             }
 
             ++index;

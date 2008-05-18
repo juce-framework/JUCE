@@ -84,7 +84,7 @@ jpeg_mem_available (j_common_ptr cinfo, long min_bytes_needed,
  */
 
 GLOBAL(void)
-jpeg_open_backing_store (j_common_ptr cinfo, backing_store_ptr info,
+jpeg_open_backing_store (j_common_ptr cinfo, struct backing_store_struct *info,
 			 long total_bytes_needed)
 {
   ERREXIT(cinfo, JERR_NO_BACKING_STORE);

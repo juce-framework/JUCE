@@ -57,10 +57,10 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
     oggpack_write(opb,c->lengthlist[0]-1,5); /* 1 to 32 */
 
     for(i=1;i<c->entries;i++){
-      long this=c->lengthlist[i];
+      long thisx=c->lengthlist[i];
       long last=c->lengthlist[i-1];
-      if(this>last){
-	for(j=last;j<this;j++){
+      if(thisx>last){
+	for(j=last;j<thisx;j++){
 	  oggpack_write(opb,i-count,_ilog(c->entries-count));
 	  count=i;
 	}
@@ -167,7 +167,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   switch((int)oggpack_read(opb,1)){
   case 0:
     /* unordered */
-    s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
+    s->lengthlist=(long*)_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
 
     /* allocated but unused entries? */
     if(oggpack_read(opb,1)){
@@ -195,7 +195,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
     /* ordered */
     {
       long length=oggpack_read(opb,5)+1;
-      s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
+      s->lengthlist=(long*)_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
 
       for(i=0;i<s->entries;){
 	long num=oggpack_read(opb,_ilog(s->entries-i));
@@ -237,7 +237,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       }
 
       /* quantized values */
-      s->quantlist=_ogg_malloc(sizeof(*s->quantlist)*quantvals);
+      s->quantlist=(long*)_ogg_malloc(sizeof(*s->quantlist)*quantvals);
       for(i=0;i<quantvals;i++)
 	s->quantlist[i]=oggpack_read(opb,s->q_quant);
 
@@ -302,13 +302,6 @@ int vorbis_book_encodev(codebook *book,int best,float *a,oggpack_buffer *b){
    be.  The first-stage decode table catches most words so that
    bitreverse is not in the main execution path. */
 
-static ogg_uint32_t bitreverse(ogg_uint32_t x){
-  x=    ((x>>16)&0x0000ffff) | ((x<<16)&0xffff0000);
-  x=    ((x>> 8)&0x00ff00ff) | ((x<< 8)&0xff00ff00);
-  x=    ((x>> 4)&0x0f0f0f0f) | ((x<< 4)&0xf0f0f0f0);
-  x=    ((x>> 2)&0x33333333) | ((x<< 2)&0xcccccccc);
-  return((x>> 1)&0x55555555) | ((x<< 1)&0xaaaaaaaa);
-}
 
 STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   int  read=book->dec_maxlength;
@@ -383,8 +376,8 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
 /* returns 0 on OK or -1 on eof *************************************/
 long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
   int step=n/book->dim;
-  long *entry = alloca(sizeof(*entry)*step);
-  float **t = alloca(sizeof(*t)*step);
+  long *entry = (long*)alloca(sizeof(*entry)*step);
+  float **t = (float**)alloca(sizeof(*t)*step);
   int i,j,o;
 
   for (i = 0; i < step; i++) {

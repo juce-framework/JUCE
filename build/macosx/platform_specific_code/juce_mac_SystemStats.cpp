@@ -159,8 +159,10 @@ void SystemStats::initialiseStats() throw()
 
         highResTimerFrequency = (int64) AudioGetHostClockFrequency();
 
+#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
         if (JUCEApplication::getInstance() != 0)
             RegisterAppearanceClient();
+#endif
 
         TXNInitTextension (0, 0, kTXNWantMoviesMask | kTXNWantGraphicsMask);
 

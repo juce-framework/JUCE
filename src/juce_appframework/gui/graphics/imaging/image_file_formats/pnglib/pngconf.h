@@ -1249,7 +1249,7 @@ typedef double          FAR * FAR * png_doublepp;
 /* Pointers to pointers to pointers; i.e., pointer to array */
 typedef char            FAR * FAR * FAR * png_charppp;
 
-#if defined(PNG_1_0_X) || defined(PNG_1_2_X)
+#if 0
 /* SPC -  Is this stuff deprecated? */
 /* It'll be removed as of libpng-1.3.0 - GR-P */
 /* libpng typedefs for types in zlib. If zlib changes

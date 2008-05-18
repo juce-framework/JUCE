@@ -41,6 +41,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
 bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
@@ -49,6 +50,8 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                        (isOkCancel) ? MB_OKCANCEL
                                     : MB_OK) == IDOK;
 }
+
+#endif
 
 //==============================================================================
 void PlatformUtilities::beep()
@@ -61,6 +64,8 @@ void PlatformUtilities::beep()
 #if JUCE_MSVC
   #pragma warning (disable : 4127)    // "Conditional expression is constant" warning
 #endif
+
+#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
 
 void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
@@ -116,5 +121,6 @@ const String SystemClipboard::getTextFromClipboard() throw()
     return result;
 }
 
+#endif
 
 END_JUCE_NAMESPACE

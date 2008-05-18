@@ -438,8 +438,8 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
 
     activeQTWindows.removeValue ((void*) this);
 
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
-    delete id;
+    QTMovieCompInternal* const i = (QTMovieCompInternal*) internal;
+    delete i;
 
     if (activeQTWindows.size() == 0 && isQTAvailable)
     {
@@ -480,15 +480,15 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
 
     controllerVisible = controllerVisible_;
 
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
     GrafPtr savedPort;
     GetPort (&savedPort);
     bool result = false;
 
-    if (juce_OpenQuickTimeMovieFromStream (movieStream, id->movie, id->dataHandle))
+    if (juce_OpenQuickTimeMovieFromStream (movieStream, qmci->movie, qmci->dataHandle))
     {
-        id->controller = 0;
+        qmci->controller = 0;
 
         void* window = getWindowHandle();
 
@@ -497,8 +497,8 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
 
         assignMovieToWindow();
 
-        SetMovieActive (id->movie, true);
-        SetMovieProgressProc (id->movie, (MovieProgressUPP) -1, 0);
+        SetMovieActive (qmci->movie, true);
+        SetMovieProgressProc (qmci->movie, (MovieProgressUPP) -1, 0);
 
         startTimer (1000 / 50); // this needs to be quite a high frequency for smooth playback
         result = true;
@@ -515,21 +515,21 @@ void QuickTimeMovieComponent::closeMovie()
 {
     stop();
 
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->controller != 0)
+    if (qmci->controller != 0)
     {
-        DisposeMovieController (id->controller);
-        id->controller = 0;
+        DisposeMovieController (qmci->controller);
+        qmci->controller = 0;
     }
 
-    if (id->movie != 0)
+    if (qmci->movie != 0)
     {
-        DisposeMovie (id->movie);
-        id->movie = 0;
+        DisposeMovie (qmci->movie);
+        qmci->movie = 0;
     }
 
-    id->clearHandle();
+    qmci->clearHandle();
 
     stopTimer();
     movieFile = File::nonexistent;
@@ -537,8 +537,8 @@ void QuickTimeMovieComponent::closeMovie()
 
 bool QuickTimeMovieComponent::isMovieOpen() const
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
-    return id->movie != 0 && id->controller != 0;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
+    return qmci->movie != 0 && qmci->controller != 0;
 }
 
 const File QuickTimeMovieComponent::getCurrentMovieFile() const
@@ -561,11 +561,11 @@ void QuickTimeMovieComponent::assignMovieToWindow()
 
     reentrant = true;
 
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
-    if (id->controller != 0)
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
+    if (qmci->controller != 0)
     {
-        DisposeMovieController (id->controller);
-        id->controller = 0;
+        DisposeMovieController (qmci->controller);
+        qmci->controller = 0;
     }
 
     controllerAssignedToWindow = false;
@@ -578,7 +578,7 @@ void QuickTimeMovieComponent::assignMovieToWindow()
         GrafPtr savedPort;
         GetPort (&savedPort);
 
-        SetMovieGWorld (id->movie, (CGrafPtr) port, 0);
+        SetMovieGWorld (qmci->movie, (CGrafPtr) port, 0);
         MacSetPort (port);
 
         Rect r;
@@ -586,25 +586,25 @@ void QuickTimeMovieComponent::assignMovieToWindow()
         r.left = 0;
         r.right  = (short) jmax (1, getWidth());
         r.bottom = (short) jmax (1, getHeight());
-        SetMovieBox (id->movie, &r);
+        SetMovieBox (qmci->movie, &r);
 
         // create the movie controller
-        id->controller = NewMovieController (id->movie, &r,
-                                             controllerVisible ? mcTopLeftMovie
-                                                               : mcNotVisible);
+        qmci->controller = NewMovieController (qmci->movie, &r,
+                                               controllerVisible ? mcTopLeftMovie
+                                                                 : mcNotVisible);
 
-        if (id->controller != 0)
+        if (qmci->controller != 0)
         {
-            MCEnableEditing (id->controller, true);
+            MCEnableEditing (qmci->controller, true);
 
-            MCDoAction (id->controller, mcActionSetUseBadge, (void*) false);
-            MCDoAction (id->controller, mcActionSetLoopIsPalindrome, (void*) false);
+            MCDoAction (qmci->controller, mcActionSetUseBadge, (void*) false);
+            MCDoAction (qmci->controller, mcActionSetLoopIsPalindrome, (void*) false);
             setLooping (looping);
 
-            MCDoAction (id->controller, mcActionSetFlags,
+            MCDoAction (qmci->controller, mcActionSetFlags,
                         (void*) (pointer_sized_int) (mcFlagSuppressMovieFrame | (controllerVisible ? 0 : (mcFlagSuppressStepButtons | mcFlagSuppressSpeakerButton))));
 
-            MCSetControllerBoundsRect (id->controller, &r);
+            MCSetControllerBoundsRect (qmci->controller, &r);
 
             controllerAssignedToWindow = true;
 
@@ -615,7 +615,7 @@ void QuickTimeMovieComponent::assignMovieToWindow()
     }
     else
     {
-        SetMovieGWorld (id->movie, 0, 0);
+        SetMovieGWorld (qmci->movie, 0, 0);
     }
 
     reentrant = false;
@@ -623,41 +623,41 @@ void QuickTimeMovieComponent::assignMovieToWindow()
 
 void QuickTimeMovieComponent::play()
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        StartMovie (id->movie);
+    if (qmci->movie != 0)
+        StartMovie (qmci->movie);
 }
 
 void QuickTimeMovieComponent::stop()
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        StopMovie (id->movie);
+    if (qmci->movie != 0)
+        StopMovie (qmci->movie);
 }
 
 bool QuickTimeMovieComponent::isPlaying() const
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    return id->movie != 0 && GetMovieRate (id->movie) != 0;
+    return qmci->movie != 0 && GetMovieRate (qmci->movie) != 0;
 }
 
 void QuickTimeMovieComponent::setPosition (const double seconds)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->controller != 0)
+    if (qmci->controller != 0)
     {
         TimeRecord time;
-        time.base = GetMovieTimeBase (id->movie);
+        time.base = GetMovieTimeBase (qmci->movie);
         time.scale = 100000;
         const uint64 t = (uint64) (100000.0 * seconds);
         time.value.lo = (UInt32) (t & 0xffffffff);
         time.value.hi = (UInt32) (t >> 32);
 
-        SetMovieTime (id->movie, &time);
+        SetMovieTime (qmci->movie, &time);
         timerCallback(); // to call MCIdle
     }
     else
@@ -668,12 +668,12 @@ void QuickTimeMovieComponent::setPosition (const double seconds)
 
 double QuickTimeMovieComponent::getPosition() const
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
+    if (qmci->movie != 0)
     {
         TimeRecord time;
-        GetMovieTime (id->movie, &time);
+        GetMovieTime (qmci->movie, &time);
 
         return ((int64) (((uint64) time.value.hi << 32) | (uint64) time.value.lo))
                     / (double) time.scale;
@@ -684,29 +684,29 @@ double QuickTimeMovieComponent::getPosition() const
 
 void QuickTimeMovieComponent::setSpeed (const float newSpeed)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        SetMovieRate (id->movie, (Fixed) (newSpeed * (Fixed) 0x00010000L));
+    if (qmci->movie != 0)
+        SetMovieRate (qmci->movie, (Fixed) (newSpeed * (Fixed) 0x00010000L));
 }
 
 double QuickTimeMovieComponent::getMovieDuration() const
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        return GetMovieDuration (id->movie) / (double) GetMovieTimeScale (id->movie);
+    if (qmci->movie != 0)
+        return GetMovieDuration (qmci->movie) / (double) GetMovieTimeScale (qmci->movie);
 
     return 0.0;
 }
 
 void QuickTimeMovieComponent::setLooping (const bool shouldLoop)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
     looping = shouldLoop;
 
-    if (id->controller != 0)
-        MCDoAction (id->controller, mcActionSetLooping, (void*) shouldLoop);
+    if (qmci->controller != 0)
+        MCDoAction (qmci->controller, mcActionSetLooping, (void*) shouldLoop);
 }
 
 bool QuickTimeMovieComponent::isLooping() const
@@ -716,18 +716,18 @@ bool QuickTimeMovieComponent::isLooping() const
 
 void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        SetMovieVolume (id->movie, jlimit ((short) 0, (short) 0x100, (short) (newVolume * 0x0100)));
+    if (qmci->movie != 0)
+        SetMovieVolume (qmci->movie, jlimit ((short) 0, (short) 0x100, (short) (newVolume * 0x0100)));
 }
 
 float QuickTimeMovieComponent::getMovieVolume() const
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
-        return jmax (0.0f, GetMovieVolume (id->movie) / (float) 0x0100);
+    if (qmci->movie != 0)
+        return jmax (0.0f, GetMovieVolume (qmci->movie) / (float) 0x0100);
 
     return 0.0f;
 }
@@ -737,12 +737,12 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
     width = 0;
     height = 0;
 
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie != 0)
+    if (qmci->movie != 0)
     {
         Rect r;
-        GetMovieNaturalBoundsRect (id->movie, &r);
+        GetMovieNaturalBoundsRect (qmci->movie, &r);
         width = r.right - r.left;
         height = r.bottom - r.top;
     }
@@ -750,9 +750,9 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
 
 void QuickTimeMovieComponent::paint (Graphics& g)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->movie == 0 || id->controller == 0)
+    if (qmci->movie == 0 || qmci->controller == 0)
     {
         g.fillAll (Colours::black);
         return;
@@ -762,7 +762,7 @@ void QuickTimeMovieComponent::paint (Graphics& g)
     GetPort (&savedPort);
 
     MacSetPort (getPortForWindow (getWindowHandle()));
-    MCDraw (id->controller, (WindowRef) getWindowHandle());
+    MCDraw (qmci->controller, (WindowRef) getWindowHandle());
 
     MacSetPort (savedPort);
 
@@ -793,9 +793,9 @@ void QuickTimeMovieComponent::moved()
 
 void QuickTimeMovieComponent::resized()
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->controller != 0 && isShowing())
+    if (qmci->controller != 0 && isShowing())
     {
         checkWindowAssociation();
 
@@ -806,7 +806,7 @@ void QuickTimeMovieComponent::resized()
             GrafPtr savedPort;
             GetPort (&savedPort);
 
-            SetMovieGWorld (id->movie, (CGrafPtr) port, 0);
+            SetMovieGWorld (qmci->movie, (CGrafPtr) port, 0);
             MacSetPort (port);
 
             lastPositionApplied = getMoviePos (this);
@@ -817,10 +817,10 @@ void QuickTimeMovieComponent::resized()
             r.right  = (short) lastPositionApplied.getRight();
             r.bottom = (short) lastPositionApplied.getBottom();
 
-            if (MCGetVisible (id->controller))
-                MCSetControllerBoundsRect (id->controller, &r);
+            if (MCGetVisible (qmci->controller))
+                MCSetControllerBoundsRect (qmci->controller, &r);
             else
-                SetMovieBox (id->movie, &r);
+                SetMovieBox (qmci->movie, &r);
 
             if (! isPlaying())
                 timerCallback();
@@ -840,14 +840,14 @@ void QuickTimeMovieComponent::visibilityChanged()
 
 void QuickTimeMovieComponent::timerCallback()
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->controller != 0)
+    if (qmci->controller != 0)
     {
         if (isTimerRunning())
             startTimer (getTimerInterval());
 
-        MCIdle (id->controller);
+        MCIdle (qmci->controller);
 
         if (lastPositionApplied != getMoviePos (this))
             resized();
@@ -873,9 +873,9 @@ void QuickTimeMovieComponent::parentHierarchyChanged()
 
 void QuickTimeMovieComponent::handleMCEvent (void* ev)
 {
-    QTMovieCompInternal* const id = (QTMovieCompInternal*) internal;
+    QTMovieCompInternal* const qmci = (QTMovieCompInternal*) internal;
 
-    if (id->controller != 0 && isShowing())
+    if (qmci->controller != 0 && isShowing())
     {
         MacClickEventData* data = (MacClickEventData*) ev;
 
@@ -883,14 +883,14 @@ void QuickTimeMovieComponent::handleMCEvent (void* ev)
         data->where.v -= getTopLevelComponent()->getScreenY();
 
         Boolean b = false;
-        MCPtInController (id->controller, data->where, &b);
+        MCPtInController (qmci->controller, data->where, &b);
 
         if (b)
         {
             const int oldTimeBeforeWaitCursor = MessageManager::getInstance()->getTimeBeforeShowingWaitCursor();
             MessageManager::getInstance()->setTimeBeforeShowingWaitCursor (0);
 
-            MCClick (id->controller,
+            MCClick (qmci->controller,
                      (WindowRef) getWindowHandle(),
                      data->where,
                      data->when,

@@ -43,7 +43,7 @@ extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
 
 
 //==============================================================================
-static Desktop* instance = 0;
+static Desktop* juce_desktopInstance = 0;
 
 Desktop::Desktop() throw()
     : mouseListeners (2),
@@ -58,8 +58,8 @@ Desktop::Desktop() throw()
 
 Desktop::~Desktop() throw()
 {
-    jassert (instance == this);
-    instance = 0;
+    jassert (juce_desktopInstance == this);
+    juce_desktopInstance = 0;
 
     // doh! If you don't delete all your windows before exiting, you're going to
     // be leaking memory!
@@ -68,10 +68,10 @@ Desktop::~Desktop() throw()
 
 Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 {
-    if (instance == 0)
-        instance = new Desktop();
+    if (juce_desktopInstance == 0)
+        juce_desktopInstance = new Desktop();
 
-    return *instance;
+    return *juce_desktopInstance;
 }
 
 //==============================================================================

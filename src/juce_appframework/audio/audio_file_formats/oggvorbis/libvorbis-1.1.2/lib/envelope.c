@@ -34,7 +34,7 @@
 #include "misc.h"
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
   int ch=vi->channels;
   int i,j;
@@ -45,7 +45,7 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   e->ch=ch;
   e->storage=128;
   e->cursor=ci->blocksizes[1]/2;
-  e->mdct_win=_ogg_calloc(n,sizeof(*e->mdct_win));
+  e->mdct_win=(float*)_ogg_calloc(n,sizeof(*e->mdct_win));
   mdct_init(&e->mdct,n);
 
   for(i=0;i<n;i++){
@@ -64,7 +64,7 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
 
   for(j=0;j<VE_BANDS;j++){
     n=e->band[j].end;
-    e->band[j].window=_ogg_malloc(n*sizeof(*e->band[0].window));
+    e->band[j].window=(float*)_ogg_malloc(n*sizeof(*e->band[0].window));
     for(i=0;i<n;i++){
       e->band[j].window[i]=sin((i+.5)/n*M_PI);
       e->band[j].total+=e->band[j].window[i];
@@ -72,8 +72,8 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
     e->band[j].total=1./e->band[j].total;
   }
 
-  e->filter=_ogg_calloc(VE_BANDS*ch,sizeof(*e->filter));
-  e->mark=_ogg_calloc(e->storage,sizeof(*e->mark));
+  e->filter=(envelope_filter_state*)_ogg_calloc(VE_BANDS*ch,sizeof(*e->filter));
+  e->mark=(int*)_ogg_calloc(e->storage,sizeof(*e->mark));
 
 }
 
@@ -107,7 +107,7 @@ static int _ve_amp(envelope_lookup *ve,
      itself (for low power signals) */
 
   float minV=ve->minenergy;
-  float *vec=alloca(n*sizeof(*vec));
+  float *vec=(float*) alloca(n*sizeof(*vec));
 
   /* stretch is used to gradually lengthen the number of windows
      considered prevoius-to-potential-trigger */
@@ -177,10 +177,10 @@ static int _ve_amp(envelope_lookup *ve,
 
     /* convert amplitude to delta */
     {
-      int p,this=filters[j].ampptr;
+      int p,thisx=filters[j].ampptr;
       float postmax,postmin,premax=-99999.f,premin=99999.f;
 
-      p=this;
+      p=thisx;
       p--;
       if(p<0)p+=VE_AMP;
       postmax=max(acc,filters[j].ampbuf[p]);
@@ -197,7 +197,7 @@ static int _ve_amp(envelope_lookup *ve,
       valmax=postmax-premax;
 
       /*filters[j].markers[pos]=valmax;*/
-      filters[j].ampbuf[this]=acc;
+      filters[j].ampbuf[thisx]=acc;
       filters[j].ampptr++;
       if(filters[j].ampptr>=VE_AMP)filters[j].ampptr=0;
     }
@@ -220,7 +220,7 @@ static ogg_int64_t totalshift=-1024;
 
 long _ve_envelope_search(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info *)vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
   envelope_lookup *ve=((private_state *)(v->backend_state))->ve;
   long i,j;
@@ -232,7 +232,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
   /* make sure we have enough storage to match the PCM */
   if(last+VE_WIN+VE_POST>ve->storage){
     ve->storage=last+VE_WIN+VE_POST; /* be sure */
-    ve->mark=_ogg_realloc(ve->mark,ve->storage*sizeof(*ve->mark));
+    ve->mark=(int*)_ogg_realloc(ve->mark,ve->storage*sizeof(*ve->mark));
   }
 
   for(j=first;j<last;j++){
@@ -335,7 +335,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 int _ve_envelope_mark(vorbis_dsp_state *v){
   envelope_lookup *ve=((private_state *)(v->backend_state))->ve;
   vorbis_info *vi=v->vi;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   long centerW=v->centerW;
   long beginW=centerW-ci->blocksizes[v->W]/4;
   long endW=centerW+ci->blocksizes[v->W]/4;

@@ -1244,8 +1244,8 @@ void drft_backward(drft_lookup *l,float *data){
 
 void drft_init(drft_lookup *l,int n){
   l->n=n;
-  l->trigcache=_ogg_calloc(3*n,sizeof(*l->trigcache));
-  l->splitcache=_ogg_calloc(32,sizeof(*l->splitcache));
+  l->trigcache=(float*)_ogg_calloc(3*n,sizeof(*l->trigcache));
+  l->splitcache=(int*)_ogg_calloc(32,sizeof(*l->splitcache));
   fdrffti(n, l->trigcache, l->splitcache);
 }
 

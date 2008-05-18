@@ -43,9 +43,10 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_ScopedLock.h"
 
 //==============================================================================
+#undef log
 #define log(a) Logger::writeToLog(a)
 
-static bool logAnyErrors (const OSStatus err, const int lineNum)
+static bool logAnyErrorsMidi (const OSStatus err, const int lineNum)
 {
     if (err == noErr)
         return true;
@@ -55,7 +56,8 @@ static bool logAnyErrors (const OSStatus err, const int lineNum)
     return false;
 }
 
-#define OK(a) logAnyErrors(a, __LINE__)
+#undef OK
+#define OK(a) logAnyErrorsMidi(a, __LINE__)
 
 
 //==============================================================================
@@ -141,10 +143,10 @@ static const String getConnectedEndpointName (MIDIEndpointRef endpoint)
 
             for (int i = 0; i < numConnections; ++i, ++pid)
             {
-                MIDIUniqueID id = EndianS32_BtoN (*pid);
+                MIDIUniqueID uid = EndianS32_BtoN (*pid);
                 MIDIObjectRef connObject;
                 MIDIObjectType connObjectType;
-                OSStatus err = MIDIObjectFindByUniqueID (id, &connObject, &connObjectType);
+                OSStatus err = MIDIObjectFindByUniqueID (uid, &connObject, &connObjectType);
 
                 if (err == noErr)
                 {
@@ -584,5 +586,7 @@ void MidiInput::stop()
     const ScopedLock sl (callbackLock);
     mpe->active = false;
 }
+
+#undef log
 
 END_JUCE_NAMESPACE

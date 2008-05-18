@@ -42,8 +42,8 @@ BEGIN_JUCE_NAMESPACE
 class InternalMultiTimerCallback    : public Timer
 {
 public:
-    InternalMultiTimerCallback (const int id_, MultiTimer& owner_)
-        : id (id_),
+    InternalMultiTimerCallback (const int timerId_, MultiTimer& owner_)
+        : timerId (timerId_),
           owner (owner_)
     {
     }
@@ -54,10 +54,10 @@ public:
 
     void timerCallback()
     {
-        owner.timerCallback (id);
+        owner.timerCallback (timerId);
     }
 
-    const int id;
+    const int timerId;
 
 private:
     MultiTimer& owner;
@@ -91,7 +91,7 @@ void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds
     {
         InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
 
-        if (t->id == timerId)
+        if (t->timerId == timerId)
         {
             t->startTimer (intervalInMilliseconds);
             return;
@@ -111,7 +111,7 @@ void MultiTimer::stopTimer (const int timerId) throw()
     {
         InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
 
-        if (t->id == timerId)
+        if (t->timerId == timerId)
             t->stopTimer();
     }
 }
@@ -123,7 +123,7 @@ bool MultiTimer::isTimerRunning (const int timerId) const throw()
     for (int i = timers.size(); --i >= 0;)
     {
         const InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
-        if (t->id == timerId)
+        if (t->timerId == timerId)
             return t->isTimerRunning();
     }
 
@@ -137,7 +137,7 @@ int MultiTimer::getTimerInterval (const int timerId) const throw()
     for (int i = timers.size(); --i >= 0;)
     {
         const InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
-        if (t->id == timerId)
+        if (t->timerId == timerId)
             return t->getTimerInterval();
     }
 

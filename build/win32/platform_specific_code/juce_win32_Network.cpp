@@ -358,7 +358,7 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
 }
 
 //==============================================================================
-typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, FLAGS, ULONG);
+typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG);
 
 bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
                                                     const String& emailSubject,

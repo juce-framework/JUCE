@@ -32,7 +32,7 @@ typedef struct {
   struct jpeg_color_quantizer * quantizer_2pass;
 } my_decomp_master;
 
-typedef my_decomp_master * my_master_ptr;
+typedef my_decomp_master * my_master_ptr6;
 
 
 /*
@@ -287,7 +287,7 @@ prepare_range_limit_table (j_decompress_ptr cinfo)
 LOCAL(void)
 master_selection (j_decompress_ptr cinfo)
 {
-  my_master_ptr master = (my_master_ptr) cinfo->master;
+  my_master_ptr6 master = (my_master_ptr6) cinfo->master;
   boolean use_c_buffer;
   long samplesperrow;
   JDIMENSION jd_samplesperrow;
@@ -437,7 +437,7 @@ master_selection (j_decompress_ptr cinfo)
 METHODDEF(void)
 prepare_for_output_pass (j_decompress_ptr cinfo)
 {
-  my_master_ptr master = (my_master_ptr) cinfo->master;
+  my_master_ptr6 master = (my_master_ptr6) cinfo->master;
 
   if (master->pub.is_dummy_pass) {
 #ifdef QUANT_2PASS_SUPPORTED
@@ -497,7 +497,7 @@ prepare_for_output_pass (j_decompress_ptr cinfo)
 METHODDEF(void)
 finish_output_pass (j_decompress_ptr cinfo)
 {
-  my_master_ptr master = (my_master_ptr) cinfo->master;
+  my_master_ptr6 master = (my_master_ptr6) cinfo->master;
 
   if (cinfo->quantize_colors)
     (*cinfo->cquantize->finish_pass) (cinfo);
@@ -514,7 +514,7 @@ finish_output_pass (j_decompress_ptr cinfo)
 GLOBAL(void)
 jpeg_new_colormap (j_decompress_ptr cinfo)
 {
-  my_master_ptr master = (my_master_ptr) cinfo->master;
+  my_master_ptr6 master = (my_master_ptr6) cinfo->master;
 
   /* Prevent application from calling me at wrong times */
   if (cinfo->global_state != DSTATE_BUFIMAGE)
@@ -542,9 +542,9 @@ jpeg_new_colormap (j_decompress_ptr cinfo)
 GLOBAL(void)
 jinit_master_decompress (j_decompress_ptr cinfo)
 {
-  my_master_ptr master;
+  my_master_ptr6 master;
 
-  master = (my_master_ptr)
+  master = (my_master_ptr6)
       (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
 				  SIZEOF(my_decomp_master));
   cinfo->master = (struct jpeg_decomp_master *) master;

@@ -105,7 +105,7 @@ static FLAC__byte ID3V2_TAG_[3] = { 'I', 'D', '3' };
  *
  ***********************************************************************/
 
-static void set_defaults_(FLAC__StreamDecoder *decoder);
+static void set_defaults_dec(FLAC__StreamDecoder *decoder);
 static FILE *get_binary_stdin_(void);
 static FLAC__bool allocate_output_(FLAC__StreamDecoder *decoder, unsigned size, unsigned channels);
 static FLAC__bool has_id_filtered_(FLAC__StreamDecoder *decoder, FLAC__byte *id);
@@ -138,9 +138,9 @@ static FLAC__bool seek_to_absolute_sample_(FLAC__StreamDecoder *decoder, FLAC__u
 #if FLAC__HAS_OGG
 static FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint64 stream_length, FLAC__uint64 target_sample);
 #endif
-static FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
-static FLAC__StreamDecoderSeekStatus file_seek_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data);
-static FLAC__StreamDecoderTellStatus file_tell_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
+static FLAC__StreamDecoderReadStatus file_read_callback_dec (const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
+static FLAC__StreamDecoderSeekStatus file_seek_callback_dec (const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data);
+static FLAC__StreamDecoderTellStatus file_tell_callback_dec (const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
 static FLAC__StreamDecoderLengthStatus file_length_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *stream_length, void *client_data);
 static FLAC__bool file_eof_callback_(const FLAC__StreamDecoder *decoder, void *client_data);
 
@@ -333,7 +333,7 @@ FLAC_API FLAC__StreamDecoder *FLAC__stream_decoder_new(void)
 
 	decoder->private_->file = 0;
 
-	set_defaults_(decoder);
+	set_defaults_dec(decoder);
 
 	decoder->protected_->state = FLAC__STREAM_DECODER_UNINITIALIZED;
 
@@ -370,7 +370,7 @@ FLAC_API void FLAC__stream_decoder_delete(FLAC__StreamDecoder *decoder)
  *
  ***********************************************************************/
 
-static FLAC__StreamDecoderInitStatus init_stream_internal_(
+static FLAC__StreamDecoderInitStatus init_stream_internal_dec(
 	FLAC__StreamDecoder *decoder,
 	FLAC__StreamDecoderReadCallback read_callback,
 	FLAC__StreamDecoderSeekCallback seek_callback,
@@ -495,7 +495,7 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_stream(
 	void *client_data
 )
 {
-	return init_stream_internal_(
+	return init_stream_internal_dec(
 		decoder,
 		read_callback,
 		seek_callback,
@@ -523,7 +523,7 @@ FLAC_API FLAC__StreamDecoderInitStatus FLAC__stream_decoder_init_ogg_stream(
 	void *client_data
 )
 {
-	return init_stream_internal_(
+	return init_stream_internal_dec(
 		decoder,
 		read_callback,
 		seek_callback,
@@ -552,10 +552,10 @@ static FLAC__StreamDecoderInitStatus init_FILE_internal_(
 	FLAC__ASSERT(0 != file);
 
 	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return decoder->protected_->state = FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED;
+		return (FLAC__StreamDecoderInitStatus) (decoder->protected_->state = (FLAC__StreamDecoderState) FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED);
 
 	if(0 == write_callback || 0 == error_callback)
-		return decoder->protected_->state = FLAC__STREAM_DECODER_INIT_STATUS_INVALID_CALLBACKS;
+		return (FLAC__StreamDecoderInitStatus) (decoder->protected_->state = (FLAC__StreamDecoderState) FLAC__STREAM_DECODER_INIT_STATUS_INVALID_CALLBACKS);
 
 	/*
 	 * To make sure that our file does not go unclosed after an error, we
@@ -567,11 +567,11 @@ static FLAC__StreamDecoderInitStatus init_FILE_internal_(
 
 	decoder->private_->file = file;
 
-	return init_stream_internal_(
+	return init_stream_internal_dec(
 		decoder,
-		file_read_callback_,
-		decoder->private_->file == stdin? 0: file_seek_callback_,
-		decoder->private_->file == stdin? 0: file_tell_callback_,
+		file_read_callback_dec,
+		decoder->private_->file == stdin? 0: file_seek_callback_dec,
+		decoder->private_->file == stdin? 0: file_tell_callback_dec,
 		decoder->private_->file == stdin? 0: file_length_callback_,
 		file_eof_callback_,
 		write_callback,
@@ -626,10 +626,10 @@ static FLAC__StreamDecoderInitStatus init_file_internal_(
 	 * in FLAC__stream_decoder_init_FILE() before the FILE* is assigned.
 	 */
 	if(decoder->protected_->state != FLAC__STREAM_DECODER_UNINITIALIZED)
-		return decoder->protected_->state = FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED;
+		return (FLAC__StreamDecoderInitStatus) (decoder->protected_->state = (FLAC__StreamDecoderState) FLAC__STREAM_DECODER_INIT_STATUS_ALREADY_INITIALIZED);
 
 	if(0 == write_callback || 0 == error_callback)
-		return decoder->protected_->state = FLAC__STREAM_DECODER_INIT_STATUS_INVALID_CALLBACKS;
+		return (FLAC__StreamDecoderInitStatus) (decoder->protected_->state = (FLAC__StreamDecoderState) FLAC__STREAM_DECODER_INIT_STATUS_INVALID_CALLBACKS);
 
 	file = filename? fopen(filename, "rb") : stdin;
 
@@ -722,7 +722,7 @@ FLAC_API FLAC__bool FLAC__stream_decoder_finish(FLAC__StreamDecoder *decoder)
 	}
 	decoder->private_->is_seeking = false;
 
-	set_defaults_(decoder);
+	set_defaults_dec(decoder);
 
 	decoder->protected_->state = FLAC__STREAM_DECODER_UNINITIALIZED;
 
@@ -1254,7 +1254,7 @@ unsigned FLAC__stream_decoder_get_input_bytes_unconsumed(const FLAC__StreamDecod
  *
  ***********************************************************************/
 
-void set_defaults_(FLAC__StreamDecoder *decoder)
+void set_defaults_dec(FLAC__StreamDecoder *decoder)
 {
 #if FLAC__HAS_OGG
 	decoder->private_->is_ogg = false;
@@ -1369,12 +1369,12 @@ FLAC__bool has_id_filtered_(FLAC__StreamDecoder *decoder, FLAC__byte *id)
 FLAC__bool find_metadata_(FLAC__StreamDecoder *decoder)
 {
 	FLAC__uint32 x;
-	unsigned i, id;
+	unsigned i, id_;
 	FLAC__bool first = true;
 
 	FLAC__ASSERT(FLAC__bitreader_is_consumed_byte_aligned(decoder->private_->input));
 
-	for(i = id = 0; i < 4; ) {
+	for(i = id_ = 0; i < 4; ) {
 		if(decoder->private_->cached) {
 			x = (FLAC__uint32)decoder->private_->lookahead;
 			decoder->private_->cached = false;
@@ -1386,19 +1386,19 @@ FLAC__bool find_metadata_(FLAC__StreamDecoder *decoder)
 		if(x == FLAC__STREAM_SYNC_STRING[i]) {
 			first = true;
 			i++;
-			id = 0;
+			id_ = 0;
 			continue;
 		}
-		if(x == ID3V2_TAG_[id]) {
-			id++;
+		if(x == ID3V2_TAG_[id_]) {
+			id_++;
 			i = 0;
-			if(id == 3) {
+			if(id_ == 3) {
 				if(!skip_id3v2_tag_(decoder))
 					return false; /* skip_id3v2_tag_ sets the state for us */
 			}
 			continue;
 		}
-		id = 0;
+		id_ = 0;
 		if(x == 0xff) { /* MAGIC NUMBER for the first 8 frame sync bits */
 			decoder->private_->header_warmup[0] = (FLAC__byte)x;
 			if(!FLAC__bitreader_read_raw_uint32(decoder->private_->input, &x, 8))
@@ -1859,7 +1859,7 @@ FLAC__bool read_metadata_picture_(FLAC__StreamDecoder *decoder, FLAC__StreamMeta
 	/* read type */
 	if(!FLAC__bitreader_read_raw_uint32(decoder->private_->input, &x, FLAC__STREAM_METADATA_PICTURE_TYPE_LEN))
 		return false; /* read_callback_ sets the state for us */
-	obj->type = x;
+	obj->type = (FLAC__StreamMetadata_Picture_Type) x;
 
 	/* read MIME type */
 	if(!FLAC__bitreader_read_raw_uint32(decoder->private_->input, &x, FLAC__STREAM_METADATA_PICTURE_MIME_TYPE_LENGTH_LEN))
@@ -3323,7 +3323,7 @@ FLAC__bool seek_to_absolute_sample_ogg_(FLAC__StreamDecoder *decoder, FLAC__uint
 }
 #endif
 
-FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data)
+FLAC__StreamDecoderReadStatus file_read_callback_dec(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes, void *client_data)
 {
 	(void)client_data;
 
@@ -3340,7 +3340,7 @@ FLAC__StreamDecoderReadStatus file_read_callback_(const FLAC__StreamDecoder *dec
 		return FLAC__STREAM_DECODER_READ_STATUS_ABORT; /* abort to avoid a deadlock */
 }
 
-FLAC__StreamDecoderSeekStatus file_seek_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data)
+FLAC__StreamDecoderSeekStatus file_seek_callback_dec(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data)
 {
 	(void)client_data;
 
@@ -3352,7 +3352,7 @@ FLAC__StreamDecoderSeekStatus file_seek_callback_(const FLAC__StreamDecoder *dec
 		return FLAC__STREAM_DECODER_SEEK_STATUS_OK;
 }
 
-FLAC__StreamDecoderTellStatus file_tell_callback_(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
+FLAC__StreamDecoderTellStatus file_tell_callback_dec(const FLAC__StreamDecoder *decoder, FLAC__uint64 *absolute_byte_offset, void *client_data)
 {
 	off_t pos;
 	(void)client_data;

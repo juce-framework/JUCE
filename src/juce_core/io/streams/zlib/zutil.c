@@ -119,8 +119,7 @@ uLong ZEXPORT zlibCompileFlags()
 #  endif
 int z_verbose = verbose;
 
-void z_error (m)
-    char *m;
+void z_error (char *m)
 {
     fprintf(stderr, "%s\n", m);
     exit(1);
@@ -130,8 +129,7 @@ void z_error (m)
 /* exported to allow conversion of error code to string for compress() and
  * uncompress()
  */
-const char * ZEXPORT zError(err)
-    int err;
+const char * ZEXPORT zError(int err)
 {
     return ERR_MSG(err);
 }
@@ -297,19 +295,14 @@ extern voidp  calloc OF((uInt items, uInt size));
 extern void   free   OF((voidpf ptr));
 #endif
 
-voidpf zcalloc (opaque, items, size)
-    voidpf opaque;
-    unsigned items;
-    unsigned size;
+voidpf zcalloc (voidpf opaque, unsigned items, unsigned size)
 {
     if (opaque) items += size - size; /* make compiler happy */
     return sizeof(uInt) > 2 ? (voidpf)malloc(items * size) :
                               (voidpf)calloc(items, size);
 }
 
-void  zcfree (opaque, ptr)
-    voidpf opaque;
-    voidpf ptr;
+void  zcfree (voidpf opaque, voidpf ptr)
 {
     free(ptr);
     if (opaque) return; /* make compiler happy */

@@ -23,9 +23,9 @@ typedef struct {
   int * Cb_b_tab;		/* => table for Cb to B conversion */
   INT32 * Cr_g_tab;		/* => table for Cr to G conversion */
   INT32 * Cb_g_tab;		/* => table for Cb to G conversion */
-} my_color_deconverter;
+} my_color_deconverter2;
 
-typedef my_color_deconverter * my_cconvert_ptr;
+typedef my_color_deconverter2 * my_cconvert_ptr2;
 
 
 /**************** YCbCr -> RGB conversion: most common case **************/
@@ -69,7 +69,7 @@ typedef my_color_deconverter * my_cconvert_ptr;
 LOCAL(void)
 build_ycc_rgb_table (j_decompress_ptr cinfo)
 {
-  my_cconvert_ptr cconvert = (my_cconvert_ptr) cinfo->cconvert;
+  my_cconvert_ptr2 cconvert = (my_cconvert_ptr2) cinfo->cconvert;
   int i;
   INT32 x;
   SHIFT_TEMPS
@@ -121,7 +121,7 @@ ycc_rgb_convert (j_decompress_ptr cinfo,
 		 JSAMPIMAGE input_buf, JDIMENSION input_row,
 		 JSAMPARRAY output_buf, int num_rows)
 {
-  my_cconvert_ptr cconvert = (my_cconvert_ptr) cinfo->cconvert;
+  my_cconvert_ptr2 cconvert = (my_cconvert_ptr2) cinfo->cconvert;
   register int y, cb, cr;
   register JSAMPROW outptr;
   register JSAMPROW inptr0, inptr1, inptr2;
@@ -166,7 +166,7 @@ ycc_rgb_convert (j_decompress_ptr cinfo,
  */
 
 METHODDEF(void)
-null_convert (j_decompress_ptr cinfo,
+null_convert2 (j_decompress_ptr cinfo,
 	      JSAMPIMAGE input_buf, JDIMENSION input_row,
 	      JSAMPARRAY output_buf, int num_rows)
 {
@@ -198,7 +198,7 @@ null_convert (j_decompress_ptr cinfo,
  */
 
 METHODDEF(void)
-grayscale_convert (j_decompress_ptr cinfo,
+grayscale_convert2 (j_decompress_ptr cinfo,
 		   JSAMPIMAGE input_buf, JDIMENSION input_row,
 		   JSAMPARRAY output_buf, int num_rows)
 {
@@ -246,7 +246,7 @@ ycck_cmyk_convert (j_decompress_ptr cinfo,
 		   JSAMPIMAGE input_buf, JDIMENSION input_row,
 		   JSAMPARRAY output_buf, int num_rows)
 {
-  my_cconvert_ptr cconvert = (my_cconvert_ptr) cinfo->cconvert;
+  my_cconvert_ptr2 cconvert = (my_cconvert_ptr2) cinfo->cconvert;
   register int y, cb, cr;
   register JSAMPROW outptr;
   register JSAMPROW inptr0, inptr1, inptr2, inptr3;
@@ -303,12 +303,12 @@ start_pass_dcolor (j_decompress_ptr cinfo)
 GLOBAL(void)
 jinit_color_deconverter (j_decompress_ptr cinfo)
 {
-  my_cconvert_ptr cconvert;
+  my_cconvert_ptr2 cconvert;
   int ci;
 
-  cconvert = (my_cconvert_ptr)
+  cconvert = (my_cconvert_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_color_deconverter));
+				SIZEOF(my_color_deconverter2));
   cinfo->cconvert = (struct jpeg_color_deconverter *) cconvert;
   cconvert->pub.start_pass = start_pass_dcolor;
 
@@ -347,7 +347,7 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
     cinfo->out_color_components = 1;
     if (cinfo->jpeg_color_space == JCS_GRAYSCALE ||
 	cinfo->jpeg_color_space == JCS_YCbCr) {
-      cconvert->pub.color_convert = grayscale_convert;
+      cconvert->pub.color_convert = grayscale_convert2;
       /* For color->grayscale conversion, only the Y (0) component is needed */
       for (ci = 1; ci < cinfo->num_components; ci++)
 	cinfo->comp_info[ci].component_needed = FALSE;
@@ -363,7 +363,7 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
     } else if (cinfo->jpeg_color_space == JCS_GRAYSCALE) {
       cconvert->pub.color_convert = gray_rgb_convert;
     } else if (cinfo->jpeg_color_space == JCS_RGB && RGB_PIXELSIZE == 3) {
-      cconvert->pub.color_convert = null_convert;
+      cconvert->pub.color_convert = null_convert2;
     } else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;
@@ -374,7 +374,7 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
       cconvert->pub.color_convert = ycck_cmyk_convert;
       build_ycc_rgb_table(cinfo);
     } else if (cinfo->jpeg_color_space == JCS_CMYK) {
-      cconvert->pub.color_convert = null_convert;
+      cconvert->pub.color_convert = null_convert2;
     } else
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;
@@ -383,7 +383,7 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
     /* Permit null conversion to same output space */
     if (cinfo->out_color_space == cinfo->jpeg_color_space) {
       cinfo->out_color_components = cinfo->num_components;
-      cconvert->pub.color_convert = null_convert;
+      cconvert->pub.color_convert = null_convert2;
     } else			/* unsupported non-null conversion */
       ERREXIT(cinfo, JERR_CONVERSION_NOTIMPL);
     break;

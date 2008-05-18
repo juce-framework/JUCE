@@ -41,14 +41,6 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
-static const float lineMarker       = 100001.0f;
-static const float moveMarker       = 100002.0f;
-static const float quadMarker       = 100003.0f;
-static const float cubicMarker      = 100004.0f;
-static const float closePathMarker  = 100005.0f;
-
-
-//==============================================================================
 PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
                                                 const AffineTransform& transform_,
                                                 float tolerence_) throw()
@@ -98,7 +90,7 @@ bool PathFlatteningIterator::next() throw()
             {
                 type = points [index++];
 
-                if (type != closePathMarker)
+                if (type != Path::closeSubPathMarker)
                 {
                     x2 = points [index++];
                     y2 = points [index++];
@@ -106,7 +98,7 @@ bool PathFlatteningIterator::next() throw()
                     if (! isIdentityTransform)
                         transform.transformPoint (x2, y2);
 
-                    if (type == quadMarker)
+                    if (type == Path::quadMarker)
                     {
                         x3 = points [index++];
                         y3 = points [index++];
@@ -114,7 +106,7 @@ bool PathFlatteningIterator::next() throw()
                         if (! isIdentityTransform)
                             transform.transformPoint (x3, y3);
                     }
-                    else if (type == cubicMarker)
+                    else if (type == Path::cubicMarker)
                     {
                         x3 = points [index++];
                         y3 = points [index++];
@@ -134,17 +126,17 @@ bool PathFlatteningIterator::next() throw()
         {
             type = *--stackPos;
 
-            if (type != closePathMarker)
+            if (type != Path::closeSubPathMarker)
             {
                 x2 = *--stackPos;
                 y2 = *--stackPos;
 
-                if (type == quadMarker)
+                if (type == Path::quadMarker)
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
                 }
-                else if (type == cubicMarker)
+                else if (type == Path::cubicMarker)
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
@@ -154,19 +146,19 @@ bool PathFlatteningIterator::next() throw()
             }
         }
 
-        if (type == lineMarker)
+        if (type == Path::lineMarker)
         {
             ++subPathIndex;
 
             closesSubPath = (stackPos == stackBase)
                              && (index < path.numElements)
-                             && (points [index] == closePathMarker)
+                             && (points [index] == Path::closeSubPathMarker)
                              && x2 == subPathCloseX
                              && y2 == subPathCloseY;
 
             return true;
         }
-        else if (type == quadMarker)
+        else if (type == Path::quadMarker)
         {
             const int offset = (int) (stackPos - stackBase);
 
@@ -195,28 +187,28 @@ bool PathFlatteningIterator::next() throw()
                 *stackPos++ = x3;
                 *stackPos++ = m2y;
                 *stackPos++ = m2x;
-                *stackPos++ = quadMarker;
+                *stackPos++ = Path::quadMarker;
 
                 *stackPos++ = m3y;
                 *stackPos++ = m3x;
                 *stackPos++ = m1y;
                 *stackPos++ = m1x;
-                *stackPos++ = quadMarker;
+                *stackPos++ = Path::quadMarker;
             }
             else
             {
                 *stackPos++ = y3;
                 *stackPos++ = x3;
-                *stackPos++ = lineMarker;
+                *stackPos++ = Path::lineMarker;
 
                 *stackPos++ = m3y;
                 *stackPos++ = m3x;
-                *stackPos++ = lineMarker;
+                *stackPos++ = Path::lineMarker;
             }
 
             jassert (stackPos < stackBase + stackSize);
         }
-        else if (type == cubicMarker)
+        else if (type == Path::cubicMarker)
         {
             const int offset = (int) (stackPos - stackBase);
 
@@ -254,7 +246,7 @@ bool PathFlatteningIterator::next() throw()
                 *stackPos++ = m3x;
                 *stackPos++ = m5y;
                 *stackPos++ = m5x;
-                *stackPos++ = cubicMarker;
+                *stackPos++ = Path::cubicMarker;
 
                 *stackPos++ = (m4y + m5y) * 0.5f;
                 *stackPos++ = (m4x + m5x) * 0.5f;
@@ -262,24 +254,24 @@ bool PathFlatteningIterator::next() throw()
                 *stackPos++ = m4x;
                 *stackPos++ = m1y;
                 *stackPos++ = m1x;
-                *stackPos++ = cubicMarker;
+                *stackPos++ = Path::cubicMarker;
             }
             else
             {
                 *stackPos++ = y4;
                 *stackPos++ = x4;
-                *stackPos++ = lineMarker;
+                *stackPos++ = Path::lineMarker;
 
                 *stackPos++ = m5y;
                 *stackPos++ = m5x;
-                *stackPos++ = lineMarker;
+                *stackPos++ = Path::lineMarker;
 
                 *stackPos++ = m4y;
                 *stackPos++ = m4x;
-                *stackPos++ = lineMarker;
+                *stackPos++ = Path::lineMarker;
             }
         }
-        else if (type == closePathMarker)
+        else if (type == Path::closeSubPathMarker)
         {
             if (x2 != subPathCloseX || y2 != subPathCloseY)
             {

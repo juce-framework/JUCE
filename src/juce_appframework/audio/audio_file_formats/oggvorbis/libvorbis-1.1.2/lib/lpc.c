@@ -62,8 +62,8 @@ Carsten Bormann
    Output: m lpc coefficients, excitation energy */
 
 float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
-  double *aut=alloca(sizeof(*aut)*(m+1));
-  double *lpc=alloca(sizeof(*lpc)*(m));
+  double *aut=(double*)alloca(sizeof(*aut)*(m+1));
+  double *lpc=(double*)alloca(sizeof(*lpc)*(m));
   double error;
   int i,j;
 
@@ -126,7 +126,7 @@ void vorbis_lpc_predict(float *coeff,float *prime,int m,
 
   long i,j,o,p;
   float y;
-  float *work=alloca(sizeof(*work)*(m+n));
+  float *work=(float*)alloca(sizeof(*work)*(m+n));
 
   if(!prime)
     for(i=0;i<m;i++)

@@ -31,10 +31,10 @@
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
-#import <Cocoa/Cocoa.h>
-#import <WebKit/HIWebView.h>
-#import <WebKit/WebPolicyDelegate.h>
-#import <WebKit/CarbonUtils.h>
+#include <Cocoa/Cocoa.h>
+#include <WebKit/HIWebView.h>
+#include <WebKit/WebPolicyDelegate.h>
+#include <WebKit/CarbonUtils.h>
 
 BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/events/juce_Timer.h"
@@ -47,7 +47,7 @@ END_JUCE_NAMESPACE
     juce::WebBrowserComponent* ownerComponent;
 }
 
-- (DownloadClickDetector*) init: (juce::WebBrowserComponent*) ownerComponent;
+- (DownloadClickDetector*) initWithOwner: (juce::WebBrowserComponent*) ownerComponent;
 
 - (void) webView: (WebView*) webView decidePolicyForNavigationAction: (NSDictionary*) actionInformation
                                                              request: (NSURLRequest*) request
@@ -58,7 +58,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @implementation DownloadClickDetector
 
-- (DownloadClickDetector*) init: (juce::WebBrowserComponent*) ownerComponent_
+- (DownloadClickDetector*) initWithOwner: (juce::WebBrowserComponent*) ownerComponent_
 {
     [super init];
     ownerComponent = ownerComponent_;
@@ -83,7 +83,7 @@ BEGIN_JUCE_NAMESPACE
 class WebBrowserComponentInternal   : public Timer
 {
 public:
-    WebBrowserComponentInternal (WebBrowserComponent* const owner_)
+    WebBrowserComponentInternal (WebBrowserComponent* owner_)
         : owner (owner_),
           view (0),
           webView (0)
@@ -124,7 +124,7 @@ public:
 
             webView = HIWebViewGetWebView (view);
 
-            clickListener = [[DownloadClickDetector alloc] init: owner_];
+            clickListener = [[DownloadClickDetector alloc] initWithOwner: owner_];
             [webView setPolicyDelegate: clickListener];
         }
 

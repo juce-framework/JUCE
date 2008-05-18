@@ -29,7 +29,7 @@
 
 typedef struct {
   int last_dc_val[MAX_COMPS_IN_SCAN]; /* last DC coef for each component */
-} savable_state;
+} savable_state2;
 
 /* This macro is to work around compilers with missing or broken
  * structure assignment.  You'll need to fix this code if you have
@@ -56,7 +56,7 @@ typedef struct {
    * In case of suspension, we exit WITHOUT updating them.
    */
   bitread_perm_state bitstate;	/* Bit buffer at start of MCU */
-  savable_state saved;		/* Other state at start of MCU */
+  savable_state2 saved;		/* Other state at start of MCU */
 
   /* These fields are NOT loaded into local working state. */
   unsigned int restarts_to_go;	/* MCUs left in this restart interval */
@@ -73,9 +73,9 @@ typedef struct {
   /* Whether we care about the DC and AC coefficient values for each block */
   boolean dc_needed[D_MAX_BLOCKS_IN_MCU];
   boolean ac_needed[D_MAX_BLOCKS_IN_MCU];
-} huff_entropy_decoder;
+} huff_entropy_decoder2;
 
-typedef huff_entropy_decoder * huff_entropy_ptr;
+typedef huff_entropy_decoder2 * huff_entropy_ptr2;
 
 
 /*
@@ -85,7 +85,7 @@ typedef huff_entropy_decoder * huff_entropy_ptr;
 METHODDEF(void)
 start_pass_huff_decoder (j_decompress_ptr cinfo)
 {
-  huff_entropy_ptr entropy = (huff_entropy_ptr) cinfo->entropy;
+  huff_entropy_ptr2 entropy = (huff_entropy_ptr2) cinfo->entropy;
   int ci, blkn, dctbl, actbl;
   jpeg_component_info * compptr;
 
@@ -434,32 +434,6 @@ jpeg_huff_decode (bitread_working_state * state,
 
 
 /*
- * Figure F.12: extend sign bit.
- * On some machines, a shift and add will be faster than a table lookup.
- */
-
-#ifdef AVOID_TABLES
-
-#define HUFF_EXTEND(x,s)  ((x) < (1<<((s)-1)) ? (x) + (((-1)<<(s)) + 1) : (x))
-
-#else
-
-#define HUFF_EXTEND(x,s)  ((x) < extend_test[s] ? (x) + extend_offset[s] : (x))
-
-static const int extend_test[16] =   /* entry n is 2**(n-1) */
-  { 0, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,
-    0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000 };
-
-static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
-  { 0, ((-1)<<1) + 1, ((-1)<<2) + 1, ((-1)<<3) + 1, ((-1)<<4) + 1,
-    ((-1)<<5) + 1, ((-1)<<6) + 1, ((-1)<<7) + 1, ((-1)<<8) + 1,
-    ((-1)<<9) + 1, ((-1)<<10) + 1, ((-1)<<11) + 1, ((-1)<<12) + 1,
-    ((-1)<<13) + 1, ((-1)<<14) + 1, ((-1)<<15) + 1 };
-
-#endif /* AVOID_TABLES */
-
-
-/*
  * Check for a restart marker & resynchronize decoder.
  * Returns FALSE if must suspend.
  */
@@ -467,7 +441,7 @@ static const int extend_offset[16] = /* entry n is (-1 << n) + 1 */
 LOCAL(boolean)
 process_restart (j_decompress_ptr cinfo)
 {
-  huff_entropy_ptr entropy = (huff_entropy_ptr) cinfo->entropy;
+  huff_entropy_ptr2 entropy = (huff_entropy_ptr2) cinfo->entropy;
   int ci;
 
   /* Throw away any unused bits remaining in bit buffer; */
@@ -516,10 +490,10 @@ process_restart (j_decompress_ptr cinfo)
 METHODDEF(boolean)
 decode_mcu (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 {
-  huff_entropy_ptr entropy = (huff_entropy_ptr) cinfo->entropy;
+  huff_entropy_ptr2 entropy = (huff_entropy_ptr2) cinfo->entropy;
   int blkn;
   BITREAD_STATE_VARS;
-  savable_state state;
+  savable_state2 state;
 
   /* Process restart marker if needed; may have to suspend */
   if (cinfo->restart_interval) {
@@ -634,12 +608,12 @@ decode_mcu (j_decompress_ptr cinfo, JBLOCKROW *MCU_data)
 GLOBAL(void)
 jinit_huff_decoder (j_decompress_ptr cinfo)
 {
-  huff_entropy_ptr entropy;
+  huff_entropy_ptr2 entropy;
   int i;
 
-  entropy = (huff_entropy_ptr)
+  entropy = (huff_entropy_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(huff_entropy_decoder));
+				SIZEOF(huff_entropy_decoder2));
   cinfo->entropy = (struct jpeg_entropy_decoder *) entropy;
   entropy->pub.start_pass = start_pass_huff_decoder;
   entropy->pub.decode_mcu = decode_mcu;

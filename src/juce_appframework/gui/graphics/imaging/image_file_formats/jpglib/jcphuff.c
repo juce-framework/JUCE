@@ -198,11 +198,11 @@ start_pass_phuff (j_compress_ptr cinfo, boolean gather_statistics)
 #define emit_byte(entropy,val)  \
 	{ *(entropy)->next_output_byte++ = (JOCTET) (val);  \
 	  if (--(entropy)->free_in_buffer == 0)  \
-	    dump_buffer(entropy); }
+	    dump_buffer_p(entropy); }
 
 
 LOCAL(void)
-dump_buffer (phuff_entropy_ptr entropy)
+dump_buffer_p (phuff_entropy_ptr entropy)
 /* Empty the output buffer; we do not support suspension in this module. */
 {
   struct jpeg_destination_mgr * dest = entropy->cinfo->dest;
@@ -225,7 +225,7 @@ dump_buffer (phuff_entropy_ptr entropy)
 
 INLINE
 LOCAL(void)
-emit_bits (phuff_entropy_ptr entropy, unsigned int code, int size)
+emit_bits_p (phuff_entropy_ptr entropy, unsigned int code, int size)
 /* Emit some bits, unless we are in gather mode */
 {
   /* This routine is heavily used, so it's worth coding tightly. */
@@ -264,9 +264,9 @@ emit_bits (phuff_entropy_ptr entropy, unsigned int code, int size)
 
 
 LOCAL(void)
-flush_bits (phuff_entropy_ptr entropy)
+flush_bits_p (phuff_entropy_ptr entropy)
 {
-  emit_bits(entropy, 0x7F, 7); /* fill any partial byte with ones */
+  emit_bits_p(entropy, 0x7F, 7); /* fill any partial byte with ones */
   entropy->put_buffer = 0;     /* and reset bit-buffer to empty */
   entropy->put_bits = 0;
 }
@@ -284,7 +284,7 @@ emit_symbol (phuff_entropy_ptr entropy, int tbl_no, int symbol)
     entropy->count_ptrs[tbl_no][symbol]++;
   else {
     c_derived_tbl * tbl = entropy->derived_tbls[tbl_no];
-    emit_bits(entropy, tbl->ehufco[symbol], tbl->ehufsi[symbol]);
+    emit_bits_p(entropy, tbl->ehufco[symbol], tbl->ehufsi[symbol]);
   }
 }
 
@@ -301,7 +301,7 @@ emit_buffered_bits (phuff_entropy_ptr entropy, char * bufstart,
     return;			/* no real work */
 
   while (nbits > 0) {
-    emit_bits(entropy, (unsigned int) (*bufstart), 1);
+    emit_bits_p(entropy, (unsigned int) (*bufstart), 1);
     bufstart++;
     nbits--;
   }
@@ -328,7 +328,7 @@ emit_eobrun (phuff_entropy_ptr entropy)
 
     emit_symbol(entropy, entropy->ac_tbl_no, nbits << 4);
     if (nbits)
-      emit_bits(entropy, entropy->EOBRUN, nbits);
+      emit_bits_p(entropy, entropy->EOBRUN, nbits);
 
     entropy->EOBRUN = 0;
 
@@ -344,14 +344,14 @@ emit_eobrun (phuff_entropy_ptr entropy)
  */
 
 LOCAL(void)
-emit_restart (phuff_entropy_ptr entropy, int restart_num)
+emit_restart_p (phuff_entropy_ptr entropy, int restart_num)
 {
   int ci;
 
   emit_eobrun(entropy);
 
   if (! entropy->gather_statistics) {
-    flush_bits(entropy);
+    flush_bits_p(entropy);
     emit_byte(entropy, 0xFF);
     emit_byte(entropy, JPEG_RST0 + restart_num);
   }
@@ -391,7 +391,7 @@ encode_mcu_DC_first (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Emit restart marker if needed */
   if (cinfo->restart_interval)
     if (entropy->restarts_to_go == 0)
-      emit_restart(entropy, entropy->next_restart_num);
+      emit_restart_p(entropy, entropy->next_restart_num);
 
   /* Encode the MCU data blocks */
   for (blkn = 0; blkn < cinfo->blocks_in_MCU; blkn++) {
@@ -435,7 +435,7 @@ encode_mcu_DC_first (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
     /* Emit that number of bits of the value, if positive, */
     /* or the complement of its magnitude, if negative. */
     if (nbits)			/* emit_bits rejects calls with size 0 */
-      emit_bits(entropy, (unsigned int) temp2, nbits);
+      emit_bits_p(entropy, (unsigned int) temp2, nbits);
   }
 
   cinfo->dest->next_output_byte = entropy->next_output_byte;
@@ -477,7 +477,7 @@ encode_mcu_AC_first (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Emit restart marker if needed */
   if (cinfo->restart_interval)
     if (entropy->restarts_to_go == 0)
-      emit_restart(entropy, entropy->next_restart_num);
+      emit_restart_p(entropy, entropy->next_restart_num);
 
   /* Encode the MCU data block */
   block = MCU_data[0];
@@ -533,7 +533,7 @@ encode_mcu_AC_first (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
 
     /* Emit that number of bits of the value, if positive, */
     /* or the complement of its magnitude, if negative. */
-    emit_bits(entropy, (unsigned int) temp2, nbits);
+    emit_bits_p(entropy, (unsigned int) temp2, nbits);
 
     r = 0;			/* reset zero run length */
   }
@@ -582,7 +582,7 @@ encode_mcu_DC_refine (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Emit restart marker if needed */
   if (cinfo->restart_interval)
     if (entropy->restarts_to_go == 0)
-      emit_restart(entropy, entropy->next_restart_num);
+      emit_restart_p(entropy, entropy->next_restart_num);
 
   /* Encode the MCU data blocks */
   for (blkn = 0; blkn < cinfo->blocks_in_MCU; blkn++) {
@@ -590,7 +590,7 @@ encode_mcu_DC_refine (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
 
     /* We simply emit the Al'th bit of the DC coefficient value. */
     temp = (*block)[0];
-    emit_bits(entropy, (unsigned int) (temp >> Al), 1);
+    emit_bits_p(entropy, (unsigned int) (temp >> Al), 1);
   }
 
   cinfo->dest->next_output_byte = entropy->next_output_byte;
@@ -634,7 +634,7 @@ encode_mcu_AC_refine (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
   /* Emit restart marker if needed */
   if (cinfo->restart_interval)
     if (entropy->restarts_to_go == 0)
-      emit_restart(entropy, entropy->next_restart_num);
+      emit_restart_p(entropy, entropy->next_restart_num);
 
   /* Encode the MCU data block */
   block = MCU_data[0];
@@ -701,7 +701,7 @@ encode_mcu_AC_refine (j_compress_ptr cinfo, JBLOCKROW *MCU_data)
 
     /* Emit output bit for newly-nonzero coef */
     temp = ((*block)[jpeg_natural_order[k]] < 0) ? 0 : 1;
-    emit_bits(entropy, (unsigned int) temp, 1);
+    emit_bits_p(entropy, (unsigned int) temp, 1);
 
     /* Emit buffered correction bits that must be associated with this code */
     emit_buffered_bits(entropy, BR_buffer, BR);
@@ -752,7 +752,7 @@ finish_pass_phuff (j_compress_ptr cinfo)
 
   /* Flush out any buffered data */
   emit_eobrun(entropy);
-  flush_bits(entropy);
+  flush_bits_p(entropy);
 
   cinfo->dest->next_output_byte = entropy->next_output_byte;
   cinfo->dest->free_in_buffer = entropy->free_in_buffer;

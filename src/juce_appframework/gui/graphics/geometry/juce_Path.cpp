@@ -43,11 +43,11 @@ BEGIN_JUCE_NAMESPACE
     jassert (x == x && y == y);
 
 //==============================================================================
-static const float lineMarker           = 100001.0f;
-static const float moveMarker           = 100002.0f;
-static const float quadMarker           = 100003.0f;
-static const float cubicMarker          = 100004.0f;
-static const float closeSubPathMarker   = 100005.0f;
+const float Path::lineMarker           = 100001.0f;
+const float Path::moveMarker           = 100002.0f;
+const float Path::quadMarker           = 100003.0f;
+const float Path::cubicMarker          = 100004.0f;
+const float Path::closeSubPathMarker   = 100005.0f;
 
 static const int defaultGranularity = 32;
 

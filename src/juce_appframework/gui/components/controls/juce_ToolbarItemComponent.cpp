@@ -40,8 +40,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../layout/juce_StretchableObjectResizer.h"
 
-const tchar* const toolbarDragDescriptor = T("_toolbarItem_"); // also in Toolbar.cpp
-
 
 //==============================================================================
 ToolbarItemFactory::ToolbarItemFactory()
@@ -104,7 +102,7 @@ public:
 
             if (dnd != 0)
             {
-                dnd->startDragging (toolbarDragDescriptor, getParentComponent(), 0, true);
+                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), 0, true);
 
                 ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 

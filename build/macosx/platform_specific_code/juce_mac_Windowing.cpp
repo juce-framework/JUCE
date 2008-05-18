@@ -2547,16 +2547,16 @@ const unsigned int kSpecialNoCursor = 'nocr';
 
 void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
 {
-    ThemeCursor id = kThemeArrowCursor;
+    ThemeCursor cursorId = kThemeArrowCursor;
 
     switch (type)
     {
     case MouseCursor::NormalCursor:
-        id = kThemeArrowCursor;
+        cursorId = kThemeArrowCursor;
         break;
 
     case MouseCursor::NoCursor:
-        id = kSpecialNoCursor;
+        cursorId = kSpecialNoCursor;
         break;
 
     case MouseCursor::DraggingHandCursor:
@@ -2573,19 +2573,19 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
         break;
 
     case MouseCursor::CopyingCursor:
-        id = kThemeCopyArrowCursor;
+        cursorId = kThemeCopyArrowCursor;
         break;
 
     case MouseCursor::WaitCursor:
-        id = kThemeWatchCursor;
+        cursorId = kThemeWatchCursor;
         break;
 
     case MouseCursor::IBeamCursor:
-        id = kThemeIBeamCursor;
+        cursorId = kThemeIBeamCursor;
         break;
 
     case MouseCursor::PointingHandCursor:
-        id = kThemePointingHandCursor;
+        cursorId = kThemePointingHandCursor;
         break;
 
     case MouseCursor::LeftRightResizeCursor:
@@ -2655,13 +2655,13 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
         }
 
     case MouseCursor::CrosshairCursor:
-        id = kThemeCrossCursor;
+        cursorId = kThemeCrossCursor;
         break;
     }
 
     CursorWrapper* cw = new CursorWrapper();
     cw->cursor = 0;
-    cw->themeCursor = id;
+    cw->themeCursor = cursorId;
 
     return (void*) cw;
 }
@@ -2767,14 +2767,14 @@ public:
 
         if (currentModel != 0)
         {
-            int id = 1000;
+            int menuId = 1000;
             const StringArray menuNames (currentModel->getMenuBarNames());
 
             for (int i = 0; i < menuNames.size(); ++i)
             {
                 const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames [i]));
 
-                MenuRef m = createMenu (menu, menuNames [i], id, i);
+                MenuRef m = createMenu (menu, menuNames [i], menuId, i);
 
                 InsertMenu (m, 0);
                 CFRelease (m);
@@ -2795,19 +2795,19 @@ public:
         }
     }
 
-    void invoke (const int id, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
+    void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
     {
         if (currentModel != 0)
         {
             if (commandManager != 0)
             {
-                ApplicationCommandTarget::InvocationInfo info (id);
+                ApplicationCommandTarget::InvocationInfo info (commandId);
                 info.invocationMethod = ApplicationCommandTarget::InvocationInfo::fromMenu;
 
                 commandManager->invoke (info, true);
             }
 
-            currentModel->menuItemSelected (id, topLevelIndex);
+            currentModel->menuItemSelected (commandId, topLevelIndex);
         }
     }
 

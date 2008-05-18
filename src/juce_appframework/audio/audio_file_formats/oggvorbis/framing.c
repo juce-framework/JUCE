@@ -192,11 +192,11 @@ int ogg_stream_init(ogg_stream_state *os,int serialno){
   if(os){
     memset(os,0,sizeof(*os));
     os->body_storage=16*1024;
-    os->body_data=_ogg_malloc(os->body_storage*sizeof(*os->body_data));
+    os->body_data=(unsigned char*) _ogg_malloc(os->body_storage*sizeof(*os->body_data));
 
     os->lacing_storage=1024;
-    os->lacing_vals=_ogg_malloc(os->lacing_storage*sizeof(*os->lacing_vals));
-    os->granule_vals=_ogg_malloc(os->lacing_storage*sizeof(*os->granule_vals));
+    os->lacing_vals=(int*) _ogg_malloc(os->lacing_storage*sizeof(*os->lacing_vals));
+    os->granule_vals=(ogg_int64_t*) _ogg_malloc(os->lacing_storage*sizeof(*os->granule_vals));
 
     os->serialno=serialno;
 
@@ -231,15 +231,15 @@ int ogg_stream_destroy(ogg_stream_state *os){
 static void _os_body_expand(ogg_stream_state *os,int needed){
   if(os->body_storage<=os->body_fill+needed){
     os->body_storage+=(needed+1024);
-    os->body_data=_ogg_realloc(os->body_data,os->body_storage*sizeof(*os->body_data));
+    os->body_data=(unsigned char*) _ogg_realloc(os->body_data,os->body_storage*sizeof(*os->body_data));
   }
 }
 
 static void _os_lacing_expand(ogg_stream_state *os,int needed){
   if(os->lacing_storage<=os->lacing_fill+needed){
     os->lacing_storage+=(needed+32);
-    os->lacing_vals=_ogg_realloc(os->lacing_vals,os->lacing_storage*sizeof(*os->lacing_vals));
-    os->granule_vals=_ogg_realloc(os->granule_vals,os->lacing_storage*sizeof(*os->granule_vals));
+    os->lacing_vals=(int*)_ogg_realloc(os->lacing_vals,os->lacing_storage*sizeof(*os->lacing_vals));
+    os->granule_vals=(ogg_int64_t*)_ogg_realloc(os->granule_vals,os->lacing_storage*sizeof(*os->granule_vals));
   }
 }
 
@@ -520,9 +520,9 @@ char *ogg_sync_buffer(ogg_sync_state *oy, long size){
     long newsize=size+oy->fill+4096; /* an extra page to be nice */
 
     if(oy->data)
-      oy->data=_ogg_realloc(oy->data,newsize);
+      oy->data=(unsigned char*) _ogg_realloc(oy->data,newsize);
     else
-      oy->data=_ogg_malloc(newsize);
+      oy->data=(unsigned char*) _ogg_malloc(newsize);
     oy->storage=newsize;
   }
 
@@ -623,7 +623,7 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
   oy->bodybytes=0;
 
   /* search for possible capture */
-  next=memchr(page+1,'O',bytes-1);
+  next=(unsigned char*)memchr(page+1,'O',bytes-1);
   if(!next)
     next=oy->data+oy->fill;
 

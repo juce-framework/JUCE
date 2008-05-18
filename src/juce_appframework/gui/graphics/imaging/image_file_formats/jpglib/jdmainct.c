@@ -129,9 +129,9 @@ typedef struct {
   int context_state;		/* process_data state machine status */
   JDIMENSION rowgroups_avail;	/* row groups available to postprocessor */
   JDIMENSION iMCU_row_ctr;	/* counts iMCU rows to detect image top/bot */
-} my_main_controller;
+} my_main_controller4;
 
-typedef my_main_controller * my_main_ptr;
+typedef my_main_controller4 * my_main_ptr4;
 
 /* context_state values: */
 #define CTX_PREPARE_FOR_IMCU	0	/* need to prepare for MCU row */
@@ -140,7 +140,7 @@ typedef my_main_controller * my_main_ptr;
 
 
 /* Forward declarations */
-METHODDEF(void) process_data_simple_main
+METHODDEF(void) process_data_simple_main2
 	JPP((j_decompress_ptr cinfo, JSAMPARRAY output_buf,
 	     JDIMENSION *out_row_ctr, JDIMENSION out_rows_avail));
 METHODDEF(void) process_data_context_main
@@ -159,7 +159,7 @@ alloc_funny_pointers (j_decompress_ptr cinfo)
  * This is done only once, not once per pass.
  */
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
   int ci, rgroup;
   int M = cinfo->min_DCT_scaled_size;
   jpeg_component_info *compptr;
@@ -200,7 +200,7 @@ make_funny_pointers (j_decompress_ptr cinfo)
  * This will be repeated at the beginning of each pass.
  */
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
   int ci, i, rgroup;
   int M = cinfo->min_DCT_scaled_size;
   jpeg_component_info *compptr;
@@ -240,7 +240,7 @@ set_wraparound_pointers (j_decompress_ptr cinfo)
  * This changes the pointer list state from top-of-image to the normal state.
  */
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
   int ci, i, rgroup;
   int M = cinfo->min_DCT_scaled_size;
   jpeg_component_info *compptr;
@@ -269,7 +269,7 @@ set_bottom_pointers (j_decompress_ptr cinfo)
  * Also sets rowgroups_avail to indicate number of nondummy row groups in row.
  */
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
   int ci, i, rgroup, iMCUheight, rows_left;
   jpeg_component_info *compptr;
   JSAMPARRAY xbuf;
@@ -304,9 +304,9 @@ set_bottom_pointers (j_decompress_ptr cinfo)
  */
 
 METHODDEF(void)
-start_pass_main (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
+start_pass_main2 (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
 
   switch (pass_mode) {
   case JBUF_PASS_THRU:
@@ -318,7 +318,7 @@ start_pass_main (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
       main_->iMCU_row_ctr = 0;
     } else {
       /* Simple case with no context needed */
-      main_->pub.process_data = process_data_simple_main;
+      main_->pub.process_data = process_data_simple_main2;
     }
     main_->buffer_full = FALSE;	/* Mark buffer empty */
     main_->rowgroup_ctr = 0;
@@ -342,11 +342,11 @@ start_pass_main (j_decompress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 
 METHODDEF(void)
-process_data_simple_main (j_decompress_ptr cinfo,
+process_data_simple_main2 (j_decompress_ptr cinfo,
 			  JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
 			  JDIMENSION out_rows_avail)
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
   JDIMENSION rowgroups_avail;
 
   /* Read input data if we haven't filled the main buffer yet */
@@ -386,7 +386,7 @@ process_data_context_main (j_decompress_ptr cinfo,
 			   JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
 			   JDIMENSION out_rows_avail)
 {
-  my_main_ptr main_ = (my_main_ptr) cinfo->main;
+  my_main_ptr4 main_ = (my_main_ptr4) cinfo->main;
 
   /* Read input data if we haven't filled the main buffer yet */
   if (! main_->buffer_full) {
@@ -475,15 +475,15 @@ process_data_crank_post (j_decompress_ptr cinfo,
 GLOBAL(void)
 jinit_d_main_controller (j_decompress_ptr cinfo, boolean need_full_buffer)
 {
-  my_main_ptr main_;
+  my_main_ptr4 main_;
   int ci, rgroup, ngroups;
   jpeg_component_info *compptr;
 
-  main_ = (my_main_ptr)
+  main_ = (my_main_ptr4)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_main_controller));
+				SIZEOF(my_main_controller4));
   cinfo->main = (struct jpeg_d_main_controller *) main_;
-  main_->pub.start_pass = start_pass_main;
+  main_->pub.start_pass = start_pass_main2;
 
   if (need_full_buffer)		/* shouldn't happen */
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);

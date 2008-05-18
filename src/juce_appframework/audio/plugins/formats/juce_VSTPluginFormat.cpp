@@ -3011,4 +3011,6 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 
 END_JUCE_NAMESPACE
 
+#undef log
+
 #endif

@@ -31,7 +31,7 @@
 
 /* compute bitrate tracking setup  */
 void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info *)vi->codec_setup;
   bitrate_manager_info *bi=&ci->bi;
 
   memset(bm,0,sizeof(*bm));
@@ -67,7 +67,7 @@ void vorbis_bitrate_clear(bitrate_manager_state *bm){
 
 int vorbis_bitrate_managed(vorbis_block *vb){
   vorbis_dsp_state      *vd=vb->vd;
-  private_state         *b=vd->backend_state;
+  private_state         *b=(private_state*)vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
 
   if(bm && bm->managed)return(1);
@@ -76,12 +76,12 @@ int vorbis_bitrate_managed(vorbis_block *vb){
 
 /* finish taking in the block we just processed */
 int vorbis_bitrate_addblock(vorbis_block *vb){
-  vorbis_block_internal *vbi=vb->internal;
+  vorbis_block_internal *vbi=(vorbis_block_internal*)vb->internal;
   vorbis_dsp_state      *vd=vb->vd;
-  private_state         *b=vd->backend_state;
+  private_state         *b=(private_state*)vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
   vorbis_info           *vi=vd->vi;
-  codec_setup_info      *ci=vi->codec_setup;
+  codec_setup_info      *ci=(codec_setup_info*)vi->codec_setup;
   bitrate_manager_info  *bi=&ci->bi;
 
   int  choice=rint(bm->avgfloat);
@@ -232,14 +232,14 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 }
 
 int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
-  private_state         *b=vd->backend_state;
+  private_state         *b=(private_state*)vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
   vorbis_block          *vb=bm->vb;
   int                    choice=PACKETBLOBS/2;
   if(!vb)return 0;
 
   if(op){
-    vorbis_block_internal *vbi=vb->internal;
+    vorbis_block_internal *vbi=(vorbis_block_internal*)vb->internal;
 
     if(vorbis_bitrate_managed(vb))
       choice=bm->choice;

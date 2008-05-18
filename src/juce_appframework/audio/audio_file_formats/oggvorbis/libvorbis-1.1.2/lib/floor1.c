@@ -87,25 +87,6 @@ static void floor1_free_look(vorbis_look_floor *i){
   }
 }
 
-static int ilog(unsigned int v){
-  int ret=0;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
-}
-
-static int ilog2(unsigned int v){
-  int ret=0;
-  if(v)--v;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
-}
-
 static void floor1_pack (vorbis_info_floor *i,oggpack_buffer *opb){
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
   int j,k;
@@ -144,10 +125,10 @@ static void floor1_pack (vorbis_info_floor *i,oggpack_buffer *opb){
 
 
 static vorbis_info_floor *floor1_unpack (vorbis_info *vi,oggpack_buffer *opb){
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
   int j,k,count=0,maxclass=-1,rangebits;
 
-  vorbis_info_floor1 *info=_ogg_calloc(1,sizeof(*info));
+  vorbis_info_floor1 *info=(vorbis_info_floor1*)_ogg_calloc(1,sizeof(*info));
   /* read partitions */
   info->partitions=oggpack_read(opb,5); /* only 0 to 31 legal */
   for(j=0;j<info->partitions;j++){
@@ -201,8 +182,8 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,
 				      vorbis_info_floor *in){
 
   int *sortpointer[VIF_POSIT+2];
-  vorbis_info_floor1 *info=(vorbis_info_floor1 *)in;
-  vorbis_look_floor1 *look=_ogg_calloc(1,sizeof(*look));
+  vorbis_info_floor1 *info=(vorbis_info_floor1*)in;
+  vorbis_look_floor1 *look=(vorbis_look_floor1*)_ogg_calloc(1,sizeof(*look));
   int i,j,n=0;
 
   look->vi=info;
@@ -593,10 +574,11 @@ static int post_Y(int *A,int *B,int pos){
   return (A[pos]+B[pos])>>1;
 }
 
-int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
+int *floor1_fit(vorbis_block *vb,void *look_,
 			  const float *logmdct,   /* in */
 			  const float *logmask){
   long i,j;
+  vorbis_look_floor1 *look = (vorbis_look_floor1*) look_;
   vorbis_info_floor1 *info=look->vi;
   long n=look->n;
   long posts=look->posts;
@@ -705,7 +687,7 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
       }
     }
 
-    output=_vorbis_block_alloc(vb,sizeof(*output)*posts);
+    output=(int*)_vorbis_block_alloc(vb,sizeof(*output)*posts);
 
     output[0]=post_Y(fit_valueA,fit_valueB,0);
     output[1]=post_Y(fit_valueA,fit_valueB,1);
@@ -736,16 +718,17 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 
 }
 
-int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor1 *look,
+int *floor1_interpolate_fit(vorbis_block *vb,void *look_,
 			  int *A,int *B,
 			  int del){
 
   long i;
+  vorbis_look_floor1* look = (vorbis_look_floor1*) look_;
   long posts=look->posts;
   int *output=NULL;
 
   if(A && B){
-    output=_vorbis_block_alloc(vb,sizeof(*output)*posts);
+    output=(int*)_vorbis_block_alloc(vb,sizeof(*output)*posts);
 
     for(i=0;i<posts;i++){
       output[i]=((65536-del)*(A[i]&0x7fff)+del*(B[i]&0x7fff)+32768)>>16;
@@ -758,13 +741,14 @@ int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 
 
 int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
-		  vorbis_look_floor1 *look,
+		  void*look_,
 		  int *post,int *ilogmask){
 
   long i,j;
+  vorbis_look_floor1 *look = (vorbis_look_floor1 *) look_;
   vorbis_info_floor1 *info=look->vi;
   long posts=look->posts;
-  codec_setup_info *ci=vb->vd->vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vb->vd->vi->codec_setup;
   int out[VIF_POSIT+2];
   static_codebook **sbooks=ci->book_param;
   codebook *books=ci->fullbooks;
@@ -851,9 +835,9 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 
     /* partition by partition */
     for(i=0,j=2;i<info->partitions;i++){
-      int class=info->partitionclass[i];
-      int cdim=info->class_dim[class];
-      int csubbits=info->class_subs[class];
+      int classx=info->partitionclass[i];
+      int cdim=info->class_dim[classx];
+      int csubbits=info->class_subs[classx];
       int csub=1<<csubbits;
       int bookas[8]={0,0,0,0,0,0,0,0};
       int cval=0;
@@ -864,11 +848,11 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
       if(csubbits){
 	int maxval[8];
 	for(k=0;k<csub;k++){
-	  int booknum=info->class_subbook[class][k];
+	  int booknum=info->class_subbook[classx][k];
 	  if(booknum<0){
 	    maxval[k]=1;
 	  }else{
-	    maxval[k]=sbooks[info->class_subbook[class][k]]->entries;
+	    maxval[k]=sbooks[info->class_subbook[classx][k]]->entries;
 	  }
 	}
 	for(k=0;k<cdim;k++){
@@ -884,7 +868,7 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 	}
 	/* write it */
 	look->phrasebits+=
-	  vorbis_book_encode(books+info->class_book[class],cval,opb);
+	  vorbis_book_encode(books+info->class_book[classx],cval,opb);
 
 #ifdef TRAIN_FLOOR1
 	{
@@ -901,7 +885,7 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 
       /* write post values */
       for(k=0;k<cdim;k++){
-	int book=info->class_subbook[class][bookas[k]];
+	int book=info->class_subbook[classx][bookas[k]];
 	if(book>=0){
 	  /* hack to allow training with 'bad' books */
 	  if(out[j+k]<(books+book)->entries)
@@ -961,35 +945,35 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
-  codec_setup_info   *ci=vb->vd->vi->codec_setup;
+  codec_setup_info   *ci=(codec_setup_info*)vb->vd->vi->codec_setup;
 
   int i,j,k;
   codebook *books=ci->fullbooks;
 
   /* unpack wrapped/predicted values from stream */
   if(oggpack_read(&vb->opb,1)==1){
-    int *fit_value=_vorbis_block_alloc(vb,(look->posts)*sizeof(*fit_value));
+    int *fit_value=(int*)_vorbis_block_alloc(vb,(look->posts)*sizeof(*fit_value));
 
     fit_value[0]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
     fit_value[1]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
 
     /* partition by partition */
     for(i=0,j=2;i<info->partitions;i++){
-      int class=info->partitionclass[i];
-      int cdim=info->class_dim[class];
-      int csubbits=info->class_subs[class];
+      int classx=info->partitionclass[i];
+      int cdim=info->class_dim[classx];
+      int csubbits=info->class_subs[classx];
       int csub=1<<csubbits;
       int cval=0;
 
       /* decode the partition's first stage cascade value */
       if(csubbits){
-	cval=vorbis_book_decode(books+info->class_book[class],&vb->opb);
+	cval=vorbis_book_decode(books+info->class_book[classx],&vb->opb);
 
 	if(cval==-1)goto eop;
       }
 
       for(k=0;k<cdim;k++){
-	int book=info->class_subbook[class][cval&(csub-1)];
+	int book=info->class_subbook[classx][cval&(csub-1)];
 	cval>>=csubbits;
 	if(book>=0){
 	  if((fit_value[j+k]=vorbis_book_decode(books+book,&vb->opb))==-1)
@@ -1049,7 +1033,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
 
-  codec_setup_info   *ci=vb->vd->vi->codec_setup;
+  codec_setup_info   *ci=(codec_setup_info*)vb->vd->vi->codec_setup;
   int                  n=ci->blocksizes[vb->W]/2;
   int j;
 

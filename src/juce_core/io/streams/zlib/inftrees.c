@@ -29,13 +29,12 @@ const char inflate_copyright[] =
    table index bits.  It will differ if the request is greater than the
    longest code or if it is less than the shortest code.
  */
-int inflate_table(type, lens, codes, table, bits, work)
-codetype type;
-unsigned short FAR *lens;
-unsigned codes;
-code FAR * FAR *table;
-unsigned FAR *bits;
-unsigned short FAR *work;
+int inflate_table (codetype type, 
+                   unsigned short FAR *lens, 
+                   unsigned codes, 
+                   code FAR * FAR *table,
+                   unsigned FAR *bits,
+                   unsigned short FAR *work)
 {
     unsigned len;               /* a code's length in bits */
     unsigned sym;               /* index of code symbols */
@@ -50,7 +49,7 @@ unsigned short FAR *work;
     unsigned fill;              /* index for replicating entries */
     unsigned low;               /* low bits for current root entry */
     unsigned mask;              /* mask for low root bits */
-    code this;                  /* table entry for duplication */
+    code thisx;                  /* table entry for duplication */
     code FAR *next;             /* next available space in table */
     const unsigned short FAR *base;     /* base value table to use */
     const unsigned short FAR *extra;    /* extra bits table to use */
@@ -115,11 +114,11 @@ unsigned short FAR *work;
         if (count[max] != 0) break;
     if (root > max) root = max;
     if (max == 0) {                     /* no symbols to code at all */
-        this.op = (unsigned char)64;    /* invalid code marker */
-        this.bits = (unsigned char)1;
-        this.val = (unsigned short)0;
-        *(*table)++ = this;             /* make a table to force an error */
-        *(*table)++ = this;
+        thisx.op = (unsigned char)64;    /* invalid code marker */
+        thisx.bits = (unsigned char)1;
+        thisx.val = (unsigned short)0;
+        *(*table)++ = thisx;             /* make a table to force an error */
+        *(*table)++ = thisx;
         *bits = 1;
         return 0;     /* no symbols, but wait for decoding to report error */
     }
@@ -215,18 +214,18 @@ unsigned short FAR *work;
     /* process all codes and make table entries */
     for (;;) {
         /* create table entry */
-        this.bits = (unsigned char)(len - drop);
+        thisx.bits = (unsigned char)(len - drop);
         if ((int)(work[sym]) < end) {
-            this.op = (unsigned char)0;
-            this.val = work[sym];
+            thisx.op = (unsigned char)0;
+            thisx.val = work[sym];
         }
         else if ((int)(work[sym]) > end) {
-            this.op = (unsigned char)(extra[work[sym]]);
-            this.val = base[work[sym]];
+            thisx.op = (unsigned char)(extra[work[sym]]);
+            thisx.val = base[work[sym]];
         }
         else {
-            this.op = (unsigned char)(32 + 64);         /* end of block */
-            this.val = 0;
+            thisx.op = (unsigned char)(32 + 64);         /* end of block */
+            thisx.val = 0;
         }
 
         /* replicate for those indices with low len bits equal to huff */
@@ -235,7 +234,7 @@ unsigned short FAR *work;
         min = fill;                 /* save offset to next table */
         do {
             fill -= incr;
-            next[(huff >> drop) + fill] = this;
+            next[(huff >> drop) + fill] = thisx;
         } while (fill != 0);
 
         /* backwards increment the len-bit code huff */
@@ -295,20 +294,20 @@ unsigned short FAR *work;
        through high index bits.  When the current sub-table is filled, the loop
        drops back to the root table to fill in any remaining entries there.
      */
-    this.op = (unsigned char)64;                /* invalid code marker */
-    this.bits = (unsigned char)(len - drop);
-    this.val = (unsigned short)0;
+    thisx.op = (unsigned char)64;                /* invalid code marker */
+    thisx.bits = (unsigned char)(len - drop);
+    thisx.val = (unsigned short)0;
     while (huff != 0) {
         /* when done with sub-table, drop back to root table */
         if (drop != 0 && (huff & mask) != low) {
             drop = 0;
             len = root;
             next = *table;
-            this.bits = (unsigned char)len;
+            thisx.bits = (unsigned char)len;
         }
 
         /* put invalid code marker in table */
-        next[huff >> drop] = this;
+        next[huff >> drop] = thisx;
 
         /* backwards increment the len-bit code huff */
         incr = 1U << (len - 1);

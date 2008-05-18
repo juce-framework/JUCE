@@ -45,7 +45,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ComboBox.h"
 #include "../buttons/juce_TextButton.h"
 
-const tchar* const toolbarDragDescriptor = T("_toolbarItem_"); // also in ToolbarItemComponent.cpp
+const tchar* const Toolbar::toolbarDragDescriptor = T("_toolbarItem_");
 
 
 //==============================================================================

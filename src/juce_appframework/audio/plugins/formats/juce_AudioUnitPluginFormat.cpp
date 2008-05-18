@@ -1287,4 +1287,6 @@ const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 
 END_JUCE_NAMESPACE
 
+#undef log
+
 #endif

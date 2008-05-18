@@ -42,6 +42,38 @@
 #include "stream_decoder.h"
 #include "stream_encoder.h"
 
+
+#ifdef _MSC_VER
+/* OPT: an MSVC built-in would be better */
+static _inline FLAC__uint32 local_swap32_(FLAC__uint32 x)
+{
+	x = ((x<<8)&0xFF00FF00) | ((x>>8)&0x00FF00FF);
+	return (x>>16) | (x<<16);
+}
+#endif
+
+#if defined(_MSC_VER) && defined(_X86_)
+/* OPT: an MSVC built-in would be better */
+static void local_swap32_block_(FLAC__uint32 *start, FLAC__uint32 len)
+{
+	__asm {
+		mov edx, start
+		mov ecx, len
+		test ecx, ecx
+loop1:
+		jz done1
+		mov eax, [edx]
+		bswap eax
+		mov [edx], eax
+		add edx, 4
+		dec ecx
+		jmp short loop1
+done1:
+	}
+}
+#endif
+
+
 /** \mainpage
  *
  * \section intro Introduction

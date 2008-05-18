@@ -261,7 +261,7 @@ public:
         If onlyCountVisibleColumns is true, this will return the index amoungst the visible columns;
         otherwise it'll return the index amongst all the columns, including any hidden ones.
     */
-    int getIndexOfColumnId (const int id, const bool onlyCountVisibleColumns) const throw();
+    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const throw();
 
     /** Returns the ID of the column at a given index.
 
@@ -418,7 +418,7 @@ private:
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
     int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
 
-    ColumnInfo* getInfoForId (const int id) const throw();
+    ColumnInfo* getInfoForId (const int columnId) const throw();
     int visibleIndexToTotalIndex (const int visibleIndex) const throw();
     void sendColumnsChanged();
     void handleAsyncUpdate();

@@ -16,6 +16,9 @@
  * Hence the magnitude should always fit in 10 or 14 bits respectively.
  */
 
+#ifndef _jchuff_h_
+#define _jchuff_h_
+
 #if BITS_IN_JSAMPLE == 8
 #define MAX_COEF_BITS 10
 #else
@@ -45,3 +48,5 @@ EXTERN(void) jpeg_make_c_derived_tbl
 /* Generate an optimal table definition given the specified counts */
 EXTERN(void) jpeg_gen_optimal_table
 	JPP((j_compress_ptr cinfo, JHUFF_TBL * htbl, long freq[]));
+
+#endif

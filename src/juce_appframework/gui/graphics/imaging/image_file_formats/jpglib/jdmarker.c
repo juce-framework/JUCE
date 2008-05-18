@@ -17,74 +17,6 @@
 #include "jpeglib.h"
 
 
-typedef enum {			/* JPEG marker codes */
-  M_SOF0  = 0xc0,
-  M_SOF1  = 0xc1,
-  M_SOF2  = 0xc2,
-  M_SOF3  = 0xc3,
-
-  M_SOF5  = 0xc5,
-  M_SOF6  = 0xc6,
-  M_SOF7  = 0xc7,
-
-  M_JPG   = 0xc8,
-  M_SOF9  = 0xc9,
-  M_SOF10 = 0xca,
-  M_SOF11 = 0xcb,
-
-  M_SOF13 = 0xcd,
-  M_SOF14 = 0xce,
-  M_SOF15 = 0xcf,
-
-  M_DHT   = 0xc4,
-
-  M_DAC   = 0xcc,
-
-  M_RST0  = 0xd0,
-  M_RST1  = 0xd1,
-  M_RST2  = 0xd2,
-  M_RST3  = 0xd3,
-  M_RST4  = 0xd4,
-  M_RST5  = 0xd5,
-  M_RST6  = 0xd6,
-  M_RST7  = 0xd7,
-
-  M_SOI   = 0xd8,
-  M_EOI   = 0xd9,
-  M_SOS   = 0xda,
-  M_DQT   = 0xdb,
-  M_DNL   = 0xdc,
-  M_DRI   = 0xdd,
-  M_DHP   = 0xde,
-  M_EXP   = 0xdf,
-
-  M_APP0  = 0xe0,
-  M_APP1  = 0xe1,
-  M_APP2  = 0xe2,
-  M_APP3  = 0xe3,
-  M_APP4  = 0xe4,
-  M_APP5  = 0xe5,
-  M_APP6  = 0xe6,
-  M_APP7  = 0xe7,
-  M_APP8  = 0xe8,
-  M_APP9  = 0xe9,
-  M_APP10 = 0xea,
-  M_APP11 = 0xeb,
-  M_APP12 = 0xec,
-  M_APP13 = 0xed,
-  M_APP14 = 0xee,
-  M_APP15 = 0xef,
-
-  M_JPG0  = 0xf0,
-  M_JPG13 = 0xfd,
-  M_COM   = 0xfe,
-
-  M_TEM   = 0x01,
-
-  M_ERROR = 0x100
-} JPEG_MARKER;
-
-
 /* Private state */
 
 typedef struct {
@@ -104,7 +36,7 @@ typedef struct {
   /* Note: cur_marker is not linked into marker_list until it's all read. */
 } my_marker_reader;
 
-typedef my_marker_reader * my_marker_ptr;
+typedef my_marker_reader * my_marker_ptr2;
 
 
 /*
@@ -739,7 +671,7 @@ METHODDEF(boolean)
 save_marker (j_decompress_ptr cinfo)
 /* Save an APPn or COM marker into the marker list */
 {
-  my_marker_ptr marker = (my_marker_ptr) cinfo->marker;
+  my_marker_ptr2 marker = (my_marker_ptr2) cinfo->marker;
   jpeg_saved_marker_ptr cur_marker = marker->cur_marker;
   unsigned int bytes_read, data_length;
   JOCTET FAR * data;
@@ -1055,13 +987,13 @@ read_markers (j_decompress_ptr cinfo)
     case M_APP13:
     case M_APP14:
     case M_APP15:
-      if (! (*((my_marker_ptr) cinfo->marker)->process_APPn[
+      if (! (*((my_marker_ptr2) cinfo->marker)->process_APPn[
 		cinfo->unread_marker - (int) M_APP0]) (cinfo))
 	return JPEG_SUSPENDED;
       break;
 
     case M_COM:
-      if (! (*((my_marker_ptr) cinfo->marker)->process_COM) (cinfo))
+      if (! (*((my_marker_ptr2) cinfo->marker)->process_COM) (cinfo))
 	return JPEG_SUSPENDED;
       break;
 
@@ -1241,7 +1173,7 @@ jpeg_resync_to_restart (j_decompress_ptr cinfo, int desired)
 METHODDEF(void)
 reset_marker_reader (j_decompress_ptr cinfo)
 {
-  my_marker_ptr marker = (my_marker_ptr) cinfo->marker;
+  my_marker_ptr2 marker = (my_marker_ptr2) cinfo->marker;
 
   cinfo->comp_info = NULL;		/* until allocated by get_sof */
   cinfo->input_scan_number = 0;		/* no SOS seen yet */
@@ -1261,11 +1193,11 @@ reset_marker_reader (j_decompress_ptr cinfo)
 GLOBAL(void)
 jinit_marker_reader (j_decompress_ptr cinfo)
 {
-  my_marker_ptr marker;
+  my_marker_ptr2 marker;
   int i;
 
   /* Create subobject in permanent pool */
-  marker = (my_marker_ptr)
+  marker = (my_marker_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
 				SIZEOF(my_marker_reader));
   cinfo->marker = (struct jpeg_marker_reader *) marker;
@@ -1300,7 +1232,7 @@ GLOBAL(void)
 jpeg_save_markers (j_decompress_ptr cinfo, int marker_code,
 		   unsigned int length_limit)
 {
-  my_marker_ptr marker = (my_marker_ptr) cinfo->marker;
+  my_marker_ptr2 marker = (my_marker_ptr2) cinfo->marker;
   long maxlength;
   jpeg_marker_parser_method processor;
 
@@ -1349,7 +1281,7 @@ GLOBAL(void)
 jpeg_set_marker_processor (j_decompress_ptr cinfo, int marker_code,
 			   jpeg_marker_parser_method routine)
 {
-  my_marker_ptr marker = (my_marker_ptr) cinfo->marker;
+  my_marker_ptr2 marker = (my_marker_ptr2) cinfo->marker;
 
   if (marker_code == (int) M_COM)
     marker->process_COM = routine;

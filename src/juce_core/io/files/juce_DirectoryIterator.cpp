@@ -37,10 +37,12 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_DirectoryIterator.h"
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly);
+                          bool* isDirectory, bool* isHidden, int64* fileSize,
+                          Time* modTime, Time* creationTime, bool* isReadOnly) throw();
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly);
-void juce_findFileClose (void* handle);
+                        bool* isDirectory, bool* isHidden, int64* fileSize, 
+                        Time* modTime, Time* creationTime, bool* isReadOnly) throw();
+void juce_findFileClose (void* handle) throw();
 
 
 //==============================================================================

@@ -37,9 +37,9 @@ static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10
 static double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
-  vorbis_look_psy_global *look=_ogg_calloc(1,sizeof(*look));
+  vorbis_look_psy_global *look=(vorbis_look_psy_global*)_ogg_calloc(1,sizeof(*look));
 
   look->channels=vi->channels;
 
@@ -92,9 +92,9 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
   float ath[EHMER_MAX];
   float workc[P_BANDS][P_LEVELS][EHMER_MAX];
   float athc[P_LEVELS][EHMER_MAX];
-  float *brute_buffer=alloca(n*sizeof(*brute_buffer));
+  float *brute_buffer=(float*) alloca(n*sizeof(*brute_buffer));
 
-  float ***ret=_ogg_malloc(sizeof(*ret)*P_BANDS);
+  float ***ret=(float***) _ogg_malloc(sizeof(*ret)*P_BANDS);
 
   memset(workc,0,sizeof(workc));
 
@@ -161,7 +161,7 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
 
   for(i=0;i<P_BANDS;i++){
     int hi_curve,lo_curve,bin;
-    ret[i]=_ogg_malloc(sizeof(**ret)*P_LEVELS);
+    ret[i]=(float**)_ogg_malloc(sizeof(**ret)*P_LEVELS);
 
     /* low frequency curves are measured with greater resolution than
        the MDCT/FFT will actually give us; we want the curve applied
@@ -181,7 +181,7 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
     if(hi_curve>=P_BANDS)hi_curve=P_BANDS-1;
 
     for(m=0;m<P_LEVELS;m++){
-      ret[i][m]=_ogg_malloc(sizeof(***ret)*(EHMER_MAX+2));
+      ret[i][m]=(float*)_ogg_malloc(sizeof(***ret)*(EHMER_MAX+2));
 
       for(j=0;j<n;j++)brute_buffer[j]=999.;
 
@@ -279,10 +279,10 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->firstoc=toOC(.25f*rate*.5/n)*(1<<(p->shiftoc+1))-gi->eighth_octave_lines;
   maxoc=toOC((n+.25f)*rate*.5/n)*(1<<(p->shiftoc+1))+.5f;
   p->total_octave_lines=maxoc-p->firstoc+1;
-  p->ath=_ogg_malloc(n*sizeof(*p->ath));
+  p->ath=(float*)_ogg_malloc(n*sizeof(*p->ath));
 
-  p->octave=_ogg_malloc(n*sizeof(*p->octave));
-  p->bark=_ogg_malloc(n*sizeof(*p->bark));
+  p->octave=(long*)_ogg_malloc(n*sizeof(*p->octave));
+  p->bark=(long*)_ogg_malloc(n*sizeof(*p->bark));
   p->vi=vi;
   p->n=n;
   p->rate=rate;
@@ -327,9 +327,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 				  vi->tone_centerboost,vi->tone_decay);
 
   /* set up rolling noise median */
-  p->noiseoffset=_ogg_malloc(P_NOISECURVES*sizeof(*p->noiseoffset));
+  p->noiseoffset=(float**)_ogg_malloc(P_NOISECURVES*sizeof(*p->noiseoffset));
   for(i=0;i<P_NOISECURVES;i++)
-    p->noiseoffset[i]=_ogg_malloc(n*sizeof(**p->noiseoffset));
+    p->noiseoffset[i]=(float*)_ogg_malloc(n*sizeof(**p->noiseoffset));
 
   for(i=0;i<n;i++){
     float halfoc=toOC((i+.5)*rate/(2.*n))*2.;
@@ -448,8 +448,8 @@ static void seed_loop(vorbis_look_psy *p,
 }
 
 static void seed_chase(float *seeds, int linesper, long n){
-  long  *posstack=alloca(n*sizeof(*posstack));
-  float *ampstack=alloca(n*sizeof(*ampstack));
+  long  *posstack=(long*)alloca(n*sizeof(*posstack));
+  float *ampstack=(float*)alloca(n*sizeof(*ampstack));
   long   stack=0;
   long   pos=0;
   long   i;
@@ -546,11 +546,11 @@ static void bark_noise_hybridmp(int n,const long *b,
                                 const float offset,
                                 const int fixed){
 
-  float *N=alloca(n*sizeof(*N));
-  float *X=alloca(n*sizeof(*N));
-  float *XX=alloca(n*sizeof(*N));
-  float *Y=alloca(n*sizeof(*N));
-  float *XY=alloca(n*sizeof(*N));
+  float *N=(float*) alloca(n*sizeof(*N));
+  float *X=(float*) alloca(n*sizeof(*N));
+  float *XX=(float*) alloca(n*sizeof(*N));
+  float *Y=(float*) alloca(n*sizeof(*N));
+  float *XY=(float*) alloca(n*sizeof(*N));
 
   float tN, tX, tXX, tY, tXY;
   int i;
@@ -783,7 +783,7 @@ void _vp_noisemask(vorbis_look_psy *p,
 		   float *logmask){
 
   int i,n=p->n;
-  float *work=alloca(n*sizeof(*work));
+  float *work=(float*) alloca(n*sizeof(*work));
 
   bark_noise_hybridmp(n,p->bark,logmdct,logmask,
 		      140.,-1);
@@ -834,7 +834,7 @@ void _vp_tonemask(vorbis_look_psy *p,
 
   int i,n=p->n;
 
-  float *seed=alloca(sizeof(*seed)*p->total_octave_lines);
+  float *seed=(float*) alloca(sizeof(*seed)*p->total_octave_lines);
   float att=local_specmax+p->vi->ath_adjatt;
   for(i=0;i<p->total_octave_lines;i++)seed[i]=NEGINF;
 
@@ -911,7 +911,7 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 
 float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   vorbis_info *vi=vd->vi;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
 
   int n=ci->blocksizes[vd->W]/2;
@@ -1001,13 +1001,13 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
 				 float **mdct){
 
   int i,j,n=p->n;
-  float **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+  float **ret=(float**) _vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
   int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
 
   for(i=0;i<vi->coupling_steps;i++){
     float *mdctM=mdct[vi->coupling_mag[i]];
     float *mdctA=mdct[vi->coupling_ang[i]];
-    ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+    ret[i]=(float*) _vorbis_block_alloc(vb,n*sizeof(**ret));
     for(j=0;j<limit;j++)
       ret[i][j]=dipole_hypot(mdctM[j],mdctA[j]);
     for(;j<n;j++)
@@ -1032,12 +1032,12 @@ int **_vp_quantize_couple_sort(vorbis_block *vb,
 
   if(p->vi->normal_point_p){
     int i,j,k,n=p->n;
-    int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+    int **ret=(int**) _vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
     int partition=p->vi->normal_partition;
-    float **work=alloca(sizeof(*work)*partition);
+    float **work=(float**) alloca(sizeof(*work)*partition);
 
     for(i=0;i<vi->coupling_steps;i++){
-      ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+      ret[i]=(int*) _vorbis_block_alloc(vb,n*sizeof(**ret));
 
       for(j=0;j<n;j+=partition){
 	for(k=0;k<partition;k++)work[k]=mags[i]+k+j;
@@ -1055,7 +1055,7 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
   int i,j,n=p->n;
   vorbis_info_psy *vi=p->vi;
   int partition=vi->normal_partition;
-  float **work=alloca(sizeof(*work)*partition);
+  float **work=(float**) alloca(sizeof(*work)*partition);
   int start=vi->normal_start;
 
   for(j=start;j<n;j+=partition){

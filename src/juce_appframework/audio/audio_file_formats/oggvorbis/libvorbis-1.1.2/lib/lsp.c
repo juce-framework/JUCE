@@ -313,11 +313,11 @@ static int comp(const void *a,const void *b){
 static int Laguerre_With_Deflation(float *a,int ord,float *r){
   int i,m;
   double lastdelta=0.f;
-  double *defl=alloca(sizeof(*defl)*(ord+1));
+  double *defl=(double*)alloca(sizeof(*defl)*(ord+1));
   for(i=0;i<=ord;i++)defl[i]=a[i];
 
   for(m=ord;m>0;m--){
-    double new=0.f,delta;
+    double newx=0.f,delta;
 
     /* iterate a root */
     while(1){
@@ -325,9 +325,9 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
 
       /* eval the polynomial and its first two derivatives */
       for(i=m;i>0;i--){
-	ppp = new*ppp + pp;
-	pp  = new*pp  + p;
-	p   = new*p   + defl[i-1];
+	ppp = newx*ppp + pp;
+	pp  = newx*pp  + p;
+	p   = newx*p   + defl[i-1];
       }
 
       /* Laguerre's method */
@@ -344,20 +344,20 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
       }
 
       delta  = m*p/denom;
-      new   -= delta;
+      newx   -= delta;
 
       if(delta<0.f)delta*=-1;
 
-      if(fabs(delta/new)<10e-12)break;
+      if(fabs(delta/newx)<10e-12)break;
       lastdelta=delta;
     }
 
-    r[m-1]=new;
+    r[m-1]=newx;
 
     /* forward deflation */
 
     for(i=m;i>0;i--)
-      defl[i-1]+=new*defl[i];
+      defl[i-1]+=newx*defl[i];
     defl++;
 
   }
@@ -369,7 +369,7 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
 static int Newton_Raphson(float *a,int ord,float *r){
   int i, k, count=0;
   double error=1.f;
-  double *root=alloca(ord*sizeof(*root));
+  double *root=(double*)alloca(ord*sizeof(*root));
 
   for(i=0; i<ord;i++) root[i] = r[i];
 
@@ -408,10 +408,10 @@ static int Newton_Raphson(float *a,int ord,float *r){
 int vorbis_lpc_to_lsp(float *lpc,float *lsp,int m){
   int order2=(m+1)>>1;
   int g1_order,g2_order;
-  float *g1=alloca(sizeof(*g1)*(order2+1));
-  float *g2=alloca(sizeof(*g2)*(order2+1));
-  float *g1r=alloca(sizeof(*g1r)*(order2+1));
-  float *g2r=alloca(sizeof(*g2r)*(order2+1));
+  float *g1=(float*)alloca(sizeof(*g1)*(order2+1));
+  float *g2=(float*)alloca(sizeof(*g2)*(order2+1));
+  float *g1r=(float*)alloca(sizeof(*g1r)*(order2+1));
+  float *g2r=(float*)alloca(sizeof(*g2r)*(order2+1));
   int i;
 
   /* even and odd are slightly different base cases */

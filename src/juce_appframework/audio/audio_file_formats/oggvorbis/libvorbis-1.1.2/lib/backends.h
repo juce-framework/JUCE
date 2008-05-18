@@ -92,7 +92,7 @@ typedef struct{
 				 vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
-  long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
+  long **(*classx)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
   int  (*forward)      (oggpack_buffer *,struct vorbis_block *,
 			vorbis_look_residue *,

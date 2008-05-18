@@ -213,8 +213,8 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
 
   if(searched>=end || ret<0){
     vf->links=m+1;
-    vf->offsets=_ogg_malloc((vf->links+1)*sizeof(*vf->offsets));
-    vf->serialnos=_ogg_malloc(vf->links*sizeof(*vf->serialnos));
+    vf->offsets=(ogg_int64_t*)_ogg_malloc((vf->links+1)*sizeof(*vf->offsets));
+    vf->serialnos=(long*)_ogg_malloc(vf->links*sizeof(*vf->serialnos));
     vf->offsets[m+1]=searched;
   }else{
     ret=_bisect_forward_serialno(vf,next,vf->offset,
@@ -297,10 +297,10 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
   int i;
   ogg_int64_t ret;
 
-  vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
-  vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
-  vf->dataoffsets=_ogg_malloc(vf->links*sizeof(*vf->dataoffsets));
-  vf->pcmlengths=_ogg_malloc(vf->links*2*sizeof(*vf->pcmlengths));
+  vf->vi=(vorbis_info*) _ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
+  vf->vc=(vorbis_comment*) _ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
+  vf->dataoffsets=(ogg_int64_t*) _ogg_malloc(vf->links*sizeof(*vf->dataoffsets));
+  vf->pcmlengths=(ogg_int64_t*) _ogg_malloc(vf->links*2*sizeof(*vf->pcmlengths));
 
   for(i=0;i<vf->links;i++){
     if(i==0){
@@ -661,8 +661,8 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   /* No seeking yet; Set up a 'single' (current) logical bitstream
      entry for partial open */
   vf->links=1;
-  vf->vi=_ogg_calloc(vf->links,sizeof(*vf->vi));
-  vf->vc=_ogg_calloc(vf->links,sizeof(*vf->vc));
+  vf->vi=(vorbis_info*) _ogg_calloc(vf->links,sizeof(*vf->vi));
+  vf->vc=(vorbis_comment*) _ogg_calloc(vf->links,sizeof(*vf->vc));
   ogg_stream_init(&vf->os,-1); /* fill in the serialno later */
 
   /* Try to fetch the headers, maintaining all the storage */
@@ -1841,14 +1841,14 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   hs1=ov_halfrate_p(vf1);
   hs2=ov_halfrate_p(vf2);
 
-  lappcm=alloca(sizeof(*lappcm)*vi1->channels);
+  lappcm=(float**) alloca(sizeof(*lappcm)*vi1->channels);
   n1=vorbis_info_blocksize(vi1,0)>>(1+hs1);
   n2=vorbis_info_blocksize(vi2,0)>>(1+hs2);
   w1=vorbis_window(&vf1->vd,0);
   w2=vorbis_window(&vf2->vd,0);
 
   for(i=0;i<vi1->channels;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=(float*) alloca(sizeof(**lappcm)*n1);
 
   _ov_getlap(vf1,vi1,&vf1->vd,lappcm,n1);
 
@@ -1888,9 +1888,9 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
 				   from this link gets dumped, this
 				   window array continues to exist */
 
-  lappcm=alloca(sizeof(*lappcm)*ch1);
+  lappcm=(float**) alloca(sizeof(*lappcm)*ch1);
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=(float*) alloca(sizeof(**lappcm)*n1);
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
   /* have lapping data; seek and prime the buffer */
@@ -1949,9 +1949,9 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
 				   from this link gets dumped, this
 				   window array continues to exist */
 
-  lappcm=alloca(sizeof(*lappcm)*ch1);
+  lappcm=(float**) alloca(sizeof(*lappcm)*ch1);
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=(float*) alloca(sizeof(**lappcm)*n1);
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
   /* have lapping data; seek and prime the buffer */

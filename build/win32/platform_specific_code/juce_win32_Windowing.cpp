@@ -95,8 +95,6 @@ extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.c
 extern void juce_CheckCurrentlyFocusedTopLevelWindow() throw();  // in juce_TopLevelWindow.cpp
 extern bool juce_IsRunningInWine() throw();
 
-const int juce_windowIsSemiTransparentFlag = (1 << 31); // also in component.cpp
-
 #ifndef ULW_ALPHA
   #define ULW_ALPHA     0x00000002
 #endif
@@ -1053,7 +1051,7 @@ private:
         if ((styleFlags & windowIgnoresMouseClicks) != 0)
             exstyle |= WS_EX_TRANSPARENT;
 
-        if ((styleFlags & juce_windowIsSemiTransparentFlag) != 0
+        if ((styleFlags & windowIsSemiTransparent) != 0
               && Desktop::canUseSemiTransparentWindows())
             exstyle |= WS_EX_LAYERED;
 

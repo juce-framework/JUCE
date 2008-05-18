@@ -31,11 +31,11 @@
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
-#import <Cocoa/Cocoa.h>
-#import <IOKit/IOKitLib.h>
-#import <IOKit/network/IOEthernetInterface.h>
-#import <IOKit/network/IONetworkInterface.h>
-#import <IOKit/network/IOEthernetController.h>
+#include <Cocoa/Cocoa.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/network/IOEthernetInterface.h>
+#include <IOKit/network/IONetworkInterface.h>
+#include <IOKit/network/IOEthernetController.h>
 
 #include <netdb.h>
 #include <arpa/inet.h>

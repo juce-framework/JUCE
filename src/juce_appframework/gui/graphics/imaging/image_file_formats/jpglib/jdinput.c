@@ -36,7 +36,7 @@ METHODDEF(int) consume_markers JPP((j_decompress_ptr cinfo));
  */
 
 LOCAL(void)
-initial_setup (j_decompress_ptr cinfo)
+initial_setup2 (j_decompress_ptr cinfo)
 /* Called once, when first SOS marker is reached */
 {
   int ci;
@@ -118,7 +118,7 @@ initial_setup (j_decompress_ptr cinfo)
 
 
 LOCAL(void)
-per_scan_setup (j_decompress_ptr cinfo)
+per_scan_setup2 (j_decompress_ptr cinfo)
 /* Do computations that are needed before processing a JPEG scan */
 /* cinfo->comps_in_scan and cinfo->cur_comp_info[] were set from SOS marker */
 {
@@ -251,9 +251,9 @@ latch_quant_tables (j_decompress_ptr cinfo)
  */
 
 METHODDEF(void)
-start_input_pass (j_decompress_ptr cinfo)
+start_input_pass2 (j_decompress_ptr cinfo)
 {
-  per_scan_setup(cinfo);
+  per_scan_setup2(cinfo);
   latch_quant_tables(cinfo);
   (*cinfo->entropy->start_pass) (cinfo);
   (*cinfo->coef->start_input_pass) (cinfo);
@@ -298,7 +298,7 @@ consume_markers (j_decompress_ptr cinfo)
   switch (val) {
   case JPEG_REACHED_SOS:	/* Found SOS */
     if (inputctl->inheaders) {	/* 1st SOS */
-      initial_setup(cinfo);
+      initial_setup2(cinfo);
       inputctl->inheaders = FALSE;
       /* Note: start_input_pass must be called by jdmaster.c
        * before any more input can be consumed.  jdapimin.c is
@@ -307,7 +307,7 @@ consume_markers (j_decompress_ptr cinfo)
     } else {			/* 2nd or later SOS marker */
       if (! inputctl->pub.has_multiple_scans)
 	ERREXIT(cinfo, JERR_EOI_EXPECTED); /* Oops, I wasn't expecting this! */
-      start_input_pass(cinfo);
+      start_input_pass2(cinfo);
     }
     break;
   case JPEG_REACHED_EOI:	/* Found EOI */
@@ -370,7 +370,7 @@ jinit_input_controller (j_decompress_ptr cinfo)
   /* Initialize method pointers */
   inputctl->pub.consume_input = consume_markers;
   inputctl->pub.reset_input_controller = reset_input_controller;
-  inputctl->pub.start_input_pass = start_input_pass;
+  inputctl->pub.start_input_pass = start_input_pass2;
   inputctl->pub.finish_input_pass = finish_input_pass;
   /* Initialize state: can't use reset_input_controller since we don't
    * want to try to reset other modules yet.

@@ -56,9 +56,9 @@ typedef struct {
    */
   UINT8 h_expand[MAX_COMPONENTS];
   UINT8 v_expand[MAX_COMPONENTS];
-} my_upsampler;
+} my_upsampler2;
 
-typedef my_upsampler * my_upsample_ptr;
+typedef my_upsampler2 * my_upsample_ptr2;
 
 
 /*
@@ -68,7 +68,7 @@ typedef my_upsampler * my_upsample_ptr;
 METHODDEF(void)
 start_pass_upsample (j_decompress_ptr cinfo)
 {
-  my_upsample_ptr upsample = (my_upsample_ptr) cinfo->upsample;
+  my_upsample_ptr2 upsample = (my_upsample_ptr2) cinfo->upsample;
 
   /* Mark the conversion buffer empty */
   upsample->next_row_out = cinfo->max_v_samp_factor;
@@ -92,7 +92,7 @@ sep_upsample (j_decompress_ptr cinfo,
 	      JSAMPARRAY output_buf, JDIMENSION *out_row_ctr,
 	      JDIMENSION out_rows_avail)
 {
-  my_upsample_ptr upsample = (my_upsample_ptr) cinfo->upsample;
+  my_upsample_ptr2 upsample = (my_upsample_ptr2) cinfo->upsample;
   int ci;
   jpeg_component_info * compptr;
   JDIMENSION num_rows;
@@ -189,7 +189,7 @@ METHODDEF(void)
 int_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 	      JSAMPARRAY input_data, JSAMPARRAY * output_data_ptr)
 {
-  my_upsample_ptr upsample = (my_upsample_ptr) cinfo->upsample;
+  my_upsample_ptr2 upsample = (my_upsample_ptr2) cinfo->upsample;
   JSAMPARRAY output_data = *output_data_ptr;
   register JSAMPROW inptr, outptr;
   register JSAMPLE invalue;
@@ -398,15 +398,15 @@ h2v2_fancy_upsample (j_decompress_ptr cinfo, jpeg_component_info * compptr,
 GLOBAL(void)
 jinit_upsampler (j_decompress_ptr cinfo)
 {
-  my_upsample_ptr upsample;
+  my_upsample_ptr2 upsample;
   int ci;
   jpeg_component_info * compptr;
   boolean need_buffer, do_fancy;
   int h_in_group, v_in_group, h_out_group, v_out_group;
 
-  upsample = (my_upsample_ptr)
+  upsample = (my_upsample_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_upsampler));
+				SIZEOF(my_upsampler2));
   cinfo->upsample = (struct jpeg_upsampler *) upsample;
   upsample->pub.start_pass = start_pass_upsample;
   upsample->pub.upsample = sep_upsample;

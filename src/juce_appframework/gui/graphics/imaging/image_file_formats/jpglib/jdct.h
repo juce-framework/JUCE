@@ -26,6 +26,9 @@
  * Quantization of the output coefficients is done by jcdctmgr.c.
  */
 
+#ifndef __jdct_h__
+#define __jdct_h__
+
 #if BITS_IN_JSAMPLE == 8
 typedef int DCTELEM;		/* 16 or 32 bits is fine */
 #else
@@ -173,4 +176,7 @@ EXTERN(void) jpeg_idct_1x1
 
 #ifndef MULTIPLY16V16		/* default definition */
 #define MULTIPLY16V16(var1,var2)  ((var1) * (var2))
+#endif
+
+
 #endif

@@ -55,7 +55,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 void* juce_fileOpen (const String& path, bool forWriting) throw();
 void juce_fileClose (void* handle) throw();
-int juce_fileWrite (void* handle, void* buffer, int size) throw();
+int juce_fileWrite (void* handle, const void* buffer, int size) throw();
 int64 juce_fileGetPosition (void* handle) throw();
 int64 juce_fileSetPosition (void* handle, int64 pos) throw();
 void juce_fileFlush (void* handle) throw();
@@ -86,11 +86,13 @@ const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSer
 // juce_firstResultFile gets the name of the file (not the whole pathname) and
 // the other pointers, if non-null, are set based on the properties of the file.
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw();
+                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, 
+                          Time* creationTime, bool* isReadOnly) throw();
 
 // returns false when no more files are found
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw();
+                        bool* isDirectory, bool* isHidden, int64* fileSize, 
+                        Time* modTime, Time* creationTime, bool* isReadOnly) throw();
 
 void juce_findFileClose (void* handle) throw();
 

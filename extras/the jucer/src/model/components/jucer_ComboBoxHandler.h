@@ -121,7 +121,7 @@ public:
 
         StringArray lines;
         lines.addLines (c->getComponentProperty (T("items"), false));
-        int id = 1;
+        int itemId = 1;
 
         for (int i = 0; i < lines.size(); ++i)
         {
@@ -129,7 +129,7 @@ public:
                 s << memberVariableName << "->addSeparator();\n";
             else
                 s << memberVariableName << "->addItem ("
-                  << quotedString (lines[i]) << ", " << id++ << ");\n";
+                  << quotedString (lines[i]) << ", " << itemId++ << ");\n";
         }
 
         if (needsCallback (component))
@@ -169,14 +169,14 @@ public:
         lines.addLines (c->getComponentProperty (T("items"), false));
 
         c->clear();
-        int id = 1;
+        int itemId = 1;
 
         for (int i = 0; i < lines.size(); ++i)
         {
             if (lines[i].trim().isEmpty())
                 c->addSeparator();
             else
-                c->addItem (lines[i], id++);
+                c->addItem (lines[i], itemId++);
         }
     }
 

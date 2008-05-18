@@ -219,7 +219,9 @@ static const String getDSErrorMessage (HRESULT hr)
 
 #ifdef DS_DEBUGGING
     #define CATCH JUCE_CATCH_EXCEPTION
+    #undef log
     #define log(a) Logger::writeToLog(a);
+    #undef logError
     #define logError(a) logDSError(a, __LINE__);
 
     static void logDSError (HRESULT hr, int lineNum)
@@ -1783,5 +1785,6 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     return error;
 }
 
+#undef log
 
 END_JUCE_NAMESPACE

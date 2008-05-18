@@ -52,6 +52,7 @@ BEGIN_JUCE_NAMESPACE
 #define MINIMUM_COORD -0x3fffffff
 #define MAXIMUM_COORD 0x3fffffff
 
+#undef ASSERT_COORDS_ARE_SENSIBLE_NUMBERS
 #define ASSERT_COORDS_ARE_SENSIBLE_NUMBERS(x, y, w, h) \
     jassert ((int) x >= MINIMUM_COORD  \
               && (int) x <= MAXIMUM_COORD \

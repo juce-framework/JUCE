@@ -28,9 +28,9 @@
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state     *vd=vb->vd;
-  private_state        *b=vd->backend_state;
+  private_state        *b=(private_state*)vd->backend_state;
   vorbis_info          *vi=vd->vi;
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*) vi->codec_setup;
   oggpack_buffer       *opb=&vb->opb;
   int                   type,mode,i;
 
@@ -69,9 +69,9 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
 
   /* alloc pcm passback storage */
   vb->pcmend=ci->blocksizes[vb->W];
-  vb->pcm=_vorbis_block_alloc(vb,sizeof(*vb->pcm)*vi->channels);
+  vb->pcm=(float**)_vorbis_block_alloc(vb,sizeof(*vb->pcm)*vi->channels);
   for(i=0;i<vi->channels;i++)
-    vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(*vb->pcm[i]));
+    vb->pcm[i]=(float*)_vorbis_block_alloc(vb,vb->pcmend*sizeof(*vb->pcm[i]));
 
   /* unpack_header enforces range checking */
   type=ci->map_type[ci->mode_param[mode]->mapping];
@@ -84,9 +84,9 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
    Useful for sequential 'fast forward' */
 int vorbis_synthesis_trackonly(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state     *vd=vb->vd;
-  private_state        *b=vd->backend_state;
+  private_state        *b=(private_state*)vd->backend_state;
   vorbis_info          *vi=vd->vi;
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
   oggpack_buffer       *opb=&vb->opb;
   int                   mode;
 
@@ -128,7 +128,7 @@ int vorbis_synthesis_trackonly(vorbis_block *vb,ogg_packet *op){
 }
 
 long vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op){
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
   oggpack_buffer       opb;
   int                  mode;
 
@@ -157,7 +157,7 @@ long vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op){
 
 int vorbis_synthesis_halfrate(vorbis_info *vi,int flag){
   /* set / clear half-sample-rate mode */
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
 
   /* right now, our MDCT can't handle < 64 sample windows. */
   if(ci->blocksizes[0]<=64 && flag)return -1;
@@ -166,7 +166,7 @@ int vorbis_synthesis_halfrate(vorbis_info *vi,int flag){
 }
 
 int vorbis_synthesis_halfrate_p(vorbis_info *vi){
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
   return ci->halfrate_flag;
 }
 

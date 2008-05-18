@@ -218,16 +218,16 @@ typedef struct {
 
   /* Workspace for constructing dummy blocks at right/bottom edges. */
   JBLOCKROW dummy_buffer[C_MAX_BLOCKS_IN_MCU];
-} my_coef_controller;
+} my_coef_controller2;
 
-typedef my_coef_controller * my_coef_ptr;
+typedef my_coef_controller2 * my_coef_ptr2;
 
 
 LOCAL(void)
-start_iMCU_row (j_compress_ptr cinfo)
+start_iMCU_row2 (j_compress_ptr cinfo)
 /* Reset within-iMCU-row counters for a new row */
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr2 coef = (my_coef_ptr2) cinfo->coef;
 
   /* In an interleaved scan, an MCU row is the same as an iMCU row.
    * In a noninterleaved scan, an iMCU row has v_samp_factor MCU rows.
@@ -252,15 +252,15 @@ start_iMCU_row (j_compress_ptr cinfo)
  */
 
 METHODDEF(void)
-start_pass_coef (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
+start_pass_coef2 (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr2 coef = (my_coef_ptr2) cinfo->coef;
 
   if (pass_mode != JBUF_CRANK_DEST)
     ERREXIT(cinfo, JERR_BAD_BUFFER_MODE);
 
   coef->iMCU_row_num = 0;
-  start_iMCU_row(cinfo);
+  start_iMCU_row2(cinfo);
 }
 
 
@@ -275,9 +275,9 @@ start_pass_coef (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 
 METHODDEF(boolean)
-compress_output (j_compress_ptr cinfo, JSAMPIMAGE input_buf)
+compress_output2 (j_compress_ptr cinfo, JSAMPIMAGE input_buf)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr2 coef = (my_coef_ptr2) cinfo->coef;
   JDIMENSION MCU_col_num;	/* index of current MCU within row */
   JDIMENSION last_MCU_col = cinfo->MCUs_per_row - 1;
   JDIMENSION last_iMCU_row = cinfo->total_iMCU_rows - 1;
@@ -346,7 +346,7 @@ compress_output (j_compress_ptr cinfo, JSAMPIMAGE input_buf)
   }
   /* Completed the iMCU row, advance counters for next one */
   coef->iMCU_row_num++;
-  start_iMCU_row(cinfo);
+  start_iMCU_row2(cinfo);
   return TRUE;
 }
 
@@ -363,16 +363,16 @@ LOCAL(void)
 transencode_coef_controller (j_compress_ptr cinfo,
 			     jvirt_barray_ptr * coef_arrays)
 {
-  my_coef_ptr coef;
+  my_coef_ptr2 coef;
   JBLOCKROW buffer;
   int i;
 
-  coef = (my_coef_ptr)
+  coef = (my_coef_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_coef_controller));
+				SIZEOF(my_coef_controller2));
   cinfo->coef = (struct jpeg_c_coef_controller *) coef;
-  coef->pub.start_pass = start_pass_coef;
-  coef->pub.compress_data = compress_output;
+  coef->pub.start_pass = start_pass_coef2;
+  coef->pub.compress_data = compress_output2;
 
   /* Save pointer to virtual arrays */
   coef->whole_image = coef_arrays;

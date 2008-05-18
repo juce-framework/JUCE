@@ -58,6 +58,26 @@ typedef void vorbis_info_mapping;
 #include "psy.h"
 #include "bitrate.h"
 
+static int ilog(unsigned int v){
+  int ret=0;
+  while(v){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
+
+static int ilog2(unsigned int v){
+  int ret=0;
+  if(v)--v;
+  while(v){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
+
+
 typedef struct private_state {
   /* local lookup storage */
   envelope_lookup        *ve; /* envelope lookup */

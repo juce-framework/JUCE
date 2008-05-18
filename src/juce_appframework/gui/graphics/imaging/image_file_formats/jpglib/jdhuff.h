@@ -12,6 +12,9 @@
 
 /* Short forms of external names for systems with brain-damaged linkers. */
 
+#ifndef __jdhuff_h__
+#define __jdhuff_h__
+
 #ifdef NEED_SHORT_EXTERNAL_NAMES
 #define jpeg_make_d_derived_tbl	jMkDDerived
 #define jpeg_fill_bit_buffer	jFilBitBuf
@@ -199,3 +202,5 @@ slowlabel: \
 EXTERN(int) jpeg_huff_decode
 	JPP((bitread_working_state * state, register bit_buf_type get_buffer,
 	     register int bits_left, d_derived_tbl * htbl, int min_bits));
+
+#endif

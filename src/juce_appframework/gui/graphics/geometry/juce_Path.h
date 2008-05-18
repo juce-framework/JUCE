@@ -619,6 +619,12 @@ private:
     int numElements;
     float pathXMin, pathXMax, pathYMin, pathYMax;
     bool useNonZeroWinding;
+
+    static const float lineMarker;
+    static const float moveMarker;
+    static const float quadMarker;
+    static const float cubicMarker;
+    static const float closeSubPathMarker;
 };
 
 #endif   // __JUCE_PATH_JUCEHEADER__

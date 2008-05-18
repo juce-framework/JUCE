@@ -76,10 +76,10 @@ static void floor0_free_look(vorbis_look_floor *i){
 }
 
 static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
-  codec_setup_info     *ci=vi->codec_setup;
+  codec_setup_info     *ci=(codec_setup_info*)vi->codec_setup;
   int j;
 
-  vorbis_info_floor0 *info=_ogg_malloc(sizeof(*info));
+  vorbis_info_floor0 *info=(vorbis_info_floor0*)_ogg_malloc(sizeof(*info));
   info->order=oggpack_read(opb,8);
   info->rate=oggpack_read(opb,16);
   info->barkmap=oggpack_read(opb,16);
@@ -117,7 +117,7 @@ static void floor0_map_lazy_init(vorbis_block      *vb,
   if(!look->linearmap[vb->W]){
     vorbis_dsp_state   *vd=vb->vd;
     vorbis_info        *vi=vd->vi;
-    codec_setup_info   *ci=vi->codec_setup;
+    codec_setup_info   *ci=(codec_setup_info*)vi->codec_setup;
     vorbis_info_floor0 *info=(vorbis_info_floor0 *)infoX;
     int W=vb->W;
     int n=ci->blocksizes[W]/2,j;
@@ -133,7 +133,7 @@ static void floor0_map_lazy_init(vorbis_block      *vb,
        the encoder may do what it wishes in filling them.  They're
        necessary in some mapping combinations to keep the scale spacing
        accurate */
-    look->linearmap[W]=_ogg_malloc((n+1)*sizeof(**look->linearmap));
+    look->linearmap[W]=(int*)_ogg_malloc((n+1)*sizeof(**look->linearmap));
     for(j=0;j<n;j++){
       int val=floor( toBARK((info->rate/2.f)/n*j)
 		     *scale); /* bark numbers represent band edges */
@@ -147,13 +147,13 @@ static void floor0_map_lazy_init(vorbis_block      *vb,
 
 static vorbis_look_floor *floor0_look(vorbis_dsp_state *vd,
 				      vorbis_info_floor *i){
-  vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-  vorbis_look_floor0 *look=_ogg_calloc(1,sizeof(*look));
+  vorbis_info_floor0 *info=(vorbis_info_floor0*)i;
+  vorbis_look_floor0 *look=(vorbis_look_floor0*)_ogg_calloc(1,sizeof(*look));
   look->m=info->order;
   look->ln=info->barkmap;
   look->vi=info;
 
-  look->linearmap=_ogg_calloc(2,sizeof(*look->linearmap));
+  look->linearmap=(int**)_ogg_calloc(2,sizeof(*look->linearmap));
 
   return look;
 }
@@ -170,14 +170,14 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
     int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
 
     if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
-      codec_setup_info  *ci=vb->vd->vi->codec_setup;
+      codec_setup_info  *ci=(codec_setup_info *)vb->vd->vi->codec_setup;
       codebook *b=ci->fullbooks+info->books[booknum];
       float last=0.f;
 
       /* the additional b->dim is a guard against any possible stack
          smash; b->dim is provably more than we can overflow the
          vector */
-      float *lsp=_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+b->dim+1));
+      float *lsp=(float*)_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+b->dim+1));
 
       for(j=0;j<look->m;j+=b->dim)
 	if(vorbis_book_decodev_set(b,lsp+j,&vb->opb,b->dim)==-1)goto eop;

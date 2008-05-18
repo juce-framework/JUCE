@@ -23,6 +23,8 @@
 #  define GZIP
 #endif
 
+#define NO_DUMMY_DECL
+
 /* ===========================================================================
  * Internal compression state.
  */

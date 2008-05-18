@@ -177,8 +177,6 @@ bool juce_isRunningAsApplication()
 extern Display* display;
 extern XContext improbableNumber;
 
-const int juce_windowIsSemiTransparentFlag = (1 << 31); // also in component.cpp
-
 static const int eventMask = NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
                              | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
                              | ExposureMask | StructureNotifyMask | FocusChangeMask;
@@ -2052,7 +2050,7 @@ private:
         XSetWMHints (display, wndH, wmHints);
         XFree (wmHints);
 
-        if ((styleFlags & juce_windowIsSemiTransparentFlag) != 0)
+        if ((styleFlags & windowIsSemiTransparent) != 0)
         {
             //xxx
         }

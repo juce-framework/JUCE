@@ -43,7 +43,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "../../../src/juce_core/io/files/juce_FileInputStream.h"
 #include "../../../src/juce_core/io/files/juce_FileOutputStream.h"
 #include "../../../src/juce_core/io/network/juce_URL.h"
@@ -634,7 +633,8 @@ struct FindFileStruct
 
 // returns 0 on failure
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
+                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, 
+                          Time* creationTime, bool* isReadOnly) throw()
 {
     DIR* const d = opendir (directory.toUTF8());
 

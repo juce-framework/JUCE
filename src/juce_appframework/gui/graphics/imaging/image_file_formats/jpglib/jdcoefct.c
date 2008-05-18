@@ -57,9 +57,9 @@ typedef struct {
   int * coef_bits_latch;
 #define SAVED_COEFS  6		/* we save coef_bits[0..5] */
 #endif
-} my_coef_controller;
+} my_coef_controller3;
 
-typedef my_coef_controller * my_coef_ptr;
+typedef my_coef_controller3 * my_coef_ptr3;
 
 /* Forward declarations */
 METHODDEF(int) decompress_onepass
@@ -76,10 +76,10 @@ METHODDEF(int) decompress_smooth_data
 
 
 LOCAL(void)
-start_iMCU_row (j_decompress_ptr cinfo)
+start_iMCU_row3 (j_decompress_ptr cinfo)
 /* Reset within-iMCU-row counters for a new row (input side) */
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
 
   /* In an interleaved scan, an MCU row is the same as an iMCU row.
    * In a noninterleaved scan, an iMCU row has v_samp_factor MCU rows.
@@ -107,7 +107,7 @@ METHODDEF(void)
 start_input_pass (j_decompress_ptr cinfo)
 {
   cinfo->input_iMCU_row = 0;
-  start_iMCU_row(cinfo);
+  start_iMCU_row3(cinfo);
 }
 
 
@@ -119,7 +119,7 @@ METHODDEF(void)
 start_output_pass (j_decompress_ptr cinfo)
 {
 #ifdef BLOCK_SMOOTHING_SUPPORTED
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
 
   /* If multipass, check to see whether to use block smoothing on this pass */
   if (coef->pub.coef_arrays != NULL) {
@@ -146,7 +146,7 @@ start_output_pass (j_decompress_ptr cinfo)
 METHODDEF(int)
 decompress_onepass (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
   JDIMENSION MCU_col_num;	/* index of current MCU within row */
   JDIMENSION last_MCU_col = cinfo->MCUs_per_row - 1;
   JDIMENSION last_iMCU_row = cinfo->total_iMCU_rows - 1;
@@ -211,7 +211,7 @@ decompress_onepass (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
   /* Completed the iMCU row, advance counters for next one */
   cinfo->output_iMCU_row++;
   if (++(cinfo->input_iMCU_row) < cinfo->total_iMCU_rows) {
-    start_iMCU_row(cinfo);
+    start_iMCU_row3(cinfo);
     return JPEG_ROW_COMPLETED;
   }
   /* Completed the scan */
@@ -243,7 +243,7 @@ dummy_consume_data (j_decompress_ptr cinfo)
 METHODDEF(int)
 consume_data (j_decompress_ptr cinfo)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
   JDIMENSION MCU_col_num;	/* index of current MCU within row */
   int blkn, ci, xindex, yindex, yoffset;
   JDIMENSION start_col;
@@ -294,7 +294,7 @@ consume_data (j_decompress_ptr cinfo)
   }
   /* Completed the iMCU row, advance counters for next one */
   if (++(cinfo->input_iMCU_row) < cinfo->total_iMCU_rows) {
-    start_iMCU_row(cinfo);
+    start_iMCU_row3(cinfo);
     return JPEG_ROW_COMPLETED;
   }
   /* Completed the scan */
@@ -314,7 +314,7 @@ consume_data (j_decompress_ptr cinfo)
 METHODDEF(int)
 decompress_data (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
   JDIMENSION last_iMCU_row = cinfo->total_iMCU_rows - 1;
   JDIMENSION block_num;
   int ci, block_row, block_rows;
@@ -404,7 +404,7 @@ decompress_data (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
 LOCAL(boolean)
 smoothing_ok (j_decompress_ptr cinfo)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
   boolean smoothing_useful = FALSE;
   int ci, coefi;
   jpeg_component_info *compptr;
@@ -460,7 +460,7 @@ smoothing_ok (j_decompress_ptr cinfo)
 METHODDEF(int)
 decompress_smooth_data (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
 {
-  my_coef_ptr coef = (my_coef_ptr) cinfo->coef;
+  my_coef_ptr3 coef = (my_coef_ptr3) cinfo->coef;
   JDIMENSION last_iMCU_row = cinfo->total_iMCU_rows - 1;
   JDIMENSION block_num, last_block_column;
   int ci, block_row, block_rows, access_rows;
@@ -675,11 +675,11 @@ decompress_smooth_data (j_decompress_ptr cinfo, JSAMPIMAGE output_buf)
 GLOBAL(void)
 jinit_d_coef_controller (j_decompress_ptr cinfo, boolean need_full_buffer)
 {
-  my_coef_ptr coef;
+  my_coef_ptr3 coef;
 
-  coef = (my_coef_ptr)
+  coef = (my_coef_ptr3)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_coef_controller));
+				SIZEOF(my_coef_controller3));
   cinfo->coef = (struct jpeg_d_coef_controller *) coef;
   coef->pub.start_input_pass = start_input_pass;
   coef->pub.start_output_pass = start_output_pass;

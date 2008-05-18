@@ -110,15 +110,6 @@ struct FLAC__BitWriter {
 	unsigned bits; /* # of used bits in accum */
 };
 
-#ifdef _MSC_VER
-/* OPT: an MSVC built-in would be better */
-static _inline FLAC__uint32 local_swap32_(FLAC__uint32 x)
-{
-	x = ((x<<8)&0xFF00FF00) | ((x>>8)&0x00FF00FF);
-	return (x>>16) | (x<<16);
-}
-#endif
-
 /* * WATCHOUT: The current implementation only grows the buffer. */
 static FLAC__bool bitwriter_grow_(FLAC__BitWriter *bw, unsigned bits_to_add)
 {

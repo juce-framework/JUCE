@@ -53,8 +53,8 @@
    some window function algebra. */
 
 void mdct_init(mdct_lookup *lookup,int n){
-  int   *bitrev=_ogg_malloc(sizeof(*bitrev)*(n/4));
-  DATA_TYPE *T=_ogg_malloc(sizeof(*T)*(n+n/4));
+  int   *bitrev=(int*) _ogg_malloc(sizeof(*bitrev)*(n/4));
+  DATA_TYPE *T=(DATA_TYPE*) _ogg_malloc(sizeof(*T)*(n+n/4));
 
   int i;
   int n2=n>>1;
@@ -498,7 +498,7 @@ void mdct_forward(mdct_lookup *init, DATA_TYPE *in, DATA_TYPE *out){
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
-  DATA_TYPE *w=alloca(n*sizeof(*w)); /* forward needs working space */
+  DATA_TYPE *w=(DATA_TYPE*) alloca(n*sizeof(*w)); /* forward needs working space */
   DATA_TYPE *w2=w+n2;
 
   /* rotate */

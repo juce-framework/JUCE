@@ -30,6 +30,7 @@
 */
 
 #include "win32_headers.h"
+#undef WINDOWS
 
 #if JUCE_ASIO
 
@@ -1958,5 +1959,7 @@ AudioIODeviceType* juce_createASIOAudioIODeviceType()
 
 
 END_JUCE_NAMESPACE
+
+#undef log
 
 #endif

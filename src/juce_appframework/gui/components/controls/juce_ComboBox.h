@@ -371,7 +371,7 @@ private:
     struct ItemInfo
     {
         String name;
-        int id;
+        int itemId;
         bool isEnabled : 1, isHeading : 1;
 
         bool isSeparator() const throw();
@@ -389,7 +389,7 @@ private:
 
     void showPopup();
 
-    ItemInfo* getItemForId (const int id) const throw();
+    ItemInfo* getItemForId (const int itemId) const throw();
     ItemInfo* getItemForIndex (const int index) const throw();
 
     ComboBox (const ComboBox&);

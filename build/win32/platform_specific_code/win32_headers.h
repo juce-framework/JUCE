@@ -34,7 +34,9 @@
 
 #include "../../../juce_Config.h"
 
-#define STRICT
+#ifndef STRICT
+ #define STRICT 1
+#endif
 #define WIN32_LEAN_AND_MEAN
 
 // don't want to get told about microsoft's mistakes..

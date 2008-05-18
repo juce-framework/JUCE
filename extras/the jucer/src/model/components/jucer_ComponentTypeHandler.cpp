@@ -224,15 +224,15 @@ int64 ComponentTypeHandler::getComponentId (Component* comp)
     if (comp == 0)
         return 0;
 
-    int64 id = comp->getComponentProperty (T("jucerCompId"), false).getHexValue64();
+    int64 compId = comp->getComponentProperty (T("jucerCompId"), false).getHexValue64();
 
-    if (id == 0)
+    if (compId == 0)
     {
-        id = Random::getSystemRandom().nextInt64();
-        setComponentId (comp, id);
+        compId = Random::getSystemRandom().nextInt64();
+        setComponentId (comp, compId);
     }
 
-    return id;
+    return compId;
 }
 
 void ComponentTypeHandler::setComponentId (Component* comp, const int64 newID)

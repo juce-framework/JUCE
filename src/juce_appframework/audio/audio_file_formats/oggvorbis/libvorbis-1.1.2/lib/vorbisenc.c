@@ -204,8 +204,8 @@ static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
 				     vorbis_info_floor1 *in,
 				     int *x){
   int i,k,is=s;
-  vorbis_info_floor1 *f=_ogg_calloc(1,sizeof(*f));
-  codec_setup_info *ci=vi->codec_setup;
+  vorbis_info_floor1 *f=(vorbis_info_floor1*) _ogg_calloc(1,sizeof(*f));
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
 
   memcpy(f,in+x[is],sizeof(*f));
   /* fill in the lowpass field, even if it's temporary */
@@ -244,7 +244,7 @@ static void vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
 					    double *x){
   int i,is=s;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy_global *g=&ci->psy_g_param;
 
   memcpy(g,in+(int)x[is],sizeof(*g));
@@ -272,7 +272,7 @@ static void vorbis_encode_global_stereo(vorbis_info *vi,
   float s=hi->stereo_point_setting;
   int i,is=s;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy_global *g=&ci->psy_g_param;
 
   if(p){
@@ -320,7 +320,7 @@ static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
 				      int *nn_partition,
 				      double *nn_thresh,
 				      int block){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
   highlevel_encode_setup *hi=&ci->hi;
   int is=s;
@@ -328,7 +328,7 @@ static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
   if(block>=ci->psys)
     ci->psys=block+1;
   if(!p){
-    p=_ogg_calloc(1,sizeof(*p));
+    p=(vorbis_info_psy*)_ogg_calloc(1,sizeof(*p));
     ci->psy_param[block]=p;
   }
 
@@ -352,7 +352,7 @@ static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
 					 vp_adjblock *in){
   int i,is=s;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   /* 0 and 2 are only used by bitmanagement, but there's no harm to always
@@ -375,7 +375,7 @@ static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
 				       compandblock *in, double *x){
   int i,is=s;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   ds=x[is]*(1.-ds)+x[is+1]*ds;
@@ -396,7 +396,7 @@ static void vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
 				    int *suppress){
   int is=s;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   p->tone_abs_limit=suppress[is]*(1.-ds)+suppress[is+1]*ds;
@@ -411,7 +411,7 @@ static void vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
 					 double userbias){
   int i,is=s,j;
   double ds=s-is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   p->noisemaxsupp=suppress[is]*(1.-ds)+suppress[is+1]*ds;
@@ -437,7 +437,7 @@ static void vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
 }
 
 static void vorbis_encode_ath_setup(vorbis_info *vi,int block){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   p->ath_adjatt=ci->hi.ath_floating_dB;
@@ -457,7 +457,7 @@ static int book_dup_or_new(codec_setup_info *ci,static_codebook *book){
 static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
 					 int *shortb,int *longb){
 
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   int is=s;
 
   int blockshort=shortb[is];
@@ -471,11 +471,11 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 				       int number, int block,
 				       vorbis_residue_template *res){
 
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   int i,n;
 
-  vorbis_info_residue0 *r=ci->residue_param[number]=
-    _ogg_malloc(sizeof(*r));
+  vorbis_info_residue0 *r=(vorbis_info_residue0*)(ci->residue_param[number]=
+    (vorbis_info_residue0*)_ogg_malloc(sizeof(*r)));
 
   memcpy(r,res->res,sizeof(*r));
   if(ci->residues<=number)ci->residues=number+1;
@@ -543,7 +543,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
   /* lowpass setup/pointlimit */
   {
     double freq=ci->hi.lowpass_kHz*1000.;
-    vorbis_info_floor1 *f=ci->floor_param[block]; /* by convention */
+    vorbis_info_floor1 *f=(vorbis_info_floor1*)ci->floor_param[block]; /* by convention */
     double nyq=vi->rate/2.;
     long blocksize=ci->blocksizes[block]>>1;
 
@@ -581,7 +581,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
 					  vorbis_mapping_template *maps){
 
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   int i,j,is=s,modes=2;
   vorbis_info_mapping0 *map=maps[is].map;
   vorbis_info_mode *mode=_mode_template;
@@ -592,7 +592,7 @@ static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
   for(i=0;i<modes;i++){
 
     ci->map_param[i]=_ogg_calloc(1,sizeof(*map));
-    ci->mode_param[i]=_ogg_calloc(1,sizeof(*mode));
+    ci->mode_param[i]=(vorbis_info_mode*)_ogg_calloc(1,sizeof(*mode));
 
     memcpy(ci->mode_param[i],mode+i,sizeof(*_mode_template));
     if(i>=ci->modes)ci->modes=i+1;
@@ -608,7 +608,7 @@ static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
 }
 
 static double setting_to_approx_bitrate(vorbis_info *vi){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
   ve_setup_data_template *setup=(ve_setup_data_template *)hi->setup;
   int is=hi->base_setting;
@@ -626,7 +626,7 @@ static void get_setup_template(vorbis_info *vi,
 			       long ch,long srate,
 			       double req,int q_or_bitrate){
   int i=0,j;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
   if(q_or_bitrate)req/=ch;
 
@@ -675,7 +675,7 @@ static void get_setup_template(vorbis_info *vi,
 /* the final setup call */
 int vorbis_encode_setup_init(vorbis_info *vi){
   int i0=0,singleblock=0;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   ve_setup_data_template *setup=NULL;
   highlevel_encode_setup *hi=&ci->hi;
 
@@ -861,9 +861,9 @@ static int vorbis_encode_setup_setting(vorbis_info *vi,
 				       long  channels,
 				       long  rate){
   int ret=0,i,is;
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
-  ve_setup_data_template *setup=hi->setup;
+  ve_setup_data_template *setup=(ve_setup_data_template*) hi->setup;
   double ds;
 
   ret=vorbis_encode_toplevel_setup(vi,channels,rate);
@@ -906,7 +906,7 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
 			    long  channels,
 			    long  rate,
 			    float quality){
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*) vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
 
   quality+=.0000001;
@@ -946,7 +946,7 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
 				long nominal_bitrate,
 				long min_bitrate){
 
-  codec_setup_info *ci=vi->codec_setup;
+  codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
   double tnominal=nominal_bitrate;
   int ret=0;
@@ -1013,7 +1013,7 @@ int vorbis_encode_init(vorbis_info *vi,
 
 int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
   if(vi){
-    codec_setup_info *ci=vi->codec_setup;
+    codec_setup_info *ci=(codec_setup_info*)vi->codec_setup;
     highlevel_encode_setup *hi=&ci->hi;
     int setp=(number&0xf); /* a read request has a low nibble of 0 */
 

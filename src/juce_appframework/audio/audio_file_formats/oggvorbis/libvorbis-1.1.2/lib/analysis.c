@@ -34,7 +34,7 @@ int analysis_noisy=1;
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
   int ret,i;
-  vorbis_block_internal *vbi=vb->internal;
+  vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
 
   vb->glue_bits=0;
   vb->time_bits=0;

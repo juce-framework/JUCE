@@ -516,7 +516,7 @@ const String URL::addEscapeChars (const String& s)
 
 //==============================================================================
 extern bool juce_launchFile (const String& fileName,
-                             const String& parameters);
+                             const String& parameters) throw();
 
 bool URL::launchInDefaultBrowser() const
 {

@@ -48,14 +48,16 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
+#undef log
 #if JUCE_COREAUDIO_LOGGING_ENABLED
   #define log(a) Logger::writeToLog (a)
 #else
   #define log(a)
 #endif
 
+#undef OK
 #if JUCE_COREAUDIO_ERROR_LOGGING_ENABLED
-  static bool logAnyErrors (const OSStatus err, const int lineNum)
+  static bool logAnyErrors_CoreAudio (const OSStatus err, const int lineNum)
   {
       if (err == noErr)
           return true;
@@ -65,7 +67,7 @@ BEGIN_JUCE_NAMESPACE
       return false;
   }
 
-  #define OK(a) logAnyErrors (a, __LINE__)
+  #define OK(a) logAnyErrors_CoreAudio (a, __LINE__)
 #else
   #define OK(a) (a == noErr)
 #endif
@@ -398,8 +400,8 @@ public:
             {
                 if (((unsigned int) index) < num)
                 {
-                    OSType id = types[index];
-                    AudioDeviceSetProperty (deviceID, 0, 0, input, kAudioDevicePropertyDataSource, sizeof (id), &id);
+                    OSType typeId = types[index];
+                    AudioDeviceSetProperty (deviceID, 0, 0, input, kAudioDevicePropertyDataSource, sizeof (typeId), &typeId);
                 }
 
                 juce_free (types);
@@ -1188,5 +1190,6 @@ AudioIODeviceType* juce_createDefaultAudioIODeviceType()
     return new CoreAudioIODeviceType();
 }
 
+#undef log
 
 END_JUCE_NAMESPACE

@@ -104,8 +104,6 @@ static bool isUnboundedMouseModeOn = false;
 static bool isCursorVisibleUntilOffscreen;
 
 //==============================================================================
-const int juce_windowIsSemiTransparentFlag = (1 << 31); // duplicated in native windowing code
-
 #define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 static uint32 nextComponentUID = 0;
@@ -439,7 +437,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
     checkMessageManagerIsLocked
 
     if (! isOpaque())
-        styleWanted |= juce_windowIsSemiTransparentFlag;
+        styleWanted |= ComponentPeer::windowIsSemiTransparent;
 
     int currentStyleFlags = 0;
 

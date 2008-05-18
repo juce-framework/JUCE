@@ -206,9 +206,9 @@ typedef struct {
   FSERRPTR fserrors;		/* accumulated errors */
   boolean on_odd_row;		/* flag to remember which row we are on */
   int * error_limiter;		/* table for clamping the applied error */
-} my_cquantizer;
+} my_cquantizer2;
 
-typedef my_cquantizer * my_cquantize_ptr;
+typedef my_cquantizer2 * my_cquantize_ptr2;
 
 
 /*
@@ -224,7 +224,7 @@ METHODDEF(void)
 prescan_quantize (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
 		  JSAMPARRAY output_buf, int num_rows)
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   register JSAMPROW ptr;
   register histptr histp;
   register hist3d histogram = cquantize->histogram;
@@ -314,7 +314,7 @@ update_box (j_decompress_ptr cinfo, boxptr boxp)
 /* Shrink the min/max bounds of a box to enclose only nonzero elements, */
 /* and recompute its volume and population */
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   histptr histp;
   int c0,c1,c2;
@@ -501,7 +501,7 @@ compute_color (j_decompress_ptr cinfo, boxptr boxp, int icolor)
 {
   /* Current algorithm: mean weighted by pixels (not colors) */
   /* Note it is important to get the rounding correct! */
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   histptr histp;
   int c0,c1,c2;
@@ -857,7 +857,7 @@ fill_inverse_cmap (j_decompress_ptr cinfo, int c0, int c1, int c2)
 /* histogram cell c0/c1/c2.  (Only that one cell MUST be filled, but */
 /* we can fill as many others as we wish.) */
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   int minc0, minc1, minc2;	/* lower left corner of update box */
   int ic0, ic1, ic2;
@@ -916,7 +916,7 @@ pass2_no_dither (j_decompress_ptr cinfo,
 		 JSAMPARRAY input_buf, JSAMPARRAY output_buf, int num_rows)
 /* This version performs no dithering */
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   register JSAMPROW inptr, outptr;
   register histptr cachep;
@@ -950,7 +950,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
 		 JSAMPARRAY input_buf, JSAMPARRAY output_buf, int num_rows)
 /* This version performs Floyd-Steinberg dithering */
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   register LOCFSERROR cur0, cur1, cur2;	/* current error or pixel value */
   LOCFSERROR belowerr0, belowerr1, belowerr2; /* error for pixel below cur */
@@ -1108,7 +1108,7 @@ LOCAL(void)
 init_error_limit (j_decompress_ptr cinfo)
 /* Allocate and fill in the error_limiter table */
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   int * table;
   int in, out;
 
@@ -1142,7 +1142,7 @@ init_error_limit (j_decompress_ptr cinfo)
 METHODDEF(void)
 finish_pass1 (j_decompress_ptr cinfo)
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
 
   /* Select the representative colors and fill in cinfo->colormap */
   cinfo->colormap = cquantize->sv_colormap;
@@ -1166,7 +1166,7 @@ finish_pass2 (j_decompress_ptr cinfo)
 METHODDEF(void)
 start_pass_2_quant (j_decompress_ptr cinfo, boolean is_pre_scan)
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
   hist3d histogram = cquantize->histogram;
   int i;
 
@@ -1229,7 +1229,7 @@ start_pass_2_quant (j_decompress_ptr cinfo, boolean is_pre_scan)
 METHODDEF(void)
 new_color_map_2_quant (j_decompress_ptr cinfo)
 {
-  my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
+  my_cquantize_ptr2 cquantize = (my_cquantize_ptr2) cinfo->cquantize;
 
   /* Reset the inverse color map */
   cquantize->needs_zeroed = TRUE;
@@ -1243,12 +1243,12 @@ new_color_map_2_quant (j_decompress_ptr cinfo)
 GLOBAL(void)
 jinit_2pass_quantizer (j_decompress_ptr cinfo)
 {
-  my_cquantize_ptr cquantize;
+  my_cquantize_ptr2 cquantize;
   int i;
 
-  cquantize = (my_cquantize_ptr)
+  cquantize = (my_cquantize_ptr2)
     (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE,
-				SIZEOF(my_cquantizer));
+				SIZEOF(my_cquantizer2));
   cinfo->cquantize = (struct jpeg_color_quantizer *) cquantize;
   cquantize->pub.start_pass = start_pass_2_quant;
   cquantize->pub.new_color_map = new_color_map_2_quant;

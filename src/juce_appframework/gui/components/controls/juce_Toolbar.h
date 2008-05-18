@@ -305,6 +305,9 @@ private:
     ToolbarItemStyle toolbarStyle;
     ComponentAnimator animator;
 
+    friend class ItemDragAndDropOverlayComponent;
+    static const tchar* const toolbarDragDescriptor;
+
     void addItemInternal (ToolbarItemFactory& factory, const int itemId, const int insertIndex);
 
     ToolbarItemComponent* getNextActiveComponent (int index, const int delta) const;

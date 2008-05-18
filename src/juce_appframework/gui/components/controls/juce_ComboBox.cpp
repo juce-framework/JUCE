@@ -114,7 +114,7 @@ void ComboBox::addItem (const String& newItemText,
             separatorPending = false;
 
             ItemInfo* const item = new ItemInfo();
-            item->id = 0;
+            item->itemId = 0;
             item->isEnabled = false;
             item->isHeading = false;
             items.add (item);
@@ -122,7 +122,7 @@ void ComboBox::addItem (const String& newItemText,
 
         ItemInfo* const item = new ItemInfo();
         item->name = newItemText;
-        item->id = newItemId;
+        item->itemId = newItemId;
         item->isEnabled = true;
         item->isHeading = false;
         items.add (item);
@@ -146,7 +146,7 @@ void ComboBox::addSectionHeading (const String& headingName) throw()
             separatorPending = false;
 
             ItemInfo* const item = new ItemInfo();
-            item->id = 0;
+            item->itemId = 0;
             item->isEnabled = false;
             item->isHeading = false;
             items.add (item);
@@ -154,7 +154,7 @@ void ComboBox::addSectionHeading (const String& headingName) throw()
 
         ItemInfo* const item = new ItemInfo();
         item->name = headingName;
-        item->id = 0;
+        item->itemId = 0;
         item->isEnabled = true;
         item->isHeading = true;
         items.add (item);
@@ -191,14 +191,14 @@ void ComboBox::clear (const bool dontSendChangeMessage)
 }
 
 //==============================================================================
-ComboBox::ItemInfo* ComboBox::getItemForId (const int id) const throw()
+ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
 {
-    jassert (id != 0);
+    jassert (itemId != 0);
 
-    if (id != 0)
+    if (itemId != 0)
     {
         for (int i = items.size(); --i >= 0;)
-            if (items.getUnchecked(i)->id == id)
+            if (items.getUnchecked(i)->itemId == itemId)
                 return items.getUnchecked(i);
     }
 
@@ -252,7 +252,7 @@ int ComboBox::getItemId (const int index) const throw()
 {
     ItemInfo* const item = getItemForIndex (index);
 
-    return (item != 0) ? item->id : 0;
+    return (item != 0) ? item->itemId : 0;
 }
 
 
@@ -310,7 +310,7 @@ int ComboBox::getSelectedId() const throw()
     const ItemInfo* const item = getItemForIndex (currentIndex);
 
     return (item != 0 && getText() == item->name)
-                ? item->id
+                ? item->itemId
                 : 0;
 }
 
@@ -352,7 +352,7 @@ void ComboBox::setText (const String& newText,
         if (item->isRealItem()
              && item->name == newText)
         {
-            setSelectedId (item->id, dontSendChangeMessage);
+            setSelectedId (item->itemId, dontSendChangeMessage);
             return;
         }
     }
@@ -555,7 +555,8 @@ void ComboBox::showPopup()
             else if (item->isHeading)
                 menu.addSectionHeader (item->name);
             else
-                menu.addItem (item->id, item->name, item->isEnabled, item->id == currentId);
+                menu.addItem (item->itemId, item->name, 
+                              item->isEnabled, item->itemId == currentId);
         }
 
         if (items.size() == 0)

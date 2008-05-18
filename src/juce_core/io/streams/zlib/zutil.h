@@ -122,7 +122,7 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  endif
 #endif
 
-#if defined(MACOS) || defined(TARGET_OS_MAC)
+#if defined(MACOS) || TARGET_OS_MAC
 #  define OS_CODE  0x07
 #  if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
 #    include <unix.h> /* for fdopen */

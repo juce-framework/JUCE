@@ -29,9 +29,6 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_MAC_HTTPSTREAM_JUCEHEADER__
-#define __JUCE_MAC_HTTPSTREAM_JUCEHEADER__
-
 // (This file gets included by the mac + linux networking code)
 
 //==============================================================================
@@ -42,8 +39,7 @@ class JUCE_HTTPSocketStream
 public:
     //==============================================================================
     JUCE_HTTPSocketStream()
-        : statusCode (0),
-          readPosition (0),
+        : readPosition (0),
           socketHandle (-1),
           levelsOfRedirection (0),
           timeoutSeconds (15)
@@ -146,9 +142,11 @@ public:
             StringArray lines;
             lines.addLines (responseHeader);
 
-            statusCode = responseHeader.fromFirstOccurrenceOf (T(" "), false, false)
-                                .substring (0, 3).getIntValue();
-
+            // NB - using charToString() here instead of just T(" "), because that was 
+            // causing a mysterious gcc internal compiler error...
+            const int statusCode = responseHeader.fromFirstOccurrenceOf (String::charToString (T(' ')), false, false)
+                                                 .substring (0, 3)
+                                                 .getIntValue();
 
             //int contentLength = findHeaderItem (lines, T("Content-Length:")).getIntValue();
             //bool isChunked = findHeaderItem (lines, T("Transfer-Encoding:")).equalsIgnoreCase ("chunked");
@@ -195,7 +193,7 @@ public:
     }
 
     //==============================================================================
-    int statusCode, readPosition;
+    int readPosition;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -402,5 +400,3 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     return 0;
 }
 
-
-#endif   // __JUCE_MAC_HTTPSTREAM_JUCEHEADER__
