@@ -1281,7 +1281,14 @@ void String::vprintf (const tchar* const pf, va_list& args) throw()
 
     do
     {
+#if JUCE_LINUX && JUCE_64BIT
+        va_list tempArgs;
+        va_copy (tempArgs, args);
+        const int num = CharacterFunctions::vprintf (buf, bufSize - 1, pf, tempArgs);
+        va_end (tempArgs);
+#else
         const int num = CharacterFunctions::vprintf (buf, bufSize - 1, pf, args);
+#endif
 
         if (num > 0)
         {

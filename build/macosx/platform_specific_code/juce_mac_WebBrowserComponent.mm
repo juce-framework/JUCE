@@ -32,6 +32,7 @@
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 #include <Cocoa/Cocoa.h>
+#include <WebKit/WebKit.h>
 #include <WebKit/HIWebView.h>
 #include <WebKit/WebPolicyDelegate.h>
 #include <WebKit/CarbonUtils.h>
@@ -226,7 +227,7 @@ public:
 
     void stop()
     {
-        [webView stopLoading];
+        [webView stopLoading: nil];
     }
 
     void updateBounds()

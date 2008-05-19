@@ -30,6 +30,7 @@
 */
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include <AppKit/AppKit.h>
 #include <Carbon/Carbon.h>
 #include <CoreAudio/HostTime.h>
 #include <ctime>
@@ -144,6 +145,8 @@ void SystemStats::initialiseStats() throw()
     if (! initialised)
     {
         initialised = true;
+
+        NSApplicationLoad();
 
 #if JUCE_INTEL
         {
