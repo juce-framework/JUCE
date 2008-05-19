@@ -115,7 +115,7 @@ public:
                               const bool hasProgressBar,
                               const bool hasCancelButton,
                               const int timeOutMsWhenCancelling = 10000,
-                              const String& cancelButtonText = T("Cancel"));
+                              const String& cancelButtonText = JUCE_T("Cancel"));
 
     /** Destructor. */
     ~ThreadWithProgressWindow();
