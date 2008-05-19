@@ -913,11 +913,9 @@ static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
     if (err == noErr)
     {
         Str255 suffix;
-#if JUCE_WIN32
-        strcpy_s ((char*) suffix, 128, fileName);
-#else
-        strcpy ((char*) suffix, fileName);
-#endif
+
+        CharacterFunctions::copy ((char*) suffix, fileName, 128);
+
         StringPtr name = suffix;
         err = PtrAndHand (name, dataRef, name[0] + 1);
 
