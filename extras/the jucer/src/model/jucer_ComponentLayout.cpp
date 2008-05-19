@@ -474,7 +474,7 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
         else
             compId = pe->getPosition().relativeToH;
 
-        return findComponentWithcompId (id);
+        return findComponentWithId (compId);
     }
     else
     {
