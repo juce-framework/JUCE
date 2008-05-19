@@ -30,22 +30,63 @@
 */
 
 #include "../../../../juce_Config.h"
+#ifdef _MSC_VER
+ #include <windows.h>
+#endif
 
 #if JUCE_USE_FLAC
 
-#define FLAC__NO_DLL 1
-
 #include "../../../juce_core/basics/juce_StandardHeader.h"
-#include "flac/all.h"
+
+#ifdef _MSC_VER
+  #pragma warning (disable : 4505)
+  #pragma warning (push)
+#endif
+
+namespace FlacNamespace
+{
+  extern "C" 
+  {
+    #define FLAC__NO_DLL 1
+
+    #if ! defined (SIZE_MAX)
+      #define SIZE_MAX 0xffffffff
+    #endif
+
+    #define __STDC_LIMIT_MACROS 1
+    #include "flac/all.h"
+    #include "flac/libFLAC/bitmath.c"
+    #include "flac/libFLAC/bitreader.c"
+    #include "flac/libFLAC/bitwriter.c"
+    #include "flac/libFLAC/cpu.c"
+    #include "flac/libFLAC/crc.c"
+    #include "flac/libFLAC/fixed.c"
+    #include "flac/libFLAC/float.c"
+    #include "flac/libFLAC/format.c"
+    #include "flac/libFLAC/lpc_flac.c"
+    #include "flac/libFLAC/md5.c"
+    #include "flac/libFLAC/memory.c"
+    #include "flac/libFLAC/stream_decoder.c"
+    #include "flac/libFLAC/stream_encoder.c"
+    #include "flac/libFLAC/stream_encoder_framing.c"
+    #include "flac/libFLAC/window_flac.c"
+  }
+}
+
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif
 
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_FlacAudioFormat.h"
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
 
+using namespace FlacNamespace;
+
 //==============================================================================
-#define formatName                          TRANS("FLAC file")
-static const tchar* const extensions[] =    { T(".flac"), 0 };
+#define flacFormatName                          TRANS("FLAC file")
+static const tchar* const flacExtensions[] =    { T(".flac"), 0 };
 
 
 //==============================================================================
@@ -59,12 +100,13 @@ class FlacReader  : public AudioFormatReader
 public:
     //==============================================================================
     FlacReader (InputStream* const in)
-        : AudioFormatReader (in, formatName),
+        : AudioFormatReader (in, flacFormatName),
           reservoir (2, 0),
           reservoirStart (0),
           samplesInReservoir (0),
           scanningForLength (false)
     {
+        using namespace FlacNamespace;
         lengthInSamples = 0;
 
         decoder = FLAC__stream_decoder_new();
@@ -114,6 +156,8 @@ public:
                int64 startSampleInFile,
                int numSamples)
     {
+        using namespace FlacNamespace;
+
         if (! ok)
             return false;
 
@@ -303,11 +347,12 @@ public:
                 const double sampleRate,
                 const int numChannels,
                 const int bitsPerSample_)
-        : AudioFormatWriter (out, formatName,
+        : AudioFormatWriter (out, flacFormatName,
                              sampleRate,
                              numChannels,
                              bitsPerSample_)
     {
+        using namespace FlacNamespace;
         encoder = FLAC__stream_encoder_new();
 
         FLAC__stream_encoder_set_do_mid_side_stereo (encoder, numChannels == 2);
@@ -393,6 +438,7 @@ public:
 
     void writeMetaData (const FLAC__StreamMetadata* metadata)
     {
+        using namespace FlacNamespace;
         const FLAC__StreamMetadata_StreamInfo& info = metadata->data.stream_info;
 
         unsigned char buffer [FLAC__STREAM_METADATA_STREAMINFO_LENGTH];
@@ -429,6 +475,7 @@ public:
                                                                unsigned int /*current_frame*/,
                                                                void* client_data)
     {
+        using namespace FlacNamespace;
         return ((FlacWriter*) client_data)->writeData (buffer, (int) bytes)
                 ? FLAC__STREAM_ENCODER_WRITE_STATUS_OK
                 : FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
@@ -457,7 +504,7 @@ public:
 
 //==============================================================================
 FlacAudioFormat::FlacAudioFormat()
-    : AudioFormat (formatName, (const tchar**) extensions)
+    : AudioFormat (flacFormatName, (const tchar**) flacExtensions)
 {
 }
 

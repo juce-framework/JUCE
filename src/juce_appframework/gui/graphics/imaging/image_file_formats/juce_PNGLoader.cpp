@@ -29,17 +29,56 @@
   ==============================================================================
 */
 
+#include "../../../../../juce_core/basics/juce_StandardHeader.h"
+
 #ifdef _MSC_VER
   #pragma warning (push)
+  #pragma warning (disable: 4390)
 #endif
 
-#include "pnglib/png.h"
+namespace zlibNamespace
+{
+  #undef OS_CODE
+  #undef fdopen
+  #include "../../../../../juce_core/io/streams/zlib/zlib.h"
+  #undef OS_CODE
+}
+
+namespace pnglibNamespace
+{
+  using namespace zlibNamespace;
+
+  extern "C"
+  {
+    using ::abs;
+    #define PNG_INTERNAL
+    #define NO_DUMMY_DECL
+
+    #include "pnglib/png.h"
+    #include "pnglib/pngconf.h"
+
+    #define PNG_NO_EXTERN
+    #include "pnglib/png.c"
+    #include "pnglib/pngerror.c"
+    #include "pnglib/pngget.c"
+    #include "pnglib/pngmem.c"
+    #include "pnglib/pngread.c"
+    #include "pnglib/pngpread.c"
+    #include "pnglib/pngrio.c"
+    #include "pnglib/pngrtran.c"
+    #include "pnglib/pngrutil.c"
+    #include "pnglib/pngset.c"
+    #include "pnglib/pngtrans.c"
+    #include "pnglib/pngwio.c"
+    #include "pnglib/pngwrite.c"
+    #include "pnglib/pngwtran.c"
+    #include "pnglib/pngwutil.c"
+  }
+}
 
 #ifdef _MSC_VER
   #pragma warning (pop)
 #endif
-
-#include "../../../../../juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
 
@@ -49,6 +88,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../../juce_core/io/juce_OutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
 
+using namespace pnglibNamespace;
 
 //==============================================================================
 static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length) throw()

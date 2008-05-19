@@ -30,12 +30,20 @@
 */
 
 #include "../../basics/juce_StandardHeader.h"
-#include "zlib/zlib.h"
+
+namespace zlibNamespace
+{
+  #undef OS_CODE
+  #undef fdopen
+  #include "zlib/zlib.h"
+  #undef OS_CODE
+}
 
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_GZIPCompressorOutputStream.h"
 
+using namespace zlibNamespace;
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
@@ -130,7 +138,7 @@ public:
 
 
 //==============================================================================
-const int bufferSize = 32768;
+const int gzipCompBufferSize = 32768;
 
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
@@ -144,7 +152,7 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
 
     helper = new GZIPCompressorHelper (compressionLevel, noWrap);
 
-    buffer = (uint8*) juce_malloc (bufferSize);
+    buffer = (uint8*) juce_malloc (gzipCompBufferSize);
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
@@ -197,7 +205,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 bool GZIPCompressorOutputStream::doNextBlock()
 {
     GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
-    const int len = h->doNextBlock (buffer, bufferSize);
+    const int len = h->doNextBlock (buffer, gzipCompBufferSize);
 
     if (len > 0)
         return destStream->write (buffer, len);

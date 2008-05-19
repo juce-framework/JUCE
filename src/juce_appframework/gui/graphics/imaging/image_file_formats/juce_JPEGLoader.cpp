@@ -35,9 +35,83 @@
   #pragma warning (push)
 #endif
 
-extern "C"
+namespace jpeglibNamespace
 {
-#include "jpglib/jpeglib.h"
+  extern "C"
+  {
+    #define JPEG_INTERNALS
+    #undef FAR
+    #include "jpglib/jpeglib.h"
+
+    #include "jpglib/jcapimin.c"
+    #include "jpglib/jcapistd.c"
+    #include "jpglib/jccoefct.c"
+    #include "jpglib/jccolor.c"
+    #undef FIX
+    #include "jpglib/jcdctmgr.c"
+    #undef CONST_BITS
+    #include "jpglib/jchuff.c"
+    #undef emit_byte
+    #include "jpglib/jcinit.c"
+    #include "jpglib/jcmainct.c"
+    #include "jpglib/jcmarker.c"
+    #include "jpglib/jcmaster.c"
+    #include "jpglib/jcomapi.c"
+    #include "jpglib/jcparam.c"
+    #include "jpglib/jcphuff.c"
+    #include "jpglib/jcprepct.c"
+    #include "jpglib/jcsample.c"
+    #include "jpglib/jctrans.c"
+    #include "jpglib/jdapistd.c"
+    #include "jpglib/jdapimin.c"
+    #include "jpglib/jdatasrc.c"
+    #include "jpglib/jdcoefct.c"
+    #undef FIX
+    #include "jpglib/jdcolor.c"
+    #undef FIX
+    #include "jpglib/jddctmgr.c"
+    #undef CONST_BITS
+    #undef ASSIGN_STATE
+    #include "jpglib/jdhuff.c"
+    #include "jpglib/jdinput.c"
+    #include "jpglib/jdmainct.c"
+    #include "jpglib/jdmarker.c"
+    #include "jpglib/jdmaster.c"
+    #undef FIX
+    #include "jpglib/jdmerge.c"
+    #undef ASSIGN_STATE
+    #include "jpglib/jdphuff.c"
+    #include "jpglib/jdpostct.c"
+    #undef FIX
+    #include "jpglib/jdsample.c"
+    #include "jpglib/jdtrans.c"
+    #include "jpglib/jfdctflt.c"
+    #include "jpglib/jfdctint.c"
+    #undef CONST_BITS
+    #undef MULTIPLY
+    #undef FIX_0_541196100
+    #include "jpglib/jfdctfst.c"
+    #undef FIX_0_541196100
+    #include "jpglib/jidctflt.c"
+    #undef CONST_BITS
+    #undef FIX_1_847759065
+    #undef MULTIPLY
+    #undef DEQUANTIZE
+    #undef DESCALE
+    #include "jpglib/jidctfst.c"
+    #undef CONST_BITS
+    #undef FIX_1_847759065
+    #undef MULTIPLY
+    #undef DEQUANTIZE
+    #include "jpglib/jidctint.c"
+    #include "jpglib/jidctred.c"
+    #include "jpglib/jmemmgr.c"
+    #include "jpglib/jmemnobs.c"
+    #include "jpglib/jquant1.c"
+    #include "jpglib/jquant2.c"
+    #include "jpglib/jutils.c"
+    #include "jpglib/transupp.c"
+  }
 }
 
 #if JUCE_MSVC
@@ -46,12 +120,12 @@ extern "C"
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "../juce_Image.h"
 #include "../../../../../juce_core/io/juce_InputStream.h"
 #include "../../../../../juce_core/io/juce_OutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
 
+using namespace jpeglibNamespace;
 
 //==============================================================================
 struct JPEGDecodingFailure {};

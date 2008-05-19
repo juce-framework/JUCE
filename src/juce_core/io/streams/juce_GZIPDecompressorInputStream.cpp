@@ -30,12 +30,45 @@
 */
 
 #include "../../basics/juce_StandardHeader.h"
-#include "zlib/zlib.h"
+
+namespace zlibNamespace
+{
+  extern "C"
+  {
+    #undef OS_CODE
+    #undef fdopen
+    #define ZLIB_INTERNAL
+    #define NO_DUMMY_DECL
+    #include "zlib/zlib.h"
+
+    #include "zlib/adler32.c"
+    #include "zlib/compress.c"
+    #undef DO1
+    #undef DO8
+    #include "zlib/crc32.c"
+    #include "zlib/deflate.c"
+    #include "zlib/infback.c"
+    #include "zlib/inffast.c"
+    #undef PULLBYTE
+    #undef LOAD
+    #undef RESTORE
+    #undef INITBITS
+    #undef NEEDBITS
+    #undef DROPBITS
+    #undef BYTEBITS
+    #include "zlib/inflate.c"
+    #include "zlib/inftrees.c"
+    #include "zlib/trees.c"
+    #include "zlib/uncompr.c"
+    #include "zlib/zutil.c"
+  }
+}
 
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_GZIPDecompressorInputStream.h"
 
+using namespace zlibNamespace;
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
@@ -127,7 +160,7 @@ public:
 };
 
 //==============================================================================
-const int bufferSize = 32768;
+const int gzipDecompBufferSize = 32768;
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sourceStream_,
                                                           const bool deleteSourceWhenDestroyed_,
@@ -141,7 +174,7 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
     activeBufferSize (0),
     originalSourcePos (sourceStream_->getPosition())
 {
-    buffer = (uint8*) juce_malloc (bufferSize);
+    buffer = (uint8*) juce_malloc (gzipDecompBufferSize);
     helper = new GZIPDecompressHelper (noWrap_);
 }
 
@@ -188,7 +221,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
                     if (h->needsInput())
                     {
-                        activeBufferSize = sourceStream->read (buffer, bufferSize);
+                        activeBufferSize = sourceStream->read (buffer, gzipDecompBufferSize);
 
                         if (activeBufferSize > 0)
                         {

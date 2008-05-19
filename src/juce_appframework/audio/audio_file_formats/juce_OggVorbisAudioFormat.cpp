@@ -39,9 +39,40 @@
   #define __MACOSX__ 1
 #endif
 
-#include "oggvorbis/vorbisenc.h"
-#include "oggvorbis/codec.h"
-#include "oggvorbis/vorbisfile.h"
+
+namespace OggVorbisNamespace
+{
+  extern "C" 
+  {
+    #include "oggvorbis/vorbisenc.h"
+    #include "oggvorbis/codec.h"
+    #include "oggvorbis/vorbisfile.h"
+
+    #include "oggvorbis/bitwise.c"
+    #include "oggvorbis/framing.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/analysis.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/bitrate.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/block.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/codebook.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/envelope.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/floor0.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/floor1.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/info.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/lpc.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/lsp.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/mapping0.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/mdct.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/psy.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/registry.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/res0.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/sharedbook.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/smallft.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/synthesis.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/vorbisenc.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/vorbisfile.c"
+    #include "oggvorbis/libvorbis-1.1.2/lib/window.c"
+  }
+}
 
 BEGIN_JUCE_NAMESPACE
 
@@ -51,9 +82,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../juce_core/io/files/juce_FileInputStream.h"
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
 
+using namespace OggVorbisNamespace;
+
 //==============================================================================
-#define formatName                          TRANS("Ogg-Vorbis file")
-static const tchar* const extensions[] =    { T(".ogg"), 0 };
+#define oggFormatName                          TRANS("Ogg-Vorbis file")
+static const tchar* const oggExtensions[] =    { T(".ogg"), 0 };
 
 
 //==============================================================================
@@ -67,7 +100,7 @@ class OggReader : public AudioFormatReader
 public:
     //==============================================================================
     OggReader (InputStream* const inp)
-        : AudioFormatReader (inp, formatName),
+        : AudioFormatReader (inp, oggFormatName),
           reservoir (2, 2048),
           reservoirStart (0),
           samplesInReservoir (0)
@@ -215,7 +248,7 @@ public:
                const int numChannels,
                const int bitsPerSample,
                const int qualityIndex)
-        : AudioFormatWriter (out, formatName,
+        : AudioFormatWriter (out, oggFormatName,
                              sampleRate,
                              numChannels,
                              bitsPerSample)
@@ -341,7 +374,7 @@ public:
 
 //==============================================================================
 OggVorbisAudioFormat::OggVorbisAudioFormat()
-    : AudioFormat (formatName, (const tchar**) extensions)
+    : AudioFormat (oggFormatName, (const tchar**) oggExtensions)
 {
 }
 
