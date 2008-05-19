@@ -465,7 +465,7 @@ public:
 
     static const Colour getImageColour (ImageButton* button, const ImageRole role)
     {
-        return Colour::fromString (button->getComponentProperty ("imageColour" + String ((int) role), "0"));
+        return Colour::fromString (button->getComponentProperty ("imageColour" + String ((int) role), false, "0"));
     }
 
     static void setImageColour (ComponentLayout& layout, ImageButton* button, const ImageRole role, const Colour& colour, const bool undoable)

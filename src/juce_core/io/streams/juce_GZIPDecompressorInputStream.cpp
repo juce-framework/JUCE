@@ -31,6 +31,11 @@
 
 #include "../../basics/juce_StandardHeader.h"
 
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4309 4305)
+#endif
+
 namespace zlibNamespace
 {
   extern "C"
@@ -63,6 +68,10 @@ namespace zlibNamespace
     #include "zlib/zutil.c"
   }
 }
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 BEGIN_JUCE_NAMESPACE
 

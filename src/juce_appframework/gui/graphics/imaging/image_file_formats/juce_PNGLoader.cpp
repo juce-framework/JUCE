@@ -47,6 +47,8 @@ namespace zlibNamespace
 namespace pnglibNamespace
 {
   using namespace zlibNamespace;
+  using ::malloc;
+  using ::free;
 
   extern "C"
   {
@@ -89,6 +91,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../colour/juce_PixelFormats.h"
 
 using namespace pnglibNamespace;
+using ::malloc;
+using ::free;
 
 //==============================================================================
 static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length) throw()

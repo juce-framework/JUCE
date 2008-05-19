@@ -44,6 +44,8 @@ BEGIN_JUCE_NAMESPACE
   #pragma warning (disable: 4312)
 #endif
 
+using ::free;
+
 //==============================================================================
 static const int midiBufferSize = 1024 * 10;
 static const int numInHeaders = 32;

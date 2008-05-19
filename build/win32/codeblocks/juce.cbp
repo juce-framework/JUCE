@@ -260,271 +260,19 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\all.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\assert.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\callback.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\export.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\format.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitbuffer.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\bitmath.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\cpu.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\crc.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\fixed.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\float.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\format.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\all.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\bitbuffer.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\bitmath.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\cpu.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\crc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\fixed.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\float.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\format.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\lpc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\md5.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\memory.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\metadata.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\stream_encoder_framing.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\private\window.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\protected\all.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\protected\stream_decoder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\include\protected\stream_encoder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\juce_FlacHeader.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\lpc_flac.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\md5.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\memory.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\stream_decoder.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\stream_encoder.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\stream_encoder_framing.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\libFLAC\window_flac.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\metadata.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\ordinals.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\stream_decoder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\flac\stream_encoder.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AiffAudioFormat.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AiffAudioFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioCDBurner.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -593,6 +341,30 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_FlacAudioFormat.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
@@ -617,454 +389,24 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioFormat.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioFormat.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\bitwise.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\codec.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\config_types.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\framing.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\juce_OggVorbisHeader.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\analysis.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\backends.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\bitrate.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\bitrate.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\block.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\books\coupled\res_books_stereo.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\books\floor\floor_books.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\books\uncoupled\res_books_uncoupled.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\codebook.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\codebook.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\codec_internal.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\envelope.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\envelope.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\floor0.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\floor1.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\highlevel.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\info.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lookup.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lookup.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lookup_data.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lpc.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lpc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lsp.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\lsp.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\mapping0.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\masking.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\mdct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\mdct.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\misc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\floor_all.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\psych_11.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\psych_16.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\psych_44.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\psych_8.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\residue_16.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\residue_44.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\residue_44u.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\residue_8.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_11.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_16.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_22.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_32.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_44.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_44u.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_8.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\modes\setup_X.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\os.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\psy.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\psy.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\registry.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\registry.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\res0.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\scales.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\sharedbook.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\smallft.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\smallft.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\synthesis.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\vorbisenc.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\vorbisfile.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\window.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\libvorbis-1.1.2\lib\window.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\ogg.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\os_types.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\vorbisenc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\audio\audio_file_formats\oggvorbis\vorbisfile.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -1356,6 +698,128 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_LADSPAPluginFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioPlayHead.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -1387,7 +851,31 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -1996,6 +1484,18 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilePreviewComponent.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -2723,6 +2223,13 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_appframework\gui\components\special\juce_WebBrowserComponent.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\components\windows\juce_AlertWindow.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
@@ -3277,327 +2784,6 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\cderror.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcapimin.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcapistd.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jccoefct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jccolor.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcdctmgr.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jchuff.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jchuff.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcinit.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcmainct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcmarker.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcmaster.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcomapi.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jconfig.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcparam.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcphuff.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcprepct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jcsample.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jctrans.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdapimin.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdapistd.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdatasrc.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdcoefct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdcolor.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdct.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jddctmgr.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdhuff.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdhuff.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdinput.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdmainct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdmarker.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdmaster.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdmerge.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdphuff.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdpostct.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdsample.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jdtrans.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jerror.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jerror.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jfdctflt.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jfdctfst.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jfdctint.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jidctflt.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jidctfst.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jidctint.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jidctred.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jinclude.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jmemmgr.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jmemnobs.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jmemsys.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jmorecfg.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jpegint.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jpeglib.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jquant1.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jquant2.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jutils.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\jversion.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\transupp.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\jpglib\transupp.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
@@ -3617,95 +2803,6 @@
 		</Unit>
 		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\juce_PNGLoader.cpp">
 			<Option compilerVar="CPP"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\png.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\png.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngconf.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngerror.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngget.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngmem.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngpread.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngread.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngrio.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngrtran.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngrutil.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngset.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngtrans.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngwio.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngwrite.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngwtran.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\pnglib\pngwutil.c">
-			<Option compilerVar="CC"/>
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
@@ -4164,6 +3261,18 @@
 			<Option target="Debug"/>
 			<Option target="Release"/>
 		</Unit>
+		<Unit filename="..\..\..\src\juce_core\io\streams\juce_FileInputSource.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_core\io\streams\juce_FileInputSource.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
 		<Unit filename="..\..\..\src\juce_core\io\streams\juce_GZIPCompressorOutputStream.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Debug"/>
@@ -4182,6 +3291,13 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_core\io\streams\juce_GZIPDecompressorInputStream.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_core\io\streams\juce_InputSource.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -4218,138 +3334,6 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_core\io\streams\juce_SubregionStream.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\adler32.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\compress.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\crc32.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\crc32.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\deflate.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\deflate.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\infback.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inffast.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inffast.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inffixed.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inflate.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inflate.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inftrees.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\inftrees.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\trees.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\trees.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\uncompr.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\zconf.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\zconf.in.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\zlib.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\zutil.c">
-			<Option compilerVar="CC"/>
-			<Option target="Debug"/>
-			<Option target="Release"/>
-		</Unit>
-		<Unit filename="..\..\..\src\juce_core\io\streams\zlib\zutil.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -4529,6 +3513,13 @@
 			<Option target="Release"/>
 		</Unit>
 		<Unit filename="..\..\..\src\juce_core\threads\juce_ScopedReadLock.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Debug"/>
+			<Option target="Release"/>
+		</Unit>
+		<Unit filename="..\..\..\src\juce_core\threads\juce_ScopedTryLock.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

@@ -762,7 +762,7 @@ FLAC__bool FLAC__bitreader_read_rice_signed(FLAC__BitReader *br, int *val, unsig
 	FLAC__ASSERT(parameter <= 31);
 
 	/* read the unary MSBs and end bit */
-	if(!FLAC__bitreader_read_unary_unsigned(br, &msbs))
+	if(!FLAC__bitreader_read_unary_unsigned(br, (unsigned int*) &msbs))
 		return false;
 
 	/* read the binary LSBs */

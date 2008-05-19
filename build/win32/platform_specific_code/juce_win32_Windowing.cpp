@@ -48,7 +48,6 @@
   #pragma warning (disable: 4312 4244)
 #endif
 
-
 #undef GetSystemMetrics // multimon overrides this for some reason and causes a mess..
 
 // these are in the windows SDK, but need to be repeated here for GCC..
@@ -112,6 +111,8 @@ static bool screenSaverAllowed = true;
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw();
 #define WM_TRAYNOTIFY WM_USER + 100
+
+using ::abs;
 
 //==============================================================================
 typedef BOOL (WINAPI* UpdateLayeredWinFunc) (HWND, HDC, POINT*, SIZE*, HDC, POINT*, COLORREF, BLENDFUNCTION*, DWORD);
