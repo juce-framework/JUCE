@@ -57,7 +57,7 @@ void MidiMessageCollector::reset (const double sampleRate_)
     const ScopedLock sl (midiCallbackLock);
     sampleRate = sampleRate_;
     incomingMessages.clear();
-    lastCallbackTime = Time::getMillisecondCounter();
+    lastCallbackTime = Time::getMillisecondCounterHiRes();
 }
 
 void MidiMessageCollector::addMessageToQueue (const MidiMessage& message)
@@ -88,16 +88,15 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
     // you need to call reset() to set the correct sample rate before using this object
     jassert (sampleRate != 44100.0001);
 
-    const uint32 timeNow = Time::getMillisecondCounter();
-    const int msElapsed = timeNow - lastCallbackTime;
+    const double timeNow = Time::getMillisecondCounterHiRes();
+    const double msElapsed = timeNow - lastCallbackTime;
 
     const ScopedLock sl (midiCallbackLock);
     lastCallbackTime = timeNow;
 
     if (! incomingMessages.isEmpty())
     {
-        int numSourceSamples = roundDoubleToInt (msElapsed * 0.001 * sampleRate);
-        const int maxBlockLengthToUse = numSamples << 2;
+        int numSourceSamples = jmax (1, roundDoubleToInt (msElapsed * 0.001 * sampleRate));
 
         int startSample = 0;
         int scale = 1 << 16;
@@ -111,6 +110,8 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
         {
             // if our list of events is longer than the buffer we're being
             // asked for, scale them down to squeeze them all in..
+            const int maxBlockLengthToUse = numSamples << 3;
+
             if (numSourceSamples > maxBlockLengthToUse)
             {
                 startSample = numSourceSamples - maxBlockLengthToUse;

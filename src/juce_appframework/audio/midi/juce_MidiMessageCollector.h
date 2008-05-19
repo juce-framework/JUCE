@@ -102,7 +102,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    uint32 lastCallbackTime;
+    double lastCallbackTime;
     CriticalSection midiCallbackLock;
     MidiBuffer incomingMessages;
     double sampleRate;
