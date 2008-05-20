@@ -57,9 +57,6 @@
  #endif
 
 #elif defined (LINUX)
- #include "../build/linux/platform_specific_code/linuxincludes.h"
- #include <ft2build.h>
- #include FT_FREETYPE_H
 
 #else
  #include <Carbon/Carbon.h>

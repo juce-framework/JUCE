@@ -34,7 +34,9 @@
 #if JUCE_PLUGINHOST_VST
 
 #ifdef _WIN32
+ #undef #define _WIN32_WINNT
  #define _WIN32_WINNT 0x500
+ #undef STRICT
  #define STRICT
  #include <windows.h>
  #include <float.h>
