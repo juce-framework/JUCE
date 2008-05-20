@@ -49,7 +49,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_Process.h"
 #include "../../../src/juce_core/threads/juce_InterProcessLock.h"
 
-#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  extern HWND juce_messageWindowHandle;
 #endif
 
@@ -122,7 +122,7 @@ void JUCE_API juce_threadEntryPoint (void*);
 
 static unsigned int __stdcall threadEntryProc (void* userData) throw()
 {
-#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
     AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
                        GetCurrentThreadId(), TRUE);
 #endif

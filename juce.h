@@ -62,7 +62,7 @@ BEGIN_JUCE_NAMESPACE
 
 // if you're compiling a command-line app, you might want to just include the core headers,
 // so you can set this macro before including juce.h
-#ifndef ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
   #include "src/juce_app_includes.h"
 #endif
 
@@ -158,30 +158,9 @@ END_JUCE_NAMESPACE
 
     // Auto-link the other win32 libs that are needed by library calls..
     #if ! (defined (DONT_AUTOLINK_TO_WIN32_LIBRARIES) || defined (JUCE_DLL))
-      #pragma comment(lib, "kernel32.lib")
-      #pragma comment(lib, "user32.lib")
-      #pragma comment(lib, "shell32.lib")
-      #pragma comment(lib, "gdi32.lib")
-      #pragma comment(lib, "vfw32.lib")
-      #pragma comment(lib, "comdlg32.lib")
-      #pragma comment(lib, "winmm.lib")
-      #pragma comment(lib, "wininet.lib")
-      #pragma comment(lib, "ole32.lib")
-      #pragma comment(lib, "advapi32.lib")
-      #pragma comment(lib, "ws2_32.lib")
-      #pragma comment(lib, "SetupAPI.Lib")
-      //#pragma comment(lib, "gdiplus.lib")
-
-      #if JUCE_OPENGL
-        #pragma comment(lib, "OpenGL32.Lib")
-        #pragma comment(lib, "GlU32.Lib")
-      #endif
-
-      #if JUCE_QUICKTIME
-        #pragma comment (lib, "QTMLClient.lib")
-      #endif
-
+      #include "build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
     #endif
+
   #endif
 
 #endif

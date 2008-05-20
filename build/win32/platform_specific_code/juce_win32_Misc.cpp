@@ -41,7 +41,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
@@ -65,7 +65,7 @@ void PlatformUtilities::beep()
   #pragma warning (disable : 4127)    // "Conditional expression is constant" warning
 #endif
 
-#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {

@@ -87,9 +87,9 @@
 
 //=============================================================================
 /** Comment out this macro if you don't want to enable QuickTime or if you don't
-    have the SDK installed. 
-    
-    If this flag is not enabled, the QuickTimeMovieComponent and QuickTimeAudioFormat 
+    have the SDK installed.
+
+    If this flag is not enabled, the QuickTimeMovieComponent and QuickTimeAudioFormat
     classes will be unavailable.
 
     On Windows, if you enable this, you'll need to have the QuickTime SDK
@@ -127,7 +127,7 @@
 /** This flag lets you enable support for CD-burning. You might want to disable
     it to build without the MS SDK under windows.
 */
-#ifndef JUCE_USE_CDBURNER
+#if (! defined (JUCE_USE_CDBURNER)) && ! (defined (_WIN32) && ! defined (_MSC_VER))
   #define JUCE_USE_CDBURNER 1
 #endif
 

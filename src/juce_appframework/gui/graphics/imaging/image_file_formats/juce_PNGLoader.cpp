@@ -33,7 +33,7 @@
 
 #ifdef _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable: 4390)
+  #pragma warning (disable: 4390 4611)
 #endif
 
 namespace zlibNamespace
@@ -55,6 +55,7 @@ namespace pnglibNamespace
     using ::abs;
     #define PNG_INTERNAL
     #define NO_DUMMY_DECL
+    #define PNG_SETJMP_NOT_SUPPORTED
 
     #include "pnglib/png.h"
     #include "pnglib/pngconf.h"
@@ -264,8 +265,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
 
     png_infop pngInfoStruct = png_create_info_struct (pngWriteStruct);
 
-    if ((pngInfoStruct == 0)
-        || setjmp (pngWriteStruct->jmpbuf))
+    if (pngInfoStruct == 0)
     {
         png_destroy_write_struct (&pngWriteStruct, (png_infopp) 0);
         return false;

@@ -92,7 +92,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/io/network/juce_URL.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 
-
 //==============================================================================
 #define TAKE_FOCUS 0
 #define DELETE_WINDOW 1
@@ -633,10 +632,10 @@ public:
         // blit results to screen.
 #if JUCE_USE_XSHM
         if (usingXShm)
-            XShmPutImage (display, (Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, False);
+            XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, False);
         else
 #endif
-            XPutImage (display, (Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
+            XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
     }
 
     //==============================================================================
@@ -969,7 +968,7 @@ public:
         unsigned int bw, depth;
         int wx, wy, w, h;
 
-        if (! XGetGeometry (display, (Drawable) windowH, &root,
+        if (! XGetGeometry (display, (::Drawable) windowH, &root,
                             &wx, &wy, (unsigned int*) &w, (unsigned int*) &h,
                             &bw, &depth))
         {
@@ -1812,7 +1811,7 @@ private:
                 unsigned long flags;
                 unsigned long functions;
                 unsigned long decorations;
-                INT32 input_mode;
+                ::INT32 input_mode;
                 unsigned long status;
             } MotifWmHints;
 
@@ -1873,7 +1872,7 @@ private:
                 unsigned long flags;
                 unsigned long functions;
                 unsigned long decorations;
-                INT32 input_mode;
+                ::INT32 input_mode;
                 unsigned long status;
             } MotifWmHints;
 
@@ -2207,7 +2206,7 @@ private:
             Window root, child;
             unsigned int bw, depth;
 
-            if (! XGetGeometry (display, (Drawable) windowH, &root,
+            if (! XGetGeometry (display, (::Drawable) windowH, &root,
                                 &wx, &wy, (unsigned int*) &ww, (unsigned int*) &wh,
                                 &bw, &depth))
             {

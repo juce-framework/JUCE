@@ -162,7 +162,7 @@ void SystemStats::initialiseStats() throw()
 
         highResTimerFrequency = (int64) AudioGetHostClockFrequency();
 
-#if ! ONLY_INCLUDE_JUCE_CORE_HEADERS
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
         if (JUCEApplication::getInstance() != 0)
             RegisterAppearanceClient();
 #endif
