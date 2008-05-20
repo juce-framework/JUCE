@@ -43,10 +43,6 @@
 #ifdef _WIN32
  #include <gl/gl.h>
  #include <gl/glu.h>
- #ifdef _MSC_VER
-  #pragma comment(lib, "OpenGL32.Lib")
-  #pragma comment(lib, "GlU32.Lib")
- #endif
 #elif defined (LINUX)
  #include <GL/gl.h>
  #include <GL/glut.h>

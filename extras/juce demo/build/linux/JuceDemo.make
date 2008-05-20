@@ -10,12 +10,12 @@ ifeq ($(CONFIG),Debug)
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include"
+  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -ljuce_debug
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
-  RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include"
+  RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucedemo
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -25,12 +25,12 @@ ifeq ($(CONFIG),Release)
   LIBDIR := build
   OBJDIR := build/intermediate/Release
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include"
+  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound -ljuce
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
-  RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include"
+  RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucedemo
   BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
@@ -38,7 +38,9 @@ endif
 OBJECTS := \
 	$(OBJDIR)/ApplicationStartup.o \
 	$(OBJDIR)/BinaryData.o \
+	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
+	$(OBJDIR)/._QuickTimeDemo.o \
 	$(OBJDIR)/AudioDemo.o \
 	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
@@ -100,7 +102,17 @@ $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
+$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/._QuickTimeDemo.o: ../../src/demos/._QuickTimeDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<

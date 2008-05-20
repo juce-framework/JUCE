@@ -265,6 +265,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\src\juce_AppConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\juce_LibrarySource.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\jucedemo_headers.h"
 				>
 			</File>
