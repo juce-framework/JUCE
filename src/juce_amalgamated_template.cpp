@@ -409,7 +409,7 @@
 
 #include "../build/macosx/platform_specific_code/juce_mac_Files.cpp"
 #include "../build/macosx/platform_specific_code/juce_mac_NamedPipe.cpp"
-#include "../build/macosx/platform_specific_code/juce_mac_SystemStats.cpp"
+#include "../build/macosx/platform_specific_code/juce_mac_SystemStats.mm"
 #include "../build/macosx/platform_specific_code/juce_mac_Threads.cpp"
 #include "../build/macosx/platform_specific_code/juce_mac_Network.mm"
 
