@@ -115,13 +115,13 @@ END_JUCE_NAMESPACE
 
 - (bool) isDiskPresent
 {
-    NSLog ([[device status] description]);
-    return [device isValid];
+    return [device isValid] 
+             && [[[device status] objectForKey: DRDeviceMediaStateKey] 
+                    isEqualTo: DRDeviceMediaStateMediaPresent];
 }
 
 - (int) getNumAvailableAudioBlocks
 {
-    NSLog ([[device status] description]);
     return [[[[device status] objectForKey: DRDeviceMediaInfoKey]
                               objectForKey: DRDeviceMediaBlocksFreeKey] intValue];
 }
@@ -427,8 +427,8 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 }
 
 const String AudioCDBurner::burn (juce::AudioCDBurner::BurnProgressListener* listener,
-                                  const bool peformFakeBurnForTesting,
-                                  const bool ejectDiscAfterwards)
+                                  const bool ejectDiscAfterwards,
+                                  const bool peformFakeBurnForTesting)
 {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     juce::String error ("Couldn't open or write to the CD device");
