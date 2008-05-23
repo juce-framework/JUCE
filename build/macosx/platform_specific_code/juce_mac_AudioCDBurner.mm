@@ -152,10 +152,12 @@ END_JUCE_NAMESPACE
     [device acquireMediaReservation];
 
     NSMutableDictionary* d = [[burn properties] mutableCopy];
+    [d autorelease];
     [d setObject: [NSNumber numberWithBool: peformFakeBurnForTesting] forKey: DRBurnTestingKey];
     [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnVerifyDiscKey];
+    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) 
+          forKey: DRBurnCompletionActionKey];
     [burn setProperties: d];
-    [d release];
 
     [burn writeLayout: tracks];
 
@@ -163,6 +165,8 @@ END_JUCE_NAMESPACE
     {
         juce::Thread::sleep (300);
         float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
+
+NSLog ([[burn status] description]);
 
         if (listener != 0 && listener->audioCDBurnProgress (progress))
         {
@@ -178,11 +182,9 @@ END_JUCE_NAMESPACE
         }
         else if ([[[burn status] objectForKey: DRStatusStateKey] isEqualTo: DRStatusStateDone])
         {
-            if (shouldEject)
-                [device openTray];
-
             break;
         }
+
         NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey] 
                                                     objectForKey: DRErrorStatusErrorStringKey];
 
@@ -211,19 +213,21 @@ END_JUCE_NAMESPACE
 - (void) setupTrackProperties: (DRTrack*) track
 {
     NSMutableDictionary*  p = [[track properties] mutableCopy];
-    [p setObject: [DRMSF msfWithFrames: lengthInFrames] forKey: DRTrackLengthKey];
-    [p setObject: [NSNumber numberWithUnsignedShort: 2048] forKey: DRBlockSizeKey];
-    [p setObject: [NSNumber numberWithInt: 16] forKey: DRDataFormKey];
-    [p setObject: [NSNumber numberWithInt: 8] forKey: DRBlockTypeKey];
-    [p setObject: [NSNumber numberWithInt: 4] forKey: DRTrackModeKey];
-    [p setObject: [NSNumber numberWithInt: 0] forKey: DRSessionFormatKey];
+    [p setObject:[DRMSF msfWithFrames: lengthInFrames] forKey: DRTrackLengthKey];
+    [p setObject:[NSNumber numberWithUnsignedShort:2352] forKey: DRBlockSizeKey];
+    [p setObject:[NSNumber numberWithInt:0] forKey: DRDataFormKey];
+    [p setObject:[NSNumber numberWithInt:0] forKey: DRBlockTypeKey];
+    [p setObject:[NSNumber numberWithInt:0] forKey: DRTrackModeKey];
+    [p setObject:[NSNumber numberWithInt:0] forKey: DRSessionFormatKey];
+    
+
     [track setProperties: p];
     [p release];
 }
 
 - (AudioTrackProducer*) initWithAudioSource: (juce::AudioSource*) source_ numSamples: (int) lengthInSamples
 {
-    AudioTrackProducer* s = [self init: lengthInSamples / (44100 / 75)];
+    AudioTrackProducer* s = [self init: (lengthInSamples + 587) / 588];
 
     if (s != nil)
         s->source = source_;

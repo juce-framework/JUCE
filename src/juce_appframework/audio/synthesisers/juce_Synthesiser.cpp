@@ -253,6 +253,9 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
 {
     if (voice != 0 && sound != 0)
     {
+        if (voice->currentlyPlayingSound != 0)
+            voice->stopNote (false);
+
         voice->startNote (midiNoteNumber,
                           velocity,
                           sound,
