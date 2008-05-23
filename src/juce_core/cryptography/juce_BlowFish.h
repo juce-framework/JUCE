@@ -42,8 +42,17 @@ class JUCE_API  BlowFish
 {
 public:
     //==============================================================================
-    /** Creates an object that can encode/decode based on the specified key. */
+    /** Creates an object that can encode/decode based on the specified key. 
+    
+        The key data can be up to 72 bytes long.
+    */
     BlowFish (const uint8* keyData, int keyBytes);
+
+    /** Creates a copy of another blowfish object. */
+    BlowFish (const BlowFish& other);
+
+    /** Copies another blowfish object. */
+    const BlowFish& operator= (const BlowFish& other);
 
     /** Destructor. */
     ~BlowFish();
@@ -60,7 +69,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    uint32* p;
+    uint32 p[18];
     uint32* s[4];
 
     uint32 F (uint32 x) const;

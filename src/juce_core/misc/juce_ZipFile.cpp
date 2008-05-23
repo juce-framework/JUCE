@@ -37,6 +37,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ZipFile.h"
 #include "../io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../io/streams/juce_BufferedInputStream.h"
+#include "../io/streams/juce_FileInputSource.h"
 #include "../io/files/juce_FileInputStream.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../threads/juce_ScopedLock.h"
@@ -62,39 +63,43 @@ public:
         : file (file_),
           zipEntryInfo (zei),
           pos (0),
-          headerSize (0)
+          headerSize (0),
+          inputStream (0)
     {
+        inputStream = file_.inputStream;
+
+        if (file_.inputSource != 0)
+        {
+            inputStream = file.inputSource->createInputStream();
+        }
+        else
+        {
+#ifdef JUCE_DEBUG
+            file_.numOpenStreams++;
+#endif
+        }
+
         char buffer [30];
 
-        if (file.source->setPosition (zei.streamOffset)
-             && file.source->read (buffer, 30) == 30
+        if (inputStream != 0 
+             && inputStream->setPosition (zei.streamOffset)
+             && inputStream->read (buffer, 30) == 30
              && littleEndianInt (buffer) == 0x04034b50)
         {
             headerSize = 30 + littleEndianShort (buffer + 26)
                             + littleEndianShort (buffer + 28);
-        }
-
-        if (! file_.isFromCustomStream)
-        {
-            source = file_.sourceFile.createInputStream();
-        }
-        else
-        {
-            source = 0;
-#ifdef JUCE_DEBUG
-            file_.numOpenStreams++;
-#endif
         }
     }
 
     ~ZipInputStream() throw()
     {
 #ifdef JUCE_DEBUG
-        if (source == 0)
+        if (inputStream != 0 && inputStream == file.inputStream)
             file.numOpenStreams--;
 #endif
 
-        delete source;
+        if (inputStream != file.inputStream)
+            delete inputStream;
     }
 
     int64 getTotalLength() throw()
@@ -108,19 +113,22 @@ public:
             return 0;
 
         howMany = (int) jmin ((int64) howMany, zipEntryInfo.compressedSize - pos);
+
+        if (inputStream == 0)
+            return 0;
+
         int num;
 
-        if (source != 0)
+        if (inputStream == file.inputStream)
         {
-            source->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
-            num = source->read (buffer, howMany);
+            const ScopedLock sl (file.lock);
+            inputStream->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            num = inputStream->read (buffer, howMany);
         }
         else
         {
-            const ScopedLock sl (file.lock);
-
-            file.source->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
-            num = file.source->read (buffer, howMany);
+            inputStream->setPosition (pos + zipEntryInfo.streamOffset + headerSize);
+            num = inputStream->read (buffer, howMany);
         }
 
         pos += num;
@@ -150,7 +158,7 @@ private:
     ZipEntryInfo zipEntryInfo;
     int64 pos;
     int headerSize;
-    InputStream* source;
+    InputStream* inputStream;
 
     ZipInputStream (const ZipInputStream&);
     const ZipInputStream& operator= (const ZipInputStream&);
@@ -160,8 +168,7 @@ private:
 //==============================================================================
 ZipFile::ZipFile (InputStream* const source_,
                   const bool deleteStreamWhenDestroyed_) throw()
-   : source (source_),
-     isFromCustomStream (true),
+   : inputStream (source_),
      deleteStreamWhenDestroyed (deleteStreamWhenDestroyed_)
 #ifdef JUCE_DEBUG
      , numOpenStreams (0)
@@ -171,14 +178,24 @@ ZipFile::ZipFile (InputStream* const source_,
 }
 
 ZipFile::ZipFile (const File& file)
-    : sourceFile (file),
-      isFromCustomStream (false),
-      deleteStreamWhenDestroyed (true)
+    : inputStream (0),
+      deleteStreamWhenDestroyed (false)
 #ifdef JUCE_DEBUG
       , numOpenStreams (0)
 #endif
 {
-    source = file.createInputStream();
+    inputSource = new FileInputSource (file);
+    init();
+}
+
+ZipFile::ZipFile (InputSource* const inputSource_)
+    : inputStream (0),
+      inputSource (inputSource_),
+      deleteStreamWhenDestroyed (false)
+#ifdef JUCE_DEBUG
+      , numOpenStreams (0)
+#endif
+{
     init();
 }
 
@@ -190,8 +207,10 @@ ZipFile::~ZipFile() throw()
         delete zei;
     }
 
-    if (deleteStreamWhenDestroyed && (source != 0))
-        delete source;
+    if (deleteStreamWhenDestroyed)
+        delete inputStream;
+
+    delete inputSource;
 
 #ifdef JUCE_DEBUG
     // If you hit this assertion, it means you've created a stream to read
@@ -273,64 +292,76 @@ void ZipFile::sortEntriesByFilename()
 //==============================================================================
 void ZipFile::init()
 {
-    if (source != 0)
+    InputStream* in = inputStream;
+    bool deleteInput = false;
+
+    if (inputSource != 0)
+    {
+        deleteInput = true;
+        in = inputSource->createInputStream();
+    }
+
+    if (in != 0)
     {
         numEntries = 0;
-        int pos = findEndOfZipEntryTable();
-        int size = (int) (source->getTotalLength() - pos);
+        int pos = findEndOfZipEntryTable (in);
+        const int size = (int) (in->getTotalLength() - pos);
 
-        source->setPosition (pos);
+        in->setPosition (pos);
         MemoryBlock headerData;
 
-        if (source->readIntoMemoryBlock (headerData, size) != size)
-            return;
-
-        pos = 0;
-
-        for (int i = 0; i < numEntries; ++i)
+        if (in->readIntoMemoryBlock (headerData, size) == size)
         {
-            if (pos + 46 > size)
-                break;
+            pos = 0;
 
-            const char* const buffer = ((const char*) headerData.getData()) + pos;
+            for (int i = 0; i < numEntries; ++i)
+            {
+                if (pos + 46 > size)
+                    break;
 
-            const int fileNameLen = littleEndianShort (buffer + 28);
+                const char* const buffer = ((const char*) headerData.getData()) + pos;
 
-            if (pos + 46 + fileNameLen > size)
-                break;
+                const int fileNameLen = littleEndianShort (buffer + 28);
 
-            ZipEntryInfo* const zei = new ZipEntryInfo();
-            zei->entry.filename = String (buffer + 46, fileNameLen);
+                if (pos + 46 + fileNameLen > size)
+                    break;
 
-            const int time = littleEndianShort (buffer + 12);
-            const int date = littleEndianShort (buffer + 14);
+                ZipEntryInfo* const zei = new ZipEntryInfo();
+                zei->entry.filename = String (buffer + 46, fileNameLen);
 
-            const int year      = 1980 + (date >> 9);
-            const int month     = ((date >> 5) & 15) - 1;
-            const int day       = date & 31;
-            const int hours     = time >> 11;
-            const int minutes   = (time >> 5) & 63;
-            const int seconds   = (time & 31) << 1;
+                const int time = littleEndianShort (buffer + 12);
+                const int date = littleEndianShort (buffer + 14);
 
-            zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
+                const int year      = 1980 + (date >> 9);
+                const int month     = ((date >> 5) & 15) - 1;
+                const int day       = date & 31;
+                const int hours     = time >> 11;
+                const int minutes   = (time >> 5) & 63;
+                const int seconds   = (time & 31) << 1;
 
-            zei->compressed = littleEndianShort (buffer + 10) != 0;
-            zei->compressedSize = littleEndianInt (buffer + 20);
-            zei->entry.uncompressedSize = littleEndianInt (buffer + 24);
+                zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
 
-            zei->streamOffset = littleEndianInt (buffer + 42);
-            entries.add (zei);
+                zei->compressed = littleEndianShort (buffer + 10) != 0;
+                zei->compressedSize = littleEndianInt (buffer + 20);
+                zei->entry.uncompressedSize = littleEndianInt (buffer + 24);
 
-            pos += 46 + fileNameLen
-                    + littleEndianShort (buffer + 30)
-                    + littleEndianShort (buffer + 32);
+                zei->streamOffset = littleEndianInt (buffer + 42);
+                entries.add (zei);
+
+                pos += 46 + fileNameLen
+                        + littleEndianShort (buffer + 30)
+                        + littleEndianShort (buffer + 32);
+            }
         }
+
+        if (deleteInput)
+            delete in;
     }
 }
 
-int ZipFile::findEndOfZipEntryTable()
+int ZipFile::findEndOfZipEntryTable (InputStream* input)
 {
-    BufferedInputStream in (source, 8192, false);
+    BufferedInputStream in (input, 8192, false);
 
     in.setPosition (in.getTotalLength());
     int64 pos = in.getPosition();

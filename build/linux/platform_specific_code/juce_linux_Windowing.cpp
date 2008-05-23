@@ -1811,7 +1811,7 @@ private:
                 unsigned long flags;
                 unsigned long functions;
                 unsigned long decorations;
-                ::INT32 input_mode;
+                long input_mode;
                 unsigned long status;
             } MotifWmHints;
 
@@ -1872,7 +1872,7 @@ private:
                 unsigned long flags;
                 unsigned long functions;
                 unsigned long decorations;
-                ::INT32 input_mode;
+                long input_mode;
                 unsigned long status;
             } MotifWmHints;
 
@@ -2186,7 +2186,7 @@ private:
                                         XA_CARDINAL, &actualType, &actualFormat, &nitems, &bytesLeft,
                                         &data) == Success)
                 {
-                    const unsigned long* const sizes = (const CARD32*) data;
+                    const unsigned long* const sizes = (const unsigned long*) data;
 
                     if (actualFormat == 32)
                         windowBorder = BorderSize ((int) sizes[2], (int) sizes[0],

@@ -310,7 +310,6 @@ static const uint32 initialSValues [4 * 256] =
 //==============================================================================
 BlowFish::BlowFish (const uint8* keyData, int keyBytes)
 {
-    p = (uint32*) juce_malloc (18 * sizeof (uint32));
     memcpy (p, initialPValues, sizeof (p));
 
     int i, j;
@@ -359,10 +358,26 @@ BlowFish::BlowFish (const uint8* keyData, int keyBytes)
     }
 }
 
+BlowFish::BlowFish (const BlowFish& other)
+{
+    for (int i = 4; --i >= 0;)
+        s[i] = (uint32*) juce_malloc (256 * sizeof (uint32));
+
+    operator= (other);
+}
+
+const BlowFish& BlowFish::operator= (const BlowFish& other)
+{
+    memcpy (p, other.p, sizeof (p));
+
+    for (int i = 4; --i >= 0;)
+        memcpy (s[i], other.s[i], 256 * sizeof (uint32));
+
+    return *this;
+}
+
 BlowFish::~BlowFish()
 {
-    juce_free (p);
-
     for (int i = 4; --i >= 0;)
         juce_free (s[i]);
 }

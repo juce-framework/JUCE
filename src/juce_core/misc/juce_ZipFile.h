@@ -34,6 +34,7 @@
 
 #include "../io/files/juce_File.h"
 #include "../io/juce_InputStream.h"
+#include "../io/streams/juce_InputSource.h"
 #include "../threads/juce_CriticalSection.h"
 
 
@@ -59,6 +60,13 @@ public:
 
     /** Creates a ZipFile based for a file. */
     ZipFile (const File& file);
+
+    /** Creates a ZipFile for an input source.
+    
+        The inputSource object will be owned by the zip file, which will delete
+        it later when not needed.
+    */
+    ZipFile (InputSource* const inputSource);
 
     /** Destructor. */
     ~ZipFile() throw();
@@ -146,9 +154,10 @@ private:
     VoidArray entries;
     friend class ZipInputStream;
     CriticalSection lock;
-    InputStream* source;
-    File sourceFile;
-    bool isFromCustomStream, deleteStreamWhenDestroyed;
+    InputStream* inputStream;
+    InputSource* inputSource;
+
+    bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG
@@ -156,7 +165,7 @@ private:
 #endif
 
     void init();
-    int findEndOfZipEntryTable();
+    int findEndOfZipEntryTable (InputStream* in);
 
     ZipFile (const ZipFile&);
     const ZipFile& operator= (const ZipFile&);
