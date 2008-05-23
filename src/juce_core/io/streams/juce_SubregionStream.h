@@ -53,7 +53,7 @@ public:
         @param lengthOfSourceStream         this specifies the maximum number of bytes
                                             from the source stream that will be passed through
                                             by this stream. When the position of this stream
-                                            exceeds lengthOfSourceStream, it will the end-of-stream.
+                                            exceeds lengthOfSourceStream, it will cause an end-of-stream.
                                             If the length passed in here is greater than the length
                                             of the source stream (as returned by getTotalLength()),
                                             then the smaller value will be used.
