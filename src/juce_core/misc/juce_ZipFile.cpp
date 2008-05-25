@@ -169,6 +169,7 @@ private:
 ZipFile::ZipFile (InputStream* const source_,
                   const bool deleteStreamWhenDestroyed_) throw()
    : inputStream (source_),
+     inputSource (0),
      deleteStreamWhenDestroyed (deleteStreamWhenDestroyed_)
 #ifdef JUCE_DEBUG
      , numOpenStreams (0)
