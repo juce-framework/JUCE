@@ -87,7 +87,8 @@ void AudioProcessorGraph::Node::unprepare()
 //==============================================================================
 AudioProcessorGraph::AudioProcessorGraph()
     : lastNodeId (0),
-      renderingBuffers (1, 1)
+      renderingBuffers (1, 1),
+      currentAudioOutputBuffer (1, 1)
 {
 }
 
@@ -644,7 +645,13 @@ private:
                 const int srcChan = sourceOutputChans.getUnchecked(0);
 
                 bufIndex = getBufferContaining (srcNode, srcChan);
-                jassert (bufIndex >= 0);
+
+                if (bufIndex < 0)
+                {
+                    // if not found, this is probably a feedback loop
+                    bufIndex = getReadOnlyEmptyBuffer();
+                    jassert (bufIndex >= 0);
+                }
 
                 if (inputChan < numOuts
                      && isBufferNeededLater (ourRenderingIndex,
@@ -672,12 +679,11 @@ private:
                     const int sourceBufIndex = getBufferContaining (sourceNodes.getUnchecked(i),
                                                                     sourceOutputChans.getUnchecked(i));
 
-                    jassert (sourceBufIndex >= 0);
-
-                    if (! isBufferNeededLater (ourRenderingIndex,
-                                               inputChan,
-                                               sourceNodes.getUnchecked(i),
-                                               sourceOutputChans.getUnchecked(i)))
+                    if (sourceBufIndex >= 0
+                        && ! isBufferNeededLater (ourRenderingIndex,
+                                                  inputChan,
+                                                  sourceNodes.getUnchecked(i),
+                                                  sourceOutputChans.getUnchecked(i)))
                     {
                         // we've found one of our input chans that can be re-used..
                         reusableInputIndex = i;
@@ -694,9 +700,15 @@ private:
 
                     const int srcIndex = getBufferContaining (sourceNodes.getUnchecked (0),
                                                               sourceOutputChans.getUnchecked (0));
-                    jassert (srcIndex >= 0);
-
-                    renderingOps.add (new CopyChannelOp (srcIndex, bufIndex));
+                    if (srcIndex < 0)
+                    {
+                        // if not found, this is probably a feedback loop
+                        renderingOps.add (new ClearChannelOp (bufIndex));
+                    }
+                    else
+                    {
+                        renderingOps.add (new CopyChannelOp (srcIndex, bufIndex));
+                    }
 
                     reusableInputIndex = 0;
                 }
@@ -755,8 +767,6 @@ private:
             midiBufferToUse = getBufferContaining (midiSourceNodes.getUnchecked(0),
                                                    AudioProcessorGraph::midiChannelIndex);
 
-            jassert (midiBufferToUse >= 0);
-
             if (midiBufferToUse >= 0)
             {
                 if (isBufferNeededLater (ourRenderingIndex,
@@ -771,6 +781,11 @@ private:
                     midiBufferToUse = newFreeBuffer;
                 }
             }
+            else
+            {
+                 // probably a feedback loop, so just use an empty one..
+                 midiBufferToUse = getFreeBuffer (true); // need to pick a buffer even if the processor doesn't use midi
+            }
         }
         else
         {
@@ -782,12 +797,11 @@ private:
                 const int sourceBufIndex = getBufferContaining (midiSourceNodes.getUnchecked(i),
                                                                 AudioProcessorGraph::midiChannelIndex);
 
-                jassert (sourceBufIndex >= 0);
-
-                if (! isBufferNeededLater (ourRenderingIndex,
-                                           AudioProcessorGraph::midiChannelIndex,
-                                           midiSourceNodes.getUnchecked(i),
-                                           AudioProcessorGraph::midiChannelIndex))
+                if (sourceBufIndex >= 0
+                     && ! isBufferNeededLater (ourRenderingIndex,
+                                               AudioProcessorGraph::midiChannelIndex,
+                                               midiSourceNodes.getUnchecked(i),
+                                               AudioProcessorGraph::midiChannelIndex))
                 {
                     // we've found one of our input buffers that can be re-used..
                     reusableInputIndex = i;
@@ -804,9 +818,10 @@ private:
 
                 const int srcIndex = getBufferContaining (midiSourceNodes.getUnchecked(0),
                                                           AudioProcessorGraph::midiChannelIndex);
-                jassert (srcIndex >= 0);
-
-                renderingOps.add (new CopyMidiBufferOp (srcIndex, midiBufferToUse));
+                if (srcIndex >= 0)
+                    renderingOps.add (new CopyMidiBufferOp (srcIndex, midiBufferToUse));
+                else
+                    renderingOps.add (new ClearMidiBufferOp (midiBufferToUse));
 
                 reusableInputIndex = 0;
             }
@@ -817,9 +832,8 @@ private:
                 {
                     const int srcIndex = getBufferContaining (midiSourceNodes.getUnchecked(j),
                                                               AudioProcessorGraph::midiChannelIndex);
-                    jassert (srcIndex >= 0);
-
-                    renderingOps.add (new AddMidiBufferOp (srcIndex, midiBufferToUse));
+                    if (srcIndex >= 0)
+                        renderingOps.add (new AddMidiBufferOp (srcIndex, midiBufferToUse));
                 }
             }
         }
@@ -1058,10 +1072,12 @@ void AudioProcessorGraph::handleAsyncUpdate()
 }
 
 //==============================================================================
-void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int /*estimatedSamplesPerBlock*/)
+void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSamplesPerBlock)
 {
-    currentAudioIOBuffer = 0;
-    currentMidiIOBuffer = 0;
+    currentAudioInputBuffer = 0;
+    currentAudioOutputBuffer.setSize (getNumOutputChannels(), estimatedSamplesPerBlock);
+    currentMidiInputBuffer = 0;
+    currentMidiOutputBuffer.clear();
 
     clearRenderingSequence();
     buildRenderingSequence();
@@ -1075,18 +1091,23 @@ void AudioProcessorGraph::releaseResources()
     renderingBuffers.setSize (1, 1);
     midiBuffers.clear();
 
-    currentAudioIOBuffer = 0;
-    currentMidiIOBuffer = 0;
+    currentAudioInputBuffer = 0;
+    currentAudioOutputBuffer.setSize (1, 1);
+    currentMidiInputBuffer = 0;
+    currentMidiOutputBuffer.clear();
 }
 
 void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
+    const int numSamples = buffer.getNumSamples();
+
     const ScopedLock sl (renderLock);
 
-    currentAudioIOBuffer = &buffer;
-    currentMidiIOBuffer = &midiMessages;
-
-    const int numSamples = buffer.getNumSamples();
+    currentAudioInputBuffer = &buffer;
+    currentAudioOutputBuffer.setSize (buffer.getNumChannels(), numSamples);
+    currentAudioOutputBuffer.clear();
+    currentMidiInputBuffer = &midiMessages;
+    currentMidiOutputBuffer.clear();
 
     for (int i = 0; i < renderingOps.size(); ++i)
     {
@@ -1095,6 +1116,9 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
 
         op->perform (renderingBuffers, midiBuffers, numSamples);
     }
+
+    for (int i = 0; i < buffer.getNumChannels(); ++i)
+        buffer.copyFrom (i, 0, currentAudioOutputBuffer, i, 0, numSamples);
 }
 
 const String AudioProcessorGraph::getInputChannelName (const int channelIndex) const
@@ -1203,10 +1227,10 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
     {
     case audioOutputNode:
     {
-        for (int i = jmin (graph->currentAudioIOBuffer->getNumChannels(),
+        for (int i = jmin (graph->currentAudioOutputBuffer.getNumChannels(),
                            buffer.getNumChannels()); --i >= 0;)
         {
-            graph->currentAudioIOBuffer->addFrom (i, 0, buffer, i, 0, buffer.getNumSamples());
+            graph->currentAudioOutputBuffer.addFrom (i, 0, buffer, i, 0, buffer.getNumSamples());
         }
 
         break;
@@ -1214,21 +1238,21 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
 
     case audioInputNode:
     {
-        for (int i = jmin (graph->currentAudioIOBuffer->getNumChannels(),
+        for (int i = jmin (graph->currentAudioInputBuffer->getNumChannels(),
                            buffer.getNumChannels()); --i >= 0;)
         {
-            buffer.addFrom (i, 0, *graph->currentAudioIOBuffer, i, 0, buffer.getNumSamples());
+            buffer.addFrom (i, 0, *graph->currentAudioInputBuffer, i, 0, buffer.getNumSamples());
         }
 
         break;
     }
 
     case midiOutputNode:
-        graph->currentMidiIOBuffer->addEvents (midiMessages, 0, buffer.getNumSamples(), 0);
+        graph->currentMidiOutputBuffer.addEvents (midiMessages, 0, buffer.getNumSamples(), 0);
         break;
 
     case midiInputNode:
-        midiMessages.addEvents (*graph->currentMidiIOBuffer, 0, buffer.getNumSamples(), 0);
+        midiMessages.addEvents (*graph->currentMidiInputBuffer, 0, buffer.getNumSamples(), 0);
         break;
 
     default:

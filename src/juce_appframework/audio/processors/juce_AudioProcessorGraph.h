@@ -237,7 +237,7 @@ public:
     /** Attempts to connect two specified channels of two nodes.
 
         If this isn't allowed (e.g. because you're trying to connect a midi channel
-        to an audio one or other such nonsense), then it'll return 0.
+        to an audio one or other such nonsense), then it'll return false.
     */
     bool addConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
                         const uint32 destNodeId, const int destChannelIndex);
@@ -422,8 +422,10 @@ private:
     VoidArray renderingOps;
 
     friend class AudioGraphIOProcessor;
-    AudioSampleBuffer* currentAudioIOBuffer;
-    MidiBuffer* currentMidiIOBuffer;
+    AudioSampleBuffer* currentAudioInputBuffer;
+    AudioSampleBuffer currentAudioOutputBuffer;
+    MidiBuffer* currentMidiInputBuffer;
+    MidiBuffer currentMidiOutputBuffer;
 
     void clearRenderingSequence();
     void buildRenderingSequence();

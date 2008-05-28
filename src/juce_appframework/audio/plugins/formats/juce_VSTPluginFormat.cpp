@@ -169,9 +169,9 @@ struct fxProgramSet
 
 
 #ifdef JUCE_LITTLE_ENDIAN
- static long swap (const long x) throw()    { return (long) swapByteOrder ((uint32) x); }
+ static long vst_swap (const long x) throw()    { return (long) swapByteOrder ((uint32) x); }
 
- static float swapFloat (const float x) throw()
+ static float vst_swapFloat (const float x) throw()
  {
      union { uint32 asInt; float asFloat; } n;
      n.asFloat = x;
@@ -179,8 +179,8 @@ struct fxProgramSet
      return n.asFloat;
  }
 #else
- #define swap(x) (x)
- #define swapFloat(x) (x)
+ #define vst_swap(x) (x)
+ #define vst_swapFloat(x) (x)
 #endif
 
 //==============================================================================
@@ -1206,7 +1206,7 @@ void VSTPluginInstance::handleMidiFromPlugin (const VstEvents* const events)
 }
 
 //==============================================================================
-static Array <VSTPluginWindow*> activeWindows;
+static Array <VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
 class VSTPluginWindow   : public AudioProcessorEditor,
@@ -1236,7 +1236,7 @@ public:
 
         movementWatcher = new CompMovementWatcher (this);
 
-        activeWindows.add (this);
+        activeVSTWindows.add (this);
 
         setSize (1, 1);
         setOpaque (true);
@@ -1249,7 +1249,7 @@ public:
 
         closePluginWindow();
 
-        activeWindows.removeValue (this);
+        activeVSTWindows.removeValue (this);
         plugin.editorBeingDeleted (this);
     }
 
@@ -1474,8 +1474,8 @@ public:
 
     void broughtToFront()
     {
-        activeWindows.removeValue (this);
-        activeWindows.add (this);
+        activeVSTWindows.removeValue (this);
+        activeVSTWindows.add (this);
 
 #if JUCE_MAC
         dispatch (effEditTop, 0, 0, 0, 0);
@@ -1753,9 +1753,9 @@ private:
 #if JUCE_WIN32
     static LRESULT CALLBACK vstHookWndProc (HWND hW, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        for (int i = activeWindows.size(); --i >= 0;)
+        for (int i = activeVSTWindows.size(); --i >= 0;)
         {
-            const VSTPluginWindow* const w = (const VSTPluginWindow*) activeWindows.getUnchecked (i);
+            const VSTPluginWindow* const w = (const VSTPluginWindow*) activeVSTWindows.getUnchecked (i);
 
             if (w->pluginHWND == hW)
             {
@@ -1965,12 +1965,12 @@ void VSTPluginInstance::handleAsyncUpdate()
 //==============================================================================
 bool VSTPluginInstance::restoreProgramSettings (const fxProgram* const prog)
 {
-    if (swap (prog->chunkMagic) == 'CcnK' && swap (prog->fxMagic) == 'FxCk')
+    if (vst_swap (prog->chunkMagic) == 'CcnK' && vst_swap (prog->fxMagic) == 'FxCk')
     {
         changeProgramName (getCurrentProgram(), prog->prgName);
 
-        for (int i = 0; i < swap (prog->numParams); ++i)
-            setParameter (i, swapFloat (prog->params[i]));
+        for (int i = 0; i < vst_swap (prog->numParams); ++i)
+            setParameter (i, vst_swapFloat (prog->params[i]));
 
         return true;
     }
@@ -1986,20 +1986,20 @@ bool VSTPluginInstance::loadFromFXBFile (const void* const data,
 
     const fxSet* const set = (const fxSet*) data;
 
-    if ((swap (set->chunkMagic) != 'CcnK' && swap (set->chunkMagic) != 'KncC')
-         || swap (set->version) > fxbVersionNum)
+    if ((vst_swap (set->chunkMagic) != 'CcnK' && vst_swap (set->chunkMagic) != 'KncC')
+         || vst_swap (set->version) > fxbVersionNum)
         return false;
 
-    if (swap (set->fxMagic) == 'FxBk')
+    if (vst_swap (set->fxMagic) == 'FxBk')
     {
         // bank of programs
-        if (swap (set->numPrograms) >= 0)
+        if (vst_swap (set->numPrograms) >= 0)
         {
             const int oldProg = getCurrentProgram();
-            const int numParams = swap (((const fxProgram*) (set->programs))->numParams);
+            const int numParams = vst_swap (((const fxProgram*) (set->programs))->numParams);
             const int progLen = sizeof (fxProgram) + (numParams - 1) * sizeof (float);
 
-            for (int i = 0; i < swap (set->numPrograms); ++i)
+            for (int i = 0; i < vst_swap (set->numPrograms); ++i)
             {
                 if (i != oldProg)
                 {
@@ -2007,7 +2007,7 @@ bool VSTPluginInstance::loadFromFXBFile (const void* const data,
                     if (((const char*) prog) - ((const char*) set) >= dataSize)
                         return false;
 
-                    if (swap (set->numPrograms) > 0)
+                    if (vst_swap (set->numPrograms) > 0)
                         setCurrentProgram (i);
 
                     if (! restoreProgramSettings (prog))
@@ -2015,7 +2015,7 @@ bool VSTPluginInstance::loadFromFXBFile (const void* const data,
                 }
             }
 
-            if (swap (set->numPrograms) > 0)
+            if (vst_swap (set->numPrograms) > 0)
                 setCurrentProgram (oldProg);
 
             const fxProgram* const prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
@@ -2026,38 +2026,38 @@ bool VSTPluginInstance::loadFromFXBFile (const void* const data,
                 return false;
         }
     }
-    else if (swap (set->fxMagic) == 'FxCk')
+    else if (vst_swap (set->fxMagic) == 'FxCk')
     {
         // single program
         const fxProgram* const prog = (const fxProgram*) data;
 
-        if (swap (prog->chunkMagic) != 'CcnK')
+        if (vst_swap (prog->chunkMagic) != 'CcnK')
             return false;
 
         changeProgramName (getCurrentProgram(), prog->prgName);
 
-        for (int i = 0; i < swap (prog->numParams); ++i)
-            setParameter (i, swapFloat (prog->params[i]));
+        for (int i = 0; i < vst_swap (prog->numParams); ++i)
+            setParameter (i, vst_swapFloat (prog->params[i]));
     }
-    else if (swap (set->fxMagic) == 'FBCh' || swap (set->fxMagic) == 'hCBF')
+    else if (vst_swap (set->fxMagic) == 'FBCh' || vst_swap (set->fxMagic) == 'hCBF')
     {
         // non-preset chunk
         const fxChunkSet* const cset = (const fxChunkSet*) data;
 
-        if (swap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (unsigned int) dataSize)
+        if (vst_swap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (unsigned int) dataSize)
             return false;
 
-        setChunkData (cset->chunk, swap (cset->chunkSize), false);
+        setChunkData (cset->chunk, vst_swap (cset->chunkSize), false);
     }
-    else if (swap (set->fxMagic) == 'FPCh' || swap (set->fxMagic) == 'hCPF')
+    else if (vst_swap (set->fxMagic) == 'FPCh' || vst_swap (set->fxMagic) == 'hCPF')
     {
         // preset chunk
         const fxProgramSet* const cset = (const fxProgramSet*) data;
 
-        if (swap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (unsigned int) dataSize)
+        if (vst_swap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (unsigned int) dataSize)
             return false;
 
-        setChunkData (cset->chunk, swap (cset->chunkSize), true);
+        setChunkData (cset->chunk, vst_swap (cset->chunkSize), true);
 
         changeProgramName (getCurrentProgram(), cset->name);
     }
@@ -2074,18 +2074,18 @@ void VSTPluginInstance::setParamsInProgramBlock (fxProgram* const prog) throw()
 {
     const int numParams = getNumParameters();
 
-    prog->chunkMagic = swap ('CcnK');
+    prog->chunkMagic = vst_swap ('CcnK');
     prog->byteSize = 0;
-    prog->fxMagic = swap ('FxCk');
-    prog->version = swap (fxbVersionNum);
-    prog->fxID = swap (getUID());
-    prog->fxVersion = swap (getVersionNumber());
-    prog->numParams = swap (numParams);
+    prog->fxMagic = vst_swap ('FxCk');
+    prog->version = vst_swap (fxbVersionNum);
+    prog->fxID = vst_swap (getUID());
+    prog->fxVersion = vst_swap (getVersionNumber());
+    prog->numParams = vst_swap (numParams);
 
     getCurrentProgramName().copyToBuffer (prog->prgName, sizeof (prog->prgName) - 1);
 
     for (int i = 0; i < numParams; ++i)
-        prog->params[i] = swapFloat (getParameter (i));
+        prog->params[i] = vst_swapFloat (getParameter (i));
 }
 
 bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB)
@@ -2104,14 +2104,14 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             dest.setSize (totalLen, true);
 
             fxChunkSet* const set = (fxChunkSet*) dest.getData();
-            set->chunkMagic = swap ('CcnK');
+            set->chunkMagic = vst_swap ('CcnK');
             set->byteSize = 0;
-            set->fxMagic = swap ('FBCh');
-            set->version = swap (fxbVersionNum);
-            set->fxID = swap (getUID());
-            set->fxVersion = swap (getVersionNumber());
-            set->numPrograms = swap (numPrograms);
-            set->chunkSize = swap (chunk.getSize());
+            set->fxMagic = vst_swap ('FBCh');
+            set->version = vst_swap (fxbVersionNum);
+            set->fxID = vst_swap (getUID());
+            set->fxVersion = vst_swap (getVersionNumber());
+            set->numPrograms = vst_swap (numPrograms);
+            set->chunkSize = vst_swap (chunk.getSize());
 
             chunk.copyTo (set->chunk, 0, chunk.getSize());
         }
@@ -2124,14 +2124,14 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             dest.setSize (totalLen, true);
 
             fxProgramSet* const set = (fxProgramSet*) dest.getData();
-            set->chunkMagic = swap ('CcnK');
+            set->chunkMagic = vst_swap ('CcnK');
             set->byteSize = 0;
-            set->fxMagic = swap ('FPCh');
-            set->version = swap (fxbVersionNum);
-            set->fxID = swap (getUID());
-            set->fxVersion = swap (getVersionNumber());
-            set->numPrograms = swap (numPrograms);
-            set->chunkSize = swap (chunk.getSize());
+            set->fxMagic = vst_swap ('FPCh');
+            set->version = vst_swap (fxbVersionNum);
+            set->fxID = vst_swap (getUID());
+            set->fxVersion = vst_swap (getVersionNumber());
+            set->numPrograms = vst_swap (numPrograms);
+            set->chunkSize = vst_swap (chunk.getSize());
 
             getCurrentProgramName().copyToBuffer (set->name, sizeof (set->name) - 1);
             chunk.copyTo (set->chunk, 0, chunk.getSize());
@@ -2146,13 +2146,13 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             dest.setSize (len, true);
 
             fxSet* const set = (fxSet*) dest.getData();
-            set->chunkMagic = swap ('CcnK');
+            set->chunkMagic = vst_swap ('CcnK');
             set->byteSize = 0;
-            set->fxMagic = swap ('FxBk');
-            set->version = swap (fxbVersionNum);
-            set->fxID = swap (getUID());
-            set->fxVersion = swap (getVersionNumber());
-            set->numPrograms = swap (numPrograms);
+            set->fxMagic = vst_swap ('FxBk');
+            set->version = vst_swap (fxbVersionNum);
+            set->fxID = vst_swap (getUID());
+            set->fxVersion = vst_swap (getVersionNumber());
+            set->numPrograms = vst_swap (numPrograms);
 
             const int oldProgram = getCurrentProgram();
             MemoryBlock oldSettings;
