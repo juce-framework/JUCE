@@ -155,6 +155,7 @@ private:
     double progress;
     AlertWindow alertWindow;
     String message;
+    CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
 
     ThreadWithProgressWindow (const ThreadWithProgressWindow&);

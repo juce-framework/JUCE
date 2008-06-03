@@ -66,7 +66,10 @@ bool ThreadWithProgressWindow::runThread (const int priority)
     startThread (priority);
     startTimer (100);
 
-    alertWindow.setMessage (message);
+    {
+        const ScopedLock sl (messageLock);
+        alertWindow.setMessage (message);
+    }
 
     const bool wasCancelled = alertWindow.runModalLoop() != 0;
 
@@ -84,6 +87,7 @@ void ThreadWithProgressWindow::setProgress (const double newProgress)
 
 void ThreadWithProgressWindow::setStatusMessage (const String& newStatusMessage)
 {
+    const ScopedLock sl (messageLock);
     message = newStatusMessage;
 }
 
@@ -97,6 +101,7 @@ void ThreadWithProgressWindow::timerCallback()
     }
     else
     {
+        const ScopedLock sl (messageLock);
         alertWindow.setMessage (message);
     }
 }
