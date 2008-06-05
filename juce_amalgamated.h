@@ -1270,11 +1270,12 @@ public:
     static int length (const char* const s) throw();
     static int length (const juce_wchar* const s) throw();
 
-    static void copy (char* dest, const char* src, const int maxChars) throw();
+    static void copy (char* dest, const char* src, const int maxBytes) throw();
     static void copy (juce_wchar* dest, const juce_wchar* src, const int maxChars) throw();
 
     static void copy (juce_wchar* dest, const char* src, const int maxChars) throw();
-    static void copy (char* dest, const juce_wchar* src, const int maxChars) throw();
+    static void copy (char* dest, const juce_wchar* src, const int maxBytes) throw();
+    static int bytesRequiredForCopy (const juce_wchar* src) throw();
 
     static void append (char* dest, const char* src) throw();
     static void append (juce_wchar* dest, const juce_wchar* src) throw();
@@ -11656,8 +11657,17 @@ class JUCE_API  BlowFish
 {
 public:
 
-    /** Creates an object that can encode/decode based on the specified key. */
+    /** Creates an object that can encode/decode based on the specified key.
+
+        The key data can be up to 72 bytes long.
+    */
     BlowFish (const uint8* keyData, int keyBytes);
+
+    /** Creates a copy of another blowfish object. */
+    BlowFish (const BlowFish& other);
+
+    /** Copies another blowfish object. */
+    const BlowFish& operator= (const BlowFish& other);
 
     /** Destructor. */
     ~BlowFish();
@@ -11671,7 +11681,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    uint32* p;
+    uint32 p[18];
     uint32* s[4];
 
     uint32 F (uint32 x) const;
@@ -12737,7 +12747,7 @@ public:
         @param lengthOfSourceStream         this specifies the maximum number of bytes
                                             from the source stream that will be passed through
                                             by this stream. When the position of this stream
-                                            exceeds lengthOfSourceStream, it will the end-of-stream.
+                                            exceeds lengthOfSourceStream, it will cause an end-of-stream.
                                             If the length passed in here is greater than the length
                                             of the source stream (as returned by getTotalLength()),
                                             then the smaller value will be used.
@@ -13189,6 +13199,13 @@ public:
     /** Creates a ZipFile based for a file. */
     ZipFile (const File& file);
 
+    /** Creates a ZipFile for an input source.
+
+        The inputSource object will be owned by the zip file, which will delete
+        it later when not needed.
+    */
+    ZipFile (InputSource* const inputSource);
+
     /** Destructor. */
     ~ZipFile() throw();
 
@@ -13269,9 +13286,10 @@ private:
     VoidArray entries;
     friend class ZipInputStream;
     CriticalSection lock;
-    InputStream* source;
-    File sourceFile;
-    bool isFromCustomStream, deleteStreamWhenDestroyed;
+    InputStream* inputStream;
+    InputSource* inputSource;
+
+    bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG
@@ -13279,7 +13297,7 @@ private:
 #endif
 
     void init();
-    int findEndOfZipEntryTable();
+    int findEndOfZipEntryTable (InputStream* in);
 
     ZipFile (const ZipFile&);
     const ZipFile& operator= (const ZipFile&);
@@ -28608,7 +28626,7 @@ public:
     /** Attempts to connect two specified channels of two nodes.
 
         If this isn't allowed (e.g. because you're trying to connect a midi channel
-        to an audio one or other such nonsense), then it'll return 0.
+        to an audio one or other such nonsense), then it'll return false.
     */
     bool addConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
                         const uint32 destNodeId, const int destChannelIndex);
@@ -28786,8 +28804,10 @@ private:
     VoidArray renderingOps;
 
     friend class AudioGraphIOProcessor;
-    AudioSampleBuffer* currentAudioIOBuffer;
-    MidiBuffer* currentMidiIOBuffer;
+    AudioSampleBuffer* currentAudioInputBuffer;
+    AudioSampleBuffer currentAudioOutputBuffer;
+    MidiBuffer* currentMidiInputBuffer;
+    MidiBuffer currentMidiOutputBuffer;
 
     void clearRenderingSequence();
     void buildRenderingSequence();
@@ -33756,6 +33776,7 @@ private:
     mutable bool listNeedsScanning;
     bool useInputNames;
 
+    StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;
     Array <MidiInputCallback*> midiCallbacks;
     Array <MidiInput*> midiCallbackDevices;
@@ -38357,7 +38378,8 @@ public:
     {
         Oversampling_none       = 0,    /**< No vertical anti-aliasing at all. */
         Oversampling_4times     = 2,    /**< Anti-aliased with 4 levels of grey - good enough for normal use. */
-        Oversampling_16times    = 4,    /**< Anti-aliased with 16 levels of grey - very good quality but slower. */
+        Oversampling_16times    = 4,    /**< Anti-aliased with 16 levels of grey - very good quality. */
+        Oversampling_32times    = 5,    /**< Anti-aliased with 32 levels of grey - very good quality but slower. */
         Oversampling_256times   = 8     /**< Anti-aliased with 256 levels of grey - best quality, but too slow for
                                              normal user-interface use. */
     };
@@ -50234,6 +50256,7 @@ private:
     double progress;
     AlertWindow alertWindow;
     String message;
+    CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
 
     ThreadWithProgressWindow (const ThreadWithProgressWindow&);
@@ -52286,7 +52309,8 @@ public:
                                      const String& fileSizeDescription,
                                      const String& fileTimeDescription,
                                      const bool isDirectory,
-                                     const bool isItemSelected);
+                                     const bool isItemSelected,
+                                     const int itemIndex);
 
     virtual Button* createFileBrowserGoUpButton();
 
@@ -52359,6 +52383,8 @@ public:
     virtual const Font getComboBoxFont (ComboBox& box);
 
     virtual Label* createComboBoxTextBox (ComboBox& box);
+
+    virtual void positionComboBoxText (ComboBox& box, Label& labelToPosition);
 
     virtual void drawLinearSlider (Graphics& g,
                                    int x, int y,
