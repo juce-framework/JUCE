@@ -202,12 +202,15 @@ String::String (const juce_wchar* const t) throw()
 {
     if (t != 0 && *t != 0)
     {
+#if JUCE_STRINGS_ARE_UNICODE
         const int len = CharacterFunctions::length (t);
         createInternal (len);
 
-#if JUCE_STRINGS_ARE_UNICODE
         memcpy (text->text, t, (len + 1) * sizeof (tchar));
 #else
+        const int len = CharacterFunctions::bytesRequiredForCopy (t);
+        createInternal (len);
+
         CharacterFunctions::copy (text->text, t, len + 1);
 #endif
     }
@@ -492,7 +495,7 @@ String::operator const char*() const throw()
         String* const mutableThis = const_cast <String*> (this);
 
         mutableThis->dupeInternalIfMultiplyReferenced();
-        int len = CharacterFunctions::length (text->text) + 1;
+        int len = CharacterFunctions::bytesRequiredForCopy (text->text) + 1;
         mutableThis->text = (InternalRefCountedStringHolder*)
                                 juce_realloc (text, sizeof (InternalRefCountedStringHolder)
                                                       + (len * sizeof (juce_wchar) + len));
@@ -535,13 +538,13 @@ String::operator const juce_wchar*() const throw()
 #endif
 
 void String::copyToBuffer (char* const destBuffer,
-                           const int maxCharsToCopy) const throw()
+                           const int bufferSizeBytes) const throw()
 {
-    const int len = jmin (maxCharsToCopy, length());
-
 #if JUCE_STRINGS_ARE_UNICODE
+    const int len = jmin (bufferSizeBytes, CharacterFunctions::bytesRequiredForCopy (text->text));
     CharacterFunctions::copy (destBuffer, text->text, len);
 #else
+    const int len = jmin (bufferSizeBytes, length());
     memcpy (destBuffer, text->text, len * sizeof (tchar));
 #endif
 

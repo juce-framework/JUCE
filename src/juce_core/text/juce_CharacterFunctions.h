@@ -91,11 +91,12 @@ public:
     static int length (const char* const s) throw();
     static int length (const juce_wchar* const s) throw();
 
-    static void copy (char* dest, const char* src, const int maxChars) throw();
+    static void copy (char* dest, const char* src, const int maxBytes) throw();
     static void copy (juce_wchar* dest, const juce_wchar* src, const int maxChars) throw();
 
     static void copy (juce_wchar* dest, const char* src, const int maxChars) throw();
-    static void copy (char* dest, const juce_wchar* src, const int maxChars) throw();
+    static void copy (char* dest, const juce_wchar* src, const int maxBytes) throw();
+    static int bytesRequiredForCopy (const juce_wchar* src) throw();
 
     static void append (char* dest, const char* src) throw();
     static void append (juce_wchar* dest, const juce_wchar* src) throw();

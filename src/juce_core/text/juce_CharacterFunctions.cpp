@@ -94,6 +94,11 @@ void CharacterFunctions::copy (char* dest, const juce_wchar* src, const int maxC
     wcstombs (dest, src, maxChars);
 }
 
+int CharacterFunctions::bytesRequiredForCopy (const juce_wchar* src) throw()
+{
+    return (int) wcstombs (0, src, 0);
+}
+
 void CharacterFunctions::append (char* dest, const char* src) throw()
 {
     strcat (dest, src);
