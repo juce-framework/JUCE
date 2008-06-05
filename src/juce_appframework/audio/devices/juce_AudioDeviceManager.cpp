@@ -96,14 +96,14 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                       e->hasAttribute (T("audioDeviceOutChans")) ? &outs : 0,
                                       true));
 
-        StringArray enabledMidiIns;
+        midiInsFromXml.clear();
         forEachXmlChildElementWithTagName (*e, c, T("MIDIINPUT"))
-            enabledMidiIns.add (c->getStringAttribute (T("name")));
+            midiInsFromXml.add (c->getStringAttribute (T("name")));
 
         const StringArray allMidiIns (MidiInput::getDevices());
 
         for (int i = allMidiIns.size(); --i >= 0;)
-            setMidiInputEnabled (allMidiIns[i], enabledMidiIns.contains (allMidiIns[i]));
+            setMidiInputEnabled (allMidiIns[i], midiInsFromXml.contains (allMidiIns[i]));
 
         if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
             error = initialise (numInputChannelsNeeded, numOutputChannelsNeeded, 0,
@@ -448,6 +448,24 @@ void AudioDeviceManager::updateXml()
         m->setAttribute (T("name"), enabledMidiInputs[i]->getName());
 
         lastExplicitSettings->addChildElement (m);
+    }
+
+    if (midiInsFromXml.size() > 0)
+    {
+        // Add any midi devices that have been enabled before, but which aren't currently
+        // open because the device has been disconnected.
+        const StringArray availableMidiDevices (MidiInput::getDevices());
+
+        for (int i = 0; i < midiInsFromXml.size(); ++i)
+        {
+            if (! availableMidiDevices.contains (midiInsFromXml[i], true)) 
+            {
+                XmlElement* const m = new XmlElement (T("MIDIINPUT"));
+                m->setAttribute (T("name"), midiInsFromXml[i]);
+
+                lastExplicitSettings->addChildElement (m);
+            }
+        }
     }
 
     if (defaultMidiOutputName.isNotEmpty())

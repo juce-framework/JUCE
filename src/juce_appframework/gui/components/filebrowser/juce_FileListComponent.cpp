@@ -101,7 +101,8 @@ public:
                                              file.getFileName(),
                                              icon,
                                              fileSize, modTime,
-                                             isDirectory, highlighted);
+                                             isDirectory, highlighted,
+                                             index);
     }
 
     void mouseDown (const MouseEvent& e)

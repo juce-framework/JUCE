@@ -160,7 +160,8 @@ public:
                                  file.getFileName(),
                                  icon,
                                  fileSize, modTime,
-                                 isDirectory, isSelected());
+                                 isDirectory, isSelected(),
+                                 indexInContentsList);
     }
 
     void itemClicked (const MouseEvent& e)

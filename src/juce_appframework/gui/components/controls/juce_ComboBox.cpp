@@ -429,13 +429,7 @@ void ComboBox::paint (Graphics& g)
 void ComboBox::resized()
 {
     if (getHeight() > 0 && getWidth() > 0)
-    {
-        label->setBounds (1, 1,
-                          getWidth() + 3 - getHeight(),
-                          getHeight() - 2);
-
-        label->setFont (getLookAndFeel().getComboBoxFont (*this));
-    }
+        getLookAndFeel().positionComboBoxText (*this, *label);
 }
 
 void ComboBox::enablementChanged()

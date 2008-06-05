@@ -58,7 +58,8 @@ public:
     {
         Oversampling_none       = 0,    /**< No vertical anti-aliasing at all. */
         Oversampling_4times     = 2,    /**< Anti-aliased with 4 levels of grey - good enough for normal use. */
-        Oversampling_16times    = 4,    /**< Anti-aliased with 16 levels of grey - very good quality but slower. */
+        Oversampling_16times    = 4,    /**< Anti-aliased with 16 levels of grey - very good quality. */
+        Oversampling_32times    = 5,    /**< Anti-aliased with 32 levels of grey - very good quality but slower. */
         Oversampling_256times   = 8     /**< Anti-aliased with 256 levels of grey - best quality, but too slow for
                                              normal user-interface use. */
     };

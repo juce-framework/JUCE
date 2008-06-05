@@ -266,7 +266,8 @@ public:
                                      const String& fileSizeDescription,
                                      const String& fileTimeDescription,
                                      const bool isDirectory,
-                                     const bool isItemSelected);
+                                     const bool isItemSelected,
+                                     const int itemIndex);
 
     virtual Button* createFileBrowserGoUpButton();
 
@@ -342,6 +343,8 @@ public:
     virtual const Font getComboBoxFont (ComboBox& box);
 
     virtual Label* createComboBoxTextBox (ComboBox& box);
+
+    virtual void positionComboBoxText (ComboBox& box, Label& labelToPosition);
 
     //==============================================================================
     virtual void drawLinearSlider (Graphics& g,

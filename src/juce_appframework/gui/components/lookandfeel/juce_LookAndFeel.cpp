@@ -537,7 +537,7 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
 
         Path p;
 
-        for (float x = (float) (stripeWidth - position); x < width + stripeWidth; x += stripeWidth)
+        for (float x = (float) (-stripeWidth - position); x < width + stripeWidth; x += stripeWidth)
             p.addQuadrilateral (x, 0.0f,
                                 x + stripeWidth * 0.5f, 0.0f,
                                 x, (float) height,
@@ -1176,6 +1176,15 @@ const Font LookAndFeel::getComboBoxFont (ComboBox& box)
 Label* LookAndFeel::createComboBoxTextBox (ComboBox&)
 {
     return new Label (String::empty, String::empty);
+}
+
+void LookAndFeel::positionComboBoxText (ComboBox& box, Label& label)
+{
+    label.setBounds (1, 1,
+                     box.getWidth() + 3 - box.getHeight(),
+                     box.getHeight() - 2);
+
+    label.setFont (getComboBoxFont (box));
 }
 
 //==============================================================================
@@ -2346,7 +2355,8 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
                                       const String& fileSizeDescription,
                                       const String& fileTimeDescription,
                                       const bool isDirectory,
-                                      const bool isItemSelected)
+                                      const bool isItemSelected,
+                                      const int /*itemIndex*/)
 {
     if (isItemSelected)
         g.fillAll (findColour (DirectoryContentsDisplayComponent::highlightColourId));

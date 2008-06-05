@@ -419,16 +419,9 @@ public:
 
     ~AddChannelOp() throw()        {}
 
-    void perform (AudioSampleBuffer& sharedBufferChans,
-                  const OwnedArray <MidiBuffer>& sharedMidiBuffers,
-                  const int numSamples) throw()
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples) throw()
     {
-        if (dstChannelNum != AudioProcessorGraph::midiChannelIndex)
-            sharedBufferChans.addFrom (dstChannelNum, 0, sharedBufferChans, srcChannelNum, 0, numSamples);
-        else
-            sharedMidiBuffers.getUnchecked (dstChannelNum)
-                ->addEvents (*sharedMidiBuffers.getUnchecked (srcChannelNum),
-                             0, numSamples, 0);
+        sharedBufferChans.addFrom (dstChannelNum, 0, sharedBufferChans, srcChannelNum, 0, numSamples);
     }
 
 private:
@@ -719,9 +712,8 @@ private:
                     {
                         const int srcIndex = getBufferContaining (sourceNodes.getUnchecked(j),
                                                                   sourceOutputChans.getUnchecked(j));
-                        jassert (srcIndex >= 0);
-
-                        renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
+                        if (srcIndex >= 0)
+                            renderingOps.add (new AddChannelOp (srcIndex, bufIndex));
                     }
                 }
             }

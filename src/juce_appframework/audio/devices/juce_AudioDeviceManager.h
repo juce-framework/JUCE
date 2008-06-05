@@ -371,6 +371,7 @@ private:
     mutable bool listNeedsScanning;
     bool useInputNames;
 
+    StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;
     Array <MidiInputCallback*> midiCallbacks;
     Array <MidiInput*> midiCallbackDevices;

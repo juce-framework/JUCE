@@ -93,8 +93,7 @@ void SplashScreen::show (const String& title,
     setVisible (true);
     centreWithSize (width, height);
 
-    addToDesktop (useDropShadow ? (ComponentPeer::windowAppearsOnTaskbar | ComponentPeer::windowHasDropShadow)
-                                : ComponentPeer::windowAppearsOnTaskbar);
+    addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
     toFront (false);
 
     MessageManager::getInstance()->dispatchPendingMessages();
