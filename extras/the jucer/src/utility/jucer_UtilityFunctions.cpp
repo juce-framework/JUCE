@@ -356,12 +356,14 @@ void positionToCode (const RelativePositionedRectangle& position,
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompY), layout, yrx, yry, yrw, yrh);
 
     String wrx, wry, wrw, wrh;
-    Component* const relCompW = layout != 0 ? layout->findComponentWithId (position.relativeToW) : 0;
+    Component* const relCompW = (layout != 0 && position.rect.getWidthMode() != PositionedRectangle::absoluteSize)
+                                    ? layout->findComponentWithId (position.relativeToW) : 0;
     if (relCompW != 0)
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompW), layout, wrx, wry, wrw, wrh);
 
     String hrx, hry, hrw, hrh;
-    Component* const relCompH = layout != 0 ? layout->findComponentWithId (position.relativeToH) : 0;
+    Component* const relCompH = (layout != 0 && position.rect.getHeightMode() != PositionedRectangle::absoluteSize) 
+                                    ? layout->findComponentWithId (position.relativeToH) : 0;
     if (relCompH != 0)
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompH), layout, hrx, hry, hrw, hrh);
 
