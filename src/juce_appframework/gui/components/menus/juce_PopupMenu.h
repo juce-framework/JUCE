@@ -259,6 +259,10 @@ public:
         This is the same as show(), but uses a specific location (in global screen
         co-ordinates) rather than the current mouse position.
 
+        Note that the co-ordinates don't specify the top-left of the menu - they
+        indicate a point of interest, and the menu will position itself nearby to
+        this point, trying to keep it fully on-screen.
+
         @see show()
     */
     int showAt (const int screenX,

@@ -728,6 +728,9 @@ public:
         This will replace the contents of the string with the output of this
         formatted printf.
 
+        Note that using the %s token with a juce string is probably a bad idea, as 
+        this may expect differect encodings on different platforms.
+
         @see formatted
     */
     void printf (const tchar* const format, ...) throw();
@@ -736,6 +739,9 @@ public:
 
         This will return a string which is the result of a sprintf using the
         arguments passed-in.
+
+        Note that using the %s token with a juce string is probably a bad idea, as 
+        this may expect differect encodings on different platforms.
 
         @see printf, vprintf
     */
@@ -746,6 +752,9 @@ public:
         This will replace the contents of the string with the output of this
         formatted printf. Used by other methods, this is public in case it's
         useful for other purposes where you want to pass a va_list through directly.
+
+        Note that using the %s token with a juce string is probably a bad idea, as 
+        this may expect differect encodings on different platforms.
 
         @see printf, formatted
     */

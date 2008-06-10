@@ -80,6 +80,8 @@ public:
     */
     AudioSource* getCurrentSource() const throw()       { return source; }
 
+    /** Sets a gain to apply to the audio data. */
+    void setGain (const float newGain) throw();
 
     //==============================================================================
     /** Implementation of the AudioIODeviceCallback method. */
@@ -108,6 +110,7 @@ private:
     float* outputChans [128];
     const float* inputChans [128];
     AudioSampleBuffer tempBuffer;
+    float lastGain, gain;
 
     AudioSourcePlayer (const AudioSourcePlayer&);
     const AudioSourcePlayer& operator= (const AudioSourcePlayer&);

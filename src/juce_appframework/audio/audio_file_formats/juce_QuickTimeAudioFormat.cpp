@@ -95,13 +95,11 @@ public:
 #ifdef WIN32
         if (InitializeQTML (0) != noErr)
             return;
-#endif
+#elif JUCE_MAC
+        EnterMoviesOnThread (0);
+#endif 
         if (EnterMovies() != noErr)
             return;
-
-#if JUCE_MAC
-        EnterMoviesOnThread (0);
-#endif
 
         bool opened = juce_OpenQuickTimeMovieFromStream (input_, movie, dataHandle);
 
@@ -233,6 +231,10 @@ public:
 
         juce_free (bufferList->mBuffers[0].mData);
         juce_free (bufferList);
+
+#if JUCE_MAC
+        ExitMoviesOnThread ();
+#endif
     }
 
     bool read (int** destSamples,

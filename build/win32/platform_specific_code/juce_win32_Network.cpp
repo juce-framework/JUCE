@@ -100,7 +100,7 @@ void* juce_openInternetFile (const String& url,
         uc.lpszUrlPath = file;
         uc.lpszHostName = server;
 
-        if (InternetCrackUrl (url, 0, ICU_ESCAPE | ICU_DECODE, &uc))
+        if (InternetCrackUrl (url, 0, 0, &uc))
         {
             const bool isFtp = url.startsWithIgnoreCase (T("ftp:"));
 
@@ -129,7 +129,7 @@ void* juce_openInternetFile (const String& url,
                 }
                 else
                 {
-                    const TCHAR* mimeTypes[] = { _T("*"), 0 };
+                    const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
 
                     HINTERNET request = HttpOpenRequest (connection,
                                                          isPost ? _T("POST")

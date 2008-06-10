@@ -42,7 +42,9 @@ AudioSourcePlayer::AudioSourcePlayer()
     : source (0),
       sampleRate (0),
       bufferSize (0),
-      tempBuffer (2, 8)
+      tempBuffer (2, 8),
+      lastGain (1.0f), 
+      gain (1.0f)
 {
 }
 
@@ -68,6 +70,11 @@ void AudioSourcePlayer::setSource (AudioSource* newSource)
         if (oldSource != 0)
             oldSource->releaseResources();
     }
+}
+
+void AudioSourcePlayer::setGain (const float newGain) throw()
+{
+    gain = newGain;
 }
 
 void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
@@ -154,6 +161,11 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
         info.numSamples = numSamples;
 
         source->getNextAudioBlock (info);
+
+        for (int i = info.buffer->getNumChannels(); --i >= 0;)
+            info.buffer->applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
+
+        lastGain = gain;
     }
     else
     {
