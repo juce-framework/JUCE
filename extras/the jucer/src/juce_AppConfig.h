@@ -29,35 +29,30 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADERS_JUCEHEADER__
-#define __JUCER_HEADERS_JUCEHEADER__
+/*
+    This file contains settings that you might want to explicitly apply to 
+    the your build.
 
-#ifdef _MSC_VER
- #pragma warning (disable: 4100 4505)
-#endif
+    Most of these are turned on or off by default, but you can override
+    that setting here by un-commenting it and giving it a 1 or 0 value.
+*/
 
-#define DONT_LIST_JUCE_AUTOLINKEDLIBS 1
-
-//==============================================================================
-#include "../../../juce_amalgamated.h"
-
-//==============================================================================
-#define JUCER_MAJOR_VERSION  1
-#define JUCER_MINOR_VERSION  11
-
-//==============================================================================
-#include "BinaryData.h"
-#include "utility/jucer_StoredSettings.h"
-#include "utility/jucer_UtilityFunctions.h"
-#include "ui/jucer_CommandIDs.h"
-
-//==============================================================================
-const int editorEdgeGap = 4;
-
-const int numSwatchColours = 24;
-
-extern ApplicationCommandManager* commandManager;
-
-
-
-#endif   // __JUCER_HEADERS_JUCEHEADER__
+//#define JUCE_ONLY_BUILD_CORE_LIBRARY   1
+//#define JUCE_FORCE_DEBUG  1
+//#define JUCE_LOG_ASSERTIONS  1
+//#define JUCE_ASIO  1
+//#define JUCE_ALSA  1
+//#define JUCE_QUICKTIME  1
+//#define JUCE_OPENGL  1
+//#define JUCE_USE_FLAC  1
+//#define JUCE_USE_OGGVORBIS  1
+//#define JUCE_USE_CDBURNER  1
+//#define JUCE_ENABLE_REPAINT_DEBUGGING  1
+//#define JUCE_USE_XINERAMA  1
+//#define JUCE_USE_XSHM  1
+//#define JUCE_PLUGINHOST_VST  1
+//#define JUCE_PLUGINHOST_AU  1
+//#define JUCE_BUILD_GUI_CLASSES  1
+//#define JUCE_CHECK_MEMORY_LEAKS  1
+//#define JUCE_CATCH_UNHANDLED_EXCEPTIONS  1
+//#define JUCE_STRINGS_ARE_UNICODE  1

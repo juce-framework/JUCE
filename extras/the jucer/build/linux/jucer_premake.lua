@@ -22,7 +22,8 @@ package.config["Release"].defines   = { "LINUX=1", "NDEBUG=1" };
 package.target = "jucer"
 
 package.includepaths = { 
-    "/usr/include"
+    "/usr/include",
+    "/usr/include/freetype2"
 }
 
 package.libpaths = { 
@@ -31,11 +32,11 @@ package.libpaths = {
 }
 
 package.config["Debug"].links = { 
-    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound", "juce_debug"
+    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound"
 }
 
 package.config["Release"].links = { 
-    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound", "juce"
+    "freetype", "pthread", "X11", "GL", "GLU", "Xinerama", "asound"
 }
 
 package.linkflags = { "static-runtime" }

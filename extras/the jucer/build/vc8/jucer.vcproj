@@ -222,6 +222,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\..\..\..\juce_amalgamated.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\Jucer To Do list.txt"
 				>
 			</File>

@@ -10,12 +10,14 @@ ifeq ($(CONFIG),Debug)
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
   OUTDIR := build
-  CPPFLAGS := -MD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include"
-  CFLAGS += $(CPPFLAGS) -g -D_DEBUG -ggdb
+  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -L "/usr/X11R6/lib/" -L "../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound -ljuce_debug
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
+  RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucer
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),Release)
@@ -23,17 +25,20 @@ ifeq ($(CONFIG),Release)
   LIBDIR := build
   OBJDIR := build/intermediate/Release
   OUTDIR := build
-  CPPFLAGS := -MD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include"
-  CFLAGS += $(CPPFLAGS) -O2
+  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2
   CXXFLAGS := $(CFLAGS)
-  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -s -L "/usr/X11R6/lib/" -L "../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound -ljuce
+  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
+  RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucer
+  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
 	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/jucer_Main.o \
+	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/jucer_ComponentLayoutEditor.o \
 	$(OBJDIR)/jucer_ComponentLayoutPanel.o \
 	$(OBJDIR)/jucer_ComponentOverlayComponent.o \
@@ -65,8 +70,15 @@ OBJECTS := \
 	$(OBJDIR)/jucer_PaintElementPath.o \
 	$(OBJDIR)/jucer_StrokeType.o \
 
+MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
+  MKDIR_TYPE := posix
+endif
+ifeq (/bin/sh.exe,$(SHELL))
+  MKDIR_TYPE := posix
+endif
+ifeq ($(MKDIR_TYPE),posix)
   CMD_MKBINDIR := mkdir -p $(BINDIR)
   CMD_MKLIBDIR := mkdir -p $(LIBDIR)
   CMD_MKOUTDIR := mkdir -p $(OUTDIR)
@@ -85,11 +97,17 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 	-@$(CMD_MKBINDIR)
 	-@$(CMD_MKLIBDIR)
 	-@$(CMD_MKOUTDIR)
-	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS) $(RESOURCES)
+	@$(BLDCMD)
 
 clean:
 	@echo Cleaning Jucer
+ifeq ($(MKDIR_TYPE),posix)
 	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+else
+	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
+	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
+	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
+endif
 
 $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	-@$(CMD_MKOBJDIR)
@@ -97,6 +115,11 @@ $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/jucer_Main.o: ../../src/jucer_Main.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
