@@ -219,7 +219,27 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\common\includes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\juce_AppConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\juce_LibrarySource.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\Main.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\MainComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\common\MainComponent.h"
 				>
 			</File>
 		</Filter>

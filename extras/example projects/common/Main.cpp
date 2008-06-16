@@ -2,66 +2,40 @@
   ==============================================================================
 
    Demonstration "Hello World" application in JUCE
-   Copyright 2004 by Julian Storer.
+   Copyright 2008 by Julian Storer.
 
   ==============================================================================
 */
 
-#include "../../../juce.h"
+#include "includes.h"
+#include "MainComponent.h"
 
 //==============================================================================
-/** This is the component that sits inside the "hello world" window, filling its
-    content area. In this example, we'll just write "hello world" inside it.
-*/
-class HelloWorldContentComponent    : public Component
-{
-public:
-    HelloWorldContentComponent()
-    {
-    }
-
-    ~HelloWorldContentComponent()
-    {
-    }
-
-    void paint (Graphics& g)
-    {
-        // clear the background with solid white
-        g.fillAll (Colours::white);
-
-        // set our drawing colour to black..
-        g.setColour (Colours::black);
-
-        // choose a suitably sized font
-        g.setFont (20.0f, Font::bold);
-
-        // and draw the text, centred in this component
-        g.drawText (T("Hello World!"),
-                    0, 0, getWidth(), getHeight(),
-                    Justification::centred, false);
-    }
-};
-
-//==============================================================================
-/** This is the top-level window that we'll pop up. Inside it, we'll create and
-    show a HelloWorldContentComponent component.
+/** 
+    This is the top-level window that we'll pop up. Inside it, we'll create and
+    show a component from the MainComponent.cpp file (you can open this file using
+    the Jucer to edit it).
 */
 class HelloWorldWindow  : public DocumentWindow
 {
 public:
     //==============================================================================
-    HelloWorldWindow()
-        : DocumentWindow (T("Hello World"),
+    HelloWorldWindow() 
+        : DocumentWindow (T("JUCE Hello World!"),
                           Colours::lightgrey, 
-                          DocumentWindow::allButtons, 
+                          DocumentWindow::allButtons,
                           true)
     {
-        setContentComponent (new HelloWorldContentComponent());
+        // Create an instance of our main content component, and add it 
+        // to our window.
+
+        MainComponent* const contentComponent = new MainComponent();
+
+        setContentComponent (contentComponent, true, true);
+
+        centreWithSize (getWidth(), getHeight());
 
         setVisible (true);
-
-        // centre the window on the desktop with this size
-        centreWithSize (400, 200);
     }
 
     ~HelloWorldWindow()
@@ -73,11 +47,11 @@ public:
     void closeButtonPressed()
     {
         // When the user presses the close button, we'll tell the app to quit. This 
-        // window will be deleted by the app object as it closes down.
+        // window will be deleted by our HelloWorldApplication::shutdown() method
+        // 
         JUCEApplication::quit();
     }
 };
-
 
 //==============================================================================
 /** This is the application object that is started up when Juce starts. It handles
