@@ -45,7 +45,6 @@
 				InlineFunctionExpansion="0"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
-				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Release/BinaryBuilder.pch"
 				AssemblerListingLocation=".\Release/"
@@ -113,6 +112,14 @@
 			>
 			<File
 				RelativePath="..\BinaryBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\juce_AppConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\juce_LibrarySource.cpp"
 				>
 			</File>
 		</Filter>
