@@ -2035,6 +2035,9 @@ public:
         This will replace the contents of the string with the output of this
         formatted printf.
 
+        Note that using the %s token with a juce string is probably a bad idea, as
+        this may expect differect encodings on different platforms.
+
         @see formatted
     */
     void printf (const tchar* const format, ...) throw();
@@ -2043,6 +2046,9 @@ public:
 
         This will return a string which is the result of a sprintf using the
         arguments passed-in.
+
+        Note that using the %s token with a juce string is probably a bad idea, as
+        this may expect differect encodings on different platforms.
 
         @see printf, vprintf
     */
@@ -2053,6 +2059,9 @@ public:
         This will replace the contents of the string with the output of this
         formatted printf. Used by other methods, this is public in case it's
         useful for other purposes where you want to pass a va_list through directly.
+
+        Note that using the %s token with a juce string is probably a bad idea, as
+        this may expect differect encodings on different platforms.
 
         @see printf, formatted
     */
@@ -12265,7 +12274,8 @@ public:
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,
-                                    void* const progressCallbackContext = 0) const;
+                                    void* const progressCallbackContext = 0,
+                                    const String& extraHeaders = String::empty) const;
 
     /** Tries to download the entire contents of this URL into a binary data block.
 
@@ -28166,6 +28176,10 @@ public:
         This is the same as show(), but uses a specific location (in global screen
         co-ordinates) rather than the current mouse position.
 
+        Note that the co-ordinates don't specify the top-left of the menu - they
+        indicate a point of interest, and the menu will position itself nearby to
+        this point, trying to keep it fully on-screen.
+
         @see show()
     */
     int showAt (const int screenX,
@@ -28868,23 +28882,22 @@ public:
 
         @param inputChannelData     a set of arrays containing the audio data for each
                                     incoming channel - this data is valid until the function
-                                    returns. Some members of the array may be null pointers, if
-                                    that channel wasn't enabled when the audio device was
-                                    opened (see AudioIODevice::open())
-        @param totalNumInputChannels    the total number of pointers to channel data in
-                                        the inputChannelData array. Note that not all of these
-                                        channels may be active, so some may be null pointers
+                                    returns. There will be one channel of data for each input
+                                    channel that was enabled when the audio device was opened
+                                    (see AudioIODevice::open())
+        @param numInputChannels     the number of pointers to channel data in the
+                                    inputChannelData array.
         @param outputChannelData    a set of arrays which need to be filled with the data
                                     that should be sent to each outgoing channel of the device.
-                                    As for the input array, some of these pointers may be null, if
-                                    those channels weren't enabled when the audio device was
-                                    opened. The contents of the array are undefined, so the
+                                    There will be one channel of data for each output channel
+                                    that was enabled when the audio device was opened (see
+                                    AudioIODevice::open())
+                                    The initial contents of the array is undefined, so the
                                     callback function must fill all the channels with zeros if
-                                    it wants to output silence - not doing this could cause quite
+                                    its output is silence. Failing to do this could cause quite
                                     an unpleasant noise!
-        @param totalNumOutputChannels   the total number of pointers to channel data in
-                                        the outputChannelData array. Note that not all of these
-                                        channels may be active, so some may be null pointers
+        @param numOutputChannels    the number of pointers to channel data in the
+                                    outputChannelData array.
         @param numSamples           the number of samples in each channel of the input and
                                     output arrays. The number of samples will depend on the
                                     audio device's buffer size and will usually remain constant,
@@ -28893,9 +28906,9 @@ public:
                                     callback to the next.
     */
     virtual void audioDeviceIOCallback (const float** inputChannelData,
-                                        int totalNumInputChannels,
+                                        int numInputChannels,
                                         float** outputChannelData,
-                                        int totalNumOutputChannels,
+                                        int numOutputChannels,
                                         int numSamples) = 0;
 
     /** Called to indicate that the device is about to start calling back.
@@ -28920,7 +28933,7 @@ public:
 };
 
 /**
-    Base class for an audio device with synchoronised input and output channels.
+    Base class for an audio device with synchronised input and output channels.
 
     Subclasses of this are used to implement different protocols such as DirectSound,
     ASIO, CoreAudio, etc.
@@ -30977,6 +30990,9 @@ public:
     */
     AudioSource* getCurrentSource() const throw()       { return source; }
 
+    /** Sets a gain to apply to the audio data. */
+    void setGain (const float newGain) throw();
+
     /** Implementation of the AudioIODeviceCallback method. */
     void audioDeviceIOCallback (const float** inputChannelData,
                                 int totalNumInputChannels,
@@ -31002,6 +31018,7 @@ private:
     float* outputChans [128];
     const float* inputChans [128];
     AudioSampleBuffer tempBuffer;
+    float lastGain, gain;
 
     AudioSourcePlayer (const AudioSourcePlayer&);
     const AudioSourcePlayer& operator= (const AudioSourcePlayer&);
