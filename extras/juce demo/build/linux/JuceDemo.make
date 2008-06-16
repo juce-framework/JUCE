@@ -40,7 +40,6 @@ OBJECTS := \
 	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
-	$(OBJDIR)/._QuickTimeDemo.o \
 	$(OBJDIR)/AudioDemo.o \
 	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
@@ -108,11 +107,6 @@ $(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/._QuickTimeDemo.o: ../../src/demos/._QuickTimeDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o $@ -c $<
