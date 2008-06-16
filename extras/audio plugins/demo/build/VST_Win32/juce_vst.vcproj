@@ -248,15 +248,14 @@
 				Name="wrapper_code"
 				>
 				<File
+					RelativePath="..\..\..\..\..\juce_amalgamated.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\wrapper\formats\VST\juce_VstWrapper.cpp"
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
 		</Filter>
 		<File
 			RelativePath="..\..\readme.txt"

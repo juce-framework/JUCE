@@ -68,8 +68,12 @@
     c:\yourdirectory\PT_711_SDK\AlturaPorts\NewFileLibs\DOA
     c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\PPC_H
     c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\AppSupport
-*/
 
+   NB. If you hit a huge pile of bugs around here, make sure that you've not got the
+   Apple QuickTime headers before the PT headers in your path, because there are
+   some filename clashes between them.
+
+*/
 #include "CEffectGroupMIDI.h"
 #include "CEffectProcessMIDI.h"
 #include "CEffectProcessRTAS.h"
@@ -84,7 +88,14 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../../../../juce.h"
+// On the mac, the amalgamated build works ok, but causes a few strange problems in windows,
+// so stick with the normal one on win32 for now...
+#ifdef _MSC_VER
+ #include "../../../../../juce.h"
+#else
+ #include "../../../../../juce_amalgamated.h"
+#endif
+
 #include "../../juce_IncludeCharacteristics.h"
 
 #ifdef _MSC_VER
@@ -446,6 +457,15 @@ public:
 
                 if (p.y > 12)
                 {
+                    if (p.x != titleW || p.y != titleH)
+                    {
+                        GrafPtr oldport;
+                        GetPort (&oldport);
+                        SetPort (owner->GetViewPort());
+                        SetOrigin (-titleW, -titleH);
+                        SetPort (oldport);
+                    }
+
                     HIViewRef v = HIViewGetFirstSubview (parentView);
                     SetControlSupervisor (v, 0);
                     stopTimer();

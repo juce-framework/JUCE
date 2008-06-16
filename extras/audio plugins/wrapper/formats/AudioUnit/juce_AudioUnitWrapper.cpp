@@ -34,7 +34,7 @@
 #include "MusicDeviceBase.h"
 #include "AUCarbonViewBase.h"
 #include "../../juce_IncludeCharacteristics.h"
-#include "../../../../../juce.h"
+#include "../../../../../juce_amalgamated.h"
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9

@@ -66,7 +66,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).dpm"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames="libcmtd.lib"
+				IgnoreDefaultLibraryNames="libcmtd.lib;uuid.lib"
 				ModuleDefinitionFile="../../../wrapper/formats/RTAS/juce_RTAS_dlldefs.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -203,6 +203,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\DemoJuceFilter.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\includes.h"
 					>
 				</File>
 				<File

@@ -40,7 +40,7 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../../../../juce.h"
+#include "../../../../../juce_amalgamated.h"
 
 #ifdef _MSC_VER
   #pragma pack (pop)
