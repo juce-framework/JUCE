@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-#include "../../../juce.h"
+#include "includes.h"
 #include "host/MainHostWindow.h"
 #include "host/InternalFilters.h"
 

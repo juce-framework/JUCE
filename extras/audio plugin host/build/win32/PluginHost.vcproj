@@ -178,6 +178,18 @@
 				RelativePath="..\..\src\HostStartup.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\includes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\juce_AppConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\juce_LibrarySource.cpp"
+				>
+			</File>
 			<Filter
 				Name="host"
 				>

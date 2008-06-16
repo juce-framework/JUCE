@@ -38,7 +38,6 @@ class FilterGraph;
 const char* const filenameSuffix = ".filtergraph";
 const char* const filenameWildcard = "*.filtergraph";
 
-
 //==============================================================================
 /**
     Represents a connection between two pins in a FilterGraph.

@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-#include "../../../../juce.h"
+#include "../includes.h"
 #include "GraphEditorPanel.h"
 #include "InternalFilters.h"
 #include "MainHostWindow.h"
