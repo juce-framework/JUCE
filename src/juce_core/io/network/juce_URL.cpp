@@ -177,7 +177,8 @@ public:
     WebInputStream (const URL& url,
                     const bool isPost_,
                     URL::OpenStreamProgressCallback* const progressCallback_,
-                    void* const progressCallbackContext_)
+                    void* const progressCallbackContext_,
+                    const String& extraHeaders)
       : position (0),
         finished (false),
         isPost (isPost_),
@@ -188,6 +189,11 @@ public:
 
         if (isPost_)
             createHeadersAndPostData (url);
+
+        headers += extraHeaders;
+        
+        if (! headers.endsWithChar (T('\n')))
+            headers << "\r\n";
 
         handle = juce_openInternetFile (server, headers, postData, isPost,
                                         progressCallback_, progressCallbackContext_);
@@ -363,10 +369,12 @@ private:
 
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
-                                     void* const progressCallbackContext) const
+                                     void* const progressCallbackContext,
+                                     const String& extraHeaders) const
 {
     WebInputStream* wi = new WebInputStream (*this, usePostCommand,
-                                             progressCallback, progressCallbackContext);
+                                             progressCallback, progressCallbackContext,
+                                             extraHeaders);
 
     if (wi->isError())
     {

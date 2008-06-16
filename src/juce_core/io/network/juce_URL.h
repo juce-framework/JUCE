@@ -162,7 +162,8 @@ public:
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,
-                                    void* const progressCallbackContext = 0) const;
+                                    void* const progressCallbackContext = 0,
+                                    const String& extraHeaders = String::empty) const;
 
 
     //==============================================================================
