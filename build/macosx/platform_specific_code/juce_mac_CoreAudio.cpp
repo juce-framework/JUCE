@@ -140,13 +140,11 @@ public:
 
         int count = 0;
         int i;
-        for (i = maxNumChans; --i >= 0;)
-            if (activeInputChans[i])
-                tempInputBuffers[i] = audioBuffer + count++ * numSamples;
+        for (i = 0; i < numInputChans; ++i)
+            tempInputBuffers[i] = audioBuffer + count++ * numSamples;
 
-        for (i = maxNumChans; --i >= 0;)
-            if (activeOutputChans[i])
-                tempOutputBuffers[i] = audioBuffer + count++ * numSamples;
+        for (i = 0; i < numOutputChans; ++i)
+            tempOutputBuffers[i] = audioBuffer + count++ * numSamples;
     }
 
     // returns the number of actual available channels
@@ -424,8 +422,17 @@ public:
 
         activeInputChans = inputChannels;
         activeOutputChans = outputChannels;
-        numInputChans = inputChannels.countNumberOfSetBits();
-        numOutputChans = outputChannels.countNumberOfSetBits();
+
+        activeInputChans.setRange (inChanNames.size(),
+                                   activeInputChans.getHighestBit() + 1 - inChanNames.size(),
+                                   false);
+
+        activeOutputChans.setRange (outChanNames.size(),
+                                    activeOutputChans.getHighestBit() + 1 - outChanNames.size(),
+                                    false);
+
+        numInputChans = activeInputChans.countNumberOfSetBits();
+        numOutputChans = activeOutputChans.countNumberOfSetBits();
 
         // set sample rate
         Float64 sr = newSampleRate;
@@ -460,17 +467,6 @@ public:
 
         if (bufferSizes.size() == 0)
             error = "Device has no available buffer-sizes";
-
-        numInputChans = jmin (numInputChans, numInputChannelInfos);
-        numOutputChans = jmin (numOutputChans, numOutputChannelInfos);
-
-        activeInputChans.setRange (inChanNames.size(),
-                                   activeInputChans.getHighestBit() + 1 - inChanNames.size(),
-                                   false);
-
-        activeOutputChans.setRange (outChanNames.size(),
-                                    activeOutputChans.getHighestBit() + 1 - outChanNames.size(),
-                                    false);
 
         if (inputDevice != 0 && error.isEmpty())
             error = inputDevice->reopen (inputChannels,
@@ -703,7 +699,9 @@ public:
                             const bool thisIsInput = inChanNames.size() > 0 && outChanNames.size() == 0;
                             const bool otherIsInput = result->inChanNames.size() > 0 && result->outChanNames.size() == 0;
 
-                            if (thisIsInput != otherIsInput)
+                            if (thisIsInput != otherIsInput
+                                 || (inChanNames.size() + outChanNames.size() == 0)
+                                 || (result->inChanNames.size() + result->outChanNames.size()) == 0)
                                 break;
                         }
 

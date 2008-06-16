@@ -1110,12 +1110,10 @@ public:
         int i, bits = 256;
 
         for (i = inChans.size(); --i >= 0;)
-            if (inChans[i] != 0)
-                bits = jmin (bits, inChans[i]->bitDepth);
+            bits = jmin (bits, inChans[i]->bitDepth);
 
         for (i = outChans.size(); --i >= 0;)
-            if (outChans[i] != 0)
-                bits = jmin (bits, outChans[i]->bitDepth);
+            bits = jmin (bits, outChans[i]->bitDepth);
 
         if (bits > 32)
             bits = 16;
@@ -1250,18 +1248,10 @@ private:
     {
         int i;
         for (i = outChans.size(); --i >= 0;)
-        {
-            DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
-            if (out != 0)
-                out->close();
-        }
+            outChans.getUnchecked(i)->close();
 
         for (i = inChans.size(); --i >= 0;)
-        {
-            DSoundInternalInChannel* const in = inChans.getUnchecked(i);
-            if (in != 0)
-                in->close();
-        }
+            inChans.getUnchecked(i)->close();
 
         if (threadShouldExit())
             return;
@@ -1273,30 +1263,20 @@ private:
         SetPriorityClass (GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
 
         for (i = outChans.size(); --i >= 0;)
-        {
-            DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
-            if (out != 0)
-                out->open();
-        }
+            outChans.getUnchecked(i)->open();
 
         for (i = inChans.size(); --i >= 0;)
-        {
-            DSoundInternalInChannel* const in = inChans.getUnchecked(i);
-            if (in != 0)
-                in->open();
-        }
+            inChans.getUnchecked(i)->open();
 
         if (! threadShouldExit())
         {
             sleep (5);
 
-            for (i = 0; i < numOutputBuffers; ++i)
-                if (outChans[i] != 0)
-                    outChans[i]->synchronisePosition();
+            for (i = 0; i < outChans.size(); ++i)
+                outChans.getUnchecked(i)->synchronisePosition();
 
-            for (i = 0; i < numInputBuffers; ++i)
-                if (inChans[i] != 0)
-                    inChans[i]->synchronisePosition();
+            for (i = 0; i < inChans.size(); ++i)
+                inChans.getUnchecked(i)->synchronisePosition();
         }
 
         SetThreadPriority (GetCurrentThread(), oldThreadPri);
@@ -1323,24 +1303,14 @@ public:
             int i;
             for (i = inChans.size(); --i >= 0;)
             {
-                DSoundInternalInChannel* const in = inChans.getUnchecked(i);
-
-                if (in != 0)
-                {
-                    in->doneFlag = false;
-                    ++numToDo;
-                }
+                inChans.getUnchecked(i)->doneFlag = false;
+                ++numToDo;
             }
 
             for (i = outChans.size(); --i >= 0;)
             {
-                DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
-
-                if (out != 0)
-                {
-                    out->doneFlag = false;
-                    ++numToDo;
-                }
+                outChans.getUnchecked(i)->doneFlag = false;
+                ++numToDo;
             }
 
             if (numToDo > 0)
@@ -1354,13 +1324,10 @@ public:
                     {
                         DSoundInternalInChannel* const in = inChans.getUnchecked(i);
 
-                        if (in != 0 && !in->doneFlag)
+                        if ((! in->doneFlag) && in->service())
                         {
-                            if (in->service())
-                            {
-                                in->doneFlag = true;
-                                --numToDo;
-                            }
+                            in->doneFlag = true;
+                            --numToDo;
                         }
                     }
 
@@ -1368,13 +1335,10 @@ public:
                     {
                         DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
 
-                        if (out != 0 && !out->doneFlag)
+                        if ((! out->doneFlag) && out->service())
                         {
-                            if (out->service())
-                            {
-                                out->doneFlag = true;
-                                --numToDo;
-                            }
+                            out->doneFlag = true;
+                            --numToDo;
                         }
                     }
 
@@ -1649,71 +1613,52 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     DSoundAudioIODeviceType dlh;
     dlh.scanForDevices();
 
-    numInputBuffers = 2 * dlh.inputDeviceNames.size();
+    enabledInputs = inputChannels;
+    numInputBuffers = inputChannels.countNumberOfSetBits();
     inputBuffers = new float* [numInputBuffers + 2];
+    zeromem (inputBuffers, sizeof (inputBuffers));
+    int i, numIns = 0;
 
-    numOutputBuffers = 2 * dlh.outputDeviceNames.size();
-    outputBuffers = new float* [numOutputBuffers + 2];
-
-    int i;
-    for (i = 0; i < numInputBuffers + 2; ++i)
+    for (i = 0; i < inputChannels.getHighestBit(); i += 2)
     {
-        if (inputChannels[i] && i < numInputBuffers)
-        {
-            inputBuffers[i] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
-            enabledInputs.setBit (i);
-        }
-        else
-        {
-            inputBuffers[i] = 0;
-        }
-    }
+        float* left = 0;
+        float* right = 0;
 
-    for (i = 0; i < numOutputBuffers + 2; ++i)
-    {
-        if (outputChannels[i] && i < numOutputBuffers)
-        {
-            outputBuffers[i] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
-            enabledOutputs.setBit (i);
-        }
-        else
-        {
-            outputBuffers[i] = 0;
-        }
-    }
+        if (inputChannels[i])
+            left = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
-    for (i = 0; i < numInputBuffers; ++i)
-    {
-        if (inputChannels[i] || inputChannels[i + 1])
-        {
+        if (inputChannels[i + 1])
+            right = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+
+        if (left != 0 || right != 0)
             inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [i / 2],
                                                       dlh.inputGuids [i / 2],
                                                       (int) sampleRate, bufferSizeSamples,
-                                                      inputBuffers[i], inputBuffers[i + 1]));
-        }
-        else
-        {
-            inChans.add (0);
-        }
-
-        ++i;
+                                                      left, right));
     }
 
-    for (i = 0; i < numOutputBuffers; ++i)
+    enabledOutputs = outputChannels;
+    numOutputBuffers = outputChannels.countNumberOfSetBits();
+    outputBuffers = new float* [numOutputBuffers + 2];
+    zeromem (outputBuffers, sizeof (outputBuffers));
+    int numOuts = 0;
+
+    for (i = 0; i < outputChannels.getHighestBit(); i += 2)
     {
-        if (outputChannels[i] || outputChannels[i + 1])
-        {
+        float* left = 0;
+        float* right = 0;
+
+        if (inputChannels[i])
+            left = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+
+        if (inputChannels[i + 1])
+            right = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+
+        if (left != 0 || right != 0)
             outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[i / 2],
                                                         dlh.outputGuids [i / 2],
                                                         (int) sampleRate, bufferSizeSamples,
-                                                        outputBuffers[i], outputBuffers[i + 1]));
-        }
-        else
-        {
-            outChans.add (0);
-        }
-
-        ++i;
+                                                        left, right));
     }
 
     String error;
@@ -1724,35 +1669,29 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     SetThreadPriority (GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
     SetPriorityClass (GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
 
-    for (i = 0; i < numOutputBuffers; ++i)
+    for (i = 0; i < outChans.size(); ++i)
     {
-        if (outChans[i] != 0)
-        {
-            error = outChans[i]->open();
+        error = outChans[i]->open();
 
-            if (error.isNotEmpty())
-            {
-                error = T("Error opening ") + dlh.outputDeviceNames[i]
-                         + T(": \"") + error + T("\"");
-                break;
-            }
+        if (error.isNotEmpty())
+        {
+            error = T("Error opening ") + dlh.outputDeviceNames[i]
+                     + T(": \"") + error + T("\"");
+            break;
         }
     }
 
     if (error.isEmpty())
     {
-        for (i = 0; i < numInputBuffers; ++i)
+        for (i = 0; i < inChans.size(); ++i)
         {
-            if (inChans[i] != 0)
-            {
-                error = inChans[i]->open();
+            error = inChans[i]->open();
 
-                if (error.isNotEmpty())
-                {
-                    error = T("Error opening ") + dlh.inputDeviceNames[i]
-                                + T(": \"") + error + T("\"");
-                    break;
-                }
+            if (error.isNotEmpty())
+            {
+                error = T("Error opening ") + dlh.inputDeviceNames[i]
+                            + T(": \"") + error + T("\"");
+                break;
             }
         }
     }
@@ -1761,13 +1700,11 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     {
         totalSamplesOut = 0;
 
-        for (i = 0; i < numOutputBuffers; ++i)
-            if (outChans[i] != 0)
-                outChans[i]->synchronisePosition();
+        for (i = 0; i < outChans.size(); ++i)
+            outChans.getUnchecked(i)->synchronisePosition();
 
-        for (i = 0; i < numInputBuffers; ++i)
-            if (inChans[i] != 0)
-                inChans[i]->synchronisePosition();
+        for (i = 0; i < inChans.size(); ++i)
+            inChans.getUnchecked(i)->synchronisePosition();
 
         startThread (9);
         sleep (10);

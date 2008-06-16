@@ -30,6 +30,7 @@ Changelist for version 1.46
 - added an option to splash screens to close themselves when the mouse is clicked
 - change to ProgressBar to allow custom text and bars that are just spinning without a known progress position. This also meant a change to the params for LookAndFeel::drawProgressBar
 - ditched win98 non-unicode support (presumably nobody will miss that!)
+- change to the way that channel data is passed to an AudioIODeviceCallback. Previously, some of the channels could be null, but now is uses a packed array of all the active channels
 
 ==============================================================================
 Changelist for version 1.45

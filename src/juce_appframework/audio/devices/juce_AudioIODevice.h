@@ -68,23 +68,22 @@ public:
 
         @param inputChannelData     a set of arrays containing the audio data for each
                                     incoming channel - this data is valid until the function
-                                    returns. Some members of the array may be null pointers, if
-                                    that channel wasn't enabled when the audio device was
-                                    opened (see AudioIODevice::open())
-        @param totalNumInputChannels    the total number of pointers to channel data in
-                                        the inputChannelData array. Note that not all of these
-                                        channels may be active, so some may be null pointers
+                                    returns. There will be one channel of data for each input 
+                                    channel that was enabled when the audio device was opened
+                                    (see AudioIODevice::open())
+        @param numInputChannels     the number of pointers to channel data in the 
+                                    inputChannelData array.
         @param outputChannelData    a set of arrays which need to be filled with the data
                                     that should be sent to each outgoing channel of the device.
-                                    As for the input array, some of these pointers may be null, if
-                                    those channels weren't enabled when the audio device was
-                                    opened. The contents of the array are undefined, so the
+                                    There will be one channel of data for each output channel
+                                    that was enabled when the audio device was opened (see 
+                                    AudioIODevice::open())
+                                    The initial contents of the array is undefined, so the
                                     callback function must fill all the channels with zeros if
-                                    it wants to output silence - not doing this could cause quite
+                                    its output is silence. Failing to do this could cause quite
                                     an unpleasant noise!
-        @param totalNumOutputChannels   the total number of pointers to channel data in
-                                        the outputChannelData array. Note that not all of these
-                                        channels may be active, so some may be null pointers
+        @param numOutputChannels    the number of pointers to channel data in the 
+                                    outputChannelData array.
         @param numSamples           the number of samples in each channel of the input and
                                     output arrays. The number of samples will depend on the
                                     audio device's buffer size and will usually remain constant,
@@ -93,9 +92,9 @@ public:
                                     callback to the next.
     */
     virtual void audioDeviceIOCallback (const float** inputChannelData,
-                                        int totalNumInputChannels,
+                                        int numInputChannels,
                                         float** outputChannelData,
-                                        int totalNumOutputChannels,
+                                        int numOutputChannels,
                                         int numSamples) = 0;
 
     /** Called to indicate that the device is about to start calling back.
@@ -122,7 +121,7 @@ public:
 
 //==============================================================================
 /**
-    Base class for an audio device with synchoronised input and output channels.
+    Base class for an audio device with synchronised input and output channels.
 
     Subclasses of this are used to implement different protocols such as DirectSound,
     ASIO, CoreAudio, etc.
