@@ -62,7 +62,7 @@ public:
     ZipFile (const File& file);
 
     /** Creates a ZipFile for an input source.
-    
+
         The inputSource object will be owned by the zip file, which will delete
         it later when not needed.
     */

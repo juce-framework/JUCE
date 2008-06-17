@@ -316,7 +316,7 @@ void WebBrowserComponent::checkWindowAssociation()
     {
         if (browser != 0 && ! blankPageShown)
         {
-            // when the component becomes invisible, some stuff like flash 
+            // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank
             // page to avoid this..
 

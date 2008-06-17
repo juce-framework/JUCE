@@ -81,7 +81,7 @@ public:
 
         char buffer [30];
 
-        if (inputStream != 0 
+        if (inputStream != 0
              && inputStream->setPosition (zei.streamOffset)
              && inputStream->read (buffer, 30) == 30
              && littleEndianInt (buffer) == 0x04034b50)

@@ -32,7 +32,7 @@
 /*
     This monolithic file contains the entire Juce source tree!
 
-    To build an app which uses Juce, all you need to do is to add this 
+    To build an app which uses Juce, all you need to do is to add this
     file to your project, and include juce.h in your own cpp files.
 
 */
@@ -343,7 +343,7 @@
 #endif
 
 //==============================================================================
-// some files include lots of library code, so leave them to the end to avoid cluttering 
+// some files include lots of library code, so leave them to the end to avoid cluttering
 // up the build for the clean files.
 #include "juce_core/io/streams/juce_GZIPCompressorOutputStream.cpp"
 #include "juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp"

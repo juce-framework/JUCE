@@ -97,7 +97,7 @@ public:
             return;
 #elif JUCE_MAC
         EnterMoviesOnThread (0);
-#endif 
+#endif
         if (EnterMovies() != noErr)
             return;
 

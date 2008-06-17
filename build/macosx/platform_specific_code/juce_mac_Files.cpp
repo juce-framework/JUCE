@@ -633,7 +633,7 @@ struct FindFileStruct
 
 // returns 0 on failure
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, 
+                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
                           Time* creationTime, bool* isReadOnly) throw()
 {
     DIR* const d = opendir (directory.toUTF8());

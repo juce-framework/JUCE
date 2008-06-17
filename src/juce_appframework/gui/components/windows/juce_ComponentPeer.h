@@ -82,7 +82,7 @@ public:
                                                         do its own repainting, but only to repaint when the
                                                         performAnyPendingRepaintsNow() method is called. */
         windowIsSemiTransparent     = (1 << 31)    /**< Not intended for public use - makes a window transparent. */
-    
+
     };
 
     //==============================================================================

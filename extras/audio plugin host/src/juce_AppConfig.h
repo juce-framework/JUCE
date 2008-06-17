@@ -30,7 +30,7 @@
 */
 
 /*
-    This file contains settings that you might want to explicitly apply to 
+    This file contains settings that you might want to explicitly apply to
     the your build.
 
     Most of these are turned on or off by default, but you can override

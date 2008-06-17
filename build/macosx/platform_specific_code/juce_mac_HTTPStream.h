@@ -142,7 +142,7 @@ public:
             StringArray lines;
             lines.addLines (responseHeader);
 
-            // NB - using charToString() here instead of just T(" "), because that was 
+            // NB - using charToString() here instead of just T(" "), because that was
             // causing a mysterious gcc internal compiler error...
             const int statusCode = responseHeader.fromFirstOccurrenceOf (String::charToString (T(' ')), false, false)
                                                  .substring (0, 3)
@@ -399,4 +399,3 @@ int juce_seekInInternetFile (void* handle, int newPosition)
 
     return 0;
 }
-

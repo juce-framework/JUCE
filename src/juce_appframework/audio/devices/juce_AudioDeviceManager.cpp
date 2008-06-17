@@ -458,7 +458,7 @@ void AudioDeviceManager::updateXml()
 
         for (int i = 0; i < midiInsFromXml.size(); ++i)
         {
-            if (! availableMidiDevices.contains (midiInsFromXml[i], true)) 
+            if (! availableMidiDevices.contains (midiInsFromXml[i], true))
             {
                 XmlElement* const m = new XmlElement (T("MIDIINPUT"));
                 m->setAttribute (T("name"), midiInsFromXml[i]);

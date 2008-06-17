@@ -40,7 +40,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
                           bool* isDirectory, bool* isHidden, int64* fileSize,
                           Time* modTime, Time* creationTime, bool* isReadOnly) throw();
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize, 
+                        bool* isDirectory, bool* isHidden, int64* fileSize,
                         Time* modTime, Time* creationTime, bool* isReadOnly) throw();
 void juce_findFileClose (void* handle) throw();
 

@@ -42,8 +42,8 @@ class JUCE_API  BlowFish
 {
 public:
     //==============================================================================
-    /** Creates an object that can encode/decode based on the specified key. 
-    
+    /** Creates an object that can encode/decode based on the specified key.
+
         The key data can be up to 72 bytes long.
     */
     BlowFish (const uint8* keyData, int keyBytes);

@@ -191,7 +191,7 @@ public:
             createHeadersAndPostData (url);
 
         headers += extraHeaders;
-        
+
         if (! headers.endsWithChar (T('\n')))
             headers << "\r\n";
 

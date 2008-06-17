@@ -86,12 +86,12 @@ const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSer
 // juce_firstResultFile gets the name of the file (not the whole pathname) and
 // the other pointers, if non-null, are set based on the properties of the file.
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, 
+                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime,
                           Time* creationTime, bool* isReadOnly) throw();
 
 // returns false when no more files are found
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize, 
+                        bool* isDirectory, bool* isHidden, int64* fileSize,
                         Time* modTime, Time* creationTime, bool* isReadOnly) throw();
 
 void juce_findFileClose (void* handle) throw();

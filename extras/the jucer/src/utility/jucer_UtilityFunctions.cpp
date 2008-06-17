@@ -362,7 +362,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompW), layout, wrx, wry, wrw, wrh);
 
     String hrx, hry, hrw, hrh;
-    Component* const relCompH = (layout != 0 && position.rect.getHeightMode() != PositionedRectangle::absoluteSize) 
+    Component* const relCompH = (layout != 0 && position.rect.getHeightMode() != PositionedRectangle::absoluteSize)
                                     ? layout->findComponentWithId (position.relativeToH) : 0;
     if (relCompH != 0)
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompH), layout, hrx, hry, hrw, hrh);

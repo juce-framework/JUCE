@@ -29,11 +29,10 @@
   ==============================================================================
 */
 
-
 /*
   ==============================================================================
 
-    This header contains the entire Juce source tree, and can be #included in 
+    This header contains the entire Juce source tree, and can be #included in
     all your source files.
 
     As well as including this in your files, you should also add juce_inline.cpp
@@ -43,11 +42,11 @@
   ==============================================================================
 */
 
-#ifndef __ALL_JUCE_HEADERS_H__
-#define __ALL_JUCE_HEADERS_H__
+#ifndef __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
+#define __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
 
 #define DONT_AUTOLINK_TO_JUCE_LIBRARY 1
 
 #include "../juce.h"
 
-#endif
+#endif   // __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__

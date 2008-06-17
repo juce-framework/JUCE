@@ -1167,7 +1167,7 @@ local void bi_windup (deflate_state *s)
  * Copy a stored block, storing first the length and its
  * one's complement if requested.
  */
-local void copy_block(deflate_state *s, 
+local void copy_block(deflate_state *s,
                       charf    *buf,    /* the input data */
                       unsigned len,     /* its length */
                       int      header)  /* true if block header must be written */

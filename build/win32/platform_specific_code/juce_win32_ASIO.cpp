@@ -1844,7 +1844,7 @@ public:
                 }
             }
 
-            jassert (freeSlot >= 0);  // unfortunately you can only have a finite number 
+            jassert (freeSlot >= 0);  // unfortunately you can only have a finite number
                                       // of ASIO devices open at the same time..
 
             if (freeSlot >= 0)

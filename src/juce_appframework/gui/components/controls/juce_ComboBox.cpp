@@ -549,7 +549,7 @@ void ComboBox::showPopup()
             else if (item->isHeading)
                 menu.addSectionHeader (item->name);
             else
-                menu.addItem (item->itemId, item->name, 
+                menu.addItem (item->itemId, item->name,
                               item->isEnabled, item->itemId == currentId);
         }
 

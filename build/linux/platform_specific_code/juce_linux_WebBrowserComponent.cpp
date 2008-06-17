@@ -53,7 +53,7 @@ WebBrowserComponent::~WebBrowserComponent()
 }
 
 //==============================================================================
-void WebBrowserComponent::goToURL (const String& url, 
+void WebBrowserComponent::goToURL (const String& url,
                                    const StringArray* headers,
                                    const MemoryBlock* postData)
 {

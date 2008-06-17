@@ -68,21 +68,21 @@ public:
 
         @param inputChannelData     a set of arrays containing the audio data for each
                                     incoming channel - this data is valid until the function
-                                    returns. There will be one channel of data for each input 
+                                    returns. There will be one channel of data for each input
                                     channel that was enabled when the audio device was opened
                                     (see AudioIODevice::open())
-        @param numInputChannels     the number of pointers to channel data in the 
+        @param numInputChannels     the number of pointers to channel data in the
                                     inputChannelData array.
         @param outputChannelData    a set of arrays which need to be filled with the data
                                     that should be sent to each outgoing channel of the device.
                                     There will be one channel of data for each output channel
-                                    that was enabled when the audio device was opened (see 
+                                    that was enabled when the audio device was opened (see
                                     AudioIODevice::open())
                                     The initial contents of the array is undefined, so the
                                     callback function must fill all the channels with zeros if
                                     its output is silence. Failing to do this could cause quite
                                     an unpleasant noise!
-        @param numOutputChannels    the number of pointers to channel data in the 
+        @param numOutputChannels    the number of pointers to channel data in the
                                     outputChannelData array.
         @param numSamples           the number of samples in each channel of the input and
                                     output arrays. The number of samples will depend on the

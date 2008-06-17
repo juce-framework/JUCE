@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_ImageCache.h"
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime, 
+                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime,
                           Time* creationTime, bool* isReadOnly) throw();
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDirectory, bool* isHidden, int64* fileSize,
