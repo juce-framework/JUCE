@@ -36,7 +36,7 @@ namespace BinaryData
     const int           pathsandtransformsdemo_cppSize = 14231;
 
     extern const char*  quicktimedemo_cpp;
-    const int           quicktimedemo_cppSize = 4447;
+    const int           quicktimedemo_cppSize = 4576;
 
     extern const char*  readme__what_this_directory_is_for_txt;
     const int           readme__what_this_directory_is_for_txtSize = 259;
