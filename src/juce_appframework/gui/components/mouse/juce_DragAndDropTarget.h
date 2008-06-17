@@ -59,6 +59,7 @@ public:
         dragged.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @returns                    true if this component wants to receive the other callbacks regarging this
                                     type of object; if it returns false, no other callbacks will be made.
     */
@@ -74,7 +75,7 @@ public:
         user feedback about whether the item can be dropped here or not.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
         @see itemDragExit
@@ -91,7 +92,7 @@ public:
         this lets you know what happens in-between.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
     */
@@ -109,7 +110,7 @@ public:
         as a signal to repaint it in its normal state.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @see itemDragEnter
     */
     virtual void itemDragExit (const String& sourceDescription,
@@ -124,7 +125,7 @@ public:
         clean up in here if there's anything you need to do when the drag finishes.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
     */

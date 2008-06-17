@@ -61,9 +61,9 @@ public:
 
     //==============================================================================
     void audioDeviceIOCallback (const float** inputChannelData,
-                                int totalNumInputChannels,
+                                int numInputChannels,
                                 float** outputChannelData,
-                                int totalNumOutputChannels,
+                                int numOutputChannels,
                                 int numSamples);
 
     void audioDeviceAboutToStart (AudioIODevice* device);

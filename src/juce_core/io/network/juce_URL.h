@@ -159,6 +159,9 @@ public:
                                 for lengthy POST operations, so that you can provide user feedback.
         @param progressCallbackContext  if a callback is specified, this value will be passed to
                                 the function
+        @param extraHeaders     if not empty, this string is appended onto the headers that
+                                are used for the request. It must therefore be a valid set of HTML
+                                header directives, separated by newlines.
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,

@@ -110,6 +110,8 @@ public:
         @param timeOutMsWhenCancelling  when 'cancel' is pressed, this is how long to wait for
                                         the thread to stop before killing it forcibly (see
                                         Thread::stopThread() )
+        @param cancelButtonText         the text that should be shown in the cancel button
+                                        (if it has one)
     */
     ThreadWithProgressWindow (const String& windowTitle,
                               const bool hasProgressBar,

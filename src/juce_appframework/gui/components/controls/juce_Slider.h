@@ -167,6 +167,8 @@ public:
                                 to be treated as a movement
         @param offset           values greater than 0.0 increase the minimum speed that will be used when
                                 the threshold is reached
+        @param userCanPressKeyToSwapMode    if true, then the user can hold down the ctrl or command
+                                key to toggle velocity-sensitive mode
     */
     void setVelocityModeParameters (const double sensitivity = 1.0,
                                     const int threshold = 1.0,
