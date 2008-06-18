@@ -1600,8 +1600,6 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 {
     closeDevice();
     totalSamplesOut = 0;
-    enabledInputs.clear();
-    enabledOutputs.clear();
 
     sampleRate = sampleRate_;
 
@@ -1614,20 +1612,24 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     dlh.scanForDevices();
 
     enabledInputs = inputChannels;
-    numInputBuffers = inputChannels.countNumberOfSetBits();
+    enabledInputs.setRange (inChannels.size(),
+                            enabledInputs.getHighestBit() + 1 - inChannels.size(),
+                            false);
+
+    numInputBuffers = enabledInputs.countNumberOfSetBits();
     inputBuffers = new float* [numInputBuffers + 2];
     zeromem (inputBuffers, sizeof (inputBuffers));
     int i, numIns = 0;
 
-    for (i = 0; i < inputChannels.getHighestBit(); i += 2)
+    for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
     {
         float* left = 0;
         float* right = 0;
 
-        if (inputChannels[i])
+        if (enabledInputs[i])
             left = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
-        if (inputChannels[i + 1])
+        if (enabledInputs[i + 1])
             right = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
         if (left != 0 || right != 0)
@@ -1638,20 +1640,24 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     }
 
     enabledOutputs = outputChannels;
-    numOutputBuffers = outputChannels.countNumberOfSetBits();
+    enabledOutputs.setRange (outChannels.size(),
+                             enabledOutputs.getHighestBit() + 1 - outChannels.size(),
+                             false);
+
+    numOutputBuffers = enabledOutputs.countNumberOfSetBits();
     outputBuffers = new float* [numOutputBuffers + 2];
     zeromem (outputBuffers, sizeof (outputBuffers));
     int numOuts = 0;
 
-    for (i = 0; i < outputChannels.getHighestBit(); i += 2)
+    for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
     {
         float* left = 0;
         float* right = 0;
 
-        if (inputChannels[i])
+        if (enabledOutputs[i])
             left = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
-        if (inputChannels[i + 1])
+        if (enabledOutputs[i + 1])
             right = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
         if (left != 0 || right != 0)
