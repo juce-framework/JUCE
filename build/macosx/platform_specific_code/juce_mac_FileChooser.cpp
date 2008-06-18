@@ -207,6 +207,9 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
         options.clientName = PlatformUtilities::juceStringToCFString (name);
         CFStringRef message = PlatformUtilities::juceStringToCFString (title);
 
+        if (userInfo.defaultLocationValid)
+            options.saveFileName = PlatformUtilities::juceStringToCFString (currentFileOrDirectory.getFileName());
+
         // nasty layout bug if the message text is set for a directory browser..
         if (selectsDirectory)
             options.windowTitle = message;
