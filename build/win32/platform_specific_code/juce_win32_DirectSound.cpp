@@ -1618,7 +1618,7 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 
     numInputBuffers = enabledInputs.countNumberOfSetBits();
     inputBuffers = new float* [numInputBuffers + 2];
-    zeromem (inputBuffers, sizeof (inputBuffers));
+    zeromem (inputBuffers, sizeof (float*) * numInputBuffers + 2);
     int i, numIns = 0;
 
     for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
@@ -1646,7 +1646,7 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 
     numOutputBuffers = enabledOutputs.countNumberOfSetBits();
     outputBuffers = new float* [numOutputBuffers + 2];
-    zeromem (outputBuffers, sizeof (outputBuffers));
+    zeromem (outputBuffers, sizeof (float*) * numOutputBuffers + 2);
     int numOuts = 0;
 
     for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
