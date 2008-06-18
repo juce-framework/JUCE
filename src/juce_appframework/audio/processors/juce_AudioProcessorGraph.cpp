@@ -1101,7 +1101,8 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
     currentMidiInputBuffer = &midiMessages;
     currentMidiOutputBuffer.clear();
 
-    for (int i = 0; i < renderingOps.size(); ++i)
+    int i;
+    for (i = 0; i < renderingOps.size(); ++i)
     {
         GraphRenderingOps::AudioGraphRenderingOp* const op
             = (GraphRenderingOps::AudioGraphRenderingOp*) renderingOps.getUnchecked(i);
@@ -1109,7 +1110,7 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
         op->perform (renderingBuffers, midiBuffers, numSamples);
     }
 
-    for (int i = 0; i < buffer.getNumChannels(); ++i)
+    for (i = 0; i < buffer.getNumChannels(); ++i)
         buffer.copyFrom (i, 0, currentAudioOutputBuffer, i, 0, numSamples);
 }
 

@@ -41,8 +41,8 @@
   ==============================================================================
 */
 
-#ifndef __ALL_JUCE_HEADERS_H__
-#define __ALL_JUCE_HEADERS_H__
+#ifndef __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
+#define __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
 
 #define DONT_AUTOLINK_TO_JUCE_LIBRARY 1
 
@@ -201,7 +201,7 @@
 /** Enabling this builds support for AudioUnit audio plugins.
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
 */
-#define JUCE_PLUGINHOST_AU 1
+//#define JUCE_PLUGINHOST_AU 1
 
 /** Disabling this will avoid linking to any UI code. This is handy for
     writing command-line utilities, e.g. on linux boxes which don't have some
@@ -2721,8 +2721,7 @@ protected:
     /** Destructor. */
     ~ArrayAllocationBase() throw()
     {
-        if (elements != 0)
-            juce_free (elements);
+        delete[] elements;
     }
 
     /** Changes the amount of storage allocated.
@@ -2736,23 +2735,26 @@ protected:
     {
         if (numAllocated != numElements)
         {
-            numAllocated = numElements;
-
             if (numElements > 0)
             {
-                if (elements == 0)
-                    elements = (ElementType*) juce_malloc (sizeof (ElementType) * numElements);
-                else
-                    elements = (ElementType*) juce_realloc (elements, sizeof (ElementType) * numElements);
+                ElementType* const newElements = new ElementType [numElements];
+
+                const int itemsToRetain = jmin (numElements, numAllocated);
+
+                for (int i = 0; i < itemsToRetain; ++i)
+                    newElements[i] = elements[i];
+
+                delete[] elements;
+                elements = newElements;
+
             }
-            else
+            else if (elements != 0)
             {
-                if (elements != 0)
-                {
-                    juce_free (elements);
-                    elements = 0;
-                }
+                delete[] elements;
+                elements = 0;
             }
+
+            numAllocated = numElements;
         }
     }
 
@@ -12271,6 +12273,9 @@ public:
                                 for lengthy POST operations, so that you can provide user feedback.
         @param progressCallbackContext  if a callback is specified, this value will be passed to
                                 the function
+        @param extraHeaders     if not empty, this string is appended onto the headers that
+                                are used for the request. It must therefore be a valid set of HTML
+                                header directives, separated by newlines.
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,
@@ -41062,6 +41067,7 @@ public:
         dragged.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @returns                    true if this component wants to receive the other callbacks regarging this
                                     type of object; if it returns false, no other callbacks will be made.
     */
@@ -41077,7 +41083,7 @@ public:
         user feedback about whether the item can be dropped here or not.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
         @see itemDragExit
@@ -41094,7 +41100,7 @@ public:
         this lets you know what happens in-between.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
     */
@@ -41112,7 +41118,7 @@ public:
         as a signal to repaint it in its normal state.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @see itemDragEnter
     */
     virtual void itemDragExit (const String& sourceDescription,
@@ -41127,7 +41133,7 @@ public:
         clean up in here if there's anything you need to do when the drag finishes.
 
         @param sourceDescription    the description string passed into DragAndDropContainer::startDragging()
-        @param sourceComponent      the component passed into DragAndDropContainer::startDragging()
+        @param sourceComponent      the component that was passed into DragAndDropContainer::startDragging()
         @param x                    the mouse x position, relative to this component
         @param y                    the mouse y position, relative to this component
     */
@@ -44363,6 +44369,8 @@ public:
                                 to be treated as a movement
         @param offset           values greater than 0.0 increase the minimum speed that will be used when
                                 the threshold is reached
+        @param userCanPressKeyToSwapMode    if true, then the user can hold down the ctrl or command
+                                key to toggle velocity-sensitive mode
     */
     void setVelocityModeParameters (const double sensitivity = 1.0,
                                     const int threshold = 1.0,
@@ -50231,6 +50239,8 @@ public:
         @param timeOutMsWhenCancelling  when 'cancel' is pressed, this is how long to wait for
                                         the thread to stop before killing it forcibly (see
                                         Thread::stopThread() )
+        @param cancelButtonText         the text that should be shown in the cancel button
+                                        (if it has one)
     */
     ThreadWithProgressWindow (const String& windowTitle,
                               const bool hasProgressBar,
@@ -53356,4 +53366,4 @@ END_JUCE_NAMESPACE
 #endif   // __JUCE_JUCEHEADER__
 /********* End of inlined file: juce.h *********/
 
-#endif
+#endif   // __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__

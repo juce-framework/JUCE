@@ -162,7 +162,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
 
         source->getNextAudioBlock (info);
 
-        for (int i = info.buffer->getNumChannels(); --i >= 0;)
+        for (i = info.buffer->getNumChannels(); --i >= 0;)
             info.buffer->applyGainRamp (i, info.startSample, info.numSamples, lastGain, gain);
 
         lastGain = gain;
