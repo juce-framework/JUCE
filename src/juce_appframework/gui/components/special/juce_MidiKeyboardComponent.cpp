@@ -207,8 +207,6 @@ void MidiKeyboardComponent::setMidiChannelsToDisplay (const int midiChannelMask)
 
 void MidiKeyboardComponent::setVelocity (const float velocity_)
 {
-    jassert (velocity > 0 && velocity <= 1.0f);
-
     velocity = jlimit (0.0f, 1.0f, velocity_);
 }
 
