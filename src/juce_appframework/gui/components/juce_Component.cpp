@@ -1195,7 +1195,7 @@ void Component::addChildComponent (Component* const child, int zOrder)
 
         if (! child->isAlwaysOnTop())
         {
-            if (zOrder < 0)
+            if (zOrder < 0 || zOrder > childComponentList_.size())
                 zOrder = childComponentList_.size();
 
             while (zOrder > 0)

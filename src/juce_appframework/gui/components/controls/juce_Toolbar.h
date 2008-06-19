@@ -37,6 +37,7 @@
 #include "../buttons/juce_Button.h"
 class ToolbarItemComponent;
 class ToolbarItemFactory;
+class MissingItemsComponent;
 
 
 //==============================================================================
@@ -304,6 +305,8 @@ private:
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
     ComponentAnimator animator;
+    friend class MissingItemsComponent;
+    Array <ToolbarItemComponent*> items;
 
     friend class ItemDragAndDropOverlayComponent;
     static const tchar* const toolbarDragDescriptor;

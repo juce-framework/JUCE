@@ -185,11 +185,11 @@ public:
           owner (owner_),
           height (height_)
     {
-        for (int i = owner_.getNumChildComponents(); --i >= 0;)
+        for (int i = owner_.items.size(); --i >= 0;)
         {
-            ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (owner_.getChildComponent (i));
+            ToolbarItemComponent* const tc = owner_.items.getUnchecked(i);
 
-            if (tc != 0 && dynamic_cast <ToolbarSpacerComp*> (tc) == 0 && ! tc->isVisible())
+            if (dynamic_cast <ToolbarSpacerComp*> (tc) == 0 && ! tc->isVisible())
             {
                 oldIndexes.insert (0, i);
                 addAndMakeVisible (tc, 0);
@@ -211,7 +211,9 @@ public:
             if (tc != 0)
             {
                 tc->setVisible (false);
-                owner.addChildComponent (tc, oldIndexes.remove (i));
+                const int index = oldIndexes.remove (i);
+                owner.items.insert (index, tc);
+                owner.addChildComponent (tc, index);
                 --i;
             }
         }
@@ -300,11 +302,11 @@ void Toolbar::setVertical (const bool shouldBeVertical)
 
 void Toolbar::clear()
 {
-    for (int i = getNumChildComponents(); --i >= 0;)
+    for (int i = items.size(); --i >= 0;)
     {
-        ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i));
-        if (tc != 0)
-            delete tc;
+        ToolbarItemComponent* const tc = items.getUnchecked(i);
+        items.remove (i);
+        delete tc;
     }
 
     resized();
@@ -342,6 +344,7 @@ void Toolbar::addItemInternal (ToolbarItemFactory& factory,
         jassert (allowedIds.contains (itemId));
 #endif
 
+        items.insert (insertIndex, tc);
         addAndMakeVisible (tc, insertIndex);
     }
 }
@@ -373,6 +376,7 @@ void Toolbar::removeToolbarItem (const int itemIndex)
 
     if (tc != 0)
     {
+        items.removeValue (tc);
         delete tc;
         resized();
     }
@@ -380,7 +384,7 @@ void Toolbar::removeToolbarItem (const int itemIndex)
 
 int Toolbar::getNumItems() const throw()
 {
-    return getNumChildComponents() - 1;
+    return items.size();
 }
 
 int Toolbar::getItemId (const int itemIndex) const throw()
@@ -391,10 +395,7 @@ int Toolbar::getItemId (const int itemIndex) const throw()
 
 ToolbarItemComponent* Toolbar::getItemComponent (const int itemIndex) const throw()
 {
-    if (itemIndex < getNumItems())
-        return dynamic_cast <ToolbarItemComponent*> (getChildComponent (itemIndex));
-
-    return 0;
+    return items [itemIndex];
 }
 
 ToolbarItemComponent* Toolbar::getNextActiveComponent (int index, const int delta) const
@@ -487,40 +488,31 @@ void Toolbar::updateAllItemPositions (const bool animate)
     {
         StretchableObjectResizer resizer;
 
-        const int numComponents = getNumChildComponents();
-        Array <ToolbarItemComponent*> activeComps;
-
         int i;
-        for (i = 0; i < numComponents; ++i)
+        for (i = 0; i < items.size(); ++i)
         {
-            ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i));
+            ToolbarItemComponent* const tc = items.getUnchecked(i);
 
-            // have you added a component directly to the toolbar? That's not advisable! Only use addCustomToolbarItem()!
-            jassert (tc != 0 || getChildComponent(i) == missingItemsButton);
+            tc->setEditingMode (isEditingActive ? ToolbarItemComponent::editableOnToolbar
+                                                : ToolbarItemComponent::normalMode);
 
-            if (tc != 0)
+            tc->setStyle (toolbarStyle);
+
+            ToolbarSpacerComp* const spacer = dynamic_cast <ToolbarSpacerComp*> (tc);
+
+            int preferredSize = 1, minSize = 1, maxSize = 1;
+
+            if (tc->getToolbarItemSizes (getThickness(), isVertical(),
+                                         preferredSize, minSize, maxSize))
             {
-                tc->setEditingMode (isEditingActive ? ToolbarItemComponent::editableOnToolbar
-                                                    : ToolbarItemComponent::normalMode);
-
-                tc->setStyle (toolbarStyle);
-
-                ToolbarSpacerComp* const spacer = dynamic_cast <ToolbarSpacerComp*> (tc);
-
-                int preferredSize = 1, minSize = 1, maxSize = 1;
-
-                if (tc->getToolbarItemSizes (getThickness(), isVertical(),
-                                             preferredSize, minSize, maxSize))
-                {
-                    tc->isActive = true;
-                    resizer.addItem (preferredSize, minSize, maxSize,
-                                     spacer != 0 ? spacer->getResizeOrder() : 2);
-                }
-                else
-                {
-                    tc->isActive = false;
-                    tc->setVisible (false);
-                }
+                tc->isActive = true;
+                resizer.addItem (preferredSize, minSize, maxSize,
+                                 spacer != 0 ? spacer->getResizeOrder() : 2);
+            }
+            else
+            {
+                tc->isActive = false;
+                tc->setVisible (false);
             }
         }
 
@@ -550,11 +542,11 @@ void Toolbar::updateAllItemPositions (const bool animate)
                                              : getLength();
 
         int pos = 0, activeIndex = 0;
-        for (i = 0; i < getNumChildComponents(); ++i)
+        for (i = 0; i < items.size(); ++i)
         {
-            ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getChildComponent (i));
+            ToolbarItemComponent* const tc = items.getUnchecked(i);
 
-            if (tc != 0 && tc->isActive)
+            if (tc->isActive)
             {
                 const int size = (int) resizer.getItemSize (activeIndex++);
 
@@ -623,6 +615,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
                 jassert (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar);
             }
 
+            items.add (tc);
             addChildComponent (tc);
             updateAllItemPositions (false);
         }
@@ -646,6 +639,7 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
                         jassert (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar);
                     }
 
+                    items.add (tc);
                     addChildComponent (tc);
                     currentIndex = getIndexOfChildComponent (tc);
                     updateAllItemPositions (true);
@@ -684,8 +678,10 @@ void Toolbar::itemDragMove (const String&, Component* sourceComponent, int x, in
 
                 if (newIndex != currentIndex)
                 {
+                    items.removeValue (tc);
                     removeChildComponent (tc);
                     addChildComponent (tc, newIndex);
+                    items.insert (newIndex, tc);
                     updateAllItemPositions (true);
                 }
                 else
@@ -705,6 +701,7 @@ void Toolbar::itemDragExit (const String&, Component* sourceComponent)
     {
         if (isParentOf (tc))
         {
+            items.removeValue (tc);
             removeChildComponent (tc);
             updateAllItemPositions (true);
         }
