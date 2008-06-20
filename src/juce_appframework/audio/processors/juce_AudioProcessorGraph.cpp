@@ -954,7 +954,7 @@ private:
         }
         else
         {
-            jassert (bufferNum > 0 && bufferNum < nodeIds.size());
+            jassert (bufferNum >= 0 && bufferNum < nodeIds.size());
 
             nodeIds.set (bufferNum, nodeId);
             channels.set (bufferNum, outputIndex);
@@ -1039,7 +1039,7 @@ void AudioProcessorGraph::buildRenderingSequence()
     VoidArray oldRenderingOps (renderingOps);
 
     {
-        // swap over to the new set of rendering sequence..
+        // swap over to the new rendering sequence..
         const ScopedLock sl (renderLock);
 
         renderingBuffers.setSize (numRenderingBuffersNeeded, getBlockSize());
@@ -1067,7 +1067,7 @@ void AudioProcessorGraph::handleAsyncUpdate()
 void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSamplesPerBlock)
 {
     currentAudioInputBuffer = 0;
-    currentAudioOutputBuffer.setSize (getNumOutputChannels(), estimatedSamplesPerBlock);
+    currentAudioOutputBuffer.setSize (jmax (1, getNumOutputChannels()), estimatedSamplesPerBlock);
     currentMidiInputBuffer = 0;
     currentMidiOutputBuffer.clear();
 
@@ -1096,7 +1096,7 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
     const ScopedLock sl (renderLock);
 
     currentAudioInputBuffer = &buffer;
-    currentAudioOutputBuffer.setSize (buffer.getNumChannels(), numSamples);
+    currentAudioOutputBuffer.setSize (jmax (1, buffer.getNumChannels()), numSamples);
     currentAudioOutputBuffer.clear();
     currentMidiInputBuffer = &midiMessages;
     currentMidiOutputBuffer.clear();
@@ -1234,7 +1234,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioSampleBuffer
         for (int i = jmin (graph->currentAudioInputBuffer->getNumChannels(),
                            buffer.getNumChannels()); --i >= 0;)
         {
-            buffer.addFrom (i, 0, *graph->currentAudioInputBuffer, i, 0, buffer.getNumSamples());
+            buffer.copyFrom (i, 0, *graph->currentAudioInputBuffer, i, 0, buffer.getNumSamples());
         }
 
         break;
@@ -1346,8 +1346,8 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 
     if (graph != 0)
     {
-        setPlayConfigDetails (type == audioOutputNode ? graph->getNumInputChannels() : 0,
-                              type == audioInputNode ? graph->getNumOutputChannels() : 0,
+        setPlayConfigDetails (type == audioOutputNode ? graph->getNumOutputChannels() : 0,
+                              type == audioInputNode ? graph->getNumInputChannels() : 0,
                               getSampleRate(),
                               getBlockSize());
 

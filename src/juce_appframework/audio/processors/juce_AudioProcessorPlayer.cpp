@@ -80,9 +80,9 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
 
 //==============================================================================
 void AudioProcessorPlayer::audioDeviceIOCallback (const float** inputChannelData,
-                                                  int totalNumInputChannels,
+                                                  int numInputChannels,
                                                   float** outputChannelData,
-                                                  int totalNumOutputChannels,
+                                                  int numOutputChannels,
                                                   int numSamples)
 {
     // these should have been prepared by audioDeviceAboutToStart()...
@@ -90,71 +90,48 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** inputChannelData
 
     incomingMidi.clear();
     messageCollector.removeNextBlockOfMessages (incomingMidi, numSamples);
+    int i, totalNumChans = 0;
 
-    int i, numActiveChans = 0, numInputs = 0, numOutputs = 0;
-
-    // messy stuff needed to compact the channels down into an array
-    // of non-zero pointers..
-    for (i = 0; i < totalNumInputChannels; ++i)
-    {
-        if (inputChannelData[i] != 0)
-        {
-            inputChans [numInputs++] = inputChannelData[i];
-            if (numInputs >= numElementsInArray (inputChans))
-                break;
-        }
-    }
-
-    for (i = 0; i < totalNumOutputChannels; ++i)
-    {
-        if (outputChannelData[i] != 0)
-        {
-            outputChans [numOutputs++] = outputChannelData[i];
-            if (numOutputs >= numElementsInArray (outputChans))
-                break;
-        }
-    }
-
-    if (numInputs > numOutputs)
+    if (numInputChannels > numOutputChannels)
     {
         // if there aren't enough output channels for the number of
         // inputs, we need to create some temporary extra ones (can't
         // use the input data in case it gets written to)
-        tempBuffer.setSize (numInputs - numOutputs, numSamples,
+        tempBuffer.setSize (numInputChannels - numOutputChannels, numSamples,
                             false, false, true);
 
-        for (i = 0; i < numOutputs; ++i)
+        for (i = 0; i < numOutputChannels; ++i)
         {
-            channels[numActiveChans] = outputChans[i];
-            memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
-            ++numActiveChans;
+            channels[totalNumChans] = outputChannelData[i];
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            ++totalNumChans;
         }
 
-        for (i = numOutputs; i < numInputs; ++i)
+        for (i = numOutputChannels; i < numInputChannels; ++i)
         {
-            channels[numActiveChans] = tempBuffer.getSampleData (i - numOutputs, 0);
-            memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
-            ++numActiveChans;
+            channels[totalNumChans] = tempBuffer.getSampleData (i - numOutputChannels, 0);
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            ++totalNumChans;
         }
     }
     else
     {
-        for (i = 0; i < numInputs; ++i)
+        for (i = 0; i < numInputChannels; ++i)
         {
-            channels[numActiveChans] = outputChans[i];
-            memcpy (channels[numActiveChans], inputChans[i], sizeof (float) * numSamples);
-            ++numActiveChans;
+            channels[totalNumChans] = outputChannelData[i];
+            memcpy (channels[totalNumChans], inputChannelData[i], sizeof (float) * numSamples);
+            ++totalNumChans;
         }
 
-        for (i = numInputs; i < numOutputs; ++i)
+        for (i = numInputChannels; i < numOutputChannels; ++i)
         {
-            channels[numActiveChans] = outputChans[i];
-            zeromem (channels[numActiveChans], sizeof (float) * numSamples);
-            ++numActiveChans;
+            channels[totalNumChans] = outputChannelData[i];
+            zeromem (channels[totalNumChans], sizeof (float) * numSamples);
+            ++totalNumChans;
         }
     }
 
-    AudioSampleBuffer buffer (channels, numActiveChans, numSamples);
+    AudioSampleBuffer buffer (channels, totalNumChans, numSamples);
 
     const ScopedLock sl (lock);
 

@@ -106,8 +106,6 @@ private:
 
     int numInputChans, numOutputChans;
     float* channels [128];
-    float* outputChans [128];
-    const float* inputChans [128];
     AudioSampleBuffer tempBuffer;
 
     MidiBuffer incomingMidi;
