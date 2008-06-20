@@ -263,7 +263,7 @@ public:
 
         @see newOpenGLContextCreated()
     */
-    OpenGLContext* getCurrentContext() const throw();
+    OpenGLContext* getCurrentContext() const throw()            { return context; }
 
     /** Makes this component the current openGL context.
 

@@ -212,7 +212,6 @@ public:
             {
                 tc->setVisible (false);
                 const int index = oldIndexes.remove (i);
-                owner.items.insert (index, tc);
                 owner.addChildComponent (tc, index);
                 --i;
             }
