@@ -1076,6 +1076,10 @@ public:
         }
     }
 
+    void textInputRequired (int /*x*/, int /*y*/)
+    {
+    }
+
     void repaint (int x, int y, int w, int h)
     {
         if (Rectangle::intersectRectangles (x, y, w, h,

@@ -484,6 +484,7 @@ public:
           fullScreen (false),
           isDragging (false),
           isMouseOver (false),
+          hasCreatedCaret (false),
           currentWindowIcon (0),
           taskBarIcon (0),
           dropTarget (0)
@@ -819,6 +820,18 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
+    void textInputRequired (int x, int y)
+    {
+        if (! hasCreatedCaret)
+        {
+            hasCreatedCaret = true;
+            CreateCaret (hwnd, 0, 0, 0);
+        }
+
+        ShowCaret (hwnd);
+        SetCaretPos (x, y);
+    }
+
     void repaint (int x, int y, int w, int h)
     {
         const RECT r = { x, y, x + w, y + h };
@@ -901,7 +914,7 @@ public:
 private:
     HWND hwnd;
     DropShadower* shadower;
-    bool fullScreen, isDragging, isMouseOver;
+    bool fullScreen, isDragging, isMouseOver, hasCreatedCaret;
     BorderSize windowBorder;
     HICON currentWindowIcon;
     NOTIFYICONDATA* taskBarIcon;
@@ -1976,6 +1989,12 @@ private:
                         break;
 
                     case WM_KILLFOCUS:
+                        if (hasCreatedCaret)
+                        {
+                            hasCreatedCaret = false;
+                            DestroyCaret();
+                        }
+
                         handleFocusLoss();
                         break;
 

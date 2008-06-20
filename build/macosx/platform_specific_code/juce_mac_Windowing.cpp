@@ -751,6 +751,10 @@ public:
         }
     }
 
+    void textInputRequired (int /*x*/, int /*y*/)
+    {
+    }
+
     //==============================================================================
     void repaint (int x, int y, int w, int h)
     {

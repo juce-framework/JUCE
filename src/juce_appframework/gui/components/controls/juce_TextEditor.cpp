@@ -2104,6 +2104,11 @@ void TextEditor::focusGained (FocusChangeType)
 
     if (caretVisible)
         textHolder->startTimer (flashSpeedIntervalMs);
+
+    ComponentPeer* const peer = getPeer();
+    if (peer != 0)
+        peer->textInputRequired (getScreenX() - peer->getScreenX(),
+                                 getScreenY() - peer->getScreenY());
 }
 
 void TextEditor::focusLost (FocusChangeType)

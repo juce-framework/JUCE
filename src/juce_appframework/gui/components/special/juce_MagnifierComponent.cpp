@@ -82,6 +82,13 @@ public:
             peer->grabFocus();
     }
 
+    void textInputRequired (int x, int y)
+    {
+        ComponentPeer* peer = magnifierComp->getPeer();
+        if (peer != 0)
+            peer->textInputRequired (x, y);
+    }
+
     void getBounds (int& x, int& y, int& w, int& h) const
     {
         x = magnifierComp->getScreenX();

@@ -254,6 +254,13 @@ public:
     /** Tries to give the window keyboard focus. */
     virtual void grabFocus() = 0;
 
+    /** Tells the window that text input may be required at the given position.
+
+        This may cause things like a virtual on-screen keyboard to appear, depending
+        on the OS.
+    */
+    virtual void textInputRequired (int x, int y) = 0;
+
     /** Called when the window gains keyboard focus. */
     void handleFocusGain();
     /** Called when the window loses keyboard focus. */
