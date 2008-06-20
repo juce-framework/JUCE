@@ -196,12 +196,12 @@
 /** Enabling this builds support for VST audio plugins.
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
-//#define JUCE_PLUGINHOST_VST 1
+#define JUCE_PLUGINHOST_VST 1
 
 /** Enabling this builds support for AudioUnit audio plugins.
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
 */
-//#define JUCE_PLUGINHOST_AU 1
+#define JUCE_PLUGINHOST_AU 1
 
 /** Disabling this will avoid linking to any UI code. This is handy for
     writing command-line utilities, e.g. on linux boxes which don't have some
@@ -29208,8 +29208,6 @@ private:
 
     int numInputChans, numOutputChans;
     float* channels [128];
-    float* outputChans [128];
-    const float* inputChans [128];
     AudioSampleBuffer tempBuffer;
 
     MidiBuffer incomingMidi;
@@ -41403,6 +41401,7 @@ private:
 
 class ToolbarItemComponent;
 class ToolbarItemFactory;
+class MissingItemsComponent;
 
 /**
     A toolbar component.
@@ -41661,6 +41660,8 @@ private:
     bool vertical, isEditingActive;
     ToolbarItemStyle toolbarStyle;
     ComponentAnimator animator;
+    friend class MissingItemsComponent;
+    Array <ToolbarItemComponent*> items;
 
     friend class ItemDragAndDropOverlayComponent;
     static const tchar* const toolbarDragDescriptor;
