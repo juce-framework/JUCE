@@ -49,6 +49,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/io/files/juce_File.h"
 #include "../../../src/juce_core/io/files/juce_NamedPipe.h"
+#include "../../../src/juce_core/threads/juce_Thread.h"
 
 
 //==============================================================================
@@ -75,7 +76,7 @@ void NamedPipe::cancelPendingReads()
 
         int timeout = 2000;
         while (intern->blocked && --timeout >= 0)
-            sleep (2);
+            Thread::sleep (2);
 
         intern->stopReadOperation = false;
     }
