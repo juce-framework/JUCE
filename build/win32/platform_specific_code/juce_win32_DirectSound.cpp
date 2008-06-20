@@ -1048,32 +1048,7 @@ public:
                        double sampleRate,
                        int bufferSizeSamples)
     {
-        BitArray ins, outs;
-
-        if (deviceIndex >= 0)
-        {
-            if (outputChannels[0])
-                outs.setBit (2 * deviceIndex);
-
-            if (outputChannels[1])
-                outs.setBit (2 * deviceIndex + 1);
-
-            if (inputIndex >= 0)
-            {
-                if (inputChannels[0])
-                    ins.setBit (2 * inputIndex);
-
-                if (inputChannels[1])
-                    ins.setBit (2 * inputIndex + 1);
-            }
-        }
-        else
-        {
-            ins = inputChannels;
-            outs = outputChannels;
-        }
-
-        lastError = openDevice (ins, outs, sampleRate, bufferSizeSamples);
+        lastError = openDevice (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
         isOpen_ = lastError.isEmpty();
 
         return lastError;
