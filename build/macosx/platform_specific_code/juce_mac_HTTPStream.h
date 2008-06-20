@@ -67,8 +67,26 @@ public:
         if (! decomposeURL (url, hostName, hostPath, hostPort))
             return false;
 
-        struct hostent* const host
-            = gethostbyname ((const char*) hostName.toUTF8());
+        const struct hostent* host = 0;
+        int port = 0;
+
+        String proxyName, proxyPath;
+        int proxyPort = 0;
+
+        String proxyURL (getenv ("http_proxy"));
+        if (proxyURL.startsWithIgnoreCase (T("http://")))
+        {
+            if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
+                return false;
+
+            host = gethostbyname ((const char*) proxyName.toUTF8());
+            port = proxyPort;
+        }
+        else
+        {
+            host = gethostbyname ((const char*) hostName.toUTF8());
+            port = hostPort;
+        }
 
         if (host == 0)
             return false;
@@ -98,17 +116,11 @@ public:
             return false;
         }
 
-        String proxyURL (getenv ("http_proxy"));
-
-        if (! proxyURL.startsWithIgnoreCase (T("http://")))
-            proxyURL = String::empty;
-
-        const MemoryBlock requestHeader (createRequestHeader (hostName, hostPath,
-                                                              proxyURL, url,
-                                                              hostPort,
+        const MemoryBlock requestHeader (createRequestHeader (hostName, hostPort,
+                                                              proxyName, proxyPort,
+                                                              hostPath, url,
                                                               headers, postData,
                                                               isPost));
-
         int totalHeaderSent = 0;
 
         while (totalHeaderSent < requestHeader.getSize())
@@ -212,37 +224,26 @@ private:
     }
 
     const MemoryBlock createRequestHeader (const String& hostName,
-                                           const String& hostPath,
-                                           const String& proxyURL,
-                                           const String& originalURL,
                                            const int hostPort,
+                                           const String& proxyName,
+                                           const int proxyPort,
+                                           const String& hostPath,
+                                           const String& originalURL,
                                            const String& headers,
                                            const MemoryBlock& postData,
                                            const bool isPost)
     {
         String header (isPost ? "POST " : "GET ");
 
-        if (proxyURL.isEmpty())
+        if (proxyName.isEmpty())
         {
             header << hostPath << " HTTP/1.0\r\nHost: "
                    << hostName << ':' << hostPort;
         }
         else
         {
-            String proxyName, proxyPath;
-            int proxyPort;
-
-            if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
-                return MemoryBlock();
-
             header << originalURL << " HTTP/1.0\r\nHost: "
                    << proxyName << ':' << proxyPort;
-
-            /* xxx needs finishing
-            const char* proxyAuth = getenv ("http_proxy_auth");
-            if (proxyAuth != 0)
-                header << T("\r\nProxy-Authorization: ") << Base64Encode (proxyAuth);
-            */
         }
 
         header << "\r\nUser-Agent: JUCE/"
