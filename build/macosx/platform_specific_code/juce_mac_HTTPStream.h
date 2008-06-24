@@ -95,7 +95,7 @@ public:
         zerostruct (address);
         memcpy ((void*) &address.sin_addr, (const void*) host->h_addr, host->h_length);
         address.sin_family = host->h_addrtype;
-        address.sin_port = htons (hostPort);
+        address.sin_port = htons (port);
 
         socketHandle = socket (host->h_addrtype, SOCK_STREAM, 0);
 
