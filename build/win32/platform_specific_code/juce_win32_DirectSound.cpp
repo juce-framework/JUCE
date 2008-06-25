@@ -373,7 +373,7 @@ public:
             totalBytesPerBuffer = (3 * bytesPerBuffer) & ~15;
             const int numChannels = 2;
 
-            hr = pDirectSound->SetCooperativeLevel (GetDesktopWindow(), 3 /* DSSCL_EXCLUSIVE */);
+            hr = pDirectSound->SetCooperativeLevel (GetDesktopWindow(), 2 /* DSSCL_PRIORITY  */);
             logError (hr);
 
             if (hr == S_OK)
@@ -511,6 +511,16 @@ public:
                                               bytesPerBuffer,
                                               (void**) &lpbuf1, &dwSize1,
                                               (void**) &lpbuf2, &dwSize2, 0);
+
+            if (hr == MAKE_HRESULT (1, 0x878, 150)) // DSERR_BUFFERLOST
+            {
+                pOutputBuffer->Restore();
+
+                hr = pOutputBuffer->Lock (writeOffset,
+                                          bytesPerBuffer,
+                                          (void**) &lpbuf1, &dwSize1,
+                                          (void**) &lpbuf2, &dwSize2, 0);
+            } 
 
             if (hr == S_OK)
             {
@@ -991,7 +1001,8 @@ public:
           sampleRate (0.0),
           inputBuffers (0),
           outputBuffers (0),
-          callback (0)
+          callback (0),
+          bufferSizeSamples (0)
     {
     }
 
