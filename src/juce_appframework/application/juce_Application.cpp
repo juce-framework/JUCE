@@ -280,11 +280,11 @@ int JUCEApplication::shutdownAppAndClearUp (const bool useMaximumForce)
 int JUCEApplication::main (int argc, char* argv[],
                            JUCEApplication* const newApp)
 {
-    juce_setCurrentExecutableFileName (argv[0]);
+    juce_setCurrentExecutableFileName (String::fromUTF8 ((const uint8*) argv[0]));
 
     String cmd;
     for (int i = 1; i < argc; ++i)
-        cmd << argv[i] << T(' ');
+        cmd << String::fromUTF8 ((const uint8*) argv[i]) << T(' ');
 
     return JUCEApplication::main (cmd, newApp);
 }

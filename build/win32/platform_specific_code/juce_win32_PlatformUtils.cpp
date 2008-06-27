@@ -186,6 +186,12 @@ bool juce_IsRunningInWine() throw()
 }
 
 //==============================================================================
+const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams() throw()
+{
+    return String (::GetCommandLineW());
+}
+
+//==============================================================================
 static void* currentModuleHandle = 0;
 
 void* PlatformUtilities::getCurrentModuleInstanceHandle() throw()

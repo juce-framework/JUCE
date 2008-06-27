@@ -186,23 +186,24 @@ END_JUCE_NAMESPACE
 
   #ifdef _CONSOLE
     #define START_JUCE_APPLICATION(AppClass) \
-        int main (int argc, char* argv[]) \
+        int main (int, char* argv[]) \
         { \
-            return JUCE_NAMESPACE::JUCEApplication::main (argc, argv, new AppClass()); \
+            JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
+            return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
         }
   #elif ! defined (_AFXDLL)
     #ifdef _WINDOWS_
       #define START_JUCE_APPLICATION(AppClass) \
-          int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR commandLine, int) \
+          int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
           { \
-              JUCE_NAMESPACE::String commandLineString (commandLine); \
+              JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
               return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
           }
     #else
       #define START_JUCE_APPLICATION(AppClass) \
-          int __stdcall WinMain (int, int, const char* commandLine, int) \
+          int __stdcall WinMain (int, int, const char*, int) \
           { \
-              JUCE_NAMESPACE::String commandLineString (commandLine); \
+              JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
               return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
           }
     #endif

@@ -139,6 +139,11 @@ public:
     */
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
 
+    /** WIN32 ONLY - Gets the command-line params as a string.
+
+        This is needed to avoid unicode problems with the argc type params.
+    */
+    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
 #endif
 
     /** Clears the floating point unit's flags.
