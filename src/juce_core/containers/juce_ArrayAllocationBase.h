@@ -70,8 +70,7 @@ protected:
     /** Destructor. */
     ~ArrayAllocationBase() throw()
     {
-        if (elements != 0)
-            juce_free (elements);
+        delete[] elements;
     }
 
     //==============================================================================
@@ -86,23 +85,26 @@ protected:
     {
         if (numAllocated != numElements)
         {
-            numAllocated = numElements;
-
             if (numElements > 0)
             {
-                if (elements == 0)
-                    elements = (ElementType*) juce_malloc (sizeof (ElementType) * numElements);
-                else
-                    elements = (ElementType*) juce_realloc (elements, sizeof (ElementType) * numElements);
+                ElementType* const newElements = new ElementType [numElements];
+
+                const int itemsToRetain = jmin (numElements, numAllocated);
+
+                for (int i = 0; i < itemsToRetain; ++i)
+                    newElements[i] = elements[i];
+
+                delete[] elements;
+                elements = newElements;
+
             }
-            else
+            else if (elements != 0)
             {
-                if (elements != 0)
-                {
-                    juce_free (elements);
-                    elements = 0;
-                }
+                delete[] elements;
+                elements = 0;
             }
+
+            numAllocated = numElements; 
         }
     }
 
