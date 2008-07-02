@@ -79,6 +79,8 @@ struct MessageThreadFuncCall
 };
 
 static bool errorCondition = false;
+static XErrorHandler oldErrorHandler = (XErrorHandler) 0;
+static XIOErrorHandler oldIOErrorHandler = (XIOErrorHandler) 0;
 
 // (defined in another file to avoid problems including certain headers in this one)
 extern bool juce_isRunningAsApplication();
@@ -90,7 +92,7 @@ static int ioErrorHandler (Display* display)
 
     errorCondition = true;
 
-    if (! juce_isRunningAsApplication())
+    if (juce_isRunningAsApplication())
         Process::terminate();
 
     return 0;
@@ -151,25 +153,33 @@ static void sig_handler (int sig)
     }
 }
 
-
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
     // Initialise xlib for multiple thread support
-    if (! XInitThreads())
-    {
-        // This is fatal!  Print error and closedown
-        Logger::outputDebugString ("Failed to initialise xlib thread support.");
+	static bool initThreadCalled = false;
 
-        if (juce_isRunningAsApplication())
-            Process::terminate();
+    if (! initThreadCalled)
+    {
+        if (! XInitThreads())
+        {
+            // This is fatal!  Print error and closedown
+            Logger::outputDebugString ("Failed to initialise xlib thread support.");
+
+            if (juce_isRunningAsApplication())
+                Process::terminate();
+           
+            return;
+        }
+ 
+        initThreadCalled = true;
     }
 
     // This is called if the client/server connection is broken
-    XSetIOErrorHandler (ioErrorHandler);
+    oldIOErrorHandler = XSetIOErrorHandler (ioErrorHandler);
 
     // This is called if a protocol error occurs
-    XSetErrorHandler (errorHandler);
+    oldErrorHandler = XSetErrorHandler (errorHandler);
 
     // Install signal handler for break-in
     struct sigaction saction;
@@ -202,6 +212,8 @@ void MessageManager::doPlatformSpecificInitialisation()
 
         if (juce_isRunningAsApplication())
             Process::terminate();
+       
+        return;
     }
 
     // Get defaults for various properties
@@ -235,6 +247,16 @@ void MessageManager::doPlatformSpecificShutdown()
     {
         XDestroyWindow (display, juce_messageWindowHandle);
         XCloseDisplay (display);
+       
+        // reset pointers
+        juce_messageWindowHandle = 0;
+        display = 0;
+       
+        // Restore original error handlers
+        XSetIOErrorHandler (oldIOErrorHandler);
+        oldIOErrorHandler = 0;
+        XSetErrorHandler (oldErrorHandler);
+        oldErrorHandler = 0;
     }
 }
 
@@ -328,6 +350,8 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 
         if (juce_isRunningAsApplication())
             Process::terminate();
+       
+        return false;
     }
 
     if (returnIfNoPendingMessages && ! XPending (display))

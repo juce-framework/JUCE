@@ -50,8 +50,8 @@
 
     @see DirectoryContentsList, FileTreeComponent
 */
-class JUCE_API  FileListComponent  : public DirectoryContentsDisplayComponent,
-                                     public ListBox,
+class JUCE_API  FileListComponent  : public ListBox,
+                                     public DirectoryContentsDisplayComponent,
                                      private ListBoxModel,
                                      private ChangeListener
 {

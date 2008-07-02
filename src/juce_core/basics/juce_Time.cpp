@@ -134,14 +134,16 @@ Time::Time (const int year,
             const int hours,
             const int minutes,
             const int seconds,
-            const int milliseconds) throw()
+            const int milliseconds,
+            const bool useLocalTime) throw()
 {
     jassert (year > 100); // year must be a 4-digit version
 
-    if (year < 1971 || year >= 2038)
+    if (year < 1971 || year >= 2038 || ! useLocalTime)
     {
         // use extended maths for dates beyond 1970 to 2037..
-        const int timeZoneAdjustment = 31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000);
+        const int timeZoneAdjustment = useLocalTime ? (31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000))
+                                                    : 0;
         const int a = (13 - month) / 12;
         const int y = year + 4800 - a;
         const int jd = day + (153 * (month + 12 * a - 2) + 2) / 5

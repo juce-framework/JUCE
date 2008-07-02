@@ -48,8 +48,8 @@
 
     @see DirectoryContentsList, FileListComponent
 */
-class JUCE_API  FileTreeComponent  : public DirectoryContentsDisplayComponent,
-                                     public TreeView
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
 {
 public:
     //==============================================================================

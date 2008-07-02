@@ -188,7 +188,12 @@ bool juce_IsRunningInWine() throw()
 //==============================================================================
 const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams() throw()
 {
-    return String (::GetCommandLineW());
+    String s (::GetCommandLineW());
+
+    StringArray tokens;
+    tokens.addTokens (s, true); // tokenise so that we can remove the initial filename argument
+
+    return tokens.joinIntoString (T(" "), 1);
 }
 
 //==============================================================================

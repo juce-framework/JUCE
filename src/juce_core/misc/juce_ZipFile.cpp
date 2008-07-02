@@ -93,7 +93,7 @@ public:
 
     ~ZipInputStream() throw()
     {
-#ifdef JUCE_DEBUG
+#ifdef JUCE_DEBUG 
         if (inputStream != 0 && inputStream == file.inputStream)
             file.numOpenStreams--;
 #endif

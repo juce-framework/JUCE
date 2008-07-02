@@ -83,6 +83,8 @@ public:
         @param minutes          minutes 0 to 59
         @param seconds          seconds 0 to 59
         @param milliseconds     milliseconds 0 to 999
+        @param useLocalTime     if true, encode using the current machine's local time; if
+                                false, it will always work in GMT.
     */
     Time (const int year,
           const int month,
@@ -90,7 +92,8 @@ public:
           const int hours,
           const int minutes,
           const int seconds = 0,
-          const int milliseconds = 0) throw();
+          const int milliseconds = 0,
+          const bool useLocalTime = true) throw();
 
     /** Destructor. */
     ~Time() throw();
