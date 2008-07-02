@@ -37,6 +37,7 @@
 #include "juce_MidiOutput.h"
 #include "../../../juce_core/text/juce_XmlElement.h"
 #include "../../gui/components/controls/juce_ComboBox.h"
+#include "../dsp/juce_AudioSampleBuffer.h"
 
 
 //==============================================================================
@@ -130,54 +131,42 @@ public:
     */
     XmlElement* createStateXml() const;
 
-
     //==============================================================================
-    /** Returns a list of the audio devices that can be used.
-
-        On Windows, this will include both DSound and ASIO devices if they are available. On
-        the Mac, it'll be a list of the CoreAudio devices.
-
-        These names are used by setAudioDevice() when changing devices.
+    /**
     */
-    const StringArray getAvailableAudioDeviceNames() const;
+    struct AudioDeviceSetup
+    {
+        AudioDeviceSetup();
 
-    /** Rescans the list of known audio devices, in case it's changed. */
-    void refreshDeviceList() const;
+        bool operator== (const AudioDeviceSetup& other) const;
 
-    /** Sets a flag to indicate that when listing audio device names, it should treat them
-        as inputs rather than outputs.
+        /**
+        */
+        String outputDeviceName;
+        /**
+        */
+        String inputDeviceName;
+        /**
+        */
+        double sampleRate;
+        /**
+        */
+        int bufferSize;
+        /**
+        */
+        BitArray inputChannels;
+        bool useDefaultInputChannels;
+        /**
+        */
+        BitArray outputChannels;
+        bool useDefaultOutputChannels;
+    };
 
-        This only really applies to DirectSound, where input and output devices are
-        separate. On ASIO and CoreAudio this makes no difference.
-
-        @see getAvailableAudioDeviceNames
+    /**
     */
-    void setInputDeviceNamesUsed (const bool useInputNames);
+    void getAudioDeviceSetup (AudioDeviceSetup& setup);
 
-    /** Just adds the list of device names to a combo box.
-
-        The only reason this is in this class is so that it can divide DSound
-        and ASIO devices into labelled sections, which makes it look much neater.
-    */
-    void addDeviceNamesToComboBox (ComboBox& combo) const;
-
-    /** Changes the audio device that should be used.
-
-        If deviceName is empty or not a valid name returned by getAvailableAudioDeviceNames(),
-        it will disable the current device.
-
-        @param deviceName           the name of the device you want to use (or an empty string to
-                                    deselect the current device)
-        @param blockSizeToUse       the samples-per-block you want to use, or 0 to use a default
-                                    value
-        @param sampleRateToUse      the target sample-rate, or 0 to use a default that the device
-                                    is capable of
-        @param inputChans           which of the audio device's input channels to open - pass 0 to
-                                    open as many of the the first ones as are needed for the number
-                                    of input channels that the app has requested
-        @param outputChans          which of the audio device's input channels to open - pass 0 to
-                                    open as many of the the first ones as are needed for the number
-                                    of output channels that the app has requested
+    /**
         @param treatAsChosenDevice  if this is true and if the device opens correctly, these new
                                     settings will be taken as having been explicitly chosen by the
                                     user, and the next time createStateXml() is called, these settings
@@ -185,15 +174,18 @@ public:
                                     temporary or default device, and a call to createStateXml() will
                                     return either the last settings that were made with treatAsChosenDevice
                                     as true, or the last XML settings that were passed into initialise().
-
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
-    const String setAudioDevice (const String& deviceName,
-                                 int blockSizeToUse,
-                                 double sampleRateToUse,
-                                 const BitArray* inputChans,
-                                 const BitArray* outputChans,
-                                 const bool treatAsChosenDevice);
+    const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
+                                      const bool treatAsChosenDevice);
+
+
+    /** Returns the currently-active audio device. */
+    AudioIODevice* getCurrentAudioDevice() const throw()                { return currentAudioDevice; }
+
+    const String getCurrentAudioDeviceType() const throw()              { return currentDeviceType; }
+    void setCurrentAudioDeviceType (const String& type,
+                                    const bool treatAsChosenDevice);
 
     /** Closes the currently-open device.
 
@@ -212,59 +204,7 @@ public:
     */
     void restartLastAudioDevice();
 
-    /** Returns the name of the currently selected audio device.
-
-        This will be an empty string if none is active.
-    */
-    const String getCurrentAudioDeviceName() const;
-
-    /** Returns the currently-active audio device. */
-    AudioIODevice* getCurrentAudioDevice() const throw()            { return currentAudioDevice; }
-
-    /** Returns the set of audio input channels currently being used.
-
-        To select different channels, use setInputChannels(), or call setAudioDevice() to
-        reopen the device with a different set of channels.
-    */
-    const BitArray getInputChannels() const throw()                 { return inputChannels; }
-
-    /** Changes the active set of input channels.
-
-        @param newEnabledChannels   the set of channels to enable
-        @param treatAsChosenDevice  if this is true and if the device opens correctly, these new
-                                    settings will be taken as having been explicitly chosen by the
-                                    user, and the next time createStateXml() is called, these settings
-                                    will be returned. If it's false, then the device is treated as a
-                                    temporary or default device, and a call to createStateXml() will
-                                    return either the last settings that were made with treatAsChosenDevice
-                                    as true, or the last XML settings that were passed into initialise().
-        @see getInputChannels
-    */
-    void setInputChannels (const BitArray& newEnabledChannels,
-                           const bool treatAsChosenDevice);
-
-    /** Returns the set of audio output channels currently being used.
-
-        To select different channels, use setOutputChannels(), or call setAudioDevice() to
-        reopen the device with a different set of channels.
-    */
-    const BitArray getOutputChannels() const throw()                { return outputChannels; }
-
-    /** Changes the active set of output channels.
-
-        @param newEnabledChannels   the set of channels to enable
-        @param treatAsChosenDevice  if this is true and if the device opens correctly, these new
-                                    settings will be taken as having been explicitly chosen by the
-                                    user, and the next time createStateXml() is called, these settings
-                                    will be returned. If it's false, then the device is treated as a
-                                    temporary or default device, and a call to createStateXml() will
-                                    return either the last settings that were made with treatAsChosenDevice
-                                    as true, or the last XML settings that were passed into initialise().
-        @see getOutputChannels
-    */
-    void setOutputChannels (const BitArray& newEnabledChannels,
-                            const bool treatAsChosenDevice);
-
+    //==============================================================================
     /** Gives the manager an audio callback to use.
 
         The manager will redirect callbacks from whatever audio device is currently
@@ -274,6 +214,7 @@ public:
     */
     void setAudioCallback (AudioIODeviceCallback* newCallback);
 
+    //==============================================================================
     /** Returns the average proportion of available CPU being spent inside the audio callbacks.
 
         Returns a value between 0 and 1.0
@@ -323,7 +264,8 @@ public:
 
     /** Removes a listener that was previously registered with addMidiInputCallback().
     */
-    void removeMidiInputCallback (MidiInputCallback* callback);
+    void removeMidiInputCallback (const String& midiInputDeviceName,
+                                  MidiInputCallback* callback);
 
     //==============================================================================
     /** Sets a midi output device to use as the default.
@@ -355,6 +297,51 @@ public:
     */
     MidiOutput* getDefaultMidiOutput() const throw()                { return defaultMidiOutput; }
 
+    /**
+    */
+    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes() const throw()       { return availableDeviceTypes; }
+
+    //==============================================================================
+    /** Creates a list of available types.
+
+        This will add a set of new AudioIODeviceType objects to the specified list, to
+        represent each available types of device.
+
+        You can override this if your app needs to do something specific, like avoid
+        using DirectSound devices, etc.
+    */
+    virtual void createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& types);
+
+    //==============================================================================
+    /** Plays a beep through the current audio device.
+
+        This is here to allow the audio setup UI panels to easily include a "test"
+        button so that the user can check where the audio is coming from.
+    */
+    void playTestSound();
+
+    /** Turns on level-measuring.
+
+        When enabled, the device manager will measure the peak input level
+        across all channels, and you can get this level by calling getCurrentInputLevel().
+
+        This is mainly intended for audio setup UI panels to use to create a mic
+        level display, so that the user can check that they've selected the right
+        device.
+
+        A simple filter is used to make the level decay smoothly, but this is
+        only intended for giving rough feedback, and not for any kind of accurate
+        measurement.
+    */
+    void enableInputLevelMeasurement (const bool enableMeasurement);
+
+    /** Returns the current input level.
+
+        To use this, you must first enable it by calling enableInputLevelMeasurement().
+
+        See enableInputLevelMeasurement() for more info.
+    */
+    double getCurrentInputLevel() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -362,14 +349,20 @@ public:
 private:
     //==============================================================================
     OwnedArray <AudioIODeviceType> availableDeviceTypes;
+    OwnedArray <AudioDeviceSetup> lastDeviceTypeConfigs;
 
+    AudioDeviceSetup currentSetup;
     AudioIODevice* currentAudioDevice;
     AudioIODeviceCallback* currentCallback;
     int numInputChansNeeded, numOutputChansNeeded;
+    String currentDeviceType;
     BitArray inputChannels, outputChannels;
     XmlElement* lastExplicitSettings;
     mutable bool listNeedsScanning;
-    bool useInputNames;
+    bool useInputNames, inputLevelMeasurementEnabled;
+    double inputLevel;
+    AudioSampleBuffer* testSound;
+    int testSoundPosition;
 
     StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;
@@ -402,11 +395,6 @@ private:
     };
 
     CallbackHandler callbackHandler;
-    String lastRunningDevice;
-    int lastRunningBlockSize;
-    double lastRunningSampleRate;
-    BitArray lastRunningIns, lastRunningOuts;
-
     friend class CallbackHandler;
 
     void audioDeviceIOCallbackInt (const float** inputChannelData,
@@ -424,6 +412,15 @@ private:
     void stopDevice();
 
     void updateXml();
+
+    void createDeviceTypesIfNeeded();
+    void scanDevicesIfNeeded();
+    void deleteCurrentDevice();
+    double chooseBestSampleRate (double preferred) const;
+    AudioIODeviceType* getCurrentDeviceTypeObject() const;
+    void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
+
+    AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
     AudioDeviceManager (const AudioDeviceManager&);
     const AudioDeviceManager& operator= (const AudioDeviceManager&);

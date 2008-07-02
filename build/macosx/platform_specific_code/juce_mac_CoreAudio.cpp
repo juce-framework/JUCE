@@ -40,6 +40,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_ScopedLock.h"
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_core/text/juce_LocalisedStrings.h"
+#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
+#include "../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
+#include "../../../src/juce_appframework/gui/components/controls/juce_ComboBox.h"
+#include "../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h"
+#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
 
 
 //==============================================================================
@@ -613,7 +618,7 @@ public:
                 for (i = numOutputChans; --i >= 0;)
                 {
                     const CallbackDetailsForChannel& info = outputChannelInfo[i];
-                    const float* src = tempOutputBuffers [info.sourceChannelNum];
+                    const float* src = tempOutputBuffers [i];
                     float* dest = ((float*) outOutputData->mBuffers[info.streamNum].mData)
                                     + info.dataOffsetSamples;
                     const int stride = info.dataStrideSamples;
@@ -833,31 +838,52 @@ class CoreAudioIODevice   : public AudioIODevice
 {
 public:
     CoreAudioIODevice (const String& deviceName,
-                       AudioDeviceID deviceId1)
+                       AudioDeviceID inputDeviceId,
+                       const int inputIndex_,
+                       AudioDeviceID outputDeviceId,
+                       const int outputIndex_)
         : AudioIODevice (deviceName, "CoreAudio"),
+          inputIndex (inputIndex_),
+          outputIndex (outputIndex_),
           isOpen_ (false),
           isStarted (false)
     {
         internal = 0;
+        CoreAudioInternal* device = 0;
 
-        CoreAudioInternal* device = new CoreAudioInternal (deviceId1);
-        lastError = device->error;
-
-        if (lastError.isNotEmpty())
+        if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
-            deleteAndZero (device);
+            jassert (inputDeviceId != 0);
+
+            device = new CoreAudioInternal (inputDeviceId);
+            lastError = device->error;
+
+            if (lastError.isNotEmpty())
+                deleteAndZero (device);
         }
         else
         {
-            CoreAudioInternal* secondDevice = device->getRelatedDevice();
+            device = new CoreAudioInternal (outputDeviceId);
+            lastError = device->error;
 
-            if (secondDevice != 0)
+            if (lastError.isNotEmpty())
             {
-                if (device->inChanNames.size() > secondDevice->inChanNames.size())
-                    swapVariables (device, secondDevice);
+                deleteAndZero (device);
+            }
+            else if (inputDeviceId != 0)
+            {
+                CoreAudioInternal* secondDevice = new CoreAudioInternal (inputDeviceId);
+                lastError = device->error;
 
-                device->inputDevice = secondDevice;
-                secondDevice->isSlaveDevice = true;
+                if (lastError.isNotEmpty())
+                {
+                    delete secondDevice;
+                }
+                else
+                {
+                    device->inputDevice = secondDevice;
+                    secondDevice->isSlaveDevice = true;
+                }
             }
         }
 
@@ -1035,6 +1061,8 @@ public:
         return lastError;
     }
 
+    int inputIndex, outputIndex;
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -1065,6 +1093,326 @@ private:
     const CoreAudioIODevice& operator= (const CoreAudioIODevice&);
 };
 
+//==============================================================================
+class CoreAudioDevicePanel   : public Component,
+                               public ComboBoxListener,
+                               public ChangeListener,
+                               public ButtonListener
+{
+public:
+    CoreAudioDevicePanel (AudioIODeviceType* type_, 
+                       AudioIODeviceType::DeviceSetupDetails& setup_)
+        : type (type_),
+          setup (setup_)
+    {
+        sampleRateDropDown = 0;
+        sampleRateLabel = 0;
+        bufferSizeDropDown = 0;
+        bufferSizeLabel = 0;
+        outputDeviceDropDown = 0;
+        outputDeviceLabel = 0;
+        inputDeviceDropDown = 0;
+        inputDeviceLabel = 0;
+        testButton = 0;
+        inputLevelMeter = 0;
+
+        type->scanForDevices();
+
+        if (setup.maxNumOutputChannels > 0)
+        {
+            outputDeviceDropDown = new ComboBox (String::empty);
+            addNamesToDeviceBox (*outputDeviceDropDown, false);
+            outputDeviceDropDown->addListener (this);
+            addAndMakeVisible (outputDeviceDropDown);
+
+            outputDeviceLabel = new Label (String::empty, TRANS ("output:"));
+            outputDeviceLabel->attachToComponent (outputDeviceDropDown, true);
+
+            addAndMakeVisible (testButton = new TextButton (TRANS ("Test")));
+            testButton->addButtonListener (this);
+        }
+
+        if (setup.maxNumInputChannels > 0)
+        {
+            inputDeviceDropDown = new ComboBox (String::empty);
+            addNamesToDeviceBox (*inputDeviceDropDown, true);
+            inputDeviceDropDown->addListener (this);
+            addAndMakeVisible (inputDeviceDropDown);
+
+            inputDeviceLabel = new Label (String::empty, TRANS ("input:"));
+            inputDeviceLabel->attachToComponent (inputDeviceDropDown, true);
+
+            addAndMakeVisible (inputLevelMeter = AudioDeviceSelectorComponent::createSimpleLevelMeterComponent (setup_.manager));
+        }
+
+        setup.manager->addChangeListener (this);
+        changeListenerCallback (0);
+    }
+
+    ~CoreAudioDevicePanel()
+    {
+        setup.manager->removeChangeListener (this);
+
+        deleteAndZero (outputDeviceLabel);
+        deleteAndZero (inputDeviceLabel);
+        deleteAndZero (sampleRateLabel);
+        deleteAndZero (bufferSizeLabel);
+        deleteAllChildren();
+    }
+
+    void resized()
+    {
+        const int lx = proportionOfWidth (0.35f);
+        const int w = proportionOfWidth (0.5f);
+        const int h = 24;
+        const int space = 6;
+        const int dh = h + space;
+        int y = 0;
+
+        if (outputDeviceDropDown != 0)
+        {
+            outputDeviceDropDown->setBounds (lx, y, w, h);
+            testButton->setBounds (outputDeviceDropDown->getRight() + 8, 
+                                   outputDeviceDropDown->getY(),
+                                   getWidth() - outputDeviceDropDown->getRight() - 10,
+                                   h);
+            y += dh;
+        }
+
+        if (inputDeviceDropDown != 0)
+        {
+            inputDeviceDropDown->setBounds (lx, y, w, h);
+
+            inputLevelMeter->setBounds (inputDeviceDropDown->getRight() + 8, 
+                                        inputDeviceDropDown->getY(),
+                                        getWidth() - inputDeviceDropDown->getRight() - 10,
+                                        h);
+            y += dh;
+        }
+
+        y += space * 2;
+
+        if (sampleRateDropDown != 0)
+        {
+            sampleRateDropDown->setBounds (lx, y, w, h);
+            y += dh;
+        }
+
+        if (bufferSizeDropDown != 0)
+        {
+            bufferSizeDropDown->setBounds (lx, y, w, h);
+            y += dh;
+        }
+    }
+
+    void comboBoxChanged (ComboBox* comboBoxThatHasChanged)
+    {
+        if (comboBoxThatHasChanged == 0)
+            return;
+
+        AudioDeviceManager::AudioDeviceSetup config;
+        setup.manager->getAudioDeviceSetup (config);
+        String error;
+
+        if (comboBoxThatHasChanged == outputDeviceDropDown
+              || comboBoxThatHasChanged == inputDeviceDropDown)
+        {
+            config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String::empty 
+                                                                                : outputDeviceDropDown->getText();
+            config.inputDeviceName = inputDeviceDropDown->getSelectedId() < 0 ? String::empty 
+                                                                              : inputDeviceDropDown->getText();
+
+            if (comboBoxThatHasChanged == inputDeviceDropDown)
+                config.useDefaultInputChannels = true;
+            else
+                config.useDefaultOutputChannels = true;
+
+            error = setup.manager->setAudioDeviceSetup (config, true);
+
+            showCorrectDeviceName (inputDeviceDropDown, true);
+            showCorrectDeviceName (outputDeviceDropDown, false);
+        }
+        else if (comboBoxThatHasChanged == sampleRateDropDown)
+        {
+            if (sampleRateDropDown->getSelectedId() > 0)
+            {
+                config.sampleRate = sampleRateDropDown->getSelectedId();
+                error = setup.manager->setAudioDeviceSetup (config, true);
+            }
+        }
+        else if (comboBoxThatHasChanged == bufferSizeDropDown)
+        {
+            if (bufferSizeDropDown->getSelectedId() > 0)
+            {
+                config.bufferSize = bufferSizeDropDown->getSelectedId();
+                error = setup.manager->setAudioDeviceSetup (config, true);
+            }
+        }
+
+        if (error.isNotEmpty())
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         T("Error when trying to open audio device!"),
+                                         error);
+        }
+    }
+
+    void buttonClicked (Button*)
+    {
+        setup.manager->playTestSound();
+    }
+
+    void changeListenerCallback (void*)
+    {
+        AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
+
+        if (currentDevice != 0)
+        {
+            showCorrectDeviceName (inputDeviceDropDown, true);
+            showCorrectDeviceName (outputDeviceDropDown, false);
+
+            // sample rate..
+            {
+                if (sampleRateDropDown == 0)
+                {
+                    addAndMakeVisible (sampleRateDropDown = new ComboBox (String::empty));
+                    sampleRateDropDown->addListener (this);
+
+                    delete sampleRateLabel;
+                    sampleRateLabel = new Label (String::empty, TRANS ("sample rate:"));
+                    sampleRateLabel->attachToComponent (sampleRateDropDown, true);
+                }
+                else
+                {
+                    sampleRateDropDown->clear();
+                    sampleRateDropDown->removeListener (this);
+                }
+
+                const int numRates = currentDevice->getNumSampleRates();
+
+                for (int i = 0; i < numRates; ++i)
+                {
+                    const int rate = roundDoubleToInt (currentDevice->getSampleRate (i));
+                    sampleRateDropDown->addItem (String (rate) + T(" Hz"), rate);
+                }
+
+                sampleRateDropDown->setSelectedId (roundDoubleToInt (currentDevice->getCurrentSampleRate()), true);
+                sampleRateDropDown->addListener (this);
+            }
+
+            // buffer size
+            {
+                if (bufferSizeDropDown == 0)
+                {
+                    addAndMakeVisible (bufferSizeDropDown = new ComboBox (String::empty));
+                    bufferSizeDropDown->addListener (this);
+
+                    delete bufferSizeLabel;
+                    bufferSizeLabel = new Label (String::empty, TRANS ("audio buffer size:"));
+                    bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
+                }
+                else
+                {
+                    bufferSizeDropDown->clear();
+                }
+
+                const int numBufferSizes = currentDevice->getNumBufferSizesAvailable();
+                double currentRate = currentDevice->getCurrentSampleRate();
+                if (currentRate == 0)
+                    currentRate = 44100.0;
+
+                for (int i = 0; i < numBufferSizes; ++i)
+                {
+                    const int bs = currentDevice->getBufferSizeSamples (i);
+                    bufferSizeDropDown->addItem (String (bs)
+                                                  + T(" samples (")
+                                                  + String (bs * 1000.0 / currentRate, 1)
+                                                  + T(" ms)"),
+                                                 bs);
+                }
+
+                bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), true);
+            }
+        }
+        else
+        {
+            jassert (setup.manager->getCurrentAudioDevice() == 0); // not the correct device type!
+
+            deleteAndZero (sampleRateLabel);
+            deleteAndZero (bufferSizeLabel);
+            deleteAndZero (sampleRateDropDown);
+            deleteAndZero (bufferSizeDropDown);
+
+            if (outputDeviceDropDown != 0)
+                outputDeviceDropDown->setSelectedId (-1, true);
+
+            if (inputDeviceDropDown != 0)
+                inputDeviceDropDown->setSelectedId (-1, true);
+        }
+
+        resized();
+        setSize (getWidth(), getLowestY() + 4);
+    }
+
+private:
+    AudioIODeviceType* const type;
+    const AudioIODeviceType::DeviceSetupDetails setup;
+
+    ComboBox* outputDeviceDropDown;
+    ComboBox* inputDeviceDropDown;
+    ComboBox* sampleRateDropDown;
+    ComboBox* bufferSizeDropDown;
+    Label* outputDeviceLabel;
+    Label* inputDeviceLabel;
+    Label* sampleRateLabel;
+    Label* bufferSizeLabel;
+    TextButton* testButton;
+    Component* inputLevelMeter;
+
+    void showCorrectDeviceName (ComboBox* const box, const bool isInput)
+    {
+        if (box != 0)
+        {
+            CoreAudioIODevice* const currentDevice = dynamic_cast <CoreAudioIODevice*> (setup.manager->getCurrentAudioDevice());
+
+            const int index = (currentDevice == 0) ? -1 
+                                                   : (isInput ? currentDevice->inputIndex
+                                                              : currentDevice->outputIndex);
+
+            if (index >= 0)
+                box->setText (type->getDeviceNames (isInput) [index], true);
+            else
+                box->setSelectedId (-1, true);
+
+            if (! isInput)
+                testButton->setEnabled (index >= 0);
+        }
+    }
+
+    void addNamesToDeviceBox (ComboBox& combo, bool isInputs)
+    {
+        const StringArray devs (type->getDeviceNames (isInputs));
+
+        for (int i = 0; i < devs.size(); ++i)
+            combo.addItem (devs[i], i + 1);
+
+        combo.addItem (TRANS("<< none >>"), -1);
+        combo.setSelectedId (-1, true);
+    }
+
+    int getLowestY() const
+    {
+        int y = 0;
+
+        for (int i = getNumChildComponents(); --i >= 0;)
+            y = jmax (y, getChildComponent (i)->getBottom());
+
+        return y;
+    }
+
+    CoreAudioDevicePanel (const CoreAudioDevicePanel&);
+    const CoreAudioDevicePanel& operator= (const CoreAudioDevicePanel&);
+};
 
 //==============================================================================
 class CoreAudioIODeviceType  : public AudioIODeviceType
@@ -1086,8 +1434,10 @@ public:
     {
         hasScanned = true;
 
-        names.clear();
-        ids.clear();
+        inputDeviceNames.clear();
+        outputDeviceNames.clear();
+        inputIds.clear();
+        outputIds.clear();
 
         UInt32 size;
         if (OK (AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &size, 0)))
@@ -1109,8 +1459,20 @@ public:
                         if (! alreadyLogged)
                             log (T("CoreAudio device: ") + nameString);
 
-                        names.add (nameString);
-                        ids.add (devs[i]);
+                        const int numIns = getNumChannels (devs[i], true);
+                        const int numOuts = getNumChannels (devs[i], false);
+
+                        if (numIns > 0)
+                        {
+                            inputDeviceNames.add (nameString);
+                            inputIds.add (devs[i]);
+                        }
+
+                        if (numOuts > 0)
+                        {
+                            outputDeviceNames.add (nameString);
+                            outputIds.add (devs[i]);
+                        }
                     }
                 }
 
@@ -1119,52 +1481,83 @@ public:
 
             juce_free (devs);
         }
+
+        inputDeviceNames.appendNumbersToDuplicates (false, true);
+        outputDeviceNames.appendNumbersToDuplicates (false, true);
     }
 
-    const StringArray getDeviceNames (const bool /*preferInputNames*/) const
+    const StringArray getDeviceNames (const bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        StringArray namesCopy (names);
-        namesCopy.removeDuplicates (true);
-
-        return namesCopy;
+        if (wantInputNames)
+            return inputDeviceNames;
+        else
+            return outputDeviceNames;
     }
 
-    const String getDefaultDeviceName (const bool preferInputNames,
-                                       const int numInputChannelsNeeded,
-                                       const int numOutputChannelsNeeded) const
+    int getDefaultDeviceIndex (const bool forInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
-
-        String result (names[0]);
 
         AudioDeviceID deviceID;
         UInt32 size = sizeof (deviceID);
 
         // if they're asking for any input channels at all, use the default input, so we
         // get the built-in mic rather than the built-in output with no inputs..
-        if (AudioHardwareGetProperty (numInputChannelsNeeded > 0
-                                                       ? kAudioHardwarePropertyDefaultInputDevice
-                                                       : kAudioHardwarePropertyDefaultOutputDevice,
+        if (AudioHardwareGetProperty (forInput ? kAudioHardwarePropertyDefaultInputDevice
+                                               : kAudioHardwarePropertyDefaultOutputDevice,
                                       &size, &deviceID) == noErr)
         {
-            for (int i = ids.size(); --i >= 0;)
-                if (ids[i] == deviceID)
-                    result = names[i];
+            if (forInput)
+            {
+                for (int i = inputIds.size(); --i >= 0;)
+                    if (inputIds[i] == deviceID)
+                        return i;
+            }
+            else
+            {
+                for (int i = outputIds.size(); --i >= 0;)
+                    if (outputIds[i] == deviceID)
+                        return i;
+            }
         }
 
-        return result;
+        return 0;
     }
 
-    AudioIODevice* createDevice (const String& deviceName)
+    int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = names.indexOf (deviceName);
+        CoreAudioIODevice* const d = dynamic_cast <CoreAudioIODevice*> (device);
+        if (d == 0)
+            return -1;
+
+        return asInput ? d->inputIndex
+                       : d->outputIndex;
+    }
+
+    bool hasSeparateInputsAndOutputs() const    { return true; }
+
+    AudioIODevice* createDevice (const String& outputDeviceName,
+                                 const String& inputDeviceName)
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+
+        const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);
+        const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
+
+        String deviceName (outputDeviceName);
+        if (deviceName.isEmpty())
+            deviceName = inputDeviceName;
 
         if (index >= 0)
-            return new CoreAudioIODevice (deviceName, ids [index]);
+            return new CoreAudioIODevice (deviceName, 
+                                          inputIds [inputIndex],
+                                          inputIndex,
+                                          outputIds [outputIndex],
+                                          outputIndex);
 
         return 0;
     }
@@ -1173,10 +1566,36 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    StringArray names;
-    Array <AudioDeviceID> ids;
+    StringArray inputDeviceNames, outputDeviceNames;
+    Array <AudioDeviceID> inputIds, outputIds;
 
     bool hasScanned;
+
+    static int getNumChannels (AudioDeviceID deviceID, bool input)
+    {
+        int total = 0;
+        UInt32 size;
+
+        if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, 0)))
+        {
+            AudioBufferList* const bufList = (AudioBufferList*) juce_calloc (size);
+
+            if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, bufList)))
+            {
+                const int numStreams = bufList->mNumberBuffers;
+
+                for (int i = 0; i < numStreams; ++i)
+                {
+                    const AudioBuffer& b = bufList->mBuffers[i];
+                    total += b.mNumberChannels;
+                }
+            }
+
+            juce_free (bufList);
+        }
+
+        return total;
+    }
 
     CoreAudioIODeviceType (const CoreAudioIODeviceType&);
     const CoreAudioIODeviceType& operator= (const CoreAudioIODeviceType&);

@@ -307,6 +307,7 @@ public:
     */
     virtual int getInputLatencyInSamples() = 0;
 
+
     //==============================================================================
     /** True if this device can show a pop-up control panel for editing its settings.
 

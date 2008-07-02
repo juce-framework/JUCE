@@ -66,12 +66,17 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
+#include "../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.h"
+#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
+#include "../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
 #include "../../../src/juce_core/threads/juce_ScopedLock.h"
-#include "../../../src/juce_appframework/gui/components/juce_Component.h"
 #include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_appframework/events/juce_Timer.h"
 #include "../../../src/juce_appframework/events/juce_MessageManager.h"
+#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
+#include "../../../src/juce_appframework/gui/components/controls/juce_ListBox.h"
+#include "../../../src/juce_core/text/juce_LocalisedStrings.h"
 
 
 //==============================================================================
@@ -120,7 +125,6 @@ static const int maxASIOChannels = 160;
 
 //==============================================================================
 class JUCE_API  ASIOAudioIODevice  : public AudioIODevice,
-                                     private Thread,
                                      private Timer
 {
 public:
@@ -128,7 +132,6 @@ public:
 
     ASIOAudioIODevice (const String& name_, const CLSID classId_, const int slotNumber)
        : AudioIODevice (name_, T("ASIO")),
-         Thread ("Juce ASIO"),
          asioObject (0),
          classId (classId_),
          currentBitDepth (16),
@@ -496,8 +499,6 @@ public:
             {
                 buffersCreated = true;
 
-                jassert (! isThreadRunning());
-
                 juce_free (tempBuffer);
 
                 tempBuffer = (float*) juce_calloc (totalBuffers * currentBlockSizeSamples * sizeof (float) + 128);
@@ -601,7 +602,6 @@ public:
                 }
 
                 isOpen_ = true;
-                isThreadReady = false;
 
                 log ("starting ASIO");
                 calledback = false;
@@ -808,26 +808,6 @@ public:
         return done;
     }
 
-    void run()
-    {
-        isThreadReady = true;
-
-        for (;;)
-        {
-            event1.wait();
-
-            if (threadShouldExit())
-                break;
-
-            processBuffer();
-        }
-
-        if (bufferIndex < 0)
-        {
-            log ("! ASIO callback never called");
-        }
-    }
-
     void resetRequest() throw()
     {
         needToReset = true;
@@ -912,7 +892,7 @@ private:
     bool isOpen_, isStarted;
     bool volatile isASIOOpen;
     bool volatile calledback;
-    bool volatile littleEndian, postOutput, needToReset, isReSync, isThreadReady;
+    bool volatile littleEndian, postOutput, needToReset, isReSync;
     bool volatile insideControlPanelModalLoop;
     bool volatile shouldUsePreferredSize;
 
@@ -1809,46 +1789,65 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (const bool /*preferInputNames*/) const
+    const StringArray getDeviceNames (const bool /*wantInputNames*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         return deviceNames;
     }
 
-    const String getDefaultDeviceName (const bool /*preferInputNames*/,
-                                       const int /*numInputChannelsNeeded*/,
-                                       const int /*numOutputChannelsNeeded*/) const
+    int getDefaultDeviceIndex (const bool) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        return deviceNames [0];
+        for (int i = deviceNames.size(); --i >= 0;)
+            if (deviceNames[i].containsIgnoreCase (T("asio4all")))
+                return i; // asio4all is a safe choice for a default..
+
+#if JUCE_DEBUG
+        if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase (T("digidesign")))
+            return 1; // (the digi m-box driver crashes the app when you run 
+                      // it in the debugger, which can be a bit annoying)
+#endif
+
+        return 0;
     }
 
-    AudioIODevice* createDevice (const String& deviceName)
+    static int findFreeSlot()
+    {
+        for (int i = 0; i < numElementsInArray (currentASIODev); ++i)
+            if (currentASIODev[i] == 0)
+                return i;
+
+        jassertfalse;  // unfortunately you can only have a finite number
+                       // of ASIO devices open at the same time..
+        return -1;
+    }
+
+    int getIndexOfDevice (AudioIODevice* d, const bool /*asInput*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = deviceNames.indexOf (deviceName);
+        return d == 0 ? -1 : deviceNames.indexOf (d->getName());
+    }
+
+    bool hasSeparateInputsAndOutputs() const    { return false; }
+
+    AudioIODevice* createDevice (const String& outputDeviceName,
+                                 const String& inputDeviceName)
+    {
+        jassert (inputDeviceName == outputDeviceName);
+        (void) inputDeviceName;
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+
+        const int index = deviceNames.indexOf (outputDeviceName);
 
         if (index >= 0)
         {
-            int freeSlot = -1;
-
-            for (int i = 0; i < numElementsInArray (currentASIODev); ++i)
-            {
-                if (currentASIODev[i] == 0)
-                {
-                    freeSlot = i;
-                    break;
-                }
-            }
-
-            jassert (freeSlot >= 0);  // unfortunately you can only have a finite number
-                                      // of ASIO devices open at the same time..
+            const int freeSlot = findFreeSlot();
 
             if (freeSlot >= 0)
-                return new ASIOAudioIODevice (deviceName, *(classIds [index]), freeSlot);
+                return new ASIOAudioIODevice (outputDeviceName, *(classIds [index]), freeSlot);
         }
 
         return 0;
@@ -1923,6 +1922,7 @@ private:
         return ok;
     }
 
+    //==============================================================================
     void addDriverInfo (const String& keyName, HKEY hk)
     {
         HKEY subKey;
@@ -1972,6 +1972,17 @@ private:
 AudioIODeviceType* juce_createASIOAudioIODeviceType()
 {
     return new ASIOAudioIODeviceType();
+}
+
+AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name, 
+                                                    void* guid)
+{
+    const int freeSlot = ASIOAudioIODeviceType::findFreeSlot();
+
+    if (freeSlot < 0)
+        return 0;
+
+    return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot);
 }
 
 

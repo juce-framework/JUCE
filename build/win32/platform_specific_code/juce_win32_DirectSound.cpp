@@ -141,12 +141,16 @@ DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
+#include "../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.h"
 #include "../../../src/juce_appframework/application/juce_Application.h"
+#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_core/basics/juce_Singleton.h"
 #include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/containers/juce_OwnedArray.h"
 #include "../../../src/juce_core/text/juce_LocalisedStrings.h"
+#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
+#include "../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h"
 
 
 static const String getDSErrorMessage (HRESULT hr)
@@ -949,7 +953,7 @@ public:
 };
 
 //==============================================================================
-static int findBestMatchForName (const String& name, const StringArray& names)
+/*static int findBestMatchForName (const String& name, const StringArray& names)
 {
     int i = names.indexOf (name);
 
@@ -978,21 +982,21 @@ static int findBestMatchForName (const String& name, const StringArray& names)
     }
 
     return bestResult;
-}
+}*/
 
 class DSoundAudioIODevice  : public AudioIODevice,
                              public Thread
 {
 public:
     DSoundAudioIODevice (const String& deviceName,
-                         const int index,
-                         const int inputIndex_)
+                         const int outputDeviceIndex_,
+                         const int inputDeviceIndex_)
         : AudioIODevice (deviceName, "DirectSound"),
           Thread ("Juce DSound"),
           isOpen_ (false),
           isStarted (false),
-          deviceIndex (index),
-          inputIndex (inputIndex_),
+          outputDeviceIndex (outputDeviceIndex_),
+          inputDeviceIndex (inputDeviceIndex_),
           inChans (4),
           outChans (4),
           numInputBuffers (0),
@@ -1004,6 +1008,17 @@ public:
           callback (0),
           bufferSizeSamples (0)
     {
+        if (outputDeviceIndex_ >= 0)
+        {
+            outChannels.add (TRANS("Left"));
+            outChannels.add (TRANS("Right"));
+        }
+
+        if (inputDeviceIndex_ >= 0)
+        {
+            inChannels.add (TRANS("Left"));
+            inChannels.add (TRANS("Right"));
+        }
     }
 
     ~DSoundAudioIODevice()
@@ -1176,13 +1191,13 @@ public:
     juce_UseDebuggingNewOperator
 
     StringArray inChannels, outChannels;
+    int outputDeviceIndex, inputDeviceIndex;
 
 private:
     bool isOpen_;
     bool isStarted;
     String lastError;
 
-    int deviceIndex, inputIndex;
     OwnedArray <DSoundInternalInChannel> inChans;
     OwnedArray <DSoundInternalOutChannel> outChans;
     WaitableEvent startEvent;
@@ -1381,6 +1396,7 @@ public:
     }
 };
 
+
 //==============================================================================
 class DSoundAudioIODeviceType  : public AudioIODeviceType
 {
@@ -1413,72 +1429,46 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (const bool preferInputNames) const
+    const StringArray getDeviceNames (const bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        return preferInputNames ? inputDeviceNames
-                                : outputDeviceNames;
+        return wantInputNames ? inputDeviceNames
+                               : outputDeviceNames;
     }
 
-    const String getDefaultDeviceName (const bool preferInputNames,
-                                       const int /*numInputChannelsNeeded*/,
-                                       const int /*numOutputChannelsNeeded*/) const
+    int getDefaultDeviceIndex (const bool /*forInput*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
-
-        return getDeviceNames (preferInputNames) [0];
+        return 0;
     }
 
-    AudioIODevice* createDevice (const String& deviceName)
+    int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        if (deviceName.isEmpty() || deviceName.equalsIgnoreCase (T("DirectSound")))
-        {
-            DSoundAudioIODevice* device = new DSoundAudioIODevice (deviceName, -1, -1);
+        DSoundAudioIODevice* const d = dynamic_cast <DSoundAudioIODevice*> (device);
+        if (d == 0)
+            return -1;
 
-            int i;
-            for (i = 0; i < outputDeviceNames.size(); ++i)
-            {
-                device->outChannels.add (outputDeviceNames[i] + TRANS(" (left)"));
-                device->outChannels.add (outputDeviceNames[i] + TRANS(" (right)"));
-            }
+        return asInput ? d->inputDeviceIndex
+                       : d->outputDeviceIndex;
+    }
 
-            for (i = 0; i < inputDeviceNames.size(); ++i)
-            {
-                device->inChannels.add (inputDeviceNames[i] + TRANS(" (left)"));
-                device->inChannels.add (inputDeviceNames[i] + TRANS(" (right)"));
-            }
+    bool hasSeparateInputsAndOutputs() const    { return true; }
 
-            return device;
-        }
-        else if (outputDeviceNames.contains (deviceName)
-                  || inputDeviceNames.contains (deviceName))
-        {
-            int outputIndex = outputDeviceNames.indexOf (deviceName);
-            int inputIndex = findBestMatchForName (deviceName, inputDeviceNames);
+    AudioIODevice* createDevice (const String& outputDeviceName,
+                                 const String& inputDeviceName)
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
 
-            if (outputIndex < 0)
-            {
-                // using an input device name instead..
-                inputIndex = inputDeviceNames.indexOf (deviceName);
-                outputIndex = jmax (0, findBestMatchForName (deviceName, outputDeviceNames));
-            }
+        const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
+        const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);
 
-            DSoundAudioIODevice* device = new DSoundAudioIODevice (deviceName, outputIndex, inputIndex);
-
-            device->outChannels.add (TRANS("Left"));
-            device->outChannels.add (TRANS("Right"));
-
-            if (inputIndex >= 0)
-            {
-                device->inChannels.add (TRANS("Left"));
-                device->inChannels.add (TRANS("Right"));
-            }
-
-            return device;
-        }
+        if (outputIndex >= 0 || inputIndex >= 0)
+            return new DSoundAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName 
+                                                                          : inputDeviceName, 
+                                            outputIndex, inputIndex);
 
         return 0;
     }
@@ -1619,8 +1609,8 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
             right = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
         if (left != 0 || right != 0)
-            inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [i / 2],
-                                                      dlh.inputGuids [i / 2],
+            inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [inputDeviceIndex],
+                                                      dlh.inputGuids [inputDeviceIndex],
                                                       (int) sampleRate, bufferSizeSamples,
                                                       left, right));
     }
@@ -1647,8 +1637,8 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
             right = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
 
         if (left != 0 || right != 0)
-            outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[i / 2],
-                                                        dlh.outputGuids [i / 2],
+            outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[outputDeviceIndex],
+                                                        dlh.outputGuids [outputDeviceIndex],
                                                         (int) sampleRate, bufferSizeSamples,
                                                         left, right));
     }
@@ -1713,6 +1703,7 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 
     return error;
 }
+
 
 #undef log
 

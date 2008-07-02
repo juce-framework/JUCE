@@ -78,7 +78,7 @@ static void getDeviceSampleRates (snd_pcm_t* handle, Array <int>& rates)
         if (snd_pcm_hw_params_any (handle, hwParams) >= 0
              && snd_pcm_hw_params_test_rate (handle, hwParams, ratesToTry[i], 0) == 0)
         {
-            rates.add (ratesToTry[i]);
+            rates.addIfNotAlreadyThere (ratesToTry[i]);
         }
     }
 }
@@ -102,6 +102,9 @@ static void getDeviceProperties (const String& id,
                                  unsigned int& maxChansIn,
                                  Array <int>& rates)
 {
+    if (id.isEmpty())
+        return;
+
     snd_ctl_t* handle;
 
     if (snd_ctl_open (&handle, id.upToLastOccurrenceOf (T(","), false, false), SND_CTL_NONBLOCK) >= 0)
@@ -149,7 +152,7 @@ static void getDeviceProperties (const String& id,
 class ALSADevice
 {
 public:
-    ALSADevice (const String& deviceName,
+    ALSADevice (const String& id,
                 const bool forInput)
         : handle (0),
           bitDepth (16),
@@ -157,7 +160,7 @@ public:
           isInput (forInput),
           sampleFormat (AudioDataConverters::int16LE)
     {
-        failed (snd_pcm_open (&handle, deviceName,
+        failed (snd_pcm_open (&handle, id,
                               forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
                               SND_PCM_ASYNC));
     }
@@ -364,12 +367,14 @@ private:
 class ALSAThread  : public Thread
 {
 public:
-    ALSAThread (const String& deviceName_)
+    ALSAThread (const String& inputId_, 
+                const String& outputId_)
         : Thread ("Juce ALSA"),
           sampleRate (0),
           bufferSize (0),
           callback (0),
-          deviceName (deviceName_),
+          inputId (inputId_),
+          outputId (outputId_),
           outputDevice (0),
           inputDevice (0),
           numCallbacks (0),
@@ -402,16 +407,9 @@ public:
         currentInputChans.clear();
         currentOutputChans.clear();
 
-        numChannelsRunning = jmax (inputChannels.getHighestBit(),
-                                   outputChannels.getHighestBit()) + 1;
-
-        numChannelsRunning = jmin (maxNumChans, jlimit ((int) minChansIn,
-                                                        (int) maxChansIn,
-                                                        numChannelsRunning));
-
         if (inputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i < numChannelsRunning; ++i)
+            for (int i = 0; i <= inputChannels.getHighestBit(); ++i)
             {
                 inputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 
@@ -425,7 +423,7 @@ public:
 
         if (outputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i < numChannelsRunning; ++i)
+            for (int i = 0; i <= outputChannels.getHighestBit(); ++i)
             {
                 outputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 
@@ -437,9 +435,9 @@ public:
             }
         }
 
-        if (totalNumOutputChannels > 0)
+        if (totalNumOutputChannels > 0 && outputId.isNotEmpty())
         {
-            outputDevice = new ALSADevice (deviceName, false);
+            outputDevice = new ALSADevice (outputId, false);
 
             if (outputDevice->error.isNotEmpty())
             {
@@ -448,7 +446,9 @@ public:
                 return;
             }
 
-            if (! outputDevice->setParameters ((unsigned int) sampleRate, numChannelsRunning, bufferSize))
+            if (! outputDevice->setParameters ((unsigned int) sampleRate, 
+                                               currentOutputChans.getHighestBit() + 1,
+                                               bufferSize))
             {
                 error = outputDevice->error;
                 deleteAndZero (outputDevice);
@@ -456,9 +456,9 @@ public:
             }
         }
 
-        if (totalNumInputChannels > 0)
+        if (totalNumInputChannels > 0 && inputId.isNotEmpty())
         {
-            inputDevice = new ALSADevice (deviceName, true);
+            inputDevice = new ALSADevice (inputId, true);
 
             if (inputDevice->error.isNotEmpty())
             {
@@ -467,7 +467,9 @@ public:
                 return;
             }
 
-            if (! inputDevice->setParameters ((unsigned int) sampleRate, numChannelsRunning, bufferSize))
+            if (! inputDevice->setParameters ((unsigned int) sampleRate, 
+                                              currentInputChans.getHighestBit() + 1,
+                                              bufferSize))
             {
                 error = inputDevice->error;
                 deleteAndZero (inputDevice);
@@ -527,7 +529,6 @@ public:
         zeromem (inputChannelDataForCallback, sizeof (inputChannelDataForCallback));
         totalNumOutputChannels = 0;
         totalNumInputChannels = 0;
-        numChannelsRunning = 0;
 
         numCallbacks = 0;
     }
@@ -544,8 +545,6 @@ public:
         {
             if (inputDevice != 0)
             {
-                jassert (numChannelsRunning >= inputDevice->numChannelsRunning);
-
                 if (! inputDevice->read (inputChannelData, bufferSize))
                 {
                     DBG ("ALSA: read failure");
@@ -584,7 +583,6 @@ public:
 
                 failed (snd_pcm_avail_update (outputDevice->handle));
 
-                jassert (numChannelsRunning >= outputDevice->numChannelsRunning);
                 if (! outputDevice->write (outputChannelData, bufferSize))
                 {
                     DBG ("ALSA: write failure");
@@ -619,7 +617,7 @@ public:
 
 private:
     //==============================================================================
-    const String deviceName;
+    const String inputId, outputId;
     ALSADevice* outputDevice;
     ALSADevice* inputDevice;
     int numCallbacks;
@@ -632,7 +630,6 @@ private:
     float* inputChannelData [maxNumChans];
     float* inputChannelDataForCallback [maxNumChans];
     int totalNumOutputChannels;
-    int numChannelsRunning;
 
     unsigned int minChansOut, maxChansOut;
     unsigned int minChansIn, maxChansIn;
@@ -656,8 +653,10 @@ private:
         maxChansOut = 0;
         minChansIn = 0;
         maxChansIn = 0;
+        unsigned int dummy = 0;
 
-        getDeviceProperties (deviceName, minChansOut, maxChansOut, minChansIn, maxChansIn, sampleRates);
+        getDeviceProperties (inputId, dummy, dummy, minChansIn, maxChansIn, sampleRates);
+        getDeviceProperties (outputId, minChansOut, maxChansOut, dummy, dummy, sampleRates);
 
         unsigned int i;
         for (i = 0; i < maxChansOut; ++i)
@@ -674,13 +673,16 @@ class ALSAAudioIODevice   : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
-                       const String& deviceId)
+                       const String& inputId_, 
+                       const String& outputId_)
         : AudioIODevice (deviceName, T("ALSA")),
+          inputId (inputId_),
+          outputId (outputId_),
           isOpen_ (false),
           isStarted (false),
           internal (0)
     {
-        internal = new ALSAThread (deviceId);
+        internal = new ALSAThread (inputId, outputId);
     }
 
     ~ALSAAudioIODevice()
@@ -839,6 +841,8 @@ public:
         return internal->error;
     }
 
+    String inputId, outputId;
+
 private:
     bool isOpen_, isStarted;
     ALSAThread* internal;
@@ -863,10 +867,14 @@ public:
     //==============================================================================
     void scanForDevices()
     {
-        hasScanned = true;
+        if (hasScanned)
+            return;
 
-        names.clear();
-        ids.clear();
+        hasScanned = true;
+        inputNames.clear();
+        inputIds.clear();
+        outputNames.clear();
+        outputIds.clear();
 
         snd_ctl_t* handle;
         snd_ctl_card_info_t* info;
@@ -874,7 +882,7 @@ public:
 
         int cardNum = -1;
 
-        while (ids.size() <= 24)
+        while (outputIds.size() + inputIds.size() <= 32)
         {
             snd_card_next (&cardNum);
 
@@ -900,18 +908,26 @@ public:
                         String id, name;
                         id << "hw:" << cardId << ',' << device;
 
-                        if (testDevice (id))
+                        bool isInput, isOutput;
+
+                        if (testDevice (id, isInput, isOutput))
                         {
                             name << snd_ctl_card_info_get_name (info);
 
                             if (name.isEmpty())
                                 name = id;
 
-                            if (device > 0)
-                                name << " (" << (device + 1) << ')';
+                            if (isInput)
+                            {
+                                inputNames.add (name);
+                                inputIds.add (id);
+                            }
 
-                            ids.add (id);
-                            names.add (name);
+                            if (isOutput)
+                            {
+                                outputNames.add (name);
+                                outputIds.add (id);
+                            }
                         }
                     }
                 }
@@ -919,35 +935,54 @@ public:
                 snd_ctl_close (handle);
             }
         }
+
+        inputNames.appendNumbersToDuplicates (false, true);
+        outputNames.appendNumbersToDuplicates (false, true);
     }
 
-    const StringArray getDeviceNames (const bool /*preferInputNames*/) const
+    const StringArray getDeviceNames (const bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        StringArray namesCopy (names);
-        namesCopy.removeDuplicates (true);
-
-        return namesCopy;
+        return wantInputNames ? inputNames : outputNames;
     }
 
-    const String getDefaultDeviceName (const bool /*preferInputNames*/,
-                                       const int /*numInputChannelsNeeded*/,
-                                       const int /*numOutputChannelsNeeded*/) const
+    int getDefaultDeviceIndex (const bool forInput) const
+    {
+        jassert (hasScanned); // need to call scanForDevices() before doing this
+        return 0;
+    }
+
+    bool hasSeparateInputsAndOutputs() const    { return true; }
+
+    int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        return names[0];
+        ALSAAudioIODevice* const d = dynamic_cast <ALSAAudioIODevice*> (device);
+        if (d == 0)
+            return -1;
+
+        return asInput ? inputIds.indexOf (d->inputId)
+                       : outputIds.indexOf (d->outputId);
     }
 
-    AudioIODevice* createDevice (const String& deviceName)
+    AudioIODevice* createDevice (const String& outputDeviceName,
+                                 const String& inputDeviceName)
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = names.indexOf (deviceName);
+        const int inputIndex = inputNames.indexOf (inputDeviceName);
+        const int outputIndex = outputNames.indexOf (outputDeviceName);
+
+        String deviceName (outputDeviceName);
+        if (deviceName.isEmpty())
+            deviceName = inputDeviceName;
 
         if (index >= 0)
-            return new ALSAAudioIODevice (deviceName, ids [index]);
+            return new ALSAAudioIODevice (deviceName, 
+                                          inputIds [inputIndex], 
+                                          outputIds [outputIndex]);
 
         return 0;
     }
@@ -956,10 +991,10 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    StringArray names, ids;
+    StringArray inputNames, outputNames, inputIds, outputIds;
     bool hasScanned;
 
-    static bool testDevice (const String& id)
+    static bool testDevice (const String& id, bool& isInput, bool& isOutput)
     {
         unsigned int minChansOut = 0, maxChansOut = 0;
         unsigned int minChansIn = 0, maxChansIn = 0;
@@ -972,7 +1007,10 @@ private:
               + T(" ins=") + String ((int) minChansIn) + T("-") + String ((int) maxChansIn)
               + T(" rates=") + String (rates.size()));
 
-        return (maxChansOut > 0 || maxChansIn > 0) && rates.size() > 0;
+        isInput = maxChansIn > 0;
+        isOutput = maxChansOut > 0;
+
+        return (isInput || isOutput) && rates.size() > 0;
     }
 
     ALSAAudioIODeviceType (const ALSAAudioIODeviceType&);

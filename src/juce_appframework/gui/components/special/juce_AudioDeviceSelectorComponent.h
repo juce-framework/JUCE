@@ -35,7 +35,7 @@
 #include "../controls/juce_ComboBox.h"
 #include "../controls/juce_ListBox.h"
 #include "../../../audio/devices/juce_AudioDeviceManager.h"
-class AudioDeviceSelectorComponentListBox;
+class MidiInputSelectorComponentListBox;
 
 //==============================================================================
 /**
@@ -90,23 +90,23 @@ public:
     void changeListenerCallback (void*);
 
     //==============================================================================
+    /** Called by the device-specific displays to create a little level meter that
+        just displays the current total input levels from the given device manager.
+    */
+    static Component* createSimpleLevelMeterComponent (AudioDeviceManager* managerToDisplay);
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     AudioDeviceManager& deviceManager;
-    ComboBox* audioDeviceDropDown;
+    ComboBox* deviceTypeDropDown;
+    Label* deviceTypeDropDownLabel;
+    Component* audioDeviceSettingsComp;
+    String audioDeviceSettingsCompType;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
 
-    ComboBox* sampleRateDropDown;
-    AudioDeviceSelectorComponentListBox* inputChansBox;
-    Label* inputsLabel;
-    AudioDeviceSelectorComponentListBox* outputChansBox;
-    Label* outputsLabel;
-    Label* sampleRateLabel;
-    ComboBox* bufferSizeDropDown;
-    Label* bufferSizeLabel;
-    Button* launchUIButton;
-    AudioDeviceSelectorComponentListBox* midiInputsList;
+    MidiInputSelectorComponentListBox* midiInputsList;
     Label* midiInputsLabel;
     ComboBox* midiOutputSelector;
     Label* midiOutputLabel;

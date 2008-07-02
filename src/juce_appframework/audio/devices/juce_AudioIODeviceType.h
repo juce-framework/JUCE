@@ -33,7 +33,8 @@
 #define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 
 #include "juce_AudioIODevice.h"
-
+class AudioDeviceManager;
+class Component;
 
 //==============================================================================
 /**
@@ -72,20 +73,6 @@ class JUCE_API  AudioIODeviceType
 {
 public:
     //==============================================================================
-    /** Creates a list of available types.
-
-        This will add a set of new AudioIODeviceType objects to the specified list, to
-        represent each available types of device.
-
-        The objects that are created should be managed by the caller (the OwnedArray
-        will delete them when the array is itself deleted).
-
-        When created, the objects are uninitialised, so you should call scanForDevices()
-        on each one before getting its list of devices.
-    */
-    static void createDeviceTypes (OwnedArray <AudioIODeviceType>& list);
-
-    //==============================================================================
     /** Returns the name of this type of driver that this object manages.
 
         This will be something like "DirectSound", "ASIO", "CoreAudio", "ALSA", etc.
@@ -104,35 +91,47 @@ public:
 
         The scanForDevices() method must have been called to create this list.
 
-        @param preferInputNames     only really used by DirectSound where devices are split up
-                                    into inputs and outputs, this indicates whether to use
-                                    the input or output name to refer to a pair of devices.
+        @param wantInputNames     only really used by DirectSound where devices are split up
+                                  into inputs and outputs, this indicates whether to use
+                                  the input or output name to refer to a pair of devices.
     */
-    virtual const StringArray getDeviceNames (const bool preferInputNames = false) const = 0;
+    virtual const StringArray getDeviceNames (const bool wantInputNames = false) const = 0;
 
     /** Returns the name of the default device.
 
         This will be one of the names from the getDeviceNames() list.
 
-        @param preferInputNames     only really used by DirectSound where devices are split up
-                                    into inputs and outputs, this indicates whether to use
-                                    the input or output name to refer to a pair of devices.
-        @param numInputChannelsNeeded   the number of input channels the user is expecting to need - this
-                                        may be used to help decide which device would be most suitable
-        @param numOutputChannelsNeeded  the number of output channels the user is expecting to need - this
-                                        may be used to help decide which device would be most suitable
+        @param forInput     if true, this means that a default input device should be
+                            returned; if false, it should return the default output
     */
-    virtual const String getDefaultDeviceName (const bool preferInputNames,
-                                               const int numInputChannelsNeeded,
-                                               const int numOutputChannelsNeeded) const = 0;
+    virtual int getDefaultDeviceIndex (const bool forInput) const = 0;
+
+    /** Returns the index of a given device in the list of device names.
+        If asInput is true, it shows the index in the inputs list, otherwise it
+        looks for it in the outputs list.
+    */
+    virtual int getIndexOfDevice (AudioIODevice* device, const bool asInput) const = 0;
+
+    /** Returns true if two different devices can be used for the input and output.
+    */
+    virtual bool hasSeparateInputsAndOutputs() const = 0;
 
     /** Creates one of the devices of this type.
 
         The deviceName must be one of the strings returned by getDeviceNames(), and
         scanForDevices() must have been called before this method is used.
     */
-    virtual AudioIODevice* createDevice (const String& deviceName) = 0;
+    virtual AudioIODevice* createDevice (const String& outputDeviceName,
+                                         const String& inputDeviceName) = 0;
 
+    //==============================================================================
+    struct DeviceSetupDetails
+    {
+        AudioDeviceManager* manager;
+        int minNumInputChannels, maxNumInputChannels;
+        int minNumOutputChannels, maxNumOutputChannels;
+        bool useStereoPairs;
+    };
 
     //==============================================================================
     /** Destructor. */
