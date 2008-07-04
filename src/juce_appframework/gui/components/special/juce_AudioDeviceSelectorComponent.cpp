@@ -42,6 +42,63 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+class SimpleDeviceManagerInputLevelMeter  : public Component, 
+                                            public Timer
+{
+public:
+    SimpleDeviceManagerInputLevelMeter (AudioDeviceManager* const manager_)
+        : manager (manager_),
+          totalBlocks (7)
+    {
+        numBlocks = 0;
+        startTimer (50);
+        manager->enableInputLevelMeasurement (true);
+    }
+
+    ~SimpleDeviceManagerInputLevelMeter()
+    {
+        manager->enableInputLevelMeasurement (false);
+    }
+
+    void timerCallback()
+    {
+        const int newNumBlocks = roundDoubleToInt (manager->getCurrentInputLevel() * totalBlocks);
+        if (newNumBlocks != numBlocks)
+        {
+            numBlocks = newNumBlocks;
+            repaint();
+        }
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (Colours::white.withAlpha (0.8f));
+        g.fillRoundedRectangle (0.0f, 0.0f, (float) getWidth(), (float) getHeight(), 3.0f);
+        g.setColour (Colours::black.withAlpha (0.2f));
+        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 1.0f);
+
+        const float w = (getWidth() - 6.0f) / (float) totalBlocks;
+
+        for (int i = 0; i < totalBlocks; ++i)
+        {
+            if (i >= numBlocks)
+                g.setColour (Colours::lightblue.withAlpha (0.6f));
+            else
+                g.setColour (i < totalBlocks - 1 ? Colours::blue.withAlpha (0.5f)
+                                                 : Colours::red);
+
+            g.fillRoundedRectangle (3.0f + i * w + w * 0.1f, 3.0f, w * 0.8f, getHeight() - 6.0f, w * 0.4f);
+        }
+    }
+
+private:
+    AudioDeviceManager* const manager;
+    const int totalBlocks;
+    int numBlocks;
+};
+
+
+//==============================================================================
 class MidiInputSelectorComponentListBox  : public ListBox,
                                            public ListBoxModel
 {
@@ -414,7 +471,8 @@ public:
                 inputDeviceLabel = new Label (String::empty, TRANS ("input:"));
                 inputDeviceLabel->attachToComponent (inputDeviceDropDown, true);
 
-                addAndMakeVisible (inputLevelMeter = AudioDeviceSelectorComponent::createSimpleLevelMeterComponent (setup.manager));
+                addAndMakeVisible (inputLevelMeter 
+                    = new SimpleDeviceManagerInputLevelMeter (setup.manager));
             }
 
             addNamesToDeviceBox (*inputDeviceDropDown, true);
@@ -588,7 +646,7 @@ private:
     {
         const StringArray devs (type->getDeviceNames (isInputs));
 
-        combo.clear();
+        combo.clear (true);
 
         for (int i = 0; i < devs.size(); ++i)
             combo.addItem (devs[i], i + 1);
@@ -1007,8 +1065,6 @@ void AudioDeviceSelectorComponent::buttonClicked (Button*)
 
 void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
 {
-//    AudioIODevice* const audioDevice = deviceManager.getCurrentAudioDevice();
-
     if (comboBoxThatHasChanged == deviceTypeDropDown)
     {
         AudioIODeviceType* const type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1];
@@ -1021,124 +1077,15 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
 
             changeListenerCallback (0); // needed in case the type hasn't actally changed
         }
-
-/*        if (outputDeviceDropDown->getSelectedId() < 0)
-        {
-            deviceManager.setAudioDevices (String::empty, deviceManager.getCurrentAudioInputDeviceName(), 0, 0, 0, 0, true);
-        }
-        else
-        {
-            String error (deviceManager.setAudioDevices (deviceName, deviceManager.getCurrentAudioInputDeviceName(), 0, 0, 0, 0, true));
-
-            if (error.isNotEmpty())
-            {
-#if JUCE_WIN32
-                if (deviceManager.getInputChannels().countNumberOfSetBits() > 0
-                      && deviceManager.getOutputChannels().countNumberOfSetBits() > 0)
-                {
-                    // in DSound, some machines lose their primary input device when a mic
-                    // is removed, and this also buggers up our attempt at opening an output
-                    // device, so this is a workaround that doesn't fail in that case.
-                    BitArray noInputs;
-                    error = deviceManager.setAudioDevices (deviceName, deviceManager.getCurrentAudioInputDeviceName(), 0, 0, &noInputs, 0, false);
-                }
-#endif
-                if (error.isNotEmpty())
-                    AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                 T("Error while opening \"")
-                                                    + deviceName
-                                                    + T("\""),
-                                                 error);
-            }
-        }
-
-        deviceName = deviceManager.getCurrentAudioOutputDeviceName();
-
-        if (deviceName.isNotEmpty())
-            outputDeviceDropDown->setText (deviceName, true);
-        else
-            outputDeviceDropDown->setSelectedId (-1, true);
-    }
-    else if (comboBoxThatHasChanged == inputDeviceDropDown)
-    {
-        String deviceName (inputDeviceDropDown->getText());
-
-        if (inputDeviceDropDown->getSelectedId() < 0)
-        {
-            deviceManager.setAudioDevices (deviceManager.getCurrentAudioOutputDeviceName(), String::empty, 0, 0, 0, 0, true);
-        }
-        else
-        {
-            String error (deviceManager.setAudioDevices (deviceManager.getCurrentAudioOutputDeviceName(), deviceName, 0, 0, 0, 0, true));
-
-            if (error.isNotEmpty())
-            {
-#if JUCE_WIN32
-                if (deviceManager.getInputChannels().countNumberOfSetBits() > 0
-                      && deviceManager.getOutputChannels().countNumberOfSetBits() > 0)
-                {
-                    // in DSound, some machines lose their primary input device when a mic
-                    // is removed, and this also buggers up our attempt at opening an output
-                    // device, so this is a workaround that doesn't fail in that case.
-                    BitArray noInputs;
-                    error = deviceManager.setAudioDevices (deviceManager.getCurrentAudioOutputDeviceName(), deviceName, 0, 0, &noInputs, 0, false);
-                }
-#endif
-                if (error.isNotEmpty())
-                    AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                 T("Error while opening \"")
-                                                    + deviceName
-                                                    + T("\""),
-                                                 error);
-            }
-        }
-
-        deviceName = deviceManager.getCurrentAudioOutputDeviceName();
-
-        if (deviceName.isNotEmpty())
-            inputDeviceDropDown->setText (deviceName, true);
-        else
-            inputDeviceDropDown->setSelectedId (-1, true);*/
     }
     else if (comboBoxThatHasChanged == midiOutputSelector)
     {
         deviceManager.setDefaultMidiOutput (midiOutputSelector->getText());
     }
-    /*else if (audioDevice != 0)
-    {
-        if (bufferSizeDropDown != 0 && comboBoxThatHasChanged == bufferSizeDropDown)
-        {
-            if (bufferSizeDropDown->getSelectedId() > 0)
-                deviceManager.setAudioDevices (deviceManager.getCurrentAudioOutputDeviceName(),
-                                               deviceManager.getCurrentAudioInputDeviceName(), 
-                                               bufferSizeDropDown->getSelectedId(),
-                                               audioDevice->getCurrentSampleRate(),
-                                               0, 0, true);
-        }
-        else if (sampleRateDropDown != 0 && comboBoxThatHasChanged == sampleRateDropDown)
-        {
-            if (sampleRateDropDown->getSelectedId() > 0)
-                deviceManager.setAudioDevices (deviceManager.getCurrentAudioOutputDeviceName(),
-                                               deviceManager.getCurrentAudioInputDeviceName(), 
-                                               audioDevice->getCurrentBufferSizeSamples(),
-                                               sampleRateDropDown->getSelectedId(),
-                                               0, 0, true);
-        }
-    }*/
 }
 
 void AudioDeviceSelectorComponent::changeListenerCallback (void*)
 {
-    /*deleteAndZero (sampleRateDropDown);
-    deleteAndZero (inputChansBox);
-    deleteAndZero (inputsLabel);
-    deleteAndZero (outputChansBox);
-    deleteAndZero (outputsLabel);
-    deleteAndZero (sampleRateLabel);
-    deleteAndZero (bufferSizeDropDown);
-    deleteAndZero (bufferSizeLabel);
-    deleteAndZero (launchUIButton);*/
-
     if (deviceTypeDropDown != 0)
     {
         deviceTypeDropDown->setText (deviceManager.getCurrentAudioDeviceType(), false);
@@ -1175,98 +1122,6 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
         }
     }
 
-/*    AudioIODevice* const currentDevice = deviceManager.getCurrentAudioDevice();
-
-    if (currentDevice != 0)
-    {
-        if (deviceManager.getCurrentAudioOutputDevice() == 0)
-            outputDeviceDropDown->setSelectedId (-1, true);
-        else
-            outputDeviceDropDown->setText (deviceManager.getCurrentAudioOutputDeviceName(), true);
-
-        if (deviceManager.getCurrentAudioInputDevice() == 0)
-            inputDeviceDropDown->setSelectedId (-1, true);
-        else
-            inputDeviceDropDown->setText (deviceManager.getCurrentAudioInputDeviceName(), true);
-
-        // sample rate
-        addAndMakeVisible (sampleRateDropDown = new ComboBox ("samplerate"));
-        sampleRateLabel = new Label ("l2", TRANS ("sample rate:"));
-        sampleRateLabel->attachToComponent (sampleRateDropDown, true);
-
-        const int numRates = currentDevice->getNumSampleRates();
-
-        int i;
-        for (i = 0; i < numRates; ++i)
-        {
-            const int rate = roundDoubleToInt (currentDevice->getSampleRate (i));
-            sampleRateDropDown->addItem (String (rate) + T(" Hz"), rate);
-        }
-
-        const double currentRate = currentDevice->getCurrentSampleRate();
-        sampleRateDropDown->setSelectedId (roundDoubleToInt (currentRate), true);
-        sampleRateDropDown->addListener (this);
-
-        // buffer size
-        addAndMakeVisible (bufferSizeDropDown = new ComboBox ("buffersize"));
-        bufferSizeLabel = new Label ("l2", TRANS ("audio buffer size:"));
-        bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
-
-        const int numBufferSizes = currentDevice->getNumBufferSizesAvailable();
-
-        for (i = 0; i < numBufferSizes; ++i)
-        {
-            const int bs = currentDevice->getBufferSizeSamples (i);
-            bufferSizeDropDown->addItem (String (bs)
-                                          + T(" samples (")
-                                          + String (bs * 1000.0 / currentRate, 1)
-                                          + T(" ms)"),
-                                         bs);
-        }
-
-        bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), true);
-        bufferSizeDropDown->addListener (this);
-
-        if (currentDevice->hasControlPanel())
-        {
-            addAndMakeVisible (launchUIButton = new TextButton (TRANS ("show this device's control panel"),
-                                                                TRANS ("opens the device's own control panel")));
-
-            launchUIButton->addButtonListener (this);
-        }
-
-        // output chans
-        if (maxOutputChannels > 0 && minOutputChannels < currentDevice->getOutputChannelNames().size())
-        {
-            addAndMakeVisible (outputChansBox
-                                = new AudioDeviceSelectorComponentListBox (deviceManager,
-                                                           AudioDeviceSelectorComponentListBox::audioOutputType,
-                                                           TRANS ("(no audio output channels found)"),
-                                                           minOutputChannels, maxOutputChannels));
-
-            outputsLabel = new Label ("l3", TRANS ("active output channels:"));
-            outputsLabel->attachToComponent (outputChansBox, true);
-        }
-
-        // input chans
-        if (maxInputChannels > 0 && minInputChannels < currentDevice->getInputChannelNames().size())
-        {
-            addAndMakeVisible (inputChansBox
-                                = new AudioDeviceSelectorComponentListBox (deviceManager,
-                                                           AudioDeviceSelectorComponentListBox::audioInputType,
-                                                           TRANS ("(no audio input channels found)"),
-                                                           minInputChannels, maxInputChannels));
-
-            inputsLabel = new Label ("l4", TRANS ("active input channels:"));
-            inputsLabel->attachToComponent (inputChansBox, true);
-        }
-    }
-    else
-    {
-        outputDeviceDropDown->setSelectedId (-1, true);
-        inputDeviceDropDown->setSelectedId (-1, true);
-    }*/
-
     if (midiInputsList != 0)
     {
         midiInputsList->updateContent();
@@ -1294,69 +1149,6 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
     }
 
     resized();
-}
-
-
-//==============================================================================
-class SimpleDeviceManagerInputLevelMeter  : public Component, 
-                                            public Timer
-{
-public:
-    SimpleDeviceManagerInputLevelMeter (AudioDeviceManager* const manager_)
-        : manager (manager_),
-          totalBlocks (7)
-    {
-        numBlocks = 0;
-        startTimer (50);
-        manager->enableInputLevelMeasurement (true);
-    }
-
-    ~SimpleDeviceManagerInputLevelMeter()
-    {
-        manager->enableInputLevelMeasurement (false);
-    }
-
-    void timerCallback()
-    {
-        const int newNumBlocks = roundDoubleToInt (manager->getCurrentInputLevel() * totalBlocks);
-        if (newNumBlocks != numBlocks)
-        {
-            numBlocks = newNumBlocks;
-            repaint();
-        }
-    }
-
-    void paint (Graphics& g)
-    {
-        g.setColour (Colours::white.withAlpha (0.8f));
-        g.fillRoundedRectangle (0.0f, 0.0f, (float) getWidth(), (float) getHeight(), 3.0f);
-        g.setColour (Colours::black.withAlpha (0.2f));
-        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 1.0f);
-
-        const float w = (getWidth() - 6.0f) / (float) totalBlocks;
-
-        for (int i = 0; i < totalBlocks; ++i)
-        {
-            if (i >= numBlocks)
-                g.setColour (Colours::lightblue.withAlpha (0.6f));
-            else
-                g.setColour (i < totalBlocks - 1 ? Colours::blue.withAlpha (0.5f)
-                                                 : Colours::red);
-
-            g.fillRoundedRectangle (3.0f + i * w + w * 0.1f, 3.0f, w * 0.8f, getHeight() - 6.0f, w * 0.4f);
-        }
-    }
-
-private:
-    AudioDeviceManager* const manager;
-    const int totalBlocks;
-    int numBlocks;
-};
-
-
-Component* AudioDeviceSelectorComponent::createSimpleLevelMeterComponent (AudioDeviceManager* managerToDisplay)
-{
-    return new SimpleDeviceManagerInputLevelMeter (managerToDisplay);
 }
 
 

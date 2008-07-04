@@ -90,12 +90,6 @@ public:
     void changeListenerCallback (void*);
 
     //==============================================================================
-    /** Called by the device-specific displays to create a little level meter that
-        just displays the current total input levels from the given device manager.
-    */
-    static Component* createSimpleLevelMeterComponent (AudioDeviceManager* managerToDisplay);
-
-    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:

@@ -953,37 +953,6 @@ public:
 };
 
 //==============================================================================
-/*static int findBestMatchForName (const String& name, const StringArray& names)
-{
-    int i = names.indexOf (name);
-
-    if (i >= 0)
-        return i;
-
-    StringArray tokens1;
-    tokens1.addTokens (name, T(" :-"), 0);
-
-    int bestResult = -1;
-    int bestNumMatches = 1;
-
-    for (i = 0; i < names.size(); ++i)
-    {
-        StringArray tokens2;
-        tokens2.addTokens (names[i], T(" :-"), 0);
-
-        int matches = 0;
-
-        for (int j = tokens1.size(); --j >= 0;)
-            if (tokens2.contains (tokens1 [j]))
-                ++matches;
-
-        if (matches > bestNumMatches)
-            bestResult = i;
-    }
-
-    return bestResult;
-}*/
-
 class DSoundAudioIODevice  : public AudioIODevice,
                              public Thread
 {

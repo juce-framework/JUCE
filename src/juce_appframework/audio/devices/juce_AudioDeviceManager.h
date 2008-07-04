@@ -299,7 +299,7 @@ public:
 
     /**
     */
-    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes() const throw()       { return availableDeviceTypes; }
+    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes();
 
     //==============================================================================
     /** Creates a list of available types.

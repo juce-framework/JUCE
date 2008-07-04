@@ -106,6 +106,12 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
     }
 }
 
+const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceTypes()
+{
+    createDeviceTypesIfNeeded();
+    return availableDeviceTypes;
+}
+
 //==============================================================================
 extern AudioIODeviceType* juce_createDefaultAudioIODeviceType();
 
@@ -394,19 +400,24 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
             return error;
         }
 
-        inputChannels.clear();
-        inputChannels.setRange (0, numInputChansNeeded, true);
-        outputChannels.clear();
-        outputChannels.setRange (0, numOutputChansNeeded, true);
-    }
-    else
-    {
-        if (! newSetup.useDefaultInputChannels)
-            inputChannels = newSetup.inputChannels;
+        if (newSetup.useDefaultInputChannels)
+        {
+            inputChannels.clear();
+            inputChannels.setRange (0, numInputChansNeeded, true);
+        }
 
-        if (! newSetup.useDefaultOutputChannels)
-            outputChannels = newSetup.outputChannels;
+        if (newSetup.useDefaultOutputChannels)
+        {
+            outputChannels.clear();
+            outputChannels.setRange (0, numOutputChansNeeded, true);
+        }
     }
+
+    if (! newSetup.useDefaultInputChannels)
+        inputChannels = newSetup.inputChannels;
+
+    if (! newSetup.useDefaultOutputChannels)
+        outputChannels = newSetup.outputChannels;
 
     currentSetup = newSetup;
 
@@ -484,212 +495,6 @@ double AudioDeviceManager::chooseBestSampleRate (double rate) const
     return rate;
 }
 
-/*const String AudioDeviceManager::setAudioDevices (const String& outputDeviceName,
-                                                  const String& inputDeviceName,
-                                                  int blockSizeToUse,
-                                                  double sampleRateToUse,
-                                                  const BitArray* inChans,
-                                                  const BitArray* outChans,
-                                                  const bool treatAsChosenDevice)
-{
-    stopDevice();
-
-    String error;
-
-    if (outputDeviceName.isNotEmpty() || inputDeviceName.isNotEmpty())
-    {
-        const StringArray outputNames (getAvailableAudioOutputDeviceNames());
-        int outputIndex = outputNames.indexOf (outputDeviceName);
-
-        if (outputIndex < 0 && outputDeviceName.isNotEmpty())
-        {
-            deleteDevices();
-            error << "No such device: " << outputDeviceName;
-            return error;
-        }
-
-        const StringArray inputNames (getAvailableAudioInputDeviceNames());
-        int inputIndex = inputNames.indexOf (inputDeviceName);
-
-        if (inputIndex < 0 && inputDeviceName.isNotEmpty())
-        {
-            deleteDevices();
-            error << "No such device: " << inputDeviceName;
-            return error;
-        }
-
-        if (currentAudioInputDevice == 0
-             || currentAudioInputDevice->getLastError().isNotEmpty()
-             || ! inputDeviceName.equalsIgnoreCase (currentAudioInputDevice->getName())
-             || currentAudioOutputDevice == 0
-             || currentAudioOutputDevice->getLastError().isNotEmpty()
-             || ! outputDeviceName.equalsIgnoreCase (currentAudioOutputDevice->getName()))
-        {
-            // change of device..
-            deleteDevices();
-
-            int n = 0;
-
-            for (int i = 0; i < availableDeviceTypes.size(); ++i)
-            {
-                AudioIODeviceType* const type = availableDeviceTypes[i];
-                const StringArray names (type->getDeviceNames (true));
-
-                if (inputIndex >= n && inputIndex < n + names.size())
-                {
-                    currentAudioInputDevice = type->createDevice (inputDeviceName);
-
-                    if (currentAudioInputDevice == 0)
-                        error = "Can't open device: " + inputDeviceName;
-                    else
-                        error = currentAudioInputDevice->getLastError();
-
-                    if (error.isNotEmpty())
-                    {
-                        deleteDevices();
-                        return error;
-                    }
-
-                    break;
-                }
-
-                n += names.size();
-            }
-
-            //xxx
-            if (true)//inputDeviceName != outputDeviceName)
-            {
-                // Using different input and output devices..
-                n = 0;
-                for (int i = 0; i < availableDeviceTypes.size(); ++i)
-                {
-                    AudioIODeviceType* const type = availableDeviceTypes[i];
-                    const StringArray names (type->getDeviceNames (false));
-
-                    if (outputIndex >= n && outputIndex < n + names.size())
-                    {
-                        currentAudioOutputDevice = type->createDevice (outputDeviceName);
-
-                        if (currentAudioOutputDevice == 0)
-                            error = "Can't open device: " + outputDeviceName;
-                        else
-                            error = currentAudioOutputDevice->getLastError();
-
-                        if (error.isNotEmpty())
-                        {
-                            deleteDevices();
-                            return error;
-                        }
-
-                        break;
-                    }
-
-                    n += names.size();
-                }
-
-                if (currentAudioInputDevice != 0 && currentAudioOutputDevice != 0)
-                {
-                    //xxx enable this optim
-                }
-
-                ConglomeratingAudioIODevice* const combiner = new ConglomeratingAudioIODevice();
-                combiner->addDevice (currentAudioInputDevice, false, true);
-                combiner->addDevice (currentAudioOutputDevice, true, false);
-
-                currentAudioDevice = combiner;
-            }
-            else
-            {
-                // Using a single device for in + out..
-                currentAudioOutputDevice = currentAudioInputDevice;
-                currentAudioDevice = currentAudioInputDevice;
-            }
-
-            inputChannels.clear();
-            inputChannels.setRange (0, numInputChansNeeded, true);
-            outputChannels.clear();
-            outputChannels.setRange (0, numOutputChansNeeded, true);
-        }
-
-        if (inChans != 0)
-            inputChannels = *inChans;
-
-        if (outChans != 0)
-            outputChannels = *outChans;
-
-        error = restartDevice (blockSizeToUse,
-                               sampleRateToUse,
-                               inputChannels,
-                               outputChannels);
-
-        if (error.isNotEmpty())
-            deleteDevices();
-    }
-    else
-    {
-        deleteDevices();
-    }
-
-    if (treatAsChosenDevice && error.isEmpty())
-        updateXml();
-
-    return error;
-}
-
-const String AudioDeviceManager::restartDevice (int blockSizeToUse,
-                                                double sampleRateToUse,
-                                                const BitArray& inChans,
-                                                const BitArray& outChans)
-{
-    stopDevice();
-
-    inputChannels = inChans;
-    outputChannels = outChans;
-
-    if (sampleRateToUse > 0)
-    {
-        bool ok = false;
-
-        for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-        {
-            const double sr = currentAudioDevice->getSampleRate (i);
-
-            if (sr == sampleRateToUse)
-                ok = true;
-        }
-
-        if (! ok)
-            sampleRateToUse = 0;
-    }
-
-    if (sampleRateToUse == 0)
-    {
-        double lowestAbove44 = 0.0;
-
-        for (int i = currentAudioDevice->getNumSampleRates(); --i >= 0;)
-        {
-            const double sr = currentAudioDevice->getSampleRate (i);
-
-            if (sr >= 44100.0 && (lowestAbove44 == 0 || sr < lowestAbove44))
-                lowestAbove44 = sr;
-        }
-
-        if (lowestAbove44 == 0.0)
-            sampleRateToUse = currentAudioDevice->getSampleRate (0);
-        else
-            sampleRateToUse = lowestAbove44;
-    }
-
-    const String error (currentAudioDevice->open (inChans, outChans,
-                                                   sampleRateToUse, blockSizeToUse));
-
-    if (error.isEmpty())
-        currentAudioDevice->start (&callbackHandler);
-
-    sendChangeMessage (this);
-    return error;
-}
-*/
 void AudioDeviceManager::stopDevice()
 {
     if (currentAudioDevice != 0)

@@ -479,7 +479,7 @@ public:
 
     ~AudioDemo()
     {
-        audioDeviceManager.removeMidiInputCallback (&synthSource.midiCollector);
+        audioDeviceManager.removeMidiInputCallback (String::empty, &synthSource.midiCollector);
         audioDeviceManager.setAudioCallback (0);
 
         transportSource.removeChangeListener (this);
