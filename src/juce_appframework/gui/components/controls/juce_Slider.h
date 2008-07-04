@@ -500,6 +500,14 @@ public:
     */
     void setScrollWheelEnabled (const bool enabled) throw();
 
+    /** Returns a number to indicate which thumb is currently being dragged by the
+        mouse.
+
+        This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
+        the maximum-value thumb, or -1 if none is currently down.
+    */
+    int getThumbBeingDragged() const throw()        { return sliderBeingDragged; }
+
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
 

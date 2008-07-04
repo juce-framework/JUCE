@@ -417,7 +417,7 @@
  #include "../build/macosx/platform_specific_code/juce_mac_AudioCDBurner.mm"
  #include "../build/macosx/platform_specific_code/juce_mac_CoreAudio.cpp"
  #include "../build/macosx/platform_specific_code/juce_mac_CoreMidi.cpp"
- #include "../build/macosx/platform_specific_code/juce_mac_FileChooser.cpp"
+ #include "../build/macosx/platform_specific_code/juce_mac_FileChooser.mm"
  #include "../build/macosx/platform_specific_code/juce_mac_Fonts.cpp"
  #include "../build/macosx/platform_specific_code/juce_mac_Messaging.cpp"
  #include "../build/macosx/platform_specific_code/juce_mac_WebBrowserComponent.mm"

@@ -33740,7 +33740,7 @@ public:
 
     /**
     */
-    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes() const throw()       { return availableDeviceTypes; }
+    const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes();
 
     /** Creates a list of available types.
 
@@ -44703,6 +44703,14 @@ public:
     */
     void setScrollWheelEnabled (const bool enabled) throw();
 
+    /** Returns a number to indicate which thumb is currently being dragged by the
+        mouse.
+
+        This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
+        the maximum-value thumb, or -1 if none is currently down.
+    */
+    int getThumbBeingDragged() const throw()        { return sliderBeingDragged; }
+
     /** Callback to indicate that the user is about to start dragging the slider.
 
         @see SliderListener::sliderDragStarted
@@ -50476,11 +50484,6 @@ public:
     void buttonClicked (Button*);
     /** @internal */
     void changeListenerCallback (void*);
-
-    /** Called by the device-specific displays to create a little level meter that
-        just displays the current total input levels from the given device manager.
-    */
-    static Component* createSimpleLevelMeterComponent (AudioDeviceManager* managerToDisplay);
 
     juce_UseDebuggingNewOperator
 

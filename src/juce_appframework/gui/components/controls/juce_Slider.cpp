@@ -113,6 +113,7 @@ Slider::Slider (const String& name)
     numDecimalPlaces (7),
     sliderRegionStart (0),
     sliderRegionSize (1),
+    sliderBeingDragged (-1),
     pixelsForFullDragExtent (250),
     style (LinearHorizontal),
     textBoxPos (TextBoxLeft),
@@ -177,6 +178,8 @@ void Slider::sendDragStart()
 void Slider::sendDragEnd()
 {
     stoppedDragging();
+
+    sliderBeingDragged = -1;
 
     for (int i = listeners.size(); --i >= 0;)
     {

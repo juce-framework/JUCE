@@ -132,7 +132,6 @@
 		84A06BE309CADB06006A43BD /* juce_mac_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A06BE209CADB06006A43BD /* juce_mac_NamedPipe.cpp */; };
 		84A4882908A22E2400752A2B /* juce_mac_CoreAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4881E08A22E2400752A2B /* juce_mac_CoreAudio.cpp */; };
 		84A4882A08A22E2400752A2B /* juce_mac_CoreMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4881F08A22E2400752A2B /* juce_mac_CoreMidi.cpp */; };
-		84A4882B08A22E2400752A2B /* juce_mac_FileChooser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4882008A22E2400752A2B /* juce_mac_FileChooser.cpp */; };
 		84A4882C08A22E2400752A2B /* juce_mac_Files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4882108A22E2400752A2B /* juce_mac_Files.cpp */; };
 		84A4882D08A22E2400752A2B /* juce_mac_Fonts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4882208A22E2400752A2B /* juce_mac_Fonts.cpp */; };
 		84A4882E08A22E2400752A2B /* juce_mac_Messaging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A4882308A22E2400752A2B /* juce_mac_Messaging.cpp */; };
@@ -532,6 +531,7 @@
 		84F593B109855693008153BA /* juce_LassoComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F593B009855693008153BA /* juce_LassoComponent.h */; };
 		84F6B7540C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F6B7520C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.cpp */; };
 		84F6B7550C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F6B7530C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.h */; };
+		84F703230E1E56FB00EB338A /* juce_mac_FileChooser.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84F703220E1E56FB00EB338A /* juce_mac_FileChooser.mm */; };
 		84F7A7AF0A8383A100D36246 /* juce_ToolbarButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F7A7AD0A8383A100D36246 /* juce_ToolbarButton.cpp */; };
 		84F7A7B00A8383A100D36246 /* juce_ToolbarButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F7A7AE0A8383A100D36246 /* juce_ToolbarButton.h */; };
 		84F7A7B80A8383C200D36246 /* juce_Toolbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F7A7B10A8383C200D36246 /* juce_Toolbar.cpp */; };
@@ -709,7 +709,6 @@
 		84A06BE209CADB06006A43BD /* juce_mac_NamedPipe.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_mac_NamedPipe.cpp; sourceTree = "<group>"; };
 		84A4881E08A22E2400752A2B /* juce_mac_CoreAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_CoreAudio.cpp; path = platform_specific_code/juce_mac_CoreAudio.cpp; sourceTree = SOURCE_ROOT; };
 		84A4881F08A22E2400752A2B /* juce_mac_CoreMidi.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_CoreMidi.cpp; path = platform_specific_code/juce_mac_CoreMidi.cpp; sourceTree = SOURCE_ROOT; };
-		84A4882008A22E2400752A2B /* juce_mac_FileChooser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_FileChooser.cpp; path = platform_specific_code/juce_mac_FileChooser.cpp; sourceTree = SOURCE_ROOT; };
 		84A4882108A22E2400752A2B /* juce_mac_Files.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_Files.cpp; path = platform_specific_code/juce_mac_Files.cpp; sourceTree = SOURCE_ROOT; };
 		84A4882208A22E2400752A2B /* juce_mac_Fonts.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_Fonts.cpp; path = platform_specific_code/juce_mac_Fonts.cpp; sourceTree = SOURCE_ROOT; };
 		84A4882308A22E2400752A2B /* juce_mac_Messaging.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_mac_Messaging.cpp; path = platform_specific_code/juce_mac_Messaging.cpp; sourceTree = SOURCE_ROOT; };
@@ -1109,6 +1108,7 @@
 		84F593B009855693008153BA /* juce_LassoComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_LassoComponent.h; sourceTree = "<group>"; };
 		84F6B7520C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_ChannelRemappingAudioSource.cpp; sourceTree = "<group>"; };
 		84F6B7530C06E29D00BB8791 /* juce_ChannelRemappingAudioSource.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_ChannelRemappingAudioSource.h; sourceTree = "<group>"; };
+		84F703220E1E56FB00EB338A /* juce_mac_FileChooser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_FileChooser.mm; sourceTree = "<group>"; };
 		84F7A7AD0A8383A100D36246 /* juce_ToolbarButton.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_ToolbarButton.cpp; sourceTree = "<group>"; };
 		84F7A7AE0A8383A100D36246 /* juce_ToolbarButton.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_ToolbarButton.h; sourceTree = "<group>"; };
 		84F7A7B10A8383C200D36246 /* juce_Toolbar.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_Toolbar.cpp; sourceTree = "<group>"; };
@@ -1321,7 +1321,7 @@
 				84CE8A400DC5D7D600799A0E /* juce_mac_AudioCDBurner.mm */,
 				84A4881E08A22E2400752A2B /* juce_mac_CoreAudio.cpp */,
 				84A4881F08A22E2400752A2B /* juce_mac_CoreMidi.cpp */,
-				84A4882008A22E2400752A2B /* juce_mac_FileChooser.cpp */,
+				84F703220E1E56FB00EB338A /* juce_mac_FileChooser.mm */,
 				84A4882108A22E2400752A2B /* juce_mac_Files.cpp */,
 				84022DFB0DAE4CB9004CF59A /* juce_mac_HTTPStream.h */,
 				84A06BE209CADB06006A43BD /* juce_mac_NamedPipe.cpp */,
@@ -2558,7 +2558,6 @@
 			files = (
 				84A4882908A22E2400752A2B /* juce_mac_CoreAudio.cpp in Sources */,
 				84A4882A08A22E2400752A2B /* juce_mac_CoreMidi.cpp in Sources */,
-				84A4882B08A22E2400752A2B /* juce_mac_FileChooser.cpp in Sources */,
 				84A4882C08A22E2400752A2B /* juce_mac_Files.cpp in Sources */,
 				84A4882D08A22E2400752A2B /* juce_mac_Fonts.cpp in Sources */,
 				84A4882E08A22E2400752A2B /* juce_mac_Messaging.cpp in Sources */,
@@ -2821,6 +2820,7 @@
 				84BE9E1C0DE56DEB00AB8F23 /* juce_mac_SystemStats.mm in Sources */,
 				84688AFB0DED58820077FDEA /* juce_AudioProcessorGraph.cpp in Sources */,
 				84688AFD0DED58820077FDEA /* juce_AudioProcessorPlayer.cpp in Sources */,
+				84F703230E1E56FB00EB338A /* juce_mac_FileChooser.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

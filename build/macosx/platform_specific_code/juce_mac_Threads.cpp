@@ -35,7 +35,6 @@
 #include <sys/file.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#include <Carbon/Carbon.h>
 
 BEGIN_JUCE_NAMESPACE
 
@@ -146,7 +145,7 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-    ExitToShell();
+    exit (0);
 }
 
 void Process::setPriority (ProcessPriority p)
