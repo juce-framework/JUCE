@@ -117,7 +117,12 @@ PropertiesFile::PropertiesFile (const File& f,
                         const String name (e->getStringAttribute (T("name")));
 
                         if (name.isNotEmpty())
-                            getAllProperties().set (name, e->getStringAttribute (T("val")));
+                        {
+                            getAllProperties().set (name, 
+                                                    e->getFirstChildElement() != 0
+                                                        ? e->getFirstChildElement()->createDocument (String::empty, true)
+                                                        : e->getStringAttribute (T("val")));
+                        }
                     }
                 }
                 else
@@ -171,7 +176,16 @@ bool PropertiesFile::save()
         {
             XmlElement* const e = new XmlElement (propertyTagName);
             e->setAttribute (T("name"), getAllProperties().getAllKeys() [i]);
-            e->setAttribute (T("val"), getAllProperties().getAllValues() [i]);
+
+            // if the value seems to contain xml, store it as such..
+            XmlDocument xmlContent (getAllProperties().getAllValues() [i]);
+            XmlElement* const childElement = xmlContent.getDocumentElement();
+
+            if (childElement != 0)
+                e->addChildElement (childElement);
+            else
+                e->setAttribute (T("val"), getAllProperties().getAllValues() [i]);
+
             doc->addChildElement (e);
         }
 
