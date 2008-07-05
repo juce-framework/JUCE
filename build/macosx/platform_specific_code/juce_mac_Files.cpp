@@ -39,7 +39,6 @@
 #include <utime.h>
 #include <pwd.h>
 #include <fcntl.h>
-#include <Carbon/Carbon.h>
 
 BEGIN_JUCE_NAMESPACE
 

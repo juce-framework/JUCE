@@ -37,9 +37,7 @@
 
 // As well as being for the mac, this file is included by the linux build.
 
-#if JUCE_MAC
- #include <Carbon/Carbon.h>
-#else
+#if ! JUCE_MAC
  #include <sys/wait.h>
  #include <errno.h>
  #include <unistd.h>

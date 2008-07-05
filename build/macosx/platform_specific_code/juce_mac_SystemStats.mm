@@ -31,7 +31,6 @@
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 #include <AppKit/AppKit.h>
-#include <Carbon/Carbon.h>
 #include <CoreAudio/HostTime.h>
 #include <ctime>
 #include <sys/resource.h>
@@ -161,13 +160,6 @@ void SystemStats::initialiseStats() throw()
 #endif
 
         highResTimerFrequency = (int64) AudioGetHostClockFrequency();
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-        if (JUCEApplication::getInstance() != 0)
-            RegisterAppearanceClient();
-#endif
-
-        TXNInitTextension (0, 0, kTXNWantMoviesMask | kTXNWantGraphicsMask);
 
         String s (SystemStats::getJUCEVersion());
 
