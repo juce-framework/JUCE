@@ -418,10 +418,10 @@
  #include "../build/macosx/platform_specific_code/juce_mac_CoreAudio.cpp"
  #include "../build/macosx/platform_specific_code/juce_mac_CoreMidi.cpp"
  #include "../build/macosx/platform_specific_code/juce_mac_FileChooser.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_Fonts.cpp"
- #include "../build/macosx/platform_specific_code/juce_mac_Messaging.cpp"
+ #include "../build/macosx/platform_specific_code/juce_mac_Fonts.mm"
+ #include "../build/macosx/platform_specific_code/juce_mac_Messaging.mm"
  #include "../build/macosx/platform_specific_code/juce_mac_WebBrowserComponent.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_Windowing.cpp"
+ #include "../build/macosx/platform_specific_code/juce_mac_Windowing.mm"
 #endif
 
 #endif

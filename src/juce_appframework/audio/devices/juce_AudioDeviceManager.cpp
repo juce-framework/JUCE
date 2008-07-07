@@ -108,7 +108,7 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
 
 const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceTypes()
 {
-    createDeviceTypesIfNeeded();
+    scanDevicesIfNeeded();
     return availableDeviceTypes;
 }
 
