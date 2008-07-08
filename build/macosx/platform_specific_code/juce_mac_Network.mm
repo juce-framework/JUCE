@@ -29,9 +29,8 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "juce_mac_NativeHeaders.h"
 
-#include <Cocoa/Cocoa.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/network/IOEthernetInterface.h>
 #include <IOKit/network/IONetworkInterface.h>
@@ -142,17 +141,6 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
 
     return numResults;
 }
-
-//==============================================================================
-class AutoPool
-{
-public:
-    AutoPool()      { pool = [[NSAutoreleasePool alloc] init]; }
-    ~AutoPool()     { [pool release]; }
-
-private:
-    NSAutoreleasePool* pool;
-};
 
 //==============================================================================
 bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,

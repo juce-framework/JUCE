@@ -29,10 +29,8 @@
   ==============================================================================
 */
 
-#include <Cocoa/Cocoa.h>
+#include "juce_mac_NativeHeaders.h"
 #include <fnmatch.h>
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
@@ -92,6 +90,7 @@ static NSString* juceStringToNS (const juce::String& s)
 
 BEGIN_JUCE_NAMESPACE
 
+
 void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
@@ -102,6 +101,8 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* extraInfoComponent)
 {
+    const AutoPool pool;
+
     StringArray* filters = new StringArray();
     filters->addTokens (filter.replaceCharacters (T(",:"), T(";;")), T(";"), 0);
     filters->trim();

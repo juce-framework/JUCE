@@ -29,11 +29,10 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "juce_mac_NativeHeaders.h"
 
 #if JUCE_USE_CDBURNER
 
-#import <Cocoa/Cocoa.h>
 #import <DiscRecording/DiscRecording.h>
 
 BEGIN_JUCE_NAMESPACE
@@ -336,33 +335,29 @@ BEGIN_JUCE_NAMESPACE
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
     : internal (0)
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     OpenDiskDevice* dev = [[OpenDiskDevice alloc] initWithDevice: [[DRDevice devices] objectAtIndex: deviceIndex]];
 
     internal = (void*) dev;
-    [pool release];
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
 
     if (dev != 0)
         [dev release];
-
-    [pool release];
 }
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     AudioCDBurner* b = new AudioCDBurner (deviceIndex);
 
     if (b->internal == 0)
         deleteAndZero (b);
 
-    [pool release];
     return b;
 }
 
@@ -389,14 +384,13 @@ static NSArray* findDiskBurnerDevices()
 
 const StringArray AudioCDBurner::findAvailableDevices()
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     NSArray* names = findDiskBurnerDevices();
     StringArray s;
 
     for (int i = 0; i < [names count]; ++i)
         s.add (String::fromUTF8 ((juce::uint8*) [[names objectAtIndex: i] UTF8String]));
 
-    [pool release];
     return s;
 }
 
@@ -416,17 +410,15 @@ int AudioCDBurner::getNumAvailableAudioBlocks() const
 
 bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
 
     if (dev != 0)
     {
         [dev addSourceTrack: source numSamples: numSamps];
-        [pool release];
         return true;
     }
 
-    [pool release];
     return false;
 }
 
@@ -434,7 +426,7 @@ const String AudioCDBurner::burn (juce::AudioCDBurner::BurnProgressListener* lis
                                   const bool ejectDiscAfterwards,
                                   const bool peformFakeBurnForTesting)
 {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    const AutoPool pool;
     juce::String error ("Couldn't open or write to the CD device");
 
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
@@ -448,7 +440,6 @@ const String AudioCDBurner::burn (juce::AudioCDBurner::BurnProgressListener* lis
              isFake: peformFakeBurnForTesting];
     }
 
-    [pool release];
     return error;
 }
 
