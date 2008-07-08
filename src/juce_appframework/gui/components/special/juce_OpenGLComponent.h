@@ -220,6 +220,12 @@ public:
     */
     void shareWith (OpenGLContext* contextToShareListsWith);
 
+    /** Returns the context that this component is sharing with.
+        @see shareWith
+    */
+    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
+
+
     //==============================================================================
     /** Flips the openGL buffers over. */
     void swapBuffers();

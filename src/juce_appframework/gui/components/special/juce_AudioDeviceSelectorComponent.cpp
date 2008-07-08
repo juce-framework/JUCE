@@ -506,7 +506,7 @@ public:
             }
 
             if (setup.maxNumInputChannels > 0
-                 && setup.minNumOutputChannels < setup.manager->getCurrentAudioDevice()->getInputChannelNames().size())
+                 && setup.minNumInputChannels < setup.manager->getCurrentAudioDevice()->getInputChannelNames().size())
             {
                 if (inputChanList == 0)
                 {
@@ -936,12 +936,14 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                             const int minOutputChannels_,
                                                             const int maxOutputChannels_,
                                                             const bool showMidiInputOptions,
-                                                            const bool showMidiOutputSelector)
+                                                            const bool showMidiOutputSelector,
+                                                            const bool showChannelsAsStereoPairs_)
     : deviceManager (deviceManager_),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
       maxInputChannels (maxInputChannels_),
+      showChannelsAsStereoPairs (showChannelsAsStereoPairs_),
       deviceTypeDropDown (0),
       deviceTypeDropDownLabel (0),
       audioDeviceSettingsComp (0)
@@ -1110,7 +1112,7 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
             details.maxNumInputChannels = maxInputChannels;
             details.minNumOutputChannels = minOutputChannels;
             details.maxNumOutputChannels = maxOutputChannels;
-            details.useStereoPairs = true;
+            details.useStereoPairs = showChannelsAsStereoPairs;
 
             audioDeviceSettingsComp = new AudioDeviceSettingsPanel (type, details);
 
