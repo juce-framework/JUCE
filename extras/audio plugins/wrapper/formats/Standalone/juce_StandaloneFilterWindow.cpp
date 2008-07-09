@@ -243,9 +243,9 @@ void StandaloneFilterWindow::showAudioSettingsDialog()
                                                filter->getNumInputChannels(),
                                                filter->getNumOutputChannels(),
                                                filter->getNumOutputChannels(),
-                                               true, false);
+                                               true, false, true);
 
-    selectorComp.setSize (500, 350);
+    selectorComp.setSize (500, 450);
 
     DialogWindow::showModalDialog (TRANS("Audio Settings"), &selectorComp, this, Colours::lightgrey, true, false, false);
 }

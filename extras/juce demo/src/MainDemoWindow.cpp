@@ -132,7 +132,7 @@ public:
           currentDemoId (0),
           demoSourceCodeText (0)
     {
-        invokeDirectly (showWidgets, true);
+        invokeDirectly (showAudio, true);
     }
 
     ~ContentComp()
