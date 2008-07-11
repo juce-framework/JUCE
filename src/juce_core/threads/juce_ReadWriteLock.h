@@ -105,6 +105,15 @@ public:
     */
     void enterWrite() const throw();
 
+    /** Tries to lock this object for writing.
+
+        This is like enterWrite(), but doesn't block - it returns true if it manages
+        to obtain the lock.
+
+        @see enterWrite
+    */
+    bool tryEnterWrite() const throw();
+
     /** Releases the write-lock.
 
         If the caller thread hasn't got the lock, this can have unpredictable results.

@@ -129,7 +129,7 @@
 
 class JuceVSTWrapper;
 static bool recursionCheck = false;
-static juce::uint32 lastMasterIdleCall = 0;
+static JUCE_NAMESPACE::uint32 lastMasterIdleCall = 0;
 
 BEGIN_JUCE_NAMESPACE
  extern void juce_callAnyTimersSynchronously();
@@ -564,7 +564,7 @@ public:
             {
                 const VstMidiEvent* const vme = (const VstMidiEvent*) e;
 
-                midiEvents.addEvent ((const juce::uint8*) vme->midiData,
+                midiEvents.addEvent ((const JUCE_NAMESPACE::uint8*) vme->midiData,
                                      4,
                                      vme->deltaFrames);
             }
@@ -692,7 +692,7 @@ public:
             ensureOutgoingEventSize (numEvents);
             outgoingEvents->numEvents = 0;
 
-            const juce::uint8* midiEventData;
+            const JUCE_NAMESPACE::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 
@@ -1072,7 +1072,7 @@ public:
         if (Component::isMouseButtonDownAnywhere()
              && ! recursionCheck)
         {
-            const juce::uint32 now = JUCE_NAMESPACE::Time::getMillisecondCounter();
+            const JUCE_NAMESPACE::uint32 now = JUCE_NAMESPACE::Time::getMillisecondCounter();
 
             if (now > lastMasterIdleCall + 20 && editorComp != 0)
             {
@@ -1378,8 +1378,8 @@ public:
 
 private:
     AudioProcessor* filter;
-    juce::MemoryBlock chunkMemory;
-    juce::uint32 chunkMemoryTime;
+    JUCE_NAMESPACE::MemoryBlock chunkMemory;
+    JUCE_NAMESPACE::uint32 chunkMemoryTime;
     EditorCompWrapper* editorComp;
     ERect editorSize;
     MidiBuffer midiEvents;

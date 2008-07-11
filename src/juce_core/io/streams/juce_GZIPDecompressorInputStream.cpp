@@ -66,6 +66,8 @@ namespace zlibNamespace
     #include "zlib/trees.c"
     #include "zlib/uncompr.c"
     #include "zlib/zutil.c"
+    #undef Byte
+    #undef Bytef
   }
 }
 

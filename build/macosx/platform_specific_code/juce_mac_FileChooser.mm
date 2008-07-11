@@ -36,12 +36,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
 END_JUCE_NAMESPACE
 
-static const juce::String nsStringToJuce (NSString* s)
+static const JUCE_NAMESPACE::String nsStringToJuce (NSString* s)
 {
-    return juce::String::fromUTF8 ((juce::uint8*) [s UTF8String]);
+    return JUCE_NAMESPACE::String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [s UTF8String]);
 }
 
-static NSString* juceStringToNS (const juce::String& s)
+static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
 {
     return [NSString stringWithUTF8String: (const char*) s.toUTF8()];
 }
@@ -49,17 +49,17 @@ static NSString* juceStringToNS (const juce::String& s)
 //==============================================================================
 @interface JuceFileChooserDelegate   : NSObject
 {
-    juce::StringArray* filters;
+    JUCE_NAMESPACE::StringArray* filters;
 }
 
-- (JuceFileChooserDelegate*) initWithFilters: (juce::StringArray*) filters_;
+- (JuceFileChooserDelegate*) initWithFilters: (JUCE_NAMESPACE::StringArray*) filters_;
 - (void) dealloc;
 - (BOOL) panel:(id) sender shouldShowFilename: (NSString*) filename;
 
 @end
 
 @implementation JuceFileChooserDelegate
-- (JuceFileChooserDelegate*) initWithFilters: (juce::StringArray*) filters_
+- (JuceFileChooserDelegate*) initWithFilters: (JUCE_NAMESPACE::StringArray*) filters_
 {
     [super init];
     filters = filters_;
@@ -78,7 +78,7 @@ static NSString* juceStringToNS (const juce::String& s)
 
     for (int i = filters->size(); --i >= 0;)
     {
-        const juce::String wildcard ((*filters)[i].toLowerCase());
+        const JUCE_NAMESPACE::String wildcard ((*filters)[i].toLowerCase());
 
         if (fnmatch (wildcard.toUTF8(), filenameUTF8, 0) == 0)
             return true;

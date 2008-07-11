@@ -674,13 +674,13 @@ extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
     extern JUCE_API void juce_DebugFree (void* const block);
 
     /** This should be used instead of calling malloc directly. */
-    #define juce_malloc(numBytes)                 juce::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
+    #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
     /** This should be used instead of calling calloc directly. */
-    #define juce_calloc(numBytes)                 juce::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
+    #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
     /** This should be used instead of calling realloc directly. */
-    #define juce_realloc(location, numBytes)      juce::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
+    #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
     /** This should be used instead of calling free directly. */
-    #define juce_free(location)                   juce::juce_DebugFree (location)
+    #define juce_free(location)                   JUCE_NAMESPACE::juce_DebugFree (location)
   #endif
 
   #if ! defined (_AFXDLL)
@@ -706,13 +706,13 @@ extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
   extern JUCE_API void juce_Free (void* const block);
 
   /** This should be used instead of calling malloc directly. */
-  #define juce_malloc(numBytes)                 juce::juce_Malloc (numBytes)
+  #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_Malloc (numBytes)
   /** This should be used instead of calling calloc directly. */
-  #define juce_calloc(numBytes)                 juce::juce_Calloc (numBytes)
+  #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_Calloc (numBytes)
   /** This should be used instead of calling realloc directly. */
-  #define juce_realloc(location, numBytes)      juce::juce_Realloc (location, numBytes)
+  #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_Realloc (location, numBytes)
   /** This should be used instead of calling free directly. */
-  #define juce_free(location)                   juce::juce_Free (location)
+  #define juce_free(location)                   JUCE_NAMESPACE::juce_Free (location)
 
   #define juce_UseDebuggingNewOperator \
     static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
@@ -7480,6 +7480,10 @@ public:
     */
     static bool isOperatingSystem64Bit() throw();
 
+    /** Returns a country code based on the current locale of the OS.
+    */
+    static const String getCountryCode();
+
     // CPU and memory information..
 
     /** Returns the approximate CPU speed.
@@ -13921,6 +13925,15 @@ public:
         @see exitWrite, ScopedWriteLock
     */
     void enterWrite() const throw();
+
+    /** Tries to lock this object for writing.
+
+        This is like enterWrite(), but doesn't block - it returns true if it manages
+        to obtain the lock.
+
+        @see enterWrite
+    */
+    bool tryEnterWrite() const throw();
 
     /** Releases the write-lock.
 

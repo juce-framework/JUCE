@@ -107,8 +107,8 @@
 
 //==============================================================================
 #if JUCE_WIN32
-  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
-  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, juce::Component* comp);
+  extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
+  extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
  #if ! JucePlugin_EditorRequiresKeyboardFocus
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
@@ -295,7 +295,7 @@ public:
     private:
         AudioProcessor* const filter;
         JucePlugInProcess* const process;
-        juce::Component* wrapper;
+        JUCE_NAMESPACE::Component* wrapper;
         AudioProcessorEditor* editorComp;
 
         void deleteEditorComp()
@@ -304,7 +304,7 @@ public:
             {
                 PopupMenu::dismissAllActiveMenus();
 
-                juce::Component* const modalComponent = juce::Component::getCurrentlyModalComponent();
+                JUCE_NAMESPACE::Component* const modalComponent = JUCE_NAMESPACE::Component::getCurrentlyModalComponent();
                 if (modalComponent != 0)
                     modalComponent->exitModalState (0);
 
@@ -317,7 +317,7 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public juce::Component,
+        class EditorCompWrapper  : public JUCE_NAMESPACE::Component,
 #if JUCE_MAC
                                    public Timer
 #else
@@ -435,7 +435,7 @@ public:
 
             void resized()
             {
-                juce::Component* const c = getChildComponent (0);
+                JUCE_NAMESPACE::Component* const c = getChildComponent (0);
 
                 if (c != 0)
                     c->setBounds (0, 0, getWidth(), getHeight());
@@ -476,7 +476,7 @@ public:
 #endif
 
 #if JUCE_WIN32
-            void globalFocusChanged (juce::Component*)
+            void globalFocusChanged (JUCE_NAMESPACE::Component*)
             {
   #if ! JucePlugin_EditorRequiresKeyboardFocus
                 if (hasKeyboardFocus (true))
@@ -485,7 +485,7 @@ public:
             }
 #endif
 
-            void childBoundsChanged (juce::Component* child)
+            void childBoundsChanged (JUCE_NAMESPACE::Component* child)
             {
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);

@@ -144,6 +144,24 @@ void ReadWriteLock::enterWrite() const throw()
     }
 }
 
+bool ReadWriteLock::tryEnterWrite() const throw()
+{
+    const int threadId = Thread::getCurrentThreadId();
+    const ScopedLock sl (accessLock);
+
+    if (readerThreads.size() + numWriters == 0
+         || threadId == writerThreadId
+         || (readerThreads.size() == 2
+              && readerThreads.getUnchecked(0) == threadId))
+    {
+        writerThreadId = threadId;
+        ++numWriters;
+        return true;
+    }
+
+    return false;
+}
+
 void ReadWriteLock::exitWrite() const throw()
 {
     const ScopedLock sl (accessLock);

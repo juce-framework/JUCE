@@ -45,10 +45,10 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @interface DownloadClickDetector   : NSObject
 {
-    juce::WebBrowserComponent* ownerComponent;
+    JUCE_NAMESPACE::WebBrowserComponent* ownerComponent;
 }
 
-- (DownloadClickDetector*) initWithOwner: (juce::WebBrowserComponent*) ownerComponent;
+- (DownloadClickDetector*) initWithOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent;
 
 - (void) webView: (WebView*) webView decidePolicyForNavigationAction: (NSDictionary*) actionInformation
                                                              request: (NSURLRequest*) request
@@ -59,7 +59,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @implementation DownloadClickDetector
 
-- (DownloadClickDetector*) initWithOwner: (juce::WebBrowserComponent*) ownerComponent_
+- (DownloadClickDetector*) initWithOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent_
 {
     [super init];
     ownerComponent = ownerComponent_;
@@ -70,7 +70,7 @@ END_JUCE_NAMESPACE
 {
     NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
 
-    if (ownerComponent->pageAboutToLoad (juce::String::fromUTF8 ((const juce::uint8*) [[url absoluteString] UTF8String])))
+    if (ownerComponent->pageAboutToLoad (JUCE_NAMESPACE::String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) [[url absoluteString] UTF8String])))
         [listener use];
     else
         [listener ignore];
@@ -190,11 +190,11 @@ public:
             {
                 const String headerName ((*headers)[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
                 headerNamesAsChars[i] = (char*) juce_calloc (headerName.copyToUTF8 (0));
-                headerName.copyToUTF8 ((juce::uint8*) headerNamesAsChars[i]);
+                headerName.copyToUTF8 ((JUCE_NAMESPACE::uint8*) headerNamesAsChars[i]);
 
                 const String headerValue ((*headers)[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
                 headerValuesAsChars[i] = (char*) juce_calloc (headerValue.copyToUTF8 (0));
-                headerValue.copyToUTF8 ((juce::uint8*) headerValuesAsChars[i]);
+                headerValue.copyToUTF8 ((JUCE_NAMESPACE::uint8*) headerValuesAsChars[i]);
             }
         }
 

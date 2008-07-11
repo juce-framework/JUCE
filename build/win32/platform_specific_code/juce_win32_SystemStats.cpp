@@ -341,6 +341,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #endif
 }
 
+
 //==============================================================================
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
