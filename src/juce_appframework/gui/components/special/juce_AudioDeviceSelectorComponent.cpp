@@ -496,8 +496,7 @@ public:
                     outputChanLabel->attachToComponent (outputChanList, true);
                 }
 
-                outputChanList->updateContent();
-                outputChanList->repaint();
+                outputChanList->refresh();
             }
             else
             {
@@ -517,8 +516,7 @@ public:
                     inputChanLabel->attachToComponent (inputChanList, true);
                 }
 
-                inputChanList->updateContent();
-                inputChanList->repaint();
+                inputChanList->refresh();
             }
             else
             {
@@ -1032,19 +1030,10 @@ void AudioDeviceSelectorComponent::resized()
         y += audioDeviceSettingsComp->getHeight() + space;
     }
 
-    VoidArray boxes;
-
     if (midiInputsList != 0)
-        boxes.add (midiInputsList);
-
-    const int boxSpace = getHeight() - y;
-
-    for (int i = 0; i < boxes.size(); ++i)
     {
-        MidiInputSelectorComponentListBox* const box = (MidiInputSelectorComponentListBox*) boxes.getUnchecked (i);
-
-        const int bh = box->getBestHeight (jmin (h * 8, boxSpace / boxes.size()) - space);
-        box->setBounds (lx, y, w, bh);
+        const int bh = midiInputsList->getBestHeight (jmin (h * 8, getHeight() - y - space));
+        midiInputsList->setBounds (lx, y, w, bh);
         y += bh + space;
     }
 
