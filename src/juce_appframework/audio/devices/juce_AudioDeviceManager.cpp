@@ -764,13 +764,8 @@ void AudioDeviceManager::addMidiInputCallback (const String& name,
             if (enabledMidiInputs[i]->getName() == name)
             {
                 const ScopedLock sl (midiCallbackLock);
-
-                if (! midiCallbacks.contains (callback))
-                {
-                    midiCallbacks.add (callback);
-                    midiCallbackDevices.add (enabledMidiInputs[i]);
-                }
-
+                midiCallbacks.add (callback);
+                midiCallbackDevices.add (enabledMidiInputs[i]);
                 break;
             }
         }
