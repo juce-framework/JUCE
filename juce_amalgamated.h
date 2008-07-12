@@ -7480,10 +7480,6 @@ public:
     */
     static bool isOperatingSystem64Bit() throw();
 
-    /** Returns a country code based on the current locale of the OS.
-    */
-    static const String getCountryCode();
-
     // CPU and memory information..
 
     /** Returns the approximate CPU speed.

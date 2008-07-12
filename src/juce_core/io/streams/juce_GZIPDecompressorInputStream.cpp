@@ -67,7 +67,6 @@ namespace zlibNamespace
     #include "zlib/uncompr.c"
     #include "zlib/zutil.c"
     #undef Byte
-    #undef Bytef
   }
 }
 
