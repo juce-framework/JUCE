@@ -29,6 +29,9 @@
   ==============================================================================
 */
 
+#ifndef __JUCE_MAC_NATIVEHEADERS_JUCEHEADER__
+#define __JUCE_MAC_NATIVEHEADERS_JUCEHEADER__
+
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
 #include <Cocoa/Cocoa.h>
@@ -47,4 +50,7 @@ private:
     NSAutoreleasePool* pool;
 };
 
+
 END_JUCE_NAMESPACE
+
+#endif

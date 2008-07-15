@@ -2309,8 +2309,14 @@ static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt3
         return 0x0101;
     case audioMasterGetVendorString:
     case audioMasterGetProductString:
-        JUCEApplication::getInstance()
-            ->getApplicationName().copyToBuffer ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+        {
+            String hostName ("Juce VST Host");
+
+            if (JUCEApplication::getInstance() != 0)
+                hostName = JUCEApplication::getInstance()->getApplicationName();
+            
+            hostName.copyToBuffer ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+        }
         break;
 
     case audioMasterGetSampleRate:

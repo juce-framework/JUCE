@@ -2497,7 +2497,7 @@ static NSImage* juceImageToNSImage (const Image& image)
 						hasAlpha: image.hasAlphaChannel()
 						isPlanar: NO
 				  colorSpaceName: NSCalibratedRGBColorSpace
-                    bitmapFormat: 0
+                    bitmapFormat: (NSBitmapFormat) 0
 					 bytesPerRow: lineStride
 					bitsPerPixel: pixelStride * 8];
 
