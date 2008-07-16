@@ -84,7 +84,8 @@ static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
             return true;
     }
 
-    return false;
+    return JUCE_NAMESPACE::File (JUCE_NAMESPACE::String::fromUTF8 ((const uint8*) filenameUTF8))
+                .isDirectory();
 }
 @end
 
