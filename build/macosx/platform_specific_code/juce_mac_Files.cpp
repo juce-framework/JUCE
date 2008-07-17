@@ -30,6 +30,7 @@
 */
 
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include <ApplicationServices/ApplicationServices.h>
 #include <sys/stat.h>
 #include <sys/dir.h>
 #include <sys/param.h>
