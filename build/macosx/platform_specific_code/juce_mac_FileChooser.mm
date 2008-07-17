@@ -36,15 +36,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
 END_JUCE_NAMESPACE
 
-static const JUCE_NAMESPACE::String nsStringToJuce (NSString* s)
-{
-    return JUCE_NAMESPACE::String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [s UTF8String]);
-}
-
-static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
-{
-    return [NSString stringWithUTF8String: (const char*) s.toUTF8()];
-}
 
 //==============================================================================
 @interface JuceFileChooserDelegate   : NSObject
@@ -84,8 +75,7 @@ static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
             return true;
     }
 
-    return JUCE_NAMESPACE::File (JUCE_NAMESPACE::String::fromUTF8 ((const uint8*) filenameUTF8))
-                .isDirectory();
+    return JUCE_NAMESPACE::File (nsStringToJuce (filename)).isDirectory();
 }
 @end
 

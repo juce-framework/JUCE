@@ -75,7 +75,7 @@ public:
 
     /** Returns the type of operating system we're running on.
 
-        @returns one of the values from the OSType enum.
+        @returns one of the values from the OperatingSystemType enum.
         @see getOperatingSystemName
     */
     static OperatingSystemType getOperatingSystemType() throw();

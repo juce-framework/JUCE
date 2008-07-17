@@ -50,7 +50,18 @@ private:
     NSAutoreleasePool* pool;
 };
 
-
 END_JUCE_NAMESPACE
+
+//==============================================================================
+static const JUCE_NAMESPACE::String nsStringToJuce (NSString* s)
+{
+    return JUCE_NAMESPACE::String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [s UTF8String]);
+}
+
+static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
+{
+    return [NSString stringWithUTF8String: (const char*) s.toUTF8()];
+}
+
 
 #endif

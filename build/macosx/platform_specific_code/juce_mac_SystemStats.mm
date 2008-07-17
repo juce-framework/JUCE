@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "juce_mac_NativeHeaders.h"
 #include <AppKit/AppKit.h>
 #include <CoreAudio/HostTime.h>
 #include <ctime>
@@ -145,6 +145,7 @@ void SystemStats::initialiseStats() throw()
     {
         initialised = true;
 
+        [NSApplication sharedApplication];
         NSApplicationLoad();
 
 #if JUCE_INTEL

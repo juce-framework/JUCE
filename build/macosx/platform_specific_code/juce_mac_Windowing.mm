@@ -29,9 +29,8 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "juce_mac_NativeHeaders.h"
 #include <Carbon/Carbon.h>
-#include <Cocoa/Cocoa.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/hid/IOHIDLib.h>
@@ -2139,6 +2138,11 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
     if (juce_currentMouseTrackingPeer != 0)
         trackNextMouseEvent();
 
+/*    [[NSRunLoop mainRunLoop] acceptInputForMode: NSDefaultRunLoopMode
+                                beforeDate: returnIfNoPendingMessages 
+                                                ? [[NSDate date] addTimeInterval: 0.01]
+                                                : [NSDate distantFuture]];
+*/
     EventRef theEvent;
 
     if (ReceiveNextEvent (0, 0, (returnIfNoPendingMessages) ? kEventDurationNoWait

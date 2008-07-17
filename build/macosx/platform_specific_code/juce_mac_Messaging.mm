@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "juce_mac_NativeHeaders.h"
 #include <Carbon/Carbon.h>
 
 BEGIN_JUCE_NAMESPACE
@@ -43,14 +43,159 @@ BEGIN_JUCE_NAMESPACE
 
 #undef Point
 
-static int kJUCEClass = FOUR_CHAR_CODE ('JUCE');
-const int kJUCEKind = 1;
-const int kCallbackKind = 2;
-
 extern void juce_HandleProcessFocusChange();
 extern void juce_maximiseAllMinimisedWindows();
 extern void juce_InvokeMainMenuCommand (const HICommand& command);
 extern void juce_MainMenuAboutToBeUsed();
+
+struct CallbackMessagePayload
+{
+    MessageCallbackFunction* function;
+    void* parameter;
+    void* volatile result;
+    bool volatile hasBeenExecuted;
+};
+
+END_JUCE_NAMESPACE
+
+#if JUCE_COCOA
+
+NSString* juceMessageName = 0;
+
+@interface JuceAppDelegate   : NSObject
+id oldDelegate;
+- (JuceAppDelegate*) init;
+- (void) dealloc;
+- (BOOL) application: (NSApplication*) theApplication openFile: (NSString*) filename;
+- (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames;
+- (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app;
+- (void) applicationDidBecomeActive: (NSNotification*) aNotification;
+- (void) applicationDidResignActive: (NSNotification*) aNotification;
+- (void) applicationWillUnhide: (NSNotification*) aNotification;
+- (void) customEvent: (NSNotification*) aNotification;
+- (void) performCallback: (id) info;
+@end
+
+@implementation JuceAppDelegate
+
+- (JuceAppDelegate*) init
+{
+    [super init];
+
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+
+    if (JUCE_NAMESPACE::JUCEApplication::getInstance() != 0)
+    {
+        oldDelegate = [NSApp delegate];
+        [NSApp setDelegate: self];
+    }
+    else
+    {
+        oldDelegate = 0;
+        [center addObserver: self selector: @selector (applicationDidResignActive:)  
+                       name: NSApplicationDidResignActiveNotification object: NSApp];
+
+        [center addObserver: self selector: @selector (applicationDidBecomeActive:)  
+                       name: NSApplicationDidBecomeActiveNotification object: NSApp];
+
+        [center addObserver: self selector: @selector (applicationWillUnhide:)  
+                       name: NSApplicationWillUnhideNotification object: NSApp];
+
+    }
+
+    [center addObserver: self selector: @selector (customEvent:)  
+                   name: juceMessageName object: nil];
+
+    return self;
+}
+
+- (void) dealloc
+{
+    if (oldDelegate != 0)
+        [NSApp setDelegate: oldDelegate];
+
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
+    [super dealloc];
+}
+
+- (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app
+{
+    if (JUCE_NAMESPACE::JUCEApplication::getInstance() != 0)
+        JUCE_NAMESPACE::JUCEApplication::getInstance()->systemRequestedQuit();
+
+    return NSTerminateLater;
+}
+
+- (BOOL) application: (NSApplication*) app openFile: (NSString*) filename
+{
+    if (JUCE_NAMESPACE::JUCEApplication::getInstance() != 0)
+    {
+        JUCE_NAMESPACE::JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
+        return YES;
+    }
+
+    return NO;
+}
+
+- (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames
+{
+    JUCE_NAMESPACE::StringArray files;
+    for (int i = 0; i < [filenames count]; ++i)
+        files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
+
+    if (files.size() > 0 && JUCE_NAMESPACE::JUCEApplication::getInstance() != 0)
+        JUCE_NAMESPACE::JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
+}
+
+- (void) applicationDidBecomeActive: (NSNotification*) aNotification
+{
+    JUCE_NAMESPACE::juce_HandleProcessFocusChange();
+}
+
+- (void) applicationDidResignActive: (NSNotification*) aNotification
+{
+    JUCE_NAMESPACE::juce_HandleProcessFocusChange();
+}
+
+- (void) applicationWillUnhide: (NSNotification*) aNotification
+{
+    JUCE_NAMESPACE::juce_maximiseAllMinimisedWindows();
+}
+
+- (void) customEvent: (NSNotification*) n
+{
+    void* message = 0;
+    [((NSData*) [n object]) getBytes: &message length: sizeof (message)];
+
+    if (message != 0)
+        JUCE_NAMESPACE::MessageManager::getInstance()->deliverMessage (message);
+}
+
+- (void) performCallback: (id) info
+{
+    JUCE_NAMESPACE::CallbackMessagePayload* pl = (JUCE_NAMESPACE::CallbackMessagePayload*) info;
+
+    if (pl != 0)
+    {
+        pl->result = (*pl->function) (pl->parameter);
+        pl->hasBeenExecuted = true;
+    }
+}
+
+@end
+#endif
+
+BEGIN_JUCE_NAMESPACE
+
+
+#if JUCE_COCOA
+static JuceAppDelegate* juceAppDelegate = 0;
+
+#else
+static int kJUCEClass = FOUR_CHAR_CODE ('JUCE');
+const int kJUCEKind = 1;
+const int kCallbackKind = 2;
+
 
 static pascal OSStatus EventHandlerProc (EventHandlerCallRef, EventRef theEvent, void* userData)
 {
@@ -62,14 +207,6 @@ static pascal OSStatus EventHandlerProc (EventHandlerCallRef, EventRef theEvent,
 
     return noErr;
 }
-
-struct CallbackMessagePayload
-{
-    MessageCallbackFunction* function;
-    void* parameter;
-    void* volatile result;
-    bool volatile hasBeenExecuted;
-};
 
 static pascal OSStatus CallbackHandlerProc (EventHandlerCallRef, EventRef theEvent, void* userData)
 {
@@ -220,6 +357,8 @@ static EventQueueRef mainQueue;
 static EventHandlerRef juceEventHandler = 0;
 static EventHandlerRef callbackEventHandler = 0;
 
+#endif
+
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
@@ -229,21 +368,22 @@ void MessageManager::doPlatformSpecificInitialisation()
     {
         initialised = true;
 
-#if MACOS_10_3_OR_EARLIER
-        // work-around for a bug in MacOS 10.2..
-        ProcessSerialNumber junkPSN;
-        (void) GetCurrentProcess (&junkPSN);
-#endif
-
-        mainQueue = GetMainEventQueue();
-
+#if JUCE_COCOA
         // if we're linking a Juce app to one or more dynamic libraries, we'll need different values
         // for this so each module doesn't interfere with the others.
         UnsignedWide t;
         Microseconds (&t);
         kJUCEClass ^= t.lo;
+
+        juceMessageName = juceStringToNS ("juce_" + String::toHexString ((int) t.lo));
+
+        juceAppDelegate = [[JuceAppDelegate alloc] init];
+#else
+        mainQueue = GetMainEventQueue();
+#endif
     }
 
+#if ! JUCE_COCOA
     const EventTypeSpec type1 = { kJUCEClass, kJUCEKind };
     InstallApplicationEventHandler (NewEventHandlerUPP (EventHandlerProc), 1, &type1, 0, &juceEventHandler);
 
@@ -268,6 +408,7 @@ void MessageManager::doPlatformSpecificInitialisation()
         AEInstallEventHandler (kCoreEventClass, kAEOpenDocuments,
                                NewAEEventHandlerUPP (OpenDocEventHandler), 0, false);
     }
+#endif
 }
 
 void MessageManager::doPlatformSpecificShutdown()
@@ -287,6 +428,14 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool juce_postMessageToSystemQueue (void* message)
 {
+#if JUCE_COCOA
+    [[NSNotificationCenter defaultCenter] postNotificationName: juceMessageName
+                                                        object: [NSData dataWithBytes: &message 
+                                                                               length: (int) sizeof (message)]];
+
+    return true;
+
+#else
     jassert (mainQueue == GetMainEventQueue());
 
     EventRef event;
@@ -299,6 +448,7 @@ bool juce_postMessageToSystemQueue (void* message)
     }
 
     return false;
+#endif
 }
 
 void MessageManager::broadcastMessage (const String& value) throw()
@@ -314,13 +464,21 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
     }
     else
     {
-        jassert (mainQueue == GetMainEventQueue());
-
         CallbackMessagePayload cmp;
         cmp.function = callback;
         cmp.parameter = data;
         cmp.result = 0;
         cmp.hasBeenExecuted = false;
+
+#if JUCE_COCOA
+        [juceAppDelegate performSelectorOnMainThread: @selector (performCallback:)
+                                          withObject: (id) &cmp
+                                       waitUntilDone: YES];
+
+        return cmp.result;
+
+#else
+        jassert (mainQueue == GetMainEventQueue());
 
         EventRef event;
         if (CreateEvent (0, kJUCEClass, kCallbackKind, 0, kEventAttributeUserEvent, &event) == noErr)
@@ -338,6 +496,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         }
 
         return 0;
+#endif
     }
 }
 

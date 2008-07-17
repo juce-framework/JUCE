@@ -326,7 +326,10 @@ void QuickTimeMovieComponent::setSpeed (const float newSpeed)
 void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 {
     if (qtMovie != 0)
+    {
         qtMovie->PutAudioVolume (newVolume);
+        qtMovie->PutAudioMute (newVolume <= 0);
+    }
 }
 
 float QuickTimeMovieComponent::getMovieVolume() const

@@ -96,6 +96,8 @@ public:
 private:
     FileListComponent (const FileListComponent&);
     const FileListComponent& operator= (const FileListComponent&);
+
+    File lastDirectory;
 };
 
 

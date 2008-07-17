@@ -171,7 +171,7 @@ public:
                                 key to toggle velocity-sensitive mode
     */
     void setVelocityModeParameters (const double sensitivity = 1.0,
-                                    const int threshold = 1.0,
+                                    const int threshold = 1,
                                     const double offset = 0.0,
                                     const bool userCanPressKeyToSwapMode = true) throw();
 

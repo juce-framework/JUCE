@@ -7464,7 +7464,7 @@ public:
 
     /** Returns the type of operating system we're running on.
 
-        @returns one of the values from the OSType enum.
+        @returns one of the values from the OperatingSystemType enum.
         @see getOperatingSystemName
     */
     static OperatingSystemType getOperatingSystemType() throw();
@@ -44393,7 +44393,7 @@ public:
                                 key to toggle velocity-sensitive mode
     */
     void setVelocityModeParameters (const double sensitivity = 1.0,
-                                    const int threshold = 1.0,
+                                    const int threshold = 1,
                                     const double offset = 0.0,
                                     const bool userCanPressKeyToSwapMode = true) throw();
 
@@ -49163,6 +49163,8 @@ public:
 private:
     FileListComponent (const FileListComponent&);
     const FileListComponent& operator= (const FileListComponent&);
+
+    File lastDirectory;
 };
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__

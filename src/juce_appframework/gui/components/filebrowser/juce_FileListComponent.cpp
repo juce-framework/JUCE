@@ -70,6 +70,12 @@ void FileListComponent::scrollToTop()
 void FileListComponent::changeListenerCallback (void*)
 {
     updateContent();
+
+    if (lastDirectory != fileList.getDirectory())
+    {
+        lastDirectory = fileList.getDirectory();
+        deselectAllRows();
+    }
 }
 
 //==============================================================================
