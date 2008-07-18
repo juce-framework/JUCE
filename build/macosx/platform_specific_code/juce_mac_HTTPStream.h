@@ -57,9 +57,19 @@ public:
                const MemoryBlock& postData,
                const bool isPost,
                URL::OpenStreamProgressCallback* callback,
-               void* callbackContext)
+               void* callbackContext,
+               int timeOutMs)
     {
         closeSocket();
+
+        uint32 timeOutTime = Time::getMillisecondCounter();
+
+        if (timeOutMs == 0)
+            timeOutTime += 60000;
+        else if (timeOutMs < 0)
+            timeOutTime = 0xffffffff;
+        else
+            timeOutTime += timeOutMs;
 
         String hostName, hostPath;
         int hostPort;
@@ -125,6 +135,12 @@ public:
 
         while (totalHeaderSent < requestHeader.getSize())
         {
+            if (Time::getMillisecondCounter() > timeOutTime)
+            {
+                closeSocket();
+                return false;
+            }
+
             const int numToSend = jmin (1024, requestHeader.getSize() - totalHeaderSent);
 
             if (send (socketHandle,
@@ -145,7 +161,7 @@ public:
             }
         }
 
-        const String responseHeader (readResponse());
+        const String responseHeader (readResponse (timeOutTime));
 
         if (responseHeader.isNotEmpty())
         {
@@ -259,12 +275,13 @@ private:
         return mb;
     }
 
-    const String readResponse()
+    const String readResponse (const uint32 timeOutTime)
     {
         int bytesRead = 0, numConsecutiveLFs  = 0;
         MemoryBlock buffer (1024, true);
 
-        while (numConsecutiveLFs < 2 && bytesRead < 32768)
+        while (numConsecutiveLFs < 2 && bytesRead < 32768
+                && Time::getMillisecondCounter() <= timeOutTime)
         {
             fd_set readbits;
             FD_ZERO (&readbits);
@@ -361,12 +378,13 @@ void* juce_openInternetFile (const String& url,
                              const MemoryBlock& postData,
                              const bool isPost,
                              URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext)
+                             void* callbackContext,
+                             int timeOutMs)
 {
     JUCE_HTTPSocketStream* const s = new JUCE_HTTPSocketStream();
 
     if (s->open (url, headers, postData, isPost,
-                 callback, callbackContext))
+                 callback, callbackContext, timeOutMs))
         return s;
 
     delete s;

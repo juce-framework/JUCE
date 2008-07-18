@@ -68,11 +68,22 @@ public:
             const uint8 green,
             const uint8 blue) throw();
 
+    /** Creates an opaque colour using 8-bit red, green and blue values */
+    static const Colour fromRGB (const uint8 red,
+                                 const uint8 green,
+                                 const uint8 blue) throw();
+
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
     Colour (const uint8 red,
             const uint8 green,
             const uint8 blue,
             const uint8 alpha) throw();
+
+    /** Creates a colour using 8-bit red, green, blue and alpha values. */
+    static const Colour fromRGBA (const uint8 red,
+                                  const uint8 green,
+                                  const uint8 blue,
+                                  const uint8 alpha) throw();
 
     /** Creates a colour from 8-bit red, green, and blue values, and a floating-point alpha.
 
@@ -83,6 +94,12 @@ public:
             const uint8 green,
             const uint8 blue,
             const float alpha) throw();
+
+    /** Creates a colour using 8-bit red, green, blue and float alpha values. */
+    static const Colour fromRGBAFloat (const uint8 red,
+                                       const uint8 green,
+                                       const uint8 blue,
+                                       const float alpha) throw();
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -104,6 +121,17 @@ public:
             const float saturation,
             const float brightness,
             const float alpha) throw();
+
+    /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
+
+        The floating point values must be between 0.0 and 1.0.
+        An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
+        Values outside the valid range will be clipped.
+    */
+    static const Colour fromHSV (const float hue,
+                                 const float saturation,
+                                 const float brightness,
+                                 const float alpha) throw();
 
     /** Destructor. */
     ~Colour() throw();

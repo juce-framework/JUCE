@@ -48,9 +48,8 @@ class SimpleDeviceManagerInputLevelMeter  : public Component,
 public:
     SimpleDeviceManagerInputLevelMeter (AudioDeviceManager* const manager_)
         : manager (manager_),
-          totalBlocks (7)
+          level (0)
     {
-        numBlocks = 0;
         startTimer (50);
         manager->enableInputLevelMeasurement (true);
     }
@@ -62,39 +61,23 @@ public:
 
     void timerCallback()
     {
-        const int newNumBlocks = roundDoubleToInt (manager->getCurrentInputLevel() * totalBlocks);
-        if (newNumBlocks != numBlocks)
+        const float newLevel = (float) manager->getCurrentInputLevel();
+
+        if (fabsf (level - newLevel) > 0.005f)
         {
-            numBlocks = newNumBlocks;
+            level = newLevel;
             repaint();
         }
     }
 
     void paint (Graphics& g)
     {
-        g.setColour (Colours::white.withAlpha (0.8f));
-        g.fillRoundedRectangle (0.0f, 0.0f, (float) getWidth(), (float) getHeight(), 3.0f);
-        g.setColour (Colours::black.withAlpha (0.2f));
-        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 1.0f);
-
-        const float w = (getWidth() - 6.0f) / (float) totalBlocks;
-
-        for (int i = 0; i < totalBlocks; ++i)
-        {
-            if (i >= numBlocks)
-                g.setColour (Colours::lightblue.withAlpha (0.6f));
-            else
-                g.setColour (i < totalBlocks - 1 ? Colours::blue.withAlpha (0.5f)
-                                                 : Colours::red);
-
-            g.fillRoundedRectangle (3.0f + i * w + w * 0.1f, 3.0f, w * 0.8f, getHeight() - 6.0f, w * 0.4f);
-        }
+        getLookAndFeel().drawLevelMeter (g, getWidth(), getHeight(), level);
     }
 
 private:
     AudioDeviceManager* const manager;
-    const int totalBlocks;
-    int numBlocks;
+    float level;
 };
 
 
@@ -232,7 +215,8 @@ class AudioDeviceSettingsPanel : public Component,
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType* type_, 
-                              AudioIODeviceType::DeviceSetupDetails& setup_)
+                              AudioIODeviceType::DeviceSetupDetails& setup_,
+                              const bool hideAdvancedOptionsWithButton)
         : type (type_),
           setup (setup_)
     {
@@ -251,6 +235,13 @@ public:
         outputChanList = 0;
         inputChanLabel = 0;
         outputChanLabel = 0;
+        showAdvancedSettingsButton = 0;
+
+        if (hideAdvancedOptionsWithButton)
+        {
+            addAndMakeVisible (showAdvancedSettingsButton = new TextButton (TRANS("Show advanced settings...")));
+            showAdvancedSettingsButton->addButtonListener (this);
+        }
 
         type->scanForDevices();
 
@@ -269,6 +260,7 @@ public:
         deleteAndZero (showUIButton);
         deleteAndZero (inputChanLabel);
         deleteAndZero (outputChanLabel);
+        deleteAndZero (showAdvancedSettingsButton);
 
         deleteAllChildren();
     }
@@ -321,20 +313,30 @@ public:
 
         y += space * 2;
 
+        if (showAdvancedSettingsButton != 0)
+        {
+            showAdvancedSettingsButton->changeWidthToFitText (h);
+            showAdvancedSettingsButton->setTopLeftPosition (lx, y);
+        }
+
         if (sampleRateDropDown != 0)
         {
+            sampleRateDropDown->setVisible (! showAdvancedSettingsButton->isVisible());
+
             sampleRateDropDown->setBounds (lx, y, w, h);
             y += dh;
         }
 
         if (bufferSizeDropDown != 0)
         {
+            bufferSizeDropDown->setVisible (! showAdvancedSettingsButton->isVisible());
             bufferSizeDropDown->setBounds (lx, y, w, h);
             y += dh;
         }
 
         if (showUIButton != 0)
         {
+            showUIButton->setVisible (! showAdvancedSettingsButton->isVisible());
             showUIButton->changeWidthToFitText (h);
             showUIButton->setTopLeftPosition (lx, y);
         }
@@ -403,7 +405,12 @@ public:
 
     void buttonClicked (Button* button)
     {
-        if (button == showUIButton)
+        if (button == showAdvancedSettingsButton)
+        {
+            showAdvancedSettingsButton->setVisible (false);
+            resized();
+        }
+        else if (button == showUIButton)
         {
             AudioIODevice* const device = setup.manager->getCurrentAudioDevice();
 
@@ -624,6 +631,7 @@ private:
     TextButton* testButton;
     Component* inputLevelMeter;
     TextButton* showUIButton;
+    TextButton* showAdvancedSettingsButton;
 
     void showCorrectDeviceName (ComboBox* const box, const bool isInput)
     {
@@ -935,13 +943,15 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                             const int maxOutputChannels_,
                                                             const bool showMidiInputOptions,
                                                             const bool showMidiOutputSelector,
-                                                            const bool showChannelsAsStereoPairs_)
+                                                            const bool showChannelsAsStereoPairs_,
+                                                            const bool hideAdvancedOptionsWithButton_)
     : deviceManager (deviceManager_),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
       maxInputChannels (maxInputChannels_),
       showChannelsAsStereoPairs (showChannelsAsStereoPairs_),
+      hideAdvancedOptionsWithButton (hideAdvancedOptionsWithButton_),
       deviceTypeDropDown (0),
       deviceTypeDropDownLabel (0),
       audioDeviceSettingsComp (0)
@@ -1103,7 +1113,7 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
             details.maxNumOutputChannels = maxOutputChannels;
             details.useStereoPairs = showChannelsAsStereoPairs;
 
-            audioDeviceSettingsComp = new AudioDeviceSettingsPanel (type, details);
+            audioDeviceSettingsComp = new AudioDeviceSettingsPanel (type, details, hideAdvancedOptionsWithButton);
 
             if (audioDeviceSettingsComp != 0)
             {

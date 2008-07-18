@@ -85,6 +85,13 @@ Colour::Colour (const uint8 red,
     argb.setARGB (0xff, red, green, blue);
 }
 
+const Colour Colour::fromRGB (const uint8 red,
+                              const uint8 green,
+                              const uint8 blue) throw()
+{
+    return Colour (red, green, blue);
+}
+
 Colour::Colour (const uint8 red,
                 const uint8 green,
                 const uint8 blue,
@@ -93,12 +100,28 @@ Colour::Colour (const uint8 red,
     argb.setARGB (alpha, red, green, blue);
 }
 
+const Colour Colour::fromRGBA (const uint8 red,
+                               const uint8 green,
+                               const uint8 blue,
+                               const uint8 alpha) throw()
+{
+    return Colour (red, green, blue, alpha);
+}
+
 Colour::Colour (const uint8 red,
                 const uint8 green,
                 const uint8 blue,
                 const float alpha) throw()
 {
     argb.setARGB (floatAlphaToInt (alpha), red, green, blue);
+}
+
+const Colour Colour::fromRGBAFloat (const uint8 red,
+                                    const uint8 green,
+                                    const uint8 blue,
+                                    const float alpha) throw()
+{
+    return Colour (red, green, blue, alpha);
 }
 
 //==============================================================================
@@ -177,6 +200,14 @@ Colour::Colour (const float hue,
     convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (floatAlphaToInt (alpha), r, g, b);
+}
+
+const Colour Colour::fromHSV (const float hue,
+                              const float saturation,
+                              const float brightness,
+                              const float alpha) throw()
+{
+    return Colour (hue, saturation, brightness, alpha);
 }
 
 Colour::Colour (const float hue,

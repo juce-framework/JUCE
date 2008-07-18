@@ -543,6 +543,9 @@ public:
     virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
+    virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
+
+    //==============================================================================
     /**
     */
     virtual void playAlertSound();

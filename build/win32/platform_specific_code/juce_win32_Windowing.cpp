@@ -820,7 +820,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
-    void textInputRequired (int x, int y)
+    void textInputRequired (int /*x*/, int /*y*/)
     {
         if (! hasCreatedCaret)
         {
@@ -829,7 +829,7 @@ public:
         }
 
         ShowCaret (hwnd);
-        SetCaretPos (x, y);
+        SetCaretPos (-1, -1);
     }
 
     void repaint (int x, int y, int w, int h)
@@ -3738,6 +3738,7 @@ class ActiveXControlData  : public ComponentMovementWatcher
     bool wasShowing;
 
 public:
+    HWND controlHWND;
     IStorage* storage;
     IOleClientSite* clientSite;
     IOleObject* control;
@@ -3748,6 +3749,7 @@ public:
         : ComponentMovementWatcher (owner_),
           owner (owner_),
           wasShowing (owner_ != 0 && owner_->isShowing()),
+          controlHWND (0),
           storage (new JuceIStorage()),
           clientSite (new JuceIOleClientSite (hwnd)),
           control (0)
@@ -3795,6 +3797,11 @@ public:
     void componentVisibilityChanged (Component&)
     {
         componentPeerChanged();
+    }
+
+    static bool doesWindowMatch (const ActiveXControlComponent* const ax, HWND hwnd)
+    {
+        return ((ActiveXControlData*) ax->control)->controlHWND == hwnd;
     }
 };
 
@@ -3863,9 +3870,7 @@ static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wPar
     {
         const ActiveXControlComponent* const ax = (const ActiveXControlComponent*) activeXComps.getUnchecked(i);
 
-        HWND controlHWND = getHWND (ax);
-
-        if (controlHWND == hwnd)
+        if (ActiveXControlData::doesWindowMatch (ax, hwnd))
         {
             switch (message)
             {
@@ -3961,12 +3966,12 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                     control = info;
                     setControlBounds (Rectangle (x, y, getWidth(), getHeight()));
 
-                    HWND controlHWND = getHWND (this);
+                    info->controlHWND = getHWND (this);
 
-                    if (controlHWND != 0)
+                    if (info->controlHWND != 0)
                     {
-                        originalWndProc = (void*) GetWindowLongPtr (controlHWND, GWLP_WNDPROC);
-                        SetWindowLongPtr (controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
+                        originalWndProc = (void*) GetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC);
+                        SetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
                     }
 
                     return true;
@@ -4007,7 +4012,7 @@ void* ActiveXControlComponent::queryInterface (const void* iid) const
 
 void ActiveXControlComponent::setControlBounds (const Rectangle& newBounds) const
 {
-    HWND hwnd = getHWND (this);
+    HWND hwnd = ((ActiveXControlData*) control)->controlHWND;
 
     if (hwnd != 0)
         MoveWindow (hwnd, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
@@ -4015,7 +4020,7 @@ void ActiveXControlComponent::setControlBounds (const Rectangle& newBounds) cons
 
 void ActiveXControlComponent::setControlVisible (const bool shouldBeVisible) const
 {
-    HWND hwnd = getHWND (this);
+    HWND hwnd = ((ActiveXControlData*) control)->controlHWND;
 
     if (hwnd != 0)
         ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);

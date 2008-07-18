@@ -162,11 +162,15 @@ public:
         @param extraHeaders     if not empty, this string is appended onto the headers that
                                 are used for the request. It must therefore be a valid set of HTML
                                 header directives, separated by newlines.
+        @param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
+                                a negative number, it will be infinite. Otherwise it specifies a 
+                                time in milliseconds.
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,
                                     void* const progressCallbackContext = 0,
-                                    const String& extraHeaders = String::empty) const;
+                                    const String& extraHeaders = String::empty,
+                                    const int connectionTimeOutMs = 0) const;
 
 
     //==============================================================================

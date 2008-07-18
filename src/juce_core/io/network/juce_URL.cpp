@@ -162,7 +162,8 @@ void* juce_openInternetFile (const String& url,
                              const MemoryBlock& optionalPostData,
                              const bool isPost,
                              URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext);
+                             void* callbackContext,
+                             int timeOutMs);
 
 void juce_closeInternetFile (void* handle);
 int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
@@ -178,12 +179,14 @@ public:
                     const bool isPost_,
                     URL::OpenStreamProgressCallback* const progressCallback_,
                     void* const progressCallbackContext_,
-                    const String& extraHeaders)
+                    const String& extraHeaders,
+                    int timeOutMs_)
       : position (0),
         finished (false),
         isPost (isPost_),
         progressCallback (progressCallback_),
-        progressCallbackContext (progressCallbackContext_)
+        progressCallbackContext (progressCallbackContext_),
+        timeOutMs (timeOutMs_)
     {
         server = url.toString (! isPost);
 
@@ -196,7 +199,8 @@ public:
             headers << "\r\n";
 
         handle = juce_openInternetFile (server, headers, postData, isPost,
-                                        progressCallback_, progressCallbackContext_);
+                                        progressCallback_, progressCallbackContext_,
+                                        timeOutMs);
     }
 
     ~WebInputStream()
@@ -265,7 +269,8 @@ public:
                     finished = false;
 
                     handle = juce_openInternetFile (server, headers, postData, isPost,
-                                                    progressCallback, progressCallbackContext);
+                                                    progressCallback, progressCallbackContext,
+                                                    timeOutMs);
                 }
 
                 skipNextBytes (wantedPos - position);
@@ -287,6 +292,7 @@ private:
     void* handle;
     URL::OpenStreamProgressCallback* const progressCallback;
     void* const progressCallbackContext;
+    const int timeOutMs;
 
     void createHeadersAndPostData (const URL& url)
     {
@@ -370,11 +376,13 @@ private:
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
                                      void* const progressCallbackContext,
-                                     const String& extraHeaders) const
+                                     const String& extraHeaders,
+                                     const int timeOutMs) const
 {
     WebInputStream* wi = new WebInputStream (*this, usePostCommand,
                                              progressCallback, progressCallbackContext,
-                                             extraHeaders);
+                                             extraHeaders,
+                                             timeOutMs);
 
     if (wi->isError())
     {

@@ -303,13 +303,15 @@ void WebBrowserComponent::checkWindowAssociation()
 {
     if (isShowing())
     {
-        if (blankPageShown)
-            goBack();
-
         if (browser->browser == 0 && getPeer() != 0)
         {
             browser->createBrowser();
             reloadLastURL();
+        }
+        else
+        {
+            if (blankPageShown)
+                goBack();
         }
     }
     else

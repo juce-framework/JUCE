@@ -79,7 +79,8 @@ void* juce_openInternetFile (const String& url,
                              const MemoryBlock& postData,
                              const bool isPost,
                              URL::OpenStreamProgressCallback* callback,
-                             void* callbackContext)
+                             void* callbackContext,
+                             int timeOutMs)
 {
     if (sessionHandle == 0)
         sessionHandle = InternetOpen (_T("juce"),
@@ -102,6 +103,13 @@ void* juce_openInternetFile (const String& url,
 
         if (InternetCrackUrl (url, 0, 0, &uc))
         {
+            if (timeOutMs == 0)
+                timeOutMs = 30000;
+            else if (timeOutMs < 0)
+                timeOutMs = -1;
+
+            InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
+
             const bool isFtp = url.startsWithIgnoreCase (T("ftp:"));
 
             HINTERNET connection = InternetConnect (sessionHandle,

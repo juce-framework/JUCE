@@ -2554,6 +2554,30 @@ void LookAndFeel::playAlertSound()
 }
 
 //==============================================================================
+void LookAndFeel::drawLevelMeter (Graphics& g, int width, int height, float level)
+{
+    g.setColour (Colours::white.withAlpha (0.7f));
+    g.fillRoundedRectangle (0.0f, 0.0f, (float) width, (float) height, 3.0f);
+    g.setColour (Colours::black.withAlpha (0.2f));
+    g.drawRoundedRectangle (1.0f, 1.0f, width - 2.0f, height - 2.0f, 3.0f, 1.0f);
+
+    const int totalBlocks = 7;
+    const int numBlocks = roundDoubleToInt (totalBlocks * level);
+    const float w = (width - 6.0f) / (float) totalBlocks;
+
+    for (int i = 0; i < totalBlocks; ++i)
+    {
+        if (i >= numBlocks)
+            g.setColour (Colours::lightblue.withAlpha (0.6f));
+        else
+            g.setColour (i < totalBlocks - 1 ? Colours::blue.withAlpha (0.5f)
+                                             : Colours::red);
+
+        g.fillRoundedRectangle (3.0f + i * w + w * 0.1f, 3.0f, w * 0.8f, height - 6.0f, w * 0.4f);
+    }
+}
+
+//==============================================================================
 static void createRoundedPath (Path& p,
                                const float x, const float y,
                                const float w, const float h,

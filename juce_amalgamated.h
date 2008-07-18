@@ -12279,11 +12279,15 @@ public:
         @param extraHeaders     if not empty, this string is appended onto the headers that
                                 are used for the request. It must therefore be a valid set of HTML
                                 header directives, separated by newlines.
+        @param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
+                                a negative number, it will be infinite. Otherwise it specifies a
+                                time in milliseconds.
     */
     InputStream* createInputStream (const bool usePostCommand,
                                     OpenStreamProgressCallback* const progressCallback = 0,
                                     void* const progressCallbackContext = 0,
-                                    const String& extraHeaders = String::empty) const;
+                                    const String& extraHeaders = String::empty,
+                                    const int connectionTimeOutMs = 0) const;
 
     /** Tries to download the entire contents of this URL into a binary data block.
 
@@ -18377,11 +18381,22 @@ public:
             const uint8 green,
             const uint8 blue) throw();
 
+    /** Creates an opaque colour using 8-bit red, green and blue values */
+    static const Colour fromRGB (const uint8 red,
+                                 const uint8 green,
+                                 const uint8 blue) throw();
+
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
     Colour (const uint8 red,
             const uint8 green,
             const uint8 blue,
             const uint8 alpha) throw();
+
+    /** Creates a colour using 8-bit red, green, blue and alpha values. */
+    static const Colour fromRGBA (const uint8 red,
+                                  const uint8 green,
+                                  const uint8 blue,
+                                  const uint8 alpha) throw();
 
     /** Creates a colour from 8-bit red, green, and blue values, and a floating-point alpha.
 
@@ -18392,6 +18407,12 @@ public:
             const uint8 green,
             const uint8 blue,
             const float alpha) throw();
+
+    /** Creates a colour using 8-bit red, green, blue and float alpha values. */
+    static const Colour fromRGBAFloat (const uint8 red,
+                                       const uint8 green,
+                                       const uint8 blue,
+                                       const float alpha) throw();
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -18413,6 +18434,17 @@ public:
             const float saturation,
             const float brightness,
             const float alpha) throw();
+
+    /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
+
+        The floating point values must be between 0.0 and 1.0.
+        An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
+        Values outside the valid range will be clipped.
+    */
+    static const Colour fromHSV (const float hue,
+                                 const float saturation,
+                                 const float brightness,
+                                 const float alpha) throw();
 
     /** Destructor. */
     ~Colour() throw();
@@ -50477,6 +50509,8 @@ public:
         @param showMidiOutputSelector   if true, the component will let the user choose a default midi output device
         @param showChannelsAsStereoPairs    if true, channels will be treated as pairs; if false, channels will be
                                         treated as a set of separate mono channels.
+        @param hideAdvancedOptionsWithButton    if true, only the minimum amount of UI components
+                                        are shown, with an "advanced" button that shows the rest of them
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
                                   const int minAudioInputChannels,
@@ -50485,7 +50519,8 @@ public:
                                   const int maxAudioOutputChannels,
                                   const bool showMidiInputOptions,
                                   const bool showMidiOutputSelector,
-                                  const bool showChannelsAsStereoPairs);
+                                  const bool showChannelsAsStereoPairs,
+                                  const bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -50509,6 +50544,7 @@ private:
     String audioDeviceSettingsCompType;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
     const bool showChannelsAsStereoPairs;
+    const bool hideAdvancedOptionsWithButton;
 
     MidiInputSelectorComponentListBox* midiInputsList;
     Label* midiInputsLabel;
@@ -52628,6 +52664,8 @@ public:
                                              PropertyComponent& component);
 
     virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
+
+    virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
 
     /**
     */

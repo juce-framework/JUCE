@@ -68,6 +68,8 @@ public:
         @param showMidiOutputSelector   if true, the component will let the user choose a default midi output device
         @param showChannelsAsStereoPairs    if true, channels will be treated as pairs; if false, channels will be 
                                         treated as a set of separate mono channels.
+        @param hideAdvancedOptionsWithButton    if true, only the minimum amount of UI components
+                                        are shown, with an "advanced" button that shows the rest of them
     */
     AudioDeviceSelectorComponent (AudioDeviceManager& deviceManager,
                                   const int minAudioInputChannels,
@@ -76,7 +78,8 @@ public:
                                   const int maxAudioOutputChannels,
                                   const bool showMidiInputOptions,
                                   const bool showMidiOutputSelector,
-                                  const bool showChannelsAsStereoPairs);
+                                  const bool showChannelsAsStereoPairs,
+                                  const bool hideAdvancedOptionsWithButton);
 
     /** Destructor */
     ~AudioDeviceSelectorComponent();
@@ -103,6 +106,7 @@ private:
     String audioDeviceSettingsCompType;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
     const bool showChannelsAsStereoPairs;
+    const bool hideAdvancedOptionsWithButton;
 
     MidiInputSelectorComponentListBox* midiInputsList;
     Label* midiInputsLabel;
