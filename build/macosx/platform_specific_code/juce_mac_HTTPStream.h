@@ -188,7 +188,7 @@ public:
                     location = T("http://") + location;
 
                 if (levelsOfRedirection++ < 3)
-                    return open (location, headers, postData, isPost, callback, callbackContext);
+                    return open (location, headers, postData, isPost, callback, callbackContext, timeOutMs);
             }
             else
             {
