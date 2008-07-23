@@ -584,7 +584,7 @@ public:
                                int sourceClipWidth,
                                int sourceClipHeight,
                                const AffineTransform& transform,
-                               const bool fillAlphaChannelWithCurrentBrush) const throw();
+                               const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
     /** Draws an image to fit within a designated rectangle.
 
@@ -613,7 +613,7 @@ public:
                           const int destWidth,
                           const int destHeight,
                           const RectanglePlacement& placementWithinTarget,
-                          const bool fillAlphaChannelWithCurrentBrush) const throw();
+                          const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
 
     //==============================================================================

@@ -366,11 +366,12 @@ int ZipFile::findEndOfZipEntryTable (InputStream* input)
 
     in.setPosition (in.getTotalLength());
     int64 pos = in.getPosition();
+    const int64 lowestPos = jmax ((int64) 0, pos - 1024);
 
     char buffer [32];
     zeromem (buffer, sizeof (buffer));
 
-    while (pos > 0)
+    while (pos > lowestPos)
     {
         in.setPosition (pos - 22);
         pos = in.getPosition();
