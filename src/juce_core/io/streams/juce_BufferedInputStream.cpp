@@ -126,7 +126,7 @@ void BufferedInputStream::ensureBuffered()
 int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
 {
     if (position >= bufferStart
-         && position + maxBytesToRead < lastReadPos)
+         && position + maxBytesToRead <= lastReadPos)
     {
         memcpy (destBuffer, buffer + (position - bufferStart), maxBytesToRead);
         position += maxBytesToRead;

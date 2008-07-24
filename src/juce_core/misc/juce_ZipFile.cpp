@@ -306,52 +306,56 @@ void ZipFile::init()
     {
         numEntries = 0;
         int pos = findEndOfZipEntryTable (in);
-        const int size = (int) (in->getTotalLength() - pos);
 
-        in->setPosition (pos);
-        MemoryBlock headerData;
-
-        if (in->readIntoMemoryBlock (headerData, size) == size)
+        if (pos >= 0 && pos < in->getTotalLength())
         {
-            pos = 0;
+            const int size = (int) (in->getTotalLength() - pos);
 
-            for (int i = 0; i < numEntries; ++i)
+            in->setPosition (pos);
+            MemoryBlock headerData;
+
+            if (in->readIntoMemoryBlock (headerData, size) == size)
             {
-                if (pos + 46 > size)
-                    break;
+                pos = 0;
 
-                const char* const buffer = ((const char*) headerData.getData()) + pos;
+                for (int i = 0; i < numEntries; ++i)
+                {
+                    if (pos + 46 > size)
+                        break;
 
-                const int fileNameLen = littleEndianShort (buffer + 28);
+                    const char* const buffer = ((const char*) headerData.getData()) + pos;
 
-                if (pos + 46 + fileNameLen > size)
-                    break;
+                    const int fileNameLen = littleEndianShort (buffer + 28);
 
-                ZipEntryInfo* const zei = new ZipEntryInfo();
-                zei->entry.filename = String (buffer + 46, fileNameLen);
+                    if (pos + 46 + fileNameLen > size)
+                        break;
 
-                const int time = littleEndianShort (buffer + 12);
-                const int date = littleEndianShort (buffer + 14);
+                    ZipEntryInfo* const zei = new ZipEntryInfo();
+                    zei->entry.filename = String (buffer + 46, fileNameLen);
 
-                const int year      = 1980 + (date >> 9);
-                const int month     = ((date >> 5) & 15) - 1;
-                const int day       = date & 31;
-                const int hours     = time >> 11;
-                const int minutes   = (time >> 5) & 63;
-                const int seconds   = (time & 31) << 1;
+                    const int time = littleEndianShort (buffer + 12);
+                    const int date = littleEndianShort (buffer + 14);
 
-                zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
+                    const int year      = 1980 + (date >> 9);
+                    const int month     = ((date >> 5) & 15) - 1;
+                    const int day       = date & 31;
+                    const int hours     = time >> 11;
+                    const int minutes   = (time >> 5) & 63;
+                    const int seconds   = (time & 31) << 1;
 
-                zei->compressed = littleEndianShort (buffer + 10) != 0;
-                zei->compressedSize = littleEndianInt (buffer + 20);
-                zei->entry.uncompressedSize = littleEndianInt (buffer + 24);
+                    zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
 
-                zei->streamOffset = littleEndianInt (buffer + 42);
-                entries.add (zei);
+                    zei->compressed = littleEndianShort (buffer + 10) != 0;
+                    zei->compressedSize = littleEndianInt (buffer + 20);
+                    zei->entry.uncompressedSize = littleEndianInt (buffer + 24);
 
-                pos += 46 + fileNameLen
-                        + littleEndianShort (buffer + 30)
-                        + littleEndianShort (buffer + 32);
+                    zei->streamOffset = littleEndianInt (buffer + 42);
+                    entries.add (zei);
+
+                    pos += 46 + fileNameLen
+                            + littleEndianShort (buffer + 30)
+                            + littleEndianShort (buffer + 32);
+                }
             }
         }
 
