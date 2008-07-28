@@ -85,7 +85,7 @@ private:
     const bool deleteSourceWhenDestroyed, noWrap;
     bool isEof;
     int activeBufferSize;
-    int64 originalSourcePos;
+    int64 originalSourcePos, currentPos;
     uint8* buffer;
     void* helper;
 

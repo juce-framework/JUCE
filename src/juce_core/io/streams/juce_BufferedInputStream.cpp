@@ -135,21 +135,28 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
     }
     else
     {
+        if (position < bufferStart || position >= lastReadPos)
+            ensureBuffered();
+
         int bytesRead = 0;
 
         while (maxBytesToRead > 0)
         {
+            const int bytesAvailable = jmin (maxBytesToRead, (int) (lastReadPos - position));
+
+            if (bytesAvailable > 0)
+            {
+                memcpy (destBuffer, buffer + (position - bufferStart), bytesAvailable);
+                maxBytesToRead -= bytesAvailable;
+                bytesRead += bytesAvailable;
+                position += bytesAvailable;
+                destBuffer = (void*) (((char*) destBuffer) + bytesAvailable);
+            }
+
             ensureBuffered();
 
             if (isExhausted())
                 break;
-
-            const int bytesAvailable = jmin (maxBytesToRead, (int) (lastReadPos - position));
-            memcpy (destBuffer, buffer + (position - bufferStart), bytesAvailable);
-            maxBytesToRead -= bytesAvailable;
-            bytesRead += bytesAvailable;
-            position += bytesAvailable;
-            destBuffer = (void*) (((char*) destBuffer) + bytesAvailable);
         }
 
         return bytesRead;

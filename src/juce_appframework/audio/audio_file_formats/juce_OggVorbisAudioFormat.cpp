@@ -98,7 +98,7 @@ public:
     //==============================================================================
     OggReader (InputStream* const inp)
         : AudioFormatReader (inp, oggFormatName),
-          reservoir (2, 2048),
+          reservoir (2, 4096),
           reservoirStart (0),
           samplesInReservoir (0)
     {
@@ -135,58 +135,73 @@ public:
                int64 startSampleInFile,
                int numSamples)
     {
-        if (startSampleInFile < reservoirStart
-            || startSampleInFile + numSamples > reservoirStart + samplesInReservoir)
+        int writeOffset = 0;
+
+        while (numSamples > 0)
         {
-            // buffer miss, so refill the reservoir
-            int bitStream = 0;
+            const int numAvailable = reservoirStart + samplesInReservoir - startSampleInFile;
 
-            reservoirStart = (int) jmax ((int64) 0, startSampleInFile - 32);
-            samplesInReservoir = jmax (numSamples + 32, reservoir.getNumSamples());
-            reservoir.setSize (numChannels, samplesInReservoir, false, false, true);
-
-            if (reservoirStart != (int) ov_pcm_tell (&ovFile))
-                ov_pcm_seek (&ovFile, reservoirStart);
-
-            int offset = 0;
-            int numToRead = samplesInReservoir;
-
-            while (numToRead > 0)
+            if (startSampleInFile >= reservoirStart && numAvailable > 0)
             {
-                float** dataIn = 0;
+                // got a few samples overlapping, so use them before seeking..
 
-                const int samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
-                if (samps == 0)
-                    break;
-
-                jassert (samps <= numToRead);
-
-                for (int i = jmin (numChannels, reservoir.getNumChannels()); --i >= 0;)
+                for (unsigned int i = 0; i < numChannels; ++i)
                 {
-                    memcpy (reservoir.getSampleData (i, offset),
-                            dataIn[i],
-                            sizeof (float) * samps);
+                    if (destSamples[i] == 0)
+                        break;
+
+                    memcpy (destSamples[i] + writeOffset,
+                            reservoir.getSampleData (jmin (i, reservoir.getNumChannels()),
+                                                     (int) (startSampleInFile - reservoirStart)),
+                            sizeof (float) * numSamples);
                 }
 
-                numToRead -= samps;
-                offset += samps;
+                startSampleInFile += numAvailable;
+                numSamples -= numAvailable;
+                writeOffset += numAvailable;
+
+                if (numSamples == 0)
+                    break;
             }
 
-            if (numToRead > 0)
-                reservoir.clear (offset, numToRead);
-        }
-
-        if (numSamples > 0)
-        {
-            for (unsigned int i = 0; i < numChannels; ++i)
+            if (startSampleInFile < reservoirStart
+                || startSampleInFile + numSamples > reservoirStart + samplesInReservoir)
             {
-                if (destSamples[i] == 0)
-                    break;
+                // buffer miss, so refill the reservoir
+                int bitStream = 0;
 
-                memcpy (destSamples[i],
-                        reservoir.getSampleData (jmin (i, reservoir.getNumChannels()),
-                                                 (int) (startSampleInFile - reservoirStart)),
-                        sizeof (float) * numSamples);
+                reservoirStart = jmax (0, (int) startSampleInFile);
+                samplesInReservoir = reservoir.getNumSamples();
+
+                if (reservoirStart != (int) ov_pcm_tell (&ovFile))
+                    ov_pcm_seek (&ovFile, reservoirStart);
+
+                int offset = 0;
+                int numToRead = samplesInReservoir;
+
+                while (numToRead > 0)
+                {
+                    float** dataIn = 0;
+
+                    const int samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
+                    if (samps == 0)
+                        break;
+
+                    jassert (samps <= numToRead);
+
+                    for (int i = jmin (numChannels, reservoir.getNumChannels()); --i >= 0;)
+                    {
+                        memcpy (reservoir.getSampleData (i, offset),
+                                dataIn[i],
+                                sizeof (float) * samps);
+                    }
+
+                    numToRead -= samps;
+                    offset += samps;
+                }
+
+                if (numToRead > 0)
+                    reservoir.clear (offset, numToRead);
             }
         }
 

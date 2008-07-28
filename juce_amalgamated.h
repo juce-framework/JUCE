@@ -12614,7 +12614,7 @@ private:
     const bool deleteSourceWhenDestroyed, noWrap;
     bool isEof;
     int activeBufferSize;
-    int64 originalSourcePos;
+    int64 originalSourcePos, currentPos;
     uint8* buffer;
     void* helper;
 
@@ -19548,7 +19548,7 @@ public:
                                int sourceClipWidth,
                                int sourceClipHeight,
                                const AffineTransform& transform,
-                               const bool fillAlphaChannelWithCurrentBrush) const throw();
+                               const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
     /** Draws an image to fit within a designated rectangle.
 
@@ -19577,7 +19577,7 @@ public:
                           const int destWidth,
                           const int destHeight,
                           const RectanglePlacement& placementWithinTarget,
-                          const bool fillAlphaChannelWithCurrentBrush) const throw();
+                          const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
     /** Returns the position of the bounding box for the current clipping region.
 

@@ -122,7 +122,6 @@ public:
     }
 
     bool needsInput() const throw()         { return dataSize <= 0; }
-    int getTotalOut() const throw()         { return (stream != 0) ? stream->total_out : 0; }
 
     void setInput (uint8* const data_, const int size) throw()
     {
@@ -182,7 +181,8 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
     noWrap (noWrap_),
     isEof (false),
     activeBufferSize (0),
-    originalSourcePos (sourceStream_->getPosition())
+    originalSourcePos (sourceStream_->getPosition()),
+    currentPos (0)
 {
     buffer = (uint8*) juce_malloc (gzipDecompBufferSize);
     helper = new GZIPDecompressHelper (noWrap_);
@@ -220,6 +220,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
             while (! h->error)
             {
                 const int n = h->doNextBlock (d, howMany);
+                currentPos += n;
 
                 if (n == 0)
                 {
@@ -269,15 +270,11 @@ bool GZIPDecompressorInputStream::isExhausted()
 
 int64 GZIPDecompressorInputStream::getPosition()
 {
-    const GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-
-    return h->getTotalOut() + activeBufferSize;
+    return currentPos;
 }
 
 bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 {
-    const int64 currentPos = getPosition();
-
     if (newPos != currentPos)
     {
         // reset the stream and start again..
@@ -286,6 +283,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 
         isEof = false;
         activeBufferSize = 0;
+        currentPos = 0;
         helper = new GZIPDecompressHelper (noWrap);
 
         sourceStream->setPosition (originalSourcePos);
