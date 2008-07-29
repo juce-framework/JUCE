@@ -829,7 +829,7 @@ public:
         }
 
         ShowCaret (hwnd);
-        SetCaretPos (-1, -1);
+        SetCaretPos (0, 0);
     }
 
     void repaint (int x, int y, int w, int h)
