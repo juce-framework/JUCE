@@ -315,6 +315,13 @@ void TabbedComponent::resized()
             contentComponents.getUnchecked (i)->setBounds (bounds);
 }
 
+void TabbedComponent::lookAndFeelChanged()
+{
+    for (int i = contentComponents.size(); --i >= 0;)
+        if (contentComponents.getUnchecked (i) != 0)
+            contentComponents.getUnchecked (i)->lookAndFeelChanged();
+}
+
 void TabbedComponent::changeCallback (const int newCurrentTabIndex,
                                       const String& newTabName)
 {

@@ -825,7 +825,7 @@ public:
         if (! hasCreatedCaret)
         {
             hasCreatedCaret = true;
-            CreateCaret (hwnd, 0, 0, 0);
+            CreateCaret (hwnd, (HBITMAP) 1, 0, 0);
         }
 
         ShowCaret (hwnd);

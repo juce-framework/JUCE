@@ -277,17 +277,24 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 {
     if (newPos != currentPos)
     {
-        // reset the stream and start again..
-        GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-        delete h;
+        if (newPos > currentPos)
+        {
+            skipNextBytes (newPos - currentPos);
+        }
+        else
+        {
+            // reset the stream and start again..
+            GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
+            delete h;
 
-        isEof = false;
-        activeBufferSize = 0;
-        currentPos = 0;
-        helper = new GZIPDecompressHelper (noWrap);
+            isEof = false;
+            activeBufferSize = 0;
+            currentPos = 0;
+            helper = new GZIPDecompressHelper (noWrap);
 
-        sourceStream->setPosition (originalSourcePos);
-        skipNextBytes (newPos);
+            sourceStream->setPosition (originalSourcePos);
+            skipNextBytes (newPos);
+        }
     }
 
     return true;

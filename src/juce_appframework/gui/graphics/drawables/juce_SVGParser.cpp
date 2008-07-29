@@ -860,11 +860,13 @@ private:
                 const String text (e->getText());
 
                 Path path;
-                parseShape (*e, path);
+                Drawable* s = parseShape (*e, path);
+                delete s;
             }
             else if (e->hasTagName (T("tspan")))
             {
-                parseText (*e);
+                Drawable* s = parseText (*e);
+                delete s;
             }
         }
 

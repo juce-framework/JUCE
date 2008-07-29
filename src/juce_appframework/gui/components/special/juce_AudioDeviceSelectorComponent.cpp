@@ -321,7 +321,8 @@ public:
 
         if (sampleRateDropDown != 0)
         {
-            sampleRateDropDown->setVisible (! showAdvancedSettingsButton->isVisible());
+            sampleRateDropDown->setVisible (showAdvancedSettingsButton == 0 
+                                             || ! showAdvancedSettingsButton->isVisible());
 
             sampleRateDropDown->setBounds (lx, y, w, h);
             y += dh;
@@ -329,14 +330,16 @@ public:
 
         if (bufferSizeDropDown != 0)
         {
-            bufferSizeDropDown->setVisible (! showAdvancedSettingsButton->isVisible());
+            bufferSizeDropDown->setVisible (showAdvancedSettingsButton == 0
+                                             || ! showAdvancedSettingsButton->isVisible());
             bufferSizeDropDown->setBounds (lx, y, w, h);
             y += dh;
         }
 
         if (showUIButton != 0)
         {
-            showUIButton->setVisible (! showAdvancedSettingsButton->isVisible());
+            showUIButton->setVisible (showAdvancedSettingsButton == 0
+                                        || ! showAdvancedSettingsButton->isVisible());
             showUIButton->changeWidthToFitText (h);
             showUIButton->setTopLeftPosition (lx, y);
         }
