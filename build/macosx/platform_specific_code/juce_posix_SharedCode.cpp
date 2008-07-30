@@ -102,51 +102,34 @@ bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
     bool ok = true;
     pthread_mutex_lock (&es->mutex);
 
-    if (! es->triggered)
+    if (timeOutMillisecs < 0)
     {
-        if (timeOutMillisecs < 0)
-        {
+        while (! es->triggered)
             pthread_cond_wait (&es->condition, &es->mutex);
-        }
-        else
+    }
+    else
+    {
+        while (! es->triggered)
         {
-            struct timespec time;
-
-#if JUCE_MAC
-            time.tv_sec = timeOutMillisecs / 1000;
-            time.tv_nsec = (timeOutMillisecs % 1000) * 1000000;
-            pthread_cond_timedwait_relative_np (&es->condition, &es->mutex, &time);
-#else
             struct timeval t;
-            int timeout = 0;
-
             gettimeofday (&t, 0);
 
+            struct timespec time;
             time.tv_sec  = t.tv_sec  + (timeOutMillisecs / 1000);
             time.tv_nsec = (t.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
 
-            while (time.tv_nsec >= 1000000000)
+            if (time.tv_nsec >= 1000000000)
             {
                 time.tv_nsec -= 1000000000;
                 time.tv_sec++;
             }
 
-            while (! timeout)
+            if (pthread_cond_timedwait (&es->condition, &es->mutex, &time) == ETIMEDOUT)
             {
-                timeout = pthread_cond_timedwait (&es->condition, &es->mutex, &time);
-
-                if (! timeout)
-                    // Success
-                    break;
-
-                if (timeout == EINTR)
-                    // Go round again
-                    timeout = 0;
+                ok = false;
+                break;
             }
-#endif
         }
-
-        ok = es->triggered;
     }
 
     es->triggered = false;
