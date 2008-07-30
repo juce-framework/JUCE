@@ -117,8 +117,20 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
 
     [panel setDelegate: delegate];
 
-    if ([panel runModalForDirectory: juceStringToNS (currentFileOrDirectory.getParentDirectory().getFullPathName())
-                               file: juceStringToNS (currentFileOrDirectory.getFileName())]
+    String directory, filename;
+    
+    if (currentFileOrDirectory.isDirectory())
+    {
+        directory = currentFileOrDirectory.getFullPathName();
+    }
+    else
+    {
+        directory = currentFileOrDirectory.getParentDirectory().getFullPathName();
+        filename = currentFileOrDirectory.getFileName();
+    }
+
+    if ([panel runModalForDirectory: juceStringToNS (directory)
+                               file: juceStringToNS (filename)]
            == NSOKButton)
     {
         if (isSaveDialogue)
