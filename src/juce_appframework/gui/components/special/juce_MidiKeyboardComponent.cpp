@@ -280,7 +280,7 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y) const
 {
     if (y < blackNoteLength)
     {
-        for (int octaveStart = 12 * (rangeStart / 12); octaveStart < rangeEnd; octaveStart += 12)
+        for (int octaveStart = 12 * (rangeStart / 12); octaveStart <= rangeEnd; octaveStart += 12)
         {
             for (int i = 0; i < 5; ++i)
             {
@@ -299,7 +299,7 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y) const
         }
     }
 
-    for (int octaveStart = 12 * (rangeStart / 12); octaveStart < rangeEnd; octaveStart += 12)
+    for (int octaveStart = 12 * (rangeStart / 12); octaveStart <= rangeEnd; octaveStart += 12)
     {
         for (int i = 0; i < 7; ++i)
         {
