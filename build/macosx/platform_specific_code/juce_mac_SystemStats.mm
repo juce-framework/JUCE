@@ -145,7 +145,7 @@ void SystemStats::initialiseStats() throw()
     {
         initialised = true;
 
-        [NSApplication sharedApplication];
+        //[NSApplication sharedApplication];
         NSApplicationLoad();
 
 #if JUCE_INTEL
