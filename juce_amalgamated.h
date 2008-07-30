@@ -46682,6 +46682,8 @@ public:
     void paint (Graphics& g);
     /** @internal */
     void resized();
+    /** @internal */
+    void lookAndFeelChanged();
 
     juce_UseDebuggingNewOperator
 
