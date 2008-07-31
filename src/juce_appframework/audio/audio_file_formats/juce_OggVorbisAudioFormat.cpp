@@ -145,6 +145,8 @@ public:
             {
                 // got a few samples overlapping, so use them before seeking..
 
+                const int numToUse = jmin (numSamples, numAvailable);
+
                 for (unsigned int i = 0; i < numChannels; ++i)
                 {
                     if (destSamples[i] == 0)
@@ -153,12 +155,12 @@ public:
                     memcpy (destSamples[i] + writeOffset,
                             reservoir.getSampleData (jmin (i, reservoir.getNumChannels()),
                                                      (int) (startSampleInFile - reservoirStart)),
-                            sizeof (float) * numSamples);
+                            sizeof (float) * numToUse);
                 }
 
-                startSampleInFile += numAvailable;
-                numSamples -= numAvailable;
-                writeOffset += numAvailable;
+                startSampleInFile += numToUse;
+                numSamples -= numToUse;
+                writeOffset += numToUse;
 
                 if (numSamples == 0)
                     break;
