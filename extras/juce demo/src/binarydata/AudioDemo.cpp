@@ -579,7 +579,8 @@ public:
                                                             2, 2,
                                                             true,
                                                             false,
-                                                            true);
+                                                            true,
+                                                            false);
 
             // ...and show it in a DialogWindow...
             audioSettingsComp.setSize (500, 450);
