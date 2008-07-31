@@ -578,10 +578,11 @@ public:
                                                             0, 1,
                                                             2, 2,
                                                             true,
-                                                            false);
+                                                            false,
+                                                            true);
 
             // ...and show it in a DialogWindow...
-            audioSettingsComp.setSize (500, 400);
+            audioSettingsComp.setSize (500, 450);
 
             DialogWindow::showModalDialog (T("Audio Settings"),
                                            &audioSettingsComp,

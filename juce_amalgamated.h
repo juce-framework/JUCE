@@ -140,7 +140,7 @@
     installed, and its header files will need to be on your include path.
 */
 #if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
-  #define JUCE_QUICKTIME 1
+//  #define JUCE_QUICKTIME 1
 #endif
 
 /** Comment out this macro if you don't want to enable OpenGL or if you don't
@@ -27386,6 +27386,13 @@ public:
     */
     bool isSuspended() const throw()                                    { return suspended; }
 
+    /** A plugin can override this to be told when it should reset any playing voices.
+
+        The default implementation does nothing, but a host may call this to tell the
+        plugin that it should stop any tails or sounds that have been left running.
+    */
+    virtual void reset();
+
     /** Returns true if the processor is being run in an offline mode for rendering.
 
         If the processor is being run live on realtime signals, this returns false.
@@ -27499,6 +27506,15 @@ public:
         By default, this returns true for all parameters.
     */
     virtual bool isParameterAutomatable (int parameterIndex) const;
+
+    /** Should return true if this parameter is a "meta" parameter.
+
+        A meta-parameter is a parameter that changes other params. It is used
+        by some hosts (e.g. AudioUnit hosts).
+
+        By default this returns false.
+    */
+    virtual bool isMetaParameter (int parameterIndex) const;
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
@@ -52311,6 +52327,10 @@ public:
                                TextLayout& textLayout);
 
     virtual int getAlertBoxWindowFlags();
+
+    virtual int getAlertWindowButtonHeight();
+
+    virtual const Font getAlertWindowFont();
 
     /** Draws a progress bar.
 
