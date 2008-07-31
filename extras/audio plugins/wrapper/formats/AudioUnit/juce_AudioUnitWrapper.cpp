@@ -289,6 +289,9 @@ public:
             if (name.isEmpty() || ! juceFilter->isParameterAutomatable (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_NonRealTime;
 
+            if (juceFilter->isMetaParameter (index))
+                outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
+
             AUBase::FillInParameterName (outParameterInfo,
                                          PlatformUtilities::juceStringToCFString (name),
                                          false);
@@ -535,6 +538,9 @@ public:
     {
         if (! prepared)
             prepareToPlay();
+
+        if (juceFilter != 0)
+            juceFilter->reset();
 
         return JuceAUBaseClass::Reset (inScope, inElement);
     }

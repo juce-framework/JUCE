@@ -403,6 +403,15 @@ public:
     */
     virtual bool isParameterAutomatable (int parameterIndex) const;
 
+    /** Should return true if this parameter is a "meta" parameter.
+
+        A meta-parameter is a parameter that changes other params. It is used
+        by some hosts (e.g. AudioUnit hosts).
+
+        By default this returns false.
+    */
+    virtual bool isMetaParameter (int parameterIndex) const;
+
     /** Sends a signal to the host to tell it that the user is about to start changing this
         parameter.
 

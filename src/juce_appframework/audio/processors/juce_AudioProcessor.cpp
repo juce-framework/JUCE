@@ -192,6 +192,11 @@ bool AudioProcessor::isParameterAutomatable (int /*index*/) const
     return true;
 }
 
+bool AudioProcessor::isMetaParameter (int parameterIndex) const
+{
+    return false;
+}
+
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {
     const ScopedLock sl (callbackLock);
