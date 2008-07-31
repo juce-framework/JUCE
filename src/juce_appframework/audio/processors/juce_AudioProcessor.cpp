@@ -203,6 +203,10 @@ void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
     suspended = shouldBeSuspended;
 }
 
+void AudioProcessor::reset()
+{
+}
+
 //==============================================================================
 void AudioProcessor::editorBeingDeleted (AudioProcessorEditor* const editor) throw()
 {

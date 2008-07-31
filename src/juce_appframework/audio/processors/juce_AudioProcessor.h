@@ -285,6 +285,13 @@ public:
     */
     bool isSuspended() const throw()                                    { return suspended; }
 
+    /** A plugin can override this to be told when it should reset any playing voices.
+
+        The default implementation does nothing, but a host may call this to tell the
+        plugin that it should stop any tails or sounds that have been left running.
+    */
+    virtual void reset();
+
     //==============================================================================
     /** Returns true if the processor is being run in an offline mode for rendering.
 

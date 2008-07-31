@@ -277,10 +277,12 @@ public:
         if (outputDeviceDropDown != 0)
         {
             outputDeviceDropDown->setBounds (lx, y, w, h);
-            testButton->setBounds (proportionOfWidth (0.77f), 
-                                   outputDeviceDropDown->getY(),
-                                   proportionOfWidth (0.18f),
-                                   h);
+
+            if (testButton != 0)
+                testButton->setBounds (proportionOfWidth (0.77f), 
+                                       outputDeviceDropDown->getY(),
+                                       proportionOfWidth (0.18f),
+                                       h);
             y += dh;
         }
 
@@ -424,7 +426,7 @@ public:
                 getTopLevelComponent()->toFront (true);
             }
         }
-        else if (button == testButton)
+        else if (button == testButton && testButton != 0)
         {
             setup.manager->playTestSound();
         }
@@ -463,8 +465,11 @@ public:
                                                                                    : TRANS ("device:"));
                 outputDeviceLabel->attachToComponent (outputDeviceDropDown, true);
 
-                addAndMakeVisible (testButton = new TextButton (TRANS ("Test")));
-                testButton->addButtonListener (this);
+                if (setup.maxNumOutputChannels > 0)
+                {
+                    addAndMakeVisible (testButton = new TextButton (TRANS ("Test")));
+                    testButton->addButtonListener (this);
+                }
             }
 
             addNamesToDeviceBox (*outputDeviceDropDown, false);
@@ -646,7 +651,7 @@ private:
 
             box->setSelectedId (index + 1, true);
 
-            if (! isInput)
+            if (testButton != 0 && ! isInput)
                 testButton->setEnabled (index >= 0);
         }
     }
