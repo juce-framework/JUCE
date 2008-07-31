@@ -166,6 +166,10 @@ public:
 
     virtual int getAlertBoxWindowFlags();
 
+    virtual int getAlertWindowButtonHeight();
+
+    virtual const Font getAlertWindowFont();
+
     /** Draws a progress bar.
 
         If the progress value is less than 0 or greater than 1.0, this should draw a spinning

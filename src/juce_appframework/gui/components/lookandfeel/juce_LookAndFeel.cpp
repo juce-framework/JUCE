@@ -509,6 +509,16 @@ int LookAndFeel::getAlertBoxWindowFlags()
             | ComponentPeer::windowHasDropShadow;
 }
 
+int LookAndFeel::getAlertWindowButtonHeight()
+{
+    return 28;
+}
+
+const Font LookAndFeel::getAlertWindowFont()
+{
+    return Font (12.0f);
+}
+
 void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
                                    int width, int height,
                                    double progress, const String& textToShow)

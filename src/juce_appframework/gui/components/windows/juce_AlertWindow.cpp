@@ -179,7 +179,7 @@ void AlertWindow::addButton (const String& name,
     b->addShortcut (shortcutKey1);
     b->addShortcut (shortcutKey2);
     b->addButtonListener (this);
-    b->changeWidthToFitText (28);
+    b->changeWidthToFitText (getLookAndFeel().getAlertWindowButtonHeight());
 
     addAndMakeVisible (b, 0);
     buttons.add (b);
@@ -363,8 +363,8 @@ void AlertWindow::paint (Graphics& g)
 {
     getLookAndFeel().drawAlertBox (g, *this, textArea, textLayout);
 
-    g.setColour (Colours::black);
-    g.setFont (12.0f);
+    g.setColour (findColour (textColourId));
+    g.setFont (getLookAndFeel().getAlertWindowFont());
 
     int i;
     for (i = textBoxes.size(); --i >= 0;)
