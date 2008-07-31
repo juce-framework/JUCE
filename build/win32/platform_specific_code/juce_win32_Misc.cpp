@@ -47,8 +47,8 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        bool isOkCancel)
 {
     return MessageBox (0, bodyText, title,
-                       (isOkCancel) ? MB_OKCANCEL
-                                    : MB_OK) == IDOK;
+                       MB_SETFOREGROUND | (isOkCancel ? MB_OKCANCEL
+                                                      : MB_OK)) == IDOK;
 }
 
 #endif
