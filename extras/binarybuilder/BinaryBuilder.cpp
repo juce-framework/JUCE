@@ -69,8 +69,9 @@ static int addFile (const File& file,
 static bool isHiddenFile (const File& f, const File& root)
 {
     return f.getFileName().endsWithIgnoreCase (T(".scc"))
+         || f.getFileName() != T(".svn")
          || f.getFileName().startsWithChar (T('.'))
-         || f.getSize() == 0
+         || (f.getSize() == 0 && ! f.isDirectory())
          || (f.getParentDirectory() != root && isHiddenFile (f.getParentDirectory(), root));
 }
 
