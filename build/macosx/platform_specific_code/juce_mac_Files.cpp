@@ -426,6 +426,12 @@ bool File::isOnHardDisk() const throw()
     return ! (isOnCDRomDrive() || isFileOnDriveType (this, (const char**) nonHDTypes));
 }
 
+bool File::isOnRemovableDrive() const throw()
+{
+    jassertfalse // xxx not implemented for mac!
+    return false;
+}
+
 static bool juce_isHiddenFile (const String& path) throw()
 {
     FSRef ref;

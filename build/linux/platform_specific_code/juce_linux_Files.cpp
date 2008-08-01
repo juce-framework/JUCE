@@ -198,6 +198,12 @@ bool File::isOnHardDisk() const throw()
     return true;
 }
 
+bool File::isOnRemovableDrive() const throw()
+{
+    jassertfalse // xxx not implemented for linux!
+    return false;
+}
+
 bool File::isHidden() const throw()
 {
     return getFileName().startsWithChar (T('.'));
