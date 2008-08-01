@@ -96,7 +96,7 @@
     installed, and its header files will need to be on your include path.
 */
 #if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
-//  #define JUCE_QUICKTIME 1
+  #define JUCE_QUICKTIME 1
 #endif
 
 
