@@ -55,9 +55,9 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 /*
     Note that a lot of methods that you'd expect to find in this file actually
-    live in juce_posix_SharedCode.cpp!
+    live in juce_posix_SharedCode.h!
 */
-#include "juce_posix_SharedCode.cpp"
+#include "juce_posix_SharedCode.h"
 
 
 //==============================================================================
