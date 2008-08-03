@@ -43195,6 +43195,7 @@ private:
     void hideCurrentMenu();
     void timerCallback();
     void repaintMenuItem (int index);
+    void showMenuInternal (const int menuIndex);
 
     MenuBarComponent (const MenuBarComponent&);
     const MenuBarComponent& operator= (const MenuBarComponent&);

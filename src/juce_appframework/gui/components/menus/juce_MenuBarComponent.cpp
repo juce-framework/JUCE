@@ -196,6 +196,7 @@ void MenuBarComponent::showMenu (int index)
 
         indexToShowAgain = -1;
         currentPopupIndex = -1;
+        itemUnderMouse = index;
         deleteAndZero (currentPopup);
         menuBarItemsChanged (0);
 
