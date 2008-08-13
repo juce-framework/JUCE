@@ -2041,26 +2041,7 @@ const String String::createStringFromData (const void* const data_,
     }
     else
     {
-#if JUCE_STRINGS_ARE_UNICODE && JUCE_LINUX
-        // (workaround for strange behaviour of mbstowcs)
-        int i;
-        for (i = 0; i < size; ++i)
-            if (data[i] == 0)
-                break;
-
-        String result;
-        result.preallocateStorage (i + 1);
-        tchar* const dst = const_cast <tchar*> ((const tchar*) result);
-
-        for (int j = 0; j < i; ++j)
-            dst[j] = (juce_wchar) (unsigned char) data[j];
-
-        dst[i] = 0;
-
-        return result;
-#else
-        return String (data, size);
-#endif
+        return String::fromUTF8 ((const uint8*) data, size);
     }
 }
 
