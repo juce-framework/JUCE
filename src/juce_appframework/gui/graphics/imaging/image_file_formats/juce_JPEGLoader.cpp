@@ -331,7 +331,7 @@ bool juce_writeJPEGImageToStream (const Image& image,
 //    jpegCompStruct.smoothing_factor = 10;
 
     if (quality < 0.0f)
-        quality = 6.0f;
+        quality = 0.85f;
 
     jpeg_set_quality (&jpegCompStruct, jlimit (0, 100, roundFloatToInt (quality * 100.0f)), TRUE);
 
