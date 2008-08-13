@@ -143,6 +143,12 @@ public:
                 outDataSize = sizeof (UInt32);
                 return noErr;
             }
+            else if (inID == kMusicDeviceProperty_InstrumentCount) 
+            {
+                outDataSize = sizeof (UInt32); 
+                outWritable = false; 
+                return noErr;
+            }
         }
 
         return JuceAUBaseClass::GetPropertyInfo (inID, inScope, inElement, outDataSize, outWritable);
@@ -164,6 +170,11 @@ public:
             else if (inID == kAudioUnitProperty_OfflineRender)
             {
                 *(UInt32*) outData = (juceFilter != 0 && juceFilter->isNonRealtime()) ? 1 : 0;
+                return noErr;
+            }
+            else if (inID == kMusicDeviceProperty_InstrumentCount) 
+            {
+                *(UInt32*) outData = 1;
                 return noErr;
             }
         }
