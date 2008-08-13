@@ -1,7 +1,13 @@
 
 ==============================================================================
 
-                            JUCE version 1.46
+                            JUCE version 1.47
+
+==============================================================================
+Changelist for version 1.47
+
+- changed the String::createStringFromData method to assume that an 8-bit file is utf-8 rather than the local ascii codepage.
+
 
 ==============================================================================
 Changelist for version 1.46
