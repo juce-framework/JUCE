@@ -148,6 +148,8 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
             }
         }
     }
+
+    [panel setDelegate: nil];
 }
 
 END_JUCE_NAMESPACE
