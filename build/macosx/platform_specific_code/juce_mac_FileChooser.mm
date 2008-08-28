@@ -45,7 +45,7 @@ END_JUCE_NAMESPACE
 
 - (JuceFileChooserDelegate*) initWithFilters: (JUCE_NAMESPACE::StringArray*) filters_;
 - (void) dealloc;
-- (BOOL) panel:(id) sender shouldShowFilename: (NSString*) filename;
+- (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename;
 
 @end
 
@@ -69,9 +69,11 @@ END_JUCE_NAMESPACE
 
     for (int i = filters->size(); --i >= 0;)
     {
-        const JUCE_NAMESPACE::String wildcard ((*filters)[i].toLowerCase());
+        const JUCE_NAMESPACE::String wildcard ((*filters)[i]);
+        const JUCE_NAMESPACE::String fname (filename);
 
-        if (fnmatch (wildcard.toUTF8(), filenameUTF8, 0) == 0)
+        if (fnmatch (wildcard.toLowerCase().toUTF8(), 
+                     fname.toLowerCase().toUTF8(), 0) == 0)
             return true;
     }
 
