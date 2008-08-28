@@ -65,19 +65,18 @@ END_JUCE_NAMESPACE
 
 - (BOOL) panel:(id) sender shouldShowFilename: (NSString*) filename
 {
-    const char* filenameUTF8 = (const char*) [filename UTF8String];
+    const JUCE_NAMESPACE::String fname (nsStringToJuce (filename));
 
     for (int i = filters->size(); --i >= 0;)
     {
         const JUCE_NAMESPACE::String wildcard ((*filters)[i]);
-        const JUCE_NAMESPACE::String fname (filename);
 
         if (fnmatch (wildcard.toLowerCase().toUTF8(), 
                      fname.toLowerCase().toUTF8(), 0) == 0)
             return true;
     }
 
-    return JUCE_NAMESPACE::File (nsStringToJuce (filename)).isDirectory();
+    return JUCE_NAMESPACE::File (fname).isDirectory();
 }
 @end
 
