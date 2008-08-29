@@ -1477,7 +1477,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithColour (int cl
         const uint8* const alphaValues
             = clipImage.lockPixelDataReadOnly (sx, sy, w, h, alphaStride, pixelStride);
 
-#if JUCE_MAC
+#if JUCE_BIG_ENDIAN
         const uint8* const alphas = alphaValues;
 #else
         const uint8* const alphas = alphaValues + (clipImage.getFormat() == Image::ARGB ? 3 : 0);
@@ -1578,7 +1578,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithImage (int x, 
         const uint8* const alpha
             = alphaImage.lockPixelDataReadOnly (x - alphaImageX, y - alphaImageY, w, h, maskStride, maskPixStride);
 
-#if JUCE_MAC
+#if JUCE_BIG_ENDIAN
         const uint8* const alphaValues = alpha;
 #else
         const uint8* const alphaValues = alpha + (alphaImage.getFormat() == Image::ARGB ? 3 : 0);
