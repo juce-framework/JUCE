@@ -1394,6 +1394,58 @@ int TextEditor::getCaretPosition() const throw()
     return caretPosition;
 }
 
+void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX, 
+                                              const int desiredCaretY) throw()
+
+{ 
+    updateCaretPosition();
+
+    int vx = roundFloatToInt (cursorX) - desiredCaretX;
+    int vy = roundFloatToInt (cursorY) - desiredCaretY;
+
+    if (desiredCaretX < jmax (1, proportionOfWidth (0.05f)))
+    {
+        vx += desiredCaretX - proportionOfWidth (0.2f);
+    }
+    else if (desiredCaretX > jmax (0, viewport->getMaximumVisibleWidth() - (wordWrap ? 2 : 10)))
+    {
+        vx += desiredCaretX + (isMultiLine() ? proportionOfWidth (0.2f) : 10) - viewport->getMaximumVisibleWidth();
+    }
+
+    vx = jlimit (0, jmax (0, textHolder->getWidth() + 8 - viewport->getMaximumVisibleWidth()), vx);
+
+    if (! isMultiLine())
+    {
+        vy = viewport->getViewPositionY();
+    }
+    else
+    {
+        vy = jlimit (0, jmax (0, textHolder->getHeight() - viewport->getMaximumVisibleHeight()), vy);
+
+        const int curH = roundFloatToInt (cursorHeight);
+
+        if (desiredCaretY < 0)
+        {
+            vy = jmax (0, desiredCaretY + vy);
+        }
+        else if (desiredCaretY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - curH)) 
+        {
+            vy += desiredCaretY + 2 + curH + topIndent - viewport->getMaximumVisibleHeight();
+        }
+    }
+
+    viewport->setViewPosition (vx, vy); 
+}
+
+const Rectangle TextEditor::getCaretRectangle() throw()
+{
+    updateCaretPosition();
+
+    return Rectangle (roundFloatToInt (cursorX) - viewport->getX(),
+                      roundFloatToInt (cursorY) - viewport->getY(), 
+                      1, roundFloatToInt (cursorHeight));
+} 
+
 //==============================================================================
 float TextEditor::getWordWrapWidth() const throw()
 {
@@ -1455,13 +1507,15 @@ void TextEditor::setScrollToShowCursor (const bool shouldScrollToShowCursor) thr
     keepCursorOnScreen = shouldScrollToShowCursor;
 }
 
-void TextEditor::scrollToMakeSureCursorIsVisible() throw()
+void TextEditor::updateCaretPosition() throw()
 {
     cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
+    getCharPosition (caretPosition, cursorX, cursorY, cursorHeight);
+}
 
-    getCharPosition (caretPosition,
-                     cursorX, cursorY,
-                     cursorHeight);
+void TextEditor::scrollToMakeSureCursorIsVisible() throw()
+{
+    updateCaretPosition();
 
     if (keepCursorOnScreen)
     {
@@ -1584,7 +1638,7 @@ void TextEditor::insertTextAtCursor (String newText)
 
     remove (selectionStart, selectionEnd,
             &undoManager,
-            newCaretPos);
+            newCaretPos - 1);
 
     if (maxTextLength > 0)
         newText = newText.substring (0, maxTextLength - getTotalNumChars());
@@ -2137,11 +2191,7 @@ void TextEditor::resized()
     }
     else
     {
-        cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
-
-        getCharPosition (caretPosition,
-                         cursorX, cursorY,
-                         cursorHeight);
+        updateCaretPosition();
     }
 }
 

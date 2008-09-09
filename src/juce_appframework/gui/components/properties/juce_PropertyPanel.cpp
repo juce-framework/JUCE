@@ -367,6 +367,27 @@ void PropertyPanel::setSectionOpen (const int sectionIndex, const bool shouldBeO
     }
 }
 
+void PropertyPanel::setSectionEnabled (const int sectionIndex, const bool shouldBeEnabled)
+{
+    int index = 0;
+
+    for (int i = 0; i < propertyHolderComponent->getNumChildComponents(); ++i)
+    {
+        PropertySectionComponent* const section = dynamic_cast <PropertySectionComponent*> (propertyHolderComponent->getChildComponent (i));
+
+        if (section != 0 && section->getName().isNotEmpty())
+        {
+            if (index == sectionIndex)
+            {
+                section->setEnabled (shouldBeEnabled);
+                break;
+            }
+
+            ++index;
+        }
+    }
+}
+
 //==============================================================================
 XmlElement* PropertyPanel::getOpennessState() const
 {

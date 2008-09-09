@@ -63,7 +63,6 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) throw()
 {
     // this method only works for valid starting bytes of a short midi message
     jassert (firstByte >= 0x80
-              && firstByte != 0xff
               && firstByte != 0xf0
               && firstByte != 0xf7);
 

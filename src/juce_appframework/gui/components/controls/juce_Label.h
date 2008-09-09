@@ -148,6 +148,12 @@ public:
     /** Returns the type of justification, as set in setJustificationType(). */
     const Justification getJustificationType() const throw()                    { return justification; }
 
+    /** Changes the gap that is left between the edge of the component and the text.
+        By default there's a small gap left at the sides of the component to allow for
+        the drawing of the border, but you can change this if necessary.
+    */
+    void setBorderSize (int horizontalBorder, int verticalBorder);
+    
     /** Makes this label "stick to" another component.
 
         This will cause the label to follow another component around, staying
@@ -294,7 +300,7 @@ private:
     SortedSet <void*> listeners;
     Component* ownerComponent;
     ComponentDeletionWatcher* deletionWatcher;
-
+    int horizontalBorderSize, verticalBorderSize;
     bool editSingleClick : 1;
     bool editDoubleClick : 1;
     bool lossOfFocusDiscardsChanges : 1;

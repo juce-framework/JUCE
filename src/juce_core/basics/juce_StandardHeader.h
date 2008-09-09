@@ -81,6 +81,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <cstring>
+#include <cstdio>
 
 #if JUCE_MAC || JUCE_LINUX
   #include <pthread.h>

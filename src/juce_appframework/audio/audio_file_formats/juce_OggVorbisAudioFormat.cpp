@@ -135,7 +135,26 @@ public:
                int64 startSampleInFile,
                int numSamples)
     {
-        int writeOffset = 0;
+        int startOffsetInDestBuffer = 0;
+
+        if (startSampleInFile < 0)
+        {
+            const int silence = (int) jmin (-startSampleInFile, (int64) numSamples);
+
+            int** destChan = destSamples;
+
+            for (int i = 2; --i >= 0;)
+            {
+                if (*destChan != 0)
+                {
+                    zeromem (*destChan, sizeof (int) * silence);
+                    ++destChan;
+                }
+            }
+
+            startOffsetInDestBuffer += silence;
+            numSamples -= silence;
+        }
 
         while (numSamples > 0)
         {
@@ -152,7 +171,7 @@ public:
                     if (destSamples[i] == 0)
                         break;
 
-                    memcpy (destSamples[i] + writeOffset,
+                    memcpy (destSamples[i] + startOffsetInDestBuffer,
                             reservoir.getSampleData (jmin (i, reservoir.getNumChannels()),
                                                      (int) (startSampleInFile - reservoirStart)),
                             sizeof (float) * numToUse);
@@ -160,7 +179,7 @@ public:
 
                 startSampleInFile += numToUse;
                 numSamples -= numToUse;
-                writeOffset += numToUse;
+                startOffsetInDestBuffer += numToUse;
 
                 if (numSamples == 0)
                     break;

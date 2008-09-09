@@ -1068,14 +1068,8 @@ const String File::getRelativePathFrom (const File& dir)  const throw()
         --commonBitLength;
 
     // if the only common bit is the root, then just return the full path..
-#if JUCE_WIN32
-    if (commonBitLength <= 0
-         || (commonBitLength == 1 && thisPath [1] == File::separator)
-         || (commonBitLength <= 3 && thisPath [1] == T(':')))
-#else
     if (commonBitLength <= 0
          || (commonBitLength == 1 && thisPath [1] == File::separator))
-#endif
         return fullPath;
 
     thisPath = thisPath.substring (commonBitLength);

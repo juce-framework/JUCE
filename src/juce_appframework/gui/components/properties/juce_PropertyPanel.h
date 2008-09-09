@@ -109,6 +109,12 @@ public:
     */
     void setSectionOpen (const int sectionIndex, const bool shouldBeOpen);
 
+    /** Enables or disables one of the sections.
+
+        The index is from 0 up to the number of items returned by getSectionNames().
+    */
+    void setSectionEnabled (const int sectionIndex, const bool shouldBeEnabled);
+
     //==============================================================================
     /** Saves the current state of open/closed sections so it can be restored later.
 

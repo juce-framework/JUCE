@@ -245,6 +245,8 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
         }
         catch (...)
         {}
+
+        in.setPosition (((char*) jpegDecompStruct.src->next_input_byte) - (char*) mb.getData());
     }
 
     return image;

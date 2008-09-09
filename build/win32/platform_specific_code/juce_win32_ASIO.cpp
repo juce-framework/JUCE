@@ -833,7 +833,7 @@ public:
                 AudioIODeviceCallback* const oldCallback = currentCallback;
 
                 close();
-                open (currentChansIn, currentChansOut,
+                open (BitArray (currentChansIn), BitArray (currentChansOut),
                       currentSampleRate, currentBlockSizeSamples);
 
                 if (oldCallback != 0)

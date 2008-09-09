@@ -47,6 +47,8 @@ Label::Label (const String& componentName,
       listeners (2),
       ownerComponent (0),
       deletionWatcher (0),
+      horizontalBorderSize (3),
+      verticalBorderSize (1),
       editSingleClick (false),
       editDoubleClick (false),
       lossOfFocusDiscardsChanges (false)
@@ -120,6 +122,13 @@ void Label::setEditable (const bool editOnSingleClick,
 void Label::setJustificationType (const Justification& justification_) throw()
 {
     justification = justification_;
+    repaint();
+}
+
+void Label::setBorderSize (int h, int v)
+{
+    horizontalBorderSize = h;
+    verticalBorderSize = v;
     repaint();
 }
 
@@ -288,7 +297,10 @@ void Label::paint (Graphics& g)
         g.setColour (findColour (textColourId).withMultipliedAlpha (alpha));
         g.setFont (font);
         g.drawFittedText (text,
-                          3, 1, getWidth() - 6, getHeight() - 2,
+                          horizontalBorderSize, 
+                          verticalBorderSize, 
+                          getWidth() - 2 * horizontalBorderSize, 
+                          getHeight() - 2 * verticalBorderSize,
                           justification,
                           jmax (1, (int) (getHeight() / font.getHeight())));
 

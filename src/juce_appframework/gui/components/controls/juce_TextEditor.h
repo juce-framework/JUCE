@@ -417,6 +417,27 @@ l    */
     */
     int getCaretPosition() const throw();
 
+    /** Attempts to scroll the text editor so that the caret ends up at 
+        a specified position.
+
+        This won't affect the caret's position within the text, it tries to scroll
+        the entire editor vertically and horizontally so that the caret is sitting
+        at the given position (relative to the top-left of this component).
+
+        Depending on the amount of text available, it might not be possible to
+        scroll far enough for the caret to reach this exact position, but it
+        will go as far as it can in that direction.
+    */ 
+    void scrollEditorToPositionCaret (const int desiredCaretX, 
+                                      const int desiredCaretY) throw();
+
+    /** Get the graphical position of the caret. 
+
+        The rectangle returned is relative to the component's top-left corner.
+        @see scrollEditorToPositionCaret
+    */ 
+    const Rectangle getCaretRectangle() throw();
+
     /** Selects a section of the text.
     */
     void setHighlightedRegion (int startIndex,
@@ -661,6 +682,8 @@ private:
     void getCharPosition (const int index,
                           float& x, float& y,
                           float& lineHeight) const throw();
+
+    void updateCaretPosition() throw();
 
     int indexAtPosition (const float x,
                          const float y) throw();

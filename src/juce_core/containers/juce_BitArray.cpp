@@ -958,7 +958,7 @@ void BitArray::parseString (const String& text,
 
 const MemoryBlock BitArray::toMemoryBlock() const throw()
 {
-    const int numBytes = (getHighestBit() + 7) >> 3;
+    const int numBytes = (getHighestBit() + 8) >> 3;
     MemoryBlock mb (numBytes);
 
     for (int i = 0; i < numBytes; ++i)

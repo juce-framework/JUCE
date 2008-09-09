@@ -110,7 +110,7 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
         {
             // if our list of events is longer than the buffer we're being
             // asked for, scale them down to squeeze them all in..
-            const int maxBlockLengthToUse = numSamples << 3;
+            const int maxBlockLengthToUse = numSamples << 5;
 
             if (numSourceSamples > maxBlockLengthToUse)
             {
@@ -150,7 +150,7 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
 void MidiMessageCollector::handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
     MidiMessage m (MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity));
-    m.setTimeStamp (Time::getMillisecondCounter() * 0.001);
+    m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
 
     addMessageToQueue (m);
 }
@@ -158,7 +158,7 @@ void MidiMessageCollector::handleNoteOn (MidiKeyboardState*, int midiChannel, in
 void MidiMessageCollector::handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber)
 {
     MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber));
-    m.setTimeStamp (Time::getMillisecondCounter() * 0.001);
+    m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
 
     addMessageToQueue (m);
 }

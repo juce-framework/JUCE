@@ -1946,15 +1946,11 @@ const String String::toHexString (const unsigned char* data,
         *d++ = hexDigits [(*data) & 0xf];
         ++data;
 
-        if (groupSize > 0 && (i % groupSize) == 0)
+        if (groupSize > 0 && (i % groupSize) == (groupSize - 1) && i < (size - 1))
             *d++ = T(' ');
     }
 
-    if (groupSize > 0)
-        --d;
-
     *d = 0;
-
     return s;
 }
 
