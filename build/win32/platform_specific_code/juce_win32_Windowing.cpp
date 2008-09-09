@@ -3801,7 +3801,8 @@ public:
 
     static bool doesWindowMatch (const ActiveXControlComponent* const ax, HWND hwnd)
     {
-        return ((ActiveXControlData*) ax->control)->controlHWND == hwnd;
+        return ((ActiveXControlData*) ax->control) != 0
+				&& ((ActiveXControlData*) ax->control)->controlHWND == hwnd;
     }
 };
 
