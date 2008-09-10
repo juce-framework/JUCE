@@ -586,6 +586,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <cstring>
+#include <cstdio>
 
 #if JUCE_MAC || JUCE_LINUX
   #include <pthread.h>
@@ -30527,6 +30528,12 @@ public:
     */
     void setSectionOpen (const int sectionIndex, const bool shouldBeOpen);
 
+    /** Enables or disables one of the sections.
+
+        The index is from 0 up to the number of items returned by getSectionNames().
+    */
+    void setSectionEnabled (const int sectionIndex, const bool shouldBeEnabled);
+
     /** Saves the current state of open/closed sections so it can be restored later.
 
         The caller is responsible for deleting the object that is returned.
@@ -32671,6 +32678,27 @@ l    */
     */
     int getCaretPosition() const throw();
 
+    /** Attempts to scroll the text editor so that the caret ends up at
+        a specified position.
+
+        This won't affect the caret's position within the text, it tries to scroll
+        the entire editor vertically and horizontally so that the caret is sitting
+        at the given position (relative to the top-left of this component).
+
+        Depending on the amount of text available, it might not be possible to
+        scroll far enough for the caret to reach this exact position, but it
+        will go as far as it can in that direction.
+    */
+    void scrollEditorToPositionCaret (const int desiredCaretX,
+                                      const int desiredCaretY) throw();
+
+    /** Get the graphical position of the caret.
+
+        The rectangle returned is relative to the component's top-left corner.
+        @see scrollEditorToPositionCaret
+    */
+    const Rectangle getCaretRectangle() throw();
+
     /** Selects a section of the text.
     */
     void setHighlightedRegion (int startIndex,
@@ -32914,6 +32942,8 @@ private:
                           float& x, float& y,
                           float& lineHeight) const throw();
 
+    void updateCaretPosition() throw();
+
     int indexAtPosition (const float x,
                          const float y) throw();
 
@@ -33040,6 +33070,12 @@ public:
 
     /** Returns the type of justification, as set in setJustificationType(). */
     const Justification getJustificationType() const throw()                    { return justification; }
+
+    /** Changes the gap that is left between the edge of the component and the text.
+        By default there's a small gap left at the sides of the component to allow for
+        the drawing of the border, but you can change this if necessary.
+    */
+    void setBorderSize (int horizontalBorder, int verticalBorder);
 
     /** Makes this label "stick to" another component.
 
@@ -33184,7 +33220,7 @@ private:
     SortedSet <void*> listeners;
     Component* ownerComponent;
     ComponentDeletionWatcher* deletionWatcher;
-
+    int horizontalBorderSize, verticalBorderSize;
     bool editSingleClick : 1;
     bool editDoubleClick : 1;
     bool lossOfFocusDiscardsChanges : 1;
@@ -43195,7 +43231,6 @@ private:
     void hideCurrentMenu();
     void timerCallback();
     void repaintMenuItem (int index);
-    void showMenuInternal (const int menuIndex);
 
     MenuBarComponent (const MenuBarComponent&);
     const MenuBarComponent& operator= (const MenuBarComponent&);
