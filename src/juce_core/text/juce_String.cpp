@@ -1596,13 +1596,13 @@ const String String::fromFirstOccurrenceOf (const tchar* const sub,
                                             const bool includeSubString,
                                             const bool ignoreCase) const throw()
 {
-    const int i = ignoreCase ? indexOf (sub)
-                             : indexOfIgnoreCase (sub);
+    const int i = ignoreCase ? indexOfIgnoreCase (sub)
+                             : indexOf (sub);
 
     if (i < 0)
         return empty;
     else
-        return substring ((includeSubString) ? i : i + CharacterFunctions::length (sub));
+        return substring (includeSubString ? i : i + CharacterFunctions::length (sub));
 }
 
 
@@ -1610,13 +1610,13 @@ const String String::fromLastOccurrenceOf (const tchar* const sub,
                                            const bool includeSubString,
                                            const bool ignoreCase) const throw()
 {
-    const int i = ignoreCase ? lastIndexOf (sub)
-                             : lastIndexOfIgnoreCase (sub);
+    const int i = ignoreCase ? lastIndexOfIgnoreCase (sub)
+                             : lastIndexOf (sub);
 
     if (i < 0)
         return *this;
     else
-        return substring ((includeSubString) ? i : i + CharacterFunctions::length (sub));
+        return substring (includeSubString ? i : i + CharacterFunctions::length (sub));
 }
 
 const String String::upToFirstOccurrenceOf (const tchar* const sub,
@@ -1629,7 +1629,7 @@ const String String::upToFirstOccurrenceOf (const tchar* const sub,
     if (i < 0)
         return *this;
     else
-        return substring (0, (includeSubString) ? i + CharacterFunctions::length (sub) : i);
+        return substring (0, includeSubString ? i + CharacterFunctions::length (sub) : i);
 }
 
 const String String::upToLastOccurrenceOf (const tchar* const sub,
@@ -1641,7 +1641,7 @@ const String String::upToLastOccurrenceOf (const tchar* const sub,
     if (i < 0)
         return *this;
 
-    return substring (0, (includeSubString) ? i + CharacterFunctions::length (sub) : i);
+    return substring (0, includeSubString ? i + CharacterFunctions::length (sub) : i);
 }
 
 bool String::isQuotedString() const throw()
