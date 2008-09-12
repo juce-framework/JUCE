@@ -79,7 +79,7 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
             {
                 int64 a = 0;
                 for (int j = 6; --j >= 0;)
-                    a = (a << 8) | ifr.ifr_hwaddr.sa_data[j];
+                    a = (a << 8) | (uint8) ifr.ifr_hwaddr.sa_data[j];
 
                 *addresses++ = a;
                 ++numResults;
