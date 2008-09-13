@@ -1056,7 +1056,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
             {
                 if (numBytesOfMidiData < 4)
                 {
-                    ensureMidiEventSize (eventIndex);
+                    ensureMidiEventSize (eventIndex + 1);
                     VstMidiEvent* const e
                         = (VstMidiEvent*) ((VstEvents*) midiEventsToSend)->events [eventIndex++];
 

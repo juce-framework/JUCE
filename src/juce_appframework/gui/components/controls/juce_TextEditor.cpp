@@ -1638,7 +1638,7 @@ void TextEditor::insertTextAtCursor (String newText)
 
     remove (selectionStart, selectionEnd,
             &undoManager,
-            newCaretPos - 1);
+            newText.isNotEmpty() ? newCaretPos - 1 : newCaretPos);
 
     if (maxTextLength > 0)
         newText = newText.substring (0, maxTextLength - getTotalNumChars());

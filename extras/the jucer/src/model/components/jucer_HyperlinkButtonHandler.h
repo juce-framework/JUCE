@@ -103,7 +103,7 @@ public:
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
     {
-        ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
+        ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 
         code.constructorCode << getColourIntialisationCode (component, memberVariableName)
                              << T('\n');
