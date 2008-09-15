@@ -65,7 +65,8 @@ public:
 
     void timerCallback()
     {
-        startTimer (1731);
+        startTimer (jmin (1731, getTimerInterval() * 2));
+
         TopLevelWindow* active = 0;
 
         if (Process::isForegroundProcess())

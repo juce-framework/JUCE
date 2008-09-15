@@ -1032,6 +1032,24 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
 
     if (initialised)
     {
+        AudioPlayHead* playHead = getPlayHead();
+
+        if (playHead != 0)
+        {
+            AudioPlayHead::CurrentPositionInfo position;
+            playHead->getCurrentPosition (position);
+
+            vstHostTime.tempo = position.bpm;
+            vstHostTime.timeSigNumerator = position.timeSigNumerator;
+            vstHostTime.timeSigDenominator = position.timeSigDenominator;
+            vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid;
+
+            if (position.isPlaying)
+                vstHostTime.flags |= kVstTransportPlaying;
+            else
+                vstHostTime.flags &= ~kVstTransportPlaying;
+        }
+
 #if JUCE_WIN32
         vstHostTime.nanoSeconds = timeGetTime() * 1000000.0;
 #elif JUCE_LINUX

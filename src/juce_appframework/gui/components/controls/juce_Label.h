@@ -180,6 +180,13 @@ public:
     */
     bool isAttachedOnLeft() const throw()                                       { return leftOfOwnerComp; }
 
+    /** Specifies the minimum amount that the font can be squashed horizantally before it starts
+        using ellipsis.
+
+        @see Graphics::drawFittedText
+    */
+    void setMinimumHorizontalScale (const float newScale);
+
     //==============================================================================
     /** Registers a listener that will be called when the label's text changes. */
     void addListener (LabelListener* const listener) throw();
@@ -301,6 +308,7 @@ private:
     Component* ownerComponent;
     ComponentDeletionWatcher* deletionWatcher;
     int horizontalBorderSize, verticalBorderSize;
+    float minimumHorizontalScale;
     bool editSingleClick : 1;
     bool editDoubleClick : 1;
     bool lossOfFocusDiscardsChanges : 1;

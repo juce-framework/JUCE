@@ -49,6 +49,7 @@ Label::Label (const String& componentName,
       deletionWatcher (0),
       horizontalBorderSize (3),
       verticalBorderSize (1),
+      minimumHorizontalScale (0.7f),
       editSingleClick (false),
       editDoubleClick (false),
       lossOfFocusDiscardsChanges (false)
@@ -302,7 +303,8 @@ void Label::paint (Graphics& g)
                           getWidth() - 2 * horizontalBorderSize, 
                           getHeight() - 2 * verticalBorderSize,
                           justification,
-                          jmax (1, (int) (getHeight() / font.getHeight())));
+                          jmax (1, (int) (getHeight() / font.getHeight())),
+                          minimumHorizontalScale);
 
         g.setColour (findColour (outlineColourId).withMultipliedAlpha (alpha));
         g.drawRect (0, 0, getWidth(), getHeight());
