@@ -84,7 +84,8 @@ Synthesiser::Synthesiser()
       lastNoteOnCounter (0),
       shouldStealNotes (true)
 {
-    zeromem (lastPitchWheelValues, sizeof (lastPitchWheelValues));
+    for (int i = 0; i < numElementsInArray (lastPitchWheelValues); ++i)
+        lastPitchWheelValues[i] = 0x2000;
 }
 
 Synthesiser::~Synthesiser()
