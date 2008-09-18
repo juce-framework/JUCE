@@ -1042,7 +1042,9 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
             vstHostTime.tempo = position.bpm;
             vstHostTime.timeSigNumerator = position.timeSigNumerator;
             vstHostTime.timeSigDenominator = position.timeSigDenominator;
-            vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid;
+            vstHostTime.ppqPos = position.ppqPosition;
+            vstHostTime.barStartPos = position.ppqPositionOfLastBarStart;
+            vstHostTime.flags |= kVstTempoValid | kVstTimeSigValid | kVstPpqPosValid | kVstBarsValid;
 
             if (position.isPlaying)
                 vstHostTime.flags |= kVstTransportPlaying;
