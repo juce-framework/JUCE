@@ -48,6 +48,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/text/juce_String.h"
 #include "../../../src/juce_core/basics/juce_Time.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "../../../src/juce_core/basics/juce_Logger.h"
 #include "../../../src/juce_core/threads/juce_ScopedLock.h"
 #include "../../../src/juce_core/threads/juce_WaitableEvent.h"
 #include "../../../src/juce_core/threads/juce_Thread.h"
@@ -56,7 +57,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../src/juce_core/io/network/juce_URL.h"
 
-#include "juce_mac_HTTPStream.h"
+//#include "juce_mac_HTTPStream.h"
 
 //==============================================================================
 static bool GetEthernetIterator (io_iterator_t* matchingServices) throw()
@@ -183,6 +184,262 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     [s release];
 
     return ok;
+}
+
+//==============================================================================
+END_JUCE_NAMESPACE
+
+using namespace JUCE_NAMESPACE;
+
+@interface JuceURLConnection  : NSInputStream
+{
+    NSURLConnection* connection;
+    NSMutableData* data;
+    NSThread* runLoopThread;
+    NSRunLoop* runLoop;
+    bool initialised, hasFailed, hasFinished;
+    int position;
+    NSLock* dataLock;
+}
+
+- (JuceURLConnection*) initWithRequest: (NSURLRequest*) req;
+- (void) dealloc;
+- (void) connection: (NSURLConnection*) connection didReceiveResponse: (NSURLResponse*) response;
+- (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error;
+- (void) connection: (NSURLConnection*) connection didReceiveData: (NSData*) data;
+- (void) connectionDidFinishLoading: (NSURLConnection*) connection;
+
+- (BOOL) isOpen;
+- (int) read: (char*) dest numBytes: (int) num;
+- (int) readPosition;
+
+- (void) runThread: (id) dummyParam;
+
+@end
+
+@implementation JuceURLConnection
+
+- (JuceURLConnection*) initWithRequest: (NSURLRequest*) req
+{
+    [super init];
+    data = [[NSMutableData data] retain];
+    dataLock = [[NSLock alloc] init];
+    connection = 0;
+    initialised = false;
+    hasFailed = false;
+    hasFinished = false;
+
+    runLoopThread = [[NSThread alloc] initWithTarget: self
+                                            selector: @selector (runThread:)
+                                              object: req];
+    
+    [runLoopThread start];
+
+    while (! [runLoopThread isExecuting])
+        Thread::sleep (1);
+
+    while ([runLoopThread isExecuting] && ! initialised)
+        Thread::sleep (1);
+
+    return self;
+}
+
+- (void) dealloc
+{
+    [connection cancel];
+    [runLoopThread cancel];
+    
+    while ([runLoopThread isExecuting])
+        [NSThread sleepForTimeInterval: 0.001];
+
+    [runLoopThread release];
+    [connection release];
+    [data release];
+    [dataLock release];
+    [super dealloc];
+}
+
+- (void) runThread: (id) request
+{
+    AutoPool pool;
+
+    runLoop = [NSRunLoop currentRunLoop];
+
+    connection = [[NSURLConnection alloc] initWithRequest: request 
+                                                 delegate: self
+                                         startImmediately: YES];
+
+    if (connection == nil)
+    {
+        hasFailed = true;
+        return;
+    }
+
+    initialised = true;
+
+    while (! ([[NSThread currentThread] isCancelled] || hasFailed || hasFinished))
+    {
+        [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
+    }
+}
+
+- (void) connection: (NSURLConnection*) connection didReceiveResponse: (NSURLResponse*) response
+{
+    [dataLock lock];
+    [data setLength: 0];
+    [dataLock unlock];
+}
+
+- (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
+{
+    NSLog ([error description]);
+    hasFailed = true;
+}
+
+- (void) connection: (NSURLConnection*) connection didReceiveData: (NSData*) newData
+{
+    [dataLock lock];
+    [data appendData: newData];
+    [dataLock unlock];
+}
+
+- (void) connectionDidFinishLoading: (NSURLConnection*) connection
+{
+    hasFinished = true;
+}
+
+- (BOOL) isOpen
+{
+    return connection != 0 && ! hasFailed;
+}
+
+- (int) readPosition
+{
+    return position;
+}
+
+- (int) read: (char*) dest numBytes: (int) numNeeded
+{
+    int numDone = 0;
+    
+    while (numNeeded > 0)
+    {
+        int available = jmin (numNeeded, [data length]);
+
+        if (available > 0)
+        {
+            [dataLock lock];
+            [data getBytes: dest length: available];
+            [data replaceBytesInRange: NSMakeRange (0, available) withBytes: nil length: 0];
+            [dataLock unlock];
+            
+            numDone += available;
+            numNeeded -= available;
+            dest += available;
+        }
+        else
+        {
+            if (hasFailed || hasFinished)
+                break;
+
+            Thread::sleep (1);
+        }
+    }
+
+    position += numDone;
+    return numDone;
+}
+
+@end
+BEGIN_JUCE_NAMESPACE
+
+
+bool juce_isOnLine()
+{
+    return true;
+}
+
+void* juce_openInternetFile (const String& url,
+                             const String& headers,
+                             const MemoryBlock& postData,
+                             const bool isPost,
+                             URL::OpenStreamProgressCallback* callback,
+                             void* callbackContext,
+                             int timeOutMs)
+{
+    AutoPool pool;
+
+    NSMutableURLRequest* req = [NSMutableURLRequest
+            requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
+               cachePolicy: NSURLRequestUseProtocolCachePolicy
+           timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)];
+
+    if (req == nil)
+        return 0;
+
+    [req setHTTPMethod: isPost ? @"POST" : @"GET"];
+    //[req setCachePolicy: NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
+
+    StringArray headerLines;
+    headerLines.addLines (headers);
+    headerLines.removeEmptyStrings (true);
+
+    for (int i = 0; i < headerLines.size(); ++i)
+    {
+        const String key (headerLines[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
+        const String value (headerLines[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
+        
+        if (key.isNotEmpty() && value.isNotEmpty())
+            [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+    }
+
+    if (isPost && postData.getSize() > 0)
+    {
+        [req setHTTPBody: [NSData dataWithBytes: postData.getData() 
+                                         length: postData.getSize()]];
+    }
+
+    JuceURLConnection* const s = [[JuceURLConnection alloc] initWithRequest: req];
+
+    if ([s isOpen])
+        return s;
+
+    delete s;
+    return 0;
+}
+
+void juce_closeInternetFile (void* handle)
+{
+    JuceURLConnection* const s = (JuceURLConnection*) handle;
+    
+    if (s != 0)
+    {
+        AutoPool pool;
+        [s release];
+    }
+}
+
+int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
+{
+    JuceURLConnection* const s = (JuceURLConnection*) handle;
+    
+    if (s != 0)
+    {
+        AutoPool pool;
+        return [s read: (char*) buffer numBytes: bytesToRead];
+    }
+
+    return 0;
+}
+
+int juce_seekInInternetFile (void* handle, int newPosition)
+{
+    JuceURLConnection* const s = (JuceURLConnection*) handle;
+    
+    if (s != 0)
+        return [s readPosition];
+
+    return 0;
 }
 
 
