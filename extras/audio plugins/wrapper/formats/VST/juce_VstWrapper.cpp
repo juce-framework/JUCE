@@ -212,6 +212,8 @@ public:
         if (! juce_postMessageToSystemQueue (m))
             delete m;
 
+        waitForThreadToExit (5000);
+
         clearSingletonInstance();
     }
 
@@ -356,6 +358,7 @@ public:
         firstResize = true;
         hasShutdown = false;
         firstProcessCallback = true;
+        shouldDeleteEditor = false;
         channels = 0;
         numInChans = JucePlugin_MaxNumInputChannels;
         numOutChans = JucePlugin_MaxNumOutputChannels;
@@ -399,7 +402,7 @@ public:
     ~JuceVSTWrapper()
     {
         stopTimer();
-        deleteEditor();
+        deleteEditor (false);
 
         hasShutdown = true;
 
@@ -443,7 +446,7 @@ public:
         jassert (! recursionCheck);
 
         stopTimer();
-        deleteEditor();
+        deleteEditor (false);
     }
 
     //==============================================================================
@@ -1056,6 +1059,12 @@ public:
 
     void timerCallback()
     {
+        if (shouldDeleteEditor)
+        {
+            shouldDeleteEditor = false;
+            deleteEditor (true);
+        }
+
         if (chunkMemoryTime > 0
              && chunkMemoryTime < JUCE_NAMESPACE::Time::getApproximateMillisecondCounter() - 2000
              && ! recursionCheck)
@@ -1125,9 +1134,11 @@ public:
                 editorComp = new EditorCompWrapper (this, ed);
             }
         }
+        
+        shouldDeleteEditor = false;
     }
 
-    void deleteEditor()
+    void deleteEditor (bool canDeleteLaterIfModal)
     {
         PopupMenu::dismissAllActiveMenus();
 
@@ -1142,7 +1153,15 @@ public:
         {
             Component* const modalComponent = Component::getCurrentlyModalComponent();
             if (modalComponent != 0)
+            {
                 modalComponent->exitModalState (0);
+                
+                if (canDeleteLaterIfModal)
+                {
+                    shouldDeleteEditor = true;
+                    return;
+                }
+            }
 
             filter->editorBeingDeleted (editorComp->getEditorComp());
 
@@ -1174,7 +1193,7 @@ public:
         {
             jassert (! recursionCheck);
 
-            deleteEditor();
+            deleteEditor (true);
             createEditorComp();
 
             if (editorComp != 0)
@@ -1247,7 +1266,7 @@ public:
         }
         else if (opCode == effEditClose)
         {
-            deleteEditor();
+            deleteEditor (true);
             return 0;
         }
         else if (opCode == effEditGetRect)
@@ -1394,6 +1413,7 @@ private:
     float** channels;
     VoidArray tempChannels; // see note in processReplacing()
     bool hasCreatedTempChannels;
+    bool shouldDeleteEditor;
 
     void deleteTempChannels()
     {
