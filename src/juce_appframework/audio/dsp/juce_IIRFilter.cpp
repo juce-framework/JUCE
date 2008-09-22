@@ -67,6 +67,27 @@ void IIRFilter::reset() throw()
     y2 = 0;
 }
 
+float IIRFilter::processSingleSampleRaw (const float in) throw()
+{
+    float out = coefficients[0] * in
+                 + coefficients[1] * x1
+                 + coefficients[2] * x2
+                 - coefficients[4] * y1
+                 - coefficients[5] * y2;
+
+#if JUCE_INTEL
+    if (! (out < -1.0e-8 || out > 1.0e-8))
+        out = 0;
+#endif
+
+    x2 = x1;
+    x1 = in;
+    y2 = y1;
+    y1 = out;
+
+    return out;
+}
+
 void IIRFilter::processSamples (float* const samples,
                                 const int numSamples) throw()
 {

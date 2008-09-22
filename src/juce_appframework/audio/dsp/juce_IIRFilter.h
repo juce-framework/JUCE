@@ -74,6 +74,13 @@ public:
     void processSamples (float* const samples,
                          const int numSamples) throw();
 
+    /** Processes a single sample, without any locking or checking.
+
+        Use this if you need fast processing of a single value, but be aware that
+        this isn't thread-safe in the way that processSamples() is.
+    */
+    float processSingleSampleRaw (const float sample) throw();
+
     //==============================================================================
     /** Sets the filter up to act as a low-pass filter.
     */
