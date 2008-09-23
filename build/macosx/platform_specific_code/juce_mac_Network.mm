@@ -36,13 +36,6 @@
 #include <IOKit/network/IONetworkInterface.h>
 #include <IOKit/network/IOEthernetController.h>
 
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-
 BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_core/text/juce_String.h"
@@ -388,7 +381,7 @@ void* juce_openInternetFile (const String& url,
     {
         const String key (headerLines[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
         const String value (headerLines[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
-        
+
         if (key.isNotEmpty() && value.isNotEmpty())
             [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
     }
