@@ -351,6 +351,9 @@ public:
     virtual void positionComboBoxText (ComboBox& box, Label& labelToPosition);
 
     //==============================================================================
+    virtual void drawLabel (Graphics& g, Label& label);
+
+    //==============================================================================
     virtual void drawLinearSlider (Graphics& g,
                                    int x, int y,
                                    int width, int height,

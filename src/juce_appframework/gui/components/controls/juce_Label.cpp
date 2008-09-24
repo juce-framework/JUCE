@@ -34,6 +34,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Label.h"
+#include "../LookAndFeel/juce_LookAndFeel.h"
 
 
 //==============================================================================
@@ -289,33 +290,7 @@ TextEditor* Label::createEditorComponent()
 //==============================================================================
 void Label::paint (Graphics& g)
 {
-    g.fillAll (findColour (backgroundColourId));
-
-    if (editor == 0)
-    {
-        const float alpha = isEnabled() ? 1.0f : 0.5f;
-
-        g.setColour (findColour (textColourId).withMultipliedAlpha (alpha));
-        g.setFont (font);
-        g.drawFittedText (text,
-                          horizontalBorderSize, 
-                          verticalBorderSize, 
-                          getWidth() - 2 * horizontalBorderSize, 
-                          getHeight() - 2 * verticalBorderSize,
-                          justification,
-                          jmax (1, (int) (getHeight() / font.getHeight())),
-                          minimumHorizontalScale);
-
-        g.setColour (findColour (outlineColourId).withMultipliedAlpha (alpha));
-        g.drawRect (0, 0, getWidth(), getHeight());
-    }
-    else if (isEnabled())
-    {
-        g.setColour (editor->findColour (TextEditor::backgroundColourId)
-                        .overlaidWith (findColour (outlineColourId)));
-
-        g.drawRect (0, 0, getWidth(), getHeight());
-    }
+    getLookAndFeel().drawLabel (g, *this);
 }
 
 void Label::mouseUp (const MouseEvent& e)

@@ -1198,6 +1198,36 @@ void LookAndFeel::positionComboBoxText (ComboBox& box, Label& label)
 }
 
 //==============================================================================
+void LookAndFeel::drawLabel (Graphics& g, Label& label)
+{
+    g.fillAll (label.findColour (Label::backgroundColourId));
+
+    if (! label.isBeingEdited())
+    {
+        const float alpha = label.isEnabled() ? 1.0f : 0.5f;
+
+        g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
+        g.setFont (label.getFont());
+        g.drawFittedText (label.getText(),
+                          label.getHorizontalBorderSize(), 
+                          label.getVerticalBorderSize(), 
+                          label.getWidth() - 2 * label.getHorizontalBorderSize(), 
+                          label.getHeight() - 2 * label.getVerticalBorderSize(),
+                          label.getJustificationType(),
+                          jmax (1, (int) (label.getHeight() / label.getFont().getHeight())),
+                          label.getMinimumHorizontalScale());
+
+        g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (alpha));
+        g.drawRect (0, 0, label.getWidth(), label.getHeight());
+    }
+    else if (label.isEnabled())
+    {
+        g.setColour (label.findColour (Label::outlineColourId));
+        g.drawRect (0, 0, label.getWidth(), label.getHeight());
+    }
+}
+
+//==============================================================================
 void LookAndFeel::drawLinearSliderBackground (Graphics& g,
                                               int x, int y,
                                               int width, int height,

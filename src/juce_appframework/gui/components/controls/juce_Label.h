@@ -153,7 +153,15 @@ public:
         the drawing of the border, but you can change this if necessary.
     */
     void setBorderSize (int horizontalBorder, int verticalBorder);
-    
+
+    /** 
+    */
+    int getHorizontalBorderSize() const throw()                                 { return horizontalBorderSize; }
+
+    /** 
+    */
+    int getVerticalBorderSize() const throw()                                   { return verticalBorderSize; }
+
     /** Makes this label "stick to" another component.
 
         This will cause the label to follow another component around, staying
@@ -186,6 +194,8 @@ public:
         @see Graphics::drawFittedText
     */
     void setMinimumHorizontalScale (const float newScale);
+
+    float getMinimumHorizontalScale() const throw()                             { return minimumHorizontalScale; }
 
     //==============================================================================
     /** Registers a listener that will be called when the label's text changes. */

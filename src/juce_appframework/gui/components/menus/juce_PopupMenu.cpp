@@ -454,7 +454,7 @@ public:
         int itemW = 80;
         int itemH = 16;
         mic->getIdealSize (itemW, itemH, standardItemHeight);
-        mic->setSize (itemW, jlimit (10, 600, itemH));
+        mic->setSize (itemW, jlimit (2, 600, itemH));
         mic->addMouseListener (this, false);
     }
 
