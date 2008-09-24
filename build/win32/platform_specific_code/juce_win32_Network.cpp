@@ -139,13 +139,17 @@ void* juce_openInternetFile (const String& url,
                 {
                     const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
 
+                    DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
+
+                    if (url.startsWithIgnoreCase (T("https:")))
+                        flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
+                                                        //  IE7 seems to automatically work out when it's https)
+
                     HINTERNET request = HttpOpenRequest (connection,
                                                          isPost ? _T("POST")
                                                                 : _T("GET"),
                                                          uc.lpszUrlPath,
-                                                         0, 0, mimeTypes,
-                                                         INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE,
-                                                         0);
+                                                         0, 0, mimeTypes, flags, 0);
 
                     if (request != 0)
                     {
