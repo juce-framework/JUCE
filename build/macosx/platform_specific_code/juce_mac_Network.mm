@@ -184,18 +184,19 @@ END_JUCE_NAMESPACE
 
 using namespace JUCE_NAMESPACE;
 
-@interface JuceURLConnection  : NSInputStream
+//==============================================================================
+@interface JuceURLConnection  : NSObject
 {
+    NSURLRequest* request;
     NSURLConnection* connection;
     NSMutableData* data;
-    NSThread* runLoopThread;
-    NSRunLoop* runLoop;
+    Thread* runLoopThread;
     bool initialised, hasFailed, hasFinished;
     int position;
     NSLock* dataLock;
 }
 
-- (JuceURLConnection*) initWithRequest: (NSURLRequest*) req;
+- (JuceURLConnection*) initWithRequest: (NSURLRequest*) req withCallback: (URL::OpenStreamProgressCallback*) callback withContext: (void*) context;
 - (void) dealloc;
 - (void) connection: (NSURLConnection*) connection didReceiveResponse: (NSURLResponse*) response;
 - (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error;
@@ -205,16 +206,50 @@ using namespace JUCE_NAMESPACE;
 - (BOOL) isOpen;
 - (int) read: (char*) dest numBytes: (int) num;
 - (int) readPosition;
-
-- (void) runThread: (id) dummyParam;
+- (void) stop;
+- (void) createConnection;
 
 @end
+
+class JuceURLConnectionMessageThread  : public Thread
+{
+    JuceURLConnection* owner;
+    
+public:
+    JuceURLConnectionMessageThread (JuceURLConnection* owner_)
+        : Thread (T("http connection")),
+          owner (owner_)
+    {
+        startThread();
+    }
+
+    ~JuceURLConnectionMessageThread()
+    {
+        stopThread (5000);
+    }
+
+    void run()
+    {
+        AutoPool pool;
+        [owner createConnection];
+
+        while (! threadShouldExit())
+        {
+            AutoPool pool;
+            [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
+        }
+    }
+};
 
 @implementation JuceURLConnection
 
 - (JuceURLConnection*) initWithRequest: (NSURLRequest*) req
+                          withCallback: (URL::OpenStreamProgressCallback*) callback
+                           withContext: (void*) context;
 {
     [super init];
+    request = req;
+    [request retain];
     data = [[NSMutableData data] retain];
     dataLock = [[NSLock alloc] init];
     connection = 0;
@@ -222,58 +257,38 @@ using namespace JUCE_NAMESPACE;
     hasFailed = false;
     hasFinished = false;
 
-    runLoopThread = [[NSThread alloc] initWithTarget: self
-                                            selector: @selector (runThread:)
-                                              object: req];
-    
-    [runLoopThread start];
+    runLoopThread = new JuceURLConnectionMessageThread (self);
 
-    while (! [runLoopThread isExecuting])
-        Thread::sleep (1);
+    while (runLoopThread->isThreadRunning() && ! initialised)
+    {
+        if (callback != 0)
+            callback (context, -1, [[request HTTPBody] length]);
 
-    while ([runLoopThread isExecuting] && ! initialised)
         Thread::sleep (1);
+    }
 
     return self;
 }
 
 - (void) dealloc
 {
-    [connection cancel];
-    [runLoopThread cancel];
-    
-    while ([runLoopThread isExecuting])
-        [NSThread sleepForTimeInterval: 0.001];
+    [self stop];
 
-    [runLoopThread release];
+    delete runLoopThread;
     [connection release];
     [data release];
     [dataLock release];
+    [request release];
     [super dealloc];
 }
 
-- (void) runThread: (id) request
+- (void) createConnection
 {
-    AutoPool pool;
-
-    runLoop = [NSRunLoop currentRunLoop];
-
     connection = [[NSURLConnection alloc] initWithRequest: request 
-                                                 delegate: self
-                                         startImmediately: YES];
+                                                 delegate: self];
 
     if (connection == nil)
-    {
-        hasFailed = true;
-        return;
-    }
-
-    initialised = true;
-
-    while (! ([[NSThread currentThread] isCancelled] || hasFailed || hasFinished))
-    {
-        [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
-    }
+        runLoopThread->signalThreadShouldExit();
 }
 
 - (void) connection: (NSURLConnection*) connection didReceiveResponse: (NSURLResponse*) response
@@ -281,12 +296,15 @@ using namespace JUCE_NAMESPACE;
     [dataLock lock];
     [data setLength: 0];
     [dataLock unlock];
+    initialised = true;
 }
 
 - (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
 {
     NSLog ([error description]);
     hasFailed = true;
+    initialised = true;
+    runLoopThread->signalThreadShouldExit();
 }
 
 - (void) connection: (NSURLConnection*) connection didReceiveData: (NSData*) newData
@@ -294,11 +312,14 @@ using namespace JUCE_NAMESPACE;
     [dataLock lock];
     [data appendData: newData];
     [dataLock unlock];
+    initialised = true;
 }
 
 - (void) connectionDidFinishLoading: (NSURLConnection*) connection
 {
     hasFinished = true;
+    initialised = true;
+    runLoopThread->signalThreadShouldExit();
 }
 
 - (BOOL) isOpen
@@ -341,6 +362,12 @@ using namespace JUCE_NAMESPACE;
 
     position += numDone;
     return numDone;
+}
+
+- (void) stop
+{
+    [connection cancel];
+    runLoopThread->stopThread (5000);
 }
 
 @end
@@ -392,12 +419,14 @@ void* juce_openInternetFile (const String& url,
                                          length: postData.getSize()]];
     }
 
-    JuceURLConnection* const s = [[JuceURLConnection alloc] initWithRequest: req];
+    JuceURLConnection* const s = [[JuceURLConnection alloc] initWithRequest: req
+                                                               withCallback: callback
+                                                                withContext: callbackContext];
 
     if ([s isOpen])
         return s;
 
-    delete s;
+    [s release];
     return 0;
 }
 
@@ -408,6 +437,7 @@ void juce_closeInternetFile (void* handle)
     if (s != 0)
     {
         AutoPool pool;
+        [s stop];
         [s release];
     }
 }
