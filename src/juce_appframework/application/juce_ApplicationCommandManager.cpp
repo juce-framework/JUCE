@@ -39,6 +39,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/components/windows/juce_ResizableWindow.h"
 #include "../gui/components/juce_Desktop.h"
 #include "../events/juce_MessageManager.h"
+#include "../../juce_core/threads/juce_Process.h"
 
 
 //==============================================================================
@@ -273,7 +274,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         }
     }
 
-    if (c == 0)
+    if (c == 0 && Process::isForegroundProcess())
     {
         // getting a bit desperate now - try all desktop comps..
         for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
