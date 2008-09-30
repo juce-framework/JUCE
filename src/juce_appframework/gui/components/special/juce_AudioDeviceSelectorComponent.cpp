@@ -1050,7 +1050,7 @@ void AudioDeviceSelectorComponent::resized()
 
     if (midiInputsList != 0)
     {
-        const int bh = midiInputsList->getBestHeight (jmin (h * 8, getHeight() - y - space));
+        const int bh = midiInputsList->getBestHeight (jmin (h * 8, getHeight() - y - space - h));
         midiInputsList->setBounds (lx, y, w, bh);
         y += bh + space;
     }

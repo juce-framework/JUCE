@@ -321,6 +321,7 @@ public:
     {
         menuCreationTime = lastFocused = lastScroll = Time::getMillisecondCounter();
         setWantsKeyboardFocus (true);
+        setMouseClickGrabsKeyboardFocus (false);
 
         setOpaque (true);
         setAlwaysOnTop (true);

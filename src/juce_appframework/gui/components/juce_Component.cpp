@@ -3079,7 +3079,7 @@ void Component::internalBroughtToFront()
 
         if (cm != 0 && cm->getTopLevelComponent() != getTopLevelComponent())
         {
-            cm->getTopLevelComponent()->toFront (false);
+            cm->getTopLevelComponent()->toFront (true);
         }
     }
 }
