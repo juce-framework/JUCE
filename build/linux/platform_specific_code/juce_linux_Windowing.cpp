@@ -452,6 +452,60 @@ static bool isShmAvailable() throw()
 }
 #endif
 
+//==============================================================================
+static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& image)
+{
+    const int width = image.getWidth();
+    const int height = image.getHeight();
+    uint32* const colour = (uint32*) juce_malloc (width * height * sizeof (uint32));
+    int index = 0;
+
+    for (int y = 0; y < height; ++y)
+        for (int x = 0; x < width; ++x)
+            colour[index++] = image.getPixelAt (x, y).getARGB();
+
+    XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
+                                   0, (char*) colour, width, height, 32, 0);
+
+    Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display), 
+                                   width, height, 24);
+
+    GC gc = XCreateGC (display, pixmap, 0, 0);
+    XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+    XFreeGC (display, gc);
+    juce_free (colour);
+
+    return pixmap;
+}
+
+static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& image)
+{
+    const int width = image.getWidth();
+    const int height = image.getHeight();
+    const int stride = (width + 7) >> 3;
+    uint8* const mask = (uint8*) juce_calloc (stride * height);
+    const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
+
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            const uint8 bit = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+            const int offset = y * stride + (x >> 3);
+
+            if (image.getPixelAt (x, y).getAlpha() >= 128)
+                mask[offset] |= bit;
+        }
+    }
+
+    Pixmap pixmap = XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
+                                                 (char*) mask, width, height, 1, 0, 1);
+
+    juce_free (mask);
+
+    return pixmap;
+}
+
 
 //==============================================================================
 class XBitmapImage  : public Image
@@ -2677,59 +2731,6 @@ bool Desktop::isScreenSaverEnabled() throw()
 }
 
 //==============================================================================
-static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& image)
-{
-    const int width = image.getWidth();
-    const int height = image.getHeight();
-    uint32* const colour = (uint32*) juce_malloc (width * height * sizeof (uint32));
-    int index = 0;
-
-    for (int y = 0; y < height; ++y)
-        for (int x = 0; x < width; ++x)
-            colour[index++] = image.getPixelAt (x, y).getARGB();
-
-    XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                   0, (char*) colour, width, height, 32, 0);
-
-    Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display), 
-                                   width, height, 24);
-
-    GC gc = XCreateGC (display, pixmap, 0, 0);
-    XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
-    XFreeGC (display, gc);
-    juce_free (colour);
-
-    return pixmap;
-}
-
-static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& image)
-{
-    const int width = image.getWidth();
-    const int height = image.getHeight();
-    const int stride = (width + 7) >> 3;
-    uint8* const mask = (uint8*) juce_calloc (stride * height);
-    const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
-
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
-            const uint8 bit = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-            const int offset = y * stride + (x >> 3);
-
-            if (image.getPixelAt (x, y).getAlpha() >= 128)
-                mask[offset] |= bit;
-        }
-    }
-
-    Pixmap pixmap = XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                                 (char*) mask, width, height, 1, 0, 1);
-
-    juce_free (mask);
-
-    return pixmap;
-}
-
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
     Window root = RootWindow (display, DefaultScreen (display));
