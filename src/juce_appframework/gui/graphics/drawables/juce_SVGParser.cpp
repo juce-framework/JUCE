@@ -1137,7 +1137,7 @@ private:
                 tokens.trim();
                 tokens.removeEmptyStrings();
 
-                if (tokens[0].containsChar T('%'))
+                if (tokens[0].containsChar (T('%')))
                     return Colour ((uint8) roundDoubleToInt (2.55 * tokens[0].getDoubleValue()),
                                    (uint8) roundDoubleToInt (2.55 * tokens[1].getDoubleValue()),
                                    (uint8) roundDoubleToInt (2.55 * tokens[2].getDoubleValue()));

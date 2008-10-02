@@ -638,48 +638,37 @@ public:
             }
             else
             {
-                if (! hasCreatedTempChannels)
+                int i;
+                for (i = 0; i < numOut; ++i)
                 {
-                    // do this just once when we start processing..
-                    hasCreatedTempChannels = true;
+                    float* chan = (float*) tempChannels.getUnchecked(i);
 
-                    // if some output channels are disabled, some hosts supply the same buffer
-                    // for multiple channels - this buggers up our method of copying the
-                    // inputs over the outputs, so we need to create unique temp buffers in this case..
-                    for (int i = 0; i < numOut; ++i)
+                    if (chan == 0)
                     {
+                        chan = outputs[i];
+
+                        // if some output channels are disabled, some hosts supply the same buffer
+                        // for multiple channels - this buggers up our method of copying the
+                        // inputs over the outputs, so we need to create unique temp buffers in this case..
                         for (int j = i; --j >= 0;)
                         {
-                            if (outputs[j] == outputs[i] && outputs[i] != 0)
+                            if (outputs[j] == chan)
                             {
-                                tempChannels.set (i, juce_malloc (sizeof (float) * blockSize * 2));
+                                chan = juce_malloc (sizeof (float) * blockSize * 2);
+                                tempChannels.set (i, chan);
                                 break;
                             }
                         }
                     }
+
+                    if (i < numIn && chan != inputs[i])
+                        memcpy (chan, inputs[i], sizeof (float) * numSamples);
+
+                    channels[i] = chan;
                 }
 
-                {
-                    int i;
-                    for (i = 0; i < numOut; ++i)
-                    {
-                        // if some output channels are disabled, the host may pass the same dummy buffer
-                        // pointer for all of these outputs - and that means that we'd be copying all our
-                        // input channels into the same place... so in this case, we use an internal dummy
-                        // buffer which has enough channels for each input.
-                        float* chan = (float*) tempChannels.getUnchecked(i);
-                        if (chan == 0)
-                            chan = outputs[i];
-
-                        if (i < numIn && chan != inputs[i])
-                            memcpy (chan, inputs[i], sizeof (float) * numSamples);
-
-                        channels[i] = chan;
-                    }
-
-                    for (; i < numIn; ++i)
-                        channels[i] = inputs[i];
-                }
+                for (; i < numIn; ++i)
+                    channels[i] = inputs[i];
 
                 AudioSampleBuffer chans (channels, jmax (numIn, numOut), numSamples);
 

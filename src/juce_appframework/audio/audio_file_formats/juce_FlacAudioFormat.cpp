@@ -45,29 +45,33 @@
 
 namespace FlacNamespace
 {
-#define FLAC__NO_DLL 1
+#if JUCE_INCLUDE_FLAC_CODE
+ #define FLAC__NO_DLL 1
 
-#if ! defined (SIZE_MAX)
+ #if ! defined (SIZE_MAX)
   #define SIZE_MAX 0xffffffff
-#endif
+ #endif
 
-#define __STDC_LIMIT_MACROS 1
-#include "flac/all.h"
-#include "flac/libFLAC/bitmath.c"
-#include "flac/libFLAC/bitreader.c"
-#include "flac/libFLAC/bitwriter.c"
-#include "flac/libFLAC/cpu.c"
-#include "flac/libFLAC/crc.c"
-#include "flac/libFLAC/fixed.c"
-#include "flac/libFLAC/float.c"
-#include "flac/libFLAC/format.c"
-#include "flac/libFLAC/lpc_flac.c"
-#include "flac/libFLAC/md5.c"
-#include "flac/libFLAC/memory.c"
-#include "flac/libFLAC/stream_decoder.c"
-#include "flac/libFLAC/stream_encoder.c"
-#include "flac/libFLAC/stream_encoder_framing.c"
-#include "flac/libFLAC/window_flac.c"
+ #define __STDC_LIMIT_MACROS 1
+ #include "flac/all.h"
+ #include "flac/libFLAC/bitmath.c"
+ #include "flac/libFLAC/bitreader.c"
+ #include "flac/libFLAC/bitwriter.c"
+ #include "flac/libFLAC/cpu.c"
+ #include "flac/libFLAC/crc.c"
+ #include "flac/libFLAC/fixed.c"
+ #include "flac/libFLAC/float.c"
+ #include "flac/libFLAC/format.c"
+ #include "flac/libFLAC/lpc_flac.c"
+ #include "flac/libFLAC/md5.c"
+ #include "flac/libFLAC/memory.c"
+ #include "flac/libFLAC/stream_decoder.c"
+ #include "flac/libFLAC/stream_encoder.c"
+ #include "flac/libFLAC/stream_encoder_framing.c"
+ #include "flac/libFLAC/window_flac.c"
+#else
+ #include <FLAC/all.h>
+#endif
 }
 
 #ifdef _MSC_VER

@@ -375,9 +375,10 @@ void ComponentPeer::handleMessage (const Message& message)
 {
     if (message.intParameter1 == fakeMouseMoveMessage)
     {
-        handleMouseMove (message.intParameter2,
-                         message.intParameter3,
-                         Time::currentTimeMillis());
+        if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
+            handleMouseMove (message.intParameter2,
+                             message.intParameter3,
+                             Time::currentTimeMillis());
     }
 }
 

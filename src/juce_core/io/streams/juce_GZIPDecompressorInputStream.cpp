@@ -38,6 +38,7 @@
 
 namespace zlibNamespace
 {
+#if JUCE_INCLUDE_ZLIB_CODE
   extern "C"
   {
     #undef OS_CODE
@@ -68,6 +69,9 @@ namespace zlibNamespace
     #include "zlib/zutil.c"
     #undef Byte
   }
+#else
+  #include <zlib.h>
+#endif
 }
 
 #if JUCE_MSVC

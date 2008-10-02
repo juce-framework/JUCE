@@ -124,6 +124,24 @@
 #endif
 
 //=============================================================================
+/** These flags let you turn off the direct inclusion of various 3rd-party libs
+    in the build.
+    You might need to turn these off if you're linking with these libs yourself 
+    are struggling with name-clashes.
+*/
+#ifndef JUCE_INCLUDE_ZLIB_CODE
+  #define JUCE_INCLUDE_ZLIB_CODE        1
+#endif
+
+#ifndef JUCE_INCLUDE_OGGVORBIS_CODE
+  #define JUCE_INCLUDE_OGGVORBIS_CODE   1
+#endif
+
+#ifndef JUCE_INCLUDE_FLAC_CODE
+  #define JUCE_INCLUDE_FLAC_CODE        1
+#endif
+
+//=============================================================================
 /** This flag lets you enable support for CD-burning. You might want to disable
     it to build without the MS SDK under windows.
 */
@@ -159,7 +177,7 @@
 /** Enabling this builds support for VST audio plugins.
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
-//#define JUCE_PLUGINHOST_VST 1
+#define JUCE_PLUGINHOST_VST 1
 
 /** Enabling this builds support for AudioUnit audio plugins.
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST

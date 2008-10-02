@@ -1753,6 +1753,14 @@ public:
         // For more recent KDE's...
         trayAtom = XInternAtom (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR", false);
         XChangeProperty (display, windowH, trayAtom, XA_WINDOW, 32, PropModeReplace, (unsigned char*) &windowH, 1);
+
+        // a minimum size must be specified for GNOME and Xfce, otherwise the icon is displayed with a width of 1 
+        XSizeHints* hints = XAllocSizeHints();
+        hints->flags = PMinSize;
+        hints->min_width = 22;
+        hints->min_height = 22;
+        XSetWMNormalHints (display, windowH, hints);
+        XFree (hints);
     }
 
     void deleteTaskBarIcon()
@@ -3250,7 +3258,11 @@ void SystemTrayIconComponent::paint (Graphics& g)
         const Image* const image = wp->getTaskbarIcon();
 
         if (image != 0)
-            g.drawImageAt (image, 0, 0, false);
+        {
+            g.drawImageWithin (image, 0, 0, getWidth(), getHeight(),
+                               RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
+                               false);
+        }
     }
 }
 

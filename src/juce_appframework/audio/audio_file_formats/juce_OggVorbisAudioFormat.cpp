@@ -42,33 +42,39 @@
 
 namespace OggVorbisNamespace
 {
-#include "oggvorbis/vorbisenc.h"
-#include "oggvorbis/codec.h"
-#include "oggvorbis/vorbisfile.h"
+#if JUCE_INCLUDE_OGGVORBIS_CODE
+ #include "oggvorbis/vorbisenc.h"
+ #include "oggvorbis/codec.h"
+ #include "oggvorbis/vorbisfile.h"
 
-#include "oggvorbis/bitwise.c"
-#include "oggvorbis/framing.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/analysis.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/bitrate.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/block.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/codebook.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/envelope.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/floor0.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/floor1.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/info.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/lpc.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/lsp.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/mapping0.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/mdct.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/psy.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/registry.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/res0.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/sharedbook.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/smallft.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/synthesis.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/vorbisenc.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/vorbisfile.c"
-#include "oggvorbis/libvorbis-1.1.2/lib/window.c"
+ #include "oggvorbis/bitwise.c"
+ #include "oggvorbis/framing.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/analysis.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/bitrate.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/block.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/codebook.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/envelope.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/floor0.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/floor1.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/info.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/lpc.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/lsp.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/mapping0.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/mdct.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/psy.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/registry.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/res0.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/sharedbook.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/smallft.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/synthesis.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/vorbisenc.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/vorbisfile.c"
+ #include "oggvorbis/libvorbis-1.1.2/lib/window.c"
+#else
+ #include <vorbis/vorbisenc.h>
+ #include <vorbis/codec.h>
+ #include <vorbis/vorbisfile.h>
+#endif
 }
 
 BEGIN_JUCE_NAMESPACE
