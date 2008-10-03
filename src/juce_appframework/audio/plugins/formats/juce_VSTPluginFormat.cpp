@@ -390,7 +390,9 @@ public:
 #if JUCE_WIN32 || JUCE_LINUX
         fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
 #elif JUCE_MAC
-        PlatformUtilities::makeFSSpecFromPath (&parentDirFSSpec, file_.getParentDirectory().getFullPathName());
+        FSRef ref;
+        PlatformUtilities::makeFSRefFromPath (&ref, file_.getParentDirectory().getFullPathName());
+        FSGetCatalogInfo (&ref, kFSCatInfoNone, 0, 0, &parentDirFSSpec, 0);
 #endif
     }
 
@@ -2334,7 +2336,7 @@ static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt3
 
             if (JUCEApplication::getInstance() != 0)
                 hostName = JUCEApplication::getInstance()->getApplicationName();
-            
+
             hostName.copyToBuffer ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
         }
         break;
