@@ -116,6 +116,10 @@
   #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
     #define MACOS_10_3_OR_EARLIER 1
   #endif
+
+  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
+    #define MACOS_10_4_OR_EARLIER 1
+  #endif
 #endif
 
 //==============================================================================
