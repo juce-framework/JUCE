@@ -44,7 +44,7 @@ Image* juce_createIconForFile (const File& file);
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
     : ListBox (String::empty, 0),
-      DirectoryContentsDisplayComponent (listToShow)      
+      DirectoryContentsDisplayComponent (listToShow)
 {
     setModel (this);
     fileList.addChangeListener (this);

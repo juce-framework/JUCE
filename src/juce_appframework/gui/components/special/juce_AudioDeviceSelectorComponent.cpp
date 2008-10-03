@@ -42,7 +42,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class SimpleDeviceManagerInputLevelMeter  : public Component, 
+class SimpleDeviceManagerInputLevelMeter  : public Component,
                                             public Timer
 {
 public:
@@ -214,7 +214,7 @@ class AudioDeviceSettingsPanel : public Component,
                                  public ButtonListener
 {
 public:
-    AudioDeviceSettingsPanel (AudioIODeviceType* type_, 
+    AudioDeviceSettingsPanel (AudioIODeviceType* type_,
                               AudioIODeviceType::DeviceSetupDetails& setup_,
                               const bool hideAdvancedOptionsWithButton)
         : type (type_),
@@ -279,7 +279,7 @@ public:
             outputDeviceDropDown->setBounds (lx, y, w, h);
 
             if (testButton != 0)
-                testButton->setBounds (proportionOfWidth (0.77f), 
+                testButton->setBounds (proportionOfWidth (0.77f),
                                        outputDeviceDropDown->getY(),
                                        proportionOfWidth (0.18f),
                                        h);
@@ -290,7 +290,7 @@ public:
         {
             inputDeviceDropDown->setBounds (lx, y, w, h);
 
-            inputLevelMeter->setBounds (proportionOfWidth (0.77f), 
+            inputLevelMeter->setBounds (proportionOfWidth (0.77f),
                                         inputDeviceDropDown->getY(),
                                         proportionOfWidth (0.18f),
                                         h);
@@ -323,7 +323,7 @@ public:
 
         if (sampleRateDropDown != 0)
         {
-            sampleRateDropDown->setVisible (showAdvancedSettingsButton == 0 
+            sampleRateDropDown->setVisible (showAdvancedSettingsButton == 0
                                              || ! showAdvancedSettingsButton->isVisible());
 
             sampleRateDropDown->setBounds (lx, y, w, h);
@@ -360,11 +360,11 @@ public:
               || comboBoxThatHasChanged == inputDeviceDropDown)
         {
             if (outputDeviceDropDown != 0)
-                config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String::empty 
+                config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String::empty
                                                                                     : outputDeviceDropDown->getText();
 
             if (inputDeviceDropDown != 0)
-                config.inputDeviceName = inputDeviceDropDown->getSelectedId() < 0 ? String::empty 
+                config.inputDeviceName = inputDeviceDropDown->getSelectedId() < 0 ? String::empty
                                                                                   : inputDeviceDropDown->getText();
 
             if (! type->hasSeparateInputsAndOutputs())
@@ -460,7 +460,7 @@ public:
                 outputDeviceDropDown->addListener (this);
                 addAndMakeVisible (outputDeviceDropDown);
 
-                outputDeviceLabel = new Label (String::empty, 
+                outputDeviceLabel = new Label (String::empty,
                                                type->hasSeparateInputsAndOutputs() ? TRANS ("output:")
                                                                                    : TRANS ("device:"));
                 outputDeviceLabel->attachToComponent (outputDeviceDropDown, true);
@@ -486,7 +486,7 @@ public:
                 inputDeviceLabel = new Label (String::empty, TRANS ("input:"));
                 inputDeviceLabel->attachToComponent (inputDeviceDropDown, true);
 
-                addAndMakeVisible (inputLevelMeter 
+                addAndMakeVisible (inputLevelMeter
                     = new SimpleDeviceManagerInputLevelMeter (setup.manager));
             }
 
@@ -499,13 +499,13 @@ public:
 
         if (currentDevice != 0)
         {
-            if (setup.maxNumOutputChannels > 0 
+            if (setup.maxNumOutputChannels > 0
                  && setup.minNumOutputChannels < setup.manager->getCurrentAudioDevice()->getOutputChannelNames().size())
             {
                 if (outputChanList == 0)
                 {
-                    addAndMakeVisible (outputChanList 
-                        = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioOutputType, 
+                    addAndMakeVisible (outputChanList
+                        = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioOutputType,
                                                       TRANS ("(no audio output channels found)")));
                     outputChanLabel = new Label (String::empty, TRANS ("active output channels:"));
                     outputChanLabel->attachToComponent (outputChanList, true);
@@ -525,7 +525,7 @@ public:
                 if (inputChanList == 0)
                 {
                     addAndMakeVisible (inputChanList
-                        = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioInputType, 
+                        = new ChannelSelectorListBox (setup, ChannelSelectorListBox::audioInputType,
                                                       TRANS ("(no audio input channels found)")));
                     inputChanLabel = new Label (String::empty, TRANS ("active input channels:"));
                     inputChanLabel->attachToComponent (inputChanList, true);
@@ -832,7 +832,7 @@ private:
 
         int getBestHeight (int maxHeight)
         {
-            return getRowHeight() * jlimit (2, jmax (2, maxHeight / getRowHeight()), 
+            return getRowHeight() * jlimit (2, jmax (2, maxHeight / getRowHeight()),
                                             getNumRows())
                        + getOutlineThickness() * 2;
         }
@@ -974,7 +974,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         for (int i = 0; i < deviceManager_.getAvailableDeviceTypes().size(); ++i)
         {
             deviceTypeDropDown
-                ->addItem (deviceManager_.getAvailableDeviceTypes().getUnchecked(i)->getTypeName(), 
+                ->addItem (deviceManager_.getAvailableDeviceTypes().getUnchecked(i)->getTypeName(),
                            i + 1);
         }
 
@@ -1100,15 +1100,15 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
         deviceTypeDropDown->setText (deviceManager.getCurrentAudioDeviceType(), false);
     }
 
-    if (audioDeviceSettingsComp == 0 
+    if (audioDeviceSettingsComp == 0
          || audioDeviceSettingsCompType != deviceManager.getCurrentAudioDeviceType())
     {
         audioDeviceSettingsCompType = deviceManager.getCurrentAudioDeviceType();
 
         deleteAndZero (audioDeviceSettingsComp);
 
-        AudioIODeviceType* const type 
-            = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == 0 
+        AudioIODeviceType* const type
+            = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == 0
                                                         ? 0 : deviceTypeDropDown->getSelectedId() - 1];
 
         if (type != 0)

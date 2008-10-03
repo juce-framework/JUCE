@@ -154,11 +154,11 @@ public:
     */
     void setBorderSize (int horizontalBorder, int verticalBorder);
 
-    /** 
+    /** Returns the size of the horizontal gap being left around the text.
     */
     int getHorizontalBorderSize() const throw()                                 { return horizontalBorderSize; }
 
-    /** 
+    /** Returns the size of the vertical gap being left around the text.
     */
     int getVerticalBorderSize() const throw()                                   { return verticalBorderSize; }
 

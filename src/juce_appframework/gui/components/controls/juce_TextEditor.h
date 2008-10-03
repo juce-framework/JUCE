@@ -417,7 +417,7 @@ l    */
     */
     int getCaretPosition() const throw();
 
-    /** Attempts to scroll the text editor so that the caret ends up at 
+    /** Attempts to scroll the text editor so that the caret ends up at
         a specified position.
 
         This won't affect the caret's position within the text, it tries to scroll
@@ -427,15 +427,15 @@ l    */
         Depending on the amount of text available, it might not be possible to
         scroll far enough for the caret to reach this exact position, but it
         will go as far as it can in that direction.
-    */ 
-    void scrollEditorToPositionCaret (const int desiredCaretX, 
+    */
+    void scrollEditorToPositionCaret (const int desiredCaretX,
                                       const int desiredCaretY) throw();
 
-    /** Get the graphical position of the caret. 
+    /** Get the graphical position of the caret.
 
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
-    */ 
+    */
     const Rectangle getCaretRectangle() throw();
 
     /** Selects a section of the text.

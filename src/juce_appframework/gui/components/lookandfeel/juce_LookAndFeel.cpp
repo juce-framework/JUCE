@@ -1209,9 +1209,9 @@ void LookAndFeel::drawLabel (Graphics& g, Label& label)
         g.setColour (label.findColour (Label::textColourId).withMultipliedAlpha (alpha));
         g.setFont (label.getFont());
         g.drawFittedText (label.getText(),
-                          label.getHorizontalBorderSize(), 
-                          label.getVerticalBorderSize(), 
-                          label.getWidth() - 2 * label.getHorizontalBorderSize(), 
+                          label.getHorizontalBorderSize(),
+                          label.getVerticalBorderSize(),
+                          label.getWidth() - 2 * label.getHorizontalBorderSize(),
                           label.getHeight() - 2 * label.getVerticalBorderSize(),
                           label.getJustificationType(),
                           jmax (1, (int) (label.getHeight() / label.getFont().getHeight())),

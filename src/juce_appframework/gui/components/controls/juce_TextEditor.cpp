@@ -1394,10 +1394,10 @@ int TextEditor::getCaretPosition() const throw()
     return caretPosition;
 }
 
-void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX, 
+void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
                                               const int desiredCaretY) throw()
 
-{ 
+{
     updateCaretPosition();
 
     int vx = roundFloatToInt (cursorX) - desiredCaretX;
@@ -1428,13 +1428,13 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
         {
             vy = jmax (0, desiredCaretY + vy);
         }
-        else if (desiredCaretY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - curH)) 
+        else if (desiredCaretY > jmax (0, viewport->getMaximumVisibleHeight() - topIndent - curH))
         {
             vy += desiredCaretY + 2 + curH + topIndent - viewport->getMaximumVisibleHeight();
         }
     }
 
-    viewport->setViewPosition (vx, vy); 
+    viewport->setViewPosition (vx, vy);
 }
 
 const Rectangle TextEditor::getCaretRectangle() throw()
@@ -1442,9 +1442,9 @@ const Rectangle TextEditor::getCaretRectangle() throw()
     updateCaretPosition();
 
     return Rectangle (roundFloatToInt (cursorX) - viewport->getX(),
-                      roundFloatToInt (cursorY) - viewport->getY(), 
+                      roundFloatToInt (cursorY) - viewport->getY(),
                       1, roundFloatToInt (cursorHeight));
-} 
+}
 
 //==============================================================================
 float TextEditor::getWordWrapWidth() const throw()

@@ -104,7 +104,7 @@ protected:
                 elements = 0;
             }
 
-            numAllocated = numElements; 
+            numAllocated = numElements;
         }
     }
 

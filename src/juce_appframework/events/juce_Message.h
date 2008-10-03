@@ -33,7 +33,7 @@
 #define __JUCE_MESSAGE_JUCEHEADER__
 
 class MessageListener;
-
+class MessageManager;
 
 //==============================================================================
 /** The base class for objects that can be delivered to a MessageListener.

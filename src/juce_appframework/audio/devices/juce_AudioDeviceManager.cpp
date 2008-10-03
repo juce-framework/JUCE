@@ -161,7 +161,7 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
         if (e->getStringAttribute (T("audioDeviceName")).isNotEmpty())
         {
-            setup.inputDeviceName = setup.outputDeviceName 
+            setup.inputDeviceName = setup.outputDeviceName
                 = e->getStringAttribute (T("audioDeviceName"));
         }
         else
@@ -425,7 +425,7 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
 
     error = currentAudioDevice->open (inputChannels,
                                       outputChannels,
-                                      currentSetup.sampleRate, 
+                                      currentSetup.sampleRate,
                                       currentSetup.bufferSize);
 
     if (error.isEmpty())
@@ -511,7 +511,7 @@ void AudioDeviceManager::restartLastAudioDevice()
 {
     if (currentAudioDevice == 0)
     {
-        if (currentSetup.inputDeviceName.isEmpty() 
+        if (currentSetup.inputDeviceName.isEmpty()
               && currentSetup.outputDeviceName.isEmpty())
         {
             // This method will only reload the last device that was running

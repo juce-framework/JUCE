@@ -66,7 +66,7 @@ public:
         @param maxAudioOutputChannels   the maximum number of audio output channels that the application needs
         @param showMidiInputOptions     if true, the component will allow the user to select which midi inputs are enabled
         @param showMidiOutputSelector   if true, the component will let the user choose a default midi output device
-        @param showChannelsAsStereoPairs    if true, channels will be treated as pairs; if false, channels will be 
+        @param showChannelsAsStereoPairs    if true, channels will be treated as pairs; if false, channels will be
                                         treated as a set of separate mono channels.
         @param hideAdvancedOptionsWithButton    if true, only the minimum amount of UI components
                                         are shown, with an "advanced" button that shows the rest of them

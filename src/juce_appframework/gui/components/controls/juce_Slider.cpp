@@ -1327,7 +1327,7 @@ void Slider::mouseDoubleClick (const MouseEvent&)
 void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
 {
     if (scrollWheelEnabled && isEnabled()
-         && style != TwoValueHorizontal 
+         && style != TwoValueHorizontal
          && style != TwoValueVertical)
     {
         if (maximum > minimum && ! isMouseButtonDownAnywhere())
