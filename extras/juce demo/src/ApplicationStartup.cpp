@@ -43,7 +43,7 @@ class JUCEDemoApplication : public JUCEApplication
 
        This is because the application object gets created before Juce has been properly
        initialised, so any embedded objects would also get constructed too soon.
-   */
+    */
     MainDemoWindow* theMainWindow;
 
 public:

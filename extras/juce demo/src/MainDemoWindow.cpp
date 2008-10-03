@@ -132,7 +132,7 @@ public:
           currentDemoId (0),
           demoSourceCodeText (0)
     {
-        invokeDirectly (showAudio, true);
+        invokeDirectly (showPathsAndTransforms, true);
     }
 
     ~ContentComp()
@@ -580,6 +580,10 @@ MainDemoWindow::~MainDemoWindow()
     // because we've set the content comp to be used as our menu bar model, we
     // have to switch this off before deleting the content comp..
     setMenuBar (0);
+
+#if JUCE_MAC  // ..and also the main bar if we're using that on a Mac...
+    MenuBarModel::setMacMainMenu (0);
+#endif
 
     // setting our content component to 0 will delete the current one, and
     // that will in turn delete all its child components. You don't always
