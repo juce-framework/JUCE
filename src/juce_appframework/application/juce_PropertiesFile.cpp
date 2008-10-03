@@ -118,7 +118,7 @@ PropertiesFile::PropertiesFile (const File& f,
 
                         if (name.isNotEmpty())
                         {
-                            getAllProperties().set (name, 
+                            getAllProperties().set (name,
                                                     e->getFirstChildElement() != 0
                                                         ? e->getFirstChildElement()->createDocument (String::empty, true)
                                                         : e->getStringAttribute (T("val")));
