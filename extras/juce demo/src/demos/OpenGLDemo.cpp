@@ -31,9 +31,6 @@
 
 #ifdef _WIN32
  #include <windows.h>
-#elif ! defined (LINUX)
- #include <Carbon.h>
- #include <Movies.h>
 #endif
 
 #include "../jucedemo_headers.h"
@@ -48,7 +45,6 @@
  #include <GL/glut.h>
  #undef KeyPress
 #else
- #include <AGL/agl.h>
  #include <GLUT/glut.h>
 #endif
 
