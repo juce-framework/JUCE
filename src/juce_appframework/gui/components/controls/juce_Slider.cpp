@@ -732,7 +732,7 @@ float Slider::getLinearSliderPos (const double value)
         sliderPosProportional = 0.5;
     }
 
-    if (style == LinearVertical || style == IncDecButtons)
+    if (isVertical() || style == IncDecButtons)
         sliderPosProportional = 1.0 - sliderPosProportional;
 
     return (float) (sliderRegionStart + sliderPosProportional * sliderRegionSize);
@@ -1235,7 +1235,7 @@ void Slider::mouseDrag (const MouseEvent& e)
                 }
                 else
                 {
-                    if (style == LinearVertical)
+                    if (isVertical())
                         scaledMousePos = 1.0 - scaledMousePos;
 
                     valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, scaledMousePos));
@@ -1261,7 +1261,7 @@ void Slider::mouseDrag (const MouseEvent& e)
                     if (mouseDiff < 0)
                         speed = -speed;
 
-                    if (style == LinearVertical || style == RotaryVerticalDrag
+                    if (isVertical() || style == RotaryVerticalDrag
                          || (style == IncDecButtons && ! incDecDragDirectionIsHorizontal()))
                         speed = -speed;
 
