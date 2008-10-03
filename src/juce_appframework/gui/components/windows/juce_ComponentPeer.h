@@ -68,8 +68,7 @@ public:
         windowHasTitleBar           = (1 << 3),    /**< Indicates that the window should have a normal OS-specific
                                                         title bar and frame\. if not specified, the window will be
                                                         borderless. */
-        windowIsResizable           = (1 << 4),    /**< Indicates that the window should let mouse clicks pass
-                                                        through it (may not be possible on some platforms). */
+        windowIsResizable           = (1 << 4),    /**< Indicates that the window should have a resizable border. */
         windowHasMinimiseButton     = (1 << 5),    /**< Indicates that if the window has a title bar, it should have a
                                                         minimise button on it. */
         windowHasMaximiseButton     = (1 << 6),    /**< Indicates that if the window has a title bar, it should have a
