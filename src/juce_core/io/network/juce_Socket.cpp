@@ -38,19 +38,20 @@
   #endif
 
 #else
-  #ifndef LINUX
-    #include <Carbon/Carbon.h>
+  #ifdef LINUX
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <sys/errno.h>
+    #include <unistd.h>
+    #include <fcntl.h>
+    #include <netinet/in.h>
+  #else
+    #include <CoreServices/CoreServices.h>
   #endif
 
-  #include <sys/types.h>
   #include <netdb.h>
-  #include <sys/socket.h>
   #include <arpa/inet.h>
-  #include <sys/errno.h>
   #include <netinet/tcp.h>
-  #include <netinet/in.h>
-  #include <fcntl.h>
-  #include <unistd.h>
 #endif
 
 #include "../../basics/juce_StandardHeader.h"
