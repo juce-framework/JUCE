@@ -33,10 +33,14 @@
 
 namespace zlibNamespace
 {
+#if JUCE_INCLUDE_ZLIB_CODE 
   #undef OS_CODE
   #undef fdopen
   #include "zlib/zlib.h"
   #undef OS_CODE
+#else
+  #include <zlib.h>
+#endif
 }
 
 BEGIN_JUCE_NAMESPACE

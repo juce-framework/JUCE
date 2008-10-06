@@ -37,6 +37,7 @@
 
 namespace jpeglibNamespace
 {
+#if JUCE_INCLUDE_JPEGLIB_CODE
   extern "C"
   {
     #define JPEG_INTERNALS
@@ -112,6 +113,11 @@ namespace jpeglibNamespace
     #include "jpglib/jutils.c"
     #include "jpglib/transupp.c"
   }
+#else
+  #define JPEG_INTERNALS
+  #undef FAR
+  #include <jpeglib.h> 
+#endif
 }
 
 #if JUCE_MSVC

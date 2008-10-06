@@ -200,6 +200,14 @@
   #define JUCE_INCLUDE_OGGVORBIS_CODE   1
 #endif
 
+#ifndef JUCE_INCLUDE_PNGLIB_CODE
+  #define JUCE_INCLUDE_PNGLIB_CODE      1
+#endif
+
+#ifndef JUCE_INCLUDE_JPEGLIB_CODE
+  #define JUCE_INCLUDE_JPEGLIB_CODE     1
+#endif
+
 //=============================================================================
 /** Enable this to add extra memory-leak info to the new and delete operators.
 
