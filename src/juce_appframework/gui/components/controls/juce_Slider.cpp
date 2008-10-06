@@ -1104,13 +1104,37 @@ void Slider::restoreMouseIfHidden()
                                                      : ((sliderBeingDragged == 1) ? getMinValue()
                                                                                   : currentValue);
 
-        const int pixelPos = (int) getLinearSliderPos (pos);
+        if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
+        {
+            int x, y, downX, downY;
+            Desktop::getMousePosition (x, y);
+            Desktop::getLastMouseDownPosition (downX, downY);
+  
+            if (style == RotaryHorizontalDrag) 
+            { 
+                const double posDiff = valueToProportionOfLength (pos) - valueToProportionOfLength (valueOnMouseDown);
+                x = pixelsForFullDragExtent * posDiff + downX;
+                y = downY;
+            }
+            else
+            {
+                const double posDiff = valueToProportionOfLength (valueOnMouseDown) - valueToProportionOfLength (pos);
+                x = downX;
+                y = pixelsForFullDragExtent * posDiff + downY;
+            }
 
-        int x = isHorizontal() ? pixelPos : (getWidth() / 2);
-        int y = isVertical()   ? pixelPos : (getHeight() / 2);
+            Desktop::setMousePosition (x, y);
+        }
+        else
+        {
+            const int pixelPos = (int) getLinearSliderPos (pos);
 
-        relativePositionToGlobal (x, y);
-        Desktop::setMousePosition (x, y);
+            int x = isHorizontal() ? pixelPos : (getWidth() / 2);
+            int y = isVertical()   ? pixelPos : (getHeight() / 2);
+
+            relativePositionToGlobal (x, y);
+            Desktop::setMousePosition (x, y);
+        }
     }
 }
 
