@@ -34,7 +34,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Label.h"
-#include "../LookAndFeel/juce_LookAndFeel.h"
+#include "../lookandfeel/juce_LookAndFeel.h"
 
 
 //==============================================================================
