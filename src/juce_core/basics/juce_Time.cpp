@@ -426,7 +426,9 @@ static int extendedModulo (const int64 value, const int modulo) throw()
 
 int Time::getMinutes() const throw()
 {
-    return extendedModulo (millisSinceEpoch / 60000, 60);
+    struct tm t;
+    millisToLocal (millisSinceEpoch, t);
+    return t.tm_min;
 }
 
 int Time::getSeconds() const throw()
