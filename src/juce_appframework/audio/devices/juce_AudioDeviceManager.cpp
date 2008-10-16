@@ -390,7 +390,7 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
                                                  newSetup.inputDeviceName);
 
         if (currentAudioDevice == 0)
-            error = "Can't open device";
+            error = "Can't open the audio device!\n\nThis may be because another application is currently using the same device - if so, you should close any other applications and try again!";
         else
             error = currentAudioDevice->getLastError();
 
