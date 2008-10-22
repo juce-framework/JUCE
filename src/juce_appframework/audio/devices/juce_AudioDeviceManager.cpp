@@ -411,6 +411,12 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
             outputChannels.clear();
             outputChannels.setRange (0, numOutputChansNeeded, true);
         }
+
+        if (newSetup.inputDeviceName.isEmpty())
+            inputChannels.clear();
+
+        if (newSetup.outputDeviceName.isEmpty())
+            outputChannels.clear();
     }
 
     if (! newSetup.useDefaultInputChannels)
