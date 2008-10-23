@@ -1663,10 +1663,13 @@ void TextEditor::setHighlightedRegion (int startPos, int numChars) throw()
 //==============================================================================
 void TextEditor::copy()
 {
-    const String selection (getTextSubstring (selectionStart, selectionEnd));
+    if (passwordCharacter == 0)
+    {
+        const String selection (getTextSubstring (selectionStart, selectionEnd));
 
-    if (selection.isNotEmpty())
-        SystemClipboard::copyTextToClipboard (selection);
+        if (selection.isNotEmpty())
+            SystemClipboard::copyTextToClipboard (selection);
+    }
 }
 
 void TextEditor::paste()
@@ -2091,9 +2094,13 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 {
     const bool writable = ! isReadOnly();
 
-    m.addItem (baseMenuItemID + 1, TRANS("cut"), writable);
-    m.addItem (baseMenuItemID + 2, TRANS("copy"), selectionStart < selectionEnd);
-    m.addItem (baseMenuItemID + 3, TRANS("paste"), writable);
+    if (passwordCharacter == 0)
+    {
+        m.addItem (baseMenuItemID + 1, TRANS("cut"), writable);
+        m.addItem (baseMenuItemID + 2, TRANS("copy"), selectionStart < selectionEnd);
+        m.addItem (baseMenuItemID + 3, TRANS("paste"), writable);
+    }
+
     m.addItem (baseMenuItemID + 4, TRANS("delete"), writable);
     m.addSeparator();
     m.addItem (baseMenuItemID + 5, TRANS("select all"));
