@@ -190,7 +190,8 @@ public:
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
                      const bool isActive = true,
-                     Image* const iconToUse = 0) throw();
+                     Image* const iconToUse = 0,
+                     const bool isTicked = false) throw();
 
     /** Appends a separator to the menu, to help break it up into sections.
 

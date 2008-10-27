@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_APP_INCLUDES_JUCEHEADER__
-#define __JUCE_APP_INCLUDES_JUCEHEADER__
+#ifndef __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
+#define __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
 
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
  #include "juce_appframework/application/juce_Application.h"
@@ -701,6 +701,9 @@
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/special/juce_MidiKeyboardComponent.h"
 #endif
+#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/special/juce_NSViewComponent.h"
+#endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/special/juce_OpenGLComponent.h"
 #endif
@@ -738,4 +741,4 @@
  #include "juce_appframework/documents/juce_UndoManager.h"
 #endif
 
-#endif   // __JUCE_APP_INCLUDES_JUCEHEADER__
+#endif

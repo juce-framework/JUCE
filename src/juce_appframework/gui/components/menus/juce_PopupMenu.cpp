@@ -1504,14 +1504,15 @@ void PopupMenu::addCustomItem (const int itemResultId,
 void PopupMenu::addSubMenu (const String& subMenuName,
                             const PopupMenu& subMenu,
                             const bool isActive,
-                            Image* const iconToUse) throw()
+                            Image* const iconToUse,
+                            const bool isTicked) throw()
 {
     addSeparatorIfPending();
 
     items.add (new MenuItemInfo (0,
                                  subMenuName,
                                  isActive && (subMenu.getNumItems() > 0),
-                                 false,
+                                 isTicked,
                                  iconToUse,
                                  Colours::black,
                                  false,
