@@ -29,29 +29,9 @@
   ==============================================================================
 */
 
-//==============================================================================
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
-
-#include "win32_headers.h"
-#include <comutil.h>
-#include <Exdisp.h>
-#include <exdispid.h>
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-  #pragma warning (disable: 4312 4244)
-#endif
-
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_ActiveXControlComponent.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_WEB_BROWSER
 
 
 //==============================================================================
@@ -342,10 +322,6 @@ void WebBrowserComponent::parentHierarchyChanged()
     checkWindowAssociation();
 }
 
-void WebBrowserComponent::moved()
-{
-}
-
 void WebBrowserComponent::resized()
 {
     browser->setSize (getWidth(), getHeight());
@@ -361,4 +337,4 @@ bool WebBrowserComponent::pageAboutToLoad (const String&)
     return true;
 }
 
-END_JUCE_NAMESPACE
+#endif

@@ -39,11 +39,10 @@
 
 #if JUCE_WIN32
   #include "juce_ActiveXControlComponent.h"
-  typedef ActiveXControlComponent QTWinBaseClass;
+  typedef ActiveXControlComponent QTCompBaseClass;
 #else
-  #include "../juce_Component.h"
-  #include "../../../events/juce_Timer.h"
-  typedef Component QTWinBaseClass;
+  #include "juce_NSViewComponent.h"
+  typedef NSViewComponent QTCompBaseClass;
 #endif
 
 //==============================================================================
@@ -51,10 +50,7 @@
     A window that can play back a QuickTime movie.
 
 */
-class JUCE_API  QuickTimeMovieComponent     : public QTWinBaseClass
-                                              #if JUCE_MAC
-                                               , private Timer
-                                              #endif
+class JUCE_API  QuickTimeMovieComponent     : public QTCompBaseClass
 {
 public:
     //==============================================================================
@@ -182,40 +178,25 @@ public:
     //==============================================================================
     /** @internal */
     void paint (Graphics& g);
-    /** @internal */
-    void parentHierarchyChanged();
-    /** @internal */
-    void visibilityChanged();
-#if JUCE_MAC
-    /** @internal */
-    void handleMCEvent (void*);
-    /** @internal */
-    void assignMovieToWindow();
-    /** @internal */
-    void timerCallback();
-    /** @internal */
-    void moved();
-    /** @internal */
-    void resized();
-#endif
 
     juce_UseDebuggingNewOperator
 
 private:
     File movieFile;
-    bool movieLoaded, controllerVisible;
+    bool movieLoaded, controllerVisible, looping;
 
-    void* internal;
-
-#if JUCE_MAC
-    void* associatedWindow;
-    Rectangle lastPositionApplied;
-    bool controllerAssignedToWindow, reentrant, looping;
-    void checkWindowAssociation();
-#endif
+#if JUCE_WIN32
+    /** @internal */
+    void parentHierarchyChanged();
+    /** @internal */
+    void visibilityChanged();
 
     void createControlIfNeeded();
     bool isControlCreated() const;
+    void* internal;
+#else
+    void* movie;
+#endif
 
     QuickTimeMovieComponent (const QuickTimeMovieComponent&);
     const QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);

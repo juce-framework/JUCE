@@ -202,6 +202,9 @@ const String makeValidCppIdentifier (String s,
     if (allowTemplates)
         allowedChars += T("<>");
 
+    if (! removeColons)
+        allowedChars += T(":");
+
     StringArray words;
     words.addTokens (s.retainCharacters (allowedChars), false);
     words.trim();

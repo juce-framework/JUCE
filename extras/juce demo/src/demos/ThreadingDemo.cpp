@@ -40,7 +40,7 @@ class BouncingBallComp  : public Component,
     float innerX, innerY;
     Colour colour;
     CriticalSection lock;
-    int threadId;
+    int64 threadId;
 
 public:
     BouncingBallComp()

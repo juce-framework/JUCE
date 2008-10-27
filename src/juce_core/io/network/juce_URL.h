@@ -223,9 +223,14 @@ public:
 
         This is the opposite of removeEscapeChars().
 
+        If isParameter is true, it means that the string is going to be used
+        as a parameter, so it also encodes '$' and ',' (which would otherwise
+        be legal in a URL.
+
         @see removeEscapeChars
     */
-    static const String addEscapeChars (const String& stringToAddEscapeCharsTo);
+    static const String addEscapeChars (const String& stringToAddEscapeCharsTo,
+                                        const bool isParameter);
 
     /** Replaces any escape character sequences in a string with their original
         character codes.

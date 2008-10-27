@@ -367,7 +367,7 @@ private:
 class ALSAThread  : public Thread
 {
 public:
-    ALSAThread (const String& inputId_, 
+    ALSAThread (const String& inputId_,
                 const String& outputId_)
         : Thread ("Juce ALSA"),
           sampleRate (0),
@@ -446,7 +446,7 @@ public:
                 return;
             }
 
-            if (! outputDevice->setParameters ((unsigned int) sampleRate, 
+            if (! outputDevice->setParameters ((unsigned int) sampleRate,
                                                currentOutputChans.getHighestBit() + 1,
                                                bufferSize))
             {
@@ -467,7 +467,7 @@ public:
                 return;
             }
 
-            if (! inputDevice->setParameters ((unsigned int) sampleRate, 
+            if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               currentInputChans.getHighestBit() + 1,
                                               bufferSize))
             {
@@ -673,7 +673,7 @@ class ALSAAudioIODevice   : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
-                       const String& inputId_, 
+                       const String& inputId_,
                        const String& outputId_)
         : AudioIODevice (deviceName, T("ALSA")),
           inputId (inputId_),
@@ -980,8 +980,8 @@ public:
             deviceName = inputDeviceName;
 
         if (index >= 0)
-            return new ALSAAudioIODevice (deviceName, 
-                                          inputIds [inputIndex], 
+            return new ALSAAudioIODevice (deviceName,
+                                          inputIds [inputIndex],
                                           outputIds [outputIndex]);
 
         return 0;

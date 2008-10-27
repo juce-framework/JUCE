@@ -31,7 +31,7 @@
 
 #include "../../../../../juce_Config.h"
 
-#if JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN32)
 
 #ifdef _WIN32
  #undef _WIN32_WINNT
@@ -40,7 +40,7 @@
  #define STRICT
  #include <windows.h>
  #include <float.h>
- #pragma warning (disable : 4312)
+ #pragma warning (disable : 4312 4355)
 #elif defined (LINUX)
  #include <float.h>
  #include <sys/time.h>
@@ -52,11 +52,19 @@
  #undef Drawable
  #undef Time
 #else
+ #ifndef JUCE_MAC_VST_INCLUDED
+  // On the mac, this file needs to be compiled indirectly, by using
+  // juce_VSTPluginFormat.mm instead - that wraps it as an objective-C file for cocoa
+  #error
+ #endif
+ #include <Cocoa/Cocoa.h>
  #include <Carbon/Carbon.h>
 #endif
 
 //==============================================================================
 #include "../../../../juce_core/basics/juce_StandardHeader.h"
+
+#if ! (JUCE_MAC && JUCE_64BIT)
 
 BEGIN_JUCE_NAMESPACE
 
@@ -70,6 +78,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../application/juce_Application.h"
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
+
+#if JUCE_MAC
+ #include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+#endif
+
 
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
@@ -206,11 +219,7 @@ class VSTPluginWindow;
 #endif
 
 //==============================================================================
-#if JUCE_MAC
-extern bool juce_isHIViewCreatedByJuce (HIViewRef view);
-extern bool juce_isWindowCreatedByJuce (WindowRef window);
-
-#if JUCE_PPC
+#if JUCE_MAC && JUCE_PPC
 static void* NewCFMFromMachO (void* const machofp) throw()
 {
     void* result = juce_malloc (8);
@@ -220,7 +229,6 @@ static void* NewCFMFromMachO (void* const machofp) throw()
 
     return result;
 }
-#endif
 #endif
 
 //==============================================================================
@@ -425,12 +433,12 @@ public:
 
         pluginName = file.getFileNameWithoutExtension();
 
-        hModule = Process::loadDynamicLibrary (file.getFullPathName());
+        hModule = PlatformUtilities::loadDynamicLibrary (file.getFullPathName());
 
-        moduleMain = (MainCall) Process::getProcedureEntryPoint (hModule, "VSTPluginMain");
+        moduleMain = (MainCall) PlatformUtilities::getProcedureEntryPoint (hModule, "VSTPluginMain");
 
         if (moduleMain == 0)
-            moduleMain = (MainCall) Process::getProcedureEntryPoint (hModule, "main");
+            moduleMain = (MainCall) PlatformUtilities::getProcedureEntryPoint (hModule, "main");
 
         return moduleMain != 0;
     }
@@ -439,7 +447,7 @@ public:
     {
         _fpreset(); // (doesn't do any harm)
 
-        Process::freeDynamicLibrary (hModule);
+        PlatformUtilities::freeDynamicLibrary (hModule);
     }
 
     void closeEffect (AEffect* eff)
@@ -1232,12 +1240,18 @@ static Array <VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
 class VSTPluginWindow   : public AudioProcessorEditor,
+                          #if ! JUCE_MAC
+                          public ComponentMovementWatcher,
+                          #endif
                           public Timer
 {
 public:
     //==============================================================================
     VSTPluginWindow (VSTPluginInstance& plugin_)
         : AudioProcessorEditor (&plugin_),
+#if ! JUCE_MAC
+          ComponentMovementWatcher (this),
+#endif
           plugin (plugin_),
           isOpen (false),
           wasShowing (false),
@@ -1253,10 +1267,8 @@ public:
         pluginWindow = None;
         pluginProc = None;
 #else
-        pluginViewRef = 0;
+        addAndMakeVisible (innerWrapper = new InnerWrapperComponent (this));
 #endif
-
-        movementWatcher = new CompMovementWatcher (this);
 
         activeVSTWindows.add (this);
 
@@ -1267,16 +1279,18 @@ public:
 
     ~VSTPluginWindow()
     {
-        deleteAndZero (movementWatcher);
-
+#if JUCE_MAC
+        deleteAndZero (innerWrapper);
+#else
         closePluginWindow();
-
+#endif
         activeVSTWindows.removeValue (this);
         plugin.editorBeingDeleted (this);
     }
 
     //==============================================================================
-    void componentMovedOrResized()
+#if ! JUCE_MAC
+    void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
         if (recursiveResize)
             return;
@@ -1290,39 +1304,7 @@ public:
 
             recursiveResize = true;
 
-#if JUCE_MAC
-            if (pluginViewRef != 0)
-            {
-                HIRect r;
-                r.origin.x = (float) x;
-                r.origin.y = (float) y;
-                r.size.width = (float) getWidth();
-                r.size.height = (float) getHeight();
-                HIViewSetFrame (pluginViewRef, &r);
-            }
-            else if (pluginWindowRef != 0)
-            {
-                Rect r;
-                r.left = getScreenX();
-                r.top = getScreenY();
-                r.right = r.left + getWidth();
-                r.bottom = r.top + getHeight();
-
-                WindowGroupRef group = GetWindowGroup (pluginWindowRef);
-                WindowGroupAttributes atts;
-                GetWindowGroupAttributes (group, &atts);
-                ChangeWindowGroupAttributes (group, 0, kWindowGroupAttrMoveTogether);
-
-                SetWindowBounds (pluginWindowRef, kWindowContentRgn, &r);
-
-                if ((atts & kWindowGroupAttrMoveTogether) != 0)
-                    ChangeWindowGroupAttributes (group, kWindowGroupAttrMoveTogether, 0);
-            }
-            else
-            {
-                repaint();
-            }
-#elif JUCE_WIN32
+#if JUCE_WIN32
             if (pluginHWND != 0)
                 MoveWindow (pluginHWND, x, y, getWidth(), getHeight(), TRUE);
 #elif JUCE_LINUX
@@ -1338,7 +1320,7 @@ public:
         }
     }
 
-    void componentVisibilityChanged()
+    void componentVisibilityChanged (Component&)
     {
         const bool isShowingNow = isShowing();
 
@@ -1352,7 +1334,7 @@ public:
                 closePluginWindow();
         }
 
-        componentMovedOrResized();
+        componentMovedOrResized (true, true);
     }
 
     void componentPeerChanged()
@@ -1360,6 +1342,7 @@ public:
         closePluginWindow();
         openPluginWindow();
     }
+#endif
 
     //==============================================================================
     bool keyStateChanged()
@@ -1373,6 +1356,12 @@ public:
     }
 
     //==============================================================================
+#if JUCE_MAC
+    void paint (Graphics& g)
+    {
+        g.fillAll (Colours::black);
+    }
+#else
     void paint (Graphics& g)
     {
         if (isOpen)
@@ -1385,18 +1374,7 @@ public:
                                        getScreenY() - peer->getScreenY(),
                                        getWidth(), getHeight());
 
-#if JUCE_MAC
-                if (pluginViewRef == 0)
-                {
-                    ERect r;
-                    r.left = getScreenX() - peer->getScreenX();
-                    r.right = r.left + getWidth();
-                    r.top = getScreenY() - peer->getScreenY();
-                    r.bottom = r.top + getHeight();
-
-                    dispatch (effEditDraw, 0, 0, &r, 0);
-                }
-#elif JUCE_LINUX
+#if JUCE_LINUX
                 if (pluginWindow != 0)
                 {
                     const Rectangle clip (g.getClipBounds());
@@ -1421,6 +1399,7 @@ public:
             g.fillAll (Colours::black);
         }
     }
+#endif
 
     //==============================================================================
     void timerCallback()
@@ -1452,20 +1431,7 @@ public:
     //==============================================================================
     void mouseDown (const MouseEvent& e)
     {
-#if JUCE_MAC
-        if (! alreadyInside)
-        {
-            alreadyInside = true;
-            toFront (true);
-            dispatch (effEditMouse, e.x, e.y, 0, 0);
-            alreadyInside = false;
-        }
-        else
-        {
-            PostEvent (::mouseDown, 0);
-        }
-#elif JUCE_LINUX
-
+#if JUCE_LINUX
         if (pluginWindow == 0)
             return;
 
@@ -1487,7 +1453,7 @@ public:
 
         sendEventToChild (&ev);
 
-#else
+#elif JUCE_WIN32
         (void) e;
 
         toFront (true);
@@ -1516,15 +1482,56 @@ private:
     HWND pluginHWND;
     void* originalWndProc;
     int sizeCheckCount;
-#elif JUCE_MAC
-    HIViewRef pluginViewRef;
-    WindowRef pluginWindowRef;
 #elif JUCE_LINUX
     Window pluginWindow;
     EventProcPtr pluginProc;
 #endif
 
     //==============================================================================
+#if JUCE_MAC
+    void openPluginWindow (WindowRef parentWindow)
+    {
+        if (isOpen || parentWindow == 0)
+            return;
+
+        isOpen = true;
+
+        ERect* rect = 0;
+        dispatch (effEditGetRect, 0, 0, &rect, 0);
+        dispatch (effEditOpen, 0, 0, parentWindow, 0);
+
+        // do this before and after like in the steinberg example
+        dispatch (effEditGetRect, 0, 0, &rect, 0);
+        dispatch (effGetProgram, 0, 0, 0, 0); // also in steinberg code
+
+        // Install keyboard hooks
+        pluginWantsKeys = (dispatch (effKeysRequired, 0, 0, 0, 0) == 0);
+
+        // double-check it's not too tiny
+        int w = 250, h = 150;
+
+        if (rect != 0)
+        {
+            w = rect->right - rect->left;
+            h = rect->bottom - rect->top;
+
+            if (w == 0 || h == 0)
+            {
+                w = 250;
+                h = 150;
+            }
+        }
+
+        w = jmax (w, 32);
+        h = jmax (h, 32);
+
+        setSize (w, h);
+
+        startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
+        repaint();
+    }
+
+#else
     void openPluginWindow()
     {
         if (isOpen || getWindowHandle() == 0)
@@ -1598,44 +1605,6 @@ private:
                 }
             }
         }
-#elif JUCE_MAC
-        HIViewRef root = HIViewGetRoot ((WindowRef) getWindowHandle());
-        HIViewFindByID (root, kHIViewWindowContentID, &root);
-        pluginViewRef = HIViewGetFirstSubview (root);
-
-        while (pluginViewRef != 0 && juce_isHIViewCreatedByJuce (pluginViewRef))
-            pluginViewRef = HIViewGetNextView (pluginViewRef);
-
-        pluginWindowRef = 0;
-
-        if (pluginViewRef == 0)
-        {
-            WindowGroupRef ourGroup = GetWindowGroup ((WindowRef) getWindowHandle());
-            //DebugPrintWindowGroup (ourGroup);
-            //DebugPrintAllWindowGroups();
-
-            GetIndexedWindow (ourGroup, 1,
-                              kWindowGroupContentsVisible,
-                              &pluginWindowRef);
-
-            if (pluginWindowRef == (WindowRef) getWindowHandle()
-                 || juce_isWindowCreatedByJuce (pluginWindowRef))
-                pluginWindowRef = 0;
-        }
-
-        int w = 250, h = 150;
-
-        if (rect != 0)
-        {
-            w = rect->right - rect->left;
-            h = rect->bottom - rect->top;
-
-            if (w == 0 || h == 0)
-            {
-                w = 250;
-                h = 150;
-            }
-        }
 
 #elif JUCE_LINUX
         pluginWindow = getChildWindow ((Window) getWindowHandle());
@@ -1675,8 +1644,10 @@ private:
         startTimer (18 + JUCE_NAMESPACE::Random::getSystemRandom().nextInt (5));
         repaint();
     }
+#endif
 
     //==============================================================================
+#if ! JUCE_MAC
     void closePluginWindow()
     {
         if (isOpen)
@@ -1701,16 +1672,19 @@ private:
                 DestroyWindow (pluginHWND);
 
             pluginHWND = 0;
-#elif JUCE_MAC
-            dispatch (effEditSleep, 0, 0, 0, 0);
-            pluginViewRef = 0;
-            stopTimer();
 #elif JUCE_LINUX
             stopTimer();
             pluginWindow = 0;
             pluginProc = 0;
 #endif
         }
+    }
+#endif
+
+    //==============================================================================
+    int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt)
+    {
+        return plugin.dispatch (opcode, index, value, ptr, opt);
     }
 
     //==============================================================================
@@ -1730,49 +1704,8 @@ private:
             sizeCheckCount = 0;
         }
     }
-#endif
 
-    //==============================================================================
-    class CompMovementWatcher  : public ComponentMovementWatcher
-    {
-    public:
-        CompMovementWatcher (VSTPluginWindow* const owner_)
-            : ComponentMovementWatcher (owner_),
-              owner (owner_)
-        {
-        }
-
-        //==============================================================================
-        void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
-        {
-            owner->componentMovedOrResized();
-        }
-
-        void componentPeerChanged()
-        {
-            owner->componentPeerChanged();
-        }
-
-        void componentVisibilityChanged (Component&)
-        {
-            owner->componentVisibilityChanged();
-        }
-
-    private:
-        VSTPluginWindow* const owner;
-    };
-
-    CompMovementWatcher* movementWatcher;
-
-    //==============================================================================
-    int dispatch (const int opcode, const int index, const int value, void* const ptr, float opt)
-    {
-        return plugin.dispatch (opcode, index, value, ptr, opt);
-    }
-
-    //==============================================================================
     // hooks to get keyboard events from VST windows..
-#if JUCE_WIN32
     static LRESULT CALLBACK vstHookWndProc (HWND hW, UINT message, WPARAM wParam, LPARAM lParam)
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)
@@ -1965,6 +1898,86 @@ private:
     }
 #endif
 
+#if JUCE_MAC
+    class InnerWrapperComponent   : public CarbonViewWrapperComponent
+    {
+    public:
+        InnerWrapperComponent (VSTPluginWindow* const owner_)
+            : owner (owner_),
+              alreadyInside (false)
+        {
+        }
+
+        ~InnerWrapperComponent()
+        {
+            deleteWindow();
+        }
+
+        HIViewRef attachView (WindowRef windowRef, HIViewRef rootView)
+        {
+            owner->openPluginWindow (windowRef);
+            return 0;
+        }
+
+        void removeView (HIViewRef)
+        {
+            owner->dispatch (effEditClose, 0, 0, 0, 0);
+            owner->dispatch (effEditSleep, 0, 0, 0, 0);
+        }
+
+        bool getEmbeddedViewSize (int& w, int& h)
+        {
+            ERect* rect = 0;
+            owner->dispatch (effEditGetRect, 0, 0, &rect, 0);
+            w = rect->right - rect->left;
+            h = rect->bottom - rect->top;
+            return true;
+        }
+
+        void mouseDown (int x, int y)
+        {
+            if (! alreadyInside)
+            {
+                alreadyInside = true;
+                getTopLevelComponent()->toFront (true);
+                owner->dispatch (effEditMouse, x, y, 0, 0);
+                alreadyInside = false;
+            }
+            else
+            {
+                PostEvent (::mouseDown, 0);
+            }
+        }
+
+        void paint()
+        {
+            ComponentPeer* const peer = getPeer();
+
+            if (peer != 0)
+            {
+                ERect r;
+                r.left = getScreenX() - peer->getScreenX();
+                r.right = r.left + getWidth();
+                r.top = getScreenY() - peer->getScreenY();
+                r.bottom = r.top + getHeight();
+
+                owner->dispatch (effEditDraw, 0, 0, &r, 0);
+            }
+        }
+
+    private:
+        VSTPluginWindow* const owner;
+        bool alreadyInside;
+    };
+
+    friend class InnerWrapperComponent;
+    InnerWrapperComponent* innerWrapper;
+
+    void resized()
+    {
+        innerWrapper->setSize (getWidth(), getHeight());
+    }
+#endif
 };
 
 //==============================================================================
@@ -3040,6 +3053,8 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 }
 
 END_JUCE_NAMESPACE
+
+#endif
 
 #undef log
 

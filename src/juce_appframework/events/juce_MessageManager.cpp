@@ -55,14 +55,7 @@ static const int quitMessageId = 0xfffff321;
 MessageManager::MessageManager() throw()
   : broadcastListeners (0),
     quitMessagePosted (false),
-    quitMessageReceived (false),
-    useMaximumForceWhenQuitting (true),
-    messageCounter (0),
-    lastMessageCounter (-1),
-    isInMessageDispatcher (0),
-    needToGetRidOfWaitCursor (false),
-    timeBeforeWaitCursor (0),
-    lastActivityCheckOkTime (0)
+    quitMessageReceived (false)
 {
     currentLockingThreadId = messageThreadId = Thread::getCurrentThreadId();
 }
@@ -82,8 +75,6 @@ MessageManager* MessageManager::getInstance() throw()
     {
         instance = new MessageManager();
         doPlatformSpecificInitialisation();
-
-        instance->setTimeBeforeShowingWaitCursor (500);
     }
 
     return instance;
@@ -111,107 +102,53 @@ void MessageManager::deliverMessage (void* message)
             recipient->handleMessage (*m);
         }
         JUCE_CATCH_EXCEPTION
-
-        if (needToGetRidOfWaitCursor)
-        {
-            needToGetRidOfWaitCursor = false;
-            MouseCursor::hideWaitCursor();
-        }
-
-        ++messageCounter;
     }
     else if (recipient == 0 && m->intParameter1 == quitMessageId)
     {
         quitMessageReceived = true;
-        useMaximumForceWhenQuitting = (m->intParameter2 != 0);
     }
 
     delete m;
 }
 
 //==============================================================================
-bool MessageManager::dispatchNextMessage (const bool returnImmediatelyIfNoMessages,
-                                          bool* const wasAMessageDispatched)
-{
-    if (quitMessageReceived)
-    {
-        if (wasAMessageDispatched != 0)
-            *wasAMessageDispatched = false;
-
-        return false;
-    }
-
-    ++isInMessageDispatcher;
-
-    bool result = false;
-
-    JUCE_TRY
-    {
-        result = juce_dispatchNextMessageOnSystemQueue (returnImmediatelyIfNoMessages);
-
-        if (wasAMessageDispatched != 0)
-            *wasAMessageDispatched = result;
-
-        if (instance == 0)
-            return false;
-    }
-    JUCE_CATCH_EXCEPTION
-
-    --isInMessageDispatcher;
-    ++messageCounter;
-
-    return result || ! returnImmediatelyIfNoMessages;
-}
-
-void MessageManager::dispatchPendingMessages (int maxNumberOfMessagesToDispatch)
+#if ! JUCE_MAC
+void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    while (--maxNumberOfMessagesToDispatch >= 0 && ! quitMessageReceived)
-    {
-        ++isInMessageDispatcher;
-
-        bool carryOn = false;
-
-        JUCE_TRY
-        {
-            carryOn = juce_dispatchNextMessageOnSystemQueue (true);
-        }
-        JUCE_CATCH_EXCEPTION
-
-        --isInMessageDispatcher;
-        ++messageCounter;
-
-        if (! carryOn)
-            break;
-    }
+    runDispatchLoopUntil (-1);
 }
 
-bool MessageManager::runDispatchLoop()
+void MessageManager::stopDispatchLoop()
 {
-    jassert (isThisTheMessageThread()); // must only be called by the message thread
-
-    while (dispatchNextMessage())
-    {
-    }
-
-    return useMaximumForceWhenQuitting;
-}
-
-//==============================================================================
-void MessageManager::postQuitMessage (const bool useMaximumForce)
-{
-    Message* const m = new Message (quitMessageId, (useMaximumForce) ? 1 : 0, 0, 0);
+    Message* const m = new Message (quitMessageId, 0, 0, 0);
     m->messageRecipient = 0;
     postMessageToQueue (m);
 
     quitMessagePosted = true;
 }
 
-bool MessageManager::hasQuitMessageBeenPosted() const throw()
+bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
-    return quitMessagePosted;
+    jassert (isThisTheMessageThread()); // must only be called by the message thread
+
+    const int64 endTime = Time::currentTimeMillis() + millisecondsToRunFor;
+
+    while ((millisecondsToRunFor < 0 || endTime > Time::currentTimeMillis())
+            && ! quitMessageReceived)
+    {
+        JUCE_TRY
+        {
+            juce_dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0);
+        }
+        JUCE_CATCH_EXCEPTION
+    }
+
+    return ! quitMessageReceived;
 }
+
+#endif
 
 //==============================================================================
 void MessageManager::deliverBroadcastMessage (const String& value)
@@ -235,78 +172,6 @@ void MessageManager::deregisterBroadcastListener (ActionListener* const listener
 }
 
 //==============================================================================
-// This gets called occasionally by the timer thread (to save using an extra thread
-// for it).
-void MessageManager::inactivityCheckCallback() throw()
-{
-    if (instance != 0)
-        instance->inactivityCheckCallbackInt();
-}
-
-void MessageManager::inactivityCheckCallbackInt() throw()
-{
-    const unsigned int now = Time::getApproximateMillisecondCounter();
-
-    if (isInMessageDispatcher > 0
-         && lastMessageCounter == messageCounter
-         && timeBeforeWaitCursor > 0
-         && lastActivityCheckOkTime > 0
-         && ! ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
-    {
-        if (now >= lastActivityCheckOkTime + timeBeforeWaitCursor
-             && ! needToGetRidOfWaitCursor)
-        {
-            // been in the same message call too long..
-            MouseCursor::showWaitCursor();
-            needToGetRidOfWaitCursor = true;
-        }
-    }
-    else
-    {
-        lastActivityCheckOkTime = now;
-        lastMessageCounter = messageCounter;
-    }
-}
-
-void MessageManager::delayWaitCursor() throw()
-{
-    if (instance != 0)
-    {
-        instance->messageCounter++;
-
-        if (instance->needToGetRidOfWaitCursor)
-        {
-            instance->needToGetRidOfWaitCursor = false;
-            MouseCursor::hideWaitCursor();
-        }
-    }
-}
-
-void MessageManager::setTimeBeforeShowingWaitCursor (const int millisecs) throw()
-{
-     // if this is a bit too small you'll get a lot of unwanted hourglass cursors..
-    jassert (millisecs <= 0 || millisecs > 200);
-
-    timeBeforeWaitCursor = millisecs;
-
-    if (millisecs > 0)
-        startTimer (millisecs / 2); // (see timerCallback() for explanation of this)
-    else
-        stopTimer();
-}
-
-void MessageManager::timerCallback()
-{
-    // dummy callback - the message manager is just a Timer to ensure that there are always
-    // some events coming in - otherwise it'll show the egg-timer/beachball-of-death.
-    ++messageCounter;
-}
-
-int MessageManager::getTimeBeforeShowingWaitCursor() const throw()
-{
-    return timeBeforeWaitCursor;
-}
-
 bool MessageManager::isThisTheMessageThread() const throw()
 {
     return Thread::getCurrentThreadId() == messageThreadId;

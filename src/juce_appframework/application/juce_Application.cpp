@@ -51,6 +51,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../juce_core/basics/juce_Initialisation.h"
 #include "../../juce_core/threads/juce_Process.h"
 #include "../../juce_core/threads/juce_InterProcessLock.h"
+#include "../../juce_core/misc/juce_PlatformUtilities.h"
 
 void juce_setCurrentExecutableFileName (const String& filename) throw();
 void juce_setCurrentThreadName (const String& name) throw();
@@ -99,9 +100,9 @@ void JUCEApplication::systemRequestedQuit()
     quit();
 }
 
-void JUCEApplication::quit (const bool useMaximumForce)
+void JUCEApplication::quit()
 {
-    MessageManager::getInstance()->postQuitMessage (useMaximumForce);
+    MessageManager::getInstance()->stopDispatchLoop();
 }
 
 void JUCEApplication::setApplicationReturnValue (const int newReturnValue) throw()
@@ -165,7 +166,6 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 {
     jassert (appInstance == 0);
     appInstance = app;
-    bool useForce = true;
 
     initialiseJuce_GUI();
 
@@ -203,7 +203,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
         app->stillInitialising = false;
 
         // now loop until a quit message is received..
-        useForce = MessageManager::getInstance()->runDispatchLoop();
+        MessageManager::getInstance()->runDispatchLoop();
 
         MessageManager::getInstance()->deregisterBroadcastListener (app);
 
@@ -224,10 +224,10 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
     }
 #endif
 
-    return shutdownAppAndClearUp (useForce);
+    return shutdownAppAndClearUp();
 }
 
-int JUCEApplication::shutdownAppAndClearUp (const bool useMaximumForce)
+int JUCEApplication::shutdownAppAndClearUp()
 {
     jassert (appInstance != 0);
     JUCEApplication* const app = appInstance;
@@ -266,11 +266,6 @@ int JUCEApplication::shutdownAppAndClearUp (const bool useMaximumForce)
         }
         JUCE_CATCH_ALL_ASSERT
 
-        if (useMaximumForce)
-        {
-            Process::terminate();
-        }
-
         reentrancyCheck = false;
     }
 
@@ -280,6 +275,10 @@ int JUCEApplication::shutdownAppAndClearUp (const bool useMaximumForce)
 int JUCEApplication::main (int argc, char* argv[],
                            JUCEApplication* const newApp)
 {
+#if JUCE_MAC
+    const ScopedAutoReleasePool pool;
+#endif
+
     juce_setCurrentExecutableFileName (String::fromUTF8 ((const uint8*) argv[0]));
 
     String cmd;
@@ -303,6 +302,9 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
 {
     if (! juceInitialisedGUI)
     {
+#if JUCE_MAC
+        const ScopedAutoReleasePool pool;
+#endif
         juceInitialisedGUI = true;
 
         initialiseJuce_NonGUI();
@@ -336,6 +338,9 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
 {
     if (juceInitialisedGUI)
     {
+#if JUCE_MAC
+        const ScopedAutoReleasePool pool;
+#endif
         DeletedAtShutdown::deleteAll();
 
         LookAndFeel::clearDefaultLookAndFeel();

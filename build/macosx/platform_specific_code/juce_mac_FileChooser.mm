@@ -29,28 +29,27 @@
   ==============================================================================
 */
 
-#include "juce_mac_NativeHeaders.h"
-#include <fnmatch.h>
-
-BEGIN_JUCE_NAMESPACE
-#include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
-END_JUCE_NAMESPACE
-
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 //==============================================================================
+END_JUCE_NAMESPACE
+using namespace JUCE_NAMESPACE;
+
 @interface JuceFileChooserDelegate   : NSObject
 {
-    JUCE_NAMESPACE::StringArray* filters;
+    StringArray* filters;
 }
 
-- (JuceFileChooserDelegate*) initWithFilters: (JUCE_NAMESPACE::StringArray*) filters_;
+- (JuceFileChooserDelegate*) initWithFilters: (StringArray*) filters_;
 - (void) dealloc;
 - (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename;
 
 @end
 
 @implementation JuceFileChooserDelegate
-- (JuceFileChooserDelegate*) initWithFilters: (JUCE_NAMESPACE::StringArray*) filters_
+- (JuceFileChooserDelegate*) initWithFilters: (StringArray*) filters_
 {
     [super init];
     filters = filters_;
@@ -63,26 +62,21 @@ END_JUCE_NAMESPACE
     [super dealloc];
 }
 
-- (BOOL) panel:(id) sender shouldShowFilename: (NSString*) filename
+- (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename
 {
-    const JUCE_NAMESPACE::String fname (nsStringToJuce (filename));
+    const String fname (nsStringToJuce (filename));
 
     for (int i = filters->size(); --i >= 0;)
-    {
-        const JUCE_NAMESPACE::String wildcard ((*filters)[i]);
-
-        if (fnmatch (wildcard.toLowerCase().toUTF8(), 
-                     fname.toLowerCase().toUTF8(), 0) == 0)
+        if (fname.matchesWildcard ((*filters)[i], true))
             return true;
-    }
 
-    return JUCE_NAMESPACE::File (fname).isDirectory();
+    return File (fname).isDirectory();
 }
 @end
 
 BEGIN_JUCE_NAMESPACE
 
-
+//==============================================================================
 void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
@@ -93,7 +87,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* extraInfoComponent)
 {
-    const AutoPool pool;
+    const ScopedAutoReleasePool pool;
 
     StringArray* filters = new StringArray();
     filters->addTokens (filter.replaceCharacters (T(",:"), T(";;")), T(";"), 0);
@@ -153,4 +147,4 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     [panel setDelegate: nil];
 }
 
-END_JUCE_NAMESPACE
+#endif

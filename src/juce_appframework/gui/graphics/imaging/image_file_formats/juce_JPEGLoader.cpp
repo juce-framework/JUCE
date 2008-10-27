@@ -116,7 +116,7 @@ namespace jpeglibNamespace
 #else
   #define JPEG_INTERNALS
   #undef FAR
-  #include <jpeglib.h> 
+  #include <jpeglib.h>
 #endif
 }
 

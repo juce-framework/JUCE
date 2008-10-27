@@ -30,7 +30,6 @@
 */
 
 #include <AudioUnit/AudioUnit.r>
-#include <AudioUnit/AudioUnitCarbonView.r>
 
 //==============================================================================
 /*  The JucePluginCharacteristics.h file is supposed to live in your plugin-specific
@@ -56,15 +55,3 @@
 
 #include "/Developer/Examples/CoreAudio/AudioUnits/AUPublic/AUBase/AUResources.r"
 
-//==============================================================================
-// component resources for Audio Unit Carbon View
-#define RES_ID			2000
-#define COMP_TYPE		kAudioUnitCarbonViewComponentType
-#define COMP_SUBTYPE	JucePlugin_AUSubType
-#define COMP_MANUF		JucePlugin_AUManufacturerCode
-#define VERSION			JucePlugin_VersionCode
-#define NAME			JucePlugin_Manufacturer ": " JucePlugin_Name " View"
-#define DESCRIPTION		NAME
-#define ENTRY_POINT		JucePlugin_AUExportPrefixQuoted "ViewEntry"
-
-#include "/Developer/Examples/CoreAudio/AudioUnits/AUPublic/AUBase/AUResources.r"

@@ -54,22 +54,11 @@ public:
 
 #if JUCE_MAC || DOXYGEN
     //==============================================================================
-    /** MAC ONLY - Turns a String into a pascal string. */
-    static void copyToStr255 (Str255& d, const String& s);
-    /** MAC ONLY - Turns a String into a pascal string. */
-    static void copyToStr63 (Str63& d, const String& s);
-
     /** MAC ONLY - Turns a Core CF String into a juce one. */
     static const String cfStringToJuceString (CFStringRef cfString);
 
     /** MAC ONLY - Turns a juce string into a Core CF one. */
     static CFStringRef juceStringToCFString (const String& s);
-
-    /** MAC ONLY - Converts a UTF16 string to a Juce String. */
-    static const String convertUTF16ToString (const UniChar* utf16);
-
-    /** MAC ONLY - Turns a file path into an FSSpec, returning true if it succeeds. */
-    static bool makeFSSpecFromPath (FSSpec* destFSSpec, const String& path);
 
     /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
     static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
@@ -153,6 +142,35 @@ public:
     static void fpuReset();
 
 
+#if JUCE_LINUX || JUCE_WIN32
+    //==============================================================================
+    /** Loads a dynamically-linked library into the process's address space.
+
+        @param pathOrFilename   the platform-dependent name and search path
+        @returns                a handle which can be used by getProcedureEntryPoint(), or
+                                zero if it fails.
+        @see freeDynamicLibrary, getProcedureEntryPoint
+    */
+    static void* loadDynamicLibrary (const String& pathOrFilename);
+
+    /** Frees a dynamically-linked library.
+
+        @param libraryHandle   a handle created by loadDynamicLibrary
+        @see loadDynamicLibrary, getProcedureEntryPoint
+    */
+    static void freeDynamicLibrary (void* libraryHandle);
+
+    /** Finds a procedure call in a dynamically-linked library.
+
+        @param libraryHandle    a library handle returned by loadDynamicLibrary
+        @param procedureName    the name of the procedure call to try to load
+        @returns                a pointer to the function if found, or 0 if it fails
+        @see loadDynamicLibrary
+    */
+    static void* getProcedureEntryPoint (void* libraryHandle,
+                                         const String& procedureName);
+#endif
+
 #if JUCE_LINUX || DOXYGEN
     //==============================================================================
 
@@ -161,6 +179,20 @@ public:
 
 
 #if JUCE_MAC
+
+//==============================================================================
+/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
+    using RAII.
+*/
+class ScopedAutoReleasePool
+{
+public:
+    ScopedAutoReleasePool();
+    ~ScopedAutoReleasePool();
+
+private:
+    void* pool;
+};
 
 //==============================================================================
 /**

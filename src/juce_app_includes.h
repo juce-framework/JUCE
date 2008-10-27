@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
-#define __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
+#ifndef __JUCE_APP_INCLUDES_JUCEHEADER__
+#define __JUCE_APP_INCLUDES_JUCEHEADER__
 
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
  #include "juce_appframework/application/juce_Application.h"
@@ -738,4 +738,4 @@
  #include "juce_appframework/documents/juce_UndoManager.h"
 #endif
 
-#endif
+#endif   // __JUCE_APP_INCLUDES_JUCEHEADER__

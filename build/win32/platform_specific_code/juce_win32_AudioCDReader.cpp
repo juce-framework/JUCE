@@ -29,37 +29,10 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_USE_CDBURNER
 
-#include "win32_headers.h"
-#include <stddef.h>
-
-#include "../../../juce_Config.h"
-
-#if JUCE_USE_CDBURNER
- // you'll need the Platform SDK for these headers - if you don't have it and don't
- // need to use CD-burning, then you might just want to disable the JUCE_USE_CDBURNER
- // flag in juce_Config.h to avoid these includes.
- #include <imapi.h>
- #include <imapierror.h>
-#endif
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
-#include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
-#include "../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.h"
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-#endif
 
 //***************************************************************************
 //       %%% TARGET STATUS VALUES %%%
@@ -2122,8 +2095,6 @@ void AudioCDReader::ejectDisk()
 }
 
 
-#if JUCE_USE_CDBURNER
-
 //==============================================================================
 static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
 {
@@ -2445,5 +2416,3 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
 }
 
 #endif
-
-END_JUCE_NAMESPACE

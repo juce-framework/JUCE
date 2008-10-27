@@ -75,6 +75,8 @@ public:
 
         commandManager->registerAllCommandsForTarget (this);
         commandManager->registerAllCommandsForTarget (mainWindow);
+
+        mainWindow->menuItemsChanged();
     }
 
     void shutdown()

@@ -183,7 +183,6 @@ public:
     void run()
     {
         uint32 lastTime = Time::getMillisecondCounter();
-        uint32 lastMessageManagerCallback = lastTime;
 
         while (! threadShouldExit())
         {
@@ -222,12 +221,6 @@ public:
 
                     now = Time::getMillisecondCounter();
 
-                    if (now > lastMessageManagerCallback + 200)
-                    {
-                        lastMessageManagerCallback = now;
-                        MessageManager::inactivityCheckCallback();
-                    }
-
                     if (now > messageDeliveryTimeout)
                         break;
                 }
@@ -237,12 +230,6 @@ public:
                 // don't wait for too long because running this loop also helps keep the
                 // Time::getApproximateMillisecondTimer value stay up-to-date
                 wait (jlimit (1, 50, timeUntilFirstTimer));
-            }
-
-            if (now > lastMessageManagerCallback + 200)
-            {
-                lastMessageManagerCallback = now;
-                MessageManager::inactivityCheckCallback();
             }
         }
     }

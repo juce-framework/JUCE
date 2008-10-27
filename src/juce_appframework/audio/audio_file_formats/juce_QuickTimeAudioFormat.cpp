@@ -64,6 +64,8 @@
 
 #include "../../../juce_core/basics/juce_StandardHeader.h"
 
+#if ! (JUCE_MAC && JUCE_64BIT)
+
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_QuickTimeAudioFormat.h"
@@ -408,7 +410,7 @@ AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*stream
     return 0;
 }
 
-
 END_JUCE_NAMESPACE
 
+#endif
 #endif

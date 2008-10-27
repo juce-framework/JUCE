@@ -64,4 +64,4 @@ static NSString* juceStringToNS (const JUCE_NAMESPACE::String& s)
 }
 
 
-#endif
+#endif   // __JUCE_MAC_NATIVEHEADERS_JUCEHEADER__

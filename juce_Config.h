@@ -30,7 +30,7 @@
 */
 
 #ifndef __JUCE_CONFIG_JUCEHEADER__
-#define __JUCE_CONFIG_JUCEHEADER__
+#define __JUCE_CONFIG_JUCEHEADER__ // (this comment is here to force the amalgamator to reinclude this file)
 
 //==============================================================================
 /*
@@ -159,12 +159,16 @@
 /** Enabling this builds support for VST audio plugins.
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
-//#define JUCE_PLUGINHOST_VST 1
+#ifndef JUCE_PLUGINHOST_VST
+//  #define JUCE_PLUGINHOST_VST 1
+#endif
 
 /** Enabling this builds support for AudioUnit audio plugins.
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
 */
-#define JUCE_PLUGINHOST_AU 1
+#ifndef JUCE_PLUGINHOST_AU
+//  #define JUCE_PLUGINHOST_AU 1
+#endif
 
 //=============================================================================
 /** Disabling this will avoid linking to any UI code. This is handy for

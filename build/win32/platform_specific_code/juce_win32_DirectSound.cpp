@@ -29,10 +29,13 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 //==============================================================================
+END_JUCE_NAMESPACE
+
 extern "C"
 {
 
@@ -524,7 +527,7 @@ public:
                                           bytesPerBuffer,
                                           (void**) &lpbuf1, &dwSize1,
                                           (void**) &lpbuf2, &dwSize2, 0);
-            } 
+            }
 
             if (hr == S_OK)
             {
@@ -1216,41 +1219,17 @@ private:
 
     void resync()
     {
-        int i;
-        for (i = outChans.size(); --i >= 0;)
-            outChans.getUnchecked(i)->close();
-
-        for (i = inChans.size(); --i >= 0;)
-            inChans.getUnchecked(i)->close();
-
-        if (threadShouldExit())
-            return;
-
-        // boost our priority while opening the devices to try to get better sync between them
-        const int oldThreadPri = GetThreadPriority (GetCurrentThread());
-        const int oldProcPri = GetPriorityClass (GetCurrentProcess());
-        SetThreadPriority (GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-        SetPriorityClass (GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-
-        for (i = outChans.size(); --i >= 0;)
-            outChans.getUnchecked(i)->open();
-
-        for (i = inChans.size(); --i >= 0;)
-            inChans.getUnchecked(i)->open();
-
         if (! threadShouldExit())
         {
             sleep (5);
 
+            int i;
             for (i = 0; i < outChans.size(); ++i)
                 outChans.getUnchecked(i)->synchronisePosition();
 
             for (i = 0; i < inChans.size(); ++i)
                 inChans.getUnchecked(i)->synchronisePosition();
         }
-
-        SetThreadPriority (GetCurrentThread(), oldThreadPri);
-        SetPriorityClass (GetCurrentProcess(), oldProcPri);
     }
 
 public:
@@ -1435,8 +1414,8 @@ public:
         const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);
 
         if (outputIndex >= 0 || inputIndex >= 0)
-            return new DSoundAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName 
-                                                                          : inputDeviceName, 
+            return new DSoundAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                          : inputDeviceName,
                                             outputIndex, inputIndex);
 
         return 0;
@@ -1676,4 +1655,4 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
 
 #undef log
 
-END_JUCE_NAMESPACE
+#endif

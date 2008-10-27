@@ -1425,7 +1425,7 @@ int Component::runModalLoop()
     {
         while (flags.currentlyModalFlag && flags.visibleFlag)
         {
-            if (! MessageManager::getInstance()->dispatchNextMessage())
+            if  (! MessageManager::getInstance()->runDispatchLoopUntil (20))
                 break;
 
             // check whether this component was deleted during the last message

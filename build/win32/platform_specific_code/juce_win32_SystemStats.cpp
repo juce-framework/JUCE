@@ -29,22 +29,9 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-
-//==============================================================================
-// Auto-link the other win32 libs that are needed by library calls..
-#if defined (JUCE_DLL_BUILD) && JUCE_MSVC
- #include "juce_win32_AutoLinkLibraries.h"
-#endif
-
-
-//==============================================================================
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 extern void juce_updateMultiMonitorInfo() throw();
 extern void juce_initialiseThreadEvents() throw();
@@ -487,4 +474,4 @@ int SystemStats::getPageSize() throw()
     return systemInfo.dwPageSize;
 }
 
-END_JUCE_NAMESPACE
+#endif

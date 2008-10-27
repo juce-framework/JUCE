@@ -1109,18 +1109,18 @@ void Slider::restoreMouseIfHidden()
             int x, y, downX, downY;
             Desktop::getMousePosition (x, y);
             Desktop::getLastMouseDownPosition (downX, downY);
-  
-            if (style == RotaryHorizontalDrag) 
-            { 
+
+            if (style == RotaryHorizontalDrag)
+            {
                 const double posDiff = valueToProportionOfLength (pos) - valueToProportionOfLength (valueOnMouseDown);
-                x = pixelsForFullDragExtent * posDiff + downX;
+                x = roundDoubleToInt (pixelsForFullDragExtent * posDiff + downX);
                 y = downY;
             }
             else
             {
                 const double posDiff = valueToProportionOfLength (valueOnMouseDown) - valueToProportionOfLength (pos);
                 x = downX;
-                y = pixelsForFullDragExtent * posDiff + downY;
+                y = roundDoubleToInt (pixelsForFullDragExtent * posDiff + downY);
             }
 
             Desktop::setMousePosition (x, y);

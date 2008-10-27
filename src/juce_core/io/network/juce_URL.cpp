@@ -109,9 +109,9 @@ static const String getMangledParameters (const StringPairArray& parameters)
         if (i > 0)
             p += T("&");
 
-        p << URL::addEscapeChars (parameters.getAllKeys() [i])
+        p << URL::addEscapeChars (parameters.getAllKeys() [i], true)
           << T("=")
-          << URL::addEscapeChars (parameters.getAllValues() [i]);
+          << URL::addEscapeChars (parameters.getAllValues() [i], true);
     }
 
     return p;
@@ -495,11 +495,13 @@ const String URL::removeEscapeChars (const String& s)
     return stringResult;
 }
 
-const String URL::addEscapeChars (const String& s)
+const String URL::addEscapeChars (const String& s, const bool isParameter)
 {
     String result;
     result.preallocateStorage (s.length() + 8);
     const char* utf8 = s.toUTF8();
+    const char* legalChars = isParameter ? "_-.*!'()"
+                                         : "_-$.*!'(),";
 
     while (*utf8 != 0)
     {
@@ -510,7 +512,7 @@ const String URL::addEscapeChars (const String& s)
             result += T('+');
         }
         else if (CharacterFunctions::isLetterOrDigit (c)
-                  || CharacterFunctions::indexOfChar ("_-$.*!'(),", c, false) >= 0)
+                  || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0)
         {
             result << c;
         }

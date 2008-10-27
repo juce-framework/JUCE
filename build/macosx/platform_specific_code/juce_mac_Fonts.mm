@@ -29,19 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-#include <ApplicationServices/ApplicationServices.h>
-
-BEGIN_JUCE_NAMESPACE
-
-
-#include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_appframework/events/juce_MessageManager.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
-#include "../../../src/juce_core/basics/juce_Singleton.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 //==============================================================================
 static OSStatus pascal CubicMoveTo (const Float32Point *pt,
@@ -539,5 +529,4 @@ void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, Strin
     defaultFixed = "Monaco";
 }
 
-
-END_JUCE_NAMESPACE
+#endif

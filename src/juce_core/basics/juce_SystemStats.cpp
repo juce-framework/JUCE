@@ -40,6 +40,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Atomic.h"
 #include "../threads/juce_Thread.h"
 #include "../text/juce_LocalisedStrings.h"
+#include "../../juce_core/misc/juce_PlatformUtilities.h"
 void juce_initialiseStrings();
 
 
@@ -57,6 +58,10 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
     {
+#if JUCE_MAC
+        const ScopedAutoReleasePool pool;
+#endif
+
 #ifdef JUCE_DEBUG
         // Some simple test code to keep an eye on things and make sure these functions
         // work ok on all platforms. Let me know if any of these assertions fail!
@@ -99,6 +104,10 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {
+#if JUCE_MAC
+        const ScopedAutoReleasePool pool;
+#endif
+
 #if JUCE_WIN32
         // need to shut down sockets if they were used..
         if (juce_CloseWin32SocketLib != 0)

@@ -96,7 +96,7 @@ void SplashScreen::show (const String& title,
     addToDesktop (useDropShadow ? ComponentPeer::windowHasDropShadow : 0);
     toFront (false);
 
-    MessageManager::getInstance()->dispatchPendingMessages();
+    MessageManager::getInstance()->runDispatchLoopUntil (300);
 
     repaint();
 

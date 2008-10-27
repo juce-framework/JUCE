@@ -29,33 +29,13 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
-#include "win32_headers.h"
-#include <wininet.h>
-#include <nb30.h>
-#include <iphlpapi.h>
-#include <mapi.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/text/juce_String.h"
-#include "juce_win32_DynamicLibraryLoader.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
 
 #ifndef INTERNET_FLAG_NEED_FILE
   #define INTERNET_FLAG_NEED_FILE 0x00000010
-#endif
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
 #endif
 
 //==============================================================================
@@ -417,4 +397,4 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
 }
 
 
-END_JUCE_NAMESPACE
+#endif

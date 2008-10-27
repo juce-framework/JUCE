@@ -29,18 +29,9 @@
   ==============================================================================
 */
 
-#include <CoreMIDI/MIDIServices.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/devices/juce_MidiOutput.h"
-#include "../../../src/juce_appframework/audio/devices/juce_MidiInput.h"
-#include "../../../src/juce_appframework/application/juce_Application.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 //==============================================================================
 #undef log
@@ -589,4 +580,4 @@ void MidiInput::stop()
 
 #undef log
 
-END_JUCE_NAMESPACE
+#endif

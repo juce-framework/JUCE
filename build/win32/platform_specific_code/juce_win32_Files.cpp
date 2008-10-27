@@ -29,40 +29,18 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
-#include <ctime>
-
-#ifndef _WIN32_IE
- #define _WIN32_IE 0x0400
-#endif
-#include <shlobj.h>
-
+//==============================================================================
 #ifndef CSIDL_MYMUSIC
  #define CSIDL_MYMUSIC 0x000d
 #endif
 
 #ifndef CSIDL_MYVIDEO
  #define CSIDL_MYVIDEO 0x000e
-#endif
-
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/io/files/juce_NamedPipe.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
 #endif
 
 //==============================================================================
@@ -711,7 +689,8 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
     if (createPipe)
     {
         intern->pipeH = CreateNamedPipe (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                         1, 64, 64, 0, NULL);
+                                         PIPE_UNLIMITED_INSTANCES,
+                                         4096, 4096, 0, NULL);
     }
     else
     {
@@ -758,20 +737,24 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
         else if (GetLastError() == ERROR_IO_PENDING)
         {
             HANDLE handles[] = { over.hEvent, intern->cancelEvent };
-
-            if (WaitForMultipleObjects (2, handles, FALSE,
-                                        timeOutMilliseconds >= 0 ? timeOutMilliseconds
-                                                                 : INFINITE) == WAIT_OBJECT_0)
+            DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
+                                                       timeOutMilliseconds >= 0 ? timeOutMilliseconds
+                                                                                : INFINITE);
+            if (waitResult != WAIT_OBJECT_0)
             {
-                if (GetOverlappedResult (intern->pipeH, &over, &numRead, FALSE))
-                {
-                    bytesRead = (int) numRead;
-                }
-                else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
-                {
-                    intern->disconnect();
-                    waitAgain = true;
-                }
+                // if the operation timed out, let's cancel it...
+                CancelIo (intern->pipeH);
+                WaitForSingleObject (over.hEvent, INFINITE);  // makes sure cancel is complete
+            }
+
+            if (GetOverlappedResult (intern->pipeH, &over, &numRead, FALSE))
+            {
+                bytesRead = (int) numRead;
+            }
+            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
+            {
+                intern->disconnect();
+                waitAgain = true;
             }
         }
         else
@@ -810,18 +793,25 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
         else if (GetLastError() == ERROR_IO_PENDING)
         {
             HANDLE handles[] = { over.hEvent, intern->cancelEvent };
+            DWORD waitResult;
 
-            if (WaitForMultipleObjects (2, handles, FALSE, timeOutMilliseconds >= 0 ? timeOutMilliseconds
-                                                                                    : INFINITE) == WAIT_OBJECT_0)
+            waitResult = WaitForMultipleObjects (2, handles, FALSE,
+                                                 timeOutMilliseconds >= 0 ? timeOutMilliseconds
+                                                                          : INFINITE);
+
+            if (waitResult != WAIT_OBJECT_0)
             {
-                if (GetOverlappedResult (intern->pipeH, &over, &numWritten, FALSE))
-                {
-                    bytesWritten = (int) numWritten;
-                }
-                else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
-                {
-                    intern->disconnect();
-                }
+                CancelIo (intern->pipeH);
+                WaitForSingleObject (over.hEvent, INFINITE);
+            }
+
+            if (GetOverlappedResult (intern->pipeH, &over, &numWritten, FALSE))
+            {
+                bytesWritten = (int) numWritten;
+            }
+            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
+            {
+                intern->disconnect();
             }
         }
 
@@ -840,4 +830,4 @@ void NamedPipe::cancelPendingReads()
 }
 
 
-END_JUCE_NAMESPACE
+#endif

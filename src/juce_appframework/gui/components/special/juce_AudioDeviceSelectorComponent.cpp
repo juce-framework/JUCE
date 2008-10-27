@@ -954,15 +954,15 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
                                                             const bool showChannelsAsStereoPairs_,
                                                             const bool hideAdvancedOptionsWithButton_)
     : deviceManager (deviceManager_),
+      deviceTypeDropDown (0),
+      deviceTypeDropDownLabel (0),
+      audioDeviceSettingsComp (0),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
       maxInputChannels (maxInputChannels_),
       showChannelsAsStereoPairs (showChannelsAsStereoPairs_),
-      hideAdvancedOptionsWithButton (hideAdvancedOptionsWithButton_),
-      deviceTypeDropDown (0),
-      deviceTypeDropDownLabel (0),
-      audioDeviceSettingsComp (0)
+      hideAdvancedOptionsWithButton (hideAdvancedOptionsWithButton_)
 {
     jassert (minOutputChannels >= 0 && minOutputChannels <= maxOutputChannels);
     jassert (minInputChannels >= 0 && minInputChannels <= maxInputChannels);

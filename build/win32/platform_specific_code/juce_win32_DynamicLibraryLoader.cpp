@@ -29,12 +29,10 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/text/juce_String.h"
 #include "juce_win32_DynamicLibraryLoader.h"
 
 
@@ -54,4 +52,5 @@ void* DynamicLibraryLoader::findProcAddress (const String& functionName)
     return (void*) GetProcAddress ((HMODULE) libHandle, functionName);
 }
 
-END_JUCE_NAMESPACE
+
+#endif

@@ -29,26 +29,19 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-#include <Cocoa/Cocoa.h>
-#include <WebKit/WebKit.h>
-#include <WebKit/HIWebView.h>
-#include <WebKit/WebPolicyDelegate.h>
-#include <WebKit/CarbonUtils.h>
-
-BEGIN_JUCE_NAMESPACE
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
-END_JUCE_NAMESPACE
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_WEB_BROWSER
 
 //==============================================================================
+END_JUCE_NAMESPACE
+
 @interface DownloadClickDetector   : NSObject
 {
     JUCE_NAMESPACE::WebBrowserComponent* ownerComponent;
 }
 
-- (DownloadClickDetector*) initWithOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent;
+- (DownloadClickDetector*) initWithWebBrowserOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent;
 
 - (void) webView: (WebView*) webView decidePolicyForNavigationAction: (NSDictionary*) actionInformation
                                                              request: (NSURLRequest*) request
@@ -59,7 +52,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @implementation DownloadClickDetector
 
-- (DownloadClickDetector*) initWithOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent_
+- (DownloadClickDetector*) initWithWebBrowserOwner: (JUCE_NAMESPACE::WebBrowserComponent*) ownerComponent_
 {
     [super init];
     ownerComponent = ownerComponent_;
@@ -81,138 +74,57 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class WebBrowserComponentInternal   : public Timer
+class WebBrowserComponentInternal  : public NSViewComponent
 {
 public:
-    WebBrowserComponentInternal (WebBrowserComponent* owner_)
-        : owner (owner_),
-          view (0),
-          webView (0)
+    WebBrowserComponentInternal (WebBrowserComponent* owner)
     {
-        HIWebViewCreate (&view);
+        webView = [[WebView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
+                                       frameName: @"" 
+                                       groupName: @""];
+        setView (webView);
 
-        ComponentPeer* const peer = owner_->getPeer();
-        jassert (peer != 0);
-
-        if (view != 0 && peer != 0)
-        {
-            WindowRef parentWindow = (WindowRef) peer->getNativeHandle();
-
-            WindowAttributes attributes;
-            GetWindowAttributes (parentWindow, &attributes);
-
-            HIViewRef parentView = 0;
-
-            if ((attributes & kWindowCompositingAttribute) != 0)
-            {
-                HIViewRef root = HIViewGetRoot (parentWindow);
-                HIViewFindByID (root, kHIViewWindowContentID, &parentView);
-
-                if (parentView == 0)
-                    parentView = root;
-            }
-            else
-            {
-                GetRootControl (parentWindow, (ControlRef*) &parentView);
-
-                if (parentView == 0)
-                    CreateRootControl (parentWindow, (ControlRef*) &parentView);
-            }
-
-            HIViewAddSubview (parentView, view);
-            updateBounds();
-            show();
-
-            webView = HIWebViewGetWebView (view);
-
-            clickListener = [[DownloadClickDetector alloc] initWithOwner: owner_];
-            [webView setPolicyDelegate: clickListener];
-        }
-
-        startTimer (500);
+        clickListener = [[DownloadClickDetector alloc] initWithWebBrowserOwner: owner];
+        [webView setPolicyDelegate: clickListener];
     }
 
     ~WebBrowserComponentInternal()
     {
         [webView setPolicyDelegate: nil];
         [clickListener release];
-
-        if (view != 0)
-            CFRelease (view);
-    }
-
-    // Horrific bodge-workaround for the fact that the webview somehow hangs onto key
-    // focus when you pop up a new window, no matter what that window does to
-    // try to grab focus for itself. This catches such a situation and forces
-    // focus away from the webview, then back to the place it should be..
-    void timerCallback()
-    {
-        WindowRef viewWindow = HIViewGetWindow (view);
-        WindowRef focusedWindow = GetUserFocusWindow();
-
-        if (focusedWindow != viewWindow)
-        {
-            if (HIViewSubtreeContainsFocus (view))
-            {
-                HIViewAdvanceFocus (HIViewGetRoot (viewWindow), 0);
-                HIViewAdvanceFocus (HIViewGetRoot (focusedWindow), 0);
-            }
-        }
-    }
-
-    void show()
-    {
-        HIViewSetVisible (view, true);
-    }
-
-    void hide()
-    {
-        HIViewSetVisible (view, false);
+        setView (0);
     }
 
     void goToURL (const String& url, 
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        char** headerNamesAsChars = 0;
-        char** headerValuesAsChars = 0;
-        int numHeaders = 0;
+        NSMutableURLRequest* r 
+            = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
+                                      cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                  timeoutInterval: 30.0];
+
+        if (postData != 0 && postData->getSize() > 0)
+        {
+            [r setHTTPMethod: @"POST"];
+            [r setHTTPBody: [NSData dataWithBytes: postData->getData() 
+                                           length: postData->getSize()]];
+        }
 
         if (headers != 0)
         {
-            numHeaders = headers->size();
-
-            headerNamesAsChars = (char**) juce_malloc (sizeof (char*) * numHeaders);
-            headerValuesAsChars = (char**) juce_malloc (sizeof (char*) * numHeaders);
-
-            int i;
-            for (i = 0; i < numHeaders; ++i)
+            for (int i = 0; i < headers->size(); ++i)
             {
                 const String headerName ((*headers)[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
-                headerNamesAsChars[i] = (char*) juce_calloc (headerName.copyToUTF8 (0));
-                headerName.copyToUTF8 ((JUCE_NAMESPACE::uint8*) headerNamesAsChars[i]);
-
                 const String headerValue ((*headers)[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
-                headerValuesAsChars[i] = (char*) juce_calloc (headerValue.copyToUTF8 (0));
-                headerValue.copyToUTF8 ((JUCE_NAMESPACE::uint8*) headerValuesAsChars[i]);
+
+                [r setValue: juceStringToNS (headerValue)
+                   forHTTPHeaderField: juceStringToNS (headerName)];
             }
         }
 
-        sendWebViewToURL ((const char*) url.toUTF8(),
-                          (const char**) headerNamesAsChars, 
-                          (const char**) headerValuesAsChars, 
-                          numHeaders,
-                          postData != 0 ? (const char*) postData->getData() : 0,
-                          postData != 0 ? postData->getSize() : 0);
-
-        for (int i = 0; i < numHeaders; ++i)
-        {
-            juce_free (headerNamesAsChars[i]);
-            juce_free (headerValuesAsChars[i]);
-        }
-
-        juce_free (headerNamesAsChars);
-        juce_free (headerValuesAsChars);
+        stop();
+        [[webView mainFrame] loadRequest: r];
     }
 
     void goBack()
@@ -230,67 +142,24 @@ public:
         [webView stopLoading: nil];
     }
 
-    void updateBounds()
-    {
-        HIRect r;
-        r.origin.x = (float) owner->getScreenX() - owner->getTopLevelComponent()->getScreenX();
-        r.origin.y = (float) owner->getScreenY() - owner->getTopLevelComponent()->getScreenY();
-        r.size.width = (float) owner->getWidth();
-        r.size.height = (float) owner->getHeight();
-        HIViewSetFrame (view, &r);
-    }
-
 private:
-    WebBrowserComponent* const owner;
-    HIViewRef view;
     WebView* webView;
     DownloadClickDetector* clickListener;
-    
-    void sendWebViewToURL (const char* utf8URL,
-                           const char** headerNames, 
-                           const char** headerValues, 
-                           int numHeaders,
-                           const char* postData, 
-                           int postDataSize)
-    {
-        NSMutableURLRequest* r = [NSMutableURLRequest 
-                                    requestWithURL: [NSURL URLWithString: [NSString stringWithUTF8String: utf8URL]]
-                                    cachePolicy: NSURLRequestUseProtocolCachePolicy
-                                    timeoutInterval: 30.0];
-
-        if (postDataSize > 0)
-        {
-            [ r setHTTPMethod: @"POST"];
-            [ r setHTTPBody: [NSData dataWithBytes: postData length: postDataSize]];
-        }
-
-        int i;
-        for (i = 0; i < numHeaders; ++i)
-        {
-            [ r setValue: [NSString stringWithUTF8String: headerValues[i]]
-                forHTTPHeaderField: [NSString stringWithUTF8String: headerNames[i]]];
-        }
-
-        [[webView mainFrame] stopLoading ];
-        [[webView mainFrame] loadRequest: r];
-    }
-    
-    WebBrowserComponentInternal (const WebBrowserComponentInternal&);
-    const WebBrowserComponentInternal& operator= (const WebBrowserComponentInternal&);
 };
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent()
     : browser (0),
-      associatedWindow (0),
       blankPageShown (false)
 {
     setOpaque (true);
+
+    addAndMakeVisible (browser = new WebBrowserComponentInternal (this));
 }
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    deleteBrowser();
+    deleteAndZero (browser);
 }
 
 //==============================================================================
@@ -310,94 +179,51 @@ void WebBrowserComponent::goToURL (const String& url,
 
     blankPageShown = false;
 
-    if (browser != 0)
-        browser->goToURL (url, headers, postData);
+    browser->goToURL (url, headers, postData);
 }
 
 void WebBrowserComponent::stop()
 {
-    if (browser != 0)
-        browser->stop();
+    browser->stop();
 }
 
 void WebBrowserComponent::goBack()
 {
     lastURL = String::empty;
     blankPageShown = false;
-
-    if (browser != 0)
-        browser->goBack();
+    browser->goBack();
 }
 
 void WebBrowserComponent::goForward()
 {
     lastURL = String::empty;
-
-    if (browser != 0)
-        browser->goForward();
+    browser->goForward();
 }
 
 //==============================================================================
 void WebBrowserComponent::paint (Graphics& g)
 {
-    if (browser == 0)
-        g.fillAll (Colours::white);
 }
 
 void WebBrowserComponent::checkWindowAssociation()
 {
-    void* const window = getWindowHandle();
-
-    if (window != associatedWindow 
-         || (browser == 0 && window != 0))
-    {
-        associatedWindow = window;
-
-        deleteBrowser();
-        createBrowser();
-    }
-
-    if (browser != 0)
-    {
-        if (associatedWindow != 0 && isShowing())
-        {
-            browser->show();
-
-            if (blankPageShown)
-                goBack();
-        }
-        else
-        {
-            if (! blankPageShown)
-            {
-                // when the component becomes invisible, some stuff like flash 
-                // carries on playing audio, so we need to force it onto a blank
-                // page to avoid this..
-
-                blankPageShown = true;
-                browser->goToURL ("about:blank", 0, 0);
-            }
-
-            browser->hide();
-        }
-    }
-}
-
-void WebBrowserComponent::createBrowser()
-{
-    deleteBrowser();
+    // when the component becomes invisible, some stuff like flash
+    // carries on playing audio, so we need to force it onto a blank
+    // page to avoid this, (and send it back when it's made visible again).
 
     if (isShowing())
     {
-        WebInitForCarbon();
-        browser = new WebBrowserComponentInternal (this);
-        reloadLastURL();
+        if (blankPageShown)
+            goBack();
     }
-}
-
-void WebBrowserComponent::deleteBrowser()
-{
-    deleteAndZero (browser);
+    else
+    {
+        if (! blankPageShown)
+        {
+            blankPageShown = true;
+            browser->goToURL ("about:blank", 0, 0);
+        }
+    }
 }
 
 void WebBrowserComponent::reloadLastURL()
@@ -409,25 +235,14 @@ void WebBrowserComponent::reloadLastURL()
     }
 }
 
-void WebBrowserComponent::updateBrowserPosition()
-{
-    if (getPeer() != 0 && browser != 0)
-        browser->updateBounds();
-}
-
 void WebBrowserComponent::parentHierarchyChanged()
 {
     checkWindowAssociation();
 }
 
-void WebBrowserComponent::moved()
-{
-    updateBrowserPosition();
-}
-
 void WebBrowserComponent::resized()
 {
-    updateBrowserPosition();
+    browser->setSize (getWidth(), getHeight());
 }
 
 void WebBrowserComponent::visibilityChanged()
@@ -440,4 +255,4 @@ bool WebBrowserComponent::pageAboutToLoad (const String& url)
     return true;
 }
 
-END_JUCE_NAMESPACE
+#endif

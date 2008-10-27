@@ -223,7 +223,7 @@ public:
         @returns    a unique identifier that identifies the calling thread.
         @see getThreadId
     */
-    static int getCurrentThreadId() throw();
+    static int64 getCurrentThreadId() throw();
 
     /** Finds the thread object that is currently running.
 
@@ -241,7 +241,7 @@ public:
 
         @see getCurrentThreadId
     */
-    int getThreadId() const throw();
+    int64 getThreadId() const throw();
 
     /** Returns the name of the thread.
 
@@ -273,7 +273,8 @@ private:
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent_, defaultEvent_;
 
-    int threadPriority_, threadId_;
+    int threadPriority_;
+    int64 threadId_;
     uint32 affinityMask_;
     bool volatile threadShouldExit_;
 

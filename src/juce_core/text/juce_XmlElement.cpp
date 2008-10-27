@@ -267,7 +267,8 @@ static void writeSpaces (OutputStream& out, int numSpaces) throw()
 }
 
 void XmlElement::writeElementAsText (OutputStream& outputStream,
-                                     const int indentationLevel) const throw()
+                                     const int indentationLevel,
+                                     const int lineWrapLength) const throw()
 {
     writeSpaces (outputStream, indentationLevel);
 
@@ -283,7 +284,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
         const XmlAttributeNode* att = attributes;
         while (att != 0)
         {
-            if (lineLen > 60 && indentationLevel >= 0)
+            if (lineLen > lineWrapLength && indentationLevel >= 0)
             {
                 outputStream.write ("\r\n", 2);
                 writeSpaces (outputStream, attIndent);
@@ -336,11 +337,11 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                             if (lastWasTextNode)
                                 outputStream.write ("\r\n", 2);
 
-                            child->writeElementAsText (outputStream, indentationLevel + 2);
+                            child->writeElementAsText (outputStream, indentationLevel + 2, lineWrapLength);
                         }
                         else
                         {
-                            child->writeElementAsText (outputStream, indentationLevel);
+                            child->writeElementAsText (outputStream, indentationLevel, lineWrapLength);
                         }
 
                         lastWasTextNode = false;
@@ -386,7 +387,8 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
 const String XmlElement::createDocument (const String& dtd,
                                          const bool allOnOneLine,
                                          const bool includeXmlHeader,
-                                         const tchar* const encoding) const throw()
+                                         const tchar* const encoding,
+                                         const int lineWrapLength) const throw()
 {
     String doc;
     doc.preallocateStorage (1024);
@@ -411,7 +413,7 @@ const String XmlElement::createDocument (const String& dtd,
     }
 
     MemoryOutputStream mem (2048, 4096);
-    writeElementAsText (mem, allOnOneLine ? -1 : 0);
+    writeElementAsText (mem, allOnOneLine ? -1 : 0, lineWrapLength);
 
     return doc + String (mem.getData(),
                          mem.getDataSize());
@@ -419,7 +421,8 @@ const String XmlElement::createDocument (const String& dtd,
 
 bool XmlElement::writeToFile (const File& f,
                               const String& dtd,
-                              const tchar* const encoding) const throw()
+                              const tchar* const encoding,
+                              const int lineWrapLength) const throw()
 {
     if (f.hasWriteAccess())
     {
@@ -432,7 +435,7 @@ bool XmlElement::writeToFile (const File& f,
             *out << "<?xml version=\"1.0\" encoding=\"" << encoding << "\"?>\r\n\r\n"
                  << dtd << "\r\n";
 
-            writeElementAsText (*out, 0);
+            writeElementAsText (*out, 0, lineWrapLength);
 
             delete out;
 

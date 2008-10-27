@@ -29,16 +29,9 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/events/juce_MessageManager.h"
-#include "../../../src/juce_appframework/application/juce_Application.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -250,4 +243,5 @@ void MessageManager::doPlatformSpecificShutdown()
     OleUninitialize();
 }
 
-END_JUCE_NAMESPACE
+
+#endif

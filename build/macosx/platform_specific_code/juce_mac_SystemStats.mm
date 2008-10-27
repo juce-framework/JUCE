@@ -29,18 +29,9 @@
   ==============================================================================
 */
 
-#include "juce_mac_NativeHeaders.h"
-#include <AppKit/AppKit.h>
-#include <CoreAudio/HostTime.h>
-#include <ctime>
-#include <sys/resource.h>
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/application/juce_Application.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 static int64 highResTimerFrequency;
 
@@ -90,29 +81,74 @@ static CPUFlags cpuFlags;
 #endif
 
 //==============================================================================
-void Logger::outputDebugString (const String& text) throw()
+void SystemStats::initialiseStats() throw()
 {
-    String withLineFeed (text + T("\n"));
-    const char* const utf8 = withLineFeed.toUTF8();
-    fwrite (utf8, strlen (utf8), 1, stdout);
+    static bool initialised = false;
+
+    if (! initialised)
+    {
+        initialised = true;
+
+        NSApplicationLoad();
+        [NSApplication sharedApplication];
+
+#if JUCE_INTEL
+        {
+            unsigned int familyModel, extFeatures;
+            const unsigned int features = getCPUIDWord (familyModel, extFeatures);
+
+            cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
+            cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
+            cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
+            cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
+        }
+#endif
+
+        highResTimerFrequency = (int64) AudioGetHostClockFrequency();
+
+        String s (SystemStats::getJUCEVersion());
+
+        rlimit lim;
+        getrlimit (RLIMIT_NOFILE, &lim);
+        lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
+        setrlimit (RLIMIT_NOFILE, &lim);      
+    }
 }
 
-void Logger::outputDebugPrintf (const tchar* format, ...) throw()
+static const String getCpuInfo (const char* key, bool lastOne = false) throw()
 {
-    String text;
-    va_list args;
-    va_start (args, format);
-    text.vprintf(format, args);
-    outputDebugString (text);
-}
+    String info;
+    char buf [256];
 
-int SystemStats::getMemorySizeInMegabytes() throw()
-{
-    long bytes;
-    if (Gestalt (gestaltPhysicalRAMSize, &bytes) == noErr)
-        return (int) (((unsigned long) bytes) / (1024 * 1024));
+    FILE* f = fopen ("/proc/cpuinfo", "r");
 
-    return 0;
+    while (f != 0 && fgets (buf, sizeof(buf), f))
+    {
+        if (strncmp (buf, key, strlen (key)) == 0)
+        {
+            char* p = buf;
+
+            while (*p && *p != '\n')
+                ++p;
+
+            if (*p != 0)
+                *p = 0;
+
+            p = buf;
+
+            while (*p != 0 && *p != ':')
+                ++p;
+
+            if (*p != 0 && *(p + 1) != 0)
+                info = p + 2;
+
+            if (! lastOne)
+                break;
+        }
+    }
+
+    fclose (f);
+    return info;
 }
 
 //==============================================================================
@@ -136,39 +172,17 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #endif
 }
 
-//==============================================================================
-void SystemStats::initialiseStats() throw()
+int SystemStats::getMemorySizeInMegabytes() throw()
 {
-    static bool initialised = false;
-
-    if (! initialised)
-    {
-        initialised = true;
-
-        //[NSApplication sharedApplication];
-        NSApplicationLoad();
-
-#if JUCE_INTEL
-        {
-            unsigned int familyModel, extFeatures;
-            const unsigned int features = getCPUIDWord (familyModel, extFeatures);
-
-            cpuFlags.hasMMX = ((features & (1 << 23)) != 0);
-            cpuFlags.hasSSE = ((features & (1 << 25)) != 0);
-            cpuFlags.hasSSE2 = ((features & (1 << 26)) != 0);
-            cpuFlags.has3DNow = ((extFeatures & (1 << 31)) != 0);
-        }
+#if MACOS_10_4_OR_EARLIER
+    long bytes;
+    if (Gestalt (gestaltPhysicalRAMSize, &bytes) == noErr)
+        return (int) (((unsigned long) bytes) / (1024 * 1024));
+    
+    return 0;
+#else
+    return (int) ([[NSProcessInfo processInfo] physicalMemory] / (1024 * 1024));
 #endif
-
-        highResTimerFrequency = (int64) AudioGetHostClockFrequency();
-
-        String s (SystemStats::getJUCEVersion());
-
-        rlimit lim;
-        getrlimit (RLIMIT_NOFILE, &lim);
-        lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
-        setrlimit (RLIMIT_NOFILE, &lim);
-    }
 }
 
 bool SystemStats::hasMMX() throw()
@@ -220,12 +234,20 @@ const String SystemStats::getCpuVendor() throw()
 
 int SystemStats::getCpuSpeedInMegaherz() throw()
 {
+#if MACOS_10_4_OR_EARLIER
     return GetCPUSpeed();
+#else
+    return roundDoubleToInt (getCpuInfo ("cpu MHz").getDoubleValue());
+#endif
 }
 
 int SystemStats::getNumCpus() throw()
 {
+#if MACOS_10_4_OR_EARLIER
     return MPProcessors();
+#else
+    return [[NSProcessInfo processInfo] activeProcessorCount];
+#endif
 }
 
 //==============================================================================
@@ -272,12 +294,12 @@ bool Time::setSystemTimeToThisTime() const throw()
 //==============================================================================
 int SystemStats::getPageSize() throw()
 {
-    jassertfalse
-    return 512; //xxx
+    return NSPageSize();
 }
 
 void PlatformUtilities::fpuReset()
 {
 }
 
-END_JUCE_NAMESPACE
+
+#endif

@@ -80,6 +80,9 @@ public:
         windowRepaintedExplictly    = (1 << 9),    /**< Not intended for public use - this tells a window not to
                                                         do its own repainting, but only to repaint when the
                                                         performAnyPendingRepaintsNow() method is called. */
+        windowIgnoresKeyPresses     = (1 << 10),   /**< Tells the window not to catch any keypresses. This can
+                                                        be used for things like plugin windows, to stop them interfering
+                                                        with the host's shortcut keys */
         windowIsSemiTransparent     = (1 << 31)    /**< Not intended for public use - makes a window transparent. */
 
     };

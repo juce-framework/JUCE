@@ -30,7 +30,7 @@
 */
 
 /*
-                        ***  DON't EDIT THIS FILE!!  ***
+                        ***  DON'T EDIT THIS FILE!!  ***
 
     The idea is that everyone's plugins should share this same wrapper
     code, so if you start hacking around in here you're missing the point!
@@ -119,7 +119,8 @@
   #pragma pack (push, 8)
 #endif
 
-#include "../../../../../juce_amalgamated.h"
+//#include "../../../../../juce_amalgamated.h"
+#include "../../../../../juce.h"
 
 #ifdef _MSC_VER
   #pragma pack (pop)
@@ -136,6 +137,10 @@ BEGIN_JUCE_NAMESPACE
 
  #if JUCE_MAC
   extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
+  extern void* attachComponentToWindowRef (Component* component, void* windowRef);
+  extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
+  extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
+  extern void checkWindowVisibility (void* nsWindow, Component* component);
  #endif
 
  #if JUCE_LINUX
@@ -355,7 +360,6 @@ public:
         outgoingEventSize = 0;
         chunkMemoryTime = 0;
         isProcessing = false;
-        firstResize = true;
         hasShutdown = false;
         firstProcessCallback = true;
         shouldDeleteEditor = false;
@@ -438,6 +442,18 @@ public:
 
     void open()
     {
+        if (editorComp == 0)
+        {
+            AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
+
+            if (ed != 0)
+                cEffect.flags |= effFlagsHasEditor;
+            else
+                cEffect.flags &= ~effFlagsHasEditor;
+
+            delete ed;
+        }
+
         startTimer (1000 / 4);
     }
 
@@ -654,7 +670,7 @@ public:
                         {
                             if (outputs[j] == chan)
                             {
-                                chan = juce_malloc (sizeof (float) * blockSize * 2);
+                                chan = (float*) juce_malloc (sizeof (float) * blockSize * 2);
                                 tempChannels.set (i, chan);
                                 break;
                             }
@@ -1062,6 +1078,11 @@ public:
             chunkMemory.setSize (0);
         }
 
+#if JUCE_MAC
+        if (hostWindow != 0)
+            checkWindowVisibility (hostWindow, editorComp);
+#endif
+
         tryMasterIdle();
     }
 
@@ -1117,13 +1138,18 @@ public:
 
             if (ed != 0)
             {
+                cEffect.flags |= effFlagsHasEditor;
                 ed->setOpaque (true);
                 ed->setVisible (true);
 
                 editorComp = new EditorCompWrapper (this, ed);
             }
+            else
+            {
+                cEffect.flags &= ~effFlagsHasEditor;
+            }
         }
-        
+
         shouldDeleteEditor = false;
     }
 
@@ -1144,13 +1170,18 @@ public:
             if (modalComponent != 0)
             {
                 modalComponent->exitModalState (0);
-                
+
                 if (canDeleteLaterIfModal)
                 {
                     shouldDeleteEditor = true;
                     return;
                 }
             }
+
+#if JUCE_MAC
+            detachComponentFromWindowRef (editorComp, hostWindow);
+            hostWindow = 0;
+#endif
 
             filter->editorBeingDeleted (editorComp->getEditorComp());
 
@@ -1161,7 +1192,7 @@ public:
             jassert (Component::getCurrentlyModalComponent() == 0);
         }
 
-#if JUCE_MAC || JUCE_LINUX
+#if JUCE_LINUX
         hostWindow = 0;
 #endif
 
@@ -1196,59 +1227,22 @@ public:
 
 #if JUCE_WIN32
                 editorComp->addToDesktop (0);
-
                 hostWindow = (HWND) ptr;
                 HWND editorWnd = (HWND) editorComp->getWindowHandle();
-
                 SetParent (editorWnd, hostWindow);
 
                 DWORD val = GetWindowLong (editorWnd, GWL_STYLE);
                 val = (val & ~WS_POPUP) | WS_CHILD;
                 SetWindowLong (editorWnd, GWL_STYLE, val);
-
-                editorComp->setVisible (true);
 #elif JUCE_LINUX
                 editorComp->addToDesktop (0);
-
                 hostWindow = (Window) ptr;
-
                 Window editorWnd = (Window) editorComp->getWindowHandle();
-
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
-
-                editorComp->setVisible (true);
 #else
-                hostWindow = (WindowRef) ptr;
-                firstResize = true;
-
-                SetAutomaticControlDragTrackingEnabledForWindow (hostWindow, true);
-
-                WindowAttributes attributes;
-                GetWindowAttributes (hostWindow, &attributes);
-
-                HIViewRef parentView = 0;
-
-                if ((attributes & kWindowCompositingAttribute) != 0)
-                {
-                    HIViewRef root = HIViewGetRoot (hostWindow);
-                    HIViewFindByID (root, kHIViewWindowContentID, &parentView);
-
-                    if (parentView == 0)
-                        parentView = root;
-                }
-                else
-                {
-                    GetRootControl (hostWindow, (ControlRef*) &parentView);
-
-                    if (parentView == 0)
-                        CreateRootControl (hostWindow, (ControlRef*) &parentView);
-                }
-
-                jassert (parentView != 0); // agh - the host has to provide a compositing window..
-
-                editorComp->setVisible (true);
-                editorComp->addToDesktop (0, (void*) parentView);
+                hostWindow = attachComponentToWindowRef (editorComp, (WindowRef) ptr);
 #endif
+                editorComp->setVisible (true);
 
                 return 1;
             }
@@ -1292,25 +1286,7 @@ public:
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
 #if JUCE_MAC
-                Rect r;
-                GetWindowBounds (hostWindow, kWindowContentRgn, &r);
-
-                if (firstResize)
-                {
-                    diffW = (r.right - r.left) - editorComp->getWidth();
-                    diffH = (r.bottom - r.top) - editorComp->getHeight();
-                    firstResize = false;
-                }
-
-                r.right = r.left + newWidth + diffW;
-                r.bottom = r.top + newHeight + diffH;
-
-                SetWindowBounds (hostWindow, kWindowContentRgn, &r);
-
-                r.bottom -= r.top;
-                r.right -= r.left;
-                r.left = r.top = 0;
-                InvalWindowRect (hostWindow, &r);
+                setNativeHostWindowSize (hostWindow, editorComp, newWidth, newHeight);
 #elif JUCE_LINUX
                 Window root;
                 int x, y;
@@ -1394,7 +1370,6 @@ private:
     VstEvents* outgoingEvents;
     int outgoingEventSize;
     bool isProcessing;
-    bool firstResize;
     bool hasShutdown;
     bool firstProcessCallback;
     int diffW, diffH;
@@ -1452,7 +1427,7 @@ private:
     }
 
 #if JUCE_MAC
-    WindowRef hostWindow;
+    void* hostWindow;
 #elif JUCE_LINUX
     Window hostWindow;
 #else
@@ -1496,8 +1471,6 @@ static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 #if JUCE_MAC && defined (JucePlugin_CFBundleIdentifier)
     juce_setCurrentExecutableFileNameFromBundleId (JucePlugin_CFBundleIdentifier);
 #endif
-
-    MessageManager::getInstance()->setTimeBeforeShowingWaitCursor (0);
 
     try
     {

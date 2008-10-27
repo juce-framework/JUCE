@@ -241,12 +241,9 @@ public:
         and maybe cancel the quit, you'll need to handle this in the systemRequestedQuit()
         method - see that method's help for more info.
 
-        @param  useMaximumForce     if this is true, the process will be forcibly killed
-                                    before leaving the WinMain or main() function, which can
-                                    be useful if threads might have got stuck somehow.
         @see MessageManager, DeletedAtShutdown
     */
-    static void quit (const bool useMaximumForce = false);
+    static void quit();
 
     /** Sets the value that should be returned as the application's exit code when the
         app quits.
@@ -293,7 +290,7 @@ private:
     int appReturnValue;
     bool stillInitialising;
 
-    static int shutdownAppAndClearUp (const bool useMaximumForce);
+    static int shutdownAppAndClearUp();
 };
 
 

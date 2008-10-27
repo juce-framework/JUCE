@@ -44,6 +44,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_Process.h"
 #include "../../../src/juce_core/io/files/juce_File.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
+#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 
 //==============================================================================
 /*
@@ -90,9 +91,9 @@ void juce_setCurrentThreadName (const String& /*name*/) throw()
 {
 }
 
-int Thread::getCurrentThreadId() throw()
+int64 Thread::getCurrentThreadId() throw()
 {
-    return (int) pthread_self();
+    return pthread_self();
 }
 
 /*
@@ -255,17 +256,17 @@ void Process::lowerPrivilege()
 }
 
 #if JUCE_BUILD_GUI_CLASSES
-void* Process::loadDynamicLibrary (const String& name)
+void* PlatformUtilities::loadDynamicLibrary (const String& name)
 {
     return dlopen ((const char*) name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
 }
 
-void Process::freeDynamicLibrary (void* handle)
+void PlatformUtilities::freeDynamicLibrary (void* handle)
 {
     dlclose(handle);
 }
 
-void* Process::getProcedureEntryPoint (void* libraryHandle, const String& procedureName)
+void* PlatformUtilities::getProcedureEntryPoint (void* libraryHandle, const String& procedureName)
 {
     return dlsym (libraryHandle, (const char*) procedureName);
 }

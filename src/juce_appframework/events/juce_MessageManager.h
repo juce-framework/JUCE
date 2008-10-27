@@ -34,10 +34,11 @@
 
 #include "../application/juce_DeletedAtShutdown.h"
 #include "../../juce_core/containers/juce_SortedSet.h"
+#include "../../juce_core/containers/juce_VoidArray.h"
 #include "juce_ActionListenerList.h"
-#include "juce_Timer.h"
 class Thread;
-class InternalTimerThread;
+class Component;
+class MessageManagerLock;
 
 
 //==============================================================================
@@ -51,8 +52,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
     @see Message, MessageListener, MessageManagerLock, JUCEApplication
 */
-class JUCE_API  MessageManager  : private DeletedAtShutdown,
-                                  private Timer
+class JUCE_API  MessageManager  : private DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -60,28 +60,22 @@ public:
     static MessageManager* getInstance() throw();
 
     //==============================================================================
-    /** Synchronously dispatches up to a certain number of messages from the queue.
+    void runDispatchLoop();
+    void stopDispatchLoop();
+    bool hasStopMessageBeenSent() const throw()         { return quitMessagePosted; }
 
-        This will return when the queue becomes empty, or when the given number of
-        messages has been sent.
+    /** Synchronously dispatches messages until a given time has elapsed.
+
+        Returns false if a quit message has been posted, otherwise returns true.
     */
-    void dispatchPendingMessages (int maxNumberOfMessagesToDispatch = 1000);
+    bool runDispatchLoopUntil (int millisecondsToRunFor);
 
-    /** Synchronously sends the next pending message.
-
-        This must only be called by the message-thread.
-
-        @param returnImmediatelyIfNoMessages    if false, it will block indefinitely until a message
-                                                needs dispatching. If true, then if no messages are
-                                                pending, it will return immediately.
-        @param wasAMessageDispatched            if this is non-zero, it will be set to true or false
-                                                depending on whether a message was actually sent or
-                                                not.
-        @returns    false if the thing that's calling it should stop calling - i.e. if the
-                    app is trying to quit.
-    */
-    bool dispatchNextMessage (const bool returnImmediatelyIfNoMessages = false,
-                              bool* const wasAMessageDispatched = 0);
+    //==============================================================================
+    /*int runModalLoop (Component* componentToBeModal);
+    bool makeComponentModal (Component* componentToBeModal);
+    bool isComponentModal (const Component* component) const;
+    Component* getCurrentModalComponent() const;
+    void exitModalLoop (int returnValue);*/
 
     //==============================================================================
     /** Calls a function using the message-thread.
@@ -120,7 +114,7 @@ public:
         (Best to ignore this method unless you really know what you're doing..)
         @see setCurrentMessageThread
     */
-    int getCurrentMessageThread() const throw()             { return messageThreadId; }
+    int64 getCurrentMessageThread() const throw()             { return messageThreadId; }
 
     /** Returns true if the caller thread has currenltly got the message manager locked.
 
@@ -153,39 +147,10 @@ public:
     void deregisterBroadcastListener (ActionListener* listener) throw();
 
     //==============================================================================
-    /** Sets a time-limit for the app to be 'busy' before an hourglass cursor will be shown.
-
-        @param millisecs    how long before the cursor is shown (the default time is 500ms). If the
-                            value is 0 or less, the wait cursor will never be shown (although on the
-                            Mac the system might still decide to show it after a while).
-        @see MouseCursor::showWaitCursor
-    */
-    void setTimeBeforeShowingWaitCursor (const int millisecs) throw();
-
-    /** Returns the time-out before the 'busy' cursor is shown when the app is busy.
-
-        @see setTimeBeforeShowingWaitCursor, MouseCursor::showWaitCursor
-    */
-    int getTimeBeforeShowingWaitCursor() const throw();
-
-    /** Tells the message manager that the system isn't locked-up, even if the message
-        loop isn't active.
-
-        Used internally, this is handy when an OS enters its own modal loop.
-    */
-    static void delayWaitCursor() throw();
-
-    //==============================================================================
-    /** Returns true if JUCEApplication::quit() has been called. */
-    bool hasQuitMessageBeenPosted() const throw();
-
-    //==============================================================================
     /** @internal */
     void deliverMessage (void*);
     /** @internal */
     void deliverBroadcastMessage (const String&);
-    /** @internal */
-    void timerCallback();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -203,28 +168,20 @@ private:
     ActionListenerList* broadcastListeners;
 
     friend class JUCEApplication;
-    bool quitMessagePosted, quitMessageReceived, useMaximumForceWhenQuitting;
+    bool quitMessagePosted, quitMessageReceived;
+    int64 messageThreadId;
 
-    int messageThreadId;
-    int volatile messageCounter, lastMessageCounter, isInMessageDispatcher;
-    bool volatile needToGetRidOfWaitCursor;
-    int volatile timeBeforeWaitCursor;
-    unsigned int lastActivityCheckOkTime;
+    VoidArray modalComponents;
+    static void* exitModalLoopCallback (void*);
 
-    bool runDispatchLoop();
     void postMessageToQueue (Message* const message);
-    void postQuitMessage (const bool useMaximumForce);
 
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
 
-    friend class InternalTimerThread;
-    static void inactivityCheckCallback() throw();
-    void inactivityCheckCallbackInt() throw();
-
     friend class MessageManagerLock;
     CriticalSection messageDispatchLock;
-    int currentLockingThreadId;
+    int64 currentLockingThreadId;
 
     MessageManager (const MessageManager&);
     const MessageManager& operator= (const MessageManager&);
@@ -332,7 +289,7 @@ public:
 
 
 private:
-    int lastLockingThreadId;
+    int64 lastLockingThreadId;
     bool locked;
 };
 

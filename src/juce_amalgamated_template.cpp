@@ -37,44 +37,22 @@
 
 */
 
+#ifdef __JUCE_JUCEHEADER__
+ /* When you add the amalgamated cpp file to your project, you mustn't include it in
+    a file where you've already included juce.h - just put it inside a file on its own,
+    possibly with your config flags preceding it, but don't include anything else. */
+ #error
+#endif
+
 #include "../juce_Config.h"
 
 //==============================================================================
 #ifdef _WIN32
- #include "../build/win32/platform_specific_code/win32_headers.h"
- #include <winsock2.h>
- #include <mapi.h>
- #include <ctime>
-
- #if JUCE_QUICKTIME
-  #include <Movies.h>
-  #include <QTML.h>
-  #include <QuickTimeComponents.h>
-  #include <MediaHandlers.h>
-  #include <ImageCodec.h>
-  #undef TARGET_OS_MAC  // quicktime sets these, but they confuse some of the 3rd party libs
-  #undef MACOS
- #endif
-
+ #include "../build/win32/platform_specific_code/juce_win32_NativeIncludes.h"
 #elif defined (LINUX)
-
+ //
 #else
- #include <Carbon/Carbon.h>
- #include <CoreAudio/HostTime.h>
- #define __Point__
- #include <IOKit/IOKitLib.h>
- #include <IOKit/graphics/IOGraphicsTypes.h>
- #include <IOKit/network/IOEthernetInterface.h>
- #include <IOKit/network/IONetworkInterface.h>
- #include <IOKit/network/IOEthernetController.h>
- #include <IOKit/IOCFPlugIn.h>
- #include <IOKit/hid/IOHIDLib.h>
- #include <IOKit/hid/IOHIDKeys.h>
-
- #include <sys/filedesc.h>
- #include <sys/time.h>
- #include <sys/proc.h>
- #include <Kernel/libkern/OSTypes.h>
+ #include "../build/macosx/platform_specific_code/juce_mac_NativeIncludes.h"
 #endif
 
 //==============================================================================
@@ -181,7 +159,7 @@
 #include "juce_appframework/audio/plugins/juce_PluginDirectoryScanner.cpp"
 #include "juce_appframework/audio/plugins/juce_PluginListComponent.cpp"
 #include "juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.cpp"
-#include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.cpp"
+#include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.mm"
 #include "juce_appframework/audio/processors/juce_AudioProcessor.cpp"
 #include "juce_appframework/audio/processors/juce_AudioProcessorEditor.cpp"
 #include "juce_appframework/audio/processors/juce_AudioProcessorGraph.cpp"
@@ -287,7 +265,6 @@
 #include "juce_appframework/gui/components/special/juce_MidiKeyboardComponent.cpp"
 #include "juce_appframework/gui/components/special/juce_OpenGLComponent.cpp"
 #include "juce_appframework/gui/components/special/juce_PreferencesPanel.cpp"
-#include "juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.cpp"
 #include "juce_appframework/gui/components/special/juce_SystemTrayIconComponent.cpp"
 #include "juce_appframework/gui/components/windows/juce_AlertWindow.cpp"
 #include "juce_appframework/gui/components/windows/juce_ComponentPeer.cpp"
@@ -358,26 +335,7 @@
 //==============================================================================
 #if JUCE_WIN32
 
-#include "../build/win32/platform_specific_code/juce_win32_Files.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_Network.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_Misc.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_PlatformUtils.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_SystemStats.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_Threads.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_DynamicLibraryLoader.cpp"
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "../build/win32/platform_specific_code/juce_win32_ASIO.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_AudioCDReader.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_DirectSound.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_FileChooser.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_Fonts.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_Messaging.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_Midi.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_WebBrowserComponent.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_Windowing.cpp"
-#endif
-
+#include "../build/win32/platform_specific_code/juce_win32_NativeCode.cpp"
 #include "../build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
 
 #endif
@@ -407,21 +365,7 @@
 //==============================================================================
 #if JUCE_MAC
 
-#include "../build/macosx/platform_specific_code/juce_mac_Files.cpp"
+#include "../build/macosx/platform_specific_code/juce_mac_NativeCode.mm"
 #include "../build/macosx/platform_specific_code/juce_mac_NamedPipe.cpp"
-#include "../build/macosx/platform_specific_code/juce_mac_SystemStats.mm"
-#include "../build/macosx/platform_specific_code/juce_mac_Threads.cpp"
-#include "../build/macosx/platform_specific_code/juce_mac_Network.mm"
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "../build/macosx/platform_specific_code/juce_mac_AudioCDBurner.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_CoreAudio.cpp"
- #include "../build/macosx/platform_specific_code/juce_mac_CoreMidi.cpp"
- #include "../build/macosx/platform_specific_code/juce_mac_FileChooser.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_Fonts.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_Messaging.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_WebBrowserComponent.mm"
- #include "../build/macosx/platform_specific_code/juce_mac_Windowing.mm"
-#endif
 
 #endif

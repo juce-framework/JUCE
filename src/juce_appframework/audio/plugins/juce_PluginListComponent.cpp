@@ -270,7 +270,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
 
     aw.enterModalState();
 
-    MessageManager::getInstance()->dispatchPendingMessages();
+    MessageManager::getInstance()->runDispatchLoopUntil (300);
 
     PluginDirectoryScanner scanner (list, *format, path, true, deadMansPedalFile);
 
@@ -279,7 +279,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
         aw.setMessage (TRANS("Testing:\n\n")
                          + scanner.getNextPluginFileThatWillBeScanned().getFileName());
 
-        MessageManager::getInstance()->dispatchPendingMessages (500);
+        MessageManager::getInstance()->runDispatchLoopUntil (20);
 
         if (! scanner.scanNextFile (true))
             break;

@@ -93,7 +93,7 @@
 #ifdef _MSC_VER
  #include "../../../../../juce.h"
 #else
- #include "../../../../../juce_amalgamated.h"
+ #include "../../../../../juce.h"
 #endif
 
 #include "../../juce_IncludeCharacteristics.h"
@@ -112,6 +112,9 @@
  #if ! JucePlugin_EditorRequiresKeyboardFocus
   extern void JUCE_CALLTYPE passFocusToHostWindow (void* hostWindow);
  #endif
+#else
+  extern void* attachSubWindow (void* hostWindowRef, JUCE_NAMESPACE::Component* comp);
+  extern void removeSubWindow (void* nsWindow, JUCE_NAMESPACE::Component* comp);
 #endif
 
 const int midiBufferSize = 1024;
@@ -150,10 +153,10 @@ class JucePlugInProcess  : public CEffectProcessMIDI,
 public:
     //==============================================================================
     JucePlugInProcess()
-        : channels (0),
-          prepared (false),
-          midiBufferNode (0),
+        : midiBufferNode (0),
           midiTransport (0),
+          channels (0),
+          prepared (false),
           sampleRate (44100.0)
     {
         juceFilter = createPluginFilter();
@@ -192,8 +195,8 @@ public:
                           JucePlugInProcess* const process_)
             : filter (filter_),
               process (process_),
-              editorComp (0),
-              wrapper (0)
+              wrapper (0),
+              editorComp (0)
         {
             // setting the size in here crashes PT for some reason, so keep it simple..
         }
@@ -261,35 +264,21 @@ public:
 
         void DrawContents (Rect*)
         {
+#if JUCE_WIN32
             if (wrapper != 0)
             {
                 ComponentPeer* const peer = wrapper->getPeer();
 
                 if (peer != 0)
                 {
-#if JUCE_WIN32
                     // (seems to be required in PT6.4, but not in 7.x)
                     peer->repaint (0, 0, wrapper->getWidth(), wrapper->getHeight());
-
-#elif JUCE_PPC
-                    // This crap is needed because if you resize a window, PT doesn't
-                    // update its clip region, so only part of your new window gets drawn.
-                    // This overrides the clipping region that's being passed into the Draw
-                    // method.
-                    Rect visible;
-                    GetVisibleRect (&visible);
-
-                    RestoreFocus();
-                    Focus (&visible);
-#endif
-                    peer->performAnyPendingRepaintsNow();
                 }
             }
+#endif
         }
 
-        void DrawBackground (Rect* r)
-        {
-        }
+        void DrawBackground (Rect*)  {}
 
         //==============================================================================
     private:
@@ -300,8 +289,11 @@ public:
 
         void deleteEditorComp()
         {
-            if (editorComp != 0)
+            if (editorComp != 0 || wrapper != 0)
             {
+#if JUCE_MAC
+                const ScopedAutoReleasePool pool;
+#endif
                 PopupMenu::dismissAllActiveMenus();
 
                 JUCE_NAMESPACE::Component* const modalComponent = JUCE_NAMESPACE::Component::getCurrentlyModalComponent();
@@ -309,6 +301,7 @@ public:
                     modalComponent->exitModalState (0);
 
                 filter->editorBeingDeleted (editorComp);
+
                 deleteAndZero (editorComp);
                 deleteAndZero (wrapper);
             }
@@ -317,26 +310,23 @@ public:
         //==============================================================================
         // A component to hold the AudioProcessorEditor, and cope with some housekeeping
         // chores when it changes or repaints.
-        class EditorCompWrapper  : public JUCE_NAMESPACE::Component,
-#if JUCE_MAC
-                                   public Timer
-#else
-                                   public FocusChangeListener
+        class EditorCompWrapper  : public JUCE_NAMESPACE::Component
+#if ! JUCE_MAC
+                                   , public FocusChangeListener
 #endif
         {
         public:
             EditorCompWrapper (void* const hostWindow_,
-                               AudioProcessorEditor* const editorComp,
+                               Component* const editorComp,
                                JuceCustomUIView* const owner_)
                 : hostWindow (hostWindow_),
                   owner (owner_),
                   titleW (0),
                   titleH (0)
-#if JUCE_MAC
-                  , forcedRepaintTimer (0)
-#endif
             {
-#if ! JucePlugin_EditorRequiresKeyboardFocus
+#if JucePlugin_EditorRequiresKeyboardFocus
+                setWantsKeyboardFocus (true);
+#else
                 setWantsKeyboardFocus (false);
 #endif
                 setOpaque (true);
@@ -347,67 +337,10 @@ public:
 
 #if JUCE_WIN32
                 attachSubWindow (hostWindow, titleW, titleH, this);
-                setVisible (true);
 #else
-                SetAutomaticControlDragTrackingEnabledForWindow ((WindowRef) hostWindow_, true);
-
-                WindowAttributes attributes;
-                GetWindowAttributes ((WindowRef) hostWindow_, &attributes);
-
-                parentView = 0;
-
-                if ((attributes & kWindowCompositingAttribute) != 0)
-                {
-                    HIViewRef root = HIViewGetRoot ((WindowRef) hostWindow_);
-                    HIViewFindByID (root, kHIViewWindowContentID, &parentView);
-
-                    if (parentView == 0)
-                        parentView = root;
-                }
-                else
-                {
-                    GetRootControl ((WindowRef) hostWindow_, (ControlRef*) &parentView);
-
-                    if (parentView == 0)
-                        CreateRootControl ((WindowRef) hostWindow_, (ControlRef*) &parentView);
-                }
-
-                jassert (parentView != 0);
-                Rect clientRect;
-                GetWindowBounds ((WindowRef) hostWindow, kWindowContentRgn, &clientRect);
-
-                titleW = clientRect.right - clientRect.left;
-                titleH = jmax (0, (clientRect.bottom - clientRect.top) - getHeight());
-                setTopLeftPosition (0, 0);
-
-                HIViewSetNeedsDisplay (parentView, true);
-
-                setVisible (true);
-                addToDesktop (ComponentPeer::windowRepaintedExplictly, (void*) parentView);
-
-                HIViewRef pluginView = HIViewGetFirstSubview (parentView);
-
-  #if ! JucePlugin_EditorRequiresKeyboardFocus
-                HIViewSetActivated (pluginView, false);
-  #endif
-                /* This is a convoluted and desperate workaround for a Digi (or maybe Apple)
-                   layout bug. Until the parent control gets some kind of mouse-move
-                   event, then our plugin's HIView remains stuck at (0, 0) in the
-                   window (despite drawing correctly), which blocks mouse events from
-                   getting to the widgets above it.
-
-                   After days of frustration the only hack I can find that works
-                   is to use this arcane function to redirect mouse events to
-                   the parent, while running a timer to spot the moment when our
-                   view mysteriously snaps back to its correct location.
-
-                   If anyone at Digi or Apple is reading this and they realise that it's
-                   their fault, could they please give me back the week of my life that
-                   they made me waste on this rubbish. Thankyou.
-                */
-                SetControlSupervisor (pluginView, parentView);
-                startTimer (150);
+                nsWindow = attachSubWindow (hostWindow, this);
 #endif
+                setVisible (true);
 
 #if JUCE_WIN32 && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().addFocusChangeListener (this);
@@ -421,16 +354,12 @@ public:
 #endif
 
 #if JUCE_MAC
-                delete forcedRepaintTimer;
+                removeSubWindow (nsWindow, this);
 #endif
             }
 
             void paint (Graphics&)
             {
-#if JUCE_MAC
-                if (forcedRepaintTimer != 0)
-                    forcedRepaintTimer->stopTimer();
-#endif
             }
 
             void resized()
@@ -442,38 +371,6 @@ public:
 
                 repaint();
             }
-
-#if JUCE_MAC
-            void timerCallback()
-            {
-                // Wait for the moment when PT deigns to allow our view to
-                // take up its actual location (see rant above)
-                HIViewRef content = 0;
-                HIViewFindByID (HIViewGetRoot ((WindowRef) hostWindow), kHIViewWindowContentID, &content);
-                HIPoint p = { 0.0f, 0.0f };
-
-                HIViewRef v = HIViewGetFirstSubview (parentView);
-                HIViewConvertPoint (&p, v, content);
-
-                if (p.y > 12)
-                {
-                    if (p.x != titleW || p.y != titleH)
-                    {
-                        GrafPtr oldport;
-                        GetPort (&oldport);
-                        SetPort (owner->GetViewPort());
-                        SetOrigin (-titleW, -titleH);
-                        SetPort (oldport);
-                    }
-
-                    HIViewRef v = HIViewGetFirstSubview (parentView);
-                    SetControlSupervisor (v, 0);
-                    stopTimer();
-
-                    forcedRepaintTimer = new RepaintCheckTimer (*this);
-                }
-            }
-#endif
 
 #if JUCE_WIN32
             void globalFocusChanged (JUCE_NAMESPACE::Component*)
@@ -492,72 +389,22 @@ public:
 
 #if JUCE_WIN32
                 resizeHostWindow (hostWindow, titleW, titleH, this);
-                owner->updateSize();
-#else
-                Rect r;
-                GetWindowBounds ((WindowRef) hostWindow, kWindowContentRgn, &r);
-
-                HIRect p;
-                zerostruct (p);
-                HIViewConvertRect (&p, parentView, 0); // find the X position of our view in case there's space to the left of it
-
-                r.right = r.left + jmax (titleW, ((int) p.origin.x) + getWidth());
-                r.bottom = r.top + getHeight() + titleH;
-
-                SetWindowBounds ((WindowRef) hostWindow, kWindowContentRgn, &r);
-
-                owner->updateSize();
-                owner->Invalidate();
 #endif
+                owner->updateSize();
+            }
+
+            void userTriedToCloseWindow()
+            {
             }
 
             //==============================================================================
             juce_UseDebuggingNewOperator
 
-#if JUCE_MAC
-        protected:
-            void internalRepaint (int x, int y, int w, int h)
-            {
-                Component::internalRepaint (x, y, w, h);
-                owner->Invalidate();
-
-                if (forcedRepaintTimer != 0 && ! forcedRepaintTimer->isTimerRunning())
-                    forcedRepaintTimer->startTimer (1000 / 25);
-            }
-
-            HIViewRef parentView;
-#endif
-
         private:
             void* const hostWindow;
+            void* nsWindow;
             JuceCustomUIView* const owner;
             int titleW, titleH;
-
-#if JUCE_MAC
-            // if PT makes us wait too long for a redraw after we've
-            // asked for one, this should kick in and force one to happen
-            class RepaintCheckTimer  : public Timer
-            {
-            public:
-                RepaintCheckTimer (EditorCompWrapper& owner_)
-                    : owner (owner_)
-                {
-                }
-
-                void timerCallback()
-                {
-                    stopTimer();
-                    ComponentPeer* const peer = owner.getPeer();
-
-                    if (peer != 0)
-                        peer->performAnyPendingRepaintsNow();
-                }
-
-                EditorCompWrapper& owner;
-            };
-
-            RepaintCheckTimer* forcedRepaintTimer;
-#endif
         };
     };
 
@@ -705,6 +552,7 @@ protected:
 
 #if defined (JUCE_DEBUG) || JUCE_LOG_ASSERTIONS
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
+        (void) numMidiEventsComingIn;
 #endif
 
         {
@@ -744,7 +592,7 @@ protected:
         if (! midiEvents.isEmpty())
         {
 #if JucePlugin_ProducesMidiOutput
-            const uint8* midiEventData;
+            const juce::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 

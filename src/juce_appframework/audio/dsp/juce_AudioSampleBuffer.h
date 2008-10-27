@@ -34,7 +34,6 @@
 
 class AudioFormatReader;
 class AudioFormatWriter;
-const int maxNumAudioSampleBufferChannels = 32;
 
 
 //==============================================================================
@@ -371,7 +370,7 @@ public:
 
 private:
     int numChannels, size, allocatedBytes;
-    float* channels [maxNumAudioSampleBufferChannels + 1];
+    float** channels;
     float* allocatedData;
 };
 

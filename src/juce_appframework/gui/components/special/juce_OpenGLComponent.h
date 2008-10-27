@@ -328,6 +328,13 @@ public:
     /** @internal */
     void paint (Graphics& g);
 
+    /** Returns the native handle of an embedded heavyweight window, if there is one.
+
+        E.g. On windows, this will return the HWND of the sub-window containing
+        the opengl context, on the mac it'll be the NSOpenGLView.
+    */
+    void* getNativeWindowHandle() const;
+
     juce_UseDebuggingNewOperator
 
 private:

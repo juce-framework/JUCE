@@ -7,9 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		845FAE4C0A5C09FA008C94D8 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */; };
+		846EC67F0EB603BE0080CCFF /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EC67E0EB603BE0080CCFF /* QuickTime.framework */; };
 		84BACBD20987847C0073300C /* juce_VstWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84BACBD10987847C0073300C /* juce_VstWrapper.cpp */; };
-		84C0A3530DE2D1FD00606895 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3450DE2D1FD00606895 /* AGL.framework */; };
 		84C0A3540DE2D1FD00606895 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3460DE2D1FD00606895 /* ApplicationServices.framework */; };
 		84C0A3550DE2D1FD00606895 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3470DE2D1FD00606895 /* AudioUnit.framework */; };
 		84C0A3560DE2D1FD00606895 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3480DE2D1FD00606895 /* Carbon.framework */; };
@@ -21,20 +20,22 @@
 		84C0A35C0DE2D1FD00606895 /* DiscRecording.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A34E0DE2D1FD00606895 /* DiscRecording.framework */; };
 		84C0A35D0DE2D1FD00606895 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A34F0DE2D1FD00606895 /* IOKit.framework */; };
 		84C0A35E0DE2D1FD00606895 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3500DE2D1FD00606895 /* OpenGL.framework */; };
-		84C0A35F0DE2D1FD00606895 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3510DE2D1FD00606895 /* QuickTime.framework */; };
 		84C0A3600DE2D1FD00606895 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C0A3520DE2D1FD00606895 /* WebKit.framework */; };
 		84C0A3620DE2D24B00606895 /* juce_amalgamated.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84C0A3610DE2D24B00606895 /* juce_amalgamated.mm */; };
+		84E01FC70E9136C6003E41AF /* juce_VstWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84E01FC60E9136C6003E41AF /* juce_VstWrapper.mm */; };
+		84E0200D0E923F75003E41AF /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E0200C0E923F75003E41AF /* QTKit.framework */; };
 		84E1AE51089EBAAA00E85E4F /* DemoEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE4D089EBAAA00E85E4F /* DemoEditorComponent.cpp */; };
 		84E1AE52089EBAAA00E85E4F /* DemoJuceFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E1AE4F089EBAAA00E85E4F /* DemoJuceFilter.cpp */; };
 		84E1AF42089EBFD900E85E4F /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84E1AF41089EBFD900E85E4F /* Info.plist */; };
-		84F5CF040B1B66B100A2E279 /* How to use this framework.txt in Resources */ = {isa = PBXBuildFile; fileRef = 84F5CF030B1B66B100A2E279 /* How to use this framework.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		84551AA009BDB8F3009C9F3E /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
 		845FAE4B0A5C09FA008C94D8 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
+		846EC67E0EB603BE0080CCFF /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
+		846EC6820EB603FF0080CCFF /* includes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = includes.h; path = ../../src/includes.h; sourceTree = SOURCE_ROOT; };
 		84BACBD10987847C0073300C /* juce_VstWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_VstWrapper.cpp; path = ../../../wrapper/formats/VST/juce_VstWrapper.cpp; sourceTree = SOURCE_ROOT; };
-		84C0A3450DE2D1FD00606895 /* AGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AGL.framework; path = /System/Library/Frameworks/AGL.framework; sourceTree = "<absolute>"; };
+		84BE92BB0EA61E590079073F /* MacExportedSymbols.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = MacExportedSymbols.txt; path = ../../../wrapper/formats/VST/MacExportedSymbols.txt; sourceTree = SOURCE_ROOT; };
 		84C0A3460DE2D1FD00606895 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		84C0A3470DE2D1FD00606895 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		84C0A3480DE2D1FD00606895 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -46,15 +47,16 @@
 		84C0A34E0DE2D1FD00606895 /* DiscRecording.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiscRecording.framework; path = /System/Library/Frameworks/DiscRecording.framework; sourceTree = "<absolute>"; };
 		84C0A34F0DE2D1FD00606895 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		84C0A3500DE2D1FD00606895 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
-		84C0A3510DE2D1FD00606895 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		84C0A3520DE2D1FD00606895 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		84C0A3610DE2D24B00606895 /* juce_amalgamated.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_amalgamated.mm; path = ../../../../../juce_amalgamated.mm; sourceTree = SOURCE_ROOT; };
+		84E01FC60E9136C6003E41AF /* juce_VstWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; name = juce_VstWrapper.mm; path = ../../../wrapper/formats/VST/juce_VstWrapper.mm; sourceTree = SOURCE_ROOT; };
+		84E0200C0E923F75003E41AF /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		84E1AE47089EBA6A00E85E4F /* JuceVST.vst */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuceVST.vst; sourceTree = BUILT_PRODUCTS_DIR; };
 		84E1AE4D089EBAAA00E85E4F /* DemoEditorComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DemoEditorComponent.cpp; path = ../../src/DemoEditorComponent.cpp; sourceTree = SOURCE_ROOT; };
 		84E1AE4E089EBAAA00E85E4F /* DemoEditorComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DemoEditorComponent.h; path = ../../src/DemoEditorComponent.h; sourceTree = SOURCE_ROOT; };
 		84E1AE4F089EBAAA00E85E4F /* DemoJuceFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DemoJuceFilter.cpp; path = ../../src/DemoJuceFilter.cpp; sourceTree = SOURCE_ROOT; };
 		84E1AE50089EBAAA00E85E4F /* DemoJuceFilter.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = DemoJuceFilter.h; path = ../../src/DemoJuceFilter.h; sourceTree = SOURCE_ROOT; };
-		84E1AF41089EBFD900E85E4F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
+		84E1AF41089EBFD900E85E4F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
 		84F5CF030B1B66B100A2E279 /* How to use this framework.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "How to use this framework.txt"; path = "../../../How to use this framework.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -63,7 +65,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84C0A3530DE2D1FD00606895 /* AGL.framework in Frameworks */,
 				84C0A3540DE2D1FD00606895 /* ApplicationServices.framework in Frameworks */,
 				84C0A3550DE2D1FD00606895 /* AudioUnit.framework in Frameworks */,
 				84C0A3560DE2D1FD00606895 /* Carbon.framework in Frameworks */,
@@ -75,8 +76,9 @@
 				84C0A35C0DE2D1FD00606895 /* DiscRecording.framework in Frameworks */,
 				84C0A35D0DE2D1FD00606895 /* IOKit.framework in Frameworks */,
 				84C0A35E0DE2D1FD00606895 /* OpenGL.framework in Frameworks */,
-				84C0A35F0DE2D1FD00606895 /* QuickTime.framework in Frameworks */,
 				84C0A3600DE2D1FD00606895 /* WebKit.framework in Frameworks */,
+				84E0200D0E923F75003E41AF /* QTKit.framework in Frameworks */,
+				846EC67F0EB603BE0080CCFF /* QuickTime.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,7 +100,6 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				84C0A3450DE2D1FD00606895 /* AGL.framework */,
 				84C0A3460DE2D1FD00606895 /* ApplicationServices.framework */,
 				84C0A3470DE2D1FD00606895 /* AudioUnit.framework */,
 				84C0A3480DE2D1FD00606895 /* Carbon.framework */,
@@ -109,8 +110,9 @@
 				84C0A34D0DE2D1FD00606895 /* CoreServices.framework */,
 				84C0A34E0DE2D1FD00606895 /* DiscRecording.framework */,
 				84C0A34F0DE2D1FD00606895 /* IOKit.framework */,
+				84E0200C0E923F75003E41AF /* QTKit.framework */,
+				846EC67E0EB603BE0080CCFF /* QuickTime.framework */,
 				84C0A3500DE2D1FD00606895 /* OpenGL.framework */,
-				84C0A3510DE2D1FD00606895 /* QuickTime.framework */,
 				84C0A3520DE2D1FD00606895 /* WebKit.framework */,
 			);
 			name = "External Frameworks and Libraries";
@@ -151,6 +153,7 @@
 				84E1AE50089EBAAA00E85E4F /* DemoJuceFilter.h */,
 				84551AA009BDB8F3009C9F3E /* JucePluginCharacteristics.h */,
 				84C0A3610DE2D24B00606895 /* juce_amalgamated.mm */,
+				846EC6820EB603FF0080CCFF /* includes.h */,
 			);
 			name = filter;
 			sourceTree = "<group>";
@@ -158,7 +161,9 @@
 		84E1AE53089EBACA00E85E4F /* wrapper code */ = {
 			isa = PBXGroup;
 			children = (
+				84E01FC60E9136C6003E41AF /* juce_VstWrapper.mm */,
 				84BACBD10987847C0073300C /* juce_VstWrapper.cpp */,
+				84BE92BB0EA61E590079073F /* MacExportedSymbols.txt */,
 			);
 			name = "wrapper code";
 			sourceTree = "<group>";
@@ -206,8 +211,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				84E1AF42089EBFD900E85E4F /* Info.plist in Resources */,
-				845FAE4C0A5C09FA008C94D8 /* juce.xcconfig in Resources */,
-				84F5CF040B1B66B100A2E279 /* How to use this framework.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,6 +225,7 @@
 				84E1AE52089EBAAA00E85E4F /* DemoJuceFilter.cpp in Sources */,
 				84BACBD20987847C0073300C /* juce_VstWrapper.cpp in Sources */,
 				84C0A3620DE2D24B00606895 /* juce_amalgamated.mm in Sources */,
+				84E01FC70E9136C6003E41AF /* juce_VstWrapper.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,12 +261,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				EXPORTED_SYMBOLS_FILE = ../../../wrapper/formats/VST/MacExportedSymbols.txt;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = info.plist;
 				INFOPLIST_PREPROCESS = YES;
+				PRELINK_LIBS = libjucedebug;
 				PRODUCT_NAME = JuceVST;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				SYMROOT = "$(HOME)/Library/Audio/Plug-Ins/VST";
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -277,6 +284,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				EXPORTED_SYMBOLS_FILE = ../../../wrapper/formats/VST/MacExportedSymbols.txt;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;

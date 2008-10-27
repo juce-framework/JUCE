@@ -29,55 +29,11 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_ASIO
+
 #undef WINDOWS
-
-#if JUCE_ASIO
-
-//==============================================================================
-/*
-    This is very frustrating - we only need to use a handful of definitions from
-    a couple of the header files in Steinberg's ASIO SDK, and it'd be easy to copy
-    about 30 lines of code into this cpp file to create a fully stand-alone ASIO
-    implementation...
-
-    ..unfortunately that would break Steinberg's license agreement for use of
-    their SDK, so I'm not allowed to do this.
-
-    This means that anyone who wants to use JUCE's ASIO abilities will have to:
-
-    1) Agree to Steinberg's licensing terms and download the ASIO SDK
-        (see www.steinberg.net/Steinberg/Developers.asp).
-
-    2) Rebuild the whole of JUCE, setting the global definition JUCE_ASIO (you
-       can un-comment the "#define JUCE_ASIO" line in juce_Config.h
-       if you prefer). Make sure that your header search path will find the
-       iasiodrv.h file that comes with the SDK. (Only about 2-3 of the SDK header
-       files are actually needed - so to simplify things, you could just copy
-       these into your JUCE directory).
-*/
-#include "iasiodrv.h"   // if you're compiling and this line causes an error because
-                        // you don't have the ASIO SDK installed, you can disable ASIO
-                        // support by commenting-out the "#define JUCE_ASIO" line in
-                        // juce_Config.h
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
-#include "../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.h"
-#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
-#include "../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_appframework/events/juce_MessageManager.h"
-#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
-#include "../../../src/juce_appframework/gui/components/controls/juce_ListBox.h"
-#include "../../../src/juce_core/text/juce_LocalisedStrings.h"
-
 
 //==============================================================================
 // #define ASIO_DEBUGGING
@@ -1806,7 +1762,7 @@ public:
 
 #if JUCE_DEBUG
         if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase (T("digidesign")))
-            return 1; // (the digi m-box driver crashes the app when you run 
+            return 1; // (the digi m-box driver crashes the app when you run
                       // it in the debugger, which can be a bit annoying)
 #endif
 
@@ -1974,7 +1930,7 @@ AudioIODeviceType* juce_createASIOAudioIODeviceType()
     return new ASIOAudioIODeviceType();
 }
 
-AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name, 
+AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name,
                                                     void* guid)
 {
     const int freeSlot = ASIOAudioIODeviceType::findFreeSlot();
@@ -1984,9 +1940,6 @@ AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name,
 
     return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot);
 }
-
-
-END_JUCE_NAMESPACE
 
 #undef log
 

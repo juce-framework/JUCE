@@ -111,6 +111,7 @@ private:
     void timerCallback();
 
     void showFor (Component* const c);
+    void hide();
 
     TooltipWindow (const TooltipWindow&);
     const TooltipWindow& operator= (const TooltipWindow&);

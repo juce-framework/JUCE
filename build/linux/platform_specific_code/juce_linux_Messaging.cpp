@@ -157,7 +157,7 @@ static void sig_handler (int sig)
 void MessageManager::doPlatformSpecificInitialisation()
 {
     // Initialise xlib for multiple thread support
-	static bool initThreadCalled = false;
+    static bool initThreadCalled = false;
 
     if (! initThreadCalled)
     {
@@ -168,10 +168,10 @@ void MessageManager::doPlatformSpecificInitialisation()
 
             if (juce_isRunningAsApplication())
                 Process::terminate();
-           
+
             return;
         }
- 
+
         initThreadCalled = true;
     }
 
@@ -212,7 +212,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
         if (juce_isRunningAsApplication())
             Process::terminate();
-       
+
         return;
     }
 
@@ -247,11 +247,11 @@ void MessageManager::doPlatformSpecificShutdown()
     {
         XDestroyWindow (display, juce_messageWindowHandle);
         XCloseDisplay (display);
-       
+
         // reset pointers
         juce_messageWindowHandle = 0;
         display = 0;
-       
+
         // Restore original error handlers
         XSetIOErrorHandler (oldIOErrorHandler);
         oldIOErrorHandler = 0;
@@ -350,7 +350,7 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 
         if (juce_isRunningAsApplication())
             Process::terminate();
-       
+
         return false;
     }
 

@@ -29,23 +29,9 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
-
-#include "win32_headers.h"
-#include <float.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-#endif
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -219,4 +205,11 @@ void PlatformUtilities::fpuReset()
 #endif
 }
 
-END_JUCE_NAMESPACE
+//==============================================================================
+void PlatformUtilities::beep()
+{
+    MessageBeep (MB_OK);
+}
+
+
+#endif

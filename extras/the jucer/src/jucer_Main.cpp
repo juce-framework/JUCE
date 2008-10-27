@@ -83,7 +83,7 @@ public:
 
             StoredSettings::deleteInstance();
 
-            quit (false);
+            quit();
         }
     }
 

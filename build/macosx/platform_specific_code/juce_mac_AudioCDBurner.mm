@@ -29,21 +29,13 @@
   ==============================================================================
 */
 
-#include "juce_mac_NativeHeaders.h"
-
-#if JUCE_USE_CDBURNER
-
-#import <DiscRecording/DiscRecording.h>
-
-BEGIN_JUCE_NAMESPACE
- #include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
- #include "../../../src/juce_appframework/audio/audio_sources/juce_AudioSource.h"
- #include "../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.h"
- #include "../../../src/juce_core/threads/juce_Thread.h"
-END_JUCE_NAMESPACE
-
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_USE_CDBURNER
 
 //==============================================================================
+END_JUCE_NAMESPACE
+
 @interface OpenDiskDevice   : NSObject
 {
     DRDevice* device;
@@ -249,18 +241,18 @@ NSLog ([[burn status] description]);
 {
 }
 
-- (BOOL) cleanupTrackAfterVerification:(DRTrack*)track
+- (BOOL) cleanupTrackAfterVerification: (DRTrack*) track
 {
     return true;
 }
 
-- (uint64_t) estimateLengthOfTrack:(DRTrack*)track
+- (uint64_t) estimateLengthOfTrack: (DRTrack*) track
 {
     return lengthInFrames;
 }
 
-- (BOOL) prepareTrack:(DRTrack*)track forBurn:(DRBurn*)burn 
-         toMedia:(NSDictionary*)mediaInfo
+- (BOOL) prepareTrack: (DRTrack*) track forBurn: (DRBurn*) burn 
+         toMedia: (NSDictionary*) mediaInfo
 {
     if (source != 0)
         source->prepareToPlay (44100 / 75, 44100);
@@ -269,7 +261,7 @@ NSLog ([[burn status] description]);
     return true;
 }
 
-- (BOOL) prepareTrackForVerification:(DRTrack*)track
+- (BOOL) prepareTrackForVerification: (DRTrack*) track
 {
     if (source != 0)
         source->prepareToPlay (44100 / 75, 44100);
@@ -277,9 +269,9 @@ NSLog ([[burn status] description]);
     return true;
 }
 
-- (uint32_t) produceDataForTrack:(DRTrack*)track intoBuffer:(char*)buffer 
-        length:(uint32_t)bufferLength atAddress:(uint64_t)address 
-        blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags
+- (uint32_t) produceDataForTrack: (DRTrack*) track intoBuffer: (char*) buffer 
+        length: (uint32_t) bufferLength atAddress: (uint64_t) address 
+        blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
     if (source != 0)
     {
@@ -310,18 +302,18 @@ NSLog ([[burn status] description]);
     return 0;
 }
 
-- (uint32_t) producePreGapForTrack:(DRTrack*)track 
-        intoBuffer:(char*)buffer length:(uint32_t)bufferLength 
-        atAddress:(uint64_t)address blockSize:(uint32_t)blockSize 
-        ioFlags:(uint32_t*)flags
+- (uint32_t) producePreGapForTrack: (DRTrack*) track 
+        intoBuffer: (char*) buffer length: (uint32_t) bufferLength 
+        atAddress: (uint64_t) address blockSize: (uint32_t) blockSize 
+        ioFlags: (uint32_t*) flags
 {
     zeromem (buffer, bufferLength);
     return bufferLength;
 }
 
-- (BOOL) verifyDataForTrack:(DRTrack*)track inBuffer:(const char*)buffer 
-         length:(uint32_t)bufferLength atAddress:(uint64_t)address 
-         blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags
+- (BOOL) verifyDataForTrack: (DRTrack*) track inBuffer: (const char*) buffer 
+         length: (uint32_t) bufferLength atAddress: (uint64_t) address 
+         blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
     return true;
 }
@@ -335,7 +327,6 @@ BEGIN_JUCE_NAMESPACE
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
     : internal (0)
 {
-    const AutoPool pool;
     OpenDiskDevice* dev = [[OpenDiskDevice alloc] initWithDevice: [[DRDevice devices] objectAtIndex: deviceIndex]];
 
     internal = (void*) dev;
@@ -343,7 +334,6 @@ AudioCDBurner::AudioCDBurner (const int deviceIndex)
 
 AudioCDBurner::~AudioCDBurner()
 {
-    const AutoPool pool;
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
 
     if (dev != 0)
@@ -352,7 +342,6 @@ AudioCDBurner::~AudioCDBurner()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    const AutoPool pool;
     AudioCDBurner* b = new AudioCDBurner (deviceIndex);
 
     if (b->internal == 0)
@@ -384,7 +373,6 @@ static NSArray* findDiskBurnerDevices()
 
 const StringArray AudioCDBurner::findAvailableDevices()
 {
-    const AutoPool pool;
     NSArray* names = findDiskBurnerDevices();
     StringArray s;
 
@@ -410,7 +398,6 @@ int AudioCDBurner::getNumAvailableAudioBlocks() const
 
 bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 {
-    const AutoPool pool;
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
 
     if (dev != 0)
@@ -426,14 +413,13 @@ const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressLis
                                   const bool ejectDiscAfterwards,
                                   const bool peformFakeBurnForTesting)
 {
-    const AutoPool pool;
-    JUCE_NAMESPACE::String error ("Couldn't open or write to the CD device");
+    String error ("Couldn't open or write to the CD device");
 
     OpenDiskDevice* dev = (OpenDiskDevice*) internal;
 
     if (dev != 0)
     {
-        error = JUCE_NAMESPACE::String::empty;
+        error = String::empty;
         [dev burn: listener 
              errorString: &error 
              ejectAfterwards: ejectDiscAfterwards
@@ -442,7 +428,5 @@ const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressLis
 
     return error;
 }
-
-END_JUCE_NAMESPACE
 
 #endif

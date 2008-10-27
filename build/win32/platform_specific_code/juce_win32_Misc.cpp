@@ -29,44 +29,12 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_appframework/application/juce_SystemClipboard.h"
-#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 
 //==============================================================================
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-bool AlertWindow::showNativeDialogBox (const String& title,
-                                       const String& bodyText,
-                                       bool isOkCancel)
-{
-    return MessageBox (0, bodyText, title,
-                       MB_SETFOREGROUND | (isOkCancel ? MB_OKCANCEL
-                                                      : MB_OK)) == IDOK;
-}
-
-#endif
-
-//==============================================================================
-void PlatformUtilities::beep()
-{
-    MessageBeep (MB_OK);
-}
-
-
-//==============================================================================
-#if JUCE_MSVC
-  #pragma warning (disable : 4127)    // "Conditional expression is constant" warning
-#endif
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-
 void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
     if (OpenClipboard (0) != 0)
@@ -121,6 +89,5 @@ const String SystemClipboard::getTextFromClipboard() throw()
     return result;
 }
 
-#endif
 
-END_JUCE_NAMESPACE
+#endif

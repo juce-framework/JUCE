@@ -30,7 +30,6 @@
 */
 
 #ifdef _WIN32
-  #include "../../../../build/win32/platform_specific_code/win32_headers.h"
   #include <winsock2.h>
 
   #ifdef _MSC_VER

@@ -97,34 +97,6 @@ public:
     /** Returns true if this process is being hosted by a debugger.
     */
     static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
-
-    //==============================================================================
-    /** Loads a dynamically-linked library into the process's address space.
-
-        @param pathOrFilename   the platform-dependent name and search path
-        @returns                a handle which can be used by getProcedureEntryPoint(), or
-                                zero if it fails.
-        @see freeDynamicLibrary, getProcedureEntryPoint
-    */
-    static void* loadDynamicLibrary (const String& pathOrFilename);
-
-    /** Frees a dynamically-linked library.
-
-        @param libraryHandle   a handle created by loadDynamicLibrary
-        @see loadDynamicLibrary, getProcedureEntryPoint
-    */
-    static void freeDynamicLibrary (void* libraryHandle);
-
-    /** Finds a procedure call in a dynamically-linked library.
-
-        @param libraryHandle    a library handle returned by loadDynamicLibrary
-        @param procedureName    the name of the procedure call to try to load
-        @returns                a pointer to the function if found, or 0 if it fails
-        @see loadDynamicLibrary
-    */
-    static void* getProcedureEntryPoint (void* libraryHandle,
-                                         const String& procedureName);
-
 };
 
 

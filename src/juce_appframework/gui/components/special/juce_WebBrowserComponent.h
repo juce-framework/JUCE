@@ -33,6 +33,9 @@
 #define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
 #include "../juce_Component.h"
+
+#if JUCE_WEB_BROWSER
+
 class WebBrowserComponentInternal;
 
 
@@ -98,8 +101,6 @@ public:
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
-    void moved();
-    /** @internal */
     void resized();
     /** @internal */
     void parentHierarchyChanged();
@@ -117,13 +118,6 @@ private:
     StringArray lastHeaders;
     MemoryBlock lastPostData;
 
-#if JUCE_MAC
-    void* associatedWindow;
-    void updateBrowserPosition();
-    void createBrowser();
-    void deleteBrowser();
-#endif
-
     void reloadLastURL();
     void checkWindowAssociation();
 
@@ -132,4 +126,5 @@ private:
 };
 
 
+#endif
 #endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__

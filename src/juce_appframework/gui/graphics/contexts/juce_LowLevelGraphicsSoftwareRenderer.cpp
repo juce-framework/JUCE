@@ -926,8 +926,8 @@ static void transformedImageRender (Image& destImage,
 
         for (int y = 0; y < destClipH; ++y)
         {
-            double sx = srcX - 0.5;
-            double sy = srcY - 0.5;
+            double sx = srcX - (srcClipWidth == destClipW ? 0.0 : 0.5);
+            double sy = srcY - (srcClipHeight == destClipH ? 0.0 : 0.5);
             DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
 
             for (int x = 0; x < destClipW; ++x)

@@ -467,7 +467,7 @@ static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& i
     XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
                                    0, (char*) colour, width, height, 32, 0);
 
-    Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display), 
+    Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
                                    width, height, 24);
 
     GC gc = XCreateGC (display, pixmap, 0, 0);
@@ -1184,7 +1184,7 @@ public:
         wmHints->icon_mask = juce_createMaskPixmapFromImage (display, newIcon);
 
         XSetWMHints (display, windowH, wmHints);
-        XFree (wmHints); 
+        XFree (wmHints);
 
         XSync (display, False);
     }
@@ -1754,7 +1754,7 @@ public:
         trayAtom = XInternAtom (display, "_KDE_NET_WM_SYSTEM_TRAY_WINDOW_FOR", false);
         XChangeProperty (display, windowH, trayAtom, XA_WINDOW, 32, PropModeReplace, (unsigned char*) &windowH, 1);
 
-        // a minimum size must be specified for GNOME and Xfce, otherwise the icon is displayed with a width of 1 
+        // a minimum size must be specified for GNOME and Xfce, otherwise the icon is displayed with a width of 1
         XSizeHints* hints = XAllocSizeHints();
         hints->flags = PMinSize;
         hints->min_width = 22;

@@ -29,28 +29,17 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/devices/juce_MidiOutput.h"
-#include "../../../src/juce_appframework/audio/devices/juce_MidiInput.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
-
-#if JUCE_MSVC
-  #pragma warning (disable: 4312)
-#endif
-
-using ::free;
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 //==============================================================================
 static const int midiBufferSize = 1024 * 10;
 static const int numInHeaders = 32;
 static const int inBufferSize = 256;
 static Array <void*, CriticalSection> activeMidiThreads;
+
+using ::free;
 
 class MidiInThread  : public Thread
 {
@@ -644,4 +633,4 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     }
 }
 
-END_JUCE_NAMESPACE
+#endif

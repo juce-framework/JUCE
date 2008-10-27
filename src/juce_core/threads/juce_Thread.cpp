@@ -225,7 +225,7 @@ void Thread::setAffinityMask (const uint32 affinityMask) throw()
     affinityMask_ = affinityMask;
 }
 
-int Thread::getThreadId() const throw()
+int64 Thread::getThreadId() const throw()
 {
     return threadId_;
 }
@@ -249,7 +249,7 @@ int Thread::getNumRunningThreads() throw()
 
 Thread* Thread::getCurrentThread() throw()
 {
-    const int thisId = getCurrentThreadId();
+    const int64 thisId = getCurrentThreadId();
     Thread* result = 0;
 
     runningThreadsLock.enter();

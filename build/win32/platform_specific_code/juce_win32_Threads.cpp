@@ -29,32 +29,12 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-  #include <crtdbg.h>
-#endif
-
-#include <process.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/text/juce_String.h"
-#include "../../../src/juce_core/threads/juce_CriticalSection.h"
-#include "../../../src/juce_core/threads/juce_WaitableEvent.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/threads/juce_Process.h"
-#include "../../../src/juce_core/threads/juce_InterProcessLock.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  extern HWND juce_messageWindowHandle;
-#endif
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
 #endif
 
 
@@ -129,7 +109,7 @@ static unsigned int __stdcall threadEntryProc (void* userData) throw()
 
     juce_threadEntryPoint (userData);
 
-    _endthreadex(0);
+    _endthreadex (0);
     return 0;
 }
 
@@ -188,7 +168,7 @@ void juce_setCurrentThreadName (const String& name) throw()
 #endif
 }
 
-int Thread::getCurrentThreadId() throw()
+int64 Thread::getCurrentThreadId() throw()
 {
     return (int) GetCurrentThreadId();
 }
@@ -335,7 +315,8 @@ void Process::terminate()
     ExitProcess (0);
 }
 
-void* Process::loadDynamicLibrary (const String& name)
+//==============================================================================
+void* PlatformUtilities::loadDynamicLibrary (const String& name)
 {
     void* result = 0;
 
@@ -348,7 +329,7 @@ void* Process::loadDynamicLibrary (const String& name)
     return result;
 }
 
-void Process::freeDynamicLibrary (void* h)
+void PlatformUtilities::freeDynamicLibrary (void* h)
 {
     JUCE_TRY
     {
@@ -358,7 +339,7 @@ void Process::freeDynamicLibrary (void* h)
     JUCE_CATCH_ALL
 }
 
-void* Process::getProcedureEntryPoint (void* h, const String& name)
+void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 {
     return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name)
                     : 0;
@@ -411,5 +392,4 @@ void InterProcessLock::exit() throw()
 }
 
 
-
-END_JUCE_NAMESPACE
+#endif

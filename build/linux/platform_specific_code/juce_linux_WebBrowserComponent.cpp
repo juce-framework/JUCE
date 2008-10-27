@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../../../src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
 
+#if JUCE_WEB_BROWSER
 
 /*
     Sorry.. This class isn't implemented on Linux!
@@ -113,10 +114,6 @@ void WebBrowserComponent::parentHierarchyChanged()
     checkWindowAssociation();
 }
 
-void WebBrowserComponent::moved()
-{
-}
-
 void WebBrowserComponent::resized()
 {
 }
@@ -131,5 +128,5 @@ bool WebBrowserComponent::pageAboutToLoad (const String& url)
     return true;
 }
 
-
+#endif
 END_JUCE_NAMESPACE

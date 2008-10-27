@@ -58,19 +58,12 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
     setOpaque (true);
 
     if (parentComponent != 0)
-    {
         parentComponent->addChildComponent (this);
-    }
-    else
-    {
-        setSize (1, 1); // to keep the OS happy by not having zero-size windows
-        addToDesktop (ComponentPeer::windowHasDropShadow
-                        | ComponentPeer::windowIsTemporary);
-    }
 }
 
 TooltipWindow::~TooltipWindow()
 {
+    hide();
 }
 
 void TooltipWindow::paint (Graphics& g)
@@ -80,7 +73,7 @@ void TooltipWindow::paint (Graphics& g)
 
 void TooltipWindow::mouseEnter (const MouseEvent&)
 {
-    setVisible (false);
+    hide();
 }
 
 void TooltipWindow::showFor (Component* const c)
@@ -94,7 +87,7 @@ void TooltipWindow::showFor (Component* const c)
 
     if (tip.isEmpty())
     {
-        setVisible (false);
+        hide();
     }
     else
     {
@@ -119,8 +112,21 @@ void TooltipWindow::showFor (Component* const c)
 
         setBounds (x, y, w, h);
         setVisible (true);
+
+        if (getParentComponent() == 0)
+        {
+            addToDesktop (ComponentPeer::windowHasDropShadow
+                            | ComponentPeer::windowIsTemporary);
+        }
+
         toFront (false);
     }
+}
+
+void TooltipWindow::hide()
+{
+    removeFromDesktop();
+    setVisible (false);
 }
 
 void TooltipWindow::timerCallback()
@@ -143,7 +149,7 @@ void TooltipWindow::timerCallback()
         if (isVisible())
         {
             lastHideTime = now;
-            setVisible (false);
+            hide();
         }
 
         changedCompsSinceShown = changedCompsSinceShown || changedComp;

@@ -3639,10 +3639,6 @@
 								>
 							</File>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\gui\components\special\juce_QuickTimeMovieComponent.cpp"
-								>
-							</File>
-							<File
 								RelativePath="..\..\..\src\juce_appframework\gui\components\special\juce_QuickTimeMovieComponent.h"
 								>
 							</File>
@@ -5674,6 +5670,10 @@
 				Name="win32_code"
 				>
 				<File
+					RelativePath="..\platform_specific_code\juce_win32_ActiveXComponent.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\platform_specific_code\juce_win32_ASIO.cpp"
 					>
 				</File>
@@ -5718,11 +5718,27 @@
 					>
 				</File>
 				<File
+					RelativePath="..\platform_specific_code\juce_win32_NativeCode.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\platform_specific_code\juce_win32_NativeIncludes.h"
+					>
+				</File>
+				<File
 					RelativePath="..\platform_specific_code\juce_win32_Network.cpp"
 					>
 				</File>
 				<File
+					RelativePath="..\platform_specific_code\juce_win32_OpenGLComponent.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\platform_specific_code\juce_win32_PlatformUtils.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\platform_specific_code\juce_win32_QuickTimeMovieComponent.cpp"
 					>
 				</File>
 				<File

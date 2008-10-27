@@ -38,7 +38,7 @@
 
 namespace zlibNamespace
 {
-#if JUCE_INCLUDE_ZLIB_CODE 
+#if JUCE_INCLUDE_ZLIB_CODE
   #undef OS_CODE
   #undef fdopen
   #include "../../../../../juce_core/io/streams/zlib/zlib.h"
@@ -52,7 +52,7 @@ namespace pnglibNamespace
 {
   using namespace zlibNamespace;
 
-#if JUCE_INCLUDE_PNGLIB_CODE 
+#if JUCE_INCLUDE_PNGLIB_CODE
   using ::malloc;
   using ::free;
 
@@ -89,7 +89,7 @@ namespace pnglibNamespace
 
   #include <png.h>
   #include <pngconf.h>
-#endif 
+#endif
 }
 
 #ifdef _MSC_VER

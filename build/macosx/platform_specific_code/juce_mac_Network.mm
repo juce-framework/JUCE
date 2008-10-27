@@ -29,31 +29,12 @@
   ==============================================================================
 */
 
-#include "juce_mac_NativeHeaders.h"
-
-#include <IOKit/IOKitLib.h>
-#include <IOKit/network/IOEthernetInterface.h>
-#include <IOKit/network/IONetworkInterface.h>
-#include <IOKit/network/IOEthernetController.h>
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/text/juce_String.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/basics/juce_Logger.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
-#include "../../../src/juce_core/threads/juce_WaitableEvent.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
-#include "../../../src/juce_core/text/juce_StringArray.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
-
-//#include "juce_mac_HTTPStream.h"
+// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 //==============================================================================
-static bool GetEthernetIterator (io_iterator_t* matchingServices) throw()
+static bool getEthernetIterator (io_iterator_t* matchingServices) throw()
 {
     mach_port_t masterPort;
 
@@ -88,7 +69,7 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
     int numResults = 0;
     io_iterator_t it;
 
-    if (GetEthernetIterator (&it))
+    if (getEthernetIterator (&it))
     {
         io_object_t i;
 
@@ -142,7 +123,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
-    const AutoPool pool;
+    const ScopedAutoReleasePool pool;
 
     String script;
     script << "tell application \"Mail\"\r\n"
@@ -171,7 +152,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
               "end tell\r\n";
 
     NSAppleScript* s = [[NSAppleScript alloc]
-                            initWithSource: [NSString stringWithUTF8String: (const char*) script.toUTF8()]];
+                            initWithSource: juceStringToNS (script)];
     NSDictionary* error = 0;
     const bool ok = [s executeAndReturnError: &error] != nil;
     [s release];
@@ -225,21 +206,21 @@ public:
 
     ~JuceURLConnectionMessageThread()
     {
-        stopThread (5000);
+        stopThread (10000);
     }
 
     void run()
     {
-        AutoPool pool;
         [owner createConnection];
 
         while (! threadShouldExit())
         {
-            AutoPool pool;
+            const ScopedAutoReleasePool pool;
             [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
     }
 };
+
 
 @implementation JuceURLConnection
 
@@ -367,7 +348,7 @@ public:
 - (void) stop
 {
     [connection cancel];
-    runLoopThread->stopThread (5000);
+    runLoopThread->stopThread (10000);
 }
 
 @end
@@ -387,7 +368,7 @@ void* juce_openInternetFile (const String& url,
                              void* callbackContext,
                              int timeOutMs)
 {
-    AutoPool pool;
+    const ScopedAutoReleasePool pool;
 
     NSMutableURLRequest* req = [NSMutableURLRequest
             requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
@@ -436,7 +417,7 @@ void juce_closeInternetFile (void* handle)
     
     if (s != 0)
     {
-        AutoPool pool;
+        const ScopedAutoReleasePool pool;
         [s stop];
         [s release];
     }
@@ -448,7 +429,7 @@ int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
     
     if (s != 0)
     {
-        AutoPool pool;
+        const ScopedAutoReleasePool pool;
         return [s read: (char*) buffer numBytes: bytesToRead];
     }
 
@@ -465,5 +446,4 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     return 0;
 }
 
-
-END_JUCE_NAMESPACE
+#endif

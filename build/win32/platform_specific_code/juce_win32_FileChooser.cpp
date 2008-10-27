@@ -29,25 +29,10 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
-#include "win32_headers.h"
-#include <shlobj.h>
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
-#include "../../../src/juce_appframework/gui/components/juce_Desktop.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-#endif
 
 //==============================================================================
 static const void* defaultDirPath = 0;
@@ -355,4 +340,4 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     }
 }
 
-END_JUCE_NAMESPACE
+#endif

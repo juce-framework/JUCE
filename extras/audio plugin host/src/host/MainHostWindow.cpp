@@ -100,12 +100,6 @@ MainHostWindow::MainHostWindow()
 
     restoreWindowStateFromString (ApplicationProperties::getInstance()->getUserSettings()->getValue ("mainWindowPos"));
 
-#if JUCE_MAC
-    setMacMainMenu (this);
-#else
-    setMenuBar (this);
-#endif
-
     setVisible (true);
 
     InternalPluginFormat internalFormat;
@@ -129,6 +123,12 @@ MainHostWindow::MainHostWindow()
     addKeyListener (commandManager->getKeyMappings());
 
     Process::setPriority (Process::HighPriority);
+
+#if JUCE_MAC
+    setMacMainMenu (this);
+#else
+    setMenuBar (this);
+#endif
 }
 
 MainHostWindow::~MainHostWindow()
@@ -441,7 +441,7 @@ void MainHostWindow::showAudioSettings()
     AudioDeviceSelectorComponent audioSettingsComp (deviceManager,
                                                     0, 256,
                                                     0, 256,
-                                                    true, true, true);
+                                                    true, true, true, false);
 
     audioSettingsComp.setSize (500, 450);
 

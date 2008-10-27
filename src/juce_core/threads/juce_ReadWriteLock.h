@@ -134,8 +134,8 @@ private:
     CriticalSection accessLock;
     WaitableEvent waitEvent;
     mutable int numWaitingWriters, numWriters;
-    mutable int writerThreadId;
-    mutable Array <int> readerThreads;
+    mutable int64 writerThreadId;
+    mutable Array <int64> readerThreads;
 
     ReadWriteLock (const ReadWriteLock&);
     const ReadWriteLock& operator= (const ReadWriteLock&);

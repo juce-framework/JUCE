@@ -29,16 +29,9 @@
   ==============================================================================
 */
 
-#include "win32_headers.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/basics/juce_Singleton.h"
-#include "../../../src/juce_appframework/gui/graphics/imaging/juce_Image.h"
+// (This file gets included by juce_win32_NativeCode.cpp, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -506,4 +499,4 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
     }
 }
 
-END_JUCE_NAMESPACE
+#endif

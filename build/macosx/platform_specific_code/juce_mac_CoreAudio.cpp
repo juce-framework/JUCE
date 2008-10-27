@@ -29,22 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-#include <CoreAudio/AudioHardware.h>
-
-BEGIN_JUCE_NAMESPACE
-
-
-#include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/text/juce_LocalisedStrings.h"
-#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
-#include "../../../src/juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"
-#include "../../../src/juce_appframework/gui/components/controls/juce_ComboBox.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h"
-#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -98,6 +85,9 @@ public:
          inputLatency (0),
          outputLatency (0),
          callback (0),
+#if ! MACOS_10_4_OR_EARLIER
+         audioProcID (0),
+#endif
          inputDevice (0),
          isSlaveDevice (false)
     {
@@ -492,7 +482,11 @@ public:
 
             if (deviceID != 0)
             {
+#if MACOS_10_4_OR_EARLIER
                 if (OK (AudioDeviceAddIOProc (deviceID, audioIOProc, (void*) this)))
+#else
+                if (OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, (void*) this, &audioProcID)))
+#endif
                 {
                     if (OK (AudioDeviceStart (deviceID, audioIOProc)))
                     {
@@ -500,7 +494,12 @@ public:
                     }
                     else
                     {
+#if MACOS_10_4_OR_EARLIER
                         OK (AudioDeviceRemoveIOProc (deviceID, audioIOProc));
+#else
+                        OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
+                        audioProcID = 0;
+#endif
                     }
                 }
             }
@@ -529,7 +528,13 @@ public:
              && ! leaveInterruptRunning)
         {
             OK (AudioDeviceStop (deviceID, audioIOProc));
+
+#if MACOS_10_4_OR_EARLIER
             OK (AudioDeviceRemoveIOProc (deviceID, audioIOProc));
+#else
+            OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
+            audioProcID = 0;
+#endif
             started = false;
 
             callbackLock.enter();
@@ -731,6 +736,9 @@ public:
     Array <double> sampleRates;
     Array <int> bufferSizes;
     AudioIODeviceCallback* callback;
+#if ! MACOS_10_4_OR_EARLIER
+    AudioDeviceIOProcID audioProcID;
+#endif
 
     CoreAudioInternal* inputDevice;
     bool isSlaveDevice;
@@ -1232,7 +1240,7 @@ public:
             deviceName = inputDeviceName;
 
         if (index >= 0)
-            return new CoreAudioIODevice (deviceName, 
+            return new CoreAudioIODevice (deviceName,
                                           inputIds [inputIndex],
                                           inputIndex,
                                           outputIds [outputIndex],
@@ -1288,4 +1296,4 @@ AudioIODeviceType* juce_createDefaultAudioIODeviceType()
 
 #undef log
 
-END_JUCE_NAMESPACE
+#endif

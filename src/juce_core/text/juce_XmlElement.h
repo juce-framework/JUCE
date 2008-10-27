@@ -190,12 +190,16 @@ public:
                                 document
         @param encodingType     the character encoding format string to put into the xml
                                 header
+        @param lineWrapLength   the line length that will be used before items get placed on
+                                a new line. This isn't an absolute maximum length, it just
+                                determines how lists of attributes get broken up
         @see writeToFile
     */
     const String createDocument (const String& dtdToUse,
                                  const bool allOnOneLine = false,
                                  const bool includeXmlHeader = true,
-                                 const tchar* const encodingType = JUCE_T("UTF-8")) const throw();
+                                 const tchar* const encodingType = JUCE_T("UTF-8"),
+                                 const int lineWrapLength = 60) const throw();
 
     /** Writes the element to a file as an XML document.
 
@@ -209,13 +213,17 @@ public:
         @param dtdToUse         the DTD to add to the document
         @param encodingType     the character encoding format string to put into the xml
                                 header
+        @param lineWrapLength   the line length that will be used before items get placed on
+                                a new line. This isn't an absolute maximum length, it just
+                                determines how lists of attributes get broken up
         @returns    true if the file is written successfully; false if something goes wrong
                     in the process
         @see createDocument
     */
     bool writeToFile (const File& destinationFile,
                       const String& dtdToUse,
-                      const tchar* const encodingType = JUCE_T("UTF-8")) const throw();
+                      const tchar* const encodingType = JUCE_T("UTF-8"),
+                      const int lineWrapLength = 60) const throw();
 
     //==============================================================================
     /** Returns this element's tag type name.
@@ -675,7 +683,9 @@ private:
 
     void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
 
-    void writeElementAsText (OutputStream& out, const int indentationLevel) const throw();
+    void writeElementAsText (OutputStream& out,
+                             const int indentationLevel,
+                             const int lineWrapLength) const throw();
 
     XmlElement** getChildElementsAsArray (const int) const throw();
     void reorderChildElements (XmlElement** const, const int) throw();
