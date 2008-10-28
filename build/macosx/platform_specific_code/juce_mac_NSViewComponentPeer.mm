@@ -380,7 +380,7 @@ END_JUCE_NAMESPACE
     context.setOrigin (originX, originY);
 
     const NSRect* rects = 0;
-    NSInteger numRects = 0;
+    int numRects = 0;
     [self getRectsBeingDrawn: &rects count: &numRects];
 
     RectangleList clip;
