@@ -425,16 +425,16 @@ static void updateModifiers (NSEvent* e)
     int m = currentModifiers & ~(ModifierKeys::shiftModifier | ModifierKeys::ctrlModifier
                                   | ModifierKeys::altModifier | ModifierKeys::commandModifier);
 
-    if ((e.modifierFlags & NSShiftKeyMask) != 0)
+    if (([e modifierFlags] & NSShiftKeyMask) != 0)
         m |= ModifierKeys::shiftModifier;
 
-    if ((e.modifierFlags & NSControlKeyMask) != 0)
+    if (([e modifierFlags] & NSControlKeyMask) != 0)
         m |= ModifierKeys::ctrlModifier;
 
-    if ((e.modifierFlags & NSAlternateKeyMask) != 0)
+    if (([e modifierFlags] & NSAlternateKeyMask) != 0)
         m |= ModifierKeys::altModifier;
 
-    if ((e.modifierFlags & NSCommandKeyMask) != 0)
+    if (([e modifierFlags] & NSCommandKeyMask) != 0)
         m |= ModifierKeys::commandModifier;
 
     currentModifiers = m;
@@ -557,7 +557,7 @@ static int getModifierForButtonNumber (const int num) throw()
         updateKeysDown (ev, true);
         used = owner->handleKeyEvent (ev, true);
 
-        if ((ev.modifierFlags & NSCommandKeyMask) != 0)
+        if (([ev modifierFlags] & NSCommandKeyMask) != 0)
         {
             // for command keys, the key-up event is thrown away, so simulate one..
             updateKeysDown (ev, false);

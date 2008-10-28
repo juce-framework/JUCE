@@ -59,6 +59,7 @@ using namespace JUCE_NAMESPACE;
 - (void) applicationWillUnhide: (NSNotification*) aNotification;
 - (void) customEvent: (id) data;
 - (void) performCallback: (id) info;
+- (void) dummyMethod;
 @end
 
 @implementation JuceAppDelegate
@@ -171,6 +172,8 @@ using namespace JUCE_NAMESPACE;
     }
 }
 
+- (void) dummyMethod  {}   // (used as a way of running a dummy thread)
+
 @end
 
 BEGIN_JUCE_NAMESPACE
@@ -207,7 +210,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
         const ScopedAutoReleasePool pool;
 
         [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
-                              beforeDate: endDate];
+                                 beforeDate: endDate];
 
         NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
                                         untilDate: endDate
@@ -224,6 +227,13 @@ void MessageManager::doPlatformSpecificInitialisation()
 {
     if (juceAppDelegate == 0)
         juceAppDelegate = [[JuceAppDelegate alloc] init];
+
+    // This launches a dummy thread, which forces Cocoa to initialise NSThreads 
+    // correctly (needed prior to 10.5)
+    if (! [NSThread isMultiThreaded])
+        [NSThread detachNewThreadSelector: @selector (dummyMethod)
+                                 toTarget: juceAppDelegate
+                               withObject: nil];
 
     initialiseMainMenu();
 }
