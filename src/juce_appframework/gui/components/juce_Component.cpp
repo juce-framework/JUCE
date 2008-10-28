@@ -476,6 +476,8 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             oldNonFullScreenBounds = peer->getNonFullScreenBounds();
 
             removeFromDesktop();
+
+            setTopLeftPosition (x, y);
         }
 
         if (parentComponent_ != 0)
