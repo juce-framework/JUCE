@@ -100,7 +100,8 @@ using namespace JUCE_NAMESPACE;
 - (void) setOwner: (NSViewComponentPeer*) owner;
 - (BOOL) canBecomeKeyWindow;
 - (BOOL) windowShouldClose: (id) window;
-
+- (NSRect) constrainFrameRect: (NSRect) frameRect toScreen: (NSScreen*) screen;
+- (NSSize) windowWillResize: (NSWindow*) window toSize: (NSSize) proposedFrameSize;
 @end
 
 BEGIN_JUCE_NAMESPACE
@@ -146,6 +147,7 @@ public:
     bool isFocused() const;
     void grabFocus();
     void textInputRequired (int x, int y);
+    NSRect constrainRect (NSRect r);
 
     //==============================================================================
     void repaint (int x, int y, int w, int h);
@@ -732,6 +734,31 @@ static int getModifierForButtonNumber (const int num) throw()
     return NO;
 }
 
+- (NSRect) constrainFrameRect: (NSRect) frameRect toScreen: (NSScreen*) screen
+{
+    if (owner == 0)
+        return frameRect;
+
+DBG (String (frameRect.origin.x) + " " + String (frameRect.origin.y) + " " + String (frameRect.size.width) + " " + String (frameRect.size.height));
+    frameRect = owner->constrainRect (frameRect);
+DBG (String (frameRect.origin.x) + " " + String (frameRect.origin.y) + " " + String (frameRect.size.width) + " " + String (frameRect.size.height));
+    return frameRect;
+}
+
+- (NSSize) windowWillResize: (NSWindow*) window toSize: (NSSize) proposedFrameSize
+{
+    if (owner == 0)
+        return proposedFrameSize;
+
+    NSRect frameRect = [self frame];
+    frameRect.size = proposedFrameSize;
+
+DBG (String (frameRect.origin.x) + " " + String (frameRect.origin.y) + " " + String (frameRect.size.width) + " " + String (frameRect.size.height));
+    frameRect = owner->constrainRect (frameRect);
+DBG (String (frameRect.origin.x) + " " + String (frameRect.origin.y) + " " + String (frameRect.size.width) + " " + String (frameRect.size.height));
+    return frameRect.size;
+}
+
 @end
 
 //==============================================================================
@@ -940,6 +967,40 @@ void NSViewComponentPeer::globalPositionToRelative (int& x, int& y)
     getBounds (wx, wy, ww, wh, true);
     x -= wx;
     y -= wy;
+}
+
+NSRect NSViewComponentPeer::constrainRect (NSRect r)
+{
+    if (constrainer != 0)
+    {
+        NSRect current = [window frame];
+        current.origin.y = [[NSScreen mainScreen] frame].size.height - current.origin.y - current.size.height;
+
+        r.origin.y = [[NSScreen mainScreen] frame].size.height - r.origin.y - r.size.height;
+
+        int x = (int) r.origin.x;
+        int y = (int) r.origin.y;
+        int w = (int) r.size.width;
+        int h = (int) r.size.height;
+
+        Rectangle original ((int) current.origin.x, (int) current.origin.y,
+                            (int) current.size.width, (int) current.size.height);
+
+        constrainer->checkBounds (x, y, w, h,
+                                  original,
+                                  Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                  y != original.getY() && y + h == original.getBottom(),
+                                  x != original.getX() && x + w == original.getRight(),
+                                  y == original.getY() && y + h != original.getBottom(),
+                                  x == original.getX() && x + w != original.getRight());
+
+        r.origin.x = x;
+        r.origin.y = [[NSScreen mainScreen] frame].size.height - r.size.height - y;
+        r.size.width = w;
+        r.size.height = h;
+    }
+
+    return r;
 }
 
 void NSViewComponentPeer::setMinimised (bool shouldBeMinimised)

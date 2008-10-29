@@ -542,6 +542,7 @@ MainDemoWindow::MainDemoWindow()
     commandManager = new ApplicationCommandManager();
 
     setResizable (true, false); // resizability is a property of ResizableWindow
+    setResizeLimits (400, 300, 8192, 8192);
 
     ContentComp* contentComp = new ContentComp (this);
 

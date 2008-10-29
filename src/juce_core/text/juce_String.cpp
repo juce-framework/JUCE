@@ -465,6 +465,8 @@ String::String (const double number,
 
 String::~String() throw()
 {
+    emptyString.refCount = safeEmptyStringRefCount;
+
     if (atomicDecrementAndReturn (text->refCount) == 0)
         juce_free (text);
 }

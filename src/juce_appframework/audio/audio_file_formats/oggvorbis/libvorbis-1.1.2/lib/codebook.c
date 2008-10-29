@@ -330,7 +330,7 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
 
   /* bisect search for the codeword in the ordered list */
   {
-    ogg_uint32_t testword=bitreverse((ogg_uint32_t)lok);
+    ogg_uint32_t testword=ogg_bitreverse((ogg_uint32_t)lok);
 
     while(hi-lo>1){
       long p=(hi-lo)>>1;

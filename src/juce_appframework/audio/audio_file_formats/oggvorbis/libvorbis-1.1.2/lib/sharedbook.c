@@ -342,7 +342,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     if(codes==NULL)goto err_out;
 
     for(i=0;i<n;i++){
-      codes[i]=bitreverse(codes[i]);
+      codes[i]=ogg_bitreverse(codes[i]);
       codep[i]=codes+i;
     }
 
@@ -385,7 +385,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     if(c->dec_maxlength<c->dec_codelengths[i])
       c->dec_maxlength=c->dec_codelengths[i];
     if(c->dec_codelengths[i]<=c->dec_firsttablen){
-      ogg_uint32_t orig=bitreverse(c->codelist[i]);
+      ogg_uint32_t orig=ogg_bitreverse(c->codelist[i]);
       for(j=0;j<(1<<(c->dec_firsttablen-c->dec_codelengths[i]));j++)
 	c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=i+1;
     }
@@ -399,7 +399,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
     for(i=0;i<tabn;i++){
       ogg_uint32_t word=i<<(32-c->dec_firsttablen);
-      if(c->dec_firsttable[bitreverse(word)]==0){
+      if(c->dec_firsttable[ogg_bitreverse(word)]==0){
 	while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
 	while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
 
@@ -412,7 +412,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
 	  if(loval>0x7fff)loval=0x7fff;
 	  if(hival>0x7fff)hival=0x7fff;
-	  c->dec_firsttable[bitreverse(word)]=
+	  c->dec_firsttable[ogg_bitreverse(word)]=
 	    0x80000000UL | (loval<<15) | hival;
 	}
       }
