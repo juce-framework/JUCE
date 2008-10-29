@@ -210,15 +210,8 @@ public:
     ~SharedMessageThread()
     {
         signalThreadShouldExit();
-
-        const int quitMessageId = 0xfffff321;
-        Message* const m = new Message (quitMessageId, 1, 0, 0);
-
-        if (! juce_postMessageToSystemQueue (m))
-            delete m;
-
+        JUCEApplication::quit();
         waitForThreadToExit (5000);
-
         clearSingletonInstance();
     }
 
@@ -226,11 +219,10 @@ public:
     {
         MessageManager* const messageManager = MessageManager::getInstance();
 
-        const int originalThreadId = messageManager->getCurrentMessageThread();
-        messageManager->setCurrentMessageThread (getThreadId());
+        const int64 originalThreadId = messageManager->getCurrentMessageThread();
+        messageManager->setCurrentMessageThread (Thread::getCurrentThreadId());
 
-        while (! threadShouldExit()
-                && messageManager->dispatchNextMessage())
+        while ((! threadShouldExit()) && messageManager->runDispatchLoopUntil (250))
         {
         }
 
@@ -238,9 +230,8 @@ public:
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
-};
+}; 
 
-juce_ImplementSingleton (SharedMessageThread);
 
 #endif
 
@@ -444,6 +435,10 @@ public:
     {
         if (editorComp == 0)
         {
+#if JUCE_LINUX
+            const MessageManagerLock mml;
+#endif
+
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
@@ -451,6 +446,7 @@ public:
             else
                 cEffect.flags &= ~effFlagsHasEditor;
 
+            filter->editorBeingDeleted (ed);
             delete ed;
         }
 

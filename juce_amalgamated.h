@@ -37274,7 +37274,7 @@ public:
         (Best to ignore this method unless you really know what you're doing..)
         @see getCurrentMessageThread
     */
-    void setCurrentMessageThread (const int threadId) throw();
+    void setCurrentMessageThread (const int64 threadId) throw();
 
     /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
 

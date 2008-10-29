@@ -177,7 +177,7 @@ bool MessageManager::isThisTheMessageThread() const throw()
     return Thread::getCurrentThreadId() == messageThreadId;
 }
 
-void MessageManager::setCurrentMessageThread (const int threadId) throw()
+void MessageManager::setCurrentMessageThread (const int64 threadId) throw()
 {
     messageThreadId = threadId;
 }
