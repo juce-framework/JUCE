@@ -49,7 +49,7 @@ AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
 
     allocatedBytes = numChannels * numSamples * sizeof (float) + 32;
     allocatedData = (float*) juce_malloc (allocatedBytes);
-    channels = (float**) juce_malloc (numChannels_ * sizeof (float*));
+    channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
 
     float* chan = allocatedData;
     for (int i = 0; i < numChannels_; ++i)
@@ -71,7 +71,7 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
 {
     jassert (numChannels_ > 0);
 
-    channels = (float**) juce_malloc (numChannels_ * sizeof (float*));
+    channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
 
     for (int i = 0; i < numChannels_; ++i)
     {
@@ -95,7 +95,7 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
     allocatedBytes = 0;
 
     if (numChannels_ > numChannels)
-        channels = (float**) juce_realloc (channels, numChannels_ * sizeof (float*));
+        channels = (float**) juce_realloc (channels, (numChannels_ + 1) * sizeof (float*));
 
     numChannels = numChannels_;
     size = numSamples;
@@ -115,7 +115,7 @@ AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) throw()
   : numChannels (other.numChannels),
     size (other.size)
 {
-    channels = (float**) juce_malloc (other.numChannels * sizeof (float*));
+    channels = (float**) juce_malloc ((other.numChannels + 1) * sizeof (float*));
 
     if (other.allocatedData != 0)
     {
