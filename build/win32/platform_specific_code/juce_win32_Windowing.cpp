@@ -808,7 +808,7 @@ public:
     static Win32ComponentPeer* getOwnerOfWindow (HWND h) throw()
     {
         if (h != 0 && GetWindowLongPtr (h, GWLP_USERDATA) == improbableWindowNumber)
-            return (Win32ComponentPeer*) GetWindowLongPtr (h, 8);
+            return (Win32ComponentPeer*) (pointer_sized_int) GetWindowLongPtr (h, 8);
 
         return 0;
     }

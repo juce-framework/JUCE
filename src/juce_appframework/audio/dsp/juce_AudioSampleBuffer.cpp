@@ -223,7 +223,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
         size = newNumSamples;
 
         if (newNumChannels > numChannels)
-            channels = (float**) juce_realloc (channels, newNumChannels * sizeof (float*));
+            channels = (float**) juce_realloc (channels, (newNumChannels + 1) * sizeof (float*));
 
         numChannels = newNumChannels;
 

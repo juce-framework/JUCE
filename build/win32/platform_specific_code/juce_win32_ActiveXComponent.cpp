@@ -488,7 +488,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
                     if (info->controlHWND != 0)
                     {
-                        originalWndProc = (void*) GetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC);
+                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC);
                         SetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
                     }
 
