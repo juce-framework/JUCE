@@ -511,7 +511,7 @@ public:
         : node (node_),
           processor (node_->processor),
           audioChannelsToUse (audioChannelsToUse_),
-          totalChans (totalChans_),
+          totalChans (jmax (1, totalChans_)),
           midiBufferToUse (midiBufferToUse_)
     {
         channels = (float**) juce_calloc (sizeof (float*) * totalChans_);
