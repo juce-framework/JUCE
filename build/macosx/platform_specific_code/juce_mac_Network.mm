@@ -166,6 +166,8 @@ END_JUCE_NAMESPACE
 using namespace JUCE_NAMESPACE;
 
 //==============================================================================
+#define JuceURLConnection MakeObjCClassName(JuceURLConnection)
+
 @interface JuceURLConnection  : NSObject
 {
     NSURLRequest* request;

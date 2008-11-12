@@ -78,6 +78,12 @@ BEGIN_JUCE_NAMESPACE
 #undef Point
 
 //==============================================================================
+#define ObjCExtraSuffix 1
+#define appendMacro1(a, b, c, d) a ## _ ## b ## _ ## c ## _ ## d
+#define appendMacro2(a, b, c, d) appendMacro1(a, b, c, d)
+#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, ObjCExtraSuffix)
+
+//==============================================================================
 #define JUCE_INCLUDED_FILE 1
 
 // Now include the actual code files..

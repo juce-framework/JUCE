@@ -30,9 +30,6 @@
 */
 
 #include "../../../juce_Config.h"
-
-#if JUCE_BUILD_GUI_CLASSES
-
 #include "linuxincludes.h"
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -3354,5 +3351,3 @@ const int KeyPress::rewindKey           = (0xffeeff03) | extendedKeyModifier;
 
 
 END_JUCE_NAMESPACE
-
-#endif

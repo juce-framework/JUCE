@@ -89,7 +89,10 @@ void SystemStats::initialiseStats() throw()
     {
         initialised = true;
 
-        NSApplicationLoad();
+        // etremely annoying: adding this line stops the apple menu items from working. Of
+        // course, not adding it means that carbon windows (e.g. in plugins) won't get
+        // any events.
+        //NSApplicationLoad();
         [NSApplication sharedApplication];
 
 #if JUCE_INTEL

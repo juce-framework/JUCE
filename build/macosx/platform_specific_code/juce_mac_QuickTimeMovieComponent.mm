@@ -57,18 +57,9 @@ bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
     return true;
 }
 
-bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
-                                         const bool controllerVisible)
+static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
 {
-    closeMovie();
-
-    if (getPeer() == 0)
-    {
-        // To open a movie, this component must be visible inside a functioning window, so that
-        // the QT control can be assigned to the window.
-        jassertfalse
-        return false;
-    }
+    QTMovie* movie = 0;
 
     FileInputStream* const fin = dynamic_cast <FileInputStream*> (movieStream);
 
@@ -82,11 +73,39 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
     {
         MemoryBlock temp;
         movieStream->readIntoMemoryBlock (temp);
+        
+        const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
+        
+        for (int i = 0; i < numElementsInArray (suffixesToTry); ++i)
+        {
+            movie = [QTMovie movieWithDataReference: [QTDataReference dataReferenceWithReferenceToData: [NSData dataWithBytes: temp.getData() 
+                                                                                                                       length: temp.getSize()]
+                                                                                                  name: [NSString stringWithCString: suffixesToTry[i]]
+                                                                                              MIMEType: @""]
+                                              error: nil];
 
-        movie = [QTMovie movieWithData: [NSData dataWithBytes: temp.getData() 
-                                                       length: temp.getSize()] 
-                                 error: nil];
+            if (movie != 0)
+                break;
+        }
     }
+    
+    return movie;
+}
+
+bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
+                                         const bool controllerVisible)
+{
+    closeMovie();
+
+    if (getPeer() == 0)
+    {
+        // To open a movie, this component must be visible inside a functioning window, so that
+        // the QT control can be assigned to the window.
+        jassertfalse
+        return false;
+    }
+
+    movie = openMovieFromStream (movieStream, movieFile);
 
     [theMovie retain];
     QTMovieView* view = (QTMovieView*) getView();
@@ -264,24 +283,8 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* movieStream, Movie& result,
     if (movieStream == 0)
         return false;
 
-    QTMovie* movie = nil;
-
-    FileInputStream* const fin = dynamic_cast <FileInputStream*> (movieStream);
-    
-    if (fin != 0)
-    {
-        movie = [QTMovie movieWithFile: juceStringToNS (fin->getFile().getFullPathName())
-                                 error: nil];
-    }
-    else
-    {
-        MemoryBlock temp;
-        movieStream->readIntoMemoryBlock (temp);
-        
-        movie = [QTMovie movieWithData: [NSData dataWithBytes: temp.getData() 
-                                                       length: temp.getSize()] 
-                                 error: nil];
-    }
+    File file;
+    QTMovie* movie = openMovieFromStream (movieStream, file);
 
     if (movie != nil)
         result = [movie quickTimeMovie];

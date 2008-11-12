@@ -367,27 +367,29 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
         return String::empty;
     }
 
-    if (currentSetup.inputDeviceName != newSetup.inputDeviceName
-         || currentSetup.outputDeviceName != newSetup.outputDeviceName
+    const String newInputDeviceName (numInputChansNeeded == 0 ? String::empty : newSetup.inputDeviceName);
+    const String newOutputDeviceName (numOutputChansNeeded == 0 ? String::empty : newSetup.outputDeviceName);
+
+    if (currentSetup.inputDeviceName != newInputDeviceName
+         || currentSetup.inputDeviceName != newOutputDeviceName
          || currentAudioDevice == 0)
     {
         deleteCurrentDevice();
         scanDevicesIfNeeded();
 
-        if (newSetup.outputDeviceName.isNotEmpty()
-             && ! type->getDeviceNames (false).contains (newSetup.outputDeviceName))
+        if (newOutputDeviceName.isNotEmpty()
+             && ! type->getDeviceNames (false).contains (newOutputDeviceName))
         {
-            return "No such device: " + newSetup.outputDeviceName;
+            return "No such device: " + newOutputDeviceName;
         }
 
-        if (newSetup.inputDeviceName.isNotEmpty()
-             && ! type->getDeviceNames (true).contains (newSetup.inputDeviceName))
+        if (newInputDeviceName.isNotEmpty()
+             && ! type->getDeviceNames (true).contains (newInputDeviceName))
         {
-            return "No such device: " + newSetup.outputDeviceName;
+            return "No such device: " + newInputDeviceName;
         }
 
-        currentAudioDevice = type->createDevice (newSetup.outputDeviceName,
-                                                 newSetup.inputDeviceName);
+        currentAudioDevice = type->createDevice (newOutputDeviceName, newInputDeviceName);
 
         if (currentAudioDevice == 0)
             error = "Can't open the audio device!\n\nThis may be because another application is currently using the same device - if so, you should close any other applications and try again!";
@@ -412,10 +414,10 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
             outputChannels.setRange (0, numOutputChansNeeded, true);
         }
 
-        if (newSetup.inputDeviceName.isEmpty())
+        if (newInputDeviceName.isEmpty())
             inputChannels.clear();
 
-        if (newSetup.outputDeviceName.isEmpty())
+        if (newOutputDeviceName.isEmpty())
             outputChannels.clear();
     }
 

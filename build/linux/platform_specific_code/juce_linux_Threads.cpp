@@ -255,7 +255,8 @@ void Process::lowerPrivilege()
     }
 }
 
-#if JUCE_BUILD_GUI_CLASSES
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+
 void* PlatformUtilities::loadDynamicLibrary (const String& name)
 {
     return dlopen ((const char*) name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
@@ -270,7 +271,7 @@ void* PlatformUtilities::getProcedureEntryPoint (void* libraryHandle, const Stri
 {
     return dlsym (libraryHandle, (const char*) procedureName);
 }
-#endif
 
+#endif
 
 END_JUCE_NAMESPACE

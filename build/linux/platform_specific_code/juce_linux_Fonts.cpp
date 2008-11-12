@@ -30,8 +30,6 @@
 */
 
 #include "../../../juce_Config.h"
-#if JUCE_BUILD_GUI_CLASSES
-
 #include "linuxincludes.h"
 
 /*  Got a build error here? You'll need to install the freetype library...
@@ -640,5 +638,3 @@ void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, Strin
 }
 
 END_JUCE_NAMESPACE
-
-#endif

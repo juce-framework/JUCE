@@ -81,7 +81,18 @@ public:
             = [[NSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                       pixelFormat: format];
 
-        renderContext = [view openGLContext];
+        if (sharedContext != 0)
+        {
+            renderContext = [[NSOpenGLContext alloc] initWithFormat: format
+                                                       shareContext: sharedContext];
+            [view setOpenGLContext: renderContext];
+            [renderContext setView: view];
+        }
+        else
+        {
+            renderContext = [view openGLContext];
+        }
+
         [format release];
 
         viewHolder = new NSViewComponentInternal (view, component);

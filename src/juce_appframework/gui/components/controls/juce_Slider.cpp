@@ -359,6 +359,8 @@ void Slider::lookAndFeelChanged()
 
         if (style == LinearBar)
             valueBox->addMouseListener (this, false);
+
+        valueBox->setTooltip (getTooltip());
     }
 
     if (style == IncDecButtons)

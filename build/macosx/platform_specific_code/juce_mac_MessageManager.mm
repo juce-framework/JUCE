@@ -41,12 +41,84 @@ struct CallbackMessagePayload
     bool volatile hasBeenExecuted;
 };
 
+/* When you use multiple DLLs which share similarly-named obj-c classes - like
+   for example having more than one juce plugin loaded into a host, then when a
+   method is called, the actual code that runs might actually be in a different module
+   than the one you expect... So any calls to library functions or statics that are 
+   made inside obj-c methods will probably end up getting executed in a different DLL's
+   memory space. Not a great thing to happen - this obviously leads to bizarre crashes.
+
+   To work around this insanity, I'm only allowing obj-c methods to make calls to
+   virtual methods of an object that's known to live inside the right module's space.
+*/
+class AppDelegateRedirector
+{
+public:
+    AppDelegateRedirector() {}
+    virtual ~AppDelegateRedirector() {}
+
+    virtual NSApplicationTerminateReply shouldTerminate()
+    {
+        if (JUCEApplication::getInstance() != 0)
+        {
+            JUCEApplication::getInstance()->systemRequestedQuit();
+
+            if (! MessageManager::getInstance()->hasStopMessageBeenSent())
+                return NSTerminateCancel;
+        }
+
+        return NSTerminateNow;
+    }
+    
+    virtual BOOL openFile (const NSString* filename)
+    {
+        if (JUCEApplication::getInstance() != 0)
+        {
+            JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
+            return YES;
+        }
+
+        return NO;
+    }
+
+    virtual void openFiles (NSArray* filenames)
+    {
+        StringArray files;
+        for (int i = 0; i < [filenames count]; ++i)
+            files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
+
+        if (files.size() > 0 && JUCEApplication::getInstance() != 0)
+            JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
+    }
+
+    virtual void focusChanged()
+    {
+        juce_HandleProcessFocusChange();
+    }
+
+    virtual void deliverMessage (void* message)
+    {
+        MessageManager::getInstance()->deliverMessage (message);
+    }
+
+    virtual void deleteSelf()
+    {
+        delete this;
+    }
+};
+
 END_JUCE_NAMESPACE
 using namespace JUCE_NAMESPACE;
 
+typedef void (*juce_HandleProcessFocusChangeFunction)();
+
+#define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
+
 @interface JuceAppDelegate   : NSObject
 {
+@private
     id oldDelegate;
+    AppDelegateRedirector* redirector;
 }
 
 - (JuceAppDelegate*) init;
@@ -67,6 +139,8 @@ using namespace JUCE_NAMESPACE;
 - (JuceAppDelegate*) init
 {
     [super init];
+
+    redirector = new AppDelegateRedirector();
 
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
@@ -97,56 +171,38 @@ using namespace JUCE_NAMESPACE;
     if (oldDelegate != 0)
         [NSApp setDelegate: oldDelegate];
 
+    redirector->deleteSelf();
     [super dealloc];
 }
 
 - (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app
 {
-    if (JUCEApplication::getInstance() != 0)
-    {
-        JUCEApplication::getInstance()->systemRequestedQuit();
-
-        if (! MessageManager::getInstance()->hasStopMessageBeenSent())
-            return NSTerminateCancel;
-    }
-
-    return NSTerminateNow;
+    return redirector->shouldTerminate();
 }
 
 - (BOOL) application: (NSApplication*) app openFile: (NSString*) filename
 {
-    if (JUCEApplication::getInstance() != 0)
-    {
-        JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
-        return YES;
-    }
-
-    return NO;
+    return redirector->openFile (filename);
 }
 
 - (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames
 {
-    StringArray files;
-    for (int i = 0; i < [filenames count]; ++i)
-        files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
-
-    if (files.size() > 0 && JUCEApplication::getInstance() != 0)
-        JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
+    return redirector->openFiles (filenames);
 }
 
 - (void) applicationDidBecomeActive: (NSNotification*) aNotification
 {
-    juce_HandleProcessFocusChange();
+    redirector->focusChanged();
 }
 
 - (void) applicationDidResignActive: (NSNotification*) aNotification
 {
-    juce_HandleProcessFocusChange();
+    redirector->focusChanged();
 }
 
 - (void) applicationWillUnhide: (NSNotification*) aNotification
 {
-    juce_HandleProcessFocusChange();
+    redirector->focusChanged();
 }
 
 - (void) customEvent: (id) n
@@ -156,7 +212,7 @@ using namespace JUCE_NAMESPACE;
     [data getBytes: &message length: sizeof (message)];
 
     if (message != 0)
-        MessageManager::getInstance()->deliverMessage (message);
+        redirector->deliverMessage (message);
 
     [data release];
 }

@@ -30,7 +30,6 @@
 */
 
 #include "../../../juce_Config.h"
-#if JUCE_BUILD_GUI_CLASSES
 
 #if JUCE_ALSA
 
@@ -484,7 +483,5 @@ MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { re
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return 0; }
 
 END_JUCE_NAMESPACE
-
-#endif
 
 #endif

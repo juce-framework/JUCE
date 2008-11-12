@@ -36,6 +36,8 @@
 //==============================================================================
 END_JUCE_NAMESPACE
 
+#define OpenDiskDevice MakeObjCClassName(OpenDiskDevice)
+
 @interface OpenDiskDevice   : NSObject
 {
     DRDevice* device;
@@ -53,6 +55,8 @@ END_JUCE_NAMESPACE
 @end
 
 //==============================================================================
+#define AudioTrackProducer MakeObjCClassName(AudioTrackProducer)
+
 @interface AudioTrackProducer   : NSObject
 {
     JUCE_NAMESPACE::AudioSource* source;

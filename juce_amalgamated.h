@@ -207,14 +207,12 @@
 //  #define JUCE_PLUGINHOST_AU 1
 #endif
 
-/** Disabling this will avoid linking to any UI code. This is handy for
+/** Enabling this will avoid including any UI code in the build. This is handy for
     writing command-line utilities, e.g. on linux boxes which don't have some
     of the UI libraries installed.
-
-    (On mac and windows, this won't generally make much difference to the build).
 */
-#ifndef JUCE_BUILD_GUI_CLASSES
-  #define JUCE_BUILD_GUI_CLASSES 1
+#ifndef JUCE_ONLY_BUILD_CORE_LIBRARY
+  //#define JUCE_ONLY_BUILD_CORE_LIBRARY  1
 #endif
 
 /** This lets you disable building of the WebBrowserComponent, if it's not required.

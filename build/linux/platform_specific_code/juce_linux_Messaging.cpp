@@ -30,7 +30,6 @@
 */
 
 #include "../../../juce_Config.h"
-#if JUCE_BUILD_GUI_CLASSES
 
 #include "linuxincludes.h"
 #include <stdio.h>
@@ -419,5 +418,3 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 }
 
 END_JUCE_NAMESPACE
-
-#endif

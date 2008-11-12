@@ -36,6 +36,9 @@
 //==============================================================================
 END_JUCE_NAMESPACE
 
+#define DownloadClickDetector MakeObjCClassName(DownloadClickDetector)
+
+
 @interface DownloadClickDetector   : NSObject
 {
     JUCE_NAMESPACE::WebBrowserComponent* ownerComponent;
@@ -59,11 +62,14 @@ END_JUCE_NAMESPACE
     return self;
 }
 
-- (void) webView: (WebView*) sender decidePolicyForNavigationAction: (NSDictionary *)actionInformation request:(NSURLRequest *)request frame:(WebFrame *)frame decisionListener:(id < WebPolicyDecisionListener >)listener
+- (void) webView: (WebView*) sender decidePolicyForNavigationAction: (NSDictionary*) actionInformation 
+                                                            request: (NSURLRequest*) request 
+                                                              frame: (WebFrame*) frame 
+                                                   decisionListener: (id <WebPolicyDecisionListener>) listener
 {
     NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
 
-    if (ownerComponent->pageAboutToLoad (JUCE_NAMESPACE::String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) [[url absoluteString] UTF8String])))
+    if (ownerComponent->pageAboutToLoad (nsStringToJuce ([url absoluteString])))
         [listener use];
     else
         [listener ignore];

@@ -30,8 +30,6 @@
 */
 
 #include "../../../juce_Config.h"
-#if JUCE_BUILD_GUI_CLASSES
-
 #include "linuxincludes.h"
 #include "../../../src/juce_core/basics/juce_StandardHeader.h"
 
@@ -56,5 +54,3 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
 }
 
 END_JUCE_NAMESPACE
-
-#endif
