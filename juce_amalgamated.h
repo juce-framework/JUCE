@@ -33060,8 +33060,7 @@ public:
 class JUCE_API  Label  : public Component,
                          public SettableTooltipClient,
                          protected TextEditorListener,
-                         private ComponentListener,
-                         private AsyncUpdater
+                         private ComponentListener
 {
 public:
 
@@ -33279,8 +33278,6 @@ protected:
     /** @internal */
     void textEditorFocusLost (TextEditor& editor);
     /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
     void colourChanged();
 
     /** Creates the TextEditor component that will be used when the user has clicked on the label.
@@ -33309,6 +33306,7 @@ private:
     bool leftOfOwnerComp : 1;
 
     bool updateFromTextEditorContents();
+    void callChangeListeners();
 
     Label (const Label&);
     const Label& operator= (const Label&);

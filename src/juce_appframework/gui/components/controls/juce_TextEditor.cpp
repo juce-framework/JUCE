@@ -2084,7 +2084,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
 bool TextEditor::keyStateChanged()
 {
     // (overridden to avoid forwarding key events to the parent)
-    return true;
+    return ! ModifierKeys::getCurrentModifiers().isCommandDown();
 }
 
 //==============================================================================

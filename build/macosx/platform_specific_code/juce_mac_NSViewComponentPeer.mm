@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -143,7 +143,7 @@ public:
     /* When you use multiple DLLs which share similarly-named obj-c classes - like
        for example having more than one juce plugin loaded into a host, then when a
        method is called, the actual code that runs might actually be in a different module
-       than the one you expect... So any calls to library functions or statics that are 
+       than the one you expect... So any calls to library functions or statics that are
        made inside obj-c methods will probably end up getting executed in a different DLL's
        memory space. Not a great thing to happen - this obviously leads to bizarre crashes.
 
@@ -209,7 +209,7 @@ END_JUCE_NAMESPACE
 
     notificationCenter = [NSNotificationCenter defaultCenter];
 
-    [notificationCenter  addObserver: self 
+    [notificationCenter  addObserver: self
                             selector: @selector (frameChanged:)
                                 name: NSViewFrameDidChangeNotification
                               object: self];
@@ -338,7 +338,7 @@ END_JUCE_NAMESPACE
 {
     if (owner != 0 && owner->redirectPerformKeyEquivalent (ev))
         return true;
-    
+
     return [super performKeyEquivalent: ev];
 }
 #endif
@@ -460,15 +460,15 @@ class JuceNSImage
 {
 public:
     JuceNSImage (const int width, const int height, const bool hasAlpha)
-        : juceImage (hasAlpha ? Image::ARGB : Image::RGB, 
+        : juceImage (hasAlpha ? Image::ARGB : Image::RGB,
                      width, height, hasAlpha)
     {
         lineStride = 0;
         pixelStride = 0;
-        imageData = juceImage.lockPixelDataReadWrite (0, 0, width, height, 
+        imageData = juceImage.lockPixelDataReadWrite (0, 0, width, height,
                                                        lineStride, pixelStride);
 
-        imageRep = [[NSBitmapImageRep alloc] 
+        imageRep = [[NSBitmapImageRep alloc]
             initWithBitmapDataPlanes: &imageData
                           pixelsWide: width
                           pixelsHigh: height
@@ -521,10 +521,10 @@ public:
     {
         const ScopedAutoReleasePool pool;
 
-        [NSGraphicsContext setCurrentContext: 
+        [NSGraphicsContext setCurrentContext:
             [NSGraphicsContext graphicsContextWithBitmapImageRep: imageRep]];
 
-        [imageToDraw drawAtPoint: NSZeroPoint 
+        [imageToDraw drawAtPoint: NSZeroPoint
                         fromRect: NSMakeRect (0, 0, [imageToDraw size].width, [imageToDraw size].height)
                        operation: NSCompositeSourceOver
                         fraction: 1.0f];
@@ -545,9 +545,9 @@ private:
     {
         jassert (Rectangle (0, 0, juceImage.getWidth(), juceImage.getHeight())
                  .contains (Rectangle (x, y, w, h)));
-        
+
         uint8* start = imageData + x * pixelStride + y * lineStride;
-        
+
         while (--h >= 0)
         {
             uint8* p = start;
@@ -558,7 +558,7 @@ private:
                 const uint8 temp = p[0];
                 p[0] = p[2];
                 p[2] = temp;
-                
+
                 p += pixelStride;
             }
         }
@@ -590,7 +590,7 @@ static int getKeyCodeFromEvent (NSEvent* ev)
     String unicode (nsStringToJuce ([ev characters]));
     String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
     int keyCode = unmodified[0];
-    
+
     if (keyCode == 0x19) // (backwards-tab)
         keyCode = 9;
 
@@ -804,7 +804,7 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     else
     {
         r.origin.y = [[NSScreen mainScreen] frame].size.height - (r.origin.y + r.size.height);
-        [window setFrame: r 
+        [window setFrame: r
                  display: true];
     }
 }
@@ -963,7 +963,7 @@ bool NSViewComponentPeer::contains (int x, int y, bool trueIfInAChildWindow) con
 const BorderSize NSViewComponentPeer::getFrameSize() const
 {
     BorderSize b;
-    
+
     if (! isSharedWindow)
     {
         NSRect v = [view convertRect: [view frame] toView: nil];
@@ -982,7 +982,7 @@ bool NSViewComponentPeer::setAlwaysOnTop (bool alwaysOnTop)
 {
     if (! isSharedWindow)
     {
-        [window setLevel: alwaysOnTop ? NSFloatingWindowLevel 
+        [window setLevel: alwaysOnTop ? NSFloatingWindowLevel
                                       : NSNormalWindowLevel];
     }
 
@@ -993,7 +993,7 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
 {
     if (isSharedWindow)
     {
-        [[view superview] addSubview: view 
+        [[view superview] addSubview: view
                           positioned: NSWindowAbove
                           relativeTo: nil];
     }
@@ -1013,13 +1013,13 @@ void NSViewComponentPeer::toBehind (ComponentPeer* other)
 
     if (isSharedWindow)
     {
-        [[view superview] addSubview: view 
+        [[view superview] addSubview: view
                           positioned: NSWindowBelow
                           relativeTo: o->view];
     }
     else
     {
-        [window orderWindow: NSWindowBelow 
+        [window orderWindow: NSWindowBelow
                  relativeTo: o->window != 0 ? [o->window windowNumber]
                                             : nil ];
     }
@@ -1091,7 +1091,7 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
     String unicode (nsStringToJuce ([ev characters]));
     String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
     int keyCode = getKeyCodeFromEvent (ev);
-    
+
     //DBG ("unicode: " + unicode + " " + String::toHexString ((int) unicode[0]));
     //DBG ("unmodified: " + unmodified + " " + String::toHexString ((int) unmodified[0]));
 
@@ -1106,6 +1106,9 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
                 juce_wchar textCharacter = unicode[0];
                 unicode = unicode.substring (1);
 
+                if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+                    textCharacter = 0;
+
                 used = handleKeyUpOrDown() || used;
                 used = handleKeyPress (keyCode, textCharacter) || used;
             }
@@ -1118,9 +1121,48 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
                 return true;
         }
     }
-    
+
     return false;
 }
+
+bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
+{
+    updateKeysDown (ev, true);
+    bool used = handleKeyEvent (ev, true);
+
+    if (([ev modifierFlags] & NSCommandKeyMask) != 0)
+    {
+        // for command keys, the key-up event is thrown away, so simulate one..
+        updateKeysDown (ev, false);
+        used = (isValidPeer (this) && handleKeyEvent (ev, false)) || used;
+    }
+
+    return used;
+}
+
+bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
+{
+    updateKeysDown (ev, false);
+    return handleKeyEvent (ev, false);
+}
+
+void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
+{
+    updateModifiers (ev);
+    handleModifierKeysChange();
+}
+
+#if MACOS_10_4_OR_EARLIER
+bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
+{
+    if ([ev type] == NSKeyDown)
+        return redirectKeyDown (ev);
+    else if ([ev type] == NSKeyUp)
+        return redirectKeyUp (ev);
+
+    return false;
+}
+#endif
 
 //==============================================================================
 void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
@@ -1186,53 +1228,14 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
     updateModifiers (ev);
 
     handleMouseWheel (roundFloatToInt ([ev deltaX] * 10.0f),
-                      roundFloatToInt ([ev deltaY] * 10.0f), 
+                      roundFloatToInt ([ev deltaY] * 10.0f),
                       getMouseTime (ev));
 }
 
 //==============================================================================
-bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
-{
-    updateKeysDown (ev, true);
-    bool used = handleKeyEvent (ev, true);
-
-    if (([ev modifierFlags] & NSCommandKeyMask) != 0)
-    {
-        // for command keys, the key-up event is thrown away, so simulate one..
-        updateKeysDown (ev, false);
-        used = (isValidPeer (this) && handleKeyEvent (ev, false)) || used;
-    }
-
-    return used;
-}
-
-bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
-{
-    updateKeysDown (ev, false);
-    return handleKeyEvent (ev, false);
-}
-
-void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
-{
-    updateModifiers (ev);
-    handleModifierKeysChange();
-}
-
-#if MACOS_10_4_OR_EARLIER
-bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
-{
-    updateKeysDown (ev, true);
-    const bool used1 = isValidPeer (this) && handleKeyEvent (ev, true);
-    updateKeysDown (ev, false);
-    const bool used2 = isValidPeer (this) && handleKeyEvent (ev, false);
-
-    return used1 || used2;
-}
-#endif
-
 BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender)
 {
-    NSString* bestType 
+    NSString* bestType
         = [[sender draggingPasteboard] availableTypeFromArray: [view getSupportedDragTypes]];
 
     if (bestType == nil)
@@ -1337,7 +1340,7 @@ void NSViewComponentPeer::redirectMovedOrResized()
 //==============================================================================
 void NSViewComponentPeer::repaint (int x, int y, int w, int h)
 {
-    [view setNeedsDisplayInRect: 
+    [view setNeedsDisplayInRect:
             NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
                         (float) w, (float) h)];
 }
@@ -1355,10 +1358,10 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 //==============================================================================
 static Image* NSImageToJuceImage (NSImage* image)
 {
-    JuceNSImage juceIm ((int) [image size].width, 
+    JuceNSImage juceIm ((int) [image size].width,
                         (int) [image size].height,
                         true);
-    
+
     juceIm.drawNSImage (image);
     return juceIm.getJuceImage().createCopy();
 }
