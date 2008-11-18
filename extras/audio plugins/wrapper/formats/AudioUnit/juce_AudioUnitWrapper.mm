@@ -75,7 +75,7 @@ class JuceAUView;
 - (void) dealloc;
 - (unsigned) interfaceVersion;
 - (NSString *) description;
-- (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit 
+- (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit
                       withSize: (NSSize) inPreferredSize;
 @end
 
@@ -951,7 +951,7 @@ private:
 	return [NSString stringWithString: @JucePlugin_Name];
 }
 
-- (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit 
+- (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit
                       withSize: (NSSize) inPreferredSize
 {
     void* pointers[2];
@@ -972,7 +972,7 @@ private:
         return 0;
 
     AudioProcessorEditor* editorComp = filter->createEditorIfNeeded();
-    
+
     if (editorComp == 0)
         return 0;
 DBG (String (inPreferredSize.width) + " " + String (inPreferredSize.height));

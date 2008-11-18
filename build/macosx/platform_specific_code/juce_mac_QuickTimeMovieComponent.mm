@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_QUICKTIME
 
@@ -41,7 +41,7 @@ QuickTimeMovieComponent::QuickTimeMovieComponent()
 {
     setOpaque (true);
     setVisible (true);
-    
+
     QTMovieView* view = [[QTMovieView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
     setView (view);
 }
@@ -73,12 +73,12 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
     {
         MemoryBlock temp;
         movieStream->readIntoMemoryBlock (temp);
-        
+
         const char* const suffixesToTry[] = { ".mov", ".mp3", ".avi", ".m4a" };
-        
+
         for (int i = 0; i < numElementsInArray (suffixesToTry); ++i)
         {
-            movie = [QTMovie movieWithDataReference: [QTDataReference dataReferenceWithReferenceToData: [NSData dataWithBytes: temp.getData() 
+            movie = [QTMovie movieWithDataReference: [QTDataReference dataReferenceWithReferenceToData: [NSData dataWithBytes: temp.getData()
                                                                                                                        length: temp.getSize()]
                                                                                                   name: [NSString stringWithCString: suffixesToTry[i]]
                                                                                               MIMEType: @""]
@@ -88,7 +88,7 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
                 break;
         }
     }
-    
+
     return movie;
 }
 
@@ -182,7 +182,7 @@ double QuickTimeMovieComponent::getMovieDuration() const
 {
     if (movie == 0)
         return 0.0;
-    
+
     QTTime t = [theMovie duration];
     return t.timeValue / (double) t.timeScale;
 }
@@ -191,7 +191,7 @@ void QuickTimeMovieComponent::setLooping (const bool shouldLoop)
 {
     looping = shouldLoop;
 
-    [theMovie setAttribute: [NSNumber numberWithBool: shouldLoop] 
+    [theMovie setAttribute: [NSNumber numberWithBool: shouldLoop]
                     forKey: QTMovieLoopsAttribute];
 }
 

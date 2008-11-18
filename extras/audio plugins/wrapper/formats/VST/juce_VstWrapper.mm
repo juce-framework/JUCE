@@ -64,7 +64,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     NSWindow* pluginWindow = [pluginView window];
     [pluginWindow setExcludedFromWindowsMenu: YES];
 
-    [hostWindow addChildWindow: pluginWindow 
+    [hostWindow addChildWindow: pluginWindow
                        ordered: NSWindowAbove];
     [hostWindow orderFront: nil];
     [pluginWindow orderFront: nil];

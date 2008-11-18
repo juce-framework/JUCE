@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -115,7 +115,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     [panel setDelegate: delegate];
 
     String directory, filename;
-    
+
     if (currentFileOrDirectory.isDirectory())
     {
         directory = currentFileOrDirectory.getFullPathName();

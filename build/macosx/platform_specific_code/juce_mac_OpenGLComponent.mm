@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_OPENGL
 
@@ -51,7 +51,7 @@ public:
         attribs[n++] = NSOpenGLPFADoubleBuffer;
         attribs[n++] = NSOpenGLPFAAccelerated;
         attribs[n++] = NSOpenGLPFAColorSize;
-        attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.redBits, 
+        attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.redBits,
                                                             pixelFormat.greenBits,
                                                             pixelFormat.blueBits);
         attribs[n++] = NSOpenGLPFAAlphaSize;
@@ -63,7 +63,7 @@ public:
         attribs[n++] = NSOpenGLPFAAccumSize;
         attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.accumulationBufferRedBits,
                                                             pixelFormat.accumulationBufferGreenBits,
-                                                            pixelFormat.accumulationBufferBlueBits,        
+                                                            pixelFormat.accumulationBufferBlueBits,
                                                             pixelFormat.accumulationBufferAlphaBits);
 
         // xxx not sure how to do fullSceneAntiAliasingNumSamples..
@@ -74,10 +74,10 @@ public:
         attribs[n++] = NSOpenGLPFANoRecovery;
         attribs[n++] = (NSOpenGLPixelFormatAttribute) 0;
 
-        NSOpenGLPixelFormat* format 
+        NSOpenGLPixelFormat* format
             = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
 
-        NSOpenGLView* view 
+        NSOpenGLView* view
             = [[NSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                       pixelFormat: format];
 
@@ -239,7 +239,7 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
 
         p = aglNextPixelFormat (p);
     }*/
-    
+
     //jassertfalse  //xxx can't see how you do this in cocoa!
 }
 

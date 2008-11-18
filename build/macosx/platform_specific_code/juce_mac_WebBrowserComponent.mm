@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_WEB_BROWSER
 
@@ -62,9 +62,9 @@ END_JUCE_NAMESPACE
     return self;
 }
 
-- (void) webView: (WebView*) sender decidePolicyForNavigationAction: (NSDictionary*) actionInformation 
-                                                            request: (NSURLRequest*) request 
-                                                              frame: (WebFrame*) frame 
+- (void) webView: (WebView*) sender decidePolicyForNavigationAction: (NSDictionary*) actionInformation
+                                                            request: (NSURLRequest*) request
+                                                              frame: (WebFrame*) frame
                                                    decisionListener: (id <WebPolicyDecisionListener>) listener
 {
     NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
@@ -86,7 +86,7 @@ public:
     WebBrowserComponentInternal (WebBrowserComponent* owner)
     {
         webView = [[WebView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
-                                       frameName: @"" 
+                                       frameName: @""
                                        groupName: @""];
         setView (webView);
 
@@ -101,11 +101,11 @@ public:
         setView (0);
     }
 
-    void goToURL (const String& url, 
+    void goToURL (const String& url,
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        NSMutableURLRequest* r 
+        NSMutableURLRequest* r
             = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: juceStringToNS (url)]
                                       cachePolicy: NSURLRequestUseProtocolCachePolicy
                                   timeoutInterval: 30.0];
@@ -113,7 +113,7 @@ public:
         if (postData != 0 && postData->getSize() > 0)
         {
             [r setHTTPMethod: @"POST"];
-            [r setHTTPBody: [NSData dataWithBytes: postData->getData() 
+            [r setHTTPBody: [NSData dataWithBytes: postData->getData()
                                            length: postData->getSize()]];
         }
 
@@ -169,7 +169,7 @@ WebBrowserComponent::~WebBrowserComponent()
 }
 
 //==============================================================================
-void WebBrowserComponent::goToURL (const String& url, 
+void WebBrowserComponent::goToURL (const String& url,
                                    const StringArray* headers,
                                    const MemoryBlock* postData)
 {

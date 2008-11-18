@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -71,10 +71,10 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
         return false;
 
     Component* sourceComp = Component::getComponentUnderMouse();
-    
+
     if (sourceComp == 0)
     {
-        jassertfalse  // this method must be called in response to a 
+        jassertfalse  // this method must be called in response to a
                       // component's mouseDrag event!
         return false;
     }
@@ -94,7 +94,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     for (int i = 0; i < files.size(); ++i)
         [filesArray addObject: juceStringToNS (files[i])];
 
-    [pboard setPropertyList: filesArray 
+    [pboard setPropertyList: filesArray
                     forType: NSFilenamesPboardType];
 
     NSPoint dragPosition = [view convertPoint: [[[view window] currentEvent] locationInWindow]
@@ -106,8 +106,8 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                  at: dragPosition
              offset: NSMakeSize (0, 0)
               event: [[view window] currentEvent]
-         pasteboard: pboard 
-             source: view 
+         pasteboard: pboard
+             source: view
           slideBack: YES];
 
     return true;
@@ -198,7 +198,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
     {
         if (screenSaverDisablerID == 0)
         {
-            IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep, 
+            IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep,
                                  kIOPMAssertionLevelOn, &screenSaverDisablerID);
         }
     }

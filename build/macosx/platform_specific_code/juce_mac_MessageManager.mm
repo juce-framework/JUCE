@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -44,7 +44,7 @@ struct CallbackMessagePayload
 /* When you use multiple DLLs which share similarly-named obj-c classes - like
    for example having more than one juce plugin loaded into a host, then when a
    method is called, the actual code that runs might actually be in a different module
-   than the one you expect... So any calls to library functions or statics that are 
+   than the one you expect... So any calls to library functions or statics that are
    made inside obj-c methods will probably end up getting executed in a different DLL's
    memory space. Not a great thing to happen - this obviously leads to bizarre crashes.
 
@@ -69,7 +69,7 @@ public:
 
         return NSTerminateNow;
     }
-    
+
     virtual BOOL openFile (const NSString* filename)
     {
         if (JUCEApplication::getInstance() != 0)
@@ -152,13 +152,13 @@ typedef void (*juce_HandleProcessFocusChangeFunction)();
     else
     {
         oldDelegate = 0;
-        [center addObserver: self selector: @selector (applicationDidResignActive:)  
+        [center addObserver: self selector: @selector (applicationDidResignActive:)
                        name: NSApplicationDidResignActiveNotification object: NSApp];
 
-        [center addObserver: self selector: @selector (applicationDidBecomeActive:)  
+        [center addObserver: self selector: @selector (applicationDidBecomeActive:)
                        name: NSApplicationDidBecomeActiveNotification object: NSApp];
 
-        [center addObserver: self selector: @selector (applicationWillUnhide:)  
+        [center addObserver: self selector: @selector (applicationWillUnhide:)
                        name: NSApplicationWillUnhideNotification object: NSApp];
 
     }
@@ -274,7 +274,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                                           dequeue: YES];
         [NSApp sendEvent: e];
     }
-    
+
     return ! quitMessagePosted;
 }
 
@@ -284,7 +284,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     if (juceAppDelegate == 0)
         juceAppDelegate = [[JuceAppDelegate alloc] init];
 
-    // This launches a dummy thread, which forces Cocoa to initialise NSThreads 
+    // This launches a dummy thread, which forces Cocoa to initialise NSThreads
     // correctly (needed prior to 10.5)
     if (! [NSThread isMultiThreaded])
         [NSThread detachNewThreadSelector: @selector (dummyMethod)
@@ -305,7 +305,7 @@ void MessageManager::doPlatformSpecificShutdown()
 bool juce_postMessageToSystemQueue (void* message)
 {
     [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
-                     withObject: (id) [[NSData alloc] initWithBytes: &message 
+                     withObject: (id) [[NSData alloc] initWithBytes: &message
                                                              length: (int) sizeof (message)]
                      waitUntilDone: NO];
     return true;

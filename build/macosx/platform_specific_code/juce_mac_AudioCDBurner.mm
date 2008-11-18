@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_USE_CDBURNER
 
@@ -69,25 +69,25 @@ END_JUCE_NAMESPACE
 - (void) setupTrackProperties: (DRTrack*) track;
 
 - (void) cleanupTrackAfterBurn: (DRTrack*) track;
-- (BOOL) cleanupTrackAfterVerification:(DRTrack*)track; 
+- (BOOL) cleanupTrackAfterVerification:(DRTrack*)track;
 - (uint64_t) estimateLengthOfTrack:(DRTrack*)track;
-- (BOOL) prepareTrack:(DRTrack*)track forBurn:(DRBurn*)burn 
-         toMedia:(NSDictionary*)mediaInfo; 
-- (BOOL) prepareTrackForVerification:(DRTrack*)track; 
-- (uint32_t) produceDataForTrack:(DRTrack*)track intoBuffer:(char*)buffer 
-        length:(uint32_t)bufferLength atAddress:(uint64_t)address 
+- (BOOL) prepareTrack:(DRTrack*)track forBurn:(DRBurn*)burn
+         toMedia:(NSDictionary*)mediaInfo;
+- (BOOL) prepareTrackForVerification:(DRTrack*)track;
+- (uint32_t) produceDataForTrack:(DRTrack*)track intoBuffer:(char*)buffer
+        length:(uint32_t)bufferLength atAddress:(uint64_t)address
         blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags;
-- (uint32_t) producePreGapForTrack:(DRTrack*)track 
-             intoBuffer:(char*)buffer length:(uint32_t)bufferLength 
-             atAddress:(uint64_t)address blockSize:(uint32_t)blockSize 
+- (uint32_t) producePreGapForTrack:(DRTrack*)track
+             intoBuffer:(char*)buffer length:(uint32_t)bufferLength
+             atAddress:(uint64_t)address blockSize:(uint32_t)blockSize
              ioFlags:(uint32_t*)flags;
-- (BOOL) verifyDataForTrack:(DRTrack*)track inBuffer:(const char*)buffer 
-         length:(uint32_t)bufferLength atAddress:(uint64_t)address 
-         blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags; 
-- (uint32_t) producePreGapForTrack:(DRTrack*)track 
-        intoBuffer:(char*)buffer length:(uint32_t)bufferLength 
-        atAddress:(uint64_t)address blockSize:(uint32_t)blockSize 
-        ioFlags:(uint32_t*)flags; 
+- (BOOL) verifyDataForTrack:(DRTrack*)track inBuffer:(const char*)buffer
+         length:(uint32_t)bufferLength atAddress:(uint64_t)address
+         blockSize:(uint32_t)blockSize ioFlags:(uint32_t*)flags;
+- (uint32_t) producePreGapForTrack:(DRTrack*)track
+        intoBuffer:(char*)buffer length:(uint32_t)bufferLength
+        atAddress:(uint64_t)address blockSize:(uint32_t)blockSize
+        ioFlags:(uint32_t*)flags;
 @end
 
 //==============================================================================
@@ -110,8 +110,8 @@ END_JUCE_NAMESPACE
 
 - (bool) isDiskPresent
 {
-    return [device isValid] 
-             && [[[device status] objectForKey: DRDeviceMediaStateKey] 
+    return [device isValid]
+             && [[[device status] objectForKey: DRDeviceMediaStateKey]
                     isEqualTo: DRDeviceMediaStateMediaPresent];
 }
 
@@ -133,7 +133,7 @@ END_JUCE_NAMESPACE
     [p release];
 }
 
-- (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener errorString: (JUCE_NAMESPACE::String*) error 
+- (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener errorString: (JUCE_NAMESPACE::String*) error
          ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting
 {
     DRBurn* burn = [DRBurn burnForDevice: device];
@@ -150,7 +150,7 @@ END_JUCE_NAMESPACE
     [d autorelease];
     [d setObject: [NSNumber numberWithBool: peformFakeBurnForTesting] forKey: DRBurnTestingKey];
     [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnVerifyDiscKey];
-    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) 
+    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount)
           forKey: DRBurnCompletionActionKey];
     [burn setProperties: d];
 
@@ -180,7 +180,7 @@ NSLog ([[burn status] description]);
             break;
         }
 
-        NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey] 
+        NSString* err = (NSString*) [[[burn status] objectForKey: DRErrorStatusKey]
                                                     objectForKey: DRErrorStatusErrorStringKey];
 
         if ([err length] > 0)
@@ -214,7 +214,7 @@ NSLog ([[burn status] description]);
     [p setObject:[NSNumber numberWithInt:0] forKey: DRBlockTypeKey];
     [p setObject:[NSNumber numberWithInt:0] forKey: DRTrackModeKey];
     [p setObject:[NSNumber numberWithInt:0] forKey: DRSessionFormatKey];
-    
+
 
     [track setProperties: p];
     [p release];
@@ -255,7 +255,7 @@ NSLog ([[burn status] description]);
     return lengthInFrames;
 }
 
-- (BOOL) prepareTrack: (DRTrack*) track forBurn: (DRBurn*) burn 
+- (BOOL) prepareTrack: (DRTrack*) track forBurn: (DRBurn*) burn
          toMedia: (NSDictionary*) mediaInfo
 {
     if (source != 0)
@@ -273,8 +273,8 @@ NSLog ([[burn status] description]);
     return true;
 }
 
-- (uint32_t) produceDataForTrack: (DRTrack*) track intoBuffer: (char*) buffer 
-        length: (uint32_t) bufferLength atAddress: (uint64_t) address 
+- (uint32_t) produceDataForTrack: (DRTrack*) track intoBuffer: (char*) buffer
+        length: (uint32_t) bufferLength atAddress: (uint64_t) address
         blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
     if (source != 0)
@@ -306,17 +306,17 @@ NSLog ([[burn status] description]);
     return 0;
 }
 
-- (uint32_t) producePreGapForTrack: (DRTrack*) track 
-        intoBuffer: (char*) buffer length: (uint32_t) bufferLength 
-        atAddress: (uint64_t) address blockSize: (uint32_t) blockSize 
+- (uint32_t) producePreGapForTrack: (DRTrack*) track
+        intoBuffer: (char*) buffer length: (uint32_t) bufferLength
+        atAddress: (uint64_t) address blockSize: (uint32_t) blockSize
         ioFlags: (uint32_t*) flags
 {
     zeromem (buffer, bufferLength);
     return bufferLength;
 }
 
-- (BOOL) verifyDataForTrack: (DRTrack*) track inBuffer: (const char*) buffer 
-         length: (uint32_t) bufferLength atAddress: (uint64_t) address 
+- (BOOL) verifyDataForTrack: (DRTrack*) track inBuffer: (const char*) buffer
+         length: (uint32_t) bufferLength atAddress: (uint64_t) address
          blockSize: (uint32_t) blockSize ioFlags: (uint32_t*) flags
 {
     return true;
@@ -424,8 +424,8 @@ const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressLis
     if (dev != 0)
     {
         error = String::empty;
-        [dev burn: listener 
-             errorString: &error 
+        [dev burn: listener
+             errorString: &error
              ejectAfterwards: ejectDiscAfterwards
              isFake: peformFakeBurnForTesting];
     }

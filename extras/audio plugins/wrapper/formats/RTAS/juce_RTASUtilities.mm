@@ -62,7 +62,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
     NSView* pluginView = (NSView*) comp->getWindowHandle();
     NSWindow* pluginWindow = [pluginView window];
 
-    [hostWindow addChildWindow: pluginWindow 
+    [hostWindow addChildWindow: pluginWindow
                        ordered: NSWindowAbove];
     [hostWindow orderFront: nil];
     return hostWindow;

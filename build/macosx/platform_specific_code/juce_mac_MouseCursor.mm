@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -38,21 +38,21 @@ static NSImage* juceImageToNSImage (const Image& image)
 {
     const ScopedAutoReleasePool pool;
     int lineStride, pixelStride;
-    const uint8* pixels = image.lockPixelDataReadOnly (0, 0, image.getWidth(), image.getHeight(), 
+    const uint8* pixels = image.lockPixelDataReadOnly (0, 0, image.getWidth(), image.getHeight(),
                                                        lineStride, pixelStride);
 
     NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
-		initWithBitmapDataPlanes: NULL
-					  pixelsWide: image.getWidth()
-					  pixelsHigh: image.getHeight()
-				   bitsPerSample: 8
-				 samplesPerPixel: image.hasAlphaChannel() ? 4 : 3
-						hasAlpha: image.hasAlphaChannel()
-						isPlanar: NO
-				  colorSpaceName: NSCalibratedRGBColorSpace
+        initWithBitmapDataPlanes: NULL
+                      pixelsWide: image.getWidth()
+                      pixelsHigh: image.getHeight()
+                   bitsPerSample: 8
+                 samplesPerPixel: image.hasAlphaChannel() ? 4 : 3
+                        hasAlpha: image.hasAlphaChannel()
+                        isPlanar: NO
+                  colorSpaceName: NSCalibratedRGBColorSpace
                     bitmapFormat: (NSBitmapFormat) 0
-					 bytesPerRow: lineStride
-					bitsPerPixel: pixelStride * 8];
+                     bytesPerRow: lineStride
+                    bitsPerPixel: pixelStride * 8];
 
     unsigned char* newData = [rep bitmapData];
     memcpy (newData, pixels, lineStride * image.getHeight());
@@ -69,7 +69,7 @@ static NSImage* juceImageToNSImage (const Image& image)
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
     NSImage* im = juceImageToNSImage (image);
-    NSCursor* c = [[NSCursor alloc] initWithImage: im 
+    NSCursor* c = [[NSCursor alloc] initWithImage: im
                                           hotSpot: NSMakePoint (hotspotX, hotspotY)];
     [im release];
 
@@ -84,7 +84,7 @@ static void* juce_cursorFromData (const unsigned char* data, const int size, flo
     if (im == 0)
         return 0;
 
-    void* const curs = juce_createMouseCursorFromImage (*im, 
+    void* const curs = juce_createMouseCursorFromImage (*im,
                                                         (int) (hx * im->getWidth()),
                                                         (int) (hy * im->getHeight()));
     delete im;
@@ -98,7 +98,7 @@ static void* juce_cursorFromWebKitFile (const char* filename, float hx, float hy
     MemoryBlock mb;
     if (f.getChildFile (filename).loadFileAsData (mb))
         return juce_cursorFromData ((const unsigned char*) mb.getData(), mb.getSize(), hx, hy);
-    
+
     return 0;
 }
 

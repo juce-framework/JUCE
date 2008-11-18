@@ -759,7 +759,7 @@ private:
             return false;
         }
 
-        if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 
+        if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                       0, &dataSize, &isWritable) != noErr)
         {
             return false;
@@ -768,7 +768,7 @@ private:
         NSView* pluginView = 0;
         AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) juce_calloc (dataSize);
 
-        if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global, 
+        if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                   0, info, &dataSize) == noErr)
         {
             NSString* viewClassName = (NSString*) (info->mCocoaAUViewClass[0]);
@@ -781,7 +781,7 @@ private:
                  && [viewClass instancesRespondToSelector: @selector (uiViewForAudioUnit: withSize:)])
             {
                 id factory = [[[viewClass alloc] init] autorelease];
-                pluginView = [factory uiViewForAudioUnit: plugin.audioUnit 
+                pluginView = [factory uiViewForAudioUnit: plugin.audioUnit
                                                 withSize: NSMakeSize (getWidth(), getHeight())];
             }
 
@@ -811,7 +811,7 @@ public:
           viewComponent (0)
     {
         addAndMakeVisible (innerWrapper = new InnerWrapperComponent (this));
- 
+
         activeWindows.add (this);
 
         setOpaque (true);
@@ -877,7 +877,7 @@ public:
 
         return viewComponent;
     }
-    
+
     void closeViewComponent()
     {
         if (viewComponent != 0)
@@ -923,12 +923,12 @@ private:
 
             HIViewRef pluginView = 0;
 
-            AudioUnitCarbonViewCreate (viewComponent, 
+            AudioUnitCarbonViewCreate (viewComponent,
                                        owner->getAudioUnit(),
-                                       windowRef, 
+                                       windowRef,
                                        rootView,
                                        &pos,
-                                       &size, 
+                                       &size,
                                        (ControlRef*) &pluginView);
 
             return pluginView;

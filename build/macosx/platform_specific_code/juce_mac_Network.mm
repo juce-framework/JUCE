@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
@@ -197,7 +197,7 @@ using namespace JUCE_NAMESPACE;
 class JuceURLConnectionMessageThread  : public Thread
 {
     JuceURLConnection* owner;
-    
+
 public:
     JuceURLConnectionMessageThread (JuceURLConnection* owner_)
         : Thread (T("http connection")),
@@ -267,7 +267,7 @@ public:
 
 - (void) createConnection
 {
-    connection = [[NSURLConnection alloc] initWithRequest: request 
+    connection = [[NSURLConnection alloc] initWithRequest: request
                                                  delegate: self];
 
     if (connection == nil)
@@ -318,7 +318,7 @@ public:
 - (int) read: (char*) dest numBytes: (int) numNeeded
 {
     int numDone = 0;
-    
+
     while (numNeeded > 0)
     {
         int available = jmin (numNeeded, [data length]);
@@ -329,7 +329,7 @@ public:
             [data getBytes: dest length: available];
             [data replaceBytesInRange: NSMakeRange (0, available) withBytes: nil length: 0];
             [dataLock unlock];
-            
+
             numDone += available;
             numNeeded -= available;
             dest += available;
@@ -398,7 +398,7 @@ void* juce_openInternetFile (const String& url,
 
     if (isPost && postData.getSize() > 0)
     {
-        [req setHTTPBody: [NSData dataWithBytes: postData.getData() 
+        [req setHTTPBody: [NSData dataWithBytes: postData.getData()
                                          length: postData.getSize()]];
     }
 
@@ -416,7 +416,7 @@ void* juce_openInternetFile (const String& url,
 void juce_closeInternetFile (void* handle)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
-    
+
     if (s != 0)
     {
         const ScopedAutoReleasePool pool;
@@ -428,7 +428,7 @@ void juce_closeInternetFile (void* handle)
 int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
-    
+
     if (s != 0)
     {
         const ScopedAutoReleasePool pool;
@@ -441,7 +441,7 @@ int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
 int juce_getInternetFileContentLength (void* handle)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
-    
+
     if (s != 0)
     {
         //xxx todo
@@ -454,7 +454,7 @@ int juce_getInternetFileContentLength (void* handle)
 int juce_seekInInternetFile (void* handle, int newPosition)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
-    
+
     if (s != 0)
         return [s readPosition];
 

@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -67,12 +67,12 @@ public:
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
         Component* const topComp = owner->getTopLevelComponent();
-        
+
         if (topComp->getPeer() != 0)
         {
             int x = 0, y = 0;
             owner->relativePositionToOtherComponent (topComp, x, y);
-            
+
             NSRect r;
             r.origin.x = (float) x;
             r.origin.y = (float) y;
@@ -87,7 +87,7 @@ public:
     void componentPeerChanged()
     {
         NSViewComponentPeer* const peer = dynamic_cast <NSViewComponentPeer*> (owner->getPeer());
-    
+
         if (currentPeer != peer)
         {
             [view removeFromSuperview];

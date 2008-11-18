@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -71,10 +71,10 @@ public:
     ~JuceMainMenuHandler() throw()
     {
         setMenu (0);
-        
+
         jassert (instance == this);
         instance = 0;
-        
+
         [callback release];
     }
 
@@ -89,12 +89,12 @@ public:
 
             if (currentModel != 0)
                 currentModel->addListener (this);
-            
+
             menuBarItemsChanged (0);
         }
     }
 
-    void addSubMenu (NSMenu* parent, const PopupMenu& child, 
+    void addSubMenu (NSMenu* parent, const PopupMenu& child,
                      const String& name, int& menuId, int& tag)
     {
         NSMenuItem* item = [parent addItemWithTitle: juceStringToNS (name)
@@ -103,7 +103,7 @@ public:
         [item setTag: tag];
 
         NSMenu* sub = createMenu (child, name, menuId, tag);
-        
+
         [parent setSubmenu: sub forItem: item];
         [sub setAutoenablesItems: false];
         [sub release];
@@ -150,7 +150,7 @@ public:
                           charactersIgnoringModifiers: f35String
                                             isARepeat: NO
                                               keyCode: 0];
-        
+
         [menu performKeyEquivalent: f35Event];
         [menu removeItem: item];
     }
@@ -158,7 +158,7 @@ public:
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
     {
         NSMenuItem* item = [[NSApp mainMenu] itemWithTag: info.commandID];
-        
+
         if (item != 0)
             flashMenuBar ([item menu]);
     }
@@ -171,14 +171,14 @@ public:
             {
                 ApplicationCommandTarget::InvocationInfo info (commandId);
                 info.invocationMethod = ApplicationCommandTarget::InvocationInfo::fromMenu;
-                
+
                 commandManager->invoke (info, true);
             }
 
             currentModel->menuItemSelected (commandId, topLevelIndex);
         }
     }
-    
+
     MenuBarModel* currentModel;
 
 private:
@@ -219,7 +219,7 @@ private:
 
                 [item setTag: iter.itemId];
                 [item setEnabled: iter.isEnabled];
-                
+
                 NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, id, topLevelIndex);
                 [m setSubmenu: sub forItem: item];
                 [sub release];
@@ -243,7 +243,7 @@ private:
                 {
                     const Array <KeyPress> keyPresses (iter.commandManager->getKeyMappings()
                                                        ->getKeyPressesAssignedToCommand (iter.itemId));
-                    
+
                     if (keyPresses.size() > 0)
                     {
                         const KeyPress& kp = keyPresses.getReference(0);
@@ -273,7 +273,7 @@ private:
                 }
             }
         }
-        
+
         [m update];
         return m;
     }
@@ -305,7 +305,7 @@ END_JUCE_NAMESPACE
         NSArray* info = (NSArray*) [item representedObject];
 
         owner->invoke ([item tag],
-                       (ApplicationCommandManager*) (pointer_sized_int) 
+                       (ApplicationCommandManager*) (pointer_sized_int)
                             [((NSNumber*) [info objectAtIndex: 0]) unsignedLongLongValue],
                        (int) [((NSNumber*) [info objectAtIndex: 1]) intValue]);
     }
@@ -328,7 +328,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel) throw()
         {
             if (JuceMainMenuHandler::instance == 0)
                 JuceMainMenuHandler::instance = new JuceMainMenuHandler();
-            
+
             JuceMainMenuHandler::instance->setMenu (newMenuBarModel);
         }
     }
@@ -336,7 +336,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel) throw()
 
 MenuBarModel* MenuBarModel::getMacMainMenu() throw()
 {
-    return JuceMainMenuHandler::instance != 0 
+    return JuceMainMenuHandler::instance != 0
             ? JuceMainMenuHandler::instance->currentModel : 0;
 }
 
@@ -344,59 +344,59 @@ MenuBarModel* MenuBarModel::getMacMainMenu() throw()
 //==============================================================================
 static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName)
 {
-	NSMenuItem* item;
+    NSMenuItem* item;
 
     // xxx should allow the 'about' and 'preferences' items to be turned on programatically...
 /*    item = [menu addItemWithTitle: juceStringToNS ("About " + appName)]
-						   action: @selector(orderFrontStandardAboutPanel:)  keyEquivalent: @""];
-	[item setTarget: NSApp];
-	[menu addItem: [NSMenuItem separatorItem]];
+                           action: @selector(orderFrontStandardAboutPanel:)  keyEquivalent: @""];
+    [item setTarget: NSApp];
+    [menu addItem: [NSMenuItem separatorItem]];
 */
 
 /*    item = [menu addItemWithTitle: NSLocalizedString (@"Preferences...", nil)
-						   action: nil  keyEquivalent: @","];
-	[menu addItem: [NSMenuItem separatorItem]];
+                           action: nil  keyEquivalent: @","];
+    [menu addItem: [NSMenuItem separatorItem]];
 */
 
     // Services...
     item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Services", nil)
                                       action: nil  keyEquivalent: @""];
-	[menu addItem: item];
+    [menu addItem: item];
     [item release];
-	NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: @"Services"];
-	[menu setSubmenu: servicesMenu forItem: item];
-	[NSApp setServicesMenu: servicesMenu];
-	[servicesMenu release];
-	[menu addItem: [NSMenuItem separatorItem]];
+    NSMenu* servicesMenu = [[NSMenu alloc] initWithTitle: @"Services"];
+    [menu setSubmenu: servicesMenu forItem: item];
+    [NSApp setServicesMenu: servicesMenu];
+    [servicesMenu release];
+    [menu addItem: [NSMenuItem separatorItem]];
 
     // Hide + Show stuff...
     item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Hide " + appName)
                                       action: @selector (hide:)  keyEquivalent: @"h"];
-	[item setTarget: NSApp];
-	[menu addItem: item];
+    [item setTarget: NSApp];
+    [menu addItem: item];
     [item release];
 
     item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Hide Others", nil)
                         action: @selector (hideOtherApplications:)  keyEquivalent: @"h"];
-	[item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
-	[item setTarget: NSApp];
-	[menu addItem: item];
+    [item setKeyEquivalentModifierMask: NSCommandKeyMask | NSAlternateKeyMask];
+    [item setTarget: NSApp];
+    [menu addItem: item];
     [item release];
 
     item = [[NSMenuItem alloc] initWithTitle: NSLocalizedString (@"Show All", nil)
                             action: @selector (unhideAllApplications:)  keyEquivalent: @""];
-	[item setTarget: NSApp];
-	[menu addItem: item];
+    [item setTarget: NSApp];
+    [menu addItem: item];
     [item release];
 
-	[menu addItem: [NSMenuItem separatorItem]];
+    [menu addItem: [NSMenuItem separatorItem]];
 
     // Quit item....
     item = [[NSMenuItem alloc] initWithTitle: juceStringToNS ("Quit " + appName)
                                       action: @selector (terminate:)  keyEquivalent: @"q"];
 
-	[item setTarget: NSApp];
-	[menu addItem: item];
+    [item setTarget: NSApp];
+    [menu addItem: item];
     [item release];
 
     return menu;

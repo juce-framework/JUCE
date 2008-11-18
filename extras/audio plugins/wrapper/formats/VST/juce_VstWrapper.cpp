@@ -230,7 +230,7 @@ public:
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
-}; 
+};
 
 
 #endif

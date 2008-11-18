@@ -29,7 +29,7 @@
   ==============================================================================
 */
 
-// (This file gets included by juce_mac_NativeCode.mm, rather than being 
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
@@ -114,7 +114,7 @@ void SystemStats::initialiseStats() throw()
         rlimit lim;
         getrlimit (RLIMIT_NOFILE, &lim);
         lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
-        setrlimit (RLIMIT_NOFILE, &lim);      
+        setrlimit (RLIMIT_NOFILE, &lim);
     }
 }
 
@@ -181,7 +181,7 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     long bytes;
     if (Gestalt (gestaltPhysicalRAMSize, &bytes) == noErr)
         return (int) (((unsigned long) bytes) / (1024 * 1024));
-    
+
     return 0;
 #else
     return (int) ([[NSProcessInfo processInfo] physicalMemory] / (1024 * 1024));
