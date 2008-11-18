@@ -547,7 +547,7 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
 
         Path p;
 
-        for (float x = (float) (-stripeWidth - position); x < width + stripeWidth; x += stripeWidth)
+        for (float x = (float) (- position); x < width + stripeWidth; x += stripeWidth)
             p.addQuadrilateral (x, 0.0f,
                                 x + stripeWidth * 0.5f, 0.0f,
                                 x, (float) height,

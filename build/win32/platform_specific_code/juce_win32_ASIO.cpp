@@ -738,7 +738,8 @@ public:
 
         JUCE_TRY
         {
-            close();
+            // are there are devices that need to be closed before showing their control panel?
+            // close();
             insideControlPanelModalLoop = true;
 
             const uint32 started = Time::getMillisecondCounter();

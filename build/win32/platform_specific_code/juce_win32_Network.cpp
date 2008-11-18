@@ -217,6 +217,26 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     }
 }
 
+int juce_getInternetFileContentLength (void* handle)
+{
+    DWORD result = 0;
+    const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
+
+    if (crs != 0)
+    {
+        DWORD index = 0;
+        DWORD size = sizeof (result);
+
+        HttpQueryInfo (crs->request,
+                       HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+                       &result,
+                       &size,
+                       &index);
+    }
+
+    return (int) result;
+}
+
 void juce_closeInternetFile (void* handle)
 {
     if (handle != 0)

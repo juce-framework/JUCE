@@ -80,14 +80,15 @@ void Label::setText (const String& newText,
     if (text != newText)
     {
         text = newText;
-
-        if (broadcastChangeMessage)
-            triggerAsyncUpdate();
-
         repaint();
 
         if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
+        {
             componentMovedOrResized (*ownerComponent, true, true);
+
+            if (broadcastChangeMessage)
+                callChangeListeners();
+        }
     }
 }
 
@@ -220,8 +221,6 @@ bool Label::updateFromTextEditorContents()
     if (text != newText)
     {
         text = newText;
-
-        triggerAsyncUpdate();
         repaint();
 
         if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
@@ -247,6 +246,9 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
             textWasEdited();
 
         exitModalState (0);
+
+        if (changed && isValidComponent())
+            callChangeListeners();
     }
 }
 
@@ -332,6 +334,15 @@ void Label::colourChanged()
     repaint();
 }
 
+void Label::setMinimumHorizontalScale (const float newScale)
+{
+    if (minimumHorizontalScale != newScale)
+    {
+        minimumHorizontalScale = newScale;
+        repaint();
+    }
+}
+
 //==============================================================================
 // We'll use a custom focus traverser here to make sure focus goes from the
 // text editor to another component rather than back to the label itself.
@@ -371,7 +382,7 @@ void Label::removeListener (LabelListener* const listener) throw()
     listeners.removeValue (listener);
 }
 
-void Label::handleAsyncUpdate()
+void Label::callChangeListeners()
 {
     for (int i = listeners.size(); --i >= 0;)
     {
@@ -408,7 +419,12 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
         hideEditor (true);
 
         if (changed)
+        {
             textWasEdited();
+
+            if (isValidComponent())
+                callChangeListeners();
+        }
     }
 }
 

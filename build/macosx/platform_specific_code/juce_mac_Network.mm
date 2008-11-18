@@ -438,6 +438,19 @@ int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
     return 0;
 }
 
+int juce_getInternetFileContentLength (void* handle)
+{
+    JuceURLConnection* const s = (JuceURLConnection*) handle;
+    
+    if (s != 0)
+    {
+        //xxx todo
+        jassertfalse
+    }
+
+    return 0;
+}
+
 int juce_seekInInternetFile (void* handle, int newPosition)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
