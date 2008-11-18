@@ -778,7 +778,11 @@ protected:
                               UInt8 inChannel,
                               UInt8 inData1,
                               UInt8 inData2,
+#if defined(MAC_OS_X_VERSION_10_5)
+                              UInt32 inStartFrame
+#else 
                               long inStartFrame)
+#endif
     {
 #if JucePlugin_WantsMidiInput
         JUCE_NAMESPACE::uint8 data [4];
