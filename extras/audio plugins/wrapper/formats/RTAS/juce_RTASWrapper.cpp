@@ -88,14 +88,7 @@
   #pragma pack (push, 8)
 #endif
 
-// On the mac, the amalgamated build works ok, but causes a few strange problems in windows,
-// so stick with the normal one on win32 for now...
-#ifdef _MSC_VER
- #include "../../../../../juce.h"
-#else
- #include "../../../../../juce.h"
-#endif
-
+#include "../../../../../juce_amalgamated.h"
 #include "../../juce_IncludeCharacteristics.h"
 
 #ifdef _MSC_VER

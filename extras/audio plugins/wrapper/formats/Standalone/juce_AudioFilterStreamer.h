@@ -32,7 +32,7 @@
 #ifndef __JUCE_AUDIOFILTERSTREAMER_JUCEHEADER__
 #define __JUCE_AUDIOFILTERSTREAMER_JUCEHEADER__
 
-#include "../../../../../juce.h"
+#include "../../../../../juce_amalgamated.h"
 
 
 //==============================================================================

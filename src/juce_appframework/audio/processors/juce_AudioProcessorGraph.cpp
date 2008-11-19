@@ -514,7 +514,10 @@ public:
           totalChans (jmax (1, totalChans_)),
           midiBufferToUse (midiBufferToUse_)
     {
-        channels = (float**) juce_calloc (sizeof (float*) * totalChans_);
+        channels = (float**) juce_calloc (sizeof (float*) * totalChans);
+
+        while (audioChannelsToUse.size() < totalChans)
+            audioChannelsToUse.add (0);
     }
 
     ~ProcessBufferOp() throw()

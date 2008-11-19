@@ -36,8 +36,8 @@
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #include "../../juce_IncludeCharacteristics.h"
-//#include "../../../../../juce_amalgamated.h"
-#include "../../../../../juce.h"
+#include "../../../../../juce_amalgamated.h"
+//#include "../../../../../juce.h"
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9

@@ -30,7 +30,7 @@
 */
 
 #include <Cocoa/Cocoa.h>
-#include "../../../../../juce.h"
+#include "../../../../../juce_amalgamated.h"
 
 //==============================================================================
 void* attachSubWindow (void* hostWindowRef, Component* comp)
