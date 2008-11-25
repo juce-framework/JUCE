@@ -2574,6 +2574,13 @@ private:
 };
 
 //==============================================================================
+void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
+{
+    if (enableOrDisable)
+        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+}
+
+//==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
 {
     return new LinuxComponentPeer (this, styleFlags);

@@ -121,7 +121,8 @@ class ContentComp  : public Component,
         setDefaultLookAndFeel      = 0x200b,
         setOldSchoolLookAndFeel    = 0x200c,
         useNativeTitleBar          = 0x200d,
-        useNativeMenus             = 0x200e
+        useNativeMenus             = 0x200e,
+        goToKioskMode              = 0x200f
     };
 
 public:
@@ -223,6 +224,10 @@ public:
 #if JUCE_MAC
             menu.addCommandItem (commandManager, useNativeMenus);
 #endif
+
+#if ! JUCE_LINUX
+            menu.addCommandItem (commandManager, goToKioskMode);
+#endif
         }
 
         return menu;
@@ -267,6 +272,10 @@ public:
                                   useNativeTitleBar
 #if JUCE_MAC
                                 , useNativeMenus
+#endif
+
+#if ! JUCE_LINUX
+                                , goToKioskMode
 #endif
         };
 
@@ -381,6 +390,13 @@ public:
             break;
 #endif
 
+#if ! JUCE_LINUX
+        case goToKioskMode:
+            result.setInfo (T("Show full-screen kiosk mode"), String::empty, generalCategory, 0);
+            result.setTicked (Desktop::getInstance().getKioskModeComponent() != 0);
+            break;
+#endif
+
         default:
             break;
         };
@@ -477,6 +493,20 @@ public:
             {
                 MenuBarModel::setMacMainMenu ((ContentComp*) mainWindow->getContentComponent());
                 mainWindow->setMenuBar (0);
+            }
+
+            break;
+#endif
+
+#if ! JUCE_LINUX
+        case goToKioskMode:
+            if (Desktop::getInstance().getKioskModeComponent() == 0)
+            {
+                Desktop::getInstance().setKioskModeComponent (getTopLevelComponent());
+            }
+            else
+            {
+                Desktop::getInstance().setKioskModeComponent (0);
             }
 
             break;

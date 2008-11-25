@@ -23677,6 +23677,25 @@ public:
     /** Unregisters a listener that was added with addFocusChangeListener(). */
     void removeFocusChangeListener (FocusChangeListener* const listener) throw();
 
+    /** Takes a component and makes it full-screen, removing the taskbar, dock, etc.
+
+        The component must already be on the desktop for this method to work. It will
+        be resized to completely fill the screen and any extraneous taskbars, menu bars,
+        etc will be hidden.
+
+        To exit kiosk mode, just call setKioskModeComponent (0). When this is called,
+        the component that's currently being used will be resized back to the size
+        and position it was in before being put into this mode.
+    */
+    void setKioskModeComponent (Component* componentToUse);
+
+    /** Returns the component that is currently being used in kiosk-mode.
+
+        This is the component that was last set by setKioskModeComponent(). If none
+        has been set, this returns 0.
+    */
+    Component* getKioskModeComponent() const             { return kioskModeComponent; }
+
     /** Returns the number of components that are currently active as top-level
         desktop windows.
 
@@ -23728,6 +23747,9 @@ private:
 
     Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
     int lastMouseX, lastMouseY;
+
+    Component* kioskModeComponent;
+    Rectangle kioskComponentOriginalBounds;
 
     void timerCallback();
     void sendMouseMove();
@@ -33289,6 +33311,10 @@ protected:
     /** Called after the user changes the text.
     */
     virtual void textWasEdited();
+
+    /** Called when the text has been altered.
+    */
+    virtual void textWasChanged();
 
 private:
     String text;
@@ -43159,13 +43185,23 @@ public:
 
         You can pass 0 to stop the current model being displayed. Be careful
         not to delete a model while it is being used.
+
+        An optional extra menu can be specified, containing items to add to the top of
+        the apple menu. (Confusingly, the 'apple' menu isn't the one with a picture of
+        an apple, it's the one next to it, with your application's name at the top
+        and the services menu etc on it). When one of these items is selected, the
+        menu bar model will be used to invoke it, and in the menuItemSelected() callback
+        the topLevelMenuIndex parameter will be -1. If you pass in an extraAppleMenuItems
+        object then newMenuBarModel must be non-null.
     */
-    static void setMacMainMenu (MenuBarModel* newMenuBarModel) throw();
+    static void setMacMainMenu (MenuBarModel* newMenuBarModel,
+                                const PopupMenu* extraAppleMenuItems = 0) throw();
 
     /** MAC ONLY - Returns the menu model that is currently being shown as
         the main menu bar.
     */
     static MenuBarModel* getMacMainMenu() throw();
+
 #endif
 
     /** @internal */

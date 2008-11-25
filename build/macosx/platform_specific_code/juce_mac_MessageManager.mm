@@ -110,8 +110,6 @@ public:
 END_JUCE_NAMESPACE
 using namespace JUCE_NAMESPACE;
 
-typedef void (*juce_HandleProcessFocusChangeFunction)();
-
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
 
 @interface JuceAppDelegate   : NSObject

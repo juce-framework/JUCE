@@ -176,6 +176,26 @@ public:
     void removeFocusChangeListener (FocusChangeListener* const listener) throw();
 
     //==============================================================================
+    /** Takes a component and makes it full-screen, removing the taskbar, dock, etc.
+
+        The component must already be on the desktop for this method to work. It will
+        be resized to completely fill the screen and any extraneous taskbars, menu bars,
+        etc will be hidden.
+        
+        To exit kiosk mode, just call setKioskModeComponent (0). When this is called, 
+        the component that's currently being used will be resized back to the size
+        and position it was in before being put into this mode.
+    */
+    void setKioskModeComponent (Component* componentToUse);
+
+    /** Returns the component that is currently being used in kiosk-mode.
+
+        This is the component that was last set by setKioskModeComponent(). If none
+        has been set, this returns 0.
+    */
+    Component* getKioskModeComponent() const             { return kioskModeComponent; }
+
+    //==============================================================================
     /** Returns the number of components that are currently active as top-level
         desktop windows.
 
@@ -230,6 +250,9 @@ private:
 
     Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
     int lastMouseX, lastMouseY;
+
+    Component* kioskModeComponent;
+    Rectangle kioskComponentOriginalBounds;
 
     void timerCallback();
     void sendMouseMove();

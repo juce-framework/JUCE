@@ -1962,6 +1962,8 @@ private:
                         // so this forces an update when the app is brought to the front
                         if (wParam != FALSE)
                             juce_repeatLastProcessPriority();
+                        else
+                            Desktop::getInstance().setKioskModeComponent (0); // turn kiosk mode off if we lose focus
 
                         juce_CheckCurrentlyFocusedTopLevelWindow();
                         modifiersAtLastCallback = -1;
@@ -2297,6 +2299,13 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 bool Desktop::isScreenSaverEnabled() throw()
 {
     return screenSaverAllowed;
+}
+
+//==============================================================================
+void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
+{
+    if (enableOrDisable)
+        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
 }
 
 //==============================================================================

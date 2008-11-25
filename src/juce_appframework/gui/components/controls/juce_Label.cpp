@@ -82,13 +82,13 @@ void Label::setText (const String& newText,
         text = newText;
         repaint();
 
+        textWasChanged();
+
         if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
-        {
             componentMovedOrResized (*ownerComponent, true, true);
 
-            if (broadcastChangeMessage)
-                callChangeListeners();
-        }
+        if (broadcastChangeMessage)
+            callChangeListeners();
     }
 }
 
@@ -194,6 +194,10 @@ void Label::textWasEdited()
 {
 }
 
+void Label::textWasChanged()
+{
+}
+
 void Label::showEditor()
 {
     if (editor == 0)
@@ -222,6 +226,8 @@ bool Label::updateFromTextEditorContents()
     {
         text = newText;
         repaint();
+
+        textWasChanged();
 
         if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
             componentMovedOrResized (*ownerComponent, true, true);

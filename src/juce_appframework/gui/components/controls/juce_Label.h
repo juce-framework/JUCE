@@ -305,6 +305,10 @@ protected:
     */
     virtual void textWasEdited();
 
+    /** Called when the text has been altered.
+    */
+    virtual void textWasChanged();
+
 private:
     String text;
     Font font;

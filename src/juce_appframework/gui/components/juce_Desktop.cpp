@@ -51,7 +51,8 @@ Desktop::Desktop() throw()
       monitorCoordsClipped (2),
       monitorCoordsUnclipped (2),
       lastMouseX (0),
-      lastMouseY (0)
+      lastMouseY (0),
+      kioskModeComponent (0)
 {
     refreshMonitorSizes();
 }
@@ -325,5 +326,41 @@ void Desktop::resetTimer() throw()
 
     getMousePosition (lastMouseX, lastMouseY);
 }
+
+//==============================================================================
+extern void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable);
+
+void Desktop::setKioskModeComponent (Component* componentToUse)
+{
+    if (kioskModeComponent != componentToUse)
+    {
+        // agh! Don't delete a component without first stopping it being the kiosk comp
+        jassert (kioskModeComponent == 0 || kioskModeComponent->isValidComponent());
+        // agh! Don't remove a component from the desktop if it's the kiosk comp!
+        jassert (kioskModeComponent == 0 || kioskModeComponent->isOnDesktop());
+
+        if (kioskModeComponent->isValidComponent())
+        {
+            juce_setKioskComponent (kioskModeComponent, false);
+
+            kioskModeComponent->setBounds (kioskComponentOriginalBounds);
+        }
+
+        kioskModeComponent = componentToUse;
+
+        if (kioskModeComponent != 0)
+        {
+            jassert (kioskModeComponent->isValidComponent());
+
+            // Only components that are already on the desktop can be put into kiosk mode!
+            jassert (kioskModeComponent->isOnDesktop());
+
+            kioskComponentOriginalBounds = kioskModeComponent->getBounds();
+
+            juce_setKioskComponent (kioskModeComponent, true);
+        }
+    }
+}
+
 
 END_JUCE_NAMESPACE

@@ -1062,9 +1062,16 @@ void juce_HandleProcessFocusChange()
     if (NSViewComponentPeer::isValidPeer (currentlyFocusedPeer))
     {
         if (Process::isForegroundProcess())
+        {
             currentlyFocusedPeer->handleFocusGain();
+        }
         else
+        {
             currentlyFocusedPeer->handleFocusLoss();
+
+            // turn kiosk mode off if we lose focus..
+            Desktop::getInstance().setKioskModeComponent (0);
+        }
     }
 }
 
@@ -1335,6 +1342,23 @@ bool NSViewComponentPeer::windowShouldClose()
 void NSViewComponentPeer::redirectMovedOrResized()
 {
     handleMovedOrResized();
+}
+
+//==============================================================================
+void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
+{
+    // Very annoyingly, this function has to use the old SetSystemUIMode function, 
+    // which is in Carbon.framework. But, because there's no Cocoa equivalent, it 
+    // is apparently still available in 64-bit apps..
+    if (enableOrDisable)
+    {
+        SetSystemUIMode (kUIModeAllSuppressed, kUIOptionAutoShowMenuBar);
+        kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
+    }
+    else
+    {
+        SetSystemUIMode (kUIModeNormal, 0);
+    }
 }
 
 //==============================================================================
