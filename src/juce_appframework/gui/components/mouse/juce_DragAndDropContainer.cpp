@@ -113,12 +113,16 @@ public:
         {
             Component* const over = dynamic_cast <Component*> (currentlyOver);
 
+            // (note: use a local copy of the dragDesc member in case the callback runs 
+            // a modal loop and deletes this object before the method completes)
+            const String dragDescLocal (dragDesc);
+
             if (over != 0
                  && over->isValidComponent()
                  && source->isValidComponent()
-                 && currentlyOver->isInterestedInDragSource (dragDesc, source))
+                 && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
             {
-                currentlyOver->itemDragExit (dragDesc, source);
+                currentlyOver->itemDragExit (dragDescLocal, source);
             }
         }
 
@@ -159,11 +163,15 @@ public:
             hit = hit->getComponentAt (rx, ry);
         }
 
+        // (note: use a local copy of the dragDesc member in case the callback runs 
+        // a modal loop and deletes this object before the method completes)
+        const String dragDescLocal (dragDesc);
+
         while (hit != 0)
         {
             DragAndDropTarget* const ddt = dynamic_cast <DragAndDropTarget*> (hit);
 
-            if (ddt != 0 && ddt->isInterestedInDragSource (dragDesc, source))
+            if (ddt != 0 && ddt->isInterestedInDragSource (dragDescLocal, source))
             {
                 relX = screenX;
                 relY = screenY;
@@ -225,7 +233,13 @@ public:
                 getParentComponent()->removeChildComponent (this);
 
             if (dropAccepted && ddt != 0)
-                ddt->itemDropped (dragDesc, source, relX, relY);
+            {
+                // (note: use a local copy of the dragDesc member in case the callback runs 
+                // a modal loop and deletes this object before the method completes)
+                const String dragDescLocal (dragDesc);
+
+                ddt->itemDropped (dragDescLocal, source, relX, relY);
+            }
 
             // careful - this object could now be deleted..
         }
@@ -233,6 +247,10 @@ public:
 
     void updateLocation (const bool canDoExternalDrag, int x, int y)
     {
+        // (note: use a local copy of the dragDesc member in case the callback runs 
+        // a modal loop and deletes this object before it returns)
+        const String dragDescLocal (dragDesc);
+
         int newX = x - xOff;
         int newY = y - yOff;
 
@@ -255,21 +273,21 @@ public:
                 if (over != 0
                      && over->isValidComponent()
                      && ! (sourceWatcher->hasBeenDeleted())
-                     && currentlyOver->isInterestedInDragSource (dragDesc, source))
+                     && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
                 {
-                    currentlyOver->itemDragExit (dragDesc, source);
+                    currentlyOver->itemDragExit (dragDescLocal, source);
                 }
 
                 currentlyOver = ddt;
 
                 if (currentlyOver != 0
-                     && currentlyOver->isInterestedInDragSource (dragDesc, source))
-                    currentlyOver->itemDragEnter (dragDesc, source, relX, relY);
+                     && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
+                    currentlyOver->itemDragEnter (dragDescLocal, source, relX, relY);
             }
 
             if (currentlyOver != 0
-                 && currentlyOver->isInterestedInDragSource (dragDesc, source))
-                currentlyOver->itemDragMove (dragDesc, source, relX, relY);
+                 && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
+                currentlyOver->itemDragMove (dragDescLocal, source, relX, relY);
 
             if (currentlyOver == 0
                  && canDoExternalDrag
@@ -281,7 +299,7 @@ public:
                     StringArray files;
                     bool canMoveFiles = false;
 
-                    if (owner->shouldDropFilesWhenDraggedExternally (dragDesc, source, files, canMoveFiles)
+                    if (owner->shouldDropFilesWhenDraggedExternally (dragDescLocal, source, files, canMoveFiles)
                          && files.size() > 0)
                     {
                         ComponentDeletionWatcher cdw (this);
