@@ -58,7 +58,7 @@ void KnownPluginList::clear()
 PluginDescription* KnownPluginList::getTypeForFile (const File& file) const throw()
 {
     for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->file == file)
+        if (types.getUnchecked(i)->fileOrIdentifier == file.getFullPathName())
             return types.getUnchecked(i);
 
     return 0;
@@ -108,7 +108,7 @@ bool KnownPluginList::isListingUpToDate (const File& possiblePluginFile) const t
     {
         const PluginDescription* const d = types.getUnchecked(i);
 
-        if (d->file == possiblePluginFile
+        if (d->fileOrIdentifier == possiblePluginFile.getFullPathName()
              && d->lastFileModTime != possiblePluginFile.getLastModificationTime())
         {
             return false;
@@ -133,7 +133,7 @@ bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
         {
             const PluginDescription* const d = types.getUnchecked(i);
 
-            if (d->file == possiblePluginFile)
+            if (d->fileOrIdentifier == possiblePluginFile.getFullPathName())
             {
                 if (d->lastFileModTime != possiblePluginFile.getLastModificationTime())
                     needsRescanning = true;
@@ -213,7 +213,10 @@ public:
         else if (method == KnownPluginList::sortByManufacturer)
             diff = first->manufacturerName.compareLexicographically (second->manufacturerName);
         else if (method == KnownPluginList::sortByFileSystemLocation)
-            diff = first->file.getParentDirectory().getFullPathName().compare (second->file.getParentDirectory().getFullPathName());
+            diff = first->fileOrIdentifier.replaceCharacter (T('\\'), T('/'))
+                                          .upToLastOccurrenceOf (T("/"), false, false)
+                                          .compare (second->fileOrIdentifier.replaceCharacter (T('\\'), T('/'))
+                                                                            .upToLastOccurrenceOf (T("/"), false, false));
 
         if (diff == 0)
             diff = first->name.compareLexicographically (second->name);
@@ -325,12 +328,12 @@ public:
     {
         for (int i = 0; i < allPlugins.size(); ++i)
         {
-            String path (allPlugins.getUnchecked(i)->file.getParentDirectory().getFullPathName());
+            String path (allPlugins.getUnchecked(i)
+                            ->fileOrIdentifier.replaceCharacter (T('\\'), T('/'))
+                                              .upToLastOccurrenceOf (T("/"), false, false));
 
             if (path.substring (1, 2) == T(":"))
                 path = path.substring (2);
-
-            path = path.replaceCharacter (T('\\'), T('/'));
 
             addPlugin (allPlugins.getUnchecked(i), path);
         }

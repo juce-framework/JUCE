@@ -690,9 +690,9 @@ public:
     void fillInPluginDescription (PluginDescription& desc) const
     {
         desc.name = name;
-        desc.file = module->file;
+        desc.fileOrIdentifier = module->file.getFullPathName();
         desc.uid = getUID();
-        desc.lastFileModTime = desc.file.getLastModificationTime();
+        desc.lastFileModTime = module->file.getLastModificationTime();
         desc.pluginFormatName = "VST";
         desc.category = getCategory();
 
@@ -2898,7 +2898,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
         return;
 
     PluginDescription desc;
-    desc.file = file;
+    desc.fileOrIdentifier = file.getFullPathName();
     desc.uid = 0;
 
     VSTPluginInstance* instance = dynamic_cast <VSTPluginInstance*> (createInstanceFromDescription (desc));
@@ -2976,12 +2976,14 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
 {
     VSTPluginInstance* result = 0;
 
-    if (fileMightContainThisPluginType (desc.file))
+    File file (desc.fileOrIdentifier);
+
+    if (fileMightContainThisPluginType (file))
     {
         const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
-        desc.file.getParentDirectory().setAsCurrentWorkingDirectory();
+        file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-        const ReferenceCountedObjectPtr <ModuleHandle> module (ModuleHandle::findOrCreateModule (desc.file));
+        const ReferenceCountedObjectPtr <ModuleHandle> module (ModuleHandle::findOrCreateModule (file));
 
         if (module != 0)
         {
@@ -3037,6 +3039,11 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const File& f)
     return f.existsAsFile()
             && f.hasFileExtension (T(".so"));
 #endif
+}
+
+bool VSTPluginFormat::doesPluginStillExist (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).exists();
 }
 
 const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()

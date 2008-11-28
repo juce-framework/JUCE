@@ -167,6 +167,9 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
     jassert (appInstance == 0);
     appInstance = app;
 
+    app->commandLineParameters = commandLine.trim();
+    commandLine = String::empty;
+
     initialiseJuce_GUI();
 
     InterProcessLock* appLock = 0;
@@ -177,11 +180,10 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 
         if (! appLock->enter(0))
         {
-            MessageManager::broadcastMessage (app->getApplicationName() + "/" + commandLine);
+            MessageManager::broadcastMessage (app->getApplicationName() + "/" + app->commandLineParameters);
 
             delete appInstance;
             appInstance = 0;
-            commandLine = String::empty;
 
             DBG ("Another instance is running - quitting...");
             return 0;
@@ -193,9 +195,7 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
         juce_setCurrentThreadName ("Juce Message Thread");
 
         // let the app do its setting-up..
-        app->initialise (commandLine.trim());
-
-        commandLine = String::empty;
+        app->initialise (app->commandLineParameters);
 
         // register for broadcast new app messages
         MessageManager::getInstance()->registerBroadcastListener (app);

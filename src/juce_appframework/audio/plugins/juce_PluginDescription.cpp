@@ -56,7 +56,7 @@ PluginDescription::PluginDescription (const PluginDescription& other) throw()
       category (other.category),
       manufacturerName (other.manufacturerName),
       version (other.version),
-      file (other.file),
+      fileOrIdentifier (other.fileOrIdentifier),
       lastFileModTime (other.lastFileModTime),
       uid (other.uid),
       isInstrument (other.isInstrument),
@@ -72,7 +72,7 @@ const PluginDescription& PluginDescription::operator= (const PluginDescription& 
     category = other.category;
     manufacturerName = other.manufacturerName;
     version = other.version;
-    file = other.file;
+    fileOrIdentifier = other.fileOrIdentifier;
     uid = other.uid;
     isInstrument = other.isInstrument;
     lastFileModTime = other.lastFileModTime;
@@ -84,7 +84,7 @@ const PluginDescription& PluginDescription::operator= (const PluginDescription& 
 
 bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
 {
-    return file == other.file
+    return fileOrIdentifier == other.fileOrIdentifier
             && uid == other.uid;
 }
 
@@ -92,7 +92,7 @@ const String PluginDescription::createIdentifierString() const throw()
 {
     return pluginFormatName
             + T("-") + name
-            + T("-") + String::toHexString (file.getFileName().hashCode())
+            + T("-") + String::toHexString (fileOrIdentifier.hashCode())
             + T("-") + String::toHexString (uid);
 }
 
@@ -104,7 +104,7 @@ XmlElement* PluginDescription::createXml() const
     e->setAttribute (T("category"), category);
     e->setAttribute (T("manufacturer"), manufacturerName);
     e->setAttribute (T("version"), version);
-    e->setAttribute (T("file"), file.getFullPathName());
+    e->setAttribute (T("file"), fileOrIdentifier);
     e->setAttribute (T("uid"), String::toHexString (uid));
     e->setAttribute (T("isInstrument"), isInstrument);
     e->setAttribute (T("fileTime"), String::toHexString (lastFileModTime.toMilliseconds()));
@@ -123,7 +123,7 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         category = xml.getStringAttribute (T("category"));
         manufacturerName = xml.getStringAttribute (T("manufacturer"));
         version = xml.getStringAttribute (T("version"));
-        file = File (xml.getStringAttribute (T("file")));
+        fileOrIdentifier = xml.getStringAttribute (T("file"));
         uid = xml.getStringAttribute (T("uid")).getHexValue32();
         isInstrument = xml.getBoolAttribute (T("isInstrument"), false);
         lastFileModTime = Time (xml.getStringAttribute (T("fileTime")).getHexValue64());

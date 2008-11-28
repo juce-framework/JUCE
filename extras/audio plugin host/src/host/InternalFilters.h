@@ -65,6 +65,7 @@ public:
     bool fileMightContainThisPluginType (const File&)           { return false; }
     const FileSearchPath getDefaultLocationsToSearch()          { return FileSearchPath(); }
     void findAllTypesForFile (OwnedArray <PluginDescription>&, const File&)     {}
+    bool doesPluginStillExist (const PluginDescription&)        { return true; }
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 
     //==============================================================================

@@ -74,8 +74,13 @@ public:
     /** The version. This string doesn't have any particular format. */
     String version;
 
-    /** The binary module file containing the plugin. */
-    File file;
+    /** Either the file containing the plugin module, or some other unique way
+        of identifying it. 
+        
+        E.g. for an AU, this would be the component ID, because not all AUs actually
+        live in a file...
+    */
+    String fileOrIdentifier;
 
     /** The last time the plugin file was changed.
         This is handy when scanning for new or changed plugins.

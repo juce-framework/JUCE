@@ -190,14 +190,16 @@ void PluginListComponent::buttonClicked (Button* b)
             const PluginDescription* const desc = list.getType (listBox->getSelectedRow());
 
             if (desc != 0)
-                desc->file.getParentDirectory().startAsProcess();
+            {
+                if (File (desc->fileOrIdentifier).existsAsFile())
+                    File (desc->fileOrIdentifier).getParentDirectory().startAsProcess();
+            }
         }
         else if (r == 7)
         {
             for (int i = list.getNumTypes(); --i >= 0;)
             {
-                if (list.getType (i)->file != File::nonexistent
-                     && ! list.getType (i)->file.exists())
+                if (! AudioPluginFormatManager::getInstance()->doesPluginStillExist (*list.getType (i)))
                 {
                     list.removeType (i);
                 }

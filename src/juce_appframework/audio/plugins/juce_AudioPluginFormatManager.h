@@ -92,6 +92,12 @@ public:
     AudioPluginInstance* createPluginInstance (const PluginDescription& description,
                                                String& errorMessage) const;
 
+    /** Checks that the file or component for this plugin actually still exists.
+
+        (This won't try to load the plugin)
+    */
+    bool doesPluginStillExist (const PluginDescription& description) const;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

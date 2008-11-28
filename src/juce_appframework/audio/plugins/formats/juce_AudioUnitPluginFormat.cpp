@@ -648,22 +648,45 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
 
     if (ph != 0 && ph->getCurrentPosition (result))
     {
-        *outIsPlaying = result.isPlaying;
-        *outTransportStateChanged = result.isPlaying != wasPlaying;
+        if (outIsPlaying != 0)
+            *outIsPlaying = result.isPlaying;
+
+        if (outTransportStateChanged != 0)
+            *outTransportStateChanged = result.isPlaying != wasPlaying;
+
         wasPlaying = result.isPlaying;
-        *outCurrentSampleInTimeLine = roundDoubleToInt (result.timeInSeconds * getSampleRate());
-        *outIsCycling = false;
-        *outCycleStartBeat = 0;
-        *outCycleEndBeat = 0;
+
+        if (outCurrentSampleInTimeLine != 0)
+            *outCurrentSampleInTimeLine = roundDoubleToInt (result.timeInSeconds * getSampleRate());
+
+        if (outIsCycling != 0)
+            *outIsCycling = false;
+
+        if (outCycleStartBeat != 0)
+            *outCycleStartBeat = 0;
+
+        if (outCycleEndBeat != 0)
+            *outCycleEndBeat = 0;
     }
     else
     {
-        *outIsPlaying = false;
-        *outTransportStateChanged = false;
-        *outCurrentSampleInTimeLine = 0;
-        *outIsCycling = false;
-        *outCycleStartBeat = 0;
-        *outCycleEndBeat = 0;
+        if (outIsPlaying != 0)
+            *outIsPlaying = false;
+
+        if (outTransportStateChanged != 0)
+            *outTransportStateChanged = false;
+
+        if (outCurrentSampleInTimeLine != 0)
+            *outCurrentSampleInTimeLine = 0;
+
+        if (outIsCycling != 0)
+            *outIsCycling = false;
+
+        if (outCycleStartBeat != 0)
+            *outCycleStartBeat = 0;
+
+        if (outCycleEndBeat != 0)
+            *outCycleEndBeat = 0;
     }
 
     return noErr;
@@ -1276,6 +1299,11 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const File& f)
 {
     return f.hasFileExtension (T(".component"))
              && f.isDirectory();
+}
+
+bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).exists();
 }
 
 const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()

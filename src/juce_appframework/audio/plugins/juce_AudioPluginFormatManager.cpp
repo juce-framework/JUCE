@@ -126,7 +126,7 @@ AudioPluginInstance* AudioPluginFormatManager::createPluginInstance (const Plugi
 
     if (result == 0)
     {
-        if (description.file != File::nonexistent && ! description.file.exists())
+        if (! doesPluginStillExist (description))
             errorMessage = TRANS ("This plug-in file no longer exists");
         else
             errorMessage = TRANS ("This plug-in failed to load correctly");
@@ -134,5 +134,15 @@ AudioPluginInstance* AudioPluginFormatManager::createPluginInstance (const Plugi
 
     return result;
 }
+
+bool AudioPluginFormatManager::doesPluginStillExist (const PluginDescription& description) const
+{
+    for (int i = 0; i < formats.size(); ++i)
+        if (formats.getUnchecked(i)->getName() == description.pluginFormatName)
+            return formats.getUnchecked(i)->doesPluginStillExist (description);
+
+    return false;
+}
+
 
 END_JUCE_NAMESPACE

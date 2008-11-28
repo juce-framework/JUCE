@@ -2028,7 +2028,9 @@ private:
                         break;
 
                     case WM_CLOSE:
-                        handleUserClosingWindow();
+                        if (! component->isCurrentlyBlockedByAnotherModalComponent())
+                            handleUserClosingWindow();
+
                         return 0;
 
                     case WM_QUIT:
@@ -2120,6 +2122,9 @@ private:
                         switch (wParam & 0xfff0)
                         {
                         case SC_CLOSE:
+                            if (sendInputAttemptWhenModalMessage())
+                                return 0;
+
                             if (hasTitleBar())
                             {
                                 PostMessage (h, WM_CLOSE, 0, 0);
@@ -2128,16 +2133,25 @@ private:
                             break;
 
                         case SC_KEYMENU:
+                            if (sendInputAttemptWhenModalMessage())
+                                return 0;
+
                             if (hasTitleBar() && h == GetCapture())
                                 ReleaseCapture();
 
                             break;
 
                         case SC_MAXIMIZE:
+                            if (sendInputAttemptWhenModalMessage())
+                                return 0;
+
                             setFullScreen (true);
                             return 0;
 
                         case SC_MINIMIZE:
+                            if (sendInputAttemptWhenModalMessage())
+                                return 0;
+
                             if (! hasTitleBar())
                             {
                                 setMinimised (true);
@@ -2146,6 +2160,9 @@ private:
                             break;
 
                         case SC_RESTORE:
+                            if (sendInputAttemptWhenModalMessage())
+                                return 0;
+
                             if (hasTitleBar())
                             {
                                 if (isFullScreen())
@@ -2179,14 +2196,7 @@ private:
                     case WM_NCLBUTTONDOWN:
                     case WM_NCRBUTTONDOWN:
                     case WM_NCMBUTTONDOWN:
-                        if (component->isCurrentlyBlockedByAnotherModalComponent())
-                        {
-                            Component* const current = Component::getCurrentlyModalComponent();
-
-                            if (current != 0)
-                                current->inputAttemptWhenModal();
-                        }
-
+                        sendInputAttemptWhenModalMessage();
                         break;
 
                     //case WM_IME_STARTCOMPOSITION;
@@ -2204,6 +2214,21 @@ private:
         // (the message manager lock exits before calling this, to avoid deadlocks if
         // this calls into non-juce windows)
         return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    bool sendInputAttemptWhenModalMessage()
+    {
+        if (component->isCurrentlyBlockedByAnotherModalComponent())
+        {
+            Component* const current = Component::getCurrentlyModalComponent();
+
+            if (current != 0)
+                current->inputAttemptWhenModal();
+
+            return true;
+        }
+
+        return false;
     }
 
     Win32ComponentPeer (const Win32ComponentPeer&);

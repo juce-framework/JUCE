@@ -52,6 +52,7 @@ public:
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const File& file);
+    bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
     //==============================================================================

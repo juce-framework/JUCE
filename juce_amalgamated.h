@@ -23269,6 +23269,10 @@ public:
     */
     int getApplicationReturnValue() const throw()                   { return appReturnValue; }
 
+    /** Returns the application's command line params.
+    */
+    const String getCommandLineParameters() const throw()           { return commandLineParameters; }
+
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
     /** @internal */
@@ -23294,6 +23298,7 @@ public:
 
 private:
 
+    String commandLineParameters;
     int appReturnValue;
     bool stillInitialising;
 
@@ -27828,8 +27833,13 @@ public:
     /** The version. This string doesn't have any particular format. */
     String version;
 
-    /** The binary module file containing the plugin. */
-    File file;
+    /** Either the file containing the plugin module, or some other unique way
+        of identifying it.
+
+        E.g. for an AU, this would be the component ID, because not all AUs actually
+        live in a file...
+    */
+    String fileOrIdentifier;
 
     /** The last time the plugin file was changed.
         This is handy when scanning for new or changed plugins.
@@ -27971,6 +27981,13 @@ public:
     */
     virtual bool fileMightContainThisPluginType (const File& file) = 0;
 
+    /** Checks whether this plugin could possibly be loaded.
+
+        It doesn't actually need to load it, just to check whether the file or component
+        still exists.
+    */
+    virtual bool doesPluginStillExist (const PluginDescription& desc) = 0;
+
     /** Returns the typical places to look for this kind of plugin.
 
         Note that if this returns no paths, it means that the format can't be scanned-for
@@ -28038,6 +28055,12 @@ public:
     */
     AudioPluginInstance* createPluginInstance (const PluginDescription& description,
                                                String& errorMessage) const;
+
+    /** Checks that the file or component for this plugin actually still exists.
+
+        (This won't try to load the plugin)
+    */
+    bool doesPluginStillExist (const PluginDescription& description) const;
 
     juce_UseDebuggingNewOperator
 
@@ -34658,6 +34681,7 @@ public:
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const File& file);
+    bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
     juce_UseDebuggingNewOperator
@@ -34773,6 +34797,7 @@ public:
     void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const File& file);
+    bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
     juce_UseDebuggingNewOperator

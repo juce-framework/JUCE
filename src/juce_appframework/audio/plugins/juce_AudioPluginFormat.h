@@ -84,6 +84,14 @@ public:
     */
     virtual bool fileMightContainThisPluginType (const File& file) = 0;
 
+    /** Checks whether this plugin could possibly be loaded.
+
+        It doesn't actually need to load it, just to check whether the file or component
+        still exists.
+    */
+    virtual bool doesPluginStillExist (const PluginDescription& desc) = 0;
+
+
     /** Returns the typical places to look for this kind of plugin.
 
         Note that if this returns no paths, it means that the format can't be scanned-for

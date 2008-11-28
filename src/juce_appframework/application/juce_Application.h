@@ -260,6 +260,10 @@ public:
     */
     int getApplicationReturnValue() const throw()                   { return appReturnValue; }
 
+    /** Returns the application's command line params.
+    */
+    const String getCommandLineParameters() const throw()           { return commandLineParameters; }
+
     //==============================================================================
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
@@ -287,6 +291,7 @@ public:
 
 private:
     //==============================================================================
+    String commandLineParameters;
     int appReturnValue;
     bool stillInitialising;
 
