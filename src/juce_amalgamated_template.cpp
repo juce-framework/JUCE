@@ -158,7 +158,7 @@
 #include "juce_appframework/audio/plugins/juce_PluginDescription.cpp"
 #include "juce_appframework/audio/plugins/juce_PluginDirectoryScanner.cpp"
 #include "juce_appframework/audio/plugins/juce_PluginListComponent.cpp"
-#include "juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.cpp"
+#include "juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.mm"
 #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.mm"
 #include "juce_appframework/audio/processors/juce_AudioProcessor.cpp"
 #include "juce_appframework/audio/processors/juce_AudioProcessorEditor.cpp"
