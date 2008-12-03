@@ -113,7 +113,7 @@ public:
         {
             Component* const over = dynamic_cast <Component*> (currentlyOver);
 
-            // (note: use a local copy of the dragDesc member in case the callback runs 
+            // (note: use a local copy of the dragDesc member in case the callback runs
             // a modal loop and deletes this object before the method completes)
             const String dragDescLocal (dragDesc);
 
@@ -163,7 +163,7 @@ public:
             hit = hit->getComponentAt (rx, ry);
         }
 
-        // (note: use a local copy of the dragDesc member in case the callback runs 
+        // (note: use a local copy of the dragDesc member in case the callback runs
         // a modal loop and deletes this object before the method completes)
         const String dragDescLocal (dragDesc);
 
@@ -234,7 +234,7 @@ public:
 
             if (dropAccepted && ddt != 0)
             {
-                // (note: use a local copy of the dragDesc member in case the callback runs 
+                // (note: use a local copy of the dragDesc member in case the callback runs
                 // a modal loop and deletes this object before the method completes)
                 const String dragDescLocal (dragDesc);
 
@@ -247,7 +247,7 @@ public:
 
     void updateLocation (const bool canDoExternalDrag, int x, int y)
     {
-        // (note: use a local copy of the dragDesc member in case the callback runs 
+        // (note: use a local copy of the dragDesc member in case the callback runs
         // a modal loop and deletes this object before it returns)
         const String dragDescLocal (dragDesc);
 

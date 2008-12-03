@@ -49,9 +49,11 @@ public:
 
     //==============================================================================
     const String getName() const                { return "AudioUnit"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 

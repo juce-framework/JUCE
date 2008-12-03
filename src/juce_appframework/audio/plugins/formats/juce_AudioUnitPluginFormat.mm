@@ -82,6 +82,129 @@ BEGIN_JUCE_NAMESPACE
 static int insideCallback = 0;
 
 //==============================================================================
+static const String osTypeToString (OSType type) throw()
+{
+    char s[4];
+    s[0] = (char) (((uint32) type) >> 24);
+    s[1] = (char) (((uint32) type) >> 16);
+    s[2] = (char) (((uint32) type) >> 8);
+    s[3] = (char) ((uint32) type);
+    return String (s, 4);
+}
+
+static OSType stringToOSType (const String& s1) throw()
+{
+    const String s (s1 + "    ");
+
+    return (((OSType) (unsigned char) s[0]) << 24)
+         | (((OSType) (unsigned char) s[1]) << 16)
+         | (((OSType) (unsigned char) s[2]) << 8)
+         | ((OSType) (unsigned char) s[3]);
+}
+
+static const tchar* auIdentifierPrefix = T("AudioUnit:");
+
+static const String createAUPluginIdentifier (const ComponentDescription& desc)
+{
+    jassert (osTypeToString ('abcd') == T("abcd")); // agh, must have got the endianness wrong..
+    jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
+
+    String s (auIdentifierPrefix);
+
+    if (desc.componentType == kAudioUnitType_MusicDevice)
+        s << "Synths/";
+    else if (desc.componentType == kAudioUnitType_MusicEffect
+              || desc.componentType == kAudioUnitType_Effect)
+        s << "Effects/";
+    else if (desc.componentType == kAudioUnitType_Generator)
+        s << "Generators/";
+    else if (desc.componentType == kAudioUnitType_Panner)
+        s << "Panners/";
+
+    s << osTypeToString (desc.componentType)
+      << T(",")
+      << osTypeToString (desc.componentSubType)
+      << T(",")
+      << osTypeToString (desc.componentManufacturer);
+
+    return s;
+}
+
+static void getAUDetails (ComponentRecord* comp, String& name, String& manufacturer)
+{
+    Handle componentNameHandle = NewHandle (sizeof (void*));
+    Handle componentInfoHandle = NewHandle (sizeof (void*));
+
+    if (componentNameHandle != 0 && componentInfoHandle != 0)
+    {
+        ComponentDescription desc;
+
+        if (GetComponentInfo (comp, &desc, componentNameHandle, componentInfoHandle, 0) == noErr)
+        {
+            ConstStr255Param nameString = (ConstStr255Param) (*componentNameHandle);
+            ConstStr255Param infoString = (ConstStr255Param) (*componentInfoHandle);
+
+            if (nameString != 0 && nameString[0] != 0)
+            {
+                const String all ((const char*) nameString + 1, nameString[0]);
+DBG ("name: "+ all);
+
+                manufacturer = all.upToFirstOccurrenceOf (T(":"), false, false).trim();
+                name = all.fromFirstOccurrenceOf (T(":"), false, false).trim();
+            }
+
+            if (infoString != 0 && infoString[0] != 0)
+            {
+                const String all ((const char*) infoString + 1, infoString[0]);
+DBG ("info: " + all);
+            }
+
+            if (name.isEmpty())
+                name = "<Unknown>";
+        }
+
+        DisposeHandle (componentNameHandle);
+        DisposeHandle (componentInfoHandle);
+    }
+}
+
+static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, ComponentDescription& desc,
+                                            String& name, String& version, String& manufacturer)
+{
+    zerostruct (desc);
+
+    if (fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
+    {
+        String s (fileOrIdentifier.substring (jmax (fileOrIdentifier.lastIndexOfChar (T(':')),
+                                                    fileOrIdentifier.lastIndexOfChar (T('/'))) + 1));
+
+        StringArray tokens;
+        tokens.addTokens (s, T(","), 0);
+        tokens.trim();
+        tokens.removeEmptyStrings();
+
+        if (tokens.size() == 3)
+        {
+            desc.componentType = stringToOSType (tokens[0]);
+            desc.componentSubType = stringToOSType (tokens[1]);
+            desc.componentManufacturer = stringToOSType (tokens[2]);
+
+            ComponentRecord* comp = FindNextComponent (0, &desc);
+
+            if (comp != 0)
+            {
+                getAUDetails (comp, name, manufacturer);
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+//==============================================================================
 class AudioUnitPluginWindowCarbon;
 class AudioUnitPluginWindowCocoa;
 
@@ -98,11 +221,11 @@ public:
     void fillInPluginDescription (PluginDescription& desc) const
     {
         desc.name = pluginName;
-        desc.file = file;
+        desc.fileOrIdentifier = createAUPluginIdentifier (componentDesc);
         desc.uid = ((int) componentDesc.componentType)
                     ^ ((int) componentDesc.componentSubType)
                     ^ ((int) componentDesc.componentManufacturer);
-        desc.lastFileModTime = file.getLastModificationTime();
+        desc.lastFileModTime = 0;
         desc.pluginFormatName = "AudioUnit";
         desc.category = getCategory();
         desc.manufacturerName = manufacturer;
@@ -163,7 +286,7 @@ private:
 
     ComponentDescription componentDesc;
     String pluginName, manufacturer, version;
-    File file;
+    String fileOrIdentifier;
     CriticalSection lock;
     bool initialised, wantsMidiMessages, wasPlaying;
 
@@ -175,7 +298,7 @@ private:
     Array <int> parameterIds;
 
     //==============================================================================
-    bool getComponentDescFromFile (const File& file);
+    bool getComponentDescFromFile (const String& fileOrIdentifier);
     void initialise();
 
     //==============================================================================
@@ -257,12 +380,12 @@ private:
     const String getCategory() const;
 
     //==============================================================================
-    AudioUnitPluginInstance (const File& file);
+    AudioUnitPluginInstance (const String& fileOrIdentifier);
 };
 
 //==============================================================================
-AudioUnitPluginInstance::AudioUnitPluginInstance (const File& file_)
-    : file (file_),
+AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier)
+    : fileOrIdentifier (fileOrIdentifier),
       initialised (false),
       wantsMidiMessages (false),
       audioUnit (0),
@@ -273,9 +396,9 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const File& file_)
     {
         ++insideCallback;
 
-        log (T("Opening AU: ") + file.getFullPathName());
+        log (T("Opening AU: ") + fileOrIdentifier);
 
-        if (getComponentDescFromFile (file))
+        if (getComponentDescFromFile (fileOrIdentifier))
         {
             ComponentRecord* const comp = FindNextComponent (0, &componentDesc);
 
@@ -314,15 +437,18 @@ AudioUnitPluginInstance::~AudioUnitPluginInstance()
     juce_free (outputBufferList);
 }
 
-bool AudioUnitPluginInstance::getComponentDescFromFile (const File& file)
+bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIdentifier)
 {
     zerostruct (componentDesc);
 
+    if (getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
+        return true;
+
+    const File file (fileOrIdentifier);
     if (! file.hasFileExtension (T(".component")))
         return false;
 
-    const String filename (file.getFullPathName());
-    const char* const utf8 = filename.toUTF8();
+    const char* const utf8 = fileOrIdentifier.toUTF8();
     CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
                                                             strlen (utf8), file.isDirectory());
     if (url != 0)
@@ -730,14 +856,23 @@ public:
 
     ~AudioUnitPluginWindowCocoa()
     {
+        const bool wasValid = isValid();
+
         wrapper->setView (0);
         activeWindows.removeValue (this);
-        if (isValid())
+
+        if (wasValid)
             plugin.editorBeingDeleted (this);
+
         delete wrapper;
     }
 
     bool isValid() const        { return wrapper->getView() != 0; }
+
+    void paint (Graphics& g)
+    {
+        g.fillAll (Colours::white);
+    }
 
     void resized()
     {
@@ -794,6 +929,11 @@ private:
 
         juce_free (info);
         wrapper->setView (pluginView);
+
+        if (pluginView != 0)
+            setSize ([pluginView frame].size.width,
+                     [pluginView frame].size.height);
+
         return pluginView != 0;
     }
 };
@@ -1264,13 +1404,13 @@ AudioUnitPluginFormat::~AudioUnitPluginFormat()
 }
 
 void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
-                                                 const File& file)
+                                                 const String& fileOrIdentifier)
 {
-    if (! fileMightContainThisPluginType (file))
+    if (! fileMightContainThisPluginType (fileOrIdentifier))
         return;
 
     PluginDescription desc;
-    desc.file = file;
+    desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
     AudioUnitPluginInstance* instance = dynamic_cast <AudioUnitPluginInstance*> (createInstanceFromDescription (desc));
@@ -1295,9 +1435,9 @@ AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const
 {
     AudioUnitPluginInstance* result = 0;
 
-    if (fileMightContainThisPluginType (desc.file))
+    if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
-        result = new AudioUnitPluginInstance (desc.file);
+        result = new AudioUnitPluginInstance (desc.fileOrIdentifier);
 
         if (result->audioUnit != 0)
         {
@@ -1312,15 +1452,73 @@ AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const
     return result;
 }
 
-bool AudioUnitPluginFormat::fileMightContainThisPluginType (const File& f)
+const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& /*directoriesToSearch*/,
+                                                                const bool /*recursive*/)
 {
+    StringArray result;
+    ComponentRecord* comp = 0;
+    ComponentDescription desc;
+    zerostruct (desc);
+
+    for (;;)
+    {
+        zerostruct (desc);
+        comp = FindNextComponent (comp, &desc);
+
+        if (comp == 0)
+            break;
+
+        GetComponentInfo (comp, &desc, 0, 0, 0);
+
+        if (desc.componentType == kAudioUnitType_MusicDevice
+             || desc.componentType == kAudioUnitType_MusicEffect
+             || desc.componentType == kAudioUnitType_Effect
+             || desc.componentType == kAudioUnitType_Generator
+             || desc.componentType == kAudioUnitType_Panner)
+        {
+            const String s (createAUPluginIdentifier (desc));
+            DBG (s);
+            result.add (s);
+        }
+    }
+
+    return result;
+}
+
+bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
+{
+    ComponentDescription desc;
+
+    String name, version, manufacturer;
+    if (getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer))
+        return FindNextComponent (0, &desc) != 0;
+
+    const File f (fileOrIdentifier);
+
     return f.hasFileExtension (T(".component"))
              && f.isDirectory();
 }
 
+const String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+{
+    ComponentDescription desc;
+    String name, version, manufacturer;
+    getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer);
+
+    if (name.isEmpty())
+        name = fileOrIdentifier;
+
+    return name;
+}
+
+bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
+{
+    return File (desc.fileOrIdentifier).exists();
+}
+
 const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath ("~/Library/Audio/Plug-Ins/Components;/Library/Audio/Plug-Ins/Components");
+    return FileSearchPath ("(Default AudioUnit locations)");
 }
 
 #endif

@@ -74,7 +74,7 @@ public:
 
     /** Looks for a type in the list which comes from this file.
     */
-    PluginDescription* getTypeForFile (const File& file) const throw();
+    PluginDescription* getTypeForFile (const String& fileOrIdentifier) const throw();
 
     /** Looks for a type in the list which matches a plugin type ID.
 
@@ -101,14 +101,15 @@ public:
         file (even if it was already known and hasn't been re-scanned) get returned
         in the array.
     */
-    bool scanAndAddFile (const File& possiblePluginFile,
+    bool scanAndAddFile (const String& possiblePluginFileOrIdentifier,
                          const bool dontRescanIfAlreadyInList,
-                         OwnedArray <PluginDescription>& typesFound);
+                         OwnedArray <PluginDescription>& typesFound,
+                         AudioPluginFormat& formatToUse);
 
     /** Returns true if the specified file is already known about and if it
         hasn't been modified since our entry was created.
     */
-    bool isListingUpToDate (const File& possiblePluginFile) const throw();
+    bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const throw();
 
     /** Scans and adds a bunch of files that might have been dragged-and-dropped.
 

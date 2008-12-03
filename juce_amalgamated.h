@@ -27836,8 +27836,8 @@ public:
     /** Either the file containing the plugin module, or some other unique way
         of identifying it.
 
-        E.g. for an AU, this would be the component ID, because not all AUs actually
-        live in a file...
+        E.g. for an AU, this would be an ID string that the component manager
+        could use to retrieve the plugin. For a VST, it's the file path.
     */
     String fileOrIdentifier;
 
@@ -27965,7 +27965,7 @@ public:
         subtypes, so in that case, each subtype is returned as a separate object.
     */
     virtual void findAllTypesForFile (OwnedArray <PluginDescription>& results,
-                                      const File& file) = 0;
+                                      const String& fileOrIdentifier) = 0;
 
     /** Tries to recreate a type from a previously generated PluginDescription.
 
@@ -27979,7 +27979,11 @@ public:
         This is for searching for potential files, so it shouldn't actually try to
         load the plugin or do anything time-consuming.
     */
-    virtual bool fileMightContainThisPluginType (const File& file) = 0;
+    virtual bool fileMightContainThisPluginType (const String& fileOrIdentifier) = 0;
+
+    /** Returns a readable version of the name of the plugin that this identifier refers to.
+    */
+    virtual const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
 
     /** Checks whether this plugin could possibly be loaded.
 
@@ -27987,6 +27991,14 @@ public:
         still exists.
     */
     virtual bool doesPluginStillExist (const PluginDescription& desc) = 0;
+
+    /** Searches a suggested set of directories for any plugins in this format.
+
+        The path might be ignored, e.g. by AUs, which are found by the OS rather
+        than manually.
+    */
+    virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
+                                                     const bool recursive) = 0;
 
     /** Returns the typical places to look for this kind of plugin.
 
@@ -28541,7 +28553,7 @@ public:
 
     /** Looks for a type in the list which comes from this file.
     */
-    PluginDescription* getTypeForFile (const File& file) const throw();
+    PluginDescription* getTypeForFile (const String& fileOrIdentifier) const throw();
 
     /** Looks for a type in the list which matches a plugin type ID.
 
@@ -28568,14 +28580,15 @@ public:
         file (even if it was already known and hasn't been re-scanned) get returned
         in the array.
     */
-    bool scanAndAddFile (const File& possiblePluginFile,
+    bool scanAndAddFile (const String& possiblePluginFileOrIdentifier,
                          const bool dontRescanIfAlreadyInList,
-                         OwnedArray <PluginDescription>& typesFound);
+                         OwnedArray <PluginDescription>& typesFound,
+                         AudioPluginFormat& formatToUse);
 
     /** Returns true if the specified file is already known about and if it
         hasn't been modified since our entry was created.
     */
-    bool isListingUpToDate (const File& possiblePluginFile) const throw();
+    bool isListingUpToDate (const String& possiblePluginFileOrIdentifier) const throw();
 
     /** Scans and adds a bunch of files that might have been dragged-and-dropped.
 
@@ -34678,9 +34691,11 @@ public:
     ~AudioUnitPluginFormat();
 
     const String getName() const                { return "AudioUnit"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
@@ -34718,9 +34733,10 @@ public:
     ~DirectXPluginFormat();
 
     const String getName() const                { return "DirectX"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     const FileSearchPath getDefaultLocationsToSearch();
 
     juce_UseDebuggingNewOperator
@@ -34757,9 +34773,10 @@ public:
     ~LADSPAPluginFormat();
 
     const String getName() const                { return "LADSPA"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     const FileSearchPath getDefaultLocationsToSearch();
 
     juce_UseDebuggingNewOperator
@@ -34794,9 +34811,11 @@ public:
     ~VSTPluginFormat();
 
     const String getName() const                { return "VST"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 
@@ -34805,6 +34824,8 @@ public:
 private:
     VSTPluginFormat (const VSTPluginFormat&);
     const VSTPluginFormat& operator= (const VSTPluginFormat&);
+
+    void recursiveFileSearch (StringArray& results, const File& dir, const bool recursive);
 };
 
 #endif
@@ -34884,12 +34905,13 @@ public:
     */
     bool scanNextFile (const bool dontRescanIfAlreadyInList);
 
-    /** Returns the file that will be scanned during the next call to scanNextFile().
+    /** Returns the description of the plugin that will be scanned during the next
+        call to scanNextFile().
 
         This is handy if you want to show the user which file is currently getting
         scanned.
     */
-    const File getNextPluginFileThatWillBeScanned() const throw();
+    const String getNextPluginFileThatWillBeScanned() const throw();
 
     /** Returns the estimated progress, between 0 and 1.
     */
@@ -34905,13 +34927,12 @@ public:
 private:
     KnownPluginList& list;
     AudioPluginFormat& format;
-    OwnedArray <File> filesToScan;
+    StringArray filesOrIdentifiersToScan;
     File deadMansPedalFile;
     StringArray failedFiles;
     int nextIndex;
     float progress;
 
-    void recursiveFileSearch (const File& dir, const bool recursive);
     const StringArray getDeadMansPedalFile() throw();
     void setDeadMansPedalFile (const StringArray& newContents) throw();
 

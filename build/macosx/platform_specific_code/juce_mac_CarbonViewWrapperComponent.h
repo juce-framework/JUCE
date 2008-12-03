@@ -29,7 +29,13 @@
   ==============================================================================
 */
 
-/** Creates a floating carbon window that can be used to hold a carbon UI.
+#ifndef __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+#define __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__
+
+
+//==============================================================================
+/**
+    Creates a floating carbon window that can be used to hold a carbon UI.
 
     This is a handy class that's designed to be inlined where needed, e.g.
     in the audio plugin hosting code.
@@ -106,6 +112,8 @@ public:
 
             setOurSizeToEmbeddedViewSize();
             setEmbeddedWindowToOurSize();
+
+            creationTime = Time::getCurrentTime();
         }
     }
 
@@ -203,6 +211,11 @@ public:
     void timerCallback()
     {
         setOurSizeToEmbeddedViewSize();
+
+        // To avoid strange overpainting problems when the UI is first opened, we'll
+        // repaint it a few times during the first second that it's on-screen..
+        if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
+            HIViewSetNeedsDisplay (embeddedView, true);
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef nextHandlerRef,
@@ -222,6 +235,8 @@ public:
 
                 SetEventParameter (event, kEventParamClickActivation, typeClickActivationResult,
                                    sizeof (ClickActivationResult), &howToHandleClick);
+
+                HIViewSetNeedsDisplay (embeddedView, true);
             }
             break;
         }
@@ -239,6 +254,9 @@ protected:
     WindowRef wrapperWindow;
     HIViewRef embeddedView;
     bool recursiveResize;
+    Time creationTime;
 
     EventHandlerRef eventHandlerRef;
 };
+
+#endif   // __JUCE_MAC_CARBONVIEWWRAPPERCOMPONENT_JUCEHEADER__

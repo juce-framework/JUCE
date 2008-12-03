@@ -181,10 +181,13 @@ public:
 
     MenuBarModel* currentModel;
 
-    void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo, 
+    void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
     {
         NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf (T("<end>"), false, true));
+
+        if (text == 0)
+            text = @"";
 
         if (iter.isSeparator)
         {
@@ -320,7 +323,7 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName, 
+static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName,
                                       const PopupMenu* extraItems)
 {
     if (extraItems != 0 && JuceMainMenuHandler::instance != 0 && extraItems->getNumItems() > 0)
@@ -329,7 +332,7 @@ static NSMenu* createStandardAppMenu (NSMenu* menu, const String& appName,
 
         while (iter.next())
             JuceMainMenuHandler::instance->addMenuItem (iter, menu, 0, -1);
-            
+
         [menu addItem: [NSMenuItem separatorItem]];
     }
 
@@ -415,7 +418,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
             delete JuceMainMenuHandler::instance;
             jassert (JuceMainMenuHandler::instance == 0); // should be zeroed in the destructor
             jassert (extraAppleMenuItems == 0); // you can't specify some extra items without also supplying a model
-            
+
             extraAppleMenuItems = 0;
         }
         else

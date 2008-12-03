@@ -68,7 +68,7 @@ public:
         subtypes, so in that case, each subtype is returned as a separate object.
     */
     virtual void findAllTypesForFile (OwnedArray <PluginDescription>& results,
-                                      const File& file) = 0;
+                                      const String& fileOrIdentifier) = 0;
 
     /** Tries to recreate a type from a previously generated PluginDescription.
 
@@ -82,7 +82,11 @@ public:
         This is for searching for potential files, so it shouldn't actually try to
         load the plugin or do anything time-consuming.
     */
-    virtual bool fileMightContainThisPluginType (const File& file) = 0;
+    virtual bool fileMightContainThisPluginType (const String& fileOrIdentifier) = 0;
+
+    /** Returns a readable version of the name of the plugin that this identifier refers to.
+    */
+    virtual const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) = 0;
 
     /** Checks whether this plugin could possibly be loaded.
 
@@ -91,6 +95,13 @@ public:
     */
     virtual bool doesPluginStillExist (const PluginDescription& desc) = 0;
 
+    /** Searches a suggested set of directories for any plugins in this format.
+
+        The path might be ignored, e.g. by AUs, which are found by the OS rather
+        than manually.
+    */
+    virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
+                                                     const bool recursive) = 0;
 
     /** Returns the typical places to look for this kind of plugin.
 

@@ -52,8 +52,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
 {
     directoriesToSearch.removeRedundantPaths();
 
-    for (int j = 0; j < directoriesToSearch.getNumPaths(); ++j)
-        recursiveFileSearch (directoriesToSearch [j], recursive);
+    filesOrIdentifiersToScan = format.searchPathsForPlugins (directoriesToSearch, recursive);
 
     // If any plugins have crashed recently when being loaded, move them to the
     // end of the list to give the others a chance to load correctly..
@@ -61,33 +60,11 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
 
     for (int i = 0; i < crashedPlugins.size(); ++i)
     {
-        const File f (crashedPlugins[i]);
+        const String f = crashedPlugins[i];
 
-        for (int j = filesToScan.size(); --j >= 0;)
-            if (f == *filesToScan.getUnchecked (j))
-                filesToScan.move (j, -1);
-    }
-}
-
-void PluginDirectoryScanner::recursiveFileSearch (const File& dir, const bool recursive)
-{
-    // avoid allowing the dir iterator to be recursive, because we want to avoid letting it delve inside
-    // .component or .vst directories.
-    DirectoryIterator iter (dir, false, "*", File::findFilesAndDirectories);
-
-    while (iter.next())
-    {
-        const File f (iter.getFile());
-        bool isPlugin = false;
-
-        if (format.fileMightContainThisPluginType (f))
-        {
-            isPlugin = true;
-            filesToScan.add (new File (f));
-        }
-
-        if (recursive && (! isPlugin) && f.isDirectory())
-            recursiveFileSearch (f, true);
+        for (int j = filesOrIdentifiersToScan.size(); --j >= 0;)
+            if (f == filesOrIdentifiersToScan[j])
+                filesOrIdentifiersToScan.move (j, -1);
     }
 }
 
@@ -96,49 +73,45 @@ PluginDirectoryScanner::~PluginDirectoryScanner()
 }
 
 //==============================================================================
-const File PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const throw()
+const String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const throw()
 {
-    File* const file = filesToScan [nextIndex];
-
-    if (file != 0)
-        return *file;
-
-    return File::nonexistent;
+    return format.getNameOfPluginFromIdentifier (filesOrIdentifiersToScan [nextIndex]);
 }
 
 bool PluginDirectoryScanner::scanNextFile (const bool dontRescanIfAlreadyInList)
 {
-    File* const file = filesToScan [nextIndex];
+    String file (filesOrIdentifiersToScan [nextIndex]);
 
-    if (file != 0)
+    if (file.isNotEmpty())
     {
-        if (! list.isListingUpToDate (*file))
+        if (! list.isListingUpToDate (file))
         {
             OwnedArray <PluginDescription> typesFound;
 
             // Add this plugin to the end of the dead-man's pedal list in case it crashes...
             StringArray crashedPlugins (getDeadMansPedalFile());
-            crashedPlugins.removeString (file->getFullPathName());
-            crashedPlugins.add (file->getFullPathName());
+            crashedPlugins.removeString (file);
+            crashedPlugins.add (file);
             setDeadMansPedalFile (crashedPlugins);
 
-            list.scanAndAddFile (*file,
+            list.scanAndAddFile (file,
                                  dontRescanIfAlreadyInList,
-                                 typesFound);
+                                 typesFound,
+                                 format);
 
             // Managed to load without crashing, so remove it from the dead-man's-pedal..
-            crashedPlugins.removeString (file->getFullPathName());
+            crashedPlugins.removeString (file);
             setDeadMansPedalFile (crashedPlugins);
 
             if (typesFound.size() == 0)
-                failedFiles.add (file->getFullPathName());
+                failedFiles.add (file);
         }
 
         ++nextIndex;
-        progress = nextIndex / (float) filesToScan.size();
+        progress = nextIndex / (float) filesOrIdentifiersToScan.size();
     }
 
-    return nextIndex < filesToScan.size();
+    return nextIndex < filesOrIdentifiersToScan.size();
 }
 
 const StringArray PluginDirectoryScanner::getDeadMansPedalFile() throw()

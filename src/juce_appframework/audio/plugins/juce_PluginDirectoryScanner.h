@@ -89,12 +89,13 @@ public:
     */
     bool scanNextFile (const bool dontRescanIfAlreadyInList);
 
-    /** Returns the file that will be scanned during the next call to scanNextFile().
+    /** Returns the description of the plugin that will be scanned during the next
+        call to scanNextFile().
 
         This is handy if you want to show the user which file is currently getting
         scanned.
     */
-    const File getNextPluginFileThatWillBeScanned() const throw();
+    const String getNextPluginFileThatWillBeScanned() const throw();
 
     /** Returns the estimated progress, between 0 and 1.
     */
@@ -111,13 +112,12 @@ public:
 private:
     KnownPluginList& list;
     AudioPluginFormat& format;
-    OwnedArray <File> filesToScan;
+    StringArray filesOrIdentifiersToScan;
     File deadMansPedalFile;
     StringArray failedFiles;
     int nextIndex;
     float progress;
 
-    void recursiveFileSearch (const File& dir, const bool recursive);
     const StringArray getDeadMansPedalFile() throw();
     void setDeadMansPedalFile (const StringArray& newContents) throw();
 

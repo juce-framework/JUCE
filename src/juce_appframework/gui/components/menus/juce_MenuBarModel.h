@@ -149,9 +149,9 @@ public:
         not to delete a model while it is being used.
 
         An optional extra menu can be specified, containing items to add to the top of
-        the apple menu. (Confusingly, the 'apple' menu isn't the one with a picture of 
-        an apple, it's the one next to it, with your application's name at the top 
-        and the services menu etc on it). When one of these items is selected, the 
+        the apple menu. (Confusingly, the 'apple' menu isn't the one with a picture of
+        an apple, it's the one next to it, with your application's name at the top
+        and the services menu etc on it). When one of these items is selected, the
         menu bar model will be used to invoke it, and in the menuItemSelected() callback
         the topLevelMenuIndex parameter will be -1. If you pass in an extraAppleMenuItems
         object then newMenuBarModel must be non-null.

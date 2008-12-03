@@ -779,8 +779,8 @@ protected:
                               UInt8 inData1,
                               UInt8 inData2,
 #if defined(MAC_OS_X_VERSION_10_5)
-                              UInt32 inStartFrame
-#else 
+                              UInt32 inStartFrame)
+#else
                               long inStartFrame)
 #endif
     {
@@ -793,6 +793,14 @@ protected:
         midiEvents.addEvent (data, 3, inStartFrame);
 #endif
 
+        return noErr;
+    }
+
+    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength)
+    {
+#if JucePlugin_WantsMidiInput
+        midiEvents.addEvent (inData, inLength, 0);
+#endif
         return noErr;
     }
 
@@ -952,7 +960,7 @@ private:
 
 - (NSString*) description
 {
-	return [NSString stringWithString: @JucePlugin_Name];
+    return [NSString stringWithString: @JucePlugin_Name];
 }
 
 - (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit

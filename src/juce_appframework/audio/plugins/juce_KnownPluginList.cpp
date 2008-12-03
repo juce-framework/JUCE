@@ -55,10 +55,10 @@ void KnownPluginList::clear()
     }
 }
 
-PluginDescription* KnownPluginList::getTypeForFile (const File& file) const throw()
+PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifier) const throw()
 {
     for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->fileOrIdentifier == file.getFullPathName())
+        if (types.getUnchecked(i)->fileOrIdentifier == fileOrIdentifier)
             return types.getUnchecked(i);
 
     return 0;
@@ -99,17 +99,33 @@ void KnownPluginList::removeType (const int index) throw()
     sendChangeMessage (this);
 }
 
-bool KnownPluginList::isListingUpToDate (const File& possiblePluginFile) const throw()
+static Time getFileModTime (const String& fileOrIdentifier) throw()
 {
-    if (getTypeForFile (possiblePluginFile) == 0)
+    if (fileOrIdentifier.startsWithChar (T('/'))
+        || fileOrIdentifier[1] == T(':'))
+    {
+        return File (fileOrIdentifier).getLastModificationTime();
+    }
+
+    return Time (0);
+}
+
+static bool timesAreDifferent (const Time& t1, const Time& t2) throw()
+{
+    return t1 != t2 || t1 == Time (0);
+}
+
+bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier) const throw()
+{
+    if (getTypeForFile (fileOrIdentifier) == 0)
         return false;
 
     for (int i = types.size(); --i >= 0;)
     {
         const PluginDescription* const d = types.getUnchecked(i);
 
-        if (d->fileOrIdentifier == possiblePluginFile.getFullPathName()
-             && d->lastFileModTime != possiblePluginFile.getLastModificationTime())
+        if (d->fileOrIdentifier == fileOrIdentifier
+             && timesAreDifferent (d->lastFileModTime, getFileModTime (fileOrIdentifier)))
         {
             return false;
         }
@@ -118,14 +134,15 @@ bool KnownPluginList::isListingUpToDate (const File& possiblePluginFile) const t
     return true;
 }
 
-bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
+bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
                                       const bool dontRescanIfAlreadyInList,
-                                      OwnedArray <PluginDescription>& typesFound)
+                                      OwnedArray <PluginDescription>& typesFound,
+                                      AudioPluginFormat& format)
 {
     bool addedOne = false;
 
     if (dontRescanIfAlreadyInList
-         && getTypeForFile (possiblePluginFile) != 0)
+         && getTypeForFile (fileOrIdentifier) != 0)
     {
         bool needsRescanning = false;
 
@@ -133,9 +150,9 @@ bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
         {
             const PluginDescription* const d = types.getUnchecked(i);
 
-            if (d->fileOrIdentifier == possiblePluginFile.getFullPathName())
+            if (d->fileOrIdentifier == fileOrIdentifier)
             {
-                if (d->lastFileModTime != possiblePluginFile.getLastModificationTime())
+                if (timesAreDifferent (d->lastFileModTime, getFileModTime (fileOrIdentifier)))
                     needsRescanning = true;
                 else
                     typesFound.add (new PluginDescription (*d));
@@ -146,23 +163,18 @@ bool KnownPluginList::scanAndAddFile (const File& possiblePluginFile,
             return false;
     }
 
-    for (int i = 0; i < AudioPluginFormatManager::getInstance()->getNumFormats(); ++i)
+    OwnedArray <PluginDescription> found;
+    format.findAllTypesForFile (found, fileOrIdentifier);
+
+    for (int i = 0; i < found.size(); ++i)
     {
-        AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (i);
+        PluginDescription* const desc = found.getUnchecked(i);
+        jassert (desc != 0);
 
-        OwnedArray <PluginDescription> found;
-        format->findAllTypesForFile (found, possiblePluginFile);
+        if (addType (*desc))
+            addedOne = true;
 
-        for (int i = 0; i < found.size(); ++i)
-        {
-            PluginDescription* const desc = found.getUnchecked(i);
-            jassert (desc != 0);
-
-            if (addType (*desc))
-                addedOne = true;
-
-            typesFound.add (new PluginDescription (*desc));
-        }
+        typesFound.add (new PluginDescription (*desc));
     }
 
     return addedOne;
@@ -173,10 +185,20 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (const StringArray& files,
 {
     for (int i = 0; i < files.size(); ++i)
     {
-        const File f (files [i]);
+        bool loaded = false;
 
-        if (! scanAndAddFile (f, true, typesFound))
+        for (int j = 0; j < AudioPluginFormatManager::getInstance()->getNumFormats(); ++j)
         {
+            AudioPluginFormat* const format = AudioPluginFormatManager::getInstance()->getFormat (j);
+
+            if (scanAndAddFile (files[i], true, typesFound, *format))
+                loaded = true;
+        }
+
+        if (! loaded)
+        {
+            const File f (files[i]);
+
             if (f.isDirectory())
             {
                 StringArray s;
@@ -350,7 +372,13 @@ public:
 
             PopupMenu subMenu;
             sub->addToMenu (subMenu, allPlugins);
+
+#if JUCE_MAC
+            // avoid the special AU formatting nonsense on Mac..
+            m.addSubMenu (sub->folder.fromFirstOccurrenceOf (T(":"), false, false), subMenu);
+#else
             m.addSubMenu (sub->folder, subMenu);
+#endif
         }
 
         for (i = 0; i < plugins.size(); ++i)

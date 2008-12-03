@@ -2892,13 +2892,13 @@ VSTPluginFormat::~VSTPluginFormat()
 }
 
 void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
-                                           const File& file)
+                                           const String& fileOrIdentifier)
 {
-    if (! fileMightContainThisPluginType (file))
+    if (! fileMightContainThisPluginType (fileOrIdentifier))
         return;
 
     PluginDescription desc;
-    desc.fileOrIdentifier = file.getFullPathName();
+    desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
     VSTPluginInstance* instance = dynamic_cast <VSTPluginInstance*> (createInstanceFromDescription (desc));
@@ -2976,10 +2976,10 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
 {
     VSTPluginInstance* result = 0;
 
-    File file (desc.fileOrIdentifier);
-
-    if (fileMightContainThisPluginType (file))
+    if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
+        File file (desc.fileOrIdentifier);
+
         const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
@@ -3008,8 +3008,10 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
     return result;
 }
 
-bool VSTPluginFormat::fileMightContainThisPluginType (const File& f)
+bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
+    const File f (fileOrIdentifier);
+
 #if JUCE_MAC
     if (f.isDirectory() && f.hasFileExtension (T(".vst")))
         return true;
@@ -3041,9 +3043,46 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const File& f)
 #endif
 }
 
+const String VSTPluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)
+{
+    return fileOrIdentifier;
+}
+
 bool VSTPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
     return File (desc.fileOrIdentifier).exists();
+}
+
+const StringArray VSTPluginFormat::searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive)
+{
+    StringArray results;
+
+    for (int j = 0; j < directoriesToSearch.getNumPaths(); ++j)
+        recursiveFileSearch (results, directoriesToSearch [j], recursive);
+
+    return results;
+}
+
+void VSTPluginFormat::recursiveFileSearch (StringArray& results, const File& dir, const bool recursive)
+{
+    // avoid allowing the dir iterator to be recursive, because we want to avoid letting it delve inside
+    // .component or .vst directories.
+    DirectoryIterator iter (dir, false, "*", File::findFilesAndDirectories);
+
+    while (iter.next())
+    {
+        const File f (iter.getFile());
+        bool isPlugin = false;
+
+        if (fileMightContainThisPluginType (f.getFullPathName()))
+        {
+            isPlugin = true;
+            results.add (f.getFullPathName());
+        }
+
+        if (recursive && (! isPlugin) && f.isDirectory())
+            recursiveFileSearch (results, f, true);
+    }
 }
 
 const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
@@ -3058,6 +3097,7 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     return FileSearchPath ("/usr/lib/vst");
 #endif
 }
+
 
 END_JUCE_NAMESPACE
 

@@ -62,10 +62,12 @@ public:
 
     //==============================================================================
     const String getName() const                                { return "Internal"; }
-    bool fileMightContainThisPluginType (const File&)           { return false; }
+    bool fileMightContainThisPluginType (const String&)         { return false; }
     const FileSearchPath getDefaultLocationsToSearch()          { return FileSearchPath(); }
-    void findAllTypesForFile (OwnedArray <PluginDescription>&, const File&)     {}
+    void findAllTypesForFile (OwnedArray <PluginDescription>&, const String&)     {}
     bool doesPluginStillExist (const PluginDescription&)        { return true; }
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)   { return fileOrIdentifier; }
+    const StringArray searchPathsForPlugins (const FileSearchPath&, const bool)   { return StringArray(); }
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 
     //==============================================================================

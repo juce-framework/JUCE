@@ -79,12 +79,12 @@ void AudioPluginFormatManager::addDefaultFormats()
     }
 #endif
 
-#if JUCE_PLUGINHOST_VST
-    formats.add (new VSTPluginFormat());
-#endif
-
 #if JUCE_PLUGINHOST_AU && JUCE_MAC
     formats.add (new AudioUnitPluginFormat());
+#endif
+
+#if JUCE_PLUGINHOST_VST
+    formats.add (new VSTPluginFormat());
 #endif
 
 #if JUCE_PLUGINHOST_DX && JUCE_WIN32

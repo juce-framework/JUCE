@@ -279,7 +279,7 @@ void PluginListComponent::scanFor (AudioPluginFormat* format)
     for (;;)
     {
         aw.setMessage (TRANS("Testing:\n\n")
-                         + scanner.getNextPluginFileThatWillBeScanned().getFileName());
+                         + scanner.getNextPluginFileThatWillBeScanned());
 
         MessageManager::getInstance()->runDispatchLoopUntil (20);
 

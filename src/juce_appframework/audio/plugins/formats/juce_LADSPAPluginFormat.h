@@ -53,9 +53,10 @@ public:
 
     //==============================================================================
     const String getName() const                { return "LADSPA"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const File& file);
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const File& file);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
     const FileSearchPath getDefaultLocationsToSearch();
 
     //==============================================================================

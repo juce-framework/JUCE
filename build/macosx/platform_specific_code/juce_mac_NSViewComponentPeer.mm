@@ -1347,8 +1347,8 @@ void NSViewComponentPeer::redirectMovedOrResized()
 //==============================================================================
 void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
 {
-    // Very annoyingly, this function has to use the old SetSystemUIMode function, 
-    // which is in Carbon.framework. But, because there's no Cocoa equivalent, it 
+    // Very annoyingly, this function has to use the old SetSystemUIMode function,
+    // which is in Carbon.framework. But, because there's no Cocoa equivalent, it
     // is apparently still available in 64-bit apps..
     if (enableOrDisable)
     {

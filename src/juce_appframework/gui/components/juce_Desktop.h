@@ -181,8 +181,8 @@ public:
         The component must already be on the desktop for this method to work. It will
         be resized to completely fill the screen and any extraneous taskbars, menu bars,
         etc will be hidden.
-        
-        To exit kiosk mode, just call setKioskModeComponent (0). When this is called, 
+
+        To exit kiosk mode, just call setKioskModeComponent (0). When this is called,
         the component that's currently being used will be resized back to the size
         and position it was in before being put into this mode.
     */
