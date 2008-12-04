@@ -626,7 +626,8 @@ public:
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
 
 #if JUCE_WIN32
-            if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL)
+            if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL
+                 && GetThreadPriority (GetCurrentThread()) >= THREAD_PRIORITY_LOWEST)
                 filter->setNonRealtime (true);
 #endif
         }

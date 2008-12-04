@@ -681,12 +681,15 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         window = [viewToAttachTo window];
         [viewToAttachTo addSubview: view];
         isSharedWindow = true;
+
+        setVisible (component->isVisible());
     }
     else
     {
         isSharedWindow = false;
         r.origin.x = (float) component->getX();
         r.origin.y = (float) component->getY();
+        r.origin.y = [[NSScreen mainScreen] frame].size.height - (r.origin.y + r.size.height);
 
         unsigned int style = 0;
         if ((windowStyleFlags & windowHasTitleBar) == 0)
@@ -709,6 +712,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
                                                      defer: YES ];
 
         [((JuceNSWindow*) window) setOwner: this];
+        [window orderOut: nil];
         [window setDelegate: window];
         [window setOpaque: component->isOpaque()];
         [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
@@ -723,8 +727,6 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
         [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
     }
-
-    setVisible (component->isVisible());
 }
 
 NSViewComponentPeer::~NSViewComponentPeer()
@@ -998,7 +1000,7 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
                           relativeTo: nil];
     }
 
-    if (window != 0)
+    if (window != 0 && component->isVisible())
     {
         if (makeActiveWindow)
             [window makeKeyAndOrderFront: nil];
