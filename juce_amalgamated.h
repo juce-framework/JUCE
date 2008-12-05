@@ -7056,6 +7056,11 @@ public:
     /** Resets this Random object to a given seed value. */
     void setSeed (const int64 newSeed) throw();
 
+    /** Reseeds this generator using a value generated from various semi-random system
+        properties like the current time, etc.
+    */
+    void setSeedRandomly();
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -11860,9 +11865,15 @@ public:
 
         The certainty parameter specifies how many iterations to use when testing
         for primality. A safe value might be anything over about 20-30.
+
+        The randomSeeds parameter lets you optionally pass it a set of values with
+        which to seed the random number generation, improving the security of the
+        keys generated.
     */
     static const BitArray createProbablePrime (int bitLength,
-                                               int certainty) throw();
+                                               int certainty,
+                                               const int* randomSeeds = 0,
+                                               int numRandomSeeds = 0) throw();
 
     /** Tests a number to see if it's prime.
 
@@ -11933,10 +11944,16 @@ public:
 
         The numBits parameter specifies the size of key, e.g. 128, 256, 512 bit. Bigger
         sizes are more secure, but this method will take longer to execute.
+
+        The randomSeeds parameter lets you optionally pass it a set of values with
+        which to seed the random number generation, improving the security of the
+        keys generated.
     */
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
-                               const int numBits) throw();
+                               const int numBits,
+                               const int* randomSeeds = 0,
+                               const int numRandomSeeds = 0) throw();
 
     juce_UseDebuggingNewOperator
 

@@ -126,12 +126,14 @@ static const BitArray findBestCommonDivisor (const BitArray& p,
 
 void RSAKey::createKeyPair (RSAKey& publicKey,
                             RSAKey& privateKey,
-                            const int numBits) throw()
+                            const int numBits,
+                            const int* randomSeeds,
+                            const int numRandomSeeds) throw()
 {
     jassert (numBits > 16); // not much point using less than this..
 
-    BitArray p (Primes::createProbablePrime (numBits / 2, 30));
-    BitArray q (Primes::createProbablePrime (numBits - numBits / 2, 30));
+    BitArray p (Primes::createProbablePrime (numBits / 2, 30, randomSeeds, numRandomSeeds));
+    BitArray q (Primes::createProbablePrime (numBits - numBits / 2, 30, randomSeeds, numRandomSeeds));
 
     BitArray n (p);
     n.multiplyBy (q);   // n = pq

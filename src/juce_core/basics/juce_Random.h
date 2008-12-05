@@ -100,6 +100,11 @@ public:
     /** Resets this Random object to a given seed value. */
     void setSeed (const int64 newSeed) throw();
 
+    /** Reseeds this generator using a value generated from various semi-random system 
+        properties like the current time, etc.
+    */
+    void setSeedRandomly();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

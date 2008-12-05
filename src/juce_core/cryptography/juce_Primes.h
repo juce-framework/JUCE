@@ -51,9 +51,15 @@ public:
 
         The certainty parameter specifies how many iterations to use when testing
         for primality. A safe value might be anything over about 20-30.
+
+        The randomSeeds parameter lets you optionally pass it a set of values with
+        which to seed the random number generation, improving the security of the
+        keys generated.
     */
     static const BitArray createProbablePrime (int bitLength,
-                                               int certainty) throw();
+                                               int certainty,
+                                               const int* randomSeeds = 0,
+                                               int numRandomSeeds = 0) throw();
 
     /** Tests a number to see if it's prime.
 

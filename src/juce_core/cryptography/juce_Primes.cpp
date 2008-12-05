@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_Primes.h"
+#include "../basics/juce_Random.h"
 
 
 //==============================================================================
@@ -121,14 +122,44 @@ static bool findCandidate (const BitArray& base,
 
 //==============================================================================
 const BitArray Primes::createProbablePrime (const int bitLength,
-                                            const int certainty) throw()
+                                            const int certainty,
+                                            const int* randomSeeds,
+                                            int numRandomSeeds) throw()
 {
+    int defaultSeeds[8];
+
+    if (numRandomSeeds <= 0)
+    {
+        randomSeeds = defaultSeeds;
+        numRandomSeeds = 8;
+
+        for (int j = 10; --j >= 0;)
+        {
+            Random r (0);
+            r.setSeedRandomly();
+
+            for (int i = numRandomSeeds; --i >= 0;)
+                defaultSeeds[i] ^= r.nextInt() ^ Random::getSystemRandom().nextInt();
+        }
+    }
+
     BitArray smallSieve;
     const int smallSieveSize = 15000;
     createSmallSieve (smallSieveSize, smallSieve);
 
     BitArray p;
-    p.fillBitsRandomly (0, bitLength);
+
+    for (int i = numRandomSeeds; --i >= 0;)
+    {
+        Random::getSystemRandom().setSeed (randomSeeds[i]);
+
+        BitArray p2;
+        p2.fillBitsRandomly (0, bitLength);
+        p.xorWith (p2);
+    }
+
+    Random::getSystemRandom().setSeedRandomly();
+
     p.setBit (bitLength - 1);
     p.clearBit (0);
 

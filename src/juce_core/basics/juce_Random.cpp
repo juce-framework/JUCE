@@ -34,6 +34,9 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Random.h"
+#include "../basics/juce_Time.h"
+#include "../basics/juce_SystemStats.h"
+
 
 //==============================================================================
 Random::Random (const int64 seedValue) throw()
@@ -48,6 +51,17 @@ Random::~Random() throw()
 void Random::setSeed (const int64 newSeed) throw()
 {
     seed = newSeed;
+}
+
+void Random::setSeedRandomly()
+{
+    Random r1 (SystemStats::getClockCycleCounter());
+    Random r2 (Time::getHighResolutionTicks());
+    Random r3 (Time::getHighResolutionTicksPerSecond());
+    Random r4 (Time::currentTimeMillis());
+
+    setSeed (r1.nextInt64() ^ r2.nextInt64()
+               ^ r3.nextInt64() ^ r4.nextInt64());
 }
 
 //==============================================================================

@@ -86,7 +86,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
         DBG (SystemStats::getJUCEVersion());
         juce_initialiseStrings();
         SystemStats::initialiseStats();
-        Random::getSystemRandom().setSeed (Time::currentTimeMillis());
+        Random::getSystemRandom().setSeedRandomly();
     }
 }
 

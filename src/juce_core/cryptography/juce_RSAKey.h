@@ -86,10 +86,16 @@ public:
 
         The numBits parameter specifies the size of key, e.g. 128, 256, 512 bit. Bigger
         sizes are more secure, but this method will take longer to execute.
+
+        The randomSeeds parameter lets you optionally pass it a set of values with
+        which to seed the random number generation, improving the security of the
+        keys generated.
     */
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
-                               const int numBits) throw();
+                               const int numBits,
+                               const int* randomSeeds = 0,
+                               const int numRandomSeeds = 0) throw();
 
 
     //==============================================================================
