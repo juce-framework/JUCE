@@ -339,6 +339,9 @@ public:
     {
         if (ok)
         {
+            // write a zero-length packet to show ogg that we're finished..
+            write (0, 0);
+
             ogg_stream_clear (&os);
             vorbis_block_clear (&vb);
             vorbis_dsp_clear (&vd);
