@@ -982,14 +982,6 @@
 							Name="formats"
 							>
 							<File
-								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.cpp"
-								>
-							</File>
-							<File
-								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.h"
-								>
-							</File>
-							<File
 								RelativePath="..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h"
 								>
 							</File>
