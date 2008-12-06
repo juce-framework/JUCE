@@ -727,6 +727,8 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
         [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
     }
+    
+    setTitle (component->getName());
 }
 
 NSViewComponentPeer::~NSViewComponentPeer()
