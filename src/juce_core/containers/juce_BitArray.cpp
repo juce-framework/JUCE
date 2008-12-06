@@ -737,46 +737,6 @@ void BitArray::setBitRangeAsInt (const int startBit, int numBits, unsigned int v
 }
 
 //==============================================================================
-void BitArray::fillBitsRandomly (int startBit, int numBits) throw()
-{
-    highestBit = jmax (highestBit, startBit + numBits);
-    ensureSize (((startBit + numBits) >> 5) + 1);
-
-    while ((startBit & 31) != 0 && numBits > 0)
-    {
-        setBit (startBit++, Random::getSystemRandom().nextBool());
-
-        --numBits;
-    }
-
-    while (numBits >= 32)
-    {
-        values [startBit >> 5] = (unsigned int) Random::getSystemRandom().nextInt();
-
-        startBit += 32;
-        numBits -= 32;
-    }
-
-    while (--numBits >= 0)
-    {
-        setBit (startBit + numBits, Random::getSystemRandom().nextBool());
-    }
-
-    highestBit = getHighestBit();
-}
-
-void BitArray::createRandomNumber (const BitArray& maximumValue) throw()
-{
-    clear();
-
-    do
-    {
-        fillBitsRandomly (0, maximumValue.getHighestBit() + 1);
-    }
-    while (compare (maximumValue) >= 0);
-}
-
-//==============================================================================
 bool BitArray::isNegative() const throw()
 {
     return negative && ! isEmpty();

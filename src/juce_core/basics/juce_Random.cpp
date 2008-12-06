@@ -34,8 +34,8 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Random.h"
-#include "../basics/juce_Time.h"
-#include "../basics/juce_SystemStats.h"
+#include "juce_Time.h"
+#include "juce_SystemStats.h"
 
 
 //==============================================================================
@@ -60,7 +60,7 @@ void Random::setSeedRandomly()
     Random r3 (Time::getHighResolutionTicksPerSecond());
     Random r4 (Time::currentTimeMillis());
 
-    setSeed (r1.nextInt64() ^ r2.nextInt64()
+    setSeed (nextInt64() ^ r1.nextInt64() ^ r2.nextInt64()
                ^ r3.nextInt64() ^ r4.nextInt64());
 }
 
@@ -98,11 +98,44 @@ double Random::nextDouble() throw()
     return ((uint32) nextInt()) / (double) 0xffffffff;
 }
 
-//==============================================================================
-static Random sysRand (1);
+const BitArray Random::nextLargeNumber (const BitArray& maximumValue) throw()
+{
+    BitArray n;
 
+    do
+    {
+        fillBitsRandomly (n, 0, maximumValue.getHighestBit() + 1);
+    }
+    while (n.compare (maximumValue) >= 0);
+
+    return n;
+}
+
+void Random::fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw()
+{
+    arrayToChange.setBit (startBit + numBits - 1, true);  // to force the array to pre-allocate space
+
+    while ((startBit & 31) != 0 && numBits > 0)
+    {
+        arrayToChange.setBit (startBit++, nextBool());
+        --numBits;
+    }
+
+    while (numBits >= 32)
+    {
+        arrayToChange.setBitRangeAsInt (startBit, 32, (unsigned int) nextInt());
+        startBit += 32;
+        numBits -= 32;
+    }
+
+    while (--numBits >= 0)
+        arrayToChange.setBit (startBit + numBits, nextBool());
+}
+
+//==============================================================================
 Random& Random::getSystemRandom() throw()
 {
+    static Random sysRand (1);
     return sysRand;
 }
 

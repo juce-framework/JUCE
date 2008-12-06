@@ -84,9 +84,10 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
         juceInitialisedNonGUI = true;
 
         DBG (SystemStats::getJUCEVersion());
+        Random::getSystemRandom().setSeedRandomly(); // (calling this more than once improves its randomness)
         juce_initialiseStrings();
         SystemStats::initialiseStats();
-        Random::getSystemRandom().setSeedRandomly();
+        Random::getSystemRandom().setSeedRandomly(); // (calling this more than once improves its randomness)
     }
 }
 

@@ -290,13 +290,6 @@ public:
     int getHighestBit() const throw();
 
     //==============================================================================
-    /** Sets a range of bits to random values. */
-    void fillBitsRandomly (int startBit, int numBits) throw();
-
-    /** Turns this value into a random number less than the given value. */
-    void createRandomNumber (const BitArray& maximumValue) throw();
-
-    //==============================================================================
     /** Converts the array to a number string.
 
         Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).

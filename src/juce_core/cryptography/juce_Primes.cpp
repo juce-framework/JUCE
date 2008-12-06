@@ -126,16 +126,16 @@ const BitArray Primes::createProbablePrime (const int bitLength,
                                             const int* randomSeeds,
                                             int numRandomSeeds) throw()
 {
-    int defaultSeeds[8];
+    int defaultSeeds [16];
 
     if (numRandomSeeds <= 0)
     {
         randomSeeds = defaultSeeds;
-        numRandomSeeds = 8;
+        numRandomSeeds = numElementsInArray (defaultSeeds);
+        Random r (0);
 
         for (int j = 10; --j >= 0;)
         {
-            Random r (0);
             r.setSeedRandomly();
 
             for (int i = numRandomSeeds; --i >= 0;)
@@ -151,14 +151,13 @@ const BitArray Primes::createProbablePrime (const int bitLength,
 
     for (int i = numRandomSeeds; --i >= 0;)
     {
-        Random::getSystemRandom().setSeed (randomSeeds[i]);
-
         BitArray p2;
-        p2.fillBitsRandomly (0, bitLength);
+
+        Random r (randomSeeds[i]);
+        r.fillBitsRandomly (p2, 0, bitLength);
+
         p.xorWith (p2);
     }
-
-    Random::getSystemRandom().setSeedRandomly();
 
     p.setBit (bitLength - 1);
     p.clearBit (0);

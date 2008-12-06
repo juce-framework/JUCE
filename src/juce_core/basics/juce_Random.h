@@ -32,6 +32,8 @@
 #ifndef __JUCE_RANDOM_JUCEHEADER__
 #define __JUCE_RANDOM_JUCEHEADER__
 
+#include "../containers/juce_BitArray.h"
+
 
 //==============================================================================
 /**
@@ -88,6 +90,15 @@ public:
     */
     bool nextBool() throw();
 
+    /** Returns a BitArray containing a random number.
+
+        @returns a random value in the range 0 to (maximumValue - 1).
+    */
+    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
+
+    /** Sets a range of bits in a BitArray to random values. */
+    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
+
     //==============================================================================
     /** To avoid the overhead of having to create a new Random object whenever
         you need a number, this is a shared application-wide object that
@@ -100,8 +111,11 @@ public:
     /** Resets this Random object to a given seed value. */
     void setSeed (const int64 newSeed) throw();
 
-    /** Reseeds this generator using a value generated from various semi-random system 
+    /** Reseeds this generator using a value generated from various semi-random system
         properties like the current time, etc.
+
+        Because this function convolves the time with the last seed value, calling
+        it repeatedly will increase the randomness of the final result.
     */
     void setSeedRandomly();
 
