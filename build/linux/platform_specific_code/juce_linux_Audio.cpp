@@ -195,8 +195,8 @@ public:
                                      SND_PCM_FORMAT_FLOAT_BE, 32, AudioDataConverters::float32BE,
                                      SND_PCM_FORMAT_S32_LE, 32, AudioDataConverters::int32LE,
                                      SND_PCM_FORMAT_S32_BE, 32, AudioDataConverters::int32BE,
-                                     SND_PCM_FORMAT_S24_LE, 24, AudioDataConverters::int24LE,
-                                     SND_PCM_FORMAT_S24_BE, 24, AudioDataConverters::int24BE,
+                                     SND_PCM_FORMAT_S24_3LE, 24, AudioDataConverters::int24LE,
+                                     SND_PCM_FORMAT_S24_3BE, 24, AudioDataConverters::int24BE,
                                      SND_PCM_FORMAT_S16_LE, 16, AudioDataConverters::int16LE,
                                      SND_PCM_FORMAT_S16_BE, 16, AudioDataConverters::int16BE };
         bitDepth = 0;
@@ -233,12 +233,14 @@ public:
 
         snd_pcm_sw_params_t* swParams;
         snd_pcm_sw_params_alloca (&swParams);
+        snd_pcm_uframes_t boundary;
 
         if (failed (snd_pcm_sw_params_current (handle, swParams))
+            || failed (snd_pcm_sw_params_get_boundary (swParams, &boundary))
             || failed (snd_pcm_sw_params_set_silence_threshold (handle, swParams, 0))
-            || failed (snd_pcm_sw_params_set_silence_size (handle, swParams, 0))
+            || failed (snd_pcm_sw_params_set_silence_size (handle, swParams, boundary))
             || failed (snd_pcm_sw_params_set_start_threshold (handle, swParams, samplesPerPeriod))
-            || failed (snd_pcm_sw_params_set_stop_threshold (handle, swParams, INT_MAX))
+            || failed (snd_pcm_sw_params_set_stop_threshold (handle, swParams, boundary))
             || failed (snd_pcm_sw_params (handle, swParams)))
         {
             return false;
