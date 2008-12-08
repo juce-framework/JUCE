@@ -273,13 +273,17 @@ public:
         if (instance == 0)
             instance = new InternalTimerThread();
 
+        const ScopedLock sl (instance->lock);
         instance->addTimer (tim);
     }
 
     static inline void remove (Timer* const tim) throw()
     {
         if (instance != 0)
+        {
+            const ScopedLock sl (instance->lock);
             instance->removeTimer (tim);
+        }
     }
 
     static inline void resetCounter (Timer* const tim,
@@ -293,6 +297,7 @@ public:
             if ((tim->next != 0 && tim->next->countdownMs < tim->countdownMs)
                  || (tim->previous != 0 && tim->previous->countdownMs > tim->countdownMs))
             {
+                const ScopedLock sl (instance->lock);
                 instance->removeTimer (tim);
                 instance->addTimer (tim);
             }

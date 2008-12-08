@@ -37,7 +37,7 @@
   #endif
 
 #else
-  #ifdef LINUX
+  #if defined (LINUX) || defined (__linux__)
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/errno.h>

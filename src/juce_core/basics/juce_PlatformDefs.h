@@ -55,7 +55,7 @@
 #if (defined (_WIN32) || defined (_WIN64))
   #define       JUCE_WIN32 1
 #else
-  #ifdef LINUX
+  #if defined (LINUX) || defined (__linux__)
     #define     JUCE_LINUX 1
   #else
     #define     JUCE_MAC 1
