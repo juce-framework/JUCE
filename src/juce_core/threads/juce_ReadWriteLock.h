@@ -34,6 +34,7 @@
 
 #include "juce_CriticalSection.h"
 #include "juce_WaitableEvent.h"
+#include "juce_Thread.h"
 #include "../containers/juce_Array.h"
 
 
@@ -134,8 +135,8 @@ private:
     CriticalSection accessLock;
     WaitableEvent waitEvent;
     mutable int numWaitingWriters, numWriters;
-    mutable int64 writerThreadId;
-    mutable Array <int64> readerThreads;
+    mutable Thread::ThreadID writerThreadId;
+    mutable Array <Thread::ThreadID> readerThreads;
 
     ReadWriteLock (const ReadWriteLock&);
     const ReadWriteLock& operator= (const ReadWriteLock&);

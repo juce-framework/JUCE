@@ -148,7 +148,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
             tchar* t = const_cast <tchar*> ((const tchar*) result);
 
-            int i;
+            unsigned int i;
             for (i = 0; i < bytesRead / sizeof (UniChar); ++i)
                 t[i] = (tchar) tempOut[i];
 

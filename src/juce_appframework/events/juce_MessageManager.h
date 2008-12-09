@@ -35,8 +35,8 @@
 #include "../application/juce_DeletedAtShutdown.h"
 #include "../../juce_core/containers/juce_SortedSet.h"
 #include "../../juce_core/containers/juce_VoidArray.h"
+#include "../../juce_core/threads/juce_Thread.h"
 #include "juce_ActionListenerList.h"
-class Thread;
 class Component;
 class MessageManagerLock;
 
@@ -107,14 +107,14 @@ public:
         (Best to ignore this method unless you really know what you're doing..)
         @see getCurrentMessageThread
     */
-    void setCurrentMessageThread (const int64 threadId) throw();
+    void setCurrentMessageThread (const Thread::ThreadID threadId) throw();
 
     /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
 
         (Best to ignore this method unless you really know what you're doing..)
         @see setCurrentMessageThread
     */
-    int64 getCurrentMessageThread() const throw()             { return messageThreadId; }
+    Thread::ThreadID getCurrentMessageThread() const throw()             { return messageThreadId; }
 
     /** Returns true if the caller thread has currenltly got the message manager locked.
 
@@ -169,7 +169,7 @@ private:
 
     friend class JUCEApplication;
     bool quitMessagePosted, quitMessageReceived;
-    int64 messageThreadId;
+    Thread::ThreadID messageThreadId;
 
     VoidArray modalComponents;
     static void* exitModalLoopCallback (void*);
@@ -181,7 +181,7 @@ private:
 
     friend class MessageManagerLock;
     CriticalSection messageDispatchLock;
-    int64 currentLockingThreadId;
+    Thread::ThreadID currentLockingThreadId;
 
     MessageManager (const MessageManager&);
     const MessageManager& operator= (const MessageManager&);
@@ -289,7 +289,7 @@ public:
 
 
 private:
-    int64 lastLockingThreadId;
+    Thread::ThreadID lastLockingThreadId;
     bool locked;
 };
 

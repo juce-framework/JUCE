@@ -84,7 +84,7 @@ public:
     virtual void openFiles (NSArray* filenames)
     {
         StringArray files;
-        for (int i = 0; i < [filenames count]; ++i)
+        for (unsigned int i = 0; i < [filenames count]; ++i)
             files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)

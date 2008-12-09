@@ -138,7 +138,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
         {
             NSOpenPanel* openPanel = (NSOpenPanel*) panel;
             NSArray* urls = [openPanel filenames];
-            for (int i = 0; i < [urls count]; ++i)
+            for (unsigned int i = 0; i < [urls count]; ++i)
             {
                 NSString* f = [urls objectAtIndex: i];
                 results.add (new File (nsStringToJuce (f)));

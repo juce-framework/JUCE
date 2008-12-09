@@ -40,7 +40,7 @@ class BouncingBallComp  : public Component,
     float innerX, innerY;
     Colour colour;
     CriticalSection lock;
-    int64 threadId;
+    Thread::ThreadID threadId;
 
 public:
     BouncingBallComp()
@@ -79,7 +79,7 @@ public:
 
         g.setColour (Colours::black);
         g.setFont (10.0f);
-        g.drawText (String::toHexString (threadId), 0, 0, getWidth(), getHeight(), Justification::centred, false);
+        g.drawText (String::toHexString ((int64) threadId), 0, 0, getWidth(), getHeight(), Justification::centred, false);
     }
 
     void parentSizeChanged()

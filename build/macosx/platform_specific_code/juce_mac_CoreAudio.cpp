@@ -74,22 +74,22 @@ class CoreAudioInternal  : public Timer
 public:
     //==============================================================================
     CoreAudioInternal (AudioDeviceID id)
-       : deviceID (id),
-         started (false),
-         audioBuffer (0),
-         numInputChans (0),
-         numOutputChans (0),
-         callbacksAllowed (true),
-         numInputChannelInfos (0),
-         numOutputChannelInfos (0),
-         inputLatency (0),
+       : inputLatency (0),
          outputLatency (0),
          callback (0),
 #if ! MACOS_10_4_OR_EARLIER
          audioProcID (0),
 #endif
          inputDevice (0),
-         isSlaveDevice (false)
+         isSlaveDevice (false),
+         deviceID (id),
+         started (false),
+         audioBuffer (0),
+         numInputChans (0),
+         numOutputChans (0),
+         callbacksAllowed (true),
+         numInputChannelInfos (0),
+         numOutputChannelInfos (0)
     {
         sampleRate = 0;
         bufferSize = 512;
@@ -391,7 +391,7 @@ public:
 
             if (types != 0)
             {
-                if (((unsigned int) index) < num)
+                if (((unsigned int) index) < (unsigned int) num)
                 {
                     OSType typeId = types[index];
                     AudioDeviceSetProperty (deviceID, 0, 0, input, kAudioDevicePropertyDataSource, sizeof (typeId), &typeId);

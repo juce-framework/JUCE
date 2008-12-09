@@ -284,8 +284,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
 
 int64 SystemStats::getClockCycleCounter() throw()
 {
-    jassertfalse
-    return 0;
+    return (int64) AudioGetCurrentHostTime();
 }
 
 bool Time::setSystemTimeToThisTime() const throw()

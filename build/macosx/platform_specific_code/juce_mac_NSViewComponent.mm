@@ -47,8 +47,8 @@ public:
     NSViewComponentInternal (NSView* view_, Component* const owner_)
         : ComponentMovementWatcher (owner_),
           owner (owner_),
-          wasShowing (false),
           currentPeer (0),
+          wasShowing (false),
           view (view_)
     {
         [view retain];

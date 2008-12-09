@@ -664,8 +664,8 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
                                           const int windowStyleFlags,
                                           NSView* viewToAttachTo)
     : ComponentPeer (component, windowStyleFlags),
-      view (0),
-      window (0)
+      window (0),
+      view (0)
 {
     NSRect r;
     r.origin.x = 0;
@@ -1266,7 +1266,7 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
     {
         NSArray* items = (NSArray*) list;
 
-        for (int i = 0; i < [items count]; ++i)
+        for (unsigned int i = 0; i < [items count]; ++i)
             files.add (nsStringToJuce ((NSString*) [items objectAtIndex: i]));
     }
 

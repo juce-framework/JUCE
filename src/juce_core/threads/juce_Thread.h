@@ -216,6 +216,11 @@ public:
     void notify() const throw();
 
     //==============================================================================
+    /** A value type used for thread IDs.
+        @see getCurrentThreadId(), getThreadId()
+    */
+    typedef void* ThreadID;
+
     /** Returns an id that identifies the caller thread.
 
         To find the ID of a particular thread object, use getThreadId().
@@ -223,7 +228,7 @@ public:
         @returns    a unique identifier that identifies the calling thread.
         @see getThreadId
     */
-    static int64 getCurrentThreadId() throw();
+    static ThreadID getCurrentThreadId() throw();
 
     /** Finds the thread object that is currently running.
 
@@ -241,7 +246,7 @@ public:
 
         @see getCurrentThreadId
     */
-    int64 getThreadId() const throw();
+    ThreadID getThreadId() const throw();
 
     /** Returns the name of the thread.
 
@@ -274,7 +279,7 @@ private:
     WaitableEvent startSuspensionEvent_, defaultEvent_;
 
     int threadPriority_;
-    int64 threadId_;
+    ThreadID threadId_;
     uint32 affinityMask_;
     bool volatile threadShouldExit_;
 

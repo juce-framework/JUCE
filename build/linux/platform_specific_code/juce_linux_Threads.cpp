@@ -91,9 +91,9 @@ void juce_setCurrentThreadName (const String& /*name*/) throw()
 {
 }
 
-int64 Thread::getCurrentThreadId() throw()
+Thread::ThreadID Thread::getCurrentThreadId() throw()
 {
-    return pthread_self();
+    return (ThreadID) pthread_self();
 }
 
 /*

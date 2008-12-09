@@ -380,7 +380,7 @@ const StringArray AudioCDBurner::findAvailableDevices()
     NSArray* names = findDiskBurnerDevices();
     StringArray s;
 
-    for (int i = 0; i < [names count]; ++i)
+    for (unsigned int i = 0; i < [names count]; ++i)
         s.add (String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [[names objectAtIndex: i] UTF8String]));
 
     return s;

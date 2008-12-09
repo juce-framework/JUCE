@@ -72,9 +72,9 @@ void juce_setCurrentThreadName (const String& /*name*/) throw()
 {
 }
 
-int64 Thread::getCurrentThreadId() throw()
+Thread::ThreadID Thread::getCurrentThreadId() throw()
 {
-    return (int64) pthread_self();
+    return (ThreadID) pthread_self();
 }
 
 void juce_setThreadPriority (void* handle, int priority) throw()

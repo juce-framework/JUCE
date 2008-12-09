@@ -315,7 +315,8 @@ private:
     const int trackNum;
     double trackUnitsPerFrame;
     int samplesPerFrame;
-    int lastSampleRead, lastThreadId;
+    int lastSampleRead;
+    Thread::ThreadID lastThreadId;
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
     AudioBufferList* bufferList;

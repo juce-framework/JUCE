@@ -348,7 +348,7 @@ struct FindFileStruct
 
             if (fnmatch (wildCardUTF8, de->d_name, 0) == 0)
             {
-                result = PlatformUtilities::convertToPrecomposedUnicode (String::fromUTF8 ((const uint8*) de->d_name));
+                result = String::fromUTF8 ((const uint8*) de->d_name);
 
                 const String path (parentDir + result);
 

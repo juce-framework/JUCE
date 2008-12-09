@@ -56,7 +56,7 @@ ReadWriteLock::~ReadWriteLock() throw()
 //==============================================================================
 void ReadWriteLock::enterRead() const throw()
 {
-    const int64 threadId = Thread::getCurrentThreadId();
+    const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const ScopedLock sl (accessLock);
 
     for (;;)
@@ -74,12 +74,12 @@ void ReadWriteLock::enterRead() const throw()
         {
             if (i < readerThreads.size())
             {
-                readerThreads.set (i + 1, readerThreads.getUnchecked (i + 1) + 1);
+                readerThreads.set (i + 1, (Thread::ThreadID) (1 + (pointer_sized_int) readerThreads.getUnchecked (i + 1)));
             }
             else
             {
                 readerThreads.add (threadId);
-                readerThreads.add (1);
+                readerThreads.add ((Thread::ThreadID) 1);
             }
 
             return;
@@ -92,14 +92,14 @@ void ReadWriteLock::enterRead() const throw()
 
 void ReadWriteLock::exitRead() const throw()
 {
-    const int64 threadId = Thread::getCurrentThreadId();
+    const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const ScopedLock sl (accessLock);
 
     for (int i = 0; i < readerThreads.size(); i += 2)
     {
         if (readerThreads.getUnchecked(i) == threadId)
         {
-            const int newCount = ((int) readerThreads.getUnchecked (i + 1)) - 1;
+            const int newCount = ((int) (Thread::ThreadID) readerThreads.getUnchecked (i + 1)) - 1;
 
             if (newCount == 0)
             {
@@ -108,7 +108,7 @@ void ReadWriteLock::exitRead() const throw()
             }
             else
             {
-                readerThreads.set (i + 1, newCount);
+                readerThreads.set (i + 1, (Thread::ThreadID) (pointer_sized_int) newCount);
             }
 
             return;
@@ -121,7 +121,7 @@ void ReadWriteLock::exitRead() const throw()
 //==============================================================================
 void ReadWriteLock::enterWrite() const throw()
 {
-    const int64 threadId = Thread::getCurrentThreadId();
+    const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const ScopedLock sl (accessLock);
 
     for (;;)
@@ -146,7 +146,7 @@ void ReadWriteLock::enterWrite() const throw()
 
 bool ReadWriteLock::tryEnterWrite() const throw()
 {
-    const int64 threadId = Thread::getCurrentThreadId();
+    const Thread::ThreadID threadId = Thread::getCurrentThreadId();
     const ScopedLock sl (accessLock);
 
     if (readerThreads.size() + numWriters == 0

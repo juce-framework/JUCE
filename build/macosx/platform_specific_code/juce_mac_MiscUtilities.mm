@@ -219,7 +219,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     NSArray* screens = [NSScreen screens];
     const float mainScreenBottom = [[NSScreen mainScreen] frame].size.height;
 
-    for (int i = 0; i < [screens count]; ++i)
+    for (unsigned int i = 0; i < [screens count]; ++i)
     {
         NSScreen* s = (NSScreen*) [screens objectAtIndex: i];
 
