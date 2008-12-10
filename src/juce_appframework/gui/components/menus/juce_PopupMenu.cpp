@@ -848,7 +848,11 @@ private:
         const Rectangle mon (Desktop::getInstance()
                                 .getMonitorAreaContaining ((minX + maxX) / 2,
                                                            (minY + maxY) / 2,
+#if JUCE_MAC
                                                            true));
+#else
+                                                           false)); // on windows, don't stop the menu overlapping the taskbar
+#endif
 
         int x, y, widthToUse, heightToUse;
         layoutMenuItems (mon.getWidth() - 24, widthToUse, heightToUse);

@@ -105,8 +105,9 @@ void AudioThumbnail::setSource (InputSource* const newSource)
 
     clear();
 
-    if (! (cache.loadThumb (*this, newSource->hashCode())
-           && isFullyLoaded()))
+    if (newSource != 0 
+          && ! (cache.loadThumb (*this, newSource->hashCode())
+                 && isFullyLoaded()))
     {
         {
             const ScopedLock sl (readerLock);
