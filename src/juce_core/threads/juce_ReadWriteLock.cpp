@@ -99,7 +99,7 @@ void ReadWriteLock::exitRead() const throw()
     {
         if (readerThreads.getUnchecked(i) == threadId)
         {
-            const int newCount = ((int) (Thread::ThreadID) readerThreads.getUnchecked (i + 1)) - 1;
+            const pointer_sized_int newCount = ((pointer_sized_int) readerThreads.getUnchecked (i + 1)) - 1;
 
             if (newCount == 0)
             {
@@ -108,7 +108,7 @@ void ReadWriteLock::exitRead() const throw()
             }
             else
             {
-                readerThreads.set (i + 1, (Thread::ThreadID) (pointer_sized_int) newCount);
+                readerThreads.set (i + 1, (Thread::ThreadID) newCount);
             }
 
             return;
