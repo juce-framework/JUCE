@@ -42,12 +42,10 @@
     #include <sys/socket.h>
     #include <sys/errno.h>
     #include <unistd.h>
-    #include <fcntl.h>
     #include <netinet/in.h>
-  #else
-    #include <CoreServices/CoreServices.h>
   #endif
 
+  #include <fcntl.h>
   #include <netdb.h>
   #include <arpa/inet.h>
   #include <netinet/tcp.h>

@@ -85,7 +85,7 @@
 //==============================================================================
 #if JUCE_MAC
 
-  #include <CoreServices/CoreServices.h>
+  #include <CoreFoundation/CoreFoundation.h>
 
   #ifndef NDEBUG
     #define JUCE_DEBUG 1
