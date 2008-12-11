@@ -217,12 +217,19 @@ using namespace JUCE_NAMESPACE;
 
 - (void) performCallback: (id) info
 {
-    CallbackMessagePayload* pl = (CallbackMessagePayload*) info;
-
-    if (pl != 0)
+    if ([info isKindOfClass: [NSData class]])
     {
-        pl->result = (*pl->function) (pl->parameter);
-        pl->hasBeenExecuted = true;
+        CallbackMessagePayload* pl = (CallbackMessagePayload*) [((NSData*) info) bytes];
+
+        if (pl != 0)
+        {
+            pl->result = (*pl->function) (pl->parameter);
+            pl->hasBeenExecuted = true;
+        }
+    }
+    else
+    {
+        jassertfalse // should never get here!
     }
 }
 
@@ -322,6 +329,8 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
     }
     else
     {
+        const ScopedAutoReleasePool pool;
+
         CallbackMessagePayload cmp;
         cmp.function = callback;
         cmp.parameter = data;
@@ -329,7 +338,8 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         cmp.hasBeenExecuted = false;
 
         [juceAppDelegate performSelectorOnMainThread: @selector (performCallback:)
-                                          withObject: (id) &cmp
+                                          withObject: [NSData dataWithBytesNoCopy: &cmp
+                                                                           length: sizeof (cmp)]
                                        waitUntilDone: YES];
 
         return cmp.result;

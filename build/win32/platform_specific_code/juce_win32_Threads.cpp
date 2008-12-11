@@ -170,7 +170,7 @@ void juce_setCurrentThreadName (const String& name) throw()
 
 Thread::ThreadID Thread::getCurrentThreadId() throw()
 {
-    return (ThreadID) GetCurrentThreadId();
+    return (ThreadID) (pointer_sized_int) GetCurrentThreadId();
 }
 
 // priority 1 to 10 where 5=normal, 1=low
