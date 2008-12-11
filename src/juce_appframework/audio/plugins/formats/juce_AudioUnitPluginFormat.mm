@@ -35,6 +35,7 @@
 
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AUCocoaUIView.h>
+#include <CoreAudioKit/AUGenericView.h>
 
 #if JUCE_MAC && JUCE_32BIT
   #define JUCE_SUPPORT_CARBON 1
@@ -838,7 +839,7 @@ static VoidArray activeWindows;
 class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
-    AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& plugin_)
+    AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& plugin_, const bool createGenericViewIfNeeded)
         : AudioProcessorEditor (&plugin_),
           plugin (plugin_),
           wrapper (0)
@@ -851,7 +852,7 @@ public:
         setVisible (true);
         setSize (100, 100);
 
-        createView();
+        createView (createGenericViewIfNeeded);
     }
 
     ~AudioUnitPluginWindowCocoa()
@@ -883,51 +884,51 @@ private:
     AudioUnitPluginInstance& plugin;
     NSViewComponent* wrapper;
 
-    bool createView()
+    bool createView (const bool createGenericViewIfNeeded)
     {
+        NSView* pluginView = 0;
+
         UInt32 dataSize = 0;
         Boolean isWritable = false;
-        if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
-                                      0, &dataSize, &isWritable) != noErr
-             || dataSize == 0)
-        {
-            return false;
-        }
 
         if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
-                                      0, &dataSize, &isWritable) != noErr)
+                                      0, &dataSize, &isWritable) == noErr
+             && dataSize != 0
+             && AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
+                                          0, &dataSize, &isWritable) == noErr)
         {
-            return false;
-        }
+            AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) juce_calloc (dataSize);
 
-        NSView* pluginView = 0;
-        AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) juce_calloc (dataSize);
-
-        if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
-                                  0, info, &dataSize) == noErr)
-        {
-            NSString* viewClassName = (NSString*) (info->mCocoaAUViewClass[0]);
-            NSString* path = (NSString*) CFURLCopyPath (info->mCocoaAUViewBundleLocation);
-            NSBundle* viewBundle = [NSBundle bundleWithPath: [path autorelease]];
-            Class viewClass = [viewBundle classNamed: viewClassName];
-
-            if ([viewClass conformsToProtocol: @protocol (AUCocoaUIBase)]
-                 && [viewClass instancesRespondToSelector: @selector (interfaceVersion)]
-                 && [viewClass instancesRespondToSelector: @selector (uiViewForAudioUnit: withSize:)])
+            if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
+                                      0, info, &dataSize) == noErr)
             {
-                id factory = [[[viewClass alloc] init] autorelease];
-                pluginView = [factory uiViewForAudioUnit: plugin.audioUnit
-                                                withSize: NSMakeSize (getWidth(), getHeight())];
+                NSString* viewClassName = (NSString*) (info->mCocoaAUViewClass[0]);
+                NSString* path = (NSString*) CFURLCopyPath (info->mCocoaAUViewBundleLocation);
+                NSBundle* viewBundle = [NSBundle bundleWithPath: [path autorelease]];
+                Class viewClass = [viewBundle classNamed: viewClassName];
+
+                if ([viewClass conformsToProtocol: @protocol (AUCocoaUIBase)]
+                     && [viewClass instancesRespondToSelector: @selector (interfaceVersion)]
+                     && [viewClass instancesRespondToSelector: @selector (uiViewForAudioUnit: withSize:)])
+                {
+                    id factory = [[[viewClass alloc] init] autorelease];
+                    pluginView = [factory uiViewForAudioUnit: plugin.audioUnit
+                                                    withSize: NSMakeSize (getWidth(), getHeight())];
+                }
+
+                for (int i = (dataSize - sizeof (CFURLRef)) / sizeof (CFStringRef); --i >= 0;)
+                {
+                    CFRelease (info->mCocoaAUViewClass[i]);
+                    CFRelease (info->mCocoaAUViewBundleLocation);
+                }
             }
 
-            for (int i = (dataSize - sizeof (CFURLRef)) / sizeof (CFStringRef); --i >= 0;)
-            {
-                CFRelease (info->mCocoaAUViewClass[i]);
-                CFRelease (info->mCocoaAUViewBundleLocation);
-            }
+            juce_free (info);
         }
 
-        juce_free (info);
+        if (createGenericViewIfNeeded && (pluginView == 0))
+            pluginView = [[AUGenericView alloc] initWithAudioUnit: plugin.audioUnit];
+
         wrapper->setView (pluginView);
 
         if (pluginView != 0)
@@ -1094,7 +1095,7 @@ private:
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
-    AudioProcessorEditor* w = new AudioUnitPluginWindowCocoa (*this);
+    AudioProcessorEditor* w = new AudioUnitPluginWindowCocoa (*this, false);
 
     if (! ((AudioUnitPluginWindowCocoa*) w)->isValid())
         deleteAndZero (w);
@@ -1108,6 +1109,9 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
             deleteAndZero (w);
     }
 #endif
+
+    if (w == 0)
+        w = new AudioUnitPluginWindowCocoa (*this, true); // use AUGenericView as a fallback
 
     return w;
 }
