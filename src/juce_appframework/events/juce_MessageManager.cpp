@@ -189,7 +189,8 @@ bool MessageManager::currentThreadHasLockedMessageManager() const throw()
 
 //==============================================================================
 MessageManagerLock::MessageManagerLock() throw()
-    : locked (false)
+    : lastLockingThreadId (0),
+      locked (false)
 {
     if (MessageManager::instance != 0)
     {

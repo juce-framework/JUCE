@@ -60,22 +60,34 @@ public:
     static MessageManager* getInstance() throw();
 
     //==============================================================================
+    /** Runs the event dispatch loop until a stop message is posted.
+
+        This method is only intended to be run by the application's startup routine,
+        as it blocks, and will only return after the stopDispatchLoop() method has been used.
+
+        @see stopDispatchLoop
+    */
     void runDispatchLoop();
+
+    /** Sends a signal that the dispatch loop should terminate.
+
+        After this is called, the runDispatchLoop() or runDispatchLoopUntil() methods 
+        will be interrupted and will return.
+
+        @see runDispatchLoop
+    */
     void stopDispatchLoop();
+
+    /** Returns true if the stopDispatchLoop() method has been called.
+    */
     bool hasStopMessageBeenSent() const throw()         { return quitMessagePosted; }
 
     /** Synchronously dispatches messages until a given time has elapsed.
 
-        Returns false if a quit message has been posted, otherwise returns true.
+        Returns false if a quit message has been posted by a call to stopDispatchLoop(), 
+        otherwise returns true.
     */
     bool runDispatchLoopUntil (int millisecondsToRunFor);
-
-    //==============================================================================
-    /*int runModalLoop (Component* componentToBeModal);
-    bool makeComponentModal (Component* componentToBeModal);
-    bool isComponentModal (const Component* component) const;
-    Component* getCurrentModalComponent() const;
-    void exitModalLoop (int returnValue);*/
 
     //==============================================================================
     /** Calls a function using the message-thread.
