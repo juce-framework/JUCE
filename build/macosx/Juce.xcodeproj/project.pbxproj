@@ -1088,7 +1088,7 @@
 		84E024E60E94028C003E41AF /* juce_mac_NativeCode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_NativeCode.mm; sourceTree = "<group>"; };
 		84E024E80E94028C003E41AF /* juce_mac_Network.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_Network.mm; sourceTree = "<group>"; };
 		84E024E90E94028C003E41AF /* juce_mac_NSViewComponent.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_NSViewComponent.mm; sourceTree = "<group>"; };
-		84E024EA0E94028C003E41AF /* juce_mac_NSViewComponentPeer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_NSViewComponentPeer.mm; sourceTree = "<group>"; };
+		84E024EA0E94028C003E41AF /* juce_mac_NSViewComponentPeer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; path = juce_mac_NSViewComponentPeer.mm; sourceTree = "<group>"; };
 		84E024EB0E94028C003E41AF /* juce_mac_OpenGLComponent.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_OpenGLComponent.mm; sourceTree = "<group>"; };
 		84E024EC0E94028C003E41AF /* juce_mac_QuickTimeMovieComponent.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_QuickTimeMovieComponent.mm; sourceTree = "<group>"; };
 		84E024ED0E94028C003E41AF /* juce_mac_SystemStats.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_SystemStats.mm; sourceTree = "<group>"; };
@@ -1177,7 +1177,7 @@
 		84FED3C80CAA96DA00003997 /* juce_FileDragAndDropTarget.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_FileDragAndDropTarget.h; sourceTree = "<group>"; };
 		84FFAF290C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FileSearchPathListComponent.cpp; path = filebrowser/juce_FileSearchPathListComponent.cpp; sourceTree = "<group>"; };
 		84FFAF2A0C6C8F2B009F6E72 /* juce_FileSearchPathListComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_FileSearchPathListComponent.h; path = filebrowser/juce_FileSearchPathListComponent.h; sourceTree = "<group>"; };
-		D2AAC046055464E500DB518D /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC046055464E500DB518D /* libjuce.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjuce.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1216,7 +1216,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC046055464E500DB518D /* libjucedebug.a */,
+				D2AAC046055464E500DB518D /* libjuce.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2566,7 +2566,7 @@
 			);
 			name = Juce;
 			productName = Juce;
-			productReference = D2AAC046055464E500DB518D /* libjucedebug.a */;
+			productReference = D2AAC046055464E500DB518D /* libjuce.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
