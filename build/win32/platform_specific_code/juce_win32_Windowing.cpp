@@ -2133,8 +2133,9 @@ private:
                             break;
 
                         case SC_KEYMENU:
-                            if (sendInputAttemptWhenModalMessage())
-                                return 0;
+                            // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very 
+                            // obscure situations that can arise if a modal loop is started from an alt-key
+                            // keypress).
 
                             if (hasTitleBar() && h == GetCapture())
                                 ReleaseCapture();
