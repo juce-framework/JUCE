@@ -112,6 +112,9 @@ using namespace JUCE_NAMESPACE;
 
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
 
+static int numPendingMessages = 0;
+static bool flushingMessages = false;
+
 @interface JuceAppDelegate   : NSObject
 {
 @private
@@ -139,6 +142,8 @@ using namespace JUCE_NAMESPACE;
     [super init];
 
     redirector = new AppDelegateRedirector();
+    numPendingMessages = 0;
+    flushingMessages = false;
 
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
@@ -205,11 +210,13 @@ using namespace JUCE_NAMESPACE;
 
 - (void) customEvent: (id) n
 {
+    atomicDecrement (numPendingMessages);
+
     NSData* data = (NSData*) n;
     void* message = 0;
     [data getBytes: &message length: sizeof (message)];
 
-    if (message != 0)
+    if (message != 0 && ! flushingMessages)
         redirector->deliverMessage (message);
 
     [data release];
@@ -303,12 +310,25 @@ void MessageManager::doPlatformSpecificShutdown()
 {
     [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
     [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
+
+    // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
+    // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
+    for (int i = 100; --i >= 0 && numPendingMessages > 0;)
+    {
+        flushingMessages = true;
+        getInstance()->runDispatchLoopUntil (10);
+    }
+
+    jassert (numPendingMessages == 0); // failed to get all the pending messages cleared before quitting..
+    
     [juceAppDelegate release];
     juceAppDelegate = 0;
 }
 
 bool juce_postMessageToSystemQueue (void* message)
 {
+    atomicIncrement (numPendingMessages);
+
     [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
                      withObject: (id) [[NSData alloc] initWithBytes: &message
                                                              length: (int) sizeof (message)]

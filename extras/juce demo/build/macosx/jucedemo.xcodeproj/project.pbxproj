@@ -30,6 +30,7 @@
 		847F4EB90E8BA9DD00F64426 /* BinaryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB10E8BA9DD00F64426 /* BinaryData.cpp */; };
 		847F4EBA0E8BA9DD00F64426 /* juce_LibrarySource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB40E8BA9DD00F64426 /* juce_LibrarySource.mm */; };
 		847F4EBB0E8BA9DD00F64426 /* MainDemoWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB60E8BA9DD00F64426 /* MainDemoWindow.cpp */; };
+		84FFCF3B0EDAFE7F007D5302 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFCF3A0EDAFE7F007D5302 /* Carbon.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,7 @@
 		847F4EB50E8BA9DD00F64426 /* jucedemo_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jucedemo_headers.h; path = ../../src/jucedemo_headers.h; sourceTree = SOURCE_ROOT; };
 		847F4EB60E8BA9DD00F64426 /* MainDemoWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MainDemoWindow.cpp; path = ../../src/MainDemoWindow.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EB70E8BA9DD00F64426 /* MainDemoWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainDemoWindow.h; path = ../../src/MainDemoWindow.h; sourceTree = SOURCE_ROOT; };
+		84FFCF3A0EDAFE7F007D5302 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* jucedemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jucedemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -82,6 +84,7 @@
 				841FE4410E8ABDD4003C3263 /* WebKit.framework in Frameworks */,
 				847F4D900E8AC35C00F64426 /* QTKit.framework in Frameworks */,
 				8450577A0EB52CE500029DFF /* QuickTime.framework in Frameworks */,
+				84FFCF3B0EDAFE7F007D5302 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,6 +137,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84FFCF3A0EDAFE7F007D5302 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				841FE4360E8ABDD4003C3263 /* CoreAudio.framework */,
 				841FE4370E8ABDD4003C3263 /* CoreMIDI.framework */,
