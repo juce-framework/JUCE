@@ -71,7 +71,7 @@ public:
 
     /** Sends a signal that the dispatch loop should terminate.
 
-        After this is called, the runDispatchLoop() or runDispatchLoopUntil() methods 
+        After this is called, the runDispatchLoop() or runDispatchLoopUntil() methods
         will be interrupted and will return.
 
         @see runDispatchLoop
@@ -84,7 +84,7 @@ public:
 
     /** Synchronously dispatches messages until a given time has elapsed.
 
-        Returns false if a quit message has been posted by a call to stopDispatchLoop(), 
+        Returns false if a quit message has been posted by a call to stopDispatchLoop(),
         otherwise returns true.
     */
     bool runDispatchLoopUntil (int millisecondsToRunFor);

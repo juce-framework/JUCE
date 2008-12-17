@@ -320,7 +320,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 
     jassert (numPendingMessages == 0); // failed to get all the pending messages cleared before quitting..
-    
+
     [juceAppDelegate release];
     juceAppDelegate = 0;
 }

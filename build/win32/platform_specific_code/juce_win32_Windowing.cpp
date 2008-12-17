@@ -2133,7 +2133,7 @@ private:
                             break;
 
                         case SC_KEYMENU:
-                            // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very 
+                            // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very
                             // obscure situations that can arise if a modal loop is started from an alt-key
                             // keypress).
 

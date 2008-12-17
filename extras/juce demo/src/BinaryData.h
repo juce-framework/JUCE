@@ -45,7 +45,7 @@ namespace BinaryData
     const int           tabledemo_cppSize = 12381;
 
     extern const char*  threadingdemo_cpp;
-    const int           threadingdemo_cppSize = 10049;
+    const int           threadingdemo_cppSize = 10068;
 
     extern const char*  treedemo_xml;
     const int           treedemo_xmlSize = 1126;
