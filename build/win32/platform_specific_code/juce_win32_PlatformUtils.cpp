@@ -159,6 +159,28 @@ void PlatformUtilities::deleteRegistryKey (const String& regKeyPath)
     }
 }
 
+void PlatformUtilities::registerFileAssociation (const String& fileExtension, 
+                                                 const String& symbolicDescription, 
+                                                 const String& fullDescription, 
+                                                 const File& targetExecutable,
+                                                 int iconResourceNumber)
+{
+    setRegistryValue ("HKEY_CLASSES_ROOT\\" + fileExtension + "\\", symbolicDescription);
+
+    const String key ("HKEY_CLASSES_ROOT\\" + symbolicDescription);
+
+    if (iconResourceNumber != 0)
+        setRegistryValue (key + "\\DefaultIcon\\",
+                          targetExecutable.getFullPathName() + "," + String (-iconResourceNumber));
+
+    setRegistryValue (key + "\\", fullDescription);
+
+    setRegistryValue (key + "\\shell\\open\\command\\", 
+                      targetExecutable.getFullPathName() + " %1");
+}
+
+
+//==============================================================================
 bool juce_IsRunningInWine() throw()
 {
     HKEY key;
