@@ -125,6 +125,7 @@ void PreferencesPanel::showInDialogBox (const String& dialogtitle,
     dw.setContentComponent (this, true, true);
     dw.centreAroundComponent (0, dw.getWidth(), dw.getHeight());
     dw.runModalLoop();
+    dw.setContentComponent (0, false, false);
 }
 
 //==============================================================================

@@ -13051,6 +13051,24 @@ public:
     /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
     static void deleteRegistryKey (const String& regKeyPath);
 
+    /** WIN32 ONLY - Creates a file association in the registry.
+
+        This lets you set the exe that should be launched by a given file extension.
+        @param fileExtension        the file extension to associate, including the
+                                    initial dot, e.g. ".txt"
+        @param symbolicDescription  a space-free short token to identify the file type
+        @param fullDescription      a human-readable description of the file type
+        @param targetExecutable     the executable that should be launched
+        @param iconResourceNumber   the icon that gets displayed for the file type will be
+                                    found by looking up this resource number in the
+                                    executable. Pass 0 here to not use an icon
+    */
+    static void registerFileAssociation (const String& fileExtension,
+                                         const String& symbolicDescription,
+                                         const String& fullDescription,
+                                         const File& targetExecutable,
+                                         int iconResourceNumber);
+
     /** WIN32 ONLY - This returns the HINSTANCE of the current module.
 
         In a normal Juce application this will be set to the module handle

@@ -43,6 +43,10 @@
     #include <sys/errno.h>
     #include <unistd.h>
     #include <netinet/in.h>
+  #else
+    #if MACOSX_DEPLOYMENT_TARGET <= MAC_OS_X_VERSION_10_4
+      #include <CoreServices/CoreServices.h>
+    #endif
   #endif
 
   #include <fcntl.h>
