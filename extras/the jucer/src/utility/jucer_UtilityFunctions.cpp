@@ -223,6 +223,9 @@ const String makeValidCppIdentifier (String s,
             n << words[i];
     }
 
+    if (CharacterFunctions::isDigit (n[0]))
+        n = T("_") + n;
+
     // make sure it's not a reserved c++ keyword..
     static const tchar* const reservedWords[] =
     {
