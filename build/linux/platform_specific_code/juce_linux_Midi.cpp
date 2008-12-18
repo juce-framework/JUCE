@@ -109,7 +109,6 @@ static snd_seq_t* iterateDevices (const bool forInput,
                                             snd_seq_connect_from (seqHandle, portId, sourceClient, sourcePort);
 
                                             returnedHandle = seqHandle;
-                                            break;
                                         }
                                     }
                                 }
