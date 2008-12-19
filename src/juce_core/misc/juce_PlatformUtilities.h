@@ -112,7 +112,7 @@ public:
     /** WIN32 ONLY - Creates a file association in the registry.
 
         This lets you set the exe that should be launched by a given file extension.
-        @param fileExtension        the file extension to associate, including the 
+        @param fileExtension        the file extension to associate, including the
                                     initial dot, e.g. ".txt"
         @param symbolicDescription  a space-free short token to identify the file type
         @param fullDescription      a human-readable description of the file type
@@ -121,9 +121,9 @@ public:
                                     found by looking up this resource number in the
                                     executable. Pass 0 here to not use an icon
     */
-    static void registerFileAssociation (const String& fileExtension, 
-                                         const String& symbolicDescription, 
-                                         const String& fullDescription, 
+    static void registerFileAssociation (const String& fileExtension,
+                                         const String& symbolicDescription,
+                                         const String& fullDescription,
                                          const File& targetExecutable,
                                          int iconResourceNumber);
 

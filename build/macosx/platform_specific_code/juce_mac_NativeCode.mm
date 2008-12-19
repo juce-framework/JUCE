@@ -78,10 +78,12 @@ BEGIN_JUCE_NAMESPACE
 #undef Point
 
 //==============================================================================
-#define ObjCExtraSuffix 1
+#ifndef JUCE_ObjCExtraSuffix
+ #define JUCE_ObjCExtraSuffix 2
+#endif
 #define appendMacro1(a, b, c, d) a ## _ ## b ## _ ## c ## _ ## d
 #define appendMacro2(a, b, c, d) appendMacro1(a, b, c, d)
-#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, ObjCExtraSuffix)
+#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_ObjCExtraSuffix)
 
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1

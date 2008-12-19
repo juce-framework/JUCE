@@ -30,7 +30,7 @@
 */
 
 #include "juce_AudioFilterStreamer.h"
-#include "../../juce_IncludeCharacteristics.h"
+#include "../juce_IncludeCharacteristics.h"
 
 
 //==============================================================================

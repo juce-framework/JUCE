@@ -42,7 +42,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 Uuid::Uuid()
 {
-    // Mix up any available MAC addresses with some time-based pseudo-random numbers 
+    // Mix up any available MAC addresses with some time-based pseudo-random numbers
     // to make it very very unlikely that two UUIDs will ever be the same..
 
     static int64 macAddresses[2];
@@ -60,7 +60,7 @@ Uuid::Uuid()
     // We'll use both a local RNG that is re-seeded, plus the shared RNG,
     // whose seed will carry over between calls to this method.
 
-    Random r (macAddresses[0] ^ macAddresses[1] 
+    Random r (macAddresses[0] ^ macAddresses[1]
                 ^ Random::getSystemRandom().nextInt64());
 
     for (int i = 4; --i >= 0;)
