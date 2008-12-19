@@ -1,8 +1,0 @@
-#
-# This file must contain the AU component's entry point.
-#
-# Your JucePluginCharacteristics.h file must define the prefix used for this 
-# function name - for more info, see the comments in JucePluginCharacteristics.h
-#
-
-_JuceDemoAUEntry
