@@ -42,27 +42,32 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 Uuid::Uuid()
 {
-    // do some serious mixing up of our MAC addresses and different types of time info,
-    // plus a couple of passes of pseudo-random numbers over the whole thing.
-    SystemStats::getMACAddresses (value.asInt64, 2);
+    // Mix up any available MAC addresses with some time-based pseudo-random numbers 
+    // to make it very very unlikely that two UUIDs will ever be the same..
 
-    int i;
-    for (i = 16; --i >= 0;)
+    static int64 macAddresses[2];
+    static bool hasCheckedMacAddresses = false;
+
+    if (! hasCheckedMacAddresses)
     {
-        Random r (Time::getHighResolutionTicks()
-                    + Random::getSystemRandom().nextInt()
-                    + value.asInt [i & 3]);
-
-        value.asBytes[i] ^= (uint8) r.nextInt();
+        hasCheckedMacAddresses = true;
+        SystemStats::getMACAddresses (macAddresses, 2);
     }
 
-    value.asInt64 [0] ^= Time::getHighResolutionTicks();
-    value.asInt64 [1] ^= Time::currentTimeMillis();
+    value.asInt64[0] = macAddresses[0];
+    value.asInt64[1] = macAddresses[1];
 
-    for (i = 4; --i >= 0;)
+    // We'll use both a local RNG that is re-seeded, plus the shared RNG,
+    // whose seed will carry over between calls to this method.
+
+    Random r (macAddresses[0] ^ macAddresses[1] 
+                ^ Random::getSystemRandom().nextInt64());
+
+    for (int i = 4; --i >= 0;)
     {
-        Random r (Time::getHighResolutionTicks() ^ value.asInt[i]);
+        r.setSeedRandomly(); // calling this repeatedly improves randomness
         value.asInt[i] ^= r.nextInt();
+        value.asInt[i] ^= Random::getSystemRandom().nextInt();
     }
 }
 
