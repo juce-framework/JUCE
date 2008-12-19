@@ -1,75 +1,36 @@
 
-                        The Juce Audio Plugin project!
-                        ==============================
+                            The Juce Polymorphic Plugin Project!
+                            ====================================
 
-(c) 2005-6 by Raw Material Software, visit www.rawmaterialsoftware.com for more info.
+(c) 2008 by Raw Material Software, visit www.rawmaterialsoftware.com for more info.
 
-The idea behind this is to create a framework which lets you write a platform-independent
-audio plugin using Juce, which can be easily rebuilt to target multiple different plugin 
-formats and platforms.
+-----------------------------------------------------------------------------------------------------
 
+The purpose of this framework is to make is simple to write an audio plugin in a generic
+way, which can then be compiled as a VST, AudioUnit, RTAS, or any combination of these. 
 
-How does it work?
-=================
+It's "polymorphic" because the output is a single binary module that acts as all of the 
+different plugin formats at the same time. This means that you only need to maintain one 
+project, and only need to perform one build to create a multi-format plugin.
 
-There's a generic audio plugin base class defined in juce_AudioFilterBase.h, and to write 
-your plugin, you just need to create a sub-class of this.
-
-You can then compile your class against one or more of the platform-specific projects,
-so that it gets wrapped as a VST, AudioUnit, RTAS, etc. - hopefully without changing any
-of your code at all, or having to go anywhere near any platform-specific stuff.
-
-
-How do I use it?
-================
-
-Under the 'wrapper/formats' directory are a bunch of different sets of files containing the
-wrapper code for each different plugin type.
-
-There is also a 'demo' folder - this shows an example plugin which can be built in all
-the different formats. The demo folder contains:
-
-- a 'src' directory containing the common, platform-independent code that defines this 
-  plugin's behaviour
-- a 'build' directory which contains projects for building the demo for each different 
-  platform and format.
-
-Have a look at the demo classes to see how it works, and then to create a real plugin, 
-you'll need to replace the demo files with your own code.
-
-I've tried to add helpful comments where you might run across common compile errors, to
-help describe what you might be doing wrong, as getting a build set-up for some of these 
-formats can be a bit of a pain. Please let me know if you find there's anything missing
-from these instructions or anything I could change to help smooth the build process along
-a bit.
-
-I'd recommend NOT putting your own plugin code inside the JuceAudioPlugin directory - it's 
-much neater to keep it somewhere separate and to alter the projects to point to your 
-files instead of the demo ones. That way when new versions of this library come out, it'll 
-make it easier to update to the latest code.
-
-For details about how to create your own projects for the various formats, see below.
+Also included are some helper classes that make it easy to create a stand-alone app to
+run your plugin without a host. This might be useful in its own right, but can also be very 
+handy when developing your plugin, because you can build, test and debug it without needing
+to keep restarting a 3rd-party host.
 
 
-Sending feedback:
-=================
+                                    How does it work?
+                                    =================
 
-- if you spot a bug or some kind of host incompatibility, tell me, of course!
+To create your plugin, you just create a subclass of the AudioPluginInstance class to 
+perform the processing. And your plugin UI is written like any normal Juce UI component.
 
-- the plan is that no-one should need to change any of the platform-specific code, or the base-class 
-  code.. So if you find that your plugin can't do something you want it to, then rather than just 
-  jumping in and hacking things to get the functionality you need, why not contact me and we'll 
-  figure out a nice generic way of doing it. That way it'll benefit all the users, and you won't 
-  have to hack it all over again when the next version comes out.
-
-- if you're really determined to rewrite large chunks of my code and send it to me to look at, 
-  *please* don't reformat anything in your own preferred style, or change the format of the 
-  comments, etc.. It's bad enough looking at people's code and trying to figure out why they've 
-  done something, but if everything's moved around I can't even diff it..
+All the platform-specific code is hidden away in wrapper classes that you just add to 
+your project - you should (hopefully) never need to even see the inner workings of these.
 
 
-What are the licensing issues?
-==============================
+                                    Licensing issues
+                                    ================
 
 Juce is released under the GPL (Gnu Public License) - this means that you're free to use
 and redistribute it as long as your products are also released under the GPL. Basically
@@ -86,71 +47,46 @@ If you're building an RTAS then you'll need to sign Digidesign's developer licen
 their SDK. Visit http://www.digidesign.com for more info.
 
 
+
+                                    Getting Started
+                                    ===============
+
+There's also a 'demo' folder - this contains an example plugin which can be built in all
+the different formats.
+
+Have a look at the demo classes to see how it works, and then to create a real plugin, 
+you'll need to replace the demo files with your own code.
+
+I've tried to add helpful comments where you might run across common compile errors, to
+help describe what you might be doing wrong, as getting a build set-up for some of these 
+formats can be a bit of a pain. Please let me know if you find there's anything missing
+from these instructions or anything I could change to help smooth the build process along
+a bit.
+
+I'd recommend NOT putting your own plugin code inside the demo plugin directory - it's 
+much neater to keep it somewhere separate and to alter the projects to point to your 
+files instead of the demo ones. That way when new versions of this library come out, it'll 
+make it easier to update to the latest code.
+
 -----------------------------------------------------------------------------------------------------
 
-                            How to create your own VST project
-                            ==================================
+                            Prerequisites for building a VST
+                            ================================
 
 - Visit http://www.steinberg.net and jump through whatever hoops are necessary to download 
   and install the VST SDK.
-- Make sure your include path contains an entry for the "vstsdk2.4" folder containing 
-  the SDK.
-- First try loading the VST demo project in JuceAudioPlugin/demo/build. Hopefully this
-  should build correctly.
-- To create your own project for a VST, the simplest way is to take a copy of
-  the demo project and go through it carefully, changing any relevent settings to reflect 
-  your own project.
-
-N.B. On the Mac, there's an important point to note about exported symbols.. When XCode builds
-  the plugin, I've had unpredictable results when trying to stop it from exporting all of
-  the internal functions as public symbols. There are some flags that are supposed to turn this
-  off, but sometimes they don't seem to have any effect, and using an explicit exports file also
-  seems a bit hit-and-miss. (If anyone knows better and can get this working, please let me know!)
-  Anyway, as well as being wasteful and showing everyone what's inside your plugin, leaving all
-  the symbols in there will cause fatal crashes when used with Tracktion, or alongside any other
-  Juce-based plugins. A way of making sure your plugin is stripped is to use the command
-  "strip -x -S YourPlugin.vst/Contents/MacOS/YourPlugin" after bulding it, which removes the
-  unnecessary symbols (although in my experience this also doesn't seem to work all the time, 
-  so it's a good idea to check it using the unix "nm" command).
-
+- Make sure your include path contains an entry for the "vstsdk2.4" folder containing the SDK.
 
 -----------------------------------------------------------------------------------------------------
 
-                         How to create your own AudioUnit project
-                         ========================================
-
-- If you've got XCode installed, the demo project in JuceAudioPlugin/demo/build/AudioUnit 
-  should just build. You may need to tweak a few paths to make sure it can find the
-  juce.h include file and juce library.
-- When copying this project to make your own, a good plan is to open up a view of the settings
-  for the project and target, viewing the "customised settings" to see those values that
-  have to be deliberately set for the plugin to work.
-
-N.B. For the Mac there can be an issue with exported symbols - see the note about this for
-  VSTs, as the same solution can be used for AudioUnits.
-
-
------------------------------------------------------------------------------------------------------
-
-                           How to create your own RTAS project
-                           ===================================
-
-
-RTAS is a bit more of a pain to build than VSTs or AUs. To begin with:
+                            Prerequisites for building an RTAS
+                            ==================================
 
 - Contact Digidesign, ask to become a Digidesign Development Partner, sign the relevent
   agreements and NDAs.
 - From the Digidesign website, download their latest Plug-In SDK
 - Install the SDK and build some of the demo plugins to make sure it all works.
-
-Compiling the juce demo RTAS on the PC:
-=======================================
-
-- Using the Digidesign demo projects in the SDK, make sure you've built debug and release 
-  versions of these static libraries: DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib.
-
-- In Visual Studio, add all of this lot to your include path:
-
+- In Visual Studio: Add all of these to your include path:
     c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
     c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
     c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
@@ -173,100 +109,181 @@ Compiling the juce demo RTAS on the PC:
     c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\PPC_H
     c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\AppSupport
     c:\yourdirectory\PT_73_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
+- In Visual Studio: Using the Digidesign demo projects in the SDK, make sure you've compiled 
+  debug and release versions of the following static libraries:
+    DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib.
+- In XCode: After installing the Digidesign SDK, make sure you've run the config_SDK_for_Mac 
+  command in the SDK's root directory. This sets up some of the tools that it needs.
 
-- The Visual Studio juce_RTAS project contains a folder called "libs", with "debug" and 
-  "release" subdirectories - these should contain links to the Digidesign lib files
-  DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib - you'll need to update these links to 
-  point to the correct locations according to where you've installed the SDK.
 
-- Fingers crossed, this should now compile..
+-----------------------------------------------------------------------------------------------------
+                        Choosing the formats to build
+                        =============================
+                        
+Each plugin project needs to contain a JucePluginCharacteristics.h file, which holds all the
+plugin-specific build details. In here, there are three macros that you can set to enable each
+of the available formats:
 
-- IMPORTANT NOTE! If you're using MSVC2005 to build your plugin, the users will need to
+#define JucePlugin_Build_VST     1
+#define JucePlugin_Build_RTAS    1
+#define JucePlugin_Build_AU      1
+
+You can set these to 0 to disable the formats that you don't want to build, and this will avoid
+any compilation problems if, for example, you don't have the appropriate SDK for a particular format.
+
+-----------------------------------------------------------------------------------------------------
+
+                        Creating a PC VST/RTAS plugin in Visual Studio
+                        ==============================================
+
+
+- First try loading the VST demo project in JuceAudioPlugin/demo/build. Hopefully this
+  should build correctly.
+- Create a new, empty, win32 project using Visual Studio. Choose "DLL" as the type of 
+  product to build
+- If building an RTAS, add to your project all the juce_RTAS_*.cpp files from the wrapper/RTAS folder.
+- If building a VST, add to your project all the juce_VST_*.cpp files from the wrapper/VST folder.
+
+- Create yourself a JucePluginCharacteristics.h file, starting with a copy of the one in the
+  demo project. Go through each item inside it carefully, and set them to the appropriate value
+  for your plugin.
+
+- Under "Additional Include Directories", add the folder in which you're going to put 
+  your JucePluginCharacteristics.h file.
+
+- If you're doing an RTAS, change these project settings (these can all be ignored if you're only doing a VST):
+    - Set "C++/Code Generation/Runtime Library" to be "Multi-threaded DLL" or "Multi-threaded Debug DLL"
+    - Set the "Linker/Input/Module Definition file" to point to "wrapper/RTAS/juce_RTAS_WinExports.def"
+    - Under "Linker/Input/Delay loaded DLLs", add the following: 
+        "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll"
+    - You may (or may not) need to add "libcmtd.lib; libcmt.lib" to the "Linker/Input/Ignore Specific Library" setting.
+    - For ONLY the following files:
+        juce_RTAS_Wrapper.cpp, juce_RTAS_DigiCode1.cpp, juce_RTAS_DigiCode2.cpp, juce_RTAS_DigiCode3.cpp,
+      change their "C++/Advanced/Calling Convention" property to "__stdcall". All other files should 
+      be left with the default calling convention of "__cdecl"
+    - Set the "Linker/General/Output File" property to "$(OutDir)\$(ProjectName).dpm" (If you're building 
+      a polymorphic VST/RTAS, then you can simply copy or rename the finished .dpm file to a .dll, and 
+      it'll function as a VST)
+    - Under "Custom build step", add the following command:
+        copy /Y "\yourdirectory\juce\extras\audio plugins\wrapper\RTAS\juce_RTAS_WinResources.rsr" "$(TargetPath)".rsr
+      The corresponding "Outputs" setting for this must be set to "$(TargetPath)".rsr
+      (This will copy and rename the juce_RTAS_WinResources.rsr file to sit next to the finished .dpm file. It's
+      a dummy resource file, but PT will refuse to load the plugin unless it has a corresponding .rsr file)
+    - Because the RTAS code duplicates some win32 constants, you might need to force it to link correctly
+      by adding "/FORCE:multiple" to the linker's additional command line options.
+    - You might want to change the output directory to "\Program Files\Common Files\Digidesign\DAE\Plug-Ins\"
+      if you want the built plugin to go directly into the PT plugins folder
+    - When setting properties, remember to change them for both your debug and release builds!
+
+- Create your actual plugin classes and add them to the project. Obviously this is the hard bit!
+
+- Add the amalgamated juce source file to the project - have a look at the demo app for neat ways of doing this.
+
+- NOTE: on Windows, because RTAS uses the altura mac-style code, there are annoying clashes caused if
+  you also include the Apple QuickTime headers, so you might need to turn off quicktime by setting the
+  juce config macro: #define JUCE_QUICKTIME 0
+
+- NOTE: If you're using MSVC2005 to build your plugin, the users will need to
   have the Microsoft VC8 Runtime installed on their machines, otherwise the DLL will 
   silently fail to load. You should probably add the runtime to your plugin's installer, 
   and you can get a copy of it here:
   http://www.microsoft.com/downloads/details.aspx?FamilyID=32bc1bee-a3f9-4c13-9c99-220b62a191ee&DisplayLang=en
 
 
-Creating a project for your own RTAS on the PC:
-=================================================
 
-- start a new empty project in Developer Studio, as a "Windows DLL"
-- in the source tree, create the same folders and add to them the same list of 
-  cpp files that are in the demo project's "wrapper code" folder.
-- select all the CPP files in the "wrapper code/RTAS specific" folder, and also 
-  the juce_RTASWrapper.cpp file, (but NOT the juce_RTASUtilities.cpp file or any
-  other files!), and in their properties dialog, under C++/Advanced, change their
-  "Calling convention" setting to "__stdcall". 
-  Remember to do this for both your debug and release builds!
-- in your project's C++/General settings, add an additional include path so that
-  it will be able find your JucePluginCharacteristics.h file.
-- Under "linker settings", change the output file name to have the suffix ".dpm" 
-  instead of ".dll"
-- Under "linker settings/input/ignore specific library", you'll probably need to
-  add "libcmtd.lib" for debug, and "libcmt.lib" for release.
-- Under "linkey settings", set the Module definition file to be
-  JuceAudioPlugin/wrapper/formats/RTAS/juce_RTAS_dlldefs.def
-- You might want to change the output directory to "\Program Files\Common Files\Digidesign\DAE\Plug-Ins\"
-  if you want the built plugin to go directly into the PT plugins folder
-- Add a custom build step to copy the dummy resource file "JuceAudioPlugin\wrapper\formats\RTAS\DefaultResourceFile"
-  to your target directory, renaming to to be the same as your .dpm file, but with
-  ".rsr" on the end of the name. The demo project does this with the command
-  "copy /Y ..\..\..\wrapper\formats\RTAS\DefaultResourceFile "$(TargetPath)".rsr"
-- Under the "general" properties, make sure that the character set is not unicode, as
-  this seems to stop some of the Digi code building. Hopefully this will be fixed
-  in future SDK releases
-- add a "libs" folder to your project, and copy the set of libraries from the
-  equivalent folder in the demo project. Make sure you enable the debug/release
-  versions of these libraries appropriately.
+-----------------------------------------------------------------------------------------------------
 
-There are quite a few things that you need to get right for an RTAS to compile correctly - 
-the Digi SDK documentation has a full list of tips on setting up a project, but the
-main ones to note are:
-
-- the SDK uses __stdcall as its calling convention, but JUCE uses __cdecl. I've got
-  around this by leaving the project's default setting as __cdecl, but changing it
-  specifically for those files that include or build files from the SDK - i.e. for
-  most of the files in the "wrapper code/RTAS specific" folder of the demo project.
-- the default struct alignment for the SDK is 2 bytes, wheras the default as used in 
-  juce is 8 bytes. Again, I've left this at the default setting, and have explicitly
-  changed it with pragmas when including/building SDK files.
-- even though it's not used, each xx.dpm file needs to have a corresponding
-  xx.dpm.rsr file next to it, or PT will refuse to load it. The demo project currently
-  does this by using a custom build step to copy and rename a small dummy rsr file called
-  JuceAudioPlugin/wrapper/formats/RTAS/DefaultResourceFile
+                            Creating a Mac AU/VST/RTAS plugin in XCode
+                            ==========================================
 
 
-Compiling the juce demo RTAS on the Mac:
-========================================
+- For an AU, make sure that the JucePlugin_Build_AU is enabled in your JucePluginCharacteristics.h
+- In XCode, create a new project based on the "Audio Unit Effect" template
+- XCode will create a bunch of template source files for you - you can remove all of these from the project
+  and delete them
+- In the target settings, clear the "Exported Symbols File" setting. The exports are specified by directives
+  within the wrapper code, so don't need to be listed explicitly.
+- All all the Apple frameworks that Juce normally requires to the "External Frameworks" list
+- Add all the juce_AU_* files from the /wrapper/AU directory to your project
+- The template project creates an AUPublic group that contains lots of AudioUnit source files. But
+  it leaves out files that it thinks you might not need, e.g. if you chose an "Audio Unit Effect" project,
+  then it won't add the classes for handling MIDI. So you'll probably need to go into this folder
+  and check that it contains AUMIDIBase.cpp, AUMidiEffectBase.cpp, MusicDeviceBase.cpp, etc
+- As for the PC, you'll need to make sure your project contains a correctly set-up JucePluginCharacteristics.h
+  file - start with a copy of the one in the demo plugin project, and go through it making sure that
+  all the values make sense for your plugin.
+- Create your actual plugin classes and add them to the project. Obviously this is the hard bit!
 
+You should now be able to build a functional AU! If you want VST support as well, then read on...
+
+- Make sure that the JucePlugin_Build_VST is enabled in your JucePluginCharacteristics.h
+- For VST support, add all the juce_VST_* files from /wrapper/VST
+- In your target info settings, add the vstsdk2_4 folder to your "Header Search Paths" list
+- Make sure that in your Info.plist, the "Bundle Name" value is correctly set to the name of your plugin.
+
+Now, if you compile, the resulting bundle should work as both a VST and AU - you can simply copy or rename it,
+changing the suffix to ".vst", and put it in your VST folder.
+
+If you also want to build an RTAS, then carry on reading...
+
+
+- Make sure that the JucePlugin_Build_RTAS is enabled in your JucePluginCharacteristics.h
 - After installing the Digidesign SDK, make sure you've run the config_SDK_for_Mac command in
   its root directory. This sets up some of the tools that it needs.
-- Load the juce_RTASDemo.xcodeproject and look through the project in XCode to find
-  all the broken links to Digidesign files. You'll need to repair these to make them
-  point to the location of the SDK files on your machine.
-- Open the project's settings, and look for the "MacBag" setting - this defines the location
-  of the MacBag folder in the Digidesign SDK. You'll need to update this to point to
-  its location on your machine.
-- It should all compile now, fingers crossed.. 
+- Add the files from /wrapper/RTAS to your project. Obviously a couple of these are for Windows, so
+  you shouldn't add those
+- In the Digi SDK, in /AlturaPorts/TDMPlugins/common/mac, there are two config files:
+    CommonDebugSettings.xconfig and CommonReleaseSettings.xconfig
+  These contain lots of Digi hackery to get their stuff to compile, so you should add them to your project
+  and change your project's settings to use these files as their base config. Even so, it's all a bit of a mess, 
+  and you may need to tweak them a bit to get it to work on your system.
+- In your target settings, add a custom build setting called "MacBag", and set this to the path where the 
+  "MacBag" folder of the Digi SDK lives.
+- Add the following to your "Header Search Paths" setting (it's easiest to copy-and-paste this setting from 
+  the demo project):
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/PlugInLibrary/**"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/DSPManager/**"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/common"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/common/PI_LibInterface"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/PACEProtection/**" 
+    "$(MacBag)/../AlturaPorts/OMS/Headers" 
+    "$(MacBag)/../AlturaPorts/Fic/Interfaces/**" 
+    "$(MacBag)/../AlturaPorts/Fic/Source/SignalNets" 
+    "$(MacBag)/../AlturaPorts/DSIPublicInterface/PublicHeaders" 
+    "$(MacBag)/../DAEWin/Include"
+    "$(MacBag)/../AlturaPorts/DigiPublic/Interfaces"
+    "$(MacBag)/../AlturaPorts/DigiPublic"
+    "$(MacBag)/../AlturaPorts/NewFileLibs/DOA"
+    "$(MacBag)/../AlturaPorts/NewFileLibs/Cmn"
+    "$(MacBag)/../AlturaPorts/TDMPlugIns/SignalProcessing/**" 
+    "$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc" 
+    "$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/utils"
+- If you get include errors compiling some of the DigiDesign code, you may need to 
+  add "/Developer/Headers/FlatCarbon" to your header search path.
+- In the SDK, find the PluginLibrary.xcodeproj file, and add this to your "External frameworks and Libraries".
+  If you've already compiled this library, you can open its item in your XCode project treeview, to find 
+  the "libPluginLibrary.a" item inside it. Drag this subitem down to your Target/"Link Binary With Libraries" 
+  build stage and drop it there to add it to the link process.
+- In your Info.plist, change the "Bundle OS Type Code" to "TDMw", and the "Bundle Creator OS Type Code" to
+  "PTul".
 
-- Building a universal binary on the Mac: for this, you'll need to recompile the Digidesign
-  PluginLibrary project as a universal binary. The easiest way to do this is to add the
-  following lines to the top of the CommonDebugSettings.xcconfig and CommonReleaseSettings.xcconfig
-  files (these are found deep in the PT SDK tree somewhere, and are used for config by both the
-  Digi projects and the juce plugin projects):
-     ARCHS = ppc i386
-     SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk
-     MACOSX_DEPLOYMENT_TARGET_ppc = 10.3
+You should now be able to build an RTAS! Again, just renaming the finished bundle to ".dpm" and
+putting it in your RTAS folder should be do the trick.
+  
+If you get any weird build problems, a good tip is to try comparing the demo plugin's build settings with your 
+own - this should usually show up what's missing.
 
 
-Creating a new project for your own RTAS plugin on the Mac:
-===========================================================
-
-It's probably easiest to take a copy of the juce demo project and go through it changing 
-its settings to those of your plugin. 
-
-If you decide to start from scratch, use the juce demo project as a reference to see
-what needs to go in there. Looking at its project info for "customised settings" is a good
-way to see what values have been set deliberately.
-
+Note about exported symbols: 
+  When XCode builds the plugin, I've had unpredictable results when trying to stop it from exporting 
+  all of the internal functions as public symbols. There are some flags that are supposed to turn this
+  off, but sometimes they don't seem to have any effect, and using an explicit exports file also
+  seems a bit hit-and-miss. (If anyone knows better and can get this working, please let me know!)
+  Anyway, as well as being wasteful and showing everyone what's inside your plugin, leaving all
+  the symbols in there will cause fatal crashes when used with Tracktion, or alongside any other
+  Juce-based plugins. A way of making sure your plugin is stripped is to use the command
+  "strip -x -S YourPlugin.vst/Contents/MacOS/YourPlugin" after bulding it, which removes the
+  unnecessary symbols (although in my experience this also doesn't seem to work all the time, 
+  so it's a good idea to check it using the unix "nm" command).

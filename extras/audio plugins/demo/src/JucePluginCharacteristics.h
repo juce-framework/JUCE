@@ -40,6 +40,15 @@
     set-up before trying to do a build.
 */
 
+
+//==============================================================================
+/*                          Plugin Formats to build                           */
+
+#define JucePlugin_Build_VST     1
+#define JucePlugin_Build_RTAS    0
+#define JucePlugin_Build_AU      1
+
+
 //==============================================================================
 /*                              Generic settings                              */
 
@@ -263,6 +272,12 @@
     override it if necessary.
 */
 #define JucePlugin_RTASProductId            JucePlugin_PluginCode
+
+/** You need to set this path to point to the location of the Digidesign WinBag
+    directory on your machine. (Only needed for Windows builds). Make sure you
+    don't put a slash on the end.
+*/
+#define JucePlugin_WinBag_path              "C:\\essentials\\PT_73_SDK\\WinBag"
 
 
 //==============================================================================

@@ -91,8 +91,16 @@
  #error "You need to define the JucePlugin_EditorRequiresKeyboardFocus value in your JucePluginCharacteristics.h file!"
 #endif
 
-#if JUCE_USE_VSTSDK_2_4 != 0 && JUCE_USE_VSTSDK_2_4 != 1
+#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS)
+ #error "You need to define at least one plugin format value in your JucePluginCharacteristics.h file!"
+#endif
+
+#if JucePlugin_Build_VST && (JUCE_USE_VSTSDK_2_4 != 0 && JUCE_USE_VSTSDK_2_4 != 1)
  #error "You need to define the JUCE_USE_VSTSDK_2_4 value in your JucePluginCharacteristics.h file!"
+#endif
+
+#if JucePlugin_Build_RTAS && _MSC_VER && ! defined (JucePlugin_WinBag_path)
+ #error "You need to define the JucePlugin_WinBag_path value in your JucePluginCharacteristics.h file!"
 #endif
 
 #endif   // __JUCE_INCLUDECHARACTERISTICS_JUCEHEADER__
