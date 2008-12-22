@@ -431,6 +431,9 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
     }
 
     rebuildMainMenu (extraAppleMenuItems);
+
+    if (newMenuBarModel != 0)
+        newMenuBarModel->menuItemsChanged();
 }
 
 MenuBarModel* MenuBarModel::getMacMainMenu() throw()

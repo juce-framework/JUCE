@@ -231,6 +231,8 @@ bool File::isHidden() const throw()
 //==============================================================================
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
+    const ScopedAutoReleasePool pool;
+
     const char* resultPath = 0;
 
     switch (type)
