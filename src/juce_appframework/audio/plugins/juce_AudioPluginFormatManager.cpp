@@ -50,6 +50,7 @@ AudioPluginFormatManager::AudioPluginFormatManager() throw()
 
 AudioPluginFormatManager::~AudioPluginFormatManager() throw()
 {
+    clearSingletonInstance();
 }
 
 juce_ImplementSingleton_SingleThreaded (AudioPluginFormatManager);
