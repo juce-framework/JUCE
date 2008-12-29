@@ -284,7 +284,7 @@ public:
     static int compareElements (const ElementType first,
                                 const ElementType second) throw()
     {
-        return first - second;
+        return (first > second) - (second < first);
     }
 };
 
@@ -312,9 +312,7 @@ public:
     static int compareElements (const ElementType first,
                                 const ElementType second) throw()
     {
-        return (first < second) ? -1
-                                : ((first == second) ? 0
-                                                     : 1);
+        return (first > second) - (second < first);
     }
 };
 

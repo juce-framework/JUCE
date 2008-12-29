@@ -202,9 +202,7 @@ int MidiMessageSequence::compareElements (const MidiMessageSequence::MidiEventHo
     const double diff = first->message.getTimeStamp()
                          - second->message.getTimeStamp();
 
-    return (diff == 0) ? 0
-                       : ((diff > 0) ? 1
-                                     : -1);
+    return (diff > 0) - (diff < 0);
 }
 
 void MidiMessageSequence::sort()
