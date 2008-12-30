@@ -629,7 +629,7 @@ static const String fixNewLines (const String& s)
     for (int i = 0; i < lines.size(); ++i)
         lines.set (i, lines[i].trimEnd());
 
-    while (lines [lines.size() - 1].trim().isEmpty())
+    while (lines.size() > 0 && lines [lines.size() - 1].trim().isEmpty())
         lines.remove (lines.size() - 1);
 
     return lines.joinIntoString (T("\r\n")) + T("\r\n");
