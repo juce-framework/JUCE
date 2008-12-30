@@ -144,7 +144,8 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                              const int numOutputChannelsNeeded,
                                              const XmlElement* const e,
                                              const bool selectDefaultDeviceOnFailure,
-                                             const String& preferredDefaultDeviceName)
+                                             const String& preferredDefaultDeviceName,
+                                             const AudioDeviceSetup* preferredSetupOptions)
 {
     scanDevicesIfNeeded();
 
@@ -158,6 +159,9 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
         String error;
         AudioDeviceSetup setup;
+
+        if (preferredSetupOptions != 0)
+            setup = *preferredSetupOptions;
 
         if (e->getStringAttribute (T("audioDeviceName")).isNotEmpty())
         {
@@ -213,7 +217,11 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
     {
         AudioDeviceSetup setup;
 
-        if (preferredDefaultDeviceName.isNotEmpty())
+        if (preferredSetupOptions != 0)
+        {
+            setup = *preferredSetupOptions;
+        }
+        else if (preferredDefaultDeviceName.isNotEmpty())
         {
             for (int j = availableDeviceTypes.size(); --j >= 0;)
             {

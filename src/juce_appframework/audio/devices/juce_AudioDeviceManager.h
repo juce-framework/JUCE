@@ -93,6 +93,62 @@ public:
     /** Destructor. */
     ~AudioDeviceManager();
 
+    //==============================================================================
+    /**
+        This structure holds a set of properties describing the current audio setup.
+
+        @see AudioDeviceManager::setAudioDeviceSetup()
+    */
+    struct AudioDeviceSetup
+    {
+        AudioDeviceSetup();
+        bool operator== (const AudioDeviceSetup& other) const;
+
+        /** The name of the audio device used for output.
+            This may be the same as the input device.
+        */
+        String outputDeviceName;
+
+        /** The name of the audio device used for input.
+            This may be the same as the output device.
+        */
+        String inputDeviceName;
+
+        /** The current sample rate. 
+            This rate is used for both the input and output devices.
+        */
+        double sampleRate;
+
+        /** The buffer size, in samples. 
+            This buffer size is used for both the input and output devices.
+        */
+        int bufferSize;
+
+        /** The set of active input channels.
+            The bits that are set in this array indicate the channels of the
+            input device that are active.
+        */
+        BitArray inputChannels;
+
+        /** If this is true, it indicates that the inputChannels array
+            should be ignored, and instead, the device's default channels 
+            should be used.
+        */
+        bool useDefaultInputChannels;
+
+        /** The set of active output channels.
+            The bits that are set in this array indicate the channels of the
+            input device that are active.
+        */
+        BitArray outputChannels;
+
+        /** If this is true, it indicates that the outputChannels array
+            should be ignored, and instead, the device's default channels 
+            should be used.
+        */
+        bool useDefaultOutputChannels;
+    };
+
 
     //==============================================================================
     /** Opens a set of audio devices ready for use.
@@ -115,6 +171,10 @@ public:
                                             (assuming that there wasn't one specified in the XML).
                                             The string can actually be a simple wildcard, containing "*"
                                             and "?" characters
+        @param preferredSetupOptions        if this is non-null, the structure will be used as the
+                                            set of preferred settings when opening the device. If you
+                                            use this parameter, the preferredDefaultDeviceName
+                                            field will be ignored
 
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
@@ -122,7 +182,8 @@ public:
                              const int numOutputChannelsNeeded,
                              const XmlElement* const savedState,
                              const bool selectDefaultDeviceOnFailure,
-                             const String& preferredDefaultDeviceName = String::empty);
+                             const String& preferredDefaultDeviceName = String::empty,
+                             const AudioDeviceSetup* preferredSetupOptions = 0);
 
     /** Returns some XML representing the current state of the manager.
 
@@ -132,41 +193,20 @@ public:
     XmlElement* createStateXml() const;
 
     //==============================================================================
-    /**
-    */
-    struct AudioDeviceSetup
-    {
-        AudioDeviceSetup();
+    /** Returns the current device properties that are in use.
 
-        bool operator== (const AudioDeviceSetup& other) const;
-
-        /**
-        */
-        String outputDeviceName;
-        /**
-        */
-        String inputDeviceName;
-        /**
-        */
-        double sampleRate;
-        /**
-        */
-        int bufferSize;
-        /**
-        */
-        BitArray inputChannels;
-        bool useDefaultInputChannels;
-        /**
-        */
-        BitArray outputChannels;
-        bool useDefaultOutputChannels;
-    };
-
-    /**
+        @see setAudioDeviceSetup
     */
     void getAudioDeviceSetup (AudioDeviceSetup& setup);
 
-    /**
+    /** Changes the current device or its settings.
+
+        If you want to change a device property, like the current sample rate or
+        block size, you can call getAudioDeviceSetup() to retrieve the current
+        settings, then tweak the appropriate fields in the AudioDeviceSetup structure,
+        and pass it back into this method to apply the new settings.
+
+        @param newSetup             the settings that you'd like to use
         @param treatAsChosenDevice  if this is true and if the device opens correctly, these new
                                     settings will be taken as having been explicitly chosen by the
                                     user, and the next time createStateXml() is called, these settings
@@ -175,6 +215,8 @@ public:
                                     return either the last settings that were made with treatAsChosenDevice
                                     as true, or the last XML settings that were passed into initialise().
         @returns an error message if anything went wrong, or an empty string if it worked ok.
+
+        @see getAudioDeviceSetup
     */
     const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
                                       const bool treatAsChosenDevice);
