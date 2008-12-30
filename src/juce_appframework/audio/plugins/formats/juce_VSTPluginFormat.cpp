@@ -2305,6 +2305,11 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
 
 //==============================================================================
 // handles non plugin-specific callbacks..
+
+static const int defaultVSTSampleRateValue = 16384;
+static const int defaultVSTBlockSizeValue = 512;
+
+
 static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt32 value, void *ptr, float opt)
 {
     (void) index;
@@ -2355,10 +2360,10 @@ static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt3
         break;
 
     case audioMasterGetSampleRate:
-        return 44100;
+        return (VstIntPtr) defaultVSTSampleRateValue;
 
     case audioMasterGetBlockSize:
-        return 512;
+        return (VstIntPtr) defaultVSTBlockSizeValue;
 
     case audioMasterSetOutputSampleRate:
         return 0;
@@ -2437,10 +2442,10 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         return 1;
 
     case audioMasterGetSampleRate:
-        return (VstIntPtr) (getSampleRate() > 0 ? getSampleRate() : 44100);
+        return (VstIntPtr) (getSampleRate() > 0 ? getSampleRate() : defaultVSTSampleRateValue);
 
     case audioMasterGetBlockSize:
-        return (VstIntPtr) getBlockSize();
+        return (VstIntPtr) (getBlockSize() > 0 ? getBlockSize() : defaultVSTBlockSizeValue);
 
     case audioMasterWantMidi:
         wantsMidiMessages = true;

@@ -65,7 +65,6 @@ extern bool juce_IsRunningInWine() throw();
 static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
-static bool screenSaverAllowed = true;
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw();
 #define WM_TRAYNOTIFY WM_USER + 100
@@ -2183,13 +2182,6 @@ private:
                             }
 
                             break;
-
-                        case SC_MONITORPOWER:
-                        case SC_SCREENSAVE:
-                            if (! screenSaverAllowed)
-                                return 0;
-
-                            break;
                         }
 
                         break;
@@ -2317,14 +2309,18 @@ void Desktop::setMousePosition (int x, int y) throw()
 }
 
 //==============================================================================
+static bool juce_screenSaverEnabled = true;
+
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
-    screenSaverAllowed = isEnabled;
+    juce_screenSaverEnabled = isEnabled;
+    SetThreadExecutionState (isEnabled ? (ES_DISPLAY_REQUIRED | ES_CONTINUOUS)
+                                       : ES_CONTINUOUS);
 }
 
 bool Desktop::isScreenSaverEnabled() throw()
 {
-    return screenSaverAllowed;
+    return juce_screenSaverEnabled;
 }
 
 //==============================================================================
