@@ -114,12 +114,12 @@ public:
         */
         String inputDeviceName;
 
-        /** The current sample rate. 
+        /** The current sample rate.
             This rate is used for both the input and output devices.
         */
         double sampleRate;
 
-        /** The buffer size, in samples. 
+        /** The buffer size, in samples.
             This buffer size is used for both the input and output devices.
         */
         int bufferSize;
@@ -131,7 +131,7 @@ public:
         BitArray inputChannels;
 
         /** If this is true, it indicates that the inputChannels array
-            should be ignored, and instead, the device's default channels 
+            should be ignored, and instead, the device's default channels
             should be used.
         */
         bool useDefaultInputChannels;
@@ -143,7 +143,7 @@ public:
         BitArray outputChannels;
 
         /** If this is true, it indicates that the outputChannels array
-            should be ignored, and instead, the device's default channels 
+            should be ignored, and instead, the device's default channels
             should be used.
         */
         bool useDefaultOutputChannels;

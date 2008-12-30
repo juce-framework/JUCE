@@ -94,26 +94,26 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    ~MidiOutput();
+    virtual ~MidiOutput();
 
     /** Makes this device output a midi message.
 
         @see MidiMessage
     */
-    void sendMessageNow (const MidiMessage& message);
+    virtual void sendMessageNow (const MidiMessage& message);
 
     /** Sends a midi reset to the device. */
-    void reset();
+    virtual void reset();
 
 
     //==============================================================================
     /** Returns the current volume setting for this device.  */
-    bool getVolume (float& leftVol,
-                    float& rightVol);
+    virtual bool getVolume (float& leftVol,
+                            float& rightVol);
 
     /** Changes the overall volume for this device.  */
-    void setVolume (float leftVol,
-                    float rightVol);
+    virtual void setVolume (float leftVol,
+                            float rightVol);
 
     //==============================================================================
     /** This lets you supply a block of messages that will be sent out at some point
@@ -133,31 +133,31 @@ public:
         samplesPerSecondForBuffer value is needed to convert this sample position to a
         real time.
     */
-    void sendBlockOfMessages (const MidiBuffer& buffer,
-                              const double millisecondCounterToStartAt,
-                              double samplesPerSecondForBuffer) throw();
+    virtual void sendBlockOfMessages (const MidiBuffer& buffer,
+                                      const double millisecondCounterToStartAt,
+                                      double samplesPerSecondForBuffer) throw();
 
     /** Gets rid of any midi messages that had been added by sendBlockOfMessages().
     */
-    void clearAllPendingMessages() throw();
+    virtual void clearAllPendingMessages() throw();
 
     /** Starts up a background thread so that the device can send blocks of data.
 
         Call this to get the device ready, before using sendBlockOfMessages().
     */
-    void startBackgroundThread() throw();
+    virtual void startBackgroundThread() throw();
 
     /** Stops the background thread, and clears any pending midi events.
 
         @see startBackgroundThread
     */
-    void stopBackgroundThread() throw();
+    virtual void stopBackgroundThread() throw();
 
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-private:
+protected:
     void* internal;
 
     struct PendingMessage

@@ -148,16 +148,16 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    ~MidiInput();
+    virtual ~MidiInput();
 
     /** Returns the name of this device.
     */
-    const String getName() const throw()                    { return name; }
+    virtual const String getName() const throw()                    { return name; }
 
     /** Allows you to set a custom name for the device, in case you don't like the name
         it was given when created.
     */
-    void setName (const String& newName) throw()            { name = newName; }
+    virtual void setName (const String& newName) throw()            { name = newName; }
 
     //==============================================================================
     /** Starts the device running.
@@ -168,18 +168,18 @@ public:
 
         @see stop
     */
-    void start();
+    virtual void start();
 
     /** Stops the device running.
 
         @see start
     */
-    void stop();
+    virtual void stop();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-private:
+protected:
     String name;
     void* internal;
 
