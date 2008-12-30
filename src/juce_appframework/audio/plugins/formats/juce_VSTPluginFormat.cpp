@@ -2437,7 +2437,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         return 1;
 
     case audioMasterGetSampleRate:
-        return (VstIntPtr) getSampleRate();
+        return (VstIntPtr) (getSampleRate() > 0 ? getSampleRate() : 44100);
 
     case audioMasterGetBlockSize:
         return (VstIntPtr) getBlockSize();
@@ -2514,6 +2514,9 @@ const String VSTPluginInstance::getVersion() const throw()
     int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
 
     String s;
+
+    if (v == 0 || v == -1)
+        v = getVersionNumber();
 
     if (v != 0)
     {

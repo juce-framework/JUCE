@@ -80,6 +80,7 @@ URL::URL (const String& url_)
 
 URL::URL (const URL& other)
     : url (other.url),
+      postData (other.postData),
       parameters (other.parameters),
       filesToUpload (other.filesToUpload),
       mimeTypes (other.mimeTypes)
@@ -89,6 +90,7 @@ URL::URL (const URL& other)
 const URL& URL::operator= (const URL& other)
 {
     url = other.url;
+    postData = other.postData;
     parameters = other.parameters;
     filesToUpload = other.filesToUpload;
     mimeTypes = other.mimeTypes;
@@ -352,14 +354,13 @@ private:
         }
         else
         {
+            appendUTF8ToPostData (getMangledParameters (url.getParameters()));
+            appendUTF8ToPostData (url.getPostData());
+
             // just a short text attachment, so use simple url encoding..
-            const String params (getMangledParameters (url.getParameters()));
-
             headers = "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                        + String ((int) strlen (params.toUTF8()))
+                        + String (postData.getSize())
                         + "\r\n";
-
-            appendUTF8ToPostData (params);
         }
     }
 
@@ -446,6 +447,13 @@ const URL URL::withFileToUpload (const String& parameterName,
     URL u (*this);
     u.filesToUpload.set (parameterName, fileToUpload.getFullPathName());
     u.mimeTypes.set (parameterName, mimeType);
+    return u;
+}
+
+const URL URL::withPOSTData (const String& postData_) const
+{
+    URL u (*this);
+    u.postData = postData_;
     return u;
 }
 
