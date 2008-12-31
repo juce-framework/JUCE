@@ -422,7 +422,8 @@ bool juce_launchFile (const String& fileName,
     String cmdString (fileName);
     cmdString << " " << parameters;
 
-    if (URL::isProbablyAWebsiteURL (cmdString) || URL::isProbablyAnEmailAddress (cmdString))
+    if (URL::isProbablyAWebsiteURL (fileName)
+         || URL::isProbablyAnEmailAddress (fileName))
     {
         // create a command that tries to launch a bunch of likely browsers
         const char* const browserNames[] = { "/etc/alternatives/x-www-browser", "firefox", "mozilla", "konqueror", "opera" };
@@ -434,6 +435,9 @@ bool juce_launchFile (const String& fileName,
 
         cmdString = cmdLines.joinIntoString (T(" || "));
     }
+
+    if (cmdString.startsWithIgnoreCase (T("file:")))
+        cmdString = cmdString.substring (5);
 
     char* const argv[4] = { "/bin/sh", "-c", (char*) cmdString.toUTF8(), 0 };
 

@@ -66,6 +66,12 @@
  #pragma warning (disable: 4309 4305)
 #endif
 
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
+ BEGIN_JUCE_NAMESPACE
+ #include "../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+ END_JUCE_NAMESPACE
+#endif
+
 //==============================================================================
 #include "juce_core/basics/juce_FileLogger.cpp"
 #include "juce_core/basics/juce_Logger.cpp"

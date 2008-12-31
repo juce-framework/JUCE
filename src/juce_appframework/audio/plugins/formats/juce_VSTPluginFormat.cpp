@@ -31,9 +31,9 @@
 
 #include "../../../../../juce_Config.h"
 
-#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WIN32)
+#if JUCE_PLUGINHOST_VST
 
-#ifdef _WIN32
+#if (defined (_WIN32) || defined (_WIN64))
  #undef _WIN32_WINNT
  #define _WIN32_WINNT 0x500
  #undef STRICT
@@ -41,7 +41,7 @@
  #include <windows.h>
  #include <float.h>
  #pragma warning (disable : 4312 4355)
-#elif defined (LINUX)
+#elif defined (LINUX) || defined (__linux__)
  #include <float.h>
  #include <sys/time.h>
  #include <X11/Xlib.h>
@@ -72,16 +72,13 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/threads/juce_Process.h"
 #include "../../../../juce_core/threads/juce_ScopedLock.h"
 #include "../../../../juce_core/basics/juce_Random.h"
+#include "../../../../juce_core/io/files/juce_DirectoryIterator.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../application/juce_Application.h"
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
-
-#if JUCE_MAC
- #include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
-#endif
 
 
 //==============================================================================
@@ -114,6 +111,7 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 #include "../juce_PluginDescription.h"
+#include "juce_VSTMidiEventList.h"
 
 #if ! JUCE_WIN32
  #define _fpreset()
@@ -771,8 +769,7 @@ private:
     AudioSampleBuffer tempBuffer;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
-    void* midiEventsToSend;
-    int numAllocatedMidiEvents;
+    VSTMidiEventList midiEventsToSend;
     VstTimeInfo vstHostTime;
     float** channels;
 
@@ -785,8 +782,6 @@ private:
     void setParamsInProgramBlock (fxProgram* const prog) throw();
     void updateStoredProgramNames();
     void initialise();
-    void ensureMidiEventSize (int numEventsNeeded);
-    void freeMidiEvents();
     void handleMidiFromPlugin (const VstEvents* const events);
     void createTempParameterStore (MemoryBlock& dest);
     void restoreFromTempParameterStore (const MemoryBlock& mb);
@@ -814,8 +809,6 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
       wantsMidiMessages (false),
       initialised (false),
       isPowerOn (false),
-      numAllocatedMidiEvents (0),
-      midiEventsToSend (0),
       tempBuffer (1, 1),
       channels (0),
       module (module_)
@@ -904,8 +897,6 @@ VSTPluginInstance::~VSTPluginInstance()
         effect = 0;
     }
 
-    freeMidiEvents();
-
     juce_free (channels);
     channels = 0;
 }
@@ -993,9 +984,9 @@ void VSTPluginInstance::prepareToPlay (double sampleRate_,
                                 || (dispatch (effCanDo, 0, 0, (void*) "receiveVstMidiEvent", 0) > 0);
 
         if (wantsMidiMessages)
-            ensureMidiEventSize (256);
+            midiEventsToSend.ensureSize (256);
         else
-            freeMidiEvents();
+            midiEventsToSend.freeEvents();
 
         incomingMidi.clear();
 
@@ -1030,7 +1021,7 @@ void VSTPluginInstance::releaseResources()
     tempBuffer.setSize (1, 1);
     incomingMidi.clear();
 
-    freeMidiEvents();
+    midiEventsToSend.freeEvents();
     juce_free (channels);
     channels = 0;
 }
@@ -1076,43 +1067,22 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
 
         if (wantsMidiMessages)
         {
-            MidiBuffer::Iterator iter (midiMessages);
+            midiEventsToSend.clear();
+            midiEventsToSend.ensureSize (1);
 
-            int eventIndex = 0;
+            MidiBuffer::Iterator iter (midiMessages);
             const uint8* midiData;
             int numBytesOfMidiData, samplePosition;
 
             while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
             {
-                if (numBytesOfMidiData < 4)
-                {
-                    ensureMidiEventSize (eventIndex + 1);
-                    VstMidiEvent* const e
-                        = (VstMidiEvent*) ((VstEvents*) midiEventsToSend)->events [eventIndex++];
-
-                    // check that some plugin hasn't messed up our objects
-                    jassert (e->type == kVstMidiType);
-                    jassert (e->byteSize == 24);
-
-                    e->deltaFrames = jlimit (0, numSamples - 1, samplePosition);
-                    e->noteLength = 0;
-                    e->noteOffset = 0;
-                    e->midiData[0] = midiData[0];
-                    e->midiData[1] = midiData[1];
-                    e->midiData[2] = midiData[2];
-                    e->detune = 0;
-                    e->noteOffVelocity = 0;
-                }
+                midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
+                                           jlimit (0, numSamples - 1, samplePosition));
             }
-
-            if (midiEventsToSend == 0)
-                ensureMidiEventSize (1);
-
-            ((VstEvents*) midiEventsToSend)->numEvents = eventIndex;
 
             try
             {
-                effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend, 0);
+                effect->dispatcher (effect, effProcessEvents, 0, 0, midiEventsToSend.events, 0);
             }
             catch (...)
             {}
@@ -1177,61 +1147,12 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
 }
 
 //==============================================================================
-void VSTPluginInstance::ensureMidiEventSize (int numEventsNeeded)
-{
-    if (numEventsNeeded > numAllocatedMidiEvents)
-    {
-        numEventsNeeded = (numEventsNeeded + 32) & ~31;
-
-        const int size = 20 + sizeof (VstEvent*) * numEventsNeeded;
-
-        if (midiEventsToSend == 0)
-            midiEventsToSend = juce_calloc (size);
-        else
-            midiEventsToSend = juce_realloc (midiEventsToSend, size);
-
-        for (int i = numAllocatedMidiEvents; i < numEventsNeeded; ++i)
-        {
-            VstMidiEvent* const e = (VstMidiEvent*) juce_calloc (sizeof (VstMidiEvent));
-            e->type = kVstMidiType;
-            e->byteSize = 24;
-
-            ((VstEvents*) midiEventsToSend)->events[i] = (VstEvent*) e;
-        }
-
-        numAllocatedMidiEvents = numEventsNeeded;
-    }
-}
-
-void VSTPluginInstance::freeMidiEvents()
-{
-    if (midiEventsToSend != 0)
-    {
-        for (int i = numAllocatedMidiEvents; --i >= 0;)
-            juce_free (((VstEvents*) midiEventsToSend)->events[i]);
-
-        juce_free (midiEventsToSend);
-        midiEventsToSend = 0;
-        numAllocatedMidiEvents = 0;
-    }
-}
-
 void VSTPluginInstance::handleMidiFromPlugin (const VstEvents* const events)
 {
     if (events != 0)
     {
         const ScopedLock sl (midiInLock);
-
-        for (int i = 0; i < events->numEvents; ++i)
-        {
-            const VstEvent* const e = events->events[i];
-
-            if (e->type == kVstMidiType)
-            {
-                incomingMidi.addEvent ((const uint8*) ((const VstMidiEvent*) e)->midiData,
-                                       3, e->deltaFrames);
-            }
-        }
+        VSTMidiEventList::addEventsToMidiBuffer (events, incomingMidi);
     }
 }
 
@@ -1899,6 +1820,11 @@ private:
 #endif
 
 #if JUCE_MAC
+
+#if ! JUCE_SUPPORT_CARBON
+ #error "To build VSTs, you need to enable the JUCE_SUPPORT_CARBON flag in your config!"
+#endif
+
     class InnerWrapperComponent   : public CarbonViewWrapperComponent
     {
     public:

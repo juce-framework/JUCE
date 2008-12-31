@@ -109,6 +109,8 @@
 #endif
 
 #include "../juce_PluginHeaders.h"
+#include "../../../../src/juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
+
 
 #ifdef _MSC_VER
   #pragma pack (pop)
@@ -336,8 +338,6 @@ public:
          filter (filter_)
     {
         editorComp = 0;
-        outgoingEvents = 0;
-        outgoingEventSize = 0;
         chunkMemoryTime = 0;
         isProcessing = false;
         hasShutdown = false;
@@ -392,15 +392,6 @@ public:
 
         delete filter;
         filter = 0;
-
-        if (outgoingEvents != 0)
-        {
-            for (int i = outgoingEventSize; --i >= 0;)
-                juce_free (outgoingEvents->events[i]);
-
-            juce_free (outgoingEvents);
-            outgoingEvents = 0;
-        }
 
         jassert (editorComp == 0);
 
@@ -560,20 +551,7 @@ public:
     VstInt32 processEvents (VstEvents* events)
     {
 #if JucePlugin_WantsMidiInput
-        for (int i = 0; i < events->numEvents; ++i)
-        {
-            const VstEvent* const e = events->events[i];
-
-            if (e != 0 && e->type == kVstMidiType)
-            {
-                const VstMidiEvent* const vme = (const VstMidiEvent*) e;
-
-                midiEvents.addEvent ((const JUCE_NAMESPACE::uint8*) vme->midiData,
-                                     4,
-                                     vme->deltaFrames);
-            }
-        }
-
+        VSTMidiEventList::addEventsToMidiBuffer (events, midiEvents);
         return 1;
 #else
         return 0;
@@ -682,8 +660,8 @@ public:
 #if JucePlugin_ProducesMidiOutput
             const int numEvents = midiEvents.getNumEvents();
 
-            ensureOutgoingEventSize (numEvents);
-            outgoingEvents->numEvents = 0;
+            outgoingEvents.ensureSize (numEvents);
+            outgoingEvents.clear();
 
             const JUCE_NAMESPACE::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
@@ -691,18 +669,12 @@ public:
 
             while (i.getNextEvent (midiEventData, midiEventSize, midiEventPosition))
             {
-                if (midiEventSize <= 4)
-                {
-                    VstMidiEvent* const vme = (VstMidiEvent*) outgoingEvents->events [outgoingEvents->numEvents++];
+                jassert (midiEventPosition >= 0 && midiEventPosition < numSamples);
 
-                    memcpy (vme->midiData, midiEventData, midiEventSize);
-                    vme->deltaFrames = midiEventPosition;
-
-                    jassert (vme->deltaFrames >= 0 && vme->deltaFrames < numSamples);
-                }
+                outgoingEvents.addEvent (midiEventData, midiEventSize, midiEventPosition);
             }
 
-            sendVstEventsToHost (outgoingEvents);
+            sendVstEventsToHost (outgoingEvents.events);
 #else
             /*  This assertion is caused when you've added some events to the
                 midiMessages array in your processBlock() method, which usually means
@@ -763,7 +735,7 @@ public:
         AudioEffectX::resume();
 
 #if JucePlugin_ProducesMidiOutput
-        ensureOutgoingEventSize (64);
+        outgoingEvents.ensureSize (64);
 #endif
 
 #if JucePlugin_WantsMidiInput && ! JUCE_USE_VSTSDK_2_4
@@ -779,7 +751,7 @@ public:
         AudioEffectX::suspend();
 
         filter->releaseResources();
-        midiEvents.clear();
+        outgoingEvents.freeEvents();
 
         isProcessing = false;
         juce_free (channels);
@@ -1355,8 +1327,7 @@ private:
     EditorCompWrapper* editorComp;
     ERect editorSize;
     MidiBuffer midiEvents;
-    VstEvents* outgoingEvents;
-    int outgoingEventSize;
+    VSTMidiEventList outgoingEvents;
     bool isProcessing;
     bool hasShutdown;
     bool firstProcessCallback;
@@ -1379,31 +1350,6 @@ private:
             tempChannels.insertMultiple (0, 0, filter->getNumInputChannels() + filter->getNumOutputChannels());
 
         hasCreatedTempChannels = false;
-    }
-
-    void ensureOutgoingEventSize (int numEvents)
-    {
-        if (outgoingEventSize < numEvents)
-        {
-            numEvents += 32;
-            const int size = 16 + sizeof (VstEvent*) * numEvents;
-
-            if (outgoingEvents == 0)
-                outgoingEvents = (VstEvents*) juce_calloc (size);
-            else
-                outgoingEvents = (VstEvents*) juce_realloc (outgoingEvents, size);
-
-            for (int i = outgoingEventSize; i < numEvents; ++i)
-            {
-                VstMidiEvent* const e = (VstMidiEvent*) juce_calloc (sizeof (VstMidiEvent));
-                e->type = kVstMidiType;
-                e->byteSize = 24;
-
-                outgoingEvents->events[i] = (VstEvent*) e;
-            }
-
-            outgoingEventSize = numEvents;
-        }
     }
 
     const String getHostName()

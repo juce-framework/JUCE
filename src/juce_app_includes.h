@@ -170,6 +170,9 @@
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_LADSPAPluginFormat.h"
 #endif
+#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
+ #include "juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
+#endif
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
 #endif

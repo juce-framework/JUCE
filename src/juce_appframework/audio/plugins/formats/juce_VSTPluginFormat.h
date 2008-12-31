@@ -34,8 +34,8 @@
 
 #include "../juce_AudioPluginFormat.h"
 
-#if JUCE_PLUGINHOST_VST
 
+#if JUCE_PLUGINHOST_VST
 
 //==============================================================================
 /**

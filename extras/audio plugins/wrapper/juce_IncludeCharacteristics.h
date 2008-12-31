@@ -42,6 +42,7 @@
 */
 #include "JucePluginCharacteristics.h"
 
+#define SUPPORT_CARBON 1
 
 //==============================================================================
 // The following stuff is just to cause a compile error if you've forgotten to

@@ -75,11 +75,6 @@ BEGIN_JUCE_NAMESPACE
  #define log(a)
 #endif
 
-#if JUCE_SUPPORT_CARBON
-#include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
-#endif
-
-
 static int insideCallback = 0;
 
 //==============================================================================

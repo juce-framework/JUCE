@@ -136,17 +136,27 @@ bool URL::isWellFormed() const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    return (possibleURL.containsChar (T('.'))
-            && (! possibleURL.containsChar (T('@')))
-            && (! possibleURL.endsWithChar (T('.')))
-            && (possibleURL.startsWithIgnoreCase (T("www."))
-                || possibleURL.startsWithIgnoreCase (T("http:"))
-                || possibleURL.startsWithIgnoreCase (T("ftp:"))
-                || possibleURL.endsWithIgnoreCase (T(".com"))
-                || possibleURL.endsWithIgnoreCase (T(".net"))
-                || possibleURL.endsWithIgnoreCase (T(".org"))
-                || possibleURL.endsWithIgnoreCase (T(".co.uk")))
-        || possibleURL.startsWithIgnoreCase (T("file:")));
+    if (possibleURL.startsWithIgnoreCase (T("http:"))
+         || possibleURL.startsWithIgnoreCase (T("ftp:")))
+        return true;
+
+    if (possibleURL.startsWithIgnoreCase (T("file:"))
+         || possibleURL.containsChar (T('@'))
+         || possibleURL.endsWithChar (T('.'))
+         || (! possibleURL.containsChar (T('.'))))
+        return false;
+
+    if (possibleURL.startsWithIgnoreCase (T("www."))
+         && possibleURL.substring (5).containsChar (T('.')))
+        return true;
+
+    const char* commonTLDs[] = { "com", "net", "org", "uk", "de", "fr", "jp" };
+
+    for (int i = 0; i < numElementsInArray (commonTLDs); ++i)
+        if ((possibleURL + T("/")).containsIgnoreCase (T(".") + String (commonTLDs[i]) + T("/")))
+            return true;
+
+    return false;
 }
 
 bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
