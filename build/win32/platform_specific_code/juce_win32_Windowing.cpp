@@ -2314,8 +2314,8 @@ static bool juce_screenSaverEnabled = true;
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
     juce_screenSaverEnabled = isEnabled;
-    SetThreadExecutionState (isEnabled ? (ES_DISPLAY_REQUIRED | ES_CONTINUOUS)
-                                       : ES_CONTINUOUS);
+    SetThreadExecutionState (isEnabled ? ES_CONTINUOUS
+                                       : (ES_DISPLAY_REQUIRED | ES_CONTINUOUS));
 }
 
 bool Desktop::isScreenSaverEnabled() throw()

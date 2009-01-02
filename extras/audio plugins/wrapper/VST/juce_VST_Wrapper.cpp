@@ -49,7 +49,7 @@
   #define PRAGMA_ALIGN_SUPPORTED 1
 #endif
 
-#include "../juce_PluginHeaders.h"
+#include "../juce_IncludeCharacteristics.h"
 
 #if JucePlugin_Build_VST
 
@@ -109,7 +109,6 @@
 #endif
 
 #include "../juce_PluginHeaders.h"
-#include "../../../../src/juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
 
 
 #ifdef _MSC_VER
@@ -1490,7 +1489,7 @@ extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
 #if JucePlugin_Build_RTAS
 BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID)
 #else
-extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD dwReason, LPVOID)
 #endif
 {
     if (dwReason == DLL_PROCESS_ATTACH)
