@@ -286,6 +286,8 @@ bool PathFlatteningIterator::next() throw()
         }
         else
         {
+            jassert (type == Path::moveMarker);
+
             subPathIndex = -1;
             subPathCloseX = x1 = x2;
             subPathCloseY = y1 = y2;
