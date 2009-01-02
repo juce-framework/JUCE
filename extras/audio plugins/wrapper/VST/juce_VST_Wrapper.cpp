@@ -1487,7 +1487,11 @@ extern "C" __declspec (dllexport) void* main (audioMasterCallback audioMaster)
 }
 #endif
 
+#if JucePlugin_Build_RTAS
 BOOL WINAPI DllMainVST (HINSTANCE instance, DWORD dwReason, LPVOID)
+#else
+extern "C" BOOL WINAPI DllMain (HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpReserved)
+#endif
 {
     if (dwReason == DLL_PROCESS_ATTACH)
         PlatformUtilities::setCurrentModuleInstanceHandle (instance);

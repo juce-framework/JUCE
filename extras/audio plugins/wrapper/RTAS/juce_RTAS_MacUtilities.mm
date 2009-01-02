@@ -40,11 +40,18 @@
 
 #if JucePlugin_Build_RTAS
 
+BEGIN_JUCE_NAMESPACE
+ extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
+END_JUCE_NAMESPACE
 
 //==============================================================================
 void initialiseMacRTAS()
 {
     NSApplicationLoad();
+
+#if defined (JucePlugin_CFBundleIdentifier)
+    juce_setCurrentExecutableFileNameFromBundleId (JucePlugin_CFBundleIdentifier);
+#endif
 }
 
 void* attachSubWindow (void* hostWindowRef, Component* comp)

@@ -359,7 +359,8 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
 
         [juceAppDelegate performSelectorOnMainThread: @selector (performCallback:)
                                           withObject: [NSData dataWithBytesNoCopy: &cmp
-                                                                           length: sizeof (cmp)]
+                                                                           length: sizeof (cmp)
+                                                                     freeWhenDone: NO]
                                        waitUntilDone: YES];
 
         return cmp.result;

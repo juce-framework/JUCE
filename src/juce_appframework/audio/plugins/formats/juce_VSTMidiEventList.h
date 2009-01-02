@@ -59,6 +59,9 @@ public:
     void clear()
     {
         numEventsUsed = 0;
+
+        if (events != 0)
+            events->numEvents = 0;
     }
 
     void addEvent (const void* const midiData, const int numBytes, const int frameOffset)
