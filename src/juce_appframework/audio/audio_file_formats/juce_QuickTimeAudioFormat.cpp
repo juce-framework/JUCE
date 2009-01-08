@@ -34,11 +34,11 @@
 #if JUCE_QUICKTIME
 
 #if ! defined (_WIN32)
- #include <Quicktime/Movies.h>
- #include <Quicktime/QTML.h>
- #include <Quicktime/QuickTimeComponents.h>
- #include <Quicktime/MediaHandlers.h>
- #include <Quicktime/ImageCodec.h>
+ #include <QuickTime/Movies.h>
+ #include <QuickTime/QTML.h>
+ #include <QuickTime/QuickTimeComponents.h>
+ #include <QuickTime/MediaHandlers.h>
+ #include <QuickTime/ImageCodec.h>
 #else
  #ifdef _MSC_VER
   #pragma warning (push)

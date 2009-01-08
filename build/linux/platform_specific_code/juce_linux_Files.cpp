@@ -295,6 +295,37 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 }
 
 //==============================================================================
+const File File::getLinkedTarget() const throw()
+{
+    char buffer [4096];
+    size_t numChars = readlink ((const char*) getFullPathName().toUTF8(),
+                                buffer, sizeof (buffer));
+
+    if (numChars > 0 && numChars <= sizeof (buffer))
+        return File (String::fromUTF8 ((const uint8*) buffer, (int) numChars));
+
+    return *this;
+}
+
+//==============================================================================
+bool File::moveToTrash() const throw()
+{
+    if (! exists())
+        return true;
+
+    File trashCan (T("~/.Trash"));
+
+    if (! trashCan.isDirectory())
+        trashCan = T("~/.local/share/Trash/files");
+
+    if (! trashCan.isDirectory())
+        return false;
+
+    return moveFileTo (trashCan.getNonexistentChildFile (getFileNameWithoutExtension(), 
+                                                         getFileExtension()));
+}
+
+//==============================================================================
 struct FindFileStruct
 {
     String parentDir, wildCard;
@@ -439,7 +470,7 @@ bool juce_launchFile (const String& fileName,
     if (cmdString.startsWithIgnoreCase (T("file:")))
         cmdString = cmdString.substring (5);
 
-    char* const argv[4] = { "/bin/sh", "-c", (char*) cmdString.toUTF8(), 0 };
+    const char* const argv[4] = { "/bin/sh", "-c", (const char*) cmdString.toUTF8(), 0 };
 
     const int cpid = fork();
 
@@ -448,7 +479,7 @@ bool juce_launchFile (const String& fileName,
         setsid();
 
         // Child process
-        execve (argv[0], argv, environ);
+        execve (argv[0], (char**) argv, environ);
         exit (0);
     }
 

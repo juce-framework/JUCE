@@ -5,19 +5,22 @@ ifndef CONFIG
   CONFIG=Debug
 endif
 
+# if multiple archs are defined turn off automated dependency generation
+DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)
+
 ifeq ($(CONFIG),Debug)
   BINDIR := build
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb
-  CXXFLAGS := $(CFLAGS)
+  CXXFLAGS += $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucedemo
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+ BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),Release)
@@ -25,39 +28,39 @@ ifeq ($(CONFIG),Release)
   LIBDIR := build
   OBJDIR := build/intermediate/Release
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2
-  CXXFLAGS := $(CFLAGS)
+  CXXFLAGS += $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lrt -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucedemo
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+ BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/MainDemoWindow.o \
 	$(OBJDIR)/ApplicationStartup.o \
-	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/BinaryData.o \
-	$(OBJDIR)/PathsAndTransformsDemo.o \
-	$(OBJDIR)/DragAndDropDemo.o \
-	$(OBJDIR)/ThreadingDemo.o \
-	$(OBJDIR)/OpenGLDemo.o \
-	$(OBJDIR)/WidgetsDemo.o \
-	$(OBJDIR)/TreeViewDemo.o \
-	$(OBJDIR)/QuickTimeDemo.o \
-	$(OBJDIR)/InterprocessCommsDemo.o \
+	$(OBJDIR)/juce_LibrarySource.o \
+	$(OBJDIR)/MainDemoWindow.o \
 	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
+	$(OBJDIR)/InterprocessCommsDemo.o \
+	$(OBJDIR)/OpenGLDemo.o \
+	$(OBJDIR)/PathsAndTransformsDemo.o \
+	$(OBJDIR)/QuickTimeDemo.o \
 	$(OBJDIR)/TableDemo.o \
+	$(OBJDIR)/ThreadingDemo.o \
+	$(OBJDIR)/TreeViewDemo.o \
+	$(OBJDIR)/WidgetsDemo.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
   MKDIR_TYPE := posix
 endif
-ifeq (/bin/sh.exe,$(SHELL))
+ifeq (/bin,$(findstring /bin,$(SHELL)))
   MKDIR_TYPE := posix
 endif
 ifeq ($(MKDIR_TYPE),posix)
@@ -84,87 +87,88 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning JuceDemo
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
 	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
 endif
 
-$(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
 $(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
+$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/DragAndDropDemo.o: ../../src/demos/DragAndDropDemo.cpp
+$(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/OpenGLDemo.o: ../../src/demos/OpenGLDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/QuickTimeDemo.o: ../../src/demos/QuickTimeDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/InterprocessCommsDemo.o: ../../src/demos/InterprocessCommsDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/DragAndDropDemo.o: ../../src/demos/DragAndDropDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/FontsAndTextDemo.o: ../../src/demos/FontsAndTextDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/InterprocessCommsDemo.o: ../../src/demos/InterprocessCommsDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/OpenGLDemo.o: ../../src/demos/OpenGLDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/QuickTimeDemo.o: ../../src/demos/QuickTimeDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/TableDemo.o: ../../src/demos/TableDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)
 

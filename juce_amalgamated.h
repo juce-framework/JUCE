@@ -6341,6 +6341,12 @@ public:
     */
     bool isHidden() const throw();
 
+    /** If this file is a link, this returns the file that it points to.
+
+        If this file isn't actually link, it'll just return itself.
+    */
+    const File getLinkedTarget() const throw();
+
     /** Returns the last modification time of this file.
 
         @returns    the time, or an invalid time if the file doesn't exist.
@@ -6430,6 +6436,14 @@ public:
         @see deleteFile
     */
     bool deleteRecursively() const throw();
+
+    /** Moves this file or folder to the trash.
+
+        @returns true if the operation succeeded. It could fail if the trash is full, or
+                 if the file is write-protected, so you should check the return value
+                 and act appropriately.
+    */
+    bool moveToTrash() const throw();
 
     /** Moves or renames a file.
 

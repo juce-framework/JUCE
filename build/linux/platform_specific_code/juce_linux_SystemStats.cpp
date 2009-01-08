@@ -77,8 +77,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    fprintf (stdout, text.toUTF8());
-    fprintf (stdout, "\n");
+    fputs (text.toUTF8(), stdout);
+    fputs ("\n", stdout);
 }
 
 void Logger::outputDebugPrintf (const tchar* format, ...) throw()

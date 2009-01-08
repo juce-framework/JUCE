@@ -331,6 +331,40 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 }
 
 //==============================================================================
+const File File::getLinkedTarget() const throw()
+{
+    FSRef ref;
+    Boolean targetIsAFolder, wasAliased;
+
+    if (PlatformUtilities::makeFSRefFromPath (&ref, getFullPathName())
+         && (FSResolveAliasFileWithMountFlags (&ref, true, &targetIsAFolder, &wasAliased, 0) == noErr)
+         && wasAliased)
+    {
+        return File (PlatformUtilities::makePathFromFSRef (&ref));
+    }
+
+    return *this;
+}
+
+//==============================================================================
+bool File::moveToTrash() const throw()
+{
+    if (! exists())
+        return true;
+
+    const ScopedAutoReleasePool pool;
+
+    NSString* p = juceStringToNS (getFullPathName());
+
+    return [[NSWorkspace sharedWorkspace] 
+                performFileOperation: NSWorkspaceRecycleOperation
+                              source: [p stringByDeletingLastPathComponent]
+                         destination: @""
+                               files: [NSArray arrayWithObject: [p lastPathComponent]]
+                                 tag: nil ];
+}
+
+//==============================================================================
 struct FindFileStruct
 {
     String parentDir, wildCard;

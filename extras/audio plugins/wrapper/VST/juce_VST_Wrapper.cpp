@@ -209,7 +209,7 @@ public:
     {
         MessageManager* const messageManager = MessageManager::getInstance();
 
-        const int64 originalThreadId = messageManager->getCurrentMessageThread();
+        const Thread::ThreadID originalThreadId = messageManager->getCurrentMessageThread();
         messageManager->setCurrentMessageThread (Thread::getCurrentThreadId());
 
         while ((! threadShouldExit()) && messageManager->runDispatchLoopUntil (250))

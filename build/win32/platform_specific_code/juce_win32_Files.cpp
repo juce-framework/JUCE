@@ -109,6 +109,29 @@ bool juce_deleteFile (const String& fileName) throw()
     return DeleteFile (fileName) != 0;
 }
 
+bool File::moveToTrash() const throw()
+{
+    if (! exists())
+        return true;
+
+    SHFILEOPSTRUCT fos;
+    zerostruct (fos);
+
+    // The string we pass in must be double null terminated..
+    String doubleNullTermPath (getFullPathName() + " ");
+    TCHAR* p = (TCHAR*) (const TCHAR*) doubleNullTermPath;
+    p [getFullPathName().length()] = 0;
+
+    fos.wFunc = FO_DELETE;
+    fos.hwnd = (HWND) 0;
+    fos.pFrom = p;
+    fos.pTo = NULL;
+    fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION 
+                   | FOF_NOCONFIRMMKDIR | FOF_RENAMEONCOLLISION;
+
+    return SHFileOperation (&fos) == 0;
+}
+
 bool juce_moveFile (const String& source, const String& dest) throw()
 {
     return MoveFile (source, dest) != 0;
@@ -500,6 +523,44 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 {
     return SetCurrentDirectory (getFullPathName()) != FALSE;
 }
+
+//==============================================================================
+const File File::getLinkedTarget() const throw()
+{
+    File result (*this);
+    String p (getFullPathName());
+
+    if (! exists())
+        p += T(".lnk");
+    else if (getFileExtension() != T(".lnk"))
+        return result;
+
+    IShellLink* shellLink = 0;
+    if (SUCCEEDED (CoCreateInstance (CLSID_ShellLink, 0, CLSCTX_INPROC_SERVER, 
+                                     IID_IShellLink, (LPVOID*) &shellLink)))
+    {
+        IPersistFile* persistFile;
+        if (SUCCEEDED (shellLink->QueryInterface (IID_IPersistFile, (LPVOID*) &persistFile)))
+        {
+            if (SUCCEEDED (persistFile->Load ((const WCHAR*) p, STGM_READ)) 
+                 && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
+            {
+                WIN32_FIND_DATA winFindData;
+                WCHAR resolvedPath [MAX_PATH];
+
+                if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, SLGP_UNCPRIORITY)))
+                    result = File (resolvedPath);
+            }
+
+            persistFile->Release();
+        }
+
+        shellLink->Release();
+    }
+
+    return result;
+}
+
 
 //==============================================================================
 template <class FindDataType>

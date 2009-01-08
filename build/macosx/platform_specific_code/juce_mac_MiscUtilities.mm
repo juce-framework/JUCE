@@ -171,8 +171,14 @@ static ScreenSaverDefeater* screenSaverDefeater = 0;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
-    if (screenSaverDefeater == 0)
+    if (isEnabled)
+    {
+        deleteAndZero (screenSaverDefeater);
+    }
+    else if (screenSaverDefeater == 0)
+    {
         screenSaverDefeater = new ScreenSaverDefeater();
+    }
 }
 
 bool Desktop::isScreenSaverEnabled() throw()

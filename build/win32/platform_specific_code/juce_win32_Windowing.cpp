@@ -2309,6 +2309,61 @@ void Desktop::setMousePosition (int x, int y) throw()
 }
 
 //==============================================================================
+class ScreenSaverDefeater   : public Timer,
+                              public DeletedAtShutdown
+{
+public:
+    ScreenSaverDefeater() throw()
+    {
+        startTimer (10000);
+        timerCallback();
+    }
+
+    ~ScreenSaverDefeater() {}
+
+    void timerCallback()
+    {
+        if (Process::isForegroundProcess())
+        {
+            // simulate a shift key getting pressed..
+            INPUT input[2];
+            input[0].type = INPUT_KEYBOARD;
+            input[0].ki.wVk = VK_SHIFT;
+            input[0].ki.dwFlags = 0;
+            input[0].ki.dwExtraInfo = 0;
+
+            input[1].type = INPUT_KEYBOARD;
+            input[1].ki.wVk = VK_SHIFT;
+            input[1].ki.dwFlags = KEYEVENTF_KEYUP;
+            input[1].ki.dwExtraInfo = 0;
+
+            SendInput (2, input, sizeof (INPUT));
+        }
+    }
+};
+
+static ScreenSaverDefeater* screenSaverDefeater = 0;
+
+void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+{
+    if (isEnabled)
+    {
+        deleteAndZero (screenSaverDefeater);
+    }
+    else if (screenSaverDefeater == 0)
+    {
+        screenSaverDefeater = new ScreenSaverDefeater();
+    }
+}
+
+bool Desktop::isScreenSaverEnabled() throw()
+{
+    return screenSaverDefeater == 0;
+}
+
+/* (The code below is the "correct" way to disable the screen saver, but it
+    completely fails on winXP when the saver is password-protected...)
+
 static bool juce_screenSaverEnabled = true;
 
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
@@ -2322,6 +2377,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 {
     return juce_screenSaverEnabled;
 }
+*/
 
 //==============================================================================
 void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
