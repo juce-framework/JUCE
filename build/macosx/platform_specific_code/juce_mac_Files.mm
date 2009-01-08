@@ -356,7 +356,7 @@ bool File::moveToTrash() const throw()
 
     NSString* p = juceStringToNS (getFullPathName());
 
-    return [[NSWorkspace sharedWorkspace] 
+    return [[NSWorkspace sharedWorkspace]
                 performFileOperation: NSWorkspaceRecycleOperation
                               source: [p stringByDeletingLastPathComponent]
                          destination: @""

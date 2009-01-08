@@ -126,7 +126,7 @@ bool File::moveToTrash() const throw()
     fos.hwnd = (HWND) 0;
     fos.pFrom = p;
     fos.pTo = NULL;
-    fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION 
+    fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION
                    | FOF_NOCONFIRMMKDIR | FOF_RENAMEONCOLLISION;
 
     return SHFileOperation (&fos) == 0;
@@ -536,13 +536,13 @@ const File File::getLinkedTarget() const throw()
         return result;
 
     IShellLink* shellLink = 0;
-    if (SUCCEEDED (CoCreateInstance (CLSID_ShellLink, 0, CLSCTX_INPROC_SERVER, 
+    if (SUCCEEDED (CoCreateInstance (CLSID_ShellLink, 0, CLSCTX_INPROC_SERVER,
                                      IID_IShellLink, (LPVOID*) &shellLink)))
     {
         IPersistFile* persistFile;
         if (SUCCEEDED (shellLink->QueryInterface (IID_IPersistFile, (LPVOID*) &persistFile)))
         {
-            if (SUCCEEDED (persistFile->Load ((const WCHAR*) p, STGM_READ)) 
+            if (SUCCEEDED (persistFile->Load ((const WCHAR*) p, STGM_READ))
                  && SUCCEEDED (shellLink->Resolve (0, SLR_ANY_MATCH | SLR_NO_UI)))
             {
                 WIN32_FIND_DATA winFindData;

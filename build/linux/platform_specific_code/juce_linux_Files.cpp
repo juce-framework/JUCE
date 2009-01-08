@@ -321,7 +321,7 @@ bool File::moveToTrash() const throw()
     if (! trashCan.isDirectory())
         return false;
 
-    return moveFileTo (trashCan.getNonexistentChildFile (getFileNameWithoutExtension(), 
+    return moveFileTo (trashCan.getNonexistentChildFile (getFileNameWithoutExtension(),
                                                          getFileExtension()));
 }
 
