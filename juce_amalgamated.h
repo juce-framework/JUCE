@@ -46959,6 +46959,24 @@ public:
     */
     void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
 
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        tabOutlineColourId              = 0x1005812,    /**< The colour to use to draw an outline around the tabs.  */
+        tabTextColourId                 = 0x1005813,    /**< The colour to use to draw the tab names. If this isn't specified,
+                                                             the look and feel will choose an appropriate colour. */
+        frontOutlineColourId            = 0x1005814,    /**< The colour to use to draw an outline around the currently-selected tab.  */
+        frontTextColourId               = 0x1005815,    /**< The colour to use to draw the currently-selected tab name. If
+                                                             this isn't specified, the look and feel will choose an appropriate
+                                                             colour. */
+    };
+
     /** @internal */
     void resized();
     /** @internal */
@@ -47047,14 +47065,14 @@ public:
     */
     int getTabBarDepth() const throw()                          { return tabDepth; }
 
-    /** Specifies an outline that should be drawn around the entire content component.
+    /** Specifies the thickness of an outline that should be drawn around the content component.
 
-        If this thickness is > 0, a line of the specified colour will be drawn around
-        the three sides of the content component which don't touch the tab-bar, and
-        the content component will be inset by this amount.
+        If this thickness is > 0, a line will be drawn around the three sides of the content
+        component which don't touch the tab-bar, and the content component will be inset by this amount.
+
+        To set the colour of the line, use setColour (outlineColourId, ...).
     */
-    void setOutline (const Colour& newOutlineColour,
-                     const int newThickness);
+    void setOutline (const int newThickness);
 
     /** Specifies a gap to leave around the edge of the content component.
 
@@ -47152,6 +47170,20 @@ public:
     */
     TabbedButtonBar& getTabbedButtonBar() const throw()             { return *tabs; }
 
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x1005800,    /**< The colour to fill the background behind the tabs. */
+        outlineColourId             = 0x1005801,    /**< The colour to use to draw an outline around the content.
+                                                         (See setOutline)  */
+    };
+
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -47178,7 +47210,6 @@ private:
     Array <Component*> contentComponents;
     Component* panelComponent;
     int tabDepth;
-    Colour outlineColour;
     int outlineThickness, edgeIndent;
 
     friend class TabCompButtonBar;
@@ -47598,6 +47629,18 @@ public:
 
     /** Creates a ResizableWindow.
 
+        This constructor doesn't specify a background colour, so the LookAndFeel's default
+        background colour will be used.
+
+        @param name                 the name to give the component
+        @param addToDesktop         if true, the window will be automatically added to the
+                                    desktop; if false, you can use it as a child component
+    */
+    ResizableWindow (const String& name,
+                     const bool addToDesktop);
+
+    /** Creates a ResizableWindow.
+
         @param name                 the name to give the component
         @param backgroundColour     the colour to use for filling the window's background.
         @param addToDesktop         if true, the window will be automatically added to the
@@ -47619,9 +47662,11 @@ public:
         As a convenience the window will fill itself with this colour, but you
         can override the paint() method if you need more customised behaviour.
 
+        This method is the same as retrieving the colour for ResizableWindow::backgroundColourId.
+
         @see setBackgroundColour
     */
-    const Colour& getBackgroundColour() const throw()               { return backgroundColour; }
+    const Colour getBackgroundColour() const throw();
 
     /** Changes the colour currently being used for the window's background.
 
@@ -47632,6 +47677,9 @@ public:
         the opacity of the colour passed-in. On window systems which can't support
         semi-transparent windows this might cause problems, (though it's unlikely you'll
         be using this class as a base for a semi-transparent component anyway).
+
+        You can also use the ResizableWindow::backgroundColourId colour id to set
+        this colour.
 
         @see getBackgroundColour
     */
@@ -47784,6 +47832,18 @@ public:
     */
     void setContentComponentSize (int width, int height);
 
+    /** A set of colour IDs to use to change the colour of various aspects of the window.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x1005700,  /**< A colour to use to fill the window's background. */
+    };
+
     juce_UseDebuggingNewOperator
 
 protected:
@@ -47846,7 +47906,6 @@ protected:
 private:
     Component* contentComponent;
     bool resizeToFitContent, fullscreen;
-    Colour backgroundColour;
     ComponentDragger dragger;
     Rectangle lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
@@ -48037,6 +48096,19 @@ public:
 
     /** Returns the maximise button, (or 0 if there isn't one). */
     Button* getMaximiseButton() const throw();
+
+    /** A set of colour IDs to use to change the colour of various aspects of the window.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        textColourId                = 0x1005701,  /**< The colour to draw any text with. It's up to the look
+                                                       and feel class how this is used. */
+    };
 
     /** @internal */
     void paint (Graphics& g);
@@ -52798,6 +52870,11 @@ public:
         @see findColour, Component::findColour, Component::setColour
     */
     void setColour (const int colourId, const Colour& colour) throw();
+
+    /** Returns true if the specified colour ID has been explicitly set using the
+        setColour() method.
+    */
+    bool isColourSpecified (const int colourId) const throw();
 
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,

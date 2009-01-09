@@ -64,6 +64,18 @@ public:
     //==============================================================================
     /** Creates a ResizableWindow.
 
+        This constructor doesn't specify a background colour, so the LookAndFeel's default
+        background colour will be used.
+
+        @param name                 the name to give the component
+        @param addToDesktop         if true, the window will be automatically added to the
+                                    desktop; if false, you can use it as a child component
+    */
+    ResizableWindow (const String& name,
+                     const bool addToDesktop);
+
+    /** Creates a ResizableWindow.
+
         @param name                 the name to give the component
         @param backgroundColour     the colour to use for filling the window's background.
         @param addToDesktop         if true, the window will be automatically added to the
@@ -86,9 +98,11 @@ public:
         As a convenience the window will fill itself with this colour, but you
         can override the paint() method if you need more customised behaviour.
 
+        This method is the same as retrieving the colour for ResizableWindow::backgroundColourId.
+
         @see setBackgroundColour
     */
-    const Colour& getBackgroundColour() const throw()               { return backgroundColour; }
+    const Colour getBackgroundColour() const throw();
 
     /** Changes the colour currently being used for the window's background.
 
@@ -99,6 +113,9 @@ public:
         the opacity of the colour passed-in. On window systems which can't support
         semi-transparent windows this might cause problems, (though it's unlikely you'll
         be using this class as a base for a semi-transparent component anyway).
+
+        You can also use the ResizableWindow::backgroundColourId colour id to set
+        this colour.
 
         @see getBackgroundColour
     */
@@ -258,6 +275,19 @@ public:
     void setContentComponentSize (int width, int height);
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the window.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x1005700,  /**< A colour to use to fill the window's background. */
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
@@ -320,7 +350,6 @@ protected:
 private:
     Component* contentComponent;
     bool resizeToFitContent, fullscreen;
-    Colour backgroundColour;
     ComponentDragger dragger;
     Rectangle lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;

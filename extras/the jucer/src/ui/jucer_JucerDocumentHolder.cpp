@@ -385,7 +385,7 @@ JucerDocumentHolder::JucerDocumentHolder (JucerDocument* const document_)
              document->getInitialHeight());
 
     addAndMakeVisible (tabbedComponent = new TabbedComponent (TabbedButtonBar::TabsAtRight));
-    tabbedComponent->setOutline (Colours::black, 0);
+    tabbedComponent->setOutline (0);
 
     tabbedComponent->addTab (T("Class"), tabColour, new ClassPropertiesPanel (*document), true);
 

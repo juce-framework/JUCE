@@ -239,6 +239,25 @@ public:
     void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        tabOutlineColourId              = 0x1005812,    /**< The colour to use to draw an outline around the tabs.  */
+        tabTextColourId                 = 0x1005813,    /**< The colour to use to draw the tab names. If this isn't specified,
+                                                             the look and feel will choose an appropriate colour. */
+        frontOutlineColourId            = 0x1005814,    /**< The colour to use to draw an outline around the currently-selected tab.  */
+        frontTextColourId               = 0x1005815,    /**< The colour to use to draw the currently-selected tab name. If 
+                                                             this isn't specified, the look and feel will choose an appropriate 
+                                                             colour. */
+    };
+
+    //==============================================================================
     /** @internal */
     void resized();
     /** @internal */

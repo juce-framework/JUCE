@@ -42,6 +42,28 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ResizableWindow::ResizableWindow (const String& name,
+                                  const bool addToDesktop_)
+    : TopLevelWindow (name, addToDesktop_),
+      resizableCorner (0),
+      resizableBorder (0),
+      contentComponent (0),
+      resizeToFitContent (false),
+      fullscreen (false),
+      lastNonFullScreenPos (50, 50, 256, 256),
+      constrainer (0)
+#ifdef JUCE_DEBUG
+      , hasBeenResized (false)
+#endif
+{
+    defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
+
+    lastNonFullScreenPos.setBounds (50, 50, 256, 256);
+
+    if (addToDesktop_)
+        Component::addToDesktop (getDesktopWindowStyleFlags());
+}
+
+ResizableWindow::ResizableWindow (const String& name,
                                   const Colour& backgroundColour_,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
@@ -50,6 +72,7 @@ ResizableWindow::ResizableWindow (const String& name,
       contentComponent (0),
       resizeToFitContent (false),
       fullscreen (false),
+      lastNonFullScreenPos (50, 50, 256, 256),
       constrainer (0)
 #ifdef JUCE_DEBUG
       , hasBeenResized (false)
@@ -58,8 +81,6 @@ ResizableWindow::ResizableWindow (const String& name,
     setBackgroundColour (backgroundColour_);
 
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
-
-    lastNonFullScreenPos.setBounds (50, 50, 256, 256);
 
     if (addToDesktop_)
         Component::addToDesktop (getDesktopWindowStyleFlags());
@@ -292,7 +313,7 @@ void ResizableWindow::setBoundsConstrained (int x, int y, int w, int h)
 //==============================================================================
 void ResizableWindow::paint (Graphics& g)
 {
-    g.fillAll (backgroundColour);
+    g.fillAll (getBackgroundColour());
 
     if (! isFullScreen())
     {
@@ -330,12 +351,19 @@ void ResizableWindow::lookAndFeelChanged()
     }
 }
 
+const Colour ResizableWindow::getBackgroundColour() const throw()
+{
+    return findColour (backgroundColourId, false);
+}
+
 void ResizableWindow::setBackgroundColour (const Colour& newColour)
 {
-    if (Desktop::canUseSemiTransparentWindows())
-        backgroundColour = newColour;
-    else
+    Colour backgroundColour (newColour);
+
+    if (! Desktop::canUseSemiTransparentWindows())
         backgroundColour = newColour.withAlpha (1.0f);
+
+    setColour (backgroundColourId, backgroundColour);
 
     setOpaque (backgroundColour.isOpaque());
     repaint();

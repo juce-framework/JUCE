@@ -160,6 +160,9 @@ LookAndFeel::LookAndFeel()
         Slider::textBoxHighlightColourId,           textHighlightColour,
         Slider::textBoxOutlineColourId,             standardOutlineColour,
 
+        ResizableWindow::backgroundColourId,        0xff777777,
+        //DocumentWindow::textColourId,               0xff000000, // (this is deliberately not set)
+
         AlertWindow::backgroundColourId,            0xffededed,
         AlertWindow::textColourId,                  0xff000000,
         AlertWindow::outlineColourId,               0xff666666,
@@ -170,6 +173,11 @@ LookAndFeel::LookAndFeel()
         TooltipWindow::backgroundColourId,          0xffeeeebb,
         TooltipWindow::textColourId,                0xff000000,
         TooltipWindow::outlineColourId,             0x4c000000,
+
+        TabbedComponent::backgroundColourId,        0x00000000,
+        TabbedComponent::outlineColourId,           0xff777777,
+        TabbedButtonBar::tabOutlineColourId,        0x80000000,
+        TabbedButtonBar::frontOutlineColourId,      0x90000000,
 
         Toolbar::backgroundColourId,                0xfff6f8f9,
         Toolbar::separatorColourId,                 0x4c000000,
@@ -233,6 +241,11 @@ void LookAndFeel::setColour (const int colourId, const Colour& colour) throw()
 
     colourIds.add (colourId);
     colours.add (colour);
+}
+
+bool LookAndFeel::isColourSpecified (const int colourId) const throw()
+{
+    return colourIds.contains (colourId);
 }
 
 //==============================================================================
@@ -1658,7 +1671,11 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
         textW -= iconW;
     }
 
-    g.setColour (window.getBackgroundColour().contrasting (isActive ? 0.7f : 0.4f));
+    if (window.isColourSpecified (DocumentWindow::textColourId) || isColourSpecified (DocumentWindow::textColourId))
+        g.setColour (findColour (DocumentWindow::textColourId));
+    else
+        g.setColour (window.getBackgroundColour().contrasting (isActive ? 0.7f : 0.4f));
+
     g.drawText (window.getName(), textX, 0, textW, h, Justification::centredLeft, true);
 }
 
@@ -2005,7 +2022,10 @@ void LookAndFeel::fillTabButtonShape (Graphics& g,
 
     g.fillPath (path);
 
-    g.setColour (Colours::black.withAlpha (button.isEnabled() ? 0.5f : 0.25f));
+    g.setColour (button.findColour (isFrontTab ? TabbedButtonBar::frontOutlineColourId
+                                               : TabbedButtonBar::tabOutlineColourId, false)
+                    .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
+
     g.strokePath (path, PathStrokeType (isFrontTab ? 1.0f : 0.5f));
 }
 
@@ -2018,7 +2038,7 @@ void LookAndFeel::drawTabButtonText (Graphics& g,
                                      TabbedButtonBar::Orientation orientation,
                                      const bool isMouseOver,
                                      const bool isMouseDown,
-                                     const bool /*isFrontTab*/)
+                                     const bool isFrontTab)
 {
     int length = w;
     int depth = h;
@@ -2055,7 +2075,12 @@ void LookAndFeel::drawTabButtonText (Graphics& g,
         transform = transform.translated ((float) x, (float) y);
     }
 
-    g.setColour (preferredBackgroundColour.contrasting());
+    if (isFrontTab && (button.isColourSpecified (TabbedButtonBar::frontTextColourId) || isColourSpecified (TabbedButtonBar::frontTextColourId)))
+        g.setColour (findColour (TabbedButtonBar::frontTextColourId));
+    else if (button.isColourSpecified (TabbedButtonBar::tabTextColourId) || isColourSpecified (TabbedButtonBar::tabTextColourId))
+        g.setColour (findColour (TabbedButtonBar::tabTextColourId));
+    else
+        g.setColour (preferredBackgroundColour.contrasting());
 
     if (! (isMouseOver || isMouseDown))
         g.setOpacity (0.8f);

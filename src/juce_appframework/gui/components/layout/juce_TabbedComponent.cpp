@@ -87,7 +87,6 @@ private:
 TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation)
     : panelComponent (0),
       tabDepth (30),
-      outlineColour (Colours::grey),
       outlineThickness (1),
       edgeIndent (0)
 {
@@ -232,9 +231,8 @@ const String& TabbedComponent::getCurrentTabName() const
     return tabs->getCurrentTabName();
 }
 
-void TabbedComponent::setOutline (const Colour& colour, int thickness)
+void TabbedComponent::setOutline (int thickness)
 {
-    outlineColour = colour;
     outlineThickness = thickness;
     repaint();
 }
@@ -246,6 +244,8 @@ void TabbedComponent::setIndent (const int indentThickness)
 
 void TabbedComponent::paint (Graphics& g)
 {
+    g.fillAll (findColour (backgroundColourId));
+
     const TabbedButtonBar::Orientation o = getOrientation();
 
     int x = 0;
@@ -276,7 +276,7 @@ void TabbedComponent::paint (Graphics& g)
         else if (o == TabbedButtonBar::TabsAtRight)
             ++r;
 
-        g.setColour (outlineColour);
+        g.setColour (findColour (outlineColourId));
         g.drawRect (x, y, r - x, b - y, outlineThickness);
     }
 }

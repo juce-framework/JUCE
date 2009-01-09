@@ -210,6 +210,19 @@ public:
     /** Returns the maximise button, (or 0 if there isn't one). */
     Button* getMaximiseButton() const throw();
 
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the window.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        textColourId                = 0x1005701,  /**< The colour to draw any text with. It's up to the look
+                                                       and feel class how this is used. */
+    };
 
     //==============================================================================
     /** @internal */

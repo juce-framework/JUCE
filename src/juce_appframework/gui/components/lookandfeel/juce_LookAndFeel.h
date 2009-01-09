@@ -126,6 +126,11 @@ public:
     */
     void setColour (const int colourId, const Colour& colour) throw();
 
+    /** Returns true if the specified colour ID has been explicitly set using the 
+        setColour() method.
+    */
+    bool isColourSpecified (const int colourId) const throw();
+
     //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,
