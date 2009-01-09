@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Typeface.h"
 #include "juce_Font.h"
+#include "../../components/lookandfeel/juce_LookAndFeel.h"
 #include "../../../../juce_core/io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../../../../juce_core/io/streams/juce_GZIPCompressorOutputStream.h"
 #include "../../../../juce_core/io/streams/juce_BufferedInputStream.h"
@@ -94,6 +95,11 @@ int TypefaceGlyphInfo::getNumKerningPairs() const throw()
     return kerningPairs.getSize() / sizeof (KerningPair);
 }
 
+
+//==============================================================================
+const tchar* Typeface::defaultTypefaceNameSans = T("<Sans-Serif>");
+const tchar* Typeface::defaultTypefaceNameSerif = T("<Serif>");
+const tchar* Typeface::defaultTypefaceNameMono = T("<Monospaced>");
 
 //==============================================================================
 Typeface::Typeface() throw()
@@ -410,7 +416,7 @@ void Typeface::setItalic (const bool shouldBeItalic) throw()
 class TypefaceCache;
 static TypefaceCache* typefaceCacheInstance = 0;
 
-void clearUpDefaultFontNames() throw(); // in juce_Font.cpp
+void clearUpDefaultFontNames() throw(); // in juce_LookAndFeel.cpp
 
 
 //==============================================================================
@@ -457,8 +463,6 @@ public:
         faces.clear();
         jassert (typefaceCacheInstance == this);
         typefaceCacheInstance = 0;
-
-        // just a courtesy call to get avoid leaking these strings at shutdown
         clearUpDefaultFontNames();
     }
 
@@ -508,9 +512,7 @@ public:
         face->typefaceName = font.getTypefaceName();
         face->flags = flags;
         face->lastUsageCount = ++counter;
-        face->typeFace = new Typeface (font.getTypefaceName(),
-                                       font.isBold(),
-                                       font.isItalic());
+        face->typeFace = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
 
         return face->typeFace;
     }

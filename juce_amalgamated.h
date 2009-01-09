@@ -17198,6 +17198,36 @@ public:
     */
     void serialise (OutputStream& outputStream);
 
+    /** A name that represents the default sans-serif typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents whatever that font is, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameSans;
+
+    /** A name that represents the default serif typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents it, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameSerif;
+
+    /** A name that represents the default monospaced typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents it, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameMono;
+
     /** A handy typedef to make it easy to use ref counted pointers to this class. */
     typedef ReferenceCountedObjectPtr <Typeface> Ptr;
 
@@ -17234,6 +17264,9 @@ private:
     bool findAndAddSystemGlyph (juce_wchar character) throw();
 
     void updateHashCode() throw();
+
+    friend class LookAndFeel;
+    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
@@ -17269,7 +17302,7 @@ public:
         @param styleFlags   the style to use - this can be a combination of the
                             Font::bold, Font::italic and Font::underlined, or
                             just Font::plain for the normal style.
-        @see FontStyleFlags, getDefaultSansSerifFontName, setDefaultSansSerifFontName
+        @see FontStyleFlags, getDefaultSansSerifFontName
     */
     Font (const float fontHeight,
           const int styleFlags = plain) throw();
@@ -17281,7 +17314,7 @@ public:
         @param styleFlags   the style to use - this can be a combination of the
                             Font::bold, Font::italic and Font::underlined, or
                             just Font::plain for the normal style.
-        @see FontStyleFlags, getDefaultSansSerifFontName, setDefaultSansSerifFontName
+        @see FontStyleFlags, getDefaultSansSerifFontName
     */
     Font (const String& typefaceName,
           const float fontHeight,
@@ -17318,6 +17351,10 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
+        This may also be set to Typeface::defaultTypefaceNameSans, Typeface::defaultTypefaceNameSerif,
+        or Typeface::defaultTypefaceNameMono, which are not actual platform-specific font names, but
+        are generic names that are used to represent the various default fonts.
+
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
     void setTypefaceName (const String& faceName) throw();
@@ -17325,39 +17362,44 @@ public:
     /** Returns the name of the typeface family that this font uses.
 
         e.g. "Arial", "Courier", etc.
+
+        Note that this may also be one of the values: Typeface::defaultTypefaceNameSans,
+        Typeface::defaultTypefaceNameSerif, or Typeface::defaultTypefaceNameMono, which are not actual
+        platform-specific font names, but are generic names that are used to represent the various
+        default fonts. If you need to know the exact typeface name being used, you can call
+        Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
     */
     const String& getTypefaceName() const throw()               { return typefaceName; }
 
-    /** Returns a platform-specific font family that is recommended for sans-serif fonts.
+    /** Returns a typeface name that represents the default sans-serif font.
 
-        This is the typeface that will be used when a font is created without
-        specifying another name.
+        This is also the typeface that will be used when a font is created without
+        specifying any typeface details.
 
-        @see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName,
-             setDefaultSansSerifFontName
+        Note that this method just returns the same value as Typeface::defaultTypefaceNameSans,
+        which is a generic placeholder string, and not a platform-specific font name.
+
+        @see Typeface::defaultTypefaceNameSans, setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName,
     */
-    static const String getDefaultSansSerifFontName() throw();
+    static const String getDefaultSansSerifFontName() throw()       { return Typeface::defaultTypefaceNameSans; }
 
-    /** Returns a platform-specific font family that is recommended for serif fonts.
+    /** Returns a typeface name that represents the default sans-serif font.
 
-        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
+        Note that this method just returns the same value as Typeface::defaultTypefaceNameSerif,
+        which is a generic placeholder string, and not a platform-specific font name.
+
+        @see Typeface::defaultTypefaceNameSerif, setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSerifFontName() throw();
+    static const String getDefaultSerifFontName() throw()           { return Typeface::defaultTypefaceNameSerif; }
 
-    /** Returns a platform-specific font family that is recommended for monospaced fonts.
+    /** Returns a typeface name that represents the default sans-serif font.
 
-        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
+        Note that this method just returns the same value as Typeface::defaultTypefaceNameMono,
+        which is a generic placeholder string, and not a platform-specific font name.
+
+        @see Typeface::defaultTypefaceNameMono, setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
     */
-    static const String getDefaultMonospacedFontName() throw();
-
-    /** Changes the default sans-serif typeface family name.
-
-        This changes the value that is returned by getDefaultSansSerifFontName(), so
-        changing this will change the default system font used.
-
-        @see getDefaultSansSerifFontName
-    */
-    static void setDefaultSansSerifFontName (const String& name) throw();
+    static const String getDefaultMonospacedFontName() throw()      { return Typeface::defaultTypefaceNameMono; }
 
     /** Returns the total height of this font.
 
@@ -17536,12 +17578,6 @@ private:
     mutable float ascent;
     int styleFlags;
     mutable Typeface::Ptr typeface;
-
-    // platform-specific calls
-    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
-
-    friend void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI();
-    static void initialiseDefaultFontNames() throw();
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__
@@ -52876,6 +52912,16 @@ public:
     */
     bool isColourSpecified (const int colourId) const throw();
 
+    virtual const Typeface::Ptr getTypefaceForFont (const Font& font);
+
+    /** Allows you to change the default sans-serif font.
+
+        If you need to supply your own Typeface object for any of the default fonts, rather
+        than just supplying the name (e.g. if you want to use an embedded font), then
+        you should instead override getTypefaceForFont() to create and return the typeface.
+    */
+    void setDefaultSansSerifTypefaceName (const String& newName);
+
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,
                                        Button& button,
@@ -53324,6 +53370,9 @@ private:
 
     Array <int> colourIds;
     Array <Colour> colours;
+
+    // default typeface names
+    String defaultSans, defaultSerif, defaultFixed;
 
     void drawShinyButtonShape (Graphics& g,
                                float x, float y, float w, float h, float maxCornerSize,

@@ -42,12 +42,10 @@ static const float minFontHeight = 0.1f;
 static const float maxFontHeight = 10000.0f;
 static const float defaultFontHeight = 14.0f;
 
-static String defaultSans, defaultSerif, defaultFixed, fallbackFont;
-
 
 //==============================================================================
 Font::Font() throw()
-    : typefaceName (defaultSans),
+    : typefaceName (Typeface::defaultTypefaceNameSans),
       height (defaultFontHeight),
       horizontalScale (1.0f),
       kerning (0),
@@ -58,7 +56,7 @@ Font::Font() throw()
 
 void Font::resetToDefaultState() throw()
 {
-    typefaceName = defaultSans;
+    typefaceName = Typeface::defaultTypefaceNameSans;
     height = defaultFontHeight;
     horizontalScale = 1.0f;
     kerning = 0;
@@ -69,7 +67,7 @@ void Font::resetToDefaultState() throw()
 
 Font::Font (const float fontHeight,
             const int styleFlags_) throw()
-    : typefaceName (defaultSans),
+    : typefaceName (Typeface::defaultTypefaceNameSans),
       height (jlimit (minFontHeight, maxFontHeight, fontHeight)),
       horizontalScale (1.0f),
       kerning (0),
@@ -157,40 +155,7 @@ void Font::setTypefaceName (const String& faceName) throw()
 }
 
 //==============================================================================
-void Font::initialiseDefaultFontNames() throw()
-{
-    Font::getDefaultFontNames (defaultSans,
-                               defaultSerif,
-                               defaultFixed);
-}
-
-void clearUpDefaultFontNames() throw() // called at shutdown by code in Typface
-{
-    defaultSans   = String::empty;
-    defaultSerif  = String::empty;
-    defaultFixed  = String::empty;
-    fallbackFont  = String::empty;
-}
-
-const String Font::getDefaultSansSerifFontName() throw()
-{
-    return defaultSans;
-}
-
-const String Font::getDefaultSerifFontName() throw()
-{
-    return defaultSerif;
-}
-
-const String Font::getDefaultMonospacedFontName() throw()
-{
-    return defaultFixed;
-}
-
-void Font::setDefaultSansSerifFontName (const String& name) throw()
-{
-    defaultSans = name;
-}
+static String fallbackFont;
 
 const String Font::getFallbackFontName() throw()
 {

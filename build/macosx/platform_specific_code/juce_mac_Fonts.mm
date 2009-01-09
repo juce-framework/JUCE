@@ -522,7 +522,7 @@ const StringArray Font::findAllTypefaceNames() throw()
     return names;
 }
 
-void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Typeface::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans  = "Lucida Grande";
     defaultSerif = "Times New Roman";

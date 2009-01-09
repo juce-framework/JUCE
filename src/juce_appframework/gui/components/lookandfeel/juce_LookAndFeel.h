@@ -131,6 +131,18 @@ public:
     */
     bool isColourSpecified (const int colourId) const throw();
 
+
+    //==============================================================================
+    virtual const Typeface::Ptr getTypefaceForFont (const Font& font);
+
+    /** Allows you to change the default sans-serif font.
+
+        If you need to supply your own Typeface object for any of the default fonts, rather
+        than just supplying the name (e.g. if you want to use an embedded font), then
+        you should instead override getTypefaceForFont() to create and return the typeface.
+    */
+    void setDefaultSansSerifTypefaceName (const String& newName);
+
     //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,
@@ -608,6 +620,9 @@ private:
 
     Array <int> colourIds;
     Array <Colour> colours;
+
+    // default typeface names
+    String defaultSans, defaultSerif, defaultFixed;
 
     void drawShinyButtonShape (Graphics& g,
                                float x, float y, float w, float h, float maxCornerSize,

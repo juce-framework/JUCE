@@ -91,6 +91,16 @@ static const Colour createBaseColour (const Colour& buttonColour,
 }
 
 //==============================================================================
+static String defaultSansName, defaultSerifName, defaultFixedName;
+
+void clearUpDefaultFontNames() throw()
+{
+    defaultSansName = String::empty;
+    defaultSerifName = String::empty;
+    defaultFixedName = String::empty;
+}
+
+//==============================================================================
 LookAndFeel::LookAndFeel()
 {
     /* if this fails it means you're trying to create a LookAndFeel object before
@@ -214,6 +224,13 @@ LookAndFeel::LookAndFeel()
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
         setColour (standardColours [i], Colour (standardColours [i + 1]));
+
+    if (defaultSansName.isEmpty())
+        Typeface::getDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName);
+
+    defaultSans = defaultSansName;
+    defaultSerif = defaultSerifName;
+    defaultFixed = defaultFixedName;
 }
 
 LookAndFeel::~LookAndFeel()
@@ -289,6 +306,27 @@ void LookAndFeel::clearDefaultLookAndFeel() throw()
         currentDefaultLF = 0;
 
     deleteAndZero (defaultLF);
+}
+
+
+//==============================================================================
+const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
+{
+    String faceName (font.getTypefaceName());
+
+    if (faceName == Typeface::defaultTypefaceNameSans)
+        faceName = defaultSans;
+    else if (faceName == Typeface::defaultTypefaceNameSerif)
+        faceName = defaultSerif;
+    else if (faceName == Typeface::defaultTypefaceNameMono)
+        faceName = defaultFixed;
+
+    return new Typeface (faceName, font.isBold(), font.isItalic());
+}
+
+void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
+{
+    defaultSans = newName;
 }
 
 //==============================================================================

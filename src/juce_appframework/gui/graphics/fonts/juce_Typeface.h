@@ -261,6 +261,37 @@ public:
     void serialise (OutputStream& outputStream);
 
     //==============================================================================
+    /** A name that represents the default sans-serif typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents whatever that font is, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel 
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameSans;
+
+    /** A name that represents the default serif typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents it, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel 
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameSerif;
+
+    /** A name that represents the default monospaced typeface name.
+
+        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
+        is a generic string that represents it, such as "DefaultSans".
+
+        If you try to create a typeface with this name, the global default LookAndFeel 
+        object will be asked to provide an appropriate typeface.
+    */
+    static const tchar* defaultTypefaceNameMono;
+
+    //==============================================================================
     /** A handy typedef to make it easy to use ref counted pointers to this class. */
     typedef ReferenceCountedObjectPtr <Typeface> Ptr;
 
@@ -298,6 +329,9 @@ private:
     bool findAndAddSystemGlyph (juce_wchar character) throw();
 
     void updateHashCode() throw();
+
+    friend class LookAndFeel;
+    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
 };
 
 

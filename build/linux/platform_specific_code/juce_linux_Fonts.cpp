@@ -630,7 +630,7 @@ static const String linux_getDefaultMonospacedFontName()
     return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
 }
 
-void Font::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Typeface::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans = linux_getDefaultSansSerifFontName();
     defaultSerif = linux_getDefaultSerifFontName();

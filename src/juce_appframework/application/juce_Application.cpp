@@ -309,7 +309,6 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
 
         initialiseJuce_NonGUI();
         MessageManager::getInstance();
-        Font::initialiseDefaultFontNames();
         LookAndFeel::setDefaultLookAndFeel (0);
 
 #if JUCE_WIN32 && JUCE_DEBUG

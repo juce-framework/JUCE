@@ -111,9 +111,9 @@ const StringArray Font::findAllTypefaceNames() throw()
 
 extern bool juce_IsRunningInWine() throw();
 
-void Font::getDefaultFontNames (String& defaultSans,
-                                String& defaultSerif,
-                                String& defaultFixed) throw()
+void Typeface::getDefaultFontNames (String& defaultSans,
+                                    String& defaultSerif,
+                                    String& defaultFixed) throw()
 {
     if (juce_IsRunningInWine())
     {
