@@ -836,7 +836,7 @@ const Path LookAndFeel::getCrossShape (const float height)
 }
 
 //==============================================================================
-void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus)
+void LookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus, bool isMouseOver)
 {
     const int boxSize = ((jmin (16, w, h) << 1) / 3) | 1;
 

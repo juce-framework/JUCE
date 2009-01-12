@@ -51,7 +51,7 @@ namespace BinaryData
     const int           treedemo_xmlSize = 1126;
 
     extern const char*  treeviewdemo_cpp;
-    const int           treeviewdemo_cppSize = 7715;
+    const int           treeviewdemo_cppSize = 8715;
 
     extern const char*  widgetsdemo_cpp;
     const int           widgetsdemo_cppSize = 53388;

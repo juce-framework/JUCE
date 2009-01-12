@@ -185,6 +185,12 @@ public:
     */
     int getLowestVisibleKey() const throw()                         { return firstKey; }
 
+    /** Returns the length of the black notes.
+
+        This will be their vertical or horizontal length, depending on the keyboard's orientation.
+    */
+    int getBlackNoteLength() const throw()                          { return blackNoteLength; }
+
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
     */

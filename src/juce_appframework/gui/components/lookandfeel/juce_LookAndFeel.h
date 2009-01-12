@@ -126,7 +126,7 @@ public:
     */
     void setColour (const int colourId, const Colour& colour) throw();
 
-    /** Returns true if the specified colour ID has been explicitly set using the 
+    /** Returns true if the specified colour ID has been explicitly set using the
         setColour() method.
     */
     bool isColourSpecified (const int colourId) const throw();
@@ -266,7 +266,7 @@ public:
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
-    virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus);
+    virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus, bool isMouseOver);
 
     //==============================================================================
     virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
@@ -606,13 +606,11 @@ protected:
     // xxx the following methods are only here to cause a compiler error, because they've been
     // deprecated or their parameters have changed. Hopefully these definitions should cause an
     // error if you try to build a subclass with the old versions.
-
     virtual int drawTickBox (Graphics&, int, int, int, int, bool, const bool, const bool, const bool) { return 0; }
-
     virtual int drawProgressBar (Graphics&, int, int, int, int, float) { return 0; }
     virtual int drawProgressBar (Graphics&, ProgressBar&, int, int, int, int, float) { return 0; }
-
     virtual void getTabButtonBestWidth (int, const String&, int) {}
+    virtual int drawTreeviewPlusMinusBox (Graphics&, int, int, int, int, bool) { return 0; }
 
 private:
     friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();

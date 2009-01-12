@@ -151,6 +151,13 @@ public:
     */
     void treeHasChanged() const throw();
 
+    /** Sends a repaint message to redraw just this item.
+
+        Note that you should only call this if you want to repaint a superficial change. If
+        you're altering the tree's nodes, you should instead call treeHasChanged().
+    */
+    void repaintItem() const;
+
     /** Returns the row number of this item in the tree.
 
         The row number of an item will change according to which items are open.
@@ -274,6 +281,14 @@ public:
         @param height   the height of the area available for drawing
     */
     virtual void paintItem (Graphics& g, int width, int height);
+
+    /** Draws the item's open/close button.
+
+        If you don't implement this method, the default behaviour is to
+        call LookAndFeel::drawTreeviewPlusMinusBox(), but you can override
+        it for custom effects.
+    */
+    virtual void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
 
     /** Called when the user clicks on this item.
 
@@ -456,6 +471,18 @@ public:
     */
     bool isMultiSelectEnabled() const throw()                       { return multiSelectEnabled; }
 
+    /** Sets a flag to indicate whether to hide the open/close buttons.
+
+        @see areOpenCloseButtonsVisible
+    */
+    void setOpenCloseButtonsVisible (const bool shouldBeVisible);
+
+    /** Returns whether open/close buttons are shown.
+
+        @see setOpenCloseButtonsVisible
+    */
+    bool areOpenCloseButtonsVisible() const throw()                 { return openCloseButtonsVisible; }
+
     //==============================================================================
     /** Deselects any items that are currently selected. */
     void clearSelectedItems();
@@ -572,10 +599,12 @@ private:
     bool needsRecalculating : 1;
     bool rootItemVisible : 1;
     bool multiSelectEnabled : 1;
+    bool openCloseButtonsVisible : 1;
 
     void itemsChanged() throw();
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
+    void updateButtonUnderMouse (const MouseEvent& e);
 
     TreeView (const TreeView&);
     const TreeView& operator= (const TreeView&);

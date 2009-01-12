@@ -197,12 +197,12 @@ public:
     void resized()
     {
         if (treeView != 0)
-            treeView->setBoundsRelative (0.05f, 0.07f, 0.9f, 0.9f);
+            treeView->setBoundsInset (BorderSize (40, 10, 10, 10));
         else if (fileTreeComp != 0)
-            fileTreeComp->setBoundsRelative (0.05f, 0.07f, 0.9f, 0.9f);
+            fileTreeComp->setBoundsInset (BorderSize (40, 10, 10, 10));
 
-        typeButton->changeWidthToFitText (20);
-        typeButton->setTopLeftPosition (40, 10);
+        typeButton->changeWidthToFitText (22);
+        typeButton->setTopLeftPosition (10, 10);
     }
 
     void showCustomTreeView()
@@ -232,6 +232,13 @@ public:
         PopupMenu m;
         m.addItem (1, T("Custom treeview showing an XML tree"));
         m.addItem (2, T("FileTreeComponent showing the file system"));
+        m.addSeparator();
+        m.addItem (3, T("Show root item"), true,
+                   treeView != 0 ? treeView->isRootItemVisible()
+                                 : fileTreeComp->isRootItemVisible());
+        m.addItem (4, T("Show open/close buttons"), true,
+                   treeView != 0 ? treeView->areOpenCloseButtonsVisible()
+                                 : fileTreeComp->areOpenCloseButtonsVisible());
 
         const int r = m.showAt (typeButton);
 
@@ -242,6 +249,20 @@ public:
         else if (r == 2)
         {
             showFileTreeComp();
+        }
+        else if (r == 3)
+        {
+            if (treeView != 0)
+                treeView->setRootItemVisible (! treeView->isRootItemVisible());
+            else
+                fileTreeComp->setRootItemVisible (! fileTreeComp->isRootItemVisible());
+        }
+        else if (r == 4)
+        {
+            if (treeView != 0)
+                treeView->setOpenCloseButtonsVisible (! treeView->areOpenCloseButtonsVisible());
+            else
+                fileTreeComp->setOpenCloseButtonsVisible (! fileTreeComp->areOpenCloseButtonsVisible());
         }
     }
 

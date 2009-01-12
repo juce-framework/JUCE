@@ -42922,6 +42922,13 @@ public:
     */
     void treeHasChanged() const throw();
 
+    /** Sends a repaint message to redraw just this item.
+
+        Note that you should only call this if you want to repaint a superficial change. If
+        you're altering the tree's nodes, you should instead call treeHasChanged().
+    */
+    void repaintItem() const;
+
     /** Returns the row number of this item in the tree.
 
         The row number of an item will change according to which items are open.
@@ -43043,6 +43050,14 @@ public:
         @param height   the height of the area available for drawing
     */
     virtual void paintItem (Graphics& g, int width, int height);
+
+    /** Draws the item's open/close button.
+
+        If you don't implement this method, the default behaviour is to
+        call LookAndFeel::drawTreeviewPlusMinusBox(), but you can override
+        it for custom effects.
+    */
+    virtual void paintOpenCloseButton (Graphics& g, int width, int height, bool isMouseOver);
 
     /** Called when the user clicks on this item.
 
@@ -43221,6 +43236,18 @@ public:
     */
     bool isMultiSelectEnabled() const throw()                       { return multiSelectEnabled; }
 
+    /** Sets a flag to indicate whether to hide the open/close buttons.
+
+        @see areOpenCloseButtonsVisible
+    */
+    void setOpenCloseButtonsVisible (const bool shouldBeVisible);
+
+    /** Returns whether open/close buttons are shown.
+
+        @see setOpenCloseButtonsVisible
+    */
+    bool areOpenCloseButtonsVisible() const throw()                 { return openCloseButtonsVisible; }
+
     /** Deselects any items that are currently selected. */
     void clearSelectedItems();
 
@@ -43332,10 +43359,12 @@ private:
     bool needsRecalculating : 1;
     bool rootItemVisible : 1;
     bool multiSelectEnabled : 1;
+    bool openCloseButtonsVisible : 1;
 
     void itemsChanged() throw();
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
+    void updateButtonUnderMouse (const MouseEvent& e);
 
     TreeView (const TreeView&);
     const TreeView& operator= (const TreeView&);
@@ -46969,6 +46998,14 @@ public:
     */
     int getCurrentTabIndex() const throw()                              { return currentTabIndex; }
 
+    /** Returns the button for a specific tab.
+
+        The button that is returned may be deleted later by this component, so don't hang
+        on to the pointer that is returned. A null pointer may be returned if the index is
+        out of range.
+    */
+    TabBarButton* getTabButton (const int index) const;
+
     /** Callback method to indicate the selected tab has been changed.
 
         @see setCurrentTabIndex
@@ -47040,8 +47077,6 @@ private:
     int currentTabIndex;
     Component* behindFrontTab;
     Button* extraTabsButton;
-
-    TabBarButton* getTabButton (const int index) const;
 
     TabbedButtonBar (const TabbedButtonBar&);
     const TabbedButtonBar& operator= (const TabbedButtonBar&);
@@ -51763,6 +51798,12 @@ public:
     */
     int getLowestVisibleKey() const throw()                         { return firstKey; }
 
+    /** Returns the length of the black notes.
+
+        This will be their vertical or horizontal length, depending on the keyboard's orientation.
+    */
+    int getBlackNoteLength() const throw()                          { return blackNoteLength; }
+
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
     */
@@ -53040,7 +53081,7 @@ public:
     virtual const Path getCrossShape (const float height);
 
     /** Draws the + or - box in a treeview. */
-    virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus);
+    virtual void drawTreeviewPlusMinusBox (Graphics& g, int x, int y, int w, int h, bool isPlus, bool isMouseOver);
 
     virtual void fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor);
     virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
@@ -53356,13 +53397,11 @@ protected:
     // xxx the following methods are only here to cause a compiler error, because they've been
     // deprecated or their parameters have changed. Hopefully these definitions should cause an
     // error if you try to build a subclass with the old versions.
-
     virtual int drawTickBox (Graphics&, int, int, int, int, bool, const bool, const bool, const bool) { return 0; }
-
     virtual int drawProgressBar (Graphics&, int, int, int, int, float) { return 0; }
     virtual int drawProgressBar (Graphics&, ProgressBar&, int, int, int, int, float) { return 0; }
-
     virtual void getTabButtonBestWidth (int, const String&, int) {}
+    virtual int drawTreeviewPlusMinusBox (Graphics&, int, int, int, int, bool) { return 0; }
 
 private:
     friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();

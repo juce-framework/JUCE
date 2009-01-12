@@ -211,6 +211,14 @@ public:
     */
     int getCurrentTabIndex() const throw()                              { return currentTabIndex; }
 
+    /** Returns the button for a specific tab.
+
+        The button that is returned may be deleted later by this component, so don't hang
+        on to the pointer that is returned. A null pointer may be returned if the index is
+        out of range.
+    */
+    TabBarButton* getTabButton (const int index) const;
+
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
 
@@ -252,8 +260,8 @@ public:
         tabTextColourId                 = 0x1005813,    /**< The colour to use to draw the tab names. If this isn't specified,
                                                              the look and feel will choose an appropriate colour. */
         frontOutlineColourId            = 0x1005814,    /**< The colour to use to draw an outline around the currently-selected tab.  */
-        frontTextColourId               = 0x1005815,    /**< The colour to use to draw the currently-selected tab name. If 
-                                                             this isn't specified, the look and feel will choose an appropriate 
+        frontTextColourId               = 0x1005815,    /**< The colour to use to draw the currently-selected tab name. If
+                                                             this isn't specified, the look and feel will choose an appropriate
                                                              colour. */
     };
 
@@ -285,8 +293,6 @@ private:
     int currentTabIndex;
     Component* behindFrontTab;
     Button* extraTabsButton;
-
-    TabBarButton* getTabButton (const int index) const;
 
     TabbedButtonBar (const TabbedButtonBar&);
     const TabbedButtonBar& operator= (const TabbedButtonBar&);

@@ -132,9 +132,9 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
-        Note that this may also be one of the values: Typeface::defaultTypefaceNameSans, 
-        Typeface::defaultTypefaceNameSerif, or Typeface::defaultTypefaceNameMono, which are not actual 
-        platform-specific font names, but are generic names that are used to represent the various 
+        Note that this may also be one of the values: Typeface::defaultTypefaceNameSans,
+        Typeface::defaultTypefaceNameSerif, or Typeface::defaultTypefaceNameMono, which are not actual
+        platform-specific font names, but are generic names that are used to represent the various
         default fonts. If you need to know the exact typeface name being used, you can call
         Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
     */

@@ -90,7 +90,7 @@ public:
 
     /** Specifies the thickness of an outline that should be drawn around the content component.
 
-        If this thickness is > 0, a line will be drawn around the three sides of the content 
+        If this thickness is > 0, a line will be drawn around the three sides of the content
         component which don't touch the tab-bar, and the content component will be inset by this amount.
 
         To set the colour of the line, use setColour (outlineColourId, ...).
@@ -207,7 +207,7 @@ public:
     enum ColourIds
     {
         backgroundColourId          = 0x1005800,    /**< The colour to fill the background behind the tabs. */
-        outlineColourId             = 0x1005801,    /**< The colour to use to draw an outline around the content. 
+        outlineColourId             = 0x1005801,    /**< The colour to use to draw an outline around the content.
                                                          (See setOutline)  */
     };
 

@@ -266,7 +266,7 @@ public:
         Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
         is a generic string that represents whatever that font is, such as "DefaultSans".
 
-        If you try to create a typeface with this name, the global default LookAndFeel 
+        If you try to create a typeface with this name, the global default LookAndFeel
         object will be asked to provide an appropriate typeface.
     */
     static const tchar* defaultTypefaceNameSans;
@@ -276,7 +276,7 @@ public:
         Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
         is a generic string that represents it, such as "DefaultSans".
 
-        If you try to create a typeface with this name, the global default LookAndFeel 
+        If you try to create a typeface with this name, the global default LookAndFeel
         object will be asked to provide an appropriate typeface.
     */
     static const tchar* defaultTypefaceNameSerif;
@@ -286,7 +286,7 @@ public:
         Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
         is a generic string that represents it, such as "DefaultSans".
 
-        If you try to create a typeface with this name, the global default LookAndFeel 
+        If you try to create a typeface with this name, the global default LookAndFeel
         object will be asked to provide an appropriate typeface.
     */
     static const tchar* defaultTypefaceNameMono;
