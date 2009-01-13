@@ -127,6 +127,11 @@ AlertWindow::~AlertWindow()
     deleteAllChildren();
 }
 
+void AlertWindow::userTriedToCloseWindow()
+{
+    exitModalState (0);
+}
+
 //==============================================================================
 void AlertWindow::setMessage (const String& message)
 {

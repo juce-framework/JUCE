@@ -337,6 +337,8 @@ protected:
     void buttonClicked (Button* button);
     /** @internal */
     void lookAndFeelChanged();
+    /** @internal */
+    void userTriedToCloseWindow();
 
 private:
     String text;
