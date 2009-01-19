@@ -295,6 +295,12 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 }
 
 //==============================================================================
+const String File::getVersion() const throw()
+{
+    return String::empty; // xxx not yet implemented
+}
+
+//==============================================================================
 const File File::getLinkedTarget() const throw()
 {
     char buffer [4096];

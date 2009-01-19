@@ -524,6 +524,35 @@ bool File::setAsCurrentWorkingDirectory() const throw()
     return SetCurrentDirectory (getFullPathName()) != FALSE;
 }
 
+
+//==============================================================================
+const String File::getVersion() const throw()
+{
+    String result;
+
+    DWORD handle = 0;
+    DWORD bufferSize = GetFileVersionInfoSize (getFullPathName(), &handle);
+    void* buffer = juce_calloc (bufferSize);
+
+    if (GetFileVersionInfo (getFullPathName(), 0, bufferSize, buffer))
+    {
+        VS_FIXEDFILEINFO* vffi;
+        UINT len = 0;
+
+        if (VerQueryValue (buffer, _T("\\"), (LPVOID*) &vffi, &len))
+        {
+            result.printf (T("%d.%d.%d.%d"),
+                           HIWORD (vffi->dwFileVersionMS),
+                           LOWORD (vffi->dwFileVersionMS),
+                           HIWORD (vffi->dwFileVersionLS),
+                           LOWORD (vffi->dwFileVersionLS));
+        }
+    }
+
+    juce_free (buffer);
+    return result;
+}
+
 //==============================================================================
 const File File::getLinkedTarget() const throw()
 {

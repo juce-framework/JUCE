@@ -331,6 +331,30 @@ bool File::setAsCurrentWorkingDirectory() const throw()
 }
 
 //==============================================================================
+const String File::getVersion() const throw()
+{
+    const ScopedAutoReleasePool pool;
+    String result;
+
+    NSBundle* bundle = [NSBundle bundleWithPath: juceStringToNS (getFullPathName())];
+    
+    if (bundle != 0)
+    {
+        NSDictionary* info = [bundle infoDictionary];
+        
+        if (info != 0)
+        {
+            NSString* name = [info valueForKey: @"CFBundleShortVersionString"];
+
+            if (name != nil)
+                result = nsStringToJuce (name);
+        }
+    }
+
+    return result;
+}
+
+//==============================================================================
 const File File::getLinkedTarget() const throw()
 {
     FSRef ref;
