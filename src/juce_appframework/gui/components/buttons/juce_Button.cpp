@@ -613,9 +613,14 @@ bool Button::keyStateChanged (Component*)
     updateState (0);
 
     if (isEnabled() && wasDown && ! isKeyDown)
+    {
         internalClickCallback (ModifierKeys::getCurrentModifiers());
 
-    return isKeyDown || wasDown;
+        // (return immediately - this button may now have been deleted)
+        return true;
+    }
+
+    return wasDown || isKeyDown;
 }
 
 bool Button::keyPressed (const KeyPress&, Component*)

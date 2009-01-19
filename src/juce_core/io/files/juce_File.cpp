@@ -96,6 +96,12 @@ bool juce_findFileNext (void* handle, String& resultFile,
 
 void juce_findFileClose (void* handle) throw();
 
+//==============================================================================
+static const String juce_addTrailingSeparator (const String& path) throw()
+{
+    return path.endsWithChar (File::separator) ? path
+                                               : path + File::separator;
+}
 
 //==============================================================================
 static const String parseAbsolutePath (String path) throw()
@@ -498,10 +504,7 @@ const File File::getChildFile (String relativePath) const throw()
             }
         }
 
-        if (! path.endsWithChar (separator))
-            path += separator;
-
-        return File (path + relativePath);
+        return File (juce_addTrailingSeparator (path) + relativePath);
     }
 }
 
@@ -663,9 +666,7 @@ int File::findChildFiles (OwnedArray<File>& results,
     // find child files or directories in this directory first..
     if (isDirectory())
     {
-        String path (fullPath);
-        if (! path.endsWithChar (separator))
-            path += separator;
+        const String path (juce_addTrailingSeparator (fullPath));
 
         String filename;
         bool isDirectory, isHidden;
@@ -758,6 +759,37 @@ int File::getNumberOfChildFiles (const int whatToLookFor,
     }
 
     return count;
+}
+
+bool File::containsSubDirectories() const throw()
+{
+    bool result = false;
+
+    if (isDirectory())
+    {
+        String filename;
+        bool isDirectory, isHidden;
+        void* const handle = juce_findFileStart (juce_addTrailingSeparator (fullPath),
+                                                 T("*"), filename, 
+                                                 &isDirectory, &isHidden, 0, 0, 0, 0);
+
+        if (handle != 0)
+        {
+            do
+            {
+                if (isDirectory)
+                {
+                    result = true;
+                    break;
+                }
+
+            } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
+
+            juce_findFileClose (handle);
+        }
+    }
+
+    return result;
 }
 
 //==============================================================================
@@ -1040,11 +1072,8 @@ const String File::getRelativePathFrom (const File& dir)  const throw()
             thisPath [len] = 0;
     }
 
-    String dirPath ((dir.existsAsFile()) ? dir.getParentDirectory().getFullPathName()
-                                         : dir.fullPath);
-
-    if (! dirPath.endsWithChar (separator))
-        dirPath += separator;
+    String dirPath (juce_addTrailingSeparator ((dir.existsAsFile()) ? dir.getParentDirectory().getFullPathName()
+                                                                    : dir.fullPath));
 
     const int len = jmin (thisPath.length(), dirPath.length());
     int commonBitLength = 0;

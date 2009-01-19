@@ -147,6 +147,11 @@ public:
     {
         [webView stopLoading: nil];
     }
+    
+    void refresh()
+    {
+        [webView reload: nil];
+    }
 
 private:
     WebView* webView;
@@ -204,6 +209,11 @@ void WebBrowserComponent::goForward()
 {
     lastURL = String::empty;
     browser->goForward();
+}
+
+void WebBrowserComponent::refresh()
+{
+    browser->refresh();
 }
 
 //==============================================================================

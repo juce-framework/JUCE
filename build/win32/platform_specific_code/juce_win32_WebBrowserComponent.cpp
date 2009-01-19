@@ -272,6 +272,12 @@ void WebBrowserComponent::goForward()
         browser->browser->GoForward();
 }
 
+void WebBrowserComponent::refresh()
+{
+    if (browser->browser != 0)
+        browser->browser->Refresh();
+}
+
 //==============================================================================
 void WebBrowserComponent::paint (Graphics& g)
 {

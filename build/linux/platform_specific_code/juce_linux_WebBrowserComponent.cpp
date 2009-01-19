@@ -90,6 +90,10 @@ void WebBrowserComponent::goForward()
 
 }
 
+void WebBrowserComponent::refresh()
+{
+}
+
 //==============================================================================
 void WebBrowserComponent::paint (Graphics& g)
 {

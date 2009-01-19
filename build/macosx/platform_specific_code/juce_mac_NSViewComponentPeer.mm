@@ -543,6 +543,9 @@ private:
 
     void swapRGBOrder (const int x, const int y, const int w, int h) const
     {
+#if JUCE_BIG_ENDIAN
+        jassert (pixelStride == 4);
+#endif
         jassert (Rectangle (0, 0, juceImage.getWidth(), juceImage.getHeight())
                  .contains (Rectangle (x, y, w, h)));
 
@@ -555,9 +558,18 @@ private:
 
             for (int i = w; --i >= 0;)
             {
-                const uint8 temp = p[0];
+#if JUCE_BIG_ENDIAN
+                const uint8 oldp3 = p[3];
+                const uint8 oldp1 = p[1];
+                p[3] = p[0];
+                p[0] = oldp1;
+                p[1] = p[2];
+                p[2] = oldp3;
+#else
+                const uint8 oldp0 = p[0];
                 p[0] = p[2];
-                p[2] = temp;
+                p[2] = oldp0;
+#endif
 
                 p += pixelStride;
             }

@@ -1483,11 +1483,15 @@ bool String::startsWithIgnoreCase (const tchar* const other) const throw()
 
 bool String::startsWithChar (const tchar character) const throw()
 {
+    jassert (character != 0); // strings can't contain a null character!
+
     return text->text[0] == character;
 }
 
 bool String::endsWithChar (const tchar character) const throw()
 {
+    jassert (character != 0); // strings can't contain a null character!
+
     return text->text[0] != 0
             && text->text [length() - 1] == character;
 }
@@ -1837,6 +1841,18 @@ bool String::containsAnyOf (const tchar* const chars) const throw()
 
     return false;
 }
+
+bool String::containsNonWhitespaceChars() const throw()
+{
+    const tchar* t = text->text;
+
+    while (*t != 0)
+        if (! CharacterFunctions::isWhitespace (*t++))
+            return true;
+
+    return false;
+}
+
 
 //==============================================================================
 int String::getIntValue() const throw()

@@ -54,6 +54,7 @@ static bool isXmlIdentifierChar_Slow (const tchar c) throw()
 //==============================================================================
 XmlDocument::XmlDocument (const String& documentText) throw()
     : originalText (documentText),
+      ignoreEmptyTextElements (true),
       inputSource (0)
 {
 }
@@ -75,6 +76,11 @@ void XmlDocument::setInputSource (InputSource* const newSource) throw()
         delete inputSource;
         inputSource = newSource;
     }
+}
+
+void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw()
+{
+    ignoreEmptyTextElements = shouldBeIgnored;
 }
 
 XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
@@ -626,9 +632,8 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
                 }
             }
 
-            textElementContent = textElementContent.trim();
-
-            if (textElementContent.isNotEmpty())
+            if (ignoreEmptyTextElements ? textElementContent.containsNonWhitespaceChars()
+                                        : textElementContent.isNotEmpty())
                 e->setText (textElementContent);
         }
     }

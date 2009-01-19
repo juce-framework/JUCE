@@ -86,6 +86,9 @@ public:
     */
     void goForward();
 
+    /** Refreshes the browser.
+    */
+    void refresh();
 
     //==============================================================================
     /** This callback is called when the browser is about to navigate

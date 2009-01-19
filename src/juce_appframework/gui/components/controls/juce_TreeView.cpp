@@ -435,6 +435,14 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
     }
 }
 
+void TreeView::deleteRootItem()
+{
+    TreeViewItem* const oldItem = rootItem;
+    setRootItem (0);
+    delete oldItem;
+}
+
+
 void TreeView::setRootItemVisible (const bool shouldBeVisible)
 {
     rootItemVisible = shouldBeVisible;

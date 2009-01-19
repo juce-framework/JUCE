@@ -414,7 +414,8 @@ public:
         The object passed in will not be deleted by the treeview, it's up to the caller
         to delete it when no longer needed. BUT make absolutely sure that you don't delete
         this item until you've removed it from the tree, either by calling setRootItem (0),
-        or by deleting the tree first.
+        or by deleting the tree first. You can also use deleteRootItem() as a quick way
+        to delete it.
     */
     void setRootItem (TreeViewItem* const newRootItem);
 
@@ -423,6 +424,12 @@ public:
         This will be the last object passed to setRootItem(), or 0 if none has been set.
     */
     TreeViewItem* getRootItem() const throw()                       { return rootItem; }
+
+    /** This will remove and delete the current root item.
+
+        It's a convenient way of deleting the item and calling setRootItem (0).
+    */
+    void deleteRootItem();
 
     /** Changes whether the tree's root item is shown or not.
 

@@ -122,6 +122,14 @@ public:
     */
     void setInputSource (InputSource* const newSource) throw();
 
+    /** Sets a flag to change the treatment of empty text elements.
+
+        If this is true (the default state), then any text elements that contain only
+        whitespace characters will be ingored during parsing. If you need to catch
+        whitespace-only text, then you should set this to false before calling the
+        getDocumentElement() method.
+    */
+    void setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -134,7 +142,7 @@ private:
     bool identifierLookupTable [128];
     String lastError, dtdText;
     StringArray tokenisedDTD;
-    bool needToLoadDTD;
+    bool needToLoadDTD, ignoreEmptyTextElements;
     InputSource* inputSource;
 
     void setLastError (const String& desc, const bool carryOn) throw();

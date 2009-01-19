@@ -176,12 +176,16 @@ public:
     /** Returns true if the string contains no characters.
 
         Note that there's also an isNotEmpty() method to help write readable code.
+
+        @see containsNonWhitespaceChars()
     */
     inline bool isEmpty() const throw()                     { return text->text[0] == 0; }
 
     /** Returns true if the string contains at least one character.
 
         Note that there's also an isEmpty() method to help write readable code.
+
+        @see containsNonWhitespaceChars()
     */
     inline bool isNotEmpty() const throw()                  { return text->text[0] != 0; }
 
@@ -340,6 +344,15 @@ public:
                     string that is passed in.
     */
     bool containsOnly (const tchar* const charactersItMightContain) const throw();
+
+    /** Returns true if this string contains any non-whitespace characters.
+
+        This will return false if the string contains only whitespace characters, or
+        if it's empty.
+
+        It is equivalent to calling "myString.trim().isNotEmpty()".
+    */
+    bool containsNonWhitespaceChars() const throw();
 
     /** Returns true if the string matches this simple wildcard expression.
 

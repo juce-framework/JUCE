@@ -63,7 +63,7 @@ XmlElement::XmlElement (const String& tagName_) throw()
       attributes (0)
 {
     // the tag name mustn't be empty, or it'll look like a text element!
-    jassert (tagName_.trim().isNotEmpty())
+    jassert (tagName_.containsNonWhitespaceChars())
 }
 
 XmlElement::XmlElement (int /*dummy*/) throw()

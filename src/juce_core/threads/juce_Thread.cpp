@@ -55,9 +55,10 @@ static CriticalSection runningThreadsLock;
 //==============================================================================
 void Thread::threadEntryPoint (Thread* const thread) throw()
 {
-    runningThreadsLock.enter();
-    runningThreads.add (thread);
-    runningThreadsLock.exit();
+    {
+        const ScopedLock sl (runningThreadsLock);
+        runningThreads.add (thread);
+    }
 
     JUCE_TRY
     {
@@ -76,10 +77,12 @@ void Thread::threadEntryPoint (Thread* const thread) throw()
     }
     JUCE_CATCH_ALL_ASSERT
 
-    runningThreadsLock.enter();
-    jassert (runningThreads.contains (thread));
-    runningThreads.removeValue (thread);
-    runningThreadsLock.exit();
+    {
+        const ScopedLock sl (runningThreadsLock);
+
+        jassert (runningThreads.contains (thread));
+        runningThreads.removeValue (thread);
+    }
 
 #if JUCE_WIN32
     juce_CloseThreadHandle (thread->threadHandle_);
@@ -250,34 +253,28 @@ int Thread::getNumRunningThreads() throw()
 Thread* Thread::getCurrentThread() throw()
 {
     const ThreadID thisId = getCurrentThreadId();
-    Thread* result = 0;
 
-    runningThreadsLock.enter();
+    const ScopedLock sl (runningThreadsLock);
 
     for (int i = runningThreads.size(); --i >= 0;)
     {
         Thread* const t = (Thread*) (runningThreads.getUnchecked(i));
 
         if (t->threadId_ == thisId)
-        {
-            result = t;
-            break;
-        }
+            return t;
     }
 
-    runningThreadsLock.exit();
-
-    return result;
+    return 0;
 }
 
 void Thread::stopAllThreads (const int timeOutMilliseconds) throw()
 {
-    runningThreadsLock.enter();
+    {
+        const ScopedLock sl (runningThreadsLock);
 
-    for (int i = runningThreads.size(); --i >= 0;)
-        ((Thread*) runningThreads.getUnchecked(i))->signalThreadShouldExit();
-
-    runningThreadsLock.exit();
+        for (int i = runningThreads.size(); --i >= 0;)
+            ((Thread*) runningThreads.getUnchecked(i))->signalThreadShouldExit();
+    }
 
     for (;;)
     {

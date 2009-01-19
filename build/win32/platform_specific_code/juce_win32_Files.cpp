@@ -77,7 +77,7 @@ bool juce_canWriteToFile (const String& fileName) throw()
 }
 
 bool juce_setFileReadOnly (const String& fileName,
-                           bool isReadOnly)
+                           bool isReadOnly) throw()
 {
     DWORD attr = GetFileAttributes (fileName);
 

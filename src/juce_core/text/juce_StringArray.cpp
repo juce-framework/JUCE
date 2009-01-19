@@ -271,7 +271,7 @@ void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings) throw(
     if (removeWhitespaceStrings)
     {
         for (int i = size(); --i >= 0;)
-            if (((const String*) strings.getUnchecked(i))->trim().isEmpty())
+            if (! ((const String*) strings.getUnchecked(i))->containsNonWhitespaceChars())
                 remove (i);
     }
     else

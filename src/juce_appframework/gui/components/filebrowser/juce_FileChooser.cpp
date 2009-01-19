@@ -54,7 +54,7 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
     useNativeDialogBox = false;
 #endif
 
-    if (fileFilters.trim().isEmpty())
+    if (! fileFilters.containsNonWhitespaceChars())
         filters = T("*");
 }
 

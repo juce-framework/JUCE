@@ -416,7 +416,7 @@ void KnownPluginList::addToMenu (PopupMenu& menu, const SortMethod sortMethod) c
             String thisSubMenuName (sortMethod == sortByCategory ? pd->category
                                                                  : pd->manufacturerName);
 
-            if (thisSubMenuName.trim().isEmpty())
+            if (! thisSubMenuName.containsNonWhitespaceChars())
                 thisSubMenuName = T("Other");
 
             if (thisSubMenuName != lastSubMenuName)

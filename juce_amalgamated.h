@@ -1535,12 +1535,16 @@ public:
     /** Returns true if the string contains no characters.
 
         Note that there's also an isNotEmpty() method to help write readable code.
+
+        @see containsNonWhitespaceChars()
     */
     inline bool isEmpty() const throw()                     { return text->text[0] == 0; }
 
     /** Returns true if the string contains at least one character.
 
         Note that there's also an isEmpty() method to help write readable code.
+
+        @see containsNonWhitespaceChars()
     */
     inline bool isNotEmpty() const throw()                  { return text->text[0] != 0; }
 
@@ -1699,6 +1703,15 @@ public:
                     string that is passed in.
     */
     bool containsOnly (const tchar* const charactersItMightContain) const throw();
+
+    /** Returns true if this string contains any non-whitespace characters.
+
+        This will return false if the string contains only whitespace characters, or
+        if it's empty.
+
+        It is equivalent to calling "myString.trim().isNotEmpty()".
+    */
+    bool containsNonWhitespaceChars() const throw();
 
     /** Returns true if the string matches this simple wildcard expression.
 
@@ -6533,6 +6546,11 @@ public:
     */
     int getNumberOfChildFiles (const int whatToLookFor,
                                const String& wildCardPattern = JUCE_T("*")) const throw();
+
+    /** Returns true if this file is a directory that contains one or more subdirectories.
+        @see isDirectory, findChildFiles
+    */
+    bool File::containsSubDirectories() const throw();
 
     /** Creates a stream to read from this file.
 
@@ -11812,7 +11830,14 @@ public:
     /** Creates a checksum for a block of binary data. */
     MD5 (const char* data, const int numBytes);
 
-    /** Creates a checksum for a string. */
+    /** Creates a checksum for a string.
+
+        Note that this operates on the string as a block of unicode characters, so the
+        result you get will differ from the value you'd get if the string was treated
+        as a block of utf8 or ascii. Bear this in mind if you're comparing the result
+        of this method with a checksum created by a different framework, which may have
+        used a different encoding.
+    */
     MD5 (const String& text);
 
     /** Creates a checksum for the input from a stream.
@@ -13751,6 +13776,15 @@ public:
     */
     void setInputSource (InputSource* const newSource) throw();
 
+    /** Sets a flag to change the treatment of empty text elements.
+
+        If this is true (the default state), then any text elements that contain only
+        whitespace characters will be ingored during parsing. If you need to catch
+        whitespace-only text, then you should set this to false before calling the
+        getDocumentElement() method.
+    */
+    void setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw();
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -13761,7 +13795,7 @@ private:
     bool identifierLookupTable [128];
     String lastError, dtdText;
     StringArray tokenisedDTD;
-    bool needToLoadDTD;
+    bool needToLoadDTD, ignoreEmptyTextElements;
     InputSource* inputSource;
 
     void setLastError (const String& desc, const bool carryOn) throw();
@@ -43179,7 +43213,8 @@ public:
         The object passed in will not be deleted by the treeview, it's up to the caller
         to delete it when no longer needed. BUT make absolutely sure that you don't delete
         this item until you've removed it from the tree, either by calling setRootItem (0),
-        or by deleting the tree first.
+        or by deleting the tree first. You can also use deleteRootItem() as a quick way
+        to delete it.
     */
     void setRootItem (TreeViewItem* const newRootItem);
 
@@ -43188,6 +43223,12 @@ public:
         This will be the last object passed to setRootItem(), or 0 if none has been set.
     */
     TreeViewItem* getRootItem() const throw()                       { return rootItem; }
+
+    /** This will remove and delete the current root item.
+
+        It's a convenient way of deleting the item and calling setRootItem (0).
+    */
+    void deleteRootItem();
 
     /** Changes whether the tree's root item is shown or not.
 
@@ -52819,6 +52860,10 @@ public:
     /** Sends the browser forward one page.
     */
     void goForward();
+
+    /** Refreshes the browser.
+    */
+    void refresh();
 
     /** This callback is called when the browser is about to navigate
         to a new location.
