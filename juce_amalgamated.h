@@ -6550,7 +6550,7 @@ public:
     /** Returns true if this file is a directory that contains one or more subdirectories.
         @see isDirectory, findChildFiles
     */
-    bool File::containsSubDirectories() const throw();
+    bool containsSubDirectories() const throw();
 
     /** Creates a stream to read from this file.
 
