@@ -204,8 +204,18 @@ bool File::isOnHardDisk() const throw()
 
 bool File::isOnRemovableDrive() const throw()
 {
-    jassertfalse // xxx not implemented for mac!
-    return false;
+   const ScopedAutoReleasePool pool;
+   BOOL removable = false;
+     
+   [[NSWorkspace sharedWorkspace]
+          getFileSystemInfoForPath: juceStringToNS (getFullPathName())
+                       isRemovable: &removable
+                        isWritable: nil
+                     isUnmountable: nil
+                       description: nil
+                              type: nil];
+
+    return removable;
 }
 
 static bool juce_isHiddenFile (const String& path) throw()
