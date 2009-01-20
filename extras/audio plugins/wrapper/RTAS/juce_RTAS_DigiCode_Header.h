@@ -35,6 +35,7 @@
 #include "../juce_IncludeCharacteristics.h"
 
 //==============================================================================
+#if JucePlugin_Build_RTAS
 #ifdef _MSC_VER
 
   #define kCompileAsCodeResource    0
@@ -68,6 +69,6 @@
   #define PLUGIN_SDK_DIRECTMIDI     1
 
 #endif
-
+#endif
 
 #endif   // __JUCE_RTAS_DIGICODE_HEADER_JUCEHEADER__
