@@ -54127,6 +54127,7 @@ END_JUCE_NAMESPACE
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "comsupp.lib")
+#pragma comment(lib, "version.lib")
 
 #if JUCE_OPENGL
  #pragma comment(lib, "OpenGL32.Lib")
