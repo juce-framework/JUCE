@@ -185,6 +185,16 @@
   #define JUCE_WEB_BROWSER 1
 #endif
 
+
+//=============================================================================
+/** Setting this allows the build to use old Carbon libraries that will be
+    deprecated in newer versions of OSX. This is handy for some backwards-compatibility
+    reasons.
+*/
+#ifndef JUCE_SUPPORT_CARBON
+  #define JUCE_SUPPORT_CARBON 1
+#endif
+
 //=============================================================================
 /*  These flags let you avoid the direct inclusion of some 3rd-party libs in the
     codebase - you might need to use this if you're linking to some of these libraries

@@ -2086,8 +2086,10 @@ const char* String::toUTF8() const throw()
     }
 }
 
-int String::copyToUTF8 (uint8* const buffer) const throw()
+int String::copyToUTF8 (uint8* const buffer, const int maxBufferSizeBytes) const throw()
 {
+    jassert (maxBufferSizeBytes >= 0); // keep this value positive, or no characters will be copied!
+
 #if JUCE_STRINGS_ARE_UNICODE
     int num = 0, index = 0;
 
@@ -2119,10 +2121,18 @@ int String::copyToUTF8 (uint8* const buffer) const throw()
 
             if (buffer != 0)
             {
-                buffer [num++] = (uint8) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
+                if (num + numExtraBytes >= maxBufferSizeBytes)
+                {
+                    buffer [num++] = 0;
+                    break;
+                }
+                else
+                {
+                    buffer [num++] = (uint8) ((0xff << (7 - numExtraBytes)) | (c >> (numExtraBytes * 6)));
 
-                while (--numExtraBytes >= 0)
-                    buffer [num++] = (uint8) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+                    while (--numExtraBytes >= 0)
+                        buffer [num++] = (uint8) (0x80 | (0x3f & (c >> (numExtraBytes * 6))));
+                }
             }
             else
             {
@@ -2132,7 +2142,15 @@ int String::copyToUTF8 (uint8* const buffer) const throw()
         else
         {
             if (buffer != 0)
+            {
+                if (num + 1 >= maxBufferSizeBytes)
+                {
+                    buffer [num++] = 0;
+                    break;
+                }
+
                 buffer [num] = (uint8) c;
+            }
 
             ++num;
         }
@@ -2144,10 +2162,10 @@ int String::copyToUTF8 (uint8* const buffer) const throw()
     return num;
 
 #else
-    const int numBytes = length() + 1;
+    const int numBytes = jmin (maxBufferSizeBytes, length() + 1);
 
     if (buffer != 0)
-        copyToBuffer ((char*) buffer, numBytes);
+        copyToBuffer ((char*) buffer, maxBufferSizeBytes);
 
     return numBytes;
 #endif

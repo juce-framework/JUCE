@@ -36,6 +36,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_WavAudioFormat.h"
 #include "../../../juce_core/io/streams/juce_BufferedInputStream.h"
 #include "../../../juce_core/text/juce_LocalisedStrings.h"
+#include "../../../juce_core/io/files/juce_FileInputStream.h"
+#include "../../../juce_core/io/files/juce_FileOutputStream.h"
 
 
 //==============================================================================
@@ -85,55 +87,55 @@ const StringPairArray WavAudioFormat::createBWAVMetadata (const String& descript
 
 struct BWAVChunk
 {
-    char description [256];
-    char originator [32];
-    char originatorRef [32];
-    char originationDate [10];
-    char originationTime [8];
+    uint8 description [256];
+    uint8 originator [32];
+    uint8 originatorRef [32];
+    uint8 originationDate [10];
+    uint8 originationTime [8];
     uint32 timeRefLow;
     uint32 timeRefHigh;
     uint16 version;
     uint8 umid[64];
     uint8 reserved[190];
-    char codingHistory[1];
+    uint8 codingHistory[1];
 
     void copyTo (StringPairArray& values) const
     {
-        values.set (WavAudioFormat::bwavDescription, String (description, 256));
-        values.set (WavAudioFormat::bwavOriginator, String (originator, 32));
-        values.set (WavAudioFormat::bwavOriginatorRef, String (originatorRef, 32));
-        values.set (WavAudioFormat::bwavOriginationDate, String (originationDate, 10));
-        values.set (WavAudioFormat::bwavOriginationTime, String (originationTime, 8));
+        values.set (WavAudioFormat::bwavDescription, String::fromUTF8 (description, 256));
+        values.set (WavAudioFormat::bwavOriginator, String::fromUTF8 (originator, 32));
+        values.set (WavAudioFormat::bwavOriginatorRef, String::fromUTF8 (originatorRef, 32));
+        values.set (WavAudioFormat::bwavOriginationDate, String::fromUTF8 (originationDate, 10));
+        values.set (WavAudioFormat::bwavOriginationTime, String::fromUTF8 (originationTime, 8));
 
         const uint32 timeLow = swapIfBigEndian (timeRefLow);
         const uint32 timeHigh = swapIfBigEndian (timeRefHigh);
         const int64 time = (((int64)timeHigh) << 32) + timeLow;
 
         values.set (WavAudioFormat::bwavTimeReference, String (time));
-        values.set (WavAudioFormat::bwavCodingHistory, String (codingHistory));
+        values.set (WavAudioFormat::bwavCodingHistory, String::fromUTF8 (codingHistory));
     }
 
     static MemoryBlock createFrom (const StringPairArray& values)
     {
-        const int sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].length();
+        const int sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].copyToUTF8 (0) - 1;
         MemoryBlock data ((sizeNeeded + 3) & ~3);
         data.fillWith (0);
 
         BWAVChunk* b = (BWAVChunk*) data.getData();
 
-        // although copyToBuffer may overrun by one byte, that's ok as long as these
-        // operations get done in the right order
-        values [WavAudioFormat::bwavDescription].copyToBuffer (b->description, 256);
-        values [WavAudioFormat::bwavOriginator].copyToBuffer (b->originator, 32);
-        values [WavAudioFormat::bwavOriginatorRef].copyToBuffer (b->originatorRef, 32);
-        values [WavAudioFormat::bwavOriginationDate].copyToBuffer (b->originationDate, 10);
-        values [WavAudioFormat::bwavOriginationTime].copyToBuffer (b->originationTime, 8);
+        // Allow these calls to overwrite an extra byte at the end, which is fine as long
+        // as they get called in the right order..
+        values [WavAudioFormat::bwavDescription].copyToUTF8 (b->description, 257);
+        values [WavAudioFormat::bwavOriginator].copyToUTF8 (b->originator, 33);
+        values [WavAudioFormat::bwavOriginatorRef].copyToUTF8 (b->originatorRef, 33);
+        values [WavAudioFormat::bwavOriginationDate].copyToUTF8 (b->originationDate, 11);
+        values [WavAudioFormat::bwavOriginationTime].copyToUTF8 (b->originationTime, 9);
 
         const int64 time = values [WavAudioFormat::bwavTimeReference].getLargeIntValue();
         b->timeRefLow = swapIfBigEndian ((uint32) (time & 0xffffffff));
         b->timeRefHigh = swapIfBigEndian ((uint32) (time >> 32));
 
-        values [WavAudioFormat::bwavCodingHistory].copyToBuffer (b->codingHistory, 256 * 1024);
+        values [WavAudioFormat::bwavCodingHistory].copyToUTF8 (b->codingHistory);
 
         if (b->description[0] != 0
             || b->originator[0] != 0
@@ -169,10 +171,14 @@ class WavAudioFormatReader  : public AudioFormatReader
     const WavAudioFormatReader& operator= (const WavAudioFormatReader&);
 
 public:
+    int64 bwavChunkStart, bwavSize;
+
     //==============================================================================
     WavAudioFormatReader (InputStream* const in)
         : AudioFormatReader (in, wavFormatName),
-          dataLength (0)
+          dataLength (0),
+          bwavChunkStart (0),
+          bwavSize (0)
     {
         if (input->readInt() == chunkName ("RIFF"))
         {
@@ -220,6 +226,9 @@ public:
                     }
                     else if (chunkType == chunkName ("bext"))
                     {
+                        bwavChunkStart = input->getPosition();
+                        bwavSize = length;
+
                         // Broadcast-wav extension chunk..
                         BWAVChunk* const bwav = (BWAVChunk*) juce_calloc (jmax (length + 1, (int) sizeof (BWAVChunk)));
 
@@ -751,5 +760,83 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
 
     return 0;
 }
+
+static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
+{
+    bool ok = false;
+    WavAudioFormat wav;
+
+    const File dest (file.getNonexistentSibling());
+
+    OutputStream* outStream = dest.createOutputStream();
+
+    if (outStream != 0)
+    {
+        AudioFormatReader* reader = wav.createReaderFor (file.createInputStream(), true);
+
+        if (reader != 0)
+        {
+            AudioFormatWriter* writer = wav.createWriterFor (outStream, reader->sampleRate, 
+                                                             reader->numChannels, reader->bitsPerSample, 
+                                                             metadata, 0);
+
+            if (writer != 0)
+            {
+                ok = writer->writeFromAudioReader (*reader, 0, -1);
+
+                outStream = 0;
+                delete writer;
+            }
+
+            delete reader;
+        }
+
+        delete outStream;
+    }
+
+    if (ok)
+        ok = dest.moveFileTo (file);
+
+    if (! ok)
+        dest.deleteFile();
+
+    return ok;
+}
+
+bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata)
+{
+    WavAudioFormatReader* reader = (WavAudioFormatReader*) createReaderFor (wavFile.createInputStream(), true);
+
+    if (reader != 0)
+    {
+        const int64 bwavPos = reader->bwavChunkStart;
+        const int64 bwavSize = reader->bwavSize;
+        delete reader;
+
+        if (bwavSize > 0)
+        {
+            MemoryBlock chunk = BWAVChunk::createFrom (newMetadata);
+
+            if (chunk.getSize() <= bwavSize)
+            {
+                // the new one will fit in the space available, so write it directly..
+                const int64 oldSize = wavFile.getSize();
+
+                FileOutputStream* out = wavFile.createOutputStream();
+                out->setPosition (bwavPos);
+                out->write (chunk.getData(), chunk.getSize());
+                out->setPosition (oldSize);
+                delete out;
+
+                jassert (wavFile.getSize() == oldSize);
+
+                return true;
+            }
+        }
+    }
+
+    return juce_slowCopyOfWavFileWithNewMetadata (wavFile, newMetadata);
+}
+
 
 END_JUCE_NAMESPACE

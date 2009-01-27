@@ -37,10 +37,6 @@
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
 
-#if JUCE_MAC && JUCE_32BIT
-  #define JUCE_SUPPORT_CARBON 1
-#endif
-
 #if JUCE_SUPPORT_CARBON
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include <AudioUnit/AudioUnitCarbonView.h>
@@ -57,6 +53,9 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../../juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../../juce_appframework/gui/components/special/juce_NSViewComponent.h"
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
+  #include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+#endif
 
 #if JUCE_MAC
 

@@ -112,11 +112,13 @@ public:
         This will take care of any floating-point conversion that's required to convert
         between the two formats. It won't deal with sample-rate conversion, though.
 
+        If numSamplesToRead < 0, it will write the entire length of the reader.
+
         @returns false if it can't read or write properly during the operation
     */
     bool writeFromAudioReader (AudioFormatReader& reader,
                                int64 startSample,
-                               int numSamplesToRead);
+                               int64 numSamplesToRead);
 
     /** Reads some samples from an AudioSource, and writes these to the output.
 

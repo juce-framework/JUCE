@@ -62,9 +62,7 @@ public:
         if (JUCEApplication::getInstance() != 0)
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
-
-            if (! MessageManager::getInstance()->hasStopMessageBeenSent())
-                return NSTerminateCancel;
+            return NSTerminateCancel;
         }
 
         return NSTerminateNow;

@@ -221,6 +221,14 @@
   #define JUCE_WEB_BROWSER 1
 #endif
 
+/** Setting this allows the build to use old Carbon libraries that will be
+    deprecated in newer versions of OSX. This is handy for some backwards-compatibility
+    reasons.
+*/
+#ifndef JUCE_SUPPORT_CARBON
+  #define JUCE_SUPPORT_CARBON 1
+#endif
+
 /*  These flags let you avoid the direct inclusion of some 3rd-party libs in the
     codebase - you might need to use this if you're linking to some of these libraries
     yourself.
@@ -2347,8 +2355,13 @@ public:
         @param destBuffer       the place to copy it to; if this is a null pointer,
                                 the method just returns the number of bytes required
                                 (including the terminating null character).
+        @param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
+                                string won't fit, it'll put in as many as it can while
+                                still allowing for a terminating null char at the end,
+                                and will return the number of bytes that were actually
+                                used. If this value is < 0, no limit is used.
     */
-    int copyToUTF8 (uint8* const destBuffer) const throw();
+    int copyToUTF8 (uint8* const destBuffer, const int maxBufferSizeBytes = 0x7fffffff) const throw();
 
     /** Returns a pointer to a UTF-8 version of this string.
 
@@ -36083,11 +36096,13 @@ public:
         This will take care of any floating-point conversion that's required to convert
         between the two formats. It won't deal with sample-rate conversion, though.
 
+        If numSamplesToRead < 0, it will write the entire length of the reader.
+
         @returns false if it can't read or write properly during the operation
     */
     bool writeFromAudioReader (AudioFormatReader& reader,
                                int64 startSample,
-                               int numSamplesToRead);
+                               int64 numSamplesToRead);
 
     /** Reads some samples from an AudioSource, and writes these to the output.
 
@@ -37228,6 +37243,13 @@ public:
                                         int bitsPerSample,
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex);
+
+    /** Utility function to replace the metadata in a wav file with a new set of values.
+
+        If possible, this cheats by overwriting just the metadata region of the file, rather
+        than by copying the whole file again.
+    */
+    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
 
     juce_UseDebuggingNewOperator
 };
@@ -43049,6 +43071,11 @@ public:
         treeHasChanged() to update the tree.
     */
     virtual int getItemHeight() const                               { return 20; }
+
+    /** You can override this method to return false if you don't want to allow the
+        user to select this item.
+    */
+    virtual bool canBeSelected() const                              { return true; }
 
     /** Creates a component that will be used to represent this item.
 

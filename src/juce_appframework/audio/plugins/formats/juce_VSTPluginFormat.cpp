@@ -79,8 +79,10 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../../../application/juce_Application.h"
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
 
+#if JUCE_MAC && JUCE_SUPPORT_CARBON
+  #include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+#endif
 
 //==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED

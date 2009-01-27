@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="JUCE"
 	ProjectGUID="{AE232C11-D91C-4CA1-B24E-8B11A52EFF26}"
 	RootNamespace="JUCE"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -207,6 +208,8 @@
 				AdditionalOptions="/IMPLIB:&quot;.\..\..\..\bin\JUCE_debug.lib&quot;&#x0D;&#x0A;"
 				OutputFile="$(OutDir)\$(ProjectName)_debug.dll"
 				IgnoreDefaultLibraryNames="libcmt.lib"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -227,9 +230,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -289,6 +289,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreDefaultLibraryNames="libcmtd.lib"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -309,9 +311,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

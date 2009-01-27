@@ -1003,8 +1003,13 @@ public:
         @param destBuffer       the place to copy it to; if this is a null pointer,
                                 the method just returns the number of bytes required
                                 (including the terminating null character).
+        @param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
+                                string won't fit, it'll put in as many as it can while
+                                still allowing for a terminating null char at the end,
+                                and will return the number of bytes that were actually 
+                                used. If this value is < 0, no limit is used.
     */
-    int copyToUTF8 (uint8* const destBuffer) const throw();
+    int copyToUTF8 (uint8* const destBuffer, const int maxBufferSizeBytes = 0x7fffffff) const throw();
 
     /** Returns a pointer to a UTF-8 version of this string.
 

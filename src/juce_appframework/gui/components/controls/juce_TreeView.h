@@ -238,6 +238,11 @@ public:
     */
     virtual int getItemHeight() const                               { return 20; }
 
+    /** You can override this method to return false if you don't want to allow the
+        user to select this item.
+    */
+    virtual bool canBeSelected() const                              { return true; }
+
     /** Creates a component that will be used to represent this item.
 
         You don't have to implement this method - if it returns 0 then no component

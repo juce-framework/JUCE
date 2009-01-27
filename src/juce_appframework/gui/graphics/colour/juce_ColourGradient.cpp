@@ -150,7 +150,7 @@ PixelARGB* ColourGradient::createLookupTable (int& numEntries) const throw()
 
         for (int j = 2; j < colours.size(); j += 2)
         {
-            const int numToDo = ((colours.getUnchecked (j) * numEntries) >> 16) - index;
+            const int numToDo = ((colours.getUnchecked (j) * (numEntries - 1)) >> 16) - index;
             const PixelARGB pix2 (colours.getUnchecked (j + 1));
 
             for (int i = 0; i < numToDo; ++i)

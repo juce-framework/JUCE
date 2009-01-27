@@ -572,6 +572,9 @@ void TreeView::resized()
 
 void TreeView::moveSelectedRow (int delta)
 {
+    if (delta == 0)
+        return;
+
     int rowSelected = 0;
 
     TreeViewItem* const firstSelected = getSelectedItem (0);
@@ -580,13 +583,36 @@ void TreeView::moveSelectedRow (int delta)
 
     rowSelected = jlimit (0, getNumRowsInTree() - 1, rowSelected + delta);
 
-    TreeViewItem* item = getItemOnRow (rowSelected);
-
-    if (item != 0)
+    for (;;)
     {
-        item->setSelected (true, true);
+        TreeViewItem* item = getItemOnRow (rowSelected);
 
-        scrollToKeepItemVisible (item);
+        if (item != 0)
+        {
+            if (! item->canBeSelected())
+            {
+                // if the row we want to highlight doesn't allow it, try skipping 
+                // to the next item..
+                const int nextRowToTry = jlimit (0, getNumRowsInTree() - 1, 
+                                                 rowSelected + (delta < 0 ? -1 : 1));
+
+                if (rowSelected != nextRowToTry)
+                {
+                    rowSelected = nextRowToTry;
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            item->setSelected (true, true);
+
+            scrollToKeepItemVisible (item);
+        }
+
+        break;
     }
 }
 
@@ -906,6 +932,9 @@ void TreeViewItem::deselectAllRecursively()
 void TreeViewItem::setSelected (const bool shouldBeSelected,
                                 const bool deselectOtherItemsFirst)
 {
+    if (shouldBeSelected && ! canBeSelected())
+        return;
+
     if (deselectOtherItemsFirst)
         getTopLevelItem()->deselectAllRecursively();
 

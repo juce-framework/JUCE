@@ -330,7 +330,7 @@ AudioFormatWriter::~AudioFormatWriter()
 
 bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                                               int64 startSample,
-                                              int numSamplesToRead)
+                                              int64 numSamplesToRead)
 {
     const int bufferSize = 16384;
     const int maxChans = 128;
@@ -340,9 +340,12 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     for (int i = maxChans; --i >= 0;)
         buffers[i] = 0;
 
+    if (numSamplesToRead < 0)
+        numSamplesToRead = reader.lengthInSamples;
+
     while (numSamplesToRead > 0)
     {
-        const int numToDo = jmin (numSamplesToRead, bufferSize);
+        const int numToDo = (int) jmin (numSamplesToRead, (int64) bufferSize);
 
         for (int i = tempBuffer.getNumChannels(); --i >= 0;)
             buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
