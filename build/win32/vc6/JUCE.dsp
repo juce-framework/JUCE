@@ -535,14 +535,6 @@ SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcesso
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_AudioUnitPluginFormat.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h
 # End Source File
 # Begin Source File

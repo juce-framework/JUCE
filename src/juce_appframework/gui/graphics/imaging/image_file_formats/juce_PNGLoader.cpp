@@ -53,8 +53,11 @@ namespace pnglibNamespace
   using namespace zlibNamespace;
 
 #if JUCE_INCLUDE_PNGLIB_CODE
-  using ::malloc;
-  using ::free;
+
+  #if (! defined(_MSC_VER)) || _MSC_VER != 1310
+    using ::malloc; // (causes conflict in VS.NET 2003)
+    using ::free;
+  #endif
 
   extern "C"
   {
@@ -105,6 +108,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../../colour/juce_PixelFormats.h"
 
 using namespace pnglibNamespace;
+
+#if defined (_MSC_VER) && _MSC_VER == 1310 && ! defined (JUCE_DEBUG)
+  using ::calloc;  // (needed in VS.NET 2003)
+#endif
+
 using ::malloc;
 using ::free;
 

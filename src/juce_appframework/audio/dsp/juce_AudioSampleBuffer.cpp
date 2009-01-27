@@ -453,6 +453,67 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     }
 }
 
+void AudioSampleBuffer::copyFrom (const int destChannel,
+                                  const int destStartSample,
+                                  const float* source,
+                                  int numSamples,
+                                  const float gain) throw()
+{
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
+    jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
+    jassert (source != 0);
+
+    if (numSamples > 0 && gain != 0)
+    {
+        float* d = channels [destChannel] + destStartSample;
+
+        if (gain != 1.0f)
+        {
+            while (--numSamples >= 0)
+                *d++ = gain * *source++;
+        }
+        else
+        {
+            memcpy (d, source, sizeof (float) * numSamples);
+        }
+    }
+}
+
+void AudioSampleBuffer::copyFromWithRamp (const int destChannel,
+                                          const int destStartSample,
+                                          const float* source,
+                                          int numSamples,
+                                          float startGain,
+                                          float endGain) throw()
+{
+    jassert (((unsigned int) destChannel) < (unsigned int) numChannels);
+    jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
+    jassert (source != 0);
+
+    if (startGain == endGain)
+    {
+        copyFrom (destChannel,
+                  destStartSample,
+                  source,
+                  numSamples,
+                  startGain);
+    }
+    else
+    {
+        if (numSamples > 0 && (startGain != 0.0f || endGain != 0.0f))
+        {
+            const float increment = (endGain - startGain) / numSamples;
+            float* d = channels [destChannel] + destStartSample;
+
+            while (--numSamples >= 0)
+            {
+                *d++ = startGain * *source++;
+                startGain += increment;
+            }
+        }
+    }
+}
+
 void AudioSampleBuffer::findMinMax (const int channel,
                                     const int startSample,
                                     int numSamples,

@@ -61,6 +61,7 @@ class ProgressBar;
 class FileBrowserComponent;
 class DirectoryContentsDisplayComponent;
 class FilePreviewComponent;
+class ImageButton;
 
 
 //==============================================================================
@@ -533,6 +534,13 @@ public:
                                                TabbedButtonBar::Orientation orientation);
 
     virtual Button* createTabBarExtrasButton();
+
+    //==============================================================================
+    virtual void drawImageButton (Graphics& g, Image* image,
+                                  int imageX, int imageY, int imageW, int imageH,
+                                  const Colour& overlayColour,
+                                  float imageOpacity,
+                                  ImageButton& button);
 
     //==============================================================================
     virtual void drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header);

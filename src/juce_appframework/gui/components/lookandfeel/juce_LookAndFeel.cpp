@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../buttons/juce_ToggleButton.h"
 #include "../buttons/juce_ShapeButton.h"
 #include "../buttons/juce_ArrowButton.h"
+#include "../buttons/juce_ImageButton.h"
 #include "../buttons/juce_DrawableButton.h"
 #include "../buttons/juce_HyperlinkButton.h"
 #include "../windows/juce_AlertWindow.h"
@@ -1617,6 +1618,31 @@ void LookAndFeel::layoutFilenameComponent (FilenameComponent& filenameComp,
     browseButton->setTopRightPosition (filenameComp.getWidth(), 0);
 
     filenameBox->setBounds (0, 0, browseButton->getX(), filenameComp.getHeight());
+}
+
+
+//==============================================================================
+void LookAndFeel::drawImageButton (Graphics& g, Image* image,
+                                   int imageX, int imageY, int imageW, int imageH,
+                                   const Colour& overlayColour,
+                                   float imageOpacity,
+                                   ImageButton& button)
+{
+    if (! overlayColour.isOpaque())
+    {
+        g.setOpacity (imageOpacity);
+
+        g.drawImage (image, imageX, imageY, imageW, imageH, 
+                     0, 0, image->getWidth(), image->getHeight(), false);
+    }
+
+    if (! overlayColour.isTransparent())
+    {
+        g.setColour (overlayColour);
+
+        g.drawImage (image, imageX, imageY, imageW, imageH,
+                     0, 0, image->getWidth(), image->getHeight(), true);
+    }
 }
 
 //==============================================================================

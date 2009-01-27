@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ImageButton.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
+#include "../lookandfeel/juce_LookAndFeel.h"
 
 
 //==============================================================================
@@ -208,31 +209,20 @@ void ImageButton::paintButton (Graphics& g,
             }
         }
 
-        const Colour& overlayColour = (isButtonDown) ? downOverlay
-                                                     : ((isMouseOverButton) ? overOverlay
-                                                                            : normalOverlay);
-
-        if (! overlayColour.isOpaque())
+        if (! scaleImageToFit)
         {
-            g.setOpacity ((isButtonDown) ? downOpacity
-                                         : ((isMouseOverButton) ? overOpacity
-                                                                : normalOpacity));
-
-            if (scaleImageToFit)
-                g.drawImage (im, imageX, imageY, imageW, imageH, 0, 0, iw, ih, false);
-            else
-                g.drawImageAt (im, imageX, imageY, false);
+            imageW = iw;
+            imageH = ih;
         }
 
-        if (! overlayColour.isTransparent())
-        {
-            g.setColour (overlayColour);
-
-            if (scaleImageToFit)
-                g.drawImage (im, imageX, imageY, imageW, imageH, 0, 0, iw, ih, true);
-            else
-                g.drawImageAt (im, imageX, imageY, true);
-        }
+        getLookAndFeel().drawImageButton (g, im, imageX, imageY, imageW, imageH, 
+                                          isButtonDown ? downOverlay
+                                                       : (isMouseOverButton ? overOverlay
+                                                                            : normalOverlay),
+                                          isButtonDown ? downOpacity
+                                                       : (isMouseOverButton ? overOpacity
+                                                                            : normalOpacity),
+                                          *this);
     }
 }
 

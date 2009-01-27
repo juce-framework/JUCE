@@ -26998,6 +26998,42 @@ public:
                    const float* source,
                    int numSamples) throw();
 
+    /** Copies samples from an array of floats into one of the channels, applying a gain to it.
+
+        @param destChannel          the channel within this buffer to copy the samples to
+        @param destStartSample      the start sample within this buffer's channel
+        @param source               the source buffer to read from
+        @param numSamples           the number of samples to process
+        @param gain                 the gain to apply
+
+        @see addFrom
+    */
+    void copyFrom (const int destChannel,
+                   const int destStartSample,
+                   const float* source,
+                   int numSamples,
+                   const float gain) throw();
+
+    /** Copies samples from an array of floats into one of the channels, applying a gain ramp.
+
+        @param destChannel          the channel within this buffer to copy the samples to
+        @param destStartSample      the start sample within this buffer's channel
+        @param source               the source buffer to read from
+        @param numSamples           the number of samples to process
+        @param startGain            the gain to apply to the first sample (this is multiplied with
+                                    the source samples before they are copied to this buffer)
+        @param endGain              the gain to apply to the final sample. The gain is linearly
+                                    interpolated between the first and last samples.
+
+        @see addFrom
+    */
+    void copyFromWithRamp (const int destChannel,
+                           const int destStartSample,
+                           const float* source,
+                           int numSamples,
+                           float startGain,
+                           float endGain) throw();
+
     /** Finds the highest and lowest sample values in a given range.
 
         @param channel      the channel to read from
@@ -52970,6 +53006,7 @@ class ProgressBar;
 class FileBrowserComponent;
 class DirectoryContentsDisplayComponent;
 class FilePreviewComponent;
+class ImageButton;
 
 /**
     LookAndFeel objects define the appearance of all the JUCE widgets, and subclasses
@@ -53414,6 +53451,12 @@ public:
                                                TabbedButtonBar::Orientation orientation);
 
     virtual Button* createTabBarExtrasButton();
+
+    virtual void drawImageButton (Graphics& g, Image* image,
+                                  int imageX, int imageY, int imageW, int imageH,
+                                  const Colour& overlayColour,
+                                  float imageOpacity,
+                                  ImageButton& button);
 
     virtual void drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header);
 
