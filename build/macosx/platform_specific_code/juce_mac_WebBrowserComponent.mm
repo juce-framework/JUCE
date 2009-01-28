@@ -147,7 +147,7 @@ public:
     {
         [webView stopLoading: nil];
     }
-    
+
     void refresh()
     {
         [webView reload: nil];

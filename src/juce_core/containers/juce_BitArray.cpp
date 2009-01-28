@@ -693,32 +693,49 @@ void BitArray::shiftBits (int bits, const int startBit) throw()
     }
 }
 
+const BitArray BitArray::getBitRange (int startBit, int numBits) const throw()
+{
+    BitArray r;
+    numBits = jmin (numBits, getHighestBit() + 1 - startBit);
+    r.ensureSize (numBits >> 5);
+    r.highestBit = numBits;
+
+    int i = 0;
+    while (numBits > 0)
+    {
+        r.values[i++] = getBitRangeAsInt (startBit, jmin (32, numBits));
+        numBits -= 32;
+        startBit += 32;
+    }
+
+    r.highestBit = r.getHighestBit();
+
+    return r;
+}
+
 int BitArray::getBitRangeAsInt (const int startBit, int numBits) const throw()
 {
     if (numBits > 32)
     {
-        jassertfalse
+        jassertfalse  // use getBitRange() if you need more than 32 bits..
         numBits = 32;
     }
 
-    if (startBit == 0)
-    {
-        if (numBits < 32)
-            return values[0] & ((1 << numBits) - 1);
+    numBits = jmin (numBits, highestBit + 1 - startBit);
 
-        return values[0];
-    }
+    if (numBits <= 0)
+        return 0;
 
-    int n = 0;
-    for (int i = numBits; --i >= 0;)
-    {
-        n <<= 1;
+    const int pos = startBit >> 5;
+    const int offset = startBit & 31;
+    const int endSpace = 32 - numBits;
 
-        if (operator[] (startBit + i))
-            n |= 1;
-    }
+    uint32 n = ((uint32) values [pos]) >> offset;
 
-    return n;
+    if (offset > endSpace)
+        n |= ((uint32) values [pos + 1]) << (32 - offset);
+
+    return (int) (n & (((uint32) 0xffffffff) >> endSpace));
 }
 
 void BitArray::setBitRangeAsInt (const int startBit, int numBits, unsigned int valueToSet) throw()

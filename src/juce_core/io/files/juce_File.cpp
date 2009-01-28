@@ -770,7 +770,7 @@ bool File::containsSubDirectories() const throw()
         String filename;
         bool isDirectory, isHidden;
         void* const handle = juce_findFileStart (juce_addTrailingSeparator (fullPath),
-                                                 T("*"), filename, 
+                                                 T("*"), filename,
                                                  &isDirectory, &isHidden, 0, 0, 0, 0);
 
         if (handle != 0)

@@ -7139,11 +7139,19 @@ public:
     /** Returns true if no bits are set. */
     bool isEmpty() const throw();
 
+    /** Returns a range of bits in the array as a new BitArray.
+
+        e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
+        @see getBitRangeAsInt
+    */
+    const BitArray getBitRange (int startBit, int numBits) const throw();
+
     /** Returns a range of bits in the array as an integer value.
 
         e.g. getBitRangeAsInt (0, 32) would return the lowest 32 bits.
 
-        Asking for more than 32 bits isn't allowed (obviously).
+        Asking for more than 32 bits isn't allowed (obviously) - for that, use
+        getBitRange().
     */
     int getBitRangeAsInt (int startBit, int numBits) const throw();
 

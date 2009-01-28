@@ -1632,7 +1632,7 @@ void LookAndFeel::drawImageButton (Graphics& g, Image* image,
     {
         g.setOpacity (imageOpacity);
 
-        g.drawImage (image, imageX, imageY, imageW, imageH, 
+        g.drawImage (image, imageX, imageY, imageW, imageH,
                      0, 0, image->getWidth(), image->getHeight(), false);
     }
 

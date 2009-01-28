@@ -62,11 +62,12 @@ MessageManager::MessageManager() throw()
 
 MessageManager::~MessageManager() throw()
 {
-    jassert (instance == this);
-    instance = 0;
     deleteAndZero (broadcastListeners);
 
     doPlatformSpecificShutdown();
+
+    jassert (instance == this);
+    instance = 0;  // do this last in case this instance is still needed by doPlatformSpecificShutdown()
 }
 
 MessageManager* MessageManager::getInstance() throw()

@@ -69,9 +69,9 @@ public:
     /** Creates a checksum for a string.
 
         Note that this operates on the string as a block of unicode characters, so the
-        result you get will differ from the value you'd get if the string was treated 
-        as a block of utf8 or ascii. Bear this in mind if you're comparing the result 
-        of this method with a checksum created by a different framework, which may have 
+        result you get will differ from the value you'd get if the string was treated
+        as a block of utf8 or ascii. Bear this in mind if you're comparing the result
+        of this method with a checksum created by a different framework, which may have
         used a different encoding.
     */
     MD5 (const String& text);

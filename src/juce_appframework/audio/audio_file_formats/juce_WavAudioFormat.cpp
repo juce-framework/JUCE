@@ -776,8 +776,8 @@ static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const Strin
 
         if (reader != 0)
         {
-            AudioFormatWriter* writer = wav.createWriterFor (outStream, reader->sampleRate, 
-                                                             reader->numChannels, reader->bitsPerSample, 
+            AudioFormatWriter* writer = wav.createWriterFor (outStream, reader->sampleRate,
+                                                             reader->numChannels, reader->bitsPerSample,
                                                              metadata, 0);
 
             if (writer != 0)

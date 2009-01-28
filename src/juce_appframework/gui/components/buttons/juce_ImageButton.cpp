@@ -215,7 +215,7 @@ void ImageButton::paintButton (Graphics& g,
             imageH = ih;
         }
 
-        getLookAndFeel().drawImageButton (g, im, imageX, imageY, imageW, imageH, 
+        getLookAndFeel().drawImageButton (g, im, imageX, imageY, imageW, imageH,
                                           isButtonDown ? downOverlay
                                                        : (isMouseOverButton ? overOverlay
                                                                             : normalOverlay),

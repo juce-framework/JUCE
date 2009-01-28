@@ -206,7 +206,7 @@ bool File::isOnRemovableDrive() const throw()
 {
    const ScopedAutoReleasePool pool;
    BOOL removable = false;
-     
+
    [[NSWorkspace sharedWorkspace]
           getFileSystemInfoForPath: juceStringToNS (getFullPathName())
                        isRemovable: &removable
@@ -347,11 +347,11 @@ const String File::getVersion() const throw()
     String result;
 
     NSBundle* bundle = [NSBundle bundleWithPath: juceStringToNS (getFullPathName())];
-    
+
     if (bundle != 0)
     {
         NSDictionary* info = [bundle infoDictionary];
-        
+
         if (info != 0)
         {
             NSString* name = [info valueForKey: @"CFBundleShortVersionString"];

@@ -591,9 +591,9 @@ void TreeView::moveSelectedRow (int delta)
         {
             if (! item->canBeSelected())
             {
-                // if the row we want to highlight doesn't allow it, try skipping 
+                // if the row we want to highlight doesn't allow it, try skipping
                 // to the next item..
-                const int nextRowToTry = jlimit (0, getNumRowsInTree() - 1, 
+                const int nextRowToTry = jlimit (0, getNumRowsInTree() - 1,
                                                  rowSelected + (delta < 0 ? -1 : 1));
 
                 if (rowSelected != nextRowToTry)
