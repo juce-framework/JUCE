@@ -1658,14 +1658,6 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_PreferencesPan
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_QuickTimeMovieComponent.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_QuickTimeMovieComponent.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_SystemTrayIconComponent.cpp
 # End Source File
 # Begin Source File
@@ -2497,6 +2489,10 @@ SOURCE=..\..\..\src\juce_core\cryptography\juce_RSAKey.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\platform_specific_code\juce_win32_ActiveXComponent.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\platform_specific_code\juce_win32_ASIO.cpp
 # End Source File
 # Begin Source File
@@ -2537,11 +2533,23 @@ SOURCE=..\platform_specific_code\juce_win32_Misc.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\platform_specific_code\juce_win32_NativeCode.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\platform_specific_code\juce_win32_Network.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\platform_specific_code\juce_win32_OpenGLComponent.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\platform_specific_code\juce_win32_PlatformUtils.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\platform_specific_code\juce_win32_QuickTimeMovieComponent.cpp
 # End Source File
 # Begin Source File
 
