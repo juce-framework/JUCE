@@ -130,7 +130,7 @@ void Desktop::getMousePosition (int& x, int& y) throw()
     const ScopedAutoReleasePool pool;
     const NSPoint p ([NSEvent mouseLocation]);
     x = roundFloatToInt (p.x);
-    y = roundFloatToInt ([[NSScreen mainScreen] frame].size.height - p.y);
+    y = roundFloatToInt ([[[NSScreen screens] objectAtIndex: 0] frame].size.height - p.y);
 }
 
 void Desktop::setMousePosition (int x, int y) throw()
@@ -223,7 +223,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     const ScopedAutoReleasePool pool;
     monitorCoords.clear();
     NSArray* screens = [NSScreen screens];
-    const float mainScreenBottom = [[NSScreen mainScreen] frame].size.height;
+    const float mainScreenBottom = [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
 
     for (unsigned int i = 0; i < [screens count]; ++i)
     {

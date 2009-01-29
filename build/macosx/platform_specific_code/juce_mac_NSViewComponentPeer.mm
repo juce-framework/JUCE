@@ -701,7 +701,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         isSharedWindow = false;
         r.origin.x = (float) component->getX();
         r.origin.y = (float) component->getY();
-        r.origin.y = [[NSScreen mainScreen] frame].size.height - (r.origin.y + r.size.height);
+        r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
 
         unsigned int style = 0;
         if ((windowStyleFlags & windowHasTitleBar) == 0)
@@ -819,7 +819,14 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     }
     else
     {
-        r.origin.y = [[NSScreen mainScreen] frame].size.height - (r.origin.y + r.size.height);
+        r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
+
+        const BorderSize border (getFrameSize());
+        r.origin.x -= border.getLeft();
+        r.origin.y -= border.getTop();
+        r.size.width += border.getLeftAndRight();
+        r.size.height += border.getTopAndBottom();
+
         [window setFrame: r
                  display: true];
     }
@@ -832,11 +839,11 @@ void NSViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool 
     if (global && [view window] != 0)
     {
         r = [view convertRect: r toView: nil];
-
         NSRect wr = [[view window] frame];
         r.origin.x += wr.origin.x;
         r.origin.y += wr.origin.y;
-        y = (int) ([[NSScreen mainScreen] frame].size.height - r.origin.y - r.size.height);
+
+        y = (int) ([[[NSScreen screens] objectAtIndex:0] frame].size.height - r.origin.y - r.size.height);
     }
     else
     {
@@ -888,9 +895,9 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
     if (constrainer != 0)
     {
         NSRect current = [window frame];
-        current.origin.y = [[NSScreen mainScreen] frame].size.height - current.origin.y - current.size.height;
+        current.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - current.origin.y - current.size.height;
 
-        r.origin.y = [[NSScreen mainScreen] frame].size.height - r.origin.y - r.size.height;
+        r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
 
         int x = (int) r.origin.x;
         int y = (int) r.origin.y;
@@ -909,7 +916,7 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
                                   x == original.getX() && x + w != original.getRight());
 
         r.origin.x = x;
-        r.origin.y = [[NSScreen mainScreen] frame].size.height - r.size.height - y;
+        r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.size.height - y;
         r.size.width = w;
         r.size.height = h;
     }
