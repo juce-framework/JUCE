@@ -45996,6 +45996,9 @@ public:
     /** @internal */
     const MouseCursor getMouseCursor();
 
+    /** Can be overridden for more control over the pop-up menu behaviour. */
+    virtual void showColumnChooserMenu (const int columnIdClicked);
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -46024,7 +46027,6 @@ private:
     void endDrag (const int finalIndex);
     int getResizeDraggerAt (const int mouseX) const throw();
     void updateColumnUnderMouse (int x, int y);
-    void showColumnChooserMenu (const int);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
     TableHeaderComponent (const TableHeaderComponent&);
