@@ -54,9 +54,11 @@ namespace pnglibNamespace
 
 #if JUCE_INCLUDE_PNGLIB_CODE
 
-  using ::calloc;
+ #if _MSC_VER != 1310
+  using ::calloc; // (causes conflict in VS.NET 2003)
   using ::malloc;
   using ::free;
+ #endif
 
   extern "C"
   {
