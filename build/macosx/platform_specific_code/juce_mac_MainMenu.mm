@@ -49,7 +49,7 @@ using namespace JUCE_NAMESPACE;
 - (JuceMenuCallback*) initWithOwner: (JuceMainMenuHandler*) owner_;
 - (void) dealloc;
 - (void) menuItemInvoked: (id) menu;
-
+- (void) menuNeedsUpdate: (NSMenu*) menu;
 @end
 BEGIN_JUCE_NAMESPACE
 
@@ -63,7 +63,8 @@ public:
 
     //==============================================================================
     JuceMainMenuHandler() throw()
-        : currentModel (0)
+        : currentModel (0),
+          lastUpdateTime (0)
     {
         callback = [[JuceMenuCallback alloc] initWithOwner: this];
     }
@@ -95,7 +96,7 @@ public:
     }
 
     void addSubMenu (NSMenu* parent, const PopupMenu& child,
-                     const String& name, const int menuId, int& tag)
+                     const String& name, const int menuId, const int tag)
     {
         NSMenuItem* item = [parent addItemWithTitle: juceStringToNS (name)
                                              action: nil
@@ -109,22 +110,48 @@ public:
         [sub release];
     }
 
+    void updateSubMenu (NSMenuItem* parentItem, const PopupMenu& menuToCopy,
+                        const String& name, const int menuId, const int tag)
+    {
+        [parentItem setTag: tag];
+        NSMenu* menu = [parentItem submenu];
+
+        [menu setTitle: juceStringToNS (name)];
+
+        while ([menu numberOfItems] > 0)
+            [menu removeItemAtIndex: 0];
+
+        PopupMenu::MenuItemIterator iter (menuToCopy);
+
+        while (iter.next())
+            addMenuItem (iter, menu, menuId, tag);
+
+        [menu setAutoenablesItems: false];
+        [menu update];
+    }
+
     void menuBarItemsChanged (MenuBarModel*)
     {
-        NSMenu* menuBar = [NSApp mainMenu];
-        while ([menuBar numberOfItems] > 1)
-            [menuBar removeItemAtIndex: 1];
+        lastUpdateTime = Time::getMillisecondCounter();
 
+        StringArray menuNames;
         if (currentModel != 0)
-        {
-            const StringArray menuNames (currentModel->getMenuBarNames());
-            int menuId = 1;
+            menuNames = currentModel->getMenuBarNames();
 
-            for (int i = 0; i < menuNames.size(); ++i)
-            {
-                const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames [i]));
-                addSubMenu (menuBar, menu, menuNames [i], menuId, i);
-            }
+        NSMenu* menuBar = [NSApp mainMenu];
+        while ([menuBar numberOfItems] > 1 + menuNames.size())
+            [menuBar removeItemAtIndex: [menuBar numberOfItems] - 1];
+
+        int menuId = 1;
+
+        for (int i = 0; i < menuNames.size(); ++i)
+        {
+            const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames [i]));
+
+            if (i >= [menuBar numberOfItems] - 1)
+                addSubMenu (menuBar, menu, menuNames[i], menuId, i);
+            else
+                updateSubMenu ([menuBar itemAtIndex: 1 + i], menu, menuNames[i], menuId, i);
         }
     }
 
@@ -163,6 +190,12 @@ public:
             flashMenuBar ([item menu]);
     }
 
+    void updateMenus()
+    {
+        if (Time::getMillisecondCounter() > lastUpdateTime + 500)
+            menuBarItemsChanged (0);
+    }
+
     void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
     {
         if (currentModel != 0)
@@ -180,6 +213,7 @@ public:
     }
 
     MenuBarModel* currentModel;
+    uint32 lastUpdateTime;
 
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
@@ -199,7 +233,8 @@ public:
                                                       action: nil
                                                keyEquivalent: @""];
 
-            [item setEnabled: iter.isEnabled];
+            [item setEnabled: false];
+            [item setIndentationLevel: 5];
         }
         else if (iter.subMenu != 0)
         {
@@ -264,8 +299,8 @@ public:
         }
     }
 
-private:
     JuceMenuCallback* callback;
+private:
 
     NSMenu* createMenu (const PopupMenu menu,
                         const String& menuName,
@@ -275,6 +310,7 @@ private:
         NSMenu* m = [[NSMenu alloc] initWithTitle: juceStringToNS (menuName)];
 
         [m setAutoenablesItems: false];
+        [m setDelegate: callback];
 
         PopupMenu::MenuItemIterator iter (menu);
 
@@ -318,8 +354,13 @@ END_JUCE_NAMESPACE
     }
 }
 
-@end
+- (void) menuNeedsUpdate: (NSMenu*) menu;
+{
+    if (JuceMainMenuHandler::instance != 0)
+        JuceMainMenuHandler::instance->updateMenus();
+}
 
+@end
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
