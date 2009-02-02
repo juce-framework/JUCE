@@ -182,9 +182,28 @@ public:
         [menu removeItem: item];
     }
 
+    static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)
+    {
+        for (int i = [menu numberOfItems]; --i >= 0;)
+        {
+            NSMenuItem* m = [menu itemAtIndex: i];
+            if ([m tag] == info.commandID)
+                return m;
+
+            if ([m submenu] != 0)
+            {
+                NSMenuItem* found = findMenuItem ([m submenu], info);
+                if (found != 0)
+                    return found;
+            }
+        }
+
+        return 0;
+    }
+
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
     {
-        NSMenuItem* item = [[NSApp mainMenu] itemWithTag: info.commandID];
+        NSMenuItem* item = findMenuItem ([NSApp mainMenu], info);
 
         if (item != 0)
             flashMenuBar ([item menu]);
@@ -234,7 +253,6 @@ public:
                                                keyEquivalent: @""];
 
             [item setEnabled: false];
-            [item setIndentationLevel: 5];
         }
         else if (iter.subMenu != 0)
         {
@@ -247,7 +265,6 @@ public:
 
             NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
             [menuToAddTo setSubmenu: sub forItem: item];
-            [sub release];
         }
         else
         {

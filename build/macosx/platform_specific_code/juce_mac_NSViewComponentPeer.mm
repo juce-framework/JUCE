@@ -821,13 +821,7 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     {
         r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);
 
-        const BorderSize border (getFrameSize());
-        r.origin.x -= border.getLeft();
-        r.origin.y -= border.getTop();
-        r.size.width += border.getLeftAndRight();
-        r.size.height += border.getTopAndBottom();
-
-        [window setFrame: r
+        [window setFrame: [window frameRectForContentRect: r]
                  display: true];
     }
 }

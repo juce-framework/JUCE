@@ -999,15 +999,13 @@ const AffineTransform Path::getTransformToScaleToFit (const float x, const float
 }
 
 //==============================================================================
-static const float collisionDetectionTolerence = 20.0f;
-
-bool Path::contains (const float x, const float y) const throw()
+bool Path::contains (const float x, const float y, const float tolerence) const throw()
 {
     if (x <= pathXMin || x >= pathXMax
          || y <= pathYMin || y >= pathYMax)
         return false;
 
-    PathFlatteningIterator i (*this, AffineTransform::identity, collisionDetectionTolerence);
+    PathFlatteningIterator i (*this, AffineTransform::identity, tolerence);
 
     int positiveCrossings = 0;
     int negativeCrossings = 0;
@@ -1034,9 +1032,10 @@ bool Path::contains (const float x, const float y) const throw()
 }
 
 bool Path::intersectsLine (const float x1, const float y1,
-                           const float x2, const float y2) throw()
+                           const float x2, const float y2,
+                           const float tolerence) throw()
 {
-    PathFlatteningIterator i (*this, AffineTransform::identity, collisionDetectionTolerence);
+    PathFlatteningIterator i (*this, AffineTransform::identity, tolerence);
 
     const Line line1 (x1, y1, x2, y2);
 

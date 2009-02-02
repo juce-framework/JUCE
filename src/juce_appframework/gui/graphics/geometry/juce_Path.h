@@ -112,19 +112,29 @@ public:
 
         The path's winding rule is taken into account by this method.
 
+        The tolerence parameter is passed to the PathFlatteningIterator that
+        is used to trace the path - for more info about it, see the notes for
+        the PathFlatteningIterator constructor.
+
         @see closeSubPath, setUsingNonZeroWinding
     */
     bool contains (const float x,
-                   const float y) const throw();
+                   const float y,
+                   const float tolerence = 10.0f) const throw();
 
     /** Checks whether a line crosses the path.
 
         This will return positive if the line crosses any of the paths constituent
         lines or curves. It doesn't take into account whether the line is inside
         or outside the path, or whether the path is open or closed.
+
+        The tolerence parameter is passed to the PathFlatteningIterator that
+        is used to trace the path - for more info about it, see the notes for
+        the PathFlatteningIterator constructor.
     */
     bool intersectsLine (const float x1, const float y1,
-                         const float x2, const float y2) throw();
+                         const float x2, const float y2,
+                         const float tolerence = 10.0f) throw();
 
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */

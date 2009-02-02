@@ -917,7 +917,14 @@ void Graphics::drawImageTransformed (const Image* const imageToDraw,
          && (! context->isClipEmpty())
          && ! transform.isSingularity())
     {
-        if (fillAlphaChannelWithCurrentBrush)
+        if (transform.isIdentity())
+        {
+            drawImage (imageToDraw,
+                       sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight,
+                       sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight,
+                       fillAlphaChannelWithCurrentBrush);
+        }
+        else if (fillAlphaChannelWithCurrentBrush)
         {
             Path p;
             p.addRectangle ((float) sourceClipX, (float) sourceClipY,
