@@ -545,7 +545,10 @@ bool juce_launchFile (const String& fileName,
     const ScopedAutoReleasePool pool;
 
     if (parameters.isEmpty())
-        return [[NSWorkspace sharedWorkspace] openFile: juceStringToNS (fileName)];
+    {
+        return [[NSWorkspace sharedWorkspace] openFile: juceStringToNS (fileName)]
+            || [[NSWorkspace sharedWorkspace] openURL: [NSURL URLWithString: juceStringToNS (fileName)]];
+    }
 
     bool ok = false;
 

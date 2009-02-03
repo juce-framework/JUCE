@@ -34011,7 +34011,7 @@ public:
 
         @see AudioDeviceManager::setAudioDeviceSetup()
     */
-    struct AudioDeviceSetup
+    struct JUCE_API  AudioDeviceSetup
     {
         AudioDeviceSetup();
         bool operator== (const AudioDeviceSetup& other) const;
