@@ -33,129 +33,46 @@
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
-//==============================================================================
-static OSStatus pascal CubicMoveTo (const Float32Point *pt,
-                                    void* callBackDataPtr)
-{
-    Path* const p = (Path*) callBackDataPtr;
-    p->startNewSubPath (pt->x, pt->y);
-
-    return noErr;
-}
-
-static OSStatus pascal CubicLineTo (const Float32Point *pt,
-                                    void* callBackDataPtr)
-{
-    Path* const p = (Path*) callBackDataPtr;
-    p->lineTo (pt->x, pt->y);
-
-    return noErr;
-}
-
-static OSStatus pascal CubicCurveTo (const Float32Point *pt1,
-                                     const Float32Point *pt2,
-                                     const Float32Point *pt3,
-                                     void* callBackDataPtr)
-{
-    Path* const p = (Path*) callBackDataPtr;
-    p->cubicTo (pt1->x, pt1->y,
-                pt2->x, pt2->y,
-                pt3->x, pt3->y);
-
-    return noErr;
-}
-
-static OSStatus pascal CubicClosePath (void* callBackDataPtr)
-{
-    Path* const p = (Path*) callBackDataPtr;
-    p->closeSubPath();
-
-    return noErr;
-}
 
 //==============================================================================
-class ATSFontHelper
+class FontHelper
 {
-    ATSUFontID fontId;
-    ATSUStyle style;
-
-    ATSCubicMoveToUPP moveToProc;
-    ATSCubicLineToUPP lineToProc;
-    ATSCubicCurveToUPP curveToProc;
-    ATSCubicClosePathUPP closePathProc;
-
-    float totalSize, ascent;
-
-    TextToUnicodeInfo encodingInfo;
+    NSFont* font;
 
 public:
     String name;
     bool isBold, isItalic;
-    float fontSize;
+    float fontSize, totalSize, ascent;
     int refCount;
 
-    ATSFontHelper (const String& name_,
-                   const bool bold_,
-                   const bool italic_,
-                   const float size_)
-        : fontId (0),
+    FontHelper (const String& name_,
+                const bool bold_,
+                const bool italic_,
+                const float size_)
+        : font (0),
           name (name_),
           isBold (bold_),
           isItalic (italic_),
           fontSize (size_),
           refCount (1)
     {
-        const char* const nameUtf8 = name_.toUTF8();
+        font = [NSFont fontWithName: juceStringToNS (name_) size: size_];
 
-        ATSUFindFontFromName (const_cast <char*> (nameUtf8),
-                              strlen (nameUtf8),
-                              kFontFullName,
-                              kFontNoPlatformCode,
-                              kFontNoScriptCode,
-                              kFontNoLanguageCode,
-                              &fontId);
+        if (italic_)
+            font = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSItalicFontMask];
 
-        ATSUCreateStyle (&style);
+        if (bold_)
+            font = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSBoldFontMask];
 
-        ATSUAttributeTag attTypes[] = { kATSUFontTag,
-                                        kATSUQDBoldfaceTag,
-                                        kATSUQDItalicTag,
-                                        kATSUSizeTag };
+        [font retain];
 
-        ByteCount attSizes[] = { sizeof (ATSUFontID),
-                                 sizeof (Boolean),
-                                 sizeof (Boolean),
-                                 sizeof (Fixed) };
-
-        Boolean bold = bold_, italic = italic_;
-        Fixed size = X2Fix (size_);
-
-        ATSUAttributeValuePtr attValues[] = { &fontId,
-                                              &bold,
-                                              &italic,
-                                              &size };
-
-        ATSUSetAttributes (style, 4, attTypes, attSizes, attValues);
-
-        moveToProc = NewATSCubicMoveToUPP (CubicMoveTo);
-        lineToProc = NewATSCubicLineToUPP (CubicLineTo);
-        curveToProc = NewATSCubicCurveToUPP (CubicCurveTo);
-        closePathProc = NewATSCubicClosePathUPP (CubicClosePath);
-
-        ascent = 0.0f;
-        float kern, descent = 0.0f;
-        getPathAndKerning (T('N'), T('O'), 0, kern, &ascent, &descent);
-        totalSize = ascent + descent;
+        ascent = fabsf ([font ascender]);
+        totalSize = ascent + fabsf ([font descender]);
     }
 
-    ~ATSFontHelper()
+    ~FontHelper()
     {
-        ATSUDisposeStyle (style);
-
-        DisposeATSCubicMoveToUPP (moveToProc);
-        DisposeATSCubicLineToUPP (lineToProc);
-        DisposeATSCubicCurveToUPP (curveToProc);
-        DisposeATSCubicClosePathUPP (closePathProc);
+        [font release];
     }
 
     bool getPathAndKerning (const juce_wchar char1,
@@ -165,128 +82,65 @@ public:
                             float* ascent,
                             float* descent)
     {
-        bool ok = false;
+        const ScopedAutoReleasePool pool;
 
-        UniChar buffer[4];
-        buffer[0] = T(' ');
-        buffer[1] = char1;
-        buffer[2] = char2;
-        buffer[3] = 0;
+        if (font == 0 
+             || ! [[font coveredCharacterSet] longCharacterIsMember: (UTF32Char) char1])
+            return false;
 
-        UniCharCount count = kATSUToTextEnd;
-        ATSUTextLayout layout;
-        OSStatus err = ATSUCreateTextLayoutWithTextPtr (buffer,
-                                                        0,
-                                                        2,
-                                                        2,
-                                                        1,
-                                                        &count,
-                                                        &style,
-                                                        &layout);
-        if (err == noErr)
+        String chars;
+        chars << ' ' << char1 << char2;
+        NSTextStorage* textStorage = [[[NSTextStorage alloc] initWithString: juceStringToNS (chars)] autorelease];
+        NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+        NSTextContainer* textContainer = [[[NSTextContainer alloc] init] autorelease];
+        [layoutManager addTextContainer: textContainer];
+        [textStorage addLayoutManager: layoutManager];
+        [textStorage setFont: font];
+
+        unsigned int glyphIndex = [layoutManager glyphRangeForCharacterRange: NSMakeRange (1, 1) 
+                                                        actualCharacterRange: 0].location;
+        NSPoint p1 = [layoutManager locationForGlyphAtIndex: glyphIndex];
+        NSPoint p2 = [layoutManager locationForGlyphAtIndex: glyphIndex + 1];
+        kerning = p2.x - p1.x;
+
+        if (ascent != 0)
+            *ascent = this->ascent;
+
+        if (descent != 0)
+            *descent = fabsf ([font descender]);
+
+        if (path != 0)
         {
-            ATSUSetTransientFontMatching (layout, true);
+            NSBezierPath* bez = [NSBezierPath bezierPath];
+            [bez moveToPoint: NSMakePoint (0, 0)];
+            [bez appendBezierPathWithGlyph: [layoutManager glyphAtIndex: glyphIndex] 
+                                                                 inFont: font];
 
-            ATSLayoutRecord* layoutRecords;
-            ItemCount numRecords;
-            Fixed* deltaYs;
-            ItemCount numDeltaYs;
-
-            ATSUDirectGetLayoutDataArrayPtrFromTextLayout (layout,
-                                                           0,
-                                                           kATSUDirectDataLayoutRecordATSLayoutRecordCurrent,
-                                                           (void**) &layoutRecords,
-                                                           &numRecords);
-
-            ATSUDirectGetLayoutDataArrayPtrFromTextLayout (layout,
-                                                           0,
-                                                           kATSUDirectDataBaselineDeltaFixedArray,
-                                                           (void**) &deltaYs,
-                                                           &numDeltaYs);
-
-            if (numRecords > 2)
+            for (int i = 0; i < [bez elementCount]; ++i)
             {
-                kerning = (float) (Fix2X (layoutRecords[2].realPos)
-                                   - Fix2X (layoutRecords[1].realPos));
-
-                if (ascent != 0)
+                NSPoint p[3];
+                switch ([bez elementAtIndex: i associatedPoints: p])
                 {
-                    ATSUTextMeasurement asc;
-                    ByteCount actualSize;
-
-                    ATSUGetLineControl (layout,
-                                        0,
-                                        kATSULineAscentTag,
-                                        sizeof (ATSUTextMeasurement),
-                                        &asc,
-                                        &actualSize);
-
-                    *ascent = (float) Fix2X (asc);
-                }
-
-                if (descent != 0)
-                {
-                    ATSUTextMeasurement desc;
-                    ByteCount actualSize;
-
-                    ATSUGetLineControl (layout,
-                                        0,
-                                        kATSULineDescentTag,
-                                        sizeof (ATSUTextMeasurement),
-                                        &desc,
-                                        &actualSize);
-
-                    *descent = (float) Fix2X (desc);
-                }
-
-                if (path != 0)
-                {
-                    OSStatus callbackResult;
-
-                    ok = (ATSUGlyphGetCubicPaths (style,
-                                                  layoutRecords[1].glyphID,
-                                                  moveToProc,
-                                                  lineToProc,
-                                                  curveToProc,
-                                                  closePathProc,
-                                                  (void*) path,
-                                                  &callbackResult) == noErr);
-
-                    if (numDeltaYs > 0 && ok)
-                    {
-                        const float dy = (float) Fix2X (deltaYs[1]);
-
-                        path->applyTransform (AffineTransform::translation (0.0f, dy));
-                    }
-                }
-                else
-                {
-                    ok = true;
+                case NSMoveToBezierPathElement:
+                    path->startNewSubPath (p[0].x, -p[0].y);
+                    break;
+                case NSLineToBezierPathElement:
+                    path->lineTo (p[0].x, -p[0].y);
+                    break;
+                case NSCurveToBezierPathElement:
+                    path->cubicTo (p[0].x, -p[0].y, p[1].x, -p[1].y, p[2].x, -p[2].y);
+                    break;
+                case NSClosePathBezierPathElement:
+                    path->closeSubPath();
+                    break;
+                default:
+                    jassertfalse
+                    break;
                 }
             }
-
-            if (deltaYs != 0)
-                ATSUDirectReleaseLayoutDataArrayPtr (0, kATSUDirectDataBaselineDeltaFixedArray,
-                                                     (void**) &deltaYs);
-
-            if (layoutRecords != 0)
-                ATSUDirectReleaseLayoutDataArrayPtr (0, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent,
-                                                     (void**) &layoutRecords);
-
-            ATSUDisposeTextLayout (layout);
         }
 
-        return kerning;
-    }
-
-    float getAscent()
-    {
-        return ascent;
-    }
-
-    float getTotalHeight()
-    {
-        return totalSize;
+        return kerning != 0;
     }
 
     juce_wchar getDefaultChar()
@@ -296,35 +150,35 @@ public:
 };
 
 //==============================================================================
-class ATSFontHelperCache  : public Timer,
-                            public DeletedAtShutdown
+class FontHelperCache  : public Timer,
+                         public DeletedAtShutdown
 {
     VoidArray cache;
 
 public:
-    ATSFontHelperCache()
+    FontHelperCache()
     {
     }
 
-    ~ATSFontHelperCache()
+    ~FontHelperCache()
     {
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f = (ATSFontHelper*) cache.getUnchecked(i);
+            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
             delete f;
         }
 
         clearSingletonInstance();
     }
 
-    ATSFontHelper* getFont (const String& name,
-                            const bool bold,
-                            const bool italic,
-                            const float size = 1024)
+    FontHelper* getFont (const String& name,
+                         const bool bold,
+                         const bool italic,
+                         const float size = 1024)
     {
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f = (ATSFontHelper*) cache.getUnchecked(i);
+            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
 
             if (f->name == name
                 && f->isBold == bold
@@ -336,16 +190,16 @@ public:
             }
         }
 
-        ATSFontHelper* const f = new ATSFontHelper (name, bold, italic, size);
+        FontHelper* const f = new FontHelper (name, bold, italic, size);
         cache.add (f);
         return f;
     }
 
-    void releaseFont (ATSFontHelper* f)
+    void releaseFont (FontHelper* f)
     {
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f2 = (ATSFontHelper*) cache.getUnchecked(i);
+            FontHelper* const f2 = (FontHelper*) cache.getUnchecked(i);
 
             if (f == f2)
             {
@@ -365,7 +219,7 @@ public:
 
         for (int i = cache.size(); --i >= 0;)
         {
-            ATSFontHelper* const f = (ATSFontHelper*) cache.getUnchecked(i);
+            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
 
             if (f->refCount == 0)
             {
@@ -378,10 +232,10 @@ public:
             delete this;
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (ATSFontHelperCache)
+    juce_DeclareSingleton_SingleThreaded_Minimal (FontHelperCache)
 };
 
-juce_ImplementSingleton_SingleThreaded (ATSFontHelperCache)
+juce_ImplementSingleton_SingleThreaded (FontHelperCache)
 
 //==============================================================================
 void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
@@ -392,11 +246,11 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
     // This method is only safe to be called from the normal UI thread..
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-    ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
-                                    ->getFont (fontName, bold, italic);
+    FontHelper* const helper = FontHelperCache::getInstance()
+                                  ->getFont (fontName, bold, italic);
 
     clear();
-    setAscent (helper->getAscent() / helper->getTotalHeight());
+    setAscent (helper->ascent / helper->totalSize);
     setName (fontName);
     setDefaultCharacter (helper->getDefaultChar());
     setBold (bold);
@@ -408,7 +262,7 @@ void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
         jassertfalse
     }
 
-    ATSFontHelperCache::getInstance()->releaseFont (helper);
+    FontHelperCache::getInstance()->releaseFont (helper);
 }
 
 bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
@@ -416,8 +270,8 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
     // This method is only safe to be called from the normal UI thread..
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-    ATSFontHelper* const helper = ATSFontHelperCache::getInstance()
-                                    ->getFont (getName(), isBold(), isItalic());
+    FontHelper* const helper = FontHelperCache::getInstance()
+                                  ->getFont (getName(), isBold(), isItalic());
 
     Path path;
     float width;
@@ -425,10 +279,10 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 
     if (helper->getPathAndKerning (character, T('I'), &path, width, 0, 0))
     {
-        path.applyTransform (AffineTransform::scale (1.0f / helper->getTotalHeight(),
-                                                     1.0f / helper->getTotalHeight()));
+        path.applyTransform (AffineTransform::scale (1.0f / helper->totalSize,
+                                                     1.0f / helper->totalSize));
 
-        addGlyph (character, path, width / helper->getTotalHeight());
+        addGlyph (character, path, width / helper->totalSize);
 
         for (int i = 0; i < glyphs.size(); ++i)
         {
@@ -437,7 +291,7 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
             float kerning;
             if (helper->getPathAndKerning (character, g->getCharacter(), 0, kerning, 0, 0))
             {
-                kerning = (kerning - width) / helper->getTotalHeight();
+                kerning = (kerning - width) / helper->totalSize;
 
                 if (kerning != 0)
                     addKerningPair (character, g->getCharacter(), kerning);
@@ -445,7 +299,7 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
 
             if (helper->getPathAndKerning (g->getCharacter(), character, 0, kerning, 0, 0))
             {
-                kerning = kerning / helper->getTotalHeight() - g->width;
+                kerning = kerning / helper->totalSize - g->width;
 
                 if (kerning != 0)
                     addKerningPair (g->getCharacter(), character, kerning);
@@ -455,68 +309,20 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
         foundOne = true;
     }
 
-    ATSFontHelperCache::getInstance()->releaseFont (helper);
+    FontHelperCache::getInstance()->releaseFont (helper);
     return foundOne;
 }
 
+//==============================================================================
 const StringArray Font::findAllTypefaceNames() throw()
 {
     StringArray names;
-    ATSFontIterator iter;
 
-    if (ATSFontIteratorCreate (kATSFontContextGlobal,
-                               0,
-                               0,
-                               kATSOptionFlagsRestrictedScope,
-                               &iter) == noErr)
-    {
-        ATSFontRef font;
+    const ScopedAutoReleasePool pool;
+    NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
 
-        while (ATSFontIteratorNext (iter, &font) == noErr)
-        {
-            CFStringRef name;
-
-            if (ATSFontGetName (font,
-                                kATSOptionFlagsDefault,
-                                &name) == noErr)
-            {
-                const String nm (PlatformUtilities::cfStringToJuceString (name));
-
-                if (nm.isNotEmpty())
-                    names.add (nm);
-
-                CFRelease (name);
-            }
-        }
-
-        ATSFontIteratorRelease (&iter);
-    }
-
-    // Use some totuous logic to eliminate bold/italic versions of fonts that we've already got
-    // a plain version of. This is only necessary because of Carbon's total lack of support
-    // for dealing with font families...
-    for (int j = names.size(); --j >= 0;)
-    {
-        const char* const endings[] = { " bold", " italic", " bold italic", " bolditalic",
-                                        " oblque", " bold oblique", " boldoblique" };
-
-        for (int i = 0; i < numElementsInArray (endings); ++i)
-        {
-            const String ending (endings[i]);
-
-            if (names[j].endsWithIgnoreCase (ending))
-            {
-                const String root (names[j].dropLastCharacters (ending.length()).trimEnd());
-
-                if (names.contains (root)
-                    || names.contains (root + T(" plain"), true))
-                {
-                    names.remove (j);
-                    break;
-                }
-            }
-        }
-    }
+    for (int i = 0; i < [fonts count]; ++i)
+        names.add (nsStringToJuce ((NSString*) [fonts objectAtIndex: i]));
 
     names.sort (true);
     return names;

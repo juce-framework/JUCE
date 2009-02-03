@@ -48,7 +48,6 @@
 #import <QTKit/QTKit.h>
 #import <WebKit/WebKit.h>
 #import <DiscRecording/DiscRecording.h>
-#import <ApplicationServices/ApplicationServices.h>
 #import <IOKit/IOKitLib.h>
 #import <IOKit/IOCFPlugIn.h>
 #import <IOKit/hid/IOHIDLib.h>
