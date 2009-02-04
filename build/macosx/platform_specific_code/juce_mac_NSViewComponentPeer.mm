@@ -1321,7 +1321,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
     context.setOrigin (originX, originY);
 
     const NSRect* rects = 0;
-    int numRects = 0;
+    NSInteger numRects = 0;
     [view getRectsBeingDrawn: &rects count: &numRects];
 
     RectangleList clip;
