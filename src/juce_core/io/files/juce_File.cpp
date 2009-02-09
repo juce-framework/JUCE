@@ -483,7 +483,7 @@ const File File::getChildFile (String relativePath) const throw()
                     if (relativePath [2] == 0 || relativePath[2] == separator)
                     {
                         const int lastSlash = path.lastIndexOfChar (separator);
-                        if (lastSlash > 0)
+                        if (lastSlash >= 0)
                             path = path.substring (0, lastSlash);
 
                         relativePath = relativePath.substring (3);

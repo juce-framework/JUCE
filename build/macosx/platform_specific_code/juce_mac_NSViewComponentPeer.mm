@@ -95,6 +95,7 @@ END_JUCE_NAMESPACE
 {
 @private
     NSViewComponentPeer* owner;
+    bool isZooming;
 }
 
 - (void) setOwner: (NSViewComponentPeer*) owner;
@@ -102,6 +103,7 @@ END_JUCE_NAMESPACE
 - (BOOL) windowShouldClose: (id) window;
 - (NSRect) constrainFrameRect: (NSRect) frameRect toScreen: (NSScreen*) screen;
 - (NSSize) windowWillResize: (NSWindow*) window toSize: (NSSize) proposedFrameSize;
+- (void) zoom: (id) sender;
 @end
 
 BEGIN_JUCE_NAMESPACE
@@ -418,6 +420,7 @@ END_JUCE_NAMESPACE
 - (void) setOwner: (NSViewComponentPeer*) owner_
 {
     owner = owner_;
+    isZooming = false;
 }
 
 - (BOOL) canBecomeKeyWindow
@@ -440,6 +443,9 @@ END_JUCE_NAMESPACE
 
 - (NSSize) windowWillResize: (NSWindow*) window toSize: (NSSize) proposedFrameSize
 {
+    if (isZooming)
+        return proposedFrameSize;
+
     NSRect frameRect = [self frame];
     frameRect.size = proposedFrameSize;
 
@@ -447,6 +453,21 @@ END_JUCE_NAMESPACE
         frameRect = owner->constrainRect (frameRect);
 
     return frameRect.size;
+}
+
+- (void) zoom: (id) sender
+{
+    isZooming = true;
+    [super zoom: sender];
+    isZooming = false;
+}
+
+- (void) windowWillMove: (NSNotification*) notification
+{
+    if (juce::Component::getCurrentlyModalComponent() != 0
+          && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
+          && (owner->getStyleFlags() & juce::ComponentPeer::windowHasTitleBar) != 0)
+        juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 }
 
 @end
@@ -1362,14 +1383,14 @@ void NSViewComponentPeer::redirectMovedOrResized()
 }
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
+void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
 {
     // Very annoyingly, this function has to use the old SetSystemUIMode function,
     // which is in Carbon.framework. But, because there's no Cocoa equivalent, it
     // is apparently still available in 64-bit apps..
     if (enableOrDisable)
     {
-        SetSystemUIMode (kUIModeAllSuppressed, kUIOptionAutoShowMenuBar);
+        SetSystemUIMode (kUIModeAllSuppressed, allowMenusAndBars ? kUIOptionAutoShowMenuBar : 0);
         kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
     }
     else

@@ -328,9 +328,9 @@ void Desktop::resetTimer() throw()
 }
 
 //==============================================================================
-extern void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable);
+extern void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars);
 
-void Desktop::setKioskModeComponent (Component* componentToUse)
+void Desktop::setKioskModeComponent (Component* componentToUse, const bool allowMenusAndBars)
 {
     if (kioskModeComponent != componentToUse)
     {
@@ -341,7 +341,7 @@ void Desktop::setKioskModeComponent (Component* componentToUse)
 
         if (kioskModeComponent->isValidComponent())
         {
-            juce_setKioskComponent (kioskModeComponent, false);
+            juce_setKioskComponent (kioskModeComponent, false, allowMenusAndBars);
 
             kioskModeComponent->setBounds (kioskComponentOriginalBounds);
         }
@@ -357,7 +357,7 @@ void Desktop::setKioskModeComponent (Component* componentToUse)
 
             kioskComponentOriginalBounds = kioskModeComponent->getBounds();
 
-            juce_setKioskComponent (kioskModeComponent, true);
+            juce_setKioskComponent (kioskModeComponent, true, allowMenusAndBars);
         }
     }
 }

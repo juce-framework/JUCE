@@ -70,7 +70,8 @@ void NamedPipe::cancelPendingReads()
         intern->stopReadOperation = true;
 
         char buffer [1] = { 0 };
-        ::write (intern->pipeIn, buffer, 1);
+        int bytesWritten = ::write (intern->pipeIn, buffer, 1);
+        (void) bytesWritten;
 
         int timeout = 2000;
         while (intern->blocked && --timeout >= 0)

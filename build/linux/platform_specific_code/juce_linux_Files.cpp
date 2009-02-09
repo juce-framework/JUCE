@@ -285,8 +285,7 @@ void juce_setCurrentExecutableFileName (const String& filename) throw()
 const File File::getCurrentWorkingDirectory() throw()
 {
     char buf [2048];
-    getcwd (buf, sizeof(buf));
-    return File (String::fromUTF8 ((const uint8*) buf));
+    return File (String::fromUTF8 ((const uint8*) getcwd (buf, sizeof (buf))));
 }
 
 bool File::setAsCurrentWorkingDirectory() const throw()

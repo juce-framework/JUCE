@@ -225,7 +225,7 @@ public:
     {
         jassert (numValuesToRemove >= 0);
 
-        if (numValuesToRemove > 0
+        if (numValuesToRemove != 0
              && firstValue < values.getLast())
         {
             const bool onAtStart = contains (firstValue - 1);

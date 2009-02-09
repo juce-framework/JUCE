@@ -90,7 +90,10 @@ public:
 
         String chars;
         chars << ' ' << char1 << char2;
-        NSTextStorage* textStorage = [[[NSTextStorage alloc] initWithString: juceStringToNS (chars)] autorelease];
+        NSTextStorage* textStorage = [[[NSTextStorage alloc] 
+              initWithString: juceStringToNS (chars)
+                  attributes: [NSDictionary dictionaryWithObject: [NSNumber numberWithInt: 0] 
+                                                          forKey: NSLigatureAttributeName]] autorelease];
         NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
         NSTextContainer* textContainer = [[[NSTextContainer alloc] init] autorelease];
         [layoutManager addTextContainer: textContainer];

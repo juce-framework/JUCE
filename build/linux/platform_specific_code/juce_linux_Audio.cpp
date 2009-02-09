@@ -448,7 +448,7 @@ public:
             }
 
             if (! outputDevice->setParameters ((unsigned int) sampleRate,
-                                               jlimit (minChansOut, maxChansOut, currentOutputChans.getHighestBit() + 1),
+                                               jlimit ((int) minChansOut, (int) maxChansOut, currentOutputChans.getHighestBit() + 1),
                                                bufferSize))
             {
                 error = outputDevice->error;
@@ -469,7 +469,7 @@ public:
             }
 
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
-                                              jlimit (minChansIn, maxChansIn, currentInputChans.getHighestBit() + 1),
+                                              jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
                                               bufferSize))
             {
                 error = inputDevice->error;

@@ -2380,7 +2380,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 */
 
 //==============================================================================
-void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable)
+void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     if (enableOrDisable)
         kioskModeComponent->setBounds (Desktop::getInstance().getMainMonitorArea (false));
