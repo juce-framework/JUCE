@@ -429,7 +429,7 @@ void Graphics::strokePath (const Path& path,
                            const PathStrokeType& strokeType,
                            const AffineTransform& transform) const throw()
 {
-    if (! state->colour.isTransparent())
+    if ((! state->colour.isTransparent()) || state->brush != 0)
     {
         Path stroke;
         strokeType.createStrokedPath (stroke, path, transform);

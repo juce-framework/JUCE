@@ -181,6 +181,13 @@ public:
     */
     const StringArray getCountryCodes() const throw()           { return countryCodes; }
 
+
+    //==============================================================================
+    /** Indicates whether to use a case-insensitive search when looking up a string.
+        This defaults to true.
+    */
+    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

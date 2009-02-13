@@ -65,6 +65,7 @@ protected:
           numAllocated (0),
           granularity (granularity_)
     {
+        jassert (granularity > 0);
     }
 
     /** Destructor. */

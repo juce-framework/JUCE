@@ -69,12 +69,26 @@
  #include "public.sdk/source/vst2.x/aeffeditor.h"
  #include "public.sdk/source/vst2.x/audioeffectx.cpp"
  #include "public.sdk/source/vst2.x/audioeffect.cpp"
+
+ #if JUCE_LINUX
+  #define __cdecl
+ #endif
+ 
+ #if ! VST_2_4_EXTENSIONS
+  #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
+ #endif 
+
 #else
  // VSTSDK V2.3 includes..
  #include "source/common/audioeffectx.h"
  #include "source/common/AEffEditor.hpp"
  #include "source/common/audioeffectx.cpp"
  #include "source/common/AudioEffect.cpp"
+
+ #if (! VST_2_3_EXTENSIONS) || VST_2_4_EXTENSIONS
+  #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
+ #endif 
+
  typedef long VstInt32;
  typedef long VstIntPtr;
  enum Vst2StringConstants
@@ -966,7 +980,13 @@ public:
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput)
     {
-        // if this method isn't implemented, nuendo4 + cubase4 crash when you've got multiple channels..
+        if  (numInChans != pluginInput->numChannels
+              || numOutChans != pluginOutput->numChannels)
+        {
+             setNumInputs (pluginInput->numChannels);
+             setNumOutputs (pluginOutput->numChannels);
+             ioChanged();
+        }
 
         numInChans = pluginInput->numChannels;
         numOutChans = pluginOutput->numChannels;

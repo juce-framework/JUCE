@@ -130,6 +130,11 @@ void StringPairArray::remove (const int index) throw()
     values.remove (index);
 }
 
+void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase) throw()
+{
+    ignoreCase = shouldIgnoreCase;
+}
+
 void StringPairArray::minimiseStorageOverheads() throw()
 {
     keys.minimiseStorageOverheads();

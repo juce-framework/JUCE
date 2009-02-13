@@ -153,7 +153,11 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
                 destBuffer = (void*) (((char*) destBuffer) + bytesAvailable);
             }
 
+            const int64 oldLastReadPos = lastReadPos;
             ensureBuffered();
+
+            if (oldLastReadPos == lastReadPos)
+                break; // if ensureBuffered() failed to read any more data, bail out
 
             if (isExhausted())
                 break;

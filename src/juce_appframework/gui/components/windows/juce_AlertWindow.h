@@ -339,6 +339,8 @@ protected:
     void lookAndFeelChanged();
     /** @internal */
     void userTriedToCloseWindow();
+    /** @internal */
+    int getDesktopWindowStyleFlags() const;
 
 private:
     String text;

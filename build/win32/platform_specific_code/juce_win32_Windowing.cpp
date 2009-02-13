@@ -2033,8 +2033,17 @@ private:
                         return 0;
 
                     case WM_QUIT:
-                        JUCEApplication::quit();
+                        if (JUCEApplication::getInstance() != 0)
+                            JUCEApplication::getInstance()->systemRequestedQuit();
                         return 0;
+
+                    case WM_QUERYENDSESSION:
+                        if (JUCEApplication::getInstance() != 0)
+                        {
+                            JUCEApplication::getInstance()->systemRequestedQuit();
+                            return MessageManager::getInstance()->hasStopMessageBeenSent();
+                        }
+                        return TRUE;
 
                     //==============================================================================
                     case WM_TRAYNOTIFY:

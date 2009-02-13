@@ -2783,6 +2783,7 @@ protected:
           numAllocated (0),
           granularity (granularity_)
     {
+        jassert (granularity > 0);
     }
 
     /** Destructor. */
@@ -8102,6 +8103,10 @@ public:
     */
     void remove (const int index) throw();
 
+    /** Indicates whether to use a case-insensitive search when looking up a key string.
+    */
+    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after
@@ -11214,23 +11219,26 @@ public:
     {
         jassert (numValuesToRemove >= 0);
 
-        if (numValuesToRemove != 0
+        if (numValuesToRemove >= 0
              && firstValue < values.getLast())
         {
             const bool onAtStart = contains (firstValue - 1);
-            Type lastValue = firstValue + numValuesToRemove;
-
-            if (lastValue < firstValue) // possible if the signed arithmetic wraps around
-                lastValue = values.getLast();
-
+            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
             const bool onAtEnd = contains (lastValue);
 
             for (int i = values.size(); --i >= 0;)
             {
-                if (values.getUnchecked(i) >= firstValue
-                     && values.getUnchecked(i) <= lastValue)
+                if (values.getUnchecked(i) <= lastValue)
                 {
-                    values.remove (i);
+                    while (values.getUnchecked(i) >= firstValue)
+                    {
+                        values.remove (i);
+
+                        if (--i < 0)
+                            break;
+                    }
+
+                    break;
                 }
             }
 
@@ -13692,6 +13700,11 @@ public:
         The country codes are supposed to be 2-character ISO complient codes.
     */
     const StringArray getCountryCodes() const throw()           { return countryCodes; }
+
+    /** Indicates whether to use a case-insensitive search when looking up a string.
+        This defaults to true.
+    */
+    void setIgnoresCase (const bool shouldIgnoreCase) throw();
 
     juce_UseDebuggingNewOperator
 
@@ -50713,6 +50726,8 @@ protected:
     void lookAndFeelChanged();
     /** @internal */
     void userTriedToCloseWindow();
+    /** @internal */
+    int getDesktopWindowStyleFlags() const;
 
 private:
     String text;

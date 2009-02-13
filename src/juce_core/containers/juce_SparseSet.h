@@ -225,23 +225,26 @@ public:
     {
         jassert (numValuesToRemove >= 0);
 
-        if (numValuesToRemove != 0
+        if (numValuesToRemove >= 0
              && firstValue < values.getLast())
         {
             const bool onAtStart = contains (firstValue - 1);
-            Type lastValue = firstValue + numValuesToRemove;
-
-            if (lastValue < firstValue) // possible if the signed arithmetic wraps around
-                lastValue = values.getLast();
-
+            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
             const bool onAtEnd = contains (lastValue);
 
             for (int i = values.size(); --i >= 0;)
             {
-                if (values.getUnchecked(i) >= firstValue
-                     && values.getUnchecked(i) <= lastValue)
+                if (values.getUnchecked(i) <= lastValue)
                 {
-                    values.remove (i);
+                    while (values.getUnchecked(i) >= firstValue)
+                    {
+                        values.remove (i);
+
+                        if (--i < 0)
+                            break;
+                    }
+
+                    break;
                 }
             }
 

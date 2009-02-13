@@ -591,6 +591,11 @@ void AlertWindow::lookAndFeelChanged()
     setDropShadowEnabled ((flags & ComponentPeer::windowHasDropShadow) != 0);
 }
 
+int AlertWindow::getDesktopWindowStyleFlags() const
+{
+    return getLookAndFeel().getAlertBoxWindowFlags();
+}
+
 //==============================================================================
 struct AlertWindowInfo
 {

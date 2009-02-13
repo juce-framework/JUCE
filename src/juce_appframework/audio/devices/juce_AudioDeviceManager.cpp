@@ -379,7 +379,7 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
     const String newOutputDeviceName (numOutputChansNeeded == 0 ? String::empty : newSetup.outputDeviceName);
 
     if (currentSetup.inputDeviceName != newInputDeviceName
-         || currentSetup.inputDeviceName != newOutputDeviceName
+         || currentSetup.outputDeviceName != newOutputDeviceName
          || currentAudioDevice == 0)
     {
         deleteCurrentDevice();
@@ -832,11 +832,17 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 {
     if (defaultMidiOutputName != deviceName)
     {
+        if (currentCallback != 0 && currentAudioDevice != 0)
+            currentCallback->audioDeviceStopped();
+
         deleteAndZero (defaultMidiOutput);
         defaultMidiOutputName = deviceName;
 
         if (deviceName.isNotEmpty())
             defaultMidiOutput = MidiOutput::openDevice (MidiOutput::getDevices().indexOf (deviceName));
+
+        if (currentCallback != 0 && currentAudioDevice != 0)
+            currentCallback->audioDeviceAboutToStart (currentAudioDevice);
 
         updateXml();
         sendChangeMessage (this);

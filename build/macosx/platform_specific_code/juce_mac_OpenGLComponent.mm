@@ -33,6 +33,88 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_OPENGL
 
+END_JUCE_NAMESPACE
+
+//==============================================================================
+@interface ThreadSafeNSOpenGLView  : NSOpenGLView
+{
+    CriticalSection* contextLock;	
+    bool needsUpdate;
+}
+
+- (id) initWithFrame: (NSRect) frameRect pixelFormat: (NSOpenGLPixelFormat*) format;
+- (bool) makeActive;
+- (void) makeInactive;
+- (void) reshape;
+@end
+
+@implementation ThreadSafeNSOpenGLView
+
+- (id) initWithFrame: (NSRect) frameRect 
+         pixelFormat: (NSOpenGLPixelFormat*) format
+{
+    contextLock = new CriticalSection();
+    self = [super initWithFrame: frameRect pixelFormat: format];
+    
+    if (self != nil)
+        [[NSNotificationCenter defaultCenter] addObserver: self 
+                                                 selector: @selector (_surfaceNeedsUpdate:)
+                                                     name: NSViewGlobalFrameDidChangeNotification
+                                                   object: self];
+    return self;
+}
+
+- (void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver: self];
+    delete contextLock;
+    [super dealloc];
+}
+
+- (bool) makeActive
+{
+    const ScopedLock sl (*contextLock);
+ 
+    if ([self openGLContext] == 0)
+        return false;
+
+    [[self openGLContext] makeCurrentContext];
+
+    if (needsUpdate)
+    {
+        [super update];
+        needsUpdate = false;
+    }
+
+    return true;
+}
+
+- (void) makeInactive
+{
+    const ScopedLock sl (*contextLock);
+    [NSOpenGLContext clearCurrentContext];
+}
+
+- (void) _surfaceNeedsUpdate: (NSNotification*) notification
+{
+    const ScopedLock sl (*contextLock);
+    needsUpdate = true;
+}
+
+- (void) update
+{
+    const ScopedLock sl (*contextLock);
+    needsUpdate = true;
+}
+
+- (void) reshape
+{
+    const ScopedLock sl (*contextLock);
+    needsUpdate = true;
+}
+
+@end
+BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 class WindowedGLContext     : public OpenGLContext
@@ -50,6 +132,7 @@ public:
         int n = 0;
         attribs[n++] = NSOpenGLPFADoubleBuffer;
         attribs[n++] = NSOpenGLPFAAccelerated;
+        attribs[n++] = NSOpenGLPFAMPSafe; // NSOpenGLPFAAccelerated, NSOpenGLPFAMultiScreen, NSOpenGLPFASingleRenderer
         attribs[n++] = NSOpenGLPFAColorSize;
         attribs[n++] = (NSOpenGLPixelFormatAttribute) jmax (pixelFormat.redBits,
                                                             pixelFormat.greenBits,
@@ -67,7 +150,6 @@ public:
                                                             pixelFormat.accumulationBufferAlphaBits);
 
         // xxx not sure how to do fullSceneAntiAliasingNumSamples..
-
         attribs[n++] = NSOpenGLPFASampleBuffers;
         attribs[n++] = (NSOpenGLPixelFormatAttribute) 1;
         attribs[n++] = NSOpenGLPFAClosestPolicy;
@@ -77,21 +159,13 @@ public:
         NSOpenGLPixelFormat* format
             = [[NSOpenGLPixelFormat alloc] initWithAttributes: attribs];
 
-        NSOpenGLView* view
-            = [[NSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
-                                      pixelFormat: format];
+        view = [[ThreadSafeNSOpenGLView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
+                                                 pixelFormat: format];
 
-        if (sharedContext != 0)
-        {
-            renderContext = [[NSOpenGLContext alloc] initWithFormat: format
-                                                       shareContext: sharedContext];
-            [view setOpenGLContext: renderContext];
-            [renderContext setView: view];
-        }
-        else
-        {
-            renderContext = [view openGLContext];
-        }
+        renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
+                                                    shareContext: sharedContext] autorelease];
+        [view setOpenGLContext: renderContext];
+        [renderContext setView: view];
 
         [format release];
 
@@ -108,15 +182,13 @@ public:
     bool makeActive() const throw()
     {
         jassert (renderContext != 0);
-        [renderContext makeCurrentContext];
-        return renderContext != 0;
+        [view makeActive];
+        return isActive();
     }
 
     bool makeInactive() const throw()
     {
-        if (! isActive())
-            [NSOpenGLContext clearCurrentContext];
-
+        [view makeInactive];
         return true;
     }
 
@@ -134,7 +206,6 @@ public:
 
     void swapBuffers()
     {
-        glFlush();
         [renderContext flushBuffer];
     }
 
@@ -173,6 +244,7 @@ public:
     juce_UseDebuggingNewOperator
 
     NSOpenGLContext* renderContext;
+	ThreadSafeNSOpenGLView* view;
 
 private:
     OpenGLPixelFormat pixelFormat;

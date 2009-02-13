@@ -139,6 +139,11 @@ public:
     void remove (const int index) throw();
 
     //==============================================================================
+    /** Indicates whether to use a case-insensitive search when looking up a key string.
+    */
+    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+
+    //==============================================================================
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after

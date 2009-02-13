@@ -124,6 +124,11 @@ void LocalisedStrings::loadFromText (const String& fileContents) throw()
     }
 }
 
+void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase) throw()
+{
+    translations.setIgnoresCase (shouldIgnoreCase);
+}
+
 //==============================================================================
 static CriticalSection currentMappingsLock;
 static LocalisedStrings* currentMappings = 0;
