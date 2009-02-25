@@ -135,6 +135,20 @@ void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase) throw()
     ignoreCase = shouldIgnoreCase;
 }
 
+const String StringPairArray::getDescription() const
+{
+    String s;
+    
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        s << keys[i] << T(" = ") << values[i];
+        if (i < keys.size())
+            s << T(", ");
+    }
+
+    return s;
+}
+
 void StringPairArray::minimiseStorageOverheads() throw()
 {
     keys.minimiseStorageOverheads();

@@ -279,7 +279,7 @@ public:
             {
                 MessageManagerLock mml (Thread::getCurrentThread());
 
-                if (! mml.lockWasGained)
+                if (! mml.lockWasGained())
                     return; // another thread is trying to kill us!
 
                 ..do some locked stuff here..

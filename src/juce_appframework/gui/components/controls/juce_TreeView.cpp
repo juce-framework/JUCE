@@ -803,6 +803,7 @@ TreeViewItem::TreeViewItem()
       selected (false),
       redrawNeeded (true),
       drawLinesInside (true),
+      drawsInLeftMargin (false),
       openness (opennessDefault)
 {
     static int nextUID = 0;
@@ -1077,6 +1078,11 @@ int TreeViewItem::getIndentX() const throw()
     return x;
 }
 
+void TreeViewItem::setDrawsInLeftMargin (bool canDrawInLeftMargin) throw()
+{
+    drawsInLeftMargin = canDrawInLeftMargin;
+}
+
 void TreeViewItem::paintRecursively (Graphics& g, int width)
 {
     jassert (ownerView != 0);
@@ -1152,7 +1158,8 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         g.saveState();
         g.setOrigin (indent, 0);
 
-        if (g.reduceClipRegion (0, 0, itemW, itemHeight))
+        if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0, 
+                                drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
             paintItem (g, itemW, itemHeight);
 
         g.restoreState();

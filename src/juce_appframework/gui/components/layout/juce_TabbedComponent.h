@@ -157,7 +157,7 @@ public:
 
         @see TabbedButtonBar::setCurrentTabIndex
     */
-    void setCurrentTabIndex (const int newTabIndex);
+    void setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage = true);
 
     /** Returns the index of the currently selected tab.
 

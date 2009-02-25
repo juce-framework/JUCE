@@ -172,6 +172,11 @@ public:
                                 const bool isStretchingBottom,
                                 const bool isStretchingRight);
 
+    /** Performs a check on the current size of a component, and moves or resizes 
+        it if it fails the constraints.
+    */
+    void checkComponentBounds (Component* component);
+
     /** Called by setBoundsForComponent() to apply a new constrained size to a
         component.
 

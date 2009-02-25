@@ -144,6 +144,13 @@ public:
     void setIgnoresCase (const bool shouldIgnoreCase) throw();
 
     //==============================================================================
+    /** Returns a descriptive string containing the items.
+
+        This is handy for dumping the contents of an array.
+    */
+    const String getDescription() const;
+
+    //==============================================================================
     /** Reduces the amount of storage being used by the array.
 
         Arrays typically allocate slightly more storage than they need, and after

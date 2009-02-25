@@ -508,7 +508,7 @@ double Slider::getMaxValue() const throw()
     return valueMax;
 }
 
-void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously)
+void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
 {
     // The minimum value only applies to sliders that are in two- or three-value mode.
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -517,9 +517,19 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
     newValue = constrainedValue (newValue);
 
     if (style == TwoValueHorizontal || style == TwoValueVertical)
+    {
+        if (allowNudgingOfOtherValues && newValue > valueMax)
+            setMaxValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+
         newValue = jmin (valueMax, newValue);
+    }
     else
+    {
+        if (allowNudgingOfOtherValues && newValue > currentValue)
+            setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+
         newValue = jmin (currentValue, newValue);
+    }
 
     if (valueMin != newValue)
     {
@@ -537,7 +547,7 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
     }
 }
 
-void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously)
+void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
 {
     // The maximum value only applies to sliders that are in two- or three-value mode.
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -546,9 +556,19 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
     newValue = constrainedValue (newValue);
 
     if (style == TwoValueHorizontal || style == TwoValueVertical)
+    {
+        if (allowNudgingOfOtherValues && newValue < valueMin)
+            setMinValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+
         newValue = jmax (valueMin, newValue);
+    }
     else
+    {
+        if (allowNudgingOfOtherValues && newValue < currentValue)
+            setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
+
         newValue = jmax (currentValue, newValue);
+    }
 
     if (valueMax != newValue)
     {
@@ -949,6 +969,10 @@ void Slider::mouseDown (const MouseEvent& e)
 {
     mouseWasHidden = false;
     incDecDragged = false;
+    mouseXWhenLastDragged = e.x;
+    mouseYWhenLastDragged = e.y;
+    mouseDragStartX = e.getMouseDownX();
+    mouseDragStartY = e.getMouseDownY();
 
     if (isEnabled())
     {
@@ -1027,8 +1051,6 @@ void Slider::mouseDown (const MouseEvent& e)
 
             minMaxDiff = valueMax - valueMin;
 
-            mouseXWhenLastDragged = e.x;
-            mouseYWhenLastDragged = e.y;
             lastAngle = rotaryStart + (rotaryEnd - rotaryStart)
                                         * valueToProportionOfLength (currentValue);
 
@@ -1217,15 +1239,15 @@ void Slider::mouseDrag (const MouseEvent& e)
                  && valueBox != 0 && valueBox->isEditable())
                 return;
 
-            if (style == IncDecButtons)
+            if (style == IncDecButtons && ! incDecDragged)
             {
-                if (! incDecDragged)
-                    incDecDragged = e.getDistanceFromDragStart() > 10 && ! e.mouseWasClicked();
-
-                if (! incDecDragged)
+                if (e.getDistanceFromDragStart() < 10 || e.mouseWasClicked())
                     return;
-            }
 
+                incDecDragged = true;
+                mouseDragStartX = e.x;
+                mouseDragStartY = e.y;
+            }
 
             if ((isVelocityBased == (userKeyOverridesVelocity ? e.mods.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier)
                                                               : false))
@@ -1245,8 +1267,8 @@ void Slider::mouseDrag (const MouseEvent& e)
                                              || style == LinearHorizontal
                                              || style == LinearBar
                                              || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                            ? e.getDistanceFromDragStartX()
-                                            : -e.getDistanceFromDragStartY();
+                                            ? e.x - mouseDragStartX
+                                            : mouseDragStartY - e.y;
 
                     double newPos = valueToProportionOfLength (valueOnMouseDown)
                                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -1311,10 +1333,10 @@ void Slider::mouseDrag (const MouseEvent& e)
         else if (sliderBeingDragged == 1)
         {
             setMinValue (snapValue (valueWhenLastDragged, true),
-                         ! sendChangeOnlyOnRelease, false);
+                         ! sendChangeOnlyOnRelease, false, true);
 
             if (e.mods.isShiftDown())
-                setMaxValue (getMinValue() + minMaxDiff, false);
+                setMaxValue (getMinValue() + minMaxDiff, false, false, true);
             else
                 minMaxDiff = valueMax - valueMin;
         }
@@ -1323,10 +1345,10 @@ void Slider::mouseDrag (const MouseEvent& e)
             jassert (sliderBeingDragged == 2);
 
             setMaxValue (snapValue (valueWhenLastDragged, true),
-                         ! sendChangeOnlyOnRelease, false);
+                         ! sendChangeOnlyOnRelease, false, true);
 
             if (e.mods.isShiftDown())
-                setMinValue (getMaxValue() - minMaxDiff, false);
+                setMinValue (getMaxValue() - minMaxDiff, false, false, true);
             else
                 minMaxDiff = valueMax - valueMin;
         }

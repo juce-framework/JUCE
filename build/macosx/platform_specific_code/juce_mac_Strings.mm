@@ -165,6 +165,8 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 }
 
 //==============================================================================
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+
 void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
     [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
@@ -182,5 +184,6 @@ const String SystemClipboard::getTextFromClipboard() throw()
                      : nsStringToJuce (text);
 }
 
+#endif
 
 #endif

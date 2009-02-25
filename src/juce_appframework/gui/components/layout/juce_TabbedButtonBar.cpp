@@ -325,7 +325,7 @@ const StringArray TabbedButtonBar::getTabNames() const
     return tabs;
 }
 
-void TabbedButtonBar::setCurrentTabIndex (int newIndex)
+void TabbedButtonBar::setCurrentTabIndex (int newIndex, const bool sendChangeMessage_)
 {
     if (currentTabIndex != newIndex)
     {
@@ -343,7 +343,9 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex)
         }
 
         resized();
-        sendChangeMessage (this);
+
+        if (sendChangeMessage_)
+            sendChangeMessage (this);
 
         currentTabChanged (newIndex, newIndex >= 0 ? tabs [newIndex] : String::empty);
     }

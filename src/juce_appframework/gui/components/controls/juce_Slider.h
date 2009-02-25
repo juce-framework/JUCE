@@ -377,18 +377,22 @@ public:
         want to handle it.
 
         @param newValue                 the new value to set - this will be restricted by the
-                                        minimum and maximum range, and the max value (in a two-value
-                                        slider) or the mid value (in a three-value slider), and
-                                        will be snapped to the nearest interval if one has been set.
+                                        minimum and maximum range, and will be snapped to the nearest
+                                        interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
                                         any SliderListeners or the valueChanged() method
         @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
                                         synchronously; if false, it will be asynchronous
+        @param allowNudgingOfOtherValues  if false, this value will be restricted to being below the 
+                                        max value (in a two-value slider) or the mid value (in a three-value
+                                        slider). If false, then if this value goes beyond those values,
+                                        it will push them along with it.
         @see getMinValue, setMaxValue, setValue
     */
     void setMinValue (double newValue,
                       const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false);
+                      const bool sendMessageSynchronously = false,
+                      const bool allowNudgingOfOtherValues = false);
 
     /** For a slider with two or three thumbs, this returns the higher of its values.
 
@@ -407,18 +411,22 @@ public:
         want to handle it.
 
         @param newValue                 the new value to set - this will be restricted by the
-                                        minimum and maximum range, and the max value (in a two-value
-                                        slider) or the mid value (in a three-value slider), and
-                                        will be snapped to the nearest interval if one has been set.
+                                        minimum and maximum range, and will be snapped to the nearest 
+                                        interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
                                         any SliderListeners or the valueChanged() method
         @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
                                         synchronously; if false, it will be asynchronous
+        @param allowNudgingOfOtherValues  if false, this value will be restricted to being above the 
+                                        min value (in a two-value slider) or the mid value (in a three-value
+                                        slider). If false, then if this value goes beyond those values,
+                                        it will push them along with it.
         @see getMaxValue, setMinValue, setValue
     */
     void setMaxValue (double newValue,
                       const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false);
+                      const bool sendMessageSynchronously = false,
+                      const bool allowNudgingOfOtherValues = false);
 
     //==============================================================================
     /** Adds a listener to be called when this slider's value changes. */
@@ -703,6 +711,7 @@ private:
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
     int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
+    int mouseDragStartX, mouseDragStartY;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;

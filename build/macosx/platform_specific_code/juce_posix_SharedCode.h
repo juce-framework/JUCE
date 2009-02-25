@@ -224,12 +224,10 @@ bool juce_canWriteToFile (const String& fileName) throw()
 
 bool juce_deleteFile (const String& fileName) throw()
 {
-    const char* const fileNameUTF8 = fileName.toUTF8();
-
     if (juce_isDirectory (fileName))
-        return rmdir (fileNameUTF8) == 0;
+        return rmdir ((const char*) fileName.toUTF8()) == 0;
     else
-        return remove (fileNameUTF8) == 0;
+        return remove ((const char*) fileName.toUTF8()) == 0;
 }
 
 bool juce_moveFile (const String& source, const String& dest) throw()
@@ -256,14 +254,13 @@ void juce_createDirectory (const String& fileName) throw()
 
 void* juce_fileOpen (const String& fileName, bool forWriting) throw()
 {
-    const char* const fileNameUTF8 = fileName.toUTF8();
     int flags = O_RDONLY;
 
     if (forWriting)
     {
         if (juce_fileExists (fileName, false))
         {
-            const int f = open (fileNameUTF8, O_RDWR, 00644);
+            const int f = open ((const char*) fileName.toUTF8(), O_RDWR, 00644);
 
             if (f != -1)
                 lseek (f, 0, SEEK_END);
@@ -276,7 +273,7 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
         }
     }
 
-    return (void*) open (fileNameUTF8, flags, 00644);
+    return (void*) open ((const char*) fileName.toUTF8(), flags, 00644);
 }
 
 void juce_fileClose (void* handle) throw()

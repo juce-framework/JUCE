@@ -197,7 +197,7 @@ public:
 
         To deselect all the tabs, use an index of -1.
     */
-    void setCurrentTabIndex (int newTabIndex);
+    void setCurrentTabIndex (int newTabIndex, const bool sendChangeMessage = true);
 
     /** Returns the name of the currently selected tab.
 

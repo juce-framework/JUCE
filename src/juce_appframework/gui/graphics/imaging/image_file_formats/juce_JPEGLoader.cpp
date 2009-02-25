@@ -245,14 +245,14 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
                 }
 
                 jpeg_finish_decompress (&jpegDecompStruct);
+
+                in.setPosition (((char*) jpegDecompStruct.src->next_input_byte) - (char*) mb.getData());
             }
 
             jpeg_destroy_decompress (&jpegDecompStruct);
         }
         catch (...)
         {}
-
-        in.setPosition (((char*) jpegDecompStruct.src->next_input_byte) - (char*) mb.getData());
     }
 
     return image;

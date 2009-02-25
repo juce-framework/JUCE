@@ -131,7 +131,7 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
 
 Image* ImageButton::getCurrentImage() const
 {
-    if (isDown())
+    if (isDown() || getToggleState())
         return getDownImage();
 
     if (isOver())

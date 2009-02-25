@@ -97,8 +97,6 @@ public:
 #ifdef WIN32
         if (InitializeQTML (0) != noErr)
             return;
-#elif JUCE_MAC
-        EnterMoviesOnThread (0);
 #endif
         if (EnterMovies() != noErr)
             return;

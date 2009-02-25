@@ -268,6 +268,8 @@ If you also want to build an RTAS, then carry on reading...
   build stage and drop it there to add it to the link process.
 - In your Info.plist, change the "Bundle OS Type Code" to "TDMw", and the "Bundle Creator OS Type Code" to
   "PTul".
+- You may need to remove the "OTHER_CFLAGS = -x c++" from the RTAS settings file to stop it complaining about 
+  obj-C code
 
 You should now be able to build an RTAS! Again, just renaming the finished bundle to ".dpm" and
 putting it in your RTAS folder should be do the trick.

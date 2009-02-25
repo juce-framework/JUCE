@@ -187,6 +187,14 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
     applyBoundsToComponent (component, x, y, w, h);
 }
 
+void ComponentBoundsConstrainer::checkComponentBounds (Component* component)
+{
+    setBoundsForComponent (component, 
+                           component->getX(), component->getY(),
+                           component->getWidth(), component->getHeight(), 
+                           false, false, false, false);
+}
+
 void ComponentBoundsConstrainer::applyBoundsToComponent (Component* component,
                                                          int x, int y, int w, int h)
 {

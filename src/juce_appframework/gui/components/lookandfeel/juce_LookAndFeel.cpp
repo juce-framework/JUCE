@@ -1626,8 +1626,11 @@ void LookAndFeel::drawImageButton (Graphics& g, Image* image,
                                    int imageX, int imageY, int imageW, int imageH,
                                    const Colour& overlayColour,
                                    float imageOpacity,
-                                   ImageButton& /*button*/)
+                                   ImageButton& button)
 {
+    if (! button.isEnabled())
+        imageOpacity *= 0.3f;
+
     if (! overlayColour.isOpaque())
     {
         g.setOpacity (imageOpacity);

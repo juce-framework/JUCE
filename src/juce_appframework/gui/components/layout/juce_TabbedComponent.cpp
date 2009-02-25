@@ -216,9 +216,9 @@ void TabbedComponent::setTabBackgroundColour (const int tabIndex, const Colour& 
         repaint();
 }
 
-void TabbedComponent::setCurrentTabIndex (const int newTabIndex)
+void TabbedComponent::setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage)
 {
-    tabs->setCurrentTabIndex (newTabIndex);
+    tabs->setCurrentTabIndex (newTabIndex, sendChangeMessage);
 }
 
 int TabbedComponent::getCurrentTabIndex() const

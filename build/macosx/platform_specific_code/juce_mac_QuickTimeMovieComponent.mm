@@ -59,6 +59,9 @@ bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
 
 static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
 {
+    // unfortunately, QTMovie objects can only be created on the main thread..
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
     QTMovie* movie = 0;
 
     FileInputStream* const fin = dynamic_cast <FileInputStream*> (movieStream);

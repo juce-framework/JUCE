@@ -52,6 +52,8 @@ void PlatformUtilities::beep()
 }
 
 //==============================================================================
+#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+
 bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
@@ -242,3 +244,6 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 }
 
 #endif
+
+#endif
+

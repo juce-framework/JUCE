@@ -82,6 +82,8 @@ ComponentPeer::~ComponentPeer()
 {
     heavyweightPeers.removeValue (this);
     delete dragAndDropTargetComponent;
+
+    Desktop::getInstance().triggerFocusCallback();
 }
 
 //==============================================================================

@@ -488,7 +488,8 @@ void Graphics::drawBevel (const int x,
                           const int bevelThickness,
                           const Colour& topLeftColour,
                           const Colour& bottomRightColour,
-                          const bool useGradient) const throw()
+                          const bool useGradient,
+                          const bool sharpEdgeOnOutside) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
@@ -500,7 +501,7 @@ void Graphics::drawBevel (const int x,
 
         for (int i = bevelThickness; --i >= 0;)
         {
-            const float op = useGradient ? ramp * (bevelThickness - i)
+            const float op = useGradient ? ramp * (sharpEdgeOnOutside ? bevelThickness - i : i)
                                          : oldOpacity;
 
             context->fillRectWithColour (x + i, y + i, width - i * 2, 1, topLeftColour.withMultipliedAlpha (op), false);

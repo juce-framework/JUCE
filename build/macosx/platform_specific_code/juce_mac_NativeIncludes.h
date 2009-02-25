@@ -67,6 +67,8 @@
 
 #if MACOS_10_4_OR_EARLIER
  #include <GLUT/glut.h>
+ typedef int NSInteger;
+ typedef unsigned int NSUInteger;
 #endif
 
 #endif   // __JUCE_MAC_NATIVEINCLUDES_JUCEHEADER__

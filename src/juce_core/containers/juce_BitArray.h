@@ -301,8 +301,11 @@ public:
     /** Converts the array to a number string.
 
         Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+
+        If minuimumNumCharacters is greater than 0, the returned string will be
+        padded with leading zeros to reach at least that length.
     */
-    const String toString (const int base) const throw();
+    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
 
     /** Converts a number string to an array.
 

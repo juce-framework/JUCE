@@ -7309,8 +7309,11 @@ public:
     /** Converts the array to a number string.
 
         Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+
+        If minuimumNumCharacters is greater than 0, the returned string will be
+        padded with leading zeros to reach at least that length.
     */
-    const String toString (const int base) const throw();
+    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
 
     /** Converts a number string to an array.
 
@@ -8106,6 +8109,12 @@ public:
     /** Indicates whether to use a case-insensitive search when looking up a key string.
     */
     void setIgnoresCase (const bool shouldIgnoreCase) throw();
+
+    /** Returns a descriptive string containing the items.
+
+        This is handy for dumping the contents of an array.
+    */
+    const String getDescription() const;
 
     /** Reduces the amount of storage being used by the array.
 
@@ -19582,6 +19591,11 @@ public:
         The top-left colour is used for the top- and left-hand edges of the
         bevel; the bottom-right colour is used for the bottom- and right-hand
         edges.
+
+        If useGradient is true, then the bevel fades out to make it look more curved
+        and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
+        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
+        the centre edges are sharp and it fades towards the outside.
     */
     void drawBevel (const int x,
                     const int y,
@@ -19590,7 +19604,8 @@ public:
                     const int bevelThickness,
                     const Colour& topLeftColour = Colours::white,
                     const Colour& bottomRightColour = Colours::black,
-                    const bool useGradient = true) const throw();
+                    const bool useGradient = true,
+                    const bool sharpEdgeOnOutside = true) const throw();
 
     /** Draws a pixel using the current colour or brush.
     */
@@ -37968,7 +37983,7 @@ public:
             {
                 MessageManagerLock mml (Thread::getCurrentThread());
 
-                if (! mml.lockWasGained)
+                if (! mml.lockWasGained())
                     return; // another thread is trying to kill us!
 
                 ..do some locked stuff here..
@@ -43250,6 +43265,21 @@ public:
     */
     virtual const String getDragSourceDescription();
 
+    /** Sets a flag to indicate that the item wants to be allowed
+        to draw all the way across to the left edge of the treeview.
+
+        By default this is false, which means that when the paintItem()
+        method is called, its graphics context is clipped to only allow
+        drawing within the item's rectangle. If this flag is set to true,
+        then the graphics context isn't clipped on its left side, so it
+        can draw all the way across to the left margin. Note that the
+        context will still have its origin in the same place though, so
+        the coordinates of anything to its left will be negative. It's
+        mostly useful if you want to draw a wider bar behind the
+        highlighted item.
+    */
+    void setDrawsInLeftMargin (bool canDrawInLeftMargin) throw();
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -43261,6 +43291,7 @@ private:
     bool selected           : 1;
     bool redrawNeeded       : 1;
     bool drawLinesInside    : 1;
+    bool drawsInLeftMargin  : 1;
     unsigned int openness   : 2;
 
     friend class TreeView;
@@ -44024,6 +44055,11 @@ public:
                                 const bool isStretchingLeft,
                                 const bool isStretchingBottom,
                                 const bool isStretchingRight);
+
+    /** Performs a check on the current size of a component, and moves or resizes
+        it if it fails the constraints.
+    */
+    void checkComponentBounds (Component* component);
 
     /** Called by setBoundsForComponent() to apply a new constrained size to a
         component.
@@ -45311,18 +45347,22 @@ public:
         want to handle it.
 
         @param newValue                 the new value to set - this will be restricted by the
-                                        minimum and maximum range, and the max value (in a two-value
-                                        slider) or the mid value (in a three-value slider), and
-                                        will be snapped to the nearest interval if one has been set.
+                                        minimum and maximum range, and will be snapped to the nearest
+                                        interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
                                         any SliderListeners or the valueChanged() method
         @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
                                         synchronously; if false, it will be asynchronous
+        @param allowNudgingOfOtherValues  if false, this value will be restricted to being below the
+                                        max value (in a two-value slider) or the mid value (in a three-value
+                                        slider). If false, then if this value goes beyond those values,
+                                        it will push them along with it.
         @see getMinValue, setMaxValue, setValue
     */
     void setMinValue (double newValue,
                       const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false);
+                      const bool sendMessageSynchronously = false,
+                      const bool allowNudgingOfOtherValues = false);
 
     /** For a slider with two or three thumbs, this returns the higher of its values.
 
@@ -45341,18 +45381,22 @@ public:
         want to handle it.
 
         @param newValue                 the new value to set - this will be restricted by the
-                                        minimum and maximum range, and the max value (in a two-value
-                                        slider) or the mid value (in a three-value slider), and
-                                        will be snapped to the nearest interval if one has been set.
+                                        minimum and maximum range, and will be snapped to the nearest
+                                        interval if one has been set.
         @param sendUpdateMessage        if false, a change to the value will not trigger a call to
                                         any SliderListeners or the valueChanged() method
         @param sendMessageSynchronously if true, then a call to the SliderListeners will be made
                                         synchronously; if false, it will be asynchronous
+        @param allowNudgingOfOtherValues  if false, this value will be restricted to being above the
+                                        min value (in a two-value slider) or the mid value (in a three-value
+                                        slider). If false, then if this value goes beyond those values,
+                                        it will push them along with it.
         @see getMaxValue, setMinValue, setValue
     */
     void setMaxValue (double newValue,
                       const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false);
+                      const bool sendMessageSynchronously = false,
+                      const bool allowNudgingOfOtherValues = false);
 
     /** Adds a listener to be called when this slider's value changes. */
     void addListener (SliderListener* const listener) throw();
@@ -45625,6 +45669,7 @@ private:
     int velocityModeThreshold;
     float rotaryStart, rotaryEnd;
     int numDecimalPlaces, mouseXWhenLastDragged, mouseYWhenLastDragged;
+    int mouseDragStartX, mouseDragStartY;
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
@@ -47134,7 +47179,7 @@ public:
 
         To deselect all the tabs, use an index of -1.
     */
-    void setCurrentTabIndex (int newTabIndex);
+    void setCurrentTabIndex (int newTabIndex, const bool sendChangeMessage = true);
 
     /** Returns the name of the currently selected tab.
 
@@ -47353,7 +47398,7 @@ public:
 
         @see TabbedButtonBar::setCurrentTabIndex
     */
-    void setCurrentTabIndex (const int newTabIndex);
+    void setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage = true);
 
     /** Returns the index of the currently selected tab.
 

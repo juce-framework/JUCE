@@ -385,7 +385,7 @@ void ComponentLayoutEditor::filesDropped (const StringArray& filenames, int x, i
 
             if (newOne != 0)
             {
-                JucerComponentHandler::setJucerComponentFile (*layout.getDocument(), newOne, f.getFullPathName());
+                JucerComponentHandler::setJucerComponentFile (*layout.getDocument(), newOne, f.getRelativePathFrom (document.getFile().getParentDirectory()));
 
                 layout.getSelectedSet().selectOnly (newOne);
             }

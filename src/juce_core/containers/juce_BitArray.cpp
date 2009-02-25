@@ -835,7 +835,7 @@ void BitArray::ensureSize (const int numVals) throw()
 }
 
 //==============================================================================
-const String BitArray::toString (const int base) const throw()
+const String BitArray::toString (const int base, const int minimumNumCharacters) const throw()
 {
     String s;
     BitArray v (*this);
@@ -878,8 +878,10 @@ const String BitArray::toString (const int base) const throw()
         return String::empty;
     }
 
-    if (s.isEmpty())
-        return T("0");
+    const int length = s.length();
+
+    if (length < minimumNumCharacters)
+        s = String::repeatedString (T("0"), minimumNumCharacters - length);
 
     return isNegative() ? T("-") + s : s;
 }

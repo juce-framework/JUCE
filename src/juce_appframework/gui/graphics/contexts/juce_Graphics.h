@@ -354,6 +354,11 @@ public:
         The top-left colour is used for the top- and left-hand edges of the
         bevel; the bottom-right colour is used for the bottom- and right-hand
         edges.
+
+        If useGradient is true, then the bevel fades out to make it look more curved
+        and less angular. If sharpEdgeOnOutside is true, the outside of the bevel is
+        sharp, and it fades towards the centre; if sharpEdgeOnOutside is false, then
+        the centre edges are sharp and it fades towards the outside.
     */
     void drawBevel (const int x,
                     const int y,
@@ -362,7 +367,8 @@ public:
                     const int bevelThickness,
                     const Colour& topLeftColour = Colours::white,
                     const Colour& bottomRightColour = Colours::black,
-                    const bool useGradient = true) const throw();
+                    const bool useGradient = true,
+                    const bool sharpEdgeOnOutside = true) const throw();
 
     /** Draws a pixel using the current colour or brush.
     */
