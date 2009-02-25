@@ -246,4 +246,3 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 #endif
 
 #endif
-

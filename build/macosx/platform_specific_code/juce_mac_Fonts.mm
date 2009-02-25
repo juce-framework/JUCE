@@ -84,15 +84,15 @@ public:
     {
         const ScopedAutoReleasePool pool;
 
-        if (font == 0 
+        if (font == 0
              || ! [[font coveredCharacterSet] longCharacterIsMember: (UTF32Char) char1])
             return false;
 
         String chars;
         chars << ' ' << char1 << char2;
-        NSTextStorage* textStorage = [[[NSTextStorage alloc] 
+        NSTextStorage* textStorage = [[[NSTextStorage alloc]
               initWithString: juceStringToNS (chars)
-                  attributes: [NSDictionary dictionaryWithObject: [NSNumber numberWithInt: 0] 
+                  attributes: [NSDictionary dictionaryWithObject: [NSNumber numberWithInt: 0]
                                                           forKey: NSLigatureAttributeName]] autorelease];
         NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
         NSTextContainer* textContainer = [[[NSTextContainer alloc] init] autorelease];
@@ -100,7 +100,7 @@ public:
         [textStorage addLayoutManager: layoutManager];
         [textStorage setFont: font];
 
-        unsigned int glyphIndex = [layoutManager glyphRangeForCharacterRange: NSMakeRange (1, 1) 
+        unsigned int glyphIndex = [layoutManager glyphRangeForCharacterRange: NSMakeRange (1, 1)
                                                         actualCharacterRange: 0].location;
         NSPoint p1 = [layoutManager locationForGlyphAtIndex: glyphIndex];
         NSPoint p2 = [layoutManager locationForGlyphAtIndex: glyphIndex + 1];
@@ -116,7 +116,7 @@ public:
         {
             NSBezierPath* bez = [NSBezierPath bezierPath];
             [bez moveToPoint: NSMakePoint (0, 0)];
-            [bez appendBezierPathWithGlyph: [layoutManager glyphAtIndex: glyphIndex] 
+            [bez appendBezierPathWithGlyph: [layoutManager glyphAtIndex: glyphIndex]
                                                                  inFont: font];
 
             for (int i = 0; i < [bez elementCount]; ++i)

@@ -355,7 +355,7 @@ public:
         can draw all the way across to the left margin. Note that the
         context will still have its origin in the same place though, so
         the coordinates of anything to its left will be negative. It's
-        mostly useful if you want to draw a wider bar behind the 
+        mostly useful if you want to draw a wider bar behind the
         highlighted item.
     */
     void setDrawsInLeftMargin (bool canDrawInLeftMargin) throw();

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		844B0A9B0F52DC6000B2F1FD /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 844B0A9A0F52DC6000B2F1FD /* Carbon.framework */; };
 		846929140A49DB9C00314975 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 846929130A49DB9C00314975 /* juce.xcconfig */; };
 		846C10D40DE33F4D00E8CCE8 /* juce_LibrarySource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */; };
 		846C10EA0DE33FA100E8CCE8 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846C10DC0DE33FA100E8CCE8 /* ApplicationServices.framework */; };
@@ -60,6 +61,7 @@
 
 /* Begin PBXFileReference section */
 		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		844B0A9A0F52DC6000B2F1FD /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		846929130A49DB9C00314975 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
 		846C10D20DE33F4D00E8CCE8 /* juce_AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_AppConfig.h; path = ../../src/juce_AppConfig.h; sourceTree = SOURCE_ROOT; };
 		846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
@@ -200,6 +202,7 @@
 				846C10F60DE33FA100E8CCE8 /* WebKit.framework in Frameworks */,
 				84E01DD90E910B7B003E41AF /* QTKit.framework in Frameworks */,
 				84F8B68E0EB5FB290020D98D /* QuickTime.framework in Frameworks */,
+				844B0A9B0F52DC6000B2F1FD /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +261,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				844B0A9A0F52DC6000B2F1FD /* Carbon.framework */,
 				846C10DC0DE33FA100E8CCE8 /* ApplicationServices.framework */,
 				846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */,
 				846C10E10DE33FA100E8CCE8 /* CoreFoundation.framework */,

@@ -138,7 +138,7 @@ void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase) throw()
 const String StringPairArray::getDescription() const
 {
     String s;
-    
+
     for (int i = 0; i < keys.size(); ++i)
     {
         s << keys[i] << T(" = ") << values[i];

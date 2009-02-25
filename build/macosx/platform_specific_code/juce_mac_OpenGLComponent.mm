@@ -38,7 +38,7 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @interface ThreadSafeNSOpenGLView  : NSOpenGLView
 {
-    CriticalSection* contextLock;	
+    CriticalSection* contextLock;
     bool needsUpdate;
 }
 
@@ -50,14 +50,14 @@ END_JUCE_NAMESPACE
 
 @implementation ThreadSafeNSOpenGLView
 
-- (id) initWithFrame: (NSRect) frameRect 
+- (id) initWithFrame: (NSRect) frameRect
          pixelFormat: (NSOpenGLPixelFormat*) format
 {
     contextLock = new CriticalSection();
     self = [super initWithFrame: frameRect pixelFormat: format];
-    
+
     if (self != nil)
-        [[NSNotificationCenter defaultCenter] addObserver: self 
+        [[NSNotificationCenter defaultCenter] addObserver: self
                                                  selector: @selector (_surfaceNeedsUpdate:)
                                                      name: NSViewGlobalFrameDidChangeNotification
                                                    object: self];
@@ -74,7 +74,7 @@ END_JUCE_NAMESPACE
 - (bool) makeActive
 {
     const ScopedLock sl (*contextLock);
- 
+
     if ([self openGLContext] == 0)
         return false;
 
@@ -244,7 +244,7 @@ public:
     juce_UseDebuggingNewOperator
 
     NSOpenGLContext* renderContext;
-	ThreadSafeNSOpenGLView* view;
+    ThreadSafeNSOpenGLView* view;
 
 private:
     OpenGLPixelFormat pixelFormat;

@@ -1158,7 +1158,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
         g.saveState();
         g.setOrigin (indent, 0);
 
-        if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0, 
+        if (g.reduceClipRegion (drawsInLeftMargin ? -indent : 0, 0,
                                 drawsInLeftMargin ? itemW + indent : itemW, itemHeight))
             paintItem (g, itemW, itemHeight);
 
