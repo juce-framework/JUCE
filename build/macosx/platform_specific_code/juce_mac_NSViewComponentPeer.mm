@@ -100,6 +100,7 @@ END_JUCE_NAMESPACE
 
 - (void) setOwner: (NSViewComponentPeer*) owner;
 - (BOOL) canBecomeKeyWindow;
+- (void) becomeKeyWindow;
 - (BOOL) windowShouldClose: (id) window;
 - (NSRect) constrainFrameRect: (NSRect) frameRect toScreen: (NSScreen*) screen;
 - (NSSize) windowWillResize: (NSWindow*) window toSize: (NSSize) proposedFrameSize;
@@ -426,6 +427,14 @@ END_JUCE_NAMESPACE
 - (BOOL) canBecomeKeyWindow
 {
     return owner != 0 && owner->canBecomeKeyWindow();
+}
+
+- (void) becomeKeyWindow
+{
+    [super becomeKeyWindow];
+
+    if (owner != 0)
+        owner->grabFocus();
 }
 
 - (BOOL) windowShouldClose: (id) window
@@ -909,6 +918,8 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
 {
     if (constrainer != 0)
     {
+        const MessageManagerLock mml;
+
         NSRect current = [window frame];
         current.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - current.origin.y - current.size.height;
 
@@ -1124,6 +1135,8 @@ void NSViewComponentPeer::grabFocus()
     {
         [window makeKeyWindow];
         [window makeFirstResponder: view];
+
+        viewFocusGain();
     }
 }
 
@@ -1133,6 +1146,8 @@ void NSViewComponentPeer::textInputRequired (int /*x*/, int /*y*/)
 
 bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
 {
+    const MessageManagerLock mml;
+
     String unicode (nsStringToJuce ([ev characters]));
     String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
     int keyCode = getKeyCodeFromEvent (ev);
@@ -1172,6 +1187,7 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
 
 bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateKeysDown (ev, true);
     bool used = handleKeyEvent (ev, true);
 
@@ -1187,12 +1203,14 @@ bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
 
 bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateKeysDown (ev, false);
     return handleKeyEvent (ev, false);
 }
 
 void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     handleModifierKeysChange();
 }
@@ -1200,6 +1218,7 @@ void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
 #if MACOS_10_4_OR_EARLIER
 bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     if ([ev type] == NSKeyDown)
         return redirectKeyDown (ev);
     else if ([ev type] == NSKeyUp)
@@ -1212,6 +1231,7 @@ bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
 //==============================================================================
 void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
     int x, y;
@@ -1222,6 +1242,7 @@ void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     const int oldMods = currentModifiers;
     updateModifiers (ev);
     currentModifiers &= ~getModifierForButtonNumber ([ev buttonNumber]);
@@ -1233,6 +1254,7 @@ void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseDrag (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
     int x, y;
@@ -1243,6 +1265,7 @@ void NSViewComponentPeer::redirectMouseDrag (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     int x, y;
     getMousePos (ev, view, x, y);
@@ -1252,6 +1275,7 @@ void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     int x, y;
     getMousePos (ev, view, x, y);
@@ -1261,6 +1285,7 @@ void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseExit (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
     int x, y;
     getMousePos (ev, view, x, y);
@@ -1270,6 +1295,7 @@ void NSViewComponentPeer::redirectMouseExit (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
+    const MessageManagerLock mml;
     updateModifiers (ev);
 
     handleMouseWheel (roundFloatToInt ([ev deltaX] * 10.0f),
@@ -1280,6 +1306,8 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 //==============================================================================
 BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender)
 {
+    const MessageManagerLock mml;
+
     NSString* bestType
         = [[sender draggingPasteboard] availableTypeFromArray: [view getSupportedDragTypes]];
 
@@ -1330,6 +1358,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
+    const MessageManagerLock mml;
     const float y = [view frame].size.height - (r.origin.y + r.size.height);
 
     JuceNSImage temp ((int) (r.size.width + 0.5f),
@@ -1363,6 +1392,8 @@ void NSViewComponentPeer::drawRect (NSRect r)
 
 bool NSViewComponentPeer::canBecomeKeyWindow()
 {
+    const MessageManagerLock mml;
+
     // If running as a plugin, let the component decide whether it's going to allow the window to get focused.
     return JUCEApplication::getInstance() != 0
             || (isValidPeer (this) && getComponent()->getWantsKeyboardFocus());
@@ -1370,6 +1401,8 @@ bool NSViewComponentPeer::canBecomeKeyWindow()
 
 bool NSViewComponentPeer::windowShouldClose()
 {
+    const MessageManagerLock mml;
+
     if (! isValidPeer (this))
         return YES;
 
@@ -1379,6 +1412,7 @@ bool NSViewComponentPeer::windowShouldClose()
 
 void NSViewComponentPeer::redirectMovedOrResized()
 {
+    const MessageManagerLock mml;
     handleMovedOrResized();
 }
 

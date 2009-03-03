@@ -393,6 +393,7 @@ bool KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
                     {
                         keyPressEntryIndex = k;
                         wasDown = true;
+                        used = true;
                         break;
                     }
                 }

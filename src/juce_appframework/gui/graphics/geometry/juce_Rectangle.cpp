@@ -106,6 +106,30 @@ void Rectangle::setSize (const int w_,
     h = h_;
 }
 
+void Rectangle::setLeft (const int newLeft) throw()
+{
+    w = jmax (0, x + w - newLeft);
+    x = newLeft;
+}
+
+void Rectangle::setTop (const int newTop) throw()
+{
+    h = jmax (0, y + h - newTop);
+    y = newTop;
+}
+
+void Rectangle::setRight (const int newRight) throw()
+{
+    x = jmin (x, newRight);
+    w = newRight - x;
+}
+
+void Rectangle::setBottom (const int newBottom) throw()
+{
+    y = jmin (y, newBottom);
+    h = newBottom - y;
+}
+
 void Rectangle::translate (const int dx,
                            const int dy) throw()
 {

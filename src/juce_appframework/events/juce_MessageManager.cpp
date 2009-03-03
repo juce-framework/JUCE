@@ -57,7 +57,8 @@ MessageManager::MessageManager() throw()
     quitMessagePosted (false),
     quitMessageReceived (false)
 {
-    currentLockingThreadId = messageThreadId = Thread::getCurrentThreadId();
+    currentLockingThreadId = 0;
+    messageThreadId = Thread::getCurrentThreadId();
 }
 
 MessageManager::~MessageManager() throw()

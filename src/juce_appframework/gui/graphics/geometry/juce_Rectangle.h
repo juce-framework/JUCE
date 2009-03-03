@@ -102,6 +102,28 @@ public:
     void setBounds (const int newX, const int newY,
                     const int newWidth, const int newHeight) throw();
 
+    /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
+        If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+    */
+    void setLeft (const int newLeft) throw();
+
+    /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
+        If the y is moved to be below the current bottom edge, the height will be set to zero.
+    */
+    void setTop (const int newTop) throw();
+
+    /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
+        If the new right is below the current X value, the X will be pushed down to match it.
+        @see getRight
+    */
+    void setRight (const int newRight) throw();
+
+    /** Adjusts the height so that the bottom edge of the rectangle has this new value.
+        If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
+        @see getBottom
+    */
+    void setBottom (const int newBottom) throw();
+    
     /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
     void translate (const int deltaX,
                     const int deltaY) throw();

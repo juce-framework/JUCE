@@ -90,18 +90,17 @@ private:
 //==============================================================================
 AlertWindow::AlertWindow (const String& title,
                           const String& message,
-                          AlertIconType iconType)
+                          AlertIconType iconType,
+                          Component* associatedComponent_)
    : TopLevelWindow (title, true),
-     alertIconType (iconType)
+     alertIconType (iconType),
+     associatedComponent (associatedComponent_)
 {
     if (message.isEmpty())
         text = T(" "); // to force an update if the message is empty
 
     setMessage (message);
 
-#if JUCE_MAC
-    setAlwaysOnTop (true);
-#else
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
         Component* const c = Desktop::getInstance().getComponent (i);
@@ -112,7 +111,6 @@ AlertWindow::AlertWindow (const String& title,
             break;
         }
     }
-#endif
 
     lookAndFeelChanged();
 
@@ -470,7 +468,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 
     if (! isVisible())
     {
-        centreAroundComponent (0, w, h);
+        centreAroundComponent (associatedComponent, w, h);
     }
     else
     {
@@ -588,7 +586,7 @@ void AlertWindow::lookAndFeelChanged()
     const int flags = getLookAndFeel().getAlertBoxWindowFlags();
 
     setUsingNativeTitleBar ((flags & ComponentPeer::windowHasTitleBar) != 0);
-    setDropShadowEnabled ((flags & ComponentPeer::windowHasDropShadow) != 0);
+    setDropShadowEnabled (isOpaque() && (flags & ComponentPeer::windowHasDropShadow) != 0);
 }
 
 int AlertWindow::getDesktopWindowStyleFlags() const
@@ -602,6 +600,7 @@ struct AlertWindowInfo
     String title, message, button1, button2, button3;
     AlertWindow::AlertIconType iconType;
     int numButtons;
+    Component* associatedComponent;
 
     int run() const
     {
@@ -612,37 +611,19 @@ struct AlertWindowInfo
 private:
     int show() const
     {
-        AlertWindow aw (title, message, iconType);
+        jassert (associatedComponent == 0 || associatedComponent->isValidComponent()); // has your comp been deleted?
 
-        if (numButtons == 1)
-        {
-            aw.addButton (button1, 0,
-                          KeyPress (KeyPress::escapeKey, 0, 0),
-                          KeyPress (KeyPress::returnKey, 0, 0));
-        }
-        else
-        {
-            const KeyPress button1ShortCut (CharacterFunctions::toLowerCase (button1[0]), 0, 0);
-            KeyPress button2ShortCut (CharacterFunctions::toLowerCase (button2[0]), 0, 0);
-            if (button1ShortCut == button2ShortCut)
-                button2ShortCut = KeyPress();
+        LookAndFeel& lf = associatedComponent->isValidComponent() ? associatedComponent->getLookAndFeel()
+                                                                  : LookAndFeel::getDefaultLookAndFeel();
 
-            if (numButtons == 2)
-            {
-                aw.addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
-                aw.addButton (button2, 0, KeyPress (KeyPress::escapeKey, 0, 0), button2ShortCut);
-            }
-            else
-            {
-                jassert (numButtons == 3);
+        Component* const alertBox = lf.createAlertWindow (title, message, button1, button2, button3,
+                                                          iconType, numButtons, associatedComponent);
 
-                aw.addButton (button1, 1, button1ShortCut);
-                aw.addButton (button2, 2, button2ShortCut);
-                aw.addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
-            }
-        }
+        jassert (alertBox != 0); // you have to return one of these!
 
-        return aw.runModalLoop();
+        const int result = alertBox->runModalLoop();
+        delete alertBox;
+        return result;
     }
 
     static void* showCallback (void* userData)
@@ -654,7 +635,8 @@ private:
 void AlertWindow::showMessageBox (AlertIconType iconType,
                                   const String& title,
                                   const String& message,
-                                  const String& buttonText)
+                                  const String& buttonText,
+                                  Component* associatedComponent)
 {
     AlertWindowInfo info;
     info.title = title;
@@ -662,6 +644,7 @@ void AlertWindow::showMessageBox (AlertIconType iconType,
     info.button1 = buttonText.isEmpty() ? TRANS("ok") : buttonText;
     info.iconType = iconType;
     info.numButtons = 1;
+    info.associatedComponent = associatedComponent;
 
     info.run();
 }
@@ -670,7 +653,8 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    const String& title,
                                    const String& message,
                                    const String& button1Text,
-                                   const String& button2Text)
+                                   const String& button2Text,
+                                   Component* associatedComponent)
 {
     AlertWindowInfo info;
     info.title = title;
@@ -679,6 +663,7 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
     info.button2 = button2Text.isEmpty() ? TRANS("cancel") : button2Text;
     info.iconType = iconType;
     info.numButtons = 2;
+    info.associatedComponent = associatedComponent;
 
     return info.run() != 0;
 }
@@ -688,7 +673,8 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
                                      const String& message,
                                      const String& button1Text,
                                      const String& button2Text,
-                                     const String& button3Text)
+                                     const String& button3Text,
+                                     Component* associatedComponent)
 {
     AlertWindowInfo info;
     info.title = title;
@@ -698,6 +684,7 @@ int AlertWindow::showYesNoCancelBox (AlertIconType iconType,
     info.button3 = button3Text.isEmpty() ? TRANS("cancel")  : button3Text;
     info.iconType = iconType;
     info.numButtons = 3;
+    info.associatedComponent = associatedComponent;
 
     return info.run();
 }

@@ -126,7 +126,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
 
         input->getNextAudioBlock (readInfo);
 
-        if (ratio > 1.0)
+        if (ratio > 1.0001)
         {
             // for down-sampling, pre-apply the filter..
 
@@ -172,7 +172,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         }
     }
 
-    if (ratio < 1.0)
+    if (ratio < 0.9999)
     {
         // for up-sampling, apply the filter after transposing..
 

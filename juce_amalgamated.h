@@ -15016,8 +15016,8 @@ private:
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 /********* Start of inlined file: juce_app_includes.h *********/
-#ifndef __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
-#define __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
+#ifndef __JUCE_APP_INCLUDES_JUCEHEADER__
+#define __JUCE_APP_INCLUDES_JUCEHEADER__
 
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
 
@@ -17746,6 +17746,28 @@ public:
     /** Changes all the rectangle's co-ordinates. */
     void setBounds (const int newX, const int newY,
                     const int newWidth, const int newHeight) throw();
+
+    /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
+        If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+    */
+    void setLeft (const int newLeft) throw();
+
+    /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
+        If the y is moved to be below the current bottom edge, the height will be set to zero.
+    */
+    void setTop (const int newTop) throw();
+
+    /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
+        If the new right is below the current X value, the X will be pushed down to match it.
+        @see getRight
+    */
+    void setRight (const int newRight) throw();
+
+    /** Adjusts the height so that the bottom edge of the rectangle has this new value.
+        If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
+        @see getBottom
+    */
+    void setBottom (const int newBottom) throw();
 
     /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
     void translate (const int deltaX,
@@ -22451,12 +22473,23 @@ public:
     */
     bool isCurrentlyModal() const throw();
 
-    /** Returns the component that is currently modal.
+    /** Returns the number of components that are currently in a modal state.
+        @see getCurrentlyModalComponent
+     */
+    static int JUCE_CALLTYPE getNumCurrentlyModalComponents() throw();
 
-        @returns the modal component, or null if no components are modal
-        @see runModalLoop, isCurrentlyModal
+    /** Returns one of the components that are currently modal.
+
+        The index specifies which of the possible modal components to return. The order
+        of the components in this list is the reverse of the order in which they became
+        modal - so the component at index 0 is always the active component, and the others
+        are progressively earlier ones that are themselves now blocked by later ones.
+
+        @returns the modal component, or null if no components are modal (or if the
+                index is out of range)
+        @see getNumCurrentlyModalComponents, runModalLoop, isCurrentlyModal
     */
-    static Component* JUCE_CALLTYPE getCurrentlyModalComponent() throw();
+    static Component* JUCE_CALLTYPE getCurrentlyModalComponent (int index = 0) throw();
 
     /** Checks whether there's a modal component somewhere that's stopping this one
         from receiving messages.
@@ -37764,7 +37797,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
     @see Message, MessageListener, MessageManagerLock, JUCEApplication
 */
-class JUCE_API  MessageManager  : private DeletedAtShutdown
+class JUCE_API  MessageManager
 {
 public:
 
@@ -37871,12 +37904,13 @@ public:
     void deliverMessage (void*);
     /** @internal */
     void deliverBroadcastMessage (const String&);
+    /** @internal */
+    ~MessageManager() throw();
 
     juce_UseDebuggingNewOperator
 
 private:
     MessageManager() throw();
-    ~MessageManager() throw();
 
     friend class MessageListener;
     friend class ChangeBroadcaster;
@@ -50522,10 +50556,14 @@ public:
         @param message  a longer, more descriptive message to show underneath the
                         headline
         @param iconType the type of icon to display
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                        alert window should be associated with. Depending on the look
+                        and feel, this might be used for positioning of the alert window.
     */
     AlertWindow (const String& title,
                  const String& message,
-                 AlertIconType iconType);
+                 AlertIconType iconType,
+                 Component* associatedComponent = 0);
 
     /** Destroys the AlertWindow */
     ~AlertWindow();
@@ -50670,11 +50708,15 @@ public:
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
                             default string "ok" (or a localised version) will be used.
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
     */
     static void JUCE_CALLTYPE showMessageBox (AlertIconType iconType,
                                               const String& title,
                                               const String& message,
-                                              const String& buttonText = String::empty);
+                                              const String& buttonText = String::empty,
+                                              Component* associatedComponent = 0);
 
     /** Shows a dialog box with two buttons.
 
@@ -50691,13 +50733,17 @@ public:
         @param button2Text  the text to show in the second button - if this string is
                             empty, the default string "cancel" (or a localised version of it)
                             will be used.
-        @returns true if button 1 was clicked, false if it was button 2
+     @param associatedComponent   if this is non-zero, it specifies the component that the
+                             alert window should be associated with. Depending on the look
+                             and feel, this might be used for positioning of the alert window.
+     @returns true if button 1 was clicked, false if it was button 2
     */
     static bool JUCE_CALLTYPE showOkCancelBox (AlertIconType iconType,
                                                const String& title,
                                                const String& message,
                                                const String& button1Text = String::empty,
-                                               const String& button2Text = String::empty);
+                                               const String& button2Text = String::empty,
+                                               Component* associatedComponent = 0);
 
     /** Shows a dialog box with three buttons.
 
@@ -50715,6 +50761,9 @@ public:
                             "no" will be used (or a localised version of it)
         @param button3Text  the text to show in the first button - if an empty string, then
                             "cancel" will be used (or a localised version of it)
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
 
         @returns one of the following values:
                  - 0 if the third button was pressed (normally used for 'cancel')
@@ -50726,7 +50775,8 @@ public:
                                                  const String& message,
                                                  const String& button1Text = String::empty,
                                                  const String& button2Text = String::empty,
-                                                 const String& button3Text = String::empty);
+                                                 const String& button3Text = String::empty,
+                                                 Component* associatedComponent = 0);
 
     /** Shows an operating-system native dialog box.
 
@@ -50785,6 +50835,7 @@ private:
     VoidArray progressBars, customComps, textBlocks, allComps;
     StringArray textboxNames, comboBoxNames;
     Font font;
+    Component* associatedComponent;
 
     void updateLayout (const bool onlyIncreaseSize);
 
@@ -51161,7 +51212,7 @@ private:
     void timerCallback();
 
     double progress;
-    AlertWindow alertWindow;
+    AlertWindow* alertWindow;
     String message;
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
@@ -53196,8 +53247,17 @@ public:
                               const bool isMouseOverButton,
                               const bool isButtonDown);
 
-    /** Draws the contents of a message box.
+    /** AlertWindow handling..
     */
+    virtual AlertWindow* createAlertWindow (const String& title,
+                                            const String& message,
+                                            const String& button1,
+                                            const String& button2,
+                                            const String& button3,
+                                            AlertWindow::AlertIconType iconType,
+                                            int numButtons,
+                                            Component* associatedComponent);
+
     virtual void drawAlertBox (Graphics& g,
                                AlertWindow& alert,
                                const Rectangle& textArea,
@@ -54173,7 +54233,7 @@ private:
 
 #endif
 
-#endif
+#endif   // __JUCE_APP_INCLUDES_JUCEHEADER__
 /********* End of inlined file: juce_app_includes.h *********/
 
 #endif

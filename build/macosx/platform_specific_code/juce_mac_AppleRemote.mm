@@ -265,6 +265,7 @@ void AppleRemoteDevice::handleCallbackInternal()
     {
         if (strcmp (cookies, buttonPatterns + i) == 0)
         {
+            const MessageManagerLock mml;
             buttonPressed ((ButtonType) buttonNum, totalValues > 0);
             break;
         }

@@ -52,7 +52,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
     @see Message, MessageListener, MessageManagerLock, JUCEApplication
 */
-class JUCE_API  MessageManager  : private DeletedAtShutdown
+class JUCE_API  MessageManager
 {
 public:
     //==============================================================================
@@ -163,13 +163,14 @@ public:
     void deliverMessage (void*);
     /** @internal */
     void deliverBroadcastMessage (const String&);
+    /** @internal */
+    ~MessageManager() throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     MessageManager() throw();
-    ~MessageManager() throw();
 
     friend class MessageListener;
     friend class ChangeBroadcaster;

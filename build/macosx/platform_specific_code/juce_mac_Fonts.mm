@@ -44,6 +44,7 @@ public:
     bool isBold, isItalic;
     float fontSize, totalSize, ascent;
     int refCount;
+    NSMutableDictionary* attributes;
 
     FontHelper (const String& name_,
                 const bool bold_,
@@ -56,10 +57,23 @@ public:
           fontSize (size_),
           refCount (1)
     {
+        attributes = [[NSMutableDictionary dictionaryWithObject: [NSNumber numberWithInt: 0]
+                                                         forKey: NSLigatureAttributeName] retain];
+
         font = [NSFont fontWithName: juceStringToNS (name_) size: size_];
 
         if (italic_)
-            font = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSItalicFontMask];
+        {
+            NSFont* newFont = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSItalicFontMask];
+
+            if (newFont == font)
+            {
+                // couldn't find an italic version, so fake it with obliqueness..
+                [attributes setObject: [NSNumber numberWithFloat: 0.16] forKey: NSObliquenessAttributeName];
+            }
+
+            font = newFont;
+        }
 
         if (bold_)
             font = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSBoldFontMask];
@@ -73,6 +87,7 @@ public:
     ~FontHelper()
     {
         [font release];
+        [attributes release];
     }
 
     bool getPathAndKerning (const juce_wchar char1,
@@ -90,10 +105,9 @@ public:
 
         String chars;
         chars << ' ' << char1 << char2;
-        NSTextStorage* textStorage = [[[NSTextStorage alloc]
-              initWithString: juceStringToNS (chars)
-                  attributes: [NSDictionary dictionaryWithObject: [NSNumber numberWithInt: 0]
-                                                          forKey: NSLigatureAttributeName]] autorelease];
+
+        NSTextStorage* textStorage = [[[NSTextStorage alloc] initWithString: juceStringToNS (chars)
+                                                                 attributes: attributes] autorelease];
         NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
         NSTextContainer* textContainer = [[[NSTextContainer alloc] init] autorelease];
         [layoutManager addTextContainer: textContainer];

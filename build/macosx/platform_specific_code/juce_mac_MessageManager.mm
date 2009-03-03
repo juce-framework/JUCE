@@ -61,6 +61,7 @@ public:
     {
         if (JUCEApplication::getInstance() != 0)
         {
+            const MessageManagerLock mml;
             JUCEApplication::getInstance()->systemRequestedQuit();
             return NSTerminateCancel;
         }
@@ -72,6 +73,7 @@ public:
     {
         if (JUCEApplication::getInstance() != 0)
         {
+            const MessageManagerLock mml;
             JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
             return YES;
         }
@@ -86,19 +88,31 @@ public:
             files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)
+        {
+            const MessageManagerLock mml;
             JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
+        }
     }
 
     virtual void focusChanged()
     {
+        const MessageManagerLock mml;
         juce_HandleProcessFocusChange();
     }
 
     virtual void deliverMessage (void* message)
     {
+        // no need for an mm lock here - deliverMessage locks it
         MessageManager::getInstance()->deliverMessage (message);
     }
 
+    virtual void performCallback (CallbackMessagePayload* pl)
+    {
+        const MessageManagerLock mml;
+        pl->result = (*pl->function) (pl->parameter);
+        pl->hasBeenExecuted = true;
+    }
+    
     virtual void deleteSelf()
     {
         delete this;
@@ -227,10 +241,7 @@ static bool flushingMessages = false;
         CallbackMessagePayload* pl = (CallbackMessagePayload*) [((NSData*) info) bytes];
 
         if (pl != 0)
-        {
-            pl->result = (*pl->function) (pl->parameter);
-            pl->hasBeenExecuted = true;
-        }
+            redirector->performCallback (pl);
     }
     else
     {
@@ -249,7 +260,6 @@ static JuceAppDelegate* juceAppDelegate = 0;
 void MessageManager::runDispatchLoop()
 {
     const ScopedAutoReleasePool pool;
-    MessageManagerLock mml;
 
     // must only be called by the message thread!
     jassert (isThisTheMessageThread());

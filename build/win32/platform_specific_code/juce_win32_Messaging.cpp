@@ -101,6 +101,8 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
 
     if (GetMessage (&m, (HWND) 0, 0, 0) > 0)
     {
+		const MessageManagerLock mml;
+
         if (m.message == specialId
              && m.hwnd == juce_messageWindowHandle)
         {

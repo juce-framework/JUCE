@@ -1539,9 +1539,14 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const throw()
             && ! mc->canModalEventBeSentToComponent (this);
 }
 
-Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent() throw()
+int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() throw()
 {
-    Component* const c = (Component*) modalComponentStack.getLast();
+    return modalComponentStack.size();
+}
+
+Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) throw()
+{
+    Component* const c = (Component*) (modalComponentStack [modalComponentStack.size() - index - 1]);
 
     return c->isValidComponent() ? c : 0;
 }

@@ -155,7 +155,7 @@ private:
     void timerCallback();
 
     double progress;
-    AlertWindow alertWindow;
+    AlertWindow* alertWindow;
     String message;
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;

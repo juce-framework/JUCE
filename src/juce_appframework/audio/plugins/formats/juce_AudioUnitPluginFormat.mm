@@ -730,13 +730,19 @@ OSStatus AudioUnitPluginInstance::getBeatAndTempo (Float64* outCurrentBeat, Floa
 
     if (ph != 0 && ph->getCurrentPosition (result))
     {
-        *outCurrentBeat = result.ppqPosition;
-        *outCurrentTempo = result.bpm;
+        if (outCurrentBeat != 0)
+            *outCurrentBeat = result.ppqPosition;
+
+        if (outCurrentTempo != 0)
+            *outCurrentTempo = result.bpm;
     }
     else
     {
-        *outCurrentBeat = 0;
-        *outCurrentTempo = 120.0;
+        if (outCurrentBeat != 0)
+            *outCurrentBeat = 0;
+
+        if (outCurrentTempo != 0)
+            *outCurrentTempo = 120.0;
     }
 
     return noErr;
@@ -752,18 +758,31 @@ OSStatus AudioUnitPluginInstance::getMusicalTimeLocation (UInt32* outDeltaSample
 
     if (ph != 0 && ph->getCurrentPosition (result))
     {
-        *outTimeSig_Numerator = result.timeSigNumerator;
-        *outTimeSig_Denominator = result.timeSigDenominator;
+        if (outTimeSig_Numerator != 0)
+            *outTimeSig_Numerator = result.timeSigNumerator;
 
-        *outDeltaSampleOffsetToNextBeat = 0; //xxx
-        *outCurrentMeasureDownBeat = result.ppqPositionOfLastBarStart; //xxx wrong
+        if (outTimeSig_Denominator != 0)
+            *outTimeSig_Denominator = result.timeSigDenominator;
+
+        if (outDeltaSampleOffsetToNextBeat != 0)
+            *outDeltaSampleOffsetToNextBeat = 0; //xxx
+
+        if (outCurrentMeasureDownBeat != 0)
+            *outCurrentMeasureDownBeat = result.ppqPositionOfLastBarStart; //xxx wrong
     }
     else
     {
-        *outDeltaSampleOffsetToNextBeat = 0;
-        *outTimeSig_Numerator = 4;
-        *outTimeSig_Denominator = 4;
-        *outCurrentMeasureDownBeat = 0;
+        if (outDeltaSampleOffsetToNextBeat != 0)
+            *outDeltaSampleOffsetToNextBeat = 0;
+
+        if (outTimeSig_Numerator != 0)
+            *outTimeSig_Numerator = 4;
+
+        if (outTimeSig_Denominator != 0)
+            *outTimeSig_Denominator = 4;
+
+        if (outCurrentMeasureDownBeat != 0)
+            *outCurrentMeasureDownBeat = 0;
     }
 
     return noErr;

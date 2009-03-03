@@ -36,6 +36,7 @@
 #include "../../graphics/effects/juce_DropShadowEffect.h"
 #include "../controls/juce_Slider.h"
 #include "../layout/juce_TabbedComponent.h"
+#include "../windows/juce_AlertWindow.h"
 
 class ToggleButton;
 class TextButton;
@@ -175,8 +176,17 @@ public:
                               const bool isButtonDown);
 
     //==============================================================================
-    /** Draws the contents of a message box.
+    /** AlertWindow handling..
     */
+    virtual AlertWindow* createAlertWindow (const String& title,
+                                            const String& message,
+                                            const String& button1,
+                                            const String& button2,
+                                            const String& button3,
+                                            AlertWindow::AlertIconType iconType,
+                                            int numButtons,
+                                            Component* associatedComponent);
+
     virtual void drawAlertBox (Graphics& g,
                                AlertWindow& alert,
                                const Rectangle& textArea,

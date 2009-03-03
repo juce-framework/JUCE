@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_ThreadWithProgressWindow.h"
+#include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 
 
@@ -46,19 +47,23 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const String& cancelButtonText)
   : Thread ("Juce Progress Window"),
     progress (0.0),
-    alertWindow (title, String::empty, AlertWindow::NoIcon),
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
 {
+    alertWindow = LookAndFeel::getDefaultLookAndFeel()
+                    .createAlertWindow (title, String::empty, cancelButtonText, String::empty, String::empty, 
+                                        AlertWindow::NoIcon, 1, 0);
+
     if (hasProgressBar)
-        alertWindow.addProgressBarComponent (progress);
+        alertWindow->addProgressBarComponent (progress);
 
     if (hasCancelButton)
-        alertWindow.addButton (cancelButtonText, 1);
+        alertWindow->addButton (cancelButtonText, 1);
 }
 
 ThreadWithProgressWindow::~ThreadWithProgressWindow()
 {
     stopThread (timeOutMsWhenCancelling);
+    delete alertWindow;
 }
 
 bool ThreadWithProgressWindow::runThread (const int priority)
@@ -68,14 +73,14 @@ bool ThreadWithProgressWindow::runThread (const int priority)
 
     {
         const ScopedLock sl (messageLock);
-        alertWindow.setMessage (message);
+        alertWindow->setMessage (message);
     }
 
-    const bool wasCancelled = alertWindow.runModalLoop() != 0;
+    const bool wasCancelled = alertWindow->runModalLoop() != 0;
 
     stopThread (timeOutMsWhenCancelling);
 
-    alertWindow.setVisible (false);
+    alertWindow->setVisible (false);
 
     return ! wasCancelled;
 }
@@ -96,13 +101,13 @@ void ThreadWithProgressWindow::timerCallback()
     if (! isThreadRunning())
     {
         // thread has finished normally..
-        alertWindow.exitModalState (0);
-        alertWindow.setVisible (false);
+        alertWindow->exitModalState (0);
+        alertWindow->setVisible (false);
     }
     else
     {
         const ScopedLock sl (messageLock);
-        alertWindow.setMessage (message);
+        alertWindow->setMessage (message);
     }
 }
 

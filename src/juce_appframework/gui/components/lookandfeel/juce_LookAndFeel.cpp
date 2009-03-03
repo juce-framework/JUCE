@@ -465,78 +465,105 @@ void LookAndFeel::changeToggleButtonWidthToFitText (ToggleButton& button)
                     button.getHeight());
 }
 
+//==============================================================================
+AlertWindow* LookAndFeel::createAlertWindow (const String& title,
+                                             const String& message,
+                                             const String& button1,
+                                             const String& button2,
+                                             const String& button3,
+                                             AlertWindow::AlertIconType iconType,
+                                             int numButtons,
+                                             Component* associatedComponent)
+{
+    AlertWindow* aw = new AlertWindow (title, message, iconType);
+    
+    if (numButtons == 1)
+    {
+        aw->addButton (button1, 0,
+                       KeyPress (KeyPress::escapeKey, 0, 0),
+                       KeyPress (KeyPress::returnKey, 0, 0));
+    }
+    else
+    {
+        const KeyPress button1ShortCut (CharacterFunctions::toLowerCase (button1[0]), 0, 0);
+        KeyPress button2ShortCut (CharacterFunctions::toLowerCase (button2[0]), 0, 0);
+        if (button1ShortCut == button2ShortCut)
+            button2ShortCut = KeyPress();
+        
+        if (numButtons == 2)
+        {
+            aw->addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
+            aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey, 0, 0), button2ShortCut);
+        }
+        else
+        {
+            jassert (numButtons == 3);
+            
+            aw->addButton (button1, 1, button1ShortCut);
+            aw->addButton (button2, 2, button2ShortCut);
+            aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
+        }
+    }
+
+    return aw;
+}
+
 void LookAndFeel::drawAlertBox (Graphics& g,
                                 AlertWindow& alert,
                                 const Rectangle& textArea,
                                 TextLayout& textLayout)
 {
-    const int iconWidth = 80;
-
-    const Colour background (alert.findColour (AlertWindow::backgroundColourId));
-
-    g.fillAll (background);
+    g.fillAll (alert.findColour (AlertWindow::backgroundColourId));
 
     int iconSpaceUsed = 0;
     Justification alignment (Justification::horizontallyCentred);
 
+    const int iconWidth = 80;
     int iconSize = jmin (iconWidth + 50, alert.getHeight() + 20);
 
     if (alert.containsAnyExtraComponents() || alert.getNumButtons() > 2)
         iconSize = jmin (iconSize, textArea.getHeight() + 50);
 
-    const Rectangle iconRect (iconSize / -10,
-                              iconSize / -10,
-                              iconSize,
-                              iconSize);
+    const Rectangle iconRect (iconSize / -10, iconSize / -10,
+                              iconSize, iconSize);
 
-    if (alert.getAlertType() == AlertWindow::QuestionIcon
-         || alert.getAlertType() == AlertWindow::InfoIcon)
+    if (alert.getAlertType() != AlertWindow::NoIcon)
     {
-        if (alert.getAlertType() == AlertWindow::InfoIcon)
-            g.setColour (background.overlaidWith (Colour (0x280000ff)));
+        Path icon;
+        uint32 colour;
+        char character;
+
+        if (alert.getAlertType() == AlertWindow::WarningIcon)
+        {
+            colour = 0x55ff5555;
+            character = '!';
+
+            icon.addTriangle (iconRect.getX() + iconRect.getWidth() * 0.5f, (float) iconRect.getY(), 
+                              (float) iconRect.getRight(), (float) iconRect.getBottom(), 
+                              (float) iconRect.getX(), (float) iconRect.getBottom());
+
+            icon = icon.createPathWithRoundedCorners (5.0f);
+        }
         else
-            g.setColour (background.overlaidWith (Colours::gold.darker().withAlpha (0.25f)));
+        {
+            colour = alert.getAlertType() == AlertWindow::InfoIcon ? 0x605555ff : 0x40b69900;
+            character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
 
-        g.fillEllipse ((float) iconRect.getX(),
-                       (float) iconRect.getY(),
-                       (float) iconRect.getWidth(),
-                       (float) iconRect.getHeight());
+            icon.addEllipse ((float) iconRect.getX(), (float) iconRect.getY(),
+                             (float) iconRect.getWidth(), (float) iconRect.getHeight());
+        }
 
-        g.setColour (background);
-        g.setFont (iconRect.getHeight() * 0.9f, Font::bold);
-        g.drawText ((alert.getAlertType() == AlertWindow::InfoIcon) ? "i"
-                                                                    : "?",
-                    iconRect.getX(),
-                    iconRect.getY(),
-                    iconRect.getWidth(),
-                    iconRect.getHeight(),
-                    Justification::centred, false);
+        GlyphArrangement ga;
+        ga.addFittedText (Font (iconRect.getHeight() * 0.9f, Font::bold),
+                          String::charToString (character),
+                          (float) iconRect.getX(), (float) iconRect.getY(),
+                          (float) iconRect.getWidth(), (float) iconRect.getHeight(),
+                          Justification::centred, false);
+        ga.createPath (icon);
 
-        iconSpaceUsed = iconWidth;
-        alignment = Justification::left;
-    }
-    else if (alert.getAlertType() == AlertWindow::WarningIcon)
-    {
-        Path p;
-        p.addTriangle (iconRect.getX() + iconRect.getWidth() * 0.5f,
-                       (float) iconRect.getY(),
-                       (float) iconRect.getRight(),
-                       (float) iconRect.getBottom(),
-                       (float) iconRect.getX(),
-                       (float) iconRect.getBottom());
-
-        g.setColour (background.overlaidWith (Colour (0x33ff0000)));
-        g.fillPath (p.createPathWithRoundedCorners (5.0f));
-
-        g.setColour (background);
-        g.setFont (iconRect.getHeight() * 0.9f, Font::bold);
-
-        g.drawText (T("!"),
-                    iconRect.getX(),
-                    iconRect.getY(),
-                    iconRect.getWidth(),
-                    iconRect.getHeight() + iconRect.getHeight() / 8,
-                    Justification::centred, false);
+        icon.setUsingNonZeroWinding (false);
+        g.setColour (Colour (colour));
+        g.fillPath (icon);
 
         iconSpaceUsed = iconWidth;
         alignment = Justification::left;
@@ -545,10 +572,8 @@ void LookAndFeel::drawAlertBox (Graphics& g,
     g.setColour (alert.findColour (AlertWindow::textColourId));
 
     textLayout.drawWithin (g,
-                           textArea.getX() + iconSpaceUsed,
-                           textArea.getY(),
-                           textArea.getWidth() - iconSpaceUsed,
-                           textArea.getHeight(),
+                           textArea.getX() + iconSpaceUsed, textArea.getY(),
+                           textArea.getWidth() - iconSpaceUsed, textArea.getHeight(),
                            alignment.getFlags() | Justification::top);
 
     g.setColour (alert.findColour (AlertWindow::outlineColourId));
@@ -571,6 +596,7 @@ const Font LookAndFeel::getAlertWindowFont()
     return Font (12.0f);
 }
 
+//==============================================================================
 void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
                                    int width, int height,
                                    double progress, const String& textToShow)

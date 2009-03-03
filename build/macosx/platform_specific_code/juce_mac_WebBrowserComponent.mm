@@ -69,6 +69,8 @@ END_JUCE_NAMESPACE
 {
     NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
 
+    const MessageManagerLock mml;
+
     if (ownerComponent->pageAboutToLoad (nsStringToJuce ([url absoluteString])))
         [listener use];
     else

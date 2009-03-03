@@ -76,10 +76,14 @@ public:
         @param message  a longer, more descriptive message to show underneath the
                         headline
         @param iconType the type of icon to display
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                        alert window should be associated with. Depending on the look
+                        and feel, this might be used for positioning of the alert window.
     */
     AlertWindow (const String& title,
                  const String& message,
-                 AlertIconType iconType);
+                 AlertIconType iconType,
+                 Component* associatedComponent = 0);
 
     /** Destroys the AlertWindow */
     ~AlertWindow();
@@ -234,11 +238,15 @@ public:
                             headline
         @param buttonText   the text to show in the button - if this string is empty, the
                             default string "ok" (or a localised version) will be used.
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
     */
     static void JUCE_CALLTYPE showMessageBox (AlertIconType iconType,
                                               const String& title,
                                               const String& message,
-                                              const String& buttonText = String::empty);
+                                              const String& buttonText = String::empty,
+                                              Component* associatedComponent = 0);
 
     /** Shows a dialog box with two buttons.
 
@@ -255,13 +263,17 @@ public:
         @param button2Text  the text to show in the second button - if this string is
                             empty, the default string "cancel" (or a localised version of it)
                             will be used.
-        @returns true if button 1 was clicked, false if it was button 2
+     @param associatedComponent   if this is non-zero, it specifies the component that the
+                             alert window should be associated with. Depending on the look
+                             and feel, this might be used for positioning of the alert window.
+     @returns true if button 1 was clicked, false if it was button 2
     */
     static bool JUCE_CALLTYPE showOkCancelBox (AlertIconType iconType,
                                                const String& title,
                                                const String& message,
                                                const String& button1Text = String::empty,
-                                               const String& button2Text = String::empty);
+                                               const String& button2Text = String::empty,
+                                               Component* associatedComponent = 0);
 
     /** Shows a dialog box with three buttons.
 
@@ -279,7 +291,10 @@ public:
                             "no" will be used (or a localised version of it)
         @param button3Text  the text to show in the first button - if an empty string, then
                             "cancel" will be used (or a localised version of it)
-
+        @param associatedComponent   if this is non-zero, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
+     
         @returns one of the following values:
                  - 0 if the third button was pressed (normally used for 'cancel')
                  - 1 if the first button was pressed (normally used for 'yes')
@@ -290,7 +305,8 @@ public:
                                                  const String& message,
                                                  const String& button1Text = String::empty,
                                                  const String& button2Text = String::empty,
-                                                 const String& button3Text = String::empty);
+                                                 const String& button3Text = String::empty,
+                                                 Component* associatedComponent = 0);
 
     //==============================================================================
     /** Shows an operating-system native dialog box.
@@ -353,6 +369,7 @@ private:
     VoidArray progressBars, customComps, textBlocks, allComps;
     StringArray textboxNames, comboBoxNames;
     Font font;
+    Component* associatedComponent;
 
     void updateLayout (const bool onlyIncreaseSize);
 

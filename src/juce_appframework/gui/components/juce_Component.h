@@ -1763,12 +1763,23 @@ public:
     */
     bool isCurrentlyModal() const throw();
 
-    /** Returns the component that is currently modal.
+    /** Returns the number of components that are currently in a modal state.
+        @see getCurrentlyModalComponent
+     */
+    static int JUCE_CALLTYPE getNumCurrentlyModalComponents() throw();
 
-        @returns the modal component, or null if no components are modal
-        @see runModalLoop, isCurrentlyModal
+    /** Returns one of the components that are currently modal.
+
+        The index specifies which of the possible modal components to return. The order
+        of the components in this list is the reverse of the order in which they became
+        modal - so the component at index 0 is always the active component, and the others
+        are progressively earlier ones that are themselves now blocked by later ones.
+     
+        @returns the modal component, or null if no components are modal (or if the
+                index is out of range)
+        @see getNumCurrentlyModalComponents, runModalLoop, isCurrentlyModal
     */
-    static Component* JUCE_CALLTYPE getCurrentlyModalComponent() throw();
+    static Component* JUCE_CALLTYPE getCurrentlyModalComponent (int index = 0) throw();
 
     /** Checks whether there's a modal component somewhere that's stopping this one
         from receiving messages.
