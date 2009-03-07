@@ -59,12 +59,6 @@
 #ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
  #include "juce_appframework/application/juce_SystemClipboard.h"
 #endif
-#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
- #include "juce_appframework/audio/midi/juce_MidiBuffer.h"
-#endif
-#ifndef __JUCE_MIDIFILE_JUCEHEADER__
- #include "juce_appframework/audio/midi/juce_MidiFile.h"
-#endif
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
  #include "juce_appframework/audio/midi/juce_MidiKeyboardState.h"
 #endif
@@ -76,6 +70,12 @@
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
  #include "juce_appframework/audio/midi/juce_MidiMessageSequence.h"
+#endif
+#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
+ #include "juce_appframework/audio/midi/juce_MidiBuffer.h"
+#endif
+#ifndef __JUCE_MIDIFILE_JUCEHEADER__
+ #include "juce_appframework/audio/midi/juce_MidiFile.h"
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
  #include "juce_appframework/audio/dsp/juce_AudioDataConverters.h"
@@ -140,6 +140,9 @@
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
  #include "juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.h"
 #endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
+ #include "juce_appframework/audio/devices/juce_MidiOutput.h"
+#endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
  #include "juce_appframework/audio/devices/juce_AudioDeviceManager.h"
 #endif
@@ -152,14 +155,17 @@
 #ifndef __JUCE_MIDIINPUT_JUCEHEADER__
  #include "juce_appframework/audio/devices/juce_MidiInput.h"
 #endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
- #include "juce_appframework/audio/devices/juce_MidiOutput.h"
-#endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
  #include "juce_appframework/audio/synthesisers/juce_Sampler.h"
 #endif
 #ifndef __JUCE_SYNTHESISER_JUCEHEADER__
  #include "juce_appframework/audio/synthesisers/juce_Synthesiser.h"
+#endif
+#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
+ #include "juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
+#endif
+#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.h"
@@ -169,12 +175,6 @@
 #endif
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_LADSPAPluginFormat.h"
-#endif
-#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
- #include "juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
-#endif
-#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/juce_AudioPluginFormat.h"
@@ -257,7 +257,6 @@
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
  #include "juce_appframework/events/juce_MessageManager.h"
 #endif
-#include "juce_appframework/events/._juce_CallbackMessage.h"
 #ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
  #include "juce_appframework/events/juce_CallbackMessage.h"
 #endif
@@ -285,6 +284,9 @@
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
  #include "juce_appframework/events/juce_InterprocessConnection.h"
 #endif
+#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
+ #include "juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h"
+#endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
  #include "juce_appframework/gui/graphics/brushes/juce_Brush.h"
 #endif
@@ -293,9 +295,6 @@
 #endif
 #ifndef __JUCE_IMAGEBRUSH_JUCEHEADER__
  #include "juce_appframework/gui/graphics/brushes/juce_ImageBrush.h"
-#endif
-#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
- #include "juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h"
 #endif
 #ifndef __JUCE_COLOUR_JUCEHEADER__
  #include "juce_appframework/gui/graphics/colour/juce_Colour.h"
