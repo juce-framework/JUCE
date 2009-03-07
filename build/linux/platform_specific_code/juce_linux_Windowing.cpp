@@ -2595,8 +2595,6 @@ void juce_windowMessageReceive (XEvent* event)
     {
         LinuxComponentPeer* const peer = LinuxComponentPeer::getPeerFor (event->xany.window);
 
-        const MessageManagerLock messLock;
-
         if (ComponentPeer::isValidPeer (peer))
             peer->handleWindowMessage (event);
     }

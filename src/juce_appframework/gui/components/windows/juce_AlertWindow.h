@@ -294,7 +294,7 @@ public:
         @param associatedComponent   if this is non-zero, it specifies the component that the
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
-     
+
         @returns one of the following values:
                  - 0 if the third button was pressed (normally used for 'cancel')
                  - 1 if the first button was pressed (normally used for 'yes')

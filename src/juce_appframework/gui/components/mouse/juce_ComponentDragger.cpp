@@ -71,14 +71,17 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
 
     if (componentToDrag->isValidComponent())
     {
-        int x = originalX + e.getDistanceFromDragStartX();
-        int y = originalY + e.getDistanceFromDragStartY();
+        int x = originalX;
+        int y = originalY;
         int w = componentToDrag->getWidth();
         int h = componentToDrag->getHeight();
 
         const Component* const parentComp = componentToDrag->getParentComponent();
         if (parentComp != 0)
             parentComp->globalPositionToRelative (x, y);
+
+        x += e.getDistanceFromDragStartX();
+        y += e.getDistanceFromDragStartY();
 
         if (constrainer != 0)
             constrainer->setBoundsForComponent (componentToDrag, x, y, w, h,

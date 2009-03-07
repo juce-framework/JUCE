@@ -2339,8 +2339,6 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
             if (getActiveEditor() != 0)
                 dispatch (effEditIdle, 0, 0, 0, 0);
 #endif
-            const MessageManagerLock mml;
-
             juce_callAnyTimersSynchronously();
 
             handleUpdateNowIfNeeded();

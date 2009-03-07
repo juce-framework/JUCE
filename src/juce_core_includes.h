@@ -32,20 +32,8 @@
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
- #include "juce_core/basics/juce_Atomic.h"
-#endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
- #include "juce_core/basics/juce_DataConversions.h"
-#endif
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
- #include "juce_core/basics/juce_FileLogger.h"
-#endif
 #ifndef __JUCE_INITIALISATION_JUCEHEADER__
  #include "juce_core/basics/juce_Initialisation.h"
-#endif
-#ifndef __JUCE_LOGGER_JUCEHEADER__
- #include "juce_core/basics/juce_Logger.h"
 #endif
 #ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
  #include "juce_core/basics/juce_MathsFunctions.h"
@@ -74,6 +62,30 @@
 #ifndef __JUCE_TIME_JUCEHEADER__
  #include "juce_core/basics/juce_Time.h"
 #endif
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+ #include "juce_core/basics/juce_Atomic.h"
+#endif
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+ #include "juce_core/basics/juce_DataConversions.h"
+#endif
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
+ #include "juce_core/basics/juce_FileLogger.h"
+#endif
+#ifndef __JUCE_LOGGER_JUCEHEADER__
+ #include "juce_core/basics/juce_Logger.h"
+#endif
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+ #include "juce_core/containers/juce_ReferenceCountedArray.h"
+#endif
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+ #include "juce_core/containers/juce_ReferenceCountedObject.h"
+#endif
+#ifndef __JUCE_SPARSESET_JUCEHEADER__
+ #include "juce_core/containers/juce_SparseSet.h"
+#endif
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
+ #include "juce_core/containers/juce_VoidArray.h"
+#endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
  #include "juce_core/containers/juce_Array.h"
 #endif
@@ -95,20 +107,8 @@
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
  #include "juce_core/containers/juce_PropertySet.h"
 #endif
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
- #include "juce_core/containers/juce_ReferenceCountedArray.h"
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
- #include "juce_core/containers/juce_ReferenceCountedObject.h"
-#endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
  #include "juce_core/containers/juce_SortedSet.h"
-#endif
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
- #include "juce_core/containers/juce_SparseSet.h"
-#endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
- #include "juce_core/containers/juce_VoidArray.h"
 #endif
 #ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/juce_InputStream.h"
@@ -152,6 +152,12 @@
 #ifndef __JUCE_URL_JUCEHEADER__
  #include "juce_core/io/network/juce_URL.h"
 #endif
+#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+ #include "juce_core/io/streams/juce_MemoryOutputStream.h"
+#endif
+#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+ #include "juce_core/io/streams/juce_SubregionStream.h"
+#endif
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_BufferedInputStream.h"
 #endif
@@ -169,12 +175,6 @@
 #endif
 #ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/streams/juce_MemoryInputStream.h"
-#endif
-#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
- #include "juce_core/io/streams/juce_MemoryOutputStream.h"
-#endif
-#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
- #include "juce_core/io/streams/juce_SubregionStream.h"
 #endif
 #ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
  #include "juce_core/misc/juce_PerformanceCounter.h"
@@ -209,6 +209,18 @@
 #ifndef __JUCE_XMLELEMENT_JUCEHEADER__
  #include "juce_core/text/juce_XmlElement.h"
 #endif
+#ifndef __JUCE_THREAD_JUCEHEADER__
+ #include "juce_core/threads/juce_Thread.h"
+#endif
+#ifndef __JUCE_THREADPOOL_JUCEHEADER__
+ #include "juce_core/threads/juce_ThreadPool.h"
+#endif
+#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
+ #include "juce_core/threads/juce_TimeSliceThread.h"
+#endif
+#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
+ #include "juce_core/threads/juce_WaitableEvent.h"
+#endif
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
  #include "juce_core/threads/juce_CriticalSection.h"
 #endif
@@ -232,18 +244,6 @@
 #endif
 #ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
  #include "juce_core/threads/juce_ScopedWriteLock.h"
-#endif
-#ifndef __JUCE_THREAD_JUCEHEADER__
- #include "juce_core/threads/juce_Thread.h"
-#endif
-#ifndef __JUCE_THREADPOOL_JUCEHEADER__
- #include "juce_core/threads/juce_ThreadPool.h"
-#endif
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
- #include "juce_core/threads/juce_TimeSliceThread.h"
-#endif
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
- #include "juce_core/threads/juce_WaitableEvent.h"
 #endif
 
 #endif

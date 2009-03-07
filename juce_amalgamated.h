@@ -15016,8 +15016,8 @@ private:
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 /********* Start of inlined file: juce_app_includes.h *********/
-#ifndef __JUCE_APP_INCLUDES_JUCEHEADER__
-#define __JUCE_APP_INCLUDES_JUCEHEADER__
+#ifndef __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
+#define __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
 
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
 
@@ -33145,6 +33145,13 @@ l    */
     */
     int getTextIndexAt (const int x, const int y) throw();
 
+    /** Counts the number of characters in the text.
+
+        This is quicker than getting the text as a string if you just need to know
+        the length.
+    */
+    int getTotalNumChars() throw();
+
     /** Returns the total width of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
@@ -33265,13 +33272,6 @@ protected:
 
     /** Used internally to dispatch a text-change message. */
     void textChanged() throw();
-
-    /** Counts the number of characters in the text.
-
-        This is quicker than getting the text as a string if you just need to know
-        the length.
-    */
-    int getTotalNumChars() throw();
 
     /** Begins a new transaction in the UndoManager.
     */
@@ -36131,11 +36131,13 @@ private:
 /********* End of inlined file: juce_PluginListComponent.h *********/
 
 #endif
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AiffAudioFormat.h *********/
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+/********* Start of inlined file: juce_FlacAudioFormat.h *********/
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_FLAC || defined (DOXYGEN)
 
 /********* Start of inlined file: juce_AudioFormat.h *********/
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
@@ -36410,6 +36412,282 @@ private:
 
 #endif   // __JUCE_AUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_AudioFormat.h *********/
+
+/**
+    Reads and writes the lossless-compression FLAC audio format.
+
+    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the FLAC header files and static libraries.
+
+    @see AudioFormat
+*/
+class JUCE_API  FlacAudioFormat    : public AudioFormat
+{
+public:
+
+    FlacAudioFormat();
+    ~FlacAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_FlacAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WavAudioFormat.h *********/
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/**
+    Reads and Writes WAV format audio files.
+
+    @see AudioFormat
+*/
+class JUCE_API  WavAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    WavAudioFormat();
+
+    /** Destructor. */
+    ~WavAudioFormat();
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavDescription;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginator;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginatorRef;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Date format is: yyyy-mm-dd
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationDate;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Time format is: hh-mm-ss
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationTime;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is the number of samples from the start of an edit that the
+        file is supposed to begin at. Seems like an obvious mistake to
+        only allow a file to occur in an edit once, but that's the way
+        it is..
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavTimeReference;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is a
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavCodingHistory;
+
+    /** Utility function to fill out the appropriate metadata for a BWAV file.
+
+        This just makes it easier than using the property names directly, and it
+        fills out the time and date in the right format.
+    */
+    static const StringPairArray createBWAVMetadata (const String& description,
+                                                     const String& originator,
+                                                     const String& originatorRef,
+                                                     const Time& dateAndTime,
+                                                     const int64 timeReferenceSamples,
+                                                     const String& codingHistory);
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    /** Utility function to replace the metadata in a wav file with a new set of values.
+
+        If possible, this cheats by overwriting just the metadata region of the file, rather
+        than by copying the whole file again.
+    */
+    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_WavAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+
+/**
+    Reads and writes the Ogg-Vorbis audio format.
+
+    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the Vorbis and Ogg header files and static libraries.
+
+    @see AudioFormat,
+*/
+class JUCE_API  OggVorbisAudioFormat : public AudioFormat
+{
+public:
+
+    OggVorbisAudioFormat();
+    ~OggVorbisAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+    const StringArray getQualityOptions();
+
+    /** Tries to estimate the quality level of an ogg file based on its size.
+
+        If it can't read the file for some reason, this will just return 1 (medium quality),
+        otherwise it will return the approximate quality setting that would have been used
+        to create the file.
+
+        @see getQualityOptions
+    */
+    int estimateOggFileQuality (const File& source);
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_QUICKTIME
+
+/**
+    Uses QuickTime to read the audio track a movie or media file.
+
+    As well as QuickTime movies, this should also manage to open other audio
+    files that quicktime can understand, like mp3, m4a, etc.
+
+    @see AudioFormat
+*/
+class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    QuickTimeAudioFormat();
+
+    /** Destructor. */
+    ~QuickTimeAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_AiffAudioFormat.h *********/
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 
 /**
     Reads and Writes AIFF format audio files.
@@ -37100,423 +37378,11 @@ private:
 /********* End of inlined file: juce_AudioThumbnailCache.h *********/
 
 #endif
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FlacAudioFormat.h *********/
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_FLAC || defined (DOXYGEN)
-
-/**
-    Reads and writes the lossless-compression FLAC audio format.
-
-    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the FLAC header files and static libraries.
-
-    @see AudioFormat
-*/
-class JUCE_API  FlacAudioFormat    : public AudioFormat
-{
-public:
-
-    FlacAudioFormat();
-    ~FlacAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_FlacAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
-/**
-    Reads and writes the Ogg-Vorbis audio format.
-
-    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the Vorbis and Ogg header files and static libraries.
-
-    @see AudioFormat,
-*/
-class JUCE_API  OggVorbisAudioFormat : public AudioFormat
-{
-public:
-
-    OggVorbisAudioFormat();
-    ~OggVorbisAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    const StringArray getQualityOptions();
-
-    /** Tries to estimate the quality level of an ogg file based on its size.
-
-        If it can't read the file for some reason, this will just return 1 (medium quality),
-        otherwise it will return the approximate quality setting that would have been used
-        to create the file.
-
-        @see getQualityOptions
-    */
-    int estimateOggFileQuality (const File& source);
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_QUICKTIME
-
-/**
-    Uses QuickTime to read the audio track a movie or media file.
-
-    As well as QuickTime movies, this should also manage to open other audio
-    files that quicktime can understand, like mp3, m4a, etc.
-
-    @see AudioFormat
-*/
-class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    QuickTimeAudioFormat();
-
-    /** Destructor. */
-    ~QuickTimeAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WavAudioFormat.h *********/
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/**
-    Reads and Writes WAV format audio files.
-
-    @see AudioFormat
-*/
-class JUCE_API  WavAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    WavAudioFormat();
-
-    /** Destructor. */
-    ~WavAudioFormat();
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavDescription;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginator;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginatorRef;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Date format is: yyyy-mm-dd
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationDate;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Time format is: hh-mm-ss
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationTime;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is the number of samples from the start of an edit that the
-        file is supposed to begin at. Seems like an obvious mistake to
-        only allow a file to occur in an edit once, but that's the way
-        it is..
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavTimeReference;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is a
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavCodingHistory;
-
-    /** Utility function to fill out the appropriate metadata for a BWAV file.
-
-        This just makes it easier than using the property names directly, and it
-        fills out the time and date in the right format.
-    */
-    static const StringPairArray createBWAVMetadata (const String& description,
-                                                     const String& originator,
-                                                     const String& originatorRef,
-                                                     const Time& dateAndTime,
-                                                     const int64 timeReferenceSamples,
-                                                     const String& codingHistory);
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    /** Utility function to replace the metadata in a wav file with a new set of values.
-
-        If possible, this cheats by overwriting just the metadata region of the file, rather
-        than by copying the whole file again.
-    */
-    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_WavAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ActionBroadcaster.h *********/
-#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-#define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ActionListenerList.h *********/
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-#define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-
-/**
-    A set of ActionListeners.
-
-    Listeners can be added and removed from the list, and messages can be
-    broadcast to all the listeners.
-
-    @see ActionListener, ActionBroadcaster
-*/
-class JUCE_API  ActionListenerList  : public MessageListener
-{
-public:
-
-    /** Creates an empty list. */
-    ActionListenerList() throw();
-
-    /** Destructor. */
-    ~ActionListenerList() throw();
-
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
-    */
-    void addActionListener (ActionListener* const listener) throw();
-
-    /** Removes a listener from the list.
-
-        If the listener isn't on the list, this won't have any effect.
-    */
-    void removeActionListener (ActionListener* const listener) throw();
-
-    /** Removes all listeners from the list. */
-    void removeAllActionListeners() throw();
-
-    /** Broadcasts a message to all the registered listeners.
-
-        This sends the message asynchronously.
-
-        If a listener is on the list when this method is called but is removed from
-        the list before the message arrives, it won't receive the message. Similarly
-        listeners that are added to the list after the message is sent but before it
-        arrives won't get the message either.
-    */
-    void sendActionMessage (const String& message) const;
-
-    /** @internal */
-    void handleMessage (const Message&);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    SortedSet <void*> actionListeners_;
-    CriticalSection actionListenerLock_;
-
-    ActionListenerList (const ActionListenerList&);
-    const ActionListenerList& operator= (const ActionListenerList&);
-};
-
-#endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-/********* End of inlined file: juce_ActionListenerList.h *********/
-
-/** Manages a list of ActionListeners, and can send them messages.
-
-    To quickly add methods to your class that can add/remove action
-    listeners and broadcast to them, you can derive from this.
-
-    @see ActionListenerList, ActionListener
-*/
-class JUCE_API  ActionBroadcaster
-{
-public:
-
-    /** Creates an ActionBroadcaster. */
-    ActionBroadcaster() throw();
-
-    /** Destructor. */
-    virtual ~ActionBroadcaster();
-
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
-    */
-    void addActionListener (ActionListener* const listener);
-
-    /** Removes a listener from the list.
-
-        If the listener isn't on the list, this won't have any effect.
-    */
-    void removeActionListener (ActionListener* const listener);
-
-    /** Removes all listeners from the list. */
-    void removeAllActionListeners();
-
-    /** Broadcasts a message to all the registered listeners.
-
-        @see ActionListenerList::sendActionMessage
-    */
-    void sendActionMessage (const String& message) const;
-
-private:
-
-    ActionListenerList actionListenerList;
-
-    ActionBroadcaster (const ActionBroadcaster&);
-    const ActionBroadcaster& operator= (const ActionBroadcaster&);
-};
-
-#endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-/********* End of inlined file: juce_ActionBroadcaster.h *********/
-
-#endif
-#ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
+#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+
+/********* Start of inlined file: juce_InterprocessConnectionServer.h *********/
+#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+#define __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
 
 /********* Start of inlined file: juce_InterprocessConnection.h *********/
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
@@ -37699,13 +37565,6 @@ private:
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 /********* End of inlined file: juce_InterprocessConnection.h *********/
 
-#endif
-#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
-
-/********* Start of inlined file: juce_InterprocessConnectionServer.h *********/
-#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
-#define __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
-
 /**
     An object that waits for client sockets to connect to a port on this host, and
     creates InterprocessConnection objects for each one.
@@ -37780,11 +37639,230 @@ private:
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+
+/********* Start of inlined file: juce_MultiTimer.h *********/
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+#define __JUCE_MULTITIMER_JUCEHEADER__
+
+/**
+    A type of timer class that can run multiple timers with different frequencies,
+    all of which share a single callback.
+
+    This class is very similar to the Timer class, but allows you run multiple
+    separate timers, where each one has a unique ID number. The methods in this
+    class are exactly equivalent to those in Timer, but with the addition of
+    this ID number.
+
+    To use it, you need to create a subclass of MultiTimer, implementing the
+    timerCallback() method. Then you can start timers with startTimer(), and
+    each time the callback is triggered, it passes in the ID of the timer that
+    caused it.
+
+    @see Timer
+*/
+class JUCE_API  MultiTimer
+{
+protected:
+
+    /** Creates a MultiTimer.
+
+        When created, no timers are running, so use startTimer() to start things off.
+    */
+    MultiTimer() throw();
+
+    /** Creates a copy of another timer.
+
+        Note that this timer will not contain any running timers, even if the one you're
+        copying from was running.
+    */
+    MultiTimer (const MultiTimer& other) throw();
+
+public:
+
+    /** Destructor. */
+    virtual ~MultiTimer();
+
+    /** The user-defined callback routine that actually gets called by each of the
+        timers that are running.
+
+        It's perfectly ok to call startTimer() or stopTimer() from within this
+        callback to change the subsequent intervals.
+    */
+    virtual void timerCallback (const int timerId) = 0;
+
+    /** Starts a timer and sets the length of interval required.
+
+        If the timer is already started, this will reset it, so the
+        time between calling this method and the next timer callback
+        will not be less than the interval length passed in.
+
+        @param timerId                  a unique Id number that identifies the timer to
+                                        start. This is the id that will be passed back
+                                        to the timerCallback() method when this timer is
+                                        triggered
+        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
+                                        rounded up to 1)
+    */
+    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
+
+    /** Stops a timer.
+
+        If a timer has been started with the given ID number, it will be cancelled.
+        No more callbacks will be made for the specified timer after this method returns.
+
+        If this is called from a different thread, any callbacks that may
+        be currently executing may be allowed to finish before the method
+        returns.
+    */
+    void stopTimer (const int timerId) throw();
+
+    /** Checks whether a timer has been started for a specified ID.
+
+        @returns true if a timer with the given ID is running.
+    */
+    bool isTimerRunning (const int timerId) const throw();
+
+    /** Returns the interval for a specified timer ID.
+
+        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
+                    is running for the ID number specified.
+    */
+    int getTimerInterval (const int timerId) const throw();
+
+private:
+    CriticalSection timerListLock;
+    VoidArray timers;
+
+    const MultiTimer& operator= (const MultiTimer&);
+};
+
+#endif   // __JUCE_MULTITIMER_JUCEHEADER__
+/********* End of inlined file: juce_MultiTimer.h *********/
+
+#endif
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_MessageManager.h *********/
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 #define __JUCE_MESSAGEMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ActionListenerList.h *********/
+#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+#define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+
+/**
+    A set of ActionListeners.
+
+    Listeners can be added and removed from the list, and messages can be
+    broadcast to all the listeners.
+
+    @see ActionListener, ActionBroadcaster
+*/
+class JUCE_API  ActionListenerList  : public MessageListener
+{
+public:
+
+    /** Creates an empty list. */
+    ActionListenerList() throw();
+
+    /** Destructor. */
+    ~ActionListenerList() throw();
+
+    /** Adds a listener to the list.
+
+        (Trying to add a listener that's already on the list will have no effect).
+    */
+    void addActionListener (ActionListener* const listener) throw();
+
+    /** Removes a listener from the list.
+
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeActionListener (ActionListener* const listener) throw();
+
+    /** Removes all listeners from the list. */
+    void removeAllActionListeners() throw();
+
+    /** Broadcasts a message to all the registered listeners.
+
+        This sends the message asynchronously.
+
+        If a listener is on the list when this method is called but is removed from
+        the list before the message arrives, it won't receive the message. Similarly
+        listeners that are added to the list after the message is sent but before it
+        arrives won't get the message either.
+    */
+    void sendActionMessage (const String& message) const;
+
+    /** @internal */
+    void handleMessage (const Message&);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    SortedSet <void*> actionListeners_;
+    CriticalSection actionListenerLock_;
+
+    ActionListenerList (const ActionListenerList&);
+    const ActionListenerList& operator= (const ActionListenerList&);
+};
+
+#endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+/********* End of inlined file: juce_ActionListenerList.h *********/
+
+/********* Start of inlined file: juce_CallbackMessage.h *********/
+#ifndef __JUCE_CMESSAGE_JUCEHEADER__
+#define __JUCE_CMESSAGE_JUCEHEADER__
+
+/**
+    A message that calls a custom function when it gets delivered.
+
+    You can use this class to fire off actions that you want to be performed later
+    on the message thread.
+
+    Unlike other Message objects, these don't get sent to a MessageListener, you
+    just call the post() method to send them, and when they arrive, your
+    messageCallback() method will automatically be invoked.
+
+    @see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  CallbackMessage   : public Message
+{
+protected:
+    CallbackMessage() throw();
+    ~CallbackMessage() throw();
+
+public:
+
+    /** Called when the message is delivered.
+
+        You should implement this method and make it do whatever action you want
+        to perform.
+
+        Note that like all other messages, this object will be deleted immediately
+        after this method has been invoked.
+    */
+    virtual void messageCallback() = 0;
+
+    /** Instead of sending this message to a MessageListener, just call this method
+        to post it to the event queue.
+
+        After you've called this, this object will belong to the MessageManager,
+        which will delete it later. So make sure you don't delete the object yourself,
+        call post() more than once, or call post() on a stack-based obect!
+    */
+    void post();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    CallbackMessage (const CallbackMessage&);
+    const CallbackMessage& operator= (const CallbackMessage&);
+};
+
+#endif   // __JUCE_MESSAGE_JUCEHEADER__
+/********* End of inlined file: juce_CallbackMessage.h *********/
 
 class Component;
 class MessageManagerLock;
@@ -37915,6 +37993,7 @@ private:
     friend class MessageListener;
     friend class ChangeBroadcaster;
     friend class ActionBroadcaster;
+    friend class CallbackMessage;
     static MessageManager* instance;
 
     SortedSet<const MessageListener*> messageListeners;
@@ -37928,13 +38007,14 @@ private:
     static void* exitModalLoopCallback (void*);
 
     void postMessageToQueue (Message* const message);
+    void postCallbackMessage (Message* const message);
 
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
 
     friend class MessageManagerLock;
-    CriticalSection messageDispatchLock;
-    Thread::ThreadID currentLockingThreadId;
+    Thread::ThreadID volatile threadWithLock;
+    CriticalSection lockingLock;
 
     MessageManager (const MessageManager&);
     const MessageManager& operator= (const MessageManager&);
@@ -37977,35 +38057,23 @@ public:
 
     /** Tries to acquire a lock on the message manager.
 
-        If this constructor
-        When this constructor returns, the message manager will have finished processing the
-        last message and will not send another message until this MessageManagerLock is
-        deleted.
+        The constructor attempts to gain a lock on the message loop, and the lock will be
+        kept for the lifetime of this object.
 
-        If the current thread already has the lock, nothing will be done, so it's perfectly
-        safe to create these locks recursively.
-    */
-    MessageManagerLock() throw();
-
-    /** Releases the current thread's lock on the message manager.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    ~MessageManagerLock() throw();
-
-    /** Tries to acquire a lock on the message manager.
-
-        This does the same thing as the normal constructor, but while it's waiting to get
-        the lock, it checks the specified thread to see if it has been given the
+        Optionally, you can pass a thread object here, and while waiting to obtain the lock,
+        this method will keep checking whether the thread has been given the
         Thread::signalThreadShouldExit() signal. If this happens, then it will return
-        without gaining the lock.
+        without gaining the lock. If you pass a thread, you must check whether the lock was
+        successful by calling lockWasGained(). If this is false, your thread is being told to
+        die, so you should take evasive action.
 
-        To find out whether the lock was successful, call lockWasGained(). If this is
-        false, your thread is being told to die, so you'd better get out of there.
+        If you pass zero for the thread object, it will wait indefinitely for the lock - be
+        careful when doing this, because it's very easy to deadlock if your message thread
+        attempts to call stopThread() on a thread just as that thread attempts to get the
+        message lock.
 
-        If the current thread already has the lock, nothing will be done, so it's perfectly
-        safe to create these locks recursively.
+        If the calling thread already has the lock, nothing will be done, so it's safe and
+        quick to use these locks recursively.
 
         E.g.
         @code
@@ -38028,7 +38096,21 @@ public:
         @endcode
 
     */
-    MessageManagerLock (Thread* const threadToCheckForExitSignal) throw();
+    MessageManagerLock (Thread* const threadToCheckForExitSignal = 0) throw();
+
+    /** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
+        instead of a thread.
+
+        See the MessageManagerLock (Thread*) constructor for details on how this works.
+    */
+    MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal) throw();
+
+    /** Releases the current thread's lock on the message manager.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+   */
+    ~MessageManagerLock() throw();
 
     /** Returns true if the lock was successfully acquired.
 
@@ -38037,114 +38119,91 @@ public:
     bool lockWasGained() const throw()                      { return locked; }
 
 private:
-    Thread::ThreadID lastLockingThreadId;
-    bool locked;
+    bool locked, needsUnlocking;
+    void* sharedEvents;
+
+    void init (Thread* const thread, ThreadPoolJob* const job) throw();
 };
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
 /********* End of inlined file: juce_MessageManager.h *********/
 
 #endif
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_MultiTimer.h *********/
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-#define __JUCE_MULTITIMER_JUCEHEADER__
+/********* Start of inlined file: juce_ActionBroadcaster.h *********/
+#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+#define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-/**
-    A type of timer class that can run multiple timers with different frequencies,
-    all of which share a single callback.
+/** Manages a list of ActionListeners, and can send them messages.
 
-    This class is very similar to the Timer class, but allows you run multiple
-    separate timers, where each one has a unique ID number. The methods in this
-    class are exactly equivalent to those in Timer, but with the addition of
-    this ID number.
+    To quickly add methods to your class that can add/remove action
+    listeners and broadcast to them, you can derive from this.
 
-    To use it, you need to create a subclass of MultiTimer, implementing the
-    timerCallback() method. Then you can start timers with startTimer(), and
-    each time the callback is triggered, it passes in the ID of the timer that
-    caused it.
-
-    @see Timer
+    @see ActionListenerList, ActionListener
 */
-class JUCE_API  MultiTimer
+class JUCE_API  ActionBroadcaster
 {
-protected:
-
-    /** Creates a MultiTimer.
-
-        When created, no timers are running, so use startTimer() to start things off.
-    */
-    MultiTimer() throw();
-
-    /** Creates a copy of another timer.
-
-        Note that this timer will not contain any running timers, even if the one you're
-        copying from was running.
-    */
-    MultiTimer (const MultiTimer& other) throw();
-
 public:
 
+    /** Creates an ActionBroadcaster. */
+    ActionBroadcaster() throw();
+
     /** Destructor. */
-    virtual ~MultiTimer();
+    virtual ~ActionBroadcaster();
 
-    /** The user-defined callback routine that actually gets called by each of the
-        timers that are running.
+    /** Adds a listener to the list.
 
-        It's perfectly ok to call startTimer() or stopTimer() from within this
-        callback to change the subsequent intervals.
+        (Trying to add a listener that's already on the list will have no effect).
     */
-    virtual void timerCallback (const int timerId) = 0;
+    void addActionListener (ActionListener* const listener);
 
-    /** Starts a timer and sets the length of interval required.
+    /** Removes a listener from the list.
 
-        If the timer is already started, this will reset it, so the
-        time between calling this method and the next timer callback
-        will not be less than the interval length passed in.
-
-        @param timerId                  a unique Id number that identifies the timer to
-                                        start. This is the id that will be passed back
-                                        to the timerCallback() method when this timer is
-                                        triggered
-        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
-                                        rounded up to 1)
+        If the listener isn't on the list, this won't have any effect.
     */
-    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
+    void removeActionListener (ActionListener* const listener);
 
-    /** Stops a timer.
+    /** Removes all listeners from the list. */
+    void removeAllActionListeners();
 
-        If a timer has been started with the given ID number, it will be cancelled.
-        No more callbacks will be made for the specified timer after this method returns.
+    /** Broadcasts a message to all the registered listeners.
 
-        If this is called from a different thread, any callbacks that may
-        be currently executing may be allowed to finish before the method
-        returns.
+        @see ActionListenerList::sendActionMessage
     */
-    void stopTimer (const int timerId) throw();
-
-    /** Checks whether a timer has been started for a specified ID.
-
-        @returns true if a timer with the given ID is running.
-    */
-    bool isTimerRunning (const int timerId) const throw();
-
-    /** Returns the interval for a specified timer ID.
-
-        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
-                    is running for the ID number specified.
-    */
-    int getTimerInterval (const int timerId) const throw();
+    void sendActionMessage (const String& message) const;
 
 private:
-    CriticalSection timerListLock;
-    VoidArray timers;
 
-    const MultiTimer& operator= (const MultiTimer&);
+    ActionListenerList actionListenerList;
+
+    ActionBroadcaster (const ActionBroadcaster&);
+    const ActionBroadcaster& operator= (const ActionBroadcaster&);
 };
 
-#endif   // __JUCE_MULTITIMER_JUCEHEADER__
-/********* End of inlined file: juce_MultiTimer.h *********/
+#endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+/********* End of inlined file: juce_ActionBroadcaster.h *********/
+
+#endif
+#ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TIMER_JUCEHEADER__
@@ -40142,10 +40201,10 @@ private:
 /********* End of inlined file: juce_PositionedRectangle.h *********/
 
 #endif
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
+#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
+#ifndef __JUCE_RECTANGLE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
@@ -41084,9 +41143,6 @@ private:
 /********* End of inlined file: juce_DrawableText.h *********/
 
 #endif
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 
 #endif
@@ -41094,6 +41150,9 @@ private:
 
 #endif
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
@@ -43122,6 +43181,12 @@ public:
     */
     int getRowNumberInTree() const throw();
 
+    /** Returns true if all the item's parent nodes are open.
+
+        This is useful to check whether the item might actually be visible or not.
+    */
+    bool areAllParentsOpen() const throw();
+
     /** Changes whether lines are drawn to connect any sub-items to this item.
 
         By default, line-drawing is turned on.
@@ -44893,6 +44958,155 @@ private:
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+
+/********* Start of inlined file: juce_ToolbarItemFactory.h *********/
+#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+#define __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+
+/**
+    A factory object which can create ToolbarItemComponent objects.
+
+    A subclass of ToolbarItemFactory publishes a set of types of toolbar item
+    that it can create.
+
+    Each type of item is identified by a unique ID, and multiple instances of an
+    item type can exist at once (even on the same toolbar, e.g. spacers or separator
+    bars).
+
+    @see Toolbar, ToolbarItemComponent, ToolbarButton
+*/
+class JUCE_API  ToolbarItemFactory
+{
+public:
+
+    ToolbarItemFactory();
+
+    /** Destructor. */
+    virtual ~ToolbarItemFactory();
+
+    /** A set of reserved item ID values, used for the built-in item types.
+    */
+    enum SpecialItemIds
+    {
+        separatorBarId      = -1,   /**< The item ID for a vertical (or horizontal) separator bar that
+                                         can be placed between sets of items to break them into groups. */
+        spacerId            = -2,   /**< The item ID for a fixed-width space that can be placed between
+                                         items.*/
+        flexibleSpacerId    = -3    /**< The item ID for a gap that pushes outwards against the things on
+                                         either side of it, filling any available space. */
+    };
+
+    /** Must return a list of the IDs for all the item types that this factory can create.
+
+        The ids should be added to the array that is passed-in.
+
+        An item ID can be any integer you choose, except for 0, which is considered a null ID,
+        and the predefined IDs in the SpecialItemIds enum.
+
+        You should also add the built-in types (separatorBarId, spacerId and flexibleSpacerId)
+        to this list if you want your toolbar to be able to contain those items.
+
+        The list returned here is used by the ToolbarItemPalette class to obtain its list
+        of available items, and their order on the palette will reflect the order in which
+        they appear on this list.
+
+        @see ToolbarItemPalette
+    */
+    virtual void getAllToolbarItemIds (Array <int>& ids) = 0;
+
+    /** Must return the set of items that should be added to a toolbar as its default set.
+
+        This method is used by Toolbar::addDefaultItems() to determine which items to
+        create.
+
+        The items that your method adds to the array that is passed-in will be added to the
+        toolbar in the same order. Items can appear in the list more than once.
+    */
+    virtual void getDefaultItemSet (Array <int>& ids) = 0;
+
+    /** Must create an instance of one of the items that the factory lists in its
+        getAllToolbarItemIds() method.
+
+        The itemId parameter can be any of the values listed by your getAllToolbarItemIds()
+        method, except for the built-in item types from the SpecialItemIds enum, which
+        are created internally by the toolbar code.
+
+        Try not to keep a pointer to the object that is returned, as it will be deleted
+        automatically by the toolbar, and remember that multiple instances of the same
+        item type are likely to exist at the same time.
+    */
+    virtual ToolbarItemComponent* createItem (const int itemId) = 0;
+};
+
+#endif   // __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+/********* End of inlined file: juce_ToolbarItemFactory.h *********/
+
+#endif
+#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+
+/********* Start of inlined file: juce_ToolbarItemPalette.h *********/
+#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+
+/**
+    A component containing a list of toolbar items, which the user can drag onto
+    a toolbar to add them.
+
+    You can use this class directly, but it's a lot easier to call Toolbar::showCustomisationDialog(),
+    which automatically shows one of these in a dialog box with lots of extra controls.
+
+    @see Toolbar
+*/
+class JUCE_API  ToolbarItemPalette    : public Component,
+                                        public DragAndDropContainer
+{
+public:
+
+    /** Creates a palette of items for a given factory, with the aim of adding them
+        to the specified toolbar.
+
+        The ToolbarItemFactory::getAllToolbarItemIds() method is used to create the
+        set of items that are shown in this palette.
+
+        The toolbar and factory must not be deleted while this object exists.
+    */
+    ToolbarItemPalette (ToolbarItemFactory& factory,
+                        Toolbar* const toolbar);
+
+    /** Destructor. */
+    ~ToolbarItemPalette();
+
+    /** @internal */
+    void resized();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    ToolbarItemFactory& factory;
+    Toolbar* toolbar;
+    Viewport* viewport;
+
+    friend class Toolbar;
+    void replaceComponent (ToolbarItemComponent* const comp);
+
+    ToolbarItemPalette (const ToolbarItemPalette&);
+    const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+};
+
+#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+/********* End of inlined file: juce_ToolbarItemPalette.h *********/
+
+#endif
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TREEVIEW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
 
 #endif
@@ -45746,7 +45960,11 @@ private:
 #ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
+
+/********* Start of inlined file: juce_TableListBox.h *********/
+#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
+#define __JUCE_TABLELISTBOX_JUCEHEADER__
 
 /********* Start of inlined file: juce_TableHeaderComponent.h *********/
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
@@ -46143,13 +46361,6 @@ private:
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_TableHeaderComponent.h *********/
 
-#endif
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-
-/********* Start of inlined file: juce_TableListBox.h *********/
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-#define __JUCE_TABLELISTBOX_JUCEHEADER__
-
 /**
     One of these is used by a TableListBox as the data model for the table's contents.
 
@@ -46427,156 +46638,10 @@ private:
 /********* End of inlined file: juce_TableListBox.h *********/
 
 #endif
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
+#ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ToolbarItemFactory.h *********/
-#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-#define __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-
-/**
-    A factory object which can create ToolbarItemComponent objects.
-
-    A subclass of ToolbarItemFactory publishes a set of types of toolbar item
-    that it can create.
-
-    Each type of item is identified by a unique ID, and multiple instances of an
-    item type can exist at once (even on the same toolbar, e.g. spacers or separator
-    bars).
-
-    @see Toolbar, ToolbarItemComponent, ToolbarButton
-*/
-class JUCE_API  ToolbarItemFactory
-{
-public:
-
-    ToolbarItemFactory();
-
-    /** Destructor. */
-    virtual ~ToolbarItemFactory();
-
-    /** A set of reserved item ID values, used for the built-in item types.
-    */
-    enum SpecialItemIds
-    {
-        separatorBarId      = -1,   /**< The item ID for a vertical (or horizontal) separator bar that
-                                         can be placed between sets of items to break them into groups. */
-        spacerId            = -2,   /**< The item ID for a fixed-width space that can be placed between
-                                         items.*/
-        flexibleSpacerId    = -3    /**< The item ID for a gap that pushes outwards against the things on
-                                         either side of it, filling any available space. */
-    };
-
-    /** Must return a list of the IDs for all the item types that this factory can create.
-
-        The ids should be added to the array that is passed-in.
-
-        An item ID can be any integer you choose, except for 0, which is considered a null ID,
-        and the predefined IDs in the SpecialItemIds enum.
-
-        You should also add the built-in types (separatorBarId, spacerId and flexibleSpacerId)
-        to this list if you want your toolbar to be able to contain those items.
-
-        The list returned here is used by the ToolbarItemPalette class to obtain its list
-        of available items, and their order on the palette will reflect the order in which
-        they appear on this list.
-
-        @see ToolbarItemPalette
-    */
-    virtual void getAllToolbarItemIds (Array <int>& ids) = 0;
-
-    /** Must return the set of items that should be added to a toolbar as its default set.
-
-        This method is used by Toolbar::addDefaultItems() to determine which items to
-        create.
-
-        The items that your method adds to the array that is passed-in will be added to the
-        toolbar in the same order. Items can appear in the list more than once.
-    */
-    virtual void getDefaultItemSet (Array <int>& ids) = 0;
-
-    /** Must create an instance of one of the items that the factory lists in its
-        getAllToolbarItemIds() method.
-
-        The itemId parameter can be any of the values listed by your getAllToolbarItemIds()
-        method, except for the built-in item types from the SpecialItemIds enum, which
-        are created internally by the toolbar code.
-
-        Try not to keep a pointer to the object that is returned, as it will be deleted
-        automatically by the toolbar, and remember that multiple instances of the same
-        item type are likely to exist at the same time.
-    */
-    virtual ToolbarItemComponent* createItem (const int itemId) = 0;
-};
-
-#endif   // __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemFactory.h *********/
-
-#endif
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-
-/********* Start of inlined file: juce_ToolbarItemPalette.h *********/
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-
-/**
-    A component containing a list of toolbar items, which the user can drag onto
-    a toolbar to add them.
-
-    You can use this class directly, but it's a lot easier to call Toolbar::showCustomisationDialog(),
-    which automatically shows one of these in a dialog box with lots of extra controls.
-
-    @see Toolbar
-*/
-class JUCE_API  ToolbarItemPalette    : public Component,
-                                        public DragAndDropContainer
-{
-public:
-
-    /** Creates a palette of items for a given factory, with the aim of adding them
-        to the specified toolbar.
-
-        The ToolbarItemFactory::getAllToolbarItemIds() method is used to create the
-        set of items that are shown in this palette.
-
-        The toolbar and factory must not be deleted while this object exists.
-    */
-    ToolbarItemPalette (ToolbarItemFactory& factory,
-                        Toolbar* const toolbar);
-
-    /** Destructor. */
-    ~ToolbarItemPalette();
-
-    /** @internal */
-    void resized();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    ToolbarItemFactory& factory;
-    Toolbar* toolbar;
-    Viewport* viewport;
-
-    friend class Toolbar;
-    void replaceComponent (ToolbarItemComponent* const comp);
-
-    ToolbarItemPalette (const ToolbarItemPalette&);
-    const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
-};
-
-#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemPalette.h *********/
-
-#endif
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -46893,158 +46958,6 @@ private:
 
 #endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_TextPropertyComponent.h *********/
-
-#endif
-#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ComponentMovementWatcher.h *********/
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-
-/** An object that watches for any movement of a component or any of its parent components.
-
-    This makes it easy to check when a component is moved relative to its top-level
-    peer window. The normal Component::moved() method is only called when a component
-    moves relative to its immediate parent, and sometimes you want to know if any of
-    components higher up the tree have moved (which of course will affect the overall
-    position of all their sub-components).
-
-    It also includes a callback that lets you know when the top-level peer is changed.
-
-    This class is used by specialised components like OpenGLComponent or QuickTimeComponent
-    because they need to keep their custom windows in the right place and respond to
-    changes in the peer.
-*/
-class JUCE_API  ComponentMovementWatcher    : public ComponentListener
-{
-public:
-
-    /** Creates a ComponentMovementWatcher to watch a given target component. */
-    ComponentMovementWatcher (Component* const component);
-
-    /** Destructor. */
-    ~ComponentMovementWatcher();
-
-    /** This callback happens when the component that is being watched is moved
-        relative to its top-level peer window, or when it is resized.
-    */
-    virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
-
-    /** This callback happens when the component's top-level peer is changed.
-    */
-    virtual void componentPeerChanged() = 0;
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void componentParentHierarchyChanged (Component& component);
-    /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-
-private:
-
-    Component* const component;
-    ComponentPeer* lastPeer;
-    VoidArray registeredParentComps;
-    bool reentrant;
-    int lastX, lastY, lastWidth, lastHeight;
-#ifdef JUCE_DEBUG
-    ComponentDeletionWatcher* deletionWatcher;
-#endif
-
-    void unregister() throw();
-    void registerWithParentComps() throw();
-
-    ComponentMovementWatcher (const ComponentMovementWatcher&);
-    const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
-};
-
-#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentMovementWatcher.h *********/
-
-#endif
-#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_GroupComponent.h *********/
-#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
-#define __JUCE_GROUPCOMPONENT_JUCEHEADER__
-
-/**
-    A component that draws an outline around itself and has an optional title at
-    the top, for drawing an outline around a group of controls.
-
-*/
-class JUCE_API  GroupComponent    : public Component
-{
-public:
-
-    /** Creates a GroupComponent.
-
-        @param componentName    the name to give the component
-        @param labelText        the text to show at the top of the outline
-    */
-    GroupComponent (const String& componentName,
-                    const String& labelText);
-
-    /** Destructor. */
-    ~GroupComponent();
-
-    /** Changes the text that's shown at the top of the component. */
-    void setText (const String& newText) throw();
-
-    /** Returns the currently displayed text label. */
-    const String getText() const throw();
-
-    /** Sets the positioning of the text label.
-
-        (The default is Justification::left)
-
-        @see getTextLabelPosition
-    */
-    void setTextLabelPosition (const Justification& justification);
-
-    /** Returns the current text label position.
-
-        @see setTextLabelPosition
-    */
-    const Justification getTextLabelPosition() const throw()            { return justification; }
-
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
-        textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
-    };
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void enablementChanged();
-    /** @internal */
-    void colourChanged();
-
-private:
-    String text;
-    Justification justification;
-
-    GroupComponent (const GroupComponent&);
-    const GroupComponent& operator= (const GroupComponent&);
-};
-
-#endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_GroupComponent.h *********/
 
 #endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
@@ -48727,13 +48640,84 @@ private:
 /********* End of inlined file: juce_MultiDocumentPanel.h *********/
 
 #endif
+#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ComponentMovementWatcher.h *********/
+#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+
+/** An object that watches for any movement of a component or any of its parent components.
+
+    This makes it easy to check when a component is moved relative to its top-level
+    peer window. The normal Component::moved() method is only called when a component
+    moves relative to its immediate parent, and sometimes you want to know if any of
+    components higher up the tree have moved (which of course will affect the overall
+    position of all their sub-components).
+
+    It also includes a callback that lets you know when the top-level peer is changed.
+
+    This class is used by specialised components like OpenGLComponent or QuickTimeComponent
+    because they need to keep their custom windows in the right place and respond to
+    changes in the peer.
+*/
+class JUCE_API  ComponentMovementWatcher    : public ComponentListener
+{
+public:
+
+    /** Creates a ComponentMovementWatcher to watch a given target component. */
+    ComponentMovementWatcher (Component* const component);
+
+    /** Destructor. */
+    ~ComponentMovementWatcher();
+
+    /** This callback happens when the component that is being watched is moved
+        relative to its top-level peer window, or when it is resized.
+    */
+    virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
+
+    /** This callback happens when the component's top-level peer is changed.
+    */
+    virtual void componentPeerChanged() = 0;
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void componentParentHierarchyChanged (Component& component);
+    /** @internal */
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+
+private:
+
+    Component* const component;
+    ComponentPeer* lastPeer;
+    VoidArray registeredParentComps;
+    bool reentrant;
+    int lastX, lastY, lastWidth, lastHeight;
+#ifdef JUCE_DEBUG
+    ComponentDeletionWatcher* deletionWatcher;
+#endif
+
+    void unregister() throw();
+    void registerWithParentComps() throw();
+
+    ComponentMovementWatcher (const ComponentMovementWatcher&);
+    const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+};
+
+#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+/********* End of inlined file: juce_ComponentMovementWatcher.h *********/
+
+#endif
 #ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
+#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
@@ -48979,6 +48963,9 @@ private:
 /********* End of inlined file: juce_StretchableLayoutManager.h *********/
 
 #endif
+#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
 
 /********* Start of inlined file: juce_StretchableLayoutResizerBar.h *********/
@@ -49131,16 +49118,435 @@ private:
 /********* End of inlined file: juce_StretchableObjectResizer.h *********/
 
 #endif
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_VIEWPORT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_GroupComponent.h *********/
+#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
+#define __JUCE_GROUPCOMPONENT_JUCEHEADER__
+
+/**
+    A component that draws an outline around itself and has an optional title at
+    the top, for drawing an outline around a group of controls.
+
+*/
+class JUCE_API  GroupComponent    : public Component
+{
+public:
+
+    /** Creates a GroupComponent.
+
+        @param componentName    the name to give the component
+        @param labelText        the text to show at the top of the outline
+    */
+    GroupComponent (const String& componentName,
+                    const String& labelText);
+
+    /** Destructor. */
+    ~GroupComponent();
+
+    /** Changes the text that's shown at the top of the component. */
+    void setText (const String& newText) throw();
+
+    /** Returns the currently displayed text label. */
+    const String getText() const throw();
+
+    /** Sets the positioning of the text label.
+
+        (The default is Justification::left)
+
+        @see getTextLabelPosition
+    */
+    void setTextLabelPosition (const Justification& justification);
+
+    /** Returns the current text label position.
+
+        @see setTextLabelPosition
+    */
+    const Justification getTextLabelPosition() const throw()            { return justification; }
+
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
+        textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
+    };
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void enablementChanged();
+    /** @internal */
+    void colourChanged();
+
+private:
+    String text;
+    Justification justification;
+
+    GroupComponent (const GroupComponent&);
+    const GroupComponent& operator= (const GroupComponent&);
+};
+
+#endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_GroupComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FilenameComponent.h *********/
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+#define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+
+class FilenameComponent;
+
+/**
+    Listens for events happening to a FilenameComponent.
+
+    Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
+    register one of these objects for event callbacks when the filename is changed.
+
+    @See FilenameComponent
+*/
+class JUCE_API  FilenameComponentListener
+{
+public:
+    /** Destructor. */
+    virtual ~FilenameComponentListener() {}
+
+    /** This method is called after the FilenameComponent's file has been changed. */
+    virtual void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged) = 0;
+};
+
+/**
+    Shows a filename as an editable text box, with a 'browse' button and a
+    drop-down list for recently selected files.
+
+    A handy component for dialogue boxes where you want the user to be able to
+    select a file or directory.
+
+    Attach an FilenameComponentListener using the addListener() method, and it will
+    get called each time the user changes the filename, either by browsing for a file
+    and clicking 'ok', or by typing a new filename into the box and pressing return.
+
+    @see FileChooser, ComboBox
+*/
+class JUCE_API  FilenameComponent  : public Component,
+                                     public SettableTooltipClient,
+                                     public FileDragAndDropTarget,
+                                     private AsyncUpdater,
+                                     private ButtonListener,
+                                     private ComboBoxListener
+{
+public:
+
+    /** Creates a FilenameComponent.
+
+        @param name             the name for this component.
+        @param currentFile      the file to initially show in the box
+        @param canEditFilename  if true, the user can manually edit the filename; if false,
+                                they can only change it by browsing for a new file
+        @param isDirectory      if true, the file will be treated as a directory, and
+                                an appropriate directory browser used
+        @param isForSaving      if true, the file browser will allow non-existent files to
+                                be picked, as the file is assumed to be used for saving rather
+                                than loading
+        @param fileBrowserWildcard  a wildcard pattern to use in the file browser - e.g. "*.txt;*.foo".
+                                If an empty string is passed in, then the pattern is assumed to be "*"
+        @param enforcedSuffix   if this is non-empty, it is treated as a suffix that will be added
+                                to any filenames that are entered or chosen
+        @param textWhenNothingSelected  the message to display in the box before any filename is entered. (This
+                                will only appear if the initial file isn't valid)
+    */
+    FilenameComponent (const String& name,
+                       const File& currentFile,
+                       const bool canEditFilename,
+                       const bool isDirectory,
+                       const bool isForSaving,
+                       const String& fileBrowserWildcard,
+                       const String& enforcedSuffix,
+                       const String& textWhenNothingSelected);
+
+    /** Destructor. */
+    ~FilenameComponent();
+
+    /** Returns the currently displayed filename. */
+    const File getCurrentFile() const;
+
+    /** Changes the current filename.
+
+        If addToRecentlyUsedList is true, the filename will also be added to the
+        drop-down list of recent files.
+
+        If sendChangeNotification is false, then the listeners won't be told of the
+        change.
+    */
+    void setCurrentFile (File newFile,
+                         const bool addToRecentlyUsedList,
+                         const bool sendChangeNotification = true);
+
+    /** Changes whether the use can type into the filename box.
+    */
+    void setFilenameIsEditable (const bool shouldBeEditable);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** Returns all the entries on the recent files list.
+
+        This can be used in conjunction with setRecentlyUsedFilenames() for saving the
+        state of this list.
+
+        @see setRecentlyUsedFilenames
+    */
+    const StringArray getRecentlyUsedFilenames() const;
+
+    /** Sets all the entries on the recent files list.
+
+        This can be used in conjunction with getRecentlyUsedFilenames() for saving the
+        state of this list.
+
+        @see getRecentlyUsedFilenames, addRecentlyUsedFile
+    */
+    void setRecentlyUsedFilenames (const StringArray& filenames);
+
+    /** Adds an entry to the recently-used files dropdown list.
+
+        If the file is already in the list, it will be moved to the top. A limit
+        is also placed on the number of items that are kept in the list.
+
+        @see getRecentlyUsedFilenames, setRecentlyUsedFilenames, setMaxNumberOfRecentFiles
+    */
+    void addRecentlyUsedFile (const File& file);
+
+    /** Changes the limit for the number of files that will be stored in the recent-file list.
+    */
+    void setMaxNumberOfRecentFiles (const int newMaximum);
+
+    /** Changes the text shown on the 'browse' button.
+
+        By default this button just says "..." but you can change it. The button itself
+        can be changed using the look-and-feel classes, so it might not actually have any
+        text on it.
+    */
+    void setBrowseButtonText (const String& browseButtonText);
+
+    /** Adds a listener that will be called when the selected file is changed. */
+    void addListener (FilenameComponentListener* const listener) throw();
+
+    /** Removes a previously-registered listener. */
+    void removeListener (FilenameComponentListener* const listener) throw();
+
+    /** Gives the component a tooltip. */
+    void setTooltip (const String& newTooltip);
+
+    /** @internal */
+    void paintOverChildren (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragEnter (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragExit (const StringArray& files);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    ComboBox* filenameBox;
+    String lastFilename;
+    Button* browseButton;
+    int maxRecentFiles;
+    bool isDir, isSaving, isFileDragOver;
+    String wildcard, enforcedSuffix, browseButtonText;
+    SortedSet <void*> listeners;
+    File defaultBrowseFile;
+
+    void comboBoxChanged (ComboBox*);
+    void buttonClicked (Button* button);
+    void handleAsyncUpdate();
+
+    FilenameComponent (const FilenameComponent&);
+    const FilenameComponent& operator= (const FilenameComponent&);
+};
+
+#endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FilenameComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FilePreviewComponent.h *********/
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    Base class for components that live inside a file chooser dialog box and
+    show previews of the files that get selected.
+
+    One of these allows special extra information to be displayed for files
+    in a dialog box as the user selects them. Each time the current file or
+    directory is changed, the selectedFileChanged() method will be called
+    to allow it to update itself appropriately.
+
+    @see FileChooser, ImagePreviewComponent
+*/
+class JUCE_API  FilePreviewComponent  : public Component
+{
+public:
+
+    /** Creates a FilePreviewComponent. */
+    FilePreviewComponent();
+
+    /** Destructor. */
+    ~FilePreviewComponent();
+
+    /** Called to indicate that the user's currently selected file has changed.
+
+        @param newSelectedFile  the newly selected file or directory, which may be
+                                File::nonexistent if none is selected.
+    */
+    virtual void selectedFileChanged (const File& newSelectedFile) = 0;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    FilePreviewComponent (const FilePreviewComponent&);
+    const FilePreviewComponent& operator= (const FilePreviewComponent&);
+};
+
+#endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FilePreviewComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/**
+    Shows a set of file paths in a list, allowing them to be added, removed or
+    re-ordered.
+
+    @see FileSearchPath
+*/
+class JUCE_API  FileSearchPathListComponent  : public Component,
+                                               public SettableTooltipClient,
+                                               public FileDragAndDropTarget,
+                                               private ButtonListener,
+                                               private ListBoxModel
+{
+public:
+
+    /** Creates an empty FileSearchPathListComponent.
+
+    */
+    FileSearchPathListComponent();
+
+    /** Destructor. */
+    ~FileSearchPathListComponent();
+
+    /** Returns the path as it is currently shown. */
+    const FileSearchPath& getPath() const throw()                   { return path; }
+
+    /** Changes the current path. */
+    void setPath (const FileSearchPath& newPath);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** A set of colour IDs to use to change the colour of various aspects of the label.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
+                                                  Make this transparent if you don't want the background to be filled. */
+    };
+
+    /** @internal */
+    int getNumRows();
+    /** @internal */
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
+    /** @internal */
+    void deleteKeyPressed (int lastRowSelected);
+    /** @internal */
+    void returnKeyPressed (int lastRowSelected);
+    /** @internal */
+    void listBoxItemDoubleClicked (int row, const MouseEvent&);
+    /** @internal */
+    void selectedRowsChanged (int lastRowSelected);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void buttonClicked (Button* button);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    FileSearchPath path;
+    File defaultBrowseTarget;
+
+    ListBox* listBox;
+    Button* addButton;
+    Button* removeButton;
+    Button* changeButton;
+    Button* upButton;
+    Button* downButton;
+
+    void changed() throw();
+    void updateButtons() throw();
+
+    FileSearchPathListComponent (const FileSearchPathListComponent&);
+    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+};
+
+#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
@@ -49474,6 +49880,170 @@ protected:
 #endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
 
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
+
+#endif
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_WildcardFileFilter.h *********/
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/**
+    A type of FileFilter that works by wildcard pattern matching.
+
+    This filter only allows files that match one of the specified patterns, but
+    allows all directories through.
+
+    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
+*/
+class JUCE_API  WildcardFileFilter  : public FileFilter
+{
+public:
+
+    /**
+        Creates a wildcard filter for one or more patterns.
+
+        The wildcardPatterns parameter is a comma or semicolon-delimited set of
+        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
+        or .aiff.
+
+        The description is a name to show the user in a list of possible patterns, so
+        for the wav/aiff example, your description might be "audio files".
+    */
+    WildcardFileFilter (const String& wildcardPatterns,
+                        const String& description);
+
+    /** Destructor. */
+    ~WildcardFileFilter();
+
+    /** Returns true if the filename matches one of the patterns specified. */
+    bool isFileSuitable (const File& file) const;
+
+    /** This always returns true. */
+    bool isDirectorySuitable (const File& file) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    StringArray wildcards;
+};
+
+#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+/********* End of inlined file: juce_WildcardFileFilter.h *********/
+
+#endif
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    A simple preview component that shows thumbnails of image files.
+
+    @see FileChooserDialogBox, FilePreviewComponent
+*/
+class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
+                                         private Timer
+{
+public:
+
+    /** Creates an ImagePreviewComponent. */
+    ImagePreviewComponent();
+
+    /** Destructor. */
+    ~ImagePreviewComponent();
+
+    /** @internal */
+    void selectedFileChanged (const File& newSelectedFile);
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    File fileToLoad;
+    Image* currentThumbnail;
+    String currentDetails;
+
+    void getThumbSize (int& w, int& h) const;
+
+    ImagePreviewComponent (const ImagePreviewComponent&);
+    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+};
+
+#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ImagePreviewComponent.h *********/
+
+#endif
+#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
+
 #endif
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 
@@ -49483,48 +50053,6 @@ protected:
 /********* Start of inlined file: juce_FileBrowserComponent.h *********/
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FilePreviewComponent.h *********/
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    Base class for components that live inside a file chooser dialog box and
-    show previews of the files that get selected.
-
-    One of these allows special extra information to be displayed for files
-    in a dialog box as the user selects them. Each time the current file or
-    directory is changed, the selectedFileChanged() method will be called
-    to allow it to update itself appropriately.
-
-    @see FileChooser, ImagePreviewComponent
-*/
-class JUCE_API  FilePreviewComponent  : public Component
-{
-public:
-
-    /** Creates a FilePreviewComponent. */
-    FilePreviewComponent();
-
-    /** Destructor. */
-    ~FilePreviewComponent();
-
-    /** Called to indicate that the user's currently selected file has changed.
-
-        @param newSelectedFile  the newly selected file or directory, which may be
-                                File::nonexistent if none is selected.
-    */
-    virtual void selectedFileChanged (const File& newSelectedFile) = 0;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    FilePreviewComponent (const FilePreviewComponent&);
-    const FilePreviewComponent& operator= (const FilePreviewComponent&);
-};
-
-#endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilePreviewComponent.h *********/
 
 /**
     A component for browsing and selecting a file or directory to open or save.
@@ -50049,469 +50577,6 @@ private:
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FilenameComponent.h *********/
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-#define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-
-class FilenameComponent;
-
-/**
-    Listens for events happening to a FilenameComponent.
-
-    Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
-    register one of these objects for event callbacks when the filename is changed.
-
-    @See FilenameComponent
-*/
-class JUCE_API  FilenameComponentListener
-{
-public:
-    /** Destructor. */
-    virtual ~FilenameComponentListener() {}
-
-    /** This method is called after the FilenameComponent's file has been changed. */
-    virtual void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged) = 0;
-};
-
-/**
-    Shows a filename as an editable text box, with a 'browse' button and a
-    drop-down list for recently selected files.
-
-    A handy component for dialogue boxes where you want the user to be able to
-    select a file or directory.
-
-    Attach an FilenameComponentListener using the addListener() method, and it will
-    get called each time the user changes the filename, either by browsing for a file
-    and clicking 'ok', or by typing a new filename into the box and pressing return.
-
-    @see FileChooser, ComboBox
-*/
-class JUCE_API  FilenameComponent  : public Component,
-                                     public SettableTooltipClient,
-                                     public FileDragAndDropTarget,
-                                     private AsyncUpdater,
-                                     private ButtonListener,
-                                     private ComboBoxListener
-{
-public:
-
-    /** Creates a FilenameComponent.
-
-        @param name             the name for this component.
-        @param currentFile      the file to initially show in the box
-        @param canEditFilename  if true, the user can manually edit the filename; if false,
-                                they can only change it by browsing for a new file
-        @param isDirectory      if true, the file will be treated as a directory, and
-                                an appropriate directory browser used
-        @param isForSaving      if true, the file browser will allow non-existent files to
-                                be picked, as the file is assumed to be used for saving rather
-                                than loading
-        @param fileBrowserWildcard  a wildcard pattern to use in the file browser - e.g. "*.txt;*.foo".
-                                If an empty string is passed in, then the pattern is assumed to be "*"
-        @param enforcedSuffix   if this is non-empty, it is treated as a suffix that will be added
-                                to any filenames that are entered or chosen
-        @param textWhenNothingSelected  the message to display in the box before any filename is entered. (This
-                                will only appear if the initial file isn't valid)
-    */
-    FilenameComponent (const String& name,
-                       const File& currentFile,
-                       const bool canEditFilename,
-                       const bool isDirectory,
-                       const bool isForSaving,
-                       const String& fileBrowserWildcard,
-                       const String& enforcedSuffix,
-                       const String& textWhenNothingSelected);
-
-    /** Destructor. */
-    ~FilenameComponent();
-
-    /** Returns the currently displayed filename. */
-    const File getCurrentFile() const;
-
-    /** Changes the current filename.
-
-        If addToRecentlyUsedList is true, the filename will also be added to the
-        drop-down list of recent files.
-
-        If sendChangeNotification is false, then the listeners won't be told of the
-        change.
-    */
-    void setCurrentFile (File newFile,
-                         const bool addToRecentlyUsedList,
-                         const bool sendChangeNotification = true);
-
-    /** Changes whether the use can type into the filename box.
-    */
-    void setFilenameIsEditable (const bool shouldBeEditable);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** Returns all the entries on the recent files list.
-
-        This can be used in conjunction with setRecentlyUsedFilenames() for saving the
-        state of this list.
-
-        @see setRecentlyUsedFilenames
-    */
-    const StringArray getRecentlyUsedFilenames() const;
-
-    /** Sets all the entries on the recent files list.
-
-        This can be used in conjunction with getRecentlyUsedFilenames() for saving the
-        state of this list.
-
-        @see getRecentlyUsedFilenames, addRecentlyUsedFile
-    */
-    void setRecentlyUsedFilenames (const StringArray& filenames);
-
-    /** Adds an entry to the recently-used files dropdown list.
-
-        If the file is already in the list, it will be moved to the top. A limit
-        is also placed on the number of items that are kept in the list.
-
-        @see getRecentlyUsedFilenames, setRecentlyUsedFilenames, setMaxNumberOfRecentFiles
-    */
-    void addRecentlyUsedFile (const File& file);
-
-    /** Changes the limit for the number of files that will be stored in the recent-file list.
-    */
-    void setMaxNumberOfRecentFiles (const int newMaximum);
-
-    /** Changes the text shown on the 'browse' button.
-
-        By default this button just says "..." but you can change it. The button itself
-        can be changed using the look-and-feel classes, so it might not actually have any
-        text on it.
-    */
-    void setBrowseButtonText (const String& browseButtonText);
-
-    /** Adds a listener that will be called when the selected file is changed. */
-    void addListener (FilenameComponentListener* const listener) throw();
-
-    /** Removes a previously-registered listener. */
-    void removeListener (FilenameComponentListener* const listener) throw();
-
-    /** Gives the component a tooltip. */
-    void setTooltip (const String& newTooltip);
-
-    /** @internal */
-    void paintOverChildren (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void lookAndFeelChanged();
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void fileDragEnter (const StringArray& files, int, int);
-    /** @internal */
-    void fileDragExit (const StringArray& files);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    ComboBox* filenameBox;
-    String lastFilename;
-    Button* browseButton;
-    int maxRecentFiles;
-    bool isDir, isSaving, isFileDragOver;
-    String wildcard, enforcedSuffix, browseButtonText;
-    SortedSet <void*> listeners;
-    File defaultBrowseFile;
-
-    void comboBoxChanged (ComboBox*);
-    void buttonClicked (Button* button);
-    void handleAsyncUpdate();
-
-    FilenameComponent (const FilenameComponent&);
-    const FilenameComponent& operator= (const FilenameComponent&);
-};
-
-#endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilenameComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/**
-    Shows a set of file paths in a list, allowing them to be added, removed or
-    re-ordered.
-
-    @see FileSearchPath
-*/
-class JUCE_API  FileSearchPathListComponent  : public Component,
-                                               public SettableTooltipClient,
-                                               public FileDragAndDropTarget,
-                                               private ButtonListener,
-                                               private ListBoxModel
-{
-public:
-
-    /** Creates an empty FileSearchPathListComponent.
-
-    */
-    FileSearchPathListComponent();
-
-    /** Destructor. */
-    ~FileSearchPathListComponent();
-
-    /** Returns the path as it is currently shown. */
-    const FileSearchPath& getPath() const throw()                   { return path; }
-
-    /** Changes the current path. */
-    void setPath (const FileSearchPath& newPath);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
-                                                  Make this transparent if you don't want the background to be filled. */
-    };
-
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
-    /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
-    /** @internal */
-    void returnKeyPressed (int lastRowSelected);
-    /** @internal */
-    void listBoxItemDoubleClicked (int row, const MouseEvent&);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void buttonClicked (Button* button);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    FileSearchPath path;
-    File defaultBrowseTarget;
-
-    ListBox* listBox;
-    Button* addButton;
-    Button* removeButton;
-    Button* changeButton;
-    Button* upButton;
-    Button* downButton;
-
-    void changed() throw();
-    void updateButtons() throw();
-
-    FileSearchPathListComponent (const FileSearchPathListComponent&);
-    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
-};
-
-#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
-
-#endif
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    A simple preview component that shows thumbnails of image files.
-
-    @see FileChooserDialogBox, FilePreviewComponent
-*/
-class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
-                                         private Timer
-{
-public:
-
-    /** Creates an ImagePreviewComponent. */
-    ImagePreviewComponent();
-
-    /** Destructor. */
-    ~ImagePreviewComponent();
-
-    /** @internal */
-    void selectedFileChanged (const File& newSelectedFile);
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    File fileToLoad;
-    Image* currentThumbnail;
-    String currentDetails;
-
-    void getThumbSize (int& w, int& h) const;
-
-    ImagePreviewComponent (const ImagePreviewComponent&);
-    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
-};
-
-#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ImagePreviewComponent.h *********/
-
-#endif
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_WildcardFileFilter.h *********/
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/**
-    A type of FileFilter that works by wildcard pattern matching.
-
-    This filter only allows files that match one of the specified patterns, but
-    allows all directories through.
-
-    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
-*/
-class JUCE_API  WildcardFileFilter  : public FileFilter
-{
-public:
-
-    /**
-        Creates a wildcard filter for one or more patterns.
-
-        The wildcardPatterns parameter is a comma or semicolon-delimited set of
-        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
-        or .aiff.
-
-        The description is a name to show the user in a list of possible patterns, so
-        for the wav/aiff example, your description might be "audio files".
-    */
-    WildcardFileFilter (const String& wildcardPatterns,
-                        const String& description);
-
-    /** Destructor. */
-    ~WildcardFileFilter();
-
-    /** Returns true if the filename matches one of the patterns specified. */
-    bool isFileSuitable (const File& file) const;
-
-    /** This always returns true. */
-    bool isDirectorySuitable (const File& file) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    StringArray wildcards;
-};
-
-#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-/********* End of inlined file: juce_WildcardFileFilter.h *********/
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -51093,6 +51158,9 @@ private:
 /********* End of inlined file: juce_SplashScreen.h *********/
 
 #endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
@@ -51225,10 +51293,164 @@ private:
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
 
 #endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+#if JUCE_WIN32 || JUCE_LINUX
+
+/**
+    On Windows only, this component sits in the taskbar tray as a small icon.
+
+    To use it, just create one of these components, but don't attempt to make it
+    visible, add it to a parent, or put it on the desktop.
+
+    You can then call setIconImage() to create an icon for it in the taskbar.
+
+    To change the icon's tooltip, you can use setIconTooltip().
+
+    To respond to mouse-events, you can override the normal mouseDown(),
+    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
+    position will not be valid, you can use this to respond to clicks. Traditionally
+    you'd use a left-click to show your application's window, and a right-click
+    to show a pop-up menu.
+*/
+class JUCE_API  SystemTrayIconComponent  : public Component
+{
+public:
+
+    SystemTrayIconComponent();
+
+    /** Destructor. */
+    ~SystemTrayIconComponent();
+
+    /** Changes the image shown in the taskbar.
+    */
+    void setIconImage (const Image& newImage);
+
+    /** Changes the tooltip that Windows shows above the icon. */
+    void setIconTooltip (const String& tooltip);
+
+#if JUCE_LINUX
+    /** @internal */
+    void paint (Graphics& g);
+#endif
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    SystemTrayIconComponent (const SystemTrayIconComponent&);
+    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+};
+
+#endif
+#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
+
+#endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WebBrowserComponent.h *********/
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+#if JUCE_WEB_BROWSER
+
+class WebBrowserComponentInternal;
+
+/**
+    A component that displays an embedded web browser.
+
+    The browser itself will be platform-dependent. On the Mac, probably Safari, on
+    Windows, probably IE.
+
+*/
+class WebBrowserComponent      : public Component
+{
+public:
+
+    /** Creates a WebBrowserComponent.
+
+        Once it's created and visible, send the browser to a URL using goToURL().
+    */
+    WebBrowserComponent();
+
+    /** Destructor. */
+    ~WebBrowserComponent();
+
+    /** Sends the browser to a particular URL.
+
+        @param url      the URL to go to.
+        @param headers  an optional set of parameters to put in the HTTP header. If
+                        you supply this, it should be a set of string in the form
+                        "HeaderKey: HeaderValue"
+        @param postData an optional block of data that will be attached to the HTTP
+                        POST request
+    */
+    void goToURL (const String& url,
+                  const StringArray* headers = 0,
+                  const MemoryBlock* postData = 0);
+
+    /** Stops the current page loading.
+    */
+    void stop();
+
+    /** Sends the browser back one page.
+    */
+    void goBack();
+
+    /** Sends the browser forward one page.
+    */
+    void goForward();
+
+    /** Refreshes the browser.
+    */
+    void refresh();
+
+    /** This callback is called when the browser is about to navigate
+        to a new location.
+
+        You can override this method to perform some action when the user
+        tries to go to a particular URL. To allow the operation to carry on,
+        return true, or return false to stop the navigation happening.
+    */
+    virtual bool pageAboutToLoad (const String& newURL);
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void parentHierarchyChanged();
+    /** @internal */
+    void visibilityChanged();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    WebBrowserComponentInternal* browser;
+    bool blankPageShown;
+
+    String lastURL;
+    StringArray lastHeaders;
+    MemoryBlock lastPostData;
+
+    void reloadLastURL();
+    void checkWindowAssociation();
+
+    WebBrowserComponent (const WebBrowserComponent&);
+    const WebBrowserComponent& operator= (const WebBrowserComponent&);
+};
+
+#endif
+#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_WebBrowserComponent.h *********/
 
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
@@ -52955,163 +53177,6 @@ private:
 /********* End of inlined file: juce_QuickTimeMovieComponent.h *********/
 
 #endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-#if JUCE_WIN32 || JUCE_LINUX
-
-/**
-    On Windows only, this component sits in the taskbar tray as a small icon.
-
-    To use it, just create one of these components, but don't attempt to make it
-    visible, add it to a parent, or put it on the desktop.
-
-    You can then call setIconImage() to create an icon for it in the taskbar.
-
-    To change the icon's tooltip, you can use setIconTooltip().
-
-    To respond to mouse-events, you can override the normal mouseDown(),
-    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
-    position will not be valid, you can use this to respond to clicks. Traditionally
-    you'd use a left-click to show your application's window, and a right-click
-    to show a pop-up menu.
-*/
-class JUCE_API  SystemTrayIconComponent  : public Component
-{
-public:
-
-    SystemTrayIconComponent();
-
-    /** Destructor. */
-    ~SystemTrayIconComponent();
-
-    /** Changes the image shown in the taskbar.
-    */
-    void setIconImage (const Image& newImage);
-
-    /** Changes the tooltip that Windows shows above the icon. */
-    void setIconTooltip (const String& tooltip);
-
-#if JUCE_LINUX
-    /** @internal */
-    void paint (Graphics& g);
-#endif
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
-};
-
-#endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
-
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WebBrowserComponent.h *********/
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-#if JUCE_WEB_BROWSER
-
-class WebBrowserComponentInternal;
-
-/**
-    A component that displays an embedded web browser.
-
-    The browser itself will be platform-dependent. On the Mac, probably Safari, on
-    Windows, probably IE.
-
-*/
-class WebBrowserComponent      : public Component
-{
-public:
-
-    /** Creates a WebBrowserComponent.
-
-        Once it's created and visible, send the browser to a URL using goToURL().
-    */
-    WebBrowserComponent();
-
-    /** Destructor. */
-    ~WebBrowserComponent();
-
-    /** Sends the browser to a particular URL.
-
-        @param url      the URL to go to.
-        @param headers  an optional set of parameters to put in the HTTP header. If
-                        you supply this, it should be a set of string in the form
-                        "HeaderKey: HeaderValue"
-        @param postData an optional block of data that will be attached to the HTTP
-                        POST request
-    */
-    void goToURL (const String& url,
-                  const StringArray* headers = 0,
-                  const MemoryBlock* postData = 0);
-
-    /** Stops the current page loading.
-    */
-    void stop();
-
-    /** Sends the browser back one page.
-    */
-    void goBack();
-
-    /** Sends the browser forward one page.
-    */
-    void goForward();
-
-    /** Refreshes the browser.
-    */
-    void refresh();
-
-    /** This callback is called when the browser is about to navigate
-        to a new location.
-
-        You can override this method to perform some action when the user
-        tries to go to a particular URL. To allow the operation to carry on,
-        return true, or return false to stop the navigation happening.
-    */
-    virtual bool pageAboutToLoad (const String& newURL);
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void parentHierarchyChanged();
-    /** @internal */
-    void visibilityChanged();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    WebBrowserComponentInternal* browser;
-    bool blankPageShown;
-
-    String lastURL;
-    StringArray lastHeaders;
-    MemoryBlock lastPostData;
-
-    void reloadLastURL();
-    void checkWindowAssociation();
-
-    WebBrowserComponent (const WebBrowserComponent&);
-    const WebBrowserComponent& operator= (const WebBrowserComponent&);
-};
-
-#endif
-#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_WebBrowserComponent.h *********/
-
-#endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
 
 /********* Start of inlined file: juce_LookAndFeel.h *********/
@@ -54233,7 +54298,7 @@ private:
 
 #endif
 
-#endif   // __JUCE_APP_INCLUDES_JUCEHEADER__
+#endif
 /********* End of inlined file: juce_app_includes.h *********/
 
 #endif

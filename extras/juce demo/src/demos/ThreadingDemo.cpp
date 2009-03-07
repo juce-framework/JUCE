@@ -33,13 +33,11 @@
 
 
 //==============================================================================
-class BouncingBallComp  : public Component,
-                          public AsyncUpdater
+class BouncingBallComp  : public Component
 {
     float x, y, size, dx, dy, w, h, parentWidth, parentHeight;
     float innerX, innerY;
     Colour colour;
-    CriticalSection lock;
     Thread::ThreadID threadId;
 
 public:
@@ -88,25 +86,8 @@ public:
         parentHeight = getParentHeight() - size;
     }
 
-    void handleAsyncUpdate()
-    {
-        const ScopedLock sl (lock);
-
-        setBounds (((int) x) - 2,
-                   ((int) y) - 2,
-                   ((int) size) + 4,
-                   ((int) size) + 4);
-
-        innerX = x - getX();
-        innerY = y - getY();
-
-        repaint();
-    }
-
     void moveBall()
     {
-        const ScopedLock sl (lock);
-
         threadId = Thread::getCurrentThreadId(); // this is so the component can print the thread ID inside the ball
 
         x += dx;
@@ -124,10 +105,15 @@ public:
         if (y > parentHeight)
             dy = -fabsf (dy);
 
-        // this is called on a background thread, so we don't want to call
-        // any UI code from here - instead we'll trigger an event that will update
-        // the component's position later. This is a safe way to avoid deadlocks
-        triggerAsyncUpdate();
+        setBounds (((int) x) - 2,
+                   ((int) y) - 2,
+                   ((int) size) + 4,
+                   ((int) size) + 4);
+
+        innerX = x - getX();
+        innerY = y - getY();
+
+        repaint();
     }
 
     juce_UseDebuggingNewOperator
@@ -166,10 +152,18 @@ public:
         // called, so we should check it often, and exit as soon as it gets flagged.
         while (! threadShouldExit())
         {
-            moveBall();
-
             // sleep a bit so the threads don't all grind the CPU to a halt..
             wait (interval);
+
+            // because this is a background thread, we mustn't do any UI work without
+            // first grabbing a MessageManagerLock..
+            const MessageManagerLock mml (Thread::getCurrentThread());
+
+            if (! mml.lockWasGained())  // if something is trying to kill this job, the lock
+                return;                 // will fail, in which case we'd better return..
+
+            // now we've got the UI thread locked, we can mess about with the components
+            moveBall();
         }
     }
 
@@ -196,8 +190,17 @@ public:
         // this is the code that runs this job. It'll be repeatedly called until we return
         // jobHasFinished instead of jobNeedsRunningAgain.
 
-        moveBall();
         Thread::sleep (30);
+
+
+        // because this is a background thread, we mustn't do any UI work without
+        // first grabbing a MessageManagerLock..
+        const MessageManagerLock mml (this);
+
+        // before moving the ball, we need to check whether the lock was actually gained, because
+        // if something is trying to stop this job, it will have failed..
+        if (mml.lockWasGained())
+            moveBall();
 
         return jobNeedsRunningAgain;
     }

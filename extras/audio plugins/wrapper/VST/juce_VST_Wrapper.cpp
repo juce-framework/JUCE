@@ -292,12 +292,7 @@ public:
         Component* const c = getChildComponent (0);
 
         if (c != 0)
-        {
-#if JUCE_LINUX
-            const MessageManagerLock mml;
-#endif
             c->setBounds (0, 0, getWidth(), getHeight());
-        }
     }
 
     void childBoundsChanged (Component* child);
@@ -428,10 +423,6 @@ public:
     {
         if (editorComp == 0)
         {
-#if JUCE_LINUX
-            const MessageManagerLock mml;
-#endif
-
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
@@ -1086,8 +1077,6 @@ public:
         if (MessageManager::getInstance()->isThisTheMessageThread()
              && ! recursionCheck)
         {
-            const MessageManagerLock mml;
-
             recursionCheck = true;
 
             juce_callAnyTimersSynchronously();
@@ -1106,10 +1095,6 @@ public:
 
         if (editorComp == 0)
         {
-#if JUCE_LINUX
-            const MessageManagerLock mml;
-#endif
-
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
@@ -1135,10 +1120,6 @@ public:
 
         jassert (! recursionCheck);
         recursionCheck = true;
-
-#if JUCE_LINUX
-        const MessageManagerLock mml;
-#endif
 
         if (editorComp != 0)
         {
@@ -1197,10 +1178,6 @@ public:
 
             if (editorComp != 0)
             {
-#if JUCE_LINUX
-                const MessageManagerLock mml;
-#endif
-
                 editorComp->setOpaque (true);
                 editorComp->setVisible (false);
 

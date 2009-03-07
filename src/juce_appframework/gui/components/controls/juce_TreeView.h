@@ -166,6 +166,12 @@ public:
     */
     int getRowNumberInTree() const throw();
 
+    /** Returns true if all the item's parent nodes are open.
+
+        This is useful to check whether the item might actually be visible or not.
+    */
+    bool areAllParentsOpen() const throw();
+
     /** Changes whether lines are drawn to connect any sub-items to this item.
 
         By default, line-drawing is turned on.

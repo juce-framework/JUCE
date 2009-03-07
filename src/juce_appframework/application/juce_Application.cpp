@@ -194,12 +194,8 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
     {
         juce_setCurrentThreadName ("Juce Message Thread");
 
-        {
-            const MessageManagerLock mml;
-
-            // let the app do its setting-up..
-            app->initialise (app->commandLineParameters);
-        }
+        // let the app do its setting-up..
+        app->initialise (app->commandLineParameters);
 
         // register for broadcast new app messages
         MessageManager::getInstance()->registerBroadcastListener (app);
@@ -246,7 +242,6 @@ int JUCEApplication::shutdownAppAndClearUp()
         JUCE_TRY
         {
             // give the app a chance to clean up..
-            const MessageManagerLock mml;
             app->shutdown();
         }
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
@@ -346,7 +341,6 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
         const ScopedAutoReleasePool pool;
 #endif
         {
-            const MessageManagerLock mml;
             DeletedAtShutdown::deleteAll();
 
             LookAndFeel::clearDefaultLookAndFeel();

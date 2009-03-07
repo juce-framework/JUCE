@@ -212,16 +212,11 @@ public:
     void updateMenus()
     {
         if (Time::getMillisecondCounter() > lastUpdateTime + 500)
-        {
-            const MessageManagerLock mml;
             menuBarItemsChanged (0);
-        }
     }
 
     void invoke (const int commandId, ApplicationCommandManager* const commandManager, const int topLevelIndex) const
     {
-        const MessageManagerLock mml;
-
         if (currentModel != 0)
         {
             if (commandManager != 0)

@@ -123,7 +123,7 @@ public:
         @see getBottom
     */
     void setBottom (const int newBottom) throw();
-    
+
     /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
     void translate (const int deltaX,
                     const int deltaY) throw();

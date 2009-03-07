@@ -38,6 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../application/juce_Application.h"
 #include "../gui/components/juce_Component.h"
 #include "../../juce_core/threads/juce_Thread.h"
+#include "../../juce_core/threads/juce_ScopedLock.h"
 #include "../../juce_core/basics/juce_Time.h"
 
 
@@ -45,7 +46,6 @@ BEGIN_JUCE_NAMESPACE
 // platform-specific functions..
 bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 bool juce_postMessageToSystemQueue (void* message);
-
 
 //==============================================================================
 MessageManager* MessageManager::instance = 0;
@@ -55,9 +55,9 @@ static const int quitMessageId = 0xfffff321;
 MessageManager::MessageManager() throw()
   : broadcastListeners (0),
     quitMessagePosted (false),
-    quitMessageReceived (false)
+    quitMessageReceived (false),
+    threadWithLock (0)
 {
-    currentLockingThreadId = 0;
     messageThreadId = Thread::getCurrentThreadId();
 }
 
@@ -89,26 +89,47 @@ void MessageManager::postMessageToQueue (Message* const message)
 }
 
 //==============================================================================
+CallbackMessage::CallbackMessage() throw()  {}
+CallbackMessage::~CallbackMessage() throw()  {}
+
+void CallbackMessage::post()
+{
+    if (MessageManager::instance != 0)
+        MessageManager::instance->postCallbackMessage (this);
+}
+
+void MessageManager::postCallbackMessage (Message* const message)
+{
+    message->messageRecipient = 0;
+    postMessageToQueue (message);
+}
+
+//==============================================================================
 // not for public use..
 void MessageManager::deliverMessage (void* message)
 {
-    const MessageManagerLock lock;
-
     Message* const m = (Message*) message;
     MessageListener* const recipient = m->messageRecipient;
 
-    if (messageListeners.contains (recipient))
+    JUCE_TRY
     {
-        JUCE_TRY
+        if (messageListeners.contains (recipient))
         {
             recipient->handleMessage (*m);
         }
-        JUCE_CATCH_EXCEPTION
+        else if (recipient == 0)
+        {
+            if (m->intParameter1 == quitMessageId)
+            {
+                quitMessageReceived = true;
+            }
+            else if (dynamic_cast <CallbackMessage*> (m) != 0)
+            {
+                (dynamic_cast <CallbackMessage*> (m))->messageCallback();
+            }
+        }
     }
-    else if (recipient == 0 && m->intParameter1 == quitMessageId)
-    {
-        quitMessageReceived = true;
-    }
+    JUCE_CATCH_EXCEPTION
 
     delete m;
 }
@@ -186,54 +207,135 @@ void MessageManager::setCurrentMessageThread (const Thread::ThreadID threadId) t
 
 bool MessageManager::currentThreadHasLockedMessageManager() const throw()
 {
-    return Thread::getCurrentThreadId() == currentLockingThreadId;
+    const Thread::ThreadID thisThread = Thread::getCurrentThreadId();
+    return thisThread == messageThreadId || thisThread == threadWithLock;
 }
 
 //==============================================================================
-MessageManagerLock::MessageManagerLock() throw()
-    : lastLockingThreadId (0),
-      locked (false)
+//==============================================================================
+/*  The only safe way to lock the message thread while another thread does
+    some work is by posting a special message, whose purpose is to tie up the event
+    loop until the other thread has finished its business.
+
+    Any other approach can get horribly deadlocked if the OS uses its own hidden locks which
+    get locked before making an event callback, because if the same OS lock gets indirectly
+    accessed from another thread inside a MM lock, you're screwed. (this is exactly what happens
+    in Cocoa).
+*/
+class SharedLockingEvents   : public ReferenceCountedObject
 {
-    if (MessageManager::instance != 0)
+public:
+    SharedLockingEvents() throw()   {}
+    ~SharedLockingEvents()          {}
+
+    /* This class just holds a couple of events to communicate between the MMLockMessage
+       and the MessageManagerLock. Because both of these objects may be deleted at any time,
+       this shared data must be kept in a separate, ref-counted container. */
+    WaitableEvent lockedEvent, releaseEvent;
+};
+
+class MMLockMessage   : public CallbackMessage
+{
+public:
+    MMLockMessage (SharedLockingEvents* const events_) throw()
+        : events (events_)
+    {}
+
+    ~MMLockMessage() throw() {}
+
+    ReferenceCountedObjectPtr <SharedLockingEvents> events;
+
+    void messageCallback()
     {
-        MessageManager::instance->messageDispatchLock.enter();
-        lastLockingThreadId = MessageManager::instance->currentLockingThreadId;
-        MessageManager::instance->currentLockingThreadId = Thread::getCurrentThreadId();
-        locked = true;
+        events->lockedEvent.signal();
+        events->releaseEvent.wait();
     }
+
+    juce_UseDebuggingNewOperator
+
+    MMLockMessage (const MMLockMessage&);
+    const MMLockMessage& operator= (const MMLockMessage&);
+};
+
+//==============================================================================
+MessageManagerLock::MessageManagerLock (Thread* const threadToCheck) throw()
+    : locked (false),
+      needsUnlocking (false)
+{
+    init (threadToCheck, 0);
 }
 
-MessageManagerLock::MessageManagerLock (Thread* const thread) throw()
-    : locked (false)
+MessageManagerLock::MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal) throw()
+    : locked (false),
+      needsUnlocking (false)
 {
-    jassert (thread != 0);  // This will only work if you give it a valid thread!
+    init (0, jobToCheckForExitSignal);
+}
 
+void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const job) throw()
+{
     if (MessageManager::instance != 0)
     {
-        for (;;)
+        if (MessageManager::instance->currentThreadHasLockedMessageManager())
         {
-            if (MessageManager::instance->messageDispatchLock.tryEnter())
+            locked = true;   // either we're on the message thread, or this it's a re-entrant call.
+        }
+        else
+        {
+            if (threadToCheck == 0 && job == 0)
             {
-                locked = true;
-                lastLockingThreadId = MessageManager::instance->currentLockingThreadId;
-                MessageManager::instance->currentLockingThreadId = Thread::getCurrentThreadId();
-                break;
+                MessageManager::instance->lockingLock.enter();
+            }
+            else
+            {
+                while (! MessageManager::instance->lockingLock.tryEnter())
+                {
+                    if ((threadToCheck != 0 && threadToCheck->threadShouldExit())
+                          || (job != 0 && job->shouldExit()))
+                        return;
+
+                    Thread::sleep (1);
+                }
             }
 
-            if (thread != 0 && thread->threadShouldExit())
-                break;
+            SharedLockingEvents* const events = new SharedLockingEvents();
+            sharedEvents = events;
+            events->incReferenceCount();
 
-            Thread::sleep (1);
+            (new MMLockMessage (events))->post();
+
+            while (! events->lockedEvent.wait (50))
+            {
+                if ((threadToCheck != 0 && threadToCheck->threadShouldExit())
+                      || (job != 0 && job->shouldExit()))
+                {
+                    events->releaseEvent.signal();
+                    events->decReferenceCount();
+                    MessageManager::instance->lockingLock.exit();
+                    return;
+                }
+            }
+
+            jassert (MessageManager::instance->threadWithLock == 0);
+
+            MessageManager::instance->threadWithLock = Thread::getCurrentThreadId();
+            locked = true;
+            needsUnlocking = true;
         }
     }
 }
 
+
 MessageManagerLock::~MessageManagerLock() throw()
 {
-    if (locked && MessageManager::instance != 0)
+    if (needsUnlocking && MessageManager::instance != 0)
     {
-        MessageManager::instance->currentLockingThreadId = lastLockingThreadId;
-        MessageManager::instance->messageDispatchLock.exit();
+        jassert (MessageManager::instance->currentThreadHasLockedMessageManager());
+
+        ((SharedLockingEvents*) sharedEvents)->releaseEvent.signal();
+        ((SharedLockingEvents*) sharedEvents)->decReferenceCount();
+        MessageManager::instance->threadWithLock = 0;
+        MessageManager::instance->lockingLock.exit();
     }
 }
 

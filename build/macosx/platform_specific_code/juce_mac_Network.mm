@@ -284,7 +284,7 @@ public:
 
 - (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
 {
-    NSLog ([error description]);
+    DBG (nsStringToJuce ([error description]));
     hasFailed = true;
     initialised = true;
     runLoopThread->signalThreadShouldExit();

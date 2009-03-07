@@ -161,8 +161,6 @@ END_JUCE_NAMESPACE
         JUCE_NAMESPACE::Thread::sleep (300);
         float progress = [[[burn status] objectForKey: DRStatusPercentCompleteKey] floatValue];
 
-NSLog ([[burn status] description]);
-
         if (listener != 0 && listener->audioCDBurnProgress (progress))
         {
             [burn abort];

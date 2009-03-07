@@ -476,7 +476,7 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
                                              Component* associatedComponent)
 {
     AlertWindow* aw = new AlertWindow (title, message, iconType);
-    
+
     if (numButtons == 1)
     {
         aw->addButton (button1, 0,
@@ -489,7 +489,7 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
         KeyPress button2ShortCut (CharacterFunctions::toLowerCase (button2[0]), 0, 0);
         if (button1ShortCut == button2ShortCut)
             button2ShortCut = KeyPress();
-        
+
         if (numButtons == 2)
         {
             aw->addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
@@ -498,7 +498,7 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
         else
         {
             jassert (numButtons == 3);
-            
+
             aw->addButton (button1, 1, button1ShortCut);
             aw->addButton (button2, 2, button2ShortCut);
             aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
@@ -538,8 +538,8 @@ void LookAndFeel::drawAlertBox (Graphics& g,
             colour = 0x55ff5555;
             character = '!';
 
-            icon.addTriangle (iconRect.getX() + iconRect.getWidth() * 0.5f, (float) iconRect.getY(), 
-                              (float) iconRect.getRight(), (float) iconRect.getBottom(), 
+            icon.addTriangle (iconRect.getX() + iconRect.getWidth() * 0.5f, (float) iconRect.getY(),
+                              (float) iconRect.getRight(), (float) iconRect.getBottom(),
                               (float) iconRect.getX(), (float) iconRect.getBottom());
 
             icon = icon.createPathWithRoundedCorners (5.0f);

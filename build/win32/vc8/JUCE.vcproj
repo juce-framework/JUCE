@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
@@ -117,6 +117,7 @@
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="true"
+				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
@@ -184,7 +185,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;JUCE_DLL_BUILD;JUCE_DLL"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
@@ -269,6 +270,7 @@
 				WholeProgramOptimization="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;JUCE_DLL_BUILD;JUCE_DLL"
 				StringPooling="true"
+				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
@@ -1220,6 +1222,10 @@
 					</File>
 					<File
 						RelativePath="..\..\..\src\juce_appframework\events\juce_AsyncUpdater.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\juce_appframework\events\juce_CallbackMessage.h"
 						>
 					</File>
 					<File

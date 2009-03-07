@@ -50,7 +50,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
 {
     alertWindow = LookAndFeel::getDefaultLookAndFeel()
-                    .createAlertWindow (title, String::empty, cancelButtonText, String::empty, String::empty, 
+                    .createAlertWindow (title, String::empty, cancelButtonText, String::empty, String::empty,
                                         AlertWindow::NoIcon, 1, 0);
 
     if (hasProgressBar)

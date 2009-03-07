@@ -36,8 +36,8 @@
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    const ScopedAutoReleasePool pool;
-    NSLog (juceStringToNS (text + T("\n")));
+    fputs (text.toUTF8(), stderr);
+    fputs ("\n", stderr);
 }
 
 void Logger::outputDebugPrintf (const tchar* format, ...) throw()
@@ -45,7 +45,7 @@ void Logger::outputDebugPrintf (const tchar* format, ...) throw()
     String text;
     va_list args;
     va_start (args, format);
-    text.vprintf(format, args);
+    text.vprintf (format, args);
     outputDebugString (text);
 }
 

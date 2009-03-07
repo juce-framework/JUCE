@@ -617,7 +617,6 @@ public:
 #endif
     }
 
-
     OSStatus ProcessBufferLists (AudioUnitRenderActionFlags& ioActionFlags,
                                  const AudioBufferList& inBuffer,
                                  AudioBufferList& outBuffer,

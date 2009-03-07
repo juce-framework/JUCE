@@ -1774,7 +1774,7 @@ public:
         of the components in this list is the reverse of the order in which they became
         modal - so the component at index 0 is always the active component, and the others
         are progressively earlier ones that are themselves now blocked by later ones.
-     
+
         @returns the modal component, or null if no components are modal (or if the
                 index is out of range)
         @see getNumCurrentlyModalComponents, runModalLoop, isCurrentlyModal

@@ -2945,23 +2945,22 @@ FLAC__StreamDecoderWriteStatus write_audio_frame_to_client_(FLAC__StreamDecoder 
 				return decoder->private_->write_callback(decoder, frame, buffer, decoder->private_->client_data);
 			}
 		}
-		else {
-			return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
-		}
+
+        return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 	}
-	else {
-		/*
-		 * If we never got STREAMINFO, turn off MD5 checking to save
-		 * cycles since we don't have a sum to compare to anyway
-		 */
-		if(!decoder->private_->has_stream_info)
-			decoder->private_->do_md5_checking = false;
-		if(decoder->private_->do_md5_checking) {
-			if(!FLAC__MD5Accumulate(&decoder->private_->md5context, buffer, frame->header.channels, frame->header.blocksize, (frame->header.bits_per_sample+7) / 8))
-				return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
-		}
-		return decoder->private_->write_callback(decoder, frame, buffer, decoder->private_->client_data);
-	}
+
+    /*
+     * If we never got STREAMINFO, turn off MD5 checking to save
+     * cycles since we don't have a sum to compare to anyway
+     */
+    if(!decoder->private_->has_stream_info)
+        decoder->private_->do_md5_checking = false;
+    if(decoder->private_->do_md5_checking) {
+        if(!FLAC__MD5Accumulate(&decoder->private_->md5context, buffer, frame->header.channels, frame->header.blocksize, (frame->header.bits_per_sample+7) / 8))
+            return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+    }
+
+    return decoder->private_->write_callback(decoder, frame, buffer, decoder->private_->client_data);
 }
 
 void send_error_to_client_(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status)

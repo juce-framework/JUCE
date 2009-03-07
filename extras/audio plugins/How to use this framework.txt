@@ -87,28 +87,30 @@ make it easier to update to the latest code.
 - From the Digidesign website, download their latest Plug-In SDK
 - Install the SDK and build some of the demo plugins to make sure it all works.
 - In Visual Studio: Add all of these to your include path:
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\common
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\common\Platform
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\SADriver\Interfaces
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\DigiPublic\Interfaces
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\Fic\Interfaces\DAEClient
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\NewFileLibs\Cmn
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\NewFileLibs\DOA
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\PPC_H
-    c:\yourdirectory\PT_73_SDK\AlturaPorts\AlturaSource\AppSupport
-    c:\yourdirectory\PT_73_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common\Platform
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
+    C:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugIns\DSPManager\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\SADriver\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\Fic\Interfaces\DAEClient
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\Cmn
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
+    C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
 - In Visual Studio: Using the Digidesign demo projects in the SDK, make sure you've compiled 
   debug and release versions of the following static libraries:
     DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib.

@@ -61,7 +61,6 @@ public:
     {
         if (JUCEApplication::getInstance() != 0)
         {
-            const MessageManagerLock mml;
             JUCEApplication::getInstance()->systemRequestedQuit();
             return NSTerminateCancel;
         }
@@ -73,7 +72,6 @@ public:
     {
         if (JUCEApplication::getInstance() != 0)
         {
-            const MessageManagerLock mml;
             JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce (filename));
             return YES;
         }
@@ -89,14 +87,12 @@ public:
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)
         {
-            const MessageManagerLock mml;
             JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
         }
     }
 
     virtual void focusChanged()
     {
-        const MessageManagerLock mml;
         juce_HandleProcessFocusChange();
     }
 
@@ -108,11 +104,10 @@ public:
 
     virtual void performCallback (CallbackMessagePayload* pl)
     {
-        const MessageManagerLock mml;
         pl->result = (*pl->function) (pl->parameter);
         pl->hasBeenExecuted = true;
     }
-    
+
     virtual void deleteSelf()
     {
         delete this;
@@ -357,6 +352,11 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
     }
     else
     {
+        // If a thread has a MessageManagerLock and then tries to call this method, it'll
+        // deadlock because the message manager is blocked from running, so can never
+        // call your function..
+        jassert (! MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+
         const ScopedAutoReleasePool pool;
 
         CallbackMessagePayload cmp;

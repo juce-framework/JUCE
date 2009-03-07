@@ -1805,8 +1805,6 @@ private:
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
         {
-            const MessageManagerLock messLock;
-
             if (isValidPeer (this))
             {
                 switch (message)

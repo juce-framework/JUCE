@@ -36,7 +36,9 @@
 #include "../../juce_core/containers/juce_SortedSet.h"
 #include "../../juce_core/containers/juce_VoidArray.h"
 #include "../../juce_core/threads/juce_Thread.h"
+#include "../../juce_core/threads/juce_ThreadPool.h"
 #include "juce_ActionListenerList.h"
+#include "juce_CallbackMessage.h"
 class Component;
 class MessageManagerLock;
 
@@ -175,6 +177,7 @@ private:
     friend class MessageListener;
     friend class ChangeBroadcaster;
     friend class ActionBroadcaster;
+    friend class CallbackMessage;
     static MessageManager* instance;
 
     SortedSet<const MessageListener*> messageListeners;
@@ -188,13 +191,14 @@ private:
     static void* exitModalLoopCallback (void*);
 
     void postMessageToQueue (Message* const message);
+    void postCallbackMessage (Message* const message);
 
     static void doPlatformSpecificInitialisation();
     static void doPlatformSpecificShutdown();
 
     friend class MessageManagerLock;
-    CriticalSection messageDispatchLock;
-    Thread::ThreadID currentLockingThreadId;
+    Thread::ThreadID volatile threadWithLock;
+    CriticalSection lockingLock;
 
     MessageManager (const MessageManager&);
     const MessageManager& operator= (const MessageManager&);
@@ -239,36 +243,23 @@ public:
     //==============================================================================
     /** Tries to acquire a lock on the message manager.
 
-        If this constructor
-        When this constructor returns, the message manager will have finished processing the
-        last message and will not send another message until this MessageManagerLock is
-        deleted.
+        The constructor attempts to gain a lock on the message loop, and the lock will be
+        kept for the lifetime of this object.
 
-        If the current thread already has the lock, nothing will be done, so it's perfectly
-        safe to create these locks recursively.
-    */
-    MessageManagerLock() throw();
-
-    /** Releases the current thread's lock on the message manager.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    ~MessageManagerLock() throw();
-
-    //==============================================================================
-    /** Tries to acquire a lock on the message manager.
-
-        This does the same thing as the normal constructor, but while it's waiting to get
-        the lock, it checks the specified thread to see if it has been given the
+        Optionally, you can pass a thread object here, and while waiting to obtain the lock,
+        this method will keep checking whether the thread has been given the
         Thread::signalThreadShouldExit() signal. If this happens, then it will return
-        without gaining the lock.
+        without gaining the lock. If you pass a thread, you must check whether the lock was
+        successful by calling lockWasGained(). If this is false, your thread is being told to
+        die, so you should take evasive action.
 
-        To find out whether the lock was successful, call lockWasGained(). If this is
-        false, your thread is being told to die, so you'd better get out of there.
+        If you pass zero for the thread object, it will wait indefinitely for the lock - be
+        careful when doing this, because it's very easy to deadlock if your message thread
+        attempts to call stopThread() on a thread just as that thread attempts to get the
+        message lock.
 
-        If the current thread already has the lock, nothing will be done, so it's perfectly
-        safe to create these locks recursively.
+        If the calling thread already has the lock, nothing will be done, so it's safe and
+        quick to use these locks recursively.
 
         E.g.
         @code
@@ -291,9 +282,26 @@ public:
         @endcode
 
     */
-    MessageManagerLock (Thread* const threadToCheckForExitSignal) throw();
+    MessageManagerLock (Thread* const threadToCheckForExitSignal = 0) throw();
+
+    //==============================================================================
+    /** This has the same behaviour as the other constructor, but takes a ThreadPoolJob
+        instead of a thread.
+
+        See the MessageManagerLock (Thread*) constructor for details on how this works.
+    */
+    MessageManagerLock (ThreadPoolJob* const jobToCheckForExitSignal) throw();
 
 
+    //==============================================================================
+    /** Releases the current thread's lock on the message manager.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+   */
+    ~MessageManagerLock() throw();
+
+    //==============================================================================
     /** Returns true if the lock was successfully acquired.
 
         (See the constructor that takes a Thread for more info).
@@ -302,8 +310,10 @@ public:
 
 
 private:
-    Thread::ThreadID lastLockingThreadId;
-    bool locked;
+    bool locked, needsUnlocking;
+    void* sharedEvents;
+
+    void init (Thread* const thread, ThreadPoolJob* const job) throw();
 };
 
 

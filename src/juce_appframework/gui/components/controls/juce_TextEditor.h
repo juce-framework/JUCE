@@ -467,6 +467,13 @@ l    */
     */
     int getTextIndexAt (const int x, const int y) throw();
 
+    /** Counts the number of characters in the text.
+
+        This is quicker than getting the text as a string if you just need to know
+        the length.
+    */
+    int getTotalNumChars() throw();
+
     /** Returns the total width of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
@@ -589,13 +596,6 @@ protected:
 
     /** Used internally to dispatch a text-change message. */
     void textChanged() throw();
-
-    /** Counts the number of characters in the text.
-
-        This is quicker than getting the text as a string if you just need to know
-        the length.
-    */
-    int getTotalNumChars() throw();
 
     /** Begins a new transaction in the UndoManager.
     */

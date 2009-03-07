@@ -41,7 +41,7 @@ class FontHelper
 
 public:
     String name;
-    bool isBold, isItalic;
+    bool isBold, isItalic, needsItalicTransform;
     float fontSize, totalSize, ascent;
     int refCount;
     NSMutableDictionary* attributes;
@@ -54,6 +54,7 @@ public:
           name (name_),
           isBold (bold_),
           isItalic (italic_),
+          needsItalicTransform (false),
           fontSize (size_),
           refCount (1)
     {
@@ -67,10 +68,7 @@ public:
             NSFont* newFont = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSItalicFontMask];
 
             if (newFont == font)
-            {
-                // couldn't find an italic version, so fake it with obliqueness..
-                [attributes setObject: [NSNumber numberWithFloat: 0.16] forKey: NSObliquenessAttributeName];
-            }
+                needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
 
             font = newFont;
         }
@@ -155,6 +153,9 @@ public:
                     break;
                 }
             }
+
+            if (needsItalicTransform)
+                path->applyTransform (AffineTransform::identity.sheared (-0.15, 0));
         }
 
         return kerning != 0;

@@ -1006,11 +1006,17 @@ void TreeViewItem::treeHasChanged() const throw()
 
 void TreeViewItem::repaintItem() const
 {
-    if (ownerView != 0)
+    if (ownerView != 0 && areAllParentsOpen())
     {
-        const Rectangle r (getItemPosition (false));
+        const Rectangle r (getItemPosition (true));
         ownerView->viewport->repaint (0, r.getY(), r.getRight(), r.getHeight());
     }
+}
+
+bool TreeViewItem::areAllParentsOpen() const throw()
+{
+    return parentItem == 0
+            || (parentItem->isOpen() && parentItem->areAllParentsOpen());
 }
 
 void TreeViewItem::updatePositions (int newY)

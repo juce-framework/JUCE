@@ -179,6 +179,27 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         for (int i = jmin (2, info.buffer->getNumChannels()); --i >= 0;)
             applyFilter (info.buffer->getSampleData (i, info.startSample), info.numSamples, filterStates[i]);
     }
+    else if (ratio <= 1.0001)
+    {
+        // if the filter's not currently being applied, keep it stoked with the last couple of samples to avoid discontinuities
+        for (int i = jmin (2, info.buffer->getNumChannels()); --i >= 0;)
+        {
+            const float* const endOfBuffer = info.buffer->getSampleData (i, info.startSample + info.numSamples - 1);
+            FilterState& fs = filterStates[i];
+
+            if (info.numSamples > 1)
+            {
+                fs.y2 = fs.x2 = *(endOfBuffer - 1);
+            }
+            else
+            {
+                fs.y2 = fs.y1;
+                fs.x2 = fs.x1;
+            }
+
+            fs.y1 = fs.x1 = *endOfBuffer;
+        }
+    }
 
     jassert (sampsInBuffer >= 0);
 }

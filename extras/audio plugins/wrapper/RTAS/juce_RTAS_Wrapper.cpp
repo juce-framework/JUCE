@@ -29,6 +29,12 @@
   ==============================================================================
 */
 
+#ifdef _MSC_VER
+ // (this is a workaround for a build problem in VC9)
+ #define _DO_NOT_DECLARE_INTERLOCKED_INTRINSICS_IN_MEMORY
+ #include <intrin.h>
+#endif
+
 #include "juce_RTAS_DigiCode_Header.h"
 
 #if JucePlugin_Build_RTAS
@@ -43,28 +49,30 @@
    To be able to include all the Digidesign headers correctly, you'll need to add this
    lot to your include path:
 
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\common
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\common\Platform
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\TDMPlugIns\DSPManager\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\SADriver\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\DigiPublic\Interfaces
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\Fic\Interfaces\DAEClient
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\NewFileLibs\Cmn
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\NewFileLibs\DOA
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\PPC_H
-    c:\yourdirectory\PT_711_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\EffectClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ProcessClasses\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Utilities
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\RTASP_Adapt
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\CoreClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Controls
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Meters
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\ViewClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\DSPClasses
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\PluginLibrary\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\common\Platform
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugins\SignalProcessing\Public
+    C:\yourdirectory\PT_80_SDK\AlturaPorts\TDMPlugIns\DSPManager\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\SADriver\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\DigiPublic\Interfaces
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\Fic\Interfaces\DAEClient
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\Cmn
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\NewFileLibs\DOA
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\PPC_H
+    c:\yourdirectory\PT_80_SDK\AlturaPorts\AlturaSource\AppSupport
+    c:\yourdirectory\PT_80_SDK\AvidCode\AVX2sdk\AVX\avx2\avx2sdk\inc
+    C:\yourdirectory\PT_80_SDK\xplat\AVX\avx2\avx2sdk\inc
 
    NB. If you hit a huge pile of bugs around here, make sure that you've not got the
    Apple QuickTime headers before the PT headers in your path, because there are
@@ -983,7 +991,9 @@ void initialiseMacRTAS();
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {
+#if JUCE_MAC
     initialiseMacRTAS();
+#endif
     initialiseJuce_NonGUI();
     return new JucePlugInGroup();
 }

@@ -473,6 +473,7 @@
 		84A48BEB08A22E4B00752A2B /* juce_TimeSliceThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A48A2508A22E4A00752A2B /* juce_TimeSliceThread.cpp */; };
 		84A48BEC08A22E4B00752A2B /* juce_TimeSliceThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A48A2608A22E4A00752A2B /* juce_TimeSliceThread.h */; };
 		84A48BED08A22E4B00752A2B /* juce_WaitableEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A48A2708A22E4A00752A2B /* juce_WaitableEvent.h */; };
+		84B1C1330F6287E70068E14F /* juce_CallbackMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 84B1C1320F6287E70068E14F /* juce_CallbackMessage.h */; };
 		84BC4E290C8DD38C00FA249B /* juce_AudioPlayHead.h in Headers */ = {isa = PBXBuildFile; fileRef = 84BC4E210C8DD38C00FA249B /* juce_AudioPlayHead.h */; };
 		84BC4E2A0C8DD38C00FA249B /* juce_AudioProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84BC4E220C8DD38C00FA249B /* juce_AudioProcessor.cpp */; };
 		84BC4E2B0C8DD38C00FA249B /* juce_AudioProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 84BC4E230C8DD38C00FA249B /* juce_AudioProcessor.h */; };
@@ -1060,6 +1061,7 @@
 		84A48A2508A22E4A00752A2B /* juce_TimeSliceThread.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_TimeSliceThread.cpp; path = ../../src/juce_core/threads/juce_TimeSliceThread.cpp; sourceTree = SOURCE_ROOT; };
 		84A48A2608A22E4A00752A2B /* juce_TimeSliceThread.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_TimeSliceThread.h; path = ../../src/juce_core/threads/juce_TimeSliceThread.h; sourceTree = SOURCE_ROOT; };
 		84A48A2708A22E4A00752A2B /* juce_WaitableEvent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = juce_WaitableEvent.h; path = ../../src/juce_core/threads/juce_WaitableEvent.h; sourceTree = SOURCE_ROOT; };
+		84B1C1320F6287E70068E14F /* juce_CallbackMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_CallbackMessage.h; sourceTree = "<group>"; };
 		84BC4E210C8DD38C00FA249B /* juce_AudioPlayHead.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_AudioPlayHead.h; sourceTree = "<group>"; };
 		84BC4E220C8DD38C00FA249B /* juce_AudioProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = juce_AudioProcessor.cpp; sourceTree = "<group>"; };
 		84BC4E230C8DD38C00FA249B /* juce_AudioProcessor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_AudioProcessor.h; sourceTree = "<group>"; };
@@ -1495,6 +1497,7 @@
 				84A4886908A22E4900752A2B /* juce_ActionListenerList.h */,
 				84A4886A08A22E4900752A2B /* juce_AsyncUpdater.cpp */,
 				84A4886B08A22E4900752A2B /* juce_AsyncUpdater.h */,
+				84B1C1320F6287E70068E14F /* juce_CallbackMessage.h */,
 				84A4886C08A22E4900752A2B /* juce_ChangeBroadcaster.cpp */,
 				84A4886D08A22E4900752A2B /* juce_ChangeBroadcaster.h */,
 				84A4886E08A22E4900752A2B /* juce_ChangeListener.h */,
@@ -2547,6 +2550,7 @@
 				8457783E0E8947C8006D9E4E /* juce_NSViewComponent.h in Headers */,
 				84E025060E94028C003E41AF /* juce_posix_SharedCode.h in Headers */,
 				84F8B60D0EB5B9230020D98D /* juce_mac_NativeIncludes.h in Headers */,
+				84B1C1330F6287E70068E14F /* juce_CallbackMessage.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
