@@ -32,9 +32,9 @@
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 
-#if JUCE_USE_FLAC || defined (DOXYGEN)
+#include "juce_AudioFormat.h" // (must keep this outside the conditional define)
 
-#include "juce_AudioFormat.h"
+#if JUCE_USE_FLAC || defined (DOXYGEN)
 
 
 //==============================================================================

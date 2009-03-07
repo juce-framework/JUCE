@@ -197,20 +197,17 @@
 #ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/juce_PluginListComponent.h"
 #endif
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h"
-#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h"
+#endif
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h"
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
 #endif
 #ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
-#endif
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h"
 #endif
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
@@ -238,6 +235,9 @@
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AudioThumbnailCache.h"
+#endif
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
  #include "juce_appframework/events/juce_InterprocessConnectionServer.h"
@@ -284,9 +284,6 @@
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
  #include "juce_appframework/events/juce_InterprocessConnection.h"
 #endif
-#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
- #include "juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h"
-#endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
  #include "juce_appframework/gui/graphics/brushes/juce_Brush.h"
 #endif
@@ -295,6 +292,9 @@
 #endif
 #ifndef __JUCE_IMAGEBRUSH_JUCEHEADER__
  #include "juce_appframework/gui/graphics/brushes/juce_ImageBrush.h"
+#endif
+#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
+ #include "juce_appframework/gui/graphics/brushes/juce_SolidColourBrush.h"
 #endif
 #ifndef __JUCE_COLOUR_JUCEHEADER__
  #include "juce_appframework/gui/graphics/colour/juce_Colour.h"

@@ -32,9 +32,9 @@
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+#include "juce_AudioFormat.h" // (must keep this outside the conditional define)
 
-#include "juce_AudioFormat.h"
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
 
 
 //==============================================================================

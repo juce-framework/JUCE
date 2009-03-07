@@ -384,6 +384,9 @@ void Slider::lookAndFeelChanged()
             decButton->setRepeatSpeed (300, 100, 20);
             decButton->addMouseListener (incButton, false);
         }
+
+        incButton->setTooltip (getTooltip());
+        decButton->setTooltip (getTooltip());
     }
 
     setComponentEffect (lf.getSliderEffect());

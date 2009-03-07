@@ -36131,13 +36131,11 @@ private:
 /********* End of inlined file: juce_PluginListComponent.h *********/
 
 #endif
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FlacAudioFormat.h *********/
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_FLAC || defined (DOXYGEN)
+/********* Start of inlined file: juce_WavAudioFormat.h *********/
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioFormat.h *********/
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
@@ -36414,52 +36412,6 @@ private:
 /********* End of inlined file: juce_AudioFormat.h *********/
 
 /**
-    Reads and writes the lossless-compression FLAC audio format.
-
-    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the FLAC header files and static libraries.
-
-    @see AudioFormat
-*/
-class JUCE_API  FlacAudioFormat    : public AudioFormat
-{
-public:
-
-    FlacAudioFormat();
-    ~FlacAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_FlacAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WavAudioFormat.h *********/
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/**
     Reads and Writes WAV format audio files.
 
     @see AudioFormat
@@ -36575,6 +36527,52 @@ public:
 /********* End of inlined file: juce_WavAudioFormat.h *********/
 
 #endif
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_AiffAudioFormat.h *********/
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+
+/**
+    Reads and Writes AIFF format audio files.
+
+    @see AudioFormat
+*/
+class JUCE_API  AiffAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates an format object. */
+    AiffAudioFormat();
+
+    /** Destructor. */
+    ~AiffAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+#if JUCE_MAC
+    bool canHandleFile (const File& fileToTest);
+#endif
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_AiffAudioFormat.h *********/
+
+#endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
@@ -36681,52 +36679,6 @@ public:
 #endif
 #endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_AiffAudioFormat.h *********/
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-
-/**
-    Reads and Writes AIFF format audio files.
-
-    @see AudioFormat
-*/
-class JUCE_API  AiffAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates an format object. */
-    AiffAudioFormat();
-
-    /** Destructor. */
-    ~AiffAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-#if JUCE_MAC
-    bool canHandleFile (const File& fileToTest);
-#endif
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AiffAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
@@ -37376,6 +37328,54 @@ private:
 
 #endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 /********* End of inlined file: juce_AudioThumbnailCache.h *********/
+
+#endif
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FlacAudioFormat.h *********/
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_FLAC || defined (DOXYGEN)
+
+/**
+    Reads and writes the lossless-compression FLAC audio format.
+
+    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the FLAC header files and static libraries.
+
+    @see AudioFormat
+*/
+class JUCE_API  FlacAudioFormat    : public AudioFormat
+{
+public:
+
+    FlacAudioFormat();
+    ~FlacAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_FlacAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
@@ -38213,9 +38213,6 @@ private:
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
 
 #endif
@@ -38739,6 +38736,9 @@ private:
 
 #endif   // __JUCE_IMAGEBRUSH_JUCEHEADER__
 /********* End of inlined file: juce_ImageBrush.h *********/
+
+#endif
+#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_COLOUR_JUCEHEADER__
