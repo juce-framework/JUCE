@@ -75,13 +75,23 @@ void MemoryOutputStream::reset() throw()
 
 bool MemoryOutputStream::write (const void* buffer, int howMany)
 {
-    int storageNeeded = position + howMany + 1;
-    storageNeeded = storageNeeded - (storageNeeded % blockSize) + blockSize;
+    if (howMany > 0)
+    {
+        int storageNeeded = position + howMany;
 
-    data->ensureSize (storageNeeded);
-    data->copyFrom (buffer, position, howMany);
-    position += howMany;
-    size = jmax (size, position);
+        if (storageNeeded >= data->getSize())
+        {
+            // if we need more space, increase the block by at least 10%..
+            storageNeeded += jmax (blockSize, storageNeeded / 10);
+            storageNeeded = storageNeeded - (storageNeeded % blockSize) + blockSize;
+
+            data->ensureSize (storageNeeded);
+        }
+
+        data->copyFrom (buffer, position, howMany);
+        position += howMany;
+        size = jmax (size, position);
+    }
 
     return true;
 }

@@ -39,11 +39,12 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/ApplicationStartup.o \
-	$(OBJDIR)/BinaryData.o \
-	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
-	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/BinaryData.o \
+	$(OBJDIR)/ApplicationStartup.o \
+	$(OBJDIR)/juce_LibrarySource.o \
+	$(OBJDIR)/TreeViewDemo.o \
+	$(OBJDIR)/WidgetsDemo.o \
 	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
 	$(OBJDIR)/InterprocessCommsDemo.o \
@@ -52,8 +53,7 @@ OBJECTS := \
 	$(OBJDIR)/QuickTimeDemo.o \
 	$(OBJDIR)/TableDemo.o \
 	$(OBJDIR)/ThreadingDemo.o \
-	$(OBJDIR)/TreeViewDemo.o \
-	$(OBJDIR)/WidgetsDemo.o \
+	$(OBJDIR)/AudioDemo.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -95,7 +95,7 @@ else
 	-@if exist $(subst /,\,$(OBJDIR)) rmdir /s /q $(subst /,\,$(OBJDIR))
 endif
 
-$(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
+$(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -105,17 +105,22 @@ $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
+$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
+$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -160,12 +165,7 @@ $(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
+$(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

@@ -572,6 +572,11 @@ void TreeView::resized()
     handleAsyncUpdate();
 }
 
+void TreeView::enablementChanged()
+{
+    repaint();
+}
+
 void TreeView::moveSelectedRow (int delta)
 {
     if (delta == 0)

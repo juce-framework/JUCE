@@ -38,7 +38,6 @@ using namespace QTOControlLib;
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
-static bool hasLoadedQT = false;
 static bool isQTAvailable = false;
 
 
@@ -95,10 +94,8 @@ QuickTimeMovieComponent::~QuickTimeMovieComponent()
 
 bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
 {
-    if (! hasLoadedQT)
+    if (! isQTAvailable)
     {
-        hasLoadedQT = true;
-
         isQTAvailable = (InitializeQTML (0) == noErr)
                            && (EnterMovies() == noErr);
     }

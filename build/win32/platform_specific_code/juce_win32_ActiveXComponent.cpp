@@ -306,9 +306,10 @@ public:
         if (wasShowing != isShowingNow)
         {
             wasShowing = isShowingNow;
-
             owner->setControlVisible (isShowingNow);
         }
+
+        componentMovedOrResized (true, true);
     }
 
     void componentVisibilityChanged (Component&)

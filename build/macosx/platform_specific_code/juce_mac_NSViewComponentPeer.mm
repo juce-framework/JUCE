@@ -629,8 +629,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 
 static int getKeyCodeFromEvent (NSEvent* ev)
 {
-    String unicode (nsStringToJuce ([ev characters]));
-    String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
+    const String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
     int keyCode = unmodified[0];
 
     if (keyCode == 0x19) // (backwards-tab)

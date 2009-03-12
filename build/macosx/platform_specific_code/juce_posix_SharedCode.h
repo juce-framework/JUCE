@@ -352,8 +352,41 @@ int64 File::getBytesFreeOnVolume() const throw()
 const String juce_getVolumeLabel (const String& filenameOnVolume,
                                   int& volumeSerialNumber) throw()
 {
-    // There is no equivalent on Linux
     volumeSerialNumber = 0;
+
+#if JUCE_MAC
+    struct VolAttrBuf
+    {
+        u_int32_t       length;
+        attrreference_t mountPointRef;
+        char            mountPointSpace [MAXPATHLEN];
+    } attrBuf;
+
+    struct attrlist attrList;
+    zerostruct (attrList);
+    attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
+    attrList.volattr = ATTR_VOL_INFO | ATTR_VOL_NAME;
+
+    File f (filenameOnVolume);
+
+    for (;;)
+    {
+        if (getattrlist ((const char*) f.getFullPathName().toUTF8(),
+                         &attrList, &attrBuf, sizeof(attrBuf), 0) == 0)
+        {
+            return String::fromUTF8 (((const uint8*) &attrBuf.mountPointRef) + attrBuf.mountPointRef.attr_dataoffset,
+                                     (int) attrBuf.mountPointRef.attr_length);
+        }
+
+        const File parent (f.getParentDirectory());
+
+        if (f == parent)
+            break;
+
+        f = parent;
+    }
+#endif
+
     return String::empty;
 }
 

@@ -619,6 +619,8 @@ public:
     bool keyPressed (const KeyPress& key);
     /** @internal */
     void colourChanged();
+    /** @internal */
+    void enablementChanged();
 
     juce_UseDebuggingNewOperator
 

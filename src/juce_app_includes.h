@@ -521,9 +521,6 @@
 #ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_ToolbarItemComponent.h"
 #endif
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_TreeView.h"
-#endif
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_TextEditor.h"
 #endif
@@ -550,6 +547,9 @@
 #endif
 #ifndef __JUCE_LABEL_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_Label.h"
+#endif
+#ifndef __JUCE_TREEVIEW_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_TreeView.h"
 #endif
 #ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/properties/juce_SliderPropertyComponent.h"
