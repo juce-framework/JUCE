@@ -27182,6 +27182,7 @@ private:
     int numChannels, size, allocatedBytes;
     float** channels;
     float* allocatedData;
+    float* preallocatedChannelSpace [32];
 };
 
 #endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
@@ -45854,9 +45855,6 @@ private:
 #ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 
 #endif
@@ -46648,6 +46646,9 @@ private:
 
 #endif
 #ifndef __JUCE_LABEL_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TREEVIEW_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__

@@ -409,6 +409,7 @@ private:
     int numChannels, size, allocatedBytes;
     float** channels;
     float* allocatedData;
+    float* preallocatedChannelSpace [32];
 };
 
 

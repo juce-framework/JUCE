@@ -71,7 +71,11 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
 {
     jassert (numChannels_ > 0);
 
-    channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
+    // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
+    if (numChannels_ < numElementsInArray (preallocatedChannelSpace))
+        channels = (float**) preallocatedChannelSpace;
+    else
+        channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
 
     for (int i = 0; i < numChannels_; ++i)
     {
@@ -160,7 +164,9 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
 AudioSampleBuffer::~AudioSampleBuffer() throw()
 {
     juce_free (allocatedData);
-    juce_free (channels);
+    
+    if (channels != (float**) preallocatedChannelSpace)
+        juce_free (channels);
 }
 
 float* AudioSampleBuffer::getSampleData (const int channelNumber,
