@@ -461,13 +461,12 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
         if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != 0)
         {
-            Component::getCurrentlyFocusedComponent()
-                ->moveKeyboardFocusToSibling (! keyInfo.getModifiers().isShiftDown());
-
-            keyWasUsed = true;
+            Component* const currentlyFocused = Component::getCurrentlyFocusedComponent();
+            currentlyFocused->moveKeyboardFocusToSibling (! keyInfo.getModifiers().isShiftDown());
+            keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
             break;
         }
-
+        
         target = target->parentComponent_;
     }
 

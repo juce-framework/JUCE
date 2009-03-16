@@ -495,10 +495,8 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
             aw->addButton (button1, 1, KeyPress (KeyPress::returnKey, 0, 0), button1ShortCut);
             aw->addButton (button2, 0, KeyPress (KeyPress::escapeKey, 0, 0), button2ShortCut);
         }
-        else
+        else if (numButtons == 3)
         {
-            jassert (numButtons == 3);
-
             aw->addButton (button1, 1, button1ShortCut);
             aw->addButton (button2, 2, button2ShortCut);
             aw->addButton (button3, 0, KeyPress (KeyPress::escapeKey, 0, 0));
@@ -1591,7 +1589,7 @@ ImageEffectFilter* LookAndFeel::getSliderEffect()
 //==============================================================================
 static const TextLayout layoutTooltipText (const String& text) throw()
 {
-    const float tooltipFontSize = 15.0f;
+    const float tooltipFontSize = 12.0f;
     const int maxToolTipWidth = 400;
 
     const Font f (tooltipFontSize, Font::bold);
@@ -1606,7 +1604,7 @@ void LookAndFeel::getTooltipSize (const String& tipText, int& width, int& height
     const TextLayout tl (layoutTooltipText (tipText));
 
     width = tl.getWidth() + 14;
-    height = tl.getHeight() + 10;
+    height = tl.getHeight() + 6;
 }
 
 void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int height)
@@ -1615,8 +1613,10 @@ void LookAndFeel::drawTooltip (Graphics& g, const String& text, int width, int h
 
     const Colour textCol (findColour (TooltipWindow::textColourId));
 
+#if ! JUCE_MAC // The mac windows already have a non-optional 1 pix outline, so don't double it here..
     g.setColour (findColour (TooltipWindow::outlineColourId));
-    g.drawRect (0, 0, width, height);
+    g.drawRect (0, 0, width, height, 1);
+#endif
 
     const TextLayout tl (layoutTooltipText (text));
 

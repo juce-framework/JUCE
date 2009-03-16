@@ -29942,16 +29942,17 @@ private:
 
     const int millisecondsBeforeTipAppears;
     int mouseX, mouseY, mouseClicks;
-    unsigned int lastMouseMoveTime, lastHideTime;
+    unsigned int lastCompChangeTime, lastHideTime;
     Component* lastComponentUnderMouse;
     bool changedCompsSinceShown;
-    String tip;
+    String tipShowing, lastTipUnderMouse;
 
     void paint (Graphics& g);
     void mouseEnter (const MouseEvent& e);
     void timerCallback();
 
-    void showFor (Component* const c);
+    static const String getTipFor (Component* const c);
+    void showFor (Component* const c, const String& tip);
     void hide();
 
     TooltipWindow (const TooltipWindow&);
@@ -43355,6 +43356,11 @@ public:
     */
     virtual void itemSelectionChanged (bool isNowSelected);
 
+    /** The item can return a tool tip string here if it wants to.
+        @see TooltipClient
+    */
+    virtual const String getTooltip();
+
     /** To allow items from your treeview to be dragged-and-dropped, implement this method.
 
         If this returns a non-empty name then when the user drags an item, the treeview will
@@ -45947,6 +45953,7 @@ private:
     double currentValue;
     bool displayPercentage;
     String displayedMessage, currentMessage;
+    uint32 lastCallbackTime;
 
     void timerCallback();
 

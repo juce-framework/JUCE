@@ -101,16 +101,17 @@ private:
     //==============================================================================
     const int millisecondsBeforeTipAppears;
     int mouseX, mouseY, mouseClicks;
-    unsigned int lastMouseMoveTime, lastHideTime;
+    unsigned int lastCompChangeTime, lastHideTime;
     Component* lastComponentUnderMouse;
     bool changedCompsSinceShown;
-    String tip;
+    String tipShowing, lastTipUnderMouse;
 
     void paint (Graphics& g);
     void mouseEnter (const MouseEvent& e);
     void timerCallback();
 
-    void showFor (Component* const c);
+    static const String getTipFor (Component* const c);
+    void showFor (Component* const c, const String& tip);
     void hide();
 
     TooltipWindow (const TooltipWindow&);

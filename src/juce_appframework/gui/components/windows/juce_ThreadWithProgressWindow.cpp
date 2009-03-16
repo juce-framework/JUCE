@@ -50,14 +50,12 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
     timeOutMsWhenCancelling (timeOutMsWhenCancelling_)
 {
     alertWindow = LookAndFeel::getDefaultLookAndFeel()
-                    .createAlertWindow (title, String::empty, cancelButtonText, String::empty, String::empty,
-                                        AlertWindow::NoIcon, 1, 0);
+                    .createAlertWindow (title, String::empty, cancelButtonText, 
+                                        String::empty, String::empty,
+                                        AlertWindow::NoIcon, hasCancelButton ? 1 : 0, 0);
 
     if (hasProgressBar)
         alertWindow->addProgressBarComponent (progress);
-
-    if (hasCancelButton)
-        alertWindow->addButton (cancelButtonText, 1);
 }
 
 ThreadWithProgressWindow::~ThreadWithProgressWindow()
@@ -76,13 +74,13 @@ bool ThreadWithProgressWindow::runThread (const int priority)
         alertWindow->setMessage (message);
     }
 
-    const bool wasCancelled = alertWindow->runModalLoop() != 0;
+    const bool finishedNaturally = alertWindow->runModalLoop() != 0;
 
     stopThread (timeOutMsWhenCancelling);
 
     alertWindow->setVisible (false);
 
-    return ! wasCancelled;
+    return finishedNaturally;
 }
 
 void ThreadWithProgressWindow::setProgress (const double newProgress)
@@ -101,7 +99,7 @@ void ThreadWithProgressWindow::timerCallback()
     if (! isThreadRunning())
     {
         // thread has finished normally..
-        alertWindow->exitModalState (0);
+        alertWindow->exitModalState (1);
         alertWindow->setVisible (false);
     }
     else

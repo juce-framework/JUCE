@@ -119,6 +119,7 @@ private:
     double currentValue;
     bool displayPercentage;
     String displayedMessage, currentMessage;
+    uint32 lastCallbackTime;
 
     void timerCallback();
 

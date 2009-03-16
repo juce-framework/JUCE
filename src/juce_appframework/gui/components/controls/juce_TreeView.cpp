@@ -41,7 +41,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class TreeViewContentComponent  : public Component
+class TreeViewContentComponent  : public Component,
+                                  public TooltipClient
 {
 public:
     TreeViewContentComponent (TreeView* const owner_)
@@ -301,6 +302,20 @@ public:
     void resized()
     {
         owner->itemsChanged();
+    }
+
+    const String getTooltip()
+    {
+        int x, y;
+        getMouseXYRelative (x, y);
+        Rectangle pos;
+
+        TreeViewItem* const item = findItemAt (y, pos);
+
+        if (item != 0)
+            return item->getTooltip();
+        
+        return owner->getTooltip();
     }
 
     //==============================================================================
@@ -978,6 +993,11 @@ void TreeViewItem::itemDoubleClicked (const MouseEvent&)
 
 void TreeViewItem::itemSelectionChanged (bool)
 {
+}
+
+const String TreeViewItem::getTooltip()
+{
+    return String::empty;
 }
 
 const String TreeViewItem::getDragSourceDescription()

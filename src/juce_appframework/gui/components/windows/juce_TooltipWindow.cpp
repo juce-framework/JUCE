@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_TooltipWindow.h"
 #include "../../../../juce_core/basics/juce_Time.h"
+#include "../../../../juce_core/threads/juce_Process.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../juce_Desktop.h"
 
@@ -47,7 +48,6 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
       mouseX (0),
       mouseY (0),
-      lastMouseMoveTime (0),
       lastHideTime (0),
       lastComponentUnderMouse (0),
       changedCompsSinceShown (true)
@@ -68,7 +68,7 @@ TooltipWindow::~TooltipWindow()
 
 void TooltipWindow::paint (Graphics& g)
 {
-    getLookAndFeel().drawTooltip (g, tip, getWidth(), getHeight());
+    getLookAndFeel().drawTooltip (g, tipShowing, getWidth(), getHeight());
 }
 
 void TooltipWindow::mouseEnter (const MouseEvent&)
@@ -76,104 +76,113 @@ void TooltipWindow::mouseEnter (const MouseEvent&)
     hide();
 }
 
-void TooltipWindow::showFor (Component* const c)
+void TooltipWindow::showFor (Component* const c, const String& tip)
 {
-    TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
+    jassert (tip.isNotEmpty());
+    tipShowing = tip;
+    
+    int mx, my;
+    Desktop::getMousePosition (mx, my);
 
-    if (ttc != 0 && ! c->isCurrentlyBlockedByAnotherModalComponent())
-        tip = ttc->getTooltip();
+    if (getParentComponent() != 0)
+        getParentComponent()->globalPositionToRelative (mx, my);
+
+    int x, y, w, h;
+    getLookAndFeel().getTooltipSize (tip, w, h);
+
+    if (mx > getParentWidth() / 2)
+        x = mx - (w + 12);
     else
-        tip = String::empty;
+        x = mx + 24;
 
-    if (tip.isEmpty())
-    {
-        hide();
-    }
+    if (my > getParentHeight() / 2)
+        y = my - (h + 6);
     else
+        y = my + 6;
+
+    setBounds (x, y, w, h);
+    setVisible (true);
+
+    if (getParentComponent() == 0)
     {
-        int mx, my;
-        Desktop::getMousePosition (mx, my);
-
-        if (getParentComponent() != 0)
-            getParentComponent()->globalPositionToRelative (mx, my);
-
-        int x, y, w, h;
-        getLookAndFeel().getTooltipSize (tip, w, h);
-
-        if (mx > getParentWidth() / 2)
-            x = mx - (w + 12);
-        else
-            x = mx + 24;
-
-        if (my > getParentHeight() / 2)
-            y = my - (h + 6);
-        else
-            y = my + 6;
-
-        setBounds (x, y, w, h);
-        setVisible (true);
-
-        if (getParentComponent() == 0)
-        {
-            addToDesktop (ComponentPeer::windowHasDropShadow
-                            | ComponentPeer::windowIsTemporary);
-        }
-
-        toFront (false);
+        addToDesktop (ComponentPeer::windowHasDropShadow
+                        | ComponentPeer::windowIsTemporary);
     }
+
+    toFront (false);
+}
+
+const String TooltipWindow::getTipFor (Component* const c)
+{
+    if (c->isValidComponent() && Process::isForegroundProcess())
+    {
+        TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
+
+        if (ttc != 0 && ! c->isCurrentlyBlockedByAnotherModalComponent())
+            return ttc->getTooltip();
+    }
+
+    return String::empty;
 }
 
 void TooltipWindow::hide()
 {
+    tipShowing = String::empty;
     removeFromDesktop();
     setVisible (false);
 }
 
 void TooltipWindow::timerCallback()
 {
+    const unsigned int now = Time::getApproximateMillisecondCounter();
+    Component* const newComp = Component::getComponentUnderMouse();
+    const String newTip (getTipFor (newComp));
+
+    const bool tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
+    lastComponentUnderMouse = newComp;
+    lastTipUnderMouse = newTip;
+
+    const int clickCount = Desktop::getInstance().getMouseButtonClickCounter();
+    const bool mouseWasClicked = clickCount > mouseClicks;
+    mouseClicks = clickCount;
+
     int mx, my;
     Desktop::getMousePosition (mx, my);
+    const bool mouseMovedQuickly = (abs (mx - mouseX) + abs (my - mouseY) > 12);
+    mouseX = mx;
+    mouseY = my;
 
-    const unsigned int now = Time::getApproximateMillisecondCounter();
-    Component* const underMouse = Component::getComponentUnderMouse();
-    const bool changedComp = (underMouse != lastComponentUnderMouse);
-    lastComponentUnderMouse = underMouse;
+    if (tipChanged || mouseWasClicked || mouseMovedQuickly)
+        lastCompChangeTime = now;
 
-    if (changedComp
-         || abs (mx - mouseX) > 4
-         || abs (my - mouseY) > 4
-         || Desktop::getInstance().getMouseButtonClickCounter() > mouseClicks)
+    if (isVisible() || now < lastHideTime + 500)
     {
-        lastMouseMoveTime = now;
-
-        if (isVisible())
+        // if a tip is currently visible (or has just disappeared), update to a new one
+        // immediately if needed.. 
+        if (newComp == 0 || mouseWasClicked || newTip.isEmpty())
         {
-            lastHideTime = now;
-            hide();
+            if (isVisible())
+            {
+                lastHideTime = now;
+                hide();
+            }
         }
-
-        changedCompsSinceShown = changedCompsSinceShown || changedComp;
-
-        tip = String::empty;
-
-        mouseX = mx;
-        mouseY = my;
-    }
-
-    if (changedCompsSinceShown)
-    {
-        if ((now > lastMouseMoveTime + millisecondsBeforeTipAppears
-              || now < lastHideTime + 500)
-             && ! isVisible())
+        else if (tipChanged)
         {
-            if (underMouse->isValidComponent())
-                showFor (underMouse);
-
-            changedCompsSinceShown = false;
+            showFor (newComp, newTip);
         }
     }
-
-    mouseClicks = Desktop::getInstance().getMouseButtonClickCounter();
+    else
+    {
+        // if there isn't currently a tip, but one is needed, only let it 
+        // appear after a timeout..
+        if (newTip.isNotEmpty()
+             && newTip != tipShowing
+             && now > lastCompChangeTime + millisecondsBeforeTipAppears)
+        {
+            showFor (newComp, newTip);
+        }
+    }
 }
 
 END_JUCE_NAMESPACE

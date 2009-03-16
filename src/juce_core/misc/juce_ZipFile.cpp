@@ -137,7 +137,7 @@ public:
 
     bool isExhausted() throw()
     {
-        return pos >= zipEntryInfo.compressedSize;
+        return headerSize <= 0 || pos >= zipEntryInfo.compressedSize;
     }
 
     int64 getPosition() throw()

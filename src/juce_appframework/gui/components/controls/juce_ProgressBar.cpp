@@ -40,7 +40,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ProgressBar::ProgressBar (double& progress_)
    : progress (progress_),
-     displayPercentage (true)
+     displayPercentage (true),
+     lastCallbackTime (0)
 {
     currentValue = jlimit (0.0, 1.0, progress);
 }
@@ -109,9 +110,14 @@ void ProgressBar::timerCallback()
     {
         if (currentValue < newProgress
              && newProgress >= 0 && newProgress < 1.0
-             && currentValue >= 0 && newProgress < 1.0)
+             && currentValue >= 0 && currentValue < 1.0)
         {
-            newProgress = jmin (currentValue + 0.02, newProgress);
+            const uint32 now = Time::getMillisecondCounter();
+            const int timeSinceLastCallback = (int) (now - lastCallbackTime);
+            lastCallbackTime = now;
+
+            newProgress = jmin (currentValue + 0.00018 * timeSinceLastCallback, 
+                                newProgress);
         }
 
         currentValue = newProgress;

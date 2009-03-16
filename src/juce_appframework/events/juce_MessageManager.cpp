@@ -278,7 +278,7 @@ void MessageManagerLock::init (Thread* const threadToCheck, ThreadPoolJob* const
     {
         if (MessageManager::instance->currentThreadHasLockedMessageManager())
         {
-            locked = true;   // either we're on the message thread, or this it's a re-entrant call.
+            locked = true;   // either we're on the message thread, or this is a re-entrant call.
         }
         else
         {

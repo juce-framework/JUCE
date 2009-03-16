@@ -247,7 +247,6 @@ public:
             addTimer (t);
 
             const ScopedUnlock ul (lock);
-            callbackNeeded = false;
 
             JUCE_TRY
             {

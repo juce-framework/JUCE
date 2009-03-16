@@ -254,12 +254,15 @@ static JuceAppDelegate* juceAppDelegate = 0;
 
 void MessageManager::runDispatchLoop()
 {
-    const ScopedAutoReleasePool pool;
+    if (! quitMessagePosted) // check that the quit message wasn't already posted..
+    {
+        const ScopedAutoReleasePool pool;
 
-    // must only be called by the message thread!
-    jassert (isThisTheMessageThread());
+        // must only be called by the message thread!
+        jassert (isThisTheMessageThread());
 
-    [NSApp run];
+        [NSApp run];
+    }
 }
 
 void MessageManager::stopDispatchLoop()

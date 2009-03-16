@@ -337,6 +337,11 @@ public:
     */
     virtual void itemSelectionChanged (bool isNowSelected);
 
+    /** The item can return a tool tip string here if it wants to.
+        @see TooltipClient
+    */
+    virtual const String getTooltip();
+
     /** To allow items from your treeview to be dragged-and-dropped, implement this method.
 
         If this returns a non-empty name then when the user drags an item, the treeview will
