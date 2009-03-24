@@ -279,7 +279,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
     NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001];
 
-    while (Time::getMillisecondCounter() < endTime)
+    while (Time::getMillisecondCounter() < endTime && ! quitMessagePosted)
     {
         const ScopedAutoReleasePool pool;
 

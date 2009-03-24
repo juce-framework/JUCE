@@ -390,6 +390,26 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
     return String::empty;
 }
 
+
+//==============================================================================
+void juce_runSystemCommand (const String& command)
+{
+    system ((const char*) command.toUTF8());
+}
+
+const String juce_getOutputFromCommand (const String& command)
+{
+    // slight bodge here, as we just pipe the output into a temp file and read it...
+    const File tempFile (File::getSpecialLocation (File::tempDirectory)
+                           .getNonexistentChildFile (String::toHexString (Random::getSystemRandom().nextInt()), ".tmp", false));
+    
+    juce_runSystemCommand (command + " > " + tempFile.getFullPathName());
+    
+    String result (tempFile.loadFileAsString());
+    tempFile.deleteFile();
+    return result;
+}
+
 //==============================================================================
 #if JUCE_64BIT
   #define filedesc ((long long) internal)

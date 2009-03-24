@@ -203,7 +203,7 @@ void Label::showEditor()
     if (editor == 0)
     {
         addAndMakeVisible (editor = createEditorComponent());
-        editor->setText (getText());
+        editor->setText (getText(), false);
         editor->addListener (this);
         editor->grabKeyboardFocus();
         editor->setHighlightedRegion (0, text.length());

@@ -961,8 +961,10 @@ void LookAndFeel::drawPopupMenuBackground (Graphics& g, int width, int height)
     for (int i = 0; i < height; i += 3)
         g.fillRect (0, i, width, 1);
 
+#if ! JUCE_MAC
     g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
+#endif
 }
 
 void LookAndFeel::drawPopupMenuUpDownArrow (Graphics& g,

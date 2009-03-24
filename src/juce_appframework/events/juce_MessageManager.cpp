@@ -163,7 +163,13 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     {
         JUCE_TRY
         {
-            juce_dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0);
+            if (! juce_dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
+            {
+                const int msToWait = (int) (endTime - Time::currentTimeMillis());
+
+                if (msToWait > 0)
+                    Thread::sleep (jmin (5, msToWait));
+            }
         }
         JUCE_CATCH_EXCEPTION
     }

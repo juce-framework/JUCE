@@ -166,7 +166,6 @@ public:
                         {
                             if (activeInputChans[chanNum])
                             {
-                                inputChannelInfo [activeChans].sourceChannelNum = chanNum;
                                 inputChannelInfo [activeChans].streamNum = i;
                                 inputChannelInfo [activeChans].dataOffsetSamples = j;
                                 inputChannelInfo [activeChans].dataStrideSamples = b.mNumberChannels;
@@ -180,7 +179,6 @@ public:
                         {
                             if (activeOutputChans[chanNum])
                             {
-                                outputChannelInfo [activeChans].sourceChannelNum = chanNum;
                                 outputChannelInfo [activeChans].streamNum = i;
                                 outputChannelInfo [activeChans].dataOffsetSamples = j;
                                 outputChannelInfo [activeChans].dataStrideSamples = b.mNumberChannels;
@@ -583,7 +581,7 @@ public:
                 for (i = numInputChans; --i >= 0;)
                 {
                     const CallbackDetailsForChannel& info = inputChannelInfo[i];
-                    float* dest = tempInputBuffers [info.sourceChannelNum];
+                    float* dest = tempInputBuffers [i];
                     const float* src = ((const float*) inInputData->mBuffers[info.streamNum].mData)
                                         + info.dataOffsetSamples;
                     const int stride = info.dataStrideSamples;
@@ -755,7 +753,6 @@ private:
 
     struct CallbackDetailsForChannel
     {
-        int sourceChannelNum;
         int streamNum;
         int dataOffsetSamples;
         int dataStrideSamples;

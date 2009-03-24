@@ -52,6 +52,21 @@ void PlatformUtilities::beep()
 }
 
 //==============================================================================
+void PlatformUtilities::addItemToDock (const File& file)
+{
+    // check that it's not already there...
+    if (! juce_getOutputFromCommand ("defaults read com.apple.dock persistent-apps")
+            .containsIgnoreCase (file.getFullPathName()))
+    {
+        juce_runSystemCommand ("defaults write com.apple.dock persistent-apps -array-add \"<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>"
+                                 + file.getFullPathName() + "</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>\"");
+
+        juce_runSystemCommand ("osascript -e \"tell application \\\"Dock\\\" to quit\"");
+    }
+}
+
+
+//==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 bool AlertWindow::showNativeDialogBox (const String& title,
@@ -242,6 +257,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 
     jassert (monitorCoords.size() > 0);
 }
+
 
 #endif
 

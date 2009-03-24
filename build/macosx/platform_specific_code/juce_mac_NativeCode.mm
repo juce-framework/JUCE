@@ -70,6 +70,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
 #include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
 #include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
+#include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
 #include "../../../src/juce_appframework/audio/audio_sources/juce_AudioSource.h"
 #include "../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.h"
 #include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"

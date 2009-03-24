@@ -77,6 +77,8 @@ public:
     /** MAC ONLY - Returns true if this file is actually a bundle. */
     static bool isBundle (const String& filename);
 
+    /** MAC ONLY - Adds an item to the dock */
+    static void addItemToDock (const File& file);
 #endif
 
 
