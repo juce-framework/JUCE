@@ -575,8 +575,8 @@ void PathStrokeType::createDashedStroke (Path& destPath,
     for (;;)
     {
         const bool isSolid = ((dashNum & 1) == 0);
-
         const float dashLen = dashLengths [dashNum++ % numDashLengths];
+
         jassert (dashLen > 0); // must be a positive increment!
         if (dashLen <= 0)
             break;
@@ -595,19 +595,15 @@ void PathStrokeType::createDashedStroke (Path& destPath,
             }
 
             if (isSolid && ! first)
-            {
                 newDestPath.lineTo (it.x1, it.y1);
-            }
             else
-            {
                 newDestPath.startNewSubPath (it.x1, it.y1);
-                first = false;
-            }
 
             dx = it.x2 - it.x1;
             dy = it.y2 - it.y1;
             lineLen = juce_hypotf (dx, dy);
             lineEndPos += lineLen;
+            first = it.closesSubPath;
         }
 
         const float alpha = (pos - (lineEndPos - lineLen)) / lineLen;

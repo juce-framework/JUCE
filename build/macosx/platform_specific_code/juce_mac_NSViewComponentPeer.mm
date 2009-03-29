@@ -180,6 +180,8 @@ public:
     virtual void redirectMovedOrResized();
     virtual NSRect constrainRect (NSRect r);
 
+    static void showArrowCursorIfNeeded();
+    
     //==============================================================================
     virtual void viewFocusGain();
     virtual void viewFocusLoss();
@@ -456,6 +458,7 @@ END_JUCE_NAMESPACE
         return proposedFrameSize;
 
     NSRect frameRect = [self frame];
+    frameRect.origin.y -= proposedFrameSize.height - frameRect.size.height;
     frameRect.size = proposedFrameSize;
 
     if (owner != 0)
@@ -1237,6 +1240,7 @@ void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
     getMousePos (ev, view, x, y);
 
     handleMouseUp (oldMods, x, y, getMouseTime (ev));
+    showArrowCursorIfNeeded();
 }
 
 void NSViewComponentPeer::redirectMouseDrag (NSEvent* ev)
@@ -1256,6 +1260,7 @@ void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
     getMousePos (ev, view, x, y);
 
     handleMouseMove (x, y, getMouseTime (ev));
+    showArrowCursorIfNeeded();
 }
 
 void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
@@ -1283,6 +1288,18 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
     handleMouseWheel (roundFloatToInt ([ev deltaX] * 10.0f),
                       roundFloatToInt ([ev deltaY] * 10.0f),
                       getMouseTime (ev));
+}
+
+void NSViewComponentPeer::showArrowCursorIfNeeded()
+{
+    if (Component::getComponentUnderMouse() == 0)
+    {
+        int mx, my;
+        Desktop::getInstance().getMousePosition (mx, my);
+        
+        if (Desktop::getInstance().findComponentAt (mx, my) == 0)
+            [[NSCursor arrowCursor] set];
+    }
 }
 
 //==============================================================================
