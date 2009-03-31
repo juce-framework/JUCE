@@ -116,9 +116,16 @@ make it easier to update to the latest code.
     DAE.lib, DigiExt.lib, DSI.lib, PlugInLib.lib.
 - In XCode: After installing the Digidesign SDK, make sure you've run the config_SDK_for_Mac 
   command in the SDK's root directory. This sets up some of the tools that it needs.
+- In XCode: If you're using the Digi files CommonDebugSettings.xcconfig and CommonReleaseSettings.xcconfig,
+  then you'll probably have to remove the "-x c++" option from their OTHER_CFLAGS setting, because
+  that prevents it compiling obj-C. Also, you might need to comment-out the GCC_PREFIX_HEADER setting,
+  unless you can persuade precompiled headers to work (I've never managed to get them working myself..)
+  You'll also probably want to add a "MacBag" setting to these files, rather than putting it into
+  your project - e.g. "MacBag = /Users/jules/SDKs/PT_80_SDK/MacBag"
 
 
 -----------------------------------------------------------------------------------------------------
+
                         Choosing the formats to build
                         =============================
                         

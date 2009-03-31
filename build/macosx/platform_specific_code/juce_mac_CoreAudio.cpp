@@ -124,22 +124,21 @@ public:
         delete inputDevice;
     }
 
-    void setTempBufferSize (const int numChannels, const int numSamples)
+    void allocateTempBuffers()
     {
+        const int tempBufSize = bufferSize + 4;
         juce_free (audioBuffer);
-
-        audioBuffer = (float*) juce_calloc (32 + numChannels * numSamples * sizeof (float));
+        audioBuffer = (float*) juce_calloc ((numInputChans + numOutputChans) * tempBufSize * sizeof (float));
 
         zeromem (tempInputBuffers, sizeof (tempInputBuffers));
         zeromem (tempOutputBuffers, sizeof (tempOutputBuffers));
 
-        int count = 0;
-        int i;
+        int i, count = 0;
         for (i = 0; i < numInputChans; ++i)
-            tempInputBuffers[i] = audioBuffer + count++ * numSamples;
+            tempInputBuffers[i] = audioBuffer + count++ * tempBufSize;
 
         for (i = 0; i < numOutputChans; ++i)
-            tempOutputBuffers[i] = audioBuffer + count++ * numSamples;
+            tempOutputBuffers[i] = audioBuffer + count++ * tempBufSize;
     }
 
     // returns the number of actual available channels
@@ -218,9 +217,7 @@ public:
         if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyBufferFrameSize, &size, &framesPerBuf)))
         {
             bufferSize = framesPerBuf;
-
-            if (bufferSize > 0)
-                setTempBufferSize (numInputChans + numOutputChans, bufferSize);
+            allocateTempBuffers();
         }
 
         bufferSizes.clear();
@@ -610,6 +607,11 @@ public:
                 else
                 {
                     jassert (inputDevice->bufferSize == bufferSize);
+
+                    // Sometimes the two linked devices seem to get their callbacks in
+                    // parallel, so we need to lock both devices to stop the input data being
+                    // changed while inside our callback..
+                    const ScopedLock sl (inputDevice->callbackLock);
 
                     callback->audioDeviceIOCallback ((const float**) inputDevice->tempInputBuffers,
                                                      inputDevice->numInputChans,
