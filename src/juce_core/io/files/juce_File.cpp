@@ -111,7 +111,7 @@ static const String parseAbsolutePath (String path) throw()
 
 #if JUCE_WIN32
     // Windows..
-    path = path.replaceCharacter (T('/'), T('\\')).unquoted();
+    path = path.replaceCharacter (T('/'), T('\\'));
 
     if (path.startsWithChar (File::separator))
     {
@@ -139,7 +139,7 @@ static const String parseAbsolutePath (String path) throw()
     }
 #else
     // Mac or Linux..
-    path = path.replaceCharacter (T('\\'), T('/')).unquoted();
+    path = path.replaceCharacter (T('\\'), T('/'));
 
     if (path.startsWithChar (T('~')))
     {

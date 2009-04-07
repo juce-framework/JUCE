@@ -429,6 +429,13 @@ static int64 getMouseEventTime() throw()
     return eventTimeOffset + thisMessageTime;
 }
 
+static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* userData)
+{
+    if (MessageManager::getInstance()->currentThreadHasLockedMessageManager())
+        return callback (userData);
+    else
+        MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
+}
 
 //==============================================================================
 class Win32ComponentPeer  : public ComponentPeer
@@ -447,8 +454,7 @@ public:
           taskBarIcon (0),
           dropTarget (0)
     {
-        MessageManager::getInstance()
-           ->callFunctionOnMessageThread (&createWindowCallback, (void*) this);
+        callFunctionIfNotLocked (&createWindowCallback, (void*) this);
 
         setTitle (component->getName());
 
@@ -475,8 +481,7 @@ public:
         // before it's destroyed
         SetWindowLongPtr (hwnd, GWLP_USERDATA, 0);
 
-        MessageManager::getInstance()
-            ->callFunctionOnMessageThread (&destroyWindowCallback, (void*) hwnd);
+        callFunctionIfNotLocked (&destroyWindowCallback, (void*) hwnd);
 
         if (currentWindowIcon != 0)
             DestroyIcon (currentWindowIcon);
@@ -732,10 +737,9 @@ public:
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
 
-        MessageManager::getInstance()
-            ->callFunctionOnMessageThread (makeActive ? &toFrontCallback1
-                                                      : &toFrontCallback2,
-                                           (void*) hwnd);
+        callFunctionIfNotLocked (makeActive ? &toFrontCallback1
+                                            : &toFrontCallback2,
+                                 (void*) hwnd);
 
         shouldDeactivateTitleBar = oldDeactivate;
 
@@ -763,8 +767,7 @@ public:
 
     bool isFocused() const
     {
-        return MessageManager::getInstance()
-                 ->callFunctionOnMessageThread (&getFocusCallback, 0) == (void*) hwnd;
+        return callFunctionIfNotLocked (&getFocusCallback, 0) == (void*) hwnd;
     }
 
     void grabFocus()
@@ -772,8 +775,7 @@ public:
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
 
-        MessageManager::getInstance()
-            ->callFunctionOnMessageThread (&setFocusCallback, (void*) hwnd);
+        callFunctionIfNotLocked (&setFocusCallback, (void*) hwnd);
 
         shouldDeactivateTitleBar = oldDeactivate;
     }

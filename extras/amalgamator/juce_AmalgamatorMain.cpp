@@ -308,8 +308,8 @@ int main (int argc, char* argv[])
 
     if (argc == 4)
     {
-        const File templateFile (File::getCurrentWorkingDirectory().getChildFile (argv[1]));
-        const File targetFile (File::getCurrentWorkingDirectory().getChildFile (argv[2]));
+        const File templateFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[1]).unquoted()));
+        const File targetFile (File::getCurrentWorkingDirectory().getChildFile (String (argv[2]).unquoted()));
         const String wildcard (String (argv[3]).unquoted());
         StringArray alreadyIncludedFiles, includesToIgnore;
 
@@ -317,7 +317,7 @@ int main (int argc, char* argv[])
     }
     else if (argc == 2)
     {
-        const File juceFolder (File::getCurrentWorkingDirectory().getChildFile (argv[1]));
+        const File juceFolder (File::getCurrentWorkingDirectory().getChildFile (String (argv[1]).unquoted()));
         mungeJuce (juceFolder);
     }
     else
