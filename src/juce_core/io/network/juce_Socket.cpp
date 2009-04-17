@@ -118,7 +118,8 @@ static bool bindSocketToPort (const int handle, const int port) throw()
 
 static int readSocket (const int handle,
                        void* const destBuffer, const int maxBytesToRead,
-                       bool volatile& connected) throw()
+                       bool volatile& connected,
+                       const bool blockUntilSpecifiedAmountHasArrived) throw()
 {
     int bytesRead = 0;
 
@@ -145,6 +146,9 @@ static int readSocket (const int handle,
         }
 
         bytesRead += bytesThisTime;
+
+        if (! blockUntilSpecifiedAmountHasArrived)
+            break;
     }
 
     return bytesRead;
@@ -335,9 +339,9 @@ StreamingSocket::~StreamingSocket()
 }
 
 //==============================================================================
-int StreamingSocket::read (void* destBuffer, const int maxBytesToRead)
+int StreamingSocket::read (void* destBuffer, const int maxBytesToRead, const bool blockUntilSpecifiedAmountHasArrived)
 {
-    return (connected && ! isListener) ? readSocket (handle, destBuffer, maxBytesToRead, connected)
+    return (connected && ! isListener) ? readSocket (handle, destBuffer, maxBytesToRead, connected, blockUntilSpecifiedAmountHasArrived)
                                        : -1;
 }
 
@@ -611,9 +615,9 @@ int DatagramSocket::waitUntilReady (const bool readyForReading,
                      : -1;
 }
 
-int DatagramSocket::read (void* destBuffer, const int maxBytesToRead)
+int DatagramSocket::read (void* destBuffer, const int maxBytesToRead, const bool blockUntilSpecifiedAmountHasArrived)
 {
-    return connected ? readSocket (handle, destBuffer, maxBytesToRead, connected)
+    return connected ? readSocket (handle, destBuffer, maxBytesToRead, connected, blockUntilSpecifiedAmountHasArrived)
                      : -1;
 }
 

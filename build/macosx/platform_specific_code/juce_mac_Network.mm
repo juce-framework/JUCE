@@ -203,7 +203,6 @@ public:
         : Thread (T("http connection")),
           owner (owner_)
     {
-        startThread();
     }
 
     ~JuceURLConnectionMessageThread()
@@ -241,6 +240,7 @@ public:
     hasFinished = false;
 
     runLoopThread = new JuceURLConnectionMessageThread (self);
+    runLoopThread->startThread();
 
     while (runLoopThread->isThreadRunning() && ! initialised)
     {
@@ -268,7 +268,7 @@ public:
 - (void) createConnection
 {
     connection = [[NSURLConnection alloc] initWithRequest: request
-                                                 delegate: self];
+                                                 delegate: [self retain]];
 
     if (connection == nil)
         runLoopThread->signalThreadShouldExit();

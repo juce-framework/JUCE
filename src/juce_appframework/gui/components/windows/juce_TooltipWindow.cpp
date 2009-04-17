@@ -80,7 +80,7 @@ void TooltipWindow::showFor (Component* const c, const String& tip)
 {
     jassert (tip.isNotEmpty());
     tipShowing = tip;
-    
+
     int mx, my;
     Desktop::getMousePosition (mx, my);
 
@@ -158,7 +158,7 @@ void TooltipWindow::timerCallback()
     if (isVisible() || now < lastHideTime + 500)
     {
         // if a tip is currently visible (or has just disappeared), update to a new one
-        // immediately if needed.. 
+        // immediately if needed..
         if (newComp == 0 || mouseWasClicked || newTip.isEmpty())
         {
             if (isVisible())
@@ -174,7 +174,7 @@ void TooltipWindow::timerCallback()
     }
     else
     {
-        // if there isn't currently a tip, but one is needed, only let it 
+        // if there isn't currently a tip, but one is needed, only let it
         // appear after a timeout..
         if (newTip.isNotEmpty()
              && newTip != tipShowing

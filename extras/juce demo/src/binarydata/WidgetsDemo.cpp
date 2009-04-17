@@ -990,7 +990,7 @@ public:
             // must check this as often as possible, because this is
             // how we know if the user's pressed 'cancel'
             if (threadShouldExit())
-                break;
+                return;
 
             // this will update the progress bar on the dialog box
             setProgress (i / (double) thingsToDo);
@@ -1002,7 +1002,7 @@ public:
 
         setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
         setStatusMessage (T("Finishing off the last few bits and pieces!"));
-        wait (3000);
+        wait (2000);
     }
 };
 

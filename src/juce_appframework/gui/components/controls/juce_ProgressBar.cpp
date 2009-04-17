@@ -116,7 +116,7 @@ void ProgressBar::timerCallback()
             const int timeSinceLastCallback = (int) (now - lastCallbackTime);
             lastCallbackTime = now;
 
-            newProgress = jmin (currentValue + 0.00018 * timeSinceLastCallback, 
+            newProgress = jmin (currentValue + 0.00018 * timeSinceLastCallback,
                                 newProgress);
         }
 

@@ -181,7 +181,7 @@ public:
     virtual NSRect constrainRect (NSRect r);
 
     static void showArrowCursorIfNeeded();
-    
+
     //==============================================================================
     virtual void viewFocusGain();
     virtual void viewFocusLoss();
@@ -636,7 +636,9 @@ static int getKeyCodeFromEvent (NSEvent* ev)
     int keyCode = unmodified[0];
 
     if (keyCode == 0x19) // (backwards-tab)
-        keyCode = 9;
+        keyCode = '\t';
+    else if (keyCode == 0x03) // (enter)
+        keyCode = '\r';
 
     return keyCode;
 }
@@ -1296,7 +1298,7 @@ void NSViewComponentPeer::showArrowCursorIfNeeded()
     {
         int mx, my;
         Desktop::getInstance().getMousePosition (mx, my);
-        
+
         if (Desktop::getInstance().findComponentAt (mx, my) == 0)
             [[NSCursor arrowCursor] set];
     }

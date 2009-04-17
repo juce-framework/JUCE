@@ -164,7 +164,7 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
 AudioSampleBuffer::~AudioSampleBuffer() throw()
 {
     juce_free (allocatedData);
-    
+
     if (channels != (float**) preallocatedChannelSpace)
         juce_free (channels);
 }

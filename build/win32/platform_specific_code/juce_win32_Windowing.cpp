@@ -434,7 +434,7 @@ static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* u
     if (MessageManager::getInstance()->currentThreadHasLockedMessageManager())
         return callback (userData);
     else
-        MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
+        return MessageManager::getInstance()->callFunctionOnMessageThread (callback, userData);
 }
 
 //==============================================================================

@@ -466,7 +466,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
             keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
             break;
         }
-        
+
         target = target->parentComponent_;
     }
 

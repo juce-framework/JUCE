@@ -112,14 +112,18 @@ public:
     int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
-    /** Reads bytes from the socket (blocking).
+    /** Reads bytes from the socket.
 
-        Note that this method will block unless you have checked the socket is ready
-        for reading before calling it (see the waitUntilReady() method).
+        If blockUntilSpecifiedAmountHasArrived is true, the method will block until
+        maxBytesToRead bytes have been read, (or until an error occurs). If this
+        flag is false, the method will return as much data as is currently available
+        without blocking.
 
         @returns the number of bytes read, or -1 if there was an error.
+        @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead);
+    int read (void* destBuffer, const int maxBytesToRead,
+              const bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 
@@ -249,14 +253,18 @@ public:
     int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
-    /** Reads bytes from the socket (blocking).
+    /** Reads bytes from the socket.
 
-        Note that this method will block unless you have checked the socket is ready
-        for reading before calling it (see the waitUntilReady() method).
+        If blockUntilSpecifiedAmountHasArrived is true, the method will block until
+        maxBytesToRead bytes have been read, (or until an error occurs). If this
+        flag is false, the method will return as much data as is currently available
+        without blocking.
 
         @returns the number of bytes read, or -1 if there was an error.
+        @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead);
+    int read (void* destBuffer, const int maxBytesToRead,
+              const bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 

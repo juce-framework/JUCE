@@ -55,7 +55,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/io/files/juce_FileOutputStream.h"
 #include "../../../src/juce_core/basics/juce_SystemStats.h"
 #include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/basics/juce_Random.h" 
+#include "../../../src/juce_core/basics/juce_Random.h"
 #include "../../../src/juce_core/io/network/juce_URL.h"
 #include "../../../src/juce_core/io/files/juce_NamedPipe.h"
 #include "../../../src/juce_core/threads/juce_InterProcessLock.h"

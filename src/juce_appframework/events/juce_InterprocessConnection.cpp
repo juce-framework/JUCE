@@ -289,7 +289,7 @@ bool InterprocessConnection::readNextMessageInt()
     const int maximumMessageSize = 1024 * 1024 * 10; // sanity check
 
     uint32 messageHeader[2];
-    const int bytes = (socket != 0) ? socket->read (messageHeader, sizeof (messageHeader))
+    const int bytes = (socket != 0) ? socket->read (messageHeader, sizeof (messageHeader), true)
                                     : pipe->read (messageHeader, sizeof (messageHeader), pipeReceiveMessageTimeout);
 
     if (bytes == sizeof (messageHeader)
@@ -308,7 +308,7 @@ bool InterprocessConnection::readNextMessageInt()
                     return false;
 
                 const int numThisTime = jmin (bytesInMessage, 65536);
-                const int bytesIn = (socket != 0) ? socket->read (((char*) messageData.getData()) + bytesRead, numThisTime)
+                const int bytesIn = (socket != 0) ? socket->read (((char*) messageData.getData()) + bytesRead, numThisTime, true)
                                                   : pipe->read (((char*) messageData.getData()) + bytesRead, numThisTime,
                                                                 pipeReceiveMessageTimeout);
 

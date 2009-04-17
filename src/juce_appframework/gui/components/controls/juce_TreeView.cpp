@@ -314,7 +314,7 @@ public:
 
         if (item != 0)
             return item->getTooltip();
-        
+
         return owner->getTooltip();
     }
 
