@@ -59,6 +59,12 @@
 #ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
  #include "juce_appframework/application/juce_SystemClipboard.h"
 #endif
+#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
+ #include "juce_appframework/audio/midi/juce_MidiBuffer.h"
+#endif
+#ifndef __JUCE_MIDIFILE_JUCEHEADER__
+ #include "juce_appframework/audio/midi/juce_MidiFile.h"
+#endif
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
  #include "juce_appframework/audio/midi/juce_MidiKeyboardState.h"
 #endif
@@ -70,12 +76,6 @@
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
  #include "juce_appframework/audio/midi/juce_MidiMessageSequence.h"
-#endif
-#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
- #include "juce_appframework/audio/midi/juce_MidiBuffer.h"
-#endif
-#ifndef __JUCE_MIDIFILE_JUCEHEADER__
- #include "juce_appframework/audio/midi/juce_MidiFile.h"
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
  #include "juce_appframework/audio/dsp/juce_AudioDataConverters.h"
@@ -140,9 +140,6 @@
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
  #include "juce_appframework/audio/audio_sources/juce_ToneGeneratorAudioSource.h"
 #endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
- #include "juce_appframework/audio/devices/juce_MidiOutput.h"
-#endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
  #include "juce_appframework/audio/devices/juce_AudioDeviceManager.h"
 #endif
@@ -155,17 +152,14 @@
 #ifndef __JUCE_MIDIINPUT_JUCEHEADER__
  #include "juce_appframework/audio/devices/juce_MidiInput.h"
 #endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
+ #include "juce_appframework/audio/devices/juce_MidiOutput.h"
+#endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
  #include "juce_appframework/audio/synthesisers/juce_Sampler.h"
 #endif
 #ifndef __JUCE_SYNTHESISER_JUCEHEADER__
  #include "juce_appframework/audio/synthesisers/juce_Synthesiser.h"
-#endif
-#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
- #include "juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
-#endif
-#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_AudioUnitPluginFormat.h"
@@ -175,6 +169,12 @@
 #endif
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/formats/juce_LADSPAPluginFormat.h"
+#endif
+#ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
+ #include "juce_appframework/audio/plugins/formats/juce_VSTMidiEventList.h"
+#endif
+#ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.h"
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/juce_AudioPluginFormat.h"
@@ -197,17 +197,8 @@
 #ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
  #include "juce_appframework/audio/plugins/juce_PluginListComponent.h"
 #endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h"
-#endif
 #ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.h"
-#endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
- #include "juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
 #endif
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_AudioCDBurner.h"
@@ -239,26 +230,14 @@
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif
-#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
- #include "juce_appframework/events/juce_InterprocessConnectionServer.h"
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
 #endif
-#ifndef __JUCE_MESSAGE_JUCEHEADER__
- #include "juce_appframework/events/juce_Message.h"
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
 #endif
-#ifndef __JUCE_TIMER_JUCEHEADER__
- #include "juce_appframework/events/juce_Timer.h"
-#endif
-#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
- #include "juce_appframework/events/juce_MessageListener.h"
-#endif
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
- #include "juce_appframework/events/juce_MultiTimer.h"
-#endif
-#ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
- #include "juce_appframework/events/juce_MessageManager.h"
-#endif
-#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
- #include "juce_appframework/events/juce_CallbackMessage.h"
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+ #include "juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.h"
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
  #include "juce_appframework/events/juce_ActionBroadcaster.h"
@@ -272,6 +251,9 @@
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
  #include "juce_appframework/events/juce_AsyncUpdater.h"
 #endif
+#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+ #include "juce_appframework/events/juce_CallbackMessage.h"
+#endif
 #ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
  #include "juce_appframework/events/juce_ChangeBroadcaster.h"
 #endif
@@ -283,6 +265,24 @@
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
  #include "juce_appframework/events/juce_InterprocessConnection.h"
+#endif
+#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+ #include "juce_appframework/events/juce_InterprocessConnectionServer.h"
+#endif
+#ifndef __JUCE_MESSAGE_JUCEHEADER__
+ #include "juce_appframework/events/juce_Message.h"
+#endif
+#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
+ #include "juce_appframework/events/juce_MessageListener.h"
+#endif
+#ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
+ #include "juce_appframework/events/juce_MessageManager.h"
+#endif
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+ #include "juce_appframework/events/juce_MultiTimer.h"
+#endif
+#ifndef __JUCE_TIMER_JUCEHEADER__
+ #include "juce_appframework/events/juce_Timer.h"
 #endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
  #include "juce_appframework/gui/graphics/brushes/juce_Brush.h"
@@ -341,6 +341,9 @@
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
  #include "juce_appframework/gui/graphics/contexts/juce_RectanglePlacement.h"
 #endif
+#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
+ #include "juce_appframework/gui/graphics/geometry/juce_AffineTransform.h"
+#endif
 #ifndef __JUCE_BORDERSIZE_JUCEHEADER__
  #include "juce_appframework/gui/graphics/geometry/juce_BorderSize.h"
 #endif
@@ -362,14 +365,11 @@
 #ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
  #include "juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.h"
 #endif
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
- #include "juce_appframework/gui/graphics/geometry/juce_RectangleList.h"
-#endif
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
  #include "juce_appframework/gui/graphics/geometry/juce_Rectangle.h"
 #endif
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
- #include "juce_appframework/gui/graphics/geometry/juce_AffineTransform.h"
+#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
+ #include "juce_appframework/gui/graphics/geometry/juce_RectangleList.h"
 #endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
  #include "juce_appframework/gui/graphics/imaging/juce_Image.h"
@@ -398,6 +398,9 @@
 #ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
  #include "juce_appframework/gui/graphics/drawables/juce_DrawableText.h"
 #endif
+#ifndef __JUCE_COMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/juce_Component.h"
+#endif
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
  #include "juce_appframework/gui/components/juce_ComponentDeletionWatcher.h"
 #endif
@@ -407,8 +410,14 @@
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
  #include "juce_appframework/gui/components/juce_Desktop.h"
 #endif
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/juce_Component.h"
+#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
+ #include "juce_appframework/gui/components/buttons/juce_ArrowButton.h"
+#endif
+#ifndef __JUCE_BUTTON_JUCEHEADER__
+ #include "juce_appframework/gui/components/buttons/juce_Button.h"
+#endif
+#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+ #include "juce_appframework/gui/components/buttons/juce_DrawableButton.h"
 #endif
 #ifndef __JUCE_HYPERLINKBUTTON_JUCEHEADER__
  #include "juce_appframework/gui/components/buttons/juce_HyperlinkButton.h"
@@ -427,15 +436,6 @@
 #endif
 #ifndef __JUCE_TOOLBARBUTTON_JUCEHEADER__
  #include "juce_appframework/gui/components/buttons/juce_ToolbarButton.h"
-#endif
-#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
- #include "juce_appframework/gui/components/buttons/juce_ArrowButton.h"
-#endif
-#ifndef __JUCE_BUTTON_JUCEHEADER__
- #include "juce_appframework/gui/components/buttons/juce_Button.h"
-#endif
-#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
- #include "juce_appframework/gui/components/buttons/juce_DrawableButton.h"
 #endif
 #ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
  #include "juce_appframework/gui/graphics/effects/juce_DropShadowEffect.h"
@@ -479,6 +479,12 @@
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/menus/juce_PopupMenuCustomComponent.h"
 #endif
+#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+ #include "juce_appframework/gui/components/mouse/juce_ComponentDragger.h"
+#endif
+#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
+ #include "juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h"
+#endif
 #ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
  #include "juce_appframework/gui/components/mouse/juce_DragAndDropTarget.h"
 #endif
@@ -503,29 +509,11 @@
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
  #include "juce_appframework/gui/components/mouse/juce_TooltipClient.h"
 #endif
-#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
- #include "juce_appframework/gui/components/mouse/juce_ComponentDragger.h"
-#endif
-#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
- #include "juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h"
-#endif
-#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_ToolbarItemFactory.h"
-#endif
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_ToolbarItemPalette.h"
-#endif
-#ifndef __JUCE_SLIDER_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_Slider.h"
-#endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_ToolbarItemComponent.h"
-#endif
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_TextEditor.h"
-#endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_ComboBox.h"
+#endif
+#ifndef __JUCE_LABEL_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_Label.h"
 #endif
 #ifndef __JUCE_LISTBOX_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_ListBox.h"
@@ -533,29 +521,35 @@
 #ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_ProgressBar.h"
 #endif
+#ifndef __JUCE_SLIDER_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_Slider.h"
+#endif
 #ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_SliderListener.h"
-#endif
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_TableListBox.h"
 #endif
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_TableHeaderComponent.h"
 #endif
+#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_TableListBox.h"
+#endif
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_TextEditor.h"
+#endif
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_Toolbar.h"
 #endif
-#ifndef __JUCE_LABEL_JUCEHEADER__
- #include "juce_appframework/gui/components/controls/juce_Label.h"
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_ToolbarItemComponent.h"
+#endif
+#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_ToolbarItemFactory.h"
+#endif
+#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+ #include "juce_appframework/gui/components/controls/juce_ToolbarItemPalette.h"
 #endif
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
  #include "juce_appframework/gui/components/controls/juce_TreeView.h"
-#endif
-#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/properties/juce_SliderPropertyComponent.h"
-#endif
-#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/properties/juce_TextPropertyComponent.h"
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/properties/juce_BooleanPropertyComponent.h"
@@ -572,38 +566,11 @@
 #ifndef __JUCE_PROPERTYPANEL_JUCEHEADER__
  #include "juce_appframework/gui/components/properties/juce_PropertyPanel.h"
 #endif
-#ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_MultiDocumentPanel.h"
+#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/properties/juce_SliderPropertyComponent.h"
 #endif
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
-#endif
-#ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_ResizableBorderComponent.h"
-#endif
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_ScrollBar.h"
-#endif
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_TabbedButtonBar.h"
-#endif
-#ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_ResizableCornerComponent.h"
-#endif
-#ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_StretchableLayoutManager.h"
-#endif
-#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_TabbedComponent.h"
-#endif
-#ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.h"
-#endif
-#ifndef __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_StretchableObjectResizer.h"
-#endif
-#ifndef __JUCE_VIEWPORT_JUCEHEADER__
- #include "juce_appframework/gui/components/layout/juce_Viewport.h"
+#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/properties/juce_TextPropertyComponent.h"
 #endif
 #ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
  #include "juce_appframework/gui/components/layout/juce_ComponentAnimator.h"
@@ -611,26 +578,41 @@
 #ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
  #include "juce_appframework/gui/components/layout/juce_ComponentBoundsConstrainer.h"
 #endif
+#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_ComponentMovementWatcher.h"
+#endif
 #ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/layout/juce_GroupComponent.h"
 #endif
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_FilenameComponent.h"
+#ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_MultiDocumentPanel.h"
 #endif
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h"
+#ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_ResizableBorderComponent.h"
 #endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.h"
+#ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_ResizableCornerComponent.h"
 #endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h"
+#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_ScrollBar.h"
 #endif
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.h"
+#ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_StretchableLayoutManager.h"
 #endif
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.h"
+#ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_StretchableLayoutResizerBar.h"
+#endif
+#ifndef __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_StretchableObjectResizer.h"
+#endif
+#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_TabbedButtonBar.h"
+#endif
+#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_TabbedComponent.h"
+#endif
+#ifndef __JUCE_VIEWPORT_JUCEHEADER__
+ #include "juce_appframework/gui/components/layout/juce_Viewport.h"
 #endif
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.h"
@@ -656,6 +638,24 @@
 #ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/filebrowser/juce_FileListComponent.h"
 #endif
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FilenameComponent.h"
+#endif
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FilePreviewComponent.h"
+#endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FileSearchPathListComponent.h"
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_FileTreeComponent.h"
+#endif
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_ImagePreviewComponent.h"
+#endif
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+ #include "juce_appframework/gui/components/filebrowser/juce_WildcardFileFilter.h"
+#endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
  #include "juce_appframework/gui/components/windows/juce_AlertWindow.h"
 #endif
@@ -674,20 +674,14 @@
 #ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
  #include "juce_appframework/gui/components/windows/juce_SplashScreen.h"
 #endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
- #include "juce_appframework/gui/components/windows/juce_TooltipWindow.h"
-#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
  #include "juce_appframework/gui/components/windows/juce_ThreadWithProgressWindow.h"
 #endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+ #include "juce_appframework/gui/components/windows/juce_TooltipWindow.h"
+#endif
 #ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
  #include "juce_appframework/gui/components/windows/juce_TopLevelWindow.h"
-#endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h"
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
- #include "juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/special/juce_ActiveXControlComponent.h"
@@ -724,6 +718,12 @@
 #endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
  #include "juce_appframework/gui/components/special/juce_QuickTimeMovieComponent.h"
+#endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h"
+#endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+ #include "juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
  #include "juce_appframework/gui/components/lookandfeel/juce_LookAndFeel.h"

@@ -247,14 +247,28 @@ public:
     void restartLastAudioDevice();
 
     //==============================================================================
-    /** Gives the manager an audio callback to use.
+    /** Registers an audio callback to be used.
 
         The manager will redirect callbacks from whatever audio device is currently
-        in use to this callback object.
+        in use to all registered callback objects. If more than one callback is
+        active, they will all be given the same input data, and their outputs will
+        be summed.
 
-        You can pass 0 in here to stop callbacks being made.
+        If necessary, this method will invoke audioDeviceAboutToStart() on the callback
+        object before returning.
+
+        To remove a callback, use removeAudioCallback().
     */
-    void setAudioCallback (AudioIODeviceCallback* newCallback);
+    void addAudioCallback (AudioIODeviceCallback* newCallback);
+
+    /** Deregisters a previously added callback.
+
+        If necessary, this method will invoke audioDeviceStopped() on the callback
+        object before returning.
+
+        @see addAudioCallback
+    */
+    void removeAudioCallback (AudioIODeviceCallback* callback);
 
     //==============================================================================
     /** Returns the average proportion of available CPU being spent inside the audio callbacks.
@@ -395,16 +409,18 @@ private:
 
     AudioDeviceSetup currentSetup;
     AudioIODevice* currentAudioDevice;
-    AudioIODeviceCallback* currentCallback;
+    SortedSet <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BitArray inputChannels, outputChannels;
     XmlElement* lastExplicitSettings;
     mutable bool listNeedsScanning;
-    bool useInputNames, inputLevelMeasurementEnabled;
+    bool useInputNames;
+    int inputLevelMeasurementEnabledCount;
     double inputLevel;
     AudioSampleBuffer* testSound;
     int testSoundPosition;
+    AudioSampleBuffer tempBuffer;
 
     StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;

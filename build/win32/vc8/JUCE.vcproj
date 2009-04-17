@@ -4334,6 +4334,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\..\src\juce_core\containers\juce_Variant.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\juce_core\containers\juce_Variant.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\src\juce_core\containers\juce_VoidArray.h"
 						>
 					</File>

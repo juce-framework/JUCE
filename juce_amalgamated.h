@@ -2537,83 +2537,218 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
-#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
 
-/********* Start of inlined file: juce_Initialisation.h *********/
-#ifndef __JUCE_INITIALISATION_JUCEHEADER__
-#define __JUCE_INITIALISATION_JUCEHEADER__
+/********* Start of inlined file: juce_Atomic.h *********/
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+#define __JUCE_ATOMIC_JUCEHEADER__
 
-/** Initialises Juce's GUI classes.
+// Atomic increment/decrement operations..
 
-    If you're embedding Juce into an application that uses its own event-loop rather
-    than using the START_JUCE_APPLICATION macro, call this function before making any
-    Juce calls, to make sure things are initialised correctly.
+#if JUCE_MAC && ! DOXYGEN
 
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+  #if ! MACOS_10_3_OR_EARLIER
 
-    @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
-*/
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
+    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
+    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+  #else
 
-/** Clears up any static data being used by Juce's GUI classes.
+    forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (1, (SInt32*) &variable); }
+    forcedinline void atomicDecrement (int& variable) throw()           { OTAtomicAdd32 (-1, (SInt32*) &variable); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (-1, (SInt32*) &variable); }
+  #endif
 
-    If you're embedding Juce into an application that uses its own event-loop rather
-    than using the START_JUCE_APPLICATION macro, call this function in your shutdown
-    code to clean up any juce objects that might be lying around.
+#elif JUCE_GCC
 
-    @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
-*/
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
+  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
+    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
+    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
+  #else
 
-/** Initialises the core parts of Juce.
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void atomicIncrement (int& variable) throw()
+    {
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock incl (%%rax)"
+            :
+            : "a" (&variable)
+            : "cc", "memory");
+        #else
+            "lock incl %0"
+            : "=m" (variable)
+            : "m" (variable));
+        #endif
+    }
 
-    If you're embedding Juce into either a command-line program, call this function
-    at the start of your main() function to make sure that Juce is initialised correctly.
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()
+    {
+        int result;
 
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock xaddl %%ebx, (%%rax) \n\
+             incl %%ebx"
+            : "=b" (result)
+            : "a" (&variable), "b" (1)
+            : "cc", "memory");
+        #else
+            "lock xaddl %%eax, (%%ecx) \n\
+             incl %%eax"
+            : "=a" (result)
+            : "c" (&variable), "a" (1)
+            : "memory");
+        #endif
 
-    @see shutdownJuce_NonGUI, initialiseJuce_GUI
-*/
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
+        return result;
+    }
 
-/** Clears up any static data being used by Juce's non-gui core classes.
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void atomicDecrement (int& variable) throw()
+    {
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock decl (%%rax)"
+            :
+            : "a" (&variable)
+            : "cc", "memory");
+        #else
+            "lock decl %0"
+            : "=m" (variable)
+            : "m" (variable));
+        #endif
+    }
 
-    If you're embedding Juce into either a command-line program, call this function
-    at the end of your main() function if you want to make sure any Juce objects are
-    cleaned up correctly.
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()
+    {
+        int result;
 
-    @see initialiseJuce_NonGUI, initialiseJuce_GUI
-*/
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock xaddl %%ebx, (%%rax) \n\
+             decl %%ebx"
+            : "=b" (result)
+            : "a" (&variable), "b" (-1)
+            : "cc", "memory");
+        #else
+            "lock xaddl %%eax, (%%ecx) \n\
+             decl %%eax"
+            : "=a" (result)
+            : "c" (&variable), "a" (-1)
+            : "memory");
+        #endif
+        return result;
+    }
+  #endif
 
-#endif   // __JUCE_INITIALISATION_JUCEHEADER__
-/********* End of inlined file: juce_Initialisation.h *********/
+#elif JUCE_USE_INTRINSICS
+
+    #pragma intrinsic (_InterlockedIncrement)
+    #pragma intrinsic (_InterlockedDecrement)
+
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicIncrement (int& variable) throw()
+    {
+        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
+    {
+        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicDecrement (int& variable) throw()
+    {
+        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
+    {
+        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
+    }
+#else
+
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicIncrement (int& variable) throw()
+    {
+        __asm {
+            mov ecx, dword ptr [variable]
+            lock inc dword ptr [ecx]
+        }
+    }
+
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
+    {
+        int result;
+
+        __asm {
+            mov ecx, dword ptr [variable]
+            mov eax, 1
+            lock xadd dword ptr [ecx], eax
+            inc eax
+            mov result, eax
+        }
+
+        return result;
+    }
+
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicDecrement (int& variable) throw()
+    {
+        __asm {
+            mov ecx, dword ptr [variable]
+            lock dec dword ptr [ecx]
+        }
+    }
+
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
+    {
+        int result;
+
+        __asm {
+            mov ecx, dword ptr [variable]
+            mov eax, -1
+            lock xadd dword ptr [ecx], eax
+            dec eax
+            mov result, eax
+        }
+
+        return result;
+    }
+#endif
+
+#endif   // __JUCE_ATOMIC_JUCEHEADER__
+/********* End of inlined file: juce_Atomic.h *********/
 
 #endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+/********* Start of inlined file: juce_FileLogger.h *********/
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
+#define __JUCE_FILELOGGER_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_RANDOM_JUCEHEADER__
+/********* Start of inlined file: juce_File.h *********/
+#ifndef __JUCE_FILE_JUCEHEADER__
+#define __JUCE_FILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_Random.h *********/
-#ifndef __JUCE_RANDOM_JUCEHEADER__
-#define __JUCE_RANDOM_JUCEHEADER__
-
-/********* Start of inlined file: juce_BitArray.h *********/
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
-#define __JUCE_BITARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_Array.h *********/
-#ifndef __JUCE_ARRAY_JUCEHEADER__
-#define __JUCE_ARRAY_JUCEHEADER__
+/********* Start of inlined file: juce_OwnedArray.h *********/
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+#define __JUCE_OWNEDARRAY_JUCEHEADER__
 
 /********* Start of inlined file: juce_ArrayAllocationBase.h *********/
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
@@ -3112,6 +3247,1281 @@ public:
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
 /********* End of inlined file: juce_CriticalSection.h *********/
+
+/** An array designed for holding objects.
+
+    This holds a list of pointers to objects, and will automatically
+    delete the objects when they are removed from the array, or when the
+    array is itself deleted.
+
+    Declare it in the form:  OwnedArray<MyObjectClass>
+
+    ..and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
+
+    After adding objects, they are 'owned' by the array and will be deleted when
+    removed or replaced.
+
+    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
+    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+
+    @see Array, ReferenceCountedArray, StringArray, CriticalSection
+*/
+template <class ObjectClass,
+          class TypeOfCriticalSectionToUse = DummyCriticalSection>
+
+class OwnedArray   : private ArrayAllocationBase <ObjectClass*>
+{
+public:
+
+    /** Creates an empty array.
+
+        @param granularity  this is the size of increment by which the internal storage
+        used by the array will grow. Only change it from the default if you know the
+        array is going to be very big and needs to be able to grow efficiently.
+
+        @see ArrayAllocationBase
+    */
+    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity),
+          numUsed (0)
+    {
+    }
+
+    /** Deletes the array and also deletes any objects inside it.
+
+        To get rid of the array without deleting its objects, use its
+        clear (false) method before deleting it.
+    */
+    ~OwnedArray()
+    {
+        clear (true);
+    }
+
+    /** Clears the array, optionally deleting the objects inside it first. */
+    void clear (const bool deleteObjects = true)
+    {
+        lock.enter();
+
+        if (deleteObjects)
+        {
+            while (numUsed > 0)
+                delete this->elements [--numUsed];
+        }
+
+        this->setAllocatedSize (0);
+        numUsed = 0;
+        lock.exit();
+    }
+
+    /** Returns the number of items currently in the array.
+        @see operator[]
+    */
+    inline int size() const throw()
+    {
+        return numUsed;
+    }
+
+    /** Returns a pointer to the object at this index in the array.
+
+        If the index is out-of-range, this will return a null pointer, (and
+        it could be null anyway, because it's ok for the array to hold null
+        pointers as well as objects).
+
+        @see getUnchecked
+    */
+    inline ObjectClass* operator[] (const int index) const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
+                                            ? this->elements [index]
+                                            : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
+
+        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
+        it can be used when you're sure the index if always going to be legal.
+    */
+    inline ObjectClass* getUnchecked (const int index) const throw()
+    {
+        lock.enter();
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        ObjectClass* const result = this->elements [index];
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns a pointer to the first object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getLast
+    */
+    inline ObjectClass* getFirst() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+        return result;
+    }
+
+    /** Returns a pointer to the last object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getFirst
+    */
+    inline ObjectClass* getLast() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Finds the index of an object which might be in the array.
+
+        @param objectToLookFor    the object to look for
+        @returns                  the index at which the object was found, or -1 if it's not found
+    */
+    int indexOf (const ObjectClass* const objectToLookFor) const throw()
+    {
+        int result = -1;
+
+        lock.enter();
+        ObjectClass* const* e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToLookFor == *e)
+            {
+                result = (int) (e - this->elements);
+                break;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+        return result;
+    }
+
+    /** Returns true if the array contains a specified object.
+
+        @param objectToLookFor      the object to look for
+        @returns                    true if the object is in the array
+    */
+    bool contains (const ObjectClass* const objectToLookFor) const throw()
+    {
+        lock.enter();
+
+        ObjectClass* const* e = this->elements;
+        int i = numUsed;
+
+        while (i >= 4)
+        {
+            if (objectToLookFor == *e
+                 || objectToLookFor == *++e
+                 || objectToLookFor == *++e
+                 || objectToLookFor == *++e)
+            {
+                lock.exit();
+                return true;
+            }
+
+            i -= 4;
+            ++e;
+        }
+
+        while (i > 0)
+        {
+            if (objectToLookFor == *e)
+            {
+                lock.exit();
+                return true;
+            }
+
+            --i;
+            ++e;
+        }
+
+        lock.exit();
+        return false;
+    }
+
+    /** Appends a new object to the end of the array.
+
+        Note that the this object will be deleted by the OwnedArray when it
+        is removed, so be careful not to delete it somewhere else.
+
+        Also be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param newObject       the new object to add to the array
+        @see set, insert, addIfNotAlreadyThere, addSorted
+    */
+    void add (const ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+        this->ensureAllocatedSize (numUsed + 1);
+        this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+        lock.exit();
+    }
+
+    /** Inserts a new object into the array at the given index.
+
+        Note that the this object will be deleted by the OwnedArray when it
+        is removed, so be careful not to delete it somewhere else.
+
+        If the index is less than 0 or greater than the size of the array, the
+        element will be added to the end of the array.
+        Otherwise, it will be inserted into the array, moving all the later elements
+        along to make room.
+
+        Be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param indexToInsertAt      the index at which the new element should be inserted
+        @param newObject            the new object to add to the array
+        @see add, addSorted, addIfNotAlreadyThere, set
+    */
+    void insert (int indexToInsertAt,
+                 const ObjectClass* const newObject) throw()
+    {
+        if (indexToInsertAt >= 0)
+        {
+            lock.enter();
+
+            if (indexToInsertAt > numUsed)
+                indexToInsertAt = numUsed;
+
+            this->ensureAllocatedSize (numUsed + 1);
+
+            ObjectClass** const e = this->elements + indexToInsertAt;
+            const int numToMove = numUsed - indexToInsertAt;
+
+            if (numToMove > 0)
+                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
+
+            *e = const_cast <ObjectClass*> (newObject);
+            ++numUsed;
+
+            lock.exit();
+        }
+        else
+        {
+            add (newObject);
+        }
+    }
+
+    /** Appends a new object at the end of the array as long as the array doesn't
+        already contain it.
+
+        If the array already contains a matching object, nothing will be done.
+
+        @param newObject   the new object to add to the array
+    */
+    void addIfNotAlreadyThere (const ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+
+        if (! contains (newObject))
+            add (newObject);
+
+        lock.exit();
+    }
+
+    /** Replaces an object in the array with a different one.
+
+        If the index is less than zero, this method does nothing.
+        If the index is beyond the end of the array, the new object is added to the end of the array.
+
+        Be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param indexToChange        the index whose value you want to change
+        @param newObject            the new value to set for this index.
+        @param deleteOldElement     whether to delete the object that's being replaced with the new one
+        @see add, insert, remove
+    */
+    void set (const int indexToChange,
+              const ObjectClass* const newObject,
+              const bool deleteOldElement = true)
+    {
+        if (indexToChange >= 0)
+        {
+            ObjectClass* toDelete = 0;
+            lock.enter();
+
+            if (indexToChange < numUsed)
+            {
+                if (deleteOldElement)
+                    toDelete = this->elements [indexToChange];
+
+                if (toDelete == newObject)
+                    toDelete = 0;
+                else
+                    this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+            }
+            else
+            {
+                this->ensureAllocatedSize (numUsed + 1);
+                this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+            }
+
+            lock.exit();
+
+            delete toDelete;
+        }
+    }
+
+    /** Inserts a new object into the array assuming that the array is sorted.
+
+        This will use a comparator to find the position at which the new object
+        should go. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator   the comparator to use to compare the elements - see the sort method
+                            for details about this object's structure
+        @param newObject    the new object to insert to the array
+        @see add, sort, indexOfSorted
+    */
+    template <class ElementComparator>
+    void addSorted (ElementComparator& comparator,
+                    ObjectClass* const newObject) throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+        lock.enter();
+        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        lock.exit();
+    }
+
+    /** Finds the index of an object in the array, assuming that the array is sorted.
+
+        This will use a comparator to do a binary-chop to find the index of the given
+        element, if it exists. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator           the comparator to use to compare the elements - see the sort()
+                                    method for details about the form this object should take
+        @param objectToLookFor      the object to search for
+        @returns                    the index of the element, or -1 if it's not found
+        @see addSorted, sort
+    */
+    template <class ElementComparator>
+    int indexOfSorted (ElementComparator& comparator,
+                       const ObjectClass* const objectToLookFor) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                lock.exit();
+                return -1;
+            }
+            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
+            {
+                lock.exit();
+                return start;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    lock.exit();
+                    return -1;
+                }
+                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
+    }
+
+    /** Removes an object from the array.
+
+        This will remove the object at a given index (optionally also
+        deleting it) and move back all the subsequent objects to close the gap.
+        If the index passed in is out-of-range, nothing will happen.
+
+        @param indexToRemove    the index of the element to remove
+        @param deleteObject     whether to delete the object that is removed
+        @see removeObject, removeRange
+    */
+    void remove (const int indexToRemove,
+                 const bool deleteObject = true)
+    {
+        lock.enter();
+        ObjectClass* toDelete = 0;
+
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        {
+            ObjectClass** const e = this->elements + indexToRemove;
+
+            if (deleteObject)
+                toDelete = *e;
+
+            --numUsed;
+            const int numToShift = numUsed - indexToRemove;
+
+            if (numToShift > 0)
+                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+
+        delete toDelete;
+    }
+
+    /** Removes a specified object from the array.
+
+        If the item isn't found, no action is taken.
+
+        @param objectToRemove   the object to try to remove
+        @param deleteObject     whether to delete the object (if it's found)
+        @see remove, removeRange
+    */
+    void removeObject (const ObjectClass* const objectToRemove,
+                       const bool deleteObject = true)
+    {
+        lock.enter();
+        ObjectClass** e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToRemove == *e)
+            {
+                remove ((int) (e - this->elements), deleteObject);
+                break;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+    }
+
+    /** Removes a range of objects from the array.
+
+        This will remove a set of objects, starting from the given index,
+        and move any subsequent elements down to close the gap.
+
+        If the range extends beyond the bounds of the array, it will
+        be safely clipped to the size of the array.
+
+        @param startIndex       the index of the first object to remove
+        @param numberToRemove   how many objects should be removed
+        @param deleteObjects    whether to delete the objects that get removed
+        @see remove, removeObject
+    */
+    void removeRange (int startIndex,
+                      const int numberToRemove,
+                      const bool deleteObjects = true)
+    {
+        lock.enter();
+        const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
+        startIndex = jlimit (0, numUsed, startIndex);
+
+        if (endIndex > startIndex)
+        {
+            if (deleteObjects)
+            {
+                for (int i = startIndex; i < endIndex; ++i)
+                {
+                    delete this->elements [i];
+                    this->elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                }
+            }
+
+            const int rangeSize = endIndex - startIndex;
+            ObjectClass** e = this->elements + startIndex;
+            int numToShift = numUsed - endIndex;
+            numUsed -= rangeSize;
+
+            while (--numToShift >= 0)
+            {
+                *e = e [rangeSize];
+                ++e;
+            }
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+    }
+
+    /** Removes the last n objects from the array.
+
+        @param howManyToRemove   how many objects to remove from the end of the array
+        @param deleteObjects     whether to also delete the objects that are removed
+        @see remove, removeObject, removeRange
+    */
+    void removeLast (int howManyToRemove = 1,
+                     const bool deleteObjects = true)
+    {
+        lock.enter();
+
+        if (howManyToRemove >= numUsed)
+        {
+            clear (deleteObjects);
+        }
+        else
+        {
+            while (--howManyToRemove >= 0)
+                remove (numUsed - 1, deleteObjects);
+        }
+
+        lock.exit();
+    }
+
+    /** Swaps a pair of objects in the array.
+
+        If either of the indexes passed in is out-of-range, nothing will happen,
+        otherwise the two objects at these positions will be exchanged.
+    */
+    void swap (const int index1,
+               const int index2) throw()
+    {
+        lock.enter();
+
+        if (((unsigned int) index1) < (unsigned int) numUsed
+             && ((unsigned int) index2) < (unsigned int) numUsed)
+        {
+            swapVariables (this->elements [index1],
+                           this->elements [index2]);
+        }
+
+        lock.exit();
+    }
+
+    /** Moves one of the objects to a different position.
+
+        This will move the object to a specified index, shuffling along
+        any intervening elements as required.
+
+        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
+        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
+
+        @param currentIndex     the index of the object to be moved. If this isn't a
+                                valid index, then nothing will be done
+        @param newIndex         the index at which you'd like this object to end up. If this
+                                is less than zero, it will be moved to the end of the array
+    */
+    void move (const int currentIndex,
+               int newIndex) throw()
+    {
+        if (currentIndex != newIndex)
+        {
+            lock.enter();
+
+            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+            {
+                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+                    newIndex = numUsed - 1;
+
+                ObjectClass* const value = this->elements [currentIndex];
+
+                if (newIndex > currentIndex)
+                {
+                    memmove (this->elements + currentIndex,
+                             this->elements + currentIndex + 1,
+                             (newIndex - currentIndex) * sizeof (ObjectClass*));
+                }
+                else
+                {
+                    memmove (this->elements + newIndex + 1,
+                             this->elements + newIndex,
+                             (currentIndex - newIndex) * sizeof (ObjectClass*));
+                }
+
+                this->elements [newIndex] = value;
+            }
+
+            lock.exit();
+        }
+    }
+
+    /** This swaps the contents of this array with those of another array.
+
+        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
+        because it just swaps their internal pointers.
+    */
+    template <class OtherArrayType>
+    void swapWithArray (OtherArrayType& otherArray) throw()
+    {
+        lock.enter();
+        otherArray.lock.enter();
+        swapVariables <int> (this->numUsed, otherArray.numUsed);
+        swapVariables <ObjectClass**> (this->elements, otherArray.elements);
+        swapVariables <int> (this->numAllocated, otherArray.numAllocated);
+        otherArray.lock.exit();
+        lock.exit();
+    }
+
+    /** Reduces the amount of storage being used by the array.
+
+        Arrays typically allocate slightly more storage than they need, and after
+        removing elements, they may have quite a lot of unused space allocated.
+        This method will reduce the amount of allocated storage to a minimum.
+    */
+    void minimiseStorageOverheads() throw()
+    {
+        lock.enter();
+
+        if (numUsed == 0)
+        {
+            this->setAllocatedSize (0);
+        }
+        else
+        {
+            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+
+            if (newAllocation < this->numAllocated)
+                this->setAllocatedSize (newAllocation);
+        }
+
+        lock.exit();
+    }
+
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (const int minNumElements) throw()
+    {
+        this->ensureAllocatedSize (minNumElements);
+    }
+
+    /** Sorts the elements in the array.
+
+        This will use a comparator object to sort the elements into order. The object
+        passed must have a method of the form:
+        @code
+        int compareElements (ElementType first, ElementType second);
+        @endcode
+
+        ..and this method must return:
+          - a value of < 0 if the first comes before the second
+          - a value of 0 if the two objects are equivalent
+          - a value of > 0 if the second comes before the first
+
+        To improve performance, the compareElements() method can be declared as static or const.
+
+        @param comparator   the comparator to use for comparing elements.
+        @param retainOrderOfEquivalentItems     if this is true, then items
+                            which the comparator says are equivalent will be
+                            kept in the order in which they currently appear
+                            in the array. This is slower to perform, but may
+                            be important in some cases. If it's false, a faster
+                            algorithm is used, but equivalent elements may be
+                            rearranged.
+        @see sortArray, indexOfSorted
+    */
+    template <class ElementComparator>
+    void sort (ElementComparator& comparator,
+               const bool retainOrderOfEquivalentItems = false) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+
+        lock.enter();
+        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        lock.exit();
+    }
+
+    /** Locks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see unlockArray
+    */
+    void lockArray() const throw()
+    {
+        lock.enter();
+    }
+
+    /** Unlocks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see lockArray
+    */
+    void unlockArray() const throw()
+    {
+        lock.exit();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int numUsed;
+    TypeOfCriticalSectionToUse lock;
+
+    // disallow copy constructor and assignment
+    OwnedArray (const OwnedArray&);
+    const OwnedArray& operator= (const OwnedArray&);
+};
+
+#endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
+/********* End of inlined file: juce_OwnedArray.h *********/
+
+/********* Start of inlined file: juce_Time.h *********/
+#ifndef __JUCE_TIME_JUCEHEADER__
+#define __JUCE_TIME_JUCEHEADER__
+
+/********* Start of inlined file: juce_RelativeTime.h *********/
+#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
+#define __JUCE_RELATIVETIME_JUCEHEADER__
+
+/** A relative measure of time.
+
+    The time is stored as a number of seconds, at double-precision floating
+    point accuracy, and may be positive or negative.
+
+    If you need an absolute time, (i.e. a date + time), see the Time class.
+*/
+class JUCE_API  RelativeTime
+{
+public:
+
+    /** Creates a RelativeTime.
+
+        @param seconds  the number of seconds, which may be +ve or -ve.
+        @see milliseconds, minutes, hours, days, weeks
+    */
+    explicit RelativeTime (const double seconds = 0.0) throw();
+
+    /** Copies another relative time. */
+    RelativeTime (const RelativeTime& other) throw();
+
+    /** Copies another relative time. */
+    const RelativeTime& operator= (const RelativeTime& other) throw();
+
+    /** Destructor. */
+    ~RelativeTime() throw();
+
+    /** Creates a new RelativeTime object representing a number of milliseconds.
+
+        @see minutes, hours, days, weeks
+    */
+    static const RelativeTime milliseconds (const int milliseconds) throw();
+
+    /** Creates a new RelativeTime object representing a number of milliseconds.
+
+        @see minutes, hours, days, weeks
+    */
+    static const RelativeTime milliseconds (const int64 milliseconds) throw();
+
+    /** Creates a new RelativeTime object representing a number of minutes.
+
+        @see milliseconds, hours, days, weeks
+    */
+    static const RelativeTime minutes (const double numberOfMinutes) throw();
+
+    /** Creates a new RelativeTime object representing a number of hours.
+
+        @see milliseconds, minutes, days, weeks
+    */
+    static const RelativeTime hours (const double numberOfHours) throw();
+
+    /** Creates a new RelativeTime object representing a number of days.
+
+        @see milliseconds, minutes, hours, weeks
+    */
+    static const RelativeTime days (const double numberOfDays) throw();
+
+    /** Creates a new RelativeTime object representing a number of weeks.
+
+        @see milliseconds, minutes, hours, days
+    */
+    static const RelativeTime weeks (const double numberOfWeeks) throw();
+
+    /** Returns the number of milliseconds this time represents.
+
+        @see milliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
+    */
+    int64 inMilliseconds() const throw();
+
+    /** Returns the number of seconds this time represents.
+
+        @see inMilliseconds, inMinutes, inHours, inDays, inWeeks
+    */
+    double inSeconds() const throw()        { return seconds; }
+
+    /** Returns the number of minutes this time represents.
+
+        @see inMilliseconds, inSeconds, inHours, inDays, inWeeks
+    */
+    double inMinutes() const throw();
+
+    /** Returns the number of hours this time represents.
+
+        @see inMilliseconds, inSeconds, inMinutes, inDays, inWeeks
+    */
+    double inHours() const throw();
+
+    /** Returns the number of days this time represents.
+
+        @see inMilliseconds, inSeconds, inMinutes, inHours, inWeeks
+    */
+    double inDays() const throw();
+
+    /** Returns the number of weeks this time represents.
+
+        @see inMilliseconds, inSeconds, inMinutes, inHours, inDays
+    */
+    double inWeeks() const throw();
+
+    /** Returns a readable textual description of the time.
+
+        The exact format of the string returned will depend on
+        the magnitude of the time - e.g.
+
+        "1 min 4 secs", "1 hr 45 mins", "2 weeks 5 days", "140 ms"
+
+        so that only the two most significant units are printed.
+
+        The returnValueForZeroTime value is the result that is returned if the
+        length is zero. Depending on your application you might want to use this
+        to return something more relevant like "empty" or "0 secs", etc.
+
+        @see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
+    */
+    const String getDescription (const String& returnValueForZeroTime = JUCE_T("0")) const throw();
+
+    /** Compares two RelativeTimes. */
+    bool operator== (const RelativeTime& other) const throw();
+    /** Compares two RelativeTimes. */
+    bool operator!= (const RelativeTime& other) const throw();
+
+    /** Compares two RelativeTimes. */
+    bool operator>  (const RelativeTime& other) const throw();
+    /** Compares two RelativeTimes. */
+    bool operator<  (const RelativeTime& other) const throw();
+    /** Compares two RelativeTimes. */
+    bool operator>= (const RelativeTime& other) const throw();
+    /** Compares two RelativeTimes. */
+    bool operator<= (const RelativeTime& other) const throw();
+
+    /** Adds another RelativeTime to this one and returns the result. */
+    const RelativeTime  operator+  (const RelativeTime& timeToAdd) const throw();
+    /** Subtracts another RelativeTime from this one and returns the result. */
+    const RelativeTime  operator-  (const RelativeTime& timeToSubtract) const throw();
+
+    /** Adds a number of seconds to this RelativeTime and returns the result. */
+    const RelativeTime  operator+  (const double secondsToAdd) const throw();
+    /** Subtracts a number of seconds from this RelativeTime and returns the result. */
+    const RelativeTime  operator-  (const double secondsToSubtract) const throw();
+
+    /** Adds another RelativeTime to this one. */
+    const RelativeTime& operator+= (const RelativeTime& timeToAdd) throw();
+    /** Subtracts another RelativeTime from this one. */
+    const RelativeTime& operator-= (const RelativeTime& timeToSubtract) throw();
+
+    /** Adds a number of seconds to this time. */
+    const RelativeTime& operator+= (const double secondsToAdd) throw();
+
+    /** Subtracts a number of seconds from this time. */
+    const RelativeTime& operator-= (const double secondsToSubtract) throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    double seconds;
+};
+
+#endif   // __JUCE_RELATIVETIME_JUCEHEADER__
+/********* End of inlined file: juce_RelativeTime.h *********/
+
+/**
+    Holds an absolute date and time.
+
+    Internally, the time is stored at millisecond precision.
+
+    @see RelativeTime
+*/
+class JUCE_API  Time
+{
+public:
+
+    /** Creates a Time object.
+
+        This default constructor creates a time of 1st January 1970, (which is
+        represented internally as 0ms).
+
+        To create a time object representing the current time, use getCurrentTime().
+
+        @see getCurrentTime
+    */
+    Time() throw();
+
+    /** Creates a copy of another Time object. */
+    Time (const Time& other) throw();
+
+    /** Creates a time based on a number of milliseconds.
+
+        The internal millisecond count is set to 0 (1st January 1970). To create a
+        time object set to the current time, use getCurrentTime().
+
+        @param millisecondsSinceEpoch   the number of milliseconds since the unix
+                                        'epoch' (midnight Jan 1st 1970).
+        @see getCurrentTime, currentTimeMillis
+    */
+    Time (const int64 millisecondsSinceEpoch) throw();
+
+    /** Creates a time from a set of date components.
+
+        The timezone is assumed to be whatever the system is using as its locale.
+
+        @param year             the year, in 4-digit format, e.g. 2004
+        @param month            the month, in the range 0 to 11
+        @param day              the day of the month, in the range 1 to 31
+        @param hours            hours in 24-hour clock format, 0 to 23
+        @param minutes          minutes 0 to 59
+        @param seconds          seconds 0 to 59
+        @param milliseconds     milliseconds 0 to 999
+        @param useLocalTime     if true, encode using the current machine's local time; if
+                                false, it will always work in GMT.
+    */
+    Time (const int year,
+          const int month,
+          const int day,
+          const int hours,
+          const int minutes,
+          const int seconds = 0,
+          const int milliseconds = 0,
+          const bool useLocalTime = true) throw();
+
+    /** Destructor. */
+    ~Time() throw();
+
+    /** Copies this time from another one. */
+    const Time& operator= (const Time& other) throw();
+
+    /** Returns a Time object that is set to the current system time.
+
+        @see currentTimeMillis
+    */
+    static const Time JUCE_CALLTYPE getCurrentTime() throw();
+
+    /** Returns the time as a number of milliseconds.
+
+        @returns    the number of milliseconds this Time object represents, since
+                    midnight jan 1st 1970.
+        @see getMilliseconds
+    */
+    int64 toMilliseconds() const throw()                            { return millisSinceEpoch; }
+
+    /** Returns the year.
+
+        A 4-digit format is used, e.g. 2004.
+    */
+    int getYear() const throw();
+
+    /** Returns the number of the month.
+
+        The value returned is in the range 0 to 11.
+        @see getMonthName
+    */
+    int getMonth() const throw();
+
+    /** Returns the name of the month.
+
+        @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
+                                    it'll return the long form, e.g. "January"
+        @see getMonth
+    */
+    const String getMonthName (const bool threeLetterVersion) const throw();
+
+    /** Returns the day of the month.
+
+        The value returned is in the range 1 to 31.
+    */
+    int getDayOfMonth() const throw();
+
+    /** Returns the number of the day of the week.
+
+        The value returned is in the range 0 to 6 (0 = sunday, 1 = monday, etc).
+    */
+    int getDayOfWeek() const throw();
+
+    /** Returns the name of the weekday.
+
+        @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
+                                    false, it'll return the full version, e.g. "Tuesday".
+    */
+    const String getWeekdayName (const bool threeLetterVersion) const throw();
+
+    /** Returns the number of hours since midnight.
+
+        This is in 24-hour clock format, in the range 0 to 23.
+
+        @see getHoursInAmPmFormat, isAfternoon
+    */
+    int getHours() const throw();
+
+    /** Returns true if the time is in the afternoon.
+
+        So it returns true for "PM", false for "AM".
+
+        @see getHoursInAmPmFormat, getHours
+    */
+    bool isAfternoon() const throw();
+
+    /** Returns the hours in 12-hour clock format.
+
+        This will return a value 1 to 12 - use isAfternoon() to find out
+        whether this is in the afternoon or morning.
+
+        @see getHours, isAfternoon
+    */
+    int getHoursInAmPmFormat() const throw();
+
+    /** Returns the number of minutes, 0 to 59. */
+    int getMinutes() const throw();
+
+    /** Returns the number of seconds, 0 to 59. */
+    int getSeconds() const throw();
+
+    /** Returns the number of milliseconds, 0 to 999.
+
+        Unlike toMilliseconds(), this just returns the position within the
+        current second rather than the total number since the epoch.
+
+        @see toMilliseconds
+    */
+    int getMilliseconds() const throw();
+
+    /** Returns true if the local timezone uses a daylight saving correction. */
+    bool isDaylightSavingTime() const throw();
+
+    /** Returns a 3-character string to indicate the local timezone. */
+    const String getTimeZone() const throw();
+
+    /** Quick way of getting a string version of a date and time.
+
+        For a more powerful way of formatting the date and time, see the formatted() method.
+
+        @param includeDate      whether to include the date in the string
+        @param includeTime      whether to include the time in the string
+        @param includeSeconds   if the time is being included, this provides an option not to include
+                                the seconds in it
+        @param use24HourClock   if the time is being included, sets whether to use am/pm or 24
+                                hour notation.
+        @see formatted
+    */
+    const String toString (const bool includeDate,
+                           const bool includeTime,
+                           const bool includeSeconds = true,
+                           const bool use24HourClock = false) const throw();
+
+    /** Converts this date/time to a string with a user-defined format.
+
+        This uses the C strftime() function to format this time as a string. To save you
+        looking it up, these are the escape codes that strftime uses (other codes might
+        work on some platforms and not others, but these are the common ones):
+
+        %a  is replaced by the locale's abbreviated weekday name.
+        %A  is replaced by the locale's full weekday name.
+        %b  is replaced by the locale's abbreviated month name.
+        %B  is replaced by the locale's full month name.
+        %c  is replaced by the locale's appropriate date and time representation.
+        %d  is replaced by the day of the month as a decimal number [01,31].
+        %H  is replaced by the hour (24-hour clock) as a decimal number [00,23].
+        %I  is replaced by the hour (12-hour clock) as a decimal number [01,12].
+        %j  is replaced by the day of the year as a decimal number [001,366].
+        %m  is replaced by the month as a decimal number [01,12].
+        %M  is replaced by the minute as a decimal number [00,59].
+        %p  is replaced by the locale's equivalent of either a.m. or p.m.
+        %S  is replaced by the second as a decimal number [00,61].
+        %U  is replaced by the week number of the year (Sunday as the first day of the week) as a decimal number [00,53].
+        %w  is replaced by the weekday as a decimal number [0,6], with 0 representing Sunday.
+        %W  is replaced by the week number of the year (Monday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Monday are considered to be in week 0.
+        %x  is replaced by the locale's appropriate date representation.
+        %X  is replaced by the locale's appropriate time representation.
+        %y  is replaced by the year without century as a decimal number [00,99].
+        %Y  is replaced by the year with century as a decimal number.
+        %Z  is replaced by the timezone name or abbreviation, or by no bytes if no timezone information exists.
+        %%  is replaced by %.
+
+        @see toString
+    */
+    const String formatted (const tchar* const format) const throw();
+
+    /** Adds a RelativeTime to this time and returns the result. */
+    const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
+
+    /** Subtracts a RelativeTime from this time and returns the result. */
+    const Time operator- (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch - delta.inMilliseconds()); }
+
+    /** Returns the relative time difference between this time and another one. */
+    const RelativeTime operator- (const Time& other) const throw()  { return RelativeTime::milliseconds (millisSinceEpoch - other.millisSinceEpoch); }
+
+    /** Compares two Time objects. */
+    bool operator== (const Time& other) const throw()               { return millisSinceEpoch == other.millisSinceEpoch; }
+
+    /** Compares two Time objects. */
+    bool operator!= (const Time& other) const throw()               { return millisSinceEpoch != other.millisSinceEpoch; }
+
+    /** Compares two Time objects. */
+    bool operator<  (const Time& other) const throw()               { return millisSinceEpoch < other.millisSinceEpoch; }
+
+    /** Compares two Time objects. */
+    bool operator<= (const Time& other) const throw()               { return millisSinceEpoch <= other.millisSinceEpoch; }
+
+    /** Compares two Time objects. */
+    bool operator>  (const Time& other) const throw()               { return millisSinceEpoch > other.millisSinceEpoch; }
+
+    /** Compares two Time objects. */
+    bool operator>= (const Time& other) const throw()               { return millisSinceEpoch >= other.millisSinceEpoch; }
+
+    /** Tries to set the computer's clock.
+
+        @returns    true if this succeeds, although depending on the system, the
+                    application might not have sufficient privileges to do this.
+    */
+    bool setSystemTimeToThisTime() const throw();
+
+    /** Returns the name of a day of the week.
+
+        @param dayNumber            the day, 0 to 6 (0 = sunday, 1 = monday, etc)
+        @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
+                                    false, it'll return the full version, e.g. "Tuesday".
+    */
+    static const String getWeekdayName (int dayNumber,
+                                        const bool threeLetterVersion) throw();
+
+    /** Returns the name of one of the months.
+
+        @param monthNumber  the month, 0 to 11
+        @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
+                                    it'll return the long form, e.g. "January"
+    */
+    static const String getMonthName (int monthNumber,
+                                      const bool threeLetterVersion) throw();
+
+    // Static methods for getting system timers directly..
+
+    /** Returns the current system time.
+
+        Returns the number of milliseconds since midnight jan 1st 1970.
+
+        Should be accurate to within a few millisecs, depending on platform,
+        hardware, etc.
+    */
+    static int64 currentTimeMillis() throw();
+
+    /** Returns the number of millisecs since system startup.
+
+        Should be accurate to within a few millisecs, depending on platform,
+        hardware, etc.
+
+        @see getApproximateMillisecondCounter
+    */
+    static uint32 getMillisecondCounter() throw();
+
+    /** Returns the number of millisecs since system startup.
+
+        Same as getMillisecondCounter(), but returns a more accurate value, using
+        the high-res timer.
+
+        @see getMillisecondCounter
+    */
+    static double getMillisecondCounterHiRes() throw();
+
+    /** Waits until the getMillisecondCounter() reaches a given value.
+
+        This will make the thread sleep as efficiently as it can while it's waiting.
+    */
+    static void waitForMillisecondCounter (const uint32 targetTime) throw();
+
+    /** Less-accurate but faster version of getMillisecondCounter().
+
+        This will return the last value that getMillisecondCounter() returned, so doesn't
+        need to make a system call, but is less accurate - it shouldn't be more than
+        100ms away from the correct time, though, so is still accurate enough for a
+        lot of purposes.
+
+        @see getMillisecondCounter
+    */
+    static uint32 getApproximateMillisecondCounter() throw();
+
+    // High-resolution timers..
+
+    /** Returns the current high-resolution counter's tick-count.
+
+        This is a similar idea to getMillisecondCounter(), but with a higher
+        resolution.
+
+        @see getHighResolutionTicksPerSecond, highResolutionTicksToSeconds,
+             secondsToHighResolutionTicks
+    */
+    static int64 getHighResolutionTicks() throw();
+
+    /** Returns the resolution of the high-resolution counter in ticks per second.
+
+        @see getHighResolutionTicks, highResolutionTicksToSeconds,
+             secondsToHighResolutionTicks
+    */
+    static int64 getHighResolutionTicksPerSecond() throw();
+
+    /** Converts a number of high-resolution ticks into seconds.
+
+        @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
+             secondsToHighResolutionTicks
+    */
+    static double highResolutionTicksToSeconds (const int64 ticks) throw();
+
+    /** Converts a number seconds into high-resolution ticks.
+
+        @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
+             highResolutionTicksToSeconds
+    */
+    static int64 secondsToHighResolutionTicks (const double seconds) throw();
+
+private:
+
+    int64 millisSinceEpoch;
+};
+
+#endif   // __JUCE_TIME_JUCEHEADER__
+/********* End of inlined file: juce_Time.h *********/
+
+/********* Start of inlined file: juce_StringArray.h *********/
+#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
+#define __JUCE_STRINGARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_VoidArray.h *********/
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
+#define __JUCE_VOIDARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_Array.h *********/
+#ifndef __JUCE_ARRAY_JUCEHEADER__
+#define __JUCE_ARRAY_JUCEHEADER__
 
 /**
     Holds a list of primitive objects, such as ints, doubles, or pointers.
@@ -4150,2421 +5560,6 @@ private:
 
 #endif   // __JUCE_ARRAY_JUCEHEADER__
 /********* End of inlined file: juce_Array.h *********/
-
-class MemoryBlock;
-
-/**
-    An array of on/off bits, also usable to store large binary integers.
-
-    A BitArray acts like an arbitrarily large integer whose bits can be set or
-    cleared, and some basic mathematical operations can be done on the number as
-    a whole.
-*/
-class JUCE_API  BitArray
-{
-public:
-
-    /** Creates an empty BitArray */
-    BitArray() throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 32 bits of the array are initialised with this value.
-    */
-    BitArray (const unsigned int value) throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 32 bits of the array are initialised with the absolute value
-        passed in, and its sign is set to reflect the sign of the number.
-    */
-    BitArray (const int value) throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 64 bits of the array are initialised with the absolute value
-        passed in, and its sign is set to reflect the sign of the number.
-    */
-    BitArray (int64 value) throw();
-
-    /** Creates a copy of another BitArray. */
-    BitArray (const BitArray& other) throw();
-
-    /** Destructor. */
-    ~BitArray() throw();
-
-    /** Copies another BitArray onto this one. */
-    const BitArray& operator= (const BitArray& other) throw();
-
-    /** Two arrays are the same if the same bits are set. */
-    bool operator== (const BitArray& other) const throw();
-    /** Two arrays are the same if the same bits are set. */
-    bool operator!= (const BitArray& other) const throw();
-
-    /** Clears all bits in the BitArray to 0. */
-    void clear() throw();
-
-    /** Clears a particular bit in the array. */
-    void clearBit (const int bitNumber) throw();
-
-    /** Sets a specified bit to 1.
-
-        If the bit number is high, this will grow the array to accomodate it.
-    */
-    void setBit (const int bitNumber) throw();
-
-    /** Sets or clears a specified bit. */
-    void setBit (const int bitNumber,
-                 const bool shouldBeSet) throw();
-
-    /** Sets a range of bits to be either on or off.
-
-        @param startBit     the first bit to change
-        @param numBits      the number of bits to change
-        @param shouldBeSet  whether to turn these bits on or off
-    */
-    void setRange (int startBit,
-                   int numBits,
-                   const bool shouldBeSet) throw();
-
-    /** Inserts a bit an a given position, shifting up any bits above it. */
-    void insertBit (const int bitNumber,
-                    const bool shouldBeSet) throw();
-
-    /** Returns the value of a specified bit in the array.
-
-        If the index is out-of-range, the result will be false.
-    */
-    bool operator[] (const int bit) const throw();
-
-    /** Returns true if no bits are set. */
-    bool isEmpty() const throw();
-
-    /** Returns a range of bits in the array as a new BitArray.
-
-        e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
-        @see getBitRangeAsInt
-    */
-    const BitArray getBitRange (int startBit, int numBits) const throw();
-
-    /** Returns a range of bits in the array as an integer value.
-
-        e.g. getBitRangeAsInt (0, 32) would return the lowest 32 bits.
-
-        Asking for more than 32 bits isn't allowed (obviously) - for that, use
-        getBitRange().
-    */
-    int getBitRangeAsInt (int startBit, int numBits) const throw();
-
-    /** Sets a range of bits in the array based on an integer value.
-
-        Copies the given integer into the array, starting at startBit,
-        and only using up to numBits of the available bits.
-    */
-    void setBitRangeAsInt (int startBit, int numBits,
-                           unsigned int valueToSet) throw();
-
-    /** Performs a bitwise OR with another BitArray.
-
-        The result ends up in this array.
-    */
-    void orWith (const BitArray& other) throw();
-
-    /** Performs a bitwise AND with another BitArray.
-
-        The result ends up in this array.
-    */
-    void andWith (const BitArray& other) throw();
-
-    /** Performs a bitwise XOR with another BitArray.
-
-        The result ends up in this array.
-    */
-    void xorWith (const BitArray& other) throw();
-
-    /** Adds another BitArray's value to this one.
-
-        Treating the two arrays as large positive integers, this
-        adds them up and puts the result in this array.
-    */
-    void add (const BitArray& other) throw();
-
-    /** Subtracts another BitArray's value from this one.
-
-        Treating the two arrays as large positive integers, this
-        subtracts them and puts the result in this array.
-
-        Note that if the result should be negative, this won't be
-        handled correctly.
-    */
-    void subtract (const BitArray& other) throw();
-
-    /** Multiplies another BitArray's value with this one.
-
-        Treating the two arrays as large positive integers, this
-        multiplies them and puts the result in this array.
-    */
-    void multiplyBy (const BitArray& other) throw();
-
-    /** Divides another BitArray's value into this one and also produces a remainder.
-
-        Treating the two arrays as large positive integers, this
-        divides this value by the other, leaving the quotient in this
-        array, and the remainder is copied into the other BitArray passed in.
-    */
-    void divideBy (const BitArray& divisor, BitArray& remainder) throw();
-
-    /** Returns the largest value that will divide both this value and the one
-        passed-in.
-    */
-    const BitArray findGreatestCommonDivisor (BitArray other) const throw();
-
-    /** Performs a modulo operation on this value.
-
-        The result is stored in this value.
-    */
-    void modulo (const BitArray& divisor) throw();
-
-    /** Performs a combined exponent and modulo operation.
-
-        This BitArray's value becomes (this ^ exponent) % modulus.
-    */
-    void exponentModulo (const BitArray& exponent, const BitArray& modulus) throw();
-
-    /** Performs an inverse modulo on the value.
-
-        i.e. the result is (this ^ -1) mod (modulus).
-    */
-    void inverseModulo (const BitArray& modulus) throw();
-
-    /** Shifts a section of bits left or right.
-
-        @param howManyBitsLeft  how far to move the bits (+ve numbers shift it left, -ve numbers shift it right).
-        @param startBit         the first bit to affect - if this is > 0, only bits above that index will be affected.
-    */
-    void shiftBits (int howManyBitsLeft,
-                    int startBit = 0) throw();
-
-    /** Does a signed comparison of two BitArrays.
-
-        Return values are:
-            - 0 if the numbers are the same
-            - < 0 if this number is smaller than the other
-            - > 0 if this number is bigger than the other
-    */
-    int compare (const BitArray& other) const throw();
-
-    /** Compares the magnitudes of two BitArrays, ignoring their signs.
-
-        Return values are:
-            - 0 if the numbers are the same
-            - < 0 if this number is smaller than the other
-            - > 0 if this number is bigger than the other
-    */
-    int compareAbsolute (const BitArray& other) const throw();
-
-    /** Returns true if the value is less than zero.
-
-        @see setNegative, negate
-    */
-    bool isNegative() const throw();
-
-    /** Changes the sign of the number to be positive or negative.
-
-        @see isNegative, negate
-    */
-    void setNegative (const bool shouldBeNegative) throw();
-
-    /** Inverts the sign of the number.
-
-        @see isNegative, setNegative
-    */
-    void negate() throw();
-
-    /** Counts the total number of set bits in the array. */
-    int countNumberOfSetBits() const throw();
-
-    /** Looks for the index of the next set bit after a given starting point.
-
-        searches from startIndex (inclusive) upwards for the first set bit,
-        and returns its index.
-
-        If no set bits are found, it returns -1.
-    */
-    int findNextSetBit (int startIndex = 0) const throw();
-
-    /** Looks for the index of the next clear bit after a given starting point.
-
-        searches from startIndex (inclusive) upwards for the first clear bit,
-        and returns its index.
-    */
-    int findNextClearBit (int startIndex = 0) const throw();
-
-    /** Returns the index of the highest set bit in the array.
-
-        If the array is empty, this will return -1.
-    */
-    int getHighestBit() const throw();
-
-    /** Converts the array to a number string.
-
-        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
-
-        If minuimumNumCharacters is greater than 0, the returned string will be
-        padded with leading zeros to reach at least that length.
-    */
-    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
-
-    /** Converts a number string to an array.
-
-        Any non-valid characters will be ignored.
-
-        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
-    */
-    void parseString (const String& text,
-                      const int base) throw();
-
-    /** Turns the array into a block of binary data.
-
-        The data is arranged as little-endian, so the first byte of data is the low 8 bits
-        of the array, and so on.
-
-        @see loadFromMemoryBlock
-    */
-    const MemoryBlock toMemoryBlock() const throw();
-
-    /** Copies a block of raw data onto this array.
-
-        The data is arranged as little-endian, so the first byte of data is the low 8 bits
-        of the array, and so on.
-
-        @see toMemoryBlock
-    */
-    void loadFromMemoryBlock (const MemoryBlock& data) throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    void ensureSize (const int numVals) throw();
-    unsigned int* values;
-    int numValues, highestBit;
-    bool negative;
-};
-
-#endif   // __JUCE_BITARRAY_JUCEHEADER__
-/********* End of inlined file: juce_BitArray.h *********/
-
-/**
-    A simple pseudo-random number generator.
-*/
-class JUCE_API  Random
-{
-public:
-
-    /** Creates a Random object based on a seed value.
-
-        For a given seed value, the subsequent numbers generated by this object
-        will be predictable, so a good idea is to set this value based
-        on the time, e.g.
-
-        new Random (Time::currentTimeMillis())
-    */
-    Random (const int64 seedValue) throw();
-
-    /** Destructor. */
-    ~Random() throw();
-
-    /** Returns the next random 32 bit integer.
-
-        @returns a random integer from the full range 0x80000000 to 0x7fffffff
-    */
-    int nextInt() throw();
-
-    /** Returns the next random number, limited to a given range.
-
-        @returns a random integer between 0 (inclusive) and maxValue (exclusive).
-    */
-    int nextInt (const int maxValue) throw();
-
-    /** Returns the next 64-bit random number.
-
-        @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
-    */
-    int64 nextInt64() throw();
-
-    /** Returns the next random floating-point number.
-
-        @returns a random value in the range 0 to 1.0
-    */
-    float nextFloat() throw();
-
-    /** Returns the next random floating-point number.
-
-        @returns a random value in the range 0 to 1.0
-    */
-    double nextDouble() throw();
-
-    /** Returns the next random boolean value.
-    */
-    bool nextBool() throw();
-
-    /** Returns a BitArray containing a random number.
-
-        @returns a random value in the range 0 to (maximumValue - 1).
-    */
-    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
-
-    /** Sets a range of bits in a BitArray to random values. */
-    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
-
-    /** To avoid the overhead of having to create a new Random object whenever
-        you need a number, this is a shared application-wide object that
-        can be used.
-
-        It's not thread-safe though, so threads should use their own Random object.
-    */
-    static Random& getSystemRandom() throw();
-
-    /** Resets this Random object to a given seed value. */
-    void setSeed (const int64 newSeed) throw();
-
-    /** Reseeds this generator using a value generated from various semi-random system
-        properties like the current time, etc.
-
-        Because this function convolves the time with the last seed value, calling
-        it repeatedly will increase the randomness of the final result.
-    */
-    void setSeedRandomly();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int64 seed;
-};
-
-#endif   // __JUCE_RANDOM_JUCEHEADER__
-/********* End of inlined file: juce_Random.h *********/
-
-#endif
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
-
-/********* Start of inlined file: juce_RelativeTime.h *********/
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
-#define __JUCE_RELATIVETIME_JUCEHEADER__
-
-/** A relative measure of time.
-
-    The time is stored as a number of seconds, at double-precision floating
-    point accuracy, and may be positive or negative.
-
-    If you need an absolute time, (i.e. a date + time), see the Time class.
-*/
-class JUCE_API  RelativeTime
-{
-public:
-
-    /** Creates a RelativeTime.
-
-        @param seconds  the number of seconds, which may be +ve or -ve.
-        @see milliseconds, minutes, hours, days, weeks
-    */
-    explicit RelativeTime (const double seconds = 0.0) throw();
-
-    /** Copies another relative time. */
-    RelativeTime (const RelativeTime& other) throw();
-
-    /** Copies another relative time. */
-    const RelativeTime& operator= (const RelativeTime& other) throw();
-
-    /** Destructor. */
-    ~RelativeTime() throw();
-
-    /** Creates a new RelativeTime object representing a number of milliseconds.
-
-        @see minutes, hours, days, weeks
-    */
-    static const RelativeTime milliseconds (const int milliseconds) throw();
-
-    /** Creates a new RelativeTime object representing a number of milliseconds.
-
-        @see minutes, hours, days, weeks
-    */
-    static const RelativeTime milliseconds (const int64 milliseconds) throw();
-
-    /** Creates a new RelativeTime object representing a number of minutes.
-
-        @see milliseconds, hours, days, weeks
-    */
-    static const RelativeTime minutes (const double numberOfMinutes) throw();
-
-    /** Creates a new RelativeTime object representing a number of hours.
-
-        @see milliseconds, minutes, days, weeks
-    */
-    static const RelativeTime hours (const double numberOfHours) throw();
-
-    /** Creates a new RelativeTime object representing a number of days.
-
-        @see milliseconds, minutes, hours, weeks
-    */
-    static const RelativeTime days (const double numberOfDays) throw();
-
-    /** Creates a new RelativeTime object representing a number of weeks.
-
-        @see milliseconds, minutes, hours, days
-    */
-    static const RelativeTime weeks (const double numberOfWeeks) throw();
-
-    /** Returns the number of milliseconds this time represents.
-
-        @see milliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
-    */
-    int64 inMilliseconds() const throw();
-
-    /** Returns the number of seconds this time represents.
-
-        @see inMilliseconds, inMinutes, inHours, inDays, inWeeks
-    */
-    double inSeconds() const throw()        { return seconds; }
-
-    /** Returns the number of minutes this time represents.
-
-        @see inMilliseconds, inSeconds, inHours, inDays, inWeeks
-    */
-    double inMinutes() const throw();
-
-    /** Returns the number of hours this time represents.
-
-        @see inMilliseconds, inSeconds, inMinutes, inDays, inWeeks
-    */
-    double inHours() const throw();
-
-    /** Returns the number of days this time represents.
-
-        @see inMilliseconds, inSeconds, inMinutes, inHours, inWeeks
-    */
-    double inDays() const throw();
-
-    /** Returns the number of weeks this time represents.
-
-        @see inMilliseconds, inSeconds, inMinutes, inHours, inDays
-    */
-    double inWeeks() const throw();
-
-    /** Returns a readable textual description of the time.
-
-        The exact format of the string returned will depend on
-        the magnitude of the time - e.g.
-
-        "1 min 4 secs", "1 hr 45 mins", "2 weeks 5 days", "140 ms"
-
-        so that only the two most significant units are printed.
-
-        The returnValueForZeroTime value is the result that is returned if the
-        length is zero. Depending on your application you might want to use this
-        to return something more relevant like "empty" or "0 secs", etc.
-
-        @see inMilliseconds, inSeconds, inMinutes, inHours, inDays, inWeeks
-    */
-    const String getDescription (const String& returnValueForZeroTime = JUCE_T("0")) const throw();
-
-    /** Compares two RelativeTimes. */
-    bool operator== (const RelativeTime& other) const throw();
-    /** Compares two RelativeTimes. */
-    bool operator!= (const RelativeTime& other) const throw();
-
-    /** Compares two RelativeTimes. */
-    bool operator>  (const RelativeTime& other) const throw();
-    /** Compares two RelativeTimes. */
-    bool operator<  (const RelativeTime& other) const throw();
-    /** Compares two RelativeTimes. */
-    bool operator>= (const RelativeTime& other) const throw();
-    /** Compares two RelativeTimes. */
-    bool operator<= (const RelativeTime& other) const throw();
-
-    /** Adds another RelativeTime to this one and returns the result. */
-    const RelativeTime  operator+  (const RelativeTime& timeToAdd) const throw();
-    /** Subtracts another RelativeTime from this one and returns the result. */
-    const RelativeTime  operator-  (const RelativeTime& timeToSubtract) const throw();
-
-    /** Adds a number of seconds to this RelativeTime and returns the result. */
-    const RelativeTime  operator+  (const double secondsToAdd) const throw();
-    /** Subtracts a number of seconds from this RelativeTime and returns the result. */
-    const RelativeTime  operator-  (const double secondsToSubtract) const throw();
-
-    /** Adds another RelativeTime to this one. */
-    const RelativeTime& operator+= (const RelativeTime& timeToAdd) throw();
-    /** Subtracts another RelativeTime from this one. */
-    const RelativeTime& operator-= (const RelativeTime& timeToSubtract) throw();
-
-    /** Adds a number of seconds to this time. */
-    const RelativeTime& operator+= (const double secondsToAdd) throw();
-
-    /** Subtracts a number of seconds from this time. */
-    const RelativeTime& operator-= (const double secondsToSubtract) throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    double seconds;
-};
-
-#endif   // __JUCE_RELATIVETIME_JUCEHEADER__
-/********* End of inlined file: juce_RelativeTime.h *********/
-
-#endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_Singleton.h *********/
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-#define __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedLock.h *********/
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDLOCK_JUCEHEADER__
-
-/**
-    Automatically locks and unlocks a CriticalSection object.
-
-    Use one of these as a local variable to control access to a CriticalSection.
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
-    {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
-
-        ...do some stuff...
-
-        // myCriticalSection gets unlocked here.
-    }
-    @endcode
-
-    @see CriticalSection, ScopedUnlock
-*/
-class JUCE_API  ScopedLock
-{
-public:
-
-    /** Creates a ScopedLock.
-
-        As soon as it is created, this will lock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be unlocked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedLock() throw()                                { lock_.exit(); }
-
-private:
-
-    const CriticalSection& lock_;
-
-    ScopedLock (const ScopedLock&);
-    const ScopedLock& operator= (const ScopedLock&);
-};
-
-/**
-    Automatically unlocks and re-locks a CriticalSection object.
-
-    This is the reverse of a ScopedLock object - instead of locking the critical
-    section for the lifetime of this object, it unlocks it.
-
-    Make sure you don't try to unlock critical sections that aren't actually locked!
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
-    {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
-
-        ... do some stuff with it locked ..
-
-        while (xyz)
-        {
-            ... do some stuff with it locked ..
-
-            const ScopedUnlock unlocker (myCriticalSection);
-
-            // myCriticalSection is now unlocked for the remainder of this block,
-            // and re-locked at the end.
-
-            ...do some stuff with it unlocked ...
-        }
-
-        // myCriticalSection gets unlocked here.
-    }
-    @endcode
-
-    @see CriticalSection, ScopedLock
-*/
-class ScopedUnlock
-{
-public:
-
-    /** Creates a ScopedUnlock.
-
-        As soon as it is created, this will unlock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be re-locked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
-
-private:
-
-    const CriticalSection& lock_;
-
-    ScopedUnlock (const ScopedLock&);
-    const ScopedUnlock& operator= (const ScopedUnlock&);
-};
-
-#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedLock.h *********/
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
-    to the class's definition.
-
-    If allowOnlyOneInstance == true, it won't allow the object to be created
-    more than once in the process's lifetime.
-
-    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
-    implementation code.
-
-    Clients can then call the static MyClass::getInstance() to get a pointer to the
-    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
-    is currently extant
-
-    it's a very good idea to also add the call clearSingletonInstance() to the
-    destructor of the class, in case it is deleted by other means than deleteInstance()
-
-    e.g. @code
-
-        class MySingleton
-        {
-        public:
-            MySingleton()
-            {
-            }
-
-            ~MySingleton()
-            {
-                // this ensures that no dangling pointers are left when the
-                // singleton is deleted.
-                clearSingletonInstance();
-            }
-
-            juce_DeclareSingleton (MySingleton, false)
-        };
-
-        juce_ImplementSingleton (MySingleton)
-
-        // example of usage:
-        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
-
-        ...
-
-        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
-
-    @endcode
-
-    If you know that your object will only be created and deleted by a single thread, you
-    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
-    of this one.
-
-    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
-*/
-#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
-\
-    static classname* _singletonInstance;  \
-    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        {\
-            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-\
-            if (_singletonInstance == 0) \
-            { \
-                static bool alreadyInside = false; \
-                static bool createdOnceAlready = false; \
-\
-                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-                jassert (! problem); \
-                if (! problem) \
-                { \
-                    createdOnceAlready = true; \
-                    alreadyInside = true; \
-                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                    alreadyInside = false; \
-\
-                    _singletonInstance = newObject; \
-                } \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton macro.
-
-    After adding the juce_DeclareSingleton to the class definition, this macro has
-    to be used in the cpp file.
-*/
-#define juce_ImplementSingleton(classname) \
-\
-    classname* classname::_singletonInstance = 0; \
-    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
-    section to make access to it thread-safe. If you know that your object will
-    only ever be created or deleted by a single thread, then this is a
-    more efficient version to use.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
-*/
-#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        { \
-            static bool alreadyInside = false; \
-            static bool createdOnceAlready = false; \
-\
-            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-            jassert (! problem); \
-            if (! problem) \
-            { \
-                createdOnceAlready = true; \
-                alreadyInside = true; \
-                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                alreadyInside = false; \
-\
-                _singletonInstance = newObject; \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
-    for recursion or repeated instantiation. It's intended for use as a lightweight
-    version of a singleton, where you're using it in very straightforward
-    circumstances and don't need the extra checking.
-
-    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
-    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
-*/
-#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-            _singletonInstance = new classname(); \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
-
-    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
-    to the class definition, this macro has to be used somewhere in the cpp file.
-*/
-#define juce_ImplementSingleton_SingleThreaded(classname) \
-\
-    classname* classname::_singletonInstance = 0;
-
-#endif   // __JUCE_SINGLETON_JUCEHEADER__
-/********* End of inlined file: juce_Singleton.h *********/
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemStats.h *********/
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
-#define __JUCE_SYSTEMSTATS_JUCEHEADER__
-
-/**
-    Contains methods for finding out about the current hardware and OS configuration.
-*/
-class JUCE_API  SystemStats
-{
-public:
-
-    /** Returns the current version of JUCE,
-
-        (just in case you didn't already know at compile-time.)
-
-        See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
-    */
-    static const String getJUCEVersion() throw();
-
-    /** The set of possible results of the getOperatingSystemType() method.
-    */
-    enum OperatingSystemType
-    {
-        UnknownOS   = 0,
-
-        MacOSX      = 0x1000,
-        Linux       = 0x2000,
-
-        Win95       = 0x4001,
-        Win98       = 0x4002,
-        WinNT351    = 0x4103,
-        WinNT40     = 0x4104,
-        Win2000     = 0x4105,
-        WinXP       = 0x4106,
-        WinVista    = 0x4107,
-
-        Windows     = 0x4000,   /**< To test whether any version of Windows is running,
-                                     you can use the expression ((getOperatingSystemType() & Windows) != 0). */
-        WindowsNT   = 0x0100,   /**< To test whether the platform is Windows NT or later (i.e. not Win95 or 98),
-                                     you can use the expression ((getOperatingSystemType() & WindowsNT) != 0). */
-    };
-
-    /** Returns the type of operating system we're running on.
-
-        @returns one of the values from the OperatingSystemType enum.
-        @see getOperatingSystemName
-    */
-    static OperatingSystemType getOperatingSystemType() throw();
-
-    /** Returns the name of the type of operating system we're running on.
-
-        @returns a string describing the OS type.
-        @see getOperatingSystemType
-    */
-    static const String getOperatingSystemName() throw();
-
-    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
-    */
-    static bool isOperatingSystem64Bit() throw();
-
-    // CPU and memory information..
-
-    /** Returns the approximate CPU speed.
-
-        @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
-                    what year you're reading this...)
-    */
-    static int getCpuSpeedInMegaherz() throw();
-
-    /** Returns a string to indicate the CPU vendor.
-
-        Might not be known on some systems.
-    */
-    static const String getCpuVendor() throw();
-
-    /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() throw();
-
-    /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() throw();
-
-    /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() throw();
-
-    /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() throw();
-
-    /** Returns the number of CPUs.
-    */
-    static int getNumCpus() throw();
-
-    /** Returns a clock-cycle tick counter, if available.
-
-        If the machine can do it, this will return a tick-count
-        where each tick is one cpu clock cycle - used for profiling
-        code.
-
-        @returns    the tick count, or zero if not available.
-    */
-    static int64 getClockCycleCounter() throw();
-
-    /** Finds out how much RAM is in the machine.
-
-        @returns    the approximate number of megabytes of memory, or zero if
-                    something goes wrong when finding out.
-    */
-    static int getMemorySizeInMegabytes() throw();
-
-    /** Returns the system page-size.
-
-        This is only used by programmers with beards.
-    */
-    static int getPageSize() throw();
-
-    /** Returns a list of MAC addresses found on this machine.
-
-        @param  addresses   an array into which the MAC addresses should be copied
-        @param  maxNum      the number of elements in this array
-        @param littleEndian the endianness of the numbers to return. Note that
-                            the default values of this parameter are different on
-                            Mac/PC to avoid breaking old software that was written
-                            before this parameter was added (when the two systems
-                            defaulted to using different endiannesses). In newer
-                            software you probably want to specify an explicit value
-                            for this.
-        @returns            the number of MAC addresses that were found
-    */
-    static int getMACAddresses (int64* addresses, int maxNum,
-#if JUCE_MAC
-                                const bool littleEndian = true) throw();
-#else
-                                const bool littleEndian = false) throw();
-#endif
-
-    // not-for-public-use platform-specific method gets called at startup to initialise things.
-    static void initialiseStats() throw();
-};
-
-#endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
-/********* End of inlined file: juce_SystemStats.h *********/
-
-#endif
-#ifndef __JUCE_TIME_JUCEHEADER__
-
-/********* Start of inlined file: juce_Time.h *********/
-#ifndef __JUCE_TIME_JUCEHEADER__
-#define __JUCE_TIME_JUCEHEADER__
-
-/**
-    Holds an absolute date and time.
-
-    Internally, the time is stored at millisecond precision.
-
-    @see RelativeTime
-*/
-class JUCE_API  Time
-{
-public:
-
-    /** Creates a Time object.
-
-        This default constructor creates a time of 1st January 1970, (which is
-        represented internally as 0ms).
-
-        To create a time object representing the current time, use getCurrentTime().
-
-        @see getCurrentTime
-    */
-    Time() throw();
-
-    /** Creates a copy of another Time object. */
-    Time (const Time& other) throw();
-
-    /** Creates a time based on a number of milliseconds.
-
-        The internal millisecond count is set to 0 (1st January 1970). To create a
-        time object set to the current time, use getCurrentTime().
-
-        @param millisecondsSinceEpoch   the number of milliseconds since the unix
-                                        'epoch' (midnight Jan 1st 1970).
-        @see getCurrentTime, currentTimeMillis
-    */
-    Time (const int64 millisecondsSinceEpoch) throw();
-
-    /** Creates a time from a set of date components.
-
-        The timezone is assumed to be whatever the system is using as its locale.
-
-        @param year             the year, in 4-digit format, e.g. 2004
-        @param month            the month, in the range 0 to 11
-        @param day              the day of the month, in the range 1 to 31
-        @param hours            hours in 24-hour clock format, 0 to 23
-        @param minutes          minutes 0 to 59
-        @param seconds          seconds 0 to 59
-        @param milliseconds     milliseconds 0 to 999
-        @param useLocalTime     if true, encode using the current machine's local time; if
-                                false, it will always work in GMT.
-    */
-    Time (const int year,
-          const int month,
-          const int day,
-          const int hours,
-          const int minutes,
-          const int seconds = 0,
-          const int milliseconds = 0,
-          const bool useLocalTime = true) throw();
-
-    /** Destructor. */
-    ~Time() throw();
-
-    /** Copies this time from another one. */
-    const Time& operator= (const Time& other) throw();
-
-    /** Returns a Time object that is set to the current system time.
-
-        @see currentTimeMillis
-    */
-    static const Time JUCE_CALLTYPE getCurrentTime() throw();
-
-    /** Returns the time as a number of milliseconds.
-
-        @returns    the number of milliseconds this Time object represents, since
-                    midnight jan 1st 1970.
-        @see getMilliseconds
-    */
-    int64 toMilliseconds() const throw()                            { return millisSinceEpoch; }
-
-    /** Returns the year.
-
-        A 4-digit format is used, e.g. 2004.
-    */
-    int getYear() const throw();
-
-    /** Returns the number of the month.
-
-        The value returned is in the range 0 to 11.
-        @see getMonthName
-    */
-    int getMonth() const throw();
-
-    /** Returns the name of the month.
-
-        @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
-                                    it'll return the long form, e.g. "January"
-        @see getMonth
-    */
-    const String getMonthName (const bool threeLetterVersion) const throw();
-
-    /** Returns the day of the month.
-
-        The value returned is in the range 1 to 31.
-    */
-    int getDayOfMonth() const throw();
-
-    /** Returns the number of the day of the week.
-
-        The value returned is in the range 0 to 6 (0 = sunday, 1 = monday, etc).
-    */
-    int getDayOfWeek() const throw();
-
-    /** Returns the name of the weekday.
-
-        @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
-                                    false, it'll return the full version, e.g. "Tuesday".
-    */
-    const String getWeekdayName (const bool threeLetterVersion) const throw();
-
-    /** Returns the number of hours since midnight.
-
-        This is in 24-hour clock format, in the range 0 to 23.
-
-        @see getHoursInAmPmFormat, isAfternoon
-    */
-    int getHours() const throw();
-
-    /** Returns true if the time is in the afternoon.
-
-        So it returns true for "PM", false for "AM".
-
-        @see getHoursInAmPmFormat, getHours
-    */
-    bool isAfternoon() const throw();
-
-    /** Returns the hours in 12-hour clock format.
-
-        This will return a value 1 to 12 - use isAfternoon() to find out
-        whether this is in the afternoon or morning.
-
-        @see getHours, isAfternoon
-    */
-    int getHoursInAmPmFormat() const throw();
-
-    /** Returns the number of minutes, 0 to 59. */
-    int getMinutes() const throw();
-
-    /** Returns the number of seconds, 0 to 59. */
-    int getSeconds() const throw();
-
-    /** Returns the number of milliseconds, 0 to 999.
-
-        Unlike toMilliseconds(), this just returns the position within the
-        current second rather than the total number since the epoch.
-
-        @see toMilliseconds
-    */
-    int getMilliseconds() const throw();
-
-    /** Returns true if the local timezone uses a daylight saving correction. */
-    bool isDaylightSavingTime() const throw();
-
-    /** Returns a 3-character string to indicate the local timezone. */
-    const String getTimeZone() const throw();
-
-    /** Quick way of getting a string version of a date and time.
-
-        For a more powerful way of formatting the date and time, see the formatted() method.
-
-        @param includeDate      whether to include the date in the string
-        @param includeTime      whether to include the time in the string
-        @param includeSeconds   if the time is being included, this provides an option not to include
-                                the seconds in it
-        @param use24HourClock   if the time is being included, sets whether to use am/pm or 24
-                                hour notation.
-        @see formatted
-    */
-    const String toString (const bool includeDate,
-                           const bool includeTime,
-                           const bool includeSeconds = true,
-                           const bool use24HourClock = false) const throw();
-
-    /** Converts this date/time to a string with a user-defined format.
-
-        This uses the C strftime() function to format this time as a string. To save you
-        looking it up, these are the escape codes that strftime uses (other codes might
-        work on some platforms and not others, but these are the common ones):
-
-        %a  is replaced by the locale's abbreviated weekday name.
-        %A  is replaced by the locale's full weekday name.
-        %b  is replaced by the locale's abbreviated month name.
-        %B  is replaced by the locale's full month name.
-        %c  is replaced by the locale's appropriate date and time representation.
-        %d  is replaced by the day of the month as a decimal number [01,31].
-        %H  is replaced by the hour (24-hour clock) as a decimal number [00,23].
-        %I  is replaced by the hour (12-hour clock) as a decimal number [01,12].
-        %j  is replaced by the day of the year as a decimal number [001,366].
-        %m  is replaced by the month as a decimal number [01,12].
-        %M  is replaced by the minute as a decimal number [00,59].
-        %p  is replaced by the locale's equivalent of either a.m. or p.m.
-        %S  is replaced by the second as a decimal number [00,61].
-        %U  is replaced by the week number of the year (Sunday as the first day of the week) as a decimal number [00,53].
-        %w  is replaced by the weekday as a decimal number [0,6], with 0 representing Sunday.
-        %W  is replaced by the week number of the year (Monday as the first day of the week) as a decimal number [00,53]. All days in a new year preceding the first Monday are considered to be in week 0.
-        %x  is replaced by the locale's appropriate date representation.
-        %X  is replaced by the locale's appropriate time representation.
-        %y  is replaced by the year without century as a decimal number [00,99].
-        %Y  is replaced by the year with century as a decimal number.
-        %Z  is replaced by the timezone name or abbreviation, or by no bytes if no timezone information exists.
-        %%  is replaced by %.
-
-        @see toString
-    */
-    const String formatted (const tchar* const format) const throw();
-
-    /** Adds a RelativeTime to this time and returns the result. */
-    const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
-
-    /** Subtracts a RelativeTime from this time and returns the result. */
-    const Time operator- (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch - delta.inMilliseconds()); }
-
-    /** Returns the relative time difference between this time and another one. */
-    const RelativeTime operator- (const Time& other) const throw()  { return RelativeTime::milliseconds (millisSinceEpoch - other.millisSinceEpoch); }
-
-    /** Compares two Time objects. */
-    bool operator== (const Time& other) const throw()               { return millisSinceEpoch == other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator!= (const Time& other) const throw()               { return millisSinceEpoch != other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator<  (const Time& other) const throw()               { return millisSinceEpoch < other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator<= (const Time& other) const throw()               { return millisSinceEpoch <= other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator>  (const Time& other) const throw()               { return millisSinceEpoch > other.millisSinceEpoch; }
-
-    /** Compares two Time objects. */
-    bool operator>= (const Time& other) const throw()               { return millisSinceEpoch >= other.millisSinceEpoch; }
-
-    /** Tries to set the computer's clock.
-
-        @returns    true if this succeeds, although depending on the system, the
-                    application might not have sufficient privileges to do this.
-    */
-    bool setSystemTimeToThisTime() const throw();
-
-    /** Returns the name of a day of the week.
-
-        @param dayNumber            the day, 0 to 6 (0 = sunday, 1 = monday, etc)
-        @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
-                                    false, it'll return the full version, e.g. "Tuesday".
-    */
-    static const String getWeekdayName (int dayNumber,
-                                        const bool threeLetterVersion) throw();
-
-    /** Returns the name of one of the months.
-
-        @param monthNumber  the month, 0 to 11
-        @param threeLetterVersion   if true, it'll be a 3-letter abbreviation, e.g. "Jan"; if false
-                                    it'll return the long form, e.g. "January"
-    */
-    static const String getMonthName (int monthNumber,
-                                      const bool threeLetterVersion) throw();
-
-    // Static methods for getting system timers directly..
-
-    /** Returns the current system time.
-
-        Returns the number of milliseconds since midnight jan 1st 1970.
-
-        Should be accurate to within a few millisecs, depending on platform,
-        hardware, etc.
-    */
-    static int64 currentTimeMillis() throw();
-
-    /** Returns the number of millisecs since system startup.
-
-        Should be accurate to within a few millisecs, depending on platform,
-        hardware, etc.
-
-        @see getApproximateMillisecondCounter
-    */
-    static uint32 getMillisecondCounter() throw();
-
-    /** Returns the number of millisecs since system startup.
-
-        Same as getMillisecondCounter(), but returns a more accurate value, using
-        the high-res timer.
-
-        @see getMillisecondCounter
-    */
-    static double getMillisecondCounterHiRes() throw();
-
-    /** Waits until the getMillisecondCounter() reaches a given value.
-
-        This will make the thread sleep as efficiently as it can while it's waiting.
-    */
-    static void waitForMillisecondCounter (const uint32 targetTime) throw();
-
-    /** Less-accurate but faster version of getMillisecondCounter().
-
-        This will return the last value that getMillisecondCounter() returned, so doesn't
-        need to make a system call, but is less accurate - it shouldn't be more than
-        100ms away from the correct time, though, so is still accurate enough for a
-        lot of purposes.
-
-        @see getMillisecondCounter
-    */
-    static uint32 getApproximateMillisecondCounter() throw();
-
-    // High-resolution timers..
-
-    /** Returns the current high-resolution counter's tick-count.
-
-        This is a similar idea to getMillisecondCounter(), but with a higher
-        resolution.
-
-        @see getHighResolutionTicksPerSecond, highResolutionTicksToSeconds,
-             secondsToHighResolutionTicks
-    */
-    static int64 getHighResolutionTicks() throw();
-
-    /** Returns the resolution of the high-resolution counter in ticks per second.
-
-        @see getHighResolutionTicks, highResolutionTicksToSeconds,
-             secondsToHighResolutionTicks
-    */
-    static int64 getHighResolutionTicksPerSecond() throw();
-
-    /** Converts a number of high-resolution ticks into seconds.
-
-        @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
-             secondsToHighResolutionTicks
-    */
-    static double highResolutionTicksToSeconds (const int64 ticks) throw();
-
-    /** Converts a number seconds into high-resolution ticks.
-
-        @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
-             highResolutionTicksToSeconds
-    */
-    static int64 secondsToHighResolutionTicks (const double seconds) throw();
-
-private:
-
-    int64 millisSinceEpoch;
-};
-
-#endif   // __JUCE_TIME_JUCEHEADER__
-/********* End of inlined file: juce_Time.h *********/
-
-#endif
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-
-/********* Start of inlined file: juce_Atomic.h *********/
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
-
-// Atomic increment/decrement operations..
-
-#if JUCE_MAC && ! DOXYGEN
-
-  #if ! MACOS_10_3_OR_EARLIER
-
-    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
-  #else
-
-    forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OTAtomicAdd32 (-1, (SInt32*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (-1, (SInt32*) &variable); }
-  #endif
-
-#elif JUCE_GCC
-
-  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
-    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
-    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
-  #else
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void atomicIncrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock incl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock incl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             incl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             incl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (1)
-            : "memory");
-        #endif
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void atomicDecrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock decl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock decl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             decl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (-1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             decl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (-1)
-            : "memory");
-        #endif
-        return result;
-    }
-  #endif
-
-#elif JUCE_USE_INTRINSICS
-
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-#else
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock inc dword ptr [ecx]
-        }
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, 1
-            lock xadd dword ptr [ecx], eax
-            inc eax
-            mov result, eax
-        }
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock dec dword ptr [ecx]
-        }
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, -1
-            lock xadd dword ptr [ecx], eax
-            dec eax
-            mov result, eax
-        }
-
-        return result;
-    }
-#endif
-
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
-/********* End of inlined file: juce_Atomic.h *********/
-
-#endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileLogger.h *********/
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
-#define __JUCE_FILELOGGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_File.h *********/
-#ifndef __JUCE_FILE_JUCEHEADER__
-#define __JUCE_FILE_JUCEHEADER__
-
-/********* Start of inlined file: juce_OwnedArray.h *********/
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-#define __JUCE_OWNEDARRAY_JUCEHEADER__
-
-/** An array designed for holding objects.
-
-    This holds a list of pointers to objects, and will automatically
-    delete the objects when they are removed from the array, or when the
-    array is itself deleted.
-
-    Declare it in the form:  OwnedArray<MyObjectClass>
-
-    ..and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
-
-    After adding objects, they are 'owned' by the array and will be deleted when
-    removed or replaced.
-
-    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
-    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
-
-    @see Array, ReferenceCountedArray, StringArray, CriticalSection
-*/
-template <class ObjectClass,
-          class TypeOfCriticalSectionToUse = DummyCriticalSection>
-
-class OwnedArray   : private ArrayAllocationBase <ObjectClass*>
-{
-public:
-
-    /** Creates an empty array.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-
-        @see ArrayAllocationBase
-    */
-    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
-          numUsed (0)
-    {
-    }
-
-    /** Deletes the array and also deletes any objects inside it.
-
-        To get rid of the array without deleting its objects, use its
-        clear (false) method before deleting it.
-    */
-    ~OwnedArray()
-    {
-        clear (true);
-    }
-
-    /** Clears the array, optionally deleting the objects inside it first. */
-    void clear (const bool deleteObjects = true)
-    {
-        lock.enter();
-
-        if (deleteObjects)
-        {
-            while (numUsed > 0)
-                delete this->elements [--numUsed];
-        }
-
-        this->setAllocatedSize (0);
-        numUsed = 0;
-        lock.exit();
-    }
-
-    /** Returns the number of items currently in the array.
-        @see operator[]
-    */
-    inline int size() const throw()
-    {
-        return numUsed;
-    }
-
-    /** Returns a pointer to the object at this index in the array.
-
-        If the index is out-of-range, this will return a null pointer, (and
-        it could be null anyway, because it's ok for the array to hold null
-        pointers as well as objects).
-
-        @see getUnchecked
-    */
-    inline ObjectClass* operator[] (const int index) const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-                                            ? this->elements [index]
-                                            : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
-
-        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
-        it can be used when you're sure the index if always going to be legal.
-    */
-    inline ObjectClass* getUnchecked (const int index) const throw()
-    {
-        lock.enter();
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ObjectClass* const result = this->elements [index];
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns a pointer to the first object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getLast
-    */
-    inline ObjectClass* getFirst() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-        return result;
-    }
-
-    /** Returns a pointer to the last object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getFirst
-    */
-    inline ObjectClass* getLast() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Finds the index of an object which might be in the array.
-
-        @param objectToLookFor    the object to look for
-        @returns                  the index at which the object was found, or -1 if it's not found
-    */
-    int indexOf (const ObjectClass* const objectToLookFor) const throw()
-    {
-        int result = -1;
-
-        lock.enter();
-        ObjectClass* const* e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToLookFor == *e)
-            {
-                result = (int) (e - this->elements);
-                break;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-        return result;
-    }
-
-    /** Returns true if the array contains a specified object.
-
-        @param objectToLookFor      the object to look for
-        @returns                    true if the object is in the array
-    */
-    bool contains (const ObjectClass* const objectToLookFor) const throw()
-    {
-        lock.enter();
-
-        ObjectClass* const* e = this->elements;
-        int i = numUsed;
-
-        while (i >= 4)
-        {
-            if (objectToLookFor == *e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e)
-            {
-                lock.exit();
-                return true;
-            }
-
-            i -= 4;
-            ++e;
-        }
-
-        while (i > 0)
-        {
-            if (objectToLookFor == *e)
-            {
-                lock.exit();
-                return true;
-            }
-
-            --i;
-            ++e;
-        }
-
-        lock.exit();
-        return false;
-    }
-
-    /** Appends a new object to the end of the array.
-
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
-
-        Also be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param newObject       the new object to add to the array
-        @see set, insert, addIfNotAlreadyThere, addSorted
-    */
-    void add (const ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-        this->ensureAllocatedSize (numUsed + 1);
-        this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-        lock.exit();
-    }
-
-    /** Inserts a new object into the array at the given index.
-
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
-
-        If the index is less than 0 or greater than the size of the array, the
-        element will be added to the end of the array.
-        Otherwise, it will be inserted into the array, moving all the later elements
-        along to make room.
-
-        Be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param indexToInsertAt      the index at which the new element should be inserted
-        @param newObject            the new object to add to the array
-        @see add, addSorted, addIfNotAlreadyThere, set
-    */
-    void insert (int indexToInsertAt,
-                 const ObjectClass* const newObject) throw()
-    {
-        if (indexToInsertAt >= 0)
-        {
-            lock.enter();
-
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
-
-            this->ensureAllocatedSize (numUsed + 1);
-
-            ObjectClass** const e = this->elements + indexToInsertAt;
-            const int numToMove = numUsed - indexToInsertAt;
-
-            if (numToMove > 0)
-                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
-
-            *e = const_cast <ObjectClass*> (newObject);
-            ++numUsed;
-
-            lock.exit();
-        }
-        else
-        {
-            add (newObject);
-        }
-    }
-
-    /** Appends a new object at the end of the array as long as the array doesn't
-        already contain it.
-
-        If the array already contains a matching object, nothing will be done.
-
-        @param newObject   the new object to add to the array
-    */
-    void addIfNotAlreadyThere (const ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-
-        if (! contains (newObject))
-            add (newObject);
-
-        lock.exit();
-    }
-
-    /** Replaces an object in the array with a different one.
-
-        If the index is less than zero, this method does nothing.
-        If the index is beyond the end of the array, the new object is added to the end of the array.
-
-        Be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param indexToChange        the index whose value you want to change
-        @param newObject            the new value to set for this index.
-        @param deleteOldElement     whether to delete the object that's being replaced with the new one
-        @see add, insert, remove
-    */
-    void set (const int indexToChange,
-              const ObjectClass* const newObject,
-              const bool deleteOldElement = true)
-    {
-        if (indexToChange >= 0)
-        {
-            ObjectClass* toDelete = 0;
-            lock.enter();
-
-            if (indexToChange < numUsed)
-            {
-                if (deleteOldElement)
-                    toDelete = this->elements [indexToChange];
-
-                if (toDelete == newObject)
-                    toDelete = 0;
-                else
-                    this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
-            }
-            else
-            {
-                this->ensureAllocatedSize (numUsed + 1);
-                this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-            }
-
-            lock.exit();
-
-            delete toDelete;
-        }
-    }
-
-    /** Inserts a new object into the array assuming that the array is sorted.
-
-        This will use a comparator to find the position at which the new object
-        should go. If the array isn't sorted, the behaviour of this
-        method will be unpredictable.
-
-        @param comparator   the comparator to use to compare the elements - see the sort method
-                            for details about this object's structure
-        @param newObject    the new object to insert to the array
-        @see add, sort, indexOfSorted
-    */
-    template <class ElementComparator>
-    void addSorted (ElementComparator& comparator,
-                    ObjectClass* const newObject) throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-        lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
-        lock.exit();
-    }
-
-    /** Finds the index of an object in the array, assuming that the array is sorted.
-
-        This will use a comparator to do a binary-chop to find the index of the given
-        element, if it exists. If the array isn't sorted, the behaviour of this
-        method will be unpredictable.
-
-        @param comparator           the comparator to use to compare the elements - see the sort()
-                                    method for details about the form this object should take
-        @param objectToLookFor      the object to search for
-        @returns                    the index of the element, or -1 if it's not found
-        @see addSorted, sort
-    */
-    template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator,
-                       const ObjectClass* const objectToLookFor) const throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-        lock.enter();
-
-        int start = 0;
-        int end = numUsed;
-
-        for (;;)
-        {
-            if (start >= end)
-            {
-                lock.exit();
-                return -1;
-            }
-            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
-            {
-                lock.exit();
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    lock.exit();
-                    return -1;
-                }
-                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
-                    start = halfway;
-                else
-                    end = halfway;
-            }
-        }
-    }
-
-    /** Removes an object from the array.
-
-        This will remove the object at a given index (optionally also
-        deleting it) and move back all the subsequent objects to close the gap.
-        If the index passed in is out-of-range, nothing will happen.
-
-        @param indexToRemove    the index of the element to remove
-        @param deleteObject     whether to delete the object that is removed
-        @see removeObject, removeRange
-    */
-    void remove (const int indexToRemove,
-                 const bool deleteObject = true)
-    {
-        lock.enter();
-        ObjectClass* toDelete = 0;
-
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
-        {
-            ObjectClass** const e = this->elements + indexToRemove;
-
-            if (deleteObject)
-                toDelete = *e;
-
-            --numUsed;
-            const int numToShift = numUsed - indexToRemove;
-
-            if (numToShift > 0)
-                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-
-        delete toDelete;
-    }
-
-    /** Removes a specified object from the array.
-
-        If the item isn't found, no action is taken.
-
-        @param objectToRemove   the object to try to remove
-        @param deleteObject     whether to delete the object (if it's found)
-        @see remove, removeRange
-    */
-    void removeObject (const ObjectClass* const objectToRemove,
-                       const bool deleteObject = true)
-    {
-        lock.enter();
-        ObjectClass** e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToRemove == *e)
-            {
-                remove ((int) (e - this->elements), deleteObject);
-                break;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-    }
-
-    /** Removes a range of objects from the array.
-
-        This will remove a set of objects, starting from the given index,
-        and move any subsequent elements down to close the gap.
-
-        If the range extends beyond the bounds of the array, it will
-        be safely clipped to the size of the array.
-
-        @param startIndex       the index of the first object to remove
-        @param numberToRemove   how many objects should be removed
-        @param deleteObjects    whether to delete the objects that get removed
-        @see remove, removeObject
-    */
-    void removeRange (int startIndex,
-                      const int numberToRemove,
-                      const bool deleteObjects = true)
-    {
-        lock.enter();
-        const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
-        startIndex = jlimit (0, numUsed, startIndex);
-
-        if (endIndex > startIndex)
-        {
-            if (deleteObjects)
-            {
-                for (int i = startIndex; i < endIndex; ++i)
-                {
-                    delete this->elements [i];
-                    this->elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
-                }
-            }
-
-            const int rangeSize = endIndex - startIndex;
-            ObjectClass** e = this->elements + startIndex;
-            int numToShift = numUsed - endIndex;
-            numUsed -= rangeSize;
-
-            while (--numToShift >= 0)
-            {
-                *e = e [rangeSize];
-                ++e;
-            }
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-    }
-
-    /** Removes the last n objects from the array.
-
-        @param howManyToRemove   how many objects to remove from the end of the array
-        @param deleteObjects     whether to also delete the objects that are removed
-        @see remove, removeObject, removeRange
-    */
-    void removeLast (int howManyToRemove = 1,
-                     const bool deleteObjects = true)
-    {
-        lock.enter();
-
-        if (howManyToRemove >= numUsed)
-        {
-            clear (deleteObjects);
-        }
-        else
-        {
-            while (--howManyToRemove >= 0)
-                remove (numUsed - 1, deleteObjects);
-        }
-
-        lock.exit();
-    }
-
-    /** Swaps a pair of objects in the array.
-
-        If either of the indexes passed in is out-of-range, nothing will happen,
-        otherwise the two objects at these positions will be exchanged.
-    */
-    void swap (const int index1,
-               const int index2) throw()
-    {
-        lock.enter();
-
-        if (((unsigned int) index1) < (unsigned int) numUsed
-             && ((unsigned int) index2) < (unsigned int) numUsed)
-        {
-            swapVariables (this->elements [index1],
-                           this->elements [index2]);
-        }
-
-        lock.exit();
-    }
-
-    /** Moves one of the objects to a different position.
-
-        This will move the object to a specified index, shuffling along
-        any intervening elements as required.
-
-        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
-        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
-
-        @param currentIndex     the index of the object to be moved. If this isn't a
-                                valid index, then nothing will be done
-        @param newIndex         the index at which you'd like this object to end up. If this
-                                is less than zero, it will be moved to the end of the array
-    */
-    void move (const int currentIndex,
-               int newIndex) throw()
-    {
-        if (currentIndex != newIndex)
-        {
-            lock.enter();
-
-            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
-            {
-                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
-                    newIndex = numUsed - 1;
-
-                ObjectClass* const value = this->elements [currentIndex];
-
-                if (newIndex > currentIndex)
-                {
-                    memmove (this->elements + currentIndex,
-                             this->elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ObjectClass*));
-                }
-                else
-                {
-                    memmove (this->elements + newIndex + 1,
-                             this->elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ObjectClass*));
-                }
-
-                this->elements [newIndex] = value;
-            }
-
-            lock.exit();
-        }
-    }
-
-    /** This swaps the contents of this array with those of another array.
-
-        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
-        because it just swaps their internal pointers.
-    */
-    template <class OtherArrayType>
-    void swapWithArray (OtherArrayType& otherArray) throw()
-    {
-        lock.enter();
-        otherArray.lock.enter();
-        swapVariables <int> (this->numUsed, otherArray.numUsed);
-        swapVariables <ObjectClass**> (this->elements, otherArray.elements);
-        swapVariables <int> (this->numAllocated, otherArray.numAllocated);
-        otherArray.lock.exit();
-        lock.exit();
-    }
-
-    /** Reduces the amount of storage being used by the array.
-
-        Arrays typically allocate slightly more storage than they need, and after
-        removing elements, they may have quite a lot of unused space allocated.
-        This method will reduce the amount of allocated storage to a minimum.
-    */
-    void minimiseStorageOverheads() throw()
-    {
-        lock.enter();
-
-        if (numUsed == 0)
-        {
-            this->setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
-
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
-        }
-
-        lock.exit();
-    }
-
-    /** Increases the array's internal storage to hold a minimum number of elements.
-
-        Calling this before adding a large known number of elements means that
-        the array won't have to keep dynamically resizing itself as the elements
-        are added, and it'll therefore be more efficient.
-    */
-    void ensureStorageAllocated (const int minNumElements) throw()
-    {
-        this->ensureAllocatedSize (minNumElements);
-    }
-
-    /** Sorts the elements in the array.
-
-        This will use a comparator object to sort the elements into order. The object
-        passed must have a method of the form:
-        @code
-        int compareElements (ElementType first, ElementType second);
-        @endcode
-
-        ..and this method must return:
-          - a value of < 0 if the first comes before the second
-          - a value of 0 if the two objects are equivalent
-          - a value of > 0 if the second comes before the first
-
-        To improve performance, the compareElements() method can be declared as static or const.
-
-        @param comparator   the comparator to use for comparing elements.
-        @param retainOrderOfEquivalentItems     if this is true, then items
-                            which the comparator says are equivalent will be
-                            kept in the order in which they currently appear
-                            in the array. This is slower to perform, but may
-                            be important in some cases. If it's false, a faster
-                            algorithm is used, but equivalent elements may be
-                            rearranged.
-        @see sortArray, indexOfSorted
-    */
-    template <class ElementComparator>
-    void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-
-        lock.enter();
-        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
-        lock.exit();
-    }
-
-    /** Locks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see unlockArray
-    */
-    void lockArray() const throw()
-    {
-        lock.enter();
-    }
-
-    /** Unlocks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see lockArray
-    */
-    void unlockArray() const throw()
-    {
-        lock.exit();
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int numUsed;
-    TypeOfCriticalSectionToUse lock;
-
-    // disallow copy constructor and assignment
-    OwnedArray (const OwnedArray&);
-    const OwnedArray& operator= (const OwnedArray&);
-};
-
-#endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_OwnedArray.h *********/
-
-/********* Start of inlined file: juce_StringArray.h *********/
-#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
-#define __JUCE_STRINGARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_VoidArray.h *********/
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
-#define __JUCE_VOIDARRAY_JUCEHEADER__
 
 /**
     A typedef for an Array of void*'s.
@@ -7979,1295 +6974,1012 @@ private:
 /********* End of inlined file: juce_FileLogger.h *********/
 
 #endif
+#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+
+/********* Start of inlined file: juce_Initialisation.h *********/
+#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+#define __JUCE_INITIALISATION_JUCEHEADER__
+
+/** Initialises Juce's GUI classes.
+
+    If you're embedding Juce into an application that uses its own event-loop rather
+    than using the START_JUCE_APPLICATION macro, call this function before making any
+    Juce calls, to make sure things are initialised correctly.
+
+    Note that if you're creating a Juce DLL for Windows, you may also need to call the
+    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+
+    @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
+*/
+void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
+
+/** Clears up any static data being used by Juce's GUI classes.
+
+    If you're embedding Juce into an application that uses its own event-loop rather
+    than using the START_JUCE_APPLICATION macro, call this function in your shutdown
+    code to clean up any juce objects that might be lying around.
+
+    @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
+*/
+void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
+
+/** Initialises the core parts of Juce.
+
+    If you're embedding Juce into either a command-line program, call this function
+    at the start of your main() function to make sure that Juce is initialised correctly.
+
+    Note that if you're creating a Juce DLL for Windows, you may also need to call the
+    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+
+    @see shutdownJuce_NonGUI, initialiseJuce_GUI
+*/
+void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
+
+/** Clears up any static data being used by Juce's non-gui core classes.
+
+    If you're embedding Juce into either a command-line program, call this function
+    at the end of your main() function if you want to make sure any Juce objects are
+    cleaned up correctly.
+
+    @see initialiseJuce_NonGUI, initialiseJuce_GUI
+*/
+void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+
+#endif   // __JUCE_INITIALISATION_JUCEHEADER__
+/********* End of inlined file: juce_Initialisation.h *********/
+
+#endif
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 
-/********* Start of inlined file: juce_ReferenceCountedArray.h *********/
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#endif
+#ifndef __JUCE_MEMORY_JUCEHEADER__
 
-/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+
+/********* Start of inlined file: juce_Random.h *********/
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+#define __JUCE_RANDOM_JUCEHEADER__
+
+/********* Start of inlined file: juce_BitArray.h *********/
+#ifndef __JUCE_BITARRAY_JUCEHEADER__
+#define __JUCE_BITARRAY_JUCEHEADER__
+
+class MemoryBlock;
 
 /**
-    Adds reference-counting to an object.
+    An array of on/off bits, also usable to store large binary integers.
 
-    To add reference-counting to a class, derive it from this class, and
-    use the ReferenceCountedObjectPtr class to point to it.
+    A BitArray acts like an arbitrarily large integer whose bits can be set or
+    cleared, and some basic mathematical operations can be done on the number as
+    a whole.
+*/
+class JUCE_API  BitArray
+{
+public:
+
+    /** Creates an empty BitArray */
+    BitArray() throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 32 bits of the array are initialised with this value.
+    */
+    BitArray (const unsigned int value) throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 32 bits of the array are initialised with the absolute value
+        passed in, and its sign is set to reflect the sign of the number.
+    */
+    BitArray (const int value) throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 64 bits of the array are initialised with the absolute value
+        passed in, and its sign is set to reflect the sign of the number.
+    */
+    BitArray (int64 value) throw();
+
+    /** Creates a copy of another BitArray. */
+    BitArray (const BitArray& other) throw();
+
+    /** Destructor. */
+    ~BitArray() throw();
+
+    /** Copies another BitArray onto this one. */
+    const BitArray& operator= (const BitArray& other) throw();
+
+    /** Two arrays are the same if the same bits are set. */
+    bool operator== (const BitArray& other) const throw();
+    /** Two arrays are the same if the same bits are set. */
+    bool operator!= (const BitArray& other) const throw();
+
+    /** Clears all bits in the BitArray to 0. */
+    void clear() throw();
+
+    /** Clears a particular bit in the array. */
+    void clearBit (const int bitNumber) throw();
+
+    /** Sets a specified bit to 1.
+
+        If the bit number is high, this will grow the array to accomodate it.
+    */
+    void setBit (const int bitNumber) throw();
+
+    /** Sets or clears a specified bit. */
+    void setBit (const int bitNumber,
+                 const bool shouldBeSet) throw();
+
+    /** Sets a range of bits to be either on or off.
+
+        @param startBit     the first bit to change
+        @param numBits      the number of bits to change
+        @param shouldBeSet  whether to turn these bits on or off
+    */
+    void setRange (int startBit,
+                   int numBits,
+                   const bool shouldBeSet) throw();
+
+    /** Inserts a bit an a given position, shifting up any bits above it. */
+    void insertBit (const int bitNumber,
+                    const bool shouldBeSet) throw();
+
+    /** Returns the value of a specified bit in the array.
+
+        If the index is out-of-range, the result will be false.
+    */
+    bool operator[] (const int bit) const throw();
+
+    /** Returns true if no bits are set. */
+    bool isEmpty() const throw();
+
+    /** Returns a range of bits in the array as a new BitArray.
+
+        e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
+        @see getBitRangeAsInt
+    */
+    const BitArray getBitRange (int startBit, int numBits) const throw();
+
+    /** Returns a range of bits in the array as an integer value.
+
+        e.g. getBitRangeAsInt (0, 32) would return the lowest 32 bits.
+
+        Asking for more than 32 bits isn't allowed (obviously) - for that, use
+        getBitRange().
+    */
+    int getBitRangeAsInt (int startBit, int numBits) const throw();
+
+    /** Sets a range of bits in the array based on an integer value.
+
+        Copies the given integer into the array, starting at startBit,
+        and only using up to numBits of the available bits.
+    */
+    void setBitRangeAsInt (int startBit, int numBits,
+                           unsigned int valueToSet) throw();
+
+    /** Performs a bitwise OR with another BitArray.
+
+        The result ends up in this array.
+    */
+    void orWith (const BitArray& other) throw();
+
+    /** Performs a bitwise AND with another BitArray.
+
+        The result ends up in this array.
+    */
+    void andWith (const BitArray& other) throw();
+
+    /** Performs a bitwise XOR with another BitArray.
+
+        The result ends up in this array.
+    */
+    void xorWith (const BitArray& other) throw();
+
+    /** Adds another BitArray's value to this one.
+
+        Treating the two arrays as large positive integers, this
+        adds them up and puts the result in this array.
+    */
+    void add (const BitArray& other) throw();
+
+    /** Subtracts another BitArray's value from this one.
+
+        Treating the two arrays as large positive integers, this
+        subtracts them and puts the result in this array.
+
+        Note that if the result should be negative, this won't be
+        handled correctly.
+    */
+    void subtract (const BitArray& other) throw();
+
+    /** Multiplies another BitArray's value with this one.
+
+        Treating the two arrays as large positive integers, this
+        multiplies them and puts the result in this array.
+    */
+    void multiplyBy (const BitArray& other) throw();
+
+    /** Divides another BitArray's value into this one and also produces a remainder.
+
+        Treating the two arrays as large positive integers, this
+        divides this value by the other, leaving the quotient in this
+        array, and the remainder is copied into the other BitArray passed in.
+    */
+    void divideBy (const BitArray& divisor, BitArray& remainder) throw();
+
+    /** Returns the largest value that will divide both this value and the one
+        passed-in.
+    */
+    const BitArray findGreatestCommonDivisor (BitArray other) const throw();
+
+    /** Performs a modulo operation on this value.
+
+        The result is stored in this value.
+    */
+    void modulo (const BitArray& divisor) throw();
+
+    /** Performs a combined exponent and modulo operation.
+
+        This BitArray's value becomes (this ^ exponent) % modulus.
+    */
+    void exponentModulo (const BitArray& exponent, const BitArray& modulus) throw();
+
+    /** Performs an inverse modulo on the value.
+
+        i.e. the result is (this ^ -1) mod (modulus).
+    */
+    void inverseModulo (const BitArray& modulus) throw();
+
+    /** Shifts a section of bits left or right.
+
+        @param howManyBitsLeft  how far to move the bits (+ve numbers shift it left, -ve numbers shift it right).
+        @param startBit         the first bit to affect - if this is > 0, only bits above that index will be affected.
+    */
+    void shiftBits (int howManyBitsLeft,
+                    int startBit = 0) throw();
+
+    /** Does a signed comparison of two BitArrays.
+
+        Return values are:
+            - 0 if the numbers are the same
+            - < 0 if this number is smaller than the other
+            - > 0 if this number is bigger than the other
+    */
+    int compare (const BitArray& other) const throw();
+
+    /** Compares the magnitudes of two BitArrays, ignoring their signs.
+
+        Return values are:
+            - 0 if the numbers are the same
+            - < 0 if this number is smaller than the other
+            - > 0 if this number is bigger than the other
+    */
+    int compareAbsolute (const BitArray& other) const throw();
+
+    /** Returns true if the value is less than zero.
+
+        @see setNegative, negate
+    */
+    bool isNegative() const throw();
+
+    /** Changes the sign of the number to be positive or negative.
+
+        @see isNegative, negate
+    */
+    void setNegative (const bool shouldBeNegative) throw();
+
+    /** Inverts the sign of the number.
+
+        @see isNegative, setNegative
+    */
+    void negate() throw();
+
+    /** Counts the total number of set bits in the array. */
+    int countNumberOfSetBits() const throw();
+
+    /** Looks for the index of the next set bit after a given starting point.
+
+        searches from startIndex (inclusive) upwards for the first set bit,
+        and returns its index.
+
+        If no set bits are found, it returns -1.
+    */
+    int findNextSetBit (int startIndex = 0) const throw();
+
+    /** Looks for the index of the next clear bit after a given starting point.
+
+        searches from startIndex (inclusive) upwards for the first clear bit,
+        and returns its index.
+    */
+    int findNextClearBit (int startIndex = 0) const throw();
+
+    /** Returns the index of the highest set bit in the array.
+
+        If the array is empty, this will return -1.
+    */
+    int getHighestBit() const throw();
+
+    /** Converts the array to a number string.
+
+        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+
+        If minuimumNumCharacters is greater than 0, the returned string will be
+        padded with leading zeros to reach at least that length.
+    */
+    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
+
+    /** Converts a number string to an array.
+
+        Any non-valid characters will be ignored.
+
+        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+    */
+    void parseString (const String& text,
+                      const int base) throw();
+
+    /** Turns the array into a block of binary data.
+
+        The data is arranged as little-endian, so the first byte of data is the low 8 bits
+        of the array, and so on.
+
+        @see loadFromMemoryBlock
+    */
+    const MemoryBlock toMemoryBlock() const throw();
+
+    /** Copies a block of raw data onto this array.
+
+        The data is arranged as little-endian, so the first byte of data is the low 8 bits
+        of the array, and so on.
+
+        @see toMemoryBlock
+    */
+    void loadFromMemoryBlock (const MemoryBlock& data) throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    void ensureSize (const int numVals) throw();
+    unsigned int* values;
+    int numValues, highestBit;
+    bool negative;
+};
+
+#endif   // __JUCE_BITARRAY_JUCEHEADER__
+/********* End of inlined file: juce_BitArray.h *********/
+
+/**
+    A simple pseudo-random number generator.
+*/
+class JUCE_API  Random
+{
+public:
+
+    /** Creates a Random object based on a seed value.
+
+        For a given seed value, the subsequent numbers generated by this object
+        will be predictable, so a good idea is to set this value based
+        on the time, e.g.
+
+        new Random (Time::currentTimeMillis())
+    */
+    Random (const int64 seedValue) throw();
+
+    /** Destructor. */
+    ~Random() throw();
+
+    /** Returns the next random 32 bit integer.
+
+        @returns a random integer from the full range 0x80000000 to 0x7fffffff
+    */
+    int nextInt() throw();
+
+    /** Returns the next random number, limited to a given range.
+
+        @returns a random integer between 0 (inclusive) and maxValue (exclusive).
+    */
+    int nextInt (const int maxValue) throw();
+
+    /** Returns the next 64-bit random number.
+
+        @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
+    */
+    int64 nextInt64() throw();
+
+    /** Returns the next random floating-point number.
+
+        @returns a random value in the range 0 to 1.0
+    */
+    float nextFloat() throw();
+
+    /** Returns the next random floating-point number.
+
+        @returns a random value in the range 0 to 1.0
+    */
+    double nextDouble() throw();
+
+    /** Returns the next random boolean value.
+    */
+    bool nextBool() throw();
+
+    /** Returns a BitArray containing a random number.
+
+        @returns a random value in the range 0 to (maximumValue - 1).
+    */
+    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
+
+    /** Sets a range of bits in a BitArray to random values. */
+    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
+
+    /** To avoid the overhead of having to create a new Random object whenever
+        you need a number, this is a shared application-wide object that
+        can be used.
+
+        It's not thread-safe though, so threads should use their own Random object.
+    */
+    static Random& getSystemRandom() throw();
+
+    /** Resets this Random object to a given seed value. */
+    void setSeed (const int64 newSeed) throw();
+
+    /** Reseeds this generator using a value generated from various semi-random system
+        properties like the current time, etc.
+
+        Because this function convolves the time with the last seed value, calling
+        it repeatedly will increase the randomness of the final result.
+    */
+    void setSeedRandomly();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int64 seed;
+};
+
+#endif   // __JUCE_RANDOM_JUCEHEADER__
+/********* End of inlined file: juce_Random.h *********/
+
+#endif
+#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_Singleton.h *********/
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+#define __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedLock.h *********/
+#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDLOCK_JUCEHEADER__
+
+/**
+    Automatically locks and unlocks a CriticalSection object.
+
+    Use one of these as a local variable to control access to a CriticalSection.
 
     e.g. @code
-    class MyClass : public ReferenceCountedObject
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
     {
-        void foo();
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
 
-        // This is a neat way of declaring a typedef for a pointer class,
-        // rather than typing out the full templated name each time..
-        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
-    };
+        ...do some stuff...
 
-    MyClass::Ptr p = new MyClass();
-    MyClass::Ptr p2 = p;
-    p = 0;
-    p2->foo();
+        // myCriticalSection gets unlocked here.
+    }
     @endcode
 
-    Once a new ReferenceCountedObject has been assigned to a pointer, be
-    careful not to delete the object manually.
-
-    @see ReferenceCountedObjectPtr, ReferenceCountedArray
+    @see CriticalSection, ScopedUnlock
 */
-class JUCE_API  ReferenceCountedObject
+class JUCE_API  ScopedLock
 {
 public:
 
-    /** Increments the object's reference count.
+    /** Creates a ScopedLock.
 
-        This is done automatically by the smart pointer, but is public just
-        in case it's needed for nefarious purposes.
+        As soon as it is created, this will lock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be unlocked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
     */
-    inline void incReferenceCount() throw()
-    {
-        atomicIncrement (refCounts);
-
-        jassert (refCounts > 0);
-    }
-
-    /** Decreases the object's reference count.
-
-        If the count gets to zero, the object will be deleted.
-    */
-    inline void decReferenceCount() throw()
-    {
-        jassert (refCounts > 0);
-
-        if (atomicDecrementAndReturn (refCounts) == 0)
-            delete this;
-    }
-
-    /** Returns the object's current reference count. */
-    inline int getReferenceCount() const throw()
-    {
-        return refCounts;
-    }
-
-protected:
-
-    /** Creates the reference-counted object (with an initial ref count of zero). */
-    ReferenceCountedObject()
-        : refCounts (0)
-    {
-    }
-
-    /** Destructor. */
-    virtual ~ReferenceCountedObject()
-    {
-        // it's dangerous to delete an object that's still referenced by something else!
-        jassert (refCounts == 0);
-    }
-
-private:
-
-    int refCounts;
-};
-
-/**
-    Used to point to an object of type ReferenceCountedObject.
-
-    It's wise to use a typedef instead of typing out the templated name
-    each time - e.g.
-
-    typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
-
-    @see ReferenceCountedObject, ReferenceCountedObjectArray
-*/
-template <class ReferenceCountedObjectClass>
-class ReferenceCountedObjectPtr
-{
-public:
-
-    /** Creates a pointer to a null object. */
-    inline ReferenceCountedObjectPtr() throw()
-        : referencedObject (0)
-    {
-    }
-
-    /** Creates a pointer to an object.
-
-        This will increment the object's reference-count if it is non-null.
-    */
-    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
-        : referencedObject (refCountedObject)
-    {
-        if (refCountedObject != 0)
-            refCountedObject->incReferenceCount();
-    }
-
-    /** Copies another pointer.
-
-        This will increment the object's reference-count (if it is non-null).
-    */
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
-        : referencedObject (other.referencedObject)
-    {
-        if (referencedObject != 0)
-            referencedObject->incReferenceCount();
-    }
-
-    /** Changes this pointer to point at a different object.
-
-        The reference count of the old object is decremented, and it might be
-        deleted if it hits zero. The new object's count is incremented.
-    */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
-    {
-        ReferenceCountedObjectClass* const newObject = other.referencedObject;
-
-        if (newObject != referencedObject)
-        {
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != 0)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
-    }
-
-    /** Changes this pointer to point at a different object.
-
-        The reference count of the old object is decremented, and it might be
-        deleted if it hits zero. The new object's count is incremented.
-    */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
-    {
-        if (referencedObject != newObject)
-        {
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != 0)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
-    }
+    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
 
     /** Destructor.
 
-        This will decrement the object's reference-count, and may delete it if it
-        gets to zero.
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
     */
-    inline ~ReferenceCountedObjectPtr()
-    {
-        if (referencedObject != 0)
-            referencedObject->decReferenceCount();
-    }
-
-    /** Returns the object that this pointer references.
-
-        The pointer returned may be zero, of course.
-    */
-    inline operator ReferenceCountedObjectClass*() const throw()
-    {
-        return referencedObject;
-    }
-
-    /** Returns true if this pointer refers to the given object. */
-    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject == object;
-    }
-
-    /** Returns true if this pointer doesn't refer to the given object. */
-    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject != object;
-    }
-
-    // the -> operator is called on the referenced object
-    inline ReferenceCountedObjectClass* operator->() const throw()
-    {
-        return referencedObject;
-    }
+    inline ~ScopedLock() throw()                                { lock_.exit(); }
 
 private:
 
-    ReferenceCountedObjectClass* referencedObject;
+    const CriticalSection& lock_;
+
+    ScopedLock (const ScopedLock&);
+    const ScopedLock& operator= (const ScopedLock&);
 };
 
-#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedObject.h *********/
-
 /**
-    Holds a list of objects derived from ReferenceCountedObject.
+    Automatically unlocks and re-locks a CriticalSection object.
 
-    A ReferenceCountedArray holds objects derived from ReferenceCountedObject,
-    and takes care of incrementing and decrementing their ref counts when they
-    are added and removed from the array.
+    This is the reverse of a ScopedLock object - instead of locking the critical
+    section for the lifetime of this object, it unlocks it.
 
-    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
-    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+    Make sure you don't try to unlock critical sections that aren't actually locked!
 
-    @see Array, OwnedArray, StringArray
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ... do some stuff with it locked ..
+
+        while (xyz)
+        {
+            ... do some stuff with it locked ..
+
+            const ScopedUnlock unlocker (myCriticalSection);
+
+            // myCriticalSection is now unlocked for the remainder of this block,
+            // and re-locked at the end.
+
+            ...do some stuff with it unlocked ...
+        }
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedLock
 */
-template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSection>
-class ReferenceCountedArray   : private ArrayAllocationBase <ObjectClass*>
+class ScopedUnlock
 {
 public:
 
-    /** Creates an empty array.
+    /** Creates a ScopedUnlock.
 
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
+        As soon as it is created, this will unlock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be re-locked.
 
-        @see ReferenceCountedObject, ArrayAllocationBase, Array, OwnedArray
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
     */
-    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
-          numUsed (0)
-    {
-    }
-
-    /** Creates a copy of another array */
-    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
-        : ArrayAllocationBase <ObjectClass*> (other.granularity),
-          numUsed (other.numUsed)
-    {
-        other.lockArray();
-        this->setAllocatedSize (numUsed);
-        memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
-
-        for (int i = numUsed; --i >= 0;)
-            if (this->elements[i] != 0)
-                this->elements[i]->incReferenceCount();
-
-        other.unlockArray();
-    }
-
-    /** Copies another array into this one.
-
-        Any existing objects in this array will first be released.
-    */
-    const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
-    {
-        if (this != &other)
-        {
-            other.lockArray();
-            lock.enter();
-
-            clear();
-
-            this->granularity = other.granularity;
-            this->ensureAllocatedSize (other.numUsed);
-            numUsed = other.numUsed;
-            memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
-            minimiseStorageOverheads();
-
-            for (int i = numUsed; --i >= 0;)
-                if (this->elements[i] != 0)
-                    this->elements[i]->incReferenceCount();
-
-            lock.exit();
-            other.unlockArray();
-        }
-
-        return *this;
-    }
+    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
 
     /** Destructor.
 
-        Any objects in the array will be released, and may be deleted if not referenced from elsewhere.
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
     */
-    ~ReferenceCountedArray()
-    {
-        clear();
-    }
-
-    /** Removes all objects from the array.
-
-        Any objects in the array that are not referenced from elsewhere will be deleted.
-    */
-    void clear()
-    {
-        lock.enter();
-
-        while (numUsed > 0)
-            if (this->elements [--numUsed] != 0)
-                this->elements [numUsed]->decReferenceCount();
-
-        jassert (numUsed == 0);
-        this->setAllocatedSize (0);
-
-        lock.exit();
-    }
-
-    /** Returns the current number of objects in the array. */
-    inline int size() const throw()
-    {
-        return numUsed;
-    }
-
-    /** Returns a pointer to the object at this index in the array.
-
-        If the index is out-of-range, this will return a null pointer, (and
-        it could be null anyway, because it's ok for the array to hold null
-        pointers as well as objects).
-
-        @see getUnchecked
-    */
-    inline ObjectClass* operator[] (const int index) const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-                                        ? this->elements [index]
-                                        : (ObjectClass*) 0;
-        lock.exit();
-        return result;
-    }
-
-    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
-
-        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
-        it can be used when you're sure the index if always going to be legal.
-    */
-    inline ObjectClass* getUnchecked (const int index) const throw()
-    {
-        lock.enter();
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ObjectClass* const result = this->elements [index];
-        lock.exit();
-        return result;
-    }
-
-    /** Returns a pointer to the first object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getLast
-    */
-    inline ObjectClass* getFirst() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns a pointer to the last object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getFirst
-    */
-    inline ObjectClass* getLast() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Finds the index of the first occurrence of an object in the array.
-
-        @param objectToLookFor    the object to look for
-        @returns                  the index at which the object was found, or -1 if it's not found
-    */
-    int indexOf (const ObjectClass* const objectToLookFor) const throw()
-    {
-        int result = -1;
-
-        lock.enter();
-        ObjectClass** e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToLookFor == *e)
-            {
-                result = (int) (e - this->elements);
-                break;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-        return result;
-    }
-
-    /** Returns true if the array contains a specified object.
-
-        @param objectToLookFor      the object to look for
-        @returns                    true if the object is in the array
-    */
-    bool contains (const ObjectClass* const objectToLookFor) const throw()
-    {
-        lock.enter();
-        ObjectClass** e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToLookFor == *e)
-            {
-                lock.exit();
-                return true;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-        return false;
-    }
-
-    /** Appends a new object to the end of the array.
-
-        This will increase the new object's reference count.
-
-        @param newObject       the new object to add to the array
-        @see set, insert, addIfNotAlreadyThere, addSorted, addArray
-    */
-    void add (ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-        this->ensureAllocatedSize (numUsed + 1);
-        this->elements [numUsed++] = newObject;
-
-        if (newObject != 0)
-            newObject->incReferenceCount();
-
-        lock.exit();
-    }
-
-    /** Inserts a new object into the array at the given index.
-
-        If the index is less than 0 or greater than the size of the array, the
-        element will be added to the end of the array.
-        Otherwise, it will be inserted into the array, moving all the later elements
-        along to make room.
-
-        This will increase the new object's reference count.
-
-        @param indexToInsertAt      the index at which the new element should be inserted
-        @param newObject            the new object to add to the array
-        @see add, addSorted, addIfNotAlreadyThere, set
-    */
-    void insert (int indexToInsertAt,
-                 ObjectClass* const newObject) throw()
-    {
-        if (indexToInsertAt >= 0)
-        {
-            lock.enter();
-
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
-
-            this->ensureAllocatedSize (numUsed + 1);
-
-            ObjectClass** const e = this->elements + indexToInsertAt;
-            const int numToMove = numUsed - indexToInsertAt;
-
-            if (numToMove > 0)
-                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
-
-            *e = newObject;
-
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            ++numUsed;
-            lock.exit();
-        }
-        else
-        {
-            add (newObject);
-        }
-    }
-
-    /** Appends a new object at the end of the array as long as the array doesn't
-        already contain it.
-
-        If the array already contains a matching object, nothing will be done.
-
-        @param newObject   the new object to add to the array
-    */
-    void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-
-        if (! contains (newObject))
-            add (newObject);
-
-        lock.exit();
-    }
-
-    /** Replaces an object in the array with a different one.
-
-        If the index is less than zero, this method does nothing.
-        If the index is beyond the end of the array, the new object is added to the end of the array.
-
-        The object being added has its reference count increased, and if it's replacing
-        another object, then that one has its reference count decreased, and may be deleted.
-
-        @param indexToChange        the index whose value you want to change
-        @param newObject            the new value to set for this index.
-        @see add, insert, remove
-    */
-    void set (const int indexToChange,
-              ObjectClass* const newObject)
-    {
-        if (indexToChange >= 0)
-        {
-            lock.enter();
-
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            if (indexToChange < numUsed)
-            {
-                if (this->elements [indexToChange] != 0)
-                    this->elements [indexToChange]->decReferenceCount();
-
-                this->elements [indexToChange] = newObject;
-            }
-            else
-            {
-                this->ensureAllocatedSize (numUsed + 1);
-                this->elements [numUsed++] = newObject;
-            }
-
-            lock.exit();
-        }
-    }
-
-    /** Adds elements from another array to the end of this array.
-
-        @param arrayToAddFrom       the array from which to copy the elements
-        @param startIndex           the first element of the other array to start copying from
-        @param numElementsToAdd     how many elements to add from the other array. If this
-                                    value is negative or greater than the number of available elements,
-                                    all available elements will be copied.
-        @see add
-    */
-    void addArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& arrayToAddFrom,
-                   int startIndex = 0,
-                   int numElementsToAdd = -1) throw()
-    {
-        arrayToAddFrom.lockArray();
-        lock.enter();
-
-        if (startIndex < 0)
-        {
-            jassertfalse
-            startIndex = 0;
-        }
-
-        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
-            numElementsToAdd = arrayToAddFrom.size() - startIndex;
-
-        if (numElementsToAdd > 0)
-        {
-            this->ensureAllocatedSize (numUsed + numElementsToAdd);
-
-            while (--numElementsToAdd >= 0)
-                add (arrayToAddFrom.getUnchecked (startIndex++));
-        }
-
-        lock.exit();
-        arrayToAddFrom.unlockArray();
-    }
-
-    /** Inserts a new object into the array assuming that the array is sorted.
-
-        This will use a comparator to find the position at which the new object
-        should go. If the array isn't sorted, the behaviour of this
-        method will be unpredictable.
-
-        @param comparator       the comparator object to use to compare the elements - see the
-                                sort() method for details about this object's form
-        @param newObject        the new object to insert to the array
-        @see add, sort
-    */
-    template <class ElementComparator>
-    void addSorted (ElementComparator& comparator,
-                    ObjectClass* newObject) throw()
-    {
-        lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
-        lock.exit();
-    }
-
-    /** Removes an object from the array.
-
-        This will remove the object at a given index and move back all the
-        subsequent objects to close the gap.
-
-        If the index passed in is out-of-range, nothing will happen.
-
-        The object that is removed will have its reference count decreased,
-        and may be deleted if not referenced from elsewhere.
-
-        @param indexToRemove    the index of the element to remove
-        @see removeObject, removeRange
-    */
-    void remove (const int indexToRemove)
-    {
-        lock.enter();
-
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
-        {
-            ObjectClass** const e = this->elements + indexToRemove;
-
-            if (*e != 0)
-                (*e)->decReferenceCount();
-
-            --numUsed;
-            const int numberToShift = numUsed - indexToRemove;
-
-            if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-    }
-
-    /** Removes the first occurrence of a specified object from the array.
-
-        If the item isn't found, no action is taken. If it is found, it is
-        removed and has its reference count decreased.
-
-        @param objectToRemove   the object to try to remove
-        @see remove, removeRange
-    */
-    void removeObject (ObjectClass* const objectToRemove)
-    {
-        lock.enter();
-        remove (indexOf (objectToRemove));
-        lock.exit();
-    }
-
-    /** Removes a range of objects from the array.
-
-        This will remove a set of objects, starting from the given index,
-        and move any subsequent elements down to close the gap.
-
-        If the range extends beyond the bounds of the array, it will
-        be safely clipped to the size of the array.
-
-        The objects that are removed will have their reference counts decreased,
-        and may be deleted if not referenced from elsewhere.
-
-        @param startIndex       the index of the first object to remove
-        @param numberToRemove   how many objects should be removed
-        @see remove, removeObject
-    */
-    void removeRange (const int startIndex,
-                      const int numberToRemove)
-    {
-        lock.enter();
-
-        const int start = jlimit (0, numUsed, startIndex);
-        const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
-
-        if (end > start)
-        {
-            int i;
-            for (i = start; i < end; ++i)
-            {
-                if (this->elements[i] != 0)
-                {
-                    this->elements[i]->decReferenceCount();
-                    this->elements[i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
-                }
-            }
-
-            const int rangeSize = end - start;
-            ObjectClass** e = this->elements + start;
-            i = numUsed - end;
-            numUsed -= rangeSize;
-
-            while (--i >= 0)
-            {
-                *e = e [rangeSize];
-                ++e;
-            }
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-    }
-
-    /** Removes the last n objects from the array.
-
-        The objects that are removed will have their reference counts decreased,
-        and may be deleted if not referenced from elsewhere.
-
-        @param howManyToRemove   how many objects to remove from the end of the array
-        @see remove, removeObject, removeRange
-    */
-    void removeLast (int howManyToRemove = 1)
-    {
-        lock.enter();
-
-        if (howManyToRemove > numUsed)
-            howManyToRemove = numUsed;
-
-        while (--howManyToRemove >= 0)
-            remove (numUsed - 1);
-
-        lock.exit();
-    }
-
-    /** Swaps a pair of objects in the array.
-
-        If either of the indexes passed in is out-of-range, nothing will happen,
-        otherwise the two objects at these positions will be exchanged.
-    */
-    void swap (const int index1,
-               const int index2) throw()
-    {
-        lock.enter();
-
-        if (((unsigned int) index1) < (unsigned int) numUsed
-             && ((unsigned int) index2) < (unsigned int) numUsed)
-        {
-            swapVariables (this->elements [index1],
-                           this->elements [index2]);
-        }
-
-        lock.exit();
-    }
-
-    /** Moves one of the objects to a different position.
-
-        This will move the object to a specified index, shuffling along
-        any intervening elements as required.
-
-        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
-        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
-
-        @param currentIndex     the index of the object to be moved. If this isn't a
-                                valid index, then nothing will be done
-        @param newIndex         the index at which you'd like this object to end up. If this
-                                is less than zero, it will be moved to the end of the array
-    */
-    void move (const int currentIndex,
-               int newIndex) throw()
-    {
-        if (currentIndex != newIndex)
-        {
-            lock.enter();
-
-            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
-            {
-                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
-                    newIndex = numUsed - 1;
-
-                ObjectClass* const value = this->elements [currentIndex];
-
-                if (newIndex > currentIndex)
-                {
-                    memmove (this->elements + currentIndex,
-                             this->elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ObjectClass*));
-                }
-                else
-                {
-                    memmove (this->elements + newIndex + 1,
-                             this->elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ObjectClass*));
-                }
-
-                this->elements [newIndex] = value;
-            }
-
-            lock.exit();
-        }
-    }
-
-    /** Compares this array to another one.
-
-        @returns true only if the other array contains the same objects in the same order
-    */
-    bool operator== (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
-    {
-        other.lockArray();
-        lock.enter();
-
-        bool result = numUsed == other.numUsed;
-
-        if (result)
-        {
-            for (int i = numUsed; --i >= 0;)
-            {
-                if (this->elements [i] != other.elements [i])
-                {
-                    result = false;
-                    break;
-                }
-            }
-        }
-
-        lock.exit();
-        other.unlockArray();
-
-        return result;
-    }
-
-    /** Compares this array to another one.
-
-        @see operator==
-    */
-    bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
-    {
-        return ! operator== (other);
-    }
-
-    /** Sorts the elements in the array.
-
-        This will use a comparator object to sort the elements into order. The object
-        passed must have a method of the form:
-        @code
-        int compareElements (ElementType first, ElementType second);
-        @endcode
-
-        ..and this method must return:
-          - a value of < 0 if the first comes before the second
-          - a value of 0 if the two objects are equivalent
-          - a value of > 0 if the second comes before the first
-
-        To improve performance, the compareElements() method can be declared as static or const.
-
-        @param comparator   the comparator to use for comparing elements.
-        @param retainOrderOfEquivalentItems     if this is true, then items
-                            which the comparator says are equivalent will be
-                            kept in the order in which they currently appear
-                            in the array. This is slower to perform, but may
-                            be important in some cases. If it's false, a faster
-                            algorithm is used, but equivalent elements may be
-                            rearranged.
-
-        @see sortArray
-    */
-    template <class ElementComparator>
-    void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-
-        lock.enter();
-        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
-        lock.exit();
-    }
-
-    /** Reduces the amount of storage being used by the array.
-
-        Arrays typically allocate slightly more storage than they need, and after
-        removing elements, they may have quite a lot of unused space allocated.
-        This method will reduce the amount of allocated storage to a minimum.
-    */
-    void minimiseStorageOverheads() throw()
-    {
-        lock.enter();
-
-        if (numUsed == 0)
-        {
-            this->setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
-
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
-        }
-
-        lock.exit();
-    }
-
-    /** Locks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see unlockArray
-    */
-    void lockArray() const throw()
-    {
-        lock.enter();
-    }
-
-    /** Unlocks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see lockArray
-    */
-    void unlockArray() const throw()
-    {
-        lock.exit();
-    }
-
-    juce_UseDebuggingNewOperator
+    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
 
 private:
-    int numUsed;
-    TypeOfCriticalSectionToUse lock;
+
+    const CriticalSection& lock_;
+
+    ScopedUnlock (const ScopedLock&);
+    const ScopedUnlock& operator= (const ScopedUnlock&);
 };
 
-#endif   // __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedArray.h *********/
-
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
-
-/********* Start of inlined file: juce_SparseSet.h *********/
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
-#define __JUCE_SPARSESET_JUCEHEADER__
+#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedLock.h *********/
 
 /**
-    Holds a set of primitive values, storing them as a set of ranges.
+    Macro to declare member variables and methods for a singleton class.
 
-    This container acts like a simple BitArray, but can efficiently hold large
-    continguous ranges of values. It's quite a specialised class, mostly useful
-    for things like keeping the set of selected rows in a listbox.
+    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
+    to the class's definition.
 
-    The type used as a template paramter must be an integer type, such as int, short,
-    int64, etc.
+    If allowOnlyOneInstance == true, it won't allow the object to be created
+    more than once in the process's lifetime.
+
+    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
+    implementation code.
+
+    Clients can then call the static MyClass::getInstance() to get a pointer to the
+    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
+    is currently extant
+
+    it's a very good idea to also add the call clearSingletonInstance() to the
+    destructor of the class, in case it is deleted by other means than deleteInstance()
+
+    e.g. @code
+
+        class MySingleton
+        {
+        public:
+            MySingleton()
+            {
+            }
+
+            ~MySingleton()
+            {
+                // this ensures that no dangling pointers are left when the
+                // singleton is deleted.
+                clearSingletonInstance();
+            }
+
+            juce_DeclareSingleton (MySingleton, false)
+        };
+
+        juce_ImplementSingleton (MySingleton)
+
+        // example of usage:
+        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
+
+        ...
+
+        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
+
+    @endcode
+
+    If you know that your object will only be created and deleted by a single thread, you
+    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
+    of this one.
+
+    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
 */
-template <class Type>
-class SparseSet
+#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
+\
+    static classname* _singletonInstance;  \
+    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        {\
+            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+\
+            if (_singletonInstance == 0) \
+            { \
+                static bool alreadyInside = false; \
+                static bool createdOnceAlready = false; \
+\
+                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+                jassert (! problem); \
+                if (! problem) \
+                { \
+                    createdOnceAlready = true; \
+                    alreadyInside = true; \
+                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                    alreadyInside = false; \
+\
+                    _singletonInstance = newObject; \
+                } \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton macro.
+
+    After adding the juce_DeclareSingleton to the class definition, this macro has
+    to be used in the cpp file.
+*/
+#define juce_ImplementSingleton(classname) \
+\
+    classname* classname::_singletonInstance = 0; \
+    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
+    section to make access to it thread-safe. If you know that your object will
+    only ever be created or deleted by a single thread, then this is a
+    more efficient version to use.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
+*/
+#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        { \
+            static bool alreadyInside = false; \
+            static bool createdOnceAlready = false; \
+\
+            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+            jassert (! problem); \
+            if (! problem) \
+            { \
+                createdOnceAlready = true; \
+                alreadyInside = true; \
+                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                alreadyInside = false; \
+\
+                _singletonInstance = newObject; \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
+    for recursion or repeated instantiation. It's intended for use as a lightweight
+    version of a singleton, where you're using it in very straightforward
+    circumstances and don't need the extra checking.
+
+    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
+    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
+*/
+#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+            _singletonInstance = new classname(); \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
+
+    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
+    to the class definition, this macro has to be used somewhere in the cpp file.
+*/
+#define juce_ImplementSingleton_SingleThreaded(classname) \
+\
+    classname* classname::_singletonInstance = 0;
+
+#endif   // __JUCE_SINGLETON_JUCEHEADER__
+/********* End of inlined file: juce_Singleton.h *********/
+
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemStats.h *********/
+#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
+#define __JUCE_SYSTEMSTATS_JUCEHEADER__
+
+/**
+    Contains methods for finding out about the current hardware and OS configuration.
+*/
+class JUCE_API  SystemStats
 {
 public:
 
-    /** Creates a new empty set. */
-    SparseSet() throw()
-    {
-    }
+    /** Returns the current version of JUCE,
 
-    /** Creates a copy of another SparseSet. */
-    SparseSet (const SparseSet<Type>& other) throw()
-        : values (other.values)
-    {
-    }
+        (just in case you didn't already know at compile-time.)
 
-    /** Destructor. */
-    ~SparseSet() throw()
-    {
-    }
-
-    /** Clears the set. */
-    void clear() throw()
-    {
-        values.clear();
-    }
-
-    /** Checks whether the set is empty.
-
-        This is much quicker than using (size() == 0).
+        See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
-    bool isEmpty() const throw()
-    {
-        return values.size() == 0;
-    }
+    static const String getJUCEVersion() throw();
 
-    /** Returns the number of values in the set.
-
-        Because of the way the data is stored, this method can take longer if there
-        are a lot of items in the set. Use isEmpty() for a quick test of whether there
-        are any items.
+    /** The set of possible results of the getOperatingSystemType() method.
     */
-    Type size() const throw()
+    enum OperatingSystemType
     {
-        Type num = 0;
+        UnknownOS   = 0,
 
-        for (int i = 0; i < values.size(); i += 2)
-            num += values[i + 1] - values[i];
+        MacOSX      = 0x1000,
+        Linux       = 0x2000,
 
-        return num;
-    }
+        Win95       = 0x4001,
+        Win98       = 0x4002,
+        WinNT351    = 0x4103,
+        WinNT40     = 0x4104,
+        Win2000     = 0x4105,
+        WinXP       = 0x4106,
+        WinVista    = 0x4107,
 
-    /** Returns one of the values in the set.
+        Windows     = 0x4000,   /**< To test whether any version of Windows is running,
+                                     you can use the expression ((getOperatingSystemType() & Windows) != 0). */
+        WindowsNT   = 0x0100,   /**< To test whether the platform is Windows NT or later (i.e. not Win95 or 98),
+                                     you can use the expression ((getOperatingSystemType() & WindowsNT) != 0). */
+    };
 
-        @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
-        @returns        the value at this index, or 0 if it's out-of-range
+    /** Returns the type of operating system we're running on.
+
+        @returns one of the values from the OperatingSystemType enum.
+        @see getOperatingSystemName
     */
-    Type operator[] (int index) const throw()
-    {
-        for (int i = 0; i < values.size(); i += 2)
-        {
-            const Type s = values.getUnchecked(i);
-            const Type e = values.getUnchecked(i + 1);
+    static OperatingSystemType getOperatingSystemType() throw();
 
-            if (index < e - s)
-                return s + index;
+    /** Returns the name of the type of operating system we're running on.
 
-            index -= e - s;
-        }
-
-        return (Type) 0;
-    }
-
-    /** Checks whether a particular value is in the set. */
-    bool contains (const Type valueToLookFor) const throw()
-    {
-        bool on = false;
-
-        for (int i = 0; i < values.size(); ++i)
-        {
-            if (values.getUnchecked(i) > valueToLookFor)
-                return on;
-
-            on = ! on;
-        }
-
-        return false;
-    }
-
-    /** Returns the number of contiguous blocks of values.
-
-        @see getRange
+        @returns a string describing the OS type.
+        @see getOperatingSystemType
     */
-    int getNumRanges() const throw()
-    {
-        return values.size() >> 1;
-    }
+    static const String getOperatingSystemName() throw();
 
-    /** Returns one of the contiguous ranges of values stored.
-
-        @param rangeIndex   the index of the range to look up, between 0
-                            and (getNumRanges() - 1)
-        @param startValue   on return, the value at the start of the range
-        @param numValues    on return, the number of values in the range
-
-        @see getTotalRange
+    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
     */
-    bool getRange (const int rangeIndex,
-                   Type& startValue,
-                   Type& numValues) const throw()
-    {
-        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
-        {
-            startValue = values [rangeIndex << 1];
-            numValues = values [(rangeIndex << 1) + 1] - startValue;
+    static bool isOperatingSystem64Bit() throw();
 
-            return true;
-        }
+    // CPU and memory information..
 
-        return false;
-    }
+    /** Returns the approximate CPU speed.
 
-    /** Returns the lowest and highest values in the set.
-
-        @see getRange
+        @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
+                    what year you're reading this...)
     */
-    bool getTotalRange (Type& lowestValue,
-                        Type& highestValue) const throw()
-    {
-        if (values.size() > 0)
-        {
-            lowestValue = values.getUnchecked (0);
-            highestValue = values.getUnchecked (values.size() - 1);
-            return true;
-        }
+    static int getCpuSpeedInMegaherz() throw();
 
-        return false;
-    }
+    /** Returns a string to indicate the CPU vendor.
 
-    /** Adds a range of contiguous values to the set.
-
-        e.g. addRange (10, 4) will add (10, 11, 12, 13) to the set.
-
-        @param firstValue       the start of the range of values to add
-        @param numValuesToAdd   how many values to add
+        Might not be known on some systems.
     */
-    void addRange (const Type firstValue,
-                   const Type numValuesToAdd) throw()
-    {
-        jassert (numValuesToAdd >= 0);
+    static const String getCpuVendor() throw();
 
-        if (numValuesToAdd > 0)
-        {
-            removeRange (firstValue, numValuesToAdd);
+    /** Checks whether Intel MMX instructions are available. */
+    static bool hasMMX() throw();
 
-            IntegerElementComparator<Type> sorter;
-            values.addSorted (sorter, firstValue);
-            values.addSorted (sorter, firstValue + numValuesToAdd);
+    /** Checks whether Intel SSE instructions are available. */
+    static bool hasSSE() throw();
 
-            simplify();
-        }
-    }
+    /** Checks whether Intel SSE2 instructions are available. */
+    static bool hasSSE2() throw();
 
-    /** Removes a range of values from the set.
+    /** Checks whether AMD 3DNOW instructions are available. */
+    static bool has3DNow() throw();
 
-        e.g. removeRange (10, 4) will remove (10, 11, 12, 13) from the set.
-
-        @param firstValue           the start of the range of values to remove
-        @param numValuesToRemove    how many values to remove
+    /** Returns the number of CPUs.
     */
-    void removeRange (const Type firstValue,
-                      const Type numValuesToRemove) throw()
-    {
-        jassert (numValuesToRemove >= 0);
+    static int getNumCpus() throw();
 
-        if (numValuesToRemove >= 0
-             && firstValue < values.getLast())
-        {
-            const bool onAtStart = contains (firstValue - 1);
-            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
-            const bool onAtEnd = contains (lastValue);
+    /** Returns a clock-cycle tick counter, if available.
 
-            for (int i = values.size(); --i >= 0;)
-            {
-                if (values.getUnchecked(i) <= lastValue)
-                {
-                    while (values.getUnchecked(i) >= firstValue)
-                    {
-                        values.remove (i);
+        If the machine can do it, this will return a tick-count
+        where each tick is one cpu clock cycle - used for profiling
+        code.
 
-                        if (--i < 0)
-                            break;
-                    }
+        @returns    the tick count, or zero if not available.
+    */
+    static int64 getClockCycleCounter() throw();
 
-                    break;
-                }
-            }
+    /** Finds out how much RAM is in the machine.
 
-            IntegerElementComparator<Type> sorter;
+        @returns    the approximate number of megabytes of memory, or zero if
+                    something goes wrong when finding out.
+    */
+    static int getMemorySizeInMegabytes() throw();
 
-            if (onAtStart)
-                values.addSorted (sorter, firstValue);
+    /** Returns the system page-size.
 
-            if (onAtEnd)
-                values.addSorted (sorter, lastValue);
+        This is only used by programmers with beards.
+    */
+    static int getPageSize() throw();
 
-            simplify();
-        }
-    }
+    /** Returns a list of MAC addresses found on this machine.
 
-    /** Does an XOR of the values in a given range. */
-    void invertRange (const Type firstValue,
-                      const Type numValues)
-    {
-        SparseSet newItems;
-        newItems.addRange (firstValue, numValues);
+        @param  addresses   an array into which the MAC addresses should be copied
+        @param  maxNum      the number of elements in this array
+        @param littleEndian the endianness of the numbers to return. Note that
+                            the default values of this parameter are different on
+                            Mac/PC to avoid breaking old software that was written
+                            before this parameter was added (when the two systems
+                            defaulted to using different endiannesses). In newer
+                            software you probably want to specify an explicit value
+                            for this.
+        @returns            the number of MAC addresses that were found
+    */
+    static int getMACAddresses (int64* addresses, int maxNum,
+#if JUCE_MAC
+                                const bool littleEndian = true) throw();
+#else
+                                const bool littleEndian = false) throw();
+#endif
 
-        int i;
-        for (i = getNumRanges(); --i >= 0;)
-        {
-            const int start = values [i << 1];
-            const int end = values [(i << 1) + 1];
-
-            newItems.removeRange (start, end);
-        }
-
-        removeRange (firstValue, numValues);
-
-        for (i = newItems.getNumRanges(); --i >= 0;)
-        {
-            const int start = newItems.values [i << 1];
-            const int end = newItems.values [(i << 1) + 1];
-
-            addRange (start, end);
-        }
-    }
-
-    /** Checks whether any part of a given range overlaps any part of this one. */
-    bool overlapsRange (const Type firstValue,
-                        const Type numValues) throw()
-    {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
-        {
-            for (int i = getNumRanges(); --i >= 0;)
-            {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
-                    return false;
-
-                if (firstValue + numValues > values.getUnchecked (i << 1))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    /** Checks whether the whole of a given range is contained within this one. */
-    bool containsRange (const Type firstValue,
-                        const Type numValues) throw()
-    {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
-        {
-            for (int i = getNumRanges(); --i >= 0;)
-            {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
-                    return false;
-
-                if (firstValue >= values.getUnchecked (i << 1)
-                     && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool operator== (const SparseSet<Type>& other) throw()
-    {
-        return values == other.values;
-    }
-
-    bool operator!= (const SparseSet<Type>& other) throw()
-    {
-        return values != other.values;
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    // alternating start/end values of ranges of values that are present.
-    Array<Type> values;
-
-    void simplify() throw()
-    {
-        jassert ((values.size() & 1) == 0);
-
-        for (int i = values.size(); --i > 0;)
-            if (values.getUnchecked(i) == values.getUnchecked (i - 1))
-                values.removeRange (i - 1, 2);
-    }
+    // not-for-public-use platform-specific method gets called at startup to initialise things.
+    static void initialiseStats() throw();
 };
 
-#endif   // __JUCE_SPARSESET_JUCEHEADER__
-/********* End of inlined file: juce_SparseSet.h *********/
+#endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
+/********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
+#ifndef __JUCE_TIME_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
@@ -10756,6 +9468,965 @@ private:
 /********* End of inlined file: juce_PropertySet.h *********/
 
 #endif
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_ReferenceCountedArray.h *********/
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+
+/**
+    Adds reference-counting to an object.
+
+    To add reference-counting to a class, derive it from this class, and
+    use the ReferenceCountedObjectPtr class to point to it.
+
+    e.g. @code
+    class MyClass : public ReferenceCountedObject
+    {
+        void foo();
+
+        // This is a neat way of declaring a typedef for a pointer class,
+        // rather than typing out the full templated name each time..
+        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
+    };
+
+    MyClass::Ptr p = new MyClass();
+    MyClass::Ptr p2 = p;
+    p = 0;
+    p2->foo();
+    @endcode
+
+    Once a new ReferenceCountedObject has been assigned to a pointer, be
+    careful not to delete the object manually.
+
+    @see ReferenceCountedObjectPtr, ReferenceCountedArray
+*/
+class JUCE_API  ReferenceCountedObject
+{
+public:
+
+    /** Increments the object's reference count.
+
+        This is done automatically by the smart pointer, but is public just
+        in case it's needed for nefarious purposes.
+    */
+    inline void incReferenceCount() throw()
+    {
+        atomicIncrement (refCounts);
+
+        jassert (refCounts > 0);
+    }
+
+    /** Decreases the object's reference count.
+
+        If the count gets to zero, the object will be deleted.
+    */
+    inline void decReferenceCount() throw()
+    {
+        jassert (refCounts > 0);
+
+        if (atomicDecrementAndReturn (refCounts) == 0)
+            delete this;
+    }
+
+    /** Returns the object's current reference count. */
+    inline int getReferenceCount() const throw()
+    {
+        return refCounts;
+    }
+
+protected:
+
+    /** Creates the reference-counted object (with an initial ref count of zero). */
+    ReferenceCountedObject()
+        : refCounts (0)
+    {
+    }
+
+    /** Destructor. */
+    virtual ~ReferenceCountedObject()
+    {
+        // it's dangerous to delete an object that's still referenced by something else!
+        jassert (refCounts == 0);
+    }
+
+private:
+
+    int refCounts;
+};
+
+/**
+    Used to point to an object of type ReferenceCountedObject.
+
+    It's wise to use a typedef instead of typing out the templated name
+    each time - e.g.
+
+    typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
+
+    @see ReferenceCountedObject, ReferenceCountedObjectArray
+*/
+template <class ReferenceCountedObjectClass>
+class ReferenceCountedObjectPtr
+{
+public:
+
+    /** Creates a pointer to a null object. */
+    inline ReferenceCountedObjectPtr() throw()
+        : referencedObject (0)
+    {
+    }
+
+    /** Creates a pointer to an object.
+
+        This will increment the object's reference-count if it is non-null.
+    */
+    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
+        : referencedObject (refCountedObject)
+    {
+        if (refCountedObject != 0)
+            refCountedObject->incReferenceCount();
+    }
+
+    /** Copies another pointer.
+
+        This will increment the object's reference-count (if it is non-null).
+    */
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
+        : referencedObject (other.referencedObject)
+    {
+        if (referencedObject != 0)
+            referencedObject->incReferenceCount();
+    }
+
+    /** Changes this pointer to point at a different object.
+
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+    {
+        ReferenceCountedObjectClass* const newObject = other.referencedObject;
+
+        if (newObject != referencedObject)
+        {
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
+            referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
+        }
+
+        return *this;
+    }
+
+    /** Changes this pointer to point at a different object.
+
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
+    {
+        if (referencedObject != newObject)
+        {
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
+            referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
+        }
+
+        return *this;
+    }
+
+    /** Destructor.
+
+        This will decrement the object's reference-count, and may delete it if it
+        gets to zero.
+    */
+    inline ~ReferenceCountedObjectPtr()
+    {
+        if (referencedObject != 0)
+            referencedObject->decReferenceCount();
+    }
+
+    /** Returns the object that this pointer references.
+
+        The pointer returned may be zero, of course.
+    */
+    inline operator ReferenceCountedObjectClass*() const throw()
+    {
+        return referencedObject;
+    }
+
+    /** Returns true if this pointer refers to the given object. */
+    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
+    {
+        return referencedObject == object;
+    }
+
+    /** Returns true if this pointer doesn't refer to the given object. */
+    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
+    {
+        return referencedObject != object;
+    }
+
+    // the -> operator is called on the referenced object
+    inline ReferenceCountedObjectClass* operator->() const throw()
+    {
+        return referencedObject;
+    }
+
+private:
+
+    ReferenceCountedObjectClass* referencedObject;
+};
+
+#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+/********* End of inlined file: juce_ReferenceCountedObject.h *********/
+
+/**
+    Holds a list of objects derived from ReferenceCountedObject.
+
+    A ReferenceCountedArray holds objects derived from ReferenceCountedObject,
+    and takes care of incrementing and decrementing their ref counts when they
+    are added and removed from the array.
+
+    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
+    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+
+    @see Array, OwnedArray, StringArray
+*/
+template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSection>
+class ReferenceCountedArray   : private ArrayAllocationBase <ObjectClass*>
+{
+public:
+
+    /** Creates an empty array.
+
+        @param granularity  this is the size of increment by which the internal storage
+        used by the array will grow. Only change it from the default if you know the
+        array is going to be very big and needs to be able to grow efficiently.
+
+        @see ReferenceCountedObject, ArrayAllocationBase, Array, OwnedArray
+    */
+    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity),
+          numUsed (0)
+    {
+    }
+
+    /** Creates a copy of another array */
+    ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+        : ArrayAllocationBase <ObjectClass*> (other.granularity),
+          numUsed (other.numUsed)
+    {
+        other.lockArray();
+        this->setAllocatedSize (numUsed);
+        memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
+
+        for (int i = numUsed; --i >= 0;)
+            if (this->elements[i] != 0)
+                this->elements[i]->incReferenceCount();
+
+        other.unlockArray();
+    }
+
+    /** Copies another array into this one.
+
+        Any existing objects in this array will first be released.
+    */
+    const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+    {
+        if (this != &other)
+        {
+            other.lockArray();
+            lock.enter();
+
+            clear();
+
+            this->granularity = other.granularity;
+            this->ensureAllocatedSize (other.numUsed);
+            numUsed = other.numUsed;
+            memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
+            minimiseStorageOverheads();
+
+            for (int i = numUsed; --i >= 0;)
+                if (this->elements[i] != 0)
+                    this->elements[i]->incReferenceCount();
+
+            lock.exit();
+            other.unlockArray();
+        }
+
+        return *this;
+    }
+
+    /** Destructor.
+
+        Any objects in the array will be released, and may be deleted if not referenced from elsewhere.
+    */
+    ~ReferenceCountedArray()
+    {
+        clear();
+    }
+
+    /** Removes all objects from the array.
+
+        Any objects in the array that are not referenced from elsewhere will be deleted.
+    */
+    void clear()
+    {
+        lock.enter();
+
+        while (numUsed > 0)
+            if (this->elements [--numUsed] != 0)
+                this->elements [numUsed]->decReferenceCount();
+
+        jassert (numUsed == 0);
+        this->setAllocatedSize (0);
+
+        lock.exit();
+    }
+
+    /** Returns the current number of objects in the array. */
+    inline int size() const throw()
+    {
+        return numUsed;
+    }
+
+    /** Returns a pointer to the object at this index in the array.
+
+        If the index is out-of-range, this will return a null pointer, (and
+        it could be null anyway, because it's ok for the array to hold null
+        pointers as well as objects).
+
+        @see getUnchecked
+    */
+    inline ObjectClass* operator[] (const int index) const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
+                                        ? this->elements [index]
+                                        : (ObjectClass*) 0;
+        lock.exit();
+        return result;
+    }
+
+    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
+
+        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
+        it can be used when you're sure the index if always going to be legal.
+    */
+    inline ObjectClass* getUnchecked (const int index) const throw()
+    {
+        lock.enter();
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        ObjectClass* const result = this->elements [index];
+        lock.exit();
+        return result;
+    }
+
+    /** Returns a pointer to the first object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getLast
+    */
+    inline ObjectClass* getFirst() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns a pointer to the last object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getFirst
+    */
+    inline ObjectClass* getLast() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Finds the index of the first occurrence of an object in the array.
+
+        @param objectToLookFor    the object to look for
+        @returns                  the index at which the object was found, or -1 if it's not found
+    */
+    int indexOf (const ObjectClass* const objectToLookFor) const throw()
+    {
+        int result = -1;
+
+        lock.enter();
+        ObjectClass** e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToLookFor == *e)
+            {
+                result = (int) (e - this->elements);
+                break;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+        return result;
+    }
+
+    /** Returns true if the array contains a specified object.
+
+        @param objectToLookFor      the object to look for
+        @returns                    true if the object is in the array
+    */
+    bool contains (const ObjectClass* const objectToLookFor) const throw()
+    {
+        lock.enter();
+        ObjectClass** e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToLookFor == *e)
+            {
+                lock.exit();
+                return true;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+        return false;
+    }
+
+    /** Appends a new object to the end of the array.
+
+        This will increase the new object's reference count.
+
+        @param newObject       the new object to add to the array
+        @see set, insert, addIfNotAlreadyThere, addSorted, addArray
+    */
+    void add (ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+        this->ensureAllocatedSize (numUsed + 1);
+        this->elements [numUsed++] = newObject;
+
+        if (newObject != 0)
+            newObject->incReferenceCount();
+
+        lock.exit();
+    }
+
+    /** Inserts a new object into the array at the given index.
+
+        If the index is less than 0 or greater than the size of the array, the
+        element will be added to the end of the array.
+        Otherwise, it will be inserted into the array, moving all the later elements
+        along to make room.
+
+        This will increase the new object's reference count.
+
+        @param indexToInsertAt      the index at which the new element should be inserted
+        @param newObject            the new object to add to the array
+        @see add, addSorted, addIfNotAlreadyThere, set
+    */
+    void insert (int indexToInsertAt,
+                 ObjectClass* const newObject) throw()
+    {
+        if (indexToInsertAt >= 0)
+        {
+            lock.enter();
+
+            if (indexToInsertAt > numUsed)
+                indexToInsertAt = numUsed;
+
+            this->ensureAllocatedSize (numUsed + 1);
+
+            ObjectClass** const e = this->elements + indexToInsertAt;
+            const int numToMove = numUsed - indexToInsertAt;
+
+            if (numToMove > 0)
+                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
+
+            *e = newObject;
+
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            ++numUsed;
+            lock.exit();
+        }
+        else
+        {
+            add (newObject);
+        }
+    }
+
+    /** Appends a new object at the end of the array as long as the array doesn't
+        already contain it.
+
+        If the array already contains a matching object, nothing will be done.
+
+        @param newObject   the new object to add to the array
+    */
+    void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+
+        if (! contains (newObject))
+            add (newObject);
+
+        lock.exit();
+    }
+
+    /** Replaces an object in the array with a different one.
+
+        If the index is less than zero, this method does nothing.
+        If the index is beyond the end of the array, the new object is added to the end of the array.
+
+        The object being added has its reference count increased, and if it's replacing
+        another object, then that one has its reference count decreased, and may be deleted.
+
+        @param indexToChange        the index whose value you want to change
+        @param newObject            the new value to set for this index.
+        @see add, insert, remove
+    */
+    void set (const int indexToChange,
+              ObjectClass* const newObject)
+    {
+        if (indexToChange >= 0)
+        {
+            lock.enter();
+
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            if (indexToChange < numUsed)
+            {
+                if (this->elements [indexToChange] != 0)
+                    this->elements [indexToChange]->decReferenceCount();
+
+                this->elements [indexToChange] = newObject;
+            }
+            else
+            {
+                this->ensureAllocatedSize (numUsed + 1);
+                this->elements [numUsed++] = newObject;
+            }
+
+            lock.exit();
+        }
+    }
+
+    /** Adds elements from another array to the end of this array.
+
+        @param arrayToAddFrom       the array from which to copy the elements
+        @param startIndex           the first element of the other array to start copying from
+        @param numElementsToAdd     how many elements to add from the other array. If this
+                                    value is negative or greater than the number of available elements,
+                                    all available elements will be copied.
+        @see add
+    */
+    void addArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& arrayToAddFrom,
+                   int startIndex = 0,
+                   int numElementsToAdd = -1) throw()
+    {
+        arrayToAddFrom.lockArray();
+        lock.enter();
+
+        if (startIndex < 0)
+        {
+            jassertfalse
+            startIndex = 0;
+        }
+
+        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+            numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+        if (numElementsToAdd > 0)
+        {
+            this->ensureAllocatedSize (numUsed + numElementsToAdd);
+
+            while (--numElementsToAdd >= 0)
+                add (arrayToAddFrom.getUnchecked (startIndex++));
+        }
+
+        lock.exit();
+        arrayToAddFrom.unlockArray();
+    }
+
+    /** Inserts a new object into the array assuming that the array is sorted.
+
+        This will use a comparator to find the position at which the new object
+        should go. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator       the comparator object to use to compare the elements - see the
+                                sort() method for details about this object's form
+        @param newObject        the new object to insert to the array
+        @see add, sort
+    */
+    template <class ElementComparator>
+    void addSorted (ElementComparator& comparator,
+                    ObjectClass* newObject) throw()
+    {
+        lock.enter();
+        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        lock.exit();
+    }
+
+    /** Removes an object from the array.
+
+        This will remove the object at a given index and move back all the
+        subsequent objects to close the gap.
+
+        If the index passed in is out-of-range, nothing will happen.
+
+        The object that is removed will have its reference count decreased,
+        and may be deleted if not referenced from elsewhere.
+
+        @param indexToRemove    the index of the element to remove
+        @see removeObject, removeRange
+    */
+    void remove (const int indexToRemove)
+    {
+        lock.enter();
+
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        {
+            ObjectClass** const e = this->elements + indexToRemove;
+
+            if (*e != 0)
+                (*e)->decReferenceCount();
+
+            --numUsed;
+            const int numberToShift = numUsed - indexToRemove;
+
+            if (numberToShift > 0)
+                memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+    }
+
+    /** Removes the first occurrence of a specified object from the array.
+
+        If the item isn't found, no action is taken. If it is found, it is
+        removed and has its reference count decreased.
+
+        @param objectToRemove   the object to try to remove
+        @see remove, removeRange
+    */
+    void removeObject (ObjectClass* const objectToRemove)
+    {
+        lock.enter();
+        remove (indexOf (objectToRemove));
+        lock.exit();
+    }
+
+    /** Removes a range of objects from the array.
+
+        This will remove a set of objects, starting from the given index,
+        and move any subsequent elements down to close the gap.
+
+        If the range extends beyond the bounds of the array, it will
+        be safely clipped to the size of the array.
+
+        The objects that are removed will have their reference counts decreased,
+        and may be deleted if not referenced from elsewhere.
+
+        @param startIndex       the index of the first object to remove
+        @param numberToRemove   how many objects should be removed
+        @see remove, removeObject
+    */
+    void removeRange (const int startIndex,
+                      const int numberToRemove)
+    {
+        lock.enter();
+
+        const int start = jlimit (0, numUsed, startIndex);
+        const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
+
+        if (end > start)
+        {
+            int i;
+            for (i = start; i < end; ++i)
+            {
+                if (this->elements[i] != 0)
+                {
+                    this->elements[i]->decReferenceCount();
+                    this->elements[i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                }
+            }
+
+            const int rangeSize = end - start;
+            ObjectClass** e = this->elements + start;
+            i = numUsed - end;
+            numUsed -= rangeSize;
+
+            while (--i >= 0)
+            {
+                *e = e [rangeSize];
+                ++e;
+            }
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+    }
+
+    /** Removes the last n objects from the array.
+
+        The objects that are removed will have their reference counts decreased,
+        and may be deleted if not referenced from elsewhere.
+
+        @param howManyToRemove   how many objects to remove from the end of the array
+        @see remove, removeObject, removeRange
+    */
+    void removeLast (int howManyToRemove = 1)
+    {
+        lock.enter();
+
+        if (howManyToRemove > numUsed)
+            howManyToRemove = numUsed;
+
+        while (--howManyToRemove >= 0)
+            remove (numUsed - 1);
+
+        lock.exit();
+    }
+
+    /** Swaps a pair of objects in the array.
+
+        If either of the indexes passed in is out-of-range, nothing will happen,
+        otherwise the two objects at these positions will be exchanged.
+    */
+    void swap (const int index1,
+               const int index2) throw()
+    {
+        lock.enter();
+
+        if (((unsigned int) index1) < (unsigned int) numUsed
+             && ((unsigned int) index2) < (unsigned int) numUsed)
+        {
+            swapVariables (this->elements [index1],
+                           this->elements [index2]);
+        }
+
+        lock.exit();
+    }
+
+    /** Moves one of the objects to a different position.
+
+        This will move the object to a specified index, shuffling along
+        any intervening elements as required.
+
+        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
+        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
+
+        @param currentIndex     the index of the object to be moved. If this isn't a
+                                valid index, then nothing will be done
+        @param newIndex         the index at which you'd like this object to end up. If this
+                                is less than zero, it will be moved to the end of the array
+    */
+    void move (const int currentIndex,
+               int newIndex) throw()
+    {
+        if (currentIndex != newIndex)
+        {
+            lock.enter();
+
+            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+            {
+                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+                    newIndex = numUsed - 1;
+
+                ObjectClass* const value = this->elements [currentIndex];
+
+                if (newIndex > currentIndex)
+                {
+                    memmove (this->elements + currentIndex,
+                             this->elements + currentIndex + 1,
+                             (newIndex - currentIndex) * sizeof (ObjectClass*));
+                }
+                else
+                {
+                    memmove (this->elements + newIndex + 1,
+                             this->elements + newIndex,
+                             (currentIndex - newIndex) * sizeof (ObjectClass*));
+                }
+
+                this->elements [newIndex] = value;
+            }
+
+            lock.exit();
+        }
+    }
+
+    /** Compares this array to another one.
+
+        @returns true only if the other array contains the same objects in the same order
+    */
+    bool operator== (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
+    {
+        other.lockArray();
+        lock.enter();
+
+        bool result = numUsed == other.numUsed;
+
+        if (result)
+        {
+            for (int i = numUsed; --i >= 0;)
+            {
+                if (this->elements [i] != other.elements [i])
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        lock.exit();
+        other.unlockArray();
+
+        return result;
+    }
+
+    /** Compares this array to another one.
+
+        @see operator==
+    */
+    bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
+    {
+        return ! operator== (other);
+    }
+
+    /** Sorts the elements in the array.
+
+        This will use a comparator object to sort the elements into order. The object
+        passed must have a method of the form:
+        @code
+        int compareElements (ElementType first, ElementType second);
+        @endcode
+
+        ..and this method must return:
+          - a value of < 0 if the first comes before the second
+          - a value of 0 if the two objects are equivalent
+          - a value of > 0 if the second comes before the first
+
+        To improve performance, the compareElements() method can be declared as static or const.
+
+        @param comparator   the comparator to use for comparing elements.
+        @param retainOrderOfEquivalentItems     if this is true, then items
+                            which the comparator says are equivalent will be
+                            kept in the order in which they currently appear
+                            in the array. This is slower to perform, but may
+                            be important in some cases. If it's false, a faster
+                            algorithm is used, but equivalent elements may be
+                            rearranged.
+
+        @see sortArray
+    */
+    template <class ElementComparator>
+    void sort (ElementComparator& comparator,
+               const bool retainOrderOfEquivalentItems = false) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+
+        lock.enter();
+        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        lock.exit();
+    }
+
+    /** Reduces the amount of storage being used by the array.
+
+        Arrays typically allocate slightly more storage than they need, and after
+        removing elements, they may have quite a lot of unused space allocated.
+        This method will reduce the amount of allocated storage to a minimum.
+    */
+    void minimiseStorageOverheads() throw()
+    {
+        lock.enter();
+
+        if (numUsed == 0)
+        {
+            this->setAllocatedSize (0);
+        }
+        else
+        {
+            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+
+            if (newAllocation < this->numAllocated)
+                this->setAllocatedSize (newAllocation);
+        }
+
+        lock.exit();
+    }
+
+    /** Locks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see unlockArray
+    */
+    void lockArray() const throw()
+    {
+        lock.enter();
+    }
+
+    /** Unlocks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see lockArray
+    */
+    void unlockArray() const throw()
+    {
+        lock.exit();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int numUsed;
+    TypeOfCriticalSectionToUse lock;
+};
+
+#endif   // __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+/********* End of inlined file: juce_ReferenceCountedArray.h *********/
+
+#endif
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
 
 /********* Start of inlined file: juce_SortedSet.h *********/
@@ -11364,6 +11035,471 @@ private:
 
 #endif   // __JUCE_SORTEDSET_JUCEHEADER__
 /********* End of inlined file: juce_SortedSet.h *********/
+
+#endif
+#ifndef __JUCE_SPARSESET_JUCEHEADER__
+
+/********* Start of inlined file: juce_SparseSet.h *********/
+#ifndef __JUCE_SPARSESET_JUCEHEADER__
+#define __JUCE_SPARSESET_JUCEHEADER__
+
+/**
+    Holds a set of primitive values, storing them as a set of ranges.
+
+    This container acts like a simple BitArray, but can efficiently hold large
+    continguous ranges of values. It's quite a specialised class, mostly useful
+    for things like keeping the set of selected rows in a listbox.
+
+    The type used as a template paramter must be an integer type, such as int, short,
+    int64, etc.
+*/
+template <class Type>
+class SparseSet
+{
+public:
+
+    /** Creates a new empty set. */
+    SparseSet() throw()
+    {
+    }
+
+    /** Creates a copy of another SparseSet. */
+    SparseSet (const SparseSet<Type>& other) throw()
+        : values (other.values)
+    {
+    }
+
+    /** Destructor. */
+    ~SparseSet() throw()
+    {
+    }
+
+    /** Clears the set. */
+    void clear() throw()
+    {
+        values.clear();
+    }
+
+    /** Checks whether the set is empty.
+
+        This is much quicker than using (size() == 0).
+    */
+    bool isEmpty() const throw()
+    {
+        return values.size() == 0;
+    }
+
+    /** Returns the number of values in the set.
+
+        Because of the way the data is stored, this method can take longer if there
+        are a lot of items in the set. Use isEmpty() for a quick test of whether there
+        are any items.
+    */
+    Type size() const throw()
+    {
+        Type num = 0;
+
+        for (int i = 0; i < values.size(); i += 2)
+            num += values[i + 1] - values[i];
+
+        return num;
+    }
+
+    /** Returns one of the values in the set.
+
+        @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
+        @returns        the value at this index, or 0 if it's out-of-range
+    */
+    Type operator[] (int index) const throw()
+    {
+        for (int i = 0; i < values.size(); i += 2)
+        {
+            const Type s = values.getUnchecked(i);
+            const Type e = values.getUnchecked(i + 1);
+
+            if (index < e - s)
+                return s + index;
+
+            index -= e - s;
+        }
+
+        return (Type) 0;
+    }
+
+    /** Checks whether a particular value is in the set. */
+    bool contains (const Type valueToLookFor) const throw()
+    {
+        bool on = false;
+
+        for (int i = 0; i < values.size(); ++i)
+        {
+            if (values.getUnchecked(i) > valueToLookFor)
+                return on;
+
+            on = ! on;
+        }
+
+        return false;
+    }
+
+    /** Returns the number of contiguous blocks of values.
+
+        @see getRange
+    */
+    int getNumRanges() const throw()
+    {
+        return values.size() >> 1;
+    }
+
+    /** Returns one of the contiguous ranges of values stored.
+
+        @param rangeIndex   the index of the range to look up, between 0
+                            and (getNumRanges() - 1)
+        @param startValue   on return, the value at the start of the range
+        @param numValues    on return, the number of values in the range
+
+        @see getTotalRange
+    */
+    bool getRange (const int rangeIndex,
+                   Type& startValue,
+                   Type& numValues) const throw()
+    {
+        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
+        {
+            startValue = values [rangeIndex << 1];
+            numValues = values [(rangeIndex << 1) + 1] - startValue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Returns the lowest and highest values in the set.
+
+        @see getRange
+    */
+    bool getTotalRange (Type& lowestValue,
+                        Type& highestValue) const throw()
+    {
+        if (values.size() > 0)
+        {
+            lowestValue = values.getUnchecked (0);
+            highestValue = values.getUnchecked (values.size() - 1);
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Adds a range of contiguous values to the set.
+
+        e.g. addRange (10, 4) will add (10, 11, 12, 13) to the set.
+
+        @param firstValue       the start of the range of values to add
+        @param numValuesToAdd   how many values to add
+    */
+    void addRange (const Type firstValue,
+                   const Type numValuesToAdd) throw()
+    {
+        jassert (numValuesToAdd >= 0);
+
+        if (numValuesToAdd > 0)
+        {
+            removeRange (firstValue, numValuesToAdd);
+
+            IntegerElementComparator<Type> sorter;
+            values.addSorted (sorter, firstValue);
+            values.addSorted (sorter, firstValue + numValuesToAdd);
+
+            simplify();
+        }
+    }
+
+    /** Removes a range of values from the set.
+
+        e.g. removeRange (10, 4) will remove (10, 11, 12, 13) from the set.
+
+        @param firstValue           the start of the range of values to remove
+        @param numValuesToRemove    how many values to remove
+    */
+    void removeRange (const Type firstValue,
+                      const Type numValuesToRemove) throw()
+    {
+        jassert (numValuesToRemove >= 0);
+
+        if (numValuesToRemove >= 0
+             && firstValue < values.getLast())
+        {
+            const bool onAtStart = contains (firstValue - 1);
+            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
+            const bool onAtEnd = contains (lastValue);
+
+            for (int i = values.size(); --i >= 0;)
+            {
+                if (values.getUnchecked(i) <= lastValue)
+                {
+                    while (values.getUnchecked(i) >= firstValue)
+                    {
+                        values.remove (i);
+
+                        if (--i < 0)
+                            break;
+                    }
+
+                    break;
+                }
+            }
+
+            IntegerElementComparator<Type> sorter;
+
+            if (onAtStart)
+                values.addSorted (sorter, firstValue);
+
+            if (onAtEnd)
+                values.addSorted (sorter, lastValue);
+
+            simplify();
+        }
+    }
+
+    /** Does an XOR of the values in a given range. */
+    void invertRange (const Type firstValue,
+                      const Type numValues)
+    {
+        SparseSet newItems;
+        newItems.addRange (firstValue, numValues);
+
+        int i;
+        for (i = getNumRanges(); --i >= 0;)
+        {
+            const int start = values [i << 1];
+            const int end = values [(i << 1) + 1];
+
+            newItems.removeRange (start, end);
+        }
+
+        removeRange (firstValue, numValues);
+
+        for (i = newItems.getNumRanges(); --i >= 0;)
+        {
+            const int start = newItems.values [i << 1];
+            const int end = newItems.values [(i << 1) + 1];
+
+            addRange (start, end);
+        }
+    }
+
+    /** Checks whether any part of a given range overlaps any part of this one. */
+    bool overlapsRange (const Type firstValue,
+                        const Type numValues) throw()
+    {
+        jassert (numValues >= 0);
+
+        if (numValues > 0)
+        {
+            for (int i = getNumRanges(); --i >= 0;)
+            {
+                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                    return false;
+
+                if (firstValue + numValues > values.getUnchecked (i << 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Checks whether the whole of a given range is contained within this one. */
+    bool containsRange (const Type firstValue,
+                        const Type numValues) throw()
+    {
+        jassert (numValues >= 0);
+
+        if (numValues > 0)
+        {
+            for (int i = getNumRanges(); --i >= 0;)
+            {
+                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                    return false;
+
+                if (firstValue >= values.getUnchecked (i << 1)
+                     && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool operator== (const SparseSet<Type>& other) throw()
+    {
+        return values == other.values;
+    }
+
+    bool operator!= (const SparseSet<Type>& other) throw()
+    {
+        return values != other.values;
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    // alternating start/end values of ranges of values that are present.
+    Array<Type> values;
+
+    void simplify() throw()
+    {
+        jassert ((values.size() & 1) == 0);
+
+        for (int i = values.size(); --i > 0;)
+            if (values.getUnchecked(i) == values.getUnchecked (i - 1))
+                values.removeRange (i - 1, 2);
+    }
+};
+
+#endif   // __JUCE_SPARSESET_JUCEHEADER__
+/********* End of inlined file: juce_SparseSet.h *********/
+
+#endif
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+
+/********* Start of inlined file: juce_Variant.h *********/
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+#define __JUCE_VARIANT_JUCEHEADER__
+
+class JUCE_API  DynamicObject;
+
+/**
+    A variant class, that can be used to hold a range of primitive values.
+
+    A var object can hold a range of simple primitive values, strings, or
+    a reference-counted pointer to a DynamicObject. The var class is intended
+    to act like the values used in dynamic scripting languages.
+
+    @see DynamicObject
+*/
+class JUCE_API  var
+{
+public:
+
+    /** Creates a void variant. */
+    var() throw();
+
+    /** Destructor. */
+    ~var();
+
+    var (const var& valueToCopy) throw();
+    var (const int value) throw();
+    var (const bool value) throw();
+    var (const double value) throw();
+    var (const char* const value) throw();
+    var (const juce_wchar* const value) throw();
+    var (const String& value) throw();
+    var (DynamicObject* const object) throw();
+
+    const var& operator= (const var& valueToCopy) throw();
+    const var& operator= (const int value) throw();
+    const var& operator= (const bool value) throw();
+    const var& operator= (const double value) throw();
+    const var& operator= (const char* const value) throw();
+    const var& operator= (const juce_wchar* const value) throw();
+    const var& operator= (const String& value) throw();
+    const var& operator= (DynamicObject* const object) throw();
+
+    operator int() const throw();
+    operator bool() const throw();
+    operator double() const throw();
+    const String toString() const throw();
+    DynamicObject* getObject() const throw();
+
+    bool isVoid() const throw()         { return type == voidType; }
+    bool isInt() const throw()          { return type == intType; }
+    bool isBool() const throw()         { return type == boolType; }
+    bool isDouble() const throw()       { return type == doubleType; }
+    bool isString() const throw()       { return type == stringType; }
+    bool isObject() const throw()       { return type == objectType; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    enum Type
+    {
+        voidType = 0,
+        intType,
+        boolType,
+        doubleType,
+        stringType,
+        objectType
+    };
+
+    Type type;
+
+    union
+    {
+        int intValue;
+        bool boolValue;
+        double doubleValue;
+        String* stringValue;
+        DynamicObject* objectValue;
+    } value;
+
+    void releaseValue() throw();
+};
+
+/**
+    Represents a dynamically implemented object.
+
+    An instance of this class can be used to store named properties, and
+    by subclassing hasMethod() and invokeMethod(), you can give your object
+    methods.
+
+    This is intended for use as a wrapper for scripting language objects.
+*/
+class JUCE_API  DynamicObject  : public ReferenceCountedObject
+{
+public:
+
+    DynamicObject();
+
+    /** Destructor. */
+    virtual ~DynamicObject();
+
+    virtual bool hasProperty (const String& propertyName) const;
+    virtual const var getProperty (const String& propertyName) const;
+    virtual void setProperty (const String& propertyName, const var& newValue);
+    virtual void removeProperty (const String& propertyName);
+
+    virtual bool hasMethod (const String& methodName) const;
+
+    virtual const var invokeMethod (const String& methodName,
+                                    const var* parameters,
+                                    int numParameters);
+
+    /** Shortcut method for invoking a method with no arguments. */
+    const var invoke (const String& methodName);
+    /** Shortcut method for invoking a method with one argument. */
+    const var invoke (const String& methodName, const var& arg1);
+    /** Shortcut method for invoking a method with 2 arguments. */
+    const var invoke (const String& methodName, const var& arg1, const var& arg2);
+    /** Shortcut method for invoking a method with 3 arguments. */
+    const var invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3);
+    /** Shortcut method for invoking a method with 4 arguments. */
+    const var invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3, const var& arg4);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    StringArray propertyNames;
+    OwnedArray <var> propertyValues;
+};
+
+#endif   // __JUCE_VARIANT_JUCEHEADER__
+/********* End of inlined file: juce_Variant.h *********/
+
+#endif
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
@@ -12138,14 +12274,18 @@ public:
     int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
-    /** Reads bytes from the socket (blocking).
+    /** Reads bytes from the socket.
 
-        Note that this method will block unless you have checked the socket is ready
-        for reading before calling it (see the waitUntilReady() method).
+        If blockUntilSpecifiedAmountHasArrived is true, the method will block until
+        maxBytesToRead bytes have been read, (or until an error occurs). If this
+        flag is false, the method will return as much data as is currently available
+        without blocking.
 
         @returns the number of bytes read, or -1 if there was an error.
+        @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead);
+    int read (void* destBuffer, const int maxBytesToRead,
+              const bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 
@@ -12268,14 +12408,18 @@ public:
     int waitUntilReady (const bool readyForReading,
                         const int timeoutMsecs) const;
 
-    /** Reads bytes from the socket (blocking).
+    /** Reads bytes from the socket.
 
-        Note that this method will block unless you have checked the socket is ready
-        for reading before calling it (see the waitUntilReady() method).
+        If blockUntilSpecifiedAmountHasArrived is true, the method will block until
+        maxBytesToRead bytes have been read, (or until an error occurs). If this
+        flag is false, the method will return as much data as is currently available
+        without blocking.
 
         @returns the number of bytes read, or -1 if there was an error.
+        @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead);
+    int read (void* destBuffer, const int maxBytesToRead,
+              const bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 
@@ -12541,137 +12685,6 @@ private:
 
 #endif   // __JUCE_URL_JUCEHEADER__
 /********* End of inlined file: juce_URL.h *********/
-
-#endif
-#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-
-/********* Start of inlined file: juce_MemoryOutputStream.h *********/
-#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-#define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-
-/** Writes data to an internal memory buffer, which grows as required.
-
-    The data that was written into the stream can then be accessed later as
-    a contiguous block of memory.
-*/
-class JUCE_API  MemoryOutputStream  : public OutputStream
-{
-public:
-
-    /** Creates a memory stream ready for writing into.
-
-        @param initialSize  the intial amount of space to allocate for writing into
-        @param granularity  the increments by which the internal storage will be increased
-        @param memoryBlockToWriteTo if this is non-zero, then this block will be used as the
-                                    place that the data gets stored. If it's zero, the stream
-                                    will allocate its own storage internally, which you can
-                                    access using getData() and getDataSize()
-    */
-    MemoryOutputStream (const int initialSize = 256,
-                        const int granularity = 256,
-                        MemoryBlock* const memoryBlockToWriteTo = 0) throw();
-
-    /** Destructor.
-
-        This will free any data that was written to it.
-    */
-    ~MemoryOutputStream() throw();
-
-    /** Returns a pointer to the data that has been written to the stream.
-
-        @see getDataSize
-    */
-    const char* getData() throw();
-
-    /** Returns the number of bytes of data that have been written to the stream.
-
-        @see getData
-    */
-    int getDataSize() const throw();
-
-    /** Resets the stream, clearing any data that has been written to it so far. */
-    void reset() throw();
-
-    void flush();
-    bool write (const void* buffer, int howMany);
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    MemoryBlock* data;
-    int position, size, blockSize;
-    bool ownsMemoryBlock;
-};
-
-#endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_MemoryOutputStream.h *********/
-
-#endif
-#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-
-/********* Start of inlined file: juce_SubregionStream.h *********/
-#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-#define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-
-/** Wraps another input stream, and reads from a specific part of it.
-
-    This lets you take a subsection of a stream and present it as an entire
-    stream in its own right.
-*/
-class JUCE_API  SubregionStream  : public InputStream
-{
-public:
-
-    /** Creates a SubregionStream from an input source.
-
-        @param sourceStream                 the source stream to read from
-        @param startPositionInSourceStream  this is the position in the source stream that
-                                            corresponds to position 0 in this stream
-        @param lengthOfSourceStream         this specifies the maximum number of bytes
-                                            from the source stream that will be passed through
-                                            by this stream. When the position of this stream
-                                            exceeds lengthOfSourceStream, it will cause an end-of-stream.
-                                            If the length passed in here is greater than the length
-                                            of the source stream (as returned by getTotalLength()),
-                                            then the smaller value will be used.
-                                            Passing a negative value for this parameter means it
-                                            will keep reading until the source's end-of-stream.
-        @param deleteSourceWhenDestroyed    whether the sourceStream that is passed in should be
-                                            deleted by this object when it is itself deleted.
-    */
-    SubregionStream (InputStream* const sourceStream,
-                     const int64 startPositionInSourceStream,
-                     const int64 lengthOfSourceStream,
-                     const bool deleteSourceWhenDestroyed) throw();
-
-    /** Destructor.
-
-        This may also delete the source stream, if that option was chosen when the
-        buffered stream was created.
-    */
-    ~SubregionStream() throw();
-
-    int64 getTotalLength();
-    int64 getPosition();
-    bool setPosition (int64 newPosition);
-    int read (void* destBuffer, int maxBytesToRead);
-    bool isExhausted();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    InputStream* const source;
-    const bool deleteSourceWhenDestroyed;
-    const int64 startPositionInSourceStream, lengthOfSourceStream;
-
-    SubregionStream (const SubregionStream&);
-    const SubregionStream& operator= (const SubregionStream&);
-};
-
-#endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_SubregionStream.h *********/
 
 #endif
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
@@ -12989,6 +13002,137 @@ private:
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
 /********* End of inlined file: juce_MemoryInputStream.h *********/
+
+#endif
+#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+
+/********* Start of inlined file: juce_MemoryOutputStream.h *********/
+#ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+#define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+
+/** Writes data to an internal memory buffer, which grows as required.
+
+    The data that was written into the stream can then be accessed later as
+    a contiguous block of memory.
+*/
+class JUCE_API  MemoryOutputStream  : public OutputStream
+{
+public:
+
+    /** Creates a memory stream ready for writing into.
+
+        @param initialSize  the intial amount of space to allocate for writing into
+        @param granularity  the increments by which the internal storage will be increased
+        @param memoryBlockToWriteTo if this is non-zero, then this block will be used as the
+                                    place that the data gets stored. If it's zero, the stream
+                                    will allocate its own storage internally, which you can
+                                    access using getData() and getDataSize()
+    */
+    MemoryOutputStream (const int initialSize = 256,
+                        const int granularity = 256,
+                        MemoryBlock* const memoryBlockToWriteTo = 0) throw();
+
+    /** Destructor.
+
+        This will free any data that was written to it.
+    */
+    ~MemoryOutputStream() throw();
+
+    /** Returns a pointer to the data that has been written to the stream.
+
+        @see getDataSize
+    */
+    const char* getData() throw();
+
+    /** Returns the number of bytes of data that have been written to the stream.
+
+        @see getData
+    */
+    int getDataSize() const throw();
+
+    /** Resets the stream, clearing any data that has been written to it so far. */
+    void reset() throw();
+
+    void flush();
+    bool write (const void* buffer, int howMany);
+    int64 getPosition();
+    bool setPosition (int64 newPosition);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    MemoryBlock* data;
+    int position, size, blockSize;
+    bool ownsMemoryBlock;
+};
+
+#endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
+/********* End of inlined file: juce_MemoryOutputStream.h *********/
+
+#endif
+#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+
+/********* Start of inlined file: juce_SubregionStream.h *********/
+#ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+#define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+
+/** Wraps another input stream, and reads from a specific part of it.
+
+    This lets you take a subsection of a stream and present it as an entire
+    stream in its own right.
+*/
+class JUCE_API  SubregionStream  : public InputStream
+{
+public:
+
+    /** Creates a SubregionStream from an input source.
+
+        @param sourceStream                 the source stream to read from
+        @param startPositionInSourceStream  this is the position in the source stream that
+                                            corresponds to position 0 in this stream
+        @param lengthOfSourceStream         this specifies the maximum number of bytes
+                                            from the source stream that will be passed through
+                                            by this stream. When the position of this stream
+                                            exceeds lengthOfSourceStream, it will cause an end-of-stream.
+                                            If the length passed in here is greater than the length
+                                            of the source stream (as returned by getTotalLength()),
+                                            then the smaller value will be used.
+                                            Passing a negative value for this parameter means it
+                                            will keep reading until the source's end-of-stream.
+        @param deleteSourceWhenDestroyed    whether the sourceStream that is passed in should be
+                                            deleted by this object when it is itself deleted.
+    */
+    SubregionStream (InputStream* const sourceStream,
+                     const int64 startPositionInSourceStream,
+                     const int64 lengthOfSourceStream,
+                     const bool deleteSourceWhenDestroyed) throw();
+
+    /** Destructor.
+
+        This may also delete the source stream, if that option was chosen when the
+        buffered stream was created.
+    */
+    ~SubregionStream() throw();
+
+    int64 getTotalLength();
+    int64 getPosition();
+    bool setPosition (int64 newPosition);
+    int read (void* destBuffer, int maxBytesToRead);
+    bool isExhausted();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    InputStream* const source;
+    const bool deleteSourceWhenDestroyed;
+    const int64 startPositionInSourceStream, lengthOfSourceStream;
+
+    SubregionStream (const SubregionStream&);
+    const SubregionStream& operator= (const SubregionStream&);
+};
+
+#endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
+/********* End of inlined file: juce_SubregionStream.h *********/
 
 #endif
 #ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
@@ -13874,11 +14018,142 @@ private:
 #ifndef __JUCE_XMLELEMENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_THREAD_JUCEHEADER__
+#ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 
-/********* Start of inlined file: juce_Thread.h *********/
-#ifndef __JUCE_THREAD_JUCEHEADER__
-#define __JUCE_THREAD_JUCEHEADER__
+#endif
+#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_InterProcessLock.h *********/
+#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+#define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+
+/**
+    Acts as a critical section which processes can use to block each other.
+
+    @see CriticalSection
+*/
+class JUCE_API  InterProcessLock
+{
+public:
+
+    /** Creates a lock object.
+
+        @param name     a name that processes will use to identify this lock object
+    */
+    InterProcessLock (const String& name) throw();
+
+    /** Destructor.
+
+        This will also release the lock if it's currently held by this process.
+    */
+    ~InterProcessLock() throw();
+
+    /** Attempts to lock the critical section.
+
+        @param timeOutMillisecs     how many milliseconds to wait if the lock
+                                    is already held by another process - a value of
+                                    0 will return immediately, negative values will wait
+                                    forever
+        @returns    true if the lock could be gained within the timeout period, or
+                    false if the timeout expired.
+    */
+    bool enter (int timeOutMillisecs = -1) throw();
+
+    /** Releases the lock if it's currently held by this process.
+    */
+    void exit() throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    void* internal;
+    String name;
+    int reentrancyLevel;
+
+    InterProcessLock (const InterProcessLock&);
+    const InterProcessLock& operator= (const InterProcessLock&);
+};
+
+#endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
+/********* End of inlined file: juce_InterProcessLock.h *********/
+
+#endif
+#ifndef __JUCE_PROCESS_JUCEHEADER__
+
+/********* Start of inlined file: juce_Process.h *********/
+#ifndef __JUCE_PROCESS_JUCEHEADER__
+#define __JUCE_PROCESS_JUCEHEADER__
+
+/** Represents the current executable's process.
+
+    This contains methods for controlling the current application at the
+    process-level.
+
+    @see Thread, JUCEApplication
+*/
+class JUCE_API  Process
+{
+public:
+
+    enum ProcessPriority
+    {
+        LowPriority         = 0,
+        NormalPriority      = 1,
+        HighPriority        = 2,
+        RealtimePriority    = 3
+    };
+
+    /** Changes the current process's priority.
+
+        @param priority     the process priority, where
+                            0=low, 1=normal, 2=high, 3=realtime
+    */
+    static void setPriority (const ProcessPriority priority);
+
+    /** Kills the current process immediately.
+
+        This is an emergency process terminator that kills the application
+        immediately - it's intended only for use only when something goes
+        horribly wrong.
+
+        @see JUCEApplication::quit
+    */
+    static void terminate();
+
+    /** Returns true if this application process is the one that the user is
+        currently using.
+    */
+    static bool isForegroundProcess() throw();
+
+    /** Raises the current process's privilege level.
+
+        Does nothing if this isn't supported by the current OS, or if process
+        privilege level is fixed.
+    */
+    static void raisePrivilege();
+
+    /** Lowers the current process's privilege level.
+
+        Does nothing if this isn't supported by the current OS, or if process
+        privilege level is fixed.
+    */
+    static void lowerPrivilege();
+
+    /** Returns true if this process is being hosted by a debugger.
+    */
+    static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
+};
+
+#endif   // __JUCE_PROCESS_JUCEHEADER__
+/********* End of inlined file: juce_Process.h *********/
+
+#endif
+#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_ReadWriteLock.h *********/
+#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
+#define __JUCE_READWRITELOCK_JUCEHEADER__
 
 /********* Start of inlined file: juce_WaitableEvent.h *********/
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
@@ -13947,6 +14222,10 @@ private:
 
 #endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
 /********* End of inlined file: juce_WaitableEvent.h *********/
+
+/********* Start of inlined file: juce_Thread.h *********/
+#ifndef __JUCE_THREAD_JUCEHEADER__
+#define __JUCE_THREAD_JUCEHEADER__
 
 /**
     Encapsulates a thread.
@@ -14192,6 +14471,326 @@ private:
 
 #endif   // __JUCE_THREAD_JUCEHEADER__
 /********* End of inlined file: juce_Thread.h *********/
+
+/**
+    A critical section that allows multiple simultaneous readers.
+
+    Features of this type of lock are:
+
+    - Multiple readers can hold the lock at the same time, but only one writer
+      can hold it at once.
+    - Writers trying to gain the lock will be blocked until all readers and writers
+      have released it
+    - Readers trying to gain the lock while a writer is waiting to acquire it will be
+      blocked until the writer has obtained and released it
+    - If a thread already has a read lock and tries to obtain a write lock, it will succeed if
+      there are no other readers
+    - If a thread already has the write lock and tries to obtain a read lock, this will succeed.
+    - Recursive locking is supported.
+
+    @see ScopedReadLock, ScopedWriteLock, CriticalSection
+*/
+class JUCE_API  ReadWriteLock
+{
+public:
+
+    /**
+        Creates a ReadWriteLock object.
+    */
+    ReadWriteLock() throw();
+
+    /** Destructor.
+
+        If the object is deleted whilst locked, any subsequent behaviour
+        is unpredictable.
+    */
+    ~ReadWriteLock() throw();
+
+    /** Locks this object for reading.
+
+        Multiple threads can simulaneously lock the object for reading, but if another
+        thread has it locked for writing, then this will block until it releases the
+        lock.
+
+        @see exitRead, ScopedReadLock
+    */
+    void enterRead() const throw();
+
+    /** Releases the read-lock.
+
+        If the caller thread hasn't got the lock, this can have unpredictable results.
+
+        If the enterRead() method has been called multiple times by the thread, each
+        call must be matched by a call to exitRead() before other threads will be allowed
+        to take over the lock.
+
+        @see enterRead, ScopedReadLock
+    */
+    void exitRead() const throw();
+
+    /** Locks this object for writing.
+
+        This will block until any other threads that have it locked for reading or
+        writing have released their lock.
+
+        @see exitWrite, ScopedWriteLock
+    */
+    void enterWrite() const throw();
+
+    /** Tries to lock this object for writing.
+
+        This is like enterWrite(), but doesn't block - it returns true if it manages
+        to obtain the lock.
+
+        @see enterWrite
+    */
+    bool tryEnterWrite() const throw();
+
+    /** Releases the write-lock.
+
+        If the caller thread hasn't got the lock, this can have unpredictable results.
+
+        If the enterWrite() method has been called multiple times by the thread, each
+        call must be matched by a call to exit() before other threads will be allowed
+        to take over the lock.
+
+        @see enterWrite, ScopedWriteLock
+    */
+    void exitWrite() const throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    CriticalSection accessLock;
+    WaitableEvent waitEvent;
+    mutable int numWaitingWriters, numWriters;
+    mutable Thread::ThreadID writerThreadId;
+    mutable Array <Thread::ThreadID> readerThreads;
+
+    ReadWriteLock (const ReadWriteLock&);
+    const ReadWriteLock& operator= (const ReadWriteLock&);
+};
+
+#endif   // __JUCE_READWRITELOCK_JUCEHEADER__
+/********* End of inlined file: juce_ReadWriteLock.h *********/
+
+#endif
+#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedReadLock.h *********/
+#ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDREADLOCK_JUCEHEADER__
+
+/**
+    Automatically locks and unlocks a ReadWriteLock object.
+
+    Use one of these as a local variable to control access to a ReadWriteLock.
+
+    e.g. @code
+
+    ReadWriteLock myLock;
+
+    for (;;)
+    {
+        const ScopedReadLock myScopedLock (myLock);
+        // myLock is now locked
+
+        ...do some stuff...
+
+        // myLock gets unlocked here.
+    }
+    @endcode
+
+    @see ReadWriteLock, ScopedWriteLock
+*/
+class JUCE_API  ScopedReadLock
+{
+public:
+
+    /** Creates a ScopedReadLock.
+
+        As soon as it is created, this will call ReadWriteLock::enterRead(), and
+        when the ScopedReadLock object is deleted, the ReadWriteLock will
+        be unlocked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedReadLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterRead(); }
+
+    /** Destructor.
+
+        The ReadWriteLock's exitRead() method will be called when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedReadLock() throw()                                { lock_.exitRead(); }
+
+private:
+
+    const ReadWriteLock& lock_;
+
+    ScopedReadLock (const ScopedReadLock&);
+    const ScopedReadLock& operator= (const ScopedReadLock&);
+};
+
+#endif   // __JUCE_SCOPEDREADLOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedReadLock.h *********/
+
+#endif
+#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedTryLock.h *********/
+#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
+
+/**
+    Automatically tries to lock and unlock a CriticalSection object.
+
+    Use one of these as a local variable to control access to a CriticalSection.
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedTryLock myScopedTryLock (myCriticalSection);
+
+        // Unlike using a ScopedLock, this may fail to actually get the lock, so you
+        // should test this with the isLocked() method before doing your thread-unsafe
+        // action..
+        if (myScopedTryLock.isLocked())
+        {
+           ...do some stuff...
+        }
+        else
+        {
+            ..our attempt at locking failed because another thread had already locked it..
+        }
+
+        // myCriticalSection gets unlocked here (if it was locked)
+    }
+    @endcode
+
+    @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
+*/
+class JUCE_API  ScopedTryLock
+{
+public:
+
+    /** Creates a ScopedTryLock.
+
+        As soon as it is created, this will try to lock the CriticalSection, and
+        when the ScopedTryLock object is deleted, the CriticalSection will
+        be unlocked if the lock was successful.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedTryLock (const CriticalSection& lock) throw()      : lock_ (lock), lockWasSuccessful (lock.tryEnter()) {}
+
+    /** Destructor.
+
+        The CriticalSection will be unlocked (if locked) when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedTryLock() throw()                                 { if (lockWasSuccessful) lock_.exit(); }
+
+    /** Lock state
+
+    @return True if the CriticalSection is locked.
+    */
+    bool isLocked() const throw()                                   { return lockWasSuccessful; }
+
+private:
+
+    const CriticalSection& lock_;
+    const bool lockWasSuccessful;
+
+    ScopedTryLock (const ScopedTryLock&);
+    const ScopedTryLock& operator= (const ScopedTryLock&);
+};
+
+#endif   // __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedTryLock.h *********/
+
+#endif
+#ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedWriteLock.h *********/
+#ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
+#define __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
+
+/**
+    Automatically locks and unlocks a ReadWriteLock object.
+
+    Use one of these as a local variable to control access to a ReadWriteLock.
+
+    e.g. @code
+
+    ReadWriteLock myLock;
+
+    for (;;)
+    {
+        const ScopedWriteLock myScopedLock (myLock);
+        // myLock is now locked
+
+        ...do some stuff...
+
+        // myLock gets unlocked here.
+    }
+    @endcode
+
+    @see ReadWriteLock, ScopedReadLock
+*/
+class JUCE_API  ScopedWriteLock
+{
+public:
+
+    /** Creates a ScopedWriteLock.
+
+        As soon as it is created, this will call ReadWriteLock::enterWrite(), and
+        when the ScopedWriteLock object is deleted, the ReadWriteLock will
+        be unlocked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedWriteLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterWrite(); }
+
+    /** Destructor.
+
+        The ReadWriteLock's exitWrite() method will be called when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedWriteLock() throw()                                { lock_.exitWrite(); }
+
+private:
+
+    const ReadWriteLock& lock_;
+
+    ScopedWriteLock (const ScopedWriteLock&);
+    const ScopedWriteLock& operator= (const ScopedWriteLock&);
+};
+
+#endif   // __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedWriteLock.h *********/
+
+#endif
+#ifndef __JUCE_THREAD_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
@@ -14552,461 +15151,6 @@ private:
 
 #endif
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-
-/********* Start of inlined file: juce_InterProcessLock.h *********/
-#ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-#define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-
-/**
-    Acts as a critical section which processes can use to block each other.
-
-    @see CriticalSection
-*/
-class JUCE_API  InterProcessLock
-{
-public:
-
-    /** Creates a lock object.
-
-        @param name     a name that processes will use to identify this lock object
-    */
-    InterProcessLock (const String& name) throw();
-
-    /** Destructor.
-
-        This will also release the lock if it's currently held by this process.
-    */
-    ~InterProcessLock() throw();
-
-    /** Attempts to lock the critical section.
-
-        @param timeOutMillisecs     how many milliseconds to wait if the lock
-                                    is already held by another process - a value of
-                                    0 will return immediately, negative values will wait
-                                    forever
-        @returns    true if the lock could be gained within the timeout period, or
-                    false if the timeout expired.
-    */
-    bool enter (int timeOutMillisecs = -1) throw();
-
-    /** Releases the lock if it's currently held by this process.
-    */
-    void exit() throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    void* internal;
-    String name;
-    int reentrancyLevel;
-
-    InterProcessLock (const InterProcessLock&);
-    const InterProcessLock& operator= (const InterProcessLock&);
-};
-
-#endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-/********* End of inlined file: juce_InterProcessLock.h *********/
-
-#endif
-#ifndef __JUCE_PROCESS_JUCEHEADER__
-
-/********* Start of inlined file: juce_Process.h *********/
-#ifndef __JUCE_PROCESS_JUCEHEADER__
-#define __JUCE_PROCESS_JUCEHEADER__
-
-/** Represents the current executable's process.
-
-    This contains methods for controlling the current application at the
-    process-level.
-
-    @see Thread, JUCEApplication
-*/
-class JUCE_API  Process
-{
-public:
-
-    enum ProcessPriority
-    {
-        LowPriority         = 0,
-        NormalPriority      = 1,
-        HighPriority        = 2,
-        RealtimePriority    = 3
-    };
-
-    /** Changes the current process's priority.
-
-        @param priority     the process priority, where
-                            0=low, 1=normal, 2=high, 3=realtime
-    */
-    static void setPriority (const ProcessPriority priority);
-
-    /** Kills the current process immediately.
-
-        This is an emergency process terminator that kills the application
-        immediately - it's intended only for use only when something goes
-        horribly wrong.
-
-        @see JUCEApplication::quit
-    */
-    static void terminate();
-
-    /** Returns true if this application process is the one that the user is
-        currently using.
-    */
-    static bool isForegroundProcess() throw();
-
-    /** Raises the current process's privilege level.
-
-        Does nothing if this isn't supported by the current OS, or if process
-        privilege level is fixed.
-    */
-    static void raisePrivilege();
-
-    /** Lowers the current process's privilege level.
-
-        Does nothing if this isn't supported by the current OS, or if process
-        privilege level is fixed.
-    */
-    static void lowerPrivilege();
-
-    /** Returns true if this process is being hosted by a debugger.
-    */
-    static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
-};
-
-#endif   // __JUCE_PROCESS_JUCEHEADER__
-/********* End of inlined file: juce_Process.h *********/
-
-#endif
-#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
-
-/********* Start of inlined file: juce_ReadWriteLock.h *********/
-#ifndef __JUCE_READWRITELOCK_JUCEHEADER__
-#define __JUCE_READWRITELOCK_JUCEHEADER__
-
-/**
-    A critical section that allows multiple simultaneous readers.
-
-    Features of this type of lock are:
-
-    - Multiple readers can hold the lock at the same time, but only one writer
-      can hold it at once.
-    - Writers trying to gain the lock will be blocked until all readers and writers
-      have released it
-    - Readers trying to gain the lock while a writer is waiting to acquire it will be
-      blocked until the writer has obtained and released it
-    - If a thread already has a read lock and tries to obtain a write lock, it will succeed if
-      there are no other readers
-    - If a thread already has the write lock and tries to obtain a read lock, this will succeed.
-    - Recursive locking is supported.
-
-    @see ScopedReadLock, ScopedWriteLock, CriticalSection
-*/
-class JUCE_API  ReadWriteLock
-{
-public:
-
-    /**
-        Creates a ReadWriteLock object.
-    */
-    ReadWriteLock() throw();
-
-    /** Destructor.
-
-        If the object is deleted whilst locked, any subsequent behaviour
-        is unpredictable.
-    */
-    ~ReadWriteLock() throw();
-
-    /** Locks this object for reading.
-
-        Multiple threads can simulaneously lock the object for reading, but if another
-        thread has it locked for writing, then this will block until it releases the
-        lock.
-
-        @see exitRead, ScopedReadLock
-    */
-    void enterRead() const throw();
-
-    /** Releases the read-lock.
-
-        If the caller thread hasn't got the lock, this can have unpredictable results.
-
-        If the enterRead() method has been called multiple times by the thread, each
-        call must be matched by a call to exitRead() before other threads will be allowed
-        to take over the lock.
-
-        @see enterRead, ScopedReadLock
-    */
-    void exitRead() const throw();
-
-    /** Locks this object for writing.
-
-        This will block until any other threads that have it locked for reading or
-        writing have released their lock.
-
-        @see exitWrite, ScopedWriteLock
-    */
-    void enterWrite() const throw();
-
-    /** Tries to lock this object for writing.
-
-        This is like enterWrite(), but doesn't block - it returns true if it manages
-        to obtain the lock.
-
-        @see enterWrite
-    */
-    bool tryEnterWrite() const throw();
-
-    /** Releases the write-lock.
-
-        If the caller thread hasn't got the lock, this can have unpredictable results.
-
-        If the enterWrite() method has been called multiple times by the thread, each
-        call must be matched by a call to exit() before other threads will be allowed
-        to take over the lock.
-
-        @see enterWrite, ScopedWriteLock
-    */
-    void exitWrite() const throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    CriticalSection accessLock;
-    WaitableEvent waitEvent;
-    mutable int numWaitingWriters, numWriters;
-    mutable Thread::ThreadID writerThreadId;
-    mutable Array <Thread::ThreadID> readerThreads;
-
-    ReadWriteLock (const ReadWriteLock&);
-    const ReadWriteLock& operator= (const ReadWriteLock&);
-};
-
-#endif   // __JUCE_READWRITELOCK_JUCEHEADER__
-/********* End of inlined file: juce_ReadWriteLock.h *********/
-
-#endif
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedReadLock.h *********/
-#ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDREADLOCK_JUCEHEADER__
-
-/**
-    Automatically locks and unlocks a ReadWriteLock object.
-
-    Use one of these as a local variable to control access to a ReadWriteLock.
-
-    e.g. @code
-
-    ReadWriteLock myLock;
-
-    for (;;)
-    {
-        const ScopedReadLock myScopedLock (myLock);
-        // myLock is now locked
-
-        ...do some stuff...
-
-        // myLock gets unlocked here.
-    }
-    @endcode
-
-    @see ReadWriteLock, ScopedWriteLock
-*/
-class JUCE_API  ScopedReadLock
-{
-public:
-
-    /** Creates a ScopedReadLock.
-
-        As soon as it is created, this will call ReadWriteLock::enterRead(), and
-        when the ScopedReadLock object is deleted, the ReadWriteLock will
-        be unlocked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedReadLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterRead(); }
-
-    /** Destructor.
-
-        The ReadWriteLock's exitRead() method will be called when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedReadLock() throw()                                { lock_.exitRead(); }
-
-private:
-
-    const ReadWriteLock& lock_;
-
-    ScopedReadLock (const ScopedReadLock&);
-    const ScopedReadLock& operator= (const ScopedReadLock&);
-};
-
-#endif   // __JUCE_SCOPEDREADLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedReadLock.h *********/
-
-#endif
-#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedTryLock.h *********/
-#ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
-
-/**
-    Automatically tries to lock and unlock a CriticalSection object.
-
-    Use one of these as a local variable to control access to a CriticalSection.
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
-    {
-        const ScopedTryLock myScopedTryLock (myCriticalSection);
-
-        // Unlike using a ScopedLock, this may fail to actually get the lock, so you
-        // should test this with the isLocked() method before doing your thread-unsafe
-        // action..
-        if (myScopedTryLock.isLocked())
-        {
-           ...do some stuff...
-        }
-        else
-        {
-            ..our attempt at locking failed because another thread had already locked it..
-        }
-
-        // myCriticalSection gets unlocked here (if it was locked)
-    }
-    @endcode
-
-    @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
-*/
-class JUCE_API  ScopedTryLock
-{
-public:
-
-    /** Creates a ScopedTryLock.
-
-        As soon as it is created, this will try to lock the CriticalSection, and
-        when the ScopedTryLock object is deleted, the CriticalSection will
-        be unlocked if the lock was successful.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedTryLock (const CriticalSection& lock) throw()      : lock_ (lock), lockWasSuccessful (lock.tryEnter()) {}
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked (if locked) when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedTryLock() throw()                                 { if (lockWasSuccessful) lock_.exit(); }
-
-    /** Lock state
-
-    @return True if the CriticalSection is locked.
-    */
-    bool isLocked() const throw()                                   { return lockWasSuccessful; }
-
-private:
-
-    const CriticalSection& lock_;
-    const bool lockWasSuccessful;
-
-    ScopedTryLock (const ScopedTryLock&);
-    const ScopedTryLock& operator= (const ScopedTryLock&);
-};
-
-#endif   // __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedTryLock.h *********/
-
-#endif
-#ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedWriteLock.h *********/
-#ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
-#define __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
-
-/**
-    Automatically locks and unlocks a ReadWriteLock object.
-
-    Use one of these as a local variable to control access to a ReadWriteLock.
-
-    e.g. @code
-
-    ReadWriteLock myLock;
-
-    for (;;)
-    {
-        const ScopedWriteLock myScopedLock (myLock);
-        // myLock is now locked
-
-        ...do some stuff...
-
-        // myLock gets unlocked here.
-    }
-    @endcode
-
-    @see ReadWriteLock, ScopedReadLock
-*/
-class JUCE_API  ScopedWriteLock
-{
-public:
-
-    /** Creates a ScopedWriteLock.
-
-        As soon as it is created, this will call ReadWriteLock::enterWrite(), and
-        when the ScopedWriteLock object is deleted, the ReadWriteLock will
-        be unlocked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedWriteLock (const ReadWriteLock& lock) throw()       : lock_ (lock) { lock.enterWrite(); }
-
-    /** Destructor.
-
-        The ReadWriteLock's exitWrite() method will be called when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedWriteLock() throw()                                { lock_.exitWrite(); }
-
-private:
-
-    const ReadWriteLock& lock_;
-
-    ScopedWriteLock (const ScopedWriteLock&);
-    const ScopedWriteLock& operator= (const ScopedWriteLock&);
-};
-
-#endif   // __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedWriteLock.h *********/
 
 #endif
 
@@ -24860,11 +25004,7 @@ public:
 /********* End of inlined file: juce_SystemClipboard.h *********/
 
 #endif
-#ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
-
-/********* Start of inlined file: juce_MidiKeyboardState.h *********/
-#ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
-#define __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
 
 /********* Start of inlined file: juce_MidiBuffer.h *********/
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
@@ -25912,6 +26052,424 @@ private:
 #endif   // __JUCE_MIDIBUFFER_JUCEHEADER__
 /********* End of inlined file: juce_MidiBuffer.h *********/
 
+#endif
+#ifndef __JUCE_MIDIFILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_MidiFile.h *********/
+#ifndef __JUCE_MIDIFILE_JUCEHEADER__
+#define __JUCE_MIDIFILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_MidiMessageSequence.h *********/
+#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+#define __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+
+/**
+    A sequence of timestamped midi messages.
+
+    This allows the sequence to be manipulated, and also to be read from and
+    written to a standard midi file.
+
+    @see MidiMessage, MidiFile
+*/
+class JUCE_API  MidiMessageSequence
+{
+public:
+
+    /** Creates an empty midi sequence object. */
+    MidiMessageSequence();
+
+    /** Creates a copy of another sequence. */
+    MidiMessageSequence (const MidiMessageSequence& other);
+
+    /** Replaces this sequence with another one. */
+    const MidiMessageSequence& operator= (const MidiMessageSequence& other);
+
+    /** Destructor. */
+    ~MidiMessageSequence();
+
+    /** Structure used to hold midi events in the sequence.
+
+        These structures act as 'handles' on the events as they are moved about in
+        the list, and make it quick to find the matching note-offs for note-on events.
+
+        @see MidiMessageSequence::getEventPointer
+    */
+    class MidiEventHolder
+    {
+    public:
+
+        /** Destructor. */
+        ~MidiEventHolder();
+
+        /** The message itself, whose timestamp is used to specify the event's time.
+        */
+        MidiMessage message;
+
+        /** The matching note-off event (if this is a note-on event).
+
+            If this isn't a note-on, this pointer will be null.
+
+            Use the MidiMessageSequence::updateMatchedPairs() method to keep these
+            note-offs up-to-date after events have been moved around in the sequence
+            or deleted.
+        */
+        MidiEventHolder* noteOffObject;
+
+        juce_UseDebuggingNewOperator
+
+    private:
+        friend class MidiMessageSequence;
+        MidiEventHolder (const MidiMessage& message);
+    };
+
+    /** Clears the sequence. */
+    void clear();
+
+    /** Returns the number of events in the sequence. */
+    int getNumEvents() const;
+
+    /** Returns a pointer to one of the events. */
+    MidiEventHolder* getEventPointer (const int index) const;
+
+    /** Returns the time of the note-up that matches the note-on at this index.
+
+        If the event at this index isn't a note-on, it'll just return 0.
+
+        @see MidiMessageSequence::MidiEventHolder::noteOffObject
+    */
+    double getTimeOfMatchingKeyUp (const int index) const;
+
+    /** Returns the index of the note-up that matches the note-on at this index.
+
+        If the event at this index isn't a note-on, it'll just return -1.
+
+        @see MidiMessageSequence::MidiEventHolder::noteOffObject
+    */
+    int getIndexOfMatchingKeyUp (const int index) const;
+
+    /** Returns the index of an event. */
+    int getIndexOf (MidiEventHolder* const event) const;
+
+    /** Returns the index of the first event on or after the given timestamp.
+
+        If the time is beyond the end of the sequence, this will return the
+        number of events.
+    */
+    int getNextIndexAtTime (const double timeStamp) const;
+
+    /** Returns the timestamp of the first event in the sequence.
+
+        @see getEndTime
+    */
+    double getStartTime() const;
+
+    /** Returns the timestamp of the last event in the sequence.
+
+        @see getStartTime
+    */
+    double getEndTime() const;
+
+    /** Returns the timestamp of the event at a given index.
+
+        If the index is out-of-range, this will return 0.0
+    */
+    double getEventTime (const int index) const;
+
+    /** Inserts a midi message into the sequence.
+
+        The index at which the new message gets inserted will depend on its timestamp,
+        because the sequence is kept sorted.
+
+        Remember to call updateMatchedPairs() after adding note-on events.
+
+        @param newMessage       the new message to add (an internal copy will be made)
+        @param timeAdjustment   an optional value to add to the timestamp of the message
+                                that will be inserted
+        @see updateMatchedPairs
+    */
+    void addEvent (const MidiMessage& newMessage,
+                   double timeAdjustment = 0);
+
+    /** Deletes one of the events in the sequence.
+
+        Remember to call updateMatchedPairs() after removing events.
+
+        @param index                 the index of the event to delete
+        @param deleteMatchingNoteUp  whether to also remove the matching note-off
+                                     if the event you're removing is a note-on
+    */
+    void deleteEvent (const int index,
+                      const bool deleteMatchingNoteUp);
+
+    /** Merges another sequence into this one.
+
+        Remember to call updateMatchedPairs() after using this method.
+
+        @param other                    the sequence to add from
+        @param timeAdjustmentDelta      an amount to add to the timestamps of the midi events
+                                        as they are read from the other sequence
+        @param firstAllowableDestTime   events will not be added if their time is earlier
+                                        than this time. (This is after their time has been adjusted
+                                        by the timeAdjustmentDelta)
+        @param endOfAllowableDestTimes  events will not be added if their time is equal to
+                                        or greater than this time. (This is after their time has
+                                        been adjusted by the timeAdjustmentDelta)
+    */
+    void addSequence (const MidiMessageSequence& other,
+                      double timeAdjustmentDelta,
+                      double firstAllowableDestTime,
+                      double endOfAllowableDestTimes);
+
+    /** Makes sure all the note-on and note-off pairs are up-to-date.
+
+        Call this after moving messages about or deleting/adding messages, and it
+        will scan the list and make sure all the note-offs in the MidiEventHolder
+        structures are pointing at the correct ones.
+    */
+    void updateMatchedPairs();
+
+    /** Copies all the messages for a particular midi channel to another sequence.
+
+        @param channelNumberToExtract   the midi channel to look for, in the range 1 to 16
+        @param destSequence             the sequence that the chosen events should be copied to
+        @param alsoIncludeMetaEvents    if true, any meta-events (which don't apply to a specific
+                                        channel) will also be copied across.
+        @see extractSysExMessages
+    */
+    void extractMidiChannelMessages (const int channelNumberToExtract,
+                                     MidiMessageSequence& destSequence,
+                                     const bool alsoIncludeMetaEvents) const;
+
+    /** Copies all midi sys-ex messages to another sequence.
+
+        @param destSequence     this is the sequence to which any sys-exes in this sequence
+                                will be added
+        @see extractMidiChannelMessages
+    */
+    void extractSysExMessages (MidiMessageSequence& destSequence) const;
+
+    /** Removes any messages in this sequence that have a specific midi channel.
+
+        @param channelNumberToRemove    the midi channel to look for, in the range 1 to 16
+    */
+    void deleteMidiChannelMessages (const int channelNumberToRemove);
+
+    /** Removes any sys-ex messages from this sequence.
+    */
+    void deleteSysExMessages();
+
+    /** Adds an offset to the timestamps of all events in the sequence.
+
+        @param deltaTime    the amount to add to each timestamp.
+    */
+    void addTimeToMessages (const double deltaTime);
+
+    /** Scans through the sequence to determine the state of any midi controllers at
+        a given time.
+
+        This will create a sequence of midi controller changes that can be
+        used to set all midi controllers to the state they would be in at the
+        specified time within this sequence.
+
+        As well as controllers, it will also recreate the midi program number
+        and pitch bend position.
+
+        @param channelNumber    the midi channel to look for, in the range 1 to 16. Controllers
+                                for other channels will be ignored.
+        @param time             the time at which you want to find out the state - there are
+                                no explicit units for this time measurement, it's the same units
+                                as used for the timestamps of the messages
+        @param resultMessages   an array to which midi controller-change messages will be added. This
+                                will be the minimum number of controller changes to recreate the
+                                state at the required time.
+    */
+    void createControllerUpdatesForTime (const int channelNumber,
+                                         const double time,
+                                         OwnedArray<MidiMessage>& resultMessages);
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
+                                const MidiMessageSequence::MidiEventHolder* const second) throw();
+
+private:
+
+    friend class MidiComparator;
+    friend class MidiFile;
+    OwnedArray <MidiEventHolder> list;
+
+    void sort();
+};
+
+#endif   // __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+/********* End of inlined file: juce_MidiMessageSequence.h *********/
+
+/**
+    Reads/writes standard midi format files.
+
+    To read a midi file, create a MidiFile object and call its readFrom() method. You
+    can then get the individual midi tracks from it using the getTrack() method.
+
+    To write a file, create a MidiFile object, add some MidiMessageSequence objects
+    to it using the addTrack() method, and then call its writeTo() method to stream
+    it out.
+
+    @see MidiMessageSequence
+*/
+class JUCE_API  MidiFile
+{
+public:
+
+    /** Creates an empty MidiFile object.
+    */
+    MidiFile() throw();
+
+    /** Destructor. */
+    ~MidiFile() throw();
+
+    /** Returns the number of tracks in the file.
+
+        @see getTrack, addTrack
+    */
+    int getNumTracks() const throw();
+
+    /** Returns a pointer to one of the tracks in the file.
+
+        @returns a pointer to the track, or 0 if the index is out-of-range
+        @see getNumTracks, addTrack
+    */
+    const MidiMessageSequence* getTrack (const int index) const throw();
+
+    /** Adds a midi track to the file.
+
+        This will make its own internal copy of the sequence that is passed-in.
+
+        @see getNumTracks, getTrack
+    */
+    void addTrack (const MidiMessageSequence& trackSequence)  throw();
+
+    /** Removes all midi tracks from the file.
+
+        @see getNumTracks
+    */
+    void clear() throw();
+
+    /** Returns the raw time format code that will be written to a stream.
+
+        After reading a midi file, this method will return the time-format that
+        was read from the file's header. It can be changed using the setTicksPerQuarterNote()
+        or setSmpteTimeFormat() methods.
+
+        If the value returned is positive, it indicates the number of midi ticks
+        per quarter-note - see setTicksPerQuarterNote().
+
+        It it's negative, the upper byte indicates the frames-per-second (but negative), and
+        the lower byte is the number of ticks per frame - see setSmpteTimeFormat().
+    */
+    short getTimeFormat() const throw();
+
+    /** Sets the time format to use when this file is written to a stream.
+
+        If this is called, the file will be written as bars/beats using the
+        specified resolution, rather than SMPTE absolute times, as would be
+        used if setSmpteTimeFormat() had been called instead.
+
+        @param ticksPerQuarterNote  e.g. 96, 960
+        @see setSmpteTimeFormat
+    */
+    void setTicksPerQuarterNote (const int ticksPerQuarterNote) throw();
+
+    /** Sets the time format to use when this file is written to a stream.
+
+        If this is called, the file will be written using absolute times, rather
+        than bars/beats as would be the case if setTicksPerBeat() had been called
+        instead.
+
+        @param framesPerSecond      must be 24, 25, 29 or 30
+        @param subframeResolution   the sub-second resolution, e.g. 4 (midi time code),
+                                    8, 10, 80 (SMPTE bit resolution), or 100. For millisecond
+                                    timing, setSmpteTimeFormat (25, 40)
+        @see setTicksPerBeat
+    */
+    void setSmpteTimeFormat (const int framesPerSecond,
+                             const int subframeResolution) throw();
+
+    /** Makes a list of all the tempo-change meta-events from all tracks in the midi file.
+
+        Useful for finding the positions of all the tempo changes in a file.
+
+        @param tempoChangeEvents    a list to which all the events will be added
+    */
+    void findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const;
+
+    /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
+
+        Useful for finding the positions of all the tempo changes in a file.
+
+        @param timeSigEvents        a list to which all the events will be added
+    */
+    void findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const;
+
+    /** Returns the latest timestamp in any of the tracks.
+
+        (Useful for finding the length of the file).
+    */
+    double getLastTimestamp() const;
+
+    /** Reads a midi file format stream.
+
+        After calling this, you can get the tracks that were read from the file by using the
+        getNumTracks() and getTrack() methods.
+
+        The timestamps of the midi events in the tracks will represent their positions in
+        terms of midi ticks. To convert them to seconds, use the convertTimestampTicksToSeconds()
+        method.
+
+        @returns true if the stream was read successfully
+    */
+    bool readFrom (InputStream& sourceStream);
+
+    /** Writes the midi tracks as a standard midi file.
+
+        @returns true if the operation succeeded.
+    */
+    bool writeTo (OutputStream& destStream);
+
+    /** Converts the timestamp of all the midi events from midi ticks to seconds.
+
+        This will use the midi time format and tempo/time signature info in the
+        tracks to convert all the timestamps to absolute values in seconds.
+    */
+    void convertTimestampTicksToSeconds();
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
+                                const MidiMessageSequence::MidiEventHolder* const second) throw();
+
+private:
+    MidiMessageSequence* tracks [128];
+    short numTracks, timeFormat;
+
+    MidiFile (const MidiFile&);
+    const MidiFile& operator= (const MidiFile&);
+
+    void readNextTrack (const char* data, int size);
+    void writeTrack (OutputStream& mainOut, const int trackNum);
+};
+
+#endif   // __JUCE_MIDIFILE_JUCEHEADER__
+/********* End of inlined file: juce_MidiFile.h *********/
+
+#endif
+#ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+
+/********* Start of inlined file: juce_MidiKeyboardState.h *********/
+#ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+#define __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
+
 class MidiKeyboardState;
 
 /**
@@ -26327,420 +26885,6 @@ private:
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiMessageSequence.h *********/
-#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
-#define __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
-
-/**
-    A sequence of timestamped midi messages.
-
-    This allows the sequence to be manipulated, and also to be read from and
-    written to a standard midi file.
-
-    @see MidiMessage, MidiFile
-*/
-class JUCE_API  MidiMessageSequence
-{
-public:
-
-    /** Creates an empty midi sequence object. */
-    MidiMessageSequence();
-
-    /** Creates a copy of another sequence. */
-    MidiMessageSequence (const MidiMessageSequence& other);
-
-    /** Replaces this sequence with another one. */
-    const MidiMessageSequence& operator= (const MidiMessageSequence& other);
-
-    /** Destructor. */
-    ~MidiMessageSequence();
-
-    /** Structure used to hold midi events in the sequence.
-
-        These structures act as 'handles' on the events as they are moved about in
-        the list, and make it quick to find the matching note-offs for note-on events.
-
-        @see MidiMessageSequence::getEventPointer
-    */
-    class MidiEventHolder
-    {
-    public:
-
-        /** Destructor. */
-        ~MidiEventHolder();
-
-        /** The message itself, whose timestamp is used to specify the event's time.
-        */
-        MidiMessage message;
-
-        /** The matching note-off event (if this is a note-on event).
-
-            If this isn't a note-on, this pointer will be null.
-
-            Use the MidiMessageSequence::updateMatchedPairs() method to keep these
-            note-offs up-to-date after events have been moved around in the sequence
-            or deleted.
-        */
-        MidiEventHolder* noteOffObject;
-
-        juce_UseDebuggingNewOperator
-
-    private:
-        friend class MidiMessageSequence;
-        MidiEventHolder (const MidiMessage& message);
-    };
-
-    /** Clears the sequence. */
-    void clear();
-
-    /** Returns the number of events in the sequence. */
-    int getNumEvents() const;
-
-    /** Returns a pointer to one of the events. */
-    MidiEventHolder* getEventPointer (const int index) const;
-
-    /** Returns the time of the note-up that matches the note-on at this index.
-
-        If the event at this index isn't a note-on, it'll just return 0.
-
-        @see MidiMessageSequence::MidiEventHolder::noteOffObject
-    */
-    double getTimeOfMatchingKeyUp (const int index) const;
-
-    /** Returns the index of the note-up that matches the note-on at this index.
-
-        If the event at this index isn't a note-on, it'll just return -1.
-
-        @see MidiMessageSequence::MidiEventHolder::noteOffObject
-    */
-    int getIndexOfMatchingKeyUp (const int index) const;
-
-    /** Returns the index of an event. */
-    int getIndexOf (MidiEventHolder* const event) const;
-
-    /** Returns the index of the first event on or after the given timestamp.
-
-        If the time is beyond the end of the sequence, this will return the
-        number of events.
-    */
-    int getNextIndexAtTime (const double timeStamp) const;
-
-    /** Returns the timestamp of the first event in the sequence.
-
-        @see getEndTime
-    */
-    double getStartTime() const;
-
-    /** Returns the timestamp of the last event in the sequence.
-
-        @see getStartTime
-    */
-    double getEndTime() const;
-
-    /** Returns the timestamp of the event at a given index.
-
-        If the index is out-of-range, this will return 0.0
-    */
-    double getEventTime (const int index) const;
-
-    /** Inserts a midi message into the sequence.
-
-        The index at which the new message gets inserted will depend on its timestamp,
-        because the sequence is kept sorted.
-
-        Remember to call updateMatchedPairs() after adding note-on events.
-
-        @param newMessage       the new message to add (an internal copy will be made)
-        @param timeAdjustment   an optional value to add to the timestamp of the message
-                                that will be inserted
-        @see updateMatchedPairs
-    */
-    void addEvent (const MidiMessage& newMessage,
-                   double timeAdjustment = 0);
-
-    /** Deletes one of the events in the sequence.
-
-        Remember to call updateMatchedPairs() after removing events.
-
-        @param index                 the index of the event to delete
-        @param deleteMatchingNoteUp  whether to also remove the matching note-off
-                                     if the event you're removing is a note-on
-    */
-    void deleteEvent (const int index,
-                      const bool deleteMatchingNoteUp);
-
-    /** Merges another sequence into this one.
-
-        Remember to call updateMatchedPairs() after using this method.
-
-        @param other                    the sequence to add from
-        @param timeAdjustmentDelta      an amount to add to the timestamps of the midi events
-                                        as they are read from the other sequence
-        @param firstAllowableDestTime   events will not be added if their time is earlier
-                                        than this time. (This is after their time has been adjusted
-                                        by the timeAdjustmentDelta)
-        @param endOfAllowableDestTimes  events will not be added if their time is equal to
-                                        or greater than this time. (This is after their time has
-                                        been adjusted by the timeAdjustmentDelta)
-    */
-    void addSequence (const MidiMessageSequence& other,
-                      double timeAdjustmentDelta,
-                      double firstAllowableDestTime,
-                      double endOfAllowableDestTimes);
-
-    /** Makes sure all the note-on and note-off pairs are up-to-date.
-
-        Call this after moving messages about or deleting/adding messages, and it
-        will scan the list and make sure all the note-offs in the MidiEventHolder
-        structures are pointing at the correct ones.
-    */
-    void updateMatchedPairs();
-
-    /** Copies all the messages for a particular midi channel to another sequence.
-
-        @param channelNumberToExtract   the midi channel to look for, in the range 1 to 16
-        @param destSequence             the sequence that the chosen events should be copied to
-        @param alsoIncludeMetaEvents    if true, any meta-events (which don't apply to a specific
-                                        channel) will also be copied across.
-        @see extractSysExMessages
-    */
-    void extractMidiChannelMessages (const int channelNumberToExtract,
-                                     MidiMessageSequence& destSequence,
-                                     const bool alsoIncludeMetaEvents) const;
-
-    /** Copies all midi sys-ex messages to another sequence.
-
-        @param destSequence     this is the sequence to which any sys-exes in this sequence
-                                will be added
-        @see extractMidiChannelMessages
-    */
-    void extractSysExMessages (MidiMessageSequence& destSequence) const;
-
-    /** Removes any messages in this sequence that have a specific midi channel.
-
-        @param channelNumberToRemove    the midi channel to look for, in the range 1 to 16
-    */
-    void deleteMidiChannelMessages (const int channelNumberToRemove);
-
-    /** Removes any sys-ex messages from this sequence.
-    */
-    void deleteSysExMessages();
-
-    /** Adds an offset to the timestamps of all events in the sequence.
-
-        @param deltaTime    the amount to add to each timestamp.
-    */
-    void addTimeToMessages (const double deltaTime);
-
-    /** Scans through the sequence to determine the state of any midi controllers at
-        a given time.
-
-        This will create a sequence of midi controller changes that can be
-        used to set all midi controllers to the state they would be in at the
-        specified time within this sequence.
-
-        As well as controllers, it will also recreate the midi program number
-        and pitch bend position.
-
-        @param channelNumber    the midi channel to look for, in the range 1 to 16. Controllers
-                                for other channels will be ignored.
-        @param time             the time at which you want to find out the state - there are
-                                no explicit units for this time measurement, it's the same units
-                                as used for the timestamps of the messages
-        @param resultMessages   an array to which midi controller-change messages will be added. This
-                                will be the minimum number of controller changes to recreate the
-                                state at the required time.
-    */
-    void createControllerUpdatesForTime (const int channelNumber,
-                                         const double time,
-                                         OwnedArray<MidiMessage>& resultMessages);
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                const MidiMessageSequence::MidiEventHolder* const second) throw();
-
-private:
-
-    friend class MidiComparator;
-    friend class MidiFile;
-    OwnedArray <MidiEventHolder> list;
-
-    void sort();
-};
-
-#endif   // __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
-/********* End of inlined file: juce_MidiMessageSequence.h *********/
-
-#endif
-#ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MIDIFILE_JUCEHEADER__
-
-/********* Start of inlined file: juce_MidiFile.h *********/
-#ifndef __JUCE_MIDIFILE_JUCEHEADER__
-#define __JUCE_MIDIFILE_JUCEHEADER__
-
-/**
-    Reads/writes standard midi format files.
-
-    To read a midi file, create a MidiFile object and call its readFrom() method. You
-    can then get the individual midi tracks from it using the getTrack() method.
-
-    To write a file, create a MidiFile object, add some MidiMessageSequence objects
-    to it using the addTrack() method, and then call its writeTo() method to stream
-    it out.
-
-    @see MidiMessageSequence
-*/
-class JUCE_API  MidiFile
-{
-public:
-
-    /** Creates an empty MidiFile object.
-    */
-    MidiFile() throw();
-
-    /** Destructor. */
-    ~MidiFile() throw();
-
-    /** Returns the number of tracks in the file.
-
-        @see getTrack, addTrack
-    */
-    int getNumTracks() const throw();
-
-    /** Returns a pointer to one of the tracks in the file.
-
-        @returns a pointer to the track, or 0 if the index is out-of-range
-        @see getNumTracks, addTrack
-    */
-    const MidiMessageSequence* getTrack (const int index) const throw();
-
-    /** Adds a midi track to the file.
-
-        This will make its own internal copy of the sequence that is passed-in.
-
-        @see getNumTracks, getTrack
-    */
-    void addTrack (const MidiMessageSequence& trackSequence)  throw();
-
-    /** Removes all midi tracks from the file.
-
-        @see getNumTracks
-    */
-    void clear() throw();
-
-    /** Returns the raw time format code that will be written to a stream.
-
-        After reading a midi file, this method will return the time-format that
-        was read from the file's header. It can be changed using the setTicksPerQuarterNote()
-        or setSmpteTimeFormat() methods.
-
-        If the value returned is positive, it indicates the number of midi ticks
-        per quarter-note - see setTicksPerQuarterNote().
-
-        It it's negative, the upper byte indicates the frames-per-second (but negative), and
-        the lower byte is the number of ticks per frame - see setSmpteTimeFormat().
-    */
-    short getTimeFormat() const throw();
-
-    /** Sets the time format to use when this file is written to a stream.
-
-        If this is called, the file will be written as bars/beats using the
-        specified resolution, rather than SMPTE absolute times, as would be
-        used if setSmpteTimeFormat() had been called instead.
-
-        @param ticksPerQuarterNote  e.g. 96, 960
-        @see setSmpteTimeFormat
-    */
-    void setTicksPerQuarterNote (const int ticksPerQuarterNote) throw();
-
-    /** Sets the time format to use when this file is written to a stream.
-
-        If this is called, the file will be written using absolute times, rather
-        than bars/beats as would be the case if setTicksPerBeat() had been called
-        instead.
-
-        @param framesPerSecond      must be 24, 25, 29 or 30
-        @param subframeResolution   the sub-second resolution, e.g. 4 (midi time code),
-                                    8, 10, 80 (SMPTE bit resolution), or 100. For millisecond
-                                    timing, setSmpteTimeFormat (25, 40)
-        @see setTicksPerBeat
-    */
-    void setSmpteTimeFormat (const int framesPerSecond,
-                             const int subframeResolution) throw();
-
-    /** Makes a list of all the tempo-change meta-events from all tracks in the midi file.
-
-        Useful for finding the positions of all the tempo changes in a file.
-
-        @param tempoChangeEvents    a list to which all the events will be added
-    */
-    void findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const;
-
-    /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
-
-        Useful for finding the positions of all the tempo changes in a file.
-
-        @param timeSigEvents        a list to which all the events will be added
-    */
-    void findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const;
-
-    /** Returns the latest timestamp in any of the tracks.
-
-        (Useful for finding the length of the file).
-    */
-    double getLastTimestamp() const;
-
-    /** Reads a midi file format stream.
-
-        After calling this, you can get the tracks that were read from the file by using the
-        getNumTracks() and getTrack() methods.
-
-        The timestamps of the midi events in the tracks will represent their positions in
-        terms of midi ticks. To convert them to seconds, use the convertTimestampTicksToSeconds()
-        method.
-
-        @returns true if the stream was read successfully
-    */
-    bool readFrom (InputStream& sourceStream);
-
-    /** Writes the midi tracks as a standard midi file.
-
-        @returns true if the operation succeeded.
-    */
-    bool writeTo (OutputStream& destStream);
-
-    /** Converts the timestamp of all the midi events from midi ticks to seconds.
-
-        This will use the midi time format and tempo/time signature info in the
-        tracks to convert all the timestamps to absolute values in seconds.
-    */
-    void convertTimestampTicksToSeconds();
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                const MidiMessageSequence::MidiEventHolder* const second) throw();
-
-private:
-    MidiMessageSequence* tracks [128];
-    short numTracks, timeFormat;
-
-    MidiFile (const MidiFile&);
-    const MidiFile& operator= (const MidiFile&);
-
-    void readNextTrack (const char* data, int size);
-    void writeTrack (OutputStream& mainOut, const int trackNum);
-};
-
-#endif   // __JUCE_MIDIFILE_JUCEHEADER__
-/********* End of inlined file: juce_MidiFile.h *********/
-
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
 
@@ -26896,6 +27040,13 @@ public:
     */
     float* getSampleData (const int channelNumber,
                           const int sampleOffset = 0) const throw();
+
+    /** Returns an array of pointers to the channels in the buffer.
+
+        Don't modify any of the pointers that are returned, and bear in mind that
+        these will become invalid if the buffer is resized.
+    */
+    float** getArrayOfChannels() const throw()          { return channels; }
 
     /** Chages the buffer's size or number of channels.
 
@@ -32163,7 +32314,128 @@ private:
 /********* End of inlined file: juce_ToneGeneratorAudioSource.h *********/
 
 #endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
+#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioDeviceManager.h *********/
+#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+#define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioIODeviceType.h *********/
+#ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+#define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+
+class AudioDeviceManager;
+class Component;
+
+/**
+    Represents a type of audio driver, such as DirectSound, ASIO, CoreAudio, etc.
+
+    To get a list of available audio driver types, use the createDeviceTypes()
+    method. Each of the objects returned can then be used to list the available
+    devices of that type. E.g.
+    @code
+    OwnedArray <AudioIODeviceType> types;
+    AudioIODeviceType::createDeviceTypes (types);
+
+    for (int i = 0; i < types.size(); ++i)
+    {
+        String typeName (types[i]->getTypeName());  // This will be things like "DirectSound", "CoreAudio", etc.
+
+        types[i]->scanForDevices();                 // This must be called before getting the list of devices
+
+        String deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
+
+        for (int j = 0; j < deviceNames.size(); ++j)
+        {
+            AudioIODevice* device = types[i]->createDevice (deviceNames [j]);
+
+            ...
+        }
+    }
+    @endcode
+
+    For an easier way of managing audio devices and their settings, have a look at the
+    AudioDeviceManager class.
+
+    @see AudioIODevice, AudioDeviceManager
+*/
+class JUCE_API  AudioIODeviceType
+{
+public:
+
+    /** Returns the name of this type of driver that this object manages.
+
+        This will be something like "DirectSound", "ASIO", "CoreAudio", "ALSA", etc.
+    */
+    const String& getTypeName() const throw()                       { return typeName; }
+
+    /** Refreshes the object's cached list of known devices.
+
+        This must be called at least once before calling getDeviceNames() or any of
+        the other device creation methods.
+    */
+    virtual void scanForDevices() = 0;
+
+    /** Returns the list of available devices of this type.
+
+        The scanForDevices() method must have been called to create this list.
+
+        @param wantInputNames     only really used by DirectSound where devices are split up
+                                  into inputs and outputs, this indicates whether to use
+                                  the input or output name to refer to a pair of devices.
+    */
+    virtual const StringArray getDeviceNames (const bool wantInputNames = false) const = 0;
+
+    /** Returns the name of the default device.
+
+        This will be one of the names from the getDeviceNames() list.
+
+        @param forInput     if true, this means that a default input device should be
+                            returned; if false, it should return the default output
+    */
+    virtual int getDefaultDeviceIndex (const bool forInput) const = 0;
+
+    /** Returns the index of a given device in the list of device names.
+        If asInput is true, it shows the index in the inputs list, otherwise it
+        looks for it in the outputs list.
+    */
+    virtual int getIndexOfDevice (AudioIODevice* device, const bool asInput) const = 0;
+
+    /** Returns true if two different devices can be used for the input and output.
+    */
+    virtual bool hasSeparateInputsAndOutputs() const = 0;
+
+    /** Creates one of the devices of this type.
+
+        The deviceName must be one of the strings returned by getDeviceNames(), and
+        scanForDevices() must have been called before this method is used.
+    */
+    virtual AudioIODevice* createDevice (const String& outputDeviceName,
+                                         const String& inputDeviceName) = 0;
+
+    struct DeviceSetupDetails
+    {
+        AudioDeviceManager* manager;
+        int minNumInputChannels, maxNumInputChannels;
+        int minNumOutputChannels, maxNumOutputChannels;
+        bool useStereoPairs;
+    };
+
+    /** Destructor. */
+    virtual ~AudioIODeviceType();
+
+protected:
+    AudioIODeviceType (const tchar* const typeName);
+
+private:
+    String typeName;
+
+    AudioIODeviceType (const AudioIODeviceType&);
+    const AudioIODeviceType& operator= (const AudioIODeviceType&);
+};
+
+#endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+/********* End of inlined file: juce_AudioIODeviceType.h *********/
 
 /********* Start of inlined file: juce_MidiOutput.h *********/
 #ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
@@ -32304,130 +32576,6 @@ protected:
 
 #endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
 /********* End of inlined file: juce_MidiOutput.h *********/
-
-#endif
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioDeviceManager.h *********/
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-#define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioIODeviceType.h *********/
-#ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
-#define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
-
-class AudioDeviceManager;
-class Component;
-
-/**
-    Represents a type of audio driver, such as DirectSound, ASIO, CoreAudio, etc.
-
-    To get a list of available audio driver types, use the createDeviceTypes()
-    method. Each of the objects returned can then be used to list the available
-    devices of that type. E.g.
-    @code
-    OwnedArray <AudioIODeviceType> types;
-    AudioIODeviceType::createDeviceTypes (types);
-
-    for (int i = 0; i < types.size(); ++i)
-    {
-        String typeName (types[i]->getTypeName());  // This will be things like "DirectSound", "CoreAudio", etc.
-
-        types[i]->scanForDevices();                 // This must be called before getting the list of devices
-
-        String deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
-
-        for (int j = 0; j < deviceNames.size(); ++j)
-        {
-            AudioIODevice* device = types[i]->createDevice (deviceNames [j]);
-
-            ...
-        }
-    }
-    @endcode
-
-    For an easier way of managing audio devices and their settings, have a look at the
-    AudioDeviceManager class.
-
-    @see AudioIODevice, AudioDeviceManager
-*/
-class JUCE_API  AudioIODeviceType
-{
-public:
-
-    /** Returns the name of this type of driver that this object manages.
-
-        This will be something like "DirectSound", "ASIO", "CoreAudio", "ALSA", etc.
-    */
-    const String& getTypeName() const throw()                       { return typeName; }
-
-    /** Refreshes the object's cached list of known devices.
-
-        This must be called at least once before calling getDeviceNames() or any of
-        the other device creation methods.
-    */
-    virtual void scanForDevices() = 0;
-
-    /** Returns the list of available devices of this type.
-
-        The scanForDevices() method must have been called to create this list.
-
-        @param wantInputNames     only really used by DirectSound where devices are split up
-                                  into inputs and outputs, this indicates whether to use
-                                  the input or output name to refer to a pair of devices.
-    */
-    virtual const StringArray getDeviceNames (const bool wantInputNames = false) const = 0;
-
-    /** Returns the name of the default device.
-
-        This will be one of the names from the getDeviceNames() list.
-
-        @param forInput     if true, this means that a default input device should be
-                            returned; if false, it should return the default output
-    */
-    virtual int getDefaultDeviceIndex (const bool forInput) const = 0;
-
-    /** Returns the index of a given device in the list of device names.
-        If asInput is true, it shows the index in the inputs list, otherwise it
-        looks for it in the outputs list.
-    */
-    virtual int getIndexOfDevice (AudioIODevice* device, const bool asInput) const = 0;
-
-    /** Returns true if two different devices can be used for the input and output.
-    */
-    virtual bool hasSeparateInputsAndOutputs() const = 0;
-
-    /** Creates one of the devices of this type.
-
-        The deviceName must be one of the strings returned by getDeviceNames(), and
-        scanForDevices() must have been called before this method is used.
-    */
-    virtual AudioIODevice* createDevice (const String& outputDeviceName,
-                                         const String& inputDeviceName) = 0;
-
-    struct DeviceSetupDetails
-    {
-        AudioDeviceManager* manager;
-        int minNumInputChannels, maxNumInputChannels;
-        int minNumOutputChannels, maxNumOutputChannels;
-        bool useStereoPairs;
-    };
-
-    /** Destructor. */
-    virtual ~AudioIODeviceType();
-
-protected:
-    AudioIODeviceType (const tchar* const typeName);
-
-private:
-    String typeName;
-
-    AudioIODeviceType (const AudioIODeviceType&);
-    const AudioIODeviceType& operator= (const AudioIODeviceType&);
-};
-
-#endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
-/********* End of inlined file: juce_AudioIODeviceType.h *********/
 
 /********* Start of inlined file: juce_ComboBox.h *********/
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
@@ -34227,14 +34375,28 @@ public:
     */
     void restartLastAudioDevice();
 
-    /** Gives the manager an audio callback to use.
+    /** Registers an audio callback to be used.
 
         The manager will redirect callbacks from whatever audio device is currently
-        in use to this callback object.
+        in use to all registered callback objects. If more than one callback is
+        active, they will all be given the same input data, and their outputs will
+        be summed.
 
-        You can pass 0 in here to stop callbacks being made.
+        If necessary, this method will invoke audioDeviceAboutToStart() on the callback
+        object before returning.
+
+        To remove a callback, use removeAudioCallback().
     */
-    void setAudioCallback (AudioIODeviceCallback* newCallback);
+    void addAudioCallback (AudioIODeviceCallback* newCallback);
+
+    /** Deregisters a previously added callback.
+
+        If necessary, this method will invoke audioDeviceStopped() on the callback
+        object before returning.
+
+        @see addAudioCallback
+    */
+    void removeAudioCallback (AudioIODeviceCallback* callback);
 
     /** Returns the average proportion of available CPU being spent inside the audio callbacks.
 
@@ -34369,16 +34531,18 @@ private:
 
     AudioDeviceSetup currentSetup;
     AudioIODevice* currentAudioDevice;
-    AudioIODeviceCallback* currentCallback;
+    SortedSet <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BitArray inputChannels, outputChannels;
     XmlElement* lastExplicitSettings;
     mutable bool listNeedsScanning;
-    bool useInputNames, inputLevelMeasurementEnabled;
+    bool useInputNames;
+    int inputLevelMeasurementEnabledCount;
     double inputLevel;
     AudioSampleBuffer* testSound;
     int testSoundPosition;
+    AudioSampleBuffer tempBuffer;
 
     StringArray midiInsFromXml;
     OwnedArray <MidiInput> enabledMidiInputs;
@@ -34452,6 +34616,9 @@ private:
 
 #endif
 #ifndef __JUCE_MIDIINPUT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
@@ -35012,6 +35179,126 @@ private:
 #ifndef __JUCE_SYNTHESISER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioUnitPluginFormat.h *********/
+#ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
+#define __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
+
+#if JUCE_PLUGINHOST_AU && JUCE_MAC
+
+/**
+    Implements a plugin format manager for AudioUnits.
+*/
+class JUCE_API  AudioUnitPluginFormat   : public AudioPluginFormat
+{
+public:
+
+    AudioUnitPluginFormat();
+    ~AudioUnitPluginFormat();
+
+    const String getName() const                { return "AudioUnit"; }
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
+    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
+    bool doesPluginStillExist (const PluginDescription& desc);
+    const FileSearchPath getDefaultLocationsToSearch();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioUnitPluginFormat (const AudioUnitPluginFormat&);
+    const AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
+};
+
+#endif
+
+#endif   // __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_AudioUnitPluginFormat.h *********/
+
+#endif
+#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_DirectXPluginFormat.h *********/
+#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+#define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+
+#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+
+//   Sorry, this file is just a placeholder at the moment!...
+
+/**
+    Implements a plugin format manager for DirectX plugins.
+*/
+class JUCE_API  DirectXPluginFormat   : public AudioPluginFormat
+{
+public:
+
+    DirectXPluginFormat();
+    ~DirectXPluginFormat();
+
+    const String getName() const                { return "DirectX"; }
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
+    const FileSearchPath getDefaultLocationsToSearch();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    DirectXPluginFormat (const DirectXPluginFormat&);
+    const DirectXPluginFormat& operator= (const DirectXPluginFormat&);
+};
+
+#endif
+
+#endif   // __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_DirectXPluginFormat.h *********/
+
+#endif
+#ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_LADSPAPluginFormat.h *********/
+#ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+#define __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+
+#if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+
+//   Sorry, this file is just a placeholder at the moment!...
+
+/**
+    Implements a plugin format manager for DirectX plugins.
+*/
+class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
+{
+public:
+
+    LADSPAPluginFormat();
+    ~LADSPAPluginFormat();
+
+    const String getName() const                { return "LADSPA"; }
+    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
+    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
+    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
+    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
+    const FileSearchPath getDefaultLocationsToSearch();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    LADSPAPluginFormat (const LADSPAPluginFormat&);
+    const LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
+};
+
+#endif
+
+#endif   // __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_LADSPAPluginFormat.h *********/
+
+#endif
 #ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
 
 /********* Start of inlined file: juce_VSTMidiEventList.h *********/
@@ -35214,126 +35501,6 @@ private:
 #endif
 #endif   // __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_VSTPluginFormat.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioUnitPluginFormat.h *********/
-#ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
-
-#if JUCE_PLUGINHOST_AU && JUCE_MAC
-
-/**
-    Implements a plugin format manager for AudioUnits.
-*/
-class JUCE_API  AudioUnitPluginFormat   : public AudioPluginFormat
-{
-public:
-
-    AudioUnitPluginFormat();
-    ~AudioUnitPluginFormat();
-
-    const String getName() const                { return "AudioUnit"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
-    bool doesPluginStillExist (const PluginDescription& desc);
-    const FileSearchPath getDefaultLocationsToSearch();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioUnitPluginFormat (const AudioUnitPluginFormat&);
-    const AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
-};
-
-#endif
-
-#endif   // __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AudioUnitPluginFormat.h *********/
-
-#endif
-#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_DirectXPluginFormat.h *********/
-#ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-
-#if JUCE_PLUGINHOST_DX && JUCE_WIN32
-
-//   Sorry, this file is just a placeholder at the moment!...
-
-/**
-    Implements a plugin format manager for DirectX plugins.
-*/
-class JUCE_API  DirectXPluginFormat   : public AudioPluginFormat
-{
-public:
-
-    DirectXPluginFormat();
-    ~DirectXPluginFormat();
-
-    const String getName() const                { return "DirectX"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-    const FileSearchPath getDefaultLocationsToSearch();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    DirectXPluginFormat (const DirectXPluginFormat&);
-    const DirectXPluginFormat& operator= (const DirectXPluginFormat&);
-};
-
-#endif
-
-#endif   // __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_DirectXPluginFormat.h *********/
-
-#endif
-#ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_LADSPAPluginFormat.h *********/
-#ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-#define __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-
-#if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
-
-//   Sorry, this file is just a placeholder at the moment!...
-
-/**
-    Implements a plugin format manager for DirectX plugins.
-*/
-class JUCE_API  LADSPAPluginFormat   : public AudioPluginFormat
-{
-public:
-
-    LADSPAPluginFormat();
-    ~LADSPAPluginFormat();
-
-    const String getName() const                { return "LADSPA"; }
-    void findAllTypesForFile (OwnedArray <PluginDescription>& results, const String& fileOrIdentifier);
-    AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
-    bool fileMightContainThisPluginType (const String& fileOrIdentifier);
-    const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier)  { return fileOrIdentifier; }
-    const FileSearchPath getDefaultLocationsToSearch();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    LADSPAPluginFormat (const LADSPAPluginFormat&);
-    const LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
-};
-
-#endif
-
-#endif   // __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_LADSPAPluginFormat.h *********/
 
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
@@ -36135,11 +36302,11 @@ private:
 /********* End of inlined file: juce_PluginListComponent.h *********/
 
 #endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_WavAudioFormat.h *********/
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+/********* Start of inlined file: juce_AiffAudioFormat.h *********/
+#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioFormat.h *********/
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
@@ -36416,128 +36583,6 @@ private:
 /********* End of inlined file: juce_AudioFormat.h *********/
 
 /**
-    Reads and Writes WAV format audio files.
-
-    @see AudioFormat
-*/
-class JUCE_API  WavAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    WavAudioFormat();
-
-    /** Destructor. */
-    ~WavAudioFormat();
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavDescription;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginator;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginatorRef;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Date format is: yyyy-mm-dd
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationDate;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Time format is: hh-mm-ss
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationTime;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is the number of samples from the start of an edit that the
-        file is supposed to begin at. Seems like an obvious mistake to
-        only allow a file to occur in an edit once, but that's the way
-        it is..
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavTimeReference;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is a
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavCodingHistory;
-
-    /** Utility function to fill out the appropriate metadata for a BWAV file.
-
-        This just makes it easier than using the property names directly, and it
-        fills out the time and date in the right format.
-    */
-    static const StringPairArray createBWAVMetadata (const String& description,
-                                                     const String& originator,
-                                                     const String& originatorRef,
-                                                     const Time& dateAndTime,
-                                                     const int64 timeReferenceSamples,
-                                                     const String& codingHistory);
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    /** Utility function to replace the metadata in a wav file with a new set of values.
-
-        If possible, this cheats by overwriting just the metadata region of the file, rather
-        than by copying the whole file again.
-    */
-    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_WavAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_AiffAudioFormat.h *********/
-#ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-
-/**
     Reads and Writes AIFF format audio files.
 
     @see AudioFormat
@@ -36575,114 +36620,6 @@ public:
 
 #endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_AiffAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
-/**
-    Reads and writes the Ogg-Vorbis audio format.
-
-    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the Vorbis and Ogg header files and static libraries.
-
-    @see AudioFormat,
-*/
-class JUCE_API  OggVorbisAudioFormat : public AudioFormat
-{
-public:
-
-    OggVorbisAudioFormat();
-    ~OggVorbisAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    const StringArray getQualityOptions();
-
-    /** Tries to estimate the quality level of an ogg file based on its size.
-
-        If it can't read the file for some reason, this will just return 1 (medium quality),
-        otherwise it will return the approximate quality setting that would have been used
-        to create the file.
-
-        @see getQualityOptions
-    */
-    int estimateOggFileQuality (const File& source);
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_QUICKTIME
-
-/**
-    Uses QuickTime to read the audio track a movie or media file.
-
-    As well as QuickTime movies, this should also manage to open other audio
-    files that quicktime can understand, like mp3, m4a, etc.
-
-    @see AudioFormat
-*/
-class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    QuickTimeAudioFormat();
-
-    /** Destructor. */
-    ~QuickTimeAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
@@ -37382,11 +37319,432 @@ public:
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
 
 #endif
-#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_InterprocessConnectionServer.h *********/
-#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
-#define __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+
+/**
+    Reads and writes the Ogg-Vorbis audio format.
+
+    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the Vorbis and Ogg header files and static libraries.
+
+    @see AudioFormat,
+*/
+class JUCE_API  OggVorbisAudioFormat : public AudioFormat
+{
+public:
+
+    OggVorbisAudioFormat();
+    ~OggVorbisAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+    const StringArray getQualityOptions();
+
+    /** Tries to estimate the quality level of an ogg file based on its size.
+
+        If it can't read the file for some reason, this will just return 1 (medium quality),
+        otherwise it will return the approximate quality setting that would have been used
+        to create the file.
+
+        @see getQualityOptions
+    */
+    int estimateOggFileQuality (const File& source);
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_QUICKTIME
+
+/**
+    Uses QuickTime to read the audio track a movie or media file.
+
+    As well as QuickTime movies, this should also manage to open other audio
+    files that quicktime can understand, like mp3, m4a, etc.
+
+    @see AudioFormat
+*/
+class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    QuickTimeAudioFormat();
+
+    /** Destructor. */
+    ~QuickTimeAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WavAudioFormat.h *********/
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/**
+    Reads and Writes WAV format audio files.
+
+    @see AudioFormat
+*/
+class JUCE_API  WavAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    WavAudioFormat();
+
+    /** Destructor. */
+    ~WavAudioFormat();
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavDescription;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginator;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginatorRef;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Date format is: yyyy-mm-dd
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationDate;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Time format is: hh-mm-ss
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationTime;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is the number of samples from the start of an edit that the
+        file is supposed to begin at. Seems like an obvious mistake to
+        only allow a file to occur in an edit once, but that's the way
+        it is..
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavTimeReference;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is a
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavCodingHistory;
+
+    /** Utility function to fill out the appropriate metadata for a BWAV file.
+
+        This just makes it easier than using the property names directly, and it
+        fills out the time and date in the right format.
+    */
+    static const StringPairArray createBWAVMetadata (const String& description,
+                                                     const String& originator,
+                                                     const String& originatorRef,
+                                                     const Time& dateAndTime,
+                                                     const int64 timeReferenceSamples,
+                                                     const String& codingHistory);
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    /** Utility function to replace the metadata in a wav file with a new set of values.
+
+        If possible, this cheats by overwriting just the metadata region of the file, rather
+        than by copying the whole file again.
+    */
+    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_WavAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ActionBroadcaster.h *********/
+#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+#define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ActionListenerList.h *********/
+#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+#define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+
+/**
+    A set of ActionListeners.
+
+    Listeners can be added and removed from the list, and messages can be
+    broadcast to all the listeners.
+
+    @see ActionListener, ActionBroadcaster
+*/
+class JUCE_API  ActionListenerList  : public MessageListener
+{
+public:
+
+    /** Creates an empty list. */
+    ActionListenerList() throw();
+
+    /** Destructor. */
+    ~ActionListenerList() throw();
+
+    /** Adds a listener to the list.
+
+        (Trying to add a listener that's already on the list will have no effect).
+    */
+    void addActionListener (ActionListener* const listener) throw();
+
+    /** Removes a listener from the list.
+
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeActionListener (ActionListener* const listener) throw();
+
+    /** Removes all listeners from the list. */
+    void removeAllActionListeners() throw();
+
+    /** Broadcasts a message to all the registered listeners.
+
+        This sends the message asynchronously.
+
+        If a listener is on the list when this method is called but is removed from
+        the list before the message arrives, it won't receive the message. Similarly
+        listeners that are added to the list after the message is sent but before it
+        arrives won't get the message either.
+    */
+    void sendActionMessage (const String& message) const;
+
+    /** @internal */
+    void handleMessage (const Message&);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    SortedSet <void*> actionListeners_;
+    CriticalSection actionListenerLock_;
+
+    ActionListenerList (const ActionListenerList&);
+    const ActionListenerList& operator= (const ActionListenerList&);
+};
+
+#endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+/********* End of inlined file: juce_ActionListenerList.h *********/
+
+/** Manages a list of ActionListeners, and can send them messages.
+
+    To quickly add methods to your class that can add/remove action
+    listeners and broadcast to them, you can derive from this.
+
+    @see ActionListenerList, ActionListener
+*/
+class JUCE_API  ActionBroadcaster
+{
+public:
+
+    /** Creates an ActionBroadcaster. */
+    ActionBroadcaster() throw();
+
+    /** Destructor. */
+    virtual ~ActionBroadcaster();
+
+    /** Adds a listener to the list.
+
+        (Trying to add a listener that's already on the list will have no effect).
+    */
+    void addActionListener (ActionListener* const listener);
+
+    /** Removes a listener from the list.
+
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeActionListener (ActionListener* const listener);
+
+    /** Removes all listeners from the list. */
+    void removeAllActionListeners();
+
+    /** Broadcasts a message to all the registered listeners.
+
+        @see ActionListenerList::sendActionMessage
+    */
+    void sendActionMessage (const String& message) const;
+
+private:
+
+    ActionListenerList actionListenerList;
+
+    ActionBroadcaster (const ActionBroadcaster&);
+    const ActionBroadcaster& operator= (const ActionBroadcaster&);
+};
+
+#endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+/********* End of inlined file: juce_ActionBroadcaster.h *********/
+
+#endif
+#ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+
+/********* Start of inlined file: juce_CallbackMessage.h *********/
+#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+#define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+
+/**
+    A message that calls a custom function when it gets delivered.
+
+    You can use this class to fire off actions that you want to be performed later
+    on the message thread.
+
+    Unlike other Message objects, these don't get sent to a MessageListener, you
+    just call the post() method to send them, and when they arrive, your
+    messageCallback() method will automatically be invoked.
+
+    @see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  CallbackMessage   : public Message
+{
+public:
+
+    CallbackMessage() throw();
+
+    /** Destructor. */
+    ~CallbackMessage() throw();
+
+    /** Called when the message is delivered.
+
+        You should implement this method and make it do whatever action you want
+        to perform.
+
+        Note that like all other messages, this object will be deleted immediately
+        after this method has been invoked.
+    */
+    virtual void messageCallback() = 0;
+
+    /** Instead of sending this message to a MessageListener, just call this method
+        to post it to the event queue.
+
+        After you've called this, this object will belong to the MessageManager,
+        which will delete it later. So make sure you don't delete the object yourself,
+        call post() more than once, or call post() on a stack-based obect!
+    */
+    void post();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    CallbackMessage (const CallbackMessage&);
+    const CallbackMessage& operator= (const CallbackMessage&);
+};
+
+#endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+/********* End of inlined file: juce_CallbackMessage.h *********/
+
+#endif
+#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
 /********* Start of inlined file: juce_InterprocessConnection.h *********/
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
@@ -37569,6 +37927,13 @@ private:
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 /********* End of inlined file: juce_InterprocessConnection.h *********/
 
+#endif
+#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+
+/********* Start of inlined file: juce_InterprocessConnectionServer.h *********/
+#ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+#define __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
+
 /**
     An object that waits for client sockets to connect to a port on this host, and
     creates InterprocessConnection objects for each one.
@@ -37640,112 +38005,7 @@ private:
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TIMER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-
-/********* Start of inlined file: juce_MultiTimer.h *********/
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-#define __JUCE_MULTITIMER_JUCEHEADER__
-
-/**
-    A type of timer class that can run multiple timers with different frequencies,
-    all of which share a single callback.
-
-    This class is very similar to the Timer class, but allows you run multiple
-    separate timers, where each one has a unique ID number. The methods in this
-    class are exactly equivalent to those in Timer, but with the addition of
-    this ID number.
-
-    To use it, you need to create a subclass of MultiTimer, implementing the
-    timerCallback() method. Then you can start timers with startTimer(), and
-    each time the callback is triggered, it passes in the ID of the timer that
-    caused it.
-
-    @see Timer
-*/
-class JUCE_API  MultiTimer
-{
-protected:
-
-    /** Creates a MultiTimer.
-
-        When created, no timers are running, so use startTimer() to start things off.
-    */
-    MultiTimer() throw();
-
-    /** Creates a copy of another timer.
-
-        Note that this timer will not contain any running timers, even if the one you're
-        copying from was running.
-    */
-    MultiTimer (const MultiTimer& other) throw();
-
-public:
-
-    /** Destructor. */
-    virtual ~MultiTimer();
-
-    /** The user-defined callback routine that actually gets called by each of the
-        timers that are running.
-
-        It's perfectly ok to call startTimer() or stopTimer() from within this
-        callback to change the subsequent intervals.
-    */
-    virtual void timerCallback (const int timerId) = 0;
-
-    /** Starts a timer and sets the length of interval required.
-
-        If the timer is already started, this will reset it, so the
-        time between calling this method and the next timer callback
-        will not be less than the interval length passed in.
-
-        @param timerId                  a unique Id number that identifies the timer to
-                                        start. This is the id that will be passed back
-                                        to the timerCallback() method when this timer is
-                                        triggered
-        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
-                                        rounded up to 1)
-    */
-    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
-
-    /** Stops a timer.
-
-        If a timer has been started with the given ID number, it will be cancelled.
-        No more callbacks will be made for the specified timer after this method returns.
-
-        If this is called from a different thread, any callbacks that may
-        be currently executing may be allowed to finish before the method
-        returns.
-    */
-    void stopTimer (const int timerId) throw();
-
-    /** Checks whether a timer has been started for a specified ID.
-
-        @returns true if a timer with the given ID is running.
-    */
-    bool isTimerRunning (const int timerId) const throw();
-
-    /** Returns the interval for a specified timer ID.
-
-        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
-                    is running for the ID number specified.
-    */
-    int getTimerInterval (const int timerId) const throw();
-
-private:
-    CriticalSection timerListLock;
-    VoidArray timers;
-
-    const MultiTimer& operator= (const MultiTimer&);
-};
-
-#endif   // __JUCE_MULTITIMER_JUCEHEADER__
-/********* End of inlined file: juce_MultiTimer.h *********/
 
 #endif
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
@@ -37753,124 +38013,6 @@ private:
 /********* Start of inlined file: juce_MessageManager.h *********/
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 #define __JUCE_MESSAGEMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ActionListenerList.h *********/
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-#define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-
-/**
-    A set of ActionListeners.
-
-    Listeners can be added and removed from the list, and messages can be
-    broadcast to all the listeners.
-
-    @see ActionListener, ActionBroadcaster
-*/
-class JUCE_API  ActionListenerList  : public MessageListener
-{
-public:
-
-    /** Creates an empty list. */
-    ActionListenerList() throw();
-
-    /** Destructor. */
-    ~ActionListenerList() throw();
-
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
-    */
-    void addActionListener (ActionListener* const listener) throw();
-
-    /** Removes a listener from the list.
-
-        If the listener isn't on the list, this won't have any effect.
-    */
-    void removeActionListener (ActionListener* const listener) throw();
-
-    /** Removes all listeners from the list. */
-    void removeAllActionListeners() throw();
-
-    /** Broadcasts a message to all the registered listeners.
-
-        This sends the message asynchronously.
-
-        If a listener is on the list when this method is called but is removed from
-        the list before the message arrives, it won't receive the message. Similarly
-        listeners that are added to the list after the message is sent but before it
-        arrives won't get the message either.
-    */
-    void sendActionMessage (const String& message) const;
-
-    /** @internal */
-    void handleMessage (const Message&);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    SortedSet <void*> actionListeners_;
-    CriticalSection actionListenerLock_;
-
-    ActionListenerList (const ActionListenerList&);
-    const ActionListenerList& operator= (const ActionListenerList&);
-};
-
-#endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-/********* End of inlined file: juce_ActionListenerList.h *********/
-
-/********* Start of inlined file: juce_CallbackMessage.h *********/
-#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-#define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-
-/**
-    A message that calls a custom function when it gets delivered.
-
-    You can use this class to fire off actions that you want to be performed later
-    on the message thread.
-
-    Unlike other Message objects, these don't get sent to a MessageListener, you
-    just call the post() method to send them, and when they arrive, your
-    messageCallback() method will automatically be invoked.
-
-    @see MessageListener, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  CallbackMessage   : public Message
-{
-public:
-
-    CallbackMessage() throw();
-
-    /** Destructor. */
-    ~CallbackMessage() throw();
-
-    /** Called when the message is delivered.
-
-        You should implement this method and make it do whatever action you want
-        to perform.
-
-        Note that like all other messages, this object will be deleted immediately
-        after this method has been invoked.
-    */
-    virtual void messageCallback() = 0;
-
-    /** Instead of sending this message to a MessageListener, just call this method
-        to post it to the event queue.
-
-        After you've called this, this object will belong to the MessageManager,
-        which will delete it later. So make sure you don't delete the object yourself,
-        call post() more than once, or call post() on a stack-based obect!
-    */
-    void post();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    CallbackMessage (const CallbackMessage&);
-    const CallbackMessage& operator= (const CallbackMessage&);
-};
-
-#endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-/********* End of inlined file: juce_CallbackMessage.h *********/
 
 class Component;
 class MessageManagerLock;
@@ -38137,84 +38279,109 @@ private:
 /********* End of inlined file: juce_MessageManager.h *********/
 
 #endif
-#ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+/********* Start of inlined file: juce_MultiTimer.h *********/
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+#define __JUCE_MULTITIMER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ActionBroadcaster.h *********/
-#ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-#define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
+/**
+    A type of timer class that can run multiple timers with different frequencies,
+    all of which share a single callback.
 
-/** Manages a list of ActionListeners, and can send them messages.
+    This class is very similar to the Timer class, but allows you run multiple
+    separate timers, where each one has a unique ID number. The methods in this
+    class are exactly equivalent to those in Timer, but with the addition of
+    this ID number.
 
-    To quickly add methods to your class that can add/remove action
-    listeners and broadcast to them, you can derive from this.
+    To use it, you need to create a subclass of MultiTimer, implementing the
+    timerCallback() method. Then you can start timers with startTimer(), and
+    each time the callback is triggered, it passes in the ID of the timer that
+    caused it.
 
-    @see ActionListenerList, ActionListener
+    @see Timer
 */
-class JUCE_API  ActionBroadcaster
+class JUCE_API  MultiTimer
 {
+protected:
+
+    /** Creates a MultiTimer.
+
+        When created, no timers are running, so use startTimer() to start things off.
+    */
+    MultiTimer() throw();
+
+    /** Creates a copy of another timer.
+
+        Note that this timer will not contain any running timers, even if the one you're
+        copying from was running.
+    */
+    MultiTimer (const MultiTimer& other) throw();
+
 public:
 
-    /** Creates an ActionBroadcaster. */
-    ActionBroadcaster() throw();
-
     /** Destructor. */
-    virtual ~ActionBroadcaster();
+    virtual ~MultiTimer();
 
-    /** Adds a listener to the list.
+    /** The user-defined callback routine that actually gets called by each of the
+        timers that are running.
 
-        (Trying to add a listener that's already on the list will have no effect).
+        It's perfectly ok to call startTimer() or stopTimer() from within this
+        callback to change the subsequent intervals.
     */
-    void addActionListener (ActionListener* const listener);
+    virtual void timerCallback (const int timerId) = 0;
 
-    /** Removes a listener from the list.
+    /** Starts a timer and sets the length of interval required.
 
-        If the listener isn't on the list, this won't have any effect.
+        If the timer is already started, this will reset it, so the
+        time between calling this method and the next timer callback
+        will not be less than the interval length passed in.
+
+        @param timerId                  a unique Id number that identifies the timer to
+                                        start. This is the id that will be passed back
+                                        to the timerCallback() method when this timer is
+                                        triggered
+        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
+                                        rounded up to 1)
     */
-    void removeActionListener (ActionListener* const listener);
+    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
 
-    /** Removes all listeners from the list. */
-    void removeAllActionListeners();
+    /** Stops a timer.
 
-    /** Broadcasts a message to all the registered listeners.
+        If a timer has been started with the given ID number, it will be cancelled.
+        No more callbacks will be made for the specified timer after this method returns.
 
-        @see ActionListenerList::sendActionMessage
+        If this is called from a different thread, any callbacks that may
+        be currently executing may be allowed to finish before the method
+        returns.
     */
-    void sendActionMessage (const String& message) const;
+    void stopTimer (const int timerId) throw();
+
+    /** Checks whether a timer has been started for a specified ID.
+
+        @returns true if a timer with the given ID is running.
+    */
+    bool isTimerRunning (const int timerId) const throw();
+
+    /** Returns the interval for a specified timer ID.
+
+        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
+                    is running for the ID number specified.
+    */
+    int getTimerInterval (const int timerId) const throw();
 
 private:
+    CriticalSection timerListLock;
+    VoidArray timers;
 
-    ActionListenerList actionListenerList;
-
-    ActionBroadcaster (const ActionBroadcaster&);
-    const ActionBroadcaster& operator= (const ActionBroadcaster&);
+    const MultiTimer& operator= (const MultiTimer&);
 };
 
-#endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-/********* End of inlined file: juce_ActionBroadcaster.h *********/
+#endif   // __JUCE_MULTITIMER_JUCEHEADER__
+/********* End of inlined file: juce_MultiTimer.h *********/
 
 #endif
-#ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
+#ifndef __JUCE_TIMER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
@@ -39782,6 +39949,9 @@ protected:
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_BORDERSIZE_JUCEHEADER__
 
 #endif
@@ -40206,13 +40376,10 @@ private:
 /********* End of inlined file: juce_PositionedRectangle.h *********/
 
 #endif
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
+#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
@@ -41151,6 +41318,9 @@ private:
 /********* End of inlined file: juce_DrawableText.h *********/
 
 #endif
+#ifndef __JUCE_COMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 
 #endif
@@ -41160,7 +41330,275 @@ private:
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
+#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
+
+/********* Start of inlined file: juce_ArrowButton.h *********/
+#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
+#define __JUCE_ARROWBUTTON_JUCEHEADER__
+
+/********* Start of inlined file: juce_DropShadowEffect.h *********/
+#ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
+#define __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
+
+/**
+    An effect filter that adds a drop-shadow behind the image's content.
+
+    (This will only work on images/components that aren't opaque, of course).
+
+    When added to a component, this effect will draw a soft-edged
+    shadow based on what gets drawn inside it. The shadow will also
+    be applied to the component's children.
+
+    For speed, this doesn't use a proper gaussian blur, but cheats by
+    using a simple bilinear filter. If you need a really high-quality
+    shadow, check out ImageConvolutionKernel::createGaussianBlur()
+
+    @see Component::setComponentEffect
+*/
+class JUCE_API  DropShadowEffect  : public ImageEffectFilter
+{
+public:
+
+    /** Creates a default drop-shadow effect.
+
+        To customise the shadow's appearance, use the setShadowProperties()
+        method.
+    */
+    DropShadowEffect();
+
+    /** Destructor. */
+    ~DropShadowEffect();
+
+    /** Sets up parameters affecting the shadow's appearance.
+
+        @param newRadius        the (approximate) radius of the blur used
+        @param newOpacity       the opacity with which the shadow is rendered
+        @param newShadowOffsetX allows the shadow to be shifted in relation to the
+                                component's contents
+        @param newShadowOffsetY allows the shadow to be shifted in relation to the
+                                component's contents
+    */
+    void setShadowProperties (const float newRadius,
+                              const float newOpacity,
+                              const int newShadowOffsetX,
+                              const int newShadowOffsetY);
+
+    /** @internal */
+    void applyEffect (Image& sourceImage, Graphics& destContext);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int offsetX, offsetY;
+    float radius, opacity;
+};
+
+#endif   // __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
+/********* End of inlined file: juce_DropShadowEffect.h *********/
+
+/**
+    A button with an arrow in it.
+
+    @see Button
+*/
+class JUCE_API  ArrowButton  : public Button
+{
+public:
+
+    /** Creates an ArrowButton.
+
+        @param buttonName       the name to give the button
+        @param arrowDirection   the direction the arrow should point in, where 0.0 is
+                                pointing right, 0.25 is down, 0.5 is left, 0.75 is up
+        @param arrowColour      the colour to use for the arrow
+    */
+    ArrowButton (const String& buttonName,
+                 float arrowDirection,
+                 const Colour& arrowColour);
+
+    /** Destructor. */
+    ~ArrowButton();
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    /** @internal */
+    void paintButton (Graphics& g,
+                      bool isMouseOverButton,
+                      bool isButtonDown);
+
+    /** @internal */
+    void buttonStateChanged();
+
+private:
+
+    Colour colour;
+    DropShadowEffect shadow;
+    Path path;
+    int offset;
+
+    ArrowButton (const ArrowButton&);
+    const ArrowButton& operator= (const ArrowButton&);
+};
+
+#endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
+/********* End of inlined file: juce_ArrowButton.h *********/
+
+#endif
+#ifndef __JUCE_BUTTON_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawableButton.h *********/
+#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+#define __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+
+/**
+    A button that displays a Drawable.
+
+    Up to three Drawable objects can be given to this button, to represent the
+    'normal', 'over' and 'down' states.
+
+    @see Button
+*/
+class JUCE_API  DrawableButton  : public Button
+{
+public:
+
+    enum ButtonStyle
+    {
+        ImageFitted,                /**< The button will just display the images, but will resize and centre them to fit inside it. */
+        ImageRaw,                   /**< The button will just display the images in their normal size and position.
+                                         This leaves it up to the caller to make sure the images are the correct size and position for the button. */
+        ImageAboveTextLabel,        /**< Draws the button as a text label across the bottom with the image resized and scaled to fit above it. */
+        ImageOnButtonBackground     /**< Draws the button as a standard rounded-rectangle button with the image on top. */
+    };
+
+    /** Creates a DrawableButton.
+
+        After creating one of these, use setImages() to specify the drawables to use.
+
+        @param buttonName           the name to give the component
+        @param buttonStyle          the layout to use
+
+        @see ButtonStyle, setButtonStyle, setImages
+    */
+    DrawableButton (const String& buttonName,
+                    const ButtonStyle buttonStyle);
+
+    /** Destructor. */
+    ~DrawableButton();
+
+    /** Sets up the images to draw for the various button states.
+
+        The button will keep its own internal copies of these drawables.
+
+        @param normalImage      the thing to draw for the button's 'normal' state. An internal copy
+                                will be made of the object passed-in if it is non-zero.
+        @param overImage        the thing to draw for the button's 'over' state - if this is
+                                zero, the button's normal image will be used when the mouse is
+                                over it. An internal copy will be made of the object passed-in
+                                if it is non-zero.
+        @param downImage        the thing to draw for the button's 'down' state - if this is
+                                zero, the 'over' image will be used instead (or the normal image
+                                as a last resort). An internal copy will be made of the object
+                                passed-in if it is non-zero.
+        @param disabledImage    an image to draw when the button is disabled. If this is zero,
+                                the normal image will be drawn with a reduced opacity instead.
+                                An internal copy will be made of the object passed-in if it is
+                                non-zero.
+        @param normalImageOn    same as the normalImage, but this is used when the button's toggle
+                                state is 'on'. If this is 0, the normal image is used instead
+        @param overImageOn      same as the overImage, but this is used when the button's toggle
+                                state is 'on'. If this is 0, the normalImageOn is drawn instead
+        @param downImageOn      same as the downImage, but this is used when the button's toggle
+                                state is 'on'. If this is 0, the overImageOn is drawn instead
+        @param disabledImageOn  same as the disabledImage, but this is used when the button's toggle
+                                state is 'on'. If this is 0, the normal image will be drawn instead
+                                with a reduced opacity
+    */
+    void setImages (const Drawable* normalImage,
+                    const Drawable* overImage = 0,
+                    const Drawable* downImage = 0,
+                    const Drawable* disabledImage = 0,
+                    const Drawable* normalImageOn = 0,
+                    const Drawable* overImageOn = 0,
+                    const Drawable* downImageOn = 0,
+                    const Drawable* disabledImageOn = 0);
+
+    /** Changes the button's style.
+
+        @see ButtonStyle
+    */
+    void setButtonStyle (const ButtonStyle newStyle);
+
+    /** Changes the button's background colours.
+
+        The toggledOffColour is the colour to use when the button's toggle state
+        is off, and toggledOnColour when it's on.
+
+        For an ImageOnly or ImageAboveTextLabel style, the background colour is
+        used to fill the background of the component.
+
+        For an ImageOnButtonBackground style, the colour is used to draw the
+        button's lozenge shape and exactly how the colour's used will depend
+        on the LookAndFeel.
+    */
+    void setBackgroundColours (const Colour& toggledOffColour,
+                               const Colour& toggledOnColour);
+
+    /** Returns the current background colour being used.
+
+        @see setBackgroundColour
+    */
+    const Colour& getBackgroundColour() const throw();
+
+    /** Gives the button an optional amount of space around the edge of the drawable.
+
+        This will only apply to ImageFitted or ImageRaw styles, it won't affect the
+        ones on a button background. If the button is too small for the given gap, a
+        smaller gap will be used.
+
+        By default there's a gap of about 3 pixels.
+    */
+    void setEdgeIndent (const int numPixelsIndent);
+
+    /** Returns the image that the button is currently displaying. */
+    const Drawable* getCurrentImage() const throw();
+    const Drawable* getNormalImage() const throw();
+    const Drawable* getOverImage() const throw();
+    const Drawable* getDownImage() const throw();
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    /** @internal */
+    void paintButton (Graphics& g,
+                      bool isMouseOverButton,
+                      bool isButtonDown);
+
+private:
+
+    ButtonStyle style;
+    Drawable* normalImage;
+    Drawable* overImage;
+    Drawable* downImage;
+    Drawable* disabledImage;
+    Drawable* normalImageOn;
+    Drawable* overImageOn;
+    Drawable* downImageOn;
+    Drawable* disabledImageOn;
+    Colour backgroundOff, backgroundOn;
+    int edgeIndent;
+
+    void deleteImages();
+    DrawableButton (const DrawableButton&);
+    const DrawableButton& operator= (const DrawableButton&);
+};
+
+#endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
+/********* End of inlined file: juce_DrawableButton.h *********/
 
 #endif
 #ifndef __JUCE_HYPERLINKBUTTON_JUCEHEADER__
@@ -41402,66 +41840,6 @@ private:
 /********* Start of inlined file: juce_ShapeButton.h *********/
 #ifndef __JUCE_SHAPEBUTTON_JUCEHEADER__
 #define __JUCE_SHAPEBUTTON_JUCEHEADER__
-
-/********* Start of inlined file: juce_DropShadowEffect.h *********/
-#ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
-#define __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
-
-/**
-    An effect filter that adds a drop-shadow behind the image's content.
-
-    (This will only work on images/components that aren't opaque, of course).
-
-    When added to a component, this effect will draw a soft-edged
-    shadow based on what gets drawn inside it. The shadow will also
-    be applied to the component's children.
-
-    For speed, this doesn't use a proper gaussian blur, but cheats by
-    using a simple bilinear filter. If you need a really high-quality
-    shadow, check out ImageConvolutionKernel::createGaussianBlur()
-
-    @see Component::setComponentEffect
-*/
-class JUCE_API  DropShadowEffect  : public ImageEffectFilter
-{
-public:
-
-    /** Creates a default drop-shadow effect.
-
-        To customise the shadow's appearance, use the setShadowProperties()
-        method.
-    */
-    DropShadowEffect();
-
-    /** Destructor. */
-    ~DropShadowEffect();
-
-    /** Sets up parameters affecting the shadow's appearance.
-
-        @param newRadius        the (approximate) radius of the blur used
-        @param newOpacity       the opacity with which the shadow is rendered
-        @param newShadowOffsetX allows the shadow to be shifted in relation to the
-                                component's contents
-        @param newShadowOffsetY allows the shadow to be shifted in relation to the
-                                component's contents
-    */
-    void setShadowProperties (const float newRadius,
-                              const float newOpacity,
-                              const int newShadowOffsetX,
-                              const int newShadowOffsetY);
-
-    /** @internal */
-    void applyEffect (Image& sourceImage, Graphics& destContext);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int offsetX, offsetY;
-    float radius, opacity;
-};
-
-#endif   // __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
-/********* End of inlined file: juce_DropShadowEffect.h *********/
 
 /**
     A button that contains a filled shape.
@@ -42502,217 +42880,6 @@ private:
 
 #endif   // __JUCE_TOOLBARBUTTON_JUCEHEADER__
 /********* End of inlined file: juce_ToolbarButton.h *********/
-
-#endif
-#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
-
-/********* Start of inlined file: juce_ArrowButton.h *********/
-#ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
-#define __JUCE_ARROWBUTTON_JUCEHEADER__
-
-/**
-    A button with an arrow in it.
-
-    @see Button
-*/
-class JUCE_API  ArrowButton  : public Button
-{
-public:
-
-    /** Creates an ArrowButton.
-
-        @param buttonName       the name to give the button
-        @param arrowDirection   the direction the arrow should point in, where 0.0 is
-                                pointing right, 0.25 is down, 0.5 is left, 0.75 is up
-        @param arrowColour      the colour to use for the arrow
-    */
-    ArrowButton (const String& buttonName,
-                 float arrowDirection,
-                 const Colour& arrowColour);
-
-    /** Destructor. */
-    ~ArrowButton();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
-
-    /** @internal */
-    void buttonStateChanged();
-
-private:
-
-    Colour colour;
-    DropShadowEffect shadow;
-    Path path;
-    int offset;
-
-    ArrowButton (const ArrowButton&);
-    const ArrowButton& operator= (const ArrowButton&);
-};
-
-#endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ArrowButton.h *********/
-
-#endif
-#ifndef __JUCE_BUTTON_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawableButton.h *********/
-#ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-#define __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-
-/**
-    A button that displays a Drawable.
-
-    Up to three Drawable objects can be given to this button, to represent the
-    'normal', 'over' and 'down' states.
-
-    @see Button
-*/
-class JUCE_API  DrawableButton  : public Button
-{
-public:
-
-    enum ButtonStyle
-    {
-        ImageFitted,                /**< The button will just display the images, but will resize and centre them to fit inside it. */
-        ImageRaw,                   /**< The button will just display the images in their normal size and position.
-                                         This leaves it up to the caller to make sure the images are the correct size and position for the button. */
-        ImageAboveTextLabel,        /**< Draws the button as a text label across the bottom with the image resized and scaled to fit above it. */
-        ImageOnButtonBackground     /**< Draws the button as a standard rounded-rectangle button with the image on top. */
-    };
-
-    /** Creates a DrawableButton.
-
-        After creating one of these, use setImages() to specify the drawables to use.
-
-        @param buttonName           the name to give the component
-        @param buttonStyle          the layout to use
-
-        @see ButtonStyle, setButtonStyle, setImages
-    */
-    DrawableButton (const String& buttonName,
-                    const ButtonStyle buttonStyle);
-
-    /** Destructor. */
-    ~DrawableButton();
-
-    /** Sets up the images to draw for the various button states.
-
-        The button will keep its own internal copies of these drawables.
-
-        @param normalImage      the thing to draw for the button's 'normal' state. An internal copy
-                                will be made of the object passed-in if it is non-zero.
-        @param overImage        the thing to draw for the button's 'over' state - if this is
-                                zero, the button's normal image will be used when the mouse is
-                                over it. An internal copy will be made of the object passed-in
-                                if it is non-zero.
-        @param downImage        the thing to draw for the button's 'down' state - if this is
-                                zero, the 'over' image will be used instead (or the normal image
-                                as a last resort). An internal copy will be made of the object
-                                passed-in if it is non-zero.
-        @param disabledImage    an image to draw when the button is disabled. If this is zero,
-                                the normal image will be drawn with a reduced opacity instead.
-                                An internal copy will be made of the object passed-in if it is
-                                non-zero.
-        @param normalImageOn    same as the normalImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normal image is used instead
-        @param overImageOn      same as the overImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normalImageOn is drawn instead
-        @param downImageOn      same as the downImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the overImageOn is drawn instead
-        @param disabledImageOn  same as the disabledImage, but this is used when the button's toggle
-                                state is 'on'. If this is 0, the normal image will be drawn instead
-                                with a reduced opacity
-    */
-    void setImages (const Drawable* normalImage,
-                    const Drawable* overImage = 0,
-                    const Drawable* downImage = 0,
-                    const Drawable* disabledImage = 0,
-                    const Drawable* normalImageOn = 0,
-                    const Drawable* overImageOn = 0,
-                    const Drawable* downImageOn = 0,
-                    const Drawable* disabledImageOn = 0);
-
-    /** Changes the button's style.
-
-        @see ButtonStyle
-    */
-    void setButtonStyle (const ButtonStyle newStyle);
-
-    /** Changes the button's background colours.
-
-        The toggledOffColour is the colour to use when the button's toggle state
-        is off, and toggledOnColour when it's on.
-
-        For an ImageOnly or ImageAboveTextLabel style, the background colour is
-        used to fill the background of the component.
-
-        For an ImageOnButtonBackground style, the colour is used to draw the
-        button's lozenge shape and exactly how the colour's used will depend
-        on the LookAndFeel.
-    */
-    void setBackgroundColours (const Colour& toggledOffColour,
-                               const Colour& toggledOnColour);
-
-    /** Returns the current background colour being used.
-
-        @see setBackgroundColour
-    */
-    const Colour& getBackgroundColour() const throw();
-
-    /** Gives the button an optional amount of space around the edge of the drawable.
-
-        This will only apply to ImageFitted or ImageRaw styles, it won't affect the
-        ones on a button background. If the button is too small for the given gap, a
-        smaller gap will be used.
-
-        By default there's a gap of about 3 pixels.
-    */
-    void setEdgeIndent (const int numPixelsIndent);
-
-    /** Returns the image that the button is currently displaying. */
-    const Drawable* getCurrentImage() const throw();
-    const Drawable* getNormalImage() const throw();
-    const Drawable* getOverImage() const throw();
-    const Drawable* getDownImage() const throw();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    /** @internal */
-    void paintButton (Graphics& g,
-                      bool isMouseOverButton,
-                      bool isButtonDown);
-
-private:
-
-    ButtonStyle style;
-    Drawable* normalImage;
-    Drawable* overImage;
-    Drawable* downImage;
-    Drawable* disabledImage;
-    Drawable* normalImageOn;
-    Drawable* overImageOn;
-    Drawable* downImageOn;
-    Drawable* disabledImageOn;
-    Colour backgroundOff, backgroundOn;
-    int edgeIndent;
-
-    void deleteImages();
-    DrawableButton (const DrawableButton&);
-    const DrawableButton& operator= (const DrawableButton&);
-};
-
-#endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_DrawableButton.h *********/
 
 #endif
 #ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
@@ -44029,6 +44196,249 @@ private:
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ComponentDragger.h *********/
+#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+#define __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ComponentBoundsConstrainer.h *********/
+#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#define __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+
+/**
+    A class that imposes restrictions on a Component's size or position.
+
+    This is used by classes such as ResizableCornerComponent,
+    ResizableBorderComponent and ResizableWindow.
+
+    The base class can impose some basic size and position limits, but you can
+    also subclass this for custom uses.
+
+    @see ResizableCornerComponent, ResizableBorderComponent, ResizableWindow
+*/
+class JUCE_API  ComponentBoundsConstrainer
+{
+public:
+
+    /** When first created, the object will not impose any restrictions on the components. */
+    ComponentBoundsConstrainer() throw();
+
+    /** Destructor. */
+    virtual ~ComponentBoundsConstrainer();
+
+    /** Imposes a minimum width limit. */
+    void setMinimumWidth (const int minimumWidth) throw();
+
+    /** Returns the current minimum width. */
+    int getMinimumWidth() const throw()                         { return minW; }
+
+    /** Imposes a maximum width limit. */
+    void setMaximumWidth (const int maximumWidth) throw();
+
+    /** Returns the current maximum width. */
+    int getMaximumWidth() const throw()                         { return maxW; }
+
+    /** Imposes a minimum height limit. */
+    void setMinimumHeight (const int minimumHeight) throw();
+
+    /** Returns the current minimum height. */
+    int getMinimumHeight() const throw()                        { return minH; }
+
+    /** Imposes a maximum height limit. */
+    void setMaximumHeight (const int maximumHeight) throw();
+
+    /** Returns the current maximum height. */
+    int getMaximumHeight() const throw()                        { return maxH; }
+
+    /** Imposes a minimum width and height limit. */
+    void setMinimumSize (const int minimumWidth,
+                         const int minimumHeight) throw();
+
+    /** Imposes a maximum width and height limit. */
+    void setMaximumSize (const int maximumWidth,
+                         const int maximumHeight) throw();
+
+    /** Set all the maximum and minimum dimensions. */
+    void setSizeLimits (const int minimumWidth,
+                        const int minimumHeight,
+                        const int maximumWidth,
+                        const int maximumHeight) throw();
+
+    /** Sets the amount by which the component is allowed to go off-screen.
+
+        The values indicate how many pixels must remain on-screen when dragged off
+        one of its parent's edges, so e.g. if minimumWhenOffTheTop is set to 10, then
+        when the component goes off the top of the screen, its y-position will be
+        clipped so that there are always at least 10 pixels on-screen. In other words,
+        the lowest y-position it can take would be (10 - the component's height).
+
+        If you pass 0 or less for one of these amounts, the component is allowed
+        to move beyond that edge completely, with no restrictions at all.
+
+        If you pass a very large number (i.e. larger that the dimensions of the
+        component itself), then the component won't be allowed to overlap that
+        edge at all. So e.g. setting minimumWhenOffTheLeft to 0xffffff will mean that
+        the component will bump into the left side of the screen and go no further.
+    */
+    void setMinimumOnscreenAmounts (const int minimumWhenOffTheTop,
+                                    const int minimumWhenOffTheLeft,
+                                    const int minimumWhenOffTheBottom,
+                                    const int minimumWhenOffTheRight) throw();
+
+    /** Specifies a width-to-height ratio that the resizer should always maintain.
+
+        If the value is 0, no aspect ratio is enforced. If it's non-zero, the width
+        will always be maintained as this multiple of the height.
+
+        @see setResizeLimits
+    */
+    void setFixedAspectRatio (const double widthOverHeight) throw();
+
+    /** Returns the aspect ratio that was set with setFixedAspectRatio().
+
+        If no aspect ratio is being enforced, this will return 0.
+    */
+    double getFixedAspectRatio() const throw();
+
+    /** This callback changes the given co-ordinates to impose whatever the current
+        constraints are set to be.
+
+        @param x                the x position that should be examined and adjusted
+        @param y                the y position that should be examined and adjusted
+        @param w                the width that should be examined and adjusted
+        @param h                the height that should be examined and adjusted
+        @param previousBounds   the component's current size
+        @param limits           the region in which the component can be positioned
+        @param isStretchingTop      whether the top edge of the component is being resized
+        @param isStretchingLeft     whether the left edge of the component is being resized
+        @param isStretchingBottom   whether the bottom edge of the component is being resized
+        @param isStretchingRight    whether the right edge of the component is being resized
+    */
+    virtual void checkBounds (int& x, int& y, int& w, int& h,
+                              const Rectangle& previousBounds,
+                              const Rectangle& limits,
+                              const bool isStretchingTop,
+                              const bool isStretchingLeft,
+                              const bool isStretchingBottom,
+                              const bool isStretchingRight);
+
+    /** This callback happens when the resizer is about to start dragging. */
+    virtual void resizeStart();
+
+    /** This callback happens when the resizer has finished dragging. */
+    virtual void resizeEnd();
+
+    /** Checks the given bounds, and then sets the component to the corrected size. */
+    void setBoundsForComponent (Component* const component,
+                                int x, int y, int w, int h,
+                                const bool isStretchingTop,
+                                const bool isStretchingLeft,
+                                const bool isStretchingBottom,
+                                const bool isStretchingRight);
+
+    /** Performs a check on the current size of a component, and moves or resizes
+        it if it fails the constraints.
+    */
+    void checkComponentBounds (Component* component);
+
+    /** Called by setBoundsForComponent() to apply a new constrained size to a
+        component.
+
+        By default this just calls setBounds(), but it virtual in case it's needed for
+        extremely cunning purposes.
+    */
+    virtual void applyBoundsToComponent (Component* component,
+                                         int x, int y, int w, int h);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int minW, maxW, minH, maxH;
+    int minOffTop, minOffLeft, minOffBottom, minOffRight;
+    double aspectRatio;
+
+    ComponentBoundsConstrainer (const ComponentBoundsConstrainer&);
+    const ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
+};
+
+#endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+/********* End of inlined file: juce_ComponentBoundsConstrainer.h *********/
+
+/**
+    An object to take care of the logic for dragging components around with the mouse.
+
+    Very easy to use - in your mouseDown() callback, call startDraggingComponent(),
+    then in your mouseDrag() callback, call dragComponent().
+
+    When starting a drag, you can give it a ComponentBoundsConstrainer to use
+    to limit the component's position and keep it on-screen.
+
+    e.g. @code
+    class MyDraggableComp
+    {
+        ComponentDragger myDragger;
+
+        void mouseDown (const MouseEvent& e)
+        {
+            myDragger.startDraggingComponent (this, 0);
+        }
+
+        void mouseDrag (const MouseEvent& e)
+        {
+            myDragger.dragComponent (this, e);
+        }
+    };
+    @endcode
+*/
+class JUCE_API  ComponentDragger
+{
+public:
+
+    /** Creates a ComponentDragger. */
+    ComponentDragger();
+
+    /** Destructor. */
+    virtual ~ComponentDragger();
+
+    /** Call this from your component's mouseDown() method, to prepare for dragging.
+
+        @param componentToDrag      the component that you want to drag
+        @param constrainer          a constrainer object to use to keep the component
+                                    from going offscreen
+        @see dragComponent
+    */
+    void startDraggingComponent (Component* const componentToDrag,
+                                 ComponentBoundsConstrainer* constrainer);
+
+    /** Call this from your mouseDrag() callback to move the component.
+
+        This will move the component, but will first check the validity of the
+        component's new position using the checkPosition() method, which you
+        can override if you need to enforce special positioning limits on the
+        component.
+
+        @param componentToDrag      the component that you want to drag
+        @param e                    the current mouse-drag event
+        @see dragComponent
+    */
+    void dragComponent (Component* const componentToDrag,
+                        const MouseEvent& e);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    ComponentBoundsConstrainer* constrainer;
+    int originalX, originalY;
+};
+
+#endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+/********* End of inlined file: juce_ComponentDragger.h *********/
+
+#endif
+#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
 
 #endif
@@ -44730,387 +45140,108 @@ private:
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+#ifndef __JUCE_COMBOBOX_JUCEHEADER__
 
-/********* Start of inlined file: juce_ComponentDragger.h *********/
-#ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
-#define __JUCE_COMPONENTDRAGGER_JUCEHEADER__
+#endif
+#ifndef __JUCE_LABEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_ComponentBoundsConstrainer.h *********/
-#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-#define __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+#endif
+#ifndef __JUCE_LISTBOX_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
+
+/********* Start of inlined file: juce_ProgressBar.h *********/
+#ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
+#define __JUCE_PROGRESSBAR_JUCEHEADER__
 
 /**
-    A class that imposes restrictions on a Component's size or position.
+    A progress bar component.
 
-    This is used by classes such as ResizableCornerComponent,
-    ResizableBorderComponent and ResizableWindow.
+    To use this, just create one and make it visible. It'll run its own timer
+    to keep an eye on a variable that you give it, and will automatically
+    redraw itself when the variable changes.
 
-    The base class can impose some basic size and position limits, but you can
-    also subclass this for custom uses.
+    For an easy way of running a background task with a dialog box showing its
+    progress, see the ThreadWithProgressWindow class.
 
-    @see ResizableCornerComponent, ResizableBorderComponent, ResizableWindow
+    @see ThreadWithProgressWindow
 */
-class JUCE_API  ComponentBoundsConstrainer
+class JUCE_API  ProgressBar  : public Component,
+                               public SettableTooltipClient,
+                               private Timer
 {
 public:
 
-    /** When first created, the object will not impose any restrictions on the components. */
-    ComponentBoundsConstrainer() throw();
+    /** Creates a ProgressBar.
+
+        @param progress     pass in a reference to a double that you're going to
+                            update with your task's progress. The ProgressBar will
+                            monitor the value of this variable and will redraw itself
+                            when the value changes. The range is from 0 to 1.0. Obviously
+                            you'd better be careful not to delete this variable while the
+                            ProgressBar still exists!
+    */
+    ProgressBar (double& progress);
 
     /** Destructor. */
-    virtual ~ComponentBoundsConstrainer();
+    ~ProgressBar();
 
-    /** Imposes a minimum width limit. */
-    void setMinimumWidth (const int minimumWidth) throw();
+    /** Turns the percentage display on or off.
 
-    /** Returns the current minimum width. */
-    int getMinimumWidth() const throw()                         { return minW; }
-
-    /** Imposes a maximum width limit. */
-    void setMaximumWidth (const int maximumWidth) throw();
-
-    /** Returns the current maximum width. */
-    int getMaximumWidth() const throw()                         { return maxW; }
-
-    /** Imposes a minimum height limit. */
-    void setMinimumHeight (const int minimumHeight) throw();
-
-    /** Returns the current minimum height. */
-    int getMinimumHeight() const throw()                        { return minH; }
-
-    /** Imposes a maximum height limit. */
-    void setMaximumHeight (const int maximumHeight) throw();
-
-    /** Returns the current maximum height. */
-    int getMaximumHeight() const throw()                        { return maxH; }
-
-    /** Imposes a minimum width and height limit. */
-    void setMinimumSize (const int minimumWidth,
-                         const int minimumHeight) throw();
-
-    /** Imposes a maximum width and height limit. */
-    void setMaximumSize (const int maximumWidth,
-                         const int maximumHeight) throw();
-
-    /** Set all the maximum and minimum dimensions. */
-    void setSizeLimits (const int minimumWidth,
-                        const int minimumHeight,
-                        const int maximumWidth,
-                        const int maximumHeight) throw();
-
-    /** Sets the amount by which the component is allowed to go off-screen.
-
-        The values indicate how many pixels must remain on-screen when dragged off
-        one of its parent's edges, so e.g. if minimumWhenOffTheTop is set to 10, then
-        when the component goes off the top of the screen, its y-position will be
-        clipped so that there are always at least 10 pixels on-screen. In other words,
-        the lowest y-position it can take would be (10 - the component's height).
-
-        If you pass 0 or less for one of these amounts, the component is allowed
-        to move beyond that edge completely, with no restrictions at all.
-
-        If you pass a very large number (i.e. larger that the dimensions of the
-        component itself), then the component won't be allowed to overlap that
-        edge at all. So e.g. setting minimumWhenOffTheLeft to 0xffffff will mean that
-        the component will bump into the left side of the screen and go no further.
+        By default this is on, and the progress bar will display a text string showing
+        its current percentage.
     */
-    void setMinimumOnscreenAmounts (const int minimumWhenOffTheTop,
-                                    const int minimumWhenOffTheLeft,
-                                    const int minimumWhenOffTheBottom,
-                                    const int minimumWhenOffTheRight) throw();
+    void setPercentageDisplay (const bool shouldDisplayPercentage);
 
-    /** Specifies a width-to-height ratio that the resizer should always maintain.
+    /** Gives the progress bar a string to display inside it.
 
-        If the value is 0, no aspect ratio is enforced. If it's non-zero, the width
-        will always be maintained as this multiple of the height.
-
-        @see setResizeLimits
+        If you call this, it will turn off the percentage display.
+        @see setPercentageDisplay
     */
-    void setFixedAspectRatio (const double widthOverHeight) throw();
+    void setTextToDisplay (const String& text);
 
-    /** Returns the aspect ratio that was set with setFixedAspectRatio().
+    /** A set of colour IDs to use to change the colour of various aspects of the bar.
 
-        If no aspect ratio is being enforced, this will return 0.
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */
-    double getFixedAspectRatio() const throw();
-
-    /** This callback changes the given co-ordinates to impose whatever the current
-        constraints are set to be.
-
-        @param x                the x position that should be examined and adjusted
-        @param y                the y position that should be examined and adjusted
-        @param w                the width that should be examined and adjusted
-        @param h                the height that should be examined and adjusted
-        @param previousBounds   the component's current size
-        @param limits           the region in which the component can be positioned
-        @param isStretchingTop      whether the top edge of the component is being resized
-        @param isStretchingLeft     whether the left edge of the component is being resized
-        @param isStretchingBottom   whether the bottom edge of the component is being resized
-        @param isStretchingRight    whether the right edge of the component is being resized
-    */
-    virtual void checkBounds (int& x, int& y, int& w, int& h,
-                              const Rectangle& previousBounds,
-                              const Rectangle& limits,
-                              const bool isStretchingTop,
-                              const bool isStretchingLeft,
-                              const bool isStretchingBottom,
-                              const bool isStretchingRight);
-
-    /** This callback happens when the resizer is about to start dragging. */
-    virtual void resizeStart();
-
-    /** This callback happens when the resizer has finished dragging. */
-    virtual void resizeEnd();
-
-    /** Checks the given bounds, and then sets the component to the corrected size. */
-    void setBoundsForComponent (Component* const component,
-                                int x, int y, int w, int h,
-                                const bool isStretchingTop,
-                                const bool isStretchingLeft,
-                                const bool isStretchingBottom,
-                                const bool isStretchingRight);
-
-    /** Performs a check on the current size of a component, and moves or resizes
-        it if it fails the constraints.
-    */
-    void checkComponentBounds (Component* component);
-
-    /** Called by setBoundsForComponent() to apply a new constrained size to a
-        component.
-
-        By default this just calls setBounds(), but it virtual in case it's needed for
-        extremely cunning purposes.
-    */
-    virtual void applyBoundsToComponent (Component* component,
-                                         int x, int y, int w, int h);
+    enum ColourIds
+    {
+        backgroundColourId              = 0x1001900,    /**< The background colour, behind the bar. */
+        foregroundColourId              = 0x1001a00,    /**< The colour to use to draw the bar itself. LookAndFeel
+                                                             classes will probably use variations on this colour. */
+    };
 
     juce_UseDebuggingNewOperator
 
-private:
-    int minW, maxW, minH, maxH;
-    int minOffTop, minOffLeft, minOffBottom, minOffRight;
-    double aspectRatio;
-
-    ComponentBoundsConstrainer (const ComponentBoundsConstrainer&);
-    const ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
-};
-
-#endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentBoundsConstrainer.h *********/
-
-/**
-    An object to take care of the logic for dragging components around with the mouse.
-
-    Very easy to use - in your mouseDown() callback, call startDraggingComponent(),
-    then in your mouseDrag() callback, call dragComponent().
-
-    When starting a drag, you can give it a ComponentBoundsConstrainer to use
-    to limit the component's position and keep it on-screen.
-
-    e.g. @code
-    class MyDraggableComp
-    {
-        ComponentDragger myDragger;
-
-        void mouseDown (const MouseEvent& e)
-        {
-            myDragger.startDraggingComponent (this, 0);
-        }
-
-        void mouseDrag (const MouseEvent& e)
-        {
-            myDragger.dragComponent (this, e);
-        }
-    };
-    @endcode
-*/
-class JUCE_API  ComponentDragger
-{
-public:
-
-    /** Creates a ComponentDragger. */
-    ComponentDragger();
-
-    /** Destructor. */
-    virtual ~ComponentDragger();
-
-    /** Call this from your component's mouseDown() method, to prepare for dragging.
-
-        @param componentToDrag      the component that you want to drag
-        @param constrainer          a constrainer object to use to keep the component
-                                    from going offscreen
-        @see dragComponent
-    */
-    void startDraggingComponent (Component* const componentToDrag,
-                                 ComponentBoundsConstrainer* constrainer);
-
-    /** Call this from your mouseDrag() callback to move the component.
-
-        This will move the component, but will first check the validity of the
-        component's new position using the checkPosition() method, which you
-        can override if you need to enforce special positioning limits on the
-        component.
-
-        @param componentToDrag      the component that you want to drag
-        @param e                    the current mouse-drag event
-        @see dragComponent
-    */
-    void dragComponent (Component* const componentToDrag,
-                        const MouseEvent& e);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    ComponentBoundsConstrainer* constrainer;
-    int originalX, originalY;
-};
-
-#endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentDragger.h *********/
-
-#endif
-#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ToolbarItemFactory.h *********/
-#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-#define __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-
-/**
-    A factory object which can create ToolbarItemComponent objects.
-
-    A subclass of ToolbarItemFactory publishes a set of types of toolbar item
-    that it can create.
-
-    Each type of item is identified by a unique ID, and multiple instances of an
-    item type can exist at once (even on the same toolbar, e.g. spacers or separator
-    bars).
-
-    @see Toolbar, ToolbarItemComponent, ToolbarButton
-*/
-class JUCE_API  ToolbarItemFactory
-{
-public:
-
-    ToolbarItemFactory();
-
-    /** Destructor. */
-    virtual ~ToolbarItemFactory();
-
-    /** A set of reserved item ID values, used for the built-in item types.
-    */
-    enum SpecialItemIds
-    {
-        separatorBarId      = -1,   /**< The item ID for a vertical (or horizontal) separator bar that
-                                         can be placed between sets of items to break them into groups. */
-        spacerId            = -2,   /**< The item ID for a fixed-width space that can be placed between
-                                         items.*/
-        flexibleSpacerId    = -3    /**< The item ID for a gap that pushes outwards against the things on
-                                         either side of it, filling any available space. */
-    };
-
-    /** Must return a list of the IDs for all the item types that this factory can create.
-
-        The ids should be added to the array that is passed-in.
-
-        An item ID can be any integer you choose, except for 0, which is considered a null ID,
-        and the predefined IDs in the SpecialItemIds enum.
-
-        You should also add the built-in types (separatorBarId, spacerId and flexibleSpacerId)
-        to this list if you want your toolbar to be able to contain those items.
-
-        The list returned here is used by the ToolbarItemPalette class to obtain its list
-        of available items, and their order on the palette will reflect the order in which
-        they appear on this list.
-
-        @see ToolbarItemPalette
-    */
-    virtual void getAllToolbarItemIds (Array <int>& ids) = 0;
-
-    /** Must return the set of items that should be added to a toolbar as its default set.
-
-        This method is used by Toolbar::addDefaultItems() to determine which items to
-        create.
-
-        The items that your method adds to the array that is passed-in will be added to the
-        toolbar in the same order. Items can appear in the list more than once.
-    */
-    virtual void getDefaultItemSet (Array <int>& ids) = 0;
-
-    /** Must create an instance of one of the items that the factory lists in its
-        getAllToolbarItemIds() method.
-
-        The itemId parameter can be any of the values listed by your getAllToolbarItemIds()
-        method, except for the built-in item types from the SpecialItemIds enum, which
-        are created internally by the toolbar code.
-
-        Try not to keep a pointer to the object that is returned, as it will be deleted
-        automatically by the toolbar, and remember that multiple instances of the same
-        item type are likely to exist at the same time.
-    */
-    virtual ToolbarItemComponent* createItem (const int itemId) = 0;
-};
-
-#endif   // __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemFactory.h *********/
-
-#endif
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-
-/********* Start of inlined file: juce_ToolbarItemPalette.h *********/
-#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-
-/**
-    A component containing a list of toolbar items, which the user can drag onto
-    a toolbar to add them.
-
-    You can use this class directly, but it's a lot easier to call Toolbar::showCustomisationDialog(),
-    which automatically shows one of these in a dialog box with lots of extra controls.
-
-    @see Toolbar
-*/
-class JUCE_API  ToolbarItemPalette    : public Component,
-                                        public DragAndDropContainer
-{
-public:
-
-    /** Creates a palette of items for a given factory, with the aim of adding them
-        to the specified toolbar.
-
-        The ToolbarItemFactory::getAllToolbarItemIds() method is used to create the
-        set of items that are shown in this palette.
-
-        The toolbar and factory must not be deleted while this object exists.
-    */
-    ToolbarItemPalette (ToolbarItemFactory& factory,
-                        Toolbar* const toolbar);
-
-    /** Destructor. */
-    ~ToolbarItemPalette();
-
+protected:
     /** @internal */
-    void resized();
-
-    juce_UseDebuggingNewOperator
+    void paint (Graphics& g);
+    /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
+    void visibilityChanged();
+    /** @internal */
+    void colourChanged();
 
 private:
-    ToolbarItemFactory& factory;
-    Toolbar* toolbar;
-    Viewport* viewport;
+    double& progress;
+    double currentValue;
+    bool displayPercentage;
+    String displayedMessage, currentMessage;
+    uint32 lastCallbackTime;
 
-    friend class Toolbar;
-    void replaceComponent (ToolbarItemComponent* const comp);
+    void timerCallback();
 
-    ToolbarItemPalette (const ToolbarItemPalette&);
-    const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+    ProgressBar (const ProgressBar&);
+    const ProgressBar& operator= (const ProgressBar&);
 };
 
-#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemPalette.h *********/
+#endif   // __JUCE_PROGRESSBAR_JUCEHEADER__
+/********* End of inlined file: juce_ProgressBar.h *********/
 
 #endif
 #ifndef __JUCE_SLIDER_JUCEHEADER__
@@ -45860,121 +45991,10 @@ private:
 /********* End of inlined file: juce_Slider.h *********/
 
 #endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMBOBOX_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_LISTBOX_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
-
-/********* Start of inlined file: juce_ProgressBar.h *********/
-#ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
-#define __JUCE_PROGRESSBAR_JUCEHEADER__
-
-/**
-    A progress bar component.
-
-    To use this, just create one and make it visible. It'll run its own timer
-    to keep an eye on a variable that you give it, and will automatically
-    redraw itself when the variable changes.
-
-    For an easy way of running a background task with a dialog box showing its
-    progress, see the ThreadWithProgressWindow class.
-
-    @see ThreadWithProgressWindow
-*/
-class JUCE_API  ProgressBar  : public Component,
-                               public SettableTooltipClient,
-                               private Timer
-{
-public:
-
-    /** Creates a ProgressBar.
-
-        @param progress     pass in a reference to a double that you're going to
-                            update with your task's progress. The ProgressBar will
-                            monitor the value of this variable and will redraw itself
-                            when the value changes. The range is from 0 to 1.0. Obviously
-                            you'd better be careful not to delete this variable while the
-                            ProgressBar still exists!
-    */
-    ProgressBar (double& progress);
-
-    /** Destructor. */
-    ~ProgressBar();
-
-    /** Turns the percentage display on or off.
-
-        By default this is on, and the progress bar will display a text string showing
-        its current percentage.
-    */
-    void setPercentageDisplay (const bool shouldDisplayPercentage);
-
-    /** Gives the progress bar a string to display inside it.
-
-        If you call this, it will turn off the percentage display.
-        @see setPercentageDisplay
-    */
-    void setTextToDisplay (const String& text);
-
-    /** A set of colour IDs to use to change the colour of various aspects of the bar.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        backgroundColourId              = 0x1001900,    /**< The background colour, behind the bar. */
-        foregroundColourId              = 0x1001a00,    /**< The colour to use to draw the bar itself. LookAndFeel
-                                                             classes will probably use variations on this colour. */
-    };
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void lookAndFeelChanged();
-    /** @internal */
-    void visibilityChanged();
-    /** @internal */
-    void colourChanged();
-
-private:
-    double& progress;
-    double currentValue;
-    bool displayPercentage;
-    String displayedMessage, currentMessage;
-    uint32 lastCallbackTime;
-
-    void timerCallback();
-
-    ProgressBar (const ProgressBar&);
-    const ProgressBar& operator= (const ProgressBar&);
-};
-
-#endif   // __JUCE_PROGRESSBAR_JUCEHEADER__
-/********* End of inlined file: juce_ProgressBar.h *********/
-
-#endif
 #ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-
-/********* Start of inlined file: juce_TableListBox.h *********/
-#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
-#define __JUCE_TABLELISTBOX_JUCEHEADER__
+#ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_TableHeaderComponent.h *********/
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
@@ -46371,6 +46391,13 @@ private:
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_TableHeaderComponent.h *********/
 
+#endif
+#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
+
+/********* Start of inlined file: juce_TableListBox.h *********/
+#ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
+#define __JUCE_TABLELISTBOX_JUCEHEADER__
+
 /**
     One of these is used by a TableListBox as the data model for the table's contents.
 
@@ -46648,135 +46675,156 @@ private:
 /********* End of inlined file: juce_TableListBox.h *********/
 
 #endif
-#ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_LABEL_JUCEHEADER__
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
+#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SliderPropertyComponent.h *********/
-#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
-#define __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+/********* Start of inlined file: juce_ToolbarItemFactory.h *********/
+#ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+#define __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
 
 /**
-    A PropertyComponent that shows its value as a slider.
+    A factory object which can create ToolbarItemComponent objects.
 
-    @see PropertyComponent, Slider
+    A subclass of ToolbarItemFactory publishes a set of types of toolbar item
+    that it can create.
+
+    Each type of item is identified by a unique ID, and multiple instances of an
+    item type can exist at once (even on the same toolbar, e.g. spacers or separator
+    bars).
+
+    @see Toolbar, ToolbarItemComponent, ToolbarButton
 */
-class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-                                            private SliderListener
+class JUCE_API  ToolbarItemFactory
 {
 public:
 
-    /** Creates the property component.
-
-        The ranges, interval and skew factor are passed to the Slider component.
-
-        If you need to customise the slider in other ways, your constructor can
-        access the slider member variable and change it directly.
-    */
-    SliderPropertyComponent (const String& propertyName,
-                             const double rangeMin,
-                             const double rangeMax,
-                             const double interval,
-                             const double skewFactor = 1.0);
+    ToolbarItemFactory();
 
     /** Destructor. */
-    ~SliderPropertyComponent();
+    virtual ~ToolbarItemFactory();
 
-    /** Called when the user moves the slider to change its value.
-
-        Your subclass must use this method to update whatever item this property
-        represents.
+    /** A set of reserved item ID values, used for the built-in item types.
     */
-    virtual void setValue (const double newValue) = 0;
+    enum SpecialItemIds
+    {
+        separatorBarId      = -1,   /**< The item ID for a vertical (or horizontal) separator bar that
+                                         can be placed between sets of items to break them into groups. */
+        spacerId            = -2,   /**< The item ID for a fixed-width space that can be placed between
+                                         items.*/
+        flexibleSpacerId    = -3    /**< The item ID for a gap that pushes outwards against the things on
+                                         either side of it, filling any available space. */
+    };
 
-    /** Returns the value that the slider should show. */
-    virtual const double getValue() const = 0;
+    /** Must return a list of the IDs for all the item types that this factory can create.
 
-    /** @internal */
-    void refresh();
-    /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
-    void sliderValueChanged (Slider*);
+        The ids should be added to the array that is passed-in.
 
-    juce_UseDebuggingNewOperator
+        An item ID can be any integer you choose, except for 0, which is considered a null ID,
+        and the predefined IDs in the SpecialItemIds enum.
 
-protected:
+        You should also add the built-in types (separatorBarId, spacerId and flexibleSpacerId)
+        to this list if you want your toolbar to be able to contain those items.
 
-    /** The slider component being used in this component.
+        The list returned here is used by the ToolbarItemPalette class to obtain its list
+        of available items, and their order on the palette will reflect the order in which
+        they appear on this list.
 
-        Your subclass has access to this in case it needs to customise it in some way.
+        @see ToolbarItemPalette
     */
-    Slider* slider;
+    virtual void getAllToolbarItemIds (Array <int>& ids) = 0;
+
+    /** Must return the set of items that should be added to a toolbar as its default set.
+
+        This method is used by Toolbar::addDefaultItems() to determine which items to
+        create.
+
+        The items that your method adds to the array that is passed-in will be added to the
+        toolbar in the same order. Items can appear in the list more than once.
+    */
+    virtual void getDefaultItemSet (Array <int>& ids) = 0;
+
+    /** Must create an instance of one of the items that the factory lists in its
+        getAllToolbarItemIds() method.
+
+        The itemId parameter can be any of the values listed by your getAllToolbarItemIds()
+        method, except for the built-in item types from the SpecialItemIds enum, which
+        are created internally by the toolbar code.
+
+        Try not to keep a pointer to the object that is returned, as it will be deleted
+        automatically by the toolbar, and remember that multiple instances of the same
+        item type are likely to exist at the same time.
+    */
+    virtual ToolbarItemComponent* createItem (const int itemId) = 0;
 };
 
-#endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SliderPropertyComponent.h *********/
+#endif   // __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
+/********* End of inlined file: juce_ToolbarItemFactory.h *********/
 
 #endif
-#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
-/********* Start of inlined file: juce_TextPropertyComponent.h *********/
-#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
-#define __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+/********* Start of inlined file: juce_ToolbarItemPalette.h *********/
+#ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+#define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
 /**
-    A PropertyComponent that shows its value as editable text.
+    A component containing a list of toolbar items, which the user can drag onto
+    a toolbar to add them.
 
-    @see PropertyComponent
+    You can use this class directly, but it's a lot easier to call Toolbar::showCustomisationDialog(),
+    which automatically shows one of these in a dialog box with lots of extra controls.
+
+    @see Toolbar
 */
-class JUCE_API  TextPropertyComponent  : public PropertyComponent
+class JUCE_API  ToolbarItemPalette    : public Component,
+                                        public DragAndDropContainer
 {
 public:
 
-    /** Creates a text property component.
+    /** Creates a palette of items for a given factory, with the aim of adding them
+        to the specified toolbar.
 
-        The maxNumChars is used to set the length of string allowable, and isMultiLine
-        sets whether the text editor allows carriage returns.
+        The ToolbarItemFactory::getAllToolbarItemIds() method is used to create the
+        set of items that are shown in this palette.
 
-        @see TextEditor
+        The toolbar and factory must not be deleted while this object exists.
     */
-    TextPropertyComponent (const String& propertyName,
-                           const int maxNumChars,
-                           const bool isMultiLine);
+    ToolbarItemPalette (ToolbarItemFactory& factory,
+                        Toolbar* const toolbar);
 
     /** Destructor. */
-    ~TextPropertyComponent();
-
-    /** Called when the user edits the text.
-
-        Your subclass must use this callback to change the value of whatever item
-        this property component represents.
-    */
-    virtual void setText (const String& newText) = 0;
-
-    /** Returns the text that should be shown in the text editor.
-    */
-    virtual const String getText() const = 0;
+    ~ToolbarItemPalette();
 
     /** @internal */
-    void refresh();
-    /** @internal */
-    void textWasEdited();
+    void resized();
 
     juce_UseDebuggingNewOperator
 
 private:
-    Label* textEditor;
+    ToolbarItemFactory& factory;
+    Toolbar* toolbar;
+    Viewport* viewport;
+
+    friend class Toolbar;
+    void replaceComponent (ToolbarItemComponent* const comp);
+
+    ToolbarItemPalette (const ToolbarItemPalette&);
+    const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
 };
 
-#endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_TextPropertyComponent.h *********/
+#endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
+/********* End of inlined file: juce_ToolbarItemPalette.h *********/
+
+#endif
+#ifndef __JUCE_TREEVIEW_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -46974,6 +47022,277 @@ private:
 
 #endif
 #ifndef __JUCE_PROPERTYPANEL_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SliderPropertyComponent.h *********/
+#ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+#define __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+
+/**
+    A PropertyComponent that shows its value as a slider.
+
+    @see PropertyComponent, Slider
+*/
+class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
+                                            private SliderListener
+{
+public:
+
+    /** Creates the property component.
+
+        The ranges, interval and skew factor are passed to the Slider component.
+
+        If you need to customise the slider in other ways, your constructor can
+        access the slider member variable and change it directly.
+    */
+    SliderPropertyComponent (const String& propertyName,
+                             const double rangeMin,
+                             const double rangeMax,
+                             const double interval,
+                             const double skewFactor = 1.0);
+
+    /** Destructor. */
+    ~SliderPropertyComponent();
+
+    /** Called when the user moves the slider to change its value.
+
+        Your subclass must use this method to update whatever item this property
+        represents.
+    */
+    virtual void setValue (const double newValue) = 0;
+
+    /** Returns the value that the slider should show. */
+    virtual const double getValue() const = 0;
+
+    /** @internal */
+    void refresh();
+    /** @internal */
+    void changeListenerCallback (void*);
+    /** @internal */
+    void sliderValueChanged (Slider*);
+
+    juce_UseDebuggingNewOperator
+
+protected:
+
+    /** The slider component being used in this component.
+
+        Your subclass has access to this in case it needs to customise it in some way.
+    */
+    Slider* slider;
+};
+
+#endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SliderPropertyComponent.h *********/
+
+#endif
+#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_TextPropertyComponent.h *********/
+#ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+#define __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+
+/**
+    A PropertyComponent that shows its value as editable text.
+
+    @see PropertyComponent
+*/
+class JUCE_API  TextPropertyComponent  : public PropertyComponent
+{
+public:
+
+    /** Creates a text property component.
+
+        The maxNumChars is used to set the length of string allowable, and isMultiLine
+        sets whether the text editor allows carriage returns.
+
+        @see TextEditor
+    */
+    TextPropertyComponent (const String& propertyName,
+                           const int maxNumChars,
+                           const bool isMultiLine);
+
+    /** Destructor. */
+    ~TextPropertyComponent();
+
+    /** Called when the user edits the text.
+
+        Your subclass must use this callback to change the value of whatever item
+        this property component represents.
+    */
+    virtual void setText (const String& newText) = 0;
+
+    /** Returns the text that should be shown in the text editor.
+    */
+    virtual const String getText() const = 0;
+
+    /** @internal */
+    void refresh();
+    /** @internal */
+    void textWasEdited();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Label* textEditor;
+};
+
+#endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_TextPropertyComponent.h *********/
+
+#endif
+#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ComponentMovementWatcher.h *********/
+#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+
+/** An object that watches for any movement of a component or any of its parent components.
+
+    This makes it easy to check when a component is moved relative to its top-level
+    peer window. The normal Component::moved() method is only called when a component
+    moves relative to its immediate parent, and sometimes you want to know if any of
+    components higher up the tree have moved (which of course will affect the overall
+    position of all their sub-components).
+
+    It also includes a callback that lets you know when the top-level peer is changed.
+
+    This class is used by specialised components like OpenGLComponent or QuickTimeComponent
+    because they need to keep their custom windows in the right place and respond to
+    changes in the peer.
+*/
+class JUCE_API  ComponentMovementWatcher    : public ComponentListener
+{
+public:
+
+    /** Creates a ComponentMovementWatcher to watch a given target component. */
+    ComponentMovementWatcher (Component* const component);
+
+    /** Destructor. */
+    ~ComponentMovementWatcher();
+
+    /** This callback happens when the component that is being watched is moved
+        relative to its top-level peer window, or when it is resized.
+    */
+    virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
+
+    /** This callback happens when the component's top-level peer is changed.
+    */
+    virtual void componentPeerChanged() = 0;
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void componentParentHierarchyChanged (Component& component);
+    /** @internal */
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+
+private:
+
+    Component* const component;
+    ComponentPeer* lastPeer;
+    VoidArray registeredParentComps;
+    bool reentrant;
+    int lastX, lastY, lastWidth, lastHeight;
+#ifdef JUCE_DEBUG
+    ComponentDeletionWatcher* deletionWatcher;
+#endif
+
+    void unregister() throw();
+    void registerWithParentComps() throw();
+
+    ComponentMovementWatcher (const ComponentMovementWatcher&);
+    const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+};
+
+#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
+/********* End of inlined file: juce_ComponentMovementWatcher.h *********/
+
+#endif
+#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_GroupComponent.h *********/
+#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
+#define __JUCE_GROUPCOMPONENT_JUCEHEADER__
+
+/**
+    A component that draws an outline around itself and has an optional title at
+    the top, for drawing an outline around a group of controls.
+
+*/
+class JUCE_API  GroupComponent    : public Component
+{
+public:
+
+    /** Creates a GroupComponent.
+
+        @param componentName    the name to give the component
+        @param labelText        the text to show at the top of the outline
+    */
+    GroupComponent (const String& componentName,
+                    const String& labelText);
+
+    /** Destructor. */
+    ~GroupComponent();
+
+    /** Changes the text that's shown at the top of the component. */
+    void setText (const String& newText) throw();
+
+    /** Returns the currently displayed text label. */
+    const String getText() const throw();
+
+    /** Sets the positioning of the text label.
+
+        (The default is Justification::left)
+
+        @see getTextLabelPosition
+    */
+    void setTextLabelPosition (const Justification& justification);
+
+    /** Returns the current text label position.
+
+        @see setTextLabelPosition
+    */
+    const Justification getTextLabelPosition() const throw()            { return justification; }
+
+    /** A set of colour IDs to use to change the colour of various aspects of the component.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
+        textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
+    };
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void enablementChanged();
+    /** @internal */
+    void colourChanged();
+
+private:
+    String text;
+    Justification justification;
+
+    GroupComponent (const GroupComponent&);
+    const GroupComponent& operator= (const GroupComponent&);
+};
+
+#endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_GroupComponent.h *********/
 
 #endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
@@ -48656,84 +48975,13 @@ private:
 /********* End of inlined file: juce_MultiDocumentPanel.h *********/
 
 #endif
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ComponentMovementWatcher.h *********/
-#ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-
-/** An object that watches for any movement of a component or any of its parent components.
-
-    This makes it easy to check when a component is moved relative to its top-level
-    peer window. The normal Component::moved() method is only called when a component
-    moves relative to its immediate parent, and sometimes you want to know if any of
-    components higher up the tree have moved (which of course will affect the overall
-    position of all their sub-components).
-
-    It also includes a callback that lets you know when the top-level peer is changed.
-
-    This class is used by specialised components like OpenGLComponent or QuickTimeComponent
-    because they need to keep their custom windows in the right place and respond to
-    changes in the peer.
-*/
-class JUCE_API  ComponentMovementWatcher    : public ComponentListener
-{
-public:
-
-    /** Creates a ComponentMovementWatcher to watch a given target component. */
-    ComponentMovementWatcher (Component* const component);
-
-    /** Destructor. */
-    ~ComponentMovementWatcher();
-
-    /** This callback happens when the component that is being watched is moved
-        relative to its top-level peer window, or when it is resized.
-    */
-    virtual void componentMovedOrResized (bool wasMoved, bool wasResized) = 0;
-
-    /** This callback happens when the component's top-level peer is changed.
-    */
-    virtual void componentPeerChanged() = 0;
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void componentParentHierarchyChanged (Component& component);
-    /** @internal */
-    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
-
-private:
-
-    Component* const component;
-    ComponentPeer* lastPeer;
-    VoidArray registeredParentComps;
-    bool reentrant;
-    int lastX, lastY, lastWidth, lastHeight;
-#ifdef JUCE_DEBUG
-    ComponentDeletionWatcher* deletionWatcher;
-#endif
-
-    void unregister() throw();
-    void registerWithParentComps() throw();
-
-    ComponentMovementWatcher (const ComponentMovementWatcher&);
-    const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
-};
-
-#endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentMovementWatcher.h *********/
-
-#endif
 #ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SCROLLBAR_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
@@ -48979,9 +49227,6 @@ private:
 /********* End of inlined file: juce_StretchableLayoutManager.h *********/
 
 #endif
-#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
 
 /********* Start of inlined file: juce_StretchableLayoutResizerBar.h *********/
@@ -49134,435 +49379,16 @@ private:
 /********* End of inlined file: juce_StretchableObjectResizer.h *********/
 
 #endif
+#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_VIEWPORT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_GroupComponent.h *********/
-#ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
-#define __JUCE_GROUPCOMPONENT_JUCEHEADER__
-
-/**
-    A component that draws an outline around itself and has an optional title at
-    the top, for drawing an outline around a group of controls.
-
-*/
-class JUCE_API  GroupComponent    : public Component
-{
-public:
-
-    /** Creates a GroupComponent.
-
-        @param componentName    the name to give the component
-        @param labelText        the text to show at the top of the outline
-    */
-    GroupComponent (const String& componentName,
-                    const String& labelText);
-
-    /** Destructor. */
-    ~GroupComponent();
-
-    /** Changes the text that's shown at the top of the component. */
-    void setText (const String& newText) throw();
-
-    /** Returns the currently displayed text label. */
-    const String getText() const throw();
-
-    /** Sets the positioning of the text label.
-
-        (The default is Justification::left)
-
-        @see getTextLabelPosition
-    */
-    void setTextLabelPosition (const Justification& justification);
-
-    /** Returns the current text label position.
-
-        @see setTextLabelPosition
-    */
-    const Justification getTextLabelPosition() const throw()            { return justification; }
-
-    /** A set of colour IDs to use to change the colour of various aspects of the component.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        outlineColourId     = 0x1005400,    /**< The colour to use for drawing the line around the edge. */
-        textColourId        = 0x1005410     /**< The colour to use to draw the text label. */
-    };
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void enablementChanged();
-    /** @internal */
-    void colourChanged();
-
-private:
-    String text;
-    Justification justification;
-
-    GroupComponent (const GroupComponent&);
-    const GroupComponent& operator= (const GroupComponent&);
-};
-
-#endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_GroupComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FilenameComponent.h *********/
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-#define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-
-class FilenameComponent;
-
-/**
-    Listens for events happening to a FilenameComponent.
-
-    Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
-    register one of these objects for event callbacks when the filename is changed.
-
-    @See FilenameComponent
-*/
-class JUCE_API  FilenameComponentListener
-{
-public:
-    /** Destructor. */
-    virtual ~FilenameComponentListener() {}
-
-    /** This method is called after the FilenameComponent's file has been changed. */
-    virtual void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged) = 0;
-};
-
-/**
-    Shows a filename as an editable text box, with a 'browse' button and a
-    drop-down list for recently selected files.
-
-    A handy component for dialogue boxes where you want the user to be able to
-    select a file or directory.
-
-    Attach an FilenameComponentListener using the addListener() method, and it will
-    get called each time the user changes the filename, either by browsing for a file
-    and clicking 'ok', or by typing a new filename into the box and pressing return.
-
-    @see FileChooser, ComboBox
-*/
-class JUCE_API  FilenameComponent  : public Component,
-                                     public SettableTooltipClient,
-                                     public FileDragAndDropTarget,
-                                     private AsyncUpdater,
-                                     private ButtonListener,
-                                     private ComboBoxListener
-{
-public:
-
-    /** Creates a FilenameComponent.
-
-        @param name             the name for this component.
-        @param currentFile      the file to initially show in the box
-        @param canEditFilename  if true, the user can manually edit the filename; if false,
-                                they can only change it by browsing for a new file
-        @param isDirectory      if true, the file will be treated as a directory, and
-                                an appropriate directory browser used
-        @param isForSaving      if true, the file browser will allow non-existent files to
-                                be picked, as the file is assumed to be used for saving rather
-                                than loading
-        @param fileBrowserWildcard  a wildcard pattern to use in the file browser - e.g. "*.txt;*.foo".
-                                If an empty string is passed in, then the pattern is assumed to be "*"
-        @param enforcedSuffix   if this is non-empty, it is treated as a suffix that will be added
-                                to any filenames that are entered or chosen
-        @param textWhenNothingSelected  the message to display in the box before any filename is entered. (This
-                                will only appear if the initial file isn't valid)
-    */
-    FilenameComponent (const String& name,
-                       const File& currentFile,
-                       const bool canEditFilename,
-                       const bool isDirectory,
-                       const bool isForSaving,
-                       const String& fileBrowserWildcard,
-                       const String& enforcedSuffix,
-                       const String& textWhenNothingSelected);
-
-    /** Destructor. */
-    ~FilenameComponent();
-
-    /** Returns the currently displayed filename. */
-    const File getCurrentFile() const;
-
-    /** Changes the current filename.
-
-        If addToRecentlyUsedList is true, the filename will also be added to the
-        drop-down list of recent files.
-
-        If sendChangeNotification is false, then the listeners won't be told of the
-        change.
-    */
-    void setCurrentFile (File newFile,
-                         const bool addToRecentlyUsedList,
-                         const bool sendChangeNotification = true);
-
-    /** Changes whether the use can type into the filename box.
-    */
-    void setFilenameIsEditable (const bool shouldBeEditable);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** Returns all the entries on the recent files list.
-
-        This can be used in conjunction with setRecentlyUsedFilenames() for saving the
-        state of this list.
-
-        @see setRecentlyUsedFilenames
-    */
-    const StringArray getRecentlyUsedFilenames() const;
-
-    /** Sets all the entries on the recent files list.
-
-        This can be used in conjunction with getRecentlyUsedFilenames() for saving the
-        state of this list.
-
-        @see getRecentlyUsedFilenames, addRecentlyUsedFile
-    */
-    void setRecentlyUsedFilenames (const StringArray& filenames);
-
-    /** Adds an entry to the recently-used files dropdown list.
-
-        If the file is already in the list, it will be moved to the top. A limit
-        is also placed on the number of items that are kept in the list.
-
-        @see getRecentlyUsedFilenames, setRecentlyUsedFilenames, setMaxNumberOfRecentFiles
-    */
-    void addRecentlyUsedFile (const File& file);
-
-    /** Changes the limit for the number of files that will be stored in the recent-file list.
-    */
-    void setMaxNumberOfRecentFiles (const int newMaximum);
-
-    /** Changes the text shown on the 'browse' button.
-
-        By default this button just says "..." but you can change it. The button itself
-        can be changed using the look-and-feel classes, so it might not actually have any
-        text on it.
-    */
-    void setBrowseButtonText (const String& browseButtonText);
-
-    /** Adds a listener that will be called when the selected file is changed. */
-    void addListener (FilenameComponentListener* const listener) throw();
-
-    /** Removes a previously-registered listener. */
-    void removeListener (FilenameComponentListener* const listener) throw();
-
-    /** Gives the component a tooltip. */
-    void setTooltip (const String& newTooltip);
-
-    /** @internal */
-    void paintOverChildren (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void lookAndFeelChanged();
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void fileDragEnter (const StringArray& files, int, int);
-    /** @internal */
-    void fileDragExit (const StringArray& files);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    ComboBox* filenameBox;
-    String lastFilename;
-    Button* browseButton;
-    int maxRecentFiles;
-    bool isDir, isSaving, isFileDragOver;
-    String wildcard, enforcedSuffix, browseButtonText;
-    SortedSet <void*> listeners;
-    File defaultBrowseFile;
-
-    void comboBoxChanged (ComboBox*);
-    void buttonClicked (Button* button);
-    void handleAsyncUpdate();
-
-    FilenameComponent (const FilenameComponent&);
-    const FilenameComponent& operator= (const FilenameComponent&);
-};
-
-#endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilenameComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FilePreviewComponent.h *********/
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    Base class for components that live inside a file chooser dialog box and
-    show previews of the files that get selected.
-
-    One of these allows special extra information to be displayed for files
-    in a dialog box as the user selects them. Each time the current file or
-    directory is changed, the selectedFileChanged() method will be called
-    to allow it to update itself appropriately.
-
-    @see FileChooser, ImagePreviewComponent
-*/
-class JUCE_API  FilePreviewComponent  : public Component
-{
-public:
-
-    /** Creates a FilePreviewComponent. */
-    FilePreviewComponent();
-
-    /** Destructor. */
-    ~FilePreviewComponent();
-
-    /** Called to indicate that the user's currently selected file has changed.
-
-        @param newSelectedFile  the newly selected file or directory, which may be
-                                File::nonexistent if none is selected.
-    */
-    virtual void selectedFileChanged (const File& newSelectedFile) = 0;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    FilePreviewComponent (const FilePreviewComponent&);
-    const FilePreviewComponent& operator= (const FilePreviewComponent&);
-};
-
-#endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilePreviewComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/**
-    Shows a set of file paths in a list, allowing them to be added, removed or
-    re-ordered.
-
-    @see FileSearchPath
-*/
-class JUCE_API  FileSearchPathListComponent  : public Component,
-                                               public SettableTooltipClient,
-                                               public FileDragAndDropTarget,
-                                               private ButtonListener,
-                                               private ListBoxModel
-{
-public:
-
-    /** Creates an empty FileSearchPathListComponent.
-
-    */
-    FileSearchPathListComponent();
-
-    /** Destructor. */
-    ~FileSearchPathListComponent();
-
-    /** Returns the path as it is currently shown. */
-    const FileSearchPath& getPath() const throw()                   { return path; }
-
-    /** Changes the current path. */
-    void setPath (const FileSearchPath& newPath);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
-                                                  Make this transparent if you don't want the background to be filled. */
-    };
-
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
-    /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
-    /** @internal */
-    void returnKeyPressed (int lastRowSelected);
-    /** @internal */
-    void listBoxItemDoubleClicked (int row, const MouseEvent&);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void buttonClicked (Button* button);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    FileSearchPath path;
-    File defaultBrowseTarget;
-
-    ListBox* listBox;
-    Button* addButton;
-    Button* removeButton;
-    Button* changeButton;
-    Button* upButton;
-    Button* downButton;
-
-    void changed() throw();
-    void updateButtons() throw();
-
-    FileSearchPathListComponent (const FileSearchPathListComponent&);
-    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
-};
-
-#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
@@ -49896,170 +49722,6 @@ protected:
 #endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
 
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
-
-#endif
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_WildcardFileFilter.h *********/
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/**
-    A type of FileFilter that works by wildcard pattern matching.
-
-    This filter only allows files that match one of the specified patterns, but
-    allows all directories through.
-
-    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
-*/
-class JUCE_API  WildcardFileFilter  : public FileFilter
-{
-public:
-
-    /**
-        Creates a wildcard filter for one or more patterns.
-
-        The wildcardPatterns parameter is a comma or semicolon-delimited set of
-        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
-        or .aiff.
-
-        The description is a name to show the user in a list of possible patterns, so
-        for the wav/aiff example, your description might be "audio files".
-    */
-    WildcardFileFilter (const String& wildcardPatterns,
-                        const String& description);
-
-    /** Destructor. */
-    ~WildcardFileFilter();
-
-    /** Returns true if the filename matches one of the patterns specified. */
-    bool isFileSuitable (const File& file) const;
-
-    /** This always returns true. */
-    bool isDirectorySuitable (const File& file) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    StringArray wildcards;
-};
-
-#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-/********* End of inlined file: juce_WildcardFileFilter.h *********/
-
-#endif
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    A simple preview component that shows thumbnails of image files.
-
-    @see FileChooserDialogBox, FilePreviewComponent
-*/
-class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
-                                         private Timer
-{
-public:
-
-    /** Creates an ImagePreviewComponent. */
-    ImagePreviewComponent();
-
-    /** Destructor. */
-    ~ImagePreviewComponent();
-
-    /** @internal */
-    void selectedFileChanged (const File& newSelectedFile);
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    File fileToLoad;
-    Image* currentThumbnail;
-    String currentDetails;
-
-    void getThumbSize (int& w, int& h) const;
-
-    ImagePreviewComponent (const ImagePreviewComponent&);
-    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
-};
-
-#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ImagePreviewComponent.h *********/
-
-#endif
-#ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
-
 #endif
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 
@@ -50069,6 +49731,48 @@ private:
 /********* Start of inlined file: juce_FileBrowserComponent.h *********/
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FilePreviewComponent.h *********/
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    Base class for components that live inside a file chooser dialog box and
+    show previews of the files that get selected.
+
+    One of these allows special extra information to be displayed for files
+    in a dialog box as the user selects them. Each time the current file or
+    directory is changed, the selectedFileChanged() method will be called
+    to allow it to update itself appropriately.
+
+    @see FileChooser, ImagePreviewComponent
+*/
+class JUCE_API  FilePreviewComponent  : public Component
+{
+public:
+
+    /** Creates a FilePreviewComponent. */
+    FilePreviewComponent();
+
+    /** Destructor. */
+    ~FilePreviewComponent();
+
+    /** Called to indicate that the user's currently selected file has changed.
+
+        @param newSelectedFile  the newly selected file or directory, which may be
+                                File::nonexistent if none is selected.
+    */
+    virtual void selectedFileChanged (const File& newSelectedFile) = 0;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    FilePreviewComponent (const FilePreviewComponent&);
+    const FilePreviewComponent& operator= (const FilePreviewComponent&);
+};
+
+#endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FilePreviewComponent.h *********/
 
 /**
     A component for browsing and selecting a file or directory to open or save.
@@ -50593,6 +50297,469 @@ private:
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FilenameComponent.h *********/
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+#define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+
+class FilenameComponent;
+
+/**
+    Listens for events happening to a FilenameComponent.
+
+    Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
+    register one of these objects for event callbacks when the filename is changed.
+
+    @See FilenameComponent
+*/
+class JUCE_API  FilenameComponentListener
+{
+public:
+    /** Destructor. */
+    virtual ~FilenameComponentListener() {}
+
+    /** This method is called after the FilenameComponent's file has been changed. */
+    virtual void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged) = 0;
+};
+
+/**
+    Shows a filename as an editable text box, with a 'browse' button and a
+    drop-down list for recently selected files.
+
+    A handy component for dialogue boxes where you want the user to be able to
+    select a file or directory.
+
+    Attach an FilenameComponentListener using the addListener() method, and it will
+    get called each time the user changes the filename, either by browsing for a file
+    and clicking 'ok', or by typing a new filename into the box and pressing return.
+
+    @see FileChooser, ComboBox
+*/
+class JUCE_API  FilenameComponent  : public Component,
+                                     public SettableTooltipClient,
+                                     public FileDragAndDropTarget,
+                                     private AsyncUpdater,
+                                     private ButtonListener,
+                                     private ComboBoxListener
+{
+public:
+
+    /** Creates a FilenameComponent.
+
+        @param name             the name for this component.
+        @param currentFile      the file to initially show in the box
+        @param canEditFilename  if true, the user can manually edit the filename; if false,
+                                they can only change it by browsing for a new file
+        @param isDirectory      if true, the file will be treated as a directory, and
+                                an appropriate directory browser used
+        @param isForSaving      if true, the file browser will allow non-existent files to
+                                be picked, as the file is assumed to be used for saving rather
+                                than loading
+        @param fileBrowserWildcard  a wildcard pattern to use in the file browser - e.g. "*.txt;*.foo".
+                                If an empty string is passed in, then the pattern is assumed to be "*"
+        @param enforcedSuffix   if this is non-empty, it is treated as a suffix that will be added
+                                to any filenames that are entered or chosen
+        @param textWhenNothingSelected  the message to display in the box before any filename is entered. (This
+                                will only appear if the initial file isn't valid)
+    */
+    FilenameComponent (const String& name,
+                       const File& currentFile,
+                       const bool canEditFilename,
+                       const bool isDirectory,
+                       const bool isForSaving,
+                       const String& fileBrowserWildcard,
+                       const String& enforcedSuffix,
+                       const String& textWhenNothingSelected);
+
+    /** Destructor. */
+    ~FilenameComponent();
+
+    /** Returns the currently displayed filename. */
+    const File getCurrentFile() const;
+
+    /** Changes the current filename.
+
+        If addToRecentlyUsedList is true, the filename will also be added to the
+        drop-down list of recent files.
+
+        If sendChangeNotification is false, then the listeners won't be told of the
+        change.
+    */
+    void setCurrentFile (File newFile,
+                         const bool addToRecentlyUsedList,
+                         const bool sendChangeNotification = true);
+
+    /** Changes whether the use can type into the filename box.
+    */
+    void setFilenameIsEditable (const bool shouldBeEditable);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** Returns all the entries on the recent files list.
+
+        This can be used in conjunction with setRecentlyUsedFilenames() for saving the
+        state of this list.
+
+        @see setRecentlyUsedFilenames
+    */
+    const StringArray getRecentlyUsedFilenames() const;
+
+    /** Sets all the entries on the recent files list.
+
+        This can be used in conjunction with getRecentlyUsedFilenames() for saving the
+        state of this list.
+
+        @see getRecentlyUsedFilenames, addRecentlyUsedFile
+    */
+    void setRecentlyUsedFilenames (const StringArray& filenames);
+
+    /** Adds an entry to the recently-used files dropdown list.
+
+        If the file is already in the list, it will be moved to the top. A limit
+        is also placed on the number of items that are kept in the list.
+
+        @see getRecentlyUsedFilenames, setRecentlyUsedFilenames, setMaxNumberOfRecentFiles
+    */
+    void addRecentlyUsedFile (const File& file);
+
+    /** Changes the limit for the number of files that will be stored in the recent-file list.
+    */
+    void setMaxNumberOfRecentFiles (const int newMaximum);
+
+    /** Changes the text shown on the 'browse' button.
+
+        By default this button just says "..." but you can change it. The button itself
+        can be changed using the look-and-feel classes, so it might not actually have any
+        text on it.
+    */
+    void setBrowseButtonText (const String& browseButtonText);
+
+    /** Adds a listener that will be called when the selected file is changed. */
+    void addListener (FilenameComponentListener* const listener) throw();
+
+    /** Removes a previously-registered listener. */
+    void removeListener (FilenameComponentListener* const listener) throw();
+
+    /** Gives the component a tooltip. */
+    void setTooltip (const String& newTooltip);
+
+    /** @internal */
+    void paintOverChildren (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void lookAndFeelChanged();
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragEnter (const StringArray& files, int, int);
+    /** @internal */
+    void fileDragExit (const StringArray& files);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    ComboBox* filenameBox;
+    String lastFilename;
+    Button* browseButton;
+    int maxRecentFiles;
+    bool isDir, isSaving, isFileDragOver;
+    String wildcard, enforcedSuffix, browseButtonText;
+    SortedSet <void*> listeners;
+    File defaultBrowseFile;
+
+    void comboBoxChanged (ComboBox*);
+    void buttonClicked (Button* button);
+    void handleAsyncUpdate();
+
+    FilenameComponent (const FilenameComponent&);
+    const FilenameComponent& operator= (const FilenameComponent&);
+};
+
+#endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FilenameComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/**
+    Shows a set of file paths in a list, allowing them to be added, removed or
+    re-ordered.
+
+    @see FileSearchPath
+*/
+class JUCE_API  FileSearchPathListComponent  : public Component,
+                                               public SettableTooltipClient,
+                                               public FileDragAndDropTarget,
+                                               private ButtonListener,
+                                               private ListBoxModel
+{
+public:
+
+    /** Creates an empty FileSearchPathListComponent.
+
+    */
+    FileSearchPathListComponent();
+
+    /** Destructor. */
+    ~FileSearchPathListComponent();
+
+    /** Returns the path as it is currently shown. */
+    const FileSearchPath& getPath() const throw()                   { return path; }
+
+    /** Changes the current path. */
+    void setPath (const FileSearchPath& newPath);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** A set of colour IDs to use to change the colour of various aspects of the label.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
+                                                  Make this transparent if you don't want the background to be filled. */
+    };
+
+    /** @internal */
+    int getNumRows();
+    /** @internal */
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
+    /** @internal */
+    void deleteKeyPressed (int lastRowSelected);
+    /** @internal */
+    void returnKeyPressed (int lastRowSelected);
+    /** @internal */
+    void listBoxItemDoubleClicked (int row, const MouseEvent&);
+    /** @internal */
+    void selectedRowsChanged (int lastRowSelected);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void buttonClicked (Button* button);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    FileSearchPath path;
+    File defaultBrowseTarget;
+
+    ListBox* listBox;
+    Button* addButton;
+    Button* removeButton;
+    Button* changeButton;
+    Button* upButton;
+    Button* downButton;
+
+    void changed() throw();
+    void updateButtons() throw();
+
+    FileSearchPathListComponent (const FileSearchPathListComponent&);
+    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+};
+
+#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
+
+#endif
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    A simple preview component that shows thumbnails of image files.
+
+    @see FileChooserDialogBox, FilePreviewComponent
+*/
+class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
+                                         private Timer
+{
+public:
+
+    /** Creates an ImagePreviewComponent. */
+    ImagePreviewComponent();
+
+    /** Destructor. */
+    ~ImagePreviewComponent();
+
+    /** @internal */
+    void selectedFileChanged (const File& newSelectedFile);
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    File fileToLoad;
+    Image* currentThumbnail;
+    String currentDetails;
+
+    void getThumbSize (int& w, int& h) const;
+
+    ImagePreviewComponent (const ImagePreviewComponent&);
+    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+};
+
+#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ImagePreviewComponent.h *********/
+
+#endif
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_WildcardFileFilter.h *********/
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/**
+    A type of FileFilter that works by wildcard pattern matching.
+
+    This filter only allows files that match one of the specified patterns, but
+    allows all directories through.
+
+    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
+*/
+class JUCE_API  WildcardFileFilter  : public FileFilter
+{
+public:
+
+    /**
+        Creates a wildcard filter for one or more patterns.
+
+        The wildcardPatterns parameter is a comma or semicolon-delimited set of
+        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
+        or .aiff.
+
+        The description is a name to show the user in a list of possible patterns, so
+        for the wav/aiff example, your description might be "audio files".
+    */
+    WildcardFileFilter (const String& wildcardPatterns,
+                        const String& description);
+
+    /** Destructor. */
+    ~WildcardFileFilter();
+
+    /** Returns true if the filename matches one of the patterns specified. */
+    bool isFileSuitable (const File& file) const;
+
+    /** This always returns true. */
+    bool isDirectorySuitable (const File& file) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    StringArray wildcards;
+};
+
+#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+/********* End of inlined file: juce_WildcardFileFilter.h *********/
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -51174,9 +51341,6 @@ private:
 /********* End of inlined file: juce_SplashScreen.h *********/
 
 #endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
@@ -51309,164 +51473,10 @@ private:
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
 
 #endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-#if JUCE_WIN32 || JUCE_LINUX
-
-/**
-    On Windows only, this component sits in the taskbar tray as a small icon.
-
-    To use it, just create one of these components, but don't attempt to make it
-    visible, add it to a parent, or put it on the desktop.
-
-    You can then call setIconImage() to create an icon for it in the taskbar.
-
-    To change the icon's tooltip, you can use setIconTooltip().
-
-    To respond to mouse-events, you can override the normal mouseDown(),
-    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
-    position will not be valid, you can use this to respond to clicks. Traditionally
-    you'd use a left-click to show your application's window, and a right-click
-    to show a pop-up menu.
-*/
-class JUCE_API  SystemTrayIconComponent  : public Component
-{
-public:
-
-    SystemTrayIconComponent();
-
-    /** Destructor. */
-    ~SystemTrayIconComponent();
-
-    /** Changes the image shown in the taskbar.
-    */
-    void setIconImage (const Image& newImage);
-
-    /** Changes the tooltip that Windows shows above the icon. */
-    void setIconTooltip (const String& tooltip);
-
-#if JUCE_LINUX
-    /** @internal */
-    void paint (Graphics& g);
-#endif
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
-};
-
-#endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
-
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WebBrowserComponent.h *********/
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-#if JUCE_WEB_BROWSER
-
-class WebBrowserComponentInternal;
-
-/**
-    A component that displays an embedded web browser.
-
-    The browser itself will be platform-dependent. On the Mac, probably Safari, on
-    Windows, probably IE.
-
-*/
-class WebBrowserComponent      : public Component
-{
-public:
-
-    /** Creates a WebBrowserComponent.
-
-        Once it's created and visible, send the browser to a URL using goToURL().
-    */
-    WebBrowserComponent();
-
-    /** Destructor. */
-    ~WebBrowserComponent();
-
-    /** Sends the browser to a particular URL.
-
-        @param url      the URL to go to.
-        @param headers  an optional set of parameters to put in the HTTP header. If
-                        you supply this, it should be a set of string in the form
-                        "HeaderKey: HeaderValue"
-        @param postData an optional block of data that will be attached to the HTTP
-                        POST request
-    */
-    void goToURL (const String& url,
-                  const StringArray* headers = 0,
-                  const MemoryBlock* postData = 0);
-
-    /** Stops the current page loading.
-    */
-    void stop();
-
-    /** Sends the browser back one page.
-    */
-    void goBack();
-
-    /** Sends the browser forward one page.
-    */
-    void goForward();
-
-    /** Refreshes the browser.
-    */
-    void refresh();
-
-    /** This callback is called when the browser is about to navigate
-        to a new location.
-
-        You can override this method to perform some action when the user
-        tries to go to a particular URL. To allow the operation to carry on,
-        return true, or return false to stop the navigation happening.
-    */
-    virtual bool pageAboutToLoad (const String& newURL);
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void parentHierarchyChanged();
-    /** @internal */
-    void visibilityChanged();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    WebBrowserComponentInternal* browser;
-    bool blankPageShown;
-
-    String lastURL;
-    StringArray lastHeaders;
-    MemoryBlock lastPostData;
-
-    void reloadLastURL();
-    void checkWindowAssociation();
-
-    WebBrowserComponent (const WebBrowserComponent&);
-    const WebBrowserComponent& operator= (const WebBrowserComponent&);
-};
-
-#endif
-#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_WebBrowserComponent.h *********/
 
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
@@ -53191,6 +53201,163 @@ private:
 #endif
 #endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_QuickTimeMovieComponent.h *********/
+
+#endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+#if JUCE_WIN32 || JUCE_LINUX
+
+/**
+    On Windows only, this component sits in the taskbar tray as a small icon.
+
+    To use it, just create one of these components, but don't attempt to make it
+    visible, add it to a parent, or put it on the desktop.
+
+    You can then call setIconImage() to create an icon for it in the taskbar.
+
+    To change the icon's tooltip, you can use setIconTooltip().
+
+    To respond to mouse-events, you can override the normal mouseDown(),
+    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
+    position will not be valid, you can use this to respond to clicks. Traditionally
+    you'd use a left-click to show your application's window, and a right-click
+    to show a pop-up menu.
+*/
+class JUCE_API  SystemTrayIconComponent  : public Component
+{
+public:
+
+    SystemTrayIconComponent();
+
+    /** Destructor. */
+    ~SystemTrayIconComponent();
+
+    /** Changes the image shown in the taskbar.
+    */
+    void setIconImage (const Image& newImage);
+
+    /** Changes the tooltip that Windows shows above the icon. */
+    void setIconTooltip (const String& tooltip);
+
+#if JUCE_LINUX
+    /** @internal */
+    void paint (Graphics& g);
+#endif
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    SystemTrayIconComponent (const SystemTrayIconComponent&);
+    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+};
+
+#endif
+#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
+
+#endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WebBrowserComponent.h *********/
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+#if JUCE_WEB_BROWSER
+
+class WebBrowserComponentInternal;
+
+/**
+    A component that displays an embedded web browser.
+
+    The browser itself will be platform-dependent. On the Mac, probably Safari, on
+    Windows, probably IE.
+
+*/
+class WebBrowserComponent      : public Component
+{
+public:
+
+    /** Creates a WebBrowserComponent.
+
+        Once it's created and visible, send the browser to a URL using goToURL().
+    */
+    WebBrowserComponent();
+
+    /** Destructor. */
+    ~WebBrowserComponent();
+
+    /** Sends the browser to a particular URL.
+
+        @param url      the URL to go to.
+        @param headers  an optional set of parameters to put in the HTTP header. If
+                        you supply this, it should be a set of string in the form
+                        "HeaderKey: HeaderValue"
+        @param postData an optional block of data that will be attached to the HTTP
+                        POST request
+    */
+    void goToURL (const String& url,
+                  const StringArray* headers = 0,
+                  const MemoryBlock* postData = 0);
+
+    /** Stops the current page loading.
+    */
+    void stop();
+
+    /** Sends the browser back one page.
+    */
+    void goBack();
+
+    /** Sends the browser forward one page.
+    */
+    void goForward();
+
+    /** Refreshes the browser.
+    */
+    void refresh();
+
+    /** This callback is called when the browser is about to navigate
+        to a new location.
+
+        You can override this method to perform some action when the user
+        tries to go to a particular URL. To allow the operation to carry on,
+        return true, or return false to stop the navigation happening.
+    */
+    virtual bool pageAboutToLoad (const String& newURL);
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void parentHierarchyChanged();
+    /** @internal */
+    void visibilityChanged();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    WebBrowserComponentInternal* browser;
+    bool blankPageShown;
+
+    String lastURL;
+    StringArray lastHeaders;
+    MemoryBlock lastPostData;
+
+    void reloadLastURL();
+    void checkWindowAssociation();
+
+    WebBrowserComponent (const WebBrowserComponent&);
+    const WebBrowserComponent& operator= (const WebBrowserComponent&);
+};
+
+#endif
+#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_WebBrowserComponent.h *********/
 
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__

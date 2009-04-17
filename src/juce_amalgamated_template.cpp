@@ -82,6 +82,7 @@
 #include "juce_core/containers/juce_BitArray.cpp"
 #include "juce_core/containers/juce_MemoryBlock.cpp"
 #include "juce_core/containers/juce_PropertySet.cpp"
+#include "juce_core/containers/juce_Variant.cpp"
 #include "juce_core/cryptography/juce_BlowFish.cpp"
 #include "juce_core/cryptography/juce_MD5.cpp"
 #include "juce_core/cryptography/juce_Primes.cpp"

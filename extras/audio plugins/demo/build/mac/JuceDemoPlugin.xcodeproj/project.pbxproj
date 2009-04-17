@@ -105,7 +105,7 @@
 		843792A50EFBF14B002A2725 /* DemoJuceFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoJuceFilter.h; path = ../../src/DemoJuceFilter.h; sourceTree = SOURCE_ROOT; };
 		843792A60EFBF14B002A2725 /* includes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = includes.h; path = ../../src/includes.h; sourceTree = SOURCE_ROOT; };
 		843792A70EFBF14B002A2725 /* juce_AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_AppConfig.h; path = ../../src/juce_AppConfig.h; sourceTree = SOURCE_ROOT; };
-		843792A80EFBF14B002A2725 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
+		843792A80EFBF14B002A2725 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
 		843792A90EFBF14B002A2725 /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
 		843792B30EFBF175002A2725 /* juce_AU_Resources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = juce_AU_Resources.r; path = ../../../wrapper/AU/juce_AU_Resources.r; sourceTree = SOURCE_ROOT; };
 		843792B40EFBF175002A2725 /* juce_AU_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_AU_Wrapper.mm; path = ../../../wrapper/AU/juce_AU_Wrapper.mm; sourceTree = SOURCE_ROOT; };
@@ -138,8 +138,8 @@
 		843796D90EFBFD16002A2725 /* juce_RTAS_MacResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = juce_RTAS_MacResources.r; path = ../../../wrapper/RTAS/juce_RTAS_MacResources.r; sourceTree = SOURCE_ROOT; };
 		843796DA0EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_RTAS_MacUtilities.mm; path = ../../../wrapper/RTAS/juce_RTAS_MacUtilities.mm; sourceTree = SOURCE_ROOT; };
 		843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RTAS_Wrapper.cpp; path = ../../../wrapper/RTAS/juce_RTAS_Wrapper.cpp; sourceTree = SOURCE_ROOT; };
-		843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonDebugSettings.xcconfig; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonDebugSettings.xcconfig; sourceTree = "<absolute>"; };
-		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
+		843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonDebugSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonDebugSettings.xcconfig; sourceTree = "<absolute>"; };
+		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
 		8BA05A7F072073D200365D66 /* AUBase.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AUBase.cpp; sourceTree = "<group>"; };
 		8BA05A80072073D200365D66 /* AUBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AUBase.h; sourceTree = "<group>"; };
@@ -581,10 +581,11 @@
 			buildSettings = {
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					/Developer/Headers/FlatCarbon,
-					"~/stuff/vstsdk2.4",
+					"~/SDKs/vstsdk2.4",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PlugInLibrary/**\"",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/DSPManager/**\"",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption\"",
@@ -608,7 +609,6 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
 				LIBRARY_STYLE = Bundle;
-				MacBag = /Users/jules/stuff/PT_73_SDK/MacBag;
 				OTHER_LDFLAGS = "-bundle";
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Examples/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_NAME = JuceDemoPlugin;
@@ -629,7 +629,7 @@
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					/Developer/Headers/FlatCarbon,
-					"~/stuff/vstsdk2.4",
+					"~/SDKs/vstsdk2.4",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PlugInLibrary/**\"",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/DSPManager/**\"",
 					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption\"",
@@ -670,7 +670,6 @@
 			baseConfigurationReference = 843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx10.5;
 			};
