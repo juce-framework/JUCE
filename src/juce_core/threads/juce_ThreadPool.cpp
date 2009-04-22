@@ -119,7 +119,7 @@ ThreadPool::ThreadPool (const int numThreads_,
         threads[i] = new ThreadPoolThread (*this);
 
         if (! startThreadsOnlyWhenNeeded)
-            threads[i]->startThread();
+            threads[i]->startThread (priority);
     }
 }
 
@@ -171,7 +171,7 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
                 {
                     if (! threads[i]->isThreadRunning())
                     {
-                        threads[i]->startThread();
+                        threads[i]->startThread (priority);
                         startedOne = true;
                     }
                 }
