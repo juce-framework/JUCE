@@ -92,6 +92,59 @@ static LRESULT CALLBACK juce_MessageWndProc (HWND h,
     return DefWindowProc (h, message, wParam, lParam);
 }
 
+static bool isEventBlockedByModalComps (MSG& m)
+{
+    if (Component::getNumCurrentlyModalComponents() == 0
+         || GetWindowLong (m.hwnd, GWLP_USERDATA) == improbableWindowNumber)
+        return false;
+
+    switch (m.message)
+    {
+        case WM_MOUSEMOVE:
+        case WM_NCMOUSEMOVE:
+        case 0x020A: /* WM_MOUSEWHEEL */
+        case 0x020E: /* WM_MOUSEHWHEEL */
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+        case WM_CHAR:
+        case WM_APPCOMMAND:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
+        case WM_MOUSEACTIVATE:
+        case WM_NCMOUSEHOVER:
+        case WM_MOUSEHOVER:
+            return true;
+
+        case WM_NCLBUTTONDOWN:
+        case WM_NCLBUTTONDBLCLK:
+        case WM_NCRBUTTONDOWN:
+        case WM_NCRBUTTONDBLCLK:
+        case WM_NCMBUTTONDOWN:
+        case WM_NCMBUTTONDBLCLK:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONDBLCLK:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONDBLCLK:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONDBLCLK:
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+        {
+            Component* const modal = Component::getCurrentlyModalComponent (0);
+            if (modal != 0)
+                modal->inputAttemptWhenModal();
+
+            return true;
+        }
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
 bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages)
 {
     MSG m;
@@ -106,7 +159,7 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
         {
             MessageManager::getInstance()->deliverMessage ((void*) m.lParam);
         }
-        else
+        else if (! isEventBlockedByModalComps (m))
         {
             if (GetWindowLong (m.hwnd, GWLP_USERDATA) != improbableWindowNumber
                  && (m.message == WM_LBUTTONDOWN || m.message == WM_RBUTTONDOWN))

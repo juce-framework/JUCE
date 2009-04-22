@@ -663,7 +663,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
     {
         const double callbackStartTime = Time::getMillisecondCounterHiRes();
 
-        tempBuffer.setSize (numOutputChannels, numSamples, false, false, true);
+        tempBuffer.setSize (jmax (1, numOutputChannels), jmax (1, numSamples), false, false, true);
 
         callbacks.getUnchecked(0)->audioDeviceIOCallback (inputChannelData, numInputChannels,
                                                           outputChannelData, numOutputChannels, numSamples);

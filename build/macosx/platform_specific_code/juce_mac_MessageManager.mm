@@ -271,6 +271,45 @@ void MessageManager::stopDispatchLoop()
     [NSApp stop: nil];
 }
 
+static bool isEventBlockedByModalComps (NSEvent* e)
+{
+    if (Component::getNumCurrentlyModalComponents() == 0)
+        return false;
+
+    [[NSApp mainMenu] update];
+    NSWindow* const w = [e window];
+    if (w == 0 || [w worksWhenModal])
+        return false;
+
+    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+    {
+        ComponentPeer* const peer = ComponentPeer::getPeer (i);
+        NSView* const compView = (NSView*) peer->getNativeHandle();
+
+        if ([compView window] == w 
+             && (NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil],
+                                [compView bounds])
+                  || peer->getComponent()->isMouseButtonDown()))
+        {
+            return false;
+        }
+    }
+
+    if ([e type] == NSLeftMouseDown
+         || [e type] == NSRightMouseDown
+         || [e type] == NSOtherMouseDown)
+    {
+        if (! [NSApp isActive])
+            [NSApp activateIgnoringOtherApps: YES];
+
+        Component* const modal = Component::getCurrentlyModalComponent (0);
+        if (modal != 0)
+            modal->inputAttemptWhenModal();
+    }
+
+    return true;
+}
+
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
     const ScopedAutoReleasePool pool;
@@ -290,7 +329,9 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                                         untilDate: endDate
                                            inMode: NSDefaultRunLoopMode
                                           dequeue: YES];
-        [NSApp sendEvent: e];
+
+        if (! isEventBlockedByModalComps (e))
+            [NSApp sendEvent: e];
     }
 
     return ! quitMessagePosted;
@@ -324,8 +365,6 @@ void MessageManager::doPlatformSpecificShutdown()
         flushingMessages = true;
         getInstance()->runDispatchLoopUntil (10);
     }
-
-    jassert (numPendingMessages == 0); // failed to get all the pending messages cleared before quitting..
 
     [juceAppDelegate release];
     juceAppDelegate = 0;

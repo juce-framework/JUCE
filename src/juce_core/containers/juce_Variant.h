@@ -53,6 +53,9 @@ class JUCE_API  var
 {
 public:
     //==============================================================================
+    typedef const var (MethodFunction) (const var& thisObject, const var* arguments, int numArguments);
+
+    //==============================================================================
     /** Creates a void variant. */
     var() throw();
 
@@ -67,6 +70,7 @@ public:
     var (const juce_wchar* const value) throw();
     var (const String& value) throw();
     var (DynamicObject* const object) throw();
+    var (MethodFunction method) throw();
 
     const var& operator= (const var& valueToCopy) throw();
     const var& operator= (const int value) throw();
@@ -76,6 +80,7 @@ public:
     const var& operator= (const juce_wchar* const value) throw();
     const var& operator= (const String& value) throw();
     const var& operator= (DynamicObject* const object) throw();
+    const var& operator= (MethodFunction method) throw();
 
     operator int() const throw();
     operator bool() const throw();
@@ -89,6 +94,43 @@ public:
     bool isDouble() const throw()       { return type == doubleType; }
     bool isString() const throw()       { return type == stringType; }
     bool isObject() const throw()       { return type == objectType; }
+    bool isMethod() const throw()       { return type == methodType; }
+
+    //==============================================================================
+    class identifier
+    {
+    public:
+        identifier (const char* const name) throw();
+        identifier (const String& name) throw();
+        ~identifier() throw();
+
+        bool operator== (const identifier& other) const throw()   { return hashCode == other.hashCode; }
+
+        String name;
+        int hashCode;
+    };
+
+    /** If this variant is an object, this returns one of its properties. */
+    const var operator[] (const identifier& propertyName) const throw();
+
+    //==============================================================================
+    /** If this variant is an object, this invokes one of its methods with no arguments. */
+    const var call (const identifier& method) const;
+    /** If this variant is an object, this invokes one of its methods with one argument. */
+    const var call (const identifier& method, const var& arg1) const;
+    /** If this variant is an object, this invokes one of its methods with 2 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2) const;
+    /** If this variant is an object, this invokes one of its methods with 3 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
+    /** If this variant is an object, this invokes one of its methods with 4 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+
+    /** If this variant is an object, this invokes one of its methods with a list of arguments. */
+    const var invoke (const identifier& method, const var* arguments, int numArguments) const;
+
+    //==============================================================================
+    /** If this variant is a method pointer, this invokes it on a target object. */
+    const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -101,7 +143,8 @@ private:
         boolType,
         doubleType,
         stringType,
-        objectType
+        objectType,
+        methodType
     };
 
     Type type;
@@ -113,6 +156,7 @@ private:
         double doubleValue;
         String* stringValue;
         DynamicObject* objectValue;
+        MethodFunction* methodValue;
     } value;
 
     void releaseValue() throw();
@@ -138,35 +182,23 @@ public:
     virtual ~DynamicObject();
 
     //==============================================================================
-    virtual bool hasProperty (const String& propertyName) const;
-    virtual const var getProperty (const String& propertyName) const;
-    virtual void setProperty (const String& propertyName, const var& newValue);
-    virtual void removeProperty (const String& propertyName);
+    virtual bool hasProperty (const var::identifier& propertyName) const;
+    virtual const var getProperty (const var::identifier& propertyName) const;
+    virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+    virtual void removeProperty (const var::identifier& propertyName);
 
     //==============================================================================
-    virtual bool hasMethod (const String& methodName) const;
+    virtual bool hasMethod (const var::identifier& methodName) const;
 
-    virtual const var invokeMethod (const String& methodName,
+    virtual const var invokeMethod (const var::identifier& methodName,
                                     const var* parameters,
                                     int numParameters);
-
-    //==============================================================================
-    /** Shortcut method for invoking a method with no arguments. */
-    const var invoke (const String& methodName);
-    /** Shortcut method for invoking a method with one argument. */
-    const var invoke (const String& methodName, const var& arg1);
-    /** Shortcut method for invoking a method with 2 arguments. */
-    const var invoke (const String& methodName, const var& arg1, const var& arg2);
-    /** Shortcut method for invoking a method with 3 arguments. */
-    const var invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3);
-    /** Shortcut method for invoking a method with 4 arguments. */
-    const var invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3, const var& arg4);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    StringArray propertyNames;
+    Array <int> propertyIds;
     OwnedArray <var> propertyValues;
 };
 

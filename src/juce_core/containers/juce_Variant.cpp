@@ -112,6 +112,12 @@ var::var (DynamicObject* const object) throw()
         object->incReferenceCount();
 }
 
+var::var (MethodFunction method_) throw()
+   : type (methodType)
+{
+    value.methodValue = method_;
+}
+
 //==============================================================================
 const var& var::operator= (const var& valueToCopy) throw()
 {
@@ -194,6 +200,14 @@ const var& var::operator= (DynamicObject* const value_) throw()
     return *this;
 }
 
+const var& var::operator= (MethodFunction method_) throw()
+{
+    releaseValue();
+    type = doubleType;
+    value.methodValue = method_;
+    return *this;
+}
+
 //==============================================================================
 var::operator int() const throw()
 {
@@ -266,6 +280,74 @@ DynamicObject* var::getObject() const throw()
     return type == objectType ? value.objectValue : 0;
 }
 
+const var var::operator[] (const var::identifier& propertyName) const throw()
+{
+    if (type == objectType && value.objectValue != 0)
+        return value.objectValue->getProperty (propertyName);
+
+    return var();
+}
+
+const var var::invoke (const var::identifier& method, const var* arguments, int numArguments) const
+{
+    if (type == objectType && value.objectValue != 0)
+        return value.objectValue->invokeMethod (method, arguments, numArguments);
+
+    return var();
+}
+
+const var var::invoke (const var& targetObject, const var* arguments, int numArguments) const
+{
+    if (isMethod())
+        return value.methodValue (targetObject, arguments, numArguments);
+
+    return var();
+}
+
+const var var::call (const var::identifier& method) const
+{
+    return invoke (method, 0, 0);
+}
+
+const var var::call (const var::identifier& method, const var& arg1) const
+{
+    return invoke (method, &arg1, 1);
+}
+
+const var var::call (const var::identifier& method, const var& arg1, const var& arg2) const
+{
+    var args[] = { arg1, arg2 };
+    return invoke (method, args, 2);
+}
+
+const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3)
+{
+    var args[] = { arg1, arg2, arg3 };
+    return invoke (method, args, 3);
+}
+
+const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+{
+    var args[] = { arg1, arg2, arg3, arg4 };
+    return invoke (method, args, 4);
+}
+
+//==============================================================================
+var::identifier::identifier (const String& name_) throw()
+    : name (name_),
+      hashCode (name_.hashCode())
+{
+}
+
+var::identifier::identifier (const char* const name_) throw()
+    : name (name_),
+      hashCode (name.hashCode())
+{
+}
+
+var::identifier::~identifier() throw()
+{
+}
 
 //==============================================================================
 //==============================================================================
@@ -277,23 +359,24 @@ DynamicObject::~DynamicObject()
 {
 }
 
-bool DynamicObject::hasProperty (const String& propertyName) const
+bool DynamicObject::hasProperty (const var::identifier& propertyName) const
 {
-    return propertyNames.contains (propertyName, false);
+    const int index = propertyIds.indexOf (propertyName.hashCode);
+    return index >= 0 && ! propertyValues.getUnchecked (index)->isMethod();
 }
 
-const var DynamicObject::getProperty (const String& propertyName) const
+const var DynamicObject::getProperty (const var::identifier& propertyName) const
 {
-    const int index = propertyNames.indexOf (propertyName, false);
+    const int index = propertyIds.indexOf (propertyName.hashCode);
     if (index >= 0)
         return *propertyValues.getUnchecked (index);
 
     return var();
 }
 
-void DynamicObject::setProperty (const String& propertyName, const var& newValue)
+void DynamicObject::setProperty (const var::identifier& propertyName, const var& newValue)
 {
-    const int index = propertyNames.indexOf (propertyName, false);
+    const int index = propertyIds.indexOf (propertyName.hashCode);
 
     if (index >= 0)
     {
@@ -301,60 +384,32 @@ void DynamicObject::setProperty (const String& propertyName, const var& newValue
     }
     else
     {
-        propertyNames.add (propertyName);
+        propertyIds.add (propertyName.hashCode);
         propertyValues.add (new var (newValue));
     }
 }
 
-void DynamicObject::removeProperty (const String& propertyName)
+void DynamicObject::removeProperty (const var::identifier& propertyName)
 {
-    const int index = propertyNames.indexOf (propertyName, false);
+    const int index = propertyIds.indexOf (propertyName.hashCode);
 
     if (index >= 0)
     {
-        propertyNames.remove (index);
+        propertyIds.remove (index);
         propertyValues.remove (index);
     }
 }
 
-bool DynamicObject::hasMethod (const String& methodName) const
+bool DynamicObject::hasMethod (const var::identifier& methodName) const
 {
-    return false;
+    return getProperty (methodName).isMethod();
 }
 
-const var DynamicObject::invokeMethod (const String& methodName,
+const var DynamicObject::invokeMethod (const var::identifier& methodName,
                                        const var* parameters,
                                        int numParameters)
 {
-    return var();
-}
-
-const var DynamicObject::invoke (const String& methodName)
-{
-    return invokeMethod (methodName, 0, 0);
-}
-
-const var DynamicObject::invoke (const String& methodName, const var& arg1)
-{
-    return invokeMethod (methodName, &arg1, 1);
-}
-
-const var DynamicObject::invoke (const String& methodName, const var& arg1, const var& arg2)
-{
-    var params[] = { arg1, arg2 };
-    return invokeMethod (methodName, params, 2);
-}
-
-const var DynamicObject::invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3)
-{
-    var params[] = { arg1, arg2, arg3 };
-    return invokeMethod (methodName, params, 3);
-}
-
-const var DynamicObject::invoke (const String& methodName, const var& arg1, const var& arg2, const var& arg3, const var& arg4)
-{
-    var params[] = { arg1, arg2, arg3, arg4 };
-    return invokeMethod (methodName, params, 4);
+    return getProperty (methodName).invoke (this, parameters, numParameters);
 }
 
 

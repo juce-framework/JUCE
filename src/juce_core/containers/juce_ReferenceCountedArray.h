@@ -158,12 +158,12 @@ public:
 
         @see getUnchecked
     */
-    inline ObjectClass* operator[] (const int index) const throw()
+    inline const ReferenceCountedObjectPtr<ObjectClass> operator[] (const int index) const throw()
     {
         lock.enter();
-        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-                                        ? this->elements [index]
-                                        : (ObjectClass*) 0;
+        const ReferenceCountedObjectPtr<ObjectClass> result ((((unsigned int) index) < (unsigned int) numUsed)
+                                                                ? this->elements [index]
+                                                                : (ObjectClass*) 0);
         lock.exit();
         return result;
     }
@@ -173,11 +173,11 @@ public:
         This is a faster and less safe version of operator[] which doesn't check the index passed in, so
         it can be used when you're sure the index if always going to be legal.
     */
-    inline ObjectClass* getUnchecked (const int index) const throw()
+    inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
     {
         lock.enter();
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ObjectClass* const result = this->elements [index];
+        const ReferenceCountedObjectPtr<ObjectClass> result (this->elements [index]);
         lock.exit();
         return result;
     }
@@ -187,11 +187,11 @@ public:
         This will return a null pointer if the array's empty.
         @see getLast
     */
-    inline ObjectClass* getFirst() const throw()
+    inline const ReferenceCountedObjectPtr<ObjectClass> getFirst() const throw()
     {
         lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
-                                                  : (ObjectClass*) 0;
+        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? this->elements [0]
+                                                                           : (ObjectClass*) 0);
         lock.exit();
 
         return result;
@@ -202,11 +202,11 @@ public:
         This will return a null pointer if the array's empty.
         @see getFirst
     */
-    inline ObjectClass* getLast() const throw()
+    inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
     {
         lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
-                                                  : (ObjectClass*) 0;
+        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? this->elements [numUsed - 1]
+                                                                           : (ObjectClass*) 0);
         lock.exit();
 
         return result;

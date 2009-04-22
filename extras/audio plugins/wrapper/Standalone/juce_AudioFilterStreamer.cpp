@@ -155,7 +155,7 @@ void AudioFilterStreamingDeviceManager::setFilter (AudioProcessor* filterToStrea
     if (streamer != 0)
     {
         removeMidiInputCallback (String::empty, streamer);
-        setAudioCallback (0);
+        removeAudioCallback (streamer);
 
         delete streamer;
         streamer = 0;
@@ -165,7 +165,7 @@ void AudioFilterStreamingDeviceManager::setFilter (AudioProcessor* filterToStrea
     {
         streamer = new AudioFilterStreamer (*filterToStream);
 
-        setAudioCallback (streamer);
+        addAudioCallback (streamer);
         addMidiInputCallback (String::empty, streamer);
     }
 }

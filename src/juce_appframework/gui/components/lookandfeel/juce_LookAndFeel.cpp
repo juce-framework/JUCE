@@ -656,6 +656,31 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
     }
 }
 
+void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, int h)
+{
+    const float radius = jmin (w, h) * 0.4f;
+    const float thickness = radius * 0.15f;
+    Path p;
+    p.addRoundedRectangle (radius * 0.4f, thickness * -0.5f, 
+                           radius * 0.6f, thickness, 
+                           thickness * 0.5f);
+
+    const float cx = x + w * 0.5f;
+    const float cy = y + h * 0.5f;
+
+    const uint32 animationIndex = (Time::getMillisecondCounter() / (1000 / 10)) % 12;
+    const Colour col (g.getCurrentColour());
+
+    for (int i = 0; i < 12; ++i)
+    {
+        const int n = (i + 12 - animationIndex) % 12;
+        g.setColour (col.withMultipliedAlpha ((n + 1) / 12.0f));
+
+        g.fillPath (p, AffineTransform::rotation (i * (float_Pi / 6.0f))
+                                       .translated (cx, cy));
+    }
+}
+
 void LookAndFeel::drawScrollbarButton (Graphics& g,
                                        ScrollBar& scrollbar,
                                        int width, int height,
