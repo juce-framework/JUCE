@@ -357,6 +357,9 @@ public:
     static bool isValidPeer (const ComponentPeer* const peer) throw();
 
     //==============================================================================
+    static void bringModalComponentToFront();
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:

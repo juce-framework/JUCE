@@ -475,7 +475,7 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
                                              int numButtons,
                                              Component* associatedComponent)
 {
-    AlertWindow* aw = new AlertWindow (title, message, iconType);
+    AlertWindow* aw = new AlertWindow (title, message, iconType, associatedComponent);
 
     if (numButtons == 1)
     {

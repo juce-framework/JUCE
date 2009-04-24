@@ -276,28 +276,70 @@ static bool isEventBlockedByModalComps (NSEvent* e)
     if (Component::getNumCurrentlyModalComponents() == 0)
         return false;
 
-    [[NSApp mainMenu] update];
     NSWindow* const w = [e window];
     if (w == 0 || [w worksWhenModal])
         return false;
+
+    bool isKey = false, isInputAttempt = false;
+
+    switch ([e type])
+    {
+        case NSKeyDown:
+        case NSKeyUp:
+            isKey = isInputAttempt = true;
+            break;
+
+        case NSLeftMouseDown:
+        case NSRightMouseDown:
+        case NSOtherMouseDown:
+            isInputAttempt = true;
+            break;
+
+        case NSLeftMouseDragged:
+        case NSRightMouseDragged:
+        case NSLeftMouseUp:
+        case NSRightMouseUp:
+        case NSOtherMouseUp:
+        case NSOtherMouseDragged:
+            if (Component::getComponentUnderMouse() != 0)
+                return false;
+            break;
+
+        case NSMouseMoved:
+        case NSMouseEntered:
+        case NSMouseExited:
+        case NSCursorUpdate:
+        case NSScrollWheel:
+        case NSTabletPoint:
+        case NSTabletProximity:
+            break;
+
+        default:
+            return false;
+    }
 
     for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
     {
         ComponentPeer* const peer = ComponentPeer::getPeer (i);
         NSView* const compView = (NSView*) peer->getNativeHandle();
 
-        if ([compView window] == w 
-             && (NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil],
-                                [compView bounds])
-                  || peer->getComponent()->isMouseButtonDown()))
+        if ([compView window] == w)
         {
-            return false;
+            if (isKey)
+            {
+                if (compView == [w firstResponder])
+                    return false;
+            }
+            else
+            {
+                if (NSPointInRect ([compView convertPoint: [e locationInWindow] fromView: nil],
+                                   [compView bounds]))
+                    return false;
+            }
         }
     }
 
-    if ([e type] == NSLeftMouseDown
-         || [e type] == NSRightMouseDown
-         || [e type] == NSOtherMouseDown)
+    if (isInputAttempt)
     {
         if (! [NSApp isActive])
             [NSApp activateIgnoringOtherApps: YES];
@@ -330,7 +372,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
                                            inMode: NSDefaultRunLoopMode
                                           dequeue: YES];
 
-        if (! isEventBlockedByModalComps (e))
+        if (e != 0 && ! isEventBlockedByModalComps (e))
             [NSApp sendEvent: e];
     }
 

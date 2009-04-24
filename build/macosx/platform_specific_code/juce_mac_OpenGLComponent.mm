@@ -164,6 +164,10 @@ public:
 
         renderContext = [[[NSOpenGLContext alloc] initWithFormat: format
                                                     shareContext: sharedContext] autorelease];
+
+        const long swapInterval = 1;
+        [renderContext setValues: &swapInterval forParameter: NSOpenGLCPSwapInterval]; 
+        
         [view setOpenGLContext: renderContext];
         [renderContext setView: view];
 

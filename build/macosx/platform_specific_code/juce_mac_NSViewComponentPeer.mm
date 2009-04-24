@@ -1141,6 +1141,8 @@ void juce_HandleProcessFocusChange()
         if (Process::isForegroundProcess())
         {
             currentlyFocusedPeer->handleFocusGain();
+
+            ComponentPeer::bringModalComponentToFront();
         }
         else
         {
@@ -1223,13 +1225,19 @@ bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
         used = (isValidPeer (this) && handleKeyEvent (ev, false)) || used;
     }
 
+    // (If we're running modally, don't allow unused keystrokes to be passed
+    // along to other blocked views..)
+    if (Component::getCurrentlyModalComponent() != 0)
+        used = true;
+
     return used;
 }
 
 bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
 {
     updateKeysDown (ev, false);
-    return handleKeyEvent (ev, false);
+    return handleKeyEvent (ev, false) 
+            || Component::getCurrentlyModalComponent() != 0;
 }
 
 void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)

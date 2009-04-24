@@ -1515,6 +1515,8 @@ void Component::exitModalState (const int returnValue)
             modalComponentStack.removeValue (this);
 
             flags.currentlyModalFlag = false;
+
+            bringModalComponentToFront();
         }
         else
         {
@@ -1549,6 +1551,34 @@ Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) throw
     Component* const c = (Component*) (modalComponentStack [modalComponentStack.size() - index - 1]);
 
     return c->isValidComponent() ? c : 0;
+}
+
+void Component::bringModalComponentToFront()
+{
+    ComponentPeer* lastOne = 0;
+
+    for (int i = 0; i < getNumCurrentlyModalComponents(); ++i)
+    {
+        Component* const c = getCurrentlyModalComponent (i);
+
+        if (c == 0)
+            break;
+
+        ComponentPeer* peer = c->getPeer();
+        
+        if (peer != 0 && peer != lastOne)
+        {
+            if (lastOne == 0)
+            {
+                peer->toFront (true);
+                peer->grabFocus();
+            }
+            else
+                peer->toBehind (lastOne);
+
+            lastOne = peer;
+        }
+    }
 }
 
 //==============================================================================
@@ -2157,8 +2187,7 @@ void Component::removeComponentListener (ComponentListener* const listenerToRemo
 //==============================================================================
 void Component::inputAttemptWhenModal()
 {
-    getTopLevelComponent()->toFront (true);
-
+    bringModalComponentToFront();
     getLookAndFeel().playAlertSound();
 }
 
@@ -3085,9 +3114,7 @@ void Component::internalBroughtToFront()
         Component* const cm = getCurrentlyModalComponent();
 
         if (cm != 0 && cm->getTopLevelComponent() != getTopLevelComponent())
-        {
-            cm->getTopLevelComponent()->toFront (true);
-        }
+            bringModalComponentToFront();
     }
 }
 

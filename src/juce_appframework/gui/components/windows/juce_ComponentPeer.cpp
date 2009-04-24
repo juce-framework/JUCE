@@ -604,16 +604,9 @@ void ComponentPeer::handleFocusGain()
     else
     {
         if (! component->isCurrentlyBlockedByAnotherModalComponent())
-        {
             component->grabKeyboardFocus();
-        }
         else
-        {
-            Component* const currentModalComp = Component::getCurrentlyModalComponent();
-
-            if (currentModalComp != 0)
-                currentModalComp->toFront (! currentModalComp->hasKeyboardFocus (true));
-        }
+            Component::bringModalComponentToFront();
     }
 }
 
@@ -770,6 +763,12 @@ void ComponentPeer::handleUserClosingWindow()
     updateCurrentModifiers();
 
     component->userTriedToCloseWindow();
+}
+
+//==============================================================================
+void ComponentPeer::bringModalComponentToFront()
+{
+    Component::bringModalComponentToFront();
 }
 
 //==============================================================================

@@ -2085,6 +2085,7 @@ private:
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
     static void* runModalLoopCallback (void*);
+    static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result,
                                   const int deltaX, const int deltaY,
                                   const Rectangle& clipRect,

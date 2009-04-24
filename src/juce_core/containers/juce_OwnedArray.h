@@ -355,12 +355,14 @@ public:
             if (indexToChange < numUsed)
             {
                 if (deleteOldElement)
+                {
                     toDelete = this->elements [indexToChange];
 
-                if (toDelete == newObject)
-                    toDelete = 0;
-                else
-                    this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+                    if (toDelete == newObject)
+                        toDelete = 0;
+                }
+
+                this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
             }
             else
             {

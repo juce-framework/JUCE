@@ -3561,12 +3561,14 @@ public:
             if (indexToChange < numUsed)
             {
                 if (deleteOldElement)
+                {
                     toDelete = this->elements [indexToChange];
 
-                if (toDelete == newObject)
-                    toDelete = 0;
-                else
-                    this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+                    if (toDelete == newObject)
+                        toDelete = 0;
+                }
+
+                this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
             }
             else
             {
@@ -20934,6 +20936,8 @@ public:
     */
     static bool isValidPeer (const ComponentPeer* const peer) throw();
 
+    static void bringModalComponentToFront();
+
     juce_UseDebuggingNewOperator
 
 protected:
@@ -22963,6 +22967,7 @@ private:
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
     static void* runModalLoopCallback (void*);
+    static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result,
                                   const int deltaX, const int deltaY,
                                   const Rectangle& clipRect,

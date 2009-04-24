@@ -1477,7 +1477,8 @@ private:
                 sendModifierKeyChangeIfNeeded();
         }
 
-        return handleKeyUpOrDown();
+        return handleKeyUpOrDown()
+                || Component::getCurrentlyModalComponent() != 0;
     }
 
     bool doKeyDown (const WPARAM key)
@@ -1562,6 +1563,9 @@ private:
 
                 break;
         }
+
+        if (Component::getCurrentlyModalComponent() != 0)
+            used = true;
 
         return used;
     }
