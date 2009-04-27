@@ -299,7 +299,12 @@ const var var::invoke (const var::identifier& method, const var* arguments, int 
 const var var::invoke (const var& targetObject, const var* arguments, int numArguments) const
 {
     if (isMethod())
-        return value.methodValue (targetObject, arguments, numArguments);
+    {
+        DynamicObject* const target = targetObject.getObject();
+
+        if (target != 0)
+            return (target->*(value.methodValue)) (arguments, numArguments);
+    }
 
     return var();
 }
@@ -412,5 +417,10 @@ const var DynamicObject::invokeMethod (const var::identifier& methodName,
     return getProperty (methodName).invoke (this, parameters, numParameters);
 }
 
+void DynamicObject::setMethod (const var::identifier& name, 
+                               var::MethodFunction methodFunction)
+{
+    setProperty (name, methodFunction);
+}
 
 END_JUCE_NAMESPACE

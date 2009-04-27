@@ -53,7 +53,7 @@ class JUCE_API  var
 {
 public:
     //==============================================================================
-    typedef const var (MethodFunction) (const var& thisObject, const var* arguments, int numArguments);
+    typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
 
     //==============================================================================
     /** Creates a void variant. */
@@ -156,7 +156,7 @@ private:
         double doubleValue;
         String* stringValue;
         DynamicObject* objectValue;
-        MethodFunction* methodValue;
+        MethodFunction methodValue;
     } value;
 
     void releaseValue() throw();
@@ -182,17 +182,57 @@ public:
     virtual ~DynamicObject();
 
     //==============================================================================
+    /** Returns true if the object has a property with this name.
+        Note that if the property is actually a method, this will return false.
+    */
     virtual bool hasProperty (const var::identifier& propertyName) const;
+    
+    /** Returns a named property.
+     
+        This returns a void if no such property exists.
+    */
     virtual const var getProperty (const var::identifier& propertyName) const;
+
+    /** Sets a named property. */
     virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+
+    /** Removes a named property. */
     virtual void removeProperty (const var::identifier& propertyName);
 
     //==============================================================================
+    /** Checks whether this object has the specified method.
+
+        The default implementation of this just checks whether there's a property
+        with this name that's actually a method, but this can be overridden for
+        building objects with dynamic invocation.
+    */
     virtual bool hasMethod (const var::identifier& methodName) const;
 
+    /** Invokes a named method on this object.
+     
+        The default implementation looks up the named property, and if it's a method
+        call, then it invokes it.
+     
+        This method is virtual to allow more dynamic invocation to used for objects
+        where the methods may not already be set as properies.
+    */
     virtual const var invokeMethod (const var::identifier& methodName,
                                     const var* parameters,
                                     int numParameters);
+
+    /** Sets up a method.
+
+        This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
+        helps to avoid accidentally invoking the wrong type of var constructor. It also makes 
+        the code easier to read,
+
+        The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
+        @code
+        setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
+        @endcode
+    */
+    void setMethod (const var::identifier& methodName, 
+                    var::MethodFunction methodFunction);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
