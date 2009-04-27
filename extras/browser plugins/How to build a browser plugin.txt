@@ -1,0 +1,54 @@
+
+
+    Juce Browser Plugin Framework
+    =============================
+    
+These classes let you easily turn a normal Juce component into a Mac/Windows NPAPI plugin 
+for use in Firefox, Safari, Opera, etc.
+
+To create your plugin, your code just needs to implement the createBrowserPlugin() function 
+to return a subclass of BrowserPluginComponent, and this acts as the plugin window.
+
+To communicate with javascript running in the host webpage, the 'var' and 'DynamicObject' juce
+classes emulate javascript objects, so you can create a javascript object that represents
+your plugin, and the webpage can invoke methods and access properties on this object. To
+get bi-directional communication between the plugin and webpage, your webpage can simply
+pass its own object to your plugin, and the plugin can call methods on this object to invoke
+javascript actions.
+
+In a similar style to audio plugins, your project has to contain a BrowserPluginCharacteristics.h
+file that defines various properties of the plugin.
+
+
+Building a Mac NPAPI Plugin with XCode
+--------------------------------------
+
+- Create a new "CFPlugin Bundle" project 
+- Add the juce wrapper source files to the project (have a look at the demo project to 
+  find out which files this includes).
+- Set up all the usual frameworks, etc, like you would for any other juce project.
+- In the project or target settings, change the "Wrapper Extension" to "plugin"
+- In your target, add a build phase "Build ResourceManager resources", and add the juce_NPAPI_MacResource.r file
+  to this step.
+- Check that your info.plist contains the same items as the demo plugin, because these needs to be set for the
+  browser to recognise it as a plugin. In particular, the "Bundle OS Type Code" should be set to BRPL.
+- The finished bundle needs to be copied into "/Library/Internet Plug-Ins", so you might want to set up a
+  post-build copy step to do this automatically
+
+
+Building a Windows NPAPI plugin in Visual Studio
+------------------------------------------------
+
+- Install the NPAPI framework and make sure that your include path is set up to include its headers
+- Create a new project to build a win32 DLL
+- Add the juce wrapper source files to the project (have a look at the demo project to 
+  find out which files this includes).
+- Your compiled plugin DLL must begin with the letters 'np' (in lower case) for it to be recognised as
+  a plugin, so you should make sure your target settings reflect this.
+- To include the BrowserPluginCharacteristics.h file, you may need to add an include path to wherever this
+  file lives in your project. Don't use a global include path for this - just add it to the project's 
+  search paths (both the c++ include paths and the resource include paths)
+- (Refer to the normal juce instructions for setting up other project settings such as which c++ libs to link to etc)
+- The finished plugin needs to be copied into "C:\Program Files\Mozilla Firefox\plugins", so you might want
+  to add a post-build step to copy it
+- 
