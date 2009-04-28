@@ -48,9 +48,7 @@
  #define _X86_
  #include <windows.h>
  #include <windowsx.h>
- #include "npapi.h"
- #include "npupp.h"
- #include "npruntime.h"
+ #include "npapi/npupp.h"
 
  // Cunning trick used to add functions to export list and avoid messing about with .def files.
  // (can't add a declspec because the functions have already been pre-declared in the npapi headers).

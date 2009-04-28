@@ -39,7 +39,6 @@ Building a Mac NPAPI Plugin with XCode
 Building a Windows NPAPI plugin in Visual Studio
 ------------------------------------------------
 
-- Install the NPAPI framework and make sure that your include path is set up to include its headers
 - Create a new project to build a win32 DLL
 - Add the juce wrapper source files to the project (have a look at the demo project to 
   find out which files this includes).
@@ -51,4 +50,6 @@ Building a Windows NPAPI plugin in Visual Studio
 - (Refer to the normal juce instructions for setting up other project settings such as which c++ libs to link to etc)
 - The finished plugin needs to be copied into "C:\Program Files\Mozilla Firefox\plugins", so you might want
   to add a post-build step to copy it
-- 
+- Note that the "browser plugins/wrapper/npapi" folder contains a copy of some NPAPI header files. If you're 
+  building a closed-source project, please check the licensing details in these files to make sure
+  you're not breaking any Mozilla licensing restictions.
