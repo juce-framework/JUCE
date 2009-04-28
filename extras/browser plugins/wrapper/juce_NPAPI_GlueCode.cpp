@@ -595,7 +595,7 @@ public:
 
         if (numParameters > 0)
         {
-            NPVariant* params = (NPVariant*) juce_malloc (sizeof (NPVariant*) * numParameters);
+            NPVariant* const params = (NPVariant*) juce_malloc (sizeof (NPVariant) * numParameters);
 
             int i;
             for (i = 0; i < numParameters; ++i)
@@ -621,7 +621,7 @@ public:
                 browser.releasevariantvalue (&result);
             }
         }
-        
+
         return returnVal;
     }
 };
