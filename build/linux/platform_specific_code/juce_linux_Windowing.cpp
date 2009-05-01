@@ -817,19 +817,23 @@ public:
                 // Make sure the Window manager does what we want
                 XSizeHints* hints = XAllocSizeHints();
                 hints->flags = USSize | USPosition;
-                hints->width = ww + windowBorder.getLeftAndRight();
-                hints->height = wh + windowBorder.getTopAndBottom();
-                hints->x = wx - windowBorder.getLeft();
-                hints->y = wy - windowBorder.getTop();
+                hints->width = ww;
+                hints->height = wh;
+                hints->x = wx;
+                hints->y = wy;
+
+                if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
+                {
+                    hints->min_width  = hints->max_width  = hints->width;
+                    hints->min_height = hints->max_height = hints->height;
+                    hints->flags |= PMinSize | PMaxSize;
+                }
+
                 XSetWMNormalHints (display, windowH, hints);
                 XFree (hints);
             }
 
-            XMoveResizeWindow (display, windowH,
-                               wx - windowBorder.getLeft(),
-                               wy - windowBorder.getTop(),
-                               ww + windowBorder.getLeftAndRight(),
-                               wh + windowBorder.getTopAndBottom());
+            XMoveResizeWindow (display, windowH, wx, wy, ww, wh);
 
             if (! deletionChecker.hasBeenDeleted())
             {

@@ -51,6 +51,9 @@ public:
     //==============================================================================
     /** Creates an empty MidiBuffer. */
     MidiBuffer() throw();
+    
+    /** Creates a MidiBuffer containing a single midi message. */
+    MidiBuffer (const MidiMessage& message) throw();
 
     /** Creates a copy of another MidiBuffer. */
     MidiBuffer (const MidiBuffer& other) throw();

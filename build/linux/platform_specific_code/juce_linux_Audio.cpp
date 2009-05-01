@@ -395,8 +395,8 @@ public:
         close();
     }
 
-    void open (const BitArray& inputChannels,
-               const BitArray& outputChannels,
+    void open (BitArray inputChannels,
+               BitArray outputChannels,
                const double sampleRate_,
                const int bufferSize_)
     {
@@ -447,6 +447,8 @@ public:
                 return;
             }
 
+            currentOutputChans.setRange (0, minChansIn, true);
+
             if (! outputDevice->setParameters ((unsigned int) sampleRate,
                                                jlimit ((int) minChansOut, (int) maxChansOut, currentOutputChans.getHighestBit() + 1),
                                                bufferSize))
@@ -468,6 +470,8 @@ public:
                 return;
             }
 
+            currentInputChans.setRange (0, minChansIn, true);
+            
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
                                               bufferSize))

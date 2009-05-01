@@ -43,6 +43,13 @@ MidiBuffer::MidiBuffer() throw()
 {
 }
 
+MidiBuffer::MidiBuffer (const MidiMessage& message) throw()
+    : ArrayAllocationBase <uint8> (32),
+      bytesUsed (0)
+{
+    addEvent (message, 0);
+}
+
 MidiBuffer::MidiBuffer (const MidiBuffer& other) throw()
     : ArrayAllocationBase <uint8> (32),
       bytesUsed (other.bytesUsed)

@@ -760,8 +760,14 @@ public:
         {
             setMinimised (false);
 
-            SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0,
-                          SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+            // must be careful not to try to put a topmost window behind a normal one, or win32
+            // promotes the normal one to be topmost!
+            if (getComponent()->isAlwaysOnTop() == otherPeer->getComponent()->isAlwaysOnTop())
+                SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0,
+                              SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+            else if (otherPeer->getComponent()->isAlwaysOnTop())
+                SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0, 
+                              SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
         }
     }
 
