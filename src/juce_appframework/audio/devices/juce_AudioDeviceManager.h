@@ -62,7 +62,7 @@
     device selection/sample-rate/latency controls.
 
     To use an AudioDeviceManager, create one, and use initialise() to set it up. Then
-    call setAudioCallback() to register your audio callback with it, and use that to process
+    call addAudioCallback() to register your audio callback with it, and use that to process
     your audio data.
 
     The manager also acts as a handy hub for incoming midi messages, allowing a

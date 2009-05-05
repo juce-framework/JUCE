@@ -1090,6 +1090,12 @@ public:
                     SubstructureRedirectMask | SubstructureNotifyMask,
                     &ev);
 
+        XWindowAttributes attr;
+        XGetWindowAttributes (display, windowH, &attr);
+
+        if (attr.override_redirect)
+            XRaiseWindow (display, windowH);
+
         XSync (display, False);
 
         handleBroughtToFront();

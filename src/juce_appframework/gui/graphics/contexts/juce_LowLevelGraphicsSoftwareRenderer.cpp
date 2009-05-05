@@ -225,7 +225,8 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
             __asm emms
 #else
             __asm__ __volatile__ (
-                "movq %[aaaa], %%mm1        \n"
+                "\tpush %%ebx               \n"
+                "\tmovq %[aaaa], %%mm1      \n"
                 "\tmovq %[rgb0], %%mm2      \n"
                 "\tpxor %%mm7, %%mm7        \n"
                 ".lineLoop2:                \n"
@@ -253,6 +254,7 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
                 "\tadd %%edi, %%esi         \n"
                 "\tdec %%ecx                \n"
                 "\tjg .lineLoop2            \n"
+                "\tpop %%ebx                \n"
                 "\temms                     \n"
                 : /* No output registers */
                 : [aaaa]   "m" (aaaa), /* Input registers */
