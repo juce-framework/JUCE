@@ -1050,14 +1050,14 @@ GraphDocumentComponent::GraphDocumentComponent (AudioDeviceManager* deviceManage
 
     addAndMakeVisible (statusBar = new TooltipBar());
 
-    deviceManager->setAudioCallback (&graphPlayer);
+    deviceManager->addAudioCallback (&graphPlayer);
 
     graphPanel->updateComponents();
 }
 
 GraphDocumentComponent::~GraphDocumentComponent()
 {
-    deviceManager->setAudioCallback (0);
+    deviceManager->removeAudioCallback (&graphPlayer);
     deleteAllChildren();
 
     graphPlayer.setProcessor (0);

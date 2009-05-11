@@ -49587,6 +49587,11 @@ public:
     */
     void setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles);
 
+    /** Returns true if hidden files are ignored.
+        @see setIgnoresHiddenFiles
+    */
+    bool ignoresHiddenFiles() const throw()          { return ignoreHiddenFiles; }
+
     /** Contains cached information about one of the files in a DirectoryContentsList.
     */
     struct FileInfo
@@ -49965,7 +49970,6 @@ public:
     void buttonClicked (Button* b);
     /** @internal */
     void comboBoxChanged (ComboBox*);
-
     /** @internal */
     void textEditorTextChanged (TextEditor& editor);
     /** @internal */
@@ -49974,7 +49978,8 @@ public:
     void textEditorEscapeKeyPressed (TextEditor& editor);
     /** @internal */
     void textEditorFocusLost (TextEditor& editor);
-
+    /** @internal */
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void selectionChanged();
     /** @internal */

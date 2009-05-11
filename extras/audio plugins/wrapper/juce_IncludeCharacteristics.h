@@ -92,7 +92,7 @@
  #error "You need to define the JucePlugin_EditorRequiresKeyboardFocus value in your JucePluginCharacteristics.h file!"
 #endif
 
-#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS)
+#if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_Standalone)
  #error "You need to define at least one plugin format value in your JucePluginCharacteristics.h file!"
 #endif
 

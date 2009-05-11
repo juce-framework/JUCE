@@ -106,6 +106,11 @@ public:
         By default these are ignored.
     */
     void setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles);
+    
+    /** Returns true if hidden files are ignored.
+        @see setIgnoresHiddenFiles
+    */
+    bool ignoresHiddenFiles() const throw()          { return ignoreHiddenFiles; }
 
     //==============================================================================
     /** Contains cached information about one of the files in a DirectoryContentsList.

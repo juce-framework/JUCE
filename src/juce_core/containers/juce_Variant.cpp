@@ -337,6 +337,13 @@ const var var::call (const var::identifier& method, const var& arg1, const var& 
     return invoke (method, args, 4);
 }
 
+const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+{
+    var args[] = { arg1, arg2, arg3, arg4, arg5 };
+    return invoke (method, args, 5);
+}
+
+
 //==============================================================================
 var::identifier::identifier (const String& name_) throw()
     : name (name_),

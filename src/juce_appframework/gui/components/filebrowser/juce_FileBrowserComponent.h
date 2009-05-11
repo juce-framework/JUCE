@@ -162,7 +162,6 @@ public:
     void buttonClicked (Button* b);
     /** @internal */
     void comboBoxChanged (ComboBox*);
-
     /** @internal */
     void textEditorTextChanged (TextEditor& editor);
     /** @internal */
@@ -171,7 +170,8 @@ public:
     void textEditorEscapeKeyPressed (TextEditor& editor);
     /** @internal */
     void textEditorFocusLost (TextEditor& editor);
-
+    /** @internal */
+    bool keyPressed (const KeyPress& key);
     /** @internal */
     void selectionChanged();
     /** @internal */

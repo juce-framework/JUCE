@@ -352,6 +352,10 @@ public:
         firstProcessCallback = true;
         shouldDeleteEditor = false;
         channels = 0;
+        speakerIn = kSpeakerArrEmpty;
+        speakerOut = kSpeakerArrEmpty;
+        speakerInChans = 0;
+        speakerOutChans = 0;
         numInChans = JucePlugin_MaxNumInputChannels;
         numOutChans = JucePlugin_MaxNumOutputChannels;
 
@@ -513,40 +517,56 @@ public:
 
     bool getInputProperties (VstInt32 index, VstPinProperties* properties)
     {
-        if (filter == 0 || index >= filter->getNumInputChannels())
+        if (filter == 0 || index >= JucePlugin_MaxNumInputChannels)
             return false;
-
+       
         const String name (filter->getInputChannelName ((int) index));
-
+       
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
         name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
-
-        properties->flags = kVstPinIsActive;
-
-        if (filter->isInputChannelStereoPair ((int) index))
-            properties->flags |= kVstPinIsStereo;
-
-        properties->arrangementType = 0;
+       
+        if (speakerIn != kSpeakerArrEmpty)
+        {
+            properties->flags = kVstPinUseSpeaker;
+            properties->arrangementType = speakerIn;
+        }
+        else
+        {
+            properties->flags = kVstPinIsActive;
+           
+            if (filter->isInputChannelStereoPair ((int) index))
+                properties->flags |= kVstPinIsStereo;
+           
+            properties->arrangementType = 0;
+        }
 
         return true;
     }
-
+   
     bool getOutputProperties (VstInt32 index, VstPinProperties* properties)
     {
-        if (filter == 0 || index >= filter->getNumOutputChannels())
+        if (filter == 0 || index >= JucePlugin_MaxNumOutputChannels)
             return false;
-
+       
         const String name (filter->getOutputChannelName ((int) index));
-
+       
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
         name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
-
-        properties->flags = kVstPinIsActive;
-
-        if (filter->isOutputChannelStereoPair ((int) index))
-            properties->flags |= kVstPinIsStereo;
-
-        properties->arrangementType = 0;
+       
+        if (speakerOut != kSpeakerArrEmpty)
+        {
+            properties->flags = kVstPinUseSpeaker;
+            properties->arrangementType = speakerOut;
+        }
+        else
+        {
+            properties->flags = kVstPinIsActive;
+           
+            if (filter->isOutputChannelStereoPair ((int) index))
+                properties->flags |= kVstPinIsStereo;
+           
+            properties->arrangementType = 0;
+        }
 
         return true;
     }
@@ -969,25 +989,33 @@ public:
         return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
-    bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
+    bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput, 
                                 VstSpeakerArrangement* pluginOutput)
     {
-        if  (numInChans != pluginInput->numChannels
-              || numOutChans != pluginOutput->numChannels)
+        const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
+
+        for (int i = 0; i < numElementsInArray (channelConfigs); ++i)
         {
-             setNumInputs (pluginInput->numChannels);
-             setNumOutputs (pluginOutput->numChannels);
-             ioChanged();
+            bool configMono      = (channelConfigs[i][1] == 1) && (pluginOutput->type == kSpeakerArrMono);
+            bool configStereo    = (channelConfigs[i][1] == 2) && (pluginOutput->type == kSpeakerArrStereo);
+            bool inCountMatches  = (channelConfigs[i][0] == pluginInput->numChannels);
+            bool outCountMatches = (channelConfigs[i][1] == pluginOutput->numChannels);
+
+            if ((configMono || configStereo) && inCountMatches && outCountMatches)
+            {
+                speakerIn = pluginInput->type;
+                speakerOut = pluginOutput->type;
+                speakerInChans = pluginInput->numChannels;
+                speakerOutChans = pluginOutput->numChannels;
+
+                filter->setPlayConfigDetails (speakerInChans, speakerOutChans,
+                                              filter->getSampleRate(),
+                                              filter->getBlockSize());
+                return true;
+            }
         }
 
-        numInChans = pluginInput->numChannels;
-        numOutChans = pluginOutput->numChannels;
-
-        filter->setPlayConfigDetails (numInChans, numOutChans,
-                                      filter->getSampleRate(),
-                                      filter->getBlockSize());
-
-        return true;
+        return false;
     }
 
     //==============================================================================
@@ -1329,6 +1357,8 @@ private:
     bool hasShutdown;
     bool firstProcessCallback;
     int diffW, diffH;
+    VstSpeakerArrangementType speakerIn, speakerOut;
+    int speakerInChans, speakerOutChans;
     int numInChans, numOutChans;
     float** channels;
     VoidArray tempChannels; // see note in processReplacing()

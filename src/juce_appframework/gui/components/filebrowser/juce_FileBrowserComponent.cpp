@@ -346,6 +346,21 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     }
 }
 
+bool FileBrowserComponent::keyPressed (const KeyPress& key)
+{
+#if JUCE_LINUX || JUCE_WIN32
+    if (key.getModifiers().isCommandDown()
+         && (key.getKeyCode() == 'H' || key.getKeyCode() == 'h'))
+    {
+        fileList->setIgnoresHiddenFiles (! fileList->ignoresHiddenFiles());
+        fileList->refresh();
+        return true;
+    }
+#endif
+
+    return false;
+}
+
 //==============================================================================
 void FileBrowserComponent::textEditorTextChanged (TextEditor&)
 {

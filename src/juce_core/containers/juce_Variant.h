@@ -124,6 +124,8 @@ public:
     const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
     /** If this variant is an object, this invokes one of its methods with 4 arguments. */
     const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    /** If this variant is an object, this invokes one of its methods with 5 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
 
     /** If this variant is an object, this invokes one of its methods with a list of arguments. */
     const var invoke (const identifier& method, const var* arguments, int numArguments) const;
