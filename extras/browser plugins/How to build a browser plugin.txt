@@ -53,3 +53,17 @@ Building a Windows NPAPI plugin in Visual Studio
 - Note that the "browser plugins/wrapper/npapi" folder contains a copy of some NPAPI header files. If you're 
   building a closed-source project, please check the licensing details in these files to make sure
   you're not breaking any Mozilla licensing restictions.
+
+
+Building a Windows ActiveX control for Internet Explorer
+--------------------------------------------------------
+
+- This is actually quite easy, because the same DLL that functions as an NPAPI plugin can
+  also be used as an ActiveX control.
+- Just create a windows NPAPI plugin as described above, but add the juce_ActiveX_GlueCode.cpp
+  file to the project.
+- In your BrowserPluginCharacteristics.h file, the JuceBrowserPlugin_ActiveXCLSID setting needs
+  to be given a unique GUID for your plugin.
+- Because the plugin is a COM object, it doesn't matter where the DLL lives, but it needs to
+  be registered in the normal COM way, with regsvr32.exe. Note that on Vista, this command
+  needs to be run with administrator permissions for it to be able to write to the registry.

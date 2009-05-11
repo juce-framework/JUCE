@@ -106,6 +106,7 @@ extern "C"
 
 //==============================================================================
 static NPNetscapeFuncs browser;
+String browserVersionDesc;
 
 //==============================================================================
 NPError NP_GetValue (void* future, NPPVariable variable, void* value)
@@ -924,8 +925,8 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
 
     if (numPluginInstances++ == 0)
     {
-        initialiseJuce_GUI();
         log ("initialiseJuce_GUI()");
+        initialiseJuce_GUI();
     }
 
     currentlyInitialisingNPP = npp;
@@ -950,8 +951,9 @@ NPError NPP_Destroy (NPP npp, NPSavedData** save)
 
         if (--numPluginInstances == 0)
         {
-            shutdownJuce_GUI();
             log ("shutdownJuce_GUI()");
+            shutdownJuce_GUI();
+            browserVersionDesc = String::empty;
         }
     }
 
@@ -1100,15 +1102,17 @@ BrowserPluginComponent::BrowserPluginComponent()
 BrowserPluginComponent::~BrowserPluginComponent()
 {
 }
+
 const String BrowserPluginComponent::getBrowserVersion() const
 {
-    String s;
+    if (browserVersionDesc.isEmpty())
+    {
+        if (getInstance (this) != 0)
+            browserVersionDesc << browser.uagent (getInstance (this));
+        else
+            browserVersionDesc << "Netscape Plugin V" << (int) ((browser.version >> 8) & 0xff)
+                               << "." << (int) (browser.version & 0xff);
+    }
 
-    if (getInstance (this) != 0)
-        s << browser.uagent (getInstance (this));
-    else
-        s << "Netscape Plugin V" << (int) ((browser.version >> 8) & 0xff)
-          << "." << (int) (browser.version & 0xff);
-
-    return s;
+    return browserVersionDesc;
 }

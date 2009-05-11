@@ -35,3 +35,8 @@
     can open. If you don't need to use it, just use a made-up name here.
 */
 #define JuceBrowserPlugin_FileSuffix        ".jucedemo"
+
+/** If you're building an activeX version, you'll need to create a unique GUID for
+    your plugin. Use a tool like uuidgen.exe to create this.
+*/
+#define JuceBrowserPlugin_ActiveXCLSID      "F683B990-3ADF-11DE-BDFE-F9CB55D89593"

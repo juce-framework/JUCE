@@ -15,7 +15,8 @@ function getPlugin()
 
 function showAMessage()
 {
-    getPlugin().printText ("This is a message sent from the website's javascript...");
+    var response = getPlugin().printText ("This is a message sent from the website's javascript...");
+    printmessage (response);
 }
 
 function popUpMessageBox()
@@ -40,7 +41,14 @@ function sendCallbackObjectToPlugin()
 
 </script>
 
-<embed id="plugin" type="application/npjucedemo-plugin" width=80% height=400>
+<!-- This tag works in IE - for Netscape plugins, remove or rename the classid tag 
+     and it should use the npapi plugin instead -->
+<object id="plugin"
+        type="application/npjucedemo-plugin"
+        classid="CLSID:F683B990-3ADF-11DE-BDFE-F9CB55D89593"
+        width="80%" height="400">
+</object>
+
 
 <br>
 <form name="formname">

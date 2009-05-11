@@ -120,7 +120,7 @@ public:
             if (numParams > 0)
                 owner->textBox->setText (owner->textBox->getText() + "\n" + params[0].toString());
 
-            return var();
+            return "text was printed ok!";
         }
 
         const var popUpMessageBox (const var* params, int numParams)
