@@ -81,7 +81,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
             if (globalSettings != 0)
             {
-                JUCE_NAMESPACE::MemoryBlock data;
+                MemoryBlock data;
 
                 if (data.fromBase64Encoding (globalSettings->getValue (T("filterState")))
                      && data.getSize() > 0)
@@ -130,7 +130,7 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 
     if (globalSettings != 0 && filter != 0)
     {
-        JUCE_NAMESPACE::MemoryBlock data;
+        MemoryBlock data;
         filter->getStateInformation (data);
 
         globalSettings->setValue (T("filterState"), data.toBase64Encoding());
@@ -185,7 +185,7 @@ void StandaloneFilterWindow::saveState()
 
     if (fc.browseForFileToSave (true))
     {
-        JUCE_NAMESPACE::MemoryBlock data;
+        MemoryBlock data;
         filter->getStateInformation (data);
 
         if (! fc.getResult().replaceWithData (data.getData(), data.getSize()))
@@ -207,7 +207,7 @@ void StandaloneFilterWindow::loadState()
 
     if (fc.browseForFileToOpen())
     {
-        JUCE_NAMESPACE::MemoryBlock data;
+        MemoryBlock data;
 
         if (fc.getResult().loadFileAsData (data))
         {

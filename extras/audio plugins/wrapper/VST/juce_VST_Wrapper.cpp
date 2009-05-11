@@ -1003,8 +1003,8 @@ public:
 
             if ((configMono || configStereo) && inCountMatches && outCountMatches)
             {
-                speakerIn = pluginInput->type;
-                speakerOut = pluginOutput->type;
+                speakerIn = (VstSpeakerArrangementType) pluginInput->type;
+                speakerOut = (VstSpeakerArrangementType) pluginOutput->type;
                 speakerInChans = pluginInput->numChannels;
                 speakerOutChans = pluginOutput->numChannels;
 
