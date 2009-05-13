@@ -46,6 +46,10 @@
 
 // If your project is building a standalone app to run your plugin, you should
 // set the JucePlugin_Build_Standalone flag in the project's settings..
+#ifndef JucePlugin_Build_Standalone
+ #define JucePlugin_Build_Standalone 0
+#endif
+
 #if ! JucePlugin_Build_Standalone
 
  // You should turn on these flags to enable the different types of plugin..
