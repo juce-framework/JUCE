@@ -108,13 +108,29 @@ public:
     */
     int getNumSamples() const throw()       { return size; }
 
+    /** Returns a pointer one of the buffer's channels.
+
+        For speed, this doesn't check whether the channel number is out of range, 
+        so be careful when using it!
+    */
+    float* getSampleData (const int channelNumber) const throw()
+    {
+        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+        return channels [channelNumber];
+    }
+
     /** Returns a pointer to a sample in one of the buffer's channels.
 
         For speed, this doesn't check whether the channel and sample number
-        are legal, so be careful when using it!
+        are out-of-range, so be careful when using it!
     */
     float* getSampleData (const int channelNumber,
-                          const int sampleOffset = 0) const throw();
+                          const int sampleOffset) const throw()
+    {
+        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+        jassert (((unsigned int) sampleOffset) < (unsigned int) size);
+        return channels [channelNumber] + sampleOffset;
+    }
 
     /** Returns an array of pointers to the channels in the buffer.
 

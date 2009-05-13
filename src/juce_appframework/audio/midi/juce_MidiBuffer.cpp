@@ -72,6 +72,13 @@ const MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
     return *this;
 }
 
+void MidiBuffer::swap (MidiBuffer& other)
+{
+    swapVariables <uint8*> (this->elements, other.elements);
+    swapVariables <int> (this->numAllocated, other.numAllocated);
+    swapVariables <int> (this->bytesUsed, other.bytesUsed);
+}
+
 MidiBuffer::~MidiBuffer() throw()
 {
 }

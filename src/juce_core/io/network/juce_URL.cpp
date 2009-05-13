@@ -525,12 +525,8 @@ const String URL::addEscapeChars (const String& s, const bool isParameter)
     {
         const char c = *utf8++;
 
-        if (c == ' ')
-        {
-            result += T('+');
-        }
-        else if (CharacterFunctions::isLetterOrDigit (c)
-                  || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0)
+        if (CharacterFunctions::isLetterOrDigit (c)
+             || CharacterFunctions::indexOfChar (legalChars, c, false) >= 0)
         {
             result << c;
         }

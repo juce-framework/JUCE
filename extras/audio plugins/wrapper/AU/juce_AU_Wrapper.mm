@@ -557,6 +557,7 @@ public:
 
         bufferSpace.setSize (2, 16);
         midiEvents.clear();
+        incomingEvents.clear();
         prepared = false;
     }
 
@@ -591,6 +592,7 @@ public:
                                        GetMaxFramesPerSlice());
 
             midiEvents.clear();
+            incomingEvents.clear();
 
             juce_free (channels);
             channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(),
@@ -700,6 +702,12 @@ public:
             }
 
             {
+                const ScopedLock sl (incomingMidiLock);
+                midiEvents.clear();
+                incomingEvents.swap (midiEvents);
+            }
+
+            {
                 AudioSampleBuffer buffer (channels, jmax (numIn, numOut), numSamples);
 
                 const ScopedLock sl (juceFilter->getCallbackLock());
@@ -784,12 +792,13 @@ protected:
 #endif
     {
 #if JucePlugin_WantsMidiInput
+        const ScopedLock sl (incomingMidiLock);
         JUCE_NAMESPACE::uint8 data [4];
         data[0] = nStatus | inChannel;
         data[1] = inData1;
         data[2] = inData2;
 
-        midiEvents.addEvent (data, 3, inStartFrame);
+        incomingEvents.addEvent (data, 3, inStartFrame);
 #endif
 
         return noErr;
@@ -798,7 +807,8 @@ protected:
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength)
     {
 #if JucePlugin_WantsMidiInput
-        midiEvents.addEvent (inData, inLength, 0);
+        const ScopedLock sl (incomingMidiLock);
+        incomingEvents.addEvent (inData, inLength, 0);
 #endif
         return noErr;
     }
@@ -866,12 +876,13 @@ private:
     AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
     float** channels;
-    MidiBuffer midiEvents;
+    MidiBuffer midiEvents, incomingEvents;
     bool prepared;
     SMPTETime lastSMPTETime;
     AUChannelInfo channelInfo [numChannelConfigs];
     AudioUnitEvent auEvent;
     mutable MemoryBlock presetsArray;
+    CriticalSection incomingMidiLock;
 };
 
 //==============================================================================

@@ -11454,6 +11454,8 @@ public:
     const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
     /** If this variant is an object, this invokes one of its methods with 4 arguments. */
     const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    /** If this variant is an object, this invokes one of its methods with 5 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
 
     /** If this variant is an object, this invokes one of its methods with a list of arguments. */
     const var invoke (const identifier& method, const var* arguments, int numArguments) const;
@@ -26057,6 +26059,13 @@ public:
     */
     int getLastEventTime() const throw();
 
+    /** Exchanges the contents of this buffer with another one.
+
+        This is a quick operation, because no memory allocating or copying is done, it
+        just swaps the internal state of the two buffers.
+    */
+    void swap (MidiBuffer& other);
+
     /**
         Used to iterate through the events in a MidiBuffer.
 
@@ -27110,13 +27119,29 @@ public:
     */
     int getNumSamples() const throw()       { return size; }
 
+    /** Returns a pointer one of the buffer's channels.
+
+        For speed, this doesn't check whether the channel number is out of range,
+        so be careful when using it!
+    */
+    float* getSampleData (const int channelNumber) const throw()
+    {
+        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+        return channels [channelNumber];
+    }
+
     /** Returns a pointer to a sample in one of the buffer's channels.
 
         For speed, this doesn't check whether the channel and sample number
-        are legal, so be careful when using it!
+        are out-of-range, so be careful when using it!
     */
     float* getSampleData (const int channelNumber,
-                          const int sampleOffset = 0) const throw();
+                          const int sampleOffset) const throw()
+    {
+        jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
+        jassert (((unsigned int) sampleOffset) < (unsigned int) size);
+        return channels [channelNumber] + sampleOffset;
+    }
 
     /** Returns an array of pointers to the channels in the buffer.
 

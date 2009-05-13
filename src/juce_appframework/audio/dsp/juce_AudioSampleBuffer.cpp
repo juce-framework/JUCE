@@ -169,15 +169,6 @@ AudioSampleBuffer::~AudioSampleBuffer() throw()
         juce_free (channels);
 }
 
-float* AudioSampleBuffer::getSampleData (const int channelNumber,
-                                         const int sampleOffset) const throw()
-{
-    jassert (((unsigned int) channelNumber) < (unsigned int) numChannels);
-    jassert (((unsigned int) sampleOffset) < (unsigned int) size);
-
-    return channels [channelNumber] + sampleOffset;
-}
-
 void AudioSampleBuffer::setSize (const int newNumChannels,
                                  const int newNumSamples,
                                  const bool keepExistingContent,

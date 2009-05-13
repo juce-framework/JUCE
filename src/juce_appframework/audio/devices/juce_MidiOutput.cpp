@@ -63,7 +63,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     // this needs to be a value in the future - RTFM for this method!
     jassert (millisecondCounterToStartAt > 0);
 
-    samplesPerSecondForBuffer *= 0.001;
+    const double timeScaleFactor = 1000.0 / samplesPerSecondForBuffer;
 
     MidiBuffer::Iterator i (buffer);
 
@@ -72,7 +72,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
 
     while (i.getNextEvent (data, len, time))
     {
-        const double eventTime = millisecondCounterToStartAt + samplesPerSecondForBuffer * time;
+        const double eventTime = millisecondCounterToStartAt + timeScaleFactor * time;
 
         PendingMessage* const m
             = new PendingMessage (data, len, eventTime);
