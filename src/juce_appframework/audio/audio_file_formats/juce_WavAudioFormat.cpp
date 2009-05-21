@@ -327,8 +327,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                                ++src;
+                                *left++ = ((int) swapIfBigEndian ((unsigned short) *src++)
+                                           + (int) swapIfBigEndian ((unsigned short) *src++)) << 15;
                             }
                         }
                         else
@@ -366,7 +366,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = littleEndian24Bit (src) << 8;
+                                *left++ = (littleEndian24Bit (src) + littleEndian24Bit (src + 3)) << 7;
                                 src += 6;
                             }
                         }
@@ -410,8 +410,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = swapIfBigEndian (*src++);
-                                ++src;
+                                *l++ = (swapIfBigEndian (*src++) >> 1) 
+                                        + (swapIfBigEndian (*src++) >> 1);
                             }
                         }
                         else

@@ -291,6 +291,9 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrem
 
         if (hasHorzBar && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! hasVertBar))
         {
+            if (wheelIncrementX == 0 && ! hasVertBar)
+                wheelIncrementX = wheelIncrementY;
+
             horizontalScrollBar->mouseWheelMove (e.getEventRelativeTo (horizontalScrollBar),
                                                  wheelIncrementX, wheelIncrementY);
             return true;

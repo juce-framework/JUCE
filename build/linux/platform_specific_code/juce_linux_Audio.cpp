@@ -424,7 +424,7 @@ public:
 
         if (outputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i <= outputChannels.getHighestBit(); ++i)
+            for (int i = 0; i <= jmax (outputChannels.getHighestBit(), minChansOut); ++i)
             {
                 outputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 
@@ -447,7 +447,7 @@ public:
                 return;
             }
 
-            currentOutputChans.setRange (0, minChansIn, true);
+            currentOutputChans.setRange (0, minChansOut, true);
 
             if (! outputDevice->setParameters ((unsigned int) sampleRate,
                                                jlimit ((int) minChansOut, (int) maxChansOut, currentOutputChans.getHighestBit() + 1),

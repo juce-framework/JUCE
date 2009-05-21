@@ -252,13 +252,13 @@ public:
         : source (source_)
     {
         source->AddRef();
-        DBG ("num IDispatch wrapper objs: " + String (++numDOWID));
+        log ("num IDispatch wrapper objs: " + String (++numDOWID));
     }
 
     ~DynamicObjectWrappingIDispatch()
     {
         source->Release();
-        DBG ("num IDispatch wrapper objs: " + String (--numDOWID));
+        log ("num IDispatch wrapper objs: " + String (--numDOWID));
     }
 
     const var getProperty (const var::identifier& propertyName) const

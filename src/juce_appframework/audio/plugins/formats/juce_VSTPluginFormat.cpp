@@ -2443,7 +2443,7 @@ static VstIntPtr VSTCALLBACK audioMaster (AEffect* effect, VstInt32 opcode, VstI
 //==============================================================================
 const String VSTPluginInstance::getVersion() const throw()
 {
-    int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
+    unsigned int v = dispatch (effGetVendorVersion, 0, 0, 0, 0);
 
     String s;
 

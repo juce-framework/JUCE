@@ -812,28 +812,27 @@ public:
             ww = jmax (1, w);
             wh = jmax (1, h);
 
-            if (! mapped)
+            // Make sure the Window manager does what we want
+            XSizeHints* hints = XAllocSizeHints();
+            hints->flags = USSize | USPosition;
+            hints->width = ww;
+            hints->height = wh;
+            hints->x = wx;
+            hints->y = wy;
+
+            if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
             {
-                // Make sure the Window manager does what we want
-                XSizeHints* hints = XAllocSizeHints();
-                hints->flags = USSize | USPosition;
-                hints->width = ww;
-                hints->height = wh;
-                hints->x = wx;
-                hints->y = wy;
-
-                if ((getStyleFlags() & (windowHasTitleBar | windowIsResizable)) == windowHasTitleBar)
-                {
-                    hints->min_width  = hints->max_width  = hints->width;
-                    hints->min_height = hints->max_height = hints->height;
-                    hints->flags |= PMinSize | PMaxSize;
-                }
-
-                XSetWMNormalHints (display, windowH, hints);
-                XFree (hints);
+                hints->min_width  = hints->max_width  = hints->width;
+                hints->min_height = hints->max_height = hints->height;
+                hints->flags |= PMinSize | PMaxSize;
             }
 
-            XMoveResizeWindow (display, windowH, wx, wy, ww, wh);
+            XSetWMNormalHints (display, windowH, hints);
+            XFree (hints);
+
+            XMoveResizeWindow (display, windowH,
+                               wx - windowBorder.getLeft(), 
+                               wy - windowBorder.getTop(), ww, wh);
 
             if (! deletionChecker.hasBeenDeleted())
             {
@@ -1960,16 +1959,23 @@ private:
 
         if (hints != None)
         {
-            long netHints [2];
-            netHints[0] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
+            int netHints [2];
+            int numHints = 0;
+            netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
+
+            if (netHints [numHints] != 0)
+                ++numHints;
 
             if ((styleFlags & windowIsTemporary) != 0)
-                netHints[1] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_MENU", True);
+                netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_MENU", True);
             else
-                netHints[1] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+                netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+
+            if (netHints [numHints] != 0)
+                ++numHints;
 
             XChangeProperty (display, wndH, hints, XA_ATOM, 32, PropModeReplace,
-                             (unsigned char*) &netHints, 2);
+                             (unsigned char*) &netHints, numHints);
         }
     }
 
@@ -2024,7 +2030,7 @@ private:
 
         if (hints != None)
         {
-            long netHints [6];
+            int netHints [6];
             int num = 0;
 
             netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_RESIZE", (styleFlags & windowIsResizable) ? True : False);
@@ -2578,8 +2584,8 @@ private:
     Atom XA_OtherMime, dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
 
-    unsigned long allowedActions [5];
-    unsigned long allowedMimeTypeAtoms [3];
+    unsigned int allowedActions [5];
+    unsigned int allowedMimeTypeAtoms [3];
     Array <Atom> srcMimeTypeAtomList;
 };
 

@@ -104,7 +104,7 @@ static bool parseFile (const File& rootFolder,
 
     StringArray lines;
     lines.addLines (content);
-    while (lines[0].trim().isEmpty())
+    while (lines.size() > 0 && lines[0].trim().isEmpty())
         lines.remove (0);
 
     for (int i = 0; i < lines.size(); ++i)

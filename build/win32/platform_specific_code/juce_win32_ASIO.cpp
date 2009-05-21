@@ -1793,7 +1793,7 @@ public:
     AudioIODevice* createDevice (const String& outputDeviceName,
                                  const String& inputDeviceName)
     {
-        jassert (inputDeviceName == outputDeviceName);
+        jassert (inputDeviceName == outputDeviceName || outputDeviceName.isEmpty() || inputDeviceName.isEmpty());
         (void) inputDeviceName;
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
