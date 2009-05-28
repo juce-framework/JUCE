@@ -52,6 +52,14 @@
 		843796F60EFC0102002A2725 /* CommonDebugSettings.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */; };
 		843796F70EFC0102002A2725 /* CommonReleaseSettings.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */; };
 		843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 843797030EFC022E002A2725 /* libPluginLibrary.a */; };
+		84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */; };
+		84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */; };
+		84D3AB670FCC74B300EA8080 /* CarbonEventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */; };
+		84D3AB680FCC74B300EA8080 /* CarbonEventHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB660FCC74B300EA8080 /* CarbonEventHandler.h */; };
+		84D3AB6C0FCC74DA00EA8080 /* AUCarbonViewControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB6A0FCC74DA00EA8080 /* AUCarbonViewControl.cpp */; };
+		84D3AB6D0FCC74DA00EA8080 /* AUCarbonViewControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB6B0FCC74DA00EA8080 /* AUCarbonViewControl.h */; };
+		84D3AB700FCC74F400EA8080 /* AUCarbonViewDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB6F0FCC74F400EA8080 /* AUCarbonViewDispatch.cpp */; };
+		84D3AB740FCC759700EA8080 /* AUViewLocalizedStringKeys.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB730FCC759700EA8080 /* AUViewLocalizedStringKeys.h */; };
 		8BA05AAE072073D300365D66 /* AUBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BA05A7F072073D200365D66 /* AUBase.cpp */; };
 		8BA05AAF072073D300365D66 /* AUBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BA05A80072073D200365D66 /* AUBase.h */; };
 		8BA05AB0072073D300365D66 /* AUDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BA05A81072073D200365D66 /* AUDispatch.cpp */; };
@@ -108,7 +116,7 @@
 		843792A80EFBF14B002A2725 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
 		843792A90EFBF14B002A2725 /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
 		843792B30EFBF175002A2725 /* juce_AU_Resources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = juce_AU_Resources.r; path = ../../../wrapper/AU/juce_AU_Resources.r; sourceTree = SOURCE_ROOT; };
-		843792B40EFBF175002A2725 /* juce_AU_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_AU_Wrapper.mm; path = ../../../wrapper/AU/juce_AU_Wrapper.mm; sourceTree = SOURCE_ROOT; };
+		843792B40EFBF175002A2725 /* juce_AU_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; name = juce_AU_Wrapper.mm; path = ../../../wrapper/AU/juce_AU_Wrapper.mm; sourceTree = SOURCE_ROOT; };
 		843795630EFBF323002A2725 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		843795640EFBF323002A2725 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		843795650EFBF323002A2725 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -141,6 +149,14 @@
 		843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonDebugSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonDebugSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
+		84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.cpp; sourceTree = DEVELOPER_DIR; };
+		84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.h; sourceTree = DEVELOPER_DIR; };
+		84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CarbonEventHandler.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.cpp; sourceTree = DEVELOPER_DIR; };
+		84D3AB660FCC74B300EA8080 /* CarbonEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CarbonEventHandler.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.h; sourceTree = DEVELOPER_DIR; };
+		84D3AB6A0FCC74DA00EA8080 /* AUCarbonViewControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewControl.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.cpp; sourceTree = DEVELOPER_DIR; };
+		84D3AB6B0FCC74DA00EA8080 /* AUCarbonViewControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewControl.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.h; sourceTree = DEVELOPER_DIR; };
+		84D3AB6F0FCC74F400EA8080 /* AUCarbonViewDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewDispatch.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewDispatch.cpp; sourceTree = DEVELOPER_DIR; };
+		84D3AB730FCC759700EA8080 /* AUViewLocalizedStringKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewLocalizedStringKeys.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUViewBase/AUViewLocalizedStringKeys.h; sourceTree = DEVELOPER_DIR; };
 		8BA05A7F072073D200365D66 /* AUBase.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AUBase.cpp; sourceTree = "<group>"; };
 		8BA05A80072073D200365D66 /* AUBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AUBase.h; sourceTree = "<group>"; };
 		8BA05A81072073D200365D66 /* AUDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AUDispatch.cpp; sourceTree = "<group>"; };
@@ -325,9 +341,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		84D3AB5D0FCC741E00EA8080 /* AUCarbonViewBase */ = {
+			isa = PBXGroup;
+			children = (
+				84D3AB6F0FCC74F400EA8080 /* AUCarbonViewDispatch.cpp */,
+				84D3AB6A0FCC74DA00EA8080 /* AUCarbonViewControl.cpp */,
+				84D3AB6B0FCC74DA00EA8080 /* AUCarbonViewControl.h */,
+				84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */,
+				84D3AB660FCC74B300EA8080 /* CarbonEventHandler.h */,
+				84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */,
+				84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */,
+			);
+			name = AUCarbonViewBase;
+			sourceTree = "<group>";
+		};
+		84D3AB720FCC758200EA8080 /* AUViewBase */ = {
+			isa = PBXGroup;
+			children = (
+				84D3AB730FCC759700EA8080 /* AUViewLocalizedStringKeys.h */,
+			);
+			name = AUViewBase;
+			sourceTree = "<group>";
+		};
 		8BA05A7D072073D200365D66 /* AUPublic */ = {
 			isa = PBXGroup;
 			children = (
+				84D3AB720FCC758200EA8080 /* AUViewBase */,
+				84D3AB5D0FCC741E00EA8080 /* AUCarbonViewBase */,
 				8BA05A7E072073D200365D66 /* AUBase */,
 				8BA05A99072073D200365D66 /* OtherBases */,
 				8BA05AA6072073D200365D66 /* Utility */,
@@ -441,6 +481,10 @@
 				8437966E0EFBF357002A2725 /* AUOutputBase.h in Headers */,
 				843796720EFBF357002A2725 /* MusicDeviceBase.h in Headers */,
 				843796DF0EFBFD16002A2725 /* juce_RTAS_DigiCode_Header.h in Headers */,
+				84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */,
+				84D3AB680FCC74B300EA8080 /* CarbonEventHandler.h in Headers */,
+				84D3AB6D0FCC74DA00EA8080 /* AUCarbonViewControl.h in Headers */,
+				84D3AB740FCC759700EA8080 /* AUViewLocalizedStringKeys.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -559,6 +603,10 @@
 				843796DE0EFBFD16002A2725 /* juce_RTAS_DigiCode3.cpp in Sources */,
 				843796E10EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm in Sources */,
 				843796E20EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp in Sources */,
+				84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */,
+				84D3AB670FCC74B300EA8080 /* CarbonEventHandler.cpp in Sources */,
+				84D3AB6C0FCC74DA00EA8080 /* AUCarbonViewControl.cpp in Sources */,
+				84D3AB700FCC74F400EA8080 /* AUCarbonViewDispatch.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
