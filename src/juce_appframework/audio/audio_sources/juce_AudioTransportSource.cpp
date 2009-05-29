@@ -128,11 +128,8 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
     if (oldMasterSource != 0)
         oldMasterSource->releaseResources();
 
-    if (oldResamplerSource != 0)
-        delete oldResamplerSource;
-
-    if (oldBufferingSource != 0)
-        delete oldBufferingSource;
+    delete oldResamplerSource;
+    delete oldBufferingSource;
 }
 
 void AudioTransportSource::start()

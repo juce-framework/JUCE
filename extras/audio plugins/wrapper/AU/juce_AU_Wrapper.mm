@@ -926,6 +926,12 @@ public:
         setSize (editorComp->getWidth(), editorComp->getHeight());
         addAndMakeVisible (editorComp);
         editorComp->addComponentListener (this);
+
+#if ! JucePlugin_EditorRequiresKeyboardFocus
+        setWantsKeyboardFocus (false);
+#else
+        setWantsKeyboardFocus (true);
+#endif
     }
 
     ~EditorCompHolder()
@@ -1196,12 +1202,16 @@ private:
             setWantsKeyboardFocus (false);
 #else
             addToDesktop (ComponentPeer::windowIsTemporary);
+            setWantsKeyboardFocus (true);
 #endif
 
             setVisible (true);
             toFront (false);
 
             addSubWindow();
+
+            NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
+            [pluginWindow setNextResponder: hostWindow];
 
             // Adds a callback bodge to work around some problems with wrapped
             // carbon windows..

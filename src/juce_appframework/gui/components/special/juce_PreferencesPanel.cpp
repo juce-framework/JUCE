@@ -67,6 +67,9 @@ void PreferencesPanel::addSettingsPage (const String& title,
     addAndMakeVisible (button);
 
     resized();
+
+    if (currentPage == 0)
+        setCurrentPage (title);
 }
 
 void PreferencesPanel::addSettingsPage (const String& title,
@@ -83,9 +86,6 @@ void PreferencesPanel::addSettingsPage (const String& title,
     iconDown.setOverlayColour (Colours::black.withAlpha (0.25f));
 
     addSettingsPage (title, &icon, &iconOver, &iconDown);
-
-    if (currentPage == 0)
-        setCurrentPage (title);
 }
 
 //==============================================================================

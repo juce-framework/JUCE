@@ -304,11 +304,23 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 
     if (message.isSysEx())
     {
-        MIDIPacketList* const packets = (MIDIPacketList*) juce_malloc (32 + message.getRawDataSize());
-        packets->numPackets = 1;
-        packets->packet[0].timeStamp = 0;
-        packets->packet[0].length = message.getRawDataSize();
-        memcpy (packets->packet[0].data, message.getRawData(), message.getRawDataSize());
+        const int maxPacketSize = 256;
+        int pos = 0, bytesLeft = message.getRawDataSize();
+        const int numPackets = (bytesLeft + maxPacketSize - 1) / maxPacketSize;
+        MIDIPacketList* const packets = (MIDIPacketList*) juce_malloc (32 * numPackets + message.getRawDataSize());
+        packets->numPackets = numPackets;
+
+        MIDIPacket* p = packets->packet;
+
+        for (int i = 0; i < numPackets; ++i)
+        {
+            p->timeStamp = 0;
+            p->length = jmin (maxPacketSize, bytesLeft);
+            memcpy (p->data, message.getRawData() + pos, p->length);
+            pos += p->length;
+            bytesLeft -= p->length;
+            p = MIDIPacketNext (p);
+        }
 
         MIDISend (mpe->port, mpe->endPoint, packets);
         juce_free (packets);

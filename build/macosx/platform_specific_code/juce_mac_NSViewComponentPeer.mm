@@ -77,6 +77,7 @@ END_JUCE_NAMESPACE
 
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
+- (BOOL) acceptsFirstResponder;
 
 - (NSArray*) getSupportedDragTypes;
 - (BOOL) sendDragCallback: (int) type sender: (id <NSDraggingInfo>) sender;
@@ -390,6 +391,11 @@ END_JUCE_NAMESPACE
         owner->viewFocusLoss();
 
     return true;
+}
+
+- (BOOL) acceptsFirstResponder
+{
+    return owner != 0 && owner->canBecomeKeyWindow();
 }
 
 //==============================================================================
@@ -1156,7 +1162,8 @@ void juce_HandleProcessFocusChange()
 
 bool NSViewComponentPeer::isFocused() const
 {
-    return window != 0 && [window isKeyWindow];
+    return isSharedWindow ? this == currentlyFocusedPeer
+                          : (window != 0 && [window isKeyWindow]);
 }
 
 void NSViewComponentPeer::grabFocus()
