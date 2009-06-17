@@ -42,6 +42,7 @@
 #include <utime.h>
 #include <pwd.h>
 #include <fcntl.h>
+#include <dlfcn.h> 
 
 #define U_ISOFS_SUPER_MAGIC     (short) 0x9660   // linux/iso_fs.h
 #define U_MSDOS_SUPER_MAGIC     (short) 0x4d44   // linux/msdos_fs.h
@@ -261,6 +262,15 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case currentExecutableFile:
     case currentApplicationFile:
+        if (! executableFile.exists())
+        {
+            Dl_info executableInfo;
+            dladdr ((const void*) juce_getFileTimes, &executableInfo);
+
+            if (executableInfo.dli_fname != 0)
+                executableFile = File (String (executableInfo.dli_fname));
+        }
+
         // if this fails, it's probably because juce_setCurrentExecutableFileName()
         // was never called to set the filename - this should be done by the juce
         // main() function, so maybe you've hacked it to use your own custom main()?

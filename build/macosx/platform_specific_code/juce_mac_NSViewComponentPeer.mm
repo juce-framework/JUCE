@@ -64,6 +64,9 @@ END_JUCE_NAMESPACE
 - (void) rightMouseDown: (NSEvent*) ev;
 - (void) rightMouseDragged: (NSEvent*) ev;
 - (void) rightMouseUp: (NSEvent*) ev;
+- (void) otherMouseDown: (NSEvent*) ev;
+- (void) otherMouseDragged: (NSEvent*) ev;
+- (void) otherMouseUp: (NSEvent*) ev;
 - (void) scrollWheel: (NSEvent*) ev;
 - (BOOL) acceptsFirstMouse: (NSEvent*) ev;
 - (void) frameChanged: (NSNotification*) n;
@@ -327,6 +330,21 @@ END_JUCE_NAMESPACE
 }
 
 - (void) rightMouseUp: (NSEvent*) ev
+{
+    [self mouseUp: ev];
+}
+
+- (void) otherMouseDown: (NSEvent*) ev
+{
+    [self mouseDown: ev];
+}
+
+- (void) otherMouseDragged: (NSEvent*) ev
+{
+    [self mouseDragged: ev];
+}
+
+- (void) otherMouseUp: (NSEvent*) ev
 {
     [self mouseUp: ev];
 }

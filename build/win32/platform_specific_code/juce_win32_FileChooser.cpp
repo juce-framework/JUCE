@@ -70,7 +70,7 @@ static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPAR
     return 0;
 }
 
-void juce_setWindowStyleBit (HWND h, int styleType, int feature, bool bitIsSet) throw();
+void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) throw();
 
 static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
 {

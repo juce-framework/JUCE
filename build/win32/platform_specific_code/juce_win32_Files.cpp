@@ -564,11 +564,10 @@ const File File::getLinkedTarget() const throw()
     else if (getFileExtension() != T(".lnk"))
         return result;
 
-    IShellLink* shellLink = 0;
-    if (SUCCEEDED (CoCreateInstance (CLSID_ShellLink, 0, CLSCTX_INPROC_SERVER,
-                                     IID_IShellLink, (LPVOID*) &shellLink)))
+    ComSmartPtr <IShellLink> shellLink;
+    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink, CLSCTX_INPROC_SERVER)))
     {
-        IPersistFile* persistFile;
+        ComSmartPtr <IPersistFile> persistFile;
         if (SUCCEEDED (shellLink->QueryInterface (IID_IPersistFile, (LPVOID*) &persistFile)))
         {
             if (SUCCEEDED (persistFile->Load ((const WCHAR*) p, STGM_READ))
@@ -580,11 +579,7 @@ const File File::getLinkedTarget() const throw()
                 if (SUCCEEDED (shellLink->GetPath (resolvedPath, MAX_PATH, &winFindData, SLGP_UNCPRIORITY)))
                     result = File (resolvedPath);
             }
-
-            persistFile->Release();
         }
-
-        shellLink->Release();
     }
 
     return result;

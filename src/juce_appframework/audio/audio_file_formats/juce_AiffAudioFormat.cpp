@@ -621,12 +621,12 @@ class AiffAudioFormatWriter  : public AudioFormatWriter
 public:
     //==============================================================================
     AiffAudioFormatWriter (OutputStream* out,
-                           const double sampleRate,
+                           const double sampleRate_,
                            const unsigned int chans,
                            const int bits)
         : AudioFormatWriter (out,
                              aiffFormatName,
-                             sampleRate,
+                             sampleRate_,
                              chans,
                              bits),
           lengthInSamples (0),

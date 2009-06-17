@@ -863,9 +863,17 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
 {
     if (defaultMidiOutputName != deviceName)
     {
+        SortedSet <AudioIODeviceCallback*> oldCallbacks;
+
+        {
+            const ScopedLock sl (audioCallbackLock);
+            oldCallbacks = callbacks;
+            callbacks.clear();
+        }
+
         if (currentAudioDevice != 0)
-            for (int i = callbacks.size(); --i >= 0;)
-                callbacks.getUnchecked(i)->audioDeviceStopped();
+            for (int i = oldCallbacks.size(); --i >= 0;)
+                oldCallbacks.getUnchecked(i)->audioDeviceStopped();
 
         deleteAndZero (defaultMidiOutput);
         defaultMidiOutputName = deviceName;
@@ -874,8 +882,13 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
             defaultMidiOutput = MidiOutput::openDevice (MidiOutput::getDevices().indexOf (deviceName));
 
         if (currentAudioDevice != 0)
-            for (int i = callbacks.size(); --i >= 0;)
-                callbacks.getUnchecked(i)->audioDeviceAboutToStart (currentAudioDevice);
+            for (int i = oldCallbacks.size(); --i >= 0;)
+                oldCallbacks.getUnchecked(i)->audioDeviceAboutToStart (currentAudioDevice);
+
+        {
+            const ScopedLock sl (audioCallbackLock);
+            callbacks = oldCallbacks;
+        }
 
         updateXml();
         sendChangeMessage (this);

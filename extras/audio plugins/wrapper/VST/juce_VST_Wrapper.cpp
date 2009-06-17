@@ -64,16 +64,16 @@
     Note that the JUCE_USE_VSTSDK_2_4 macro should be defined in JucePluginCharacteristics.h
 */
 #if JUCE_USE_VSTSDK_2_4
+ #ifdef __GNUC__
+  #define __cdecl
+ #endif 
+
  // VSTSDK V2.4 includes..
  #include "public.sdk/source/vst2.x/audioeffectx.h"
  #include "public.sdk/source/vst2.x/aeffeditor.h"
  #include "public.sdk/source/vst2.x/audioeffectx.cpp"
  #include "public.sdk/source/vst2.x/audioeffect.cpp"
 
- #if JUCE_LINUX
-  #define __cdecl
- #endif
- 
  #if ! VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
  #endif 
@@ -88,6 +88,8 @@
  #if (! VST_2_3_EXTENSIONS) || VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
  #endif 
+
+ #define __aeffect__  // (needed for juce_VSTMidiEventList.h to work)
 
  typedef long VstInt32;
  typedef long VstIntPtr;
@@ -115,6 +117,20 @@
     kVstSmpte599fps   = 12, ///< HDTV: 59.94 fps
     kVstSmpte60fps    = 13  ///< HDTV: 60 fps
  };
+
+ struct VstMidiSysexEvent
+ {
+    VstInt32 type;          ///< #kVstSysexType
+    VstInt32 byteSize;      ///< sizeof (VstMidiSysexEvent)
+    VstInt32 deltaFrames;   ///< sample frames related to the current block start sample position
+    VstInt32 flags;         ///< none defined yet (should be zero)
+    VstInt32 dumpBytes;     ///< byte size of sysexDump
+    VstIntPtr resvd1;       ///< zero (Reserved for future use)
+    char* sysexDump;        ///< sysex dump
+    VstIntPtr resvd2;       ///< zero (Reserved for future use)
+ };
+
+ typedef int VstSpeakerArrangementType; 
 #endif
 
 //==============================================================================

@@ -504,7 +504,7 @@ bool StreamingSocket::isLocal() const throw()
 DatagramSocket::DatagramSocket (const int localPortNumber)
     : portNumber (0),
       handle (-1),
-      connected (false),
+      connected (true),
       serverAddress (0)
 {
 #if JUCE_WIN32

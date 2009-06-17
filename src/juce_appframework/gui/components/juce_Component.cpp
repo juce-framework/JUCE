@@ -1619,7 +1619,7 @@ void Component::updateMouseCursor() const throw()
     sendFakeMouseMove();
 }
 
-void Component::internalUpdateMouseCursor (const bool forcedUpdate) throw()
+void Component::internalUpdateMouseCursor (bool forcedUpdate) throw()
 {
     ComponentPeer* const peer = getPeer();
 
@@ -1632,6 +1632,7 @@ void Component::internalUpdateMouseCursor (const bool forcedUpdate) throw()
                                         || ! isCursorVisibleUntilOffscreen))
         {
             mc = MouseCursor::NoCursor;
+            forcedUpdate = true;
         }
 
         static void* currentCursorHandle = 0;

@@ -34,6 +34,7 @@
 
 #include "../juce_Component.h"
 #include "../juce_ComponentDeletionWatcher.h"
+#include "../../../events/juce_ChangeBroadcaster.h"
 #include "../../../events/juce_Timer.h"
 
 
@@ -49,8 +50,12 @@
 
     You'll need to make sure the animator object isn't deleted before it finishes
     moving the components.
+ 
+    The class is a ChangeBroadcaster and sends a notification when any components
+    start or finish being animated.
 */
-class JUCE_API  ComponentAnimator  : private Timer
+class JUCE_API  ComponentAnimator  : public ChangeBroadcaster,
+                                     private Timer
 {
 public:
     //==============================================================================
@@ -121,6 +126,9 @@ public:
     */
     const Rectangle getComponentDestination (Component* const component);
 
+    /** Returns true if the specified component is currently being animated.
+    */
+    bool isAnimating (Component* component) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

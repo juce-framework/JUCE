@@ -660,8 +660,6 @@ public:
             int ls, ps;
             const uint8* const pixels = lockPixelDataReadOnly (0, 0, getWidth(), getHeight(), ls, ps);
 
-            jassert (! isARGB())
-
             for (int y = sy; y < sy + dh; ++y)
             {
                 const uint8* p = pixels + y * ls + sx * ps;
@@ -1961,15 +1959,15 @@ private:
         {
             int netHints [2];
             int numHints = 0;
-            netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
-
-            if (netHints [numHints] != 0)
-                ++numHints;
-
             if ((styleFlags & windowIsTemporary) != 0)
                 netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_MENU", True);
             else
                 netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+
+            if (netHints [numHints] != 0)
+                ++numHints;
+
+            netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
 
             if (netHints [numHints] != 0)
                 ++numHints;

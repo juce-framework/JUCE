@@ -153,4 +153,46 @@
  #pragma warning (pop)
 #endif
 
+//==============================================================================
+/** A simple COM smart pointer. 
+    Avoids having to include ATL just to get one of these.
+*/
+template <class T>
+class ComSmartPtr
+{
+public:
+    ComSmartPtr() throw() : p (0)                       {}
+    ComSmartPtr (T* const p_) : p (p_)                  { if (p_ != 0) p_->AddRef(); }
+    ComSmartPtr (const ComSmartPtr<T>& p_) : p (p_.p)   { if (p != 0) p->AddRef(); }
+    ~ComSmartPtr()                                      { if (p != 0) p->Release(); }
+
+    operator T*() const throw()     { return p; }
+    T& operator*() const throw()    { return *p; }
+    T** operator&() throw()         { return &p; }
+    T* operator->() const throw()   { return p; }
+
+    T* operator= (T* const newP)
+    {
+        if (newP != 0)
+            newP->AddRef();
+        
+        if (p != 0)
+            p->Release();
+
+        p = newP;
+        return newP;
+    }
+
+    T* operator= (const ComSmartPtr<T>& newP)  { return operator= (newP.p); }
+
+    HRESULT CoCreateInstance (REFCLSID rclsid, DWORD dwClsContext)
+    {
+        operator= (0);
+        return ::CoCreateInstance (rclsid, 0, dwClsContext, __uuidof(T), (void**) &p);
+    }
+
+    T* p;
+};
+
+
 #endif   // __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__

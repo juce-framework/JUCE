@@ -432,12 +432,12 @@ void TableListBox::paintListBoxItem (int, Graphics&, int, int, bool)
 {
 }
 
-Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
+Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelected_, Component* existingComponentToUpdate)
 {
     if (existingComponentToUpdate == 0)
         existingComponentToUpdate = new TableListRowComp (*this);
 
-    ((TableListRowComp*) existingComponentToUpdate)->update (rowNumber, isRowSelected);
+    ((TableListRowComp*) existingComponentToUpdate)->update (rowNumber, isRowSelected_);
 
     return existingComponentToUpdate;
 }

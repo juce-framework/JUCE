@@ -3281,8 +3281,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
+    OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity_),
           numUsed (0)
     {
     }
@@ -4557,8 +4557,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    Array (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
+    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity_),
          numUsed (0)
     {
     }
@@ -10474,8 +10474,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
+    SortedSet (const int granularity_ = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity_),
          numUsed (0)
     {
     }
@@ -42387,8 +42387,12 @@ private:
 
     You'll need to make sure the animator object isn't deleted before it finishes
     moving the components.
+
+    The class is a ChangeBroadcaster and sends a notification when any components
+    start or finish being animated.
 */
-class JUCE_API  ComponentAnimator  : private Timer
+class JUCE_API  ComponentAnimator  : public ChangeBroadcaster,
+                                     private Timer
 {
 public:
 
@@ -42457,6 +42461,10 @@ public:
         return its current position.
     */
     const Rectangle getComponentDestination (Component* const component);
+
+    /** Returns true if the specified component is currently being animated.
+    */
+    bool isAnimating (Component* component) const;
 
     juce_UseDebuggingNewOperator
 

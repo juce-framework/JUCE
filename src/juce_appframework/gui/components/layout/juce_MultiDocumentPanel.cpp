@@ -179,7 +179,7 @@ void MultiDocumentPanel::addWindow (Component* component)
 }
 
 bool MultiDocumentPanel::addDocument (Component* const component,
-                                      const Colour& backgroundColour,
+                                      const Colour& docColour,
                                       const bool deleteWhenRemoved)
 {
     // If you try passing a full DocumentWindow or ResizableWindow in here, you'll end up
@@ -191,7 +191,7 @@ bool MultiDocumentPanel::addDocument (Component* const component,
 
     components.add (component);
     component->setComponentProperty (T("mdiDocumentDelete_"), deleteWhenRemoved);
-    component->setComponentProperty (T("mdiDocumentBkg_"), backgroundColour);
+    component->setComponentProperty (T("mdiDocumentBkg_"), docColour);
     component->addComponentListener (this);
 
     if (mode == FloatingWindows)
@@ -224,14 +224,14 @@ bool MultiDocumentPanel::addDocument (Component* const component,
             Array <Component*> temp (components);
 
             for (int i = 0; i < temp.size(); ++i)
-                tabComponent->addTab (temp[i]->getName(), backgroundColour, temp[i], false);
+                tabComponent->addTab (temp[i]->getName(), docColour, temp[i], false);
 
             resized();
         }
         else
         {
             if (tabComponent != 0)
-                tabComponent->addTab (component->getName(), backgroundColour, component, false);
+                tabComponent->addTab (component->getName(), docColour, component, false);
             else
                 addAndMakeVisible (component);
         }

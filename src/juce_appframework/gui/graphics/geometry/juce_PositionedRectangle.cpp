@@ -335,65 +335,65 @@ void PositionedRectangle::decodeSizeString (const String& s, uint8& mode, double
 }
 
 void PositionedRectangle::applyPosAndSize (double& xOut, double& wOut,
-                                           const double x, const double w,
-                                           const uint8 xMode, const uint8 wMode,
+                                           const double x_, const double w_,
+                                           const uint8 xMode_, const uint8 wMode_,
                                            const int parentPos,
                                            const int parentSize) const throw()
 {
-    if (wMode == proportionalSize)
-        wOut = roundDoubleToInt (w * parentSize);
-    else if (wMode == parentSizeMinusAbsolute)
-        wOut = jmax (0, parentSize - roundDoubleToInt (w));
+    if (wMode_ == proportionalSize)
+        wOut = roundDoubleToInt (w_ * parentSize);
+    else if (wMode_ == parentSizeMinusAbsolute)
+        wOut = jmax (0, parentSize - roundDoubleToInt (w_));
     else
-        wOut = roundDoubleToInt (w);
+        wOut = roundDoubleToInt (w_);
 
-    if ((xMode & proportionOfParentSize) != 0)
-        xOut = parentPos + x * parentSize;
-    else if ((xMode & absoluteFromParentBottomRight) != 0)
-        xOut = (parentPos + parentSize) - x;
-    else if ((xMode & absoluteFromParentCentre) != 0)
-        xOut = x + (parentPos + parentSize / 2);
+    if ((xMode_ & proportionOfParentSize) != 0)
+        xOut = parentPos + x_ * parentSize;
+    else if ((xMode_ & absoluteFromParentBottomRight) != 0)
+        xOut = (parentPos + parentSize) - x_;
+    else if ((xMode_ & absoluteFromParentCentre) != 0)
+        xOut = x_ + (parentPos + parentSize / 2);
     else
-        xOut = x + parentPos;
+        xOut = x_ + parentPos;
 
-    if ((xMode & anchorAtRightOrBottom) != 0)
+    if ((xMode_ & anchorAtRightOrBottom) != 0)
         xOut -= wOut;
-    else if ((xMode & anchorAtCentre) != 0)
+    else if ((xMode_ & anchorAtCentre) != 0)
         xOut -= wOut / 2;
 }
 
 void PositionedRectangle::updatePosAndSize (double& xOut, double& wOut,
-                                            double x, const double w,
-                                            const uint8 xMode, const uint8 wMode,
+                                            double x_, const double w_,
+                                            const uint8 xMode_, const uint8 wMode_,
                                             const int parentPos,
                                             const int parentSize) const throw()
 {
-    if (wMode == proportionalSize)
+    if (wMode_ == proportionalSize)
     {
         if (parentSize > 0)
-            wOut = w / parentSize;
+            wOut = w_ / parentSize;
     }
-    else if (wMode == parentSizeMinusAbsolute)
-        wOut = parentSize - w;
+    else if (wMode_ == parentSizeMinusAbsolute)
+        wOut = parentSize - w_;
     else
-        wOut = w;
+        wOut = w_;
 
-    if ((xMode & anchorAtRightOrBottom) != 0)
-        x += w;
-    else if ((xMode & anchorAtCentre) != 0)
-        x += w / 2;
+    if ((xMode_ & anchorAtRightOrBottom) != 0)
+        x_ += w_;
+    else if ((xMode_ & anchorAtCentre) != 0)
+        x_ += w_ / 2;
 
-    if ((xMode & proportionOfParentSize) != 0)
+    if ((xMode_ & proportionOfParentSize) != 0)
     {
         if (parentSize > 0)
-            xOut = (x - parentPos) / parentSize;
+            xOut = (x_ - parentPos) / parentSize;
     }
-    else if ((xMode & absoluteFromParentBottomRight) != 0)
-        xOut = (parentPos + parentSize) - x;
-    else if ((xMode & absoluteFromParentCentre) != 0)
-        xOut = x - (parentPos + parentSize / 2);
+    else if ((xMode_ & absoluteFromParentBottomRight) != 0)
+        xOut = (parentPos + parentSize) - x_;
+    else if ((xMode_ & absoluteFromParentCentre) != 0)
+        xOut = x_ - (parentPos + parentSize / 2);
     else
-        xOut = x - parentPos;
+        xOut = x_ - parentPos;
 }
 
 END_JUCE_NAMESPACE

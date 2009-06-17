@@ -40,11 +40,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ToolbarButton::ToolbarButton (const int itemId,
+ToolbarButton::ToolbarButton (const int itemId_,
                               const String& buttonText,
                               Drawable* const normalImage_,
                               Drawable* const toggledOnImage_)
-   : ToolbarItemComponent (itemId, buttonText, true),
+   : ToolbarItemComponent (itemId_, buttonText, true),
      normalImage (normalImage_),
      toggledOnImage (toggledOnImage_)
 {

@@ -39,8 +39,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ImageButton::ImageButton (const String& text)
-    : Button (text),
+ImageButton::ImageButton (const String& text_)
+    : Button (text_),
       scaleImageToFit (true),
       preserveProportions (true),
       alphaThreshold (0),

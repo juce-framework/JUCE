@@ -42,9 +42,9 @@ class MagnifyingPeer    : public ComponentPeer
 {
 public:
     //==============================================================================
-    MagnifyingPeer (Component* const component,
+    MagnifyingPeer (Component* const component_,
                     MagnifierComponent* const magnifierComp_)
-        : ComponentPeer (component, 0),
+        : ComponentPeer (component_, 0),
           magnifierComp (magnifierComp_)
     {
     }

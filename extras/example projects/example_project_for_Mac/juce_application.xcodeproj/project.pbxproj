@@ -11,6 +11,7 @@
 		841083D50DB36EA400AB8583 /* MainComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 841083D30DB36EA400AB8583 /* MainComponent.cpp */; };
 		841084880DB374E700AB8583 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 841084870DB374E700AB8583 /* juce.xcconfig */; };
 		841136A00D0480DE0054B790 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8411369F0D0480DE0054B790 /* OpenGL.framework */; };
+		84204DA50FDEFA3800FA4ABC /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84204DA40FDEFA3800FA4ABC /* Carbon.framework */; };
 		846EC7870EB607050080CCFF /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846EC7860EB607050080CCFF /* QTKit.framework */; };
 		84F30CD108FEAAA20087E26C /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F30CD008FEAAA20087E26C /* Main.cpp */; };
 		84F30CED08FEAD7A0087E26C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F30CEC08FEAD7A0087E26C /* CoreAudio.framework */; };
@@ -34,6 +35,7 @@
 		841083D40DB36EA400AB8583 /* MainComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../common/MainComponent.h; sourceTree = SOURCE_ROOT; };
 		841084870DB374E700AB8583 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
 		8411369F0D0480DE0054B790 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		84204DA40FDEFA3800FA4ABC /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		846EC7860EB607050080CCFF /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		84F30CD008FEAAA20087E26C /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../common/Main.cpp; sourceTree = SOURCE_ROOT; };
 		84F30CEC08FEAD7A0087E26C /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
@@ -64,6 +66,7 @@
 				84FBB8880E06CCE900B52196 /* AudioUnit.framework in Frameworks */,
 				84FBB88D0E06CD0100B52196 /* WebKit.framework in Frameworks */,
 				846EC7870EB607050080CCFF /* QTKit.framework in Frameworks */,
+				84204DA50FDEFA3800FA4ABC /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +118,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				84204DA40FDEFA3800FA4ABC /* Carbon.framework */,
 				84FBB8870E06CCE900B52196 /* AudioUnit.framework */,
 				84FBB8720E06CC5D00B52196 /* Cocoa.framework */,
 				4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */,

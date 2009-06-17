@@ -142,6 +142,7 @@ void ComponentAnimator::animateComponent (Component* const component,
         {
             at = new AnimationTask (component);
             tasks.add (at);
+            sendChangeMessage (this);
         }
 
         at->msElapsed = 0;
@@ -181,6 +182,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
 
         delete at;
         tasks.remove (i);
+        sendChangeMessage (this);
     }
 }
 
@@ -196,6 +198,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 
         tasks.removeValue (at);
         delete at;
+        sendChangeMessage (this);
     }
 }
 
@@ -209,6 +212,11 @@ const Rectangle ComponentAnimator::getComponentDestination (Component* const com
         return component->getBounds();
 
     return Rectangle();
+}
+
+bool ComponentAnimator::isAnimating (Component* component) const
+{
+    return findTaskFor (component) != 0;
 }
 
 void ComponentAnimator::timerCallback()
@@ -228,6 +236,7 @@ void ComponentAnimator::timerCallback()
         {
             tasks.remove (i);
             delete at;
+            sendChangeMessage (this);
         }
     }
 
