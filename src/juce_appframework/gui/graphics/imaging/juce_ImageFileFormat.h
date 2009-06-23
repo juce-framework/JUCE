@@ -152,7 +152,7 @@ public:
 
     @see ImageFileFormat, JPEGImageFormat
 */
-class PNGImageFormat  : public ImageFileFormat
+class JUCE_API  PNGImageFormat  : public ImageFileFormat
 {
 public:
     //==============================================================================
@@ -175,7 +175,7 @@ public:
 
     @see ImageFileFormat, PNGImageFormat
 */
-class JPEGImageFormat  : public ImageFileFormat
+class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 {
 public:
     //==============================================================================

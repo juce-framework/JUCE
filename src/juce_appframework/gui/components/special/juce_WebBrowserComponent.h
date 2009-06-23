@@ -47,7 +47,7 @@ class WebBrowserComponentInternal;
     Windows, probably IE.
 
 */
-class WebBrowserComponent      : public Component
+class JUCE_API  WebBrowserComponent      : public Component
 {
 public:
     //==============================================================================

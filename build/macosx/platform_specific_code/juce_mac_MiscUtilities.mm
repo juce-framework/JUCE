@@ -78,7 +78,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                             juceStringToNS (bodyText),
                             @"Ok",
                             isOkCancel ? @"Cancel" : nil,
-                            nil) == 0;
+                            nil) == NSAlertDefaultReturn;
 }
 
 //==============================================================================

@@ -890,36 +890,71 @@ static void transformedImageRender (Image& destImage,
 
     if (quality == Graphics::lowResamplingQuality) // nearest-neighbour..
     {
-        for (int y = 0; y < destClipH; ++y)
+        if (alpha == 255)
         {
-            double sx = srcX;
-            double sy = srcY;
-
-            DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
-
-            for (int x = 0; x < destClipW; ++x)
+            for (int y = 0; y < destClipH; ++y)
             {
-                const int ix = roundDoubleToInt (floor (sx)) - srcClipX;
+                double sx = srcX;
+                double sy = srcY;
 
-                if (((unsigned int) ix) < (unsigned int) srcClipWidth)
+                DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
+
+                for (int x = destClipW; --x >= 0;)
                 {
-                    const int iy = roundDoubleToInt (floor (sy)) - srcClipY;
+                    const int ix = ((int) sx) - srcClipX;
 
-                    if (((unsigned int) iy) < (unsigned int) srcClipHeight)
+                    if (((unsigned int) ix) < (unsigned int) srcClipWidth)
                     {
-                        const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
+                        const int iy = ((int) sy) - srcClipY;
 
-                        dest->blend (*src, alpha);
+                        if (((unsigned int) iy) < (unsigned int) srcClipHeight)
+                        {
+                            const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
+                            dest->set (*src);
+                        }
                     }
+
+                    ++dest;
+                    sx += pixelDX;
+                    sy += pixelDY;
                 }
 
-                ++dest;
-                sx += pixelDX;
-                sy += pixelDY;
+                srcX += lineDX;
+                srcY += lineDY;
             }
+        }
+        else
+        {
+            for (int y = 0; y < destClipH; ++y)
+            {
+                double sx = srcX;
+                double sy = srcY;
 
-            srcX += lineDX;
-            srcY += lineDY;
+                DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
+
+                for (int x = destClipW; --x >= 0;)
+                {
+                    const int ix = ((int) sx) - srcClipX;
+
+                    if (((unsigned int) ix) < (unsigned int) srcClipWidth)
+                    {
+                        const int iy = ((int) sy) - srcClipY;
+
+                        if (((unsigned int) iy) < (unsigned int) srcClipHeight)
+                        {
+                            const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
+                            dest->blend (*src, alpha);
+                        }
+                    }
+
+                    ++dest;
+                    sx += pixelDX;
+                    sy += pixelDY;
+                }
+
+                srcX += lineDX;
+                srcY += lineDY;
+            }
         }
     }
     else

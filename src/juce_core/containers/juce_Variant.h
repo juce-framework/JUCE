@@ -97,7 +97,7 @@ public:
     bool isMethod() const throw()       { return type == methodType; }
 
     //==============================================================================
-    class identifier
+    class JUCE_API  identifier
     {
     public:
         identifier (const char* const name) throw();

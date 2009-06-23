@@ -152,6 +152,58 @@ struct BWAVChunk
 
 } PACKED;
 
+
+//==============================================================================
+struct SMPLChunk
+{
+    struct SampleLoop
+    {
+        uint32 identifier;
+        uint32 type;
+        uint32 start;
+        uint32 end;
+        uint32 fraction;
+        uint32 playCount;
+    } PACKED;
+
+    uint32 manufacturer;
+    uint32 product;
+    uint32 samplePeriod;
+    uint32 midiUnityNote;
+    uint32 midiPitchFraction;
+    uint32 smpteFormat;
+    uint32 smpteOffset;
+    uint32 numSampleLoops;
+    uint32 samplerData;
+    SampleLoop loops[1];
+
+    void copyTo (StringPairArray& values, const int totalSize) const
+    {
+        values.set (T("Manufacturer"),      String (swapIfBigEndian (manufacturer)));
+        values.set (T("Product"),           String (swapIfBigEndian (product)));
+        values.set (T("SamplePeriod"),      String (swapIfBigEndian (samplePeriod)));
+        values.set (T("MidiUnityNote"),     String (swapIfBigEndian (midiUnityNote)));
+        values.set (T("MidiPitchFraction"), String (swapIfBigEndian (midiPitchFraction)));
+        values.set (T("SmpteFormat"),       String (swapIfBigEndian (smpteFormat)));
+        values.set (T("SmpteOffset"),       String (swapIfBigEndian (smpteOffset)));
+        values.set (T("NumSampleLoops"),    String (swapIfBigEndian (numSampleLoops)));
+        values.set (T("SamplerData"),       String (swapIfBigEndian (samplerData)));
+
+        for (uint32 i = 0; i < numSampleLoops; ++i)
+        {
+            if ((uint8*) (loops + (i + 1)) > ((uint8*) this) + totalSize)
+                break;
+
+            values.set (String::formatted (T("Loop%dIdentifier"), i),   String (swapIfBigEndian (loops[i].identifier)));
+            values.set (String::formatted (T("Loop%dType"), i),         String (swapIfBigEndian (loops[i].type)));
+            values.set (String::formatted (T("Loop%dStart"), i),        String (swapIfBigEndian (loops[i].start)));
+            values.set (String::formatted (T("Loop%dEnd"), i),          String (swapIfBigEndian (loops[i].end)));
+            values.set (String::formatted (T("Loop%dFraction"), i),     String (swapIfBigEndian (loops[i].fraction)));
+            values.set (String::formatted (T("Loop%dPlayCount"), i),    String (swapIfBigEndian (loops[i].playCount)));
+        }
+    }
+} PACKED;
+
 #if JUCE_MSVC
   #pragma pack (pop)
 #endif
@@ -231,15 +283,18 @@ public:
 
                         // Broadcast-wav extension chunk..
                         BWAVChunk* const bwav = (BWAVChunk*) juce_calloc (jmax (length + 1, (int) sizeof (BWAVChunk)));
-
-                        if (bwav != 0)
-                        {
-                            input->read (bwav, length);
-                            bwav->copyTo (metadataValues);
-                            juce_free (bwav);
-                        }
+                        input->read (bwav, length);
+                        bwav->copyTo (metadataValues);
+                        juce_free (bwav);
                     }
-                    else if ((hasGotType && hasGotData) || chunkEnd <= input->getPosition())
+                    else if (chunkType == chunkName ("smpl"))
+                    {
+                        SMPLChunk* const smpl = (SMPLChunk*) juce_calloc (jmax (length + 1, (int) sizeof (SMPLChunk)));
+                        input->read (smpl, length);
+                        smpl->copyTo (metadataValues, length);
+                        juce_free (smpl);
+                    }
+                    else if (chunkEnd <= input->getPosition())
                     {
                         break;
                     }

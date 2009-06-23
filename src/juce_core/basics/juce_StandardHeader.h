@@ -121,6 +121,10 @@
     #define JUCE_API __declspec (dllimport)
     #pragma warning (disable: 4251)
   #endif
+#elif defined (__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+  #ifdef JUCE_DLL_BUILD
+    #define JUCE_API __attribute__ ((visibility("default")))
+  #endif
 #endif
 
 #ifndef JUCE_API

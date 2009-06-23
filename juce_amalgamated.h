@@ -669,6 +669,10 @@
     #define JUCE_API __declspec (dllimport)
     #pragma warning (disable: 4251)
   #endif
+#elif defined (__GNUC__) && ((__GNUC__ >= 4) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+  #ifdef JUCE_DLL_BUILD
+    #define JUCE_API __attribute__ ((visibility("default")))
+  #endif
 #endif
 
 #ifndef JUCE_API
@@ -11428,7 +11432,7 @@ public:
     bool isObject() const throw()       { return type == objectType; }
     bool isMethod() const throw()       { return type == methodType; }
 
-    class identifier
+    class JUCE_API  identifier
     {
     public:
         identifier (const char* const name) throw();
@@ -40843,7 +40847,7 @@ public:
 
     @see ImageFileFormat, JPEGImageFormat
 */
-class PNGImageFormat  : public ImageFileFormat
+class JUCE_API  PNGImageFormat  : public ImageFileFormat
 {
 public:
 
@@ -40863,7 +40867,7 @@ public:
 
     @see ImageFileFormat, PNGImageFormat
 */
-class JPEGImageFormat  : public ImageFileFormat
+class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 {
 public:
 
@@ -53393,7 +53397,7 @@ class WebBrowserComponentInternal;
     Windows, probably IE.
 
 */
-class WebBrowserComponent      : public Component
+class JUCE_API  WebBrowserComponent      : public Component
 {
 public:
 
