@@ -606,6 +606,7 @@ public:
     {
         const ScopedAutoReleasePool pool;
 
+        [NSGraphicsContext saveGraphicsState];
         [NSGraphicsContext setCurrentContext:
             [NSGraphicsContext graphicsContextWithBitmapImageRep: imageRep]];
 
@@ -615,6 +616,7 @@ public:
                         fraction: 1.0f];
 
         [[NSGraphicsContext currentContext] flushGraphics];
+        [NSGraphicsContext restoreGraphicsState];
 
         if (juceImage.hasAlphaChannel())
             swapRGBOrder (0, 0, juceImage.getWidth(), juceImage.getHeight());
@@ -1261,7 +1263,7 @@ bool NSViewComponentPeer::redirectKeyDown (NSEvent* ev)
 bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
 {
     updateKeysDown (ev, false);
-    return handleKeyEvent (ev, false) 
+    return handleKeyEvent (ev, false)
             || Component::getCurrentlyModalComponent() != 0;
 }
 

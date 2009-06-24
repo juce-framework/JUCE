@@ -132,6 +132,13 @@
 #endif
 
 //=============================================================================
+/** Enabling this provides support for cameras, using the CameraDevice class
+*/
+#if JUCE_QUICKTIME && ! defined (JUCE_USE_CAMERA)
+//  #define JUCE_USE_CAMERA 1
+#endif
+
+//=============================================================================
 /** Enabling this macro means that all regions that get repainted will have a coloured
     line drawn around them.
 

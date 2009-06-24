@@ -371,6 +371,9 @@
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
  #include "juce_appframework/gui/graphics/geometry/juce_RectangleList.h"
 #endif
+#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
+ #include "juce_appframework/gui/graphics/imaging/juce_CameraDevice.h"
+#endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
  #include "juce_appframework/gui/graphics/imaging/juce_Image.h"
 #endif

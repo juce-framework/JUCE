@@ -108,10 +108,7 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
+				Name="VCWebDeploymentTool"			/>			<Tool				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
@@ -207,10 +204,7 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
+				Name="VCWebDeploymentTool"			/>			<Tool				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>

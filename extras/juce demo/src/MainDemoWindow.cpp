@@ -115,6 +115,7 @@ class ContentComp  : public Component,
         showQuicktime              = 0x2008,
         showInterprocessComms      = 0x2009,
         showTable                  = 0x2010,
+        showCamera                 = 0x2011,
 
         showSourceCode             = 0x200a,
 
@@ -206,6 +207,7 @@ public:
             menu.addCommandItem (commandManager, showOpenGL);
             menu.addCommandItem (commandManager, showQuicktime);
             menu.addCommandItem (commandManager, showInterprocessComms);
+            menu.addCommandItem (commandManager, showCamera);
 
             menu.addSeparator();
             menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
@@ -265,6 +267,7 @@ public:
                                   showDragAndDrop,
                                   showOpenGL,
                                   showQuicktime,
+                                  showCamera,
                                   showInterprocessComms,
                                   showSourceCode,
                                   setDefaultLookAndFeel,
@@ -343,7 +346,7 @@ public:
             result.setInfo (T("OpenGL"), T("Shows the OpenGL demo"), demosCategory, 0);
             result.addDefaultKeypress (T('9'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showOpenGL);
-#ifndef JUCE_OPENGL
+#if ! JUCE_OPENGL
             result.setActive (false);
 #endif
             break;
@@ -353,6 +356,15 @@ public:
             result.addDefaultKeypress (T('b'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showQuicktime);
 #if ! (JUCE_QUICKTIME && ! JUCE_LINUX)
+            result.setActive (false);
+#endif
+            break;
+
+        case showCamera:
+            result.setInfo (T("Camera Capture"), T("Shows the camera demo"), demosCategory, 0);
+            result.addDefaultKeypress (T('c'), ModifierKeys::commandModifier);
+            result.setTicked (currentDemoId == showCamera);
+#if ! JUCE_USE_CAMERA
             result.setActive (false);
 #endif
             break;
@@ -458,6 +470,13 @@ public:
 #if JUCE_QUICKTIME && ! JUCE_LINUX
             showDemo (createQuickTimeDemo(), BinaryData::quicktimedemo_cpp);
             currentDemoId = showQuicktime;
+#endif
+            break;
+
+        case showCamera:
+#if JUCE_USE_CAMERA
+            showDemo (createCameraDemo(), BinaryData::camerademo_cpp);
+            currentDemoId = showCamera;
 #endif
             break;
 

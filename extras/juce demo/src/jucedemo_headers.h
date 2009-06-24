@@ -65,4 +65,9 @@ Component* createInterprocessCommsDemo();
  Component* createOpenGLDemo();
 #endif
 
+#if JUCE_USE_CAMERA
+  Component* createCameraDemo();
+#endif
+
+
 #endif   // __JUCEDEMO_HEADERS_JUCEHEADER__

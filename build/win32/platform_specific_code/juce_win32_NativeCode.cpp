@@ -62,6 +62,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/events/juce_MessageManager.h"
 #include "../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h"
+#include "../../../src/juce_appframework/gui/graphics/imaging/juce_CameraDevice.h"
 #include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
 #include "../../../src/juce_appframework/gui/components/juce_Desktop.h"
 #include "../../../src/juce_appframework/gui/components/menus/juce_MenuBarModel.h"
@@ -110,6 +111,7 @@ BEGIN_JUCE_NAMESPACE
  #include "juce_win32_Midi.cpp"
  #include "juce_win32_ASIO.cpp"
  #include "juce_win32_DirectSound.cpp"
+ #include "juce_win32_CameraDevice.cpp"
 #endif
 
 //==============================================================================

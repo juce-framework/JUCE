@@ -45,7 +45,7 @@
 
 #ifdef _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4100 4201 4514 4312)
+  #pragma warning (disable : 4100 4201 4514 4312 4995)
 #endif
 
 #define _WIN32_WINNT 0x0500
@@ -124,6 +124,20 @@
  #include <imapierror.h>
 #endif
 
+//==============================================================================
+#if JUCE_USE_CAMERA
+
+ /*  If you're using the camera classes, you'll need access to a few DirectShow headers.
+
+     Both of these files are provided in the normal Windows SDK, but some Microsoft plonker
+     didn't realise that qedit.h doesn't actually compile without the rest of the DirectShow SDK!
+     Microsoft's suggested fix for this is to hack their qedit.h file! See:
+     http://social.msdn.microsoft.com/Forums/en-US/windowssdk/thread/ed097d2c-3d68-4f48-8448-277eaaf68252
+     .. which is a pathetic bodge, but a lot less hassle than installing the full DShow SDK.
+ */
+ #include <dshow.h>
+ #include <qedit.h>
+#endif
 
 //==============================================================================
 #if JUCE_QUICKTIME
@@ -154,7 +168,7 @@
 #endif
 
 //==============================================================================
-/** A simple COM smart pointer. 
+/** A simple COM smart pointer.
     Avoids having to include ATL just to get one of these.
 */
 template <class T>
@@ -175,7 +189,7 @@ public:
     {
         if (newP != 0)
             newP->AddRef();
-        
+
         if (p != 0)
             p->Release();
 

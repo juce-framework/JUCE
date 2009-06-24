@@ -512,6 +512,8 @@
 		84E025060E94028C003E41AF /* juce_posix_SharedCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E024F00E94028C003E41AF /* juce_posix_SharedCode.h */; };
 		84E8209409729D2A0097675B /* juce_AudioFormatManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E8209209729D2A0097675B /* juce_AudioFormatManager.cpp */; };
 		84E8209509729D2A0097675B /* juce_AudioFormatManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 84E8209309729D2A0097675B /* juce_AudioFormatManager.h */; };
+		84EE00FD0FF22E660093FACA /* juce_mac_CameraDevice.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84EE00FC0FF22E660093FACA /* juce_mac_CameraDevice.mm */; };
+		84EE01050FF235750093FACA /* juce_CameraDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 84EE01040FF235750093FACA /* juce_CameraDevice.h */; };
 		84F1B8DA09499F1400AD8EDE /* juce_MidiKeyboardComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1B8D809499F1400AD8EDE /* juce_MidiKeyboardComponent.cpp */; };
 		84F1B8DB09499F1400AD8EDE /* juce_MidiKeyboardComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1B8D909499F1400AD8EDE /* juce_MidiKeyboardComponent.h */; };
 		84F1F05D0A36CE96008CCC5E /* juce_FilenameComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1F05B0A36CE96008CCC5E /* juce_FilenameComponent.cpp */; };
@@ -1103,6 +1105,8 @@
 		84E024F00E94028C003E41AF /* juce_posix_SharedCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_posix_SharedCode.h; sourceTree = "<group>"; };
 		84E8209209729D2A0097675B /* juce_AudioFormatManager.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_AudioFormatManager.cpp; sourceTree = "<group>"; };
 		84E8209309729D2A0097675B /* juce_AudioFormatManager.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_AudioFormatManager.h; sourceTree = "<group>"; };
+		84EE00FC0FF22E660093FACA /* juce_mac_CameraDevice.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_CameraDevice.mm; sourceTree = "<group>"; };
+		84EE01040FF235750093FACA /* juce_CameraDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_CameraDevice.h; sourceTree = "<group>"; };
 		84F1B8D809499F1400AD8EDE /* juce_MidiKeyboardComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = juce_MidiKeyboardComponent.cpp; sourceTree = "<group>"; };
 		84F1B8D909499F1400AD8EDE /* juce_MidiKeyboardComponent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = juce_MidiKeyboardComponent.h; sourceTree = "<group>"; };
 		84F1F05B0A36CE96008CCC5E /* juce_FilenameComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = juce_FilenameComponent.cpp; path = filebrowser/juce_FilenameComponent.cpp; sourceTree = "<group>"; };
@@ -1349,6 +1353,7 @@
 			children = (
 				84E024DB0E94028C003E41AF /* juce_mac_AppleRemote.mm */,
 				84E024DC0E94028C003E41AF /* juce_mac_AudioCDBurner.mm */,
+				84EE00FC0FF22E660093FACA /* juce_mac_CameraDevice.mm */,
 				84E024DD0E94028C003E41AF /* juce_mac_CoreAudio.cpp */,
 				84E024DE0E94028C003E41AF /* juce_mac_CoreMidi.cpp */,
 				8435DA410E95527D008FBD1C /* juce_mac_Debugging.mm */,
@@ -1934,6 +1939,7 @@
 			isa = PBXGroup;
 			children = (
 				84A4894608A22E4A00752A2B /* image_file_formats */,
+				84EE01040FF235750093FACA /* juce_CameraDevice.h */,
 				84A4898608A22E4A00752A2B /* juce_Image.cpp */,
 				84A4898708A22E4A00752A2B /* juce_Image.h */,
 				84A4898808A22E4A00752A2B /* juce_ImageCache.cpp */,
@@ -2558,6 +2564,7 @@
 				84F8B60D0EB5B9230020D98D /* juce_mac_NativeIncludes.h in Headers */,
 				84B1C1330F6287E70068E14F /* juce_CallbackMessage.h in Headers */,
 				849C0A9E0F98AF62001C1494 /* juce_Variant.h in Headers */,
+				84EE01050FF235750093FACA /* juce_CameraDevice.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2878,6 +2885,7 @@
 				8435DA420E95527D008FBD1C /* juce_mac_Debugging.mm in Sources */,
 				84CA4AF40E9BF8B6004CCC0E /* juce_VSTPluginFormat.mm in Sources */,
 				849C0A9F0F98AF62001C1494 /* juce_Variant.cpp in Sources */,
+				84EE00FD0FF22E660093FACA /* juce_mac_CameraDevice.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2890,6 +2898,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
@@ -2900,6 +2909,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				STRIP_STYLE = "non-global";

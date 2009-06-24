@@ -85,6 +85,8 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -179,6 +181,8 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/jucedemo.pdb"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -319,6 +323,10 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\CameraDemo.cpp"
+					>
 				</File>
 				<File
 					RelativePath="..\..\src\demos\DragAndDropDemo.cpp"

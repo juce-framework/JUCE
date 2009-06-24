@@ -93,7 +93,7 @@
 		84F176A90A271BD000908B2F /* jucer_EditingPanelBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = jucer_EditingPanelBase.h; sourceTree = "<group>"; };
 		84F176AA0A271BD000908B2F /* jucer_JucerDocumentHolder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = jucer_JucerDocumentHolder.cpp; sourceTree = "<group>"; };
 		84F176AB0A271BD000908B2F /* jucer_JucerDocumentHolder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = jucer_JucerDocumentHolder.h; sourceTree = "<group>"; };
-		84F176AC0A271BD000908B2F /* jucer_MainWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = jucer_MainWindow.cpp; sourceTree = "<group>"; };
+		84F176AC0A271BD000908B2F /* jucer_MainWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; path = jucer_MainWindow.cpp; sourceTree = "<group>"; };
 		84F176AD0A271BD000908B2F /* jucer_MainWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = jucer_MainWindow.h; sourceTree = "<group>"; };
 		84F176AE0A271BD000908B2F /* jucer_PaintRoutineEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = jucer_PaintRoutineEditor.cpp; sourceTree = "<group>"; };
 		84F176AF0A271BD000908B2F /* jucer_PaintRoutineEditor.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = jucer_PaintRoutineEditor.h; sourceTree = "<group>"; };

@@ -58,6 +58,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_appframework/events/juce_MessageManager.h"
 #include "../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h"
+#include "../../../src/juce_appframework/gui/graphics/imaging/juce_CameraDevice.h"
 #include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
 #include "../../../src/juce_appframework/gui/components/juce_Desktop.h"
 #include "../../../src/juce_appframework/gui/components/menus/juce_MenuBarModel.h"
@@ -115,6 +116,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_mac_WebBrowserComponent.mm"
 #include "juce_mac_CoreAudio.cpp"
 #include "juce_mac_CoreMidi.cpp"
+#include "juce_mac_CameraDevice.mm"
 #endif
 
 END_JUCE_NAMESPACE

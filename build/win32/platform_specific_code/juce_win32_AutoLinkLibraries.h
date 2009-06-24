@@ -22,3 +22,7 @@
 #if JUCE_QUICKTIME
  #pragma comment (lib, "QTMLClient.lib")
 #endif
+
+#if JUCE_USE_CAMERA
+ #pragma comment (lib, "Strmiids.lib")
+#endif

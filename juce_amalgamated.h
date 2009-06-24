@@ -171,6 +171,12 @@
   #define JUCE_USE_CDBURNER 1
 #endif
 
+/** Enabling this provides support for cameras, using the CameraDevice class
+*/
+#if JUCE_QUICKTIME && ! defined (JUCE_USE_CAMERA)
+//  #define JUCE_USE_CAMERA 1
+#endif
+
 /** Enabling this macro means that all regions that get repainted will have a coloured
     line drawn around them.
 
@@ -19458,8 +19464,9 @@ public:
         stretchToFit                            = 64,
 
         /** If this flag is set, then the source rectangle will be resized so that it is the
-            minimum size to completely fill the destination rectangle. This means that some
-            of the source rectangle may fall outside the destination.
+            minimum size to completely fill the destination rectangle, without changing its
+            aspect ratio. This means that some of the source rectangle may fall outside
+            the destination.
 
             If this flag is not set, the source will be given the maximum size at which none
             of it falls outside the destination rectangle.
@@ -40488,6 +40495,135 @@ private:
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
+
+/********* Start of inlined file: juce_CameraDevice.h *********/
+#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
+#define __JUCE_CAMERADEVICE_JUCEHEADER__
+
+#if JUCE_USE_CAMERA
+
+/**
+    Receives callbacks with images from a CameraDevice.
+
+    @see CameraDevice::addListener
+*/
+class CameraImageListener
+{
+public:
+    CameraImageListener() {}
+    virtual ~CameraImageListener() {}
+
+    /** This method is called when a new image arrives.
+
+        This may be called by any thread, so be careful about thread-safety,
+        and make sure that you process the data as quickly as possible to
+        avoid glitching!
+    */
+    virtual void imageReceived (Image& image) = 0;
+};
+
+/**
+    Controls any camera capture devices that might be available.
+
+    Use getAvailableDevices() to list the devices that are attached to the
+    system, then call openDevice to open one for use. Once you have a CameraDevice
+    object, you can get a viewer component from it, and use its methods to
+    stream to a file or capture still-frames.
+*/
+class JUCE_API  CameraDevice
+{
+public:
+    /** Destructor. */
+    virtual ~CameraDevice();
+
+    /** Returns a list of the available cameras on this machine.
+
+        You can open one of these devices by calling openDevice().
+    */
+    static const StringArray getAvailableDevices();
+
+    /** Opens a camera device.
+
+        The index parameter indicates which of the items returned by getAvailableDevices()
+        to open.
+
+        The size constraints allow the method to choose between different resolutions if
+        the camera supports this. If the resolution cam't be specified (e.g. on the Mac)
+        then these will be ignored.
+    */
+    static CameraDevice* openDevice (int deviceIndex,
+                                     int minWidth = 128, int minHeight = 64,
+                                     int maxWidth = 1024, int maxHeight = 768);
+
+    /** Returns the name of this device */
+    const String getName() const throw()        { return name; }
+
+    /** Creates a component that can be used to display a preview of the
+        video from this camera.
+    */
+    Component* createViewerComponent();
+
+    /** Starts recording video to the specified file.
+
+        You should use getFileExtension() to find out the correct extension to
+        use for your filename.
+
+        If the file exists, it will be deleted before the recording starts.
+
+        This method may not start recording instantly, so if you need to know the
+        exact time at which the file begins, you can call getTimeOfFirstRecordedFrame()
+        after the recording has finished.
+    */
+    void startRecordingToFile (const File& file);
+
+    /** Stops recording, after a call to startRecordingToFile().
+    */
+    void stopRecording();
+
+    /** Returns the file extension that should be used for the files
+        that you pass to startRecordingToFile().
+
+        This may be platform-specific, e.g. ".mov" or ".avi".
+    */
+    static const String getFileExtension();
+
+    /** After calling stopRecording(), this method can be called to return the timestamp
+        of the first frame that was written to the file.
+    */
+    const Time getTimeOfFirstRecordedFrame() const;
+
+    /** Adds a listener to receive images from the camera.
+
+        Be very careful not to delete the listener without first removing it by calling
+        removeListener().
+    */
+    void addListener (CameraImageListener* listenerToAdd);
+
+    /** Removes a listener that was previously added with addListener().
+    */
+    void removeListener (CameraImageListener* listenerToRemove);
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    /** @internal */
+    CameraDevice (const String& name, int index);
+
+private:
+    void* internal;
+    bool isRecording;
+    String name;
+
+    CameraDevice (const CameraDevice&);
+    const CameraDevice& operator= (const CameraDevice&);
+};
+
+#endif
+#endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
+/********* End of inlined file: juce_CameraDevice.h *********/
+
+#endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
 
 #endif
@@ -54723,6 +54859,10 @@ END_JUCE_NAMESPACE
 
 #if JUCE_QUICKTIME
  #pragma comment (lib, "QTMLClient.lib")
+#endif
+
+#if JUCE_USE_CAMERA
+ #pragma comment (lib, "Strmiids.lib")
 #endif
 /********* End of inlined file: juce_win32_AutoLinkLibraries.h *********/
 

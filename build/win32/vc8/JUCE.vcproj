@@ -2549,6 +2549,10 @@
 							Name="imaging"
 							>
 							<File
+								RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\juce_CameraDevice.h"
+								>
+							</File>
+							<File
 								RelativePath="..\..\..\src\juce_appframework\gui\graphics\imaging\juce_Image.cpp"
 								>
 								<FileConfiguration
@@ -5684,6 +5688,14 @@
 				</File>
 				<File
 					RelativePath="..\platform_specific_code\juce_win32_AudioCDReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\platform_specific_code\juce_win32_AutoLinkLibraries.h"
+					>
+				</File>
+				<File
+					RelativePath="..\platform_specific_code\juce_win32_CameraDevice.cpp"
 					>
 				</File>
 				<File
