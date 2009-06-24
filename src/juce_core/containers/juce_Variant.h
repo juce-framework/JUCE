@@ -44,9 +44,9 @@ class JUCE_API  DynamicObject;
     A variant class, that can be used to hold a range of primitive values.
 
     A var object can hold a range of simple primitive values, strings, or
-    a reference-counted pointer to a DynamicObject. The var class is intended 
+    a reference-counted pointer to a DynamicObject. The var class is intended
     to act like the values used in dynamic scripting languages.
- 
+
     @see DynamicObject
 */
 class JUCE_API  var
@@ -171,7 +171,7 @@ private:
     An instance of this class can be used to store named properties, and
     by subclassing hasMethod() and invokeMethod(), you can give your object
     methods.
- 
+
     This is intended for use as a wrapper for scripting language objects.
 */
 class JUCE_API  DynamicObject  : public ReferenceCountedObject
@@ -179,7 +179,7 @@ class JUCE_API  DynamicObject  : public ReferenceCountedObject
 public:
     //==============================================================================
     DynamicObject();
-    
+
     /** Destructor. */
     virtual ~DynamicObject();
 
@@ -188,9 +188,9 @@ public:
         Note that if the property is actually a method, this will return false.
     */
     virtual bool hasProperty (const var::identifier& propertyName) const;
-    
+
     /** Returns a named property.
-     
+
         This returns a void if no such property exists.
     */
     virtual const var getProperty (const var::identifier& propertyName) const;
@@ -211,10 +211,10 @@ public:
     virtual bool hasMethod (const var::identifier& methodName) const;
 
     /** Invokes a named method on this object.
-     
+
         The default implementation looks up the named property, and if it's a method
         call, then it invokes it.
-     
+
         This method is virtual to allow more dynamic invocation to used for objects
         where the methods may not already be set as properies.
     */
@@ -225,7 +225,7 @@ public:
     /** Sets up a method.
 
         This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
-        helps to avoid accidentally invoking the wrong type of var constructor. It also makes 
+        helps to avoid accidentally invoking the wrong type of var constructor. It also makes
         the code easier to read,
 
         The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
@@ -233,7 +233,7 @@ public:
         setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
         @endcode
     */
-    void setMethod (const var::identifier& methodName, 
+    void setMethod (const var::identifier& methodName,
                     var::MethodFunction methodFunction);
 
     //==============================================================================

@@ -92,8 +92,9 @@ public:
 
         //==============================================================================
         /** If this flag is set, then the source rectangle will be resized so that it is the
-            minimum size to completely fill the destination rectangle. This means that some
-            of the source rectangle may fall outside the destination.
+            minimum size to completely fill the destination rectangle, without changing its
+            aspect ratio. This means that some of the source rectangle may fall outside
+            the destination.
 
             If this flag is not set, the source will be given the maximum size at which none
             of it falls outside the destination rectangle.

@@ -470,7 +470,7 @@ public:
             audioSourcePlayer.setSource (&mixerSource);
 
             // start the IO device pulling its data from our callback..
-            audioDeviceManager.setAudioCallback (this);
+            audioDeviceManager.addAudioCallback (this);
 
             // and we need to send midi input to our synth for processing
             audioDeviceManager.addMidiInputCallback (String::empty, &synthSource.midiCollector);
@@ -480,7 +480,7 @@ public:
     ~AudioDemo()
     {
         audioDeviceManager.removeMidiInputCallback (String::empty, &synthSource.midiCollector);
-        audioDeviceManager.setAudioCallback (0);
+        audioDeviceManager.removeAudioCallback (this);
 
         transportSource.removeChangeListener (this);
 

@@ -424,7 +424,7 @@ const var DynamicObject::invokeMethod (const var::identifier& methodName,
     return getProperty (methodName).invoke (this, parameters, numParameters);
 }
 
-void DynamicObject::setMethod (const var::identifier& name, 
+void DynamicObject::setMethod (const var::identifier& name,
                                var::MethodFunction methodFunction)
 {
     setProperty (name, methodFunction);

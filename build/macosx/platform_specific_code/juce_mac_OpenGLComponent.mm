@@ -166,8 +166,8 @@ public:
                                                     shareContext: sharedContext] autorelease];
 
         const GLint swapInterval = 1;
-        [renderContext setValues: &swapInterval forParameter: NSOpenGLCPSwapInterval]; 
-        
+        [renderContext setValues: &swapInterval forParameter: NSOpenGLCPSwapInterval];
+
         [view setOpenGLContext: renderContext];
         [renderContext setView: view];
 

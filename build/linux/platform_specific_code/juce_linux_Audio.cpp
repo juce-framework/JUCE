@@ -471,7 +471,7 @@ public:
             }
 
             currentInputChans.setRange (0, minChansIn, true);
-            
+
             if (! inputDevice->setParameters ((unsigned int) sampleRate,
                                               jlimit ((int) minChansIn, (int) maxChansIn, currentInputChans.getHighestBit() + 1),
                                               bufferSize))

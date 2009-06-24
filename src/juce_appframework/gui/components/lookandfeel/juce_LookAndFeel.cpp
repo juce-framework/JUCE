@@ -661,8 +661,8 @@ void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, i
     const float radius = jmin (w, h) * 0.4f;
     const float thickness = radius * 0.15f;
     Path p;
-    p.addRoundedRectangle (radius * 0.4f, thickness * -0.5f, 
-                           radius * 0.6f, thickness, 
+    p.addRoundedRectangle (radius * 0.4f, thickness * -0.5f,
+                           radius * 0.6f, thickness,
                            thickness * 0.5f);
 
     const float cx = x + w * 0.5f;

@@ -829,7 +829,7 @@ public:
             XFree (hints);
 
             XMoveResizeWindow (display, windowH,
-                               wx - windowBorder.getLeft(), 
+                               wx - windowBorder.getLeft(),
                                wy - windowBorder.getTop(), ww, wh);
 
             if (! deletionChecker.hasBeenDeleted())

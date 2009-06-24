@@ -42,7 +42,7 @@
 #include <utime.h>
 #include <pwd.h>
 #include <fcntl.h>
-#include <dlfcn.h> 
+#include <dlfcn.h>
 
 #define U_ISOFS_SUPER_MAGIC     (short) 0x9660   // linux/iso_fs.h
 #define U_MSDOS_SUPER_MAGIC     (short) 0x4d44   // linux/msdos_fs.h

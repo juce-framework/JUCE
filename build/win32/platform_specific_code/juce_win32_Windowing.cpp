@@ -766,7 +766,7 @@ public:
                 SetWindowPos (hwnd, otherPeer->hwnd, 0, 0, 0, 0,
                               SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
             else if (otherPeer->getComponent()->isAlwaysOnTop())
-                SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0, 
+                SetWindowPos (hwnd, HWND_TOP, 0, 0, 0, 0,
                               SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOSENDCHANGING);
         }
     }

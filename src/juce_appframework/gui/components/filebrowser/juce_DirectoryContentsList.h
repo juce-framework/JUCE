@@ -106,7 +106,7 @@ public:
         By default these are ignored.
     */
     void setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles);
-    
+
     /** Returns true if hidden files are ignored.
         @see setIgnoresHiddenFiles
     */

@@ -50,7 +50,7 @@
 
     You'll need to make sure the animator object isn't deleted before it finishes
     moving the components.
- 
+
     The class is a ChangeBroadcaster and sends a notification when any components
     start or finish being animated.
 */

@@ -211,8 +211,8 @@ public:
                                   double progress, const String& textToShow);
 
     //==============================================================================
-    // Draws a small image that spins to indicate that something's happening.. 
-    // This method should use the current time to animate itself, so just keep 
+    // Draws a small image that spins to indicate that something's happening..
+    // This method should use the current time to animate itself, so just keep
     // repainting it every so often.
     virtual void drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, int h);
 

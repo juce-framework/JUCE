@@ -110,7 +110,7 @@ public:
 
     /** Returns a pointer one of the buffer's channels.
 
-        For speed, this doesn't check whether the channel number is out of range, 
+        For speed, this doesn't check whether the channel number is out of range,
         so be careful when using it!
     */
     float* getSampleData (const int channelNumber) const throw()

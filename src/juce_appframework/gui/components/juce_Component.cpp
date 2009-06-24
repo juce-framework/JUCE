@@ -1565,7 +1565,7 @@ void Component::bringModalComponentToFront()
             break;
 
         ComponentPeer* peer = c->getPeer();
-        
+
         if (peer != 0 && peer != lastOne)
         {
             if (lastOne == 0)

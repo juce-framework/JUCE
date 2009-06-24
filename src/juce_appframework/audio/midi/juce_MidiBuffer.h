@@ -51,7 +51,7 @@ public:
     //==============================================================================
     /** Creates an empty MidiBuffer. */
     MidiBuffer() throw();
-    
+
     /** Creates a MidiBuffer containing a single midi message. */
     MidiBuffer (const MidiMessage& message) throw();
 
@@ -157,12 +157,12 @@ public:
 
     //==============================================================================
     /** Exchanges the contents of this buffer with another one.
-     
+
         This is a quick operation, because no memory allocating or copying is done, it
         just swaps the internal state of the two buffers.
     */
     void swap (MidiBuffer& other);
-    
+
     //==============================================================================
     /**
         Used to iterate through the events in a MidiBuffer.

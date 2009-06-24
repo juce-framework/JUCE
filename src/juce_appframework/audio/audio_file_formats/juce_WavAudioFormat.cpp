@@ -465,7 +465,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = (swapIfBigEndian (*src++) >> 1) 
+                                *l++ = (swapIfBigEndian (*src++) >> 1)
                                         + (swapIfBigEndian (*src++) >> 1);
                             }
                         }
