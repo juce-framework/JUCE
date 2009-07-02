@@ -180,6 +180,7 @@ void* juce_openInternetFile (const String& url,
 void juce_closeInternetFile (void* handle);
 int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
 int juce_seekInInternetFile (void* handle, int newPosition);
+int64 juce_getInternetFileContentLength (void* handle);
 
 
 //==============================================================================
@@ -228,7 +229,7 @@ public:
     //==============================================================================
     int64 getTotalLength()
     {
-        return -1;
+        return juce_getInternetFileContentLength (handle);
     }
 
     bool isExhausted()

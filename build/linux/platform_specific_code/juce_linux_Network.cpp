@@ -242,8 +242,7 @@ public:
             // NB - using charToString() here instead of just T(" "), because that was
             // causing a mysterious gcc internal compiler error...
             const int statusCode = responseHeader.fromFirstOccurrenceOf (String::charToString (T(' ')), false, false)
-            .substring (0, 3)
-            .getIntValue();
+                                                 .substring (0, 3).getIntValue();
 
             //int contentLength = findHeaderItem (lines, T("Content-Length:")).getIntValue();
             //bool isChunked = findHeaderItem (lines, T("Transfer-Encoding:")).equalsIgnoreCase ("chunked");
@@ -478,7 +477,7 @@ int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
     return 0;
 }
 
-int juce_getInternetFileContentLength (void* handle)
+int64 juce_getInternetFileContentLength (void* handle)
 {
     JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
 
@@ -488,7 +487,7 @@ int juce_getInternetFileContentLength (void* handle)
         jassertfalse
     }
 
-    return 0;
+    return -1;
 }
 
 int juce_seekInInternetFile (void* handle, int newPosition)

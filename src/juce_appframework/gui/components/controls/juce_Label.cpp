@@ -212,9 +212,19 @@ void Label::showEditor()
         resized();
         repaint();
 
+        editorShown (editor);
+        
         enterModalState();
         editor->grabKeyboardFocus();
     }
+}
+
+void Label::editorShown (TextEditor* editorComponent)
+{
+}
+
+void Label::editorAboutToBeHidden (TextEditor* editorComponent)
+{
 }
 
 bool Label::updateFromTextEditorContents()
@@ -242,6 +252,8 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
 {
     if (editor != 0)
     {
+        editorAboutToBeHidden (editor);
+
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents();
 

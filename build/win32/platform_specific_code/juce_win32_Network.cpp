@@ -217,9 +217,9 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     }
 }
 
-int juce_getInternetFileContentLength (void* handle)
+int64 juce_getInternetFileContentLength (void* handle)
 {
-    DWORD result = 0;
+    DWORD result = -1;
     const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
 
     if (crs != 0)

@@ -1584,9 +1584,18 @@ Button* LookAndFeel::createSliderButton (const bool isIncrement)
     return new TextButton (isIncrement ? "+" : "-", String::empty);
 }
 
+class SliderLabelComp : public Label
+{
+public:
+    SliderLabelComp() : Label (String::empty, String::empty) {}
+    ~SliderLabelComp()    {}
+
+    void mouseWheelMove (const MouseEvent&, float, float) {}
+};
+
 Label* LookAndFeel::createSliderTextBox (Slider& slider)
 {
-    Label* const l = new Label (T("n"), String::empty);
+    Label* const l = new SliderLabelComp();
 
     l->setJustificationType (Justification::centred);
 

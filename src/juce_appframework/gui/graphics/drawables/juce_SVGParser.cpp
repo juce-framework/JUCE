@@ -352,8 +352,8 @@ private:
                     y2 = lastY + (lastY - lastY2);
                     path.cubicTo (x2, y2, x, y, x3, y3);
 
-                    lastX2 = x2;
-                    lastY2 = y2;
+                    lastX2 = x;
+                    lastY2 = y;
                     lastX = x3;
                     lastY = y3;
                 }

@@ -71,8 +71,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity_),
+    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity),
           numUsed (0)
     {
     }

@@ -47,7 +47,7 @@ class FilenameComponent;
     Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
     register one of these objects for event callbacks when the filename is changed.
 
-    @See FilenameComponent
+    @see FilenameComponent
 */
 class JUCE_API  FilenameComponentListener
 {

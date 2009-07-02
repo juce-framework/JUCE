@@ -176,7 +176,7 @@ public:
                               const bool isButtonDown);
 
     //==============================================================================
-    /** AlertWindow handling..
+    /* AlertWindow handling.. 
     */
     virtual AlertWindow* createAlertWindow (const String& title,
                                             const String& message,

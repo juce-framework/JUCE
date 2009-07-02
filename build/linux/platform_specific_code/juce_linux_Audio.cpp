@@ -410,7 +410,7 @@ public:
 
         if (inputChannels.getHighestBit() >= 0)
         {
-            for (int i = 0; i <= inputChannels.getHighestBit(); ++i)
+            for (int i = 0; i <= jmax (inputChannels.getHighestBit(), minChansIn); ++i)
             {
                 inputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
 

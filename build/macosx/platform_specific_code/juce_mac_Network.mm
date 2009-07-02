@@ -176,6 +176,7 @@ using namespace JUCE_NAMESPACE;
     Thread* runLoopThread;
     bool initialised, hasFailed, hasFinished;
     int position;
+    int64 contentLength;
     NSLock* dataLock;
 }
 
@@ -238,6 +239,7 @@ public:
     initialised = false;
     hasFailed = false;
     hasFinished = false;
+    contentLength = -1;
 
     runLoopThread = new JuceURLConnectionMessageThread (self);
     runLoopThread->startThread();
@@ -280,6 +282,7 @@ public:
     [data setLength: 0];
     [dataLock unlock];
     initialised = true;
+    contentLength = [response expectedContentLength];
 }
 
 - (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
@@ -438,17 +441,14 @@ int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
     return 0;
 }
 
-int juce_getInternetFileContentLength (void* handle)
+int64 juce_getInternetFileContentLength (void* handle)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
 
     if (s != 0)
-    {
-        //xxx todo
-        jassertfalse
-    }
+        return s->contentLength;
 
-    return 0;
+    return -1;
 }
 
 int juce_seekInInternetFile (void* handle, int newPosition)

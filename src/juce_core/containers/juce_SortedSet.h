@@ -76,8 +76,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    SortedSet (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity_),
+    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity),
          numUsed (0)
     {
     }
