@@ -3291,8 +3291,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity_),
+    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity),
           numUsed (0)
     {
     }
@@ -4567,8 +4567,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity_),
+    Array (const int granularity = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity),
          numUsed (0)
     {
     }
@@ -10484,8 +10484,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    SortedSet (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity_),
+    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity),
          numUsed (0)
     {
     }
@@ -31519,28 +31519,37 @@ public:
                                     range -1.0 to 1.0 or beyond)
                                     If the format is stereo, then destSamples[0] is the left channel
                                     data, and destSamples[1] is the right channel.
-                                    The array passed in should be zero-terminated, and it's ok to
-                                    pass in an array with a different number of channels than
-                                    the number in the stream, so if you pass in an array with only
-                                    one channel and the stream is stereo, the reader will
-                                    put a merged sum of the stereo channels into the single
-                                    destination channel.
-        @param startSample          the offset into the audio stream from which the samples
+                                    The numDestChannels parameter indicates how many pointers this array
+                                    contains, but some of these pointers can be null if you don't want to
+                                    read data for some of the channels
+        @param numDestChannels      the number of array elements in the destChannels array
+        @param startSampleInSource  the position in the audio file or stream at which the samples
                                     should be read, as a number of samples from the start of the
                                     stream. It's ok for this to be beyond the start or end of the
-                                    available data - any samples that can't be read will be padded
-                                    with zeros.
-        @param numSamples           the number of samples to read. If this is greater than the
-                                    number of samples available, the result will be padded with
-                                    zeros
+                                    available data - any samples that are out-of-range will be returned
+                                    as zeros.
+        @param numSamplesToRead     the number of samples to read. If this is greater than the number
+                                    of samples that the file or stream contains. the result will be padded
+                                    with zeros
+        @param fillLeftoverChannelsWithCopies   if true, this indicates that if there's no source data available
+                                    for some of the channels that you pass in, then they should be filled with
+                                    copies of valid source channels.
+                                    E.g. if you're reading a mono file and you pass 2 channels to this method, then
+                                    if fillLeftoverChannelsWithCopies is true, both destination channels will be filled
+                                    with the same data from the file's single channel. If fillLeftoverChannelsWithCopies
+                                    was false, then only the first channel would be filled with the file's contents, and
+                                    the second would be cleared. If there are many channels, e.g. you try to read 4 channels
+                                    from a stereo file, then the last 3 would all end up with copies of the same data.
         @returns                    true if the operation succeeded, false if there was an error. Note
                                     that reading sections of data beyond the extent of the stream isn't an
                                     error - the reader should just return zeros for these regions
         @see readMaxLevels
     */
-    virtual bool read (int** destSamples,
-                       int64 startSample,
-                       int numSamples) = 0;
+    bool read (int** destSamples,
+               int numDestChannels,
+               int64 startSampleInSource,
+               int numSamplesToRead,
+               const bool fillLeftoverChannelsWithCopies);
 
     /** Finds the highest and lowest sample levels from a section of the audio stream.
 
@@ -31619,6 +31628,27 @@ public:
 
     /** The input stream, for use by subclasses. */
     InputStream* input;
+
+    /** Subclasses must implement this method to perform the low-level read operation.
+
+        Callers should use read() instead of calling this directly.
+
+        @param destSamples  the array of destination buffers to fill. Some of these
+                            pointers may be null
+        @param numDestChannels  the number of items in the destSamples array. This
+                            value is guaranteed not to be greater than the number of
+                            channels that this reader object contains
+        @param startOffsetInDestBuffer      the number of samples from the start of the
+                            dest data at which to begin writing
+        @param startSampleInFile    the number of samples into the source data at which
+                            to begin reading. This value is guaranteed to be >= 0.
+        @param numSamples   the number of samples to read
+    */
+    virtual bool readSamples (int** destSamples,
+                              int numDestChannels,
+                              int startOffsetInDestBuffer,
+                              int64 startSampleInFile,
+                              int numSamples) = 0;
 
     juce_UseDebuggingNewOperator
 
@@ -33914,6 +33944,15 @@ protected:
     /** Called when the text has been altered.
     */
     virtual void textWasChanged();
+
+    /** Called when the text editor has just appeared, due to a user click or other
+        focus change.
+    */
+    virtual void editorShown (TextEditor* editorComponent);
+
+    /** Called when the text editor is going to be deleted, after editing has finished.
+    */
+    virtual void editorAboutToBeHidden (TextEditor* editorComponent);
 
 private:
     String text;
@@ -36861,9 +36900,8 @@ public:
     ~AudioCDReader();
 
     /** Implementation of the AudioFormatReader method. */
-    bool read (int** destSamples,
-               int64 startSampleInFile,
-               int numSamples);
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
 
     /** Checks whether the CD has been removed from the drive.
     */
@@ -37138,9 +37176,8 @@ public:
     /** Destructor. */
     ~AudioSubsectionReader();
 
-    bool read (int** destSamples,
-               int64 startSample,
-               int numSamples);
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
 
     void readMaxLevels (int64 startSample,
                         int64 numSamples,
@@ -50568,7 +50605,7 @@ class FilenameComponent;
     Use FilenameComponent::addListener() and FilenameComponent::removeListener() to
     register one of these objects for event callbacks when the filename is changed.
 
-    @See FilenameComponent
+    @see FilenameComponent
 */
 class JUCE_API  FilenameComponentListener
 {
@@ -53750,7 +53787,7 @@ public:
                               const bool isMouseOverButton,
                               const bool isButtonDown);
 
-    /** AlertWindow handling..
+    /* AlertWindow handling..
     */
     virtual AlertWindow* createAlertWindow (const String& title,
                                             const String& message,

@@ -310,89 +310,55 @@ public:
     }
 
     //==============================================================================
-    bool read (int** destSamples,
-               int64 startSampleInFile,
-               int numSamples)
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples)
     {
-        int64 start = startSampleInFile;
-        int startOffsetInDestBuffer = 0;
+        numSamples = (int) jmin ((int64) numSamples, lengthInSamples - startSampleInFile);
 
-        if (startSampleInFile < 0)
+        if (numSamples <= 0)
+            return true;
+
+        input->setPosition (dataChunkStart + startSampleInFile * bytesPerFrame);
+
+        const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
+        char tempBuffer [tempBufSize];
+
+        while (numSamples > 0)
         {
-            const int silence = (int) jmin (-startSampleInFile, (int64) numSamples);
-
-            int** destChan = destSamples;
-
-            for (int i = 2; --i >= 0;)
-            {
-                if (*destChan != 0)
-                {
-                    zeromem (*destChan, sizeof (int) * silence);
-                    ++destChan;
-                }
-            }
-
-            startOffsetInDestBuffer += silence;
-            numSamples -= silence;
-            start = 0;
-        }
-
-        const int numToDo = (int) jlimit ((int64) 0, (int64) numSamples, lengthInSamples - start);
-
-        if (numToDo > 0)
-        {
-            input->setPosition (dataChunkStart + start * bytesPerFrame);
-
-            int num = numToDo;
             int* left = destSamples[0];
             if (left != 0)
-                 left += startOffsetInDestBuffer;
+                left += startOffsetInDestBuffer;
 
-            int* right = destSamples[1];
+            int* right = numDestChannels > 1 ? destSamples[1] : 0;
             if (right != 0)
                 right += startOffsetInDestBuffer;
 
-            // (keep this a multiple of 3)
-            const int tempBufSize = 1440 * 4;
-            char tempBuffer [tempBufSize];
+            const int numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
+            const int bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
-            while (num > 0)
+            if (bytesRead < numThisTime * bytesPerFrame)
+                zeromem (tempBuffer + bytesRead, numThisTime * bytesPerFrame - bytesRead);
+
+            if (bitsPerSample == 16)
             {
-                const int numThisTime = jmin (tempBufSize / bytesPerFrame, num);
-                const int bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
+                const short* src = (const short*) tempBuffer;
 
-                if (bytesRead < numThisTime * bytesPerFrame)
-                    zeromem (tempBuffer + bytesRead, numThisTime * bytesPerFrame - bytesRead);
-
-                if (bitsPerSample == 16)
+                if (numChannels > 1)
                 {
-                    const short* src = (const short*) tempBuffer;
-
-                    if (numChannels > 1)
+                    if (left == 0)
                     {
-                        if (left == 0)
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                ++src;
-                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                            }
+                            ++src;
+                            *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
-                        else if (right == 0)
+                    }
+                    else if (right == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *left++ = ((int) swapIfBigEndian ((unsigned short) *src++)
-                                           + (int) swapIfBigEndian ((unsigned short) *src++)) << 15;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                            }
+                            *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            ++src;
                         }
                     }
                     else
@@ -400,40 +366,39 @@ public:
                         for (int i = numThisTime; --i >= 0;)
                         {
                             *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
                     }
                 }
-                else if (bitsPerSample == 24)
+                else
                 {
-                    const char* src = (const char*) tempBuffer;
-
-                    if (numChannels > 1)
+                    for (int i = numThisTime; --i >= 0;)
                     {
-                        if (left == 0)
+                        *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                    }
+                }
+            }
+            else if (bitsPerSample == 24)
+            {
+                const char* src = (const char*) tempBuffer;
+
+                if (numChannels > 1)
+                {
+                    if (left == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                src += 6;
-                                *right++ = littleEndian24Bit (src) << 8;
-                            }
+                            src += 3;
+                            *right++ = littleEndian24Bit (src) << 8;
+                            src += 3;
                         }
-                        else if (right == 0)
+                    }
+                    else if (right == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *left++ = (littleEndian24Bit (src) + littleEndian24Bit (src + 3)) << 7;
-                                src += 6;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < numThisTime; ++i)
-                            {
-                                *left++ = littleEndian24Bit (src) << 8;
-                                src += 3;
-                                *right++ = littleEndian24Bit (src) << 8;
-                                src += 3;
-                            }
+                            *left++ = littleEndian24Bit (src) << 8;
+                            src += 6;
                         }
                     }
                     else
@@ -442,40 +407,42 @@ public:
                         {
                             *left++ = littleEndian24Bit (src) << 8;
                             src += 3;
+                            *right++ = littleEndian24Bit (src) << 8;
+                            src += 3;
                         }
                     }
                 }
-                else if (bitsPerSample == 32)
+                else
                 {
-                    const unsigned int* src = (const unsigned int*) tempBuffer;
-                    unsigned int* l = (unsigned int*) left;
-                    unsigned int* r = (unsigned int*) right;
-
-                    if (numChannels > 1)
+                    for (int i = 0; i < numThisTime; ++i)
                     {
-                        if (l == 0)
+                        *left++ = littleEndian24Bit (src) << 8;
+                        src += 3;
+                    }
+                }
+            }
+            else if (bitsPerSample == 32)
+            {
+                const unsigned int* src = (const unsigned int*) tempBuffer;
+                unsigned int* l = (unsigned int*) left;
+                unsigned int* r = (unsigned int*) right;
+
+                if (numChannels > 1)
+                {
+                    if (l == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                ++src;
-                                *r++ = swapIfBigEndian (*src++);
-                            }
+                            ++src;
+                            *r++ = swapIfBigEndian (*src++);
                         }
-                        else if (r == 0)
+                    }
+                    else if (r == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *l++ = (swapIfBigEndian (*src++) >> 1)
-                                        + (swapIfBigEndian (*src++) >> 1);
-                            }
-                        }
-                        else
-                        {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *l++ = swapIfBigEndian (*src++);
-                                *r++ = swapIfBigEndian (*src++);
-                            }
+                            *l++ = swapIfBigEndian (*src++);
+                            ++src;
                         }
                     }
                     else
@@ -483,66 +450,71 @@ public:
                         for (int i = numThisTime; --i >= 0;)
                         {
                             *l++ = swapIfBigEndian (*src++);
+                            *r++ = swapIfBigEndian (*src++);
                         }
                     }
-
-                    left = (int*)l;
-                    right = (int*)r;
                 }
-                else if (bitsPerSample == 8)
+                else
                 {
-                    const unsigned char* src = (const unsigned char*) tempBuffer;
-
-                    if (numChannels > 1)
+                    for (int i = numThisTime; --i >= 0;)
                     {
-                        if (left == 0)
+                        *l++ = swapIfBigEndian (*src++);
+                    }
+                }
+
+                left = (int*)l;
+                right = (int*)r;
+            }
+            else if (bitsPerSample == 8)
+            {
+                const unsigned char* src = (const unsigned char*) tempBuffer;
+
+                if (numChannels > 1)
+                {
+                    if (left == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                ++src;
-                                *right++ = ((int) *src++ - 128) << 24;
-                            }
+                            ++src;
+                            *right++ = ((int) *src++ - 128) << 24;
                         }
-                        else if (right == 0)
+                    }
+                    else if (right == 0)
+                    {
+                        for (int i = numThisTime; --i >= 0;)
                         {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *left++ = ((int) *src++ - 128) << 24;
-                                ++src;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = numThisTime; --i >= 0;)
-                            {
-                                *left++ = ((int) *src++ - 128) << 24;
-                                *right++ = ((int) *src++ - 128) << 24;
-                            }
+                            *left++ = ((int) *src++ - 128) << 24;
+                            ++src;
                         }
                     }
                     else
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = ((int)*src++ - 128) << 24;
+                            *left++ = ((int) *src++ - 128) << 24;
+                            *right++ = ((int) *src++ - 128) << 24;
                         }
                     }
                 }
-
-                num -= numThisTime;
+                else
+                {
+                    for (int i = numThisTime; --i >= 0;)
+                    {
+                        *left++ = ((int)*src++ - 128) << 24;
+                    }
+                }
             }
+
+            startOffsetInDestBuffer += numThisTime;
+            numSamples -= numThisTime;
         }
 
-        if (numToDo < numSamples)
+        if (numSamples > 0)
         {
-            int** destChan = destSamples;
-
-            while (*destChan != 0)
-            {
-                zeromem ((*destChan) + (startOffsetInDestBuffer + numToDo),
-                          sizeof (int) * (numSamples - numToDo));
-                ++destChan;
-            }
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != 0)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer,
+                             sizeof (int) * numSamples);
         }
 
         return true;

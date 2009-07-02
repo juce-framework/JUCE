@@ -626,7 +626,7 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
 
         chans[2] = 0;
 
-        reader->read (chans, readerStartSample, numSamples);
+        reader->read (chans, 2, readerStartSample, numSamples, true);
 
         if (! reader->usesFloatingPointData)
         {

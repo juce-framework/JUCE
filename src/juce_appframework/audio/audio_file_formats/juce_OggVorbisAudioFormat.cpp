@@ -137,31 +137,9 @@ public:
     }
 
     //==============================================================================
-    bool read (int** destSamples,
-               int64 startSampleInFile,
-               int numSamples)
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples)
     {
-        int startOffsetInDestBuffer = 0;
-
-        if (startSampleInFile < 0)
-        {
-            const int silence = (int) jmin (-startSampleInFile, (int64) numSamples);
-
-            int** destChan = destSamples;
-
-            for (int i = 2; --i >= 0;)
-            {
-                if (*destChan != 0)
-                {
-                    zeromem (*destChan, sizeof (int) * silence);
-                    ++destChan;
-                }
-            }
-
-            startOffsetInDestBuffer += silence;
-            numSamples -= silence;
-        }
-
         while (numSamples > 0)
         {
             const int numAvailable = reservoirStart + samplesInReservoir - startSampleInFile;
@@ -172,16 +150,11 @@ public:
 
                 const int numToUse = jmin (numSamples, numAvailable);
 
-                for (unsigned int i = 0; i < numChannels; ++i)
-                {
-                    if (destSamples[i] == 0)
-                        break;
-
-                    memcpy (destSamples[i] + startOffsetInDestBuffer,
-                            reservoir.getSampleData (jmin (i, reservoir.getNumChannels()),
-                                                     (int) (startSampleInFile - reservoirStart)),
-                            sizeof (float) * numToUse);
-                }
+                for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
+                    if (destSamples[i] != 0)
+                        memcpy (destSamples[i] + startOffsetInDestBuffer,
+                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                sizeof (float) * numToUse);
 
                 startSampleInFile += numToUse;
                 numSamples -= numToUse;
@@ -230,6 +203,14 @@ public:
                 if (numToRead > 0)
                     reservoir.clear (offset, numToRead);
             }
+        }
+
+        if (numSamples > 0)
+        {
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != 0)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer,
+                             sizeof (int) * numSamples);
         }
 
         return true;

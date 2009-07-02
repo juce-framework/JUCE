@@ -1745,31 +1745,12 @@ AudioCDReader::~AudioCDReader()
     decUserCount();
 }
 
-bool AudioCDReader::read (int** destSamples,
-                          int64 startSampleInFile,
-                          int numSamples)
+bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                 int64 startSampleInFile, int numSamples)
 {
-    CDDeviceWrapper* const device = (CDDeviceWrapper*)handle;
+    CDDeviceWrapper* const device = (CDDeviceWrapper*) handle;
 
     bool ok = true;
-    int offset = 0;
-
-    if (startSampleInFile < 0)
-    {
-        int* l = destSamples[0];
-        int* r = destSamples[1];
-
-        numSamples += (int) startSampleInFile;
-        offset -= (int) startSampleInFile;
-
-        while (++startSampleInFile <= 0)
-        {
-            *l++ = 0;
-
-            if (r != 0)
-                *r++ = 0;
-        }
-    }
 
     while (numSamples > 0)
     {
@@ -1781,8 +1762,8 @@ bool AudioCDReader::read (int** destSamples,
         {
             const int toDo = (int) jmin ((int64) numSamples, bufferEndSample - startSampleInFile);
 
-            int* const l = destSamples[0] + offset;
-            int* const r = destSamples[1] + offset;
+            int* const l = destSamples[0] + startOffsetInDestBuffer;
+            int* const r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : 0;
             const short* src = (const short*) buffer.getData();
             src += 2 * (startSampleInFile - bufferStartSample);
 
@@ -1794,7 +1775,7 @@ bool AudioCDReader::read (int** destSamples,
                     r[i] = src [(i << 1) + 1] << 16;
             }
 
-            offset += toDo;
+            startOffsetInDestBuffer += toDo;
             startSampleInFile += toDo;
             numSamples -= toDo;
         }
@@ -1840,8 +1821,8 @@ bool AudioCDReader::read (int** destSamples,
             }
             else
             {
-                int* l = destSamples[0] + offset;
-                int* r = destSamples[1] + offset;
+                int* l = destSamples[0] + startOffsetInDestBuffer;
+                int* r = numDestChannels > 1 ? (destSamples[1] + startOffsetInDestBuffer) : 0;
 
                 while (--numSamples >= 0)
                 {

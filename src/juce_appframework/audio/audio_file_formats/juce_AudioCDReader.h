@@ -76,9 +76,8 @@ public:
     ~AudioCDReader();
 
     /** Implementation of the AudioFormatReader method. */
-    bool read (int** destSamples,
-               int64 startSampleInFile,
-               int numSamples);
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
 
     /** Checks whether the CD has been removed from the drive.
     */

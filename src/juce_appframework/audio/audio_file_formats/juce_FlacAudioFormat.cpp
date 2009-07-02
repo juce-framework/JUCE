@@ -153,32 +153,13 @@ public:
     }
 
     // returns the number of samples read
-    bool read (int** destSamples,
-               int64 startSampleInFile,
-               int numSamples)
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples)
     {
         using namespace FlacNamespace;
 
         if (! ok)
             return false;
-
-        int offset = 0;
-
-        if (startSampleInFile < 0)
-        {
-            const int num = (int) jmin ((int64) numSamples, -startSampleInFile);
-
-            int n = 0;
-            while (destSamples[n] != 0)
-            {
-                zeromem (destSamples[n], sizeof (int) * num);
-                ++n;
-            }
-
-            offset += num;
-            startSampleInFile += num;
-            numSamples -= num;
-        }
 
         while (numSamples > 0)
         {
@@ -190,16 +171,13 @@ public:
 
                 jassert (num > 0);
 
-                int n = 0;
-                while (destSamples[n] != 0)
-                {
-                    memcpy (destSamples[n] + offset,
-                            reservoir.getSampleData (n, (int) (startSampleInFile - reservoirStart)),
-                            sizeof (int) * num);
-                    ++n;
-                }
+                for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
+                    if (destSamples[i] != 0)
+                        memcpy (destSamples[i] + startOffsetInDestBuffer,
+                                reservoir.getSampleData (i, (int) (startSampleInFile - reservoirStart)),
+                                sizeof (int) * num);
 
-                offset += num;
+                startOffsetInDestBuffer += num;
                 startSampleInFile += num;
                 numSamples -= num;
             }
@@ -235,12 +213,10 @@ public:
 
         if (numSamples > 0)
         {
-            int n = 0;
-            while (destSamples[n] != 0)
-            {
-                zeromem (destSamples[n] + offset, sizeof (int) * numSamples);
-                ++n;
-            }
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != 0)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer,
+                             sizeof (int) * numSamples);
         }
 
         return true;

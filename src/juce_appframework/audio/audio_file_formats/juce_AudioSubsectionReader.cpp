@@ -62,26 +62,23 @@ AudioSubsectionReader::~AudioSubsectionReader()
 }
 
 //==============================================================================
-bool AudioSubsectionReader::read (int** destSamples,
-                                  int64 startSampleInFile,
-                                  int numSamples)
+bool AudioSubsectionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                         int64 startSampleInFile, int numSamples)
 {
-    if (startSampleInFile < 0 || startSampleInFile + numSamples > length)
+    if (startSampleInFile + numSamples > length)
     {
-        int** d = destSamples;
-        while (*d != 0)
-        {
-            zeromem (*d, sizeof (int) * numSamples);
-            ++d;
-        }
+        for (int i = numDestChannels; --i >= 0;)
+            if (destSamples[i] != 0)
+                zeromem (destSamples[i], sizeof (int) * numSamples);
 
-        startSampleInFile = jmax ((int64) 0, startSampleInFile);
-        numSamples = jmax (0, jmin (numSamples, (int) (length - startSampleInFile)));
+        numSamples = jmin (numSamples, (int) (length - startSampleInFile));
+        
+        if (numSamples <= 0)
+            return true;
     }
 
-    return source->read (destSamples,
-                         startSampleInFile + startSample,
-                         numSamples);
+    return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
+                                startSampleInFile + startSample, numSamples);
 }
 
 void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile,

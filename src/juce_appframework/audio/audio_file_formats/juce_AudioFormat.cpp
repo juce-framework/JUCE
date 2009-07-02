@@ -55,6 +55,67 @@ AudioFormatReader::~AudioFormatReader()
     delete input;
 }
 
+bool AudioFormatReader::read (int** destSamples, 
+                              int numDestChannels,
+                              int64 startSampleInSource, 
+                              int numSamplesToRead,
+                              const bool fillLeftoverChannelsWithCopies)
+{
+    jassert (numDestChannels > 0); // you have to actually give this some channels to work with!
+
+    int startOffsetInDestBuffer = 0;
+
+    if (startSampleInSource < 0)
+    {
+        const int silence = (int) jmin (-startSampleInSource, (int64) numSamplesToRead);
+
+        for (int i = numDestChannels; --i >= 0;)
+            if (destSamples[i] != 0)
+                zeromem (destSamples[i], sizeof (int) * silence);
+
+        startOffsetInDestBuffer += silence;
+        numSamplesToRead -= silence;
+        startSampleInSource = 0;
+    }
+
+    if (numSamplesToRead <= 0)
+        return true;
+
+    if (! readSamples (destSamples, jmin (numChannels, numDestChannels), startOffsetInDestBuffer, 
+                       startSampleInSource, numSamplesToRead))
+        return false;
+
+    if (numDestChannels > numChannels)
+    {
+        if (fillLeftoverChannelsWithCopies)
+        {
+            int* lastFullChannel = destSamples[0];
+            
+            for (int i = numDestChannels; --i > 0;)
+            {
+                if (destSamples[i] != 0)
+                {
+                    lastFullChannel = destSamples[i];
+                    break;
+                }
+            }
+
+            if (lastFullChannel != 0)
+                for (int i = numChannels; i < numDestChannels; ++i)
+                    if (destSamples[i] != 0)
+                        memcpy (destSamples[i], lastFullChannel, sizeof (int) * numSamplesToRead);
+        }
+        else
+        {
+            for (int i = numChannels; i < numDestChannels; ++i)
+                if (destSamples[i] != 0)
+                    zeromem (destSamples[i], sizeof (int) * numSamplesToRead);
+        }
+    }
+
+    return true;
+}
+
 static void findMaxMin (const float* src, const int num,
                         float& maxVal, float& minVal)
 {
@@ -106,7 +167,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read ((int**) tempBuffer, startSampleInFile, numToDo);
+            read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
 
@@ -144,7 +205,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
         while (numSamples > 0)
         {
             const int numToDo = (int) jmin (numSamples, (int64) bufferSize);
-            read ((int**) tempBuffer, startSampleInFile, numToDo);
+            read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
 
@@ -230,7 +291,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         if (bufferStart >= (int) lengthInSamples)
             break;
 
-        read ((int**) tempBuffer, bufferStart, numThisTime);
+        read ((int**) tempBuffer, 2, bufferStart, numThisTime, false);
 
         int num = numThisTime;
         while (--num >= 0)
@@ -350,7 +411,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
         for (int i = tempBuffer.getNumChannels(); --i >= 0;)
             buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
 
-        if (! reader.read (buffers, startSample, numToDo))
+        if (! reader.read (buffers, maxChans, startSample, numToDo, false))
             return false;
 
         if (reader.usesFloatingPointData != isFloatingPoint())

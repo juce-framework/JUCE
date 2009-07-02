@@ -73,9 +73,8 @@ public:
 
 
     //==============================================================================
-    bool read (int** destSamples,
-               int64 startSample,
-               int numSamples);
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
 
     void readMaxLevels (int64 startSample,
                         int64 numSamples,

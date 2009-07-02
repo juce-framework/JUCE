@@ -237,33 +237,31 @@ public:
 #endif
     }
 
-    bool read (int** destSamples,
-               int64 startSample,
-               int numSamples)
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples)
     {
         checkThreadIsAttached();
-        int done = 0;
 
         while (numSamples > 0)
         {
-            if (! loadFrame ((int) startSample))
+            if (! loadFrame ((int) startSampleInFile))
                 return false;
 
             const int numToDo = jmin (numSamples, samplesPerFrame);
 
-            for (unsigned int j = 0; j < inputStreamDesc.mChannelsPerFrame; ++j)
+            for (int j = numDestChannels; --j >= 0;)
             {
                 if (destSamples[j] != 0)
                 {
                     const short* const src = ((const short*) bufferList->mBuffers[0].mData) + j;
 
                     for (int i = 0; i < numToDo; ++i)
-                        destSamples[j][done + i] = src [i << 1] << 16;
+                        destSamples[j][startOffsetInDestBuffer + i] = src [i << 1] << 16;
                 }
             }
 
-            done += numToDo;
-            startSample += numToDo;
+            startOffsetInDestBuffer += numToDo;
+            startSampleInFile += numToDo;
             numSamples -= numToDo;
         }
 

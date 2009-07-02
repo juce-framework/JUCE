@@ -149,9 +149,8 @@ void AudioCDReader::refreshTrackLengths()
     lengthInSamples = sample;
 }
 
-bool AudioCDReader::read (int** destSamples,
-                          int64 startSampleInFile,
-                          int numSamples)
+bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                 int64 startSampleInFile, int numSamples)
 {
     while (numSamples > 0)
     {
@@ -198,7 +197,7 @@ bool AudioCDReader::read (int** destSamples,
         const int startPos = (int) (startSampleInFile - trackStartSamples.getUnchecked (track));
         const int numAvailable = (int) jmin ((int64) numSamples, reader->lengthInSamples - startPos);
 
-        reader->read (destSamples, startPos, numAvailable);
+        reader->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer, startPos, numAvailable);
 
         numSamples -= numAvailable;
         startSampleInFile += numAvailable;
