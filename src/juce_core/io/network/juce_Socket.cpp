@@ -90,21 +90,20 @@ static void initWin32Sockets()
 //==============================================================================
 static bool resetSocketOptions (const int handle, const bool isDatagram) throw()
 {
-    if (handle <= 0)
-        return false;
-
     const int sndBufSize = 65536;
     const int rcvBufSize = 65536;
     const int one = 1;
 
-    return setsockopt (handle, SOL_SOCKET, SO_RCVBUF, (const char*) &rcvBufSize, sizeof (int)) == 0
-            && setsockopt (handle, SOL_SOCKET, SO_SNDBUF, (const char*) &sndBufSize, sizeof (int)) == 0
-            && (isDatagram || (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (int)) == 0));
+    return handle > 0
+            && setsockopt (handle, SOL_SOCKET, SO_RCVBUF, (const char*) &rcvBufSize, sizeof (rcvBufSize)) == 0
+            && setsockopt (handle, SOL_SOCKET, SO_SNDBUF, (const char*) &sndBufSize, sizeof (sndBufSize)) == 0
+            && (isDatagram ? (setsockopt (handle, SOL_SOCKET, SO_BROADCAST, (const char*) &one, sizeof (one)) == 0)
+                           : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
 }
 
 static bool bindSocketToPort (const int handle, const int port) throw()
 {
-    if (handle == 0 || port <= 0)
+    if (handle <= 0 || port <= 0)
         return false;
 
     struct sockaddr_in servTmpAddr;

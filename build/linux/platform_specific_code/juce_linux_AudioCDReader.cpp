@@ -61,9 +61,8 @@ void AudioCDReader::refreshTrackLengths()
 {
 }
 
-bool AudioCDReader::read (int** destSamples,
-                          int64 startSampleInFile,
-                          int numSamples)
+bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                                 int64 startSampleInFile, int numSamples)
 {
     return false;
 }
