@@ -6720,8 +6720,16 @@ public:
     /** Returns the number of bytes free on the drive that this file lives on.
 
         @returns the number of bytes free, or 0 if there's a problem finding this out
+        @see getVolumeTotalSize
     */
     int64 getBytesFreeOnVolume() const throw();
+
+    /** Returns the total size of the drive that contains this file.
+
+        @returns the total number of bytes that the volume can hold
+        @see getBytesFreeOnVolume
+    */
+    int64 getVolumeTotalSize() const throw();
 
     /** Returns true if this file is on a CD or DVD drive. */
     bool isOnCDRomDrive() const throw();
@@ -12436,9 +12444,13 @@ public:
         make a connection, but will save the destination you've provided. After this, you can
         call read() or write().
 
+        If enableBroadcasting is true, the socket will be allowed to send broadcast messages
+        (may require extra privileges on linux)
+
         To wait for other sockets to connect to this one, call waitForNextConnection().
     */
-    DatagramSocket (const int localPortNumber);
+    DatagramSocket (const int localPortNumber,
+                    const bool enableBroadcasting = false);
 
     /** Destructor. */
     ~DatagramSocket();
@@ -12526,7 +12538,7 @@ public:
 private:
     String hostName;
     int volatile portNumber, handle;
-    bool connected;
+    bool connected, allowBroadcast;
     void* serverAddress;
 
     DatagramSocket (const String& hostname, const int portNumber, const int handle, const int localPortNumber);
@@ -14427,19 +14439,21 @@ public:
     bool waitForThreadToExit (const int timeOutMilliseconds) const throw();
 
     /** Changes the thread's priority.
+        May return false if for some reason the priority can't be changed.
 
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
     */
-    void setPriority (const int priority) throw();
+    bool setPriority (const int priority) throw();
 
     /** Changes the priority of the caller thread.
 
         Similar to setPriority(), but this static method acts on the caller thread.
+        May return false if for some reason the priority can't be changed.
 
         @see setPriority
     */
-    static void setCurrentThreadPriority (const int priority) throw();
+    static bool setCurrentThreadPriority (const int priority) throw();
 
     /** Sets the affinity mask for the thread.
 
@@ -15101,8 +15115,9 @@ public:
     /** Changes the priority of all the threads.
 
         This will call Thread::setPriority() for each thread in the pool.
+        May return false if for some reason the priority can't be changed.
     */
-    void setThreadPriorities (const int newPriority);
+    bool setThreadPriorities (const int newPriority);
 
     juce_UseDebuggingNewOperator
 
@@ -54047,6 +54062,10 @@ public:
     virtual void drawResizableFrame (Graphics& g,
                                     int w, int h,
                                     const BorderSize& borders);
+
+    virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
+                                                const BorderSize& border,
+                                                ResizableWindow& window);
 
     virtual void drawResizableWindowBorder (Graphics& g,
                                             int w, int h,

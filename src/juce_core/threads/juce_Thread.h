@@ -158,19 +158,21 @@ public:
 
     //==============================================================================
     /** Changes the thread's priority.
+        May return false if for some reason the priority can't be changed.
 
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
     */
-    void setPriority (const int priority) throw();
+    bool setPriority (const int priority) throw();
 
     /** Changes the priority of the caller thread.
 
         Similar to setPriority(), but this static method acts on the caller thread.
+        May return false if for some reason the priority can't be changed.
 
         @see setPriority
     */
-    static void setCurrentThreadPriority (const int priority) throw();
+    static bool setCurrentThreadPriority (const int priority) throw();
 
     //==============================================================================
     /** Sets the affinity mask for the thread.

@@ -452,6 +452,10 @@ public:
                                     const BorderSize& borders);
 
     //==============================================================================
+    virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
+                                                const BorderSize& border, 
+                                                ResizableWindow& window);
+
     virtual void drawResizableWindowBorder (Graphics& g,
                                             int w, int h,
                                             const BorderSize& border,

@@ -77,7 +77,7 @@ Thread::ThreadID Thread::getCurrentThreadId() throw()
     return (ThreadID) pthread_self();
 }
 
-void juce_setThreadPriority (void* handle, int priority) throw()
+bool juce_setThreadPriority (void* handle, int priority) throw()
 {
     if (handle == 0)
         handle = (void*) pthread_self();
@@ -86,7 +86,7 @@ void juce_setThreadPriority (void* handle, int priority) throw()
     int policy;
     pthread_getschedparam ((pthread_t) handle, &policy, &param);
     param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
-    pthread_setschedparam ((pthread_t) handle, policy, &param);
+    return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
 void Thread::yield() throw()

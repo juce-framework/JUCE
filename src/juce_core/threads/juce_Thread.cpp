@@ -42,7 +42,7 @@ BEGIN_JUCE_NAMESPACE
 // these functions are implemented in the platform-specific code.
 void* juce_createThread (void* userData) throw();
 void juce_killThread (void* handle) throw();
-void juce_setThreadPriority (void* handle, int priority) throw();
+bool juce_setThreadPriority (void* handle, int priority) throw();
 void juce_setCurrentThreadName (const String& name) throw();
 #if JUCE_WIN32
 void juce_CloseThreadHandle (void* handle) throw();
@@ -210,17 +210,21 @@ void Thread::stopThread (const int timeOutMilliseconds) throw()
 }
 
 //==============================================================================
-void Thread::setPriority (const int priority) throw()
+bool Thread::setPriority (const int priority) throw()
 {
     const ScopedLock sl (startStopLock);
 
-    threadPriority_ = priority;
-    juce_setThreadPriority (threadHandle_, priority);
+    const bool worked = juce_setThreadPriority (threadHandle_, priority);
+    
+    if (worked)
+        threadPriority_ = priority;
+    
+    return worked;
 }
 
-void Thread::setCurrentThreadPriority (const int priority) throw()
+bool Thread::setCurrentThreadPriority (const int priority) throw()
 {
-    juce_setThreadPriority (0, priority);
+    return juce_setThreadPriority (0, priority);
 }
 
 void Thread::setAffinityMask (const uint32 affinityMask) throw()

@@ -25,6 +25,7 @@ package.includepaths = {
     "../../../../../",
     "/usr/include/vst/source/common",
     "/usr/include/vst",
+    "/usr/include/freetype2",
     "../../src"
 }
 

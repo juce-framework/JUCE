@@ -173,14 +173,22 @@ void ResizableBorderComponent::updateMouseZone (const MouseEvent& e) throw()
 
     if (ResizableBorderComponent::hitTest (e.x, e.y))
     {
-        if (e.x < jmax (borderSize.getLeft(), proportionOfWidth (0.1f)))
+        if (e.x < jmax (borderSize.getLeft(), 
+                        proportionOfWidth (0.1f), 
+                        jmin (10, proportionOfWidth (0.33f))))
             newZone |= zoneL;
-        else if (e.x >= jmin (getWidth() - borderSize.getRight(), proportionOfWidth (0.9f)))
+        else if (e.x >= jmin (getWidth() - borderSize.getRight(), 
+                              proportionOfWidth (0.9f),
+                              getWidth() - jmin (10, proportionOfWidth (0.33f))))
             newZone |= zoneR;
 
-        if (e.y < jmax (borderSize.getTop(), proportionOfHeight (0.1f)))
+        if (e.y < jmax (borderSize.getTop(), 
+                        proportionOfHeight (0.1f), 
+                        jmin (10, proportionOfHeight (0.33f))))
             newZone |= zoneT;
-        else if (e.y >= jmin (getHeight() - borderSize.getBottom(), proportionOfHeight (0.9f)))
+        else if (e.y >= jmin (getHeight() - borderSize.getBottom(), 
+                              proportionOfHeight (0.9f),
+                              getHeight() - jmin (10, proportionOfHeight (0.33f))))
             newZone |= zoneB;
     }
 

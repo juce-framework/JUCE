@@ -1744,6 +1744,12 @@ void LookAndFeel::drawResizableFrame (Graphics&, int /*w*/, int /*h*/,
 }
 
 //==============================================================================
+void LookAndFeel::fillResizableWindowBackground (Graphics& g, int /*w*/, int /*h*/,
+                                                 const BorderSize& /*border*/, ResizableWindow& window)
+{
+   g.fillAll (window.getBackgroundColour());
+}
+
 void LookAndFeel::drawResizableWindowBorder (Graphics& g, int w, int h,
                                              const BorderSize& border, ResizableWindow&)
 {

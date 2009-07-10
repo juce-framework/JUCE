@@ -97,19 +97,24 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 
 void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
 {
-    initialisers.add (imageMemberName + T(" (0)"));
+    const String initialiser (imageMemberName + T(" (0)"));
 
-    privateMemberDeclarations
-        << "Image* " << imageMemberName << ";\n";
-
-    if (resourceName.isNotEmpty())
+    if (! initialisers.contains (initialiser, false))
     {
-        constructorCode
-            << imageMemberName << " = ImageCache::getFromMemory ("
-            << resourceName << ", " << resourceName << "Size);\n";
+        initialisers.add (initialiser);
 
-        destructorCode
-            << "ImageCache::release (" << imageMemberName << ");\n";
+        privateMemberDeclarations
+            << "Image* " << imageMemberName << ";\n";
+
+        if (resourceName.isNotEmpty())
+        {
+            constructorCode
+                << imageMemberName << " = ImageCache::getFromMemory ("
+                << resourceName << ", " << resourceName << "Size);\n";
+
+            destructorCode
+                << "ImageCache::release (" << imageMemberName << ");\n";
+        }
     }
 }
 

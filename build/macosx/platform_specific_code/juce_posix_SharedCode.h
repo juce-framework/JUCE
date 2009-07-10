@@ -339,14 +339,20 @@ static bool doStatFS (const File* file, struct statfs& result) throw()
 
 int64 File::getBytesFreeOnVolume() const throw()
 {
-    int64 free_space = 0;
-
     struct statfs buf;
     if (doStatFS (this, buf))
-        // Note: this returns space available to non-super user
-        free_space = (int64) buf.f_bsize * (int64) buf.f_bavail;
+        return (int64) buf.f_bsize * (int64) buf.f_bavail; // Note: this returns space available to non-super user
 
-    return free_space;
+    return 0;
+}
+
+int64 File::getVolumeTotalSize() const throw()
+{
+    struct statfs buf;
+    if (doStatFS (this, buf))
+        return (int64) buf.f_bsize * (int64) buf.f_blocks;
+
+    return 0;
 }
 
 const String juce_getVolumeLabel (const String& filenameOnVolume,

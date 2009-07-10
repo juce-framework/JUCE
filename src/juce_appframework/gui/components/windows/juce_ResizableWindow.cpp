@@ -313,7 +313,8 @@ void ResizableWindow::setBoundsConstrained (int x, int y, int w, int h)
 //==============================================================================
 void ResizableWindow::paint (Graphics& g)
 {
-    g.fillAll (getBackgroundColour());
+    getLookAndFeel().fillResizableWindowBackground (g, getWidth(), getHeight(),
+                                                    getBorderThickness(), *this);
 
     if (! isFullScreen())
     {
@@ -501,7 +502,14 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     const Rectangle screen (Desktop::getInstance().getMonitorAreaContaining (r.getX(), r.getY()));
 
-    r = r.getIntersection (screen);
+    if (! screen.contains (r))
+    {
+        r.setSize (jmin (r.getWidth(), screen.getWidth()),
+                   jmin (r.getHeight(), screen.getHeight()));
+
+        r.setPosition (jlimit (screen.getX(), screen.getRight() - r.getWidth(), r.getX()),
+                       jlimit (screen.getY(), screen.getBottom() - r.getHeight(), r.getY()));
+    }
 
     lastNonFullScreenPos = r;
 

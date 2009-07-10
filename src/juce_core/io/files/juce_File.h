@@ -699,8 +699,16 @@ public:
     /** Returns the number of bytes free on the drive that this file lives on.
 
         @returns the number of bytes free, or 0 if there's a problem finding this out
+        @see getVolumeTotalSize
     */
     int64 getBytesFreeOnVolume() const throw();
+
+    /** Returns the total size of the drive that contains this file.
+
+        @returns the total number of bytes that the volume can hold
+        @see getBytesFreeOnVolume
+    */
+    int64 getVolumeTotalSize() const throw();
 
     /** Returns true if this file is on a CD or DVD drive. */
     bool isOnCDRomDrive() const throw();

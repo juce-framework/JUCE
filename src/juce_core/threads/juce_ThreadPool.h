@@ -265,8 +265,9 @@ public:
     /** Changes the priority of all the threads.
 
         This will call Thread::setPriority() for each thread in the pool.
+        May return false if for some reason the priority can't be changed.
     */
-    void setThreadPriorities (const int newPriority);
+    bool setThreadPriorities (const int newPriority);
 
 
     //==============================================================================

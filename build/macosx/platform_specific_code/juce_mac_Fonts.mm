@@ -288,6 +288,9 @@ bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
     // This method is only safe to be called from the normal UI thread..
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
+    if (character == 0)
+        return false;
+
     FontHelper* const helper = FontHelperCache::getInstance()
                                   ->getFont (getName(), isBold(), isItalic());
 

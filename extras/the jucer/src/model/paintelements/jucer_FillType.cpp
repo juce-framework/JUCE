@@ -182,7 +182,7 @@ void FillType::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode
 
     case imageBrush:
         {
-            const String imageVariable (T("internalCachedImage") + String (code.getUniqueSuffix()));
+            const String imageVariable ("cachedImage_" + imageResourceName + "_" + String (code.getUniqueSuffix()));
 
             code.addImageResourceLoader (imageVariable, imageResourceName);
 

@@ -364,20 +364,28 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
     return String (dest);
 }
 
-int64 File::getBytesFreeOnVolume() const throw()
+static int64 getDiskSpaceInfo (String fn, const bool total) throw()
 {
-    String fn (getFullPathName());
     if (fn[1] == T(':'))
         fn = fn.substring (0, 2) + T("\\");
 
-    ULARGE_INTEGER spc;
-    ULARGE_INTEGER tot;
-    ULARGE_INTEGER totFree;
+    ULARGE_INTEGER spc, tot, totFree;
 
     if (GetDiskFreeSpaceEx (fn, &spc, &tot, &totFree))
-        return (int64)(spc.QuadPart);
+        return (int64) (total ? tot.QuadPart 
+                              : spc.QuadPart);
 
     return 0;
+}
+
+int64 File::getBytesFreeOnVolume() const throw()
+{
+    return getDiskSpaceInfo (getFullPathName(), false);
+}
+
+int64 File::getVolumeTotalSize() const throw()
+{
+    return getDiskSpaceInfo (getFullPathName(), true);
 }
 
 //==============================================================================

@@ -313,15 +313,20 @@ const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs
     return s;
 }
 
-void ThreadPool::setThreadPriorities (const int newPriority)
+bool ThreadPool::setThreadPriorities (const int newPriority)
 {
+    bool ok = true;
+
     if (priority != newPriority)
     {
         priority = newPriority;
 
         for (int i = numThreads; --i >= 0;)
-            threads[i]->setPriority (newPriority);
+            if (! threads[i]->setPriority (newPriority))
+                ok = false;
     }
+    
+    return ok;
 }
 
 bool ThreadPool::runNextJob()

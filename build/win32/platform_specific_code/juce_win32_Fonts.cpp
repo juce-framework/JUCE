@@ -62,7 +62,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
         zerostruct (lf);
 
         lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
+        lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
         lf.lfQuality = DEFAULT_QUALITY;
         lf.lfCharSet = DEFAULT_CHARSET;
         lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
@@ -91,7 +91,7 @@ const StringArray Font::findAllTypefaceNames() throw()
         zerostruct (lf);
 
         lf.lfWeight = FW_DONTCARE;
-        lf.lfOutPrecision = OUT_TT_ONLY_PRECIS;
+        lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
         lf.lfQuality = DEFAULT_QUALITY;
         lf.lfCharSet = DEFAULT_CHARSET;
         lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;

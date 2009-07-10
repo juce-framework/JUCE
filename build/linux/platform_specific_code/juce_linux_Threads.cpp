@@ -112,7 +112,7 @@ Thread::ThreadID Thread::getCurrentThreadId() throw()
 
 // priority 1 to 10 where 5=normal, 1=low. If the handle is 0, sets the
 // priority of the current thread
-void juce_setThreadPriority (void* handle, int priority) throw()
+bool juce_setThreadPriority (void* handle, int priority) throw()
 {
     struct sched_param param;
     int policy, maxp, minp, pri;
@@ -137,8 +137,10 @@ void juce_setThreadPriority (void* handle, int priority) throw()
 
         param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
 
-        pthread_setschedparam ((pthread_t) handle, policy, &param);
+        return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
     }
+    
+    return false;
 }
 
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()

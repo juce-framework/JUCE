@@ -85,7 +85,7 @@ bool AudioFormatReader::read (int** destSamples,
                        startSampleInSource, numSamplesToRead))
         return false;
 
-    if (numDestChannels > numChannels)
+    if (numDestChannels > (int) numChannels)
     {
         if (fillLeftoverChannelsWithCopies)
         {

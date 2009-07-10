@@ -120,7 +120,7 @@ public:
         {
             if (dynamic_cast <const DrawableImage*> (getDrawable()) != 0)
             {
-                const String imageVariable (T("internalCachedImage") + String (code.getUniqueSuffix()));
+                const String imageVariable ("cachedImage_" + resourceName);
 
                 code.addImageResourceLoader (imageVariable, resourceName);
 

@@ -88,7 +88,7 @@ static void initWin32Sockets()
 #endif
 
 //==============================================================================
-static bool resetSocketOptions (const int handle, const bool isDatagram) throw()
+static bool resetSocketOptions (const int handle, const bool isDatagram, const bool allowBroadcast) throw()
 {
     const int sndBufSize = 65536;
     const int rcvBufSize = 65536;
@@ -97,7 +97,7 @@ static bool resetSocketOptions (const int handle, const bool isDatagram) throw()
     return handle > 0
             && setsockopt (handle, SOL_SOCKET, SO_RCVBUF, (const char*) &rcvBufSize, sizeof (rcvBufSize)) == 0
             && setsockopt (handle, SOL_SOCKET, SO_SNDBUF, (const char*) &sndBufSize, sizeof (sndBufSize)) == 0
-            && (isDatagram ? (setsockopt (handle, SOL_SOCKET, SO_BROADCAST, (const char*) &one, sizeof (one)) == 0)
+            && (isDatagram ? ((! allowBroadcast) || setsockopt (handle, SOL_SOCKET, SO_BROADCAST, (const char*) &one, sizeof (one)) == 0)
                            : (setsockopt (handle, IPPROTO_TCP, TCP_NODELAY, (const char*) &one, sizeof (one)) == 0));
 }
 
@@ -299,7 +299,7 @@ static bool connectSocket (int volatile& handle,
     }
 
     setSocketBlockingState (handle, true);
-    resetSocketOptions (handle, false);
+    resetSocketOptions (handle, false, false);
 
     return true;
 }
@@ -329,7 +329,7 @@ StreamingSocket::StreamingSocket (const String& hostName_,
     initWin32Sockets();
 #endif
 
-    resetSocketOptions (handle_, false);
+    resetSocketOptions (handle_, false, false);
 }
 
 StreamingSocket::~StreamingSocket()
@@ -397,7 +397,7 @@ bool StreamingSocket::connect (const String& remoteHostName,
     connected = connectSocket (handle, false, 0, remoteHostName,
                                remotePortNumber, timeOutMillisecs);
 
-    if (! (connected && resetSocketOptions (handle, false)))
+    if (! (connected && resetSocketOptions (handle, false, false)))
     {
         close();
         return false;
@@ -500,10 +500,11 @@ bool StreamingSocket::isLocal() const throw()
 
 //==============================================================================
 //==============================================================================
-DatagramSocket::DatagramSocket (const int localPortNumber)
+DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroadcast_)
     : portNumber (0),
       handle (-1),
       connected (true),
+      allowBroadcast (allowBroadcast_),
       serverAddress (0)
 {
 #if JUCE_WIN32
@@ -520,13 +521,14 @@ DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
       portNumber (portNumber_),
       handle (handle_),
       connected (true),
+      allowBroadcast (false),
       serverAddress (0)
 {
 #if JUCE_WIN32
     initWin32Sockets();
 #endif
 
-    resetSocketOptions (handle_, true);
+    resetSocketOptions (handle_, true, allowBroadcast);
     bindToPort (localPortNumber);
 }
 
@@ -572,7 +574,7 @@ bool DatagramSocket::connect (const String& remoteHostName,
                                remoteHostName, remotePortNumber,
                                timeOutMillisecs);
 
-    if (! (connected && resetSocketOptions (handle, true)))
+    if (! (connected && resetSocketOptions (handle, true, allowBroadcast)))
     {
         close();
         return false;

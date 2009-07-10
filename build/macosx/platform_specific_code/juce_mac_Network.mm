@@ -170,6 +170,7 @@ using namespace JUCE_NAMESPACE;
 
 @interface JuceURLConnection  : NSObject
 {
+@public
     NSURLRequest* request;
     NSURLConnection* connection;
     NSMutableData* data;
