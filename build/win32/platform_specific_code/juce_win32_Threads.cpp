@@ -174,7 +174,7 @@ Thread::ThreadID Thread::getCurrentThreadId() throw()
 }
 
 // priority 1 to 10 where 5=normal, 1=low
-void juce_setThreadPriority (void* threadHandle, int priority) throw()
+bool juce_setThreadPriority (void* threadHandle, int priority) throw()
 {
     int pri = THREAD_PRIORITY_TIME_CRITICAL;
 
@@ -194,7 +194,7 @@ void juce_setThreadPriority (void* threadHandle, int priority) throw()
     if (threadHandle == 0)
         threadHandle = GetCurrentThread();
 
-    SetThreadPriority (threadHandle, pri);
+    return SetThreadPriority (threadHandle, pri);
 }
 
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
