@@ -437,6 +437,10 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\..\src\demos\WebBrowserDemo.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\demos\WidgetsDemo.cpp"
 					>
 					<FileConfiguration

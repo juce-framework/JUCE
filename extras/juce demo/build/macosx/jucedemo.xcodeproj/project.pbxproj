@@ -30,6 +30,7 @@
 		847F4EB90E8BA9DD00F64426 /* BinaryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB10E8BA9DD00F64426 /* BinaryData.cpp */; };
 		847F4EBA0E8BA9DD00F64426 /* juce_LibrarySource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB40E8BA9DD00F64426 /* juce_LibrarySource.mm */; };
 		847F4EBB0E8BA9DD00F64426 /* MainDemoWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EB60E8BA9DD00F64426 /* MainDemoWindow.cpp */; };
+		84E81551100BAF6200FAE212 /* WebBrowserDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E81550100BAF6200FAE212 /* WebBrowserDemo.cpp */; };
 		84EE00FA0FF22E390093FACA /* CameraDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84EE00F90FF22E390093FACA /* CameraDemo.cpp */; };
 		84EE01200FF23BBE0093FACA /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EE011F0FF23BBE0093FACA /* QuartzCore.framework */; };
 		84FFCF3B0EDAFE7F007D5302 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FFCF3A0EDAFE7F007D5302 /* Carbon.framework */; };
@@ -67,6 +68,7 @@
 		847F4EB50E8BA9DD00F64426 /* jucedemo_headers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jucedemo_headers.h; path = ../../src/jucedemo_headers.h; sourceTree = SOURCE_ROOT; };
 		847F4EB60E8BA9DD00F64426 /* MainDemoWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MainDemoWindow.cpp; path = ../../src/MainDemoWindow.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EB70E8BA9DD00F64426 /* MainDemoWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MainDemoWindow.h; path = ../../src/MainDemoWindow.h; sourceTree = SOURCE_ROOT; };
+		84E81550100BAF6200FAE212 /* WebBrowserDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; name = WebBrowserDemo.cpp; path = ../../src/demos/WebBrowserDemo.cpp; sourceTree = SOURCE_ROOT; };
 		84EE00F90FF22E390093FACA /* CameraDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CameraDemo.cpp; path = ../../src/demos/CameraDemo.cpp; sourceTree = SOURCE_ROOT; };
 		84EE011F0FF23BBE0093FACA /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		84FFCF3A0EDAFE7F007D5302 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
@@ -173,6 +175,7 @@
 				847F4EA10E8BA9C300F64426 /* TableDemo.cpp */,
 				847F4EA20E8BA9C300F64426 /* ThreadingDemo.cpp */,
 				847F4EA30E8BA9C300F64426 /* TreeViewDemo.cpp */,
+				84E81550100BAF6200FAE212 /* WebBrowserDemo.cpp */,
 				847F4EA40E8BA9C300F64426 /* WidgetsDemo.cpp */,
 			);
 			name = demos;
@@ -247,6 +250,7 @@
 				847F4EBA0E8BA9DD00F64426 /* juce_LibrarySource.mm in Sources */,
 				847F4EBB0E8BA9DD00F64426 /* MainDemoWindow.cpp in Sources */,
 				84EE00FA0FF22E390093FACA /* CameraDemo.cpp in Sources */,
+				84E81551100BAF6200FAE212 /* WebBrowserDemo.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

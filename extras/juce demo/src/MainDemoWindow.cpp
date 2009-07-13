@@ -116,6 +116,7 @@ class ContentComp  : public Component,
         showInterprocessComms      = 0x2009,
         showTable                  = 0x2010,
         showCamera                 = 0x2011,
+        showWebBrowser             = 0x2012,
 
         showSourceCode             = 0x200a,
 
@@ -208,6 +209,7 @@ public:
             menu.addCommandItem (commandManager, showQuicktime);
             menu.addCommandItem (commandManager, showInterprocessComms);
             menu.addCommandItem (commandManager, showCamera);
+            menu.addCommandItem (commandManager, showWebBrowser);
 
             menu.addSeparator();
             menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
@@ -268,6 +270,7 @@ public:
                                   showOpenGL,
                                   showQuicktime,
                                   showCamera,
+                                  showWebBrowser,
                                   showInterprocessComms,
                                   showSourceCode,
                                   setDefaultLookAndFeel,
@@ -369,6 +372,15 @@ public:
 #endif
             break;
 
+        case showWebBrowser:
+            result.setInfo (T("Web Browser"), T("Shows the web browser demo"), demosCategory, 0);
+            result.addDefaultKeypress (T('i'), ModifierKeys::commandModifier);
+            result.setTicked (currentDemoId == showWebBrowser);
+#if ! JUCE_WEB_BROWSER
+            result.setActive (false);
+#endif
+            break;
+            
         case showInterprocessComms:
             result.setInfo (T("Interprocess Comms"), T("Shows the interprocess communications demo"), demosCategory, 0);
             result.addDefaultKeypress (T('0'), ModifierKeys::commandModifier);
@@ -477,6 +489,13 @@ public:
 #if JUCE_USE_CAMERA
             showDemo (createCameraDemo(), BinaryData::camerademo_cpp);
             currentDemoId = showCamera;
+#endif
+            break;
+
+        case showWebBrowser:
+#if JUCE_WEB_BROWSER
+            showDemo (createWebBrowserDemo(), BinaryData::webbrowserdemo_cpp);
+            currentDemoId = showWebBrowser;
 #endif
             break;
 

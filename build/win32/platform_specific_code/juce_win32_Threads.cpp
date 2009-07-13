@@ -194,7 +194,7 @@ bool juce_setThreadPriority (void* threadHandle, int priority) throw()
     if (threadHandle == 0)
         threadHandle = GetCurrentThread();
 
-    return SetThreadPriority (threadHandle, pri);
+    return (bool) SetThreadPriority (threadHandle, pri);
 }
 
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()

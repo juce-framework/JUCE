@@ -57,8 +57,9 @@ private:
     ComponentDeletionWatcher* sourceWatcher;
     Component* mouseDragSource;
     ComponentDeletionWatcher* mouseDragSourceWatcher;
-
     DragAndDropTarget* currentlyOver;
+    ComponentDeletionWatcher* currentlyOverWatcher;
+
     String dragDesc;
     int xOff, yOff;
     bool hasCheckedForExternalDrag, drawImage;
@@ -75,6 +76,7 @@ public:
           source (s),
           owner (o),
           currentlyOver (0),
+          currentlyOverWatcher (0),
           dragDesc (desc),
           hasCheckedForExternalDrag (false),
           drawImage (true)
@@ -109,29 +111,19 @@ public:
         if (owner->dragImageComponent == this)
             owner->dragImageComponent = 0;
 
-        if (((Component*) currentlyOver)->isValidComponent())
-        {
-            Component* const over = dynamic_cast <Component*> (currentlyOver);
-
-            // (note: use a local copy of the dragDesc member in case the callback runs
-            // a modal loop and deletes this object before the method completes)
-            const String dragDescLocal (dragDesc);
-
-            if (over != 0
-                 && over->isValidComponent()
-                 && source->isValidComponent()
-                 && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
-            {
-                currentlyOver->itemDragExit (dragDescLocal, source);
-            }
-        }
-
         if (! mouseDragSourceWatcher->hasBeenDeleted())
+        {
             mouseDragSource->removeMouseListener (this);
+
+            if (currentlyOverWatcher != 0 && ! currentlyOverWatcher->hasBeenDeleted())
+                if (currentlyOver->isInterestedInDragSource (dragDesc, source))
+                    currentlyOver->itemDragExit (dragDesc, source);
+        }
 
         delete mouseDragSourceWatcher;
         delete sourceWatcher;
         delete image;
+        delete currentlyOverWatcher;
     }
 
     void paint (Graphics& g)
@@ -268,21 +260,34 @@ public:
 
             if (ddt != currentlyOver)
             {
-                Component* const over = dynamic_cast <Component*> (currentlyOver);
-
-                if (over != 0
-                     && over->isValidComponent()
-                     && ! (sourceWatcher->hasBeenDeleted())
-                     && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
+                if (currentlyOverWatcher != 0 && ! currentlyOverWatcher->hasBeenDeleted())
                 {
-                    currentlyOver->itemDragExit (dragDescLocal, source);
+                    Component* const over = dynamic_cast <Component*> (currentlyOver);
+
+                    if (over != 0
+                         && over->isValidComponent()
+                         && ! (sourceWatcher->hasBeenDeleted())
+                         && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
+                    {
+                        currentlyOver->itemDragExit (dragDescLocal, source);
+                    }
                 }
 
                 currentlyOver = ddt;
+                deleteAndZero (currentlyOverWatcher);
 
-                if (currentlyOver != 0
-                     && currentlyOver->isInterestedInDragSource (dragDescLocal, source))
-                    currentlyOver->itemDragEnter (dragDescLocal, source, relX, relY);
+                if (ddt != 0)
+                {
+                    currentlyOverWatcher = new ComponentDeletionWatcher (dynamic_cast <Component*> (ddt));
+
+                    if (currentlyOver->isInterestedInDragSource (dragDescLocal, source))
+                        currentlyOver->itemDragEnter (dragDescLocal, source, relX, relY);
+                }
+            }
+            else if (currentlyOverWatcher != 0 && ! currentlyOverWatcher->hasBeenDeleted())
+            {
+                currentlyOver = 0;
+                deleteAndZero (currentlyOverWatcher);
             }
 
             if (currentlyOver != 0

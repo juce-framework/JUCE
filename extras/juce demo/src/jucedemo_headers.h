@@ -65,6 +65,10 @@ Component* createInterprocessCommsDemo();
  Component* createOpenGLDemo();
 #endif
 
+#if JUCE_WEB_BROWSER
+  Component* createWebBrowserDemo();
+#endif
+
 #if JUCE_USE_CAMERA
   Component* createCameraDemo();
 #endif
