@@ -53,7 +53,7 @@ class Component;
 
         types[i]->scanForDevices();                 // This must be called before getting the list of devices
 
-        String deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
+        StringArray deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
 
         for (int j = 0; j < deviceNames.size(); ++j)
         {
