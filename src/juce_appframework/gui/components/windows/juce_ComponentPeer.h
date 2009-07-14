@@ -281,7 +281,7 @@ public:
     /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.
     */
-    bool handleKeyUpOrDown();
+    bool handleKeyUpOrDown (const bool isKeyDown);
 
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();

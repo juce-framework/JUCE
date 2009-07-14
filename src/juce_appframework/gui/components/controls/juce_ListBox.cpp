@@ -791,15 +791,16 @@ bool ListBox::keyPressed (const KeyPress& key)
     return true;
 }
 
-bool ListBox::keyStateChanged()
+bool ListBox::keyStateChanged (const bool isKeyDown)
 {
-    return KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::pageUpKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::pageDownKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::homeKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::endKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::returnKey);
+    return isKeyDown 
+            && (KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::pageUpKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::pageDownKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::homeKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::endKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::returnKey));
 }
 
 void ListBox::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)

@@ -26,7 +26,7 @@
 		842CC8EF0FA5D26A008C7970 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 842CC8E00FA5D26A008C7970 /* ApplicationServices.framework */; };
 		842CC8F00FA5D26A008C7970 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 842CC8E10FA5D26A008C7970 /* CoreFoundation.framework */; };
 		842CC94A0FA5D934008C7970 /* juce_NPAPI_MacResource.r in Rez */ = {isa = PBXBuildFile; fileRef = 842CC42A0FA5BD3C008C7970 /* juce_NPAPI_MacResource.r */; };
-		842CCB300FA5F201008C7970 /* JuceBrowserPluginDemo.bundle in CopyFiles */ = {isa = PBXBuildFile; fileRef = 842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.bundle */; };
+		842CCB300FA5F201008C7970 /* JuceBrowserPluginDemo.plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.plugin */; };
 		8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8D5B49A704867FD3000E48DA /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -37,7 +37,7 @@
 			dstPath = "/Library/Internet Plug-Ins";
 			dstSubfolderSpec = 0;
 			files = (
-				842CCB300FA5F201008C7970 /* JuceBrowserPluginDemo.bundle in CopyFiles */,
+				842CCB300FA5F201008C7970 /* JuceBrowserPluginDemo.plugin in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,7 +68,7 @@
 		842CC8DF0FA5D26A008C7970 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		842CC8E00FA5D26A008C7970 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		842CC8E10FA5D26A008C7970 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuceBrowserPluginDemo.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuceBrowserPluginDemo.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		842CC93B0FA5D5D1008C7970 /* test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = test.html; path = ../../test.html; sourceTree = SOURCE_ROOT; };
 		8D576317048677EA00EA77CD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -168,7 +168,7 @@
 		842CC9370FA5D51F008C7970 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.bundle */,
+				842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.plugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -193,7 +193,7 @@
 			name = JuceBrowserPluginDemo;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = JuceBrowserPluginDemo;
-			productReference = 842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.bundle */;
+			productReference = 842CC9360FA5D51F008C7970 /* JuceBrowserPluginDemo.plugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */

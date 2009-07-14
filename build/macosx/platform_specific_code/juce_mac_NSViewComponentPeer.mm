@@ -1224,7 +1224,7 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
                 if (([ev modifierFlags] & NSCommandKeyMask) != 0)
                     textCharacter = 0;
 
-                used = handleKeyUpOrDown() || used;
+                used = handleKeyUpOrDown (true) || used;
                 used = handleKeyPress (keyCode, textCharacter) || used;
             }
 
@@ -1232,7 +1232,7 @@ bool NSViewComponentPeer::handleKeyEvent (NSEvent* ev, bool isKeyDown)
         }
         else
         {
-            if (handleKeyUpOrDown())
+            if (handleKeyUpOrDown (false))
                 return true;
         }
     }

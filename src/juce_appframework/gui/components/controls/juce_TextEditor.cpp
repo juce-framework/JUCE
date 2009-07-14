@@ -2081,8 +2081,16 @@ bool TextEditor::keyPressed (const KeyPress& key)
     return true;
 }
 
-bool TextEditor::keyStateChanged()
+bool TextEditor::keyStateChanged (const bool isKeyDown)
 {
+    if (! isKeyDown)
+        return false;
+
+#if JUCE_WIN32
+    if (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0).isCurrentlyDown())
+        return false;  // We need to explicitly allow alt-F4 to pass through on Windows
+#endif
+
     // (overridden to avoid forwarding key events to the parent)
     return ! ModifierKeys::getCurrentModifiers().isCommandDown();
 }

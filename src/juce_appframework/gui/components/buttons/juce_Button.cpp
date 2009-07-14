@@ -599,7 +599,7 @@ bool Button::isRegisteredForShortcut (const KeyPress& key) const throw()
     return false;
 }
 
-bool Button::keyStateChanged (Component*)
+bool Button::keyStateChanged (const bool, Component*)
 {
     if (! isEnabled())
         return false;

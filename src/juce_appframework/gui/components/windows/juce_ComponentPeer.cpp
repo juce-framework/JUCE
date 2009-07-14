@@ -473,7 +473,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
     return keyWasUsed;
 }
 
-bool ComponentPeer::handleKeyUpOrDown()
+bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 {
     updateCurrentModifiers();
 
@@ -495,7 +495,7 @@ bool ComponentPeer::handleKeyUpOrDown()
     {
         const ComponentDeletionWatcher deletionChecker (target);
 
-        keyWasUsed = target->keyStateChanged();
+        keyWasUsed = target->keyStateChanged (isKeyDown);
 
         if (keyWasUsed || deletionChecker.hasBeenDeleted())
             break;
@@ -504,7 +504,7 @@ bool ComponentPeer::handleKeyUpOrDown()
         {
             for (int i = target->keyListeners_->size(); --i >= 0;)
             {
-                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyStateChanged (target);
+                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyStateChanged (isKeyDown, target);
 
                 if (keyWasUsed || deletionChecker.hasBeenDeleted())
                     return keyWasUsed;

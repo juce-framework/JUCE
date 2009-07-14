@@ -1483,7 +1483,7 @@ private:
                 sendModifierKeyChangeIfNeeded();
         }
 
-        return handleKeyUpOrDown()
+        return handleKeyUpOrDown (false)
                 || Component::getCurrentlyModalComponent() != 0;
     }
 
@@ -1538,7 +1538,7 @@ private:
             case VK_F14:
             case VK_F15:
             case VK_F16:
-                used = handleKeyUpOrDown();
+                used = handleKeyUpOrDown (true);
                 used = handleKeyPress (extendedKeyModifier | (int) key, 0) || used;
                 break;
 
@@ -1548,11 +1548,11 @@ private:
             case VK_DIVIDE:
             case VK_SEPARATOR:
             case VK_DECIMAL:
-                used = handleKeyUpOrDown();
+                used = handleKeyUpOrDown (true);
                 break;
 
             default:
-                used = handleKeyUpOrDown();
+                used = handleKeyUpOrDown (true);
 
                 {
                     MSG msg;

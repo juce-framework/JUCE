@@ -447,7 +447,7 @@ protected:
     /** @internal */
     bool keyPressed (const KeyPress& key, Component* originatingComponent);
     /** @internal */
-    bool keyStateChanged (Component* originatingComponent);
+    bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

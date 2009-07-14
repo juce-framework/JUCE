@@ -1004,7 +1004,7 @@ public:
     }
 
     //==============================================================================
-    bool keyStateChanged()
+    bool keyStateChanged (const bool)
     {
         return false;
     }

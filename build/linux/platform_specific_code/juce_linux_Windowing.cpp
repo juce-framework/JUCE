@@ -1320,7 +1320,7 @@ public:
                     handleModifierKeysChange();
 
                 if (keyDownChange)
-                    handleKeyUpOrDown();
+                    handleKeyUpOrDown (true);
 
                 if (keyPressed)
                     handleKeyPress (keyCode, unicodeChar);
@@ -1342,7 +1342,7 @@ public:
                     handleModifierKeysChange();
 
                 if (keyDownChange)
-                    handleKeyUpOrDown();
+                    handleKeyUpOrDown (false);
 
                 break;
             }

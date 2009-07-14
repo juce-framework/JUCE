@@ -284,7 +284,7 @@ public:
                         currentlyOver->itemDragEnter (dragDescLocal, source, relX, relY);
                 }
             }
-            else if (currentlyOverWatcher != 0 && ! currentlyOverWatcher->hasBeenDeleted())
+            else if (currentlyOverWatcher != 0 && currentlyOverWatcher->hasBeenDeleted())
             {
                 currentlyOver = 0;
                 deleteAndZero (currentlyOverWatcher);

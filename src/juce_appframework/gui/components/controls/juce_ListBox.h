@@ -540,7 +540,7 @@ public:
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */

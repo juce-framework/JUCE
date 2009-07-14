@@ -1269,7 +1269,7 @@ public:
 #endif
 
     //==============================================================================
-    bool keyStateChanged()
+    bool keyStateChanged (const bool)
     {
         return pluginWantsKeys;
     }

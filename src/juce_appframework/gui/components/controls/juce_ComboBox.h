@@ -360,7 +360,7 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     bool keyPressed (const KeyPress&);
 

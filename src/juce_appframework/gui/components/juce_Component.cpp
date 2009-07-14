@@ -3534,7 +3534,7 @@ bool Component::keyPressed (const KeyPress&)
     return false;
 }
 
-bool Component::keyStateChanged()
+bool Component::keyStateChanged (const bool /*isKeyDown*/)
 {
     return false;
 }

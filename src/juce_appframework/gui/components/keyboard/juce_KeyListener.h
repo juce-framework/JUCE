@@ -76,10 +76,15 @@ public:
         false, then the key will be passed to other components that might want to use it.
 
         @param originatingComponent     the component that received the key event
+        @param isKeyDown                true if a key is being pressed, false if one is being released
         @see KeyPress, Component::keyStateChanged
     */
-    virtual bool keyStateChanged (Component* originatingComponent);
+    virtual bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
 
+private:
+    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
+    // subclass to use the new parameters to keyStateChanged)
+    virtual void keyStateChanged (Component*) {};
 };
 
 

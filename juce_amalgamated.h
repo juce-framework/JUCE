@@ -11435,6 +11435,7 @@ public:
     operator int() const throw();
     operator bool() const throw();
     operator double() const throw();
+    operator const String() const throw();
     const String toString() const throw();
     DynamicObject* getObject() const throw();
 
@@ -16293,10 +16294,15 @@ public:
         false, then the key will be passed to other components that might want to use it.
 
         @param originatingComponent     the component that received the key event
+        @param isKeyDown                true if a key is being pressed, false if one is being released
         @see KeyPress, Component::keyStateChanged
     */
-    virtual bool keyStateChanged (Component* originatingComponent);
+    virtual bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
 
+private:
+    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
+    // subclass to use the new parameters to keyStateChanged)
+    virtual void keyStateChanged (Component*) {};
 };
 
 #endif   // __JUCE_KEYLISTENER_JUCEHEADER__
@@ -20933,7 +20939,7 @@ public:
     /** Called whenever a key is pressed or released.
         Returns true if the keystroke was used.
     */
-    bool handleKeyUpOrDown();
+    bool handleKeyUpOrDown (const bool isKeyDown);
 
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();
@@ -22444,9 +22450,11 @@ public:
         To find out which keys are up or down at any time, see the KeyPress::isKeyCurrentlyDown()
         method.
 
+        @param isKeyDown    true if a key has been pressed; false if it has been released
+
         @see keyPressed, KeyPress, getCurrentlyFocusedComponent, addKeyListener
     */
-    virtual bool keyStateChanged();
+    virtual bool keyStateChanged (const bool isKeyDown);
 
     /** Called when a modifier key is pressed or released.
 
@@ -23059,6 +23067,10 @@ private:
     Component (const Component&);
 
     const Component& operator= (const Component&);
+
+    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
+    // subclass to use the new parameters to keyStateChanged)
+    virtual void keyStateChanged() {};
 
 protected:
     /** @internal */
@@ -29258,7 +29270,7 @@ public:
 
         To create a node, call AudioProcessorGraph::addNode().
     */
-    class Node   : public ReferenceCountedObject
+    class JUCE_API  Node   : public ReferenceCountedObject
     {
     public:
         /** Destructor.
@@ -29307,7 +29319,7 @@ public:
 
         To create a connection, use AudioProcessorGraph::addConnection().
     */
-    struct Connection
+    struct JUCE_API  Connection
     {
     public:
 
@@ -29465,7 +29477,7 @@ public:
 
         @see AudioProcessorGraph
     */
-    class AudioGraphIOProcessor     : public AudioPluginInstance
+    class JUCE_API  AudioGraphIOProcessor     : public AudioPluginInstance
     {
     public:
         /** Specifies the mode in which this processor will operate.
@@ -30630,7 +30642,7 @@ protected:
     /** @internal */
     bool keyPressed (const KeyPress& key, Component* originatingComponent);
     /** @internal */
-    bool keyStateChanged (Component* originatingComponent);
+    bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -32501,7 +32513,7 @@ class Component;
 
         types[i]->scanForDevices();                 // This must be called before getting the list of devices
 
-        String deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
+        StringArray deviceNames (types[i]->getDeviceNames());  // This will now return a list of available devices of this type
 
         for (int j = 0; j < deviceNames.size(); ++j)
         {
@@ -33521,7 +33533,7 @@ l    */
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     void focusGained (FocusChangeType cause);
     /** @internal */
@@ -34304,7 +34316,7 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     bool keyPressed (const KeyPress&);
 
@@ -36281,7 +36293,7 @@ public:
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -43486,7 +43498,7 @@ public:
     /** @internal */
     bool keyPressed (const KeyPress& key, Component* originatingComponent);
     /** @internal */
-    bool keyStateChanged (Component* originatingComponent);
+    bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
     /** @internal */
     void globalFocusChanged (Component* focusedComponent);
 
@@ -52713,7 +52725,7 @@ public:
     /** @internal */
     void timerCallback();
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     void focusLost (FocusChangeType cause);
     /** @internal */

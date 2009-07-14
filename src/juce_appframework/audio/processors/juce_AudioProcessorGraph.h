@@ -72,7 +72,7 @@ public:
 
         To create a node, call AudioProcessorGraph::addNode().
     */
-    class Node   : public ReferenceCountedObject
+    class JUCE_API  Node   : public ReferenceCountedObject
     {
     public:
         /** Destructor.
@@ -125,7 +125,7 @@ public:
 
         To create a connection, use AudioProcessorGraph::addConnection().
     */
-    struct Connection
+    struct JUCE_API  Connection
     {
     public:
         //==============================================================================
@@ -289,7 +289,7 @@ public:
 
         @see AudioProcessorGraph
     */
-    class AudioGraphIOProcessor     : public AudioPluginInstance
+    class JUCE_API  AudioGraphIOProcessor     : public AudioPluginInstance
     {
     public:
         /** Specifies the mode in which this processor will operate.

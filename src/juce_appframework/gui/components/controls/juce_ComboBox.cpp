@@ -501,13 +501,14 @@ bool ComboBox::keyPressed (const KeyPress& key)
     return used;
 }
 
-bool ComboBox::keyStateChanged()
+bool ComboBox::keyStateChanged (const bool isKeyDown)
 {
     // only forward key events that aren't used by this component
-    return KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::leftKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
-        || KeyPress::isKeyCurrentlyDown (KeyPress::rightKey);
+    return isKeyDown
+            && (KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::leftKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)
+                || KeyPress::isKeyCurrentlyDown (KeyPress::rightKey));
 }
 
 //==============================================================================

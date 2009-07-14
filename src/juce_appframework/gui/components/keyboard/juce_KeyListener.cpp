@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-bool KeyListener::keyStateChanged (Component*)
+bool KeyListener::keyStateChanged (const bool, Component*)
 {
     return false;
 }

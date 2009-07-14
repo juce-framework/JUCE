@@ -264,7 +264,7 @@ const String var::toString() const throw()
     switch (type)
     {
         case voidType:
-        case objectType:    return "Object 0x" + String::toHexString ((pointer_sized_int) value.objectValue);
+        case objectType:    return "Object 0x" + String::toHexString ((int) (pointer_sized_int) value.objectValue);
         case intType:       return String (value.intValue);
         case boolType:      return value.boolValue ? T("1") : T("0");
         case doubleType:    return String (value.doubleValue);
@@ -273,6 +273,11 @@ const String var::toString() const throw()
     }
 
     return String::empty;
+}
+
+var::operator const String() const throw()
+{
+    return toString();
 }
 
 DynamicObject* var::getObject() const throw()

@@ -827,7 +827,7 @@ STDAPI DllGetClassObject (REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 
     *ppv = 0;
 
-    if (CLSIDToJuceString (rclsid) == String (JuceBrowserPlugin_ActiveXCLSID))
+    if (CLSIDToJuceString (rclsid).equalsIgnoreCase (String (JuceBrowserPlugin_ActiveXCLSID)))
     {
         JuceActiveXObjectFactory* afx = new JuceActiveXObjectFactory();
         if (afx->QueryInterface (riid, ppv) == S_OK)
@@ -855,7 +855,7 @@ static HRESULT doRegistration (const bool unregister)
 {
     const String company (makeLegalRegistryName (JuceBrowserPlugin_Company));
     const String plugin (makeLegalRegistryName (JuceBrowserPlugin_Name));
-    const String clsID ("{" + String (JuceBrowserPlugin_ActiveXCLSID) + "}");
+    const String clsID ("{" + String (JuceBrowserPlugin_ActiveXCLSID).toUpperCase() + "}");
     const String root ("HKEY_CLASSES_ROOT\\");
     const String companyDotPlugin (company + "." + plugin);
     const String companyDotPluginCur (companyDotPlugin + ".1");

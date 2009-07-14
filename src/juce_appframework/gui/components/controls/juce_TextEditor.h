@@ -531,7 +531,7 @@ l    */
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */
-    bool keyStateChanged();
+    bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     void focusGained (FocusChangeType cause);
     /** @internal */

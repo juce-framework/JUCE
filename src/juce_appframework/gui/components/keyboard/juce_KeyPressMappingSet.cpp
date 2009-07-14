@@ -368,7 +368,7 @@ bool KeyPressMappingSet::keyPressed (const KeyPress& key,
     return used;
 }
 
-bool KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
+bool KeyPressMappingSet::keyStateChanged (const bool /*isKeyDown*/, Component* originatingComponent)
 {
     bool used = false;
     const uint32 now = Time::getMillisecondCounter();
@@ -433,7 +433,7 @@ bool KeyPressMappingSet::keyStateChanged (Component* originatingComponent)
 void KeyPressMappingSet::globalFocusChanged (Component* focusedComponent)
 {
     if (focusedComponent != 0)
-        focusedComponent->keyStateChanged();
+        focusedComponent->keyStateChanged (false);
 }
 
 

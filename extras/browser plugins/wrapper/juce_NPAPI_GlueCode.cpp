@@ -440,12 +440,20 @@ public:
 
     NSView* findViewAt (NSView* parent, float x, float y) const
     {
-        NSRect r = [parent frame];
-        x -= r.origin.x;
-        y -= r.origin.y;
+        NSRect frame = [parent frame];
+        NSRect bounds = [parent bounds];
+        x -= frame.origin.x;
+        y -= frame.origin.y;
 
-        if (x >= 0 && x < r.size.width && y >= 0 && y < r.size.height)
+        Rectangle rr (frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        Rectangle rr2 (bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+        //log (String ((int) x) + ", " + String ((int) y) + " - " + nsStringToJuce([parent description]) + "   " + rr.toString() + "   " + rr2.toString());
+        
+        if (x >= 0 && x < frame.size.width && y >= 0 && y < frame.size.height)
         {
+            x += bounds.origin.x; // adjust for scrolling panels
+            y += bounds.origin.y;
+
             for (int i = [[parent subviews] count]; --i >= 0;)
             {
                 NSView* v = (NSView*) [[parent subviews] objectAtIndex: i];
@@ -483,17 +491,46 @@ public:
         if (windowRef != 0)
         {
             NSWindow* win = [[[NSWindow alloc] initWithWindowRef: windowRef] autorelease];
-            parentView = findViewAt ([win contentView], window->x + 0.5f, window->y + 0.5f);
 
-            log (nsStringToJuce ([parentView description]));
+            const Rectangle clip (window->clipRect.left, window->clipRect.top,
+                                  window->clipRect.right - window->clipRect.left,
+                                  window->clipRect.bottom - window->clipRect.top);
+            const Rectangle target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
+            const Rectangle intersection (clip.getIntersection (target));
 
-            if (! isBrowserContentView (parentView))
-                parentView = currentParentView;
+            // in firefox the clip rect is usually out of step with the target rect, but in safari it matches
+            log ("plugin window clip: " + clip.toString());
+            log ("plugin window target: " + target.toString());
+            log ("plugin window intersection: " + intersection.toString());
+
+            if (! intersection.isEmpty())
+            {
+                NSView* content = [win contentView];
+
+                float wx = (float) intersection.getCentreX();
+                float wy = (float) intersection.getCentreY();
+
+                NSRect v = [content convertRect: [content frame] toView: nil];
+                NSRect w = [win frame];
+
+                log ("wx: " + Rectangle (v.origin.x, v.origin.y, v.size.width, v.size.height).toString() 
+                     + "   " + Rectangle (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
+
+                // adjust the requested window pos to deal with the content view's origin within the window
+                wy -= w.size.height - (v.origin.y + v.size.height);
+
+                parentView = findViewAt (content, wx, wy);
+
+                if (! isBrowserContentView (parentView))
+                    parentView = currentParentView;
+            }
+
+            log ("parent: " + nsStringToJuce ([parentView description]));
         }
 
         if (parentView != currentParentView)
         {
-            //log ("new view: " + nsStringToJuce ([parentView description]));
+            log ("new view: " + nsStringToJuce ([parentView description]));
 
             removeFromDesktop();
             setVisible (false);
@@ -894,7 +931,6 @@ public:
 private:
     bool shouldRetainBrowserObject() const
     {
-#if JUCE_MAC
         const String version (browser.uagent (npp));
 
         if (! version.containsIgnoreCase (T(" AppleWebKit/")))
@@ -903,9 +939,6 @@ private:
         int versionNum = version.fromFirstOccurrenceOf (T(" AppleWebKit/"), false, true).getIntValue();
 
         return versionNum == 0 || versionNum >= 420;
-#else
-        return true;
-#endif
     }
 };
 

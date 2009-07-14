@@ -1481,10 +1481,12 @@ public:
 
         To find out which keys are up or down at any time, see the KeyPress::isKeyCurrentlyDown()
         method.
+     
+        @param isKeyDown    true if a key has been pressed; false if it has been released
 
         @see keyPressed, KeyPress, getCurrentlyFocusedComponent, addKeyListener
     */
-    virtual bool keyStateChanged();
+    virtual bool keyStateChanged (const bool isKeyDown);
 
     /** Called when a modifier key is pressed or released.
 
@@ -2110,6 +2112,10 @@ private:
     Component (const Component&);
 
     const Component& operator= (const Component&);
+
+    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
+    // subclass to use the new parameters to keyStateChanged)
+    virtual void keyStateChanged() {};
 
 protected:
     /** @internal */
