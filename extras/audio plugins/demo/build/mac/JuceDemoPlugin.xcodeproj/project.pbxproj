@@ -632,27 +632,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Developer/Headers/FlatCarbon,
 					"~/SDKs/vstsdk2.4",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PlugInLibrary/**\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/DSPManager/**\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/common\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/common/PI_LibInterface\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PACEProtection/**\"",
-					"\"$(MacBag)/../AlturaPorts/OMS/Headers\"",
-					"\"$(MacBag)/../AlturaPorts/Fic/Interfaces/**\"",
-					"\"$(MacBag)/../AlturaPorts/Fic/Source/SignalNets\"",
-					"\"$(MacBag)/../AlturaPorts/DSIPublicInterface/PublicHeaders\"",
-					"\"$(MacBag)/../DAEWin/Include\"",
-					"\"$(MacBag)/../AlturaPorts/DigiPublic/Interfaces\"",
-					"\"$(MacBag)/../AlturaPorts/DigiPublic\"",
-					"\"$(MacBag)/../AlturaPorts/NewFileLibs/DOA\"",
-					"\"$(MacBag)/../AlturaPorts/NewFileLibs/Cmn\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SignalProcessing/**\"",
-					"\"$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc\"",
-					"\"$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/utils\"",
+					"$(HEADER_SEARCH_PATHS)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
@@ -676,27 +657,8 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GENERATE_PKGINFO_FILE = YES;
 				HEADER_SEARCH_PATHS = (
-					/Developer/Headers/FlatCarbon,
 					"~/SDKs/vstsdk2.4",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PlugInLibrary/**\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/DSPManager/**\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/common\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/common/PI_LibInterface\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/PACEProtection/**\"",
-					"\"$(MacBag)/../AlturaPorts/OMS/Headers\"",
-					"\"$(MacBag)/../AlturaPorts/Fic/Interfaces/**\"",
-					"\"$(MacBag)/../AlturaPorts/Fic/Source/SignalNets\"",
-					"\"$(MacBag)/../AlturaPorts/DSIPublicInterface/PublicHeaders\"",
-					"\"$(MacBag)/../DAEWin/Include\"",
-					"\"$(MacBag)/../AlturaPorts/DigiPublic/Interfaces\"",
-					"\"$(MacBag)/../AlturaPorts/DigiPublic\"",
-					"\"$(MacBag)/../AlturaPorts/NewFileLibs/DOA\"",
-					"\"$(MacBag)/../AlturaPorts/NewFileLibs/Cmn\"",
-					"\"$(MacBag)/../AlturaPorts/TDMPlugIns/SignalProcessing/**\"",
-					"\"$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc\"",
-					"\"$(MacBag)/../AvidCode/AVX2sdk/AVX/avx2/avx2sdk/utils\"",
+					"$(HEADER_SEARCH_PATHS)",
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";

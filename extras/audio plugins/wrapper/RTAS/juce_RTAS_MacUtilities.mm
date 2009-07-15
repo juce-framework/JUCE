@@ -35,6 +35,14 @@
 // obj-c files correctly.
 @class dummyclassname;
 
+// Horrible carbon-based fix for a cocoa bug, where an NSWindow that wraps a carbon
+// window fails to keep its position updated when the user drags the window around..
+#define WINDOWPOSITON_BODGE 1
+
+#if WINDOWPOSITON_BODGE
+ #include <Carbon/Carbon.h>
+#endif
+
 #include <Cocoa/Cocoa.h>
 #include "../juce_PluginHeaders.h"
 
@@ -68,6 +76,17 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
     f.size.width = comp->getWidth();
     f.size.height = comp->getHeight();
     [content setFrame: f];
+
+#if WINDOWPOSITON_BODGE
+    {
+        Rect winBounds;
+        GetWindowBounds ((WindowRef) hostWindowRef, kWindowContentRgn, &winBounds);
+        NSRect w = [hostWindow frame];
+        w.origin.x = winBounds.left;
+        w.origin.y = [[NSScreen mainScreen] frame].size.height - winBounds.bottom;
+        [hostWindow setFrame: w display: NO animate: NO];
+    }
+#endif
 
     NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
     windowPos.y = [[NSScreen mainScreen] frame].size.height - (windowPos.y + f.size.height);

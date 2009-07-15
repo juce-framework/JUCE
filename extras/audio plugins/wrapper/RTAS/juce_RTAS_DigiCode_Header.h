@@ -65,8 +65,12 @@
   #define kNoViews                  0
   #define kUseDSPCodeDecode         0
 
+  #define MAC_VERSION               1
   #define PLUGIN_SDK_BUILD          1
   #define PLUGIN_SDK_DIRECTMIDI     1
+  #define DIGI_PASCAL 
+
+  #include "MacAlwaysInclude.h"
 
 #endif
 #endif
