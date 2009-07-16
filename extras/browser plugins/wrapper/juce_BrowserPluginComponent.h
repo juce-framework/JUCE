@@ -62,6 +62,10 @@ public:
     */
     const String getBrowserVersion() const;
 
+    /** Returns the URL that the browser is currently showing.
+    */
+    const String getBrowserURL() const;
+    
     /** The plugin must implement this method to return a variant object whose
         properties and methods can be accessed by javascript in the browser.
      

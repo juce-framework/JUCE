@@ -43,6 +43,7 @@
 #include <windowsx.h>
 #include <olectl.h>
 #include <objsafe.h>
+#include <exdisp.h>
 #pragma warning (disable:4584)
 
 #include "../../../juce_amalgamated.h"
@@ -458,7 +459,8 @@ public:
     //==============================================================================
     AXBrowserPluginHolderComponent()
         : child (0),
-          parentHWND (0)
+          parentHWND (0),
+          browser (0)
     {
         setOpaque (true);
         setWantsKeyboardFocus (false);
@@ -490,12 +492,28 @@ public:
 
     void setWindow (IOleInPlaceSite* site)
     {
+        if (browser != 0)
+        {
+            browser->Release();
+            browser = 0;
+        }
+
         HWND newHWND = 0;
 
         if (site != 0)
+        {
             site->GetWindow (&newHWND);
 
-        //log ("setWindow: " + String ((int) newHWND));
+            IServiceProvider* sp = 0;
+            site->QueryInterface (IID_IServiceProvider, (void**) &sp);
+
+            if (sp != 0)
+            {
+                sp->QueryService (IID_IWebBrowserApp, IID_IWebBrowser2, (void**) &browser);
+                sp->Release();
+            }
+        }
+
         if (parentHWND != newHWND)
         {
             removeFromDesktop();
@@ -521,10 +539,21 @@ public:
             site->OnInPlaceActivate();
     }
 
+    const String getBrowserURL() const
+    {
+        if (browser == 0)
+            return String::empty;
+
+        BSTR url = 0;
+        browser->get_LocationURL (&url);
+        return URL::removeEscapeChars (url);
+    }
+
 private:
     //==============================================================================
     BrowserPluginComponent* child;
     HWND parentHWND;
+    IWebBrowser2* browser;
 };
 
 //==============================================================================
@@ -757,6 +786,12 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
     }
 
     return resultString;
+}
+
+const String getActiveXBrowserURL (const BrowserPluginComponent* comp)
+{
+    AXBrowserPluginHolderComponent* const ax = dynamic_cast <AXBrowserPluginHolderComponent*> (comp->getParentComponent());
+    return ax != 0 ? ax->getBrowserURL() : String::empty;
 }
 
 //==============================================================================

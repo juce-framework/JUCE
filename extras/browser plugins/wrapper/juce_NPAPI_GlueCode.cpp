@@ -1149,3 +1149,54 @@ const String BrowserPluginComponent::getBrowserVersion() const
 
     return browserVersionDesc;
 }
+
+//==============================================================================
+#if JUCE_WIN32
+extern const String getActiveXBrowserURL (const BrowserPluginComponent* comp);
+#endif
+
+const String BrowserPluginComponent::getBrowserURL() const
+{
+    String result;
+
+#if JUCE_WIN32
+    result = getActiveXBrowserURL (this);
+
+    if (result.isNotEmpty())
+        return result;
+#endif
+
+    NPP npp = getInstance (this);
+    if (npp != 0)
+    {
+        NPObject* windowObj = 0;
+        browser.getvalue (npp, NPNVWindowNPObject, &windowObj);
+
+        if (windowObj != 0)
+        {
+            NPVariant location;
+            bool ok = browser.getproperty (npp, windowObj, 
+                                           browser.getstringidentifier ("location"), &location);
+            browser.releaseobject (windowObj);
+
+            jassert (ok);
+            if (ok)
+            {
+                NPVariant href;
+                ok = browser.getproperty (npp, location.value.objectValue, 
+                                          browser.getstringidentifier ("href"), &href);
+                browser.releasevariantvalue (&location);
+
+                jassert (ok);
+                if (ok)
+                {
+                    result = URL::removeEscapeChars (createValueFromNPVariant (npp, href).toString());
+                    browser.releasevariantvalue (&href);
+                }
+            }
+        }
+    }
+    
+    return result;
+}
+
