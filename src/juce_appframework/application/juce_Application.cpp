@@ -53,7 +53,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../juce_core/threads/juce_InterProcessLock.h"
 #include "../../juce_core/misc/juce_PlatformUtilities.h"
 
-void juce_setCurrentExecutableFileName (const String& filename) throw();
 void juce_setCurrentThreadName (const String& name) throw();
 
 static JUCEApplication* appInstance = 0;
@@ -278,8 +277,6 @@ int JUCEApplication::main (int argc, char* argv[],
 #if JUCE_MAC
     const ScopedAutoReleasePool pool;
 #endif
-
-    juce_setCurrentExecutableFileName (String::fromUTF8 ((const uint8*) argv[0]));
 
     String cmd;
     for (int i = 1; i < argc; ++i)

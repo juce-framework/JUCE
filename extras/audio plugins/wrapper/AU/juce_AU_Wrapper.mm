@@ -60,10 +60,6 @@ static VoidArray activePlugins;
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 static const int numChannelConfigs = numElementsInArray (channelConfigs);
 
-BEGIN_JUCE_NAMESPACE
-extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
-END_JUCE_NAMESPACE
-
 #if JucePlugin_IsSynth
  #define JuceAUBaseClass MusicDeviceBase
 #else
@@ -119,10 +115,6 @@ public:
 #endif
 
             initialiseJuce_GUI();
-
-#ifdef JucePlugin_CFBundleIdentifier
-            juce_setCurrentExecutableFileNameFromBundleId (JucePlugin_CFBundleIdentifier);
-#endif
         }
 
         juceFilter = createPluginFilter();

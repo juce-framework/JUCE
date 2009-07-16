@@ -71,10 +71,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static File executableFile;
-
-
-//==============================================================================
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
@@ -262,21 +258,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case currentExecutableFile:
     case currentApplicationFile:
-        if (! executableFile.exists())
-        {
-            Dl_info executableInfo;
-            dladdr ((const void*) juce_getFileTimes, &executableInfo);
-
-            if (executableInfo.dli_fname != 0)
-                executableFile = File (String (executableInfo.dli_fname));
-        }
-
-        // if this fails, it's probably because juce_setCurrentExecutableFileName()
-        // was never called to set the filename - this should be done by the juce
-        // main() function, so maybe you've hacked it to use your own custom main()?
-        jassert (executableFile.exists());
-
-        return executableFile;
+        return juce_getExecutableFile();
 
     default:
         jassertfalse // unknown type?
@@ -286,11 +268,6 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     return File::nonexistent;
 }
 
-//==============================================================================
-void juce_setCurrentExecutableFileName (const String& filename) throw()
-{
-    executableFile = File::getCurrentWorkingDirectory().getChildFile (filename);
-}
 
 //==============================================================================
 const File File::getCurrentWorkingDirectory() throw()

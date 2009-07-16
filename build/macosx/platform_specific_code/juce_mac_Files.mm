@@ -39,8 +39,6 @@
 */
 
 //==============================================================================
-static File executableFile;
-
 const unsigned int macTimeToUnixTimeDiff = 0x7c25be90;
 
 static uint64 utcDateTimeToUnixTime (const UTCDateTime& d) throw()
@@ -281,22 +279,23 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case tempDirectory:
     {
-        File tmp (T("~/Library/Caches/") + executableFile.getFileNameWithoutExtension());
+        File tmp (T("~/Library/Caches/") + juce_getExecutableFile().getFileNameWithoutExtension());
 
         tmp.createDirectory();
         return tmp.getFullPathName();
     }
 
     case currentExecutableFile:
-        return executableFile;
+        return juce_getExecutableFile();
 
     case currentApplicationFile:
     {
-        const File parent (executableFile.getParentDirectory());
+        const File exe (juce_getExecutableFile());
+        const File parent (exe.getParentDirectory());
 
         return parent.getFullPathName().endsWithIgnoreCase (T("Contents/MacOS"))
                 ? parent.getParentDirectory().getParentDirectory()
-                : executableFile;
+                : exe;
     }
 
     default:
@@ -308,22 +307,6 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         return File (PlatformUtilities::convertToPrecomposedUnicode (resultPath));
 
     return File::nonexistent;
-}
-
-void juce_setCurrentExecutableFileName (const String& filename) throw()
-{
-    executableFile = File::getCurrentWorkingDirectory()
-                        .getChildFile (PlatformUtilities::convertToPrecomposedUnicode (filename));
-}
-
-void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw()
-{
-    const ScopedAutoReleasePool pool;
-
-    NSBundle* b = [NSBundle bundleWithIdentifier: juceStringToNS (bundleId)];
-
-    if (b != nil)
-        executableFile = nsStringToJuce ([b executablePath]);
 }
 
 //==============================================================================

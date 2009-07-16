@@ -320,6 +320,13 @@ void juce_fileFlush (void* handle) throw()
         fsync ((int) (pointer_sized_int) handle);
 }
 
+const File juce_getExecutableFile()
+{
+    Dl_info exeInfo;
+    dladdr ((const void*) juce_getExecutableFile, &exeInfo);
+    return File (exeInfo.dli_fname);
+}
+
 //==============================================================================
 // if this file doesn't exist, find a parent of it that does..
 static bool doStatFS (const File* file, struct statfs& result) throw()

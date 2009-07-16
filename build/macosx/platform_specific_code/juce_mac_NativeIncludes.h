@@ -64,6 +64,7 @@
 #include <sys/mount.h>
 #include <fnmatch.h>
 #include <utime.h>
+#include <dlfcn.h>
 
 #if MACOS_10_4_OR_EARLIER
  #include <GLUT/glut.h>

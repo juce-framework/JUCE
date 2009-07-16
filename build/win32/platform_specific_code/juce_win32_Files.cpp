@@ -512,12 +512,6 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
     return juce_getSpecialFolderPath (csidlType);
 }
 
-
-void juce_setCurrentExecutableFileName (const String&) throw()
-{
-    // n/a on windows
-}
-
 //==============================================================================
 const File File::getCurrentWorkingDirectory() throw()
 {

@@ -156,7 +156,6 @@ BEGIN_JUCE_NAMESPACE
 
  #if JUCE_MAC
   extern void initialiseMac();
-  extern void juce_setCurrentExecutableFileNameFromBundleId (const String& bundleId) throw();
   extern void* attachComponentToWindowRef (Component* component, void* windowRef);
   extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
   extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
@@ -1444,10 +1443,6 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 static AEffect* pluginEntryPoint (audioMasterCallback audioMaster)
 {
     initialiseJuce_GUI();
-
-#if JUCE_MAC && defined (JucePlugin_CFBundleIdentifier)
-    juce_setCurrentExecutableFileNameFromBundleId (JucePlugin_CFBundleIdentifier);
-#endif
 
     try
     {
