@@ -1455,7 +1455,8 @@ bool NSViewComponentPeer::canBecomeKeyWindow()
 {
     // If running as a plugin, let the component decide whether it's going to allow the window to get focused.
     return JUCEApplication::getInstance() != 0
-            || (isValidPeer (this) && getComponent()->getWantsKeyboardFocus());
+            || (isValidPeer (this) 
+                && ! getComponent()->getComponentPropertyBool ("juce_disallowFocus", false, false));
 }
 
 bool NSViewComponentPeer::windowShouldClose()

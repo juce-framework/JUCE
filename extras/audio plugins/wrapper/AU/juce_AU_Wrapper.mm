@@ -922,6 +922,7 @@ public:
 #if ! JucePlugin_EditorRequiresKeyboardFocus
         setWantsKeyboardFocus (false);
 #else
+        setComponentProperty ("juce_disallowFocus", true);
         setWantsKeyboardFocus (true);
 #endif
     }

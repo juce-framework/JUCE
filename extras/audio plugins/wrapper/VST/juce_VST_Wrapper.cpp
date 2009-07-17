@@ -274,6 +274,10 @@ public:
         editor->setTopLeftPosition (0, 0);
         addAndMakeVisible (editor);
 
+#if ! JucePlugin_EditorRequiresKeyboardFocus
+        setComponentProperty ("juce_disallowFocus", true);
+#endif
+        
 #if JUCE_WIN32
         addMouseListener (this, true);
 #endif
