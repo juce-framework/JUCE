@@ -403,11 +403,10 @@ void MessageManager::doPlatformSpecificShutdown()
 
     // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
     // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
-    for (int i = 100; --i >= 0 && numPendingMessages > 0;)
-    {
-        flushingMessages = true;
-        getInstance()->runDispatchLoopUntil (10);
-    }
+    flushingMessages = true;
+    if (JUCEApplication::getInstance() != 0) // (must avoid blocking here when running as a plugin)
+        for (int i = 100; --i >= 0 && numPendingMessages > 0;)
+            getInstance()->runDispatchLoopUntil (10);
 
     [juceAppDelegate release];
     juceAppDelegate = 0;
