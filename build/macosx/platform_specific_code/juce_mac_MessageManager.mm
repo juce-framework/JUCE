@@ -120,13 +120,13 @@ using namespace JUCE_NAMESPACE;
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
 
 static int numPendingMessages = 0;
-static bool flushingMessages = false;
 
 @interface JuceAppDelegate   : NSObject
 {
 @private
     id oldDelegate;
     AppDelegateRedirector* redirector;
+    bool flushingMessages;
 }
 
 - (JuceAppDelegate*) init;
@@ -218,6 +218,7 @@ static bool flushingMessages = false;
 - (void) customEvent: (id) n
 {
     atomicDecrement (numPendingMessages);
+    [self release];
 
     NSData* data = (NSData*) n;
     void* message = 0;
@@ -398,23 +399,27 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
-    [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
+    if (juceAppDelegate != 0)
+    {
+        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
+        [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
 
-    // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
-    // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
-    flushingMessages = true;
-    if (JUCEApplication::getInstance() != 0) // (must avoid blocking here when running as a plugin)
-        for (int i = 100; --i >= 0 && numPendingMessages > 0;)
-            getInstance()->runDispatchLoopUntil (10);
+        // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
+        // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
+        juceAppDelegate->flushingMessages = true;
+        if (JUCEApplication::getInstance() != 0) // (must avoid blocking here when running as a plugin)
+            for (int i = 100; --i >= 0 && numPendingMessages > 0;)
+                getInstance()->runDispatchLoopUntil (10);
 
-    [juceAppDelegate release];
-    juceAppDelegate = 0;
+        [juceAppDelegate release];
+        juceAppDelegate = 0;
+    }
 }
 
 bool juce_postMessageToSystemQueue (void* message)
 {
     atomicIncrement (numPendingMessages);
+    [juceAppDelegate retain];
 
     [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
                      withObject: (id) [[NSData alloc] initWithBytes: &message

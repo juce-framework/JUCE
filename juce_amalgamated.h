@@ -34533,7 +34533,18 @@ public:
     /** Returns the currently-active audio device. */
     AudioIODevice* getCurrentAudioDevice() const throw()                { return currentAudioDevice; }
 
+    /** Returns the type of audio device currently in use.
+        @see setCurrentAudioDeviceType
+    */
     const String getCurrentAudioDeviceType() const throw()              { return currentDeviceType; }
+
+    /** Changes the class of audio device being used.
+
+        This switches between, e.g. ASIO and DirectSound. On the Mac you probably won't ever call
+        this because there's only one type: CoreAudio.
+
+        For a list of types, see getAvailableDeviceTypes().
+    */
     void setCurrentAudioDeviceType (const String& type,
                                     const bool treatAsChosenDevice);
 
@@ -34657,7 +34668,7 @@ public:
     */
     MidiOutput* getDefaultMidiOutput() const throw()                { return defaultMidiOutput; }
 
-    /**
+    /** Returns a list of the types of device supported.
     */
     const OwnedArray <AudioIODeviceType>& getAvailableDeviceTypes();
 

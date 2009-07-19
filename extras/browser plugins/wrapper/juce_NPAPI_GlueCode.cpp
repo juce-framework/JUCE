@@ -118,7 +118,7 @@ NPError NP_GetValue (void* future, NPPVariable variable, void* value)
 NPError OSCALL NP_GetEntryPoints (NPPluginFuncs* funcs)
 {
 #if JUCE_WIN32
-  #pragma EXPORTED_FUNCTION
+    #pragma EXPORTED_FUNCTION
 #endif
 
     log ("NP_GetEntryPoints");
@@ -157,7 +157,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
                               )
 {
 #if JUCE_WIN32
-  #pragma EXPORTED_FUNCTION
+    #pragma EXPORTED_FUNCTION
 #endif
 
     log ("NP_Initialize");
@@ -167,51 +167,8 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
     if (((funcs->version >> 8) & 0xff) > NP_VERSION_MAJOR)
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
 
-    if (funcs->size < sizeof (NPNetscapeFuncs))
-        return NPERR_INVALID_FUNCTABLE_ERROR;
-
-    browser.size                   = funcs->size;
-    browser.version                = funcs->version;
-    browser.geturlnotify           = funcs->geturlnotify;
-    browser.geturl                 = funcs->geturl;
-    browser.posturlnotify          = funcs->posturlnotify;
-    browser.posturl                = funcs->posturl;
-    browser.requestread            = funcs->requestread;
-    browser.newstream              = funcs->newstream;
-    browser.write                  = funcs->write;
-    browser.destroystream          = funcs->destroystream;
-    browser.status                 = funcs->status;
-    browser.uagent                 = funcs->uagent;
-    browser.memalloc               = funcs->memalloc;
-    browser.memfree                = funcs->memfree;
-    browser.memflush               = funcs->memflush;
-    browser.reloadplugins          = funcs->reloadplugins;
-    browser.getJavaEnv             = funcs->getJavaEnv;
-    browser.getJavaPeer            = funcs->getJavaPeer;
-    browser.getvalue               = funcs->getvalue;
-    browser.setvalue               = funcs->setvalue;
-    browser.invalidaterect         = funcs->invalidaterect;
-    browser.invalidateregion       = funcs->invalidateregion;
-    browser.forceredraw            = funcs->forceredraw;
-    browser.getstringidentifier    = funcs->getstringidentifier;
-    browser.getstringidentifiers   = funcs->getstringidentifiers;
-    browser.getintidentifier       = funcs->getintidentifier;
-    browser.identifierisstring     = funcs->identifierisstring;
-    browser.utf8fromidentifier     = funcs->utf8fromidentifier;
-    browser.intfromidentifier      = funcs->intfromidentifier;
-    browser.createobject           = funcs->createobject;
-    browser.retainobject           = funcs->retainobject;
-    browser.releaseobject          = funcs->releaseobject;
-    browser.invoke                 = funcs->invoke;
-    browser.invokeDefault          = funcs->invokeDefault;
-    browser.evaluate               = funcs->evaluate;
-    browser.getproperty            = funcs->getproperty;
-    browser.setproperty            = funcs->setproperty;
-    browser.removeproperty         = funcs->removeproperty;
-    browser.hasproperty            = funcs->hasproperty;
-    browser.hasmethod              = funcs->hasmethod;
-    browser.releasevariantvalue    = funcs->releasevariantvalue;
-    browser.setexception           = funcs->setexception;
+    zerostruct (browser);
+    memcpy (&browser, funcs, jmin (funcs->size, sizeof (browser)));
 
 #ifdef XP_UNIX
     pluginFuncs->version            = (NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR;
@@ -239,7 +196,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
 NPError OSCALL NP_Shutdown()
 {
 #if JUCE_WIN32
-  #pragma EXPORTED_FUNCTION
+    #pragma EXPORTED_FUNCTION
 #endif
 
     log ("NP_Shutdown");
@@ -866,11 +823,14 @@ static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
     else if (v.isDouble())
         DOUBLE_TO_NPVARIANT ((double) v, out); 
     else if (v.isString())
-#if JUCE_MAC
-        STRINGZ_TO_NPVARIANT (strdup (v.toString().toUTF8()), out);
-#else
-        STRINGZ_TO_NPVARIANT (_strdup (v.toString().toUTF8()), out);
-#endif
+    {
+        const String s (v.toString());
+        const char* const utf8 = s.toUTF8();
+        const int utf8Len = strlen (utf8) + 1;
+        char* const stringCopy = (char*) browser.memalloc (utf8Len);
+        memcpy (stringCopy, utf8, utf8Len);
+        STRINGZ_TO_NPVARIANT (stringCopy, out);
+    }
     else if (v.isObject())
         OBJECT_TO_NPVARIANT (NPObjectWrappingDynamicObject::create (npp, v), out);
     else

@@ -1193,6 +1193,7 @@ private:
 #if ! JucePlugin_EditorRequiresKeyboardFocus
             addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
             setWantsKeyboardFocus (false);
+            setComponentProperty ("juce_disallowFocus", true);
 #else
             addToDesktop (ComponentPeer::windowIsTemporary);
             setWantsKeyboardFocus (true);
