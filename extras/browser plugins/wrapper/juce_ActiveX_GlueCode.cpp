@@ -143,7 +143,7 @@ public:
             {
                 var* args = (var*) juce_calloc (sizeof (var) * numArgs);
                 for (int j = 0; j < numArgs; ++j)
-                    args[j] = variantTojuceVar (pDispParams->rgvarg[j]);
+                    args[(numArgs - 1) - j] = variantTojuceVar (pDispParams->rgvarg[j]);
 
                 result = v.invoke (memberId, args, numArgs);
 
@@ -349,7 +349,7 @@ public:
             VARIANT* params = (VARIANT*) juce_calloc (sizeof (VARIANT) * (numParameters + 1));
 
             for (int i = 0; i < numParameters; ++i)
-                juceVarToVariant (parameters[i], params[i]);
+                juceVarToVariant (parameters[(numParameters - 1) - i], params[i]);
 
             DISPPARAMS dispParams;
             zerostruct (dispParams);

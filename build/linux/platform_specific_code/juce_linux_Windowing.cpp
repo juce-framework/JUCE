@@ -1159,7 +1159,7 @@ public:
     void setIcon (const Image& newIcon)
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        uint32* const data = (uint32*) juce_malloc (dataSize * sizeof (uint32));
+        unsigned long* const data = (unsigned long*) juce_malloc (dataSize * sizeof (uint32));
 
         int index = 0;
         data[index++] = newIcon.getWidth();
