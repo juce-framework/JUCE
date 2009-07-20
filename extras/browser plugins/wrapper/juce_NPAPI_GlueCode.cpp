@@ -102,6 +102,18 @@ extern "C"
     NPError NP_Shutdown();
 }
 #pragma export off
+
+#ifndef NP_CLASS_STRUCT_VERSION_ENUM	// fill in some symbols that are missing from the OSX 10.4 SDK
+  #define NPNVpluginDrawingModel 1000
+  #define NPDrawingModelCoreGraphics 1
+
+  typedef struct NP_CGContext
+  {
+    CGContextRef context;
+    WindowRef window;
+  } NP_CGContext;
+#endif
+
 #endif
 
 //==============================================================================
@@ -757,15 +769,27 @@ public:
     static bool class_construct (NPObject* npobj, const NPVariant* args, uint32_t argCount, NPVariant* result)  { return ((NPObjectWrappingDynamicObject*) npobj)->construct (args, argCount, result); }
 };
 
+#ifndef NP_CLASS_STRUCT_VERSION_ENUM
 static NPClass sNPObjectWrappingDynamicObject_NPClass =
 {
-    NP_CLASS_STRUCT_VERSION_ENUM, NPObjectWrappingDynamicObject::createInstance,
+    NP_CLASS_STRUCT_VERSION, NPObjectWrappingDynamicObject::createInstance,
     NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
     NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
     NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
     NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
-    NPObjectWrappingDynamicObject::class_removeProperty, NPObjectWrappingDynamicObject::class_enumerate
+    NPObjectWrappingDynamicObject::class_removeProperty
 };
+#else
+static NPClass sNPObjectWrappingDynamicObject_NPClass =
+{
+	NP_CLASS_STRUCT_VERSION_ENUM, NPObjectWrappingDynamicObject::createInstance,
+	NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
+	NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
+	NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
+	NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
+	NPObjectWrappingDynamicObject::class_removeProperty, NPObjectWrappingDynamicObject::class_enumerate
+};
+#endif
 
 bool NPObjectWrappingDynamicObject::construct (const NPVariant* args, uint32_t argCount, NPVariant* result)
 {
