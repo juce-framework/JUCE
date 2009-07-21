@@ -126,6 +126,8 @@ static int numPendingMessages = 0;
 @private
     id oldDelegate;
     AppDelegateRedirector* redirector;
+
+@public
     bool flushingMessages;
 }
 
@@ -170,7 +172,6 @@ static int numPendingMessages = 0;
 
         [center addObserver: self selector: @selector (applicationWillUnhide:)
                        name: NSApplicationWillUnhideNotification object: NSApp];
-
     }
 
     return self;
@@ -218,7 +219,6 @@ static int numPendingMessages = 0;
 - (void) customEvent: (id) n
 {
     atomicDecrement (numPendingMessages);
-    [self release];
 
     NSData* data = (NSData*) n;
     void* message = 0;
@@ -226,8 +226,6 @@ static int numPendingMessages = 0;
 
     if (message != 0 && ! flushingMessages)
         redirector->deliverMessage (message);
-
-    [data release];
 }
 
 - (void) performCallback: (id) info
@@ -407,9 +405,13 @@ void MessageManager::doPlatformSpecificShutdown()
         // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
         // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
         juceAppDelegate->flushingMessages = true;
-        if (JUCEApplication::getInstance() != 0) // (must avoid blocking here when running as a plugin)
-            for (int i = 100; --i >= 0 && numPendingMessages > 0;)
-                getInstance()->runDispatchLoopUntil (10);
+
+        for (int i = 100; --i >= 0 && numPendingMessages > 0;)
+        {
+            const ScopedAutoReleasePool pool;
+            [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
+                                     beforeDate: [NSDate dateWithTimeIntervalSinceNow: 5 * 0.001]];
+        }
 
         [juceAppDelegate release];
         juceAppDelegate = 0;
@@ -419,11 +421,9 @@ void MessageManager::doPlatformSpecificShutdown()
 bool juce_postMessageToSystemQueue (void* message)
 {
     atomicIncrement (numPendingMessages);
-    [juceAppDelegate retain];
 
     [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
-                     withObject: (id) [[NSData alloc] initWithBytes: &message
-                                                             length: (int) sizeof (message)]
+                     withObject: (id) [NSData dataWithBytes: &message length: (int) sizeof (message)]
                      waitUntilDone: NO];
     return true;
 }

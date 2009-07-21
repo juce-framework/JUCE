@@ -613,6 +613,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
+        dp->setName (xml.getStringAttribute (T("id")));
         dp->setSolidFill (Colours::transparentBlack);
 
         path.applyTransform (transform);

@@ -119,10 +119,12 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
         { kEventClassWindow, kEventWindowHidden }
     };
 
+    EventHandlerRef ref;
     InstallWindowEventHandler ((WindowRef) windowRef,
                                NewEventHandlerUPP (windowVisibilityBodge),
                                GetEventTypeCount (eventsToCatch), eventsToCatch,
-                               (void*) hostWindow, 0);
+                               (void*) hostWindow, &ref);
+    comp->setComponentProperty ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 #endif
 
     return hostWindow;
@@ -131,6 +133,12 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
     const ScopedAutoReleasePool pool;
+
+#if ADD_CARBON_BODGE
+    EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int) 
+                                comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
+    RemoveEventHandler (ref);
+#endif
 
     NSWindow* hostWindow = (NSWindow*) nsWindow;
     NSView* pluginView = (NSView*) comp->getWindowHandle();
