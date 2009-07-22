@@ -38,9 +38,7 @@
 
 #define ADD_CARBON_BODGE 1   // see note below..
 
-#if ADD_CARBON_BODGE
- #include <Carbon/Carbon.h>
-#endif
+#include <Carbon/Carbon.h>
 
 #include "../juce_PluginHeaders.h"
 
@@ -148,6 +146,11 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     comp->removeFromDesktop();
 
     [hostWindow release];
+
+    // The event loop needs to be run between closing the window and deleting the plugin,
+    // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
+    // in Live when you delete the plugin with its window open.
+    MessageManager::getInstance()->runDispatchLoopUntil (10);
 }
 
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight)
