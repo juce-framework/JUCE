@@ -447,7 +447,7 @@ public:
     {
         return [[v className] isEqualToString: @"WebNetscapePluginDocumentView"]
             || [[v className] isEqualToString: @"WebPluginDocumentView"]
-            || [[v className] isEqualToString: @"ChildView"];
+            || ([[v className] isEqualToString: @"ChildView"] && ([v frame].origin.x != 0 && [v frame].origin.y != 0));
     }
 
     void setWindow (NPWindow* window)

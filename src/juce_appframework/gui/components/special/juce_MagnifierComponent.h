@@ -89,6 +89,9 @@ public:
     /** Returns the current zoom factor. */
     double getScaleFactor() const throw()                   { return scaleFactor; }
 
+    /** Changes the quality setting used to rescale the graphics.
+    */
+    void setResamplingQuality (Graphics::ResamplingQuality newQuality);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -102,6 +105,7 @@ private:
     double scaleFactor;
     ComponentPeer* peer;
     bool deleteContent;
+    Graphics::ResamplingQuality quality;
 
     //==============================================================================
     void paint (Graphics& g);

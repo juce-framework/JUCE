@@ -913,8 +913,8 @@ public:
             type->DefineTypeNames (createRTASName());
             type->DefineSampleRateSupport (eSupports48kAnd96kAnd192k);
 
-            type->DefineStemFormats (getFormatForChans (channelConfigs [i][0]),
-                                     getFormatForChans (channelConfigs [i][1]));
+            type->DefineStemFormats (getFormatForChans (channelConfigs [i][0] != 0 ? channelConfigs [i][0] : channelConfigs [i][1]),
+                                     getFormatForChans (channelConfigs [i][1] != 0 ? channelConfigs [i][1] : channelConfigs [i][0]));
 
             type->AddGestalt (pluginGestalt_CanBypass);
             type->AddGestalt (pluginGestalt_SupportsVariableQuanta);

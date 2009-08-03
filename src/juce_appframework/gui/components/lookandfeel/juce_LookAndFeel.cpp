@@ -365,10 +365,15 @@ void LookAndFeel::drawButtonBackground (Graphics& g,
                       button.isConnectedOnBottom());
 }
 
+const Font LookAndFeel::getFontForTextButton (TextButton& button)
+{
+    return button.getFont();
+}
+
 void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
                                   bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
-    g.setFont (button.getFont());
+    g.setFont (getFontForTextButton (button));
     g.setColour (button.findColour (TextButton::textColourId)
                        .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
 

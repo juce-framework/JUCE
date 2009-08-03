@@ -40,7 +40,7 @@ static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
                                 int type,
                                 LPARAM lParam)
 {
-    if (lpelfe != 0 && type == TRUETYPE_FONTTYPE)
+    if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
     {
         const String fontName (lpelfe->elfLogFont.lfFaceName);
 
@@ -55,8 +55,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
                                 int type,
                                 LPARAM lParam)
 {
-    if (lpelfe != 0
-        && ((type & (DEVICE_FONTTYPE | RASTER_FONTTYPE)) == 0))
+    if (lpelfe != 0 && (type & RASTER_FONTTYPE) == 0)
     {
         LOGFONTW lf;
         zerostruct (lf);

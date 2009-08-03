@@ -105,11 +105,9 @@ const AffineTransform RectanglePlacement::getTransformToFit (float x, float y,
     const float scaleY = dh / h;
 
     if ((flags & stretchToFit) != 0)
-    {
         return AffineTransform::translation (-x, -y)
                     .scaled (scaleX, scaleY)
-                    .translated (dx - x, dy - y);
-    }
+                    .translated (dx, dy);
 
     float scale = (flags & fillDestination) != 0 ? jmax (scaleX, scaleY)
                                                  : jmin (scaleX, scaleY);

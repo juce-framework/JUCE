@@ -135,6 +135,7 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
     if (n >= maxEdgesPerLine)
     {
         remapTableForNumEdges (maxEdgesPerLine + juce_edgeTableDefaultEdgesPerLine);
+        jassert (n < maxEdgesPerLine);
         lineStart = table + lineStrideElements * y;
     }
 

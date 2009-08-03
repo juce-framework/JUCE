@@ -55,7 +55,7 @@
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9
-static VoidArray activePlugins;
+static VoidArray activePlugins, activeUIs;
 
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 static const int numChannelConfigs = numElementsInArray (channelConfigs);
@@ -108,7 +108,7 @@ public:
           channels (0),
           prepared (false)
     {
-        if (activePlugins.size() == 0)
+        if (activePlugins.size() + activeUIs.size() == 0)
         {
 #if BUILD_AU_CARBON_UI
             NSApplicationLoad();
@@ -143,7 +143,7 @@ public:
         jassert (activePlugins.contains (this));
         activePlugins.removeValue (this);
 
-        if (activePlugins.size() == 0)
+        if (activePlugins.size() + activeUIs.size() == 0)
             shutdownJuce_GUI();
     }
 
@@ -993,6 +993,8 @@ public:
     [self setHidden: NO];
     [self setPostsFrameChangedNotifications: YES];
 
+    activeUIs.add (self);
+
     editorComp->addToDesktop (0, (void*) self);
     editorComp->setVisible (true);
 
@@ -1005,10 +1007,19 @@ public:
     // is trying to delete our plugin..
     jassert (Component::getCurrentlyModalComponent() == 0);
 
-    if (editorComp != 0 && editorComp->getChildComponent(0) != 0)
-        filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
+    if (editorComp != 0 && editorComp->isValidComponent())
+    {
+        if (editorComp->getChildComponent(0) != 0)
+            if (activePlugins.contains ((void*) filter)) // plugin may have been deleted before the UI
+                filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
 
-    deleteAndZero (editorComp);
+        deleteAndZero (editorComp);
+    }
+
+    jassert (activeUIs.contains (self));
+    activeUIs.removeValue (self);
+    if (activePlugins.size() + activeUIs.size() == 0)
+        shutdownJuce_GUI();
 
     [super dealloc];
 }

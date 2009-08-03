@@ -200,7 +200,8 @@ MagnifierComponent::MagnifierComponent (Component* const content_,
     : content (content_),
       scaleFactor (0.0),
       peer (0),
-      deleteContent (deleteContentCompWhenNoLongerNeeded)
+      deleteContent (deleteContentCompWhenNoLongerNeeded),
+      quality (Graphics::lowResamplingQuality)
 {
     holderComp = new PeerHolderComp (this);
     setScaleFactor (1.0);
@@ -272,7 +273,7 @@ void MagnifierComponent::paint (Graphics& g)
     g2.reduceClipRegion (srcX, srcY, srcW, srcH);
     holderComp->paintEntireComponent (g2);
 
-    g.setImageResamplingQuality (Graphics::lowResamplingQuality);
+    g.setImageResamplingQuality (quality);
     g.drawImage (&temp,
                  0, 0, (int) (w * scaleFactor), (int) (h * scaleFactor),
                  0, 0, w, h,

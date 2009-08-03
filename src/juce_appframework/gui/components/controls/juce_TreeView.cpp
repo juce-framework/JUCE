@@ -278,7 +278,7 @@ public:
 
         if (buttonUnderMouse != newItem)
         {
-            if (buttonUnderMouse != 0)
+            if (buttonUnderMouse != 0 && containsItem (buttonUnderMouse))
             {
                 const Rectangle r (buttonUnderMouse->getItemPosition (false));
                 repaint (0, r.getY(), r.getX(), buttonUnderMouse->getItemHeight());
@@ -362,6 +362,15 @@ private:
 
             item->setSelected ((! cmd) || (! item->isSelected()), ! cmd);
         }
+    }
+                    
+    bool containsItem (TreeViewItem* const item) const
+    {
+        for (int i = rowComponentItems.size(); --i >= 0;)
+            if ((TreeViewItem*) rowComponentItems.getUnchecked (i) == item)
+                return true;
+
+        return false;
     }
 };
 

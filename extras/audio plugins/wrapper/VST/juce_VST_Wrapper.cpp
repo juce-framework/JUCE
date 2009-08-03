@@ -221,9 +221,13 @@ class SharedMessageThread : public Thread
 {
 public:
     SharedMessageThread()
-      : Thread (T("VstMessageThread"))
+      : Thread (T("VstMessageThread")),
+        initialised (false)
     {
         startThread (7);
+        
+        while (! initialised)
+            sleep (1);
     }
 
     ~SharedMessageThread()
@@ -241,6 +245,9 @@ public:
         const Thread::ThreadID originalThreadId = messageManager->getCurrentMessageThread();
         messageManager->setCurrentMessageThread (Thread::getCurrentThreadId());
 
+        initialiseJuce_GUI();
+        initialised = true;
+
         while ((! threadShouldExit()) && messageManager->runDispatchLoopUntil (250))
         {
         }
@@ -249,8 +256,12 @@ public:
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
+    
+private:
+    bool initialised;
 };
 
+juce_ImplementSingleton (SharedMessageThread)
 
 #endif
 
@@ -446,6 +457,7 @@ public:
     {
         if (editorComp == 0)
         {
+            const MessageManagerLock mmLock;
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
@@ -462,6 +474,7 @@ public:
 
     void close()
     {
+        const MessageManagerLock mmLock;
         jassert (! recursionCheck);
 
         stopTimer();
@@ -1179,6 +1192,7 @@ public:
                 if (canDeleteLaterIfModal)
                 {
                     shouldDeleteEditor = true;
+                    recursionCheck = false;
                     return;
                 }
             }
@@ -1219,6 +1233,7 @@ public:
         }
         else if (opCode == effEditOpen)
         {
+            const MessageManagerLock mmLock;
             jassert (! recursionCheck);
 
             deleteEditor (true);
@@ -1253,11 +1268,13 @@ public:
         }
         else if (opCode == effEditClose)
         {
+            const MessageManagerLock mmLock;
             deleteEditor (true);
             return 0;
         }
         else if (opCode == effEditGetRect)
         {
+            const MessageManagerLock mmLock;
             createEditorComp();
 
             if (editorComp != 0)
@@ -1490,7 +1507,6 @@ extern "C" __attribute__ ((visibility("default"))) AEffect* main_macho (audioMas
 
 extern "C" AEffect* VSTPluginMain (audioMasterCallback audioMaster)
 {
-    initialiseJuce_GUI();
     SharedMessageThread::getInstance();
 
     return pluginEntryPoint (audioMaster);

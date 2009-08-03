@@ -41,6 +41,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_Desktop.h"
 #include "../../../../juce_core/text/juce_LocalisedStrings.h"
 #include "../../../events/juce_MessageManager.h"
+#include "../../../application/juce_Application.h"
 
 static const int titleH = 24;
 static const int iconWidth = 80;
@@ -111,6 +112,9 @@ AlertWindow::AlertWindow (const String& title,
             break;
         }
     }
+
+    if (JUCEApplication::getInstance() == 0)
+        setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
 
     lookAndFeelChanged();
 

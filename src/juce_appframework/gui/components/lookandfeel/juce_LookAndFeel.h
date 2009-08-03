@@ -153,6 +153,8 @@ public:
                                        bool isMouseOverButton,
                                        bool isButtonDown);
 
+    virtual const Font getFontForTextButton (TextButton& button);
+
     /** Draws the text for a TextButton. */
     virtual void drawButtonText (Graphics& g,
                                  TextButton& button,

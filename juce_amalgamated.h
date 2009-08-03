@@ -12593,6 +12593,32 @@ public:
     /** True if it seems to be valid. */
     bool isWellFormed() const;
 
+    /** Returns just the domain part of the URL.
+
+        E.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
+    */
+    const String getDomain() const;
+
+    /** Returns the path part of the URL.
+
+        E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
+    */
+    const String getSubPath() const;
+
+    /** Returns the scheme of the URL.
+
+        E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
+        include the colon).
+    */
+    const String getScheme() const;
+
+    /** Returns a new version of this URL that uses a different sub-path.
+
+        E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
+        "bar", it'll return "http://www.xyz.com/bar?x=1".
+    */
+    const URL withNewSubPath (const String& newPath) const;
+
     /** Returns a copy of this URL, with a GET parameter added to the end.
 
         Any control characters in the value will be encoded.
@@ -52446,6 +52472,10 @@ public:
     /** Returns the current zoom factor. */
     double getScaleFactor() const throw()                   { return scaleFactor; }
 
+    /** Changes the quality setting used to rescale the graphics.
+    */
+    void setResamplingQuality (Graphics::ResamplingQuality newQuality);
+
     juce_UseDebuggingNewOperator
 
     /** @internal */
@@ -52457,6 +52487,7 @@ private:
     double scaleFactor;
     ComponentPeer* peer;
     bool deleteContent;
+    Graphics::ResamplingQuality quality;
 
     void paint (Graphics& g);
     void mouseDown (const MouseEvent& e);
@@ -53802,6 +53833,8 @@ public:
                                        const Colour& backgroundColour,
                                        bool isMouseOverButton,
                                        bool isButtonDown);
+
+    virtual const Font getFontForTextButton (TextButton& button);
 
     /** Draws the text for a TextButton. */
     virtual void drawButtonText (Graphics& g,
