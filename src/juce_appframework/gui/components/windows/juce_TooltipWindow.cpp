@@ -66,6 +66,11 @@ TooltipWindow::~TooltipWindow()
     hide();
 }
 
+void TooltipWindow::setMillisecondsBeforeTipAppears (const int newTimeMs) throw()
+{
+    millisecondsBeforeTipAppears = newTimeMs;
+}
+
 void TooltipWindow::paint (Graphics& g)
 {
     getLookAndFeel().drawTooltip (g, tipShowing, getWidth(), getHeight());

@@ -245,6 +245,11 @@ void MagnifierComponent::setScaleFactor (double newScaleFactor)
     }
 }
 
+void MagnifierComponent::setResamplingQuality (Graphics::ResamplingQuality newQuality)
+{
+    quality = newQuality;
+}
+
 void MagnifierComponent::paint (Graphics& g)
 {
     const int w = holderComp->getWidth();

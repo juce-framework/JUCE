@@ -872,6 +872,11 @@ public:
         }
     }
 
+    bool isInside (HWND h) const
+    {
+        return GetAncestor (hwnd, GA_ROOT) == h;
+    }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -2296,10 +2301,20 @@ bool Process::isForegroundProcess() throw()
     if (fg == 0)
         return true;
 
-    DWORD processId = 0;
-    GetWindowThreadProcessId (fg, &processId);
+    // when running as a plugin in IE8, the browser UI runs in a different process to the plugin, so 
+    // process ID isn't a reliable way to check if the foreground window belongs to us - instead, we
+    // have to see if any of our windows are children of the foreground window
+    fg = GetAncestor (fg, GA_ROOT);
 
-    return processId == GetCurrentProcessId();
+    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+    {
+        Win32ComponentPeer* const wp = dynamic_cast <Win32ComponentPeer*> (ComponentPeer::getPeer (i));
+
+        if (wp != 0 && wp->isInside (fg))
+            return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

@@ -80,6 +80,12 @@ public:
     ~TooltipWindow();
 
     //==============================================================================
+    /** Changes the time before the tip appears.
+        This lets you change the value that was set in the constructor.
+    */
+    void setMillisecondsBeforeTipAppears (const int newTimeMs = 700) throw();
+    
+    //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the tooltip.
 
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
@@ -99,7 +105,7 @@ public:
 
 private:
     //==============================================================================
-    const int millisecondsBeforeTipAppears;
+    int millisecondsBeforeTipAppears;
     int mouseX, mouseY, mouseClicks;
     unsigned int lastCompChangeTime, lastHideTime;
     Component* lastComponentUnderMouse;
