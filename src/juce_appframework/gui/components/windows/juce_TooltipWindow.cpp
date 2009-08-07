@@ -119,7 +119,9 @@ void TooltipWindow::showFor (Component* const c, const String& tip)
 
 const String TooltipWindow::getTipFor (Component* const c)
 {
-    if (c->isValidComponent() && Process::isForegroundProcess())
+    if (c->isValidComponent() 
+         && Process::isForegroundProcess()
+         && ! Component::isMouseButtonDownAnywhere())
     {
         TooltipClient* const ttc = dynamic_cast <TooltipClient*> (c);
 
