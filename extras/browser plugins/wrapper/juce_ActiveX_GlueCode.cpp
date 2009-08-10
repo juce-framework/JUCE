@@ -55,18 +55,11 @@
 #endif
 
 //==============================================================================
-#if JUCE_MAC && JUCE_DEBUG && 0
-static void log (const String& s)
-{
-    FILE* f = fopen ("/Users/jules/Desktop/log.txt", "a+");
-    fprintf (f, (const char*) s);
-    fprintf (f, "\n");
-    fflush (f);
-    fclose (f);
-}
-#else
-#define log(a) DBG(a)
+#if JUCE_DEBUG
+static int numDOWID = 0, numJuceSO = 0;
 #endif
+
+#define log(a) DBG(a)
 
 // Cunning trick used to add functions to export list without messing about with .def files.
 #define EXPORTED_FUNCTION comment(linker, "/EXPORT:" __FUNCTION__ "=" __FUNCDNAME__)
@@ -74,10 +67,6 @@ static void log (const String& s)
 //==============================================================================
 static void juceVarToVariant (const var& v, VARIANT& dest);
 static const var variantTojuceVar (const VARIANT& v);
-
-#if JUCE_DEBUG
- static int numDOWID = 0, numJuceSO = 0;
-#endif
 
 //==============================================================================
 // Takes care of the logic in invoking var methods from IDispatch callbacks.
@@ -87,7 +76,7 @@ public:
     IDispatchHelper() {}
     ~IDispatchHelper() {}
 
-    var::identifier getId (int hash) const
+    var::identifier getId (const int hash) const
     {
         for (int i = knownIdentifiers.size(); --i >= 0;)
             if (knownIdentifiers.getUnchecked(i)->hashCode == hash)
@@ -557,6 +546,52 @@ private:
 };
 
 //==============================================================================
+extern String browserVersionDesc;
+
+static const String getExePath()
+{
+    TCHAR moduleFile [2048];
+    moduleFile[0] = 0;
+    GetModuleFileName (0, moduleFile, 2048);
+    return moduleFile;
+}
+
+static const String getExeVersion (const String& exeFileName, const String& fieldName)
+{
+    String resultString;
+    DWORD pointlessWin32Variable;
+    DWORD size = GetFileVersionInfoSize (exeFileName, &pointlessWin32Variable);
+
+    if (size > 0)
+    {
+        void* const exeInfo = juce_calloc (size);
+
+        if (GetFileVersionInfo (exeFileName, 0, size, exeInfo))
+        {
+            TCHAR* result = 0;
+            unsigned int resultLen = 0;
+
+            // try the 1200 codepage (Unicode) 
+            String queryStr ("\\StringFileInfo\\040904B0\\" + fieldName);
+
+            if (! VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen))
+            {
+                // try the 1252 codepage (Windows Multilingual) 
+                queryStr = "\\StringFileInfo\\040904E4\\" + fieldName; 
+                VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen);
+            }
+
+            resultString = String (result, resultLen);
+        }
+
+        juce_free (exeInfo);
+    }
+
+    return resultString;
+}
+
+static int numActivePlugins = 0;
+
 class JuceActiveXObject     : public IUnknown,
                               public IDispatch,
                               public IObjectWithSite,
@@ -574,7 +609,7 @@ public:
 
     ~JuceActiveXObject()
     {
-        deleteAndZero (holderComp);
+        deleteHolderComp();
         log ("~JuceActiveXObject");
     }
 
@@ -633,25 +668,48 @@ public:
 
                 if (inPlaceSite != 0)
                 {
-                    if (holderComp == 0)
-                        holderComp = new AXBrowserPluginHolderComponent();
+                    createHolderComp();
 
                     holderComp->setWindow (inPlaceSite);
-
                     inPlaceSite->Release();
                 }
                 else
                 {
-                    deleteAndZero (holderComp);
+                    deleteHolderComp();
                 }
             }
             else
             {
-                deleteAndZero (holderComp);
+                deleteHolderComp();
             }
         }
 
         return S_OK;
+    }
+
+    void createHolderComp()
+    {
+        if (numActivePlugins++ == 0)
+        {
+            log ("initialiseJuce_GUI()");
+            initialiseJuce_GUI();
+
+            browserVersionDesc = "Internet Explorer " + getExeVersion (getExePath(), "FileVersion");
+        }
+
+        if (holderComp == 0)
+            holderComp = new AXBrowserPluginHolderComponent();
+    }
+
+    void deleteHolderComp()
+    {
+        deleteAndZero (holderComp);
+
+        if (--numActivePlugins == 0)
+        {
+            log ("shutdownJuce_GUI()");
+            shutdownJuce_GUI();
+        }
     }
 
     HRESULT __stdcall GetSite (REFIID riid, void **ppvSite)
@@ -744,50 +802,6 @@ private:
 };
 
 //==============================================================================
-extern String browserVersionDesc;
-
-static const String getExePath()
-{
-    TCHAR moduleFile [2048];
-    moduleFile[0] = 0;
-    GetModuleFileName (0, moduleFile, 2048);
-    return moduleFile;
-}
-
-static const String getExeVersion (const String& exeFileName, const String& fieldName)
-{
-    String resultString;
-    DWORD pointlessWin32Variable;
-    DWORD size = GetFileVersionInfoSize (exeFileName, &pointlessWin32Variable);
-
-    if (size > 0)
-    {
-        void* const exeInfo = juce_calloc (size);
-
-        if (GetFileVersionInfo (exeFileName, 0, size, exeInfo))
-        {
-            TCHAR* result = 0;
-            unsigned int resultLen = 0;
-
-            // try the 1200 codepage (Unicode) 
-            String queryStr ("\\StringFileInfo\\040904B0\\" + fieldName);
-
-            if (! VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen))
-            {
-                // try the 1252 codepage (Windows Multilingual) 
-                queryStr = "\\StringFileInfo\\040904E4\\" + fieldName; 
-                VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen);
-            }
-
-            resultString = String (result, resultLen);
-        }
-
-        juce_free (exeInfo);
-    }
-
-    return resultString;
-}
-
 const String getActiveXBrowserURL (const BrowserPluginComponent* comp)
 {
     AXBrowserPluginHolderComponent* const ax = dynamic_cast <AXBrowserPluginHolderComponent*> (comp->getParentComponent());
@@ -799,34 +813,21 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
 {
     #pragma EXPORTED_FUNCTION
 
-    static int numPluginInstances = 0;
-
     switch (reason)
     {
     case DLL_PROCESS_ATTACH:
         log ("DLL_PROCESS_ATTACH");
-
-        if (numPluginInstances++ == 0)
-        {
-            log ("initialiseJuce_GUI()");
-            initialiseJuce_GUI();
-
-            browserVersionDesc = "Internet Explorer " + getExeVersion (getExePath(), "FileVersion");
-        }
-
         PlatformUtilities::setCurrentModuleInstanceHandle (instance);
         break;
 
     case DLL_PROCESS_DETACH:
         log ("DLL_PROCESS_DETACH");
+        browserVersionDesc = String::empty;
 
-        if (--numPluginInstances == 0)
-        {
-            log ("shutdownJuce_GUI()");
-            browserVersionDesc = String::empty;
-            shutdownJuce_GUI();
-        }
-
+        // IE has a tendency to leak our objects, so although none of this should be 
+        // necessary, it's best to make sure..
+        jassert (numActivePlugins == 0);
+        shutdownJuce_GUI();
         break;
 
     default:

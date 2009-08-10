@@ -86,10 +86,12 @@ class JUCE_API  ASIOAudioIODevice  : public AudioIODevice,
 public:
     Component ourWindow;
 
-    ASIOAudioIODevice (const String& name_, const CLSID classId_, const int slotNumber)
+    ASIOAudioIODevice (const String& name_, const CLSID classId_, const int slotNumber, 
+                       const String& optionalDllForDirectLoading_)
        : AudioIODevice (name_, T("ASIO")),
          asioObject (0),
          classId (classId_),
+         optionalDllForDirectLoading (optionalDllForDirectLoading_),
          currentBitDepth (16),
          currentSampleRate (0),
          tempBuffer (0),
@@ -813,6 +815,7 @@ private:
 
     void* windowHandle;
     CLSID classId;
+    const String optionalDllForDirectLoading;
     String error;
 
     long totalNumInputChans, totalNumOutputChans;
@@ -875,11 +878,37 @@ private:
             {
                 return true;
             }
+
+            // If a class isn't registered but we have a path for it, we can fallback to
+            // doing a direct load of the COM object (only available via the juce_createASIOAudioIODeviceForGUID function).
+            if (optionalDllForDirectLoading.isNotEmpty())
+            {
+                HMODULE h = LoadLibrary (optionalDllForDirectLoading);
+
+                if (h != 0)
+                {
+                    typedef HRESULT (CALLBACK* DllGetClassObjectFunc) (REFCLSID clsid, REFIID iid, LPVOID* ppv);
+                    DllGetClassObjectFunc dllGetClassObject = (DllGetClassObjectFunc) GetProcAddress (h, "DllGetClassObject");
+
+                    if (dllGetClassObject != 0)
+                    {
+                        IClassFactory* classFactory = 0;
+                        HRESULT hr = dllGetClassObject (classId, IID_IClassFactory, (void**) &classFactory);
+
+                        if (classFactory != 0)
+                        {
+                            hr = classFactory->CreateInstance (0, classId, (void**) &asioObject);
+                            classFactory->Release();
+                        }
+
+                        return asioObject != 0;
+                    }
+                }
+            }
         }
         JUCE_CATCH_ALL
 
         asioObject = 0;
-
         return false;
     }
 
@@ -1804,7 +1833,7 @@ public:
             const int freeSlot = findFreeSlot();
 
             if (freeSlot >= 0)
-                return new ASIOAudioIODevice (outputDeviceName, *(classIds [index]), freeSlot);
+                return new ASIOAudioIODevice (outputDeviceName, *(classIds [index]), freeSlot, String::empty);
         }
 
         return 0;
@@ -1932,14 +1961,15 @@ AudioIODeviceType* juce_createASIOAudioIODeviceType()
 }
 
 AudioIODevice* juce_createASIOAudioIODeviceForGUID (const String& name,
-                                                    void* guid)
+                                                    void* guid,
+                                                    const String& optionalDllForDirectLoading)
 {
     const int freeSlot = ASIOAudioIODeviceType::findFreeSlot();
 
     if (freeSlot < 0)
         return 0;
 
-    return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot);
+    return new ASIOAudioIODevice (name, *(CLSID*) guid, freeSlot, optionalDllForDirectLoading);
 }
 
 #undef log
