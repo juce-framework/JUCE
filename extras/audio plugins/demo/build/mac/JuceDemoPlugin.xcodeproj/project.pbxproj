@@ -49,9 +49,8 @@
 		843796E00EFBFD16002A2725 /* juce_RTAS_MacResources.r in Rez */ = {isa = PBXBuildFile; fileRef = 843796D90EFBFD16002A2725 /* juce_RTAS_MacResources.r */; };
 		843796E10EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 843796DA0EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm */; };
 		843796E20EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */; };
-		843796F60EFC0102002A2725 /* CommonDebugSettings.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */; };
-		843796F70EFC0102002A2725 /* CommonReleaseSettings.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */; };
 		843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 843797030EFC022E002A2725 /* libPluginLibrary.a */; };
+		849817021010B3C500297ECA /* JuceDemoPlugin.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D01CCD20486CAD60068D4B7 /* JuceDemoPlugin.component */; };
 		84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */; };
 		84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */; };
 		84D3AB670FCC74B300EA8080 /* CarbonEventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */; };
@@ -101,6 +100,19 @@
 			remoteInfo = "Plugin Library";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		849817161010B3D100297ECA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "~/Library/Audio/Plug-Ins/Components";
+			dstSubfolderSpec = 0;
+			files = (
+				849817021010B3C500297ECA /* JuceDemoPlugin.component in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -500,6 +512,7 @@
 				8D01CCCB0486CAD60068D4B7 /* Sources */,
 				8D01CCCD0486CAD60068D4B7 /* Frameworks */,
 				8D01CCCF0486CAD60068D4B7 /* Rez */,
+				849817161010B3D100297ECA /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -550,8 +563,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D01CCCA0486CAD60068D4B7 /* InfoPlist.strings in Resources */,
-				843796F60EFC0102002A2725 /* CommonDebugSettings.xcconfig in Resources */,
-				843796F70EFC0102002A2725 /* CommonReleaseSettings.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -638,6 +649,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
 				LIBRARY_STYLE = Bundle;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = "-bundle";
 				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Examples/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_NAME = JuceDemoPlugin;

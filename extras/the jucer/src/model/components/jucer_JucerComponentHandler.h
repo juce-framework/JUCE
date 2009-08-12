@@ -189,7 +189,8 @@ private:
         void setFile (const File& newFile)
         {
             setJucerComponentFile (document, component,
-                                   newFile.getRelativePathFrom (document.getFile().getParentDirectory()));
+                                   newFile.getRelativePathFrom (document.getFile().getParentDirectory())
+                                          .replaceCharacter (T('\\'), T('/')));
         }
 
         const File getFile() const

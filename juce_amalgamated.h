@@ -66,7 +66,7 @@
     See also SystemStats::getJUCEVersion() for a string version.
 */
 #define JUCE_MAJOR_VERSION      1
-#define JUCE_MINOR_VERSION      46
+#define JUCE_MINOR_VERSION      50
 
 /** Current Juce version number.
 
@@ -10115,6 +10115,26 @@ public:
         lock.exit();
     }
 
+    /** Inserts or replaces an object in the array, assuming it is sorted.
+
+        This is similar to addSorted, but if a matching element already exists, then it will be
+        replaced by the new one, rather than the new one being added as well.
+    */
+    template <class ElementComparator>
+    void addOrReplaceSorted (ElementComparator& comparator,
+                             ObjectClass* newObject) throw()
+    {
+        lock.enter();
+        const int index = findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed);
+
+        if (index > 0 && comparator.compareElements (newObject, this->elements [index - 1]) == 0)
+            set (index - 1, newObject); // replace an existing object that matches
+        else
+            insert (index, newObject);  // no match, so insert the new one
+
+        lock.exit();
+    }
+
     /** Removes an object from the array.
 
         This will remove the object at a given index and move back all the
@@ -15095,11 +15115,16 @@ public:
                                     methods called to try to interrupt them
         @param timeOutMilliseconds  the length of time this method should wait for all the jobs to finish
                                     before giving up and returning false
+        @param deleteInactiveJobs   if true, any jobs that aren't currently running will be deleted. If false,
+                                    they will simply be removed from the pool. Jobs that are already running when
+                                    this method is called can choose whether they should be deleted by
+                                    returning jobHasFinishedAndShouldBeDeleted from their runJob() method.
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
                     expires while waiting for them to stop
     */
     bool removeAllJobs (const bool interruptRunningJobs,
-                        const int timeOutMilliseconds);
+                        const int timeOutMilliseconds,
+                        const bool deleteInactiveJobs = false);
 
     /** Returns the number of jobs currently running or queued.
     */

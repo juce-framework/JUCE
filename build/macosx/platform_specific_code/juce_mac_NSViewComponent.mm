@@ -41,17 +41,17 @@ class NSViewComponentInternal  : public ComponentMovementWatcher
     bool wasShowing;
 
 public:
-    NSView* view;
+    NSView* const view;
 
     //==============================================================================
-    NSViewComponentInternal (NSView* view_, Component* const owner_)
+    NSViewComponentInternal (NSView* const view_, Component* const owner_)
         : ComponentMovementWatcher (owner_),
           owner (owner_),
           currentPeer (0),
           wasShowing (false),
           view (view_)
     {
-        [view retain];
+        [view_ retain];
 
         if (owner_->isShowing())
             componentPeerChanged();
@@ -64,6 +64,18 @@ public:
     }
 
     //==============================================================================
+    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized)
+    {
+        ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
+        
+        // The ComponentMovementWatcher version of this method avoids calling
+        // us when the top-level comp is resized, but for an NSView we need to know this
+        // because with inverted co-ords, we need to update the position even if the
+        // top-left pos hasn't changed
+        if (comp.isOnDesktop() && wasResized)
+            componentMovedOrResized (wasMoved, wasResized);
+    }
+
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/)
     {
         Component* const topComp = owner->getTopLevelComponent();

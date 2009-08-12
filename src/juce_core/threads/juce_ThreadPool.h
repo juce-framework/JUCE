@@ -218,11 +218,16 @@ public:
                                     methods called to try to interrupt them
         @param timeOutMilliseconds  the length of time this method should wait for all the jobs to finish
                                     before giving up and returning false
+        @param deleteInactiveJobs   if true, any jobs that aren't currently running will be deleted. If false, 
+                                    they will simply be removed from the pool. Jobs that are already running when 
+                                    this method is called can choose whether they should be deleted by
+                                    returning jobHasFinishedAndShouldBeDeleted from their runJob() method.
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
                     expires while waiting for them to stop
     */
     bool removeAllJobs (const bool interruptRunningJobs,
-                        const int timeOutMilliseconds);
+                        const int timeOutMilliseconds,
+                        const bool deleteInactiveJobs = false);
 
     /** Returns the number of jobs currently running or queued.
     */

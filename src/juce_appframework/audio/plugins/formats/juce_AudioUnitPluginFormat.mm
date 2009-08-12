@@ -1535,7 +1535,7 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 
 const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath ("(Default AudioUnit locations)");
+    return FileSearchPath ("/(Default AudioUnit locations)");
 }
 
 #endif

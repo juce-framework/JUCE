@@ -264,7 +264,8 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
 }
 
 bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
-                                const int timeOutMs)
+                                const int timeOutMs,
+                                const bool deleteInactiveJobs)
 {
     lock.enter();
 
@@ -280,6 +281,9 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
         else
         {
             jobs.remove (i);
+            
+            if (deleteInactiveJobs)
+                delete job;
         }
     }
 

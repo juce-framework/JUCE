@@ -221,6 +221,12 @@ any compilation problems if, for example, you don't have the appropriate SDK for
 - As for the PC, you'll need to make sure your project contains a correctly set-up JucePluginCharacteristics.h
   file - start with a copy of the one in the demo plugin project, and go through it making sure that
   all the values make sense for your plugin.
+- Because of the flat naming structure used by Objective-C, if a host loads several different plugins which
+  all contain slightly different versions of the juce library, you can get nasty situations where all their obj-C
+  classes are cross-linked to the similarly-named class in other modules, and everything turns into a big mess...
+  To avoid this, you're advised to set a unique JUCE_ObjCExtraSuffix value (you'll find this in juce_mac_NativeCode.mm,
+  or if you're using the amalgamated version, you can just set it before including juce_amalgamated.cpp). Choose a 
+  suffix that's unique to both the name and version of your plugin.
 - Create your actual plugin classes and add them to the project. Obviously this is the hard bit!
 
 You should now be able to build a functional AU! If you want VST support as well, then read on...
@@ -232,6 +238,12 @@ You should now be able to build a functional AU! If you want VST support as well
 
 Now, if you compile, the resulting bundle should work as both a VST and AU - you can simply copy or rename it,
 changing the suffix to ".vst", and put it in your VST folder.
+
+NOTE! If you use the Finder to rename your xyz.component file to xyz.vst, it might look like it's done
+exactly this... but in fact, the Finder may have secretly renamed it as "xyz.vst.component", even though 
+it shows "xyz.vst" as the name on the screen. I have wasted quite a lot of time angrily wondering why my VSTs 
+don't seem to work, before realising that this is what has happened. You should use the command-line to rename 
+it correctly.
 
 If you also want to build an RTAS, then carry on reading...
 

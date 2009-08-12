@@ -52,106 +52,107 @@ OBJECTS := \
 	$(OBJDIR)/juce_BitArray.o \
 	$(OBJDIR)/juce_MemoryBlock.o \
 	$(OBJDIR)/juce_PropertySet.o \
+	$(OBJDIR)/juce_Variant.o \
 	$(OBJDIR)/juce_InputStream.o \
 	$(OBJDIR)/juce_OutputStream.o \
+	$(OBJDIR)/juce_DirectoryIterator.o \
+	$(OBJDIR)/juce_File.o \
 	$(OBJDIR)/juce_FileInputStream.o \
 	$(OBJDIR)/juce_FileOutputStream.o \
 	$(OBJDIR)/juce_FileSearchPath.o \
 	$(OBJDIR)/juce_NamedPipe.o \
-	$(OBJDIR)/juce_DirectoryIterator.o \
-	$(OBJDIR)/juce_File.o \
-	$(OBJDIR)/juce_Socket.o \
 	$(OBJDIR)/juce_URL.o \
+	$(OBJDIR)/juce_Socket.o \
 	$(OBJDIR)/juce_BufferedInputStream.o \
 	$(OBJDIR)/juce_FileInputSource.o \
 	$(OBJDIR)/juce_GZIPCompressorOutputStream.o \
 	$(OBJDIR)/juce_GZIPDecompressorInputStream.o \
 	$(OBJDIR)/juce_MemoryInputStream.o \
-	$(OBJDIR)/juce_SubregionStream.o \
 	$(OBJDIR)/juce_MemoryOutputStream.o \
+	$(OBJDIR)/juce_SubregionStream.o \
 	$(OBJDIR)/juce_PerformanceCounter.o \
 	$(OBJDIR)/juce_Uuid.o \
 	$(OBJDIR)/juce_ZipFile.o \
-	$(OBJDIR)/juce_StringArray.o \
-	$(OBJDIR)/juce_XmlDocument.o \
-	$(OBJDIR)/juce_XmlElement.o \
-	$(OBJDIR)/juce_StringPairArray.o \
 	$(OBJDIR)/juce_CharacterFunctions.o \
 	$(OBJDIR)/juce_LocalisedStrings.o \
+	$(OBJDIR)/juce_StringArray.o \
+	$(OBJDIR)/juce_StringPairArray.o \
+	$(OBJDIR)/juce_XmlDocument.o \
+	$(OBJDIR)/juce_XmlElement.o \
 	$(OBJDIR)/juce_String.o \
 	$(OBJDIR)/juce_InterProcessLock.o \
 	$(OBJDIR)/juce_ReadWriteLock.o \
-	$(OBJDIR)/juce_Thread.o \
-	$(OBJDIR)/juce_ThreadPool.o \
 	$(OBJDIR)/juce_TimeSliceThread.o \
-	$(OBJDIR)/juce_Application.o \
+	$(OBJDIR)/juce_ThreadPool.o \
+	$(OBJDIR)/juce_Thread.o \
 	$(OBJDIR)/juce_ApplicationCommandInfo.o \
 	$(OBJDIR)/juce_ApplicationCommandManager.o \
 	$(OBJDIR)/juce_ApplicationCommandTarget.o \
 	$(OBJDIR)/juce_ApplicationProperties.o \
 	$(OBJDIR)/juce_DeletedAtShutdown.o \
 	$(OBJDIR)/juce_PropertiesFile.o \
+	$(OBJDIR)/juce_Application.o \
 	$(OBJDIR)/juce_AudioDataConverters.o \
-	$(OBJDIR)/juce_AudioSampleBuffer.o \
 	$(OBJDIR)/juce_IIRFilter.o \
+	$(OBJDIR)/juce_AudioSampleBuffer.o \
 	$(OBJDIR)/juce_MidiBuffer.o \
-	$(OBJDIR)/juce_MidiFile.o \
 	$(OBJDIR)/juce_MidiKeyboardState.o \
 	$(OBJDIR)/juce_MidiMessage.o \
 	$(OBJDIR)/juce_MidiMessageCollector.o \
 	$(OBJDIR)/juce_MidiMessageSequence.o \
-	$(OBJDIR)/juce_AudioProcessorPlayer.o \
-	$(OBJDIR)/juce_GenericAudioProcessorEditor.o \
+	$(OBJDIR)/juce_MidiFile.o \
 	$(OBJDIR)/juce_AudioProcessor.o \
 	$(OBJDIR)/juce_AudioProcessorEditor.o \
 	$(OBJDIR)/juce_AudioProcessorGraph.o \
+	$(OBJDIR)/juce_AudioProcessorPlayer.o \
+	$(OBJDIR)/juce_GenericAudioProcessorEditor.o \
+	$(OBJDIR)/juce_AudioPluginFormat.o \
 	$(OBJDIR)/juce_AudioPluginFormatManager.o \
 	$(OBJDIR)/juce_AudioPluginInstance.o \
 	$(OBJDIR)/juce_KnownPluginList.o \
 	$(OBJDIR)/juce_PluginDescription.o \
 	$(OBJDIR)/juce_PluginDirectoryScanner.o \
 	$(OBJDIR)/juce_PluginListComponent.o \
-	$(OBJDIR)/juce_AudioPluginFormat.o \
 	$(OBJDIR)/juce_VSTPluginFormat.o \
-	$(OBJDIR)/juce_AiffAudioFormat.o \
-	$(OBJDIR)/juce_AudioCDReader.o \
+	$(OBJDIR)/juce_WavAudioFormat.o \
 	$(OBJDIR)/juce_AudioFormat.o \
 	$(OBJDIR)/juce_AudioFormatManager.o \
-	$(OBJDIR)/juce_AudioSubsectionReader.o \
 	$(OBJDIR)/juce_AudioThumbnail.o \
 	$(OBJDIR)/juce_AudioThumbnailCache.o \
-	$(OBJDIR)/juce_OggVorbisAudioFormat.o \
-	$(OBJDIR)/juce_QuickTimeAudioFormat.o \
-	$(OBJDIR)/juce_WavAudioFormat.o \
 	$(OBJDIR)/juce_FlacAudioFormat.o \
+	$(OBJDIR)/juce_AiffAudioFormat.o \
+	$(OBJDIR)/juce_QuickTimeAudioFormat.o \
+	$(OBJDIR)/juce_AudioCDReader.o \
+	$(OBJDIR)/juce_OggVorbisAudioFormat.o \
+	$(OBJDIR)/juce_AudioSubsectionReader.o \
 	$(OBJDIR)/juce_AudioFormatReaderSource.o \
 	$(OBJDIR)/juce_AudioSourcePlayer.o \
-	$(OBJDIR)/juce_AudioTransportSource.o \
 	$(OBJDIR)/juce_BufferingAudioSource.o \
 	$(OBJDIR)/juce_ChannelRemappingAudioSource.o \
 	$(OBJDIR)/juce_IIRFilterAudioSource.o \
 	$(OBJDIR)/juce_MixerAudioSource.o \
 	$(OBJDIR)/juce_ResamplingAudioSource.o \
 	$(OBJDIR)/juce_ToneGeneratorAudioSource.o \
-	$(OBJDIR)/juce_AudioDeviceManager.o \
+	$(OBJDIR)/juce_AudioTransportSource.o \
 	$(OBJDIR)/juce_AudioIODevice.o \
 	$(OBJDIR)/juce_AudioIODeviceType.o \
 	$(OBJDIR)/juce_MidiOutput.o \
-	$(OBJDIR)/juce_Sampler.o \
+	$(OBJDIR)/juce_AudioDeviceManager.o \
 	$(OBJDIR)/juce_Synthesiser.o \
+	$(OBJDIR)/juce_Sampler.o \
+	$(OBJDIR)/juce_FileBasedDocument.o \
 	$(OBJDIR)/juce_RecentlyOpenedFilesList.o \
 	$(OBJDIR)/juce_UndoManager.o \
-	$(OBJDIR)/juce_FileBasedDocument.o \
 	$(OBJDIR)/juce_ActionBroadcaster.o \
 	$(OBJDIR)/juce_ActionListenerList.o \
 	$(OBJDIR)/juce_AsyncUpdater.o \
 	$(OBJDIR)/juce_ChangeBroadcaster.o \
 	$(OBJDIR)/juce_ChangeListenerList.o \
-	$(OBJDIR)/juce_InterprocessConnection.o \
 	$(OBJDIR)/juce_InterprocessConnectionServer.o \
 	$(OBJDIR)/juce_Message.o \
 	$(OBJDIR)/juce_MessageListener.o \
 	$(OBJDIR)/juce_MultiTimer.o \
+	$(OBJDIR)/juce_InterprocessConnection.o \
 	$(OBJDIR)/juce_Timer.o \
 	$(OBJDIR)/juce_MessageManager.o \
 	$(OBJDIR)/juce_Brush.o \
@@ -167,12 +168,12 @@ OBJECTS := \
 	$(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o \
 	$(OBJDIR)/juce_RectanglePlacement.o \
 	$(OBJDIR)/juce_EdgeTable.o \
-	$(OBJDIR)/juce_DrawablePath.o \
-	$(OBJDIR)/juce_DrawableText.o \
-	$(OBJDIR)/juce_SVGParser.o \
 	$(OBJDIR)/juce_Drawable.o \
 	$(OBJDIR)/juce_DrawableComposite.o \
 	$(OBJDIR)/juce_DrawableImage.o \
+	$(OBJDIR)/juce_DrawablePath.o \
+	$(OBJDIR)/juce_DrawableText.o \
+	$(OBJDIR)/juce_SVGParser.o \
 	$(OBJDIR)/juce_DropShadowEffect.o \
 	$(OBJDIR)/juce_GlowEffect.o \
 	$(OBJDIR)/juce_ReduceOpacityEffect.o \
@@ -185,41 +186,41 @@ OBJECTS := \
 	$(OBJDIR)/juce_Line.o \
 	$(OBJDIR)/juce_Path.o \
 	$(OBJDIR)/juce_PathIterator.o \
-	$(OBJDIR)/juce_PathStrokeType.o \
 	$(OBJDIR)/juce_Point.o \
-	$(OBJDIR)/juce_PositionedRectangle.o \
-	$(OBJDIR)/juce_RectangleList.o \
 	$(OBJDIR)/juce_Rectangle.o \
-	$(OBJDIR)/juce_ImageConvolutionKernel.o \
+	$(OBJDIR)/juce_RectangleList.o \
+	$(OBJDIR)/juce_PathStrokeType.o \
+	$(OBJDIR)/juce_PositionedRectangle.o \
 	$(OBJDIR)/juce_Image.o \
 	$(OBJDIR)/juce_ImageCache.o \
+	$(OBJDIR)/juce_ImageConvolutionKernel.o \
 	$(OBJDIR)/juce_ImageFileFormat.o \
 	$(OBJDIR)/juce_GIFLoader.o \
-	$(OBJDIR)/juce_JPEGLoader.o \
 	$(OBJDIR)/juce_PNGLoader.o \
+	$(OBJDIR)/juce_JPEGLoader.o \
 	$(OBJDIR)/juce_Component.o \
 	$(OBJDIR)/juce_ComponentListener.o \
 	$(OBJDIR)/juce_Desktop.o \
 	$(OBJDIR)/juce_ArrowButton.o \
-	$(OBJDIR)/juce_Button.o \
-	$(OBJDIR)/juce_DrawableButton.o \
 	$(OBJDIR)/juce_HyperlinkButton.o \
 	$(OBJDIR)/juce_ShapeButton.o \
 	$(OBJDIR)/juce_TextButton.o \
 	$(OBJDIR)/juce_ToggleButton.o \
-	$(OBJDIR)/juce_ToolbarButton.o \
+	$(OBJDIR)/juce_DrawableButton.o \
 	$(OBJDIR)/juce_ImageButton.o \
-	$(OBJDIR)/juce_ComboBox.o \
-	$(OBJDIR)/juce_Label.o \
-	$(OBJDIR)/juce_ListBox.o \
+	$(OBJDIR)/juce_ToolbarButton.o \
+	$(OBJDIR)/juce_Button.o \
 	$(OBJDIR)/juce_ProgressBar.o \
-	$(OBJDIR)/juce_TableHeaderComponent.o \
-	$(OBJDIR)/juce_TableListBox.o \
 	$(OBJDIR)/juce_TextEditor.o \
+	$(OBJDIR)/juce_TableHeaderComponent.o \
 	$(OBJDIR)/juce_Toolbar.o \
 	$(OBJDIR)/juce_ToolbarItemComponent.o \
 	$(OBJDIR)/juce_ToolbarItemPalette.o \
+	$(OBJDIR)/juce_TableListBox.o \
+	$(OBJDIR)/juce_Label.o \
 	$(OBJDIR)/juce_Slider.o \
+	$(OBJDIR)/juce_ListBox.o \
+	$(OBJDIR)/juce_ComboBox.o \
 	$(OBJDIR)/juce_TreeView.o \
 	$(OBJDIR)/juce_DirectoryContentsDisplayComponent.o \
 	$(OBJDIR)/juce_DirectoryContentsList.o \
@@ -233,37 +234,37 @@ OBJECTS := \
 	$(OBJDIR)/juce_FileTreeComponent.o \
 	$(OBJDIR)/juce_ImagePreviewComponent.o \
 	$(OBJDIR)/juce_WildcardFileFilter.o \
-	$(OBJDIR)/juce_KeyPressMappingSet.o \
-	$(OBJDIR)/juce_ModifierKeys.o \
 	$(OBJDIR)/juce_KeyboardFocusTraverser.o \
 	$(OBJDIR)/juce_KeyListener.o \
-	$(OBJDIR)/juce_KeyMappingEditorComponent.o \
 	$(OBJDIR)/juce_KeyPress.o \
+	$(OBJDIR)/juce_ModifierKeys.o \
+	$(OBJDIR)/juce_KeyPressMappingSet.o \
+	$(OBJDIR)/juce_KeyMappingEditorComponent.o \
 	$(OBJDIR)/juce_ComponentAnimator.o \
 	$(OBJDIR)/juce_ComponentBoundsConstrainer.o \
 	$(OBJDIR)/juce_ComponentMovementWatcher.o \
 	$(OBJDIR)/juce_GroupComponent.o \
-	$(OBJDIR)/juce_MultiDocumentPanel.o \
-	$(OBJDIR)/juce_ResizableBorderComponent.o \
 	$(OBJDIR)/juce_ResizableCornerComponent.o \
 	$(OBJDIR)/juce_ScrollBar.o \
 	$(OBJDIR)/juce_StretchableLayoutManager.o \
 	$(OBJDIR)/juce_StretchableLayoutResizerBar.o \
 	$(OBJDIR)/juce_StretchableObjectResizer.o \
 	$(OBJDIR)/juce_TabbedButtonBar.o \
-	$(OBJDIR)/juce_Viewport.o \
 	$(OBJDIR)/juce_TabbedComponent.o \
+	$(OBJDIR)/juce_MultiDocumentPanel.o \
+	$(OBJDIR)/juce_Viewport.o \
+	$(OBJDIR)/juce_ResizableBorderComponent.o \
 	$(OBJDIR)/juce_OldSchoolLookAndFeel.o \
 	$(OBJDIR)/juce_LookAndFeel.o \
 	$(OBJDIR)/juce_MenuBarComponent.o \
 	$(OBJDIR)/juce_MenuBarModel.o \
 	$(OBJDIR)/juce_PopupMenu.o \
 	$(OBJDIR)/juce_ComponentDragger.o \
-	$(OBJDIR)/juce_DragAndDropContainer.o \
 	$(OBJDIR)/juce_MouseCursor.o \
 	$(OBJDIR)/juce_MouseEvent.o \
 	$(OBJDIR)/juce_MouseHoverDetector.o \
 	$(OBJDIR)/juce_MouseListener.o \
+	$(OBJDIR)/juce_DragAndDropContainer.o \
 	$(OBJDIR)/juce_BooleanPropertyComponent.o \
 	$(OBJDIR)/juce_ButtonPropertyComponent.o \
 	$(OBJDIR)/juce_ChoicePropertyComponent.o \
@@ -277,32 +278,32 @@ OBJECTS := \
 	$(OBJDIR)/juce_ColourSelector.o \
 	$(OBJDIR)/juce_DropShadower.o \
 	$(OBJDIR)/juce_MagnifierComponent.o \
-	$(OBJDIR)/juce_MidiKeyboardComponent.o \
 	$(OBJDIR)/juce_OpenGLComponent.o \
 	$(OBJDIR)/juce_PreferencesPanel.o \
 	$(OBJDIR)/juce_SystemTrayIconComponent.o \
+	$(OBJDIR)/juce_MidiKeyboardComponent.o \
 	$(OBJDIR)/juce_TooltipWindow.o \
-	$(OBJDIR)/juce_TopLevelWindow.o \
-	$(OBJDIR)/juce_ComponentPeer.o \
-	$(OBJDIR)/juce_AlertWindow.o \
 	$(OBJDIR)/juce_DialogWindow.o \
 	$(OBJDIR)/juce_DocumentWindow.o \
 	$(OBJDIR)/juce_ResizableWindow.o \
 	$(OBJDIR)/juce_SplashScreen.o \
 	$(OBJDIR)/juce_ThreadWithProgressWindow.o \
-	$(OBJDIR)/juce_linux_SystemStats.o \
-	$(OBJDIR)/juce_linux_Threads.o \
-	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
-	$(OBJDIR)/juce_linux_Windowing.o \
-	$(OBJDIR)/juce_linux_Audio.o \
-	$(OBJDIR)/juce_linux_AudioCDReader.o \
+	$(OBJDIR)/juce_TopLevelWindow.o \
+	$(OBJDIR)/juce_ComponentPeer.o \
+	$(OBJDIR)/juce_AlertWindow.o \
 	$(OBJDIR)/juce_linux_FileChooser.o \
-	$(OBJDIR)/juce_linux_Files.o \
 	$(OBJDIR)/juce_linux_Fonts.o \
 	$(OBJDIR)/juce_linux_Messaging.o \
 	$(OBJDIR)/juce_linux_Midi.o \
 	$(OBJDIR)/juce_linux_NamedPipe.o \
+	$(OBJDIR)/juce_linux_Threads.o \
+	$(OBJDIR)/juce_linux_SystemStats.o \
+	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
+	$(OBJDIR)/juce_linux_Audio.o \
 	$(OBJDIR)/juce_linux_Network.o \
+	$(OBJDIR)/juce_linux_AudioCDReader.o \
+	$(OBJDIR)/juce_linux_Files.o \
+	$(OBJDIR)/juce_linux_Windowing.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -409,12 +410,27 @@ $(OBJDIR)/juce_PropertySet.o: ../../src/juce_core/containers/juce_PropertySet.cp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_Variant.o: ../../src/juce_core/containers/juce_Variant.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_InputStream.o: ../../src/juce_core/io/juce_InputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_OutputStream.o: ../../src/juce_core/io/juce_OutputStream.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DirectoryIterator.o: ../../src/juce_core/io/files/juce_DirectoryIterator.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_File.o: ../../src/juce_core/io/files/juce_File.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -439,22 +455,12 @@ $(OBJDIR)/juce_NamedPipe.o: ../../src/juce_core/io/files/juce_NamedPipe.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_DirectoryIterator.o: ../../src/juce_core/io/files/juce_DirectoryIterator.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_File.o: ../../src/juce_core/io/files/juce_File.cpp
+$(OBJDIR)/juce_URL.o: ../../src/juce_core/io/network/juce_URL.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Socket.o: ../../src/juce_core/io/network/juce_Socket.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_URL.o: ../../src/juce_core/io/network/juce_URL.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -484,12 +490,12 @@ $(OBJDIR)/juce_MemoryInputStream.o: ../../src/juce_core/io/streams/juce_MemoryIn
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_SubregionStream.o: ../../src/juce_core/io/streams/juce_SubregionStream.cpp
+$(OBJDIR)/juce_MemoryOutputStream.o: ../../src/juce_core/io/streams/juce_MemoryOutputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MemoryOutputStream.o: ../../src/juce_core/io/streams/juce_MemoryOutputStream.cpp
+$(OBJDIR)/juce_SubregionStream.o: ../../src/juce_core/io/streams/juce_SubregionStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -509,7 +515,22 @@ $(OBJDIR)/juce_ZipFile.o: ../../src/juce_core/misc/juce_ZipFile.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_CharacterFunctions.o: ../../src/juce_core/text/juce_CharacterFunctions.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_LocalisedStrings.o: ../../src/juce_core/text/juce_LocalisedStrings.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_StringArray.o: ../../src/juce_core/text/juce_StringArray.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_StringPairArray.o: ../../src/juce_core/text/juce_StringPairArray.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -520,21 +541,6 @@ $(OBJDIR)/juce_XmlDocument.o: ../../src/juce_core/text/juce_XmlDocument.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_XmlElement.o: ../../src/juce_core/text/juce_XmlElement.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_StringPairArray.o: ../../src/juce_core/text/juce_StringPairArray.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_CharacterFunctions.o: ../../src/juce_core/text/juce_CharacterFunctions.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_LocalisedStrings.o: ../../src/juce_core/text/juce_LocalisedStrings.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -554,7 +560,7 @@ $(OBJDIR)/juce_ReadWriteLock.o: ../../src/juce_core/threads/juce_ReadWriteLock.c
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_Thread.o: ../../src/juce_core/threads/juce_Thread.cpp
+$(OBJDIR)/juce_TimeSliceThread.o: ../../src/juce_core/threads/juce_TimeSliceThread.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -564,12 +570,7 @@ $(OBJDIR)/juce_ThreadPool.o: ../../src/juce_core/threads/juce_ThreadPool.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_TimeSliceThread.o: ../../src/juce_core/threads/juce_TimeSliceThread.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Application.o: ../../src/juce_appframework/application/juce_Application.cpp
+$(OBJDIR)/juce_Thread.o: ../../src/juce_core/threads/juce_Thread.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -604,12 +605,12 @@ $(OBJDIR)/juce_PropertiesFile.o: ../../src/juce_appframework/application/juce_Pr
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioDataConverters.o: ../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.cpp
+$(OBJDIR)/juce_Application.o: ../../src/juce_appframework/application/juce_Application.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioSampleBuffer.o: ../../src/juce_appframework/audio/dsp/juce_AudioSampleBuffer.cpp
+$(OBJDIR)/juce_AudioDataConverters.o: ../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -619,12 +620,12 @@ $(OBJDIR)/juce_IIRFilter.o: ../../src/juce_appframework/audio/dsp/juce_IIRFilter
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MidiBuffer.o: ../../src/juce_appframework/audio/midi/juce_MidiBuffer.cpp
+$(OBJDIR)/juce_AudioSampleBuffer.o: ../../src/juce_appframework/audio/dsp/juce_AudioSampleBuffer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MidiFile.o: ../../src/juce_appframework/audio/midi/juce_MidiFile.cpp
+$(OBJDIR)/juce_MidiBuffer.o: ../../src/juce_appframework/audio/midi/juce_MidiBuffer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -649,12 +650,7 @@ $(OBJDIR)/juce_MidiMessageSequence.o: ../../src/juce_appframework/audio/midi/juc
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioProcessorPlayer.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorPlayer.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.cpp
+$(OBJDIR)/juce_MidiFile.o: ../../src/juce_appframework/audio/midi/juce_MidiFile.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -670,6 +666,21 @@ $(OBJDIR)/juce_AudioProcessorEditor.o: ../../src/juce_appframework/audio/process
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioProcessorGraph.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorGraph.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AudioProcessorPlayer.o: ../../src/juce_appframework/audio/processors/juce_AudioProcessorPlayer.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/juce_appframework/audio/processors/juce_GenericAudioProcessorEditor.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AudioPluginFormat.o: ../../src/juce_appframework/audio/plugins/juce_AudioPluginFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -704,22 +715,12 @@ $(OBJDIR)/juce_PluginListComponent.o: ../../src/juce_appframework/audio/plugins/
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioPluginFormat.o: ../../src/juce_appframework/audio/plugins/juce_AudioPluginFormat.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_VSTPluginFormat.o: ../../src/juce_appframework/audio/plugins/formats/juce_VSTPluginFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AiffAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_AudioCDReader.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.cpp
+$(OBJDIR)/juce_WavAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -734,11 +735,6 @@ $(OBJDIR)/juce_AudioFormatManager.o: ../../src/juce_appframework/audio/audio_fil
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioSubsectionReader.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_AudioThumbnail.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioThumbnail.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -749,7 +745,12 @@ $(OBJDIR)/juce_AudioThumbnailCache.o: ../../src/juce_appframework/audio/audio_fi
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_OggVorbisAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp
+$(OBJDIR)/juce_FlacAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AiffAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AiffAudioFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -759,12 +760,17 @@ $(OBJDIR)/juce_QuickTimeAudioFormat.o: ../../src/juce_appframework/audio/audio_f
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_WavAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_WavAudioFormat.cpp
+$(OBJDIR)/juce_AudioCDReader.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_FlacAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp
+$(OBJDIR)/juce_OggVorbisAudioFormat.o: ../../src/juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_AudioSubsectionReader.o: ../../src/juce_appframework/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -775,11 +781,6 @@ $(OBJDIR)/juce_AudioFormatReaderSource.o: ../../src/juce_appframework/audio/audi
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioSourcePlayer.o: ../../src/juce_appframework/audio/audio_sources/juce_AudioSourcePlayer.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_AudioTransportSource.o: ../../src/juce_appframework/audio/audio_sources/juce_AudioTransportSource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -814,7 +815,7 @@ $(OBJDIR)/juce_ToneGeneratorAudioSource.o: ../../src/juce_appframework/audio/aud
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_AudioDeviceManager.o: ../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.cpp
+$(OBJDIR)/juce_AudioTransportSource.o: ../../src/juce_appframework/audio/audio_sources/juce_AudioTransportSource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -834,12 +835,22 @@ $(OBJDIR)/juce_MidiOutput.o: ../../src/juce_appframework/audio/devices/juce_Midi
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_Sampler.o: ../../src/juce_appframework/audio/synthesisers/juce_Sampler.cpp
+$(OBJDIR)/juce_AudioDeviceManager.o: ../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Synthesiser.o: ../../src/juce_appframework/audio/synthesisers/juce_Synthesiser.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Sampler.o: ../../src/juce_appframework/audio/synthesisers/juce_Sampler.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_FileBasedDocument.o: ../../src/juce_appframework/documents/juce_FileBasedDocument.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -850,11 +861,6 @@ $(OBJDIR)/juce_RecentlyOpenedFilesList.o: ../../src/juce_appframework/documents/
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_UndoManager.o: ../../src/juce_appframework/documents/juce_UndoManager.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_FileBasedDocument.o: ../../src/juce_appframework/documents/juce_FileBasedDocument.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -884,11 +890,6 @@ $(OBJDIR)/juce_ChangeListenerList.o: ../../src/juce_appframework/events/juce_Cha
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_InterprocessConnection.o: ../../src/juce_appframework/events/juce_InterprocessConnection.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_InterprocessConnectionServer.o: ../../src/juce_appframework/events/juce_InterprocessConnectionServer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -905,6 +906,11 @@ $(OBJDIR)/juce_MessageListener.o: ../../src/juce_appframework/events/juce_Messag
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MultiTimer.o: ../../src/juce_appframework/events/juce_MultiTimer.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_InterprocessConnection.o: ../../src/juce_appframework/events/juce_InterprocessConnection.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -984,21 +990,6 @@ $(OBJDIR)/juce_EdgeTable.o: ../../src/juce_appframework/gui/graphics/contexts/ju
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_DrawablePath.o: ../../src/juce_appframework/gui/graphics/drawables/juce_DrawablePath.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_DrawableText.o: ../../src/juce_appframework/gui/graphics/drawables/juce_DrawableText.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_SVGParser.o: ../../src/juce_appframework/gui/graphics/drawables/juce_SVGParser.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_Drawable.o: ../../src/juce_appframework/gui/graphics/drawables/juce_Drawable.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1010,6 +1001,21 @@ $(OBJDIR)/juce_DrawableComposite.o: ../../src/juce_appframework/gui/graphics/dra
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableImage.o: ../../src/juce_appframework/gui/graphics/drawables/juce_DrawableImage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DrawablePath.o: ../../src/juce_appframework/gui/graphics/drawables/juce_DrawablePath.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DrawableText.o: ../../src/juce_appframework/gui/graphics/drawables/juce_DrawableText.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_SVGParser.o: ../../src/juce_appframework/gui/graphics/drawables/juce_SVGParser.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1074,22 +1080,7 @@ $(OBJDIR)/juce_PathIterator.o: ../../src/juce_appframework/gui/graphics/geometry
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_PathStrokeType.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_Point.o: ../../src/juce_appframework/gui/graphics/geometry/juce_Point.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_PositionedRectangle.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_RectangleList.o: ../../src/juce_appframework/gui/graphics/geometry/juce_RectangleList.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1099,7 +1090,17 @@ $(OBJDIR)/juce_Rectangle.o: ../../src/juce_appframework/gui/graphics/geometry/ju
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_ImageConvolutionKernel.o: ../../src/juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp
+$(OBJDIR)/juce_RectangleList.o: ../../src/juce_appframework/gui/graphics/geometry/juce_RectangleList.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_PathStrokeType.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_PositionedRectangle.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1114,6 +1115,11 @@ $(OBJDIR)/juce_ImageCache.o: ../../src/juce_appframework/gui/graphics/imaging/ju
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_ImageConvolutionKernel.o: ../../src/juce_appframework/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_ImageFileFormat.o: ../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1124,12 +1130,12 @@ $(OBJDIR)/juce_GIFLoader.o: ../../src/juce_appframework/gui/graphics/imaging/ima
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_JPEGLoader.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp
+$(OBJDIR)/juce_PNGLoader.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_PNGLoader.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp
+$(OBJDIR)/juce_JPEGLoader.o: ../../src/juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1154,16 +1160,6 @@ $(OBJDIR)/juce_ArrowButton.o: ../../src/juce_appframework/gui/components/buttons
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_Button.o: ../../src/juce_appframework/gui/components/buttons/juce_Button.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_DrawableButton.o: ../../src/juce_appframework/gui/components/buttons/juce_DrawableButton.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_HyperlinkButton.o: ../../src/juce_appframework/gui/components/buttons/juce_HyperlinkButton.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1184,7 +1180,7 @@ $(OBJDIR)/juce_ToggleButton.o: ../../src/juce_appframework/gui/components/button
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_ToolbarButton.o: ../../src/juce_appframework/gui/components/buttons/juce_ToolbarButton.cpp
+$(OBJDIR)/juce_DrawableButton.o: ../../src/juce_appframework/gui/components/buttons/juce_DrawableButton.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1194,17 +1190,12 @@ $(OBJDIR)/juce_ImageButton.o: ../../src/juce_appframework/gui/components/buttons
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_ComboBox.o: ../../src/juce_appframework/gui/components/controls/juce_ComboBox.cpp
+$(OBJDIR)/juce_ToolbarButton.o: ../../src/juce_appframework/gui/components/buttons/juce_ToolbarButton.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_Label.o: ../../src/juce_appframework/gui/components/controls/juce_Label.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ListBox.o: ../../src/juce_appframework/gui/components/controls/juce_ListBox.cpp
+$(OBJDIR)/juce_Button.o: ../../src/juce_appframework/gui/components/buttons/juce_Button.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1214,17 +1205,12 @@ $(OBJDIR)/juce_ProgressBar.o: ../../src/juce_appframework/gui/components/control
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_TableHeaderComponent.o: ../../src/juce_appframework/gui/components/controls/juce_TableHeaderComponent.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_TableListBox.o: ../../src/juce_appframework/gui/components/controls/juce_TableListBox.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_TextEditor.o: ../../src/juce_appframework/gui/components/controls/juce_TextEditor.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_TableHeaderComponent.o: ../../src/juce_appframework/gui/components/controls/juce_TableHeaderComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1244,7 +1230,27 @@ $(OBJDIR)/juce_ToolbarItemPalette.o: ../../src/juce_appframework/gui/components/
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_TableListBox.o: ../../src/juce_appframework/gui/components/controls/juce_TableListBox.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Label.o: ../../src/juce_appframework/gui/components/controls/juce_Label.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_Slider.o: ../../src/juce_appframework/gui/components/controls/juce_Slider.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ListBox.o: ../../src/juce_appframework/gui/components/controls/juce_ListBox.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ComboBox.o: ../../src/juce_appframework/gui/components/controls/juce_ComboBox.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1314,16 +1320,6 @@ $(OBJDIR)/juce_WildcardFileFilter.o: ../../src/juce_appframework/gui/components/
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_KeyPressMappingSet.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ModifierKeys.o: ../../src/juce_appframework/gui/components/keyboard/juce_ModifierKeys.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_KeyboardFocusTraverser.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1334,12 +1330,22 @@ $(OBJDIR)/juce_KeyListener.o: ../../src/juce_appframework/gui/components/keyboar
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_KeyMappingEditorComponent.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.cpp
+$(OBJDIR)/juce_KeyPress.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyPress.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_KeyPress.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyPress.cpp
+$(OBJDIR)/juce_ModifierKeys.o: ../../src/juce_appframework/gui/components/keyboard/juce_ModifierKeys.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_KeyPressMappingSet.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyPressMappingSet.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_KeyMappingEditorComponent.o: ../../src/juce_appframework/gui/components/keyboard/juce_KeyMappingEditorComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1360,16 +1366,6 @@ $(OBJDIR)/juce_ComponentMovementWatcher.o: ../../src/juce_appframework/gui/compo
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GroupComponent.o: ../../src/juce_appframework/gui/components/layout/juce_GroupComponent.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_MultiDocumentPanel.o: ../../src/juce_appframework/gui/components/layout/juce_MultiDocumentPanel.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ResizableBorderComponent.o: ../../src/juce_appframework/gui/components/layout/juce_ResizableBorderComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1404,12 +1400,22 @@ $(OBJDIR)/juce_TabbedButtonBar.o: ../../src/juce_appframework/gui/components/lay
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_TabbedComponent.o: ../../src/juce_appframework/gui/components/layout/juce_TabbedComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MultiDocumentPanel.o: ../../src/juce_appframework/gui/components/layout/juce_MultiDocumentPanel.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_Viewport.o: ../../src/juce_appframework/gui/components/layout/juce_Viewport.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_TabbedComponent.o: ../../src/juce_appframework/gui/components/layout/juce_TabbedComponent.cpp
+$(OBJDIR)/juce_ResizableBorderComponent.o: ../../src/juce_appframework/gui/components/layout/juce_ResizableBorderComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1444,11 +1450,6 @@ $(OBJDIR)/juce_ComponentDragger.o: ../../src/juce_appframework/gui/components/mo
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_DragAndDropContainer.o: ../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_MouseCursor.o: ../../src/juce_appframework/gui/components/mouse/juce_MouseCursor.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1465,6 +1466,11 @@ $(OBJDIR)/juce_MouseHoverDetector.o: ../../src/juce_appframework/gui/components/
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseListener.o: ../../src/juce_appframework/gui/components/mouse/juce_MouseListener.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_DragAndDropContainer.o: ../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1534,11 +1540,6 @@ $(OBJDIR)/juce_MagnifierComponent.o: ../../src/juce_appframework/gui/components/
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MidiKeyboardComponent.o: ../../src/juce_appframework/gui/components/special/juce_MidiKeyboardComponent.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_OpenGLComponent.o: ../../src/juce_appframework/gui/components/special/juce_OpenGLComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1554,22 +1555,12 @@ $(OBJDIR)/juce_SystemTrayIconComponent.o: ../../src/juce_appframework/gui/compon
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_MidiKeyboardComponent.o: ../../src/juce_appframework/gui/components/special/juce_MidiKeyboardComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_TooltipWindow.o: ../../src/juce_appframework/gui/components/windows/juce_TooltipWindow.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_TopLevelWindow.o: ../../src/juce_appframework/gui/components/windows/juce_TopLevelWindow.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_ComponentPeer.o: ../../src/juce_appframework/gui/components/windows/juce_ComponentPeer.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_AlertWindow.o: ../../src/juce_appframework/gui/components/windows/juce_AlertWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1599,42 +1590,22 @@ $(OBJDIR)/juce_ThreadWithProgressWindow.o: ../../src/juce_appframework/gui/compo
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStats.cpp
+$(OBJDIR)/juce_TopLevelWindow.o: ../../src/juce_appframework/gui/components/windows/juce_TopLevelWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
+$(OBJDIR)/juce_ComponentPeer.o: ../../src/juce_appframework/gui/components/windows/juce_ComponentPeer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Windowing.o: platform_specific_code/juce_linux_Windowing.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Audio.o: platform_specific_code/juce_linux_Audio.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_AudioCDReader.o: platform_specific_code/juce_linux_AudioCDReader.cpp
+$(OBJDIR)/juce_AlertWindow.o: ../../src/juce_appframework/gui/components/windows/juce_AlertWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_FileChooser.o: platform_specific_code/juce_linux_FileChooser.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Files.o: platform_specific_code/juce_linux_Files.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1659,7 +1630,42 @@ $(OBJDIR)/juce_linux_NamedPipe.o: platform_specific_code/juce_linux_NamedPipe.cp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStats.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Audio.o: platform_specific_code/juce_linux_Audio.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_linux_Network.o: platform_specific_code/juce_linux_Network.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_AudioCDReader.o: platform_specific_code/juce_linux_AudioCDReader.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Files.o: platform_specific_code/juce_linux_Files.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Windowing.o: platform_specific_code/juce_linux_Windowing.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

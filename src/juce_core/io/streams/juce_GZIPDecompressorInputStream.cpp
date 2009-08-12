@@ -46,14 +46,13 @@ namespace zlibNamespace
     #define ZLIB_INTERNAL
     #define NO_DUMMY_DECL
     #include "zlib/zlib.h"
-
     #include "zlib/adler32.c"
     #include "zlib/compress.c"
     #undef DO1
     #undef DO8
     #include "zlib/crc32.c"
     #include "zlib/deflate.c"
-    #include "zlib/infback.c"
+    //#include "zlib/infback.c"
     #include "zlib/inffast.c"
     #undef PULLBYTE
     #undef LOAD
@@ -65,7 +64,7 @@ namespace zlibNamespace
     #include "zlib/inflate.c"
     #include "zlib/inftrees.c"
     #include "zlib/trees.c"
-    #include "zlib/uncompr.c"
+    //#include "zlib/uncompr.c"
     #include "zlib/zutil.c"
     #undef Byte
   }

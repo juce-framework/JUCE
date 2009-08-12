@@ -209,7 +209,8 @@ public:
         snd_seq_ev_set_subs (&event);
         snd_seq_ev_set_direct (&event);
 
-        snd_seq_event_output_direct (seqHandle, &event);
+        snd_seq_event_output (seqHandle, &event);
+        snd_seq_drain_output (seqHandle);
     }
 
     juce_UseDebuggingNewOperator

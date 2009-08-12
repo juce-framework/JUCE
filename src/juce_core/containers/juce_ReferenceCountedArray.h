@@ -442,6 +442,26 @@ public:
         lock.exit();
     }
 
+    /** Inserts or replaces an object in the array, assuming it is sorted.
+     
+        This is similar to addSorted, but if a matching element already exists, then it will be 
+        replaced by the new one, rather than the new one being added as well.
+    */
+    template <class ElementComparator>
+    void addOrReplaceSorted (ElementComparator& comparator,
+                             ObjectClass* newObject) throw()
+    {
+        lock.enter();
+        const int index = findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed);
+
+        if (index > 0 && comparator.compareElements (newObject, this->elements [index - 1]) == 0)
+            set (index - 1, newObject); // replace an existing object that matches
+        else
+            insert (index, newObject);  // no match, so insert the new one
+
+        lock.exit();
+    }
+
     //==============================================================================
     /** Removes an object from the array.
 

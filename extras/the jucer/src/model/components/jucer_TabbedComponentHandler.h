@@ -999,7 +999,8 @@ private:
         void setFile (const File& newFile)
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(), tabIndex,
-                                                             newFile.getRelativePathFrom (document.getFile().getParentDirectory())),
+                                                             newFile.getRelativePathFrom (document.getFile().getParentDirectory())
+                                                                    .replaceCharacter (T('\\'), T('/'))),
                               T("Change tab component file"));
         }
 
