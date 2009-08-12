@@ -210,6 +210,8 @@ public:
             }
             else if (inID == kAudioUnitProperty_CocoaUI)
             {
+                const ScopedAutoReleasePool pool;
+
                 AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) outData;
                 NSBundle* b = [NSBundle bundleForClass: [JuceUICreationClass class]];
 
