@@ -1191,7 +1191,7 @@ private:
 
             setSize (contentComp->getWidth(), contentComp->getHeight());
             SizeControl (parentHIView, contentComp->getWidth(), contentComp->getHeight());
-            
+
             WindowRef windowRef = HIViewGetWindow (parentHIView);
             hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
 
@@ -1239,7 +1239,7 @@ private:
 
             if (comp != 0)
                 comp->removeComponentListener (this);
-            
+
             const ScopedAutoReleasePool pool;
 
             NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];

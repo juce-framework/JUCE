@@ -302,7 +302,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             const MemoryBlock& mb = resources[i]->data;
 
             defs << "// JUCER_RESOURCE: " << name << ", " << mb.getSize()
-                << ", \"" 
+                << ", \""
                 << File (resources[i]->originalFilename)
                     .getRelativePathFrom (code.document->getFile())
                     .replaceCharacter (T('\\'), T('/'))

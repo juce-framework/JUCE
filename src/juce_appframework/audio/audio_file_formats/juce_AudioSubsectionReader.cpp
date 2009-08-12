@@ -72,7 +72,7 @@ bool AudioSubsectionReader::readSamples (int** destSamples, int numDestChannels,
                 zeromem (destSamples[i], sizeof (int) * numSamples);
 
         numSamples = jmin (numSamples, (int) (length - startSampleInFile));
-        
+
         if (numSamples <= 0)
             return true;
     }

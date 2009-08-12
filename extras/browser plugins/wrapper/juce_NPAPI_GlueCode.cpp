@@ -103,7 +103,7 @@ extern "C"
 }
 #pragma export off
 
-#ifndef NP_CLASS_STRUCT_VERSION_ENUM	// fill in some symbols that are missing from the OSX 10.4 SDK
+#ifndef NP_CLASS_STRUCT_VERSION_ENUM   // fill in some symbols that are missing from the OSX 10.4 SDK
   #define NPNVpluginDrawingModel 1000
   #define NPDrawingModelCoreGraphics 1
 
@@ -312,7 +312,7 @@ public:
     {
         return child->getJavascriptObject();
     }
-    
+
     //==============================================================================
     NPP npp;
     BrowserPluginComponent* child;
@@ -417,7 +417,7 @@ public:
         Rectangle rr (frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
         Rectangle rr2 (bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
         //log (String ((int) x) + ", " + String ((int) y) + " - " + nsStringToJuce([parent description]) + "   " + rr.toString() + "   " + rr2.toString());
-        
+
         if (x >= 0 && x < frame.size.width && y >= 0 && y < frame.size.height)
         {
             x += bounds.origin.x; // adjust for scrolling panels
@@ -482,7 +482,7 @@ public:
                 NSRect v = [content convertRect: [content frame] toView: nil];
                 NSRect w = [win frame];
 
-                log ("wx: " + Rectangle (v.origin.x, v.origin.y, v.size.width, v.size.height).toString() 
+                log ("wx: " + Rectangle (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
                      + "   " + Rectangle (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
 
                 // adjust the requested window pos to deal with the content view's origin within the window
@@ -576,7 +576,7 @@ public:
     {
         NPVariant value;
         createNPVariantFromValue (npp, value, newValue);
-        
+
         browser.setproperty (npp, source, getIdentifierFromString (propertyName), &value);
         browser.releasevariantvalue (&value);
     }
@@ -596,7 +596,7 @@ public:
                             int numParameters)
     {
         var returnVal;
-        
+
         NPVariant result;
         VOID_TO_NPVARIANT (result);
 
@@ -617,7 +617,7 @@ public:
 
             for (i = 0; i < numParameters; ++i)
                 browser.releasevariantvalue (&params[i]);
-            
+
             juce_free (params);
         }
         else
@@ -706,7 +706,7 @@ private:
             return false;
 
         const var result (o->getProperty (propName));
-        
+
         if (out != 0)
             createNPVariantFromValue (npp, *out, result);
 
@@ -782,12 +782,12 @@ static NPClass sNPObjectWrappingDynamicObject_NPClass =
 #else
 static NPClass sNPObjectWrappingDynamicObject_NPClass =
 {
-	NP_CLASS_STRUCT_VERSION_ENUM, NPObjectWrappingDynamicObject::createInstance,
-	NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
-	NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
-	NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
-	NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
-	NPObjectWrappingDynamicObject::class_removeProperty, NPObjectWrappingDynamicObject::class_enumerate
+    NP_CLASS_STRUCT_VERSION_ENUM, NPObjectWrappingDynamicObject::createInstance,
+    NPObjectWrappingDynamicObject::class_deallocate, NPObjectWrappingDynamicObject::class_invalidate,
+    NPObjectWrappingDynamicObject::class_hasMethod, NPObjectWrappingDynamicObject::class_invoke,
+    NPObjectWrappingDynamicObject::class_invokeDefault, NPObjectWrappingDynamicObject::class_hasProperty,
+    NPObjectWrappingDynamicObject::class_getProperty, NPObjectWrappingDynamicObject::class_setProperty,
+    NPObjectWrappingDynamicObject::class_removeProperty, NPObjectWrappingDynamicObject::class_enumerate
 };
 #endif
 
@@ -810,7 +810,7 @@ NPObject* NPObjectWrappingDynamicObject::create (NPP npp, const var& objectToWra
 
     if (nppObject != 0)
         ((NPObjectWrappingDynamicObject*) nppObject)->object = objectToWrap;
-    
+
     return nppObject;
 }
 
@@ -826,10 +826,10 @@ static const var createValueFromNPVariant (NPP npp, const NPVariant& v)
         return var (NPVARIANT_TO_DOUBLE (v));
     else if (NPVARIANT_IS_STRING (v))
 #if JUCE_MAC
-        return var (String::fromUTF8 ((const juce::uint8*) (NPVARIANT_TO_STRING (v).UTF8Characters), 
+        return var (String::fromUTF8 ((const juce::uint8*) (NPVARIANT_TO_STRING (v).UTF8Characters),
                                       (int) NPVARIANT_TO_STRING (v).UTF8Length));
 #else
-        return var (String::fromUTF8 ((const juce::uint8*) (NPVARIANT_TO_STRING (v).utf8characters), 
+        return var (String::fromUTF8 ((const juce::uint8*) (NPVARIANT_TO_STRING (v).utf8characters),
                                       (int) NPVARIANT_TO_STRING (v).utf8length));
 #endif
     else if (NPVARIANT_IS_OBJECT (v))
@@ -843,9 +843,9 @@ static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
     if (v.isInt())
         INT32_TO_NPVARIANT ((int) v, out);
     else if (v.isBool())
-        BOOLEAN_TO_NPVARIANT ((bool) v, out); 
+        BOOLEAN_TO_NPVARIANT ((bool) v, out);
     else if (v.isDouble())
-        DOUBLE_TO_NPVARIANT ((double) v, out); 
+        DOUBLE_TO_NPVARIANT ((double) v, out);
     else if (v.isString())
     {
         const String s (v.toString());
@@ -892,7 +892,7 @@ public:
             deleteAndZero (holderComp);
             scriptObject = 0;
         }
-        
+
         return true;
     }
 
@@ -987,18 +987,18 @@ NPError NPP_SetWindow (NPP npp, NPWindow* pNPWindow)
 
     JucePluginInstance* const p = (JucePluginInstance*) npp->pdata;
 
-    if (p == 0) 
+    if (p == 0)
         return NPERR_GENERIC_ERROR;
 
     currentlyInitialisingNPP = npp;
-    NPError result = p->setWindow (pNPWindow) ? NPERR_NO_ERROR 
+    NPError result = p->setWindow (pNPWindow) ? NPERR_NO_ERROR
                                               : NPERR_MODULE_LOAD_FAILED_ERROR;
     currentlyInitialisingNPP = 0;
     return result;
 }
 
 //==============================================================================
-NPError	NPP_GetValue (NPP npp, NPPVariable variable, void* value)
+NPError NPP_GetValue (NPP npp, NPPVariable variable, void* value)
 {
     if (npp == 0)
         return NPERR_INVALID_INSTANCE_ERROR;
@@ -1008,7 +1008,7 @@ NPError	NPP_GetValue (NPP npp, NPPVariable variable, void* value)
     if (p == 0)
         return NPERR_GENERIC_ERROR;
 
-    switch (variable) 
+    switch (variable)
     {
     case NPPVpluginNameString:
         *((char**) value) = JuceBrowserPlugin_Name;
@@ -1029,7 +1029,7 @@ NPError	NPP_GetValue (NPP npp, NPPVariable variable, void* value)
 
 NPError NPP_NewStream (NPP npp,
                        NPMIMEType type,
-                       NPStream* stream, 
+                       NPStream* stream,
                        NPBool seekable,
                        ::uint16* stype)
 {
@@ -1159,7 +1159,7 @@ const String BrowserPluginComponent::getBrowserURL() const
         if (windowObj != 0)
         {
             NPVariant location;
-            bool ok = browser.getproperty (npp, windowObj, 
+            bool ok = browser.getproperty (npp, windowObj,
                                            browser.getstringidentifier ("location"), &location);
             browser.releaseobject (windowObj);
 
@@ -1167,7 +1167,7 @@ const String BrowserPluginComponent::getBrowserURL() const
             if (ok)
             {
                 NPVariant href;
-                ok = browser.getproperty (npp, location.value.objectValue, 
+                ok = browser.getproperty (npp, location.value.objectValue,
                                           browser.getstringidentifier ("href"), &href);
                 browser.releasevariantvalue (&location);
 
@@ -1180,7 +1180,6 @@ const String BrowserPluginComponent::getBrowserURL() const
             }
         }
     }
-    
+
     return result;
 }
-

@@ -376,7 +376,7 @@ public:
             result.setInfo (T("Web Browser"), T("Shows the web browser demo"), demosCategory, 0);
             result.addDefaultKeypress (T('i'), ModifierKeys::commandModifier);
             result.setTicked (currentDemoId == showWebBrowser);
-#if ! JUCE_WEB_BROWSER
+#if (! JUCE_WEB_BROWSER) || JUCE_LINUX
             result.setActive (false);
 #endif
             break;

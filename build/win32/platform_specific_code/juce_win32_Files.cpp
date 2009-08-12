@@ -372,7 +372,7 @@ static int64 getDiskSpaceInfo (String fn, const bool total) throw()
     ULARGE_INTEGER spc, tot, totFree;
 
     if (GetDiskFreeSpaceEx (fn, &spc, &tot, &totFree))
-        return (int64) (total ? tot.QuadPart 
+        return (int64) (total ? tot.QuadPart
                               : spc.QuadPart);
 
     return 0;

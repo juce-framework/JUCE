@@ -20,7 +20,7 @@
 
 //==============================================================================
 /** This is the mime-type of the plugin.
- 
+
     In your HTML, this is the 'type' parameter of the embed tag, e.g.
 
     <embed id="plugin" type="application/npjucedemo-plugin" width=90% height=500>

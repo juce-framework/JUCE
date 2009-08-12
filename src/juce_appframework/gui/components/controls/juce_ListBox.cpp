@@ -793,7 +793,7 @@ bool ListBox::keyPressed (const KeyPress& key)
 
 bool ListBox::keyStateChanged (const bool isKeyDown)
 {
-    return isKeyDown 
+    return isKeyDown
             && (KeyPress::isKeyCurrentlyDown (KeyPress::upKey)
                 || KeyPress::isKeyCurrentlyDown (KeyPress::pageUpKey)
                 || KeyPress::isKeyCurrentlyDown (KeyPress::downKey)

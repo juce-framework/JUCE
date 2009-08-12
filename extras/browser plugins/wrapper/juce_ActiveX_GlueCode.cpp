@@ -209,7 +209,7 @@ public:
     HRESULT __stdcall GetTypeInfoCount (UINT*)                  { return E_NOTIMPL; }
     HRESULT __stdcall GetTypeInfo (UINT, LCID, ITypeInfo**)     { return E_NOTIMPL; }
 
-    HRESULT __stdcall GetIDsOfNames (REFIID riid, LPOLESTR* rgszNames, UINT cNames, 
+    HRESULT __stdcall GetIDsOfNames (REFIID riid, LPOLESTR* rgszNames, UINT cNames,
                                      LCID lcid, DISPID* rgDispId)
     {
         return iDispatchHelper.doGetIDsOfNames (rgszNames, cNames, rgDispId);
@@ -219,7 +219,7 @@ public:
                               DISPPARAMS* pDispParams, VARIANT* pVarResult,
                               EXCEPINFO* pExcepInfo, UINT* puArgErr)
     {
-        return iDispatchHelper.doInvoke (object, dispIdMember, riid, lcid, wFlags, pDispParams, 
+        return iDispatchHelper.doInvoke (object, dispIdMember, riid, lcid, wFlags, pDispParams,
                                          pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -571,13 +571,13 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
             TCHAR* result = 0;
             unsigned int resultLen = 0;
 
-            // try the 1200 codepage (Unicode) 
+            // try the 1200 codepage (Unicode)
             String queryStr ("\\StringFileInfo\\040904B0\\" + fieldName);
 
             if (! VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen))
             {
-                // try the 1252 codepage (Windows Multilingual) 
-                queryStr = "\\StringFileInfo\\040904E4\\" + fieldName; 
+                // try the 1252 codepage (Windows Multilingual)
+                queryStr = "\\StringFileInfo\\040904E4\\" + fieldName;
                 VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen);
             }
 
@@ -632,21 +632,21 @@ public:
     HRESULT __stdcall GetTypeInfoCount (UINT* pctinfo)                              { return E_NOTIMPL; }
     HRESULT __stdcall GetTypeInfo (UINT iTInfo, LCID lcid, ITypeInfo** ppTInfo)     { return E_NOTIMPL; }
 
-    HRESULT __stdcall GetIDsOfNames (REFIID riid, LPOLESTR* rgszNames, UINT cNames, 
+    HRESULT __stdcall GetIDsOfNames (REFIID riid, LPOLESTR* rgszNames, UINT cNames,
                                      LCID lcid, DISPID* rgDispId)
     {
         return iDispatchHelper.doGetIDsOfNames (rgszNames, cNames, rgDispId);
     }
 
-    HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, 
-                              DISPPARAMS* pDispParams, VARIANT* pVarResult, 
+    HRESULT __stdcall Invoke (DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+                              DISPPARAMS* pDispParams, VARIANT* pVarResult,
                               EXCEPINFO* pExcepInfo, UINT* puArgErr)
     {
         if (holderComp == 0)
             return DISP_E_MEMBERNOTFOUND;
 
-        return iDispatchHelper.doInvoke (holderComp->getObject(), 
-                                         dispIdMember, riid, lcid, wFlags, pDispParams, 
+        return iDispatchHelper.doInvoke (holderComp->getObject(),
+                                         dispIdMember, riid, lcid, wFlags, pDispParams,
                                          pVarResult, pExcepInfo, puArgErr);
     }
 
@@ -713,8 +713,8 @@ public:
     }
 
     HRESULT __stdcall GetSite (REFIID riid, void **ppvSite)
-    { 
-        *ppvSite = site; 
+    {
+        *ppvSite = site;
         return S_OK;
     }
 
@@ -824,7 +824,7 @@ extern "C" BOOL WINAPI DllMain (HANDLE instance, DWORD reason, LPVOID)
         log ("DLL_PROCESS_DETACH");
         browserVersionDesc = String::empty;
 
-        // IE has a tendency to leak our objects, so although none of this should be 
+        // IE has a tendency to leak our objects, so although none of this should be
         // necessary, it's best to make sure..
         jassert (numActivePlugins == 0);
         shutdownJuce_GUI();
@@ -875,7 +875,7 @@ STDAPI DllGetClassObject (REFCLSID rclsid, REFIID riid, LPVOID* ppv)
     return CLASS_E_CLASSNOTAVAILABLE;
 }
 
-STDAPI DllCanUnloadNow() 
+STDAPI DllCanUnloadNow()
 {
     #pragma EXPORTED_FUNCTION
     return S_OK;
@@ -938,7 +938,7 @@ static HRESULT doRegistration (const bool unregister)
             PlatformUtilities::setRegistryValue (settings.getAllKeys()[i],
                                                  settings [settings.getAllKeys()[i]]);
 
-        // check whether the registration actually worked - if not, we probably don't have 
+        // check whether the registration actually worked - if not, we probably don't have
         // enough privileges to write to the registry..
         if (PlatformUtilities::getRegistryValue (clsIDRoot + "InProcServer32\\") != dllPath)
             return SELFREG_E_CLASS;
@@ -947,7 +947,7 @@ static HRESULT doRegistration (const bool unregister)
     return S_OK;
 }
 
-STDAPI DllRegisterServer() 
+STDAPI DllRegisterServer()
 {
     #pragma EXPORTED_FUNCTION
     return doRegistration (false);

@@ -68,7 +68,7 @@
   #define MAC_VERSION               1
   #define PLUGIN_SDK_BUILD          1
   #define PLUGIN_SDK_DIRECTMIDI     1
-  #define DIGI_PASCAL 
+  #define DIGI_PASCAL
 
   #include "MacAlwaysInclude.h"
 

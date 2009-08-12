@@ -178,7 +178,7 @@ public:
                               const bool isButtonDown);
 
     //==============================================================================
-    /* AlertWindow handling.. 
+    /* AlertWindow handling..
     */
     virtual AlertWindow* createAlertWindow (const String& title,
                                             const String& message,
@@ -455,7 +455,7 @@ public:
 
     //==============================================================================
     virtual void fillResizableWindowBackground (Graphics& g, int w, int h,
-                                                const BorderSize& border, 
+                                                const BorderSize& border,
                                                 ResizableWindow& window);
 
     virtual void drawResizableWindowBorder (Graphics& g,

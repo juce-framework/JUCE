@@ -55,9 +55,9 @@ AudioFormatReader::~AudioFormatReader()
     delete input;
 }
 
-bool AudioFormatReader::read (int** destSamples, 
+bool AudioFormatReader::read (int** destSamples,
                               int numDestChannels,
-                              int64 startSampleInSource, 
+                              int64 startSampleInSource,
                               int numSamplesToRead,
                               const bool fillLeftoverChannelsWithCopies)
 {
@@ -81,7 +81,7 @@ bool AudioFormatReader::read (int** destSamples,
     if (numSamplesToRead <= 0)
         return true;
 
-    if (! readSamples (destSamples, jmin (numChannels, numDestChannels), startOffsetInDestBuffer, 
+    if (! readSamples (destSamples, jmin (numChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
 
@@ -90,7 +90,7 @@ bool AudioFormatReader::read (int** destSamples,
         if (fillLeftoverChannelsWithCopies)
         {
             int* lastFullChannel = destSamples[0];
-            
+
             for (int i = numDestChannels; --i > 0;)
             {
                 if (destSamples[i] != 0)

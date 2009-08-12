@@ -95,15 +95,15 @@ public:
                                     stream. It's ok for this to be beyond the start or end of the
                                     available data - any samples that are out-of-range will be returned
                                     as zeros.
-        @param numSamplesToRead     the number of samples to read. If this is greater than the number 
+        @param numSamplesToRead     the number of samples to read. If this is greater than the number
                                     of samples that the file or stream contains. the result will be padded
                                     with zeros
         @param fillLeftoverChannelsWithCopies   if true, this indicates that if there's no source data available
-                                    for some of the channels that you pass in, then they should be filled with 
-                                    copies of valid source channels. 
+                                    for some of the channels that you pass in, then they should be filled with
+                                    copies of valid source channels.
                                     E.g. if you're reading a mono file and you pass 2 channels to this method, then
-                                    if fillLeftoverChannelsWithCopies is true, both destination channels will be filled 
-                                    with the same data from the file's single channel. If fillLeftoverChannelsWithCopies 
+                                    if fillLeftoverChannelsWithCopies is true, both destination channels will be filled
+                                    with the same data from the file's single channel. If fillLeftoverChannelsWithCopies
                                     was false, then only the first channel would be filled with the file's contents, and
                                     the second would be cleared. If there are many channels, e.g. you try to read 4 channels
                                     from a stereo file, then the last 3 would all end up with copies of the same data.
@@ -112,9 +112,9 @@ public:
                                     error - the reader should just return zeros for these regions
         @see readMaxLevels
     */
-    bool read (int** destSamples, 
+    bool read (int** destSamples,
                int numDestChannels,
-               int64 startSampleInSource, 
+               int64 startSampleInSource,
                int numSamplesToRead,
                const bool fillLeftoverChannelsWithCopies);
 
@@ -200,27 +200,27 @@ public:
 
     //==============================================================================
     /** Subclasses must implement this method to perform the low-level read operation.
-     
+
         Callers should use read() instead of calling this directly.
-     
+
         @param destSamples  the array of destination buffers to fill. Some of these
                             pointers may be null
         @param numDestChannels  the number of items in the destSamples array. This
-                            value is guaranteed not to be greater than the number of 
+                            value is guaranteed not to be greater than the number of
                             channels that this reader object contains
-        @param startOffsetInDestBuffer      the number of samples from the start of the 
+        @param startOffsetInDestBuffer      the number of samples from the start of the
                             dest data at which to begin writing
         @param startSampleInFile    the number of samples into the source data at which
                             to begin reading. This value is guaranteed to be >= 0.
         @param numSamples   the number of samples to read
     */
-    virtual bool readSamples (int** destSamples, 
+    virtual bool readSamples (int** destSamples,
                               int numDestChannels,
                               int startOffsetInDestBuffer,
                               int64 startSampleInFile,
                               int numSamples) = 0;
-    
-    
+
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

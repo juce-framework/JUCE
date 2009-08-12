@@ -1481,7 +1481,7 @@ public:
 
         To find out which keys are up or down at any time, see the KeyPress::isKeyCurrentlyDown()
         method.
-     
+
         @param isKeyDown    true if a key has been pressed; false if it has been released
 
         @see keyPressed, KeyPress, getCurrentlyFocusedComponent, addKeyListener

@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_INCLUDE_BROWSER_PLUGIN_INFO_H__
-#define __JUCE_INCLUDE_BROWSER_PLUGIN_INFO_H__
+#ifndef __JUCE_INCLUDEBROWSERPLUGININFO_JUCEHEADER__
+#define __JUCE_INCLUDEBROWSERPLUGININFO_JUCEHEADER__
 
 #include "BrowserPluginCharacteristics.h"
 
@@ -50,4 +50,4 @@
  #error "You haven't defined all the necessary JuceBrowserPlugin_xx values in your BrowserPluginCharacteristics.h file!"
 #endif
 
-#endif
+#endif   // __JUCE_INCLUDEBROWSERPLUGININFO_JUCEHEADER__

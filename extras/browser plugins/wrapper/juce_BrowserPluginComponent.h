@@ -29,8 +29,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BROWSERPLUGINCOMP_H__
-#define __JUCE_BROWSERPLUGINCOMP_H__
+#ifndef __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__
+#define __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__
 
 #include "../../../../juce/juce_amalgamated.h"
 
@@ -38,10 +38,10 @@
 //==============================================================================
 /**
     Base class for a browser plugin object.
- 
+
     You need to implement a createBrowserPlugin() function that the host will call
     when it needs a new instance of your BrowserPluginComponent subclass. The host will
-    delete the BrowserPluginComponent later when the user navigates away from the 
+    delete the BrowserPluginComponent later when the user navigates away from the
     page.
 */
 class BrowserPluginComponent    : public Component
@@ -53,7 +53,7 @@ public:
         @see createBrowserPlugin
     */
     BrowserPluginComponent();
-    
+
     /** Destructor. */
     ~BrowserPluginComponent();
 
@@ -65,10 +65,10 @@ public:
     /** Returns the URL that the browser is currently showing.
     */
     const String getBrowserURL() const;
-    
+
     /** The plugin must implement this method to return a variant object whose
         properties and methods can be accessed by javascript in the browser.
-     
+
         If your plugin doesn't need to represent itself, you can just return
         a void var() object here.
     */
@@ -81,7 +81,7 @@ public:
 
 //==============================================================================
 /**
-    This function must be implemented somewhere in your code to create the actual 
+    This function must be implemented somewhere in your code to create the actual
     plugin object that you want to use.
 
     Obviously multiple instances may be used simultaneously, so be VERY cautious
@@ -90,4 +90,4 @@ public:
 BrowserPluginComponent* JUCE_CALLTYPE createBrowserPlugin();
 
 
-#endif
+#endif   // __JUCE_BROWSERPLUGINCOMPONENT_JUCEHEADER__

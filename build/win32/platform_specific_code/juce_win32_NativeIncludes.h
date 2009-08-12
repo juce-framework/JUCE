@@ -201,7 +201,7 @@ public:
 
     HRESULT CoCreateInstance (REFCLSID rclsid, DWORD dwClsContext)
     {
-#ifndef __MINGW32__ 
+#ifndef __MINGW32__
         operator= (0);
         return ::CoCreateInstance (rclsid, 0, dwClsContext, __uuidof(T), (void**) &p);
 #else

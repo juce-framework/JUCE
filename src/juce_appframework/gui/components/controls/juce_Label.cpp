@@ -213,7 +213,7 @@ void Label::showEditor()
         repaint();
 
         editorShown (editor);
-        
+
         enterModalState();
         editor->grabKeyboardFocus();
     }

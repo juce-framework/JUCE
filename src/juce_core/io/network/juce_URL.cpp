@@ -137,10 +137,10 @@ static int findStartOfDomain (const String& url)
 {
     int i = 0;
 
-    while (CharacterFunctions::isLetterOrDigit (url[i]) 
+    while (CharacterFunctions::isLetterOrDigit (url[i])
            || CharacterFunctions::indexOfChar (T("+-."), url[i], false) >= 0)
         ++i;
-    
+
     return url[i] == T(':') ? i + 1 : 0;
 }
 
@@ -149,11 +149,11 @@ const String URL::getDomain() const
     int start = findStartOfDomain (url);
     while (url[start] == T('/'))
         ++start;
-    
+
     const int end1 = url.indexOfChar (start, T('/'));
     const int end2 = url.indexOfChar (start, T(':'));
 
-    const int end = (end1 < 0 || end2 < 0) ? jmax (end1, end2) 
+    const int end = (end1 < 0 || end2 < 0) ? jmax (end1, end2)
                                            : jmin (end1, end2);
 
     return url.substring (start, end);
@@ -191,7 +191,7 @@ const URL URL::withNewSubPath (const String& newPath) const
 
     if (! u.url.endsWithChar (T('/')))
         u.url << '/';
-    
+
     if (newPath.startsWithChar (T('/')))
         u.url << newPath.substring (1);
     else

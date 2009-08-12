@@ -64,12 +64,12 @@
 #define _UINT32
 #endif
 
-/* 
- * NO_NSPR_10_SUPPORT disables the inclusion 
- * of obsolete/protypes.h, whose int16, uint16, 
- * int32, and uint32 typedefs conflict with those 
- * in this file. 
- */ 
+/*
+ * NO_NSPR_10_SUPPORT disables the inclusion
+ * of obsolete/protypes.h, whose int16, uint16,
+ * int32, and uint32 typedefs conflict with those
+ * in this file.
+ */
 #ifndef NO_NSPR_10_SUPPORT
 #define NO_NSPR_10_SUPPORT
 #endif
@@ -107,7 +107,7 @@
 #endif
 #endif
 
-#if defined(XP_UNIX) 
+#if defined(XP_UNIX)
 #	include <stdio.h>
 #	if defined(MOZ_X11)
 #		include <X11/Xlib.h>
@@ -291,11 +291,11 @@ typedef struct _NPRect
   uint16 right;
 } NPRect;
 
-typedef struct _NPSize 
-{ 
-  int32 width; 
-  int32 height; 
-} NPSize; 
+typedef struct _NPSize
+{
+  int32 width;
+  int32 height;
+} NPSize;
 
 #ifdef XP_UNIX
 /*
@@ -338,21 +338,21 @@ typedef struct
 
 
 /*
- *   The following masks are applied on certain platforms to NPNV and 
- *   NPPV selectors that pass around pointers to COM interfaces. Newer 
- *   compilers on some platforms may generate vtables that are not 
- *   compatible with older compilers. To prevent older plugins from 
- *   not understanding a new browser's ABI, these masks change the 
+ *   The following masks are applied on certain platforms to NPNV and
+ *   NPPV selectors that pass around pointers to COM interfaces. Newer
+ *   compilers on some platforms may generate vtables that are not
+ *   compatible with older compilers. To prevent older plugins from
+ *   not understanding a new browser's ABI, these masks change the
  *   values of those selectors on those platforms. To remain backwards
- *   compatible with differenet versions of the browser, plugins can 
+ *   compatible with differenet versions of the browser, plugins can
  *   use these masks to dynamically determine and use the correct C++
- *   ABI that the browser is expecting. This does not apply to Windows 
+ *   ABI that the browser is expecting. This does not apply to Windows
  *   as Microsoft's COM ABI will likely not change.
  */
 
 #define NP_ABI_GCC3_MASK  0x10000000
 /*
- *   gcc 3.x generated vtables on UNIX and OSX are incompatible with 
+ *   gcc 3.x generated vtables on UNIX and OSX are incompatible with
  *   previous compilers.
  */
 #if (defined (XP_UNIX) && defined(__GNUC__) && (__GNUC__ >= 3))
@@ -368,7 +368,7 @@ typedef struct
  *   different than CFM. In addition to having a different
  *   C++ ABI, it also has has different C calling convention.
  *   You must use glue code when calling between CFM and
- *   Mach-O C functions. 
+ *   Mach-O C functions.
  */
 #if (defined(TARGET_RT_MAC_MACHO))
 #define _NP_ABI_MIXIN_FOR_MACHO NP_ABI_MACHO_MASK

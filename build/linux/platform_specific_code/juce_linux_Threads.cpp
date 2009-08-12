@@ -139,7 +139,7 @@ bool juce_setThreadPriority (void* handle, int priority) throw()
 
         return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
     }
-    
+
     return false;
 }
 

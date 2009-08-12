@@ -81,10 +81,10 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 /** This suffix is used for naming all Obj-C classes that are used inside juce.
- 
+
     Because of the flat naming structure used by Obj-C, you can get horrible situations where
     two DLLs are loaded into a host, each of which uses classes with the same names, and these get
-    cross-linked so that when you make a call to a class that you thought was private, it ends up 
+    cross-linked so that when you make a call to a class that you thought was private, it ends up
     actually calling into a similarly named class in the other module's address space.
 
     By changing this macro to a unique value, you ensure that all the obj-C classes in your app

@@ -67,7 +67,7 @@ public:
     void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized)
     {
         ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
-        
+
         // The ComponentMovementWatcher version of this method avoids calling
         // us when the top-level comp is resized, but for an NSView we need to know this
         // because with inverted co-ords, we need to update the position even if the

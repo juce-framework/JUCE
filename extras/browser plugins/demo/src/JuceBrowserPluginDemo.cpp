@@ -36,7 +36,7 @@
 /**
     This is our top-level component for our plugin..
 */
-class JuceDemoBrowserPlugin  : public BrowserPluginComponent, 
+class JuceDemoBrowserPlugin  : public BrowserPluginComponent,
                                public ButtonListener
 {
 public:
@@ -75,7 +75,7 @@ public:
     void setJavascriptObjectFromBrowser (var callbackObject)
     {
         javascriptObjectFromBrowser = callbackObject;
-        
+
         button->setEnabled (javascriptObjectFromBrowser.isObject());
     }
 
@@ -126,9 +126,9 @@ public:
         const var popUpMessageBox (const var* params, int numParams)
         {
             if (numParams > 0)
-                AlertWindow::showMessageBox (AlertWindow::InfoIcon, 
-                                             "A message from the webpage", 
-                                             params[0].toString(), 
+                AlertWindow::showMessageBox (AlertWindow::InfoIcon,
+                                             "A message from the webpage",
+                                             params[0].toString(),
                                              String::empty, owner);
             return var();
         }

@@ -66,7 +66,7 @@
 #if JUCE_USE_VSTSDK_2_4
  #ifdef __GNUC__
   #define __cdecl
- #endif 
+ #endif
 
  // VSTSDK V2.4 includes..
  #include "public.sdk/source/vst2.x/audioeffectx.h"
@@ -76,7 +76,7 @@
 
  #if ! VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
- #endif 
+ #endif
 
 #else
  // VSTSDK V2.3 includes..
@@ -87,7 +87,7 @@
 
  #if (! VST_2_3_EXTENSIONS) || VST_2_4_EXTENSIONS
   #error // You're probably trying to include the wrong VSTSDK version - make sure your include path matches the JUCE_USE_VSTSDK_2_4 flag
- #endif 
+ #endif
 
  #define __aeffect__  // (needed for juce_VSTMidiEventList.h to work)
 
@@ -130,7 +130,7 @@
     VstIntPtr resvd2;       ///< zero (Reserved for future use)
  };
 
- typedef int VstSpeakerArrangementType; 
+ typedef int VstSpeakerArrangementType;
 #endif
 
 //==============================================================================
@@ -225,7 +225,7 @@ public:
         initialised (false)
     {
         startThread (7);
-        
+
         while (! initialised)
             sleep (1);
     }
@@ -256,7 +256,7 @@ public:
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
-    
+
 private:
     bool initialised;
 };
@@ -288,7 +288,7 @@ public:
 #if ! JucePlugin_EditorRequiresKeyboardFocus
         setComponentProperty ("juce_disallowFocus", true);
 #endif
-        
+
 #if JUCE_WIN32
         addMouseListener (this, true);
 #endif
@@ -551,12 +551,12 @@ public:
     {
         if (filter == 0 || index >= JucePlugin_MaxNumInputChannels)
             return false;
-       
+
         const String name (filter->getInputChannelName ((int) index));
-       
+
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
         name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
-       
+
         if (speakerIn != kSpeakerArrEmpty)
         {
             properties->flags = kVstPinUseSpeaker;
@@ -565,26 +565,26 @@ public:
         else
         {
             properties->flags = kVstPinIsActive;
-           
+
             if (filter->isInputChannelStereoPair ((int) index))
                 properties->flags |= kVstPinIsStereo;
-           
+
             properties->arrangementType = 0;
         }
 
         return true;
     }
-   
+
     bool getOutputProperties (VstInt32 index, VstPinProperties* properties)
     {
         if (filter == 0 || index >= JucePlugin_MaxNumOutputChannels)
             return false;
-       
+
         const String name (filter->getOutputChannelName ((int) index));
-       
+
         name.copyToBuffer (properties->label, kVstMaxLabelLen - 1);
         name.copyToBuffer (properties->shortLabel, kVstMaxShortLabelLen - 1);
-       
+
         if (speakerOut != kSpeakerArrEmpty)
         {
             properties->flags = kVstPinUseSpeaker;
@@ -593,10 +593,10 @@ public:
         else
         {
             properties->flags = kVstPinIsActive;
-           
+
             if (filter->isOutputChannelStereoPair ((int) index))
                 properties->flags |= kVstPinIsStereo;
-           
+
             properties->arrangementType = 0;
         }
 
@@ -1021,7 +1021,7 @@ public:
         return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
-    bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput, 
+    bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput)
     {
         const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };

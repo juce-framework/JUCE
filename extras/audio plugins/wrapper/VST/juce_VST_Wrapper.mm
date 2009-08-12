@@ -133,7 +133,7 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     const ScopedAutoReleasePool pool;
 
 #if ADD_CARBON_BODGE
-    EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int) 
+    EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
                                 comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
     RemoveEventHandler (ref);
 #endif

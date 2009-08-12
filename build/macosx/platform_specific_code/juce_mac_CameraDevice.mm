@@ -261,8 +261,8 @@ END_JUCE_NAMESPACE
          fromConnection: (QTCaptureConnection*) connection
 {
     const ScopedAutoReleasePool pool;
-	CIImage* image = [CIImage imageWithCVImageBuffer: videoFrame];
-	NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc] initWithCIImage: image] autorelease];
+    CIImage* image = [CIImage imageWithCVImageBuffer: videoFrame];
+    NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc] initWithCIImage: image] autorelease];
 
     internal->callListeners (bitmap);
 }

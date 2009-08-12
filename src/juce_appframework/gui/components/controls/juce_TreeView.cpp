@@ -363,7 +363,7 @@ private:
             item->setSelected ((! cmd) || (! item->isSelected()), ! cmd);
         }
     }
-                    
+
     bool containsItem (TreeViewItem* const item) const
     {
         for (int i = rowComponentItems.size(); --i >= 0;)

@@ -86,7 +86,7 @@ class JUCE_API  ASIOAudioIODevice  : public AudioIODevice,
 public:
     Component ourWindow;
 
-    ASIOAudioIODevice (const String& name_, const CLSID classId_, const int slotNumber, 
+    ASIOAudioIODevice (const String& name_, const CLSID classId_, const int slotNumber,
                        const String& optionalDllForDirectLoading_)
        : AudioIODevice (name_, T("ASIO")),
          asioObject (0),

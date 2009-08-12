@@ -35,8 +35,8 @@
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
  #include "juce_core/basics/juce_Atomic.h"
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
- #include "juce_core/basics/juce_DataConversions.h"
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+ #include "juce_core/basics/juce_StandardHeader.h"
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
  #include "juce_core/basics/juce_FileLogger.h"
@@ -65,20 +65,20 @@
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
  #include "juce_core/basics/juce_Singleton.h"
 #endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
- #include "juce_core/basics/juce_StandardHeader.h"
-#endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
  #include "juce_core/basics/juce_SystemStats.h"
 #endif
 #ifndef __JUCE_TIME_JUCEHEADER__
  #include "juce_core/basics/juce_Time.h"
 #endif
-#ifndef __JUCE_ARRAY_JUCEHEADER__
- #include "juce_core/containers/juce_Array.h"
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+ #include "juce_core/basics/juce_DataConversions.h"
 #endif
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "juce_core/containers/juce_ArrayAllocationBase.h"
+#endif
+#ifndef __JUCE_ARRAY_JUCEHEADER__
+ #include "juce_core/containers/juce_Array.h"
 #endif
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
  #include "juce_core/containers/juce_BitArray.h"
@@ -89,29 +89,29 @@
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
  #include "juce_core/containers/juce_MemoryBlock.h"
 #endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
- #include "juce_core/containers/juce_OwnedArray.h"
-#endif
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
  #include "juce_core/containers/juce_PropertySet.h"
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
- #include "juce_core/containers/juce_ReferenceCountedArray.h"
 #endif
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
  #include "juce_core/containers/juce_ReferenceCountedObject.h"
 #endif
-#ifndef __JUCE_SORTEDSET_JUCEHEADER__
- #include "juce_core/containers/juce_SortedSet.h"
-#endif
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
  #include "juce_core/containers/juce_SparseSet.h"
 #endif
-#ifndef __JUCE_VARIANT_JUCEHEADER__
- #include "juce_core/containers/juce_Variant.h"
-#endif
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
  #include "juce_core/containers/juce_VoidArray.h"
+#endif
+#ifndef __JUCE_SORTEDSET_JUCEHEADER__
+ #include "juce_core/containers/juce_SortedSet.h"
+#endif
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+ #include "juce_core/containers/juce_ReferenceCountedArray.h"
+#endif
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+ #include "juce_core/containers/juce_OwnedArray.h"
+#endif
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+ #include "juce_core/containers/juce_Variant.h"
 #endif
 #ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
  #include "juce_core/io/juce_InputStream.h"

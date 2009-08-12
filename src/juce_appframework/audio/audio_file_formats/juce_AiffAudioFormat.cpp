@@ -162,7 +162,7 @@ public:
                       int64 startSampleInFile, int numSamples)
     {
         numSamples = (int) jmin ((int64) numSamples, lengthInSamples - startSampleInFile);
-        
+
         if (numSamples <= 0)
             return true;
 

@@ -196,7 +196,7 @@ public:
         }
 
         imageSwapLock.enter();
-	    int ls, ps;
+        int ls, ps;
         const int lineStride = width * 3;
         uint8* const dest = loadingImage->lockPixelDataReadWrite (0, 0, width, height, ls, ps);
 
@@ -535,11 +535,11 @@ private:
 
         while (enumerator->Next (1, &pin, 0) == S_OK)
         {
-		    PIN_DIRECTION dir;
-		    pin->QueryDirection (&dir);
+            PIN_DIRECTION dir;
+            pin->QueryDirection (&dir);
 
-		    if (wantedDirection == dir)
-		    {
+            if (wantedDirection == dir)
+            {
                 PIN_INFO info;
                 zerostruct (info);
                 pin->QueryPinInfo (&info);
@@ -547,10 +547,10 @@ private:
                 if (pinName == 0 || String (pinName).equalsIgnoreCase (String (info.achName)))
                 {
                     pin.p->AddRef();
-			        *result = pin;
-			        return true;
+                    *result = pin;
+                    return true;
                 }
-		    }
+            }
         }
 
         return false;
@@ -578,7 +578,7 @@ private:
             return false;
 
         graphRegistrationID = 0;
-	    return SUCCEEDED (rot->Register (0, graphBuilder, moniker, &graphRegistrationID));
+        return SUCCEEDED (rot->Register (0, graphBuilder, moniker, &graphRegistrationID));
     }
 
     void removeGraphFromRot()
@@ -586,7 +586,7 @@ private:
         ComSmartPtr <IRunningObjectTable> rot;
 
         if (SUCCEEDED (GetRunningObjectTable (0, &rot)))
-		    rot->Revoke (graphRegistrationID);
+            rot->Revoke (graphRegistrationID);
     }
 
     static void deleteMediaType (AM_MEDIA_TYPE* const pmt)
@@ -606,23 +606,23 @@ private:
     public:
         GrabberCallback (DShowCameraDeviceInteral& owner_)
             : owner (owner_)
-	    {
+        {
         }
 
         HRESULT __stdcall QueryInterface (REFIID id, void** result)
         {
-		    if (id == IID_IUnknown)
-			    *result = dynamic_cast <IUnknown*> (this);
-		    else if (id == IID_ISampleGrabberCB)
-			    *result = dynamic_cast <ISampleGrabberCB*> (this);
-		    else
-		    {
-			    *result = 0;
-			    return E_NOINTERFACE;
-		    }
+            if (id == IID_IUnknown)
+                *result = dynamic_cast <IUnknown*> (this);
+            else if (id == IID_ISampleGrabberCB)
+                *result = dynamic_cast <ISampleGrabberCB*> (this);
+            else
+            {
+                *result = 0;
+                return E_NOINTERFACE;
+            }
 
-		    AddRef();
-		    return S_OK;
+            AddRef();
+            return S_OK;
         }
 
         ULONG __stdcall AddRef()    { return ++refCount; }
@@ -631,13 +631,13 @@ private:
         //==============================================================================
         STDMETHODIMP SampleCB (double /*SampleTime*/, IMediaSample* /*pSample*/)
         {
-		    return E_FAIL;
+            return E_FAIL;
         }
 
         STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
         {
-		    owner.handleFrame (time, buffer, bufferSize);
-		    return S_OK;
+            owner.handleFrame (time, buffer, bufferSize);
+            return S_OK;
         }
 
     private:

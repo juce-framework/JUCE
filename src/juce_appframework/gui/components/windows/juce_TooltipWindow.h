@@ -84,7 +84,7 @@ public:
         This lets you change the value that was set in the constructor.
     */
     void setMillisecondsBeforeTipAppears (const int newTimeMs = 700) throw();
-    
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the tooltip.
 

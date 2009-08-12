@@ -308,7 +308,7 @@ protected:
     /** Called when the text has been altered.
     */
     virtual void textWasChanged();
-    
+
     /** Called when the text editor has just appeared, due to a user click or other
         focus change.
     */

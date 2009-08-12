@@ -215,10 +215,10 @@ bool Thread::setPriority (const int priority) throw()
     const ScopedLock sl (startStopLock);
 
     const bool worked = juce_setThreadPriority (threadHandle_, priority);
-    
+
     if (worked)
         threadPriority_ = priority;
-    
+
     return worked;
 }
 

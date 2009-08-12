@@ -61,20 +61,20 @@
 
 /*******************************************************************************
  * WHAT'S UP WITH THIS FILE?
- * 
+ *
  * This is where we define the mystical JNI_PUBLIC_API macro that works on all
- * platforms. If you're running with Visual C++, Symantec C, or Borland's 
+ * platforms. If you're running with Visual C++, Symantec C, or Borland's
  * development environment on the PC, you're all set. Or if you're on the Mac
  * with Metrowerks, Symantec or MPW with SC you're ok too. For UNIX it shouldn't
  * matter.
 
- * Changes by sailesh on 9/26 
+ * Changes by sailesh on 9/26
 
  * There are two symbols used in the declaration of the JNI functions
  * and native code that uses the JNI:
- * JNICALL - specifies the calling convention 
- * JNIEXPORT - specifies export status of the function 
- * 
+ * JNICALL - specifies the calling convention
+ * JNIEXPORT - specifies export status of the function
+ *
  * The syntax to specify calling conventions is different in Win16 and
  * Win32 - the brains at Micro$oft at work here. JavaSoft in their
  * infinite wisdom cares for no platform other than Win32, and so they
@@ -109,7 +109,7 @@
 #			define JNICALL                          __stdcall
 #		else /* !_WIN32 */
 #		    if defined(_WINDLL)
-#			define JNI_PUBLIC_API(ResultType)	ResultType __cdecl __export __loadds 
+#			define JNI_PUBLIC_API(ResultType)	ResultType __cdecl __export __loadds
 #			define JNI_PUBLIC_VAR(VarType)		VarType
 #			define JNI_NATIVE_STUB(ResultType)	ResultType __cdecl __loadds
 #			define JNICALL			        __loadds
@@ -127,13 +127,13 @@
 #			define JNI_NATIVE_STUB(ResultType)	 __export ResultType
 #			define JNICALL
 #		else /* !_WIN32 */
-#			define JNI_PUBLIC_API(ResultType)	ResultType _cdecl _export _loadds 
+#			define JNI_PUBLIC_API(ResultType)	ResultType _cdecl _export _loadds
 #			define JNI_PUBLIC_VAR(VarType)		VarType
 #			define JNI_NATIVE_STUB(ResultType)	ResultType _cdecl _loadds
 #			define JNICALL			_loadds
 #		endif
 #	else
-#		error Unsupported PC development environment.	
+#		error Unsupported PC development environment.
 #	endif
 #	ifndef IS_LITTLE_ENDIAN
 #		define IS_LITTLE_ENDIAN
@@ -174,12 +174,12 @@
 #		if !__option(enumsalwaysint)
 #			error You need to define 'Enums Always Int' for your project.
 #		endif
-#		if defined(TARGET_CPU_68K) && !TARGET_RT_MAC_CFM 
-#			if !__option(fourbyteints) 
+#		if defined(TARGET_CPU_68K) && !TARGET_RT_MAC_CFM
+#			if !__option(fourbyteints)
 #				error You need to define 'Struct Alignment: 68k' for your project.
 #			endif
 #		endif /* !GENERATINGCFM */
-#		define JNI_PUBLIC_API(ResultType)	__declspec(export) ResultType 
+#		define JNI_PUBLIC_API(ResultType)	__declspec(export) ResultType
 #		define JNI_PUBLIC_VAR(VarType)		JNI_PUBLIC_API(VarType)
 #		define JNI_NATIVE_STUB(ResultType)	JNI_PUBLIC_API(ResultType)
 #	elif defined(__SC__)				/* Symantec */

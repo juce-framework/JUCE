@@ -195,13 +195,13 @@ public:
         To use the socket for sending, call the connect() method. This will not immediately
         make a connection, but will save the destination you've provided. After this, you can
         call read() or write().
-     
+
         If enableBroadcasting is true, the socket will be allowed to send broadcast messages
         (may require extra privileges on linux)
 
         To wait for other sockets to connect to this one, call waitForNextConnection().
     */
-    DatagramSocket (const int localPortNumber, 
+    DatagramSocket (const int localPortNumber,
                     const bool enableBroadcasting = false);
 
     /** Destructor. */

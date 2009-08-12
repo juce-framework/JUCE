@@ -281,7 +281,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
         else
         {
             jobs.remove (i);
-            
+
             if (deleteInactiveJobs)
                 delete job;
         }
@@ -329,7 +329,7 @@ bool ThreadPool::setThreadPriorities (const int newPriority)
             if (! threads[i]->setPriority (newPriority))
                 ok = false;
     }
-    
+
     return ok;
 }
 

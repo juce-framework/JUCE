@@ -1375,7 +1375,7 @@ const String String::replaceSection (int index,
 
     const int newStringLen = (stringToInsert != 0) ? CharacterFunctions::length (stringToInsert) : 0;
     const int newTotalLen = len + newStringLen - numCharsToReplace;
-    
+
     if (newTotalLen <= 0)
         return String::empty;
 

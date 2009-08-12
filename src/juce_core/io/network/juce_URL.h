@@ -86,16 +86,16 @@ public:
         E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
     */
     const String getSubPath() const;
-    
-    /** Returns the scheme of the URL. 
 
-        E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't 
+    /** Returns the scheme of the URL.
+
+        E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
         include the colon).
     */
     const String getScheme() const;
-    
+
     /** Returns a new version of this URL that uses a different sub-path.
-     
+
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "bar", it'll return "http://www.xyz.com/bar?x=1".
     */
