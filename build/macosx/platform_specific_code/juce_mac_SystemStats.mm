@@ -142,9 +142,9 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
     uint64 mem = 0;
-	size_t memSize = sizeof (mem);
-	int mib[] = { CTL_HW, HW_MEMSIZE };
-	sysctl (mib, 2, &mem, &memSize, 0, 0);
+    size_t memSize = sizeof (mem);
+    int mib[] = { CTL_HW, HW_MEMSIZE };
+    sysctl (mib, 2, &mem, &memSize, 0, 0);
     return mem / (1024 * 1024);
 }
 
@@ -198,10 +198,10 @@ const String SystemStats::getCpuVendor() throw()
 int SystemStats::getCpuSpeedInMegaherz() throw()
 {
     uint64 speedHz = 0;
-	size_t speedSize = sizeof (speedHz);
-	int mib[] = { CTL_HW, HW_CPU_FREQ };
-	sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
-    
+    size_t speedSize = sizeof (speedHz);
+    int mib[] = { CTL_HW, HW_CPU_FREQ };
+    sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
+
 #if JUCE_BIG_ENDIAN
     if (speedSize == 4)
         speedHz >>= 32;
