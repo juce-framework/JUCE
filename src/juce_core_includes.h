@@ -35,9 +35,6 @@
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
  #include "juce_core/basics/juce_Atomic.h"
 #endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
- #include "juce_core/basics/juce_StandardHeader.h"
-#endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
  #include "juce_core/basics/juce_FileLogger.h"
 #endif
@@ -59,6 +56,9 @@
 #ifndef __JUCE_RANDOM_JUCEHEADER__
  #include "juce_core/basics/juce_Random.h"
 #endif
+#ifndef __JUCE_TIME_JUCEHEADER__
+ #include "juce_core/basics/juce_Time.h"
+#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
  #include "juce_core/basics/juce_RelativeTime.h"
 #endif
@@ -68,11 +68,11 @@
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
  #include "juce_core/basics/juce_SystemStats.h"
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
- #include "juce_core/basics/juce_Time.h"
-#endif
 #ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
  #include "juce_core/basics/juce_DataConversions.h"
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+ #include "juce_core/basics/juce_StandardHeader.h"
 #endif
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "juce_core/containers/juce_ArrayAllocationBase.h"

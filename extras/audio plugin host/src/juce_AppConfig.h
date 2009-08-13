@@ -31,10 +31,17 @@
 
 /*
     This file contains settings that you might want to explicitly apply to
-    the your build.
+    your Juce build.
 
-    Most of these are turned on or off by default, but you can override
-    that setting here by un-commenting it and giving it a 1 or 0 value.
+    These flags enable or disable juce features - if you're linking to juce as
+    a library, then to change them, you'd need to alter your juce_Config.h file and
+    recompile the juce lib. But because we're using the amalgamated file, you can
+    just include this file before including your juce_amalgamated.cpp file to
+    have the same effect.
+
+    If you leave any of these commented-out, they'll take on the default value
+    assigned to them in juce_Config.h, so to force them on or off, just set them
+    to an explicit 0 or 1 in here.
 */
 
 #define JUCE_PLUGINHOST_VST  1

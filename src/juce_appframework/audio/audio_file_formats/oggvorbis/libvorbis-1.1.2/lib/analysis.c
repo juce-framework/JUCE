@@ -69,7 +69,7 @@ int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
 }
 
 /* there was no great place to put this.... */
-void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off){
+void _analysis_output_always(const char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off){
   int j;
   FILE *of;
   char buffer[80];

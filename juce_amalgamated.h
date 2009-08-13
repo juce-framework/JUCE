@@ -80,7 +80,7 @@
 
 /********* Start of inlined file: juce_Config.h *********/
 #ifndef __JUCE_CONFIG_JUCEHEADER__
-#define __JUCE_CONFIG_JUCEHEADER__ // (this comment is here to force the amalgamator to reinclude this file)
+#define __JUCE_CONFIG_JUCEHEADER__
 
 /*
     This file contains macros that enable/disable various JUCE features.
@@ -637,10 +637,6 @@
 #include <typeinfo>
 #include <cstring>
 #include <cstdio>
-
-#if JUCE_MAC || JUCE_LINUX
-  #include <pthread.h>
-#endif
 
 #if JUCE_USE_INTRINSICS
   #include <intrin.h>
@@ -2741,9 +2737,6 @@ BEGIN_JUCE_NAMESPACE
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
 /********* End of inlined file: juce_Atomic.h *********/
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
@@ -7466,6 +7459,9 @@ private:
 /********* End of inlined file: juce_Random.h *********/
 
 #endif
+#ifndef __JUCE_TIME_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
@@ -7996,10 +7992,10 @@ public:
 /********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__

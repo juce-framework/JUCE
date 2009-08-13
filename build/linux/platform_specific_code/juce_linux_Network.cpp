@@ -29,25 +29,9 @@
   ==============================================================================
 */
 
-#include "linuxincludes.h"
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <linux/if.h>
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/text/juce_StringArray.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/containers/juce_MemoryBlock.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -500,4 +484,4 @@ int juce_seekInInternetFile (void* handle, int newPosition)
     return 0;
 }
 
-END_JUCE_NAMESPACE
+#endif

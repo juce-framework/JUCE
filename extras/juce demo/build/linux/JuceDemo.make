@@ -43,7 +43,6 @@ OBJECTS := \
 	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
-	$(OBJDIR)/WebBrowserDemo.o \
 	$(OBJDIR)/WidgetsDemo.o \
 	$(OBJDIR)/ThreadingDemo.o \
 	$(OBJDIR)/TreeViewDemo.o \
@@ -56,6 +55,7 @@ OBJECTS := \
 	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/CameraDemo.o \
 	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/WebBrowserDemo.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -117,11 +117,6 @@ $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/WebBrowserDemo.o: ../../src/demos/WebBrowserDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -178,6 +173,11 @@ $(OBJDIR)/CameraDemo.o: ../../src/demos/CameraDemo.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/WebBrowserDemo.o: ../../src/demos/WebBrowserDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

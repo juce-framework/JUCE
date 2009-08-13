@@ -29,23 +29,9 @@
   ==============================================================================
 */
 
-#include "linuxincludes.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-#include <sys/sysinfo.h>
-#include <dlfcn.h>
-
-
-#ifndef CPU_ISSET
-  #undef SUPPORT_AFFINITIES
-#endif
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/threads/juce_Process.h"
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -274,4 +260,4 @@ void PlatformUtilities::fpuReset()
 {
 }
 
-END_JUCE_NAMESPACE
+#endif

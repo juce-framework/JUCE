@@ -44,13 +44,13 @@
  #error
 #endif
 
-#include "../juce_Config.h"
+#include "../juce_Config.h"  // FORCE_AMALGAMATOR_INCLUDE
 
 //==============================================================================
 #ifdef _WIN32
  #include "../build/win32/platform_specific_code/juce_win32_NativeIncludes.h"
 #elif defined (LINUX)
- //
+ #include "../build/linux/platform_specific_code/juce_linux_NativeIncludes.h"
 #else
  #include "../build/macosx/platform_specific_code/juce_mac_NativeIncludes.h"
 #endif
@@ -333,46 +333,24 @@
 #include "juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
-#include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp"
-#include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"
-#include "juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp"
-#include "juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp"
+ #include "juce_appframework/audio/audio_file_formats/juce_FlacAudioFormat.cpp"
+ #include "juce_appframework/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"
+ #include "juce_appframework/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp"
+ #include "juce_appframework/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp"
 #endif
 
 //==============================================================================
 #if JUCE_WIN32
-
-#include "../build/win32/platform_specific_code/juce_win32_NativeCode.cpp"
-#include "../build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
-
+ #include "../build/win32/platform_specific_code/juce_win32_NativeCode.cpp"
+ #include "../build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
 #endif
 
 //==============================================================================
 #if JUCE_LINUX
-
-#include "../build/linux/platform_specific_code/juce_linux_Files.cpp"
-#include "../build/linux/platform_specific_code/juce_linux_NamedPipe.cpp"
-#include "../build/linux/platform_specific_code/juce_linux_Network.cpp"
-#include "../build/linux/platform_specific_code/juce_linux_SystemStats.cpp"
-#include "../build/linux/platform_specific_code/juce_linux_Threads.cpp"
-
-#if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "../build/linux/platform_specific_code/juce_linux_Audio.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_AudioCDReader.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_FileChooser.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_Fonts.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_Messaging.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_Midi.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_WebBrowserComponent.cpp"
- #include "../build/linux/platform_specific_code/juce_linux_Windowing.cpp"
-#endif
-
+ #include "../build/linux/platform_specific_code/juce_linux_NativeCode.cpp"
 #endif
 
 //==============================================================================
 #if JUCE_MAC
-
-#include "../build/macosx/platform_specific_code/juce_mac_NativeCode.mm"
-#include "../build/macosx/platform_specific_code/juce_mac_NamedPipe.cpp"
-
+ #include "../build/macosx/platform_specific_code/juce_mac_NativeCode.mm"
 #endif

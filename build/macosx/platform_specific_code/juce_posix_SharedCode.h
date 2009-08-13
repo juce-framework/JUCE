@@ -407,7 +407,8 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
 //==============================================================================
 void juce_runSystemCommand (const String& command)
 {
-    system ((const char*) command.toUTF8());
+    int result = system ((const char*) command.toUTF8());
+    (void) result;
 }
 
 const String juce_getOutputFromCommand (const String& command)

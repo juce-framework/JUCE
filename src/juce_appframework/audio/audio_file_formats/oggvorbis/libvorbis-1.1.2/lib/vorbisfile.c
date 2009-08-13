@@ -1704,7 +1704,7 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
 }
 
 extern float *vorbis_window(vorbis_dsp_state *v,int W);
-extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,
+extern void _analysis_output_always(const char *base,int i,float *v,int n,int bark,int dB,
 			     ogg_int64_t off);
 
 static void _ov_splice(float **pcm,float **lappcm,

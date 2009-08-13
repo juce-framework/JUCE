@@ -35,7 +35,7 @@
 #include "os.h"
 
 
-static void _v_writestring(oggpack_buffer *o,char *s, int bytes){
+static void _v_writestring(oggpack_buffer *o, const char *s, int bytes){
 
   while(bytes--){
     oggpack_write(o,*s++,8);
@@ -64,7 +64,7 @@ void vorbis_comment_add(vorbis_comment *vc,char *comment){
   vc->user_comments[vc->comments]=NULL;
 }
 
-void vorbis_comment_add_tag(vorbis_comment *vc, char *tag, char *contents){
+void vorbis_comment_add_tag(vorbis_comment *vc, const char *tag, char *contents){
   char *comment=(char*)alloca(strlen(tag)+strlen(contents)+2); /* +2 for = and \0 */
   strcpy(comment, tag);
   strcat(comment, "=");

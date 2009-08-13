@@ -131,7 +131,8 @@ static bool parseFile (const File& rootFolder,
                 if (matchesWildcard (filename.replaceCharacter (T('\\'), T('/')), wildcards)
                      && ! includesToIgnore.contains (targetFile.getFileName()))
                 {
-                    if (! alreadyIncludedFiles.contains (targetFile.getFullPathName()))
+                    if (line.containsIgnoreCase (T("FORCE_AMALGAMATOR_INCLUDE"))
+                        || ! alreadyIncludedFiles.contains (targetFile.getFullPathName()))
                     {
                         if (! canFileBeReincluded (targetFile))
                             alreadyIncludedFiles.add (targetFile.getFullPathName());

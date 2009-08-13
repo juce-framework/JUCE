@@ -30,7 +30,7 @@
 */
 
 #ifndef __JUCE_CONFIG_JUCEHEADER__
-#define __JUCE_CONFIG_JUCEHEADER__ // (this comment is here to force the amalgamator to reinclude this file)
+#define __JUCE_CONFIG_JUCEHEADER__
 
 //==============================================================================
 /*

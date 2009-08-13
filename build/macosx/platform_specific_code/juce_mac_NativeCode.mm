@@ -38,7 +38,6 @@
 
 #include "juce_mac_NativeIncludes.h"
 
-
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
@@ -49,6 +48,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../src/juce_core/threads/juce_Thread.h"
 #include "../../../src/juce_core/threads/juce_InterProcessLock.h"
 #include "../../../src/juce_core/io/files/juce_FileInputStream.h"
+#include "../../../src/juce_core/io/files/juce_NamedPipe.h"
 #include "../../../src/juce_core/io/network/juce_URL.h"
 #include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
 #include "../../../src/juce_core/text/juce_LocalisedStrings.h"
@@ -109,6 +109,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_mac_Strings.mm"
 #include "juce_mac_SystemStats.mm"
 #include "juce_mac_Network.mm"
+#include "juce_mac_NamedPipe.cpp"
 #include "juce_mac_Threads.mm"
 #include "juce_posix_SharedCode.h"
 #include "juce_mac_Files.mm"

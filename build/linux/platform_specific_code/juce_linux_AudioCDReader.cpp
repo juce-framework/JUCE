@@ -29,11 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/audio_file_formats/juce_AudioCDReader.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -106,4 +104,4 @@ int AudioCDReader::getCDDBId()
     return 0;
 }
 
-END_JUCE_NAMESPACE
+#endif

@@ -29,38 +29,13 @@
   ==============================================================================
 */
 
-#include "../../../juce_Config.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 #if JUCE_ALSA
 
-#include "linuxincludes.h"
-
 //==============================================================================
-/* Got an include error here? If so, you've either not got ALSA installed, or you've
-   not got your paths set up correctly to find its header files.
-
-   The package you need to install to get ASLA support is "libasound2-dev".
-
-   If you don't have the ALSA library and don't want to build Juce with audio support,
-   just disable the JUCE_ALSA flag in juce_Config.h
-*/
-#include <alsa/asoundlib.h>
-
-
-//==============================================================================
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/io/files/juce_FileInputStream.h"
-#include "../../../src/juce_core/basics/juce_Singleton.h"
-#include "../../../src/juce_appframework/audio/dsp/juce_AudioDataConverters.h"
-
 static const int maxNumChans = 64;
 
 
@@ -1028,20 +1003,13 @@ AudioIODeviceType* juce_createDefaultAudioIODeviceType()
     return new ALSAAudioIODeviceType();
 }
 
-
-END_JUCE_NAMESPACE
-
-
 //==============================================================================
 #else  // if ALSA is turned off..
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+AudioIODeviceType* juce_createDefaultAudioIODeviceType()
+{
+    return 0;
+}
 
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
-AudioIODeviceType* juce_createDefaultAudioIODeviceType()    { return 0; }
-
-END_JUCE_NAMESPACE
-
+#endif
 #endif

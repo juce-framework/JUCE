@@ -380,7 +380,7 @@ public:
             result.setActive (false);
 #endif
             break;
-            
+
         case showInterprocessComms:
             result.setInfo (T("Interprocess Comms"), T("Shows the interprocess communications demo"), demosCategory, 0);
             result.addDefaultKeypress (T('0'), ModifierKeys::commandModifier);

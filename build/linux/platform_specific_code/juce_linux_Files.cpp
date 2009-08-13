@@ -29,45 +29,14 @@
   ==============================================================================
 */
 
-#include "linuxincludes.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-#include <sys/stat.h>
-#include <sys/dir.h>
-#include <sys/ptrace.h>
-#include <sys/vfs.h>        // for statfs
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fnmatch.h>
-#include <utime.h>
-#include <pwd.h>
-#include <fcntl.h>
-#include <dlfcn.h>
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 #define U_ISOFS_SUPER_MAGIC     (short) 0x9660   // linux/iso_fs.h
 #define U_MSDOS_SUPER_MAGIC     (short) 0x4d44   // linux/msdos_fs.h
 #define U_NFS_SUPER_MAGIC       (short) 0x6969   // linux/nfs_fs.h
 #define U_SMB_SUPER_MAGIC       (short) 0x517B   // linux/smb_fs.h
-
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/io/files/juce_FileInputStream.h"
-#include "../../../src/juce_core/io/files/juce_FileOutputStream.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/basics/juce_Random.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
-#include "../../../src/juce_core/io/files/juce_NamedPipe.h"
-#include "../../../src/juce_core/threads/juce_InterProcessLock.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-
-//==============================================================================
-/*
-    Note that a lot of methods that you'd expect to find in this file actually
-    live in juce_posix_SharedCode.h!
-*/
-#include "../../macosx/platform_specific_code/juce_posix_SharedCode.h"
 
 
 //==============================================================================
@@ -479,5 +448,4 @@ bool juce_launchFile (const String& fileName,
     return cpid >= 0;
 }
 
-
-END_JUCE_NAMESPACE
+#endif

@@ -29,14 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../juce_Config.h"
-#include "linuxincludes.h"
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/components/filebrowser/juce_FileChooser.h"
-
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 //==============================================================================
 void FileChooser::showPlatformDialog (OwnedArray<File>& results,
@@ -53,4 +48,4 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     jassertfalse
 }
 
-END_JUCE_NAMESPACE
+#endif

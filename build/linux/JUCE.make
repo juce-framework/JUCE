@@ -291,19 +291,20 @@ OBJECTS := \
 	$(OBJDIR)/juce_TopLevelWindow.o \
 	$(OBJDIR)/juce_ComponentPeer.o \
 	$(OBJDIR)/juce_AlertWindow.o \
-	$(OBJDIR)/juce_linux_FileChooser.o \
-	$(OBJDIR)/juce_linux_Fonts.o \
-	$(OBJDIR)/juce_linux_Messaging.o \
-	$(OBJDIR)/juce_linux_Midi.o \
-	$(OBJDIR)/juce_linux_NamedPipe.o \
-	$(OBJDIR)/juce_linux_Threads.o \
-	$(OBJDIR)/juce_linux_SystemStats.o \
-	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
-	$(OBJDIR)/juce_linux_Audio.o \
-	$(OBJDIR)/juce_linux_Network.o \
-	$(OBJDIR)/juce_linux_AudioCDReader.o \
 	$(OBJDIR)/juce_linux_Files.o \
+	$(OBJDIR)/juce_linux_Audio.o \
+	$(OBJDIR)/juce_linux_Fonts.o \
+	$(OBJDIR)/juce_linux_Network.o \
+	$(OBJDIR)/juce_linux_NamedPipe.o \
+	$(OBJDIR)/juce_linux_Midi.o \
 	$(OBJDIR)/juce_linux_Windowing.o \
+	$(OBJDIR)/juce_linux_AudioCDReader.o \
+	$(OBJDIR)/juce_linux_Threads.o \
+	$(OBJDIR)/juce_linux_Messaging.o \
+	$(OBJDIR)/juce_linux_SystemStats.o \
+	$(OBJDIR)/juce_linux_NativeCode.o \
+	$(OBJDIR)/juce_linux_FileChooser.o \
+	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -1605,42 +1606,7 @@ $(OBJDIR)/juce_AlertWindow.o: ../../src/juce_appframework/gui/components/windows
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_FileChooser.o: platform_specific_code/juce_linux_FileChooser.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Fonts.o: platform_specific_code/juce_linux_Fonts.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Messaging.o: platform_specific_code/juce_linux_Messaging.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Midi.o: platform_specific_code/juce_linux_Midi.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_NamedPipe.o: platform_specific_code/juce_linux_NamedPipe.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStats.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
+$(OBJDIR)/juce_linux_Files.o: platform_specific_code/juce_linux_Files.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1650,7 +1616,27 @@ $(OBJDIR)/juce_linux_Audio.o: platform_specific_code/juce_linux_Audio.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_linux_Fonts.o: platform_specific_code/juce_linux_Fonts.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_linux_Network.o: platform_specific_code/juce_linux_Network.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_NamedPipe.o: platform_specific_code/juce_linux_NamedPipe.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Midi.o: platform_specific_code/juce_linux_Midi.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Windowing.o: platform_specific_code/juce_linux_Windowing.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1660,12 +1646,32 @@ $(OBJDIR)/juce_linux_AudioCDReader.o: platform_specific_code/juce_linux_AudioCDR
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Files.o: platform_specific_code/juce_linux_Files.cpp
+$(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Windowing.o: platform_specific_code/juce_linux_Windowing.cpp
+$(OBJDIR)/juce_linux_Messaging.o: platform_specific_code/juce_linux_Messaging.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStats.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_NativeCode.o: platform_specific_code/juce_linux_NativeCode.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_FileChooser.o: platform_specific_code/juce_linux_FileChooser.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

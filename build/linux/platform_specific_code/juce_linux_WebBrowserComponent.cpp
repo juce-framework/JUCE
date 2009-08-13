@@ -29,11 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/components/special/juce_WebBrowserComponent.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 #if JUCE_WEB_BROWSER
 
@@ -133,4 +131,4 @@ bool WebBrowserComponent::pageAboutToLoad (const String& url)
 }
 
 #endif
-END_JUCE_NAMESPACE
+#endif

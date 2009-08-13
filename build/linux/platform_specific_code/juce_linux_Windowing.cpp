@@ -29,65 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../juce_Config.h"
-#include "linuxincludes.h"
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/Xmd.h>
-#include <X11/keysym.h>
-#include <X11/cursorfont.h>
-#include <dlfcn.h>
-
-#if JUCE_USE_XINERAMA
- /* If you're trying to use Xinerama, you'll need to install the "libxinerama-dev" package..
- */
- #include <X11/extensions/Xinerama.h>
-#endif
-
-#if JUCE_USE_XSHM
- #include <X11/extensions/XShm.h>
- #include <sys/shm.h>
- #include <sys/ipc.h>
-#endif
-
-#if JUCE_OPENGL
- /*  Got an include error here?
-
-     If you want to install OpenGL support, the packages to get are "mesa-common-dev"
-     and "freeglut3-dev".
-
-     Alternatively, you can turn off the JUCE_OPENGL flag in juce_Config.h if you
-     want to disable it.
- */
- #include <GL/glx.h>
-#endif
-
-
-#undef KeyPress
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/events/juce_Timer.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
-#include "../../../src/juce_appframework/gui/components/keyboard/juce_KeyPress.h"
-#include "../../../src/juce_appframework/application/juce_SystemClipboard.h"
-#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_OpenGLComponent.h"
-#include "../../../src/juce_appframework/gui/components/juce_Desktop.h"
-#include "../../../src/juce_appframework/events/juce_MessageManager.h"
-#include "../../../src/juce_appframework/gui/components/juce_ComponentDeletionWatcher.h"
-#include "../../../src/juce_appframework/gui/graphics/geometry/juce_RectangleList.h"
-#include "../../../src/juce_appframework/gui/graphics/imaging/juce_ImageFileFormat.h"
-#include "../../../src/juce_appframework/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
-#include "../../../src/juce_appframework/gui/components/mouse/juce_DragAndDropContainer.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_SystemTrayIconComponent.h"
-#include "../../../src/juce_appframework/application/juce_Application.h"
-#include "../../../src/juce_core/threads/juce_Process.h"
-#include "../../../src/juce_core/io/network/juce_URL.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 //==============================================================================
 #define TAKE_FOCUS 0
@@ -3369,4 +3313,4 @@ const int KeyPress::fastForwardKey      = (0xffeeff02) | extendedKeyModifier;
 const int KeyPress::rewindKey           = (0xffeeff03) | extendedKeyModifier;
 
 
-END_JUCE_NAMESPACE
+#endif

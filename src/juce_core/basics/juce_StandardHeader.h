@@ -83,10 +83,6 @@
 #include <cstring>
 #include <cstdio>
 
-#if JUCE_MAC || JUCE_LINUX
-  #include <pthread.h>
-#endif
-
 #if JUCE_USE_INTRINSICS
   #include <intrin.h>
 #endif

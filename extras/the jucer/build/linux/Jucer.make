@@ -5,19 +5,22 @@ ifndef CONFIG
   CONFIG=Debug
 endif
 
+# if multiple archs are defined turn off automated dependency generation
+DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)
+
 ifeq ($(CONFIG),Debug)
   BINDIR := build
   LIBDIR := build
   OBJDIR := build/intermediate/Debug
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -g -D_DEBUG -ggdb
-  CXXFLAGS := $(CFLAGS)
+  CXXFLAGS += $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "DEBUG=1" -D "_DEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucer
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+ BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 ifeq ($(CONFIG),Release)
@@ -25,14 +28,14 @@ ifeq ($(CONFIG),Release)
   LIBDIR := build
   OBJDIR := build/intermediate/Release
   OUTDIR := build
-  CPPFLAGS := -MMD -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
+  CPPFLAGS := $(DEPFLAGS) -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   CFLAGS += $(CPPFLAGS) $(TARGET_ARCH) -O2
-  CXXFLAGS := $(CFLAGS)
+  CXXFLAGS += $(CFLAGS)
   LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows -s -L"/usr/X11R6/lib/" -L"../../../../bin" -lfreetype -lpthread -lX11 -lGL -lGLU -lXinerama -lasound
   LDDEPS :=
   RESFLAGS := -D "LINUX=1" -D "NDEBUG=1" -I "/usr/include" -I "/usr/include/freetype2"
   TARGET := jucer
-  BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
+ BLDCMD = $(CXX) -o $(OUTDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS) $(RESOURCES) $(TARGET_ARCH)
 endif
 
 OBJECTS := \
@@ -55,18 +58,18 @@ OBJECTS := \
 	$(OBJDIR)/jucer_UtilityFunctions.o \
 	$(OBJDIR)/jucer_FilePropertyComponent.o \
 	$(OBJDIR)/jucer_FontPropertyComponent.o \
-	$(OBJDIR)/jucer_BinaryResources.o \
 	$(OBJDIR)/jucer_ComponentLayout.o \
-	$(OBJDIR)/jucer_GeneratedCode.o \
-	$(OBJDIR)/jucer_JucerDocument.o \
+	$(OBJDIR)/jucer_BinaryResources.o \
 	$(OBJDIR)/jucer_ObjectTypes.o \
 	$(OBJDIR)/jucer_PaintRoutine.o \
+	$(OBJDIR)/jucer_GeneratedCode.o \
+	$(OBJDIR)/jucer_JucerDocument.o \
 	$(OBJDIR)/jucer_ComponentTypeHandler.o \
 	$(OBJDIR)/jucer_ButtonDocument.o \
 	$(OBJDIR)/jucer_ComponentDocument.o \
 	$(OBJDIR)/jucer_ColouredElement.o \
-	$(OBJDIR)/jucer_FillType.o \
 	$(OBJDIR)/jucer_PaintElement.o \
+	$(OBJDIR)/jucer_FillType.o \
 	$(OBJDIR)/jucer_PaintElementPath.o \
 	$(OBJDIR)/jucer_StrokeType.o \
 
@@ -75,7 +78,7 @@ CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
 ifeq (,$(CMD))
   MKDIR_TYPE := posix
 endif
-ifeq (/bin/sh.exe,$(SHELL))
+ifeq (/bin,$(findstring /bin,$(SHELL)))
   MKDIR_TYPE := posix
 endif
 ifeq ($(MKDIR_TYPE),posix)
@@ -102,7 +105,8 @@ $(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)
 clean:
 	@echo Cleaning Jucer
 ifeq ($(MKDIR_TYPE),posix)
-	-@rm -rf $(OUTDIR)/$(TARGET) $(OBJDIR)
+	-@rm -f $(OUTDIR)/$(TARGET)
+	-@rm -rf $(OBJDIR)
 else
 	-@if exist $(subst /,\,$(OUTDIR)/$(TARGET)) del /q $(subst /,\,$(OUTDIR)/$(TARGET))
 	-@if exist $(subst /,\,$(OBJDIR)) del /q $(subst /,\,$(OBJDIR))
@@ -112,167 +116,167 @@ endif
 $(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_Main.o: ../../src/jucer_Main.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentLayoutEditor.o: ../../src/ui/jucer_ComponentLayoutEditor.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentLayoutPanel.o: ../../src/ui/jucer_ComponentLayoutPanel.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentOverlayComponent.o: ../../src/ui/jucer_ComponentOverlayComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_EditingPanelBase.o: ../../src/ui/jucer_EditingPanelBase.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_JucerDocumentHolder.o: ../../src/ui/jucer_JucerDocumentHolder.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_MainWindow.o: ../../src/ui/jucer_MainWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PaintRoutineEditor.o: ../../src/ui/jucer_PaintRoutineEditor.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PaintRoutinePanel.o: ../../src/ui/jucer_PaintRoutinePanel.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PrefsPanel.o: ../../src/ui/jucer_PrefsPanel.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ResourceEditorPanel.o: ../../src/ui/jucer_ResourceEditorPanel.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_SnapGridPainter.o: ../../src/ui/jucer_SnapGridPainter.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_TestComponent.o: ../../src/ui/jucer_TestComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_StoredSettings.o: ../../src/utility/jucer_StoredSettings.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_UtilityFunctions.o: ../../src/utility/jucer_UtilityFunctions.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_FilePropertyComponent.o: ../../src/properties/jucer_FilePropertyComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_FontPropertyComponent.o: ../../src/properties/jucer_FontPropertyComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/jucer_BinaryResources.o: ../../src/model/jucer_BinaryResources.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentLayout.o: ../../src/model/jucer_ComponentLayout.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_GeneratedCode.o: ../../src/model/jucer_GeneratedCode.cpp
+$(OBJDIR)/jucer_BinaryResources.o: ../../src/model/jucer_BinaryResources.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/jucer_JucerDocument.o: ../../src/model/jucer_JucerDocument.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ObjectTypes.o: ../../src/model/jucer_ObjectTypes.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PaintRoutine.o: ../../src/model/jucer_PaintRoutine.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_GeneratedCode.o: ../../src/model/jucer_GeneratedCode.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_JucerDocument.o: ../../src/model/jucer_JucerDocument.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentTypeHandler.o: ../../src/model/components/jucer_ComponentTypeHandler.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ButtonDocument.o: ../../src/model/documents/jucer_ButtonDocument.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentDocument.o: ../../src/model/documents/jucer_ComponentDocument.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ColouredElement.o: ../../src/model/paintelements/jucer_ColouredElement.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
-
-$(OBJDIR)/jucer_FillType.o: ../../src/model/paintelements/jucer_FillType.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PaintElement.o: ../../src/model/paintelements/jucer_PaintElement.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_FillType.o: ../../src/model/paintelements/jucer_FillType.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_PaintElementPath.o: ../../src/model/paintelements/jucer_PaintElementPath.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_StrokeType.o: ../../src/model/paintelements/jucer_StrokeType.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o $@ -c $<
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)
 

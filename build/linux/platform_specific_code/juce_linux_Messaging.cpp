@@ -29,24 +29,11 @@
   ==============================================================================
 */
 
-#include "../../../juce_Config.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
-#include "linuxincludes.h"
-#include <stdio.h>
-#include <signal.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xresource.h>
-#include <X11/Xutil.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/events/juce_MessageManager.h"
-#include "../../../src/juce_core/threads/juce_WaitableEvent.h"
-#include "../../../src/juce_core/threads/juce_Process.h"
-#include "../../../src/juce_core/threads/juce_ScopedLock.h"
-
+//==============================================================================
 #ifdef JUCE_DEBUG
   #define JUCE_DEBUG_XERRORS 1
 #endif
@@ -417,4 +404,4 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
     return true;
 }
 
-END_JUCE_NAMESPACE
+#endif

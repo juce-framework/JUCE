@@ -29,26 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-#include <sys/stat.h>
-#include <sys/dir.h>
-#include <fcntl.h>
-
-// As well as being for the mac, this file is included by the linux build.
-
-#if ! JUCE_MAC
- #include <sys/wait.h>
- #include <errno.h>
- #include <unistd.h>
-#endif
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/io/files/juce_NamedPipe.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE
 
 //==============================================================================
 struct NamedPipeInternal
@@ -233,5 +216,4 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
     return bytesWritten;
 }
 
-
-END_JUCE_NAMESPACE
+#endif

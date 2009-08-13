@@ -29,32 +29,14 @@
   ==============================================================================
 */
 
-#include "linuxincludes.h"
-#include <dlfcn.h>
-#include <sys/file.h>
-#include <sys/types.h>
-#include <sys/ptrace.h>
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_core/threads/juce_CriticalSection.h"
-#include "../../../src/juce_core/threads/juce_WaitableEvent.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/threads/juce_Process.h"
-#include "../../../src/juce_core/io/files/juce_File.h"
-#include "../../../src/juce_core/basics/juce_SystemStats.h"
-#include "../../../src/juce_core/misc/juce_PlatformUtilities.h"
-
-//==============================================================================
 /*
     Note that a lot of methods that you'd expect to find in this file actually
     live in juce_posix_SharedCode.h!
 */
-
-#ifndef CPU_ISSET
-  #undef SUPPORT_AFFINITIES
-#endif
 
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
@@ -276,4 +258,4 @@ void* PlatformUtilities::getProcedureEntryPoint (void* libraryHandle, const Stri
 
 #endif
 
-END_JUCE_NAMESPACE
+#endif

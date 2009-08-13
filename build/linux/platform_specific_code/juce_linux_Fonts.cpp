@@ -29,26 +29,9 @@
   ==============================================================================
 */
 
-#include "../../../juce_Config.h"
-#include "linuxincludes.h"
-
-/*  Got a build error here? You'll need to install the freetype library...
-
-    The name of the package to install is "libfreetype6-dev".
-*/
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#include "../../../src/juce_appframework/gui/graphics/fonts/juce_Font.h"
-#include "../../../src/juce_core/basics/juce_Singleton.h"
-#include "../../../src/juce_core/io/streams/juce_MemoryInputStream.h"
-#include "../../../src/juce_core/io/files/juce_DirectoryIterator.h"
-#include "../../../src/juce_core/text/juce_XmlDocument.h"
-#include "../../../src/juce_appframework/application/juce_DeletedAtShutdown.h"
+// (This file gets included by juce_linux_NativeCode.cpp, rather than being
+// compiled on its own).
+#ifdef JUCE_INCLUDED_FILE
 
 
 //==============================================================================
@@ -637,4 +620,4 @@ void Typeface::getDefaultFontNames (String& defaultSans, String& defaultSerif, S
     defaultFixed = linux_getDefaultMonospacedFontName();
 }
 
-END_JUCE_NAMESPACE
+#endif
