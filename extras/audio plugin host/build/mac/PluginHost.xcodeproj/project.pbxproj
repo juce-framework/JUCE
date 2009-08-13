@@ -241,7 +241,7 @@
 			buildSettings = {
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Juce Plugin Host";
+				PRODUCT_NAME = PluginHost;
 				USER_HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(inherited)";
 				ZERO_LINK = NO;
 			};
@@ -251,7 +251,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 84FC4CD80CD8894600850651 /* juce.xcconfig */;
 			buildSettings = {
-				PRODUCT_NAME = "Juce Plugin Host";
+				PRODUCT_NAME = PluginHost;
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(inherited)";
 				ZERO_LINK = NO;

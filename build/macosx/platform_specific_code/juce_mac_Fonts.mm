@@ -342,7 +342,7 @@ const StringArray Font::findAllTypefaceNames() throw()
     const ScopedAutoReleasePool pool;
     NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
 
-    for (int i = 0; i < [fonts count]; ++i)
+    for (unsigned int i = 0; i < [fonts count]; ++i)
         names.add (nsStringToJuce ((NSString*) [fonts objectAtIndex: i]));
 
     names.sort (true);

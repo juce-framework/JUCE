@@ -89,7 +89,7 @@ void SystemStats::initialiseStats() throw()
     {
         initialised = true;
 
-        // etremely annoying: adding this line stops the apple menu items from working. Of
+        // extremely annoying: adding this line stops the apple menu items from working. Of
         // course, not adding it means that carbon windows (e.g. in plugins) won't get
         // any events.
         //NSApplicationLoad();
@@ -118,42 +118,6 @@ void SystemStats::initialiseStats() throw()
     }
 }
 
-static const String getCpuInfo (const char* key, bool lastOne = false) throw()
-{
-    String info;
-    char buf [256];
-
-    FILE* f = fopen ("/proc/cpuinfo", "r");
-
-    while (f != 0 && fgets (buf, sizeof(buf), f))
-    {
-        if (strncmp (buf, key, strlen (key)) == 0)
-        {
-            char* p = buf;
-
-            while (*p && *p != '\n')
-                ++p;
-
-            if (*p != 0)
-                *p = 0;
-
-            p = buf;
-
-            while (*p != 0 && *p != ':')
-                ++p;
-
-            if (*p != 0 && *(p + 1) != 0)
-                info = p + 2;
-
-            if (! lastOne)
-                break;
-        }
-    }
-
-    fclose (f);
-    return info;
-}
-
 //==============================================================================
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
 {
@@ -177,15 +141,11 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
-#if MACOS_10_4_OR_EARLIER
-    long bytes;
-    if (Gestalt (gestaltPhysicalRAMSize, &bytes) == noErr)
-        return (int) (((unsigned long) bytes) / (1024 * 1024));
-
-    return 0;
-#else
-    return (int) ([[NSProcessInfo processInfo] physicalMemory] / (1024 * 1024));
-#endif
+    uint64 mem = 0;
+	size_t memSize = sizeof (mem);
+	int mib[] = { CTL_HW, HW_MEMSIZE };
+	sysctl (mib, 2, &mem, &memSize, 0, 0);
+    return mem / (1024 * 1024);
 }
 
 bool SystemStats::hasMMX() throw()
@@ -237,11 +197,16 @@ const String SystemStats::getCpuVendor() throw()
 
 int SystemStats::getCpuSpeedInMegaherz() throw()
 {
-#if MACOS_10_4_OR_EARLIER
-    return GetCPUSpeed();
-#else
-    return roundDoubleToInt (getCpuInfo ("cpu MHz").getDoubleValue());
+    uint64 speedHz = 0;
+	size_t speedSize = sizeof (speedHz);
+	int mib[] = { CTL_HW, HW_CPU_FREQ };
+	sysctl (mib, 2, &speedHz, &speedSize, 0, 0);
+    
+#if JUCE_BIG_ENDIAN
+    if (speedSize == 4)
+        speedHz >>= 32;
 #endif
+    return speedHz / 1000000;
 }
 
 int SystemStats::getNumCpus() throw()

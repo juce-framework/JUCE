@@ -13,7 +13,6 @@
 // This is where all the juce code gets included, via this amalgamated file..
 #include "../../../juce_amalgamated.mm"
 
-
 /* NB. A handy tip is that if you're doing a lot of debugging into the juce code, then stepping through
    the amalgamated file can be slow or impossible for the debugger. But if you use the following line
    instead of the one above, then it makes it a lot easier..

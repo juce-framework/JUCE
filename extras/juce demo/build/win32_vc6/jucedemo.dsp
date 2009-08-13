@@ -149,10 +149,6 @@ SOURCE=..\..\src\BinaryData.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\juce_LibrarySource.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\jucedemo_headers.h
 # End Source File
 # Begin Source File

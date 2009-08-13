@@ -360,7 +360,9 @@
 #endif /* PNG_SETJMP_SUPPORTED */
 
 #ifdef BSD
+#if ! JUCE_MAC
 #  include <strings.h>
+#endif
 #else
 #  include <string.h>
 #endif
