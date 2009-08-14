@@ -74,20 +74,23 @@ library beforehand, but instead by just adding <code>juce_amalgamated.cpp</code>
 there's less setting-up required for a new user to do before getting stuck-in, but some compilers
 and debuggers can struggle with the huge files involved, so you may prefer to build
 your project in the traditional way, using it as a separate library.</p>
+<p>A variation on this approach is to include <code>juce_amalgamated_template.cpp</code> in your app, which has the 
+same effect as the normal amalgamated file, but which actually pulls in all the juce cpp files via #include statements
+rather than by pre-munging them into one file. This makes debugging a lot easier</p>
 
 <h2>Building your application with JUCE</h2>
 
-<h3><a name="buildvc2005"></a>Compiling with Microsoft Visual Studio 2005</h3>
+<h3><a name="buildvc2005"></a>Compiling with Microsoft Visual Studio</h3>
 
 <p>The quickest way to get started is to try building the demo application - there's a Visual Studio
 soluion in <code>juce/extras/juce demo/build/win32_vc8/jucedemo.sln</code>.</p>
-<p>This should build and run with no extra set-up needed in Visual Studio. (If you're using VCExpress Edition
-see below for the few extra steps needed).</p>
-<p>The only thing to check if you're unfamiliar with Visual Studio is that the <code>jucedemo</code> 
+<p>This should build and run with no extra set-up needed in all versions of Visual Studio from 2005 onwards,
+including the free version of Visual Express 2009.</p>
+<p>One thing to check if you're unfamiliar with Visual Studio is that the <code>jucedemo</code> 
 project needs to be selected as your "startup" project (right-click on the 
 jucedemo project in the solution explorer for this option). Also, the active configuration should be
-set to "Debug" or "Release", (the first time you load a project, VS selects one of the configurations and 
-usually picks "Debug DLL" as its default, for reasons best known to itself).</p>
+set to "Debug" or "Release", (the first time you load a project, VS selects one of the configurations by default 
+and usually picks "Debug DLL", for reasons best known to itself).</p>
 
 <p>To create your own application that links to Juce:</p>
 <ol>
@@ -112,33 +115,6 @@ all need to do is to add <code>juce_amalagamated.cpp</code> to your project, and
 your project without needing to link to it separately, so you can skip the steps above that involve
 setting up the link paths, etc. Most of the demo apps are written using the amalgamated version,
 so refer to these for an example of how to do this.</p>
-
-
-<h3><a name="buildvcx"></a>Compiling with Microsoft Visual C++ Express edition</h3>
-
-<p>Although VCExpress is basically the same thing as Visual Studio 2005, it doesn't come
-with all the Win32 library code pre-installed, so a couple of extra steps are required before JUCE
-can be compiled with it:</p>
-
-<ol>
-<li>Install the latest Platform SDK from Microsoft.</li>
-<li>A few extra items need to be added to your include and library search paths. The first few 
-entries on your include path should look like this (obviously you might have things installed in 
-different places, but the order is important!):
-<pre>C:\Program Files\Microsoft Platform SDK\include
-C:\Program Files\Microsoft Platform SDK\include\crt
-C:\Program Files\Microsoft Platform SDK\include\mfc
-C:\mycode\juce
-...</pre>
-And the library search path should begin like this:
-<pre>$(VSInstallDir)VC\lib
-C:\Program Files\Microsoft Platform SDK\lib
-C:\mycode\juce\bin
-...</pre>
-</li>
-</ol>
-    
-<p>Then, you can follow the same instructions as for Visual Studio 2005 above.</p>
 
 <h3><a name="buildvc6"></a>Compiling with Microsoft Visual Studio 6</h3>
 
@@ -212,31 +188,33 @@ or "-ljucedebug".</li>
 <li>You'll also need to add some or all of the following OSX frameworks to your "External Frameworks and Libraries" list,
 depending on what features your application uses:
 <pre>Cocoa.framework
-CoreFoundation.framework
-CoreServices.framework
-ApplicationServices.framework
 Carbon.framework
 IOKit.framework
-QuickTime.framework
 CoreAudio.framework
 CoreMIDI.framework
-AudioUnit.framework
-OpenGL.framework
-AGL.framework
 WebKit.framework
-DiscRecording.framework</pre>
+DiscRecording.framework
+QTKit.framework
+QuickTime.framework
+QuartzCore.framework
+AudioUnit.framework
+AudioToolbox.framework
+OpenGL.framework
+AppKit.framework
+CoreAudioKit.framework
+CoreFoundation.framework</pre>
 
 In future there may be other frameworks that you'll need to link with to support new JUCE features. 
 (It should be pretty obvious from the link-time error when one of these is missing).
 </li>
 </ol>
 
-<p>If all this seems too complicated, you can use the <em>amalgamated</em> form of Juce (see earlier note). To do this,
-all need to do is to add <code>juce_amalagamated.cpp</code> to your project, and include 
-<code>juce_amalagamated.h</code> instead of <code>juce.h</code>. This pulls the entire library into 
-your project without needing to link to it separately, so you can skip the steps above that involve
-compiling the library, setting up the link paths, etc. Most of the demo apps are written using the amalgamated version,
-so refer to these for an example of how to do this.</p>
+<p>If all this seems too complicated, you can make things slightly easier by using the <em>amalgamated</em> form of Juce 
+(see earlier note). To do this, all you need to do is to add <code>juce_amalagamated.cpp</code> to your project, and include 
+<code>juce_amalagamated.h</code> instead of <code>juce.h</code>. This pulls the entire library into your project without needing
+to link to it separately, so you can skip the steps above that involve compiling the library, setting up the link paths, etc. 
+Most of the demo apps are written using the amalgamated version, so have a look through their source code for examples of how 
+to do this.</p>
 
 <h3><a name="buildcodeblocks"></a>Creating a JUCE application with Code::Blocks and MinGW</h3>
 <ol>

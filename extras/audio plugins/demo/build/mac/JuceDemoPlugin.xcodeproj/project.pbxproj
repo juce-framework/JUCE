@@ -20,7 +20,6 @@
 		843792B10EFBF14B002A2725 /* JucePluginCharacteristics.h in Headers */ = {isa = PBXBuildFile; fileRef = 843792A90EFBF14B002A2725 /* JucePluginCharacteristics.h */; };
 		843792B50EFBF175002A2725 /* juce_AU_Resources.r in Rez */ = {isa = PBXBuildFile; fileRef = 843792B30EFBF175002A2725 /* juce_AU_Resources.r */; };
 		843792B60EFBF175002A2725 /* juce_AU_Wrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 843792B40EFBF175002A2725 /* juce_AU_Wrapper.mm */; };
-		8437956E0EFBF323002A2725 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843795630EFBF323002A2725 /* AudioToolbox.framework */; };
 		8437956F0EFBF323002A2725 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843795640EFBF323002A2725 /* AudioUnit.framework */; };
 		843795700EFBF323002A2725 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843795650EFBF323002A2725 /* Cocoa.framework */; };
 		843795710EFBF323002A2725 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843795660EFBF323002A2725 /* OpenGL.framework */; };
@@ -39,7 +38,6 @@
 		8437966E0EFBF357002A2725 /* AUOutputBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 843796640EFBF357002A2725 /* AUOutputBase.h */; };
 		843796710EFBF357002A2725 /* MusicDeviceBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796670EFBF357002A2725 /* MusicDeviceBase.cpp */; };
 		843796720EFBF357002A2725 /* MusicDeviceBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 843796680EFBF357002A2725 /* MusicDeviceBase.h */; };
-		843796750EFBF416002A2725 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843796740EFBF416002A2725 /* CoreFoundation.framework */; };
 		8437967F0EFBF5E4002A2725 /* juce_VST_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8437967D0EFBF5E4002A2725 /* juce_VST_Wrapper.cpp */; };
 		843796800EFBF5E4002A2725 /* juce_VST_Wrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8437967E0EFBF5E4002A2725 /* juce_VST_Wrapper.mm */; };
 		843796DC0EFBFD16002A2725 /* juce_RTAS_DigiCode1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796D50EFBFD16002A2725 /* juce_RTAS_DigiCode1.cpp */; };
@@ -50,6 +48,7 @@
 		843796E10EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 843796DA0EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm */; };
 		843796E20EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */; };
 		843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 843797030EFC022E002A2725 /* libPluginLibrary.a */; };
+		84978759103561A60020003B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84978758103561A60020003B /* AudioToolbox.framework */; };
 		849817021010B3C500297ECA /* JuceDemoPlugin.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D01CCD20486CAD60068D4B7 /* JuceDemoPlugin.component */; };
 		84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */; };
 		84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */; };
@@ -129,7 +128,6 @@
 		843792A90EFBF14B002A2725 /* JucePluginCharacteristics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JucePluginCharacteristics.h; path = ../../src/JucePluginCharacteristics.h; sourceTree = SOURCE_ROOT; };
 		843792B30EFBF175002A2725 /* juce_AU_Resources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; name = juce_AU_Resources.r; path = ../../../wrapper/AU/juce_AU_Resources.r; sourceTree = SOURCE_ROOT; };
 		843792B40EFBF175002A2725 /* juce_AU_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; name = juce_AU_Wrapper.mm; path = ../../../wrapper/AU/juce_AU_Wrapper.mm; sourceTree = SOURCE_ROOT; };
-		843795630EFBF323002A2725 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		843795640EFBF323002A2725 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		843795650EFBF323002A2725 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		843795660EFBF323002A2725 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
@@ -148,7 +146,6 @@
 		843796640EFBF357002A2725 /* AUOutputBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUOutputBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUOutputBase.h; sourceTree = DEVELOPER_DIR; };
 		843796670EFBF357002A2725 /* MusicDeviceBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicDeviceBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.cpp; sourceTree = DEVELOPER_DIR; };
 		843796680EFBF357002A2725 /* MusicDeviceBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicDeviceBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h; sourceTree = DEVELOPER_DIR; };
-		843796740EFBF416002A2725 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		8437967D0EFBF5E4002A2725 /* juce_VST_Wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_VST_Wrapper.cpp; path = ../../../wrapper/VST/juce_VST_Wrapper.cpp; sourceTree = SOURCE_ROOT; };
 		8437967E0EFBF5E4002A2725 /* juce_VST_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_VST_Wrapper.mm; path = ../../../wrapper/VST/juce_VST_Wrapper.mm; sourceTree = SOURCE_ROOT; };
 		843796D50EFBFD16002A2725 /* juce_RTAS_DigiCode1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RTAS_DigiCode1.cpp; path = ../../../wrapper/RTAS/juce_RTAS_DigiCode1.cpp; sourceTree = SOURCE_ROOT; };
@@ -161,6 +158,7 @@
 		843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonDebugSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonDebugSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
+		84978758103561A60020003B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.cpp; sourceTree = DEVELOPER_DIR; };
 		84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.h; sourceTree = DEVELOPER_DIR; };
 		84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CarbonEventHandler.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.cpp; sourceTree = DEVELOPER_DIR; };
@@ -209,7 +207,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */,
-				8437956E0EFBF323002A2725 /* AudioToolbox.framework in Frameworks */,
 				8437956F0EFBF323002A2725 /* AudioUnit.framework in Frameworks */,
 				843795700EFBF323002A2725 /* Cocoa.framework in Frameworks */,
 				843795710EFBF323002A2725 /* OpenGL.framework in Frameworks */,
@@ -220,7 +217,7 @@
 				843795760EFBF323002A2725 /* DiscRecording.framework in Frameworks */,
 				843795770EFBF323002A2725 /* QTKit.framework in Frameworks */,
 				843795780EFBF323002A2725 /* WebKit.framework in Frameworks */,
-				843796750EFBF416002A2725 /* CoreFoundation.framework in Frameworks */,
+				84978759103561A60020003B /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,9 +241,8 @@
 			isa = PBXGroup;
 			children = (
 				843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */,
-				843796740EFBF416002A2725 /* CoreFoundation.framework */,
-				843795630EFBF323002A2725 /* AudioToolbox.framework */,
 				843795640EFBF323002A2725 /* AudioUnit.framework */,
+				84978758103561A60020003B /* AudioToolbox.framework */,
 				843795650EFBF323002A2725 /* Cocoa.framework */,
 				843795660EFBF323002A2725 /* OpenGL.framework */,
 				843795670EFBF323002A2725 /* IOKit.framework */,
