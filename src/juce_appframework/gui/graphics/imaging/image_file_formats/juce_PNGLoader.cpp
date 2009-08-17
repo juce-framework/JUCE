@@ -156,20 +156,12 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         png_uint_32 width, height;
         int bitDepth, colorType, interlaceType;
 
-        try
-        {
-            png_read_info (pngReadStruct, pngInfoStruct);
+        png_read_info (pngReadStruct, pngInfoStruct);
 
-            png_get_IHDR (pngReadStruct, pngInfoStruct,
-                          &width, &height,
-                          &bitDepth, &colorType,
-                          &interlaceType, 0, 0);
-        }
-        catch (...)
-        {
-            png_destroy_read_struct (&pngReadStruct, 0, 0);
-            return 0;
-        }
+        png_get_IHDR (pngReadStruct, pngInfoStruct,
+                      &width, &height,
+                      &bitDepth, &colorType,
+                      &interlaceType, 0, 0);
 
         if (bitDepth == 16)
             png_set_strip_16 (pngReadStruct);
@@ -199,23 +191,11 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         for (y = (int) height; --y >= 0;)
             rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
 
-        bool crashed = false;
-
-        try
-        {
-            png_read_image (pngReadStruct, rows);
-            png_read_end (pngReadStruct, pngInfoStruct);
-        }
-        catch (...)
-        {
-            crashed = true;
-        }
+        png_read_image (pngReadStruct, rows);
+        png_read_end (pngReadStruct, pngInfoStruct);
 
         juce_free (rows);
         png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
-
-        if (crashed)
-            return 0;
 
         // now convert the data to a juce image format..
         image = new Image (hasAlphaChan ? Image::ARGB : Image::RGB,

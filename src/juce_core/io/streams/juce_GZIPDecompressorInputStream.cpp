@@ -52,7 +52,6 @@ namespace zlibNamespace
     #undef DO8
     #include "zlib/crc32.c"
     #include "zlib/deflate.c"
-    //#include "zlib/infback.c"
     #include "zlib/inffast.c"
     #undef PULLBYTE
     #undef LOAD
@@ -64,7 +63,6 @@ namespace zlibNamespace
     #include "zlib/inflate.c"
     #include "zlib/inftrees.c"
     #include "zlib/trees.c"
-    //#include "zlib/uncompr.c"
     #include "zlib/zutil.c"
     #undef Byte
   }

@@ -1,13 +1,16 @@
 
 ==============================================================================
 
-                            JUCE version 1.47
+                            JUCE version 1.50
 
 ==============================================================================
-Changelist for version 1.47
+Changelist for version 1.50
 
-- changed the String::createStringFromData method to assume that an 8-bit file is utf-8 rather than the local ascii codepage.
-
+- It's been far too long since the last official release, and there are a vast number of new features and fixes in this version - far too many to list here! Check the SVN logs for more detailed information
+- All Mac native code has been ported from Carbon to Cocoa. (There are a few exceptions, e.g. audio plugins, where Carbon support is still needed, but these remnants can easily be phased out in the future when no longer needed)
+- Amalgamated builds: The entire Juce library can now be added to your application as a single (very large) cpp file! This can speed up builds (no need to build the juce library) and simplify project management, as well as making it easy to handle multiple juce projects that all need the library to be built with different settings.
+- Support for browser plugins! In a similar way to building audio plugins, you can now build NPAPI and ActiveX browser plugins.
+- Support for webcams! The CameraDevice class makes it easy to show a preview of a camera, and to stream its input to a video file.
 
 ==============================================================================
 Changelist for version 1.46
