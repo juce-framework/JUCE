@@ -232,6 +232,10 @@ public:
                     var::MethodFunction methodFunction);
 
     //==============================================================================
+    /** Removes all properties and methods from the object. */
+    void clear();
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:

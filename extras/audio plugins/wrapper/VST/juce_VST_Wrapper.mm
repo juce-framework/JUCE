@@ -124,27 +124,32 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
 
 void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 {
-    const ScopedAutoReleasePool pool;
+    {
+        const ScopedAutoReleasePool pool;
 
 #if ADD_CARBON_BODGE
-    EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                                comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
-    RemoveEventHandler (ref);
+        EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
+                                    comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
+        RemoveEventHandler (ref);
 #endif
 
-    NSWindow* hostWindow = (NSWindow*) nsWindow;
-    NSView* pluginView = (NSView*) comp->getWindowHandle();
-    NSWindow* pluginWindow = [pluginView window];
+        NSWindow* hostWindow = (NSWindow*) nsWindow;
+        NSView* pluginView = (NSView*) comp->getWindowHandle();
+        NSWindow* pluginWindow = [pluginView window];
 
-    [hostWindow removeChildWindow: pluginWindow];
-    comp->removeFromDesktop();
-
-    [hostWindow release];
+        [hostWindow removeChildWindow: pluginWindow];
+        comp->removeFromDesktop();
+        
+        [hostWindow release];
+    }
 
     // The event loop needs to be run between closing the window and deleting the plugin,
     // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-    // in Live when you delete the plugin with its window open.
-    MessageManager::getInstance()->runDispatchLoopUntil (10);
+    // in Live and Reaper when you delete the plugin with its window open.
+    // (Doing it this way rather than using a single longer timout means that w can guarantee
+    // how many messages will be dispatched, which seems to be vital in Reaper)
+    for (int i = 20; --i >= 0;)
+        MessageManager::getInstance()->runDispatchLoopUntil (1);
 }
 
 void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth, int newHeight)

@@ -429,4 +429,10 @@ void DynamicObject::setMethod (const var::identifier& name,
     setProperty (name, methodFunction);
 }
 
+void DynamicObject::clear()
+{
+    propertyIds.clear();
+    propertyValues.clear();
+}
+
 END_JUCE_NAMESPACE

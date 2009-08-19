@@ -217,6 +217,7 @@ static int numPendingMessages = 0;
     NSData* data = (NSData*) n;
     void* message = 0;
     [data getBytes: &message length: sizeof (message)];
+    [data release];
 
     if (message != 0 && ! flushingMessages)
         redirector->deliverMessage (message);
@@ -354,7 +355,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
     NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001];
 
-    while (Time::getMillisecondCounter() < endTime && ! quitMessagePosted)
+    while (! quitMessagePosted)
     {
         const ScopedAutoReleasePool pool;
 
@@ -368,6 +369,9 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
         if (e != 0 && ! isEventBlockedByModalComps (e))
             [NSApp sendEvent: e];
+        
+        if (Time::getMillisecondCounter() >= endTime)
+            break;
     }
 
     return ! quitMessagePosted;
@@ -417,7 +421,7 @@ bool juce_postMessageToSystemQueue (void* message)
     atomicIncrement (numPendingMessages);
 
     [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
-                     withObject: (id) [NSData dataWithBytes: &message length: (int) sizeof (message)]
+                     withObject: (id) [[NSData alloc] initWithBytes: &message length: (int) sizeof (message)]
                      waitUntilDone: NO];
     return true;
 }
