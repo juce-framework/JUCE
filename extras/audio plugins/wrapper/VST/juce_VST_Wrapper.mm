@@ -139,7 +139,7 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 
         [hostWindow removeChildWindow: pluginWindow];
         comp->removeFromDesktop();
-        
+
         [hostWindow release];
     }
 

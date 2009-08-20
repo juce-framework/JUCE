@@ -2712,6 +2712,9 @@ BEGIN_JUCE_NAMESPACE
 /********* End of inlined file: juce_Atomic.h *********/
 
 #endif
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileLogger.h *********/
@@ -7432,9 +7435,6 @@ private:
 /********* End of inlined file: juce_Random.h *********/
 
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
@@ -7821,6 +7821,9 @@ private:
 /********* End of inlined file: juce_Singleton.h *********/
 
 #endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
 
 /********* Start of inlined file: juce_SystemStats.h *********/
@@ -7965,16 +7968,13 @@ public:
 /********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+#ifndef __JUCE_TIME_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
@@ -7984,6 +7984,9 @@ public:
 
 #endif
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
@@ -9454,7 +9457,11 @@ private:
 /********* End of inlined file: juce_PropertySet.h *********/
 
 #endif
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_ReferenceCountedArray.h *********/
+#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
+#define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 
 /********* Start of inlined file: juce_ReferenceCountedObject.h *********/
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
@@ -9675,952 +9682,6 @@ private:
 
 #endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 /********* End of inlined file: juce_ReferenceCountedObject.h *********/
-
-#endif
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
-
-/********* Start of inlined file: juce_SparseSet.h *********/
-#ifndef __JUCE_SPARSESET_JUCEHEADER__
-#define __JUCE_SPARSESET_JUCEHEADER__
-
-/**
-    Holds a set of primitive values, storing them as a set of ranges.
-
-    This container acts like a simple BitArray, but can efficiently hold large
-    continguous ranges of values. It's quite a specialised class, mostly useful
-    for things like keeping the set of selected rows in a listbox.
-
-    The type used as a template paramter must be an integer type, such as int, short,
-    int64, etc.
-*/
-template <class Type>
-class SparseSet
-{
-public:
-
-    /** Creates a new empty set. */
-    SparseSet() throw()
-    {
-    }
-
-    /** Creates a copy of another SparseSet. */
-    SparseSet (const SparseSet<Type>& other) throw()
-        : values (other.values)
-    {
-    }
-
-    /** Destructor. */
-    ~SparseSet() throw()
-    {
-    }
-
-    /** Clears the set. */
-    void clear() throw()
-    {
-        values.clear();
-    }
-
-    /** Checks whether the set is empty.
-
-        This is much quicker than using (size() == 0).
-    */
-    bool isEmpty() const throw()
-    {
-        return values.size() == 0;
-    }
-
-    /** Returns the number of values in the set.
-
-        Because of the way the data is stored, this method can take longer if there
-        are a lot of items in the set. Use isEmpty() for a quick test of whether there
-        are any items.
-    */
-    Type size() const throw()
-    {
-        Type num = 0;
-
-        for (int i = 0; i < values.size(); i += 2)
-            num += values[i + 1] - values[i];
-
-        return num;
-    }
-
-    /** Returns one of the values in the set.
-
-        @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
-        @returns        the value at this index, or 0 if it's out-of-range
-    */
-    Type operator[] (int index) const throw()
-    {
-        for (int i = 0; i < values.size(); i += 2)
-        {
-            const Type s = values.getUnchecked(i);
-            const Type e = values.getUnchecked(i + 1);
-
-            if (index < e - s)
-                return s + index;
-
-            index -= e - s;
-        }
-
-        return (Type) 0;
-    }
-
-    /** Checks whether a particular value is in the set. */
-    bool contains (const Type valueToLookFor) const throw()
-    {
-        bool on = false;
-
-        for (int i = 0; i < values.size(); ++i)
-        {
-            if (values.getUnchecked(i) > valueToLookFor)
-                return on;
-
-            on = ! on;
-        }
-
-        return false;
-    }
-
-    /** Returns the number of contiguous blocks of values.
-
-        @see getRange
-    */
-    int getNumRanges() const throw()
-    {
-        return values.size() >> 1;
-    }
-
-    /** Returns one of the contiguous ranges of values stored.
-
-        @param rangeIndex   the index of the range to look up, between 0
-                            and (getNumRanges() - 1)
-        @param startValue   on return, the value at the start of the range
-        @param numValues    on return, the number of values in the range
-
-        @see getTotalRange
-    */
-    bool getRange (const int rangeIndex,
-                   Type& startValue,
-                   Type& numValues) const throw()
-    {
-        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
-        {
-            startValue = values [rangeIndex << 1];
-            numValues = values [(rangeIndex << 1) + 1] - startValue;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /** Returns the lowest and highest values in the set.
-
-        @see getRange
-    */
-    bool getTotalRange (Type& lowestValue,
-                        Type& highestValue) const throw()
-    {
-        if (values.size() > 0)
-        {
-            lowestValue = values.getUnchecked (0);
-            highestValue = values.getUnchecked (values.size() - 1);
-            return true;
-        }
-
-        return false;
-    }
-
-    /** Adds a range of contiguous values to the set.
-
-        e.g. addRange (10, 4) will add (10, 11, 12, 13) to the set.
-
-        @param firstValue       the start of the range of values to add
-        @param numValuesToAdd   how many values to add
-    */
-    void addRange (const Type firstValue,
-                   const Type numValuesToAdd) throw()
-    {
-        jassert (numValuesToAdd >= 0);
-
-        if (numValuesToAdd > 0)
-        {
-            removeRange (firstValue, numValuesToAdd);
-
-            IntegerElementComparator<Type> sorter;
-            values.addSorted (sorter, firstValue);
-            values.addSorted (sorter, firstValue + numValuesToAdd);
-
-            simplify();
-        }
-    }
-
-    /** Removes a range of values from the set.
-
-        e.g. removeRange (10, 4) will remove (10, 11, 12, 13) from the set.
-
-        @param firstValue           the start of the range of values to remove
-        @param numValuesToRemove    how many values to remove
-    */
-    void removeRange (const Type firstValue,
-                      const Type numValuesToRemove) throw()
-    {
-        jassert (numValuesToRemove >= 0);
-
-        if (numValuesToRemove >= 0
-             && firstValue < values.getLast())
-        {
-            const bool onAtStart = contains (firstValue - 1);
-            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
-            const bool onAtEnd = contains (lastValue);
-
-            for (int i = values.size(); --i >= 0;)
-            {
-                if (values.getUnchecked(i) <= lastValue)
-                {
-                    while (values.getUnchecked(i) >= firstValue)
-                    {
-                        values.remove (i);
-
-                        if (--i < 0)
-                            break;
-                    }
-
-                    break;
-                }
-            }
-
-            IntegerElementComparator<Type> sorter;
-
-            if (onAtStart)
-                values.addSorted (sorter, firstValue);
-
-            if (onAtEnd)
-                values.addSorted (sorter, lastValue);
-
-            simplify();
-        }
-    }
-
-    /** Does an XOR of the values in a given range. */
-    void invertRange (const Type firstValue,
-                      const Type numValues)
-    {
-        SparseSet newItems;
-        newItems.addRange (firstValue, numValues);
-
-        int i;
-        for (i = getNumRanges(); --i >= 0;)
-        {
-            const int start = values [i << 1];
-            const int end = values [(i << 1) + 1];
-
-            newItems.removeRange (start, end);
-        }
-
-        removeRange (firstValue, numValues);
-
-        for (i = newItems.getNumRanges(); --i >= 0;)
-        {
-            const int start = newItems.values [i << 1];
-            const int end = newItems.values [(i << 1) + 1];
-
-            addRange (start, end);
-        }
-    }
-
-    /** Checks whether any part of a given range overlaps any part of this one. */
-    bool overlapsRange (const Type firstValue,
-                        const Type numValues) throw()
-    {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
-        {
-            for (int i = getNumRanges(); --i >= 0;)
-            {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
-                    return false;
-
-                if (firstValue + numValues > values.getUnchecked (i << 1))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    /** Checks whether the whole of a given range is contained within this one. */
-    bool containsRange (const Type firstValue,
-                        const Type numValues) throw()
-    {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
-        {
-            for (int i = getNumRanges(); --i >= 0;)
-            {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
-                    return false;
-
-                if (firstValue >= values.getUnchecked (i << 1)
-                     && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool operator== (const SparseSet<Type>& other) throw()
-    {
-        return values == other.values;
-    }
-
-    bool operator!= (const SparseSet<Type>& other) throw()
-    {
-        return values != other.values;
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    // alternating start/end values of ranges of values that are present.
-    Array<Type> values;
-
-    void simplify() throw()
-    {
-        jassert ((values.size() & 1) == 0);
-
-        for (int i = values.size(); --i > 0;)
-            if (values.getUnchecked(i) == values.getUnchecked (i - 1))
-                values.removeRange (i - 1, 2);
-    }
-};
-
-#endif   // __JUCE_SPARSESET_JUCEHEADER__
-/********* End of inlined file: juce_SparseSet.h *********/
-
-#endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SORTEDSET_JUCEHEADER__
-
-/********* Start of inlined file: juce_SortedSet.h *********/
-#ifndef __JUCE_SORTEDSET_JUCEHEADER__
-#define __JUCE_SORTEDSET_JUCEHEADER__
-
-#if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4512)
-#endif
-
-/**
-    Holds a set of unique primitive objects, such as ints or doubles.
-
-    A set can only hold one item with a given value, so if for example it's a
-    set of integers, attempting to add the same integer twice will do nothing
-    the second time.
-
-    Internally, the list of items is kept sorted (which means that whatever
-    kind of primitive type is used must support the ==, <, >, <= and >= operators
-    to determine the order), and searching the set for known values is very fast
-    because it uses a binary-chop method.
-
-    Note that if you're using a class or struct as the element type, it must be
-    capable of being copied or moved with a straightforward memcpy, rather than
-    needing construction and destruction code.
-
-    To make all the set's methods thread-safe, pass in "CriticalSection" as the templated
-    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
-
-    @see Array, OwnedArray, ReferenceCountedArray, StringArray, CriticalSection
-*/
-template <class ElementType, class TypeOfCriticalSectionToUse = DummyCriticalSection>
-class SortedSet   : private ArrayAllocationBase <ElementType>
-{
-public:
-
-    /** Creates an empty set.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-
-        @see ArrayAllocationBase
-    */
-    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
-         numUsed (0)
-    {
-    }
-
-    /** Creates a copy of another set.
-        @param other    the set to copy
-    */
-    SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
-       : ArrayAllocationBase <ElementType> (other.granularity)
-    {
-        other.lockSet();
-        numUsed = other.numUsed;
-        setAllocatedSize (other.numUsed);
-        memcpy (this->elements, other.elements, numUsed * sizeof (ElementType));
-        other.unlockSet();
-    }
-
-    /** Destructor. */
-    ~SortedSet() throw()
-    {
-    }
-
-    /** Copies another set over this one.
-        @param other    the set to copy
-    */
-    const SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
-    {
-        if (this != &other)
-        {
-            other.lockSet();
-            lock.enter();
-
-            this->granularity = other.granularity;
-            ensureAllocatedSize (other.size());
-            numUsed = other.numUsed;
-            memcpy (this->elements, other.elements, numUsed * sizeof (ElementType));
-            minimiseStorageOverheads();
-
-            lock.exit();
-            other.unlockSet();
-        }
-
-        return *this;
-    }
-
-    /** Compares this set to another one.
-
-        Two sets are considered equal if they both contain the same set of
-        elements.
-
-        @param other    the other set to compare with
-    */
-    bool operator== (const SortedSet<ElementType>& other) const throw()
-    {
-        lock.enter();
-
-        if (numUsed != other.numUsed)
-        {
-            lock.exit();
-            return false;
-        }
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (this->elements [i] != other.elements [i])
-            {
-                lock.exit();
-                return false;
-            }
-        }
-
-        lock.exit();
-        return true;
-    }
-
-    /** Compares this set to another one.
-
-        Two sets are considered equal if they both contain the same set of
-        elements.
-
-        @param other    the other set to compare with
-    */
-    bool operator!= (const SortedSet<ElementType>& other) const throw()
-    {
-        return ! operator== (other);
-    }
-
-    /** Removes all elements from the set.
-
-        This will remove all the elements, and free any storage that the set is
-        using. To clear it without freeing the storage, use the clearQuick()
-        method instead.
-
-        @see clearQuick
-    */
-    void clear() throw()
-    {
-        lock.enter();
-        this->setAllocatedSize (0);
-        numUsed = 0;
-        lock.exit();
-    }
-
-    /** Removes all elements from the set without freeing the array's allocated storage.
-
-        @see clear
-    */
-    void clearQuick() throw()
-    {
-        lock.enter();
-        numUsed = 0;
-        lock.exit();
-    }
-
-    /** Returns the current number of elements in the set.
-    */
-    inline int size() const throw()
-    {
-        return numUsed;
-    }
-
-    /** Returns one of the elements in the set.
-
-        If the index passed in is beyond the range of valid elements, this
-        will return zero.
-
-        If you're certain that the index will always be a valid element, you
-        can call getUnchecked() instead, which is faster.
-
-        @param index    the index of the element being requested (0 is the first element in the set)
-        @see getUnchecked, getFirst, getLast
-    */
-    inline ElementType operator[] (const int index) const throw()
-    {
-        lock.enter();
-        const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
-                                        ? this->elements [index]
-                                        : (ElementType) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns one of the elements in the set, without checking the index passed in.
-        Unlike the operator[] method, this will try to return an element without
-        checking that the index is within the bounds of the set, so should only
-        be used when you're confident that it will always be a valid index.
-
-        @param index    the index of the element being requested (0 is the first element in the set)
-        @see operator[], getFirst, getLast
-    */
-    inline ElementType getUnchecked (const int index) const throw()
-    {
-        lock.enter();
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
-        const ElementType result = this->elements [index];
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns the first element in the set, or 0 if the set is empty.
-
-        @see operator[], getUnchecked, getLast
-    */
-    inline ElementType getFirst() const throw()
-    {
-        lock.enter();
-        const ElementType result = (numUsed > 0) ? this->elements [0]
-                                                 : (ElementType) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns the last element in the set, or 0 if the set is empty.
-
-        @see operator[], getUnchecked, getFirst
-    */
-    inline ElementType getLast() const throw()
-    {
-        lock.enter();
-        const ElementType result = (numUsed > 0) ? this->elements [numUsed - 1]
-                                                 : (ElementType) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Finds the index of the first element which matches the value passed in.
-
-        This will search the set for the given object, and return the index
-        of its first occurrence. If the object isn't found, the method will return -1.
-
-        @param elementToLookFor   the value or object to look for
-        @returns                  the index of the object, or -1 if it's not found
-    */
-    int indexOf (const ElementType elementToLookFor) const throw()
-    {
-        lock.enter();
-
-        int start = 0;
-        int end = numUsed;
-
-        for (;;)
-        {
-            if (start >= end)
-            {
-                lock.exit();
-                return -1;
-            }
-            else if (elementToLookFor == this->elements [start])
-            {
-                lock.exit();
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    lock.exit();
-                    return -1;
-                }
-                else if (elementToLookFor >= this->elements [halfway])
-                    start = halfway;
-                else
-                    end = halfway;
-            }
-        }
-    }
-
-    /** Returns true if the set contains at least one occurrence of an object.
-
-        @param elementToLookFor     the value or object to look for
-        @returns                    true if the item is found
-    */
-    bool contains (const ElementType elementToLookFor) const throw()
-    {
-        lock.enter();
-
-        int start = 0;
-        int end = numUsed;
-
-        for (;;)
-        {
-            if (start >= end)
-            {
-                lock.exit();
-                return false;
-            }
-            else if (elementToLookFor == this->elements [start])
-            {
-                lock.exit();
-                return true;
-            }
-            else
-            {
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    lock.exit();
-                    return false;
-                }
-                else if (elementToLookFor >= this->elements [halfway])
-                    start = halfway;
-                else
-                    end = halfway;
-            }
-        }
-    }
-
-    /** Adds a new element to the set, (as long as it's not already in there).
-
-        @param newElement       the new object to add to the set
-        @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
-    */
-    void add (const ElementType newElement) throw()
-    {
-        lock.enter();
-
-        int start = 0;
-        int end = numUsed;
-
-        for (;;)
-        {
-            if (start >= end)
-            {
-                jassert (start <= end);
-                insertInternal (start, newElement);
-                break;
-            }
-            else if (newElement == this->elements [start])
-            {
-                break;
-            }
-            else
-            {
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    if (newElement >= this->elements [halfway])
-                        insertInternal (start + 1, newElement);
-                    else
-                        insertInternal (start, newElement);
-
-                    break;
-                }
-                else if (newElement >= this->elements [halfway])
-                    start = halfway;
-                else
-                    end = halfway;
-            }
-        }
-
-        lock.exit();
-    }
-
-    /** Adds elements from an array to this set.
-
-        @param elementsToAdd        the array of elements to add
-        @param numElementsToAdd     how many elements are in this other array
-        @see add
-    */
-    void addArray (const ElementType* elementsToAdd,
-                   int numElementsToAdd) throw()
-    {
-        lock.enter();
-
-        while (--numElementsToAdd >= 0)
-            add (*elementsToAdd++);
-
-        lock.exit();
-    }
-
-    /** Adds elements from another set to this one.
-
-        @param setToAddFrom         the set from which to copy the elements
-        @param startIndex           the first element of the other set to start copying from
-        @param numElementsToAdd     how many elements to add from the other set. If this
-                                    value is negative or greater than the number of available elements,
-                                    all available elements will be copied.
-        @see add
-    */
-    template <class OtherSetType>
-    void addSet (const OtherSetType& setToAddFrom,
-                 int startIndex = 0,
-                 int numElementsToAdd = -1) throw()
-    {
-        setToAddFrom.lockSet();
-        lock.enter();
-        jassert (this != &setToAddFrom);
-
-        if (this != &setToAddFrom)
-        {
-            if (startIndex < 0)
-            {
-                jassertfalse
-                startIndex = 0;
-            }
-
-            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
-                numElementsToAdd = setToAddFrom.size() - startIndex;
-
-            addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
-        }
-
-        lock.exit();
-        setToAddFrom.unlockSet();
-    }
-
-    /** Removes an element from the set.
-
-        This will remove the element at a given index.
-        If the index passed in is out-of-range, nothing will happen.
-
-        @param indexToRemove    the index of the element to remove
-        @returns                the element that has been removed
-        @see removeValue, removeRange
-    */
-    ElementType remove (const int indexToRemove) throw()
-    {
-        lock.enter();
-
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
-        {
-            --numUsed;
-
-            ElementType* const e = this->elements + indexToRemove;
-            ElementType const removed = *e;
-            const int numberToShift = numUsed - indexToRemove;
-
-            if (numberToShift > 0)
-                memmove (e, e + 1, numberToShift * sizeof (ElementType));
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-
-            lock.exit();
-            return removed;
-        }
-        else
-        {
-            lock.exit();
-            return 0;
-        }
-    }
-
-    /** Removes an item from the set.
-
-        This will remove the given element from the set, if it's there.
-
-        @param valueToRemove   the object to try to remove
-        @see remove, removeRange
-    */
-    void removeValue (const ElementType valueToRemove) throw()
-    {
-        lock.enter();
-        remove (indexOf (valueToRemove));
-        lock.exit();
-    }
-
-    /** Removes any elements which are also in another set.
-
-        @param otherSet   the other set in which to look for elements to remove
-        @see removeValuesNotIn, remove, removeValue, removeRange
-    */
-    template <class OtherSetType>
-    void removeValuesIn (const OtherSetType& otherSet) throw()
-    {
-        otherSet.lockSet();
-        lock.enter();
-
-        if (this == &otherSet)
-        {
-            clear();
-        }
-        else
-        {
-            if (otherSet.size() > 0)
-            {
-                for (int i = numUsed; --i >= 0;)
-                    if (otherSet.contains (this->elements [i]))
-                        remove (i);
-            }
-        }
-
-        lock.exit();
-        otherSet.unlockSet();
-    }
-
-    /** Removes any elements which are not found in another set.
-
-        Only elements which occur in this other set will be retained.
-
-        @param otherSet    the set in which to look for elements NOT to remove
-        @see removeValuesIn, remove, removeValue, removeRange
-    */
-    template <class OtherSetType>
-    void removeValuesNotIn (const OtherSetType& otherSet) throw()
-    {
-        otherSet.lockSet();
-        lock.enter();
-
-        if (this != &otherSet)
-        {
-            if (otherSet.size() <= 0)
-            {
-                clear();
-            }
-            else
-            {
-                for (int i = numUsed; --i >= 0;)
-                    if (! otherSet.contains (this->elements [i]))
-                        remove (i);
-            }
-        }
-
-        lock.exit();
-        otherSet.lockSet();
-    }
-
-    /** Reduces the amount of storage being used by the set.
-
-        Sets typically allocate slightly more storage than they need, and after
-        removing elements, they may have quite a lot of unused space allocated.
-        This method will reduce the amount of allocated storage to a minimum.
-    */
-    void minimiseStorageOverheads() throw()
-    {
-        lock.enter();
-
-        if (numUsed == 0)
-        {
-            this->setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
-
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
-        }
-
-        lock.exit();
-    }
-
-    /** Locks the set's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see unlockSet
-    */
-    void lockSet() const throw()
-    {
-        lock.enter();
-    }
-
-    /** Unlocks the set's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see lockSet
-    */
-    void unlockSet() const throw()
-    {
-        lock.exit();
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int numUsed;
-    TypeOfCriticalSectionToUse lock;
-
-    void insertInternal (const int indexToInsertAt, const ElementType newElement) throw()
-    {
-        this->ensureAllocatedSize (numUsed + 1);
-
-        ElementType* const insertPos = this->elements + indexToInsertAt;
-        const int numberToMove = numUsed - indexToInsertAt;
-
-        if (numberToMove > 0)
-            memmove (insertPos + 1, insertPos, numberToMove * sizeof (ElementType));
-
-        *insertPos = newElement;
-        ++numUsed;
-    }
-};
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-#endif
-
-#endif   // __JUCE_SORTEDSET_JUCEHEADER__
-/********* End of inlined file: juce_SortedSet.h *********/
-
-#endif
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ReferenceCountedArray.h *********/
-#ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 
 /**
     Holds a list of objects derived from ReferenceCountedObject.
@@ -11372,7 +10433,943 @@ private:
 /********* End of inlined file: juce_ReferenceCountedArray.h *********/
 
 #endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SORTEDSET_JUCEHEADER__
+
+/********* Start of inlined file: juce_SortedSet.h *********/
+#ifndef __JUCE_SORTEDSET_JUCEHEADER__
+#define __JUCE_SORTEDSET_JUCEHEADER__
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4512)
+#endif
+
+/**
+    Holds a set of unique primitive objects, such as ints or doubles.
+
+    A set can only hold one item with a given value, so if for example it's a
+    set of integers, attempting to add the same integer twice will do nothing
+    the second time.
+
+    Internally, the list of items is kept sorted (which means that whatever
+    kind of primitive type is used must support the ==, <, >, <= and >= operators
+    to determine the order), and searching the set for known values is very fast
+    because it uses a binary-chop method.
+
+    Note that if you're using a class or struct as the element type, it must be
+    capable of being copied or moved with a straightforward memcpy, rather than
+    needing construction and destruction code.
+
+    To make all the set's methods thread-safe, pass in "CriticalSection" as the templated
+    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+
+    @see Array, OwnedArray, ReferenceCountedArray, StringArray, CriticalSection
+*/
+template <class ElementType, class TypeOfCriticalSectionToUse = DummyCriticalSection>
+class SortedSet   : private ArrayAllocationBase <ElementType>
+{
+public:
+
+    /** Creates an empty set.
+
+        @param granularity  this is the size of increment by which the internal storage
+        used by the array will grow. Only change it from the default if you know the
+        array is going to be very big and needs to be able to grow efficiently.
+
+        @see ArrayAllocationBase
+    */
+    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity),
+         numUsed (0)
+    {
+    }
+
+    /** Creates a copy of another set.
+        @param other    the set to copy
+    */
+    SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
+       : ArrayAllocationBase <ElementType> (other.granularity)
+    {
+        other.lockSet();
+        numUsed = other.numUsed;
+        setAllocatedSize (other.numUsed);
+        memcpy (this->elements, other.elements, numUsed * sizeof (ElementType));
+        other.unlockSet();
+    }
+
+    /** Destructor. */
+    ~SortedSet() throw()
+    {
+    }
+
+    /** Copies another set over this one.
+        @param other    the set to copy
+    */
+    const SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    {
+        if (this != &other)
+        {
+            other.lockSet();
+            lock.enter();
+
+            this->granularity = other.granularity;
+            ensureAllocatedSize (other.size());
+            numUsed = other.numUsed;
+            memcpy (this->elements, other.elements, numUsed * sizeof (ElementType));
+            minimiseStorageOverheads();
+
+            lock.exit();
+            other.unlockSet();
+        }
+
+        return *this;
+    }
+
+    /** Compares this set to another one.
+
+        Two sets are considered equal if they both contain the same set of
+        elements.
+
+        @param other    the other set to compare with
+    */
+    bool operator== (const SortedSet<ElementType>& other) const throw()
+    {
+        lock.enter();
+
+        if (numUsed != other.numUsed)
+        {
+            lock.exit();
+            return false;
+        }
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (this->elements [i] != other.elements [i])
+            {
+                lock.exit();
+                return false;
+            }
+        }
+
+        lock.exit();
+        return true;
+    }
+
+    /** Compares this set to another one.
+
+        Two sets are considered equal if they both contain the same set of
+        elements.
+
+        @param other    the other set to compare with
+    */
+    bool operator!= (const SortedSet<ElementType>& other) const throw()
+    {
+        return ! operator== (other);
+    }
+
+    /** Removes all elements from the set.
+
+        This will remove all the elements, and free any storage that the set is
+        using. To clear it without freeing the storage, use the clearQuick()
+        method instead.
+
+        @see clearQuick
+    */
+    void clear() throw()
+    {
+        lock.enter();
+        this->setAllocatedSize (0);
+        numUsed = 0;
+        lock.exit();
+    }
+
+    /** Removes all elements from the set without freeing the array's allocated storage.
+
+        @see clear
+    */
+    void clearQuick() throw()
+    {
+        lock.enter();
+        numUsed = 0;
+        lock.exit();
+    }
+
+    /** Returns the current number of elements in the set.
+    */
+    inline int size() const throw()
+    {
+        return numUsed;
+    }
+
+    /** Returns one of the elements in the set.
+
+        If the index passed in is beyond the range of valid elements, this
+        will return zero.
+
+        If you're certain that the index will always be a valid element, you
+        can call getUnchecked() instead, which is faster.
+
+        @param index    the index of the element being requested (0 is the first element in the set)
+        @see getUnchecked, getFirst, getLast
+    */
+    inline ElementType operator[] (const int index) const throw()
+    {
+        lock.enter();
+        const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
+                                        ? this->elements [index]
+                                        : (ElementType) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns one of the elements in the set, without checking the index passed in.
+        Unlike the operator[] method, this will try to return an element without
+        checking that the index is within the bounds of the set, so should only
+        be used when you're confident that it will always be a valid index.
+
+        @param index    the index of the element being requested (0 is the first element in the set)
+        @see operator[], getFirst, getLast
+    */
+    inline ElementType getUnchecked (const int index) const throw()
+    {
+        lock.enter();
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        const ElementType result = this->elements [index];
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns the first element in the set, or 0 if the set is empty.
+
+        @see operator[], getUnchecked, getLast
+    */
+    inline ElementType getFirst() const throw()
+    {
+        lock.enter();
+        const ElementType result = (numUsed > 0) ? this->elements [0]
+                                                 : (ElementType) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns the last element in the set, or 0 if the set is empty.
+
+        @see operator[], getUnchecked, getFirst
+    */
+    inline ElementType getLast() const throw()
+    {
+        lock.enter();
+        const ElementType result = (numUsed > 0) ? this->elements [numUsed - 1]
+                                                 : (ElementType) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Finds the index of the first element which matches the value passed in.
+
+        This will search the set for the given object, and return the index
+        of its first occurrence. If the object isn't found, the method will return -1.
+
+        @param elementToLookFor   the value or object to look for
+        @returns                  the index of the object, or -1 if it's not found
+    */
+    int indexOf (const ElementType elementToLookFor) const throw()
+    {
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                lock.exit();
+                return -1;
+            }
+            else if (elementToLookFor == this->elements [start])
+            {
+                lock.exit();
+                return start;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    lock.exit();
+                    return -1;
+                }
+                else if (elementToLookFor >= this->elements [halfway])
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
+    }
+
+    /** Returns true if the set contains at least one occurrence of an object.
+
+        @param elementToLookFor     the value or object to look for
+        @returns                    true if the item is found
+    */
+    bool contains (const ElementType elementToLookFor) const throw()
+    {
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                lock.exit();
+                return false;
+            }
+            else if (elementToLookFor == this->elements [start])
+            {
+                lock.exit();
+                return true;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    lock.exit();
+                    return false;
+                }
+                else if (elementToLookFor >= this->elements [halfway])
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
+    }
+
+    /** Adds a new element to the set, (as long as it's not already in there).
+
+        @param newElement       the new object to add to the set
+        @see set, insert, addIfNotAlreadyThere, addSorted, addSet, addArray
+    */
+    void add (const ElementType newElement) throw()
+    {
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                jassert (start <= end);
+                insertInternal (start, newElement);
+                break;
+            }
+            else if (newElement == this->elements [start])
+            {
+                break;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    if (newElement >= this->elements [halfway])
+                        insertInternal (start + 1, newElement);
+                    else
+                        insertInternal (start, newElement);
+
+                    break;
+                }
+                else if (newElement >= this->elements [halfway])
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
+
+        lock.exit();
+    }
+
+    /** Adds elements from an array to this set.
+
+        @param elementsToAdd        the array of elements to add
+        @param numElementsToAdd     how many elements are in this other array
+        @see add
+    */
+    void addArray (const ElementType* elementsToAdd,
+                   int numElementsToAdd) throw()
+    {
+        lock.enter();
+
+        while (--numElementsToAdd >= 0)
+            add (*elementsToAdd++);
+
+        lock.exit();
+    }
+
+    /** Adds elements from another set to this one.
+
+        @param setToAddFrom         the set from which to copy the elements
+        @param startIndex           the first element of the other set to start copying from
+        @param numElementsToAdd     how many elements to add from the other set. If this
+                                    value is negative or greater than the number of available elements,
+                                    all available elements will be copied.
+        @see add
+    */
+    template <class OtherSetType>
+    void addSet (const OtherSetType& setToAddFrom,
+                 int startIndex = 0,
+                 int numElementsToAdd = -1) throw()
+    {
+        setToAddFrom.lockSet();
+        lock.enter();
+        jassert (this != &setToAddFrom);
+
+        if (this != &setToAddFrom)
+        {
+            if (startIndex < 0)
+            {
+                jassertfalse
+                startIndex = 0;
+            }
+
+            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
+                numElementsToAdd = setToAddFrom.size() - startIndex;
+
+            addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
+        }
+
+        lock.exit();
+        setToAddFrom.unlockSet();
+    }
+
+    /** Removes an element from the set.
+
+        This will remove the element at a given index.
+        If the index passed in is out-of-range, nothing will happen.
+
+        @param indexToRemove    the index of the element to remove
+        @returns                the element that has been removed
+        @see removeValue, removeRange
+    */
+    ElementType remove (const int indexToRemove) throw()
+    {
+        lock.enter();
+
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        {
+            --numUsed;
+
+            ElementType* const e = this->elements + indexToRemove;
+            ElementType const removed = *e;
+            const int numberToShift = numUsed - indexToRemove;
+
+            if (numberToShift > 0)
+                memmove (e, e + 1, numberToShift * sizeof (ElementType));
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+
+            lock.exit();
+            return removed;
+        }
+        else
+        {
+            lock.exit();
+            return 0;
+        }
+    }
+
+    /** Removes an item from the set.
+
+        This will remove the given element from the set, if it's there.
+
+        @param valueToRemove   the object to try to remove
+        @see remove, removeRange
+    */
+    void removeValue (const ElementType valueToRemove) throw()
+    {
+        lock.enter();
+        remove (indexOf (valueToRemove));
+        lock.exit();
+    }
+
+    /** Removes any elements which are also in another set.
+
+        @param otherSet   the other set in which to look for elements to remove
+        @see removeValuesNotIn, remove, removeValue, removeRange
+    */
+    template <class OtherSetType>
+    void removeValuesIn (const OtherSetType& otherSet) throw()
+    {
+        otherSet.lockSet();
+        lock.enter();
+
+        if (this == &otherSet)
+        {
+            clear();
+        }
+        else
+        {
+            if (otherSet.size() > 0)
+            {
+                for (int i = numUsed; --i >= 0;)
+                    if (otherSet.contains (this->elements [i]))
+                        remove (i);
+            }
+        }
+
+        lock.exit();
+        otherSet.unlockSet();
+    }
+
+    /** Removes any elements which are not found in another set.
+
+        Only elements which occur in this other set will be retained.
+
+        @param otherSet    the set in which to look for elements NOT to remove
+        @see removeValuesIn, remove, removeValue, removeRange
+    */
+    template <class OtherSetType>
+    void removeValuesNotIn (const OtherSetType& otherSet) throw()
+    {
+        otherSet.lockSet();
+        lock.enter();
+
+        if (this != &otherSet)
+        {
+            if (otherSet.size() <= 0)
+            {
+                clear();
+            }
+            else
+            {
+                for (int i = numUsed; --i >= 0;)
+                    if (! otherSet.contains (this->elements [i]))
+                        remove (i);
+            }
+        }
+
+        lock.exit();
+        otherSet.lockSet();
+    }
+
+    /** Reduces the amount of storage being used by the set.
+
+        Sets typically allocate slightly more storage than they need, and after
+        removing elements, they may have quite a lot of unused space allocated.
+        This method will reduce the amount of allocated storage to a minimum.
+    */
+    void minimiseStorageOverheads() throw()
+    {
+        lock.enter();
+
+        if (numUsed == 0)
+        {
+            this->setAllocatedSize (0);
+        }
+        else
+        {
+            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+
+            if (newAllocation < this->numAllocated)
+                this->setAllocatedSize (newAllocation);
+        }
+
+        lock.exit();
+    }
+
+    /** Locks the set's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see unlockSet
+    */
+    void lockSet() const throw()
+    {
+        lock.enter();
+    }
+
+    /** Unlocks the set's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see lockSet
+    */
+    void unlockSet() const throw()
+    {
+        lock.exit();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int numUsed;
+    TypeOfCriticalSectionToUse lock;
+
+    void insertInternal (const int indexToInsertAt, const ElementType newElement) throw()
+    {
+        this->ensureAllocatedSize (numUsed + 1);
+
+        ElementType* const insertPos = this->elements + indexToInsertAt;
+        const int numberToMove = numUsed - indexToInsertAt;
+
+        if (numberToMove > 0)
+            memmove (insertPos + 1, insertPos, numberToMove * sizeof (ElementType));
+
+        *insertPos = newElement;
+        ++numUsed;
+    }
+};
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
+
+#endif   // __JUCE_SORTEDSET_JUCEHEADER__
+/********* End of inlined file: juce_SortedSet.h *********/
+
+#endif
+#ifndef __JUCE_SPARSESET_JUCEHEADER__
+
+/********* Start of inlined file: juce_SparseSet.h *********/
+#ifndef __JUCE_SPARSESET_JUCEHEADER__
+#define __JUCE_SPARSESET_JUCEHEADER__
+
+/**
+    Holds a set of primitive values, storing them as a set of ranges.
+
+    This container acts like a simple BitArray, but can efficiently hold large
+    continguous ranges of values. It's quite a specialised class, mostly useful
+    for things like keeping the set of selected rows in a listbox.
+
+    The type used as a template paramter must be an integer type, such as int, short,
+    int64, etc.
+*/
+template <class Type>
+class SparseSet
+{
+public:
+
+    /** Creates a new empty set. */
+    SparseSet() throw()
+    {
+    }
+
+    /** Creates a copy of another SparseSet. */
+    SparseSet (const SparseSet<Type>& other) throw()
+        : values (other.values)
+    {
+    }
+
+    /** Destructor. */
+    ~SparseSet() throw()
+    {
+    }
+
+    /** Clears the set. */
+    void clear() throw()
+    {
+        values.clear();
+    }
+
+    /** Checks whether the set is empty.
+
+        This is much quicker than using (size() == 0).
+    */
+    bool isEmpty() const throw()
+    {
+        return values.size() == 0;
+    }
+
+    /** Returns the number of values in the set.
+
+        Because of the way the data is stored, this method can take longer if there
+        are a lot of items in the set. Use isEmpty() for a quick test of whether there
+        are any items.
+    */
+    Type size() const throw()
+    {
+        Type num = 0;
+
+        for (int i = 0; i < values.size(); i += 2)
+            num += values[i + 1] - values[i];
+
+        return num;
+    }
+
+    /** Returns one of the values in the set.
+
+        @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
+        @returns        the value at this index, or 0 if it's out-of-range
+    */
+    Type operator[] (int index) const throw()
+    {
+        for (int i = 0; i < values.size(); i += 2)
+        {
+            const Type s = values.getUnchecked(i);
+            const Type e = values.getUnchecked(i + 1);
+
+            if (index < e - s)
+                return s + index;
+
+            index -= e - s;
+        }
+
+        return (Type) 0;
+    }
+
+    /** Checks whether a particular value is in the set. */
+    bool contains (const Type valueToLookFor) const throw()
+    {
+        bool on = false;
+
+        for (int i = 0; i < values.size(); ++i)
+        {
+            if (values.getUnchecked(i) > valueToLookFor)
+                return on;
+
+            on = ! on;
+        }
+
+        return false;
+    }
+
+    /** Returns the number of contiguous blocks of values.
+
+        @see getRange
+    */
+    int getNumRanges() const throw()
+    {
+        return values.size() >> 1;
+    }
+
+    /** Returns one of the contiguous ranges of values stored.
+
+        @param rangeIndex   the index of the range to look up, between 0
+                            and (getNumRanges() - 1)
+        @param startValue   on return, the value at the start of the range
+        @param numValues    on return, the number of values in the range
+
+        @see getTotalRange
+    */
+    bool getRange (const int rangeIndex,
+                   Type& startValue,
+                   Type& numValues) const throw()
+    {
+        if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
+        {
+            startValue = values [rangeIndex << 1];
+            numValues = values [(rangeIndex << 1) + 1] - startValue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Returns the lowest and highest values in the set.
+
+        @see getRange
+    */
+    bool getTotalRange (Type& lowestValue,
+                        Type& highestValue) const throw()
+    {
+        if (values.size() > 0)
+        {
+            lowestValue = values.getUnchecked (0);
+            highestValue = values.getUnchecked (values.size() - 1);
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Adds a range of contiguous values to the set.
+
+        e.g. addRange (10, 4) will add (10, 11, 12, 13) to the set.
+
+        @param firstValue       the start of the range of values to add
+        @param numValuesToAdd   how many values to add
+    */
+    void addRange (const Type firstValue,
+                   const Type numValuesToAdd) throw()
+    {
+        jassert (numValuesToAdd >= 0);
+
+        if (numValuesToAdd > 0)
+        {
+            removeRange (firstValue, numValuesToAdd);
+
+            IntegerElementComparator<Type> sorter;
+            values.addSorted (sorter, firstValue);
+            values.addSorted (sorter, firstValue + numValuesToAdd);
+
+            simplify();
+        }
+    }
+
+    /** Removes a range of values from the set.
+
+        e.g. removeRange (10, 4) will remove (10, 11, 12, 13) from the set.
+
+        @param firstValue           the start of the range of values to remove
+        @param numValuesToRemove    how many values to remove
+    */
+    void removeRange (const Type firstValue,
+                      const Type numValuesToRemove) throw()
+    {
+        jassert (numValuesToRemove >= 0);
+
+        if (numValuesToRemove >= 0
+             && firstValue < values.getLast())
+        {
+            const bool onAtStart = contains (firstValue - 1);
+            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
+            const bool onAtEnd = contains (lastValue);
+
+            for (int i = values.size(); --i >= 0;)
+            {
+                if (values.getUnchecked(i) <= lastValue)
+                {
+                    while (values.getUnchecked(i) >= firstValue)
+                    {
+                        values.remove (i);
+
+                        if (--i < 0)
+                            break;
+                    }
+
+                    break;
+                }
+            }
+
+            IntegerElementComparator<Type> sorter;
+
+            if (onAtStart)
+                values.addSorted (sorter, firstValue);
+
+            if (onAtEnd)
+                values.addSorted (sorter, lastValue);
+
+            simplify();
+        }
+    }
+
+    /** Does an XOR of the values in a given range. */
+    void invertRange (const Type firstValue,
+                      const Type numValues)
+    {
+        SparseSet newItems;
+        newItems.addRange (firstValue, numValues);
+
+        int i;
+        for (i = getNumRanges(); --i >= 0;)
+        {
+            const int start = values [i << 1];
+            const int end = values [(i << 1) + 1];
+
+            newItems.removeRange (start, end);
+        }
+
+        removeRange (firstValue, numValues);
+
+        for (i = newItems.getNumRanges(); --i >= 0;)
+        {
+            const int start = newItems.values [i << 1];
+            const int end = newItems.values [(i << 1) + 1];
+
+            addRange (start, end);
+        }
+    }
+
+    /** Checks whether any part of a given range overlaps any part of this one. */
+    bool overlapsRange (const Type firstValue,
+                        const Type numValues) throw()
+    {
+        jassert (numValues >= 0);
+
+        if (numValues > 0)
+        {
+            for (int i = getNumRanges(); --i >= 0;)
+            {
+                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                    return false;
+
+                if (firstValue + numValues > values.getUnchecked (i << 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Checks whether the whole of a given range is contained within this one. */
+    bool containsRange (const Type firstValue,
+                        const Type numValues) throw()
+    {
+        jassert (numValues >= 0);
+
+        if (numValues > 0)
+        {
+            for (int i = getNumRanges(); --i >= 0;)
+            {
+                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                    return false;
+
+                if (firstValue >= values.getUnchecked (i << 1)
+                     && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool operator== (const SparseSet<Type>& other) throw()
+    {
+        return values == other.values;
+    }
+
+    bool operator!= (const SparseSet<Type>& other) throw()
+    {
+        return values != other.values;
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    // alternating start/end values of ranges of values that are present.
+    Array<Type> values;
+
+    void simplify() throw()
+    {
+        jassert ((values.size() & 1) == 0);
+
+        for (int i = values.size(); --i > 0;)
+            if (values.getUnchecked(i) == values.getUnchecked (i - 1))
+                values.removeRange (i - 1, 2);
+    }
+};
+
+#endif   // __JUCE_SPARSESET_JUCEHEADER__
+/********* End of inlined file: juce_SparseSet.h *********/
 
 #endif
 #ifndef __JUCE_VARIANT_JUCEHEADER__
@@ -11584,6 +11581,9 @@ private:
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__
 /********* End of inlined file: juce_Variant.h *********/
+
+#endif
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
@@ -23845,52 +23845,6 @@ private:
 #ifndef __JUCE_APPLICATIONCOMMANDID_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-
-/********* Start of inlined file: juce_DeletedAtShutdown.h *********/
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-#define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-
-/**
-    Classes derived from this will be automatically deleted when the application exits.
-
-    After JUCEApplication::shutdown() has been called, any objects derived from
-    DeletedAtShutdown which are still in existence will be deleted in the reverse
-    order to that in which they were created.
-
-    So if you've got a singleton and don't want to have to explicitly delete it, just
-    inherit from this and it'll be taken care of.
-*/
-class JUCE_API  DeletedAtShutdown
-{
-protected:
-    /** Creates a DeletedAtShutdown object. */
-    DeletedAtShutdown() throw();
-
-    /** Destructor.
-
-        It's ok to delete these objects explicitly - it's only the ones left
-        dangling at the end that will be deleted automatically.
-    */
-    virtual ~DeletedAtShutdown();
-
-public:
-    /** Deletes all extant objects.
-
-        This shouldn't be used by applications, as it's called automatically
-        in the shutdown code of the JUCEApplication class.
-    */
-    static void deleteAll();
-
-private:
-    DeletedAtShutdown (const DeletedAtShutdown&);
-    const DeletedAtShutdown& operator= (const DeletedAtShutdown&);
-};
-
-#endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-/********* End of inlined file: juce_DeletedAtShutdown.h *********/
-
-#endif
 #ifndef __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
 
 #endif
@@ -23989,6 +23943,49 @@ private:
 /********* Start of inlined file: juce_Desktop.h *********/
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
 #define __JUCE_DESKTOP_JUCEHEADER__
+
+/********* Start of inlined file: juce_DeletedAtShutdown.h *********/
+#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+#define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+
+/**
+    Classes derived from this will be automatically deleted when the application exits.
+
+    After JUCEApplication::shutdown() has been called, any objects derived from
+    DeletedAtShutdown which are still in existence will be deleted in the reverse
+    order to that in which they were created.
+
+    So if you've got a singleton and don't want to have to explicitly delete it, just
+    inherit from this and it'll be taken care of.
+*/
+class JUCE_API  DeletedAtShutdown
+{
+protected:
+    /** Creates a DeletedAtShutdown object. */
+    DeletedAtShutdown() throw();
+
+    /** Destructor.
+
+        It's ok to delete these objects explicitly - it's only the ones left
+        dangling at the end that will be deleted automatically.
+    */
+    virtual ~DeletedAtShutdown();
+
+public:
+    /** Deletes all extant objects.
+
+        This shouldn't be used by applications, as it's called automatically
+        in the shutdown code of the JUCEApplication class.
+    */
+    static void deleteAll();
+
+private:
+    DeletedAtShutdown (const DeletedAtShutdown&);
+    const DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+};
+
+#endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+/********* End of inlined file: juce_DeletedAtShutdown.h *********/
 
 /********* Start of inlined file: juce_Timer.h *********/
 #ifndef __JUCE_TIMER_JUCEHEADER__
@@ -25109,6 +25106,9 @@ private:
 
 #endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
 /********* End of inlined file: juce_ApplicationProperties.h *********/
+
+#endif
+#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
@@ -26796,9 +26796,6 @@ private:
 #ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 
 /********* Start of inlined file: juce_MidiMessageCollector.h *********/
@@ -27031,6 +27028,9 @@ private:
 
 #endif   // __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 /********* End of inlined file: juce_MidiMessageCollector.h *********/
+
+#endif
+#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -28387,9 +28387,6 @@ private:
 #ifndef __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioProcessorGraph.h *********/
@@ -29650,6 +29647,9 @@ private:
 
 #endif   // __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 /********* End of inlined file: juce_AudioProcessorGraph.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
@@ -32512,12 +32512,6 @@ private:
 /********* End of inlined file: juce_ToneGeneratorAudioSource.h *********/
 
 #endif
-#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioDeviceManager.h *********/
@@ -34833,10 +34827,16 @@ private:
 /********* End of inlined file: juce_AudioDeviceManager.h *********/
 
 #endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
+#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
@@ -36920,6 +36920,162 @@ private:
 /********* End of inlined file: juce_AudioCDBurner.h *********/
 
 #endif
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioCDReader.h *********/
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+#define __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+#if JUCE_MAC
+
+#endif
+
+/**
+    A type of AudioFormatReader that reads from an audio CD.
+
+    One of these can be used to read a CD as if it's one big audio stream. Use the
+    getPositionOfTrackStart() method to find where the individual tracks are
+    within the stream.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioCDReader  : public AudioFormatReader
+{
+public:
+
+    /** Returns a list of names of Audio CDs currently available for reading.
+
+        If there's a CD drive but no CD in it, this might return an empty list, or
+        possibly a device that can be opened but which has no tracks, depending
+        on the platform.
+
+        @see createReaderForCD
+    */
+    static const StringArray getAvailableCDNames();
+
+    /** Tries to create an AudioFormatReader that can read from an Audio CD.
+
+        @param index    the index of one of the available CDs - use getAvailableCDNames()
+                        to find out how many there are.
+        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
+                        caller will be responsible for deleting the object returned.
+    */
+    static AudioCDReader* createReaderForCD (const int index);
+
+    /** Destructor. */
+    ~AudioCDReader();
+
+    /** Implementation of the AudioFormatReader method. */
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    /** Checks whether the CD has been removed from the drive.
+    */
+    bool isCDStillPresent() const;
+
+    /** Returns the total number of tracks (audio + data).
+    */
+    int getNumTracks() const;
+
+    /** Finds the sample offset of the start of a track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    int getPositionOfTrackStart (int trackNum) const;
+
+    /** Returns true if a given track is an audio track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    bool isTrackAudio (int trackNum) const;
+
+    /** Refreshes the object's table of contents.
+
+        If the disc has been ejected and a different one put in since this
+        object was created, this will cause it to update its idea of how many tracks
+        there are, etc.
+    */
+    void refreshTrackLengths();
+
+    /** Enables scanning for indexes within tracks.
+
+        @see getLastIndex
+    */
+    void enableIndexScanning (bool enabled);
+
+    /** Returns the index number found during the last read() call.
+
+        Index scanning is turned off by default - turn it on with enableIndexScanning().
+
+        Then when the read() method is called, if it comes across an index within that
+        block, the index number is stored and returned by this method.
+
+        Some devices might not support indexes, of course.
+
+        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
+
+        @see enableIndexScanning
+    */
+    int getLastIndex() const;
+
+    /** Scans a track to find the position of any indexes within it.
+
+        @param trackNumber  the track to look in, where 0 is the first track on the disc
+        @returns    an array of sample positions of any index points found (not including
+                    the index that marks the start of the track)
+    */
+    const Array <int> findIndexesInTrack (const int trackNumber);
+
+    /** Returns the CDDB id number for the CD.
+
+        It's not a great way of identifying a disc, but it's traditional.
+    */
+    int getCDDBId();
+
+    /** Tries to eject the disk.
+
+        Of course this might not be possible, if some other process is using it.
+    */
+    void ejectDisk();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+#if JUCE_MAC
+    File volumeDir;
+    OwnedArray<File> tracks;
+    Array <int> trackStartSamples;
+    int currentReaderTrack;
+    AudioFormatReader* reader;
+    AudioCDReader (const File& volume);
+public:
+    static int compareElements (const File* const, const File* const) throw();
+private:
+
+#elif JUCE_WIN32
+    int numTracks;
+    int trackStarts[100];
+    bool audioTracks [100];
+    void* handle;
+    bool indexingEnabled;
+    int lastIndex, firstFrameInBuffer, samplesInBuffer;
+    MemoryBlock buffer;
+    AudioCDReader (void* handle);
+    int getIndexAt (int samplePos);
+
+#elif JUCE_LINUX
+    AudioCDReader();
+#endif
+
+    AudioCDReader (const AudioCDReader&);
+    const AudioCDReader& operator= (const AudioCDReader&);
+};
+
+#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioCDReader.h *********/
+
+#endif
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
 
 #endif
@@ -37039,7 +37195,76 @@ private:
 /********* End of inlined file: juce_AudioFormatManager.h *********/
 
 #endif
+#ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/**
+    This class is used to wrap an AudioFormatReader and only read from a
+    subsection of the file.
+
+    So if you have a reader which can read a 1000 sample file, you could wrap it
+    in one of these to only access, e.g. samples 100 to 200, and any samples
+    outside that will come back as 0. Accessing sample 0 from this reader will
+    actually read the first sample from the other's subsection, which might
+    be at a non-zero position.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
+{
+public:
+
+    /** Creates a AudioSubsectionReader for a given data source.
+
+        @param sourceReader             the source reader from which we'll be taking data
+        @param subsectionStartSample    the sample within the source reader which will be
+                                        mapped onto sample 0 for this reader.
+        @param subsectionLength         the number of samples from the source that will
+                                        make up the subsection. If this reader is asked for
+                                        any samples beyond this region, it will return zero.
+        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
+                                        this object is deleted.
+    */
+    AudioSubsectionReader (AudioFormatReader* const sourceReader,
+                           const int64 subsectionStartSample,
+                           const int64 subsectionLength,
+                           const bool deleteSourceWhenDeleted);
+
+    /** Destructor. */
+    ~AudioSubsectionReader();
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    void readMaxLevels (int64 startSample,
+                        int64 numSamples,
+                        float& lowestLeft,
+                        float& highestLeft,
+                        float& lowestRight,
+                        float& highestRight);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatReader* const source;
+    int64 startSample, length;
+    const bool deleteSourceWhenDeleted;
+
+    AudioSubsectionReader (const AudioSubsectionReader&);
+    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+};
+
+#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioSubsectionReader.h *********/
 
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
@@ -37310,6 +37535,114 @@ public:
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
 
 #endif
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+
+/**
+    Reads and writes the Ogg-Vorbis audio format.
+
+    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the Vorbis and Ogg header files and static libraries.
+
+    @see AudioFormat,
+*/
+class JUCE_API  OggVorbisAudioFormat : public AudioFormat
+{
+public:
+
+    OggVorbisAudioFormat();
+    ~OggVorbisAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+    const StringArray getQualityOptions();
+
+    /** Tries to estimate the quality level of an ogg file based on its size.
+
+        If it can't read the file for some reason, this will just return 1 (medium quality),
+        otherwise it will return the approximate quality setting that would have been used
+        to create the file.
+
+        @see getQualityOptions
+    */
+    int estimateOggFileQuality (const File& source);
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_QUICKTIME
+
+/**
+    Uses QuickTime to read the audio track a movie or media file.
+
+    As well as QuickTime movies, this should also manage to open other audio
+    files that quicktime can understand, like mp3, m4a, etc.
+
+    @see AudioFormat
+*/
+class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    QuickTimeAudioFormat();
+
+    /** Destructor. */
+    ~QuickTimeAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+
+#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_WavAudioFormat.h *********/
@@ -37430,339 +37763,6 @@ public:
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_WavAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
-/**
-    Reads and writes the Ogg-Vorbis audio format.
-
-    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the Vorbis and Ogg header files and static libraries.
-
-    @see AudioFormat,
-*/
-class JUCE_API  OggVorbisAudioFormat : public AudioFormat
-{
-public:
-
-    OggVorbisAudioFormat();
-    ~OggVorbisAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    const StringArray getQualityOptions();
-
-    /** Tries to estimate the quality level of an ogg file based on its size.
-
-        If it can't read the file for some reason, this will just return 1 (medium quality),
-        otherwise it will return the approximate quality setting that would have been used
-        to create the file.
-
-        @see getQualityOptions
-    */
-    int estimateOggFileQuality (const File& source);
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioCDReader.h *********/
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-#define __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-#if JUCE_MAC
-
-#endif
-
-/**
-    A type of AudioFormatReader that reads from an audio CD.
-
-    One of these can be used to read a CD as if it's one big audio stream. Use the
-    getPositionOfTrackStart() method to find where the individual tracks are
-    within the stream.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioCDReader  : public AudioFormatReader
-{
-public:
-
-    /** Returns a list of names of Audio CDs currently available for reading.
-
-        If there's a CD drive but no CD in it, this might return an empty list, or
-        possibly a device that can be opened but which has no tracks, depending
-        on the platform.
-
-        @see createReaderForCD
-    */
-    static const StringArray getAvailableCDNames();
-
-    /** Tries to create an AudioFormatReader that can read from an Audio CD.
-
-        @param index    the index of one of the available CDs - use getAvailableCDNames()
-                        to find out how many there are.
-        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
-                        caller will be responsible for deleting the object returned.
-    */
-    static AudioCDReader* createReaderForCD (const int index);
-
-    /** Destructor. */
-    ~AudioCDReader();
-
-    /** Implementation of the AudioFormatReader method. */
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    /** Checks whether the CD has been removed from the drive.
-    */
-    bool isCDStillPresent() const;
-
-    /** Returns the total number of tracks (audio + data).
-    */
-    int getNumTracks() const;
-
-    /** Finds the sample offset of the start of a track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    int getPositionOfTrackStart (int trackNum) const;
-
-    /** Returns true if a given track is an audio track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    bool isTrackAudio (int trackNum) const;
-
-    /** Refreshes the object's table of contents.
-
-        If the disc has been ejected and a different one put in since this
-        object was created, this will cause it to update its idea of how many tracks
-        there are, etc.
-    */
-    void refreshTrackLengths();
-
-    /** Enables scanning for indexes within tracks.
-
-        @see getLastIndex
-    */
-    void enableIndexScanning (bool enabled);
-
-    /** Returns the index number found during the last read() call.
-
-        Index scanning is turned off by default - turn it on with enableIndexScanning().
-
-        Then when the read() method is called, if it comes across an index within that
-        block, the index number is stored and returned by this method.
-
-        Some devices might not support indexes, of course.
-
-        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
-
-        @see enableIndexScanning
-    */
-    int getLastIndex() const;
-
-    /** Scans a track to find the position of any indexes within it.
-
-        @param trackNumber  the track to look in, where 0 is the first track on the disc
-        @returns    an array of sample positions of any index points found (not including
-                    the index that marks the start of the track)
-    */
-    const Array <int> findIndexesInTrack (const int trackNumber);
-
-    /** Returns the CDDB id number for the CD.
-
-        It's not a great way of identifying a disc, but it's traditional.
-    */
-    int getCDDBId();
-
-    /** Tries to eject the disk.
-
-        Of course this might not be possible, if some other process is using it.
-    */
-    void ejectDisk();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-#if JUCE_MAC
-    File volumeDir;
-    OwnedArray<File> tracks;
-    Array <int> trackStartSamples;
-    int currentReaderTrack;
-    AudioFormatReader* reader;
-    AudioCDReader (const File& volume);
-public:
-    static int compareElements (const File* const, const File* const) throw();
-private:
-
-#elif JUCE_WIN32
-    int numTracks;
-    int trackStarts[100];
-    bool audioTracks [100];
-    void* handle;
-    bool indexingEnabled;
-    int lastIndex, firstFrameInBuffer, samplesInBuffer;
-    MemoryBlock buffer;
-    AudioCDReader (void* handle);
-    int getIndexAt (int samplePos);
-
-#elif JUCE_LINUX
-    AudioCDReader();
-#endif
-
-    AudioCDReader (const AudioCDReader&);
-    const AudioCDReader& operator= (const AudioCDReader&);
-};
-
-#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDReader.h *********/
-
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_QUICKTIME
-
-/**
-    Uses QuickTime to read the audio track a movie or media file.
-
-    As well as QuickTime movies, this should also manage to open other audio
-    files that quicktime can understand, like mp3, m4a, etc.
-
-    @see AudioFormat
-*/
-class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    QuickTimeAudioFormat();
-
-    /** Destructor. */
-    ~QuickTimeAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/**
-    This class is used to wrap an AudioFormatReader and only read from a
-    subsection of the file.
-
-    So if you have a reader which can read a 1000 sample file, you could wrap it
-    in one of these to only access, e.g. samples 100 to 200, and any samples
-    outside that will come back as 0. Accessing sample 0 from this reader will
-    actually read the first sample from the other's subsection, which might
-    be at a non-zero position.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
-{
-public:
-
-    /** Creates a AudioSubsectionReader for a given data source.
-
-        @param sourceReader             the source reader from which we'll be taking data
-        @param subsectionStartSample    the sample within the source reader which will be
-                                        mapped onto sample 0 for this reader.
-        @param subsectionLength         the number of samples from the source that will
-                                        make up the subsection. If this reader is asked for
-                                        any samples beyond this region, it will return zero.
-        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
-                                        this object is deleted.
-    */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
-
-    /** Destructor. */
-    ~AudioSubsectionReader();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatReader* const source;
-    int64 startSample, length;
-    const bool deleteSourceWhenDeleted;
-
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
-};
-
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
 
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -38224,111 +38224,6 @@ private:
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-
-/********* Start of inlined file: juce_MultiTimer.h *********/
-#ifndef __JUCE_MULTITIMER_JUCEHEADER__
-#define __JUCE_MULTITIMER_JUCEHEADER__
-
-/**
-    A type of timer class that can run multiple timers with different frequencies,
-    all of which share a single callback.
-
-    This class is very similar to the Timer class, but allows you run multiple
-    separate timers, where each one has a unique ID number. The methods in this
-    class are exactly equivalent to those in Timer, but with the addition of
-    this ID number.
-
-    To use it, you need to create a subclass of MultiTimer, implementing the
-    timerCallback() method. Then you can start timers with startTimer(), and
-    each time the callback is triggered, it passes in the ID of the timer that
-    caused it.
-
-    @see Timer
-*/
-class JUCE_API  MultiTimer
-{
-protected:
-
-    /** Creates a MultiTimer.
-
-        When created, no timers are running, so use startTimer() to start things off.
-    */
-    MultiTimer() throw();
-
-    /** Creates a copy of another timer.
-
-        Note that this timer will not contain any running timers, even if the one you're
-        copying from was running.
-    */
-    MultiTimer (const MultiTimer& other) throw();
-
-public:
-
-    /** Destructor. */
-    virtual ~MultiTimer();
-
-    /** The user-defined callback routine that actually gets called by each of the
-        timers that are running.
-
-        It's perfectly ok to call startTimer() or stopTimer() from within this
-        callback to change the subsequent intervals.
-    */
-    virtual void timerCallback (const int timerId) = 0;
-
-    /** Starts a timer and sets the length of interval required.
-
-        If the timer is already started, this will reset it, so the
-        time between calling this method and the next timer callback
-        will not be less than the interval length passed in.
-
-        @param timerId                  a unique Id number that identifies the timer to
-                                        start. This is the id that will be passed back
-                                        to the timerCallback() method when this timer is
-                                        triggered
-        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
-                                        rounded up to 1)
-    */
-    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
-
-    /** Stops a timer.
-
-        If a timer has been started with the given ID number, it will be cancelled.
-        No more callbacks will be made for the specified timer after this method returns.
-
-        If this is called from a different thread, any callbacks that may
-        be currently executing may be allowed to finish before the method
-        returns.
-    */
-    void stopTimer (const int timerId) throw();
-
-    /** Checks whether a timer has been started for a specified ID.
-
-        @returns true if a timer with the given ID is running.
-    */
-    bool isTimerRunning (const int timerId) const throw();
-
-    /** Returns the interval for a specified timer ID.
-
-        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
-                    is running for the ID number specified.
-    */
-    int getTimerInterval (const int timerId) const throw();
-
-private:
-    CriticalSection timerListLock;
-    VoidArray timers;
-
-    const MultiTimer& operator= (const MultiTimer&);
-};
-
-#endif   // __JUCE_MULTITIMER_JUCEHEADER__
-/********* End of inlined file: juce_MultiTimer.h *********/
-
-#endif
-#ifndef __JUCE_TIMER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_MessageManager.h *********/
@@ -38598,6 +38493,111 @@ private:
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
 /********* End of inlined file: juce_MessageManager.h *********/
+
+#endif
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+
+/********* Start of inlined file: juce_MultiTimer.h *********/
+#ifndef __JUCE_MULTITIMER_JUCEHEADER__
+#define __JUCE_MULTITIMER_JUCEHEADER__
+
+/**
+    A type of timer class that can run multiple timers with different frequencies,
+    all of which share a single callback.
+
+    This class is very similar to the Timer class, but allows you run multiple
+    separate timers, where each one has a unique ID number. The methods in this
+    class are exactly equivalent to those in Timer, but with the addition of
+    this ID number.
+
+    To use it, you need to create a subclass of MultiTimer, implementing the
+    timerCallback() method. Then you can start timers with startTimer(), and
+    each time the callback is triggered, it passes in the ID of the timer that
+    caused it.
+
+    @see Timer
+*/
+class JUCE_API  MultiTimer
+{
+protected:
+
+    /** Creates a MultiTimer.
+
+        When created, no timers are running, so use startTimer() to start things off.
+    */
+    MultiTimer() throw();
+
+    /** Creates a copy of another timer.
+
+        Note that this timer will not contain any running timers, even if the one you're
+        copying from was running.
+    */
+    MultiTimer (const MultiTimer& other) throw();
+
+public:
+
+    /** Destructor. */
+    virtual ~MultiTimer();
+
+    /** The user-defined callback routine that actually gets called by each of the
+        timers that are running.
+
+        It's perfectly ok to call startTimer() or stopTimer() from within this
+        callback to change the subsequent intervals.
+    */
+    virtual void timerCallback (const int timerId) = 0;
+
+    /** Starts a timer and sets the length of interval required.
+
+        If the timer is already started, this will reset it, so the
+        time between calling this method and the next timer callback
+        will not be less than the interval length passed in.
+
+        @param timerId                  a unique Id number that identifies the timer to
+                                        start. This is the id that will be passed back
+                                        to the timerCallback() method when this timer is
+                                        triggered
+        @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
+                                        rounded up to 1)
+    */
+    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
+
+    /** Stops a timer.
+
+        If a timer has been started with the given ID number, it will be cancelled.
+        No more callbacks will be made for the specified timer after this method returns.
+
+        If this is called from a different thread, any callbacks that may
+        be currently executing may be allowed to finish before the method
+        returns.
+    */
+    void stopTimer (const int timerId) throw();
+
+    /** Checks whether a timer has been started for a specified ID.
+
+        @returns true if a timer with the given ID is running.
+    */
+    bool isTimerRunning (const int timerId) const throw();
+
+    /** Returns the interval for a specified timer ID.
+
+        @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
+                    is running for the ID number specified.
+    */
+    int getTimerInterval (const int timerId) const throw();
+
+private:
+    CriticalSection timerListLock;
+    VoidArray timers;
+
+    const MultiTimer& operator= (const MultiTimer&);
+};
+
+#endif   // __JUCE_MULTITIMER_JUCEHEADER__
+/********* End of inlined file: juce_MultiTimer.h *********/
+
+#endif
+#ifndef __JUCE_TIMER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BRUSH_JUCEHEADER__
@@ -39927,9 +39927,6 @@ public:
 /********* End of inlined file: juce_LowLevelGraphicsContext.h *********/
 
 #endif
-#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
 
 /********* Start of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
@@ -40163,6 +40160,9 @@ protected:
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 /********* End of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h *********/
+
+#endif
+#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
@@ -40598,6 +40598,135 @@ private:
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
+
+/********* Start of inlined file: juce_CameraDevice.h *********/
+#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
+#define __JUCE_CAMERADEVICE_JUCEHEADER__
+
+#if JUCE_USE_CAMERA
+
+/**
+    Receives callbacks with images from a CameraDevice.
+
+    @see CameraDevice::addListener
+*/
+class CameraImageListener
+{
+public:
+    CameraImageListener() {}
+    virtual ~CameraImageListener() {}
+
+    /** This method is called when a new image arrives.
+
+        This may be called by any thread, so be careful about thread-safety,
+        and make sure that you process the data as quickly as possible to
+        avoid glitching!
+    */
+    virtual void imageReceived (Image& image) = 0;
+};
+
+/**
+    Controls any camera capture devices that might be available.
+
+    Use getAvailableDevices() to list the devices that are attached to the
+    system, then call openDevice to open one for use. Once you have a CameraDevice
+    object, you can get a viewer component from it, and use its methods to
+    stream to a file or capture still-frames.
+*/
+class JUCE_API  CameraDevice
+{
+public:
+    /** Destructor. */
+    virtual ~CameraDevice();
+
+    /** Returns a list of the available cameras on this machine.
+
+        You can open one of these devices by calling openDevice().
+    */
+    static const StringArray getAvailableDevices();
+
+    /** Opens a camera device.
+
+        The index parameter indicates which of the items returned by getAvailableDevices()
+        to open.
+
+        The size constraints allow the method to choose between different resolutions if
+        the camera supports this. If the resolution cam't be specified (e.g. on the Mac)
+        then these will be ignored.
+    */
+    static CameraDevice* openDevice (int deviceIndex,
+                                     int minWidth = 128, int minHeight = 64,
+                                     int maxWidth = 1024, int maxHeight = 768);
+
+    /** Returns the name of this device */
+    const String getName() const throw()        { return name; }
+
+    /** Creates a component that can be used to display a preview of the
+        video from this camera.
+    */
+    Component* createViewerComponent();
+
+    /** Starts recording video to the specified file.
+
+        You should use getFileExtension() to find out the correct extension to
+        use for your filename.
+
+        If the file exists, it will be deleted before the recording starts.
+
+        This method may not start recording instantly, so if you need to know the
+        exact time at which the file begins, you can call getTimeOfFirstRecordedFrame()
+        after the recording has finished.
+    */
+    void startRecordingToFile (const File& file);
+
+    /** Stops recording, after a call to startRecordingToFile().
+    */
+    void stopRecording();
+
+    /** Returns the file extension that should be used for the files
+        that you pass to startRecordingToFile().
+
+        This may be platform-specific, e.g. ".mov" or ".avi".
+    */
+    static const String getFileExtension();
+
+    /** After calling stopRecording(), this method can be called to return the timestamp
+        of the first frame that was written to the file.
+    */
+    const Time getTimeOfFirstRecordedFrame() const;
+
+    /** Adds a listener to receive images from the camera.
+
+        Be very careful not to delete the listener without first removing it by calling
+        removeListener().
+    */
+    void addListener (CameraImageListener* listenerToAdd);
+
+    /** Removes a listener that was previously added with addListener().
+    */
+    void removeListener (CameraImageListener* listenerToRemove);
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    /** @internal */
+    CameraDevice (const String& name, int index);
+
+private:
+    void* internal;
+    bool isRecording;
+    String name;
+
+    CameraDevice (const CameraDevice&);
+    const CameraDevice& operator= (const CameraDevice&);
+};
+
+#endif
+#endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
+/********* End of inlined file: juce_CameraDevice.h *********/
+
+#endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
 
 #endif
@@ -40841,135 +40970,6 @@ private:
 
 #endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
 /********* End of inlined file: juce_ImageConvolutionKernel.h *********/
-
-#endif
-#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
-
-/********* Start of inlined file: juce_CameraDevice.h *********/
-#ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
-#define __JUCE_CAMERADEVICE_JUCEHEADER__
-
-#if JUCE_USE_CAMERA
-
-/**
-    Receives callbacks with images from a CameraDevice.
-
-    @see CameraDevice::addListener
-*/
-class CameraImageListener
-{
-public:
-    CameraImageListener() {}
-    virtual ~CameraImageListener() {}
-
-    /** This method is called when a new image arrives.
-
-        This may be called by any thread, so be careful about thread-safety,
-        and make sure that you process the data as quickly as possible to
-        avoid glitching!
-    */
-    virtual void imageReceived (Image& image) = 0;
-};
-
-/**
-    Controls any camera capture devices that might be available.
-
-    Use getAvailableDevices() to list the devices that are attached to the
-    system, then call openDevice to open one for use. Once you have a CameraDevice
-    object, you can get a viewer component from it, and use its methods to
-    stream to a file or capture still-frames.
-*/
-class JUCE_API  CameraDevice
-{
-public:
-    /** Destructor. */
-    virtual ~CameraDevice();
-
-    /** Returns a list of the available cameras on this machine.
-
-        You can open one of these devices by calling openDevice().
-    */
-    static const StringArray getAvailableDevices();
-
-    /** Opens a camera device.
-
-        The index parameter indicates which of the items returned by getAvailableDevices()
-        to open.
-
-        The size constraints allow the method to choose between different resolutions if
-        the camera supports this. If the resolution cam't be specified (e.g. on the Mac)
-        then these will be ignored.
-    */
-    static CameraDevice* openDevice (int deviceIndex,
-                                     int minWidth = 128, int minHeight = 64,
-                                     int maxWidth = 1024, int maxHeight = 768);
-
-    /** Returns the name of this device */
-    const String getName() const throw()        { return name; }
-
-    /** Creates a component that can be used to display a preview of the
-        video from this camera.
-    */
-    Component* createViewerComponent();
-
-    /** Starts recording video to the specified file.
-
-        You should use getFileExtension() to find out the correct extension to
-        use for your filename.
-
-        If the file exists, it will be deleted before the recording starts.
-
-        This method may not start recording instantly, so if you need to know the
-        exact time at which the file begins, you can call getTimeOfFirstRecordedFrame()
-        after the recording has finished.
-    */
-    void startRecordingToFile (const File& file);
-
-    /** Stops recording, after a call to startRecordingToFile().
-    */
-    void stopRecording();
-
-    /** Returns the file extension that should be used for the files
-        that you pass to startRecordingToFile().
-
-        This may be platform-specific, e.g. ".mov" or ".avi".
-    */
-    static const String getFileExtension();
-
-    /** After calling stopRecording(), this method can be called to return the timestamp
-        of the first frame that was written to the file.
-    */
-    const Time getTimeOfFirstRecordedFrame() const;
-
-    /** Adds a listener to receive images from the camera.
-
-        Be very careful not to delete the listener without first removing it by calling
-        removeListener().
-    */
-    void addListener (CameraImageListener* listenerToAdd);
-
-    /** Removes a listener that was previously added with addListener().
-    */
-    void removeListener (CameraImageListener* listenerToRemove);
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    /** @internal */
-    CameraDevice (const String& name, int index);
-
-private:
-    void* internal;
-    bool isRecording;
-    String name;
-
-    CameraDevice (const CameraDevice&);
-    const CameraDevice& operator= (const CameraDevice&);
-};
-
-#endif
-#endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
-/********* End of inlined file: juce_CameraDevice.h *********/
 
 #endif
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
@@ -41663,6 +41663,9 @@ private:
 /********* End of inlined file: juce_DrawableText.h *********/
 
 #endif
+#ifndef __JUCE_COMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 
 #endif
@@ -41670,9 +41673,6 @@ private:
 
 #endif
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
@@ -41788,6 +41788,9 @@ private:
 
 #endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
 /********* End of inlined file: juce_ArrowButton.h *********/
+
+#endif
+#ifndef __JUCE_BUTTON_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
@@ -42175,9 +42178,6 @@ private:
 
 #endif   // __JUCE_IMAGEBUTTON_JUCEHEADER__
 /********* End of inlined file: juce_ImageButton.h *********/
-
-#endif
-#ifndef __JUCE_BUTTON_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SHAPEBUTTON_JUCEHEADER__
@@ -43340,7 +43340,7 @@ private:
 #ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_KEYPRESS_JUCEHEADER__
+#ifndef __JUCE_KEYLISTENER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
@@ -44286,13 +44286,13 @@ private:
 /********* End of inlined file: juce_KeyMappingEditorComponent.h *********/
 
 #endif
-#ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_KEYLISTENER_JUCEHEADER__
+#ifndef __JUCE_KEYPRESS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
@@ -45493,7 +45493,13 @@ private:
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_COMBOBOX_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_LABEL_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_LISTBOX_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
@@ -47022,7 +47028,13 @@ private:
 /********* End of inlined file: juce_TableListBox.h *********/
 
 #endif
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
@@ -47110,9 +47122,6 @@ public:
 /********* End of inlined file: juce_ToolbarItemFactory.h *********/
 
 #endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ToolbarItemPalette.h *********/
@@ -47169,15 +47178,6 @@ private:
 
 #endif
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_LISTBOX_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMBOBOX_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -49337,12 +49337,6 @@ private:
 #ifndef __JUCE_SCROLLBAR_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_StretchableLayoutManager.h *********/
@@ -49738,6 +49732,12 @@ private:
 /********* End of inlined file: juce_StretchableObjectResizer.h *********/
 
 #endif
+#ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_VIEWPORT_JUCEHEADER__
 
 #endif
@@ -50084,14 +50084,11 @@ protected:
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
+#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileChooser.h *********/
-#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
-#define __JUCE_FILECHOOSER_JUCEHEADER__
+/********* Start of inlined file: juce_FileBrowserComponent.h *********/
+#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_FilePreviewComponent.h *********/
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
@@ -50134,175 +50131,6 @@ private:
 
 #endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FilePreviewComponent.h *********/
-
-/**
-    Creates a dialog box to choose a file or directory to load or save.
-
-    To use a FileChooser:
-    - create one (as a local stack variable is the neatest way)
-    - call one of its browseFor.. methods
-    - if this returns true, the user has selected a file, so you can retrieve it
-      with the getResult() method.
-
-    e.g. @code
-    void loadMooseFile()
-    {
-        FileChooser myChooser ("Please select the moose you want to load...",
-                               File::getSpecialLocation (File::userHomeDirectory),
-                               "*.moose");
-
-        if (myChooser.browseForFileToOpen())
-        {
-            File mooseFile (myChooser.getResult());
-
-            loadMoose (mooseFile);
-        }
-    }
-    @endcode
-*/
-class JUCE_API  FileChooser
-{
-public:
-
-    /** Creates a FileChooser.
-
-        After creating one of these, use one of the browseFor... methods to display it.
-
-        @param dialogBoxTitle           a text string to display in the dialog box to
-                                        tell the user what's going on
-        @param initialFileOrDirectory   the file or directory that should be selected when
-                                        the dialog box opens. If this parameter is set to
-                                        File::nonexistent, a sensible default directory
-                                        will be used instead.
-        @param filePatternsAllowed      a set of file patterns to specify which files can be
-                                        selected - each pattern should be separated by a
-                                        comma or semi-colon, e.g. "*" or "*.jpg;*.gif". An
-                                        empty string means that all files are allowed
-        @param useOSNativeDialogBox     if true, then a native dialog box will be used if
-                                        possible; if false, then a Juce-based browser dialog
-                                        box will always be used
-        @see browseForFileToOpen, browseForFileToSave, browseForDirectory
-    */
-    FileChooser (const String& dialogBoxTitle,
-                 const File& initialFileOrDirectory = File::nonexistent,
-                 const String& filePatternsAllowed = String::empty,
-                 const bool useOSNativeDialogBox = true);
-
-    /** Destructor. */
-    ~FileChooser();
-
-    /** Shows a dialog box to choose a file to open.
-
-        This will display the dialog box modally, using an "open file" mode, so that
-        it won't allow non-existent files or directories to be chosen.
-
-        @param previewComponent   an optional component to display inside the dialog
-                                  box to show special info about the files that the user
-                                  is browsing. The component will not be deleted by this
-                                  object, so the caller must take care of it.
-        @returns    true if the user selected a file, in which case, use the getResult()
-                    method to find out what it was. Returns false if they cancelled instead.
-        @see browseForFileToSave, browseForDirectory
-    */
-    bool browseForFileToOpen (FilePreviewComponent* previewComponent = 0);
-
-    /** Same as browseForFileToOpen, but allows the user to select multiple files.
-
-        The files that are returned can be obtained by calling getResults(). See
-        browseForFileToOpen() for more info about the behaviour of this method.
-    */
-    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
-
-    /** Shows a dialog box to choose a file to save.
-
-        This will display the dialog box modally, using an "save file" mode, so it
-        will allow non-existent files to be chosen, but not directories.
-
-        @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
-                    the user if they're sure they want to overwrite a file that already
-                    exists
-        @returns    true if the user chose a file and pressed 'ok', in which case, use
-                    the getResult() method to find out what the file was. Returns false
-                    if they cancelled instead.
-        @see browseForFileToOpen, browseForDirectory
-    */
-    bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
-
-    /** Shows a dialog box to choose a directory.
-
-        This will display the dialog box modally, using an "open directory" mode, so it
-        will only allow directories to be returned, not files.
-
-        @returns    true if the user chose a directory and pressed 'ok', in which case, use
-                    the getResult() method to find out what they chose. Returns false
-                    if they cancelled instead.
-        @see browseForFileToOpen, browseForFileToSave
-    */
-    bool browseForDirectory();
-
-    /** Returns the last file that was chosen by one of the browseFor methods.
-
-        After calling the appropriate browseFor... method, this method lets you
-        find out what file or directory they chose.
-
-        Note that the file returned is only valid if the browse method returned true (i.e.
-        if the user pressed 'ok' rather than cancelling).
-
-        If you're using a multiple-file select, then use the getResults() method instead,
-        to obtain the list of all files chosen.
-
-        @see getResults
-    */
-    const File getResult() const;
-
-    /** Returns a list of all the files that were chosen during the last call to a
-        browse method.
-
-        This array may be empty if no files were chosen, or can contain multiple entries
-        if multiple files were chosen.
-
-        @see getResult
-    */
-    const OwnedArray <File>& getResults() const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String title, filters;
-    File startingFile;
-    OwnedArray <File> results;
-    bool useNativeDialogBox;
-
-    bool showDialog (const bool isDirectory,
-                     const bool isSave,
-                     const bool warnAboutOverwritingExistingFiles,
-                     const bool selectMultipleFiles,
-                     FilePreviewComponent* const previewComponent);
-
-    static void showPlatformDialog (OwnedArray<File>& results,
-                                    const String& title,
-                                    const File& file,
-                                    const String& filters,
-                                    bool isDirectory,
-                                    bool isSave,
-                                    bool warnAboutOverwritingExistingFiles,
-                                    bool selectMultipleFiles,
-                                    FilePreviewComponent* previewComponent);
-};
-
-#endif   // __JUCE_FILECHOOSER_JUCEHEADER__
-/********* End of inlined file: juce_FileChooser.h *********/
-
-#endif
-#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileChooserDialogBox.h *********/
-#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-#define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileBrowserComponent.h *********/
-#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
 /**
     A component for browsing and selecting a file or directory to open or save.
@@ -50468,6 +50296,181 @@ private:
 
 #endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileBrowserComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileChooser.h *********/
+#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
+#define __JUCE_FILECHOOSER_JUCEHEADER__
+
+/**
+    Creates a dialog box to choose a file or directory to load or save.
+
+    To use a FileChooser:
+    - create one (as a local stack variable is the neatest way)
+    - call one of its browseFor.. methods
+    - if this returns true, the user has selected a file, so you can retrieve it
+      with the getResult() method.
+
+    e.g. @code
+    void loadMooseFile()
+    {
+        FileChooser myChooser ("Please select the moose you want to load...",
+                               File::getSpecialLocation (File::userHomeDirectory),
+                               "*.moose");
+
+        if (myChooser.browseForFileToOpen())
+        {
+            File mooseFile (myChooser.getResult());
+
+            loadMoose (mooseFile);
+        }
+    }
+    @endcode
+*/
+class JUCE_API  FileChooser
+{
+public:
+
+    /** Creates a FileChooser.
+
+        After creating one of these, use one of the browseFor... methods to display it.
+
+        @param dialogBoxTitle           a text string to display in the dialog box to
+                                        tell the user what's going on
+        @param initialFileOrDirectory   the file or directory that should be selected when
+                                        the dialog box opens. If this parameter is set to
+                                        File::nonexistent, a sensible default directory
+                                        will be used instead.
+        @param filePatternsAllowed      a set of file patterns to specify which files can be
+                                        selected - each pattern should be separated by a
+                                        comma or semi-colon, e.g. "*" or "*.jpg;*.gif". An
+                                        empty string means that all files are allowed
+        @param useOSNativeDialogBox     if true, then a native dialog box will be used if
+                                        possible; if false, then a Juce-based browser dialog
+                                        box will always be used
+        @see browseForFileToOpen, browseForFileToSave, browseForDirectory
+    */
+    FileChooser (const String& dialogBoxTitle,
+                 const File& initialFileOrDirectory = File::nonexistent,
+                 const String& filePatternsAllowed = String::empty,
+                 const bool useOSNativeDialogBox = true);
+
+    /** Destructor. */
+    ~FileChooser();
+
+    /** Shows a dialog box to choose a file to open.
+
+        This will display the dialog box modally, using an "open file" mode, so that
+        it won't allow non-existent files or directories to be chosen.
+
+        @param previewComponent   an optional component to display inside the dialog
+                                  box to show special info about the files that the user
+                                  is browsing. The component will not be deleted by this
+                                  object, so the caller must take care of it.
+        @returns    true if the user selected a file, in which case, use the getResult()
+                    method to find out what it was. Returns false if they cancelled instead.
+        @see browseForFileToSave, browseForDirectory
+    */
+    bool browseForFileToOpen (FilePreviewComponent* previewComponent = 0);
+
+    /** Same as browseForFileToOpen, but allows the user to select multiple files.
+
+        The files that are returned can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
+
+    /** Shows a dialog box to choose a file to save.
+
+        This will display the dialog box modally, using an "save file" mode, so it
+        will allow non-existent files to be chosen, but not directories.
+
+        @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
+                    the user if they're sure they want to overwrite a file that already
+                    exists
+        @returns    true if the user chose a file and pressed 'ok', in which case, use
+                    the getResult() method to find out what the file was. Returns false
+                    if they cancelled instead.
+        @see browseForFileToOpen, browseForDirectory
+    */
+    bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
+
+    /** Shows a dialog box to choose a directory.
+
+        This will display the dialog box modally, using an "open directory" mode, so it
+        will only allow directories to be returned, not files.
+
+        @returns    true if the user chose a directory and pressed 'ok', in which case, use
+                    the getResult() method to find out what they chose. Returns false
+                    if they cancelled instead.
+        @see browseForFileToOpen, browseForFileToSave
+    */
+    bool browseForDirectory();
+
+    /** Returns the last file that was chosen by one of the browseFor methods.
+
+        After calling the appropriate browseFor... method, this method lets you
+        find out what file or directory they chose.
+
+        Note that the file returned is only valid if the browse method returned true (i.e.
+        if the user pressed 'ok' rather than cancelling).
+
+        If you're using a multiple-file select, then use the getResults() method instead,
+        to obtain the list of all files chosen.
+
+        @see getResults
+    */
+    const File getResult() const;
+
+    /** Returns a list of all the files that were chosen during the last call to a
+        browse method.
+
+        This array may be empty if no files were chosen, or can contain multiple entries
+        if multiple files were chosen.
+
+        @see getResult
+    */
+    const OwnedArray <File>& getResults() const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String title, filters;
+    File startingFile;
+    OwnedArray <File> results;
+    bool useNativeDialogBox;
+
+    bool showDialog (const bool isDirectory,
+                     const bool isSave,
+                     const bool warnAboutOverwritingExistingFiles,
+                     const bool selectMultipleFiles,
+                     FilePreviewComponent* const previewComponent);
+
+    static void showPlatformDialog (OwnedArray<File>& results,
+                                    const String& title,
+                                    const File& file,
+                                    const String& filters,
+                                    bool isDirectory,
+                                    bool isSave,
+                                    bool warnAboutOverwritingExistingFiles,
+                                    bool selectMultipleFiles,
+                                    FilePreviewComponent* previewComponent);
+};
+
+#endif   // __JUCE_FILECHOOSER_JUCEHEADER__
+/********* End of inlined file: juce_FileChooser.h *********/
+
+#endif
+#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileChooserDialogBox.h *********/
+#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+#define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 
 /**
     A file open/save dialog box.
@@ -50652,278 +50655,6 @@ private:
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/**
-    Shows a set of file paths in a list, allowing them to be added, removed or
-    re-ordered.
-
-    @see FileSearchPath
-*/
-class JUCE_API  FileSearchPathListComponent  : public Component,
-                                               public SettableTooltipClient,
-                                               public FileDragAndDropTarget,
-                                               private ButtonListener,
-                                               private ListBoxModel
-{
-public:
-
-    /** Creates an empty FileSearchPathListComponent.
-
-    */
-    FileSearchPathListComponent();
-
-    /** Destructor. */
-    ~FileSearchPathListComponent();
-
-    /** Returns the path as it is currently shown. */
-    const FileSearchPath& getPath() const throw()                   { return path; }
-
-    /** Changes the current path. */
-    void setPath (const FileSearchPath& newPath);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
-                                                  Make this transparent if you don't want the background to be filled. */
-    };
-
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
-    /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
-    /** @internal */
-    void returnKeyPressed (int lastRowSelected);
-    /** @internal */
-    void listBoxItemDoubleClicked (int row, const MouseEvent&);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void buttonClicked (Button* button);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    FileSearchPath path;
-    File defaultBrowseTarget;
-
-    ListBox* listBox;
-    Button* addButton;
-    Button* removeButton;
-    Button* changeButton;
-    Button* upButton;
-    Button* downButton;
-
-    void changed() throw();
-    void updateButtons() throw();
-
-    FileSearchPathListComponent (const FileSearchPathListComponent&);
-    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
-};
-
-#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
-
-#endif
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_WildcardFileFilter.h *********/
-#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-
-/**
-    A type of FileFilter that works by wildcard pattern matching.
-
-    This filter only allows files that match one of the specified patterns, but
-    allows all directories through.
-
-    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
-*/
-class JUCE_API  WildcardFileFilter  : public FileFilter
-{
-public:
-
-    /**
-        Creates a wildcard filter for one or more patterns.
-
-        The wildcardPatterns parameter is a comma or semicolon-delimited set of
-        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
-        or .aiff.
-
-        The description is a name to show the user in a list of possible patterns, so
-        for the wav/aiff example, your description might be "audio files".
-    */
-    WildcardFileFilter (const String& wildcardPatterns,
-                        const String& description);
-
-    /** Destructor. */
-    ~WildcardFileFilter();
-
-    /** Returns true if the filename matches one of the patterns specified. */
-    bool isFileSuitable (const File& file) const;
-
-    /** This always returns true. */
-    bool isDirectorySuitable (const File& file) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    StringArray wildcards;
-};
-
-#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-/********* End of inlined file: juce_WildcardFileFilter.h *********/
-
-#endif
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    A simple preview component that shows thumbnails of image files.
-
-    @see FileChooserDialogBox, FilePreviewComponent
-*/
-class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
-                                         private Timer
-{
-public:
-
-    /** Creates an ImagePreviewComponent. */
-    ImagePreviewComponent();
-
-    /** Destructor. */
-    ~ImagePreviewComponent();
-
-    /** @internal */
-    void selectedFileChanged (const File& newSelectedFile);
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    File fileToLoad;
-    Image* currentThumbnail;
-    String currentDetails;
-
-    void getThumbSize (int& w, int& h) const;
-
-    ImagePreviewComponent (const ImagePreviewComponent&);
-    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
-};
-
-#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ImagePreviewComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -51117,7 +50848,276 @@ private:
 /********* End of inlined file: juce_FilenameComponent.h *********/
 
 #endif
-#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/**
+    Shows a set of file paths in a list, allowing them to be added, removed or
+    re-ordered.
+
+    @see FileSearchPath
+*/
+class JUCE_API  FileSearchPathListComponent  : public Component,
+                                               public SettableTooltipClient,
+                                               public FileDragAndDropTarget,
+                                               private ButtonListener,
+                                               private ListBoxModel
+{
+public:
+
+    /** Creates an empty FileSearchPathListComponent.
+
+    */
+    FileSearchPathListComponent();
+
+    /** Destructor. */
+    ~FileSearchPathListComponent();
+
+    /** Returns the path as it is currently shown. */
+    const FileSearchPath& getPath() const throw()                   { return path; }
+
+    /** Changes the current path. */
+    void setPath (const FileSearchPath& newPath);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** A set of colour IDs to use to change the colour of various aspects of the label.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
+                                                  Make this transparent if you don't want the background to be filled. */
+    };
+
+    /** @internal */
+    int getNumRows();
+    /** @internal */
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
+    /** @internal */
+    void deleteKeyPressed (int lastRowSelected);
+    /** @internal */
+    void returnKeyPressed (int lastRowSelected);
+    /** @internal */
+    void listBoxItemDoubleClicked (int row, const MouseEvent&);
+    /** @internal */
+    void selectedRowsChanged (int lastRowSelected);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void buttonClicked (Button* button);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    FileSearchPath path;
+    File defaultBrowseTarget;
+
+    ListBox* listBox;
+    Button* addButton;
+    Button* removeButton;
+    Button* changeButton;
+    Button* upButton;
+    Button* downButton;
+
+    void changed() throw();
+    void updateButtons() throw();
+
+    FileSearchPathListComponent (const FileSearchPathListComponent&);
+    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+};
+
+#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
+
+#endif
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    A simple preview component that shows thumbnails of image files.
+
+    @see FileChooserDialogBox, FilePreviewComponent
+*/
+class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
+                                         private Timer
+{
+public:
+
+    /** Creates an ImagePreviewComponent. */
+    ImagePreviewComponent();
+
+    /** Destructor. */
+    ~ImagePreviewComponent();
+
+    /** @internal */
+    void selectedFileChanged (const File& newSelectedFile);
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    File fileToLoad;
+    Image* currentThumbnail;
+    String currentDetails;
+
+    void getThumbSize (int& w, int& h) const;
+
+    ImagePreviewComponent (const ImagePreviewComponent&);
+    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+};
+
+#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ImagePreviewComponent.h *********/
+
+#endif
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_WildcardFileFilter.h *********/
+#ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+#define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+
+/**
+    A type of FileFilter that works by wildcard pattern matching.
+
+    This filter only allows files that match one of the specified patterns, but
+    allows all directories through.
+
+    @see FileFilter, DirectoryContentsList, FileListComponent, FileBrowserComponent
+*/
+class JUCE_API  WildcardFileFilter  : public FileFilter
+{
+public:
+
+    /**
+        Creates a wildcard filter for one or more patterns.
+
+        The wildcardPatterns parameter is a comma or semicolon-delimited set of
+        patterns, e.g. "*.wav;*.aiff" would look for files ending in either .wav
+        or .aiff.
+
+        The description is a name to show the user in a list of possible patterns, so
+        for the wav/aiff example, your description might be "audio files".
+    */
+    WildcardFileFilter (const String& wildcardPatterns,
+                        const String& description);
+
+    /** Destructor. */
+    ~WildcardFileFilter();
+
+    /** Returns true if the filename matches one of the patterns specified. */
+    bool isFileSuitable (const File& file) const;
+
+    /** This always returns true. */
+    bool isDirectorySuitable (const File& file) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    StringArray wildcards;
+};
+
+#endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
+/********* End of inlined file: juce_WildcardFileFilter.h *********/
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -51452,6 +51452,9 @@ private:
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
 /********* End of inlined file: juce_AlertWindow.h *********/
+
+#endif
+#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__
@@ -51828,13 +51831,10 @@ private:
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
 
 #endif
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
@@ -52417,6 +52417,483 @@ private:
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_MagnifierComponent.h *********/
+#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
+#define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
+
+/**
+    A component that contains another component, and can magnify or shrink it.
+
+    This component will continually update its size so that it fits the zoomed
+    version of the content component that you put inside it, so don't try to
+    change the size of this component directly - instead change that of the
+    content component.
+
+    To make it all work, the magnifier uses extremely cunning ComponentPeer tricks
+    to remap mouse events correctly. This means that the content component won't
+    appear to be a direct child of this component, and instead will think its
+    on the desktop.
+*/
+class JUCE_API  MagnifierComponent    : public Component
+{
+public:
+
+    /** Creates a MagnifierComponent.
+
+        This component will continually update its size so that it fits the zoomed
+        version of the content component that you put inside it, so don't try to
+        change the size of this component directly - instead change that of the
+        content component.
+
+        @param contentComponent     the component to add as the magnified one
+        @param deleteContentCompWhenNoLongerNeeded  if true, the content component will
+                                    be deleted when this component is deleted. If false,
+                                    it's the caller's responsibility to delete it later.
+    */
+    MagnifierComponent (Component* const contentComponent,
+                        const bool deleteContentCompWhenNoLongerNeeded);
+
+    /** Destructor. */
+    ~MagnifierComponent();
+
+    /** Returns the current content component. */
+    Component* getContentComponent() const throw()          { return content; }
+
+    /** Changes the zoom level.
+
+        The scale factor must be greater than zero. Values less than 1 will shrink the
+        image; values greater than 1 will multiply its size by this amount.
+
+        When this is called, this component will change its size to fit the full extent
+        of the newly zoomed content.
+    */
+    void setScaleFactor (double newScaleFactor);
+
+    /** Returns the current zoom factor. */
+    double getScaleFactor() const throw()                   { return scaleFactor; }
+
+    /** Changes the quality setting used to rescale the graphics.
+    */
+    void setResamplingQuality (Graphics::ResamplingQuality newQuality);
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void childBoundsChanged (Component*);
+
+private:
+    Component* content;
+    Component* holderComp;
+    double scaleFactor;
+    ComponentPeer* peer;
+    bool deleteContent;
+    Graphics::ResamplingQuality quality;
+
+    void paint (Graphics& g);
+    void mouseDown (const MouseEvent& e);
+    void mouseUp (const MouseEvent& e);
+    void mouseDrag (const MouseEvent& e);
+    void mouseMove (const MouseEvent& e);
+    void mouseEnter (const MouseEvent& e);
+    void mouseExit (const MouseEvent& e);
+    void mouseWheelMove (const MouseEvent& e, float, float);
+
+    int scaleInt (const int n) const throw();
+
+    MagnifierComponent (const MagnifierComponent&);
+    const MagnifierComponent& operator= (const MagnifierComponent&);
+};
+
+#endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_MagnifierComponent.h *********/
+
+#endif
+#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_MidiKeyboardComponent.h *********/
+#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#define __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays a piano keyboard, whose notes can be clicked on.
+
+    This component will mimic a physical midi keyboard, showing the current state of
+    a MidiKeyboardState object. When the on-screen keys are clicked on, it will play these
+    notes by calling the noteOn() and noteOff() methods of its MidiKeyboardState object.
+
+    Another feature is that the computer keyboard can also be used to play notes. By
+    default it maps the top two rows of a standard querty keyboard to the notes, but
+    these can be remapped if needed. It will only respond to keypresses when it has
+    the keyboard focus, so to disable this feature you can call setWantsKeyboardFocus (false).
+
+    The component is also a ChangeBroadcaster, so if you want to be informed when the
+    keyboard is scrolled, you can register a ChangeListener for callbacks.
+
+    @see MidiKeyboardState
+*/
+class JUCE_API  MidiKeyboardComponent  : public Component,
+                                         public MidiKeyboardStateListener,
+                                         public ChangeBroadcaster,
+                                         private Timer,
+                                         private AsyncUpdater
+{
+public:
+
+    /** The direction of the keyboard.
+
+        @see setOrientation
+    */
+    enum Orientation
+    {
+        horizontalKeyboard,
+        verticalKeyboardFacingLeft,
+        verticalKeyboardFacingRight,
+    };
+
+    /** Creates a MidiKeyboardComponent.
+
+        @param state        the midi keyboard model that this component will represent
+        @param orientation  whether the keyboard is horizonal or vertical
+    */
+    MidiKeyboardComponent (MidiKeyboardState& state,
+                           const Orientation orientation);
+
+    /** Destructor. */
+    ~MidiKeyboardComponent();
+
+    /** Changes the velocity used in midi note-on messages that are triggered by clicking
+        on the component.
+
+        Values are 0 to 1.0, where 1.0 is the heaviest.
+
+        @see setMidiChannel
+    */
+    void setVelocity (const float velocity);
+
+    /** Changes the midi channel number that will be used for events triggered by clicking
+        on the component.
+
+        The channel must be between 1 and 16 (inclusive). This is the channel that will be
+        passed on to the MidiKeyboardState::noteOn() method when the user clicks the component.
+
+        Although this is the channel used for outgoing events, the component can display
+        incoming events from more than one channel - see setMidiChannelsToDisplay()
+
+        @see setVelocity
+    */
+    void setMidiChannel (const int midiChannelNumber);
+
+    /** Returns the midi channel that the keyboard is using for midi messages.
+
+        @see setMidiChannel
+    */
+    int getMidiChannel() const throw()                              { return midiChannel; }
+
+    /** Sets a mask to indicate which incoming midi channels should be represented by
+        key movements.
+
+        The mask is a set of bits, where bit 0 = midi channel 1, bit 1 = midi channel 2, etc.
+
+        If the MidiKeyboardState has a key down for any of the channels whose bits are set
+        in this mask, the on-screen keys will also go down.
+
+        By default, this mask is set to 0xffff (all channels displayed).
+
+        @see setMidiChannel
+    */
+    void setMidiChannelsToDisplay (const int midiChannelMask);
+
+    /** Returns the current set of midi channels represented by the component.
+
+        This is the value that was set with setMidiChannelsToDisplay().
+    */
+    int getMidiChannelsToDisplay() const throw()                    { return midiInChannelMask; }
+
+    /** Changes the width used to draw the white keys. */
+    void setKeyWidth (const float widthInPixels);
+
+    /** Returns the width that was set by setKeyWidth(). */
+    float getKeyWidth() const throw()                               { return keyWidth; }
+
+    /** Changes the keyboard's current direction. */
+    void setOrientation (const Orientation newOrientation);
+
+    /** Returns the keyboard's current direction. */
+    const Orientation getOrientation() const throw()                { return orientation; }
+
+    /** Sets the range of midi notes that the keyboard will be limited to.
+
+        By default the range is 0 to 127 (inclusive), but you can limit this if you
+        only want a restricted set of the keys to be shown.
+
+        Note that the values here are inclusive and must be between 0 and 127.
+    */
+    void setAvailableRange (const int lowestNote,
+                            const int highestNote);
+
+    /** Returns the first note in the available range.
+
+        @see setAvailableRange
+    */
+    int getRangeStart() const throw()                               { return rangeStart; }
+
+    /** Returns the last note in the available range.
+
+        @see setAvailableRange
+    */
+    int getRangeEnd() const throw()                                 { return rangeEnd; }
+
+    /** If the keyboard extends beyond the size of the component, this will scroll
+        it to show the given key at the start.
+
+        Whenever the keyboard's position is changed, this will use the ChangeBroadcaster
+        base class to send a callback to any ChangeListeners that have been registered.
+    */
+    void setLowestVisibleKey (int noteNumber);
+
+    /** Returns the number of the first key shown in the component.
+
+        @see setLowestVisibleKey
+    */
+    int getLowestVisibleKey() const throw()                         { return firstKey; }
+
+    /** Returns the length of the black notes.
+
+        This will be their vertical or horizontal length, depending on the keyboard's orientation.
+    */
+    int getBlackNoteLength() const throw()                          { return blackNoteLength; }
+
+    /** If set to true, then scroll buttons will appear at either end of the keyboard
+        if there are too many notes to fit them all in the component at once.
+    */
+    void setScrollButtonsVisible (const bool canScroll);
+
+    /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        whiteNoteColourId               = 0x1005000,
+        blackNoteColourId               = 0x1005001,
+        keySeparatorLineColourId        = 0x1005002,
+        mouseOverKeyOverlayColourId     = 0x1005003,  /**< This colour will be overlaid on the normal note colour. */
+        keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
+        textLabelColourId               = 0x1005005,
+        upDownButtonBackgroundColourId  = 0x1005006,
+        upDownButtonArrowColourId       = 0x1005007
+    };
+
+    /** Returns the position within the component of the left-hand edge of a key.
+
+        Depending on the keyboard's orientation, this may be a horizontal or vertical
+        distance, in either direction.
+    */
+    int getKeyStartPosition (const int midiNoteNumber) const;
+
+    /** Deletes all key-mappings.
+
+        @see setKeyPressForNote
+    */
+    void clearKeyMappings();
+
+    /** Maps a key-press to a given note.
+
+        @param key                  the key that should trigger the note
+        @param midiNoteOffsetFromC  how many semitones above C the triggered note should
+                                    be. The actual midi note that gets played will be
+                                    this value + (12 * the current base octave). To change
+                                    the base octave, see setKeyPressBaseOctave()
+    */
+    void setKeyPressForNote (const KeyPress& key,
+                             const int midiNoteOffsetFromC);
+
+    /** Removes any key-mappings for a given note.
+
+        For a description of what the note number means, see setKeyPressForNote().
+    */
+    void removeKeyPressForNote (const int midiNoteOffsetFromC);
+
+    /** Changes the base note above which key-press-triggered notes are played.
+
+        The set of key-mappings that trigger notes can be moved up and down to cover
+        the entire scale using this method.
+
+        The value passed in is an octave number between 0 and 10 (inclusive), and
+        indicates which C is the base note to which the key-mapped notes are
+        relative.
+    */
+    void setKeyPressBaseOctave (const int newOctaveNumber);
+
+    /** This sets the octave number which is shown as the octave number for middle C.
+
+        This affects only the default implementation of getWhiteNoteText(), which
+        passes this octave number to MidiMessage::getMidiNoteName() in order to
+        get the note text. See MidiMessage::getMidiNoteName() for more info about
+        the parameter.
+
+        By default this value is set to 3.
+
+        @see getOctaveForMiddleC
+    */
+    void setOctaveForMiddleC (const int octaveNumForMiddleC) throw();
+
+    /** This returns the value set by setOctaveForMiddleC().
+        @see setOctaveForMiddleC
+    */
+    int getOctaveForMiddleC() const throw()             { return octaveNumForMiddleC; }
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void mouseMove (const MouseEvent& e);
+    /** @internal */
+    void mouseDrag (const MouseEvent& e);
+    /** @internal */
+    void mouseDown (const MouseEvent& e);
+    /** @internal */
+    void mouseUp (const MouseEvent& e);
+    /** @internal */
+    void mouseEnter (const MouseEvent& e);
+    /** @internal */
+    void mouseExit (const MouseEvent& e);
+    /** @internal */
+    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    /** @internal */
+    void timerCallback();
+    /** @internal */
+    bool keyStateChanged (const bool isKeyDown);
+    /** @internal */
+    void focusLost (FocusChangeType cause);
+    /** @internal */
+    void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
+    /** @internal */
+    void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
+    /** @internal */
+    void handleAsyncUpdate();
+    /** @internal */
+    void colourChanged();
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    friend class MidiKeyboardUpDownButton;
+
+    /** Draws a white note in the given rectangle.
+
+        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
+        currently pressed down.
+
+        When doing this, be sure to note the keyboard's orientation.
+    */
+    virtual void drawWhiteNote (int midiNoteNumber,
+                                Graphics& g,
+                                int x, int y, int w, int h,
+                                bool isDown, bool isOver,
+                                const Colour& lineColour,
+                                const Colour& textColour);
+
+    /** Draws a black note in the given rectangle.
+
+        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
+        currently pressed down.
+
+        When doing this, be sure to note the keyboard's orientation.
+    */
+    virtual void drawBlackNote (int midiNoteNumber,
+                                Graphics& g,
+                                int x, int y, int w, int h,
+                                bool isDown, bool isOver,
+                                const Colour& noteFillColour);
+
+    /** Allows text to be drawn on the white notes.
+
+        By default this is used to label the C in each octave, but could be used for other things.
+
+        @see setOctaveForMiddleC
+    */
+    virtual const String getWhiteNoteText (const int midiNoteNumber);
+
+    /** Draws the up and down buttons that change the base note. */
+    virtual void drawUpDownButton (Graphics& g, int w, int h,
+                                   const bool isMouseOver,
+                                   const bool isButtonPressed,
+                                   const bool movesOctavesUp);
+
+    /** Callback when the mouse is clicked on a key.
+
+        You could use this to do things like handle right-clicks on keys, etc.
+
+        Return true if you want the click to trigger the note, or false if you
+        want to handle it yourself and not have the note played.
+
+        @see mouseDraggedToKey
+    */
+    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
+
+    /** Callback when the mouse is dragged from one key onto another.
+
+        @see mouseDownOnKey
+    */
+    virtual void mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
+
+    /** Calculates the positon of a given midi-note.
+
+        This can be overridden to create layouts with custom key-widths.
+
+        @param midiNoteNumber   the note to find
+        @param keyWidth         the desired width in pixels of one key - see setKeyWidth()
+        @param x                the x position of the left-hand edge of the key (this method
+                                always works in terms of a horizontal keyboard)
+        @param w                the width of the key
+    */
+    virtual void getKeyPosition (int midiNoteNumber, float keyWidth,
+                                 int& x, int& w) const;
+
+private:
+
+    MidiKeyboardState& state;
+    int xOffset, blackNoteLength;
+    float keyWidth;
+    Orientation orientation;
+
+    int midiChannel, midiInChannelMask;
+    float velocity;
+    int noteUnderMouse, mouseDownNote;
+    BitArray keysPressed, keysCurrentlyDrawnDown;
+
+    int rangeStart, rangeEnd, firstKey;
+    bool canScroll, mouseDragging;
+    Button* scrollDown;
+    Button* scrollUp;
+
+    Array <KeyPress> keyPresses;
+    Array <int> keyPressNotes;
+    int keyMappingOctave;
+    int octaveNumForMiddleC;
+
+    void getKeyPos (int midiNoteNumber, int& x, int& w) const;
+    int xyToNote (int x, int y);
+    int remappedXYToNote (int x, int y) const;
+    void resetAnyKeysInUse();
+    void updateNoteUnderMouse (int x, int y);
+    void repaintNote (const int midiNoteNumber);
+
+    MidiKeyboardComponent (const MidiKeyboardComponent&);
+    const MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+};
+
+#endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_MidiKeyboardComponent.h *********/
+
+#endif
 #ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_NSViewComponent.h *********/
@@ -52914,198 +53391,6 @@ private:
 /********* End of inlined file: juce_PreferencesPanel.h *********/
 
 #endif
-#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_MagnifierComponent.h *********/
-#ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-#define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-
-/**
-    A component that contains another component, and can magnify or shrink it.
-
-    This component will continually update its size so that it fits the zoomed
-    version of the content component that you put inside it, so don't try to
-    change the size of this component directly - instead change that of the
-    content component.
-
-    To make it all work, the magnifier uses extremely cunning ComponentPeer tricks
-    to remap mouse events correctly. This means that the content component won't
-    appear to be a direct child of this component, and instead will think its
-    on the desktop.
-*/
-class JUCE_API  MagnifierComponent    : public Component
-{
-public:
-
-    /** Creates a MagnifierComponent.
-
-        This component will continually update its size so that it fits the zoomed
-        version of the content component that you put inside it, so don't try to
-        change the size of this component directly - instead change that of the
-        content component.
-
-        @param contentComponent     the component to add as the magnified one
-        @param deleteContentCompWhenNoLongerNeeded  if true, the content component will
-                                    be deleted when this component is deleted. If false,
-                                    it's the caller's responsibility to delete it later.
-    */
-    MagnifierComponent (Component* const contentComponent,
-                        const bool deleteContentCompWhenNoLongerNeeded);
-
-    /** Destructor. */
-    ~MagnifierComponent();
-
-    /** Returns the current content component. */
-    Component* getContentComponent() const throw()          { return content; }
-
-    /** Changes the zoom level.
-
-        The scale factor must be greater than zero. Values less than 1 will shrink the
-        image; values greater than 1 will multiply its size by this amount.
-
-        When this is called, this component will change its size to fit the full extent
-        of the newly zoomed content.
-    */
-    void setScaleFactor (double newScaleFactor);
-
-    /** Returns the current zoom factor. */
-    double getScaleFactor() const throw()                   { return scaleFactor; }
-
-    /** Changes the quality setting used to rescale the graphics.
-    */
-    void setResamplingQuality (Graphics::ResamplingQuality newQuality);
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void childBoundsChanged (Component*);
-
-private:
-    Component* content;
-    Component* holderComp;
-    double scaleFactor;
-    ComponentPeer* peer;
-    bool deleteContent;
-    Graphics::ResamplingQuality quality;
-
-    void paint (Graphics& g);
-    void mouseDown (const MouseEvent& e);
-    void mouseUp (const MouseEvent& e);
-    void mouseDrag (const MouseEvent& e);
-    void mouseMove (const MouseEvent& e);
-    void mouseEnter (const MouseEvent& e);
-    void mouseExit (const MouseEvent& e);
-    void mouseWheelMove (const MouseEvent& e, float, float);
-
-    int scaleInt (const int n) const throw();
-
-    MagnifierComponent (const MagnifierComponent&);
-    const MagnifierComponent& operator= (const MagnifierComponent&);
-};
-
-#endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_MagnifierComponent.h *********/
-
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WebBrowserComponent.h *********/
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-#if JUCE_WEB_BROWSER
-
-class WebBrowserComponentInternal;
-
-/**
-    A component that displays an embedded web browser.
-
-    The browser itself will be platform-dependent. On the Mac, probably Safari, on
-    Windows, probably IE.
-
-*/
-class JUCE_API  WebBrowserComponent      : public Component
-{
-public:
-
-    /** Creates a WebBrowserComponent.
-
-        Once it's created and visible, send the browser to a URL using goToURL().
-    */
-    WebBrowserComponent();
-
-    /** Destructor. */
-    ~WebBrowserComponent();
-
-    /** Sends the browser to a particular URL.
-
-        @param url      the URL to go to.
-        @param headers  an optional set of parameters to put in the HTTP header. If
-                        you supply this, it should be a set of string in the form
-                        "HeaderKey: HeaderValue"
-        @param postData an optional block of data that will be attached to the HTTP
-                        POST request
-    */
-    void goToURL (const String& url,
-                  const StringArray* headers = 0,
-                  const MemoryBlock* postData = 0);
-
-    /** Stops the current page loading.
-    */
-    void stop();
-
-    /** Sends the browser back one page.
-    */
-    void goBack();
-
-    /** Sends the browser forward one page.
-    */
-    void goForward();
-
-    /** Refreshes the browser.
-    */
-    void refresh();
-
-    /** This callback is called when the browser is about to navigate
-        to a new location.
-
-        You can override this method to perform some action when the user
-        tries to go to a particular URL. To allow the operation to carry on,
-        return true, or return false to stop the navigation happening.
-    */
-    virtual bool pageAboutToLoad (const String& newURL);
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void parentHierarchyChanged();
-    /** @internal */
-    void visibilityChanged();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    WebBrowserComponentInternal* browser;
-    bool blankPageShown;
-
-    String lastURL;
-    StringArray lastHeaders;
-    MemoryBlock lastPostData;
-
-    void reloadLastURL();
-    void checkWindowAssociation();
-
-    WebBrowserComponent (const WebBrowserComponent&);
-    const WebBrowserComponent& operator= (const WebBrowserComponent&);
-};
-
-#endif
-#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_WebBrowserComponent.h *********/
-
-#endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_QuickTimeMovieComponent.h *********/
@@ -53339,388 +53624,103 @@ private:
 /********* End of inlined file: juce_SystemTrayIconComponent.h *********/
 
 #endif
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiKeyboardComponent.h *********/
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
-#define __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+/********* Start of inlined file: juce_WebBrowserComponent.h *********/
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+#if JUCE_WEB_BROWSER
+
+class WebBrowserComponentInternal;
 
 /**
-    A component that displays a piano keyboard, whose notes can be clicked on.
+    A component that displays an embedded web browser.
 
-    This component will mimic a physical midi keyboard, showing the current state of
-    a MidiKeyboardState object. When the on-screen keys are clicked on, it will play these
-    notes by calling the noteOn() and noteOff() methods of its MidiKeyboardState object.
+    The browser itself will be platform-dependent. On the Mac, probably Safari, on
+    Windows, probably IE.
 
-    Another feature is that the computer keyboard can also be used to play notes. By
-    default it maps the top two rows of a standard querty keyboard to the notes, but
-    these can be remapped if needed. It will only respond to keypresses when it has
-    the keyboard focus, so to disable this feature you can call setWantsKeyboardFocus (false).
-
-    The component is also a ChangeBroadcaster, so if you want to be informed when the
-    keyboard is scrolled, you can register a ChangeListener for callbacks.
-
-    @see MidiKeyboardState
 */
-class JUCE_API  MidiKeyboardComponent  : public Component,
-                                         public MidiKeyboardStateListener,
-                                         public ChangeBroadcaster,
-                                         private Timer,
-                                         private AsyncUpdater
+class JUCE_API  WebBrowserComponent      : public Component
 {
 public:
 
-    /** The direction of the keyboard.
+    /** Creates a WebBrowserComponent.
 
-        @see setOrientation
+        Once it's created and visible, send the browser to a URL using goToURL().
     */
-    enum Orientation
-    {
-        horizontalKeyboard,
-        verticalKeyboardFacingLeft,
-        verticalKeyboardFacingRight,
-    };
-
-    /** Creates a MidiKeyboardComponent.
-
-        @param state        the midi keyboard model that this component will represent
-        @param orientation  whether the keyboard is horizonal or vertical
-    */
-    MidiKeyboardComponent (MidiKeyboardState& state,
-                           const Orientation orientation);
+    WebBrowserComponent();
 
     /** Destructor. */
-    ~MidiKeyboardComponent();
+    ~WebBrowserComponent();
 
-    /** Changes the velocity used in midi note-on messages that are triggered by clicking
-        on the component.
+    /** Sends the browser to a particular URL.
 
-        Values are 0 to 1.0, where 1.0 is the heaviest.
-
-        @see setMidiChannel
+        @param url      the URL to go to.
+        @param headers  an optional set of parameters to put in the HTTP header. If
+                        you supply this, it should be a set of string in the form
+                        "HeaderKey: HeaderValue"
+        @param postData an optional block of data that will be attached to the HTTP
+                        POST request
     */
-    void setVelocity (const float velocity);
+    void goToURL (const String& url,
+                  const StringArray* headers = 0,
+                  const MemoryBlock* postData = 0);
 
-    /** Changes the midi channel number that will be used for events triggered by clicking
-        on the component.
-
-        The channel must be between 1 and 16 (inclusive). This is the channel that will be
-        passed on to the MidiKeyboardState::noteOn() method when the user clicks the component.
-
-        Although this is the channel used for outgoing events, the component can display
-        incoming events from more than one channel - see setMidiChannelsToDisplay()
-
-        @see setVelocity
+    /** Stops the current page loading.
     */
-    void setMidiChannel (const int midiChannelNumber);
+    void stop();
 
-    /** Returns the midi channel that the keyboard is using for midi messages.
-
-        @see setMidiChannel
+    /** Sends the browser back one page.
     */
-    int getMidiChannel() const throw()                              { return midiChannel; }
+    void goBack();
 
-    /** Sets a mask to indicate which incoming midi channels should be represented by
-        key movements.
-
-        The mask is a set of bits, where bit 0 = midi channel 1, bit 1 = midi channel 2, etc.
-
-        If the MidiKeyboardState has a key down for any of the channels whose bits are set
-        in this mask, the on-screen keys will also go down.
-
-        By default, this mask is set to 0xffff (all channels displayed).
-
-        @see setMidiChannel
+    /** Sends the browser forward one page.
     */
-    void setMidiChannelsToDisplay (const int midiChannelMask);
+    void goForward();
 
-    /** Returns the current set of midi channels represented by the component.
-
-        This is the value that was set with setMidiChannelsToDisplay().
+    /** Refreshes the browser.
     */
-    int getMidiChannelsToDisplay() const throw()                    { return midiInChannelMask; }
+    void refresh();
 
-    /** Changes the width used to draw the white keys. */
-    void setKeyWidth (const float widthInPixels);
+    /** This callback is called when the browser is about to navigate
+        to a new location.
 
-    /** Returns the width that was set by setKeyWidth(). */
-    float getKeyWidth() const throw()                               { return keyWidth; }
-
-    /** Changes the keyboard's current direction. */
-    void setOrientation (const Orientation newOrientation);
-
-    /** Returns the keyboard's current direction. */
-    const Orientation getOrientation() const throw()                { return orientation; }
-
-    /** Sets the range of midi notes that the keyboard will be limited to.
-
-        By default the range is 0 to 127 (inclusive), but you can limit this if you
-        only want a restricted set of the keys to be shown.
-
-        Note that the values here are inclusive and must be between 0 and 127.
+        You can override this method to perform some action when the user
+        tries to go to a particular URL. To allow the operation to carry on,
+        return true, or return false to stop the navigation happening.
     */
-    void setAvailableRange (const int lowestNote,
-                            const int highestNote);
-
-    /** Returns the first note in the available range.
-
-        @see setAvailableRange
-    */
-    int getRangeStart() const throw()                               { return rangeStart; }
-
-    /** Returns the last note in the available range.
-
-        @see setAvailableRange
-    */
-    int getRangeEnd() const throw()                                 { return rangeEnd; }
-
-    /** If the keyboard extends beyond the size of the component, this will scroll
-        it to show the given key at the start.
-
-        Whenever the keyboard's position is changed, this will use the ChangeBroadcaster
-        base class to send a callback to any ChangeListeners that have been registered.
-    */
-    void setLowestVisibleKey (int noteNumber);
-
-    /** Returns the number of the first key shown in the component.
-
-        @see setLowestVisibleKey
-    */
-    int getLowestVisibleKey() const throw()                         { return firstKey; }
-
-    /** Returns the length of the black notes.
-
-        This will be their vertical or horizontal length, depending on the keyboard's orientation.
-    */
-    int getBlackNoteLength() const throw()                          { return blackNoteLength; }
-
-    /** If set to true, then scroll buttons will appear at either end of the keyboard
-        if there are too many notes to fit them all in the component at once.
-    */
-    void setScrollButtonsVisible (const bool canScroll);
-
-    /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        whiteNoteColourId               = 0x1005000,
-        blackNoteColourId               = 0x1005001,
-        keySeparatorLineColourId        = 0x1005002,
-        mouseOverKeyOverlayColourId     = 0x1005003,  /**< This colour will be overlaid on the normal note colour. */
-        keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
-        textLabelColourId               = 0x1005005,
-        upDownButtonBackgroundColourId  = 0x1005006,
-        upDownButtonArrowColourId       = 0x1005007
-    };
-
-    /** Returns the position within the component of the left-hand edge of a key.
-
-        Depending on the keyboard's orientation, this may be a horizontal or vertical
-        distance, in either direction.
-    */
-    int getKeyStartPosition (const int midiNoteNumber) const;
-
-    /** Deletes all key-mappings.
-
-        @see setKeyPressForNote
-    */
-    void clearKeyMappings();
-
-    /** Maps a key-press to a given note.
-
-        @param key                  the key that should trigger the note
-        @param midiNoteOffsetFromC  how many semitones above C the triggered note should
-                                    be. The actual midi note that gets played will be
-                                    this value + (12 * the current base octave). To change
-                                    the base octave, see setKeyPressBaseOctave()
-    */
-    void setKeyPressForNote (const KeyPress& key,
-                             const int midiNoteOffsetFromC);
-
-    /** Removes any key-mappings for a given note.
-
-        For a description of what the note number means, see setKeyPressForNote().
-    */
-    void removeKeyPressForNote (const int midiNoteOffsetFromC);
-
-    /** Changes the base note above which key-press-triggered notes are played.
-
-        The set of key-mappings that trigger notes can be moved up and down to cover
-        the entire scale using this method.
-
-        The value passed in is an octave number between 0 and 10 (inclusive), and
-        indicates which C is the base note to which the key-mapped notes are
-        relative.
-    */
-    void setKeyPressBaseOctave (const int newOctaveNumber);
-
-    /** This sets the octave number which is shown as the octave number for middle C.
-
-        This affects only the default implementation of getWhiteNoteText(), which
-        passes this octave number to MidiMessage::getMidiNoteName() in order to
-        get the note text. See MidiMessage::getMidiNoteName() for more info about
-        the parameter.
-
-        By default this value is set to 3.
-
-        @see getOctaveForMiddleC
-    */
-    void setOctaveForMiddleC (const int octaveNumForMiddleC) throw();
-
-    /** This returns the value set by setOctaveForMiddleC().
-        @see setOctaveForMiddleC
-    */
-    int getOctaveForMiddleC() const throw()             { return octaveNumForMiddleC; }
+    virtual bool pageAboutToLoad (const String& newURL);
 
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
     void resized();
     /** @internal */
-    void mouseMove (const MouseEvent& e);
+    void parentHierarchyChanged();
     /** @internal */
-    void mouseDrag (const MouseEvent& e);
-    /** @internal */
-    void mouseDown (const MouseEvent& e);
-    /** @internal */
-    void mouseUp (const MouseEvent& e);
-    /** @internal */
-    void mouseEnter (const MouseEvent& e);
-    /** @internal */
-    void mouseExit (const MouseEvent& e);
-    /** @internal */
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
-    /** @internal */
-    void timerCallback();
-    /** @internal */
-    bool keyStateChanged (const bool isKeyDown);
-    /** @internal */
-    void focusLost (FocusChangeType cause);
-    /** @internal */
-    void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
-    /** @internal */
-    void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
-    /** @internal */
-    void handleAsyncUpdate();
-    /** @internal */
-    void colourChanged();
+    void visibilityChanged();
 
     juce_UseDebuggingNewOperator
 
-protected:
-    friend class MidiKeyboardUpDownButton;
-
-    /** Draws a white note in the given rectangle.
-
-        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
-        currently pressed down.
-
-        When doing this, be sure to note the keyboard's orientation.
-    */
-    virtual void drawWhiteNote (int midiNoteNumber,
-                                Graphics& g,
-                                int x, int y, int w, int h,
-                                bool isDown, bool isOver,
-                                const Colour& lineColour,
-                                const Colour& textColour);
-
-    /** Draws a black note in the given rectangle.
-
-        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
-        currently pressed down.
-
-        When doing this, be sure to note the keyboard's orientation.
-    */
-    virtual void drawBlackNote (int midiNoteNumber,
-                                Graphics& g,
-                                int x, int y, int w, int h,
-                                bool isDown, bool isOver,
-                                const Colour& noteFillColour);
-
-    /** Allows text to be drawn on the white notes.
-
-        By default this is used to label the C in each octave, but could be used for other things.
-
-        @see setOctaveForMiddleC
-    */
-    virtual const String getWhiteNoteText (const int midiNoteNumber);
-
-    /** Draws the up and down buttons that change the base note. */
-    virtual void drawUpDownButton (Graphics& g, int w, int h,
-                                   const bool isMouseOver,
-                                   const bool isButtonPressed,
-                                   const bool movesOctavesUp);
-
-    /** Callback when the mouse is clicked on a key.
-
-        You could use this to do things like handle right-clicks on keys, etc.
-
-        Return true if you want the click to trigger the note, or false if you
-        want to handle it yourself and not have the note played.
-
-        @see mouseDraggedToKey
-    */
-    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
-
-    /** Callback when the mouse is dragged from one key onto another.
-
-        @see mouseDownOnKey
-    */
-    virtual void mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
-
-    /** Calculates the positon of a given midi-note.
-
-        This can be overridden to create layouts with custom key-widths.
-
-        @param midiNoteNumber   the note to find
-        @param keyWidth         the desired width in pixels of one key - see setKeyWidth()
-        @param x                the x position of the left-hand edge of the key (this method
-                                always works in terms of a horizontal keyboard)
-        @param w                the width of the key
-    */
-    virtual void getKeyPosition (int midiNoteNumber, float keyWidth,
-                                 int& x, int& w) const;
-
 private:
+    WebBrowserComponentInternal* browser;
+    bool blankPageShown;
 
-    MidiKeyboardState& state;
-    int xOffset, blackNoteLength;
-    float keyWidth;
-    Orientation orientation;
+    String lastURL;
+    StringArray lastHeaders;
+    MemoryBlock lastPostData;
 
-    int midiChannel, midiInChannelMask;
-    float velocity;
-    int noteUnderMouse, mouseDownNote;
-    BitArray keysPressed, keysCurrentlyDrawnDown;
+    void reloadLastURL();
+    void checkWindowAssociation();
 
-    int rangeStart, rangeEnd, firstKey;
-    bool canScroll, mouseDragging;
-    Button* scrollDown;
-    Button* scrollUp;
-
-    Array <KeyPress> keyPresses;
-    Array <int> keyPressNotes;
-    int keyMappingOctave;
-    int octaveNumForMiddleC;
-
-    void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-    int xyToNote (int x, int y);
-    int remappedXYToNote (int x, int y) const;
-    void resetAnyKeysInUse();
-    void updateNoteUnderMouse (int x, int y);
-    void repaintNote (const int midiNoteNumber);
-
-    MidiKeyboardComponent (const MidiKeyboardComponent&);
-    const MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+    WebBrowserComponent (const WebBrowserComponent&);
+    const WebBrowserComponent& operator= (const WebBrowserComponent&);
 };
 
-#endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_MidiKeyboardComponent.h *********/
+#endif
+#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_WebBrowserComponent.h *********/
 
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__

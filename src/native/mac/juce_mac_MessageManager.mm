@@ -369,7 +369,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
         if (e != 0 && ! isEventBlockedByModalComps (e))
             [NSApp sendEvent: e];
-        
+
         if (Time::getMillisecondCounter() >= endTime)
             break;
     }

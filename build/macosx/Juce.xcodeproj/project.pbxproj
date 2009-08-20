@@ -1220,7 +1220,7 @@
 			children = (
 				84A4883308A22E4900752A2B /* juce_appframework */,
 				84A4899708A22E4A00752A2B /* juce_core */,
-				84A4881C08A22E2400752A2B /* mac specific code */,
+				84A4881C08A22E2400752A2B /* native mac code */,
 			);
 			lineEnding = 2;
 			name = Source;
@@ -1350,7 +1350,7 @@
 			name = midi;
 			sourceTree = "<group>";
 		};
-		84A4881C08A22E2400752A2B /* mac specific code */ = {
+		84A4881C08A22E2400752A2B /* native mac code */ = {
 			isa = PBXGroup;
 			children = (
 				8484E9A4103C958A008B7C6C /* juce_mac_NativeCode.mm */,
@@ -1381,8 +1381,8 @@
 				8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */,
 				8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */,
 			);
-			name = "mac specific code";
-			path = platform_specific_code;
+			name = "native mac code";
+			path = ../../src/native/mac;
 			sourceTree = SOURCE_ROOT;
 		};
 		84A4883308A22E4900752A2B /* juce_appframework */ = {
