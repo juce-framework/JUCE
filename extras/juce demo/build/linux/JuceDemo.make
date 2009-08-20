@@ -43,13 +43,13 @@ OBJECTS := \
 	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
+	$(OBJDIR)/PathsAndTransformsDemo.o \
 	$(OBJDIR)/WidgetsDemo.o \
 	$(OBJDIR)/ThreadingDemo.o \
 	$(OBJDIR)/TreeViewDemo.o \
 	$(OBJDIR)/QuickTimeDemo.o \
 	$(OBJDIR)/TableDemo.o \
 	$(OBJDIR)/OpenGLDemo.o \
-	$(OBJDIR)/PathsAndTransformsDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
 	$(OBJDIR)/InterprocessCommsDemo.o \
 	$(OBJDIR)/DragAndDropDemo.o \
@@ -117,6 +117,11 @@ $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -143,11 +148,6 @@ $(OBJDIR)/TableDemo.o: ../../src/demos/TableDemo.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/OpenGLDemo.o: ../../src/demos/OpenGLDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

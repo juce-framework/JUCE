@@ -66,10 +66,10 @@ OBJECTS := \
 	$(OBJDIR)/juce_BufferedInputStream.o \
 	$(OBJDIR)/juce_FileInputSource.o \
 	$(OBJDIR)/juce_GZIPCompressorOutputStream.o \
-	$(OBJDIR)/juce_GZIPDecompressorInputStream.o \
 	$(OBJDIR)/juce_MemoryInputStream.o \
 	$(OBJDIR)/juce_MemoryOutputStream.o \
 	$(OBJDIR)/juce_SubregionStream.o \
+	$(OBJDIR)/juce_GZIPDecompressorInputStream.o \
 	$(OBJDIR)/juce_PerformanceCounter.o \
 	$(OBJDIR)/juce_Uuid.o \
 	$(OBJDIR)/juce_ZipFile.o \
@@ -189,8 +189,8 @@ OBJECTS := \
 	$(OBJDIR)/juce_Point.o \
 	$(OBJDIR)/juce_Rectangle.o \
 	$(OBJDIR)/juce_RectangleList.o \
-	$(OBJDIR)/juce_PathStrokeType.o \
 	$(OBJDIR)/juce_PositionedRectangle.o \
+	$(OBJDIR)/juce_PathStrokeType.o \
 	$(OBJDIR)/juce_Image.o \
 	$(OBJDIR)/juce_ImageCache.o \
 	$(OBJDIR)/juce_ImageConvolutionKernel.o \
@@ -291,20 +291,19 @@ OBJECTS := \
 	$(OBJDIR)/juce_TopLevelWindow.o \
 	$(OBJDIR)/juce_ComponentPeer.o \
 	$(OBJDIR)/juce_AlertWindow.o \
-	$(OBJDIR)/juce_linux_Files.o \
-	$(OBJDIR)/juce_linux_Audio.o \
-	$(OBJDIR)/juce_linux_Fonts.o \
-	$(OBJDIR)/juce_linux_Network.o \
-	$(OBJDIR)/juce_linux_NamedPipe.o \
-	$(OBJDIR)/juce_linux_Midi.o \
 	$(OBJDIR)/juce_linux_Windowing.o \
-	$(OBJDIR)/juce_linux_AudioCDReader.o \
-	$(OBJDIR)/juce_linux_Threads.o \
-	$(OBJDIR)/juce_linux_Messaging.o \
-	$(OBJDIR)/juce_linux_SystemStats.o \
-	$(OBJDIR)/juce_linux_NativeCode.o \
-	$(OBJDIR)/juce_linux_FileChooser.o \
 	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
+	$(OBJDIR)/juce_linux_Threads.o \
+	$(OBJDIR)/juce_linux_SystemStats.o \
+	$(OBJDIR)/juce_linux_Network.o \
+	$(OBJDIR)/juce_linux_Messaging.o \
+	$(OBJDIR)/juce_linux_Midi.o \
+	$(OBJDIR)/juce_linux_Files.o \
+	$(OBJDIR)/juce_linux_Fonts.o \
+	$(OBJDIR)/juce_linux_FileChooser.o \
+	$(OBJDIR)/juce_linux_AudioCDReader.o \
+	$(OBJDIR)/juce_linux_Audio.o \
+	$(OBJDIR)/juce_linux_NativeCode.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -481,11 +480,6 @@ $(OBJDIR)/juce_GZIPCompressorOutputStream.o: ../../src/juce_core/io/streams/juce
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_GZIPDecompressorInputStream.o: ../../src/juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_MemoryInputStream.o: ../../src/juce_core/io/streams/juce_MemoryInputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -497,6 +491,11 @@ $(OBJDIR)/juce_MemoryOutputStream.o: ../../src/juce_core/io/streams/juce_MemoryO
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SubregionStream.o: ../../src/juce_core/io/streams/juce_SubregionStream.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_GZIPDecompressorInputStream.o: ../../src/juce_core/io/streams/juce_GZIPDecompressorInputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1096,12 +1095,12 @@ $(OBJDIR)/juce_RectangleList.o: ../../src/juce_appframework/gui/graphics/geometr
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_PathStrokeType.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp
+$(OBJDIR)/juce_PositionedRectangle.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_PositionedRectangle.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PositionedRectangle.cpp
+$(OBJDIR)/juce_PathStrokeType.o: ../../src/juce_appframework/gui/graphics/geometry/juce_PathStrokeType.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1606,72 +1605,67 @@ $(OBJDIR)/juce_AlertWindow.o: ../../src/juce_appframework/gui/components/windows
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Files.o: platform_specific_code/juce_linux_Files.cpp
+$(OBJDIR)/juce_linux_Windowing.o: ../../src/native/linux/juce_linux_Windowing.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Audio.o: platform_specific_code/juce_linux_Audio.cpp
+$(OBJDIR)/juce_linux_WebBrowserComponent.o: ../../src/native/linux/juce_linux_WebBrowserComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Fonts.o: platform_specific_code/juce_linux_Fonts.cpp
+$(OBJDIR)/juce_linux_Threads.o: ../../src/native/linux/juce_linux_Threads.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Network.o: platform_specific_code/juce_linux_Network.cpp
+$(OBJDIR)/juce_linux_SystemStats.o: ../../src/native/linux/juce_linux_SystemStats.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_NamedPipe.o: platform_specific_code/juce_linux_NamedPipe.cpp
+$(OBJDIR)/juce_linux_Network.o: ../../src/native/linux/juce_linux_Network.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Midi.o: platform_specific_code/juce_linux_Midi.cpp
+$(OBJDIR)/juce_linux_Messaging.o: ../../src/native/linux/juce_linux_Messaging.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Windowing.o: platform_specific_code/juce_linux_Windowing.cpp
+$(OBJDIR)/juce_linux_Midi.o: ../../src/native/linux/juce_linux_Midi.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_AudioCDReader.o: platform_specific_code/juce_linux_AudioCDReader.cpp
+$(OBJDIR)/juce_linux_Files.o: ../../src/native/linux/juce_linux_Files.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Threads.o: platform_specific_code/juce_linux_Threads.cpp
+$(OBJDIR)/juce_linux_Fonts.o: ../../src/native/linux/juce_linux_Fonts.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Messaging.o: platform_specific_code/juce_linux_Messaging.cpp
+$(OBJDIR)/juce_linux_FileChooser.o: ../../src/native/linux/juce_linux_FileChooser.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_SystemStats.o: platform_specific_code/juce_linux_SystemStats.cpp
+$(OBJDIR)/juce_linux_AudioCDReader.o: ../../src/native/linux/juce_linux_AudioCDReader.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_NativeCode.o: platform_specific_code/juce_linux_NativeCode.cpp
+$(OBJDIR)/juce_linux_Audio.o: ../../src/native/linux/juce_linux_Audio.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_FileChooser.o: platform_specific_code/juce_linux_FileChooser.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_linux_WebBrowserComponent.o: platform_specific_code/juce_linux_WebBrowserComponent.cpp
+$(OBJDIR)/juce_linux_NativeCode.o: ../../src/native/juce_linux_NativeCode.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

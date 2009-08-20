@@ -50,15 +50,7 @@ int CharacterFunctions::length (const char* const s) throw()
 
 int CharacterFunctions::length (const juce_wchar* const s) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    int n = 0;
-    while (s[n] != 0)
-        ++n;
-
-    return n;
-#else
     return (int) wcslen (s);
-#endif
 }
 
 void CharacterFunctions::copy (char* dest, const char* src, const int maxChars) throw()
@@ -68,14 +60,7 @@ void CharacterFunctions::copy (char* dest, const char* src, const int maxChars) 
 
 void CharacterFunctions::copy (juce_wchar* dest, const juce_wchar* src, int maxChars) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    while (--maxChars >= 0 && *src != 0)
-        *dest++ = *src++;
-
-    *dest = 0;
-#else
     wcsncpy (dest, src, maxChars);
-#endif
 }
 
 void CharacterFunctions::copy (juce_wchar* dest, const char* src, const int maxChars) throw()
@@ -100,17 +85,7 @@ void CharacterFunctions::append (char* dest, const char* src) throw()
 
 void CharacterFunctions::append (juce_wchar* dest, const juce_wchar* src) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    while (*dest != 0)
-        ++dest;
-
-    while (*src != 0)
-        *dest++ = *src++;
-
-    *dest = 0;
-#else
     wcscat (dest, src);
-#endif
 }
 
 int CharacterFunctions::compare (const char* const s1, const char* const s2) throw()
@@ -121,57 +96,19 @@ int CharacterFunctions::compare (const char* const s1, const char* const s2) thr
 int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2) throw()
 {
     jassert (s1 != 0 && s2 != 0);
-
-#if MACOS_10_2_OR_EARLIER
-    for (;;)
-    {
-        if (*s1 != *s2)
-        {
-            const int diff = *s1 - *s2;
-
-            if (diff != 0)
-                return diff < 0 ? -1 : 1;
-        }
-        else if (*s1 == 0)
-            break;
-
-        ++s1;
-        ++s2;
-    }
-
-    return 0;
-#else
     return wcscmp (s1, s2);
-#endif
 }
 
 int CharacterFunctions::compare (const char* const s1, const char* const s2, const int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
-
     return strncmp (s1, s2, maxChars);
 }
 
 int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw()
 {
     jassert (s1 != 0 && s2 != 0);
-
-#if MACOS_10_2_OR_EARLIER
-    while (--maxChars >= 0)
-    {
-        if (*s1 != *s2)
-            return (*s1 < *s2) ? -1 : 1;
-        else if (*s1 == 0)
-            break;
-
-        ++s1;
-        ++s2;
-    }
-
-    return 0;
-#else
     return wcsncmp (s1, s2, maxChars);
-#endif
 }
 
 int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2) throw()
@@ -257,31 +194,7 @@ const char* CharacterFunctions::find (const char* const haystack, const char* co
 
 const juce_wchar* CharacterFunctions::find (const juce_wchar* haystack, const juce_wchar* const needle) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    while (*haystack != 0)
-    {
-        const juce_wchar* s1 = haystack;
-        const juce_wchar* s2 = needle;
-
-        for (;;)
-        {
-            if (*s2 == 0)
-                return haystack;
-
-            if (*s1 != *s2 || *s2 == 0)
-                break;
-
-            ++s1;
-            ++s2;
-        }
-
-        ++haystack;
-    }
-
-    return 0;
-#else
     return wcsstr (haystack, needle);
-#endif
 }
 
 int CharacterFunctions::indexOfChar (const char* const haystack, const char needle, const bool ignoreCase) throw()
@@ -424,16 +337,7 @@ int CharacterFunctions::ftime (char* const dest, const int maxChars, const char*
 
 int CharacterFunctions::ftime (juce_wchar* const dest, const int maxChars, const juce_wchar* const format, const struct tm* const tm) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    const String formatTemp (format);
-    size_t num = strftime ((char*) dest, maxChars, (const char*) formatTemp, tm);
-    String temp ((char*) dest);
-    temp.copyToBuffer (dest, num);
-    dest [num] = 0;
-    return (int) num;
-#else
     return (int) wcsftime (dest, maxChars, format, tm);
-#endif
 }
 
 int CharacterFunctions::getIntValue (const char* const s) throw()
@@ -534,13 +438,8 @@ double CharacterFunctions::getDoubleValue (const char* const s) throw()
 
 double CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    String temp (s);
-    return atof ((const char*) temp);
-#else
     wchar_t* endChar;
     return wcstod (s, &endChar);
-#endif
 }
 
 //==============================================================================
@@ -551,11 +450,7 @@ char CharacterFunctions::toUpperCase (const char character) throw()
 
 juce_wchar CharacterFunctions::toUpperCase (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return toupper ((char) character);
-#else
     return towupper (character);
-#endif
 }
 
 void CharacterFunctions::toUpperCase (char* s) throw()
@@ -606,11 +501,7 @@ char CharacterFunctions::toLowerCase (const char character) throw()
 
 juce_wchar CharacterFunctions::toLowerCase (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return tolower ((char) character);
-#else
     return towlower (character);
-#endif
 }
 
 void CharacterFunctions::toLowerCase (char* s) throw()
@@ -661,11 +552,7 @@ bool CharacterFunctions::isWhitespace (const char character) throw()
 
 bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return isWhitespace ((char) character);
-#else
     return iswspace (character) != 0;
-#endif
 }
 
 bool CharacterFunctions::isDigit (const char character) throw()
@@ -675,11 +562,7 @@ bool CharacterFunctions::isDigit (const char character) throw()
 
 bool CharacterFunctions::isDigit (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return isdigit ((char) character) != 0;
-#else
     return iswdigit (character) != 0;
-#endif
 }
 
 bool CharacterFunctions::isLetter (const char character) throw()
@@ -690,11 +573,7 @@ bool CharacterFunctions::isLetter (const char character) throw()
 
 bool CharacterFunctions::isLetter (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return isLetter ((char) character);
-#else
     return iswalpha (character) != 0;
-#endif
 }
 
 bool CharacterFunctions::isLetterOrDigit (const char character) throw()
@@ -706,11 +585,7 @@ bool CharacterFunctions::isLetterOrDigit (const char character) throw()
 
 bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 {
-#if MACOS_10_2_OR_EARLIER
-    return isLetterOrDigit ((char) character);
-#else
     return iswalnum (character) != 0;
-#endif
 }
 
 int CharacterFunctions::getHexDigitValue (const tchar digit) throw()

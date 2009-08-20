@@ -42,11 +42,11 @@
 
 //==============================================================================
 #ifdef _WIN32
- #include "../build/win32/platform_specific_code/juce_win32_NativeIncludes.h"
+ #include "native/windows/juce_win32_NativeIncludes.h"
 #elif defined (LINUX)
- #include "../build/linux/platform_specific_code/juce_linux_NativeIncludes.h"
+ #include "native/linux/juce_linux_NativeIncludes.h"
 #else
- #include "../build/macosx/platform_specific_code/juce_mac_NativeIncludes.h"
+ #include "native/mac/juce_mac_NativeIncludes.h"
 #endif
 
 //==============================================================================
@@ -62,9 +62,11 @@
 
 #if JUCE_MAC && JUCE_32BIT && JUCE_SUPPORT_CARBON && ! JUCE_ONLY_BUILD_CORE_LIBRARY
  BEGIN_JUCE_NAMESPACE
- #include "../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+ #include "native/mac/juce_mac_CarbonViewWrapperComponent.h"
  END_JUCE_NAMESPACE
 #endif
+
+#define JUCE_AMALGAMATED_TEMPLATE 1
 
 //==============================================================================
 #include "juce_core/basics/juce_FileLogger.cpp"
@@ -335,16 +337,13 @@
 
 //==============================================================================
 #if JUCE_WIN32
- #include "../build/win32/platform_specific_code/juce_win32_NativeCode.cpp"
- #include "../build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
+ #include "native/juce_win32_NativeCode.cpp"
 #endif
 
-//==============================================================================
 #if JUCE_LINUX
- #include "../build/linux/platform_specific_code/juce_linux_NativeCode.cpp"
+ #include "native/juce_linux_NativeCode.cpp"
 #endif
 
-//==============================================================================
 #if JUCE_MAC
- #include "../build/macosx/platform_specific_code/juce_mac_NativeCode.mm"
+ #include "native/juce_mac_NativeCode.mm"
 #endif

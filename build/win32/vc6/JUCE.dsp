@@ -2489,87 +2489,87 @@ SOURCE=..\..\..\src\juce_core\cryptography\juce_RSAKey.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_ActiveXComponent.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_ActiveXComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_ASIO.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_ASIO.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_AudioCDReader.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_AudioCDReader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_DirectSound.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_DirectSound.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_DynamicLibraryLoader.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_DynamicLibraryLoader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_FileChooser.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_FileChooser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Files.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Files.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Fonts.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Fonts.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Messaging.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Messaging.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Midi.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Midi.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Misc.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Misc.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_NativeCode.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_NativeCode.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Network.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Network.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_OpenGLComponent.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_OpenGLComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_PlatformUtils.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_PlatformUtils.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_QuickTimeMovieComponent.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_SystemStats.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_SystemStats.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Threads.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Threads.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_WebBrowserComponent.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_WebBrowserComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\juce_win32_Windowing.cpp
+SOURCE=..\..\..\src\native\windows\juce_win32_Windowing.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\platform_specific_code\win32_headers.h
+SOURCE=..\..\..\src\native\windows\win32_headers.h
 # End Source File
 # End Group
 # Begin Source File

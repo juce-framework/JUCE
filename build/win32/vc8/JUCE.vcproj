@@ -5679,99 +5679,99 @@
 				Name="win32_code"
 				>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_ActiveXComponent.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_ActiveXComponent.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_ASIO.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_ASIO.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_AudioCDReader.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_AudioCDReader.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_AutoLinkLibraries.h"
+					RelativePath="..\..\..\src\native\windows\juce_win32_AutoLinkLibraries.h"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_CameraDevice.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_CameraDevice.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_DirectSound.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_DirectSound.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_DynamicLibraryLoader.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_DynamicLibraryLoader.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_DynamicLibraryLoader.h"
+					RelativePath="..\..\..\src\native\windows\juce_win32_DynamicLibraryLoader.h"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_FileChooser.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_FileChooser.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Files.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Files.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Fonts.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Fonts.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Messaging.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Messaging.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Midi.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Midi.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Misc.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Misc.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_NativeCode.cpp"
+					RelativePath="..\..\..\src\native\juce_win32_NativeCode.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_NativeIncludes.h"
+					RelativePath="..\..\..\src\native\windows\juce_win32_NativeIncludes.h"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Network.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Network.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_OpenGLComponent.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_OpenGLComponent.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_PlatformUtils.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_PlatformUtils.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_QuickTimeMovieComponent.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_QuickTimeMovieComponent.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_SystemStats.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_SystemStats.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Threads.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Threads.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_WebBrowserComponent.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_WebBrowserComponent.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\platform_specific_code\juce_win32_Windowing.cpp"
+					RelativePath="..\..\..\src\native\windows\juce_win32_Windowing.cpp"
 					>
 				</File>
 			</Filter>

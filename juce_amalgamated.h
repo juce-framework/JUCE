@@ -305,9 +305,6 @@
     - Either JUCE_INTEL or JUCE_PPC
     - Either JUCE_GCC or JUCE_MSVC
 
-    On the Mac, it also defines MACOS_10_2_OR_EARLIER if the build is targeting OSX10.2,
-    and MACOS_10_3_OR_EARLIER if it is targeting either 10.2 or 10.3
-
     It also includes a set of macros for debug console output and assertions.
 
 */
@@ -368,7 +365,7 @@
   #endif
 
   #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #define MACOS_10_2_OR_EARLIER 1
+    #error "Building for OSX 10.2 is no longer supported!"
   #endif
 
   #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
@@ -1008,22 +1005,6 @@ inline void swapVariables (Type& variable1, Type& variable2) throw()
   /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
       versions of these functions of various platforms and compilers. */
   forcedinline float juce_hypotf (float a, float b)             { return (float) _hypot (a, b); }
-#elif MACOS_10_2_OR_EARLIER
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline double juce_hypot (double a, double b)           { return hypot (a, b); }
-
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline float juce_hypotf (float a, float b)             { return (float) hypot (a, b); }
-  forcedinline float sinf (const float a)                       { return (float) sin (a); }
-  forcedinline float cosf (const float a)                       { return (float) cos (a); }
-  forcedinline float tanf (const float a)                       { return (float) tan (a); }
-  forcedinline float atan2f (const float a, const float b)      { return (float) atan2 (a, b); }
-  forcedinline float sqrtf (const float a)                      { return (float) sqrt (a); }
-  forcedinline float logf (const float a)                       { return (float) log (a); }
-  forcedinline float powf (const float a, const float b)        { return (float) pow (a, b); }
-  forcedinline float expf (const float a)                       { return (float) exp (a); }
 #else
   /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
       versions of these functions of various platforms and compilers. */
@@ -1054,9 +1035,7 @@ const float   float_Pi   = 3.14159265358979323846f;
 #if JUCE_LINUX
   #define juce_isfinite(v)      std::isfinite(v)
 #elif JUCE_MAC
-  #if MACOS_10_2_OR_EARLIER
-    #define juce_isfinite(v)    __isfinite(v)
-  #elif MACOS_10_3_OR_EARLIER
+  #if MACOS_10_3_OR_EARLIER
     #ifdef isfinite
       #define juce_isfinite(v)    isfinite(v)
     #else

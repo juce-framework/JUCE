@@ -75,7 +75,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../juce_core/misc/juce_PlatformUtilities.h"
 
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
-  #include "../../../../../build/macosx/platform_specific_code/juce_mac_CarbonViewWrapperComponent.h"
+  #include "../../../../native/mac/juce_mac_CarbonViewWrapperComponent.h"
 #endif
 
 //==============================================================================

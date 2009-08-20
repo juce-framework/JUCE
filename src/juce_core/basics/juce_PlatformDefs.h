@@ -38,9 +38,6 @@
     - Either JUCE_INTEL or JUCE_PPC
     - Either JUCE_GCC or JUCE_MSVC
 
-    On the Mac, it also defines MACOS_10_2_OR_EARLIER if the build is targeting OSX10.2,
-    and MACOS_10_3_OR_EARLIER if it is targeting either 10.2 or 10.3
-
     It also includes a set of macros for debug console output and assertions.
 
 */
@@ -104,7 +101,7 @@
   #endif
 
   #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #define MACOS_10_2_OR_EARLIER 1
+    #error "Building for OSX 10.2 is no longer supported!"
   #endif
 
   #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)

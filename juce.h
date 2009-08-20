@@ -152,7 +152,7 @@ END_JUCE_NAMESPACE
 
     // Auto-link the other win32 libs that are needed by library calls..
     #if ! (defined (DONT_AUTOLINK_TO_WIN32_LIBRARIES) || defined (JUCE_DLL))
-      #include "build/win32/platform_specific_code/juce_win32_AutoLinkLibraries.h"
+      #include "src/native/windows/juce_win32_AutoLinkLibraries.h"
     #endif
 
   #endif

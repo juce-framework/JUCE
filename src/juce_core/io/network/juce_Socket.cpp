@@ -192,7 +192,7 @@ static int waitForReadiness (const int handle, const bool forReading,
     {
         int opt;
 
-#if defined (JUCE_LINUX) || (defined (JUCE_MAC) && ! MACOS_10_2_OR_EARLIER)
+#if defined (JUCE_LINUX) || defined (JUCE_MAC)
         socklen_t len = sizeof (opt);
 #else
         int len = sizeof (opt);
@@ -471,7 +471,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
     {
         struct sockaddr address;
 
-#if defined (JUCE_LINUX) || (defined (JUCE_MAC) && ! MACOS_10_2_OR_EARLIER)
+#if defined (JUCE_LINUX) || defined (JUCE_MAC)
         socklen_t len = sizeof (sockaddr);
 #else
         int len = sizeof (sockaddr);
@@ -581,7 +581,7 @@ DatagramSocket* DatagramSocket::waitForNextConnection() const
 {
     struct sockaddr address;
 
-#if defined (JUCE_LINUX) || (defined (JUCE_MAC) && ! MACOS_10_2_OR_EARLIER)
+#if defined (JUCE_LINUX) || defined (JUCE_MAC)
     socklen_t len = sizeof (sockaddr);
 #else
     int len = sizeof (sockaddr);

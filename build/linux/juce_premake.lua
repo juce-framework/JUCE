@@ -123,7 +123,8 @@ package.files = { matchfiles (
     "../../src/juce_appframework/gui/components/special/*.h",
     "../../src/juce_appframework/gui/components/windows/*.cpp",
     "../../src/juce_appframework/gui/components/windows/*.h",
-    "platform_specific_code/*.h", 
-    "platform_specific_code/*.cpp"
+    "../../src/native/linux/*.h", 
+    "../../src/native/linux/*.cpp", 
+    "../../src/native/juce_linux_NativeCode.cpp"
     )
 }
