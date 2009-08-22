@@ -40,22 +40,22 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/ApplicationStartup.o \
-	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/juce_LibrarySource.o \
 	$(OBJDIR)/MainDemoWindow.o \
-	$(OBJDIR)/PathsAndTransformsDemo.o \
-	$(OBJDIR)/WidgetsDemo.o \
-	$(OBJDIR)/ThreadingDemo.o \
-	$(OBJDIR)/TreeViewDemo.o \
-	$(OBJDIR)/QuickTimeDemo.o \
-	$(OBJDIR)/TableDemo.o \
-	$(OBJDIR)/OpenGLDemo.o \
+	$(OBJDIR)/BinaryData.o \
+	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/CameraDemo.o \
+	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
 	$(OBJDIR)/InterprocessCommsDemo.o \
-	$(OBJDIR)/DragAndDropDemo.o \
-	$(OBJDIR)/CameraDemo.o \
-	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/OpenGLDemo.o \
+	$(OBJDIR)/PathsAndTransformsDemo.o \
+	$(OBJDIR)/QuickTimeDemo.o \
+	$(OBJDIR)/TableDemo.o \
+	$(OBJDIR)/ThreadingDemo.o \
+	$(OBJDIR)/TreeViewDemo.o \
 	$(OBJDIR)/WebBrowserDemo.o \
+	$(OBJDIR)/WidgetsDemo.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -102,11 +102,6 @@ $(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -117,37 +112,22 @@ $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
+$(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
+$(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
+$(OBJDIR)/CameraDemo.o: ../../src/demos/CameraDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/QuickTimeDemo.o: ../../src/demos/QuickTimeDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/TableDemo.o: ../../src/demos/TableDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/OpenGLDemo.o: ../../src/demos/OpenGLDemo.cpp
+$(OBJDIR)/DragAndDropDemo.o: ../../src/demos/DragAndDropDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -162,22 +142,42 @@ $(OBJDIR)/InterprocessCommsDemo.o: ../../src/demos/InterprocessCommsDemo.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/DragAndDropDemo.o: ../../src/demos/DragAndDropDemo.cpp
+$(OBJDIR)/OpenGLDemo.o: ../../src/demos/OpenGLDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/CameraDemo.o: ../../src/demos/CameraDemo.cpp
+$(OBJDIR)/PathsAndTransformsDemo.o: ../../src/demos/PathsAndTransformsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
+$(OBJDIR)/QuickTimeDemo.o: ../../src/demos/QuickTimeDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/TableDemo.o: ../../src/demos/TableDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/WebBrowserDemo.o: ../../src/demos/WebBrowserDemo.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

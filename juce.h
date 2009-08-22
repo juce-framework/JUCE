@@ -34,7 +34,7 @@
 //==============================================================================
 
 // (this includes things that need defining outside of the JUCE namespace)
-#include "src/juce_core/basics/juce_StandardHeader.h"
+#include "src/core/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
 

@@ -2516,1459 +2516,7 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-
-/********* Start of inlined file: juce_Atomic.h *********/
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
-
-// Atomic increment/decrement operations..
-
-#if JUCE_MAC && ! DOXYGEN
-
-  #if ! MACOS_10_3_OR_EARLIER
-
-    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
-  #else
-
-    forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OTAtomicAdd32 (-1, (SInt32*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (-1, (SInt32*) &variable); }
-  #endif
-
-#elif JUCE_GCC
-
-  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
-    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
-    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
-  #else
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void atomicIncrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock incl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock incl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             incl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             incl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (1)
-            : "memory");
-        #endif
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void atomicDecrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock decl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock decl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             decl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (-1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             decl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (-1)
-            : "memory");
-        #endif
-        return result;
-    }
-  #endif
-
-#elif JUCE_USE_INTRINSICS
-
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-#else
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock inc dword ptr [ecx]
-        }
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, 1
-            lock xadd dword ptr [ecx], eax
-            inc eax
-            mov result, eax
-        }
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock dec dword ptr [ecx]
-        }
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, -1
-            lock xadd dword ptr [ecx], eax
-            dec eax
-            mov result, eax
-        }
-
-        return result;
-    }
-#endif
-
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
-/********* End of inlined file: juce_Atomic.h *********/
-
-#endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileLogger.h *********/
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
-#define __JUCE_FILELOGGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_File.h *********/
-#ifndef __JUCE_FILE_JUCEHEADER__
-#define __JUCE_FILE_JUCEHEADER__
-
-/********* Start of inlined file: juce_OwnedArray.h *********/
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-#define __JUCE_OWNEDARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ArrayAllocationBase.h *********/
-#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
-#define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
-
-/** The default size of chunk in which arrays increase their storage.
-
-    Used by ArrayAllocationBase and its subclasses.
-*/
-const int juceDefaultArrayGranularity = 8;
-
-/**
-    Implements some basic array storage allocation functions.
-
-    This class isn't really for public use - it's used by the other
-    array classes, but might come in handy for some purposes.
-
-    @see Array, OwnedArray, ReferenceCountedArray
-*/
-template <class ElementType>
-class ArrayAllocationBase
-{
-protected:
-
-    /** Creates an empty array.
-
-        @param granularity_  this is the size of increment by which the internal storage
-        will be increased.
-    */
-    ArrayAllocationBase (const int granularity_) throw()
-        : elements (0),
-          numAllocated (0),
-          granularity (granularity_)
-    {
-        jassert (granularity > 0);
-    }
-
-    /** Destructor. */
-    ~ArrayAllocationBase() throw()
-    {
-        delete[] elements;
-    }
-
-    /** Changes the amount of storage allocated.
-
-        This will retain any data currently held in the array, and either add or
-        remove extra space at the end.
-
-        @param numElements  the number of elements that are needed
-    */
-    void setAllocatedSize (const int numElements) throw()
-    {
-        if (numAllocated != numElements)
-        {
-            if (numElements > 0)
-            {
-                ElementType* const newElements = new ElementType [numElements];
-
-                const int itemsToRetain = jmin (numElements, numAllocated);
-
-                for (int i = 0; i < itemsToRetain; ++i)
-                    newElements[i] = elements[i];
-
-                delete[] elements;
-                elements = newElements;
-
-            }
-            else if (elements != 0)
-            {
-                delete[] elements;
-                elements = 0;
-            }
-
-            numAllocated = numElements;
-        }
-    }
-
-    /** Increases the amount of storage allocated if it is less than a given amount.
-
-        This will retain any data currently held in the array, but will add
-        extra space at the end to make sure there it's at least as big as the size
-        passed in. If it's already bigger, no action is taken.
-
-        @param minNumElements  the minimum number of elements that are needed
-    */
-    void ensureAllocatedSize (int minNumElements) throw()
-    {
-        if (minNumElements > numAllocated)
-        {
-            // for arrays with small granularity that get big, start
-            // increasing the size in bigger jumps
-            if (minNumElements > (granularity << 6))
-            {
-                minNumElements += (minNumElements / granularity);
-                if (minNumElements > (granularity << 8))
-                    minNumElements += granularity << 6;
-                else
-                    minNumElements += granularity << 5;
-            }
-
-            setAllocatedSize (granularity * (minNumElements / granularity + 1));
-        }
-    }
-
-    ElementType* elements;
-    int numAllocated, granularity;
-
-private:
-    ArrayAllocationBase (const ArrayAllocationBase&);
-    const ArrayAllocationBase& operator= (const ArrayAllocationBase&);
-};
-
-#endif   // __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
-/********* End of inlined file: juce_ArrayAllocationBase.h *********/
-
-/********* Start of inlined file: juce_ElementComparator.h *********/
-#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
-#define __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
-
-/**
-    Sorts a range of elements in an array.
-
-    The comparator object that is passed-in must define a public method with the following
-    signature:
-    @code
-    int compareElements (ElementType first, ElementType second);
-    @endcode
-
-    ..and this method must return:
-      - a value of < 0 if the first comes before the second
-      - a value of 0 if the two objects are equivalent
-      - a value of > 0 if the second comes before the first
-
-    To improve performance, the compareElements() method can be declared as static or const.
-
-    @param comparator       an object which defines a compareElements() method
-    @param array            the array to sort
-    @param firstElement     the index of the first element of the range to be sorted
-    @param lastElement      the index of the last element in the range that needs
-                            sorting (this is inclusive)
-    @param retainOrderOfEquivalentItems     if true, the order of items that the
-                            comparator deems the same will be maintained - this will be
-                            a slower algorithm than if they are allowed to be moved around.
-
-    @see sortArrayRetainingOrder
-*/
-template <class ElementType, class ElementComparator>
-static void sortArray (ElementComparator& comparator,
-                       ElementType* const array,
-                       int firstElement,
-                       int lastElement,
-                       const bool retainOrderOfEquivalentItems)
-{
-    (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                        // avoids getting warning messages about the parameter being unused
-
-    if (lastElement > firstElement)
-    {
-        if (retainOrderOfEquivalentItems)
-        {
-            for (int i = firstElement; i < lastElement; ++i)
-            {
-                if (comparator.compareElements (array[i], array [i + 1]) > 0)
-                {
-                    const ElementType temp = array [i];
-                    array [i] = array[i + 1];
-                    array [i + 1] = temp;
-
-                    if (i > firstElement)
-                        i -= 2;
-                }
-            }
-        }
-        else
-        {
-            int fromStack[30], toStack[30];
-            int stackIndex = 0;
-
-            for (;;)
-            {
-                const int size = (lastElement - firstElement) + 1;
-
-                if (size <= 8)
-                {
-                    int j = lastElement;
-                    int maxIndex;
-
-                    while (j > firstElement)
-                    {
-                        maxIndex = firstElement;
-                        for (int k = firstElement + 1; k <= j; ++k)
-                            if (comparator.compareElements (array[k], array [maxIndex]) > 0)
-                                maxIndex = k;
-
-                        const ElementType temp = array [maxIndex];
-                        array [maxIndex] = array[j];
-                        array [j] = temp;
-
-                        --j;
-                    }
-                }
-                else
-                {
-                    const int mid = firstElement + (size >> 1);
-                    ElementType temp = array [mid];
-                    array [mid] = array [firstElement];
-                    array [firstElement] = temp;
-
-                    int i = firstElement;
-                    int j = lastElement + 1;
-
-                    for (;;)
-                    {
-                        while (++i <= lastElement
-                                && comparator.compareElements (array[i], array [firstElement]) <= 0)
-                        {}
-
-                        while (--j > firstElement
-                                && comparator.compareElements (array[j], array [firstElement]) >= 0)
-                        {}
-
-                        if (j < i)
-                            break;
-
-                        temp = array[i];
-                        array[i] = array[j];
-                        array[j] = temp;
-                    }
-
-                    temp = array [firstElement];
-                    array [firstElement] = array[j];
-                    array [j] = temp;
-
-                    if (j - 1 - firstElement >= lastElement - i)
-                    {
-                        if (firstElement + 1 < j)
-                        {
-                            fromStack [stackIndex] = firstElement;
-                            toStack [stackIndex] = j - 1;
-                            ++stackIndex;
-                        }
-
-                        if (i < lastElement)
-                        {
-                            firstElement = i;
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        if (i < lastElement)
-                        {
-                            fromStack [stackIndex] = i;
-                            toStack [stackIndex] = lastElement;
-                            ++stackIndex;
-                        }
-
-                        if (firstElement + 1 < j)
-                        {
-                            lastElement = j - 1;
-                            continue;
-                        }
-                    }
-                }
-
-                if (--stackIndex < 0)
-                    break;
-
-                jassert (stackIndex < numElementsInArray (fromStack));
-
-                firstElement = fromStack [stackIndex];
-                lastElement = toStack [stackIndex];
-            }
-        }
-    }
-}
-
-/**
-    Searches a sorted array of elements, looking for the index at which a specified value
-    should be inserted for it to be in the correct order.
-
-    The comparator object that is passed-in must define a public method with the following
-    signature:
-    @code
-    int compareElements (ElementType first, ElementType second);
-    @endcode
-
-    ..and this method must return:
-      - a value of < 0 if the first comes before the second
-      - a value of 0 if the two objects are equivalent
-      - a value of > 0 if the second comes before the first
-
-    To improve performance, the compareElements() method can be declared as static or const.
-
-    @param comparator       an object which defines a compareElements() method
-    @param array            the array to search
-    @param newElement       the value that is going to be inserted
-    @param firstElement     the index of the first element to search
-    @param lastElement      the index of the last element in the range (this is non-inclusive)
-*/
-template <class ElementType, class ElementComparator>
-static int findInsertIndexInSortedArray (ElementComparator& comparator,
-                                         ElementType* const array,
-                                         const ElementType newElement,
-                                         int firstElement,
-                                         int lastElement)
-{
-    jassert (firstElement <= lastElement);
-
-    (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                        // avoids getting warning messages about the parameter being unused
-
-    while (firstElement < lastElement)
-    {
-        if (comparator.compareElements (newElement, array [firstElement]) == 0)
-        {
-            ++firstElement;
-            break;
-        }
-        else
-        {
-            const int halfway = (firstElement + lastElement) >> 1;
-
-            if (halfway == firstElement)
-            {
-                if (comparator.compareElements (newElement, array [halfway]) >= 0)
-                    ++firstElement;
-
-                break;
-            }
-            else if (comparator.compareElements (newElement, array [halfway]) >= 0)
-            {
-                firstElement = halfway;
-            }
-            else
-            {
-                lastElement = halfway;
-            }
-        }
-    }
-
-    return firstElement;
-}
-
-/**
-    A simple ElementComparator class that can be used to sort an array of
-    integer primitive objects.
-
-    Example: @code
-    Array <int> myArray;
-
-    IntegerElementComparator<int> sorter;
-    myArray.sort (sorter);
-    @endcode
-
-    For floating point values, see the FloatElementComparator class instead.
-
-    @see FloatElementComparator, ElementComparator
-*/
-template <class ElementType>
-class IntegerElementComparator
-{
-public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
-    {
-        return (first < second) ? -1 : ((first == second) ? 0 : 1);
-    }
-};
-
-/**
-    A simple ElementComparator class that can be used to sort an array of numeric
-    double or floating point primitive objects.
-
-    Example: @code
-    Array <double> myArray;
-
-    FloatElementComparator<double> sorter;
-    myArray.sort (sorter);
-    @endcode
-
-    For integer values, see the IntegerElementComparator class instead.
-
-    @see IntegerElementComparator, ElementComparator
-*/
-template <class ElementType>
-class FloatElementComparator
-{
-public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
-    {
-        return (first < second) ? -1 : ((first == second) ? 0 : 1);
-    }
-};
-
-#endif   // __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
-/********* End of inlined file: juce_ElementComparator.h *********/
-
-/********* Start of inlined file: juce_CriticalSection.h *********/
-#ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
-#define __JUCE_CRITICALSECTION_JUCEHEADER__
-
-/**
-    Prevents multiple threads from accessing shared objects at the same time.
-
-    @see ScopedLock, Thread, InterProcessLock
-*/
-class JUCE_API  CriticalSection
-{
-public:
-
-    /**
-        Creates a CriticalSection object
-    */
-    CriticalSection() throw();
-
-    /** Destroys a CriticalSection object.
-
-        If the critical section is deleted whilst locked, its subsequent behaviour
-        is unpredictable.
-    */
-    ~CriticalSection() throw();
-
-    /** Locks this critical section.
-
-        If the lock is currently held by another thread, this will wait until it
-        becomes free.
-
-        If the lock is already held by the caller thread, the method returns immediately.
-
-        @see exit, ScopedLock
-    */
-    void enter() const throw();
-
-    /** Attempts to lock this critical section without blocking.
-
-        This method behaves identically to CriticalSection::enter, except that the caller thread
-        does not wait if the lock is currently held by another thread but returns false immediately.
-
-        @returns false if the lock is currently held by another thread, true otherwise.
-        @see enter
-    */
-    bool tryEnter() const throw();
-
-    /** Releases the lock.
-
-        If the caller thread hasn't got the lock, this can have unpredictable results.
-
-        If the enter() method has been called multiple times by the thread, each
-        call must be matched by a call to exit() before other threads will be allowed
-        to take over the lock.
-
-        @see enter, ScopedLock
-    */
-    void exit() const throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-#if JUCE_WIN32
-  #if JUCE_64BIT
-    // To avoid including windows.h in the public Juce includes, we'll just allocate a
-    // block of memory here that's big enough to be used internally as a windows critical
-    // section object.
-    uint8 internal [44];
-  #else
-    uint8 internal [24];
-  #endif
-#else
-    mutable pthread_mutex_t internal;
-#endif
-
-    CriticalSection (const CriticalSection&);
-    const CriticalSection& operator= (const CriticalSection&);
-};
-
-/**
-    A class that can be used in place of a real CriticalSection object.
-
-    This is currently used by some templated array classes, and should get
-    optimised out by the compiler.
-
-    @see Array, OwnedArray, ReferenceCountedArray
-*/
-class JUCE_API  DummyCriticalSection
-{
-public:
-    forcedinline DummyCriticalSection() throw()         {}
-    forcedinline ~DummyCriticalSection() throw()        {}
-
-    forcedinline void enter() const throw()             {}
-    forcedinline void exit() const throw()              {}
-};
-
-#endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
-/********* End of inlined file: juce_CriticalSection.h *********/
-
-/** An array designed for holding objects.
-
-    This holds a list of pointers to objects, and will automatically
-    delete the objects when they are removed from the array, or when the
-    array is itself deleted.
-
-    Declare it in the form:  OwnedArray<MyObjectClass>
-
-    ..and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
-
-    After adding objects, they are 'owned' by the array and will be deleted when
-    removed or replaced.
-
-    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
-    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
-
-    @see Array, ReferenceCountedArray, StringArray, CriticalSection
-*/
-template <class ObjectClass,
-          class TypeOfCriticalSectionToUse = DummyCriticalSection>
-
-class OwnedArray   : private ArrayAllocationBase <ObjectClass*>
-{
-public:
-
-    /** Creates an empty array.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-
-        @see ArrayAllocationBase
-    */
-    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
-          numUsed (0)
-    {
-    }
-
-    /** Deletes the array and also deletes any objects inside it.
-
-        To get rid of the array without deleting its objects, use its
-        clear (false) method before deleting it.
-    */
-    ~OwnedArray()
-    {
-        clear (true);
-    }
-
-    /** Clears the array, optionally deleting the objects inside it first. */
-    void clear (const bool deleteObjects = true)
-    {
-        lock.enter();
-
-        if (deleteObjects)
-        {
-            while (numUsed > 0)
-                delete this->elements [--numUsed];
-        }
-
-        this->setAllocatedSize (0);
-        numUsed = 0;
-        lock.exit();
-    }
-
-    /** Returns the number of items currently in the array.
-        @see operator[]
-    */
-    inline int size() const throw()
-    {
-        return numUsed;
-    }
-
-    /** Returns a pointer to the object at this index in the array.
-
-        If the index is out-of-range, this will return a null pointer, (and
-        it could be null anyway, because it's ok for the array to hold null
-        pointers as well as objects).
-
-        @see getUnchecked
-    */
-    inline ObjectClass* operator[] (const int index) const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-                                            ? this->elements [index]
-                                            : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
-
-        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
-        it can be used when you're sure the index if always going to be legal.
-    */
-    inline ObjectClass* getUnchecked (const int index) const throw()
-    {
-        lock.enter();
-        jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ObjectClass* const result = this->elements [index];
-        lock.exit();
-
-        return result;
-    }
-
-    /** Returns a pointer to the first object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getLast
-    */
-    inline ObjectClass* getFirst() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-        return result;
-    }
-
-    /** Returns a pointer to the last object in the array.
-
-        This will return a null pointer if the array's empty.
-        @see getFirst
-    */
-    inline ObjectClass* getLast() const throw()
-    {
-        lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
-                                                  : (ObjectClass*) 0;
-        lock.exit();
-
-        return result;
-    }
-
-    /** Finds the index of an object which might be in the array.
-
-        @param objectToLookFor    the object to look for
-        @returns                  the index at which the object was found, or -1 if it's not found
-    */
-    int indexOf (const ObjectClass* const objectToLookFor) const throw()
-    {
-        int result = -1;
-
-        lock.enter();
-        ObjectClass* const* e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToLookFor == *e)
-            {
-                result = (int) (e - this->elements);
-                break;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-        return result;
-    }
-
-    /** Returns true if the array contains a specified object.
-
-        @param objectToLookFor      the object to look for
-        @returns                    true if the object is in the array
-    */
-    bool contains (const ObjectClass* const objectToLookFor) const throw()
-    {
-        lock.enter();
-
-        ObjectClass* const* e = this->elements;
-        int i = numUsed;
-
-        while (i >= 4)
-        {
-            if (objectToLookFor == *e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e)
-            {
-                lock.exit();
-                return true;
-            }
-
-            i -= 4;
-            ++e;
-        }
-
-        while (i > 0)
-        {
-            if (objectToLookFor == *e)
-            {
-                lock.exit();
-                return true;
-            }
-
-            --i;
-            ++e;
-        }
-
-        lock.exit();
-        return false;
-    }
-
-    /** Appends a new object to the end of the array.
-
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
-
-        Also be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param newObject       the new object to add to the array
-        @see set, insert, addIfNotAlreadyThere, addSorted
-    */
-    void add (const ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-        this->ensureAllocatedSize (numUsed + 1);
-        this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-        lock.exit();
-    }
-
-    /** Inserts a new object into the array at the given index.
-
-        Note that the this object will be deleted by the OwnedArray when it
-        is removed, so be careful not to delete it somewhere else.
-
-        If the index is less than 0 or greater than the size of the array, the
-        element will be added to the end of the array.
-        Otherwise, it will be inserted into the array, moving all the later elements
-        along to make room.
-
-        Be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param indexToInsertAt      the index at which the new element should be inserted
-        @param newObject            the new object to add to the array
-        @see add, addSorted, addIfNotAlreadyThere, set
-    */
-    void insert (int indexToInsertAt,
-                 const ObjectClass* const newObject) throw()
-    {
-        if (indexToInsertAt >= 0)
-        {
-            lock.enter();
-
-            if (indexToInsertAt > numUsed)
-                indexToInsertAt = numUsed;
-
-            this->ensureAllocatedSize (numUsed + 1);
-
-            ObjectClass** const e = this->elements + indexToInsertAt;
-            const int numToMove = numUsed - indexToInsertAt;
-
-            if (numToMove > 0)
-                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
-
-            *e = const_cast <ObjectClass*> (newObject);
-            ++numUsed;
-
-            lock.exit();
-        }
-        else
-        {
-            add (newObject);
-        }
-    }
-
-    /** Appends a new object at the end of the array as long as the array doesn't
-        already contain it.
-
-        If the array already contains a matching object, nothing will be done.
-
-        @param newObject   the new object to add to the array
-    */
-    void addIfNotAlreadyThere (const ObjectClass* const newObject) throw()
-    {
-        lock.enter();
-
-        if (! contains (newObject))
-            add (newObject);
-
-        lock.exit();
-    }
-
-    /** Replaces an object in the array with a different one.
-
-        If the index is less than zero, this method does nothing.
-        If the index is beyond the end of the array, the new object is added to the end of the array.
-
-        Be careful not to add the same object to the array more than once,
-        as this will obviously cause deletion of dangling pointers.
-
-        @param indexToChange        the index whose value you want to change
-        @param newObject            the new value to set for this index.
-        @param deleteOldElement     whether to delete the object that's being replaced with the new one
-        @see add, insert, remove
-    */
-    void set (const int indexToChange,
-              const ObjectClass* const newObject,
-              const bool deleteOldElement = true)
-    {
-        if (indexToChange >= 0)
-        {
-            ObjectClass* toDelete = 0;
-            lock.enter();
-
-            if (indexToChange < numUsed)
-            {
-                if (deleteOldElement)
-                {
-                    toDelete = this->elements [indexToChange];
-
-                    if (toDelete == newObject)
-                        toDelete = 0;
-                }
-
-                this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
-            }
-            else
-            {
-                this->ensureAllocatedSize (numUsed + 1);
-                this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-            }
-
-            lock.exit();
-
-            delete toDelete;
-        }
-    }
-
-    /** Inserts a new object into the array assuming that the array is sorted.
-
-        This will use a comparator to find the position at which the new object
-        should go. If the array isn't sorted, the behaviour of this
-        method will be unpredictable.
-
-        @param comparator   the comparator to use to compare the elements - see the sort method
-                            for details about this object's structure
-        @param newObject    the new object to insert to the array
-        @see add, sort, indexOfSorted
-    */
-    template <class ElementComparator>
-    void addSorted (ElementComparator& comparator,
-                    ObjectClass* const newObject) throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-        lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
-        lock.exit();
-    }
-
-    /** Finds the index of an object in the array, assuming that the array is sorted.
-
-        This will use a comparator to do a binary-chop to find the index of the given
-        element, if it exists. If the array isn't sorted, the behaviour of this
-        method will be unpredictable.
-
-        @param comparator           the comparator to use to compare the elements - see the sort()
-                                    method for details about the form this object should take
-        @param objectToLookFor      the object to search for
-        @returns                    the index of the element, or -1 if it's not found
-        @see addSorted, sort
-    */
-    template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator,
-                       const ObjectClass* const objectToLookFor) const throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-        lock.enter();
-
-        int start = 0;
-        int end = numUsed;
-
-        for (;;)
-        {
-            if (start >= end)
-            {
-                lock.exit();
-                return -1;
-            }
-            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
-            {
-                lock.exit();
-                return start;
-            }
-            else
-            {
-                const int halfway = (start + end) >> 1;
-
-                if (halfway == start)
-                {
-                    lock.exit();
-                    return -1;
-                }
-                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
-                    start = halfway;
-                else
-                    end = halfway;
-            }
-        }
-    }
-
-    /** Removes an object from the array.
-
-        This will remove the object at a given index (optionally also
-        deleting it) and move back all the subsequent objects to close the gap.
-        If the index passed in is out-of-range, nothing will happen.
-
-        @param indexToRemove    the index of the element to remove
-        @param deleteObject     whether to delete the object that is removed
-        @see removeObject, removeRange
-    */
-    void remove (const int indexToRemove,
-                 const bool deleteObject = true)
-    {
-        lock.enter();
-        ObjectClass* toDelete = 0;
-
-        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
-        {
-            ObjectClass** const e = this->elements + indexToRemove;
-
-            if (deleteObject)
-                toDelete = *e;
-
-            --numUsed;
-            const int numToShift = numUsed - indexToRemove;
-
-            if (numToShift > 0)
-                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-
-        delete toDelete;
-    }
-
-    /** Removes a specified object from the array.
-
-        If the item isn't found, no action is taken.
-
-        @param objectToRemove   the object to try to remove
-        @param deleteObject     whether to delete the object (if it's found)
-        @see remove, removeRange
-    */
-    void removeObject (const ObjectClass* const objectToRemove,
-                       const bool deleteObject = true)
-    {
-        lock.enter();
-        ObjectClass** e = this->elements;
-
-        for (int i = numUsed; --i >= 0;)
-        {
-            if (objectToRemove == *e)
-            {
-                remove ((int) (e - this->elements), deleteObject);
-                break;
-            }
-
-            ++e;
-        }
-
-        lock.exit();
-    }
-
-    /** Removes a range of objects from the array.
-
-        This will remove a set of objects, starting from the given index,
-        and move any subsequent elements down to close the gap.
-
-        If the range extends beyond the bounds of the array, it will
-        be safely clipped to the size of the array.
-
-        @param startIndex       the index of the first object to remove
-        @param numberToRemove   how many objects should be removed
-        @param deleteObjects    whether to delete the objects that get removed
-        @see remove, removeObject
-    */
-    void removeRange (int startIndex,
-                      const int numberToRemove,
-                      const bool deleteObjects = true)
-    {
-        lock.enter();
-        const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
-        startIndex = jlimit (0, numUsed, startIndex);
-
-        if (endIndex > startIndex)
-        {
-            if (deleteObjects)
-            {
-                for (int i = startIndex; i < endIndex; ++i)
-                {
-                    delete this->elements [i];
-                    this->elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
-                }
-            }
-
-            const int rangeSize = endIndex - startIndex;
-            ObjectClass** e = this->elements + startIndex;
-            int numToShift = numUsed - endIndex;
-            numUsed -= rangeSize;
-
-            while (--numToShift >= 0)
-            {
-                *e = e [rangeSize];
-                ++e;
-            }
-
-            if ((numUsed << 1) < this->numAllocated)
-                minimiseStorageOverheads();
-        }
-
-        lock.exit();
-    }
-
-    /** Removes the last n objects from the array.
-
-        @param howManyToRemove   how many objects to remove from the end of the array
-        @param deleteObjects     whether to also delete the objects that are removed
-        @see remove, removeObject, removeRange
-    */
-    void removeLast (int howManyToRemove = 1,
-                     const bool deleteObjects = true)
-    {
-        lock.enter();
-
-        if (howManyToRemove >= numUsed)
-        {
-            clear (deleteObjects);
-        }
-        else
-        {
-            while (--howManyToRemove >= 0)
-                remove (numUsed - 1, deleteObjects);
-        }
-
-        lock.exit();
-    }
-
-    /** Swaps a pair of objects in the array.
-
-        If either of the indexes passed in is out-of-range, nothing will happen,
-        otherwise the two objects at these positions will be exchanged.
-    */
-    void swap (const int index1,
-               const int index2) throw()
-    {
-        lock.enter();
-
-        if (((unsigned int) index1) < (unsigned int) numUsed
-             && ((unsigned int) index2) < (unsigned int) numUsed)
-        {
-            swapVariables (this->elements [index1],
-                           this->elements [index2]);
-        }
-
-        lock.exit();
-    }
-
-    /** Moves one of the objects to a different position.
-
-        This will move the object to a specified index, shuffling along
-        any intervening elements as required.
-
-        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
-        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
-
-        @param currentIndex     the index of the object to be moved. If this isn't a
-                                valid index, then nothing will be done
-        @param newIndex         the index at which you'd like this object to end up. If this
-                                is less than zero, it will be moved to the end of the array
-    */
-    void move (const int currentIndex,
-               int newIndex) throw()
-    {
-        if (currentIndex != newIndex)
-        {
-            lock.enter();
-
-            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
-            {
-                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
-                    newIndex = numUsed - 1;
-
-                ObjectClass* const value = this->elements [currentIndex];
-
-                if (newIndex > currentIndex)
-                {
-                    memmove (this->elements + currentIndex,
-                             this->elements + currentIndex + 1,
-                             (newIndex - currentIndex) * sizeof (ObjectClass*));
-                }
-                else
-                {
-                    memmove (this->elements + newIndex + 1,
-                             this->elements + newIndex,
-                             (currentIndex - newIndex) * sizeof (ObjectClass*));
-                }
-
-                this->elements [newIndex] = value;
-            }
-
-            lock.exit();
-        }
-    }
-
-    /** This swaps the contents of this array with those of another array.
-
-        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
-        because it just swaps their internal pointers.
-    */
-    template <class OtherArrayType>
-    void swapWithArray (OtherArrayType& otherArray) throw()
-    {
-        lock.enter();
-        otherArray.lock.enter();
-        swapVariables <int> (this->numUsed, otherArray.numUsed);
-        swapVariables <ObjectClass**> (this->elements, otherArray.elements);
-        swapVariables <int> (this->numAllocated, otherArray.numAllocated);
-        otherArray.lock.exit();
-        lock.exit();
-    }
-
-    /** Reduces the amount of storage being used by the array.
-
-        Arrays typically allocate slightly more storage than they need, and after
-        removing elements, they may have quite a lot of unused space allocated.
-        This method will reduce the amount of allocated storage to a minimum.
-    */
-    void minimiseStorageOverheads() throw()
-    {
-        lock.enter();
-
-        if (numUsed == 0)
-        {
-            this->setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
-
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
-        }
-
-        lock.exit();
-    }
-
-    /** Increases the array's internal storage to hold a minimum number of elements.
-
-        Calling this before adding a large known number of elements means that
-        the array won't have to keep dynamically resizing itself as the elements
-        are added, and it'll therefore be more efficient.
-    */
-    void ensureStorageAllocated (const int minNumElements) throw()
-    {
-        this->ensureAllocatedSize (minNumElements);
-    }
-
-    /** Sorts the elements in the array.
-
-        This will use a comparator object to sort the elements into order. The object
-        passed must have a method of the form:
-        @code
-        int compareElements (ElementType first, ElementType second);
-        @endcode
-
-        ..and this method must return:
-          - a value of < 0 if the first comes before the second
-          - a value of 0 if the two objects are equivalent
-          - a value of > 0 if the second comes before the first
-
-        To improve performance, the compareElements() method can be declared as static or const.
-
-        @param comparator   the comparator to use for comparing elements.
-        @param retainOrderOfEquivalentItems     if this is true, then items
-                            which the comparator says are equivalent will be
-                            kept in the order in which they currently appear
-                            in the array. This is slower to perform, but may
-                            be important in some cases. If it's false, a faster
-                            algorithm is used, but equivalent elements may be
-                            rearranged.
-        @see sortArray, indexOfSorted
-    */
-    template <class ElementComparator>
-    void sort (ElementComparator& comparator,
-               const bool retainOrderOfEquivalentItems = false) const throw()
-    {
-        (void) comparator;  // if you pass in an object with a static compareElements() method, this
-                            // avoids getting warning messages about the parameter being unused
-
-        lock.enter();
-        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
-        lock.exit();
-    }
-
-    /** Locks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see unlockArray
-    */
-    void lockArray() const throw()
-    {
-        lock.enter();
-    }
-
-    /** Unlocks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see lockArray
-    */
-    void unlockArray() const throw()
-    {
-        lock.exit();
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int numUsed;
-    TypeOfCriticalSectionToUse lock;
-
-    // disallow copy constructor and assignment
-    OwnedArray (const OwnedArray&);
-    const OwnedArray& operator= (const OwnedArray&);
-};
-
-#endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_OwnedArray.h *********/
+#ifndef __JUCE_TIME_JUCEHEADER__
 
 /********* Start of inlined file: juce_Time.h *********/
 #ifndef __JUCE_TIME_JUCEHEADER__
@@ -4492,17 +3040,1054 @@ private:
 #endif   // __JUCE_TIME_JUCEHEADER__
 /********* End of inlined file: juce_Time.h *********/
 
-/********* Start of inlined file: juce_StringArray.h *********/
-#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
-#define __JUCE_STRINGARRAY_JUCEHEADER__
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
 
-/********* Start of inlined file: juce_VoidArray.h *********/
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
-#define __JUCE_VOIDARRAY_JUCEHEADER__
+#endif
+#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemStats.h *********/
+#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
+#define __JUCE_SYSTEMSTATS_JUCEHEADER__
+
+/**
+    Contains methods for finding out about the current hardware and OS configuration.
+*/
+class JUCE_API  SystemStats
+{
+public:
+
+    /** Returns the current version of JUCE,
+
+        (just in case you didn't already know at compile-time.)
+
+        See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
+    */
+    static const String getJUCEVersion() throw();
+
+    /** The set of possible results of the getOperatingSystemType() method.
+    */
+    enum OperatingSystemType
+    {
+        UnknownOS   = 0,
+
+        MacOSX      = 0x1000,
+        Linux       = 0x2000,
+
+        Win95       = 0x4001,
+        Win98       = 0x4002,
+        WinNT351    = 0x4103,
+        WinNT40     = 0x4104,
+        Win2000     = 0x4105,
+        WinXP       = 0x4106,
+        WinVista    = 0x4107,
+
+        Windows     = 0x4000,   /**< To test whether any version of Windows is running,
+                                     you can use the expression ((getOperatingSystemType() & Windows) != 0). */
+        WindowsNT   = 0x0100,   /**< To test whether the platform is Windows NT or later (i.e. not Win95 or 98),
+                                     you can use the expression ((getOperatingSystemType() & WindowsNT) != 0). */
+    };
+
+    /** Returns the type of operating system we're running on.
+
+        @returns one of the values from the OperatingSystemType enum.
+        @see getOperatingSystemName
+    */
+    static OperatingSystemType getOperatingSystemType() throw();
+
+    /** Returns the name of the type of operating system we're running on.
+
+        @returns a string describing the OS type.
+        @see getOperatingSystemType
+    */
+    static const String getOperatingSystemName() throw();
+
+    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
+    */
+    static bool isOperatingSystem64Bit() throw();
+
+    // CPU and memory information..
+
+    /** Returns the approximate CPU speed.
+
+        @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
+                    what year you're reading this...)
+    */
+    static int getCpuSpeedInMegaherz() throw();
+
+    /** Returns a string to indicate the CPU vendor.
+
+        Might not be known on some systems.
+    */
+    static const String getCpuVendor() throw();
+
+    /** Checks whether Intel MMX instructions are available. */
+    static bool hasMMX() throw();
+
+    /** Checks whether Intel SSE instructions are available. */
+    static bool hasSSE() throw();
+
+    /** Checks whether Intel SSE2 instructions are available. */
+    static bool hasSSE2() throw();
+
+    /** Checks whether AMD 3DNOW instructions are available. */
+    static bool has3DNow() throw();
+
+    /** Returns the number of CPUs.
+    */
+    static int getNumCpus() throw();
+
+    /** Returns a clock-cycle tick counter, if available.
+
+        If the machine can do it, this will return a tick-count
+        where each tick is one cpu clock cycle - used for profiling
+        code.
+
+        @returns    the tick count, or zero if not available.
+    */
+    static int64 getClockCycleCounter() throw();
+
+    /** Finds out how much RAM is in the machine.
+
+        @returns    the approximate number of megabytes of memory, or zero if
+                    something goes wrong when finding out.
+    */
+    static int getMemorySizeInMegabytes() throw();
+
+    /** Returns the system page-size.
+
+        This is only used by programmers with beards.
+    */
+    static int getPageSize() throw();
+
+    /** Returns a list of MAC addresses found on this machine.
+
+        @param  addresses   an array into which the MAC addresses should be copied
+        @param  maxNum      the number of elements in this array
+        @param littleEndian the endianness of the numbers to return. Note that
+                            the default values of this parameter are different on
+                            Mac/PC to avoid breaking old software that was written
+                            before this parameter was added (when the two systems
+                            defaulted to using different endiannesses). In newer
+                            software you probably want to specify an explicit value
+                            for this.
+        @returns            the number of MAC addresses that were found
+    */
+    static int getMACAddresses (int64* addresses, int maxNum,
+#if JUCE_MAC
+                                const bool littleEndian = true) throw();
+#else
+                                const bool littleEndian = false) throw();
+#endif
+
+    // not-for-public-use platform-specific method gets called at startup to initialise things.
+    static void initialiseStats() throw();
+};
+
+#endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
+/********* End of inlined file: juce_SystemStats.h *********/
+
+#endif
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_Singleton.h *********/
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+#define __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedLock.h *********/
+#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDLOCK_JUCEHEADER__
+
+/********* Start of inlined file: juce_CriticalSection.h *********/
+#ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
+#define __JUCE_CRITICALSECTION_JUCEHEADER__
+
+/**
+    Prevents multiple threads from accessing shared objects at the same time.
+
+    @see ScopedLock, Thread, InterProcessLock
+*/
+class JUCE_API  CriticalSection
+{
+public:
+
+    /**
+        Creates a CriticalSection object
+    */
+    CriticalSection() throw();
+
+    /** Destroys a CriticalSection object.
+
+        If the critical section is deleted whilst locked, its subsequent behaviour
+        is unpredictable.
+    */
+    ~CriticalSection() throw();
+
+    /** Locks this critical section.
+
+        If the lock is currently held by another thread, this will wait until it
+        becomes free.
+
+        If the lock is already held by the caller thread, the method returns immediately.
+
+        @see exit, ScopedLock
+    */
+    void enter() const throw();
+
+    /** Attempts to lock this critical section without blocking.
+
+        This method behaves identically to CriticalSection::enter, except that the caller thread
+        does not wait if the lock is currently held by another thread but returns false immediately.
+
+        @returns false if the lock is currently held by another thread, true otherwise.
+        @see enter
+    */
+    bool tryEnter() const throw();
+
+    /** Releases the lock.
+
+        If the caller thread hasn't got the lock, this can have unpredictable results.
+
+        If the enter() method has been called multiple times by the thread, each
+        call must be matched by a call to exit() before other threads will be allowed
+        to take over the lock.
+
+        @see enter, ScopedLock
+    */
+    void exit() const throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+#if JUCE_WIN32
+  #if JUCE_64BIT
+    // To avoid including windows.h in the public Juce includes, we'll just allocate a
+    // block of memory here that's big enough to be used internally as a windows critical
+    // section object.
+    uint8 internal [44];
+  #else
+    uint8 internal [24];
+  #endif
+#else
+    mutable pthread_mutex_t internal;
+#endif
+
+    CriticalSection (const CriticalSection&);
+    const CriticalSection& operator= (const CriticalSection&);
+};
+
+/**
+    A class that can be used in place of a real CriticalSection object.
+
+    This is currently used by some templated array classes, and should get
+    optimised out by the compiler.
+
+    @see Array, OwnedArray, ReferenceCountedArray
+*/
+class JUCE_API  DummyCriticalSection
+{
+public:
+    forcedinline DummyCriticalSection() throw()         {}
+    forcedinline ~DummyCriticalSection() throw()        {}
+
+    forcedinline void enter() const throw()             {}
+    forcedinline void exit() const throw()              {}
+};
+
+#endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
+/********* End of inlined file: juce_CriticalSection.h *********/
+
+/**
+    Automatically locks and unlocks a CriticalSection object.
+
+    Use one of these as a local variable to control access to a CriticalSection.
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ...do some stuff...
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedUnlock
+*/
+class JUCE_API  ScopedLock
+{
+public:
+
+    /** Creates a ScopedLock.
+
+        As soon as it is created, this will lock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be unlocked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
+
+    /** Destructor.
+
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedLock() throw()                                { lock_.exit(); }
+
+private:
+
+    const CriticalSection& lock_;
+
+    ScopedLock (const ScopedLock&);
+    const ScopedLock& operator= (const ScopedLock&);
+};
+
+/**
+    Automatically unlocks and re-locks a CriticalSection object.
+
+    This is the reverse of a ScopedLock object - instead of locking the critical
+    section for the lifetime of this object, it unlocks it.
+
+    Make sure you don't try to unlock critical sections that aren't actually locked!
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ... do some stuff with it locked ..
+
+        while (xyz)
+        {
+            ... do some stuff with it locked ..
+
+            const ScopedUnlock unlocker (myCriticalSection);
+
+            // myCriticalSection is now unlocked for the remainder of this block,
+            // and re-locked at the end.
+
+            ...do some stuff with it unlocked ...
+        }
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedLock
+*/
+class ScopedUnlock
+{
+public:
+
+    /** Creates a ScopedUnlock.
+
+        As soon as it is created, this will unlock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be re-locked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
+
+    /** Destructor.
+
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
+
+private:
+
+    const CriticalSection& lock_;
+
+    ScopedUnlock (const ScopedLock&);
+    const ScopedUnlock& operator= (const ScopedUnlock&);
+};
+
+#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedLock.h *********/
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
+    to the class's definition.
+
+    If allowOnlyOneInstance == true, it won't allow the object to be created
+    more than once in the process's lifetime.
+
+    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
+    implementation code.
+
+    Clients can then call the static MyClass::getInstance() to get a pointer to the
+    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
+    is currently extant
+
+    it's a very good idea to also add the call clearSingletonInstance() to the
+    destructor of the class, in case it is deleted by other means than deleteInstance()
+
+    e.g. @code
+
+        class MySingleton
+        {
+        public:
+            MySingleton()
+            {
+            }
+
+            ~MySingleton()
+            {
+                // this ensures that no dangling pointers are left when the
+                // singleton is deleted.
+                clearSingletonInstance();
+            }
+
+            juce_DeclareSingleton (MySingleton, false)
+        };
+
+        juce_ImplementSingleton (MySingleton)
+
+        // example of usage:
+        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
+
+        ...
+
+        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
+
+    @endcode
+
+    If you know that your object will only be created and deleted by a single thread, you
+    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
+    of this one.
+
+    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
+*/
+#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
+\
+    static classname* _singletonInstance;  \
+    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        {\
+            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+\
+            if (_singletonInstance == 0) \
+            { \
+                static bool alreadyInside = false; \
+                static bool createdOnceAlready = false; \
+\
+                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+                jassert (! problem); \
+                if (! problem) \
+                { \
+                    createdOnceAlready = true; \
+                    alreadyInside = true; \
+                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                    alreadyInside = false; \
+\
+                    _singletonInstance = newObject; \
+                } \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton macro.
+
+    After adding the juce_DeclareSingleton to the class definition, this macro has
+    to be used in the cpp file.
+*/
+#define juce_ImplementSingleton(classname) \
+\
+    classname* classname::_singletonInstance = 0; \
+    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
+    section to make access to it thread-safe. If you know that your object will
+    only ever be created or deleted by a single thread, then this is a
+    more efficient version to use.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
+*/
+#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        { \
+            static bool alreadyInside = false; \
+            static bool createdOnceAlready = false; \
+\
+            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+            jassert (! problem); \
+            if (! problem) \
+            { \
+                createdOnceAlready = true; \
+                alreadyInside = true; \
+                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                alreadyInside = false; \
+\
+                _singletonInstance = newObject; \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
+    for recursion or repeated instantiation. It's intended for use as a lightweight
+    version of a singleton, where you're using it in very straightforward
+    circumstances and don't need the extra checking.
+
+    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
+    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
+*/
+#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+            _singletonInstance = new classname(); \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
+
+    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
+    to the class definition, this macro has to be used somewhere in the cpp file.
+*/
+#define juce_ImplementSingleton_SingleThreaded(classname) \
+\
+    classname* classname::_singletonInstance = 0;
+
+#endif   // __JUCE_SINGLETON_JUCEHEADER__
+/********* End of inlined file: juce_Singleton.h *********/
+
+#endif
+#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+
+/********* Start of inlined file: juce_Random.h *********/
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+#define __JUCE_RANDOM_JUCEHEADER__
+
+/********* Start of inlined file: juce_BitArray.h *********/
+#ifndef __JUCE_BITARRAY_JUCEHEADER__
+#define __JUCE_BITARRAY_JUCEHEADER__
 
 /********* Start of inlined file: juce_Array.h *********/
 #ifndef __JUCE_ARRAY_JUCEHEADER__
 #define __JUCE_ARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_ArrayAllocationBase.h *********/
+#ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+#define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+
+/** The default size of chunk in which arrays increase their storage.
+
+    Used by ArrayAllocationBase and its subclasses.
+*/
+const int juceDefaultArrayGranularity = 8;
+
+/**
+    Implements some basic array storage allocation functions.
+
+    This class isn't really for public use - it's used by the other
+    array classes, but might come in handy for some purposes.
+
+    @see Array, OwnedArray, ReferenceCountedArray
+*/
+template <class ElementType>
+class ArrayAllocationBase
+{
+protected:
+
+    /** Creates an empty array.
+
+        @param granularity_  this is the size of increment by which the internal storage
+        will be increased.
+    */
+    ArrayAllocationBase (const int granularity_) throw()
+        : elements (0),
+          numAllocated (0),
+          granularity (granularity_)
+    {
+        jassert (granularity > 0);
+    }
+
+    /** Destructor. */
+    ~ArrayAllocationBase() throw()
+    {
+        delete[] elements;
+    }
+
+    /** Changes the amount of storage allocated.
+
+        This will retain any data currently held in the array, and either add or
+        remove extra space at the end.
+
+        @param numElements  the number of elements that are needed
+    */
+    void setAllocatedSize (const int numElements) throw()
+    {
+        if (numAllocated != numElements)
+        {
+            if (numElements > 0)
+            {
+                ElementType* const newElements = new ElementType [numElements];
+
+                const int itemsToRetain = jmin (numElements, numAllocated);
+
+                for (int i = 0; i < itemsToRetain; ++i)
+                    newElements[i] = elements[i];
+
+                delete[] elements;
+                elements = newElements;
+
+            }
+            else if (elements != 0)
+            {
+                delete[] elements;
+                elements = 0;
+            }
+
+            numAllocated = numElements;
+        }
+    }
+
+    /** Increases the amount of storage allocated if it is less than a given amount.
+
+        This will retain any data currently held in the array, but will add
+        extra space at the end to make sure there it's at least as big as the size
+        passed in. If it's already bigger, no action is taken.
+
+        @param minNumElements  the minimum number of elements that are needed
+    */
+    void ensureAllocatedSize (int minNumElements) throw()
+    {
+        if (minNumElements > numAllocated)
+        {
+            // for arrays with small granularity that get big, start
+            // increasing the size in bigger jumps
+            if (minNumElements > (granularity << 6))
+            {
+                minNumElements += (minNumElements / granularity);
+                if (minNumElements > (granularity << 8))
+                    minNumElements += granularity << 6;
+                else
+                    minNumElements += granularity << 5;
+            }
+
+            setAllocatedSize (granularity * (minNumElements / granularity + 1));
+        }
+    }
+
+    ElementType* elements;
+    int numAllocated, granularity;
+
+private:
+    ArrayAllocationBase (const ArrayAllocationBase&);
+    const ArrayAllocationBase& operator= (const ArrayAllocationBase&);
+};
+
+#endif   // __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
+/********* End of inlined file: juce_ArrayAllocationBase.h *********/
+
+/********* Start of inlined file: juce_ElementComparator.h *********/
+#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+#define __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+
+/**
+    Sorts a range of elements in an array.
+
+    The comparator object that is passed-in must define a public method with the following
+    signature:
+    @code
+    int compareElements (ElementType first, ElementType second);
+    @endcode
+
+    ..and this method must return:
+      - a value of < 0 if the first comes before the second
+      - a value of 0 if the two objects are equivalent
+      - a value of > 0 if the second comes before the first
+
+    To improve performance, the compareElements() method can be declared as static or const.
+
+    @param comparator       an object which defines a compareElements() method
+    @param array            the array to sort
+    @param firstElement     the index of the first element of the range to be sorted
+    @param lastElement      the index of the last element in the range that needs
+                            sorting (this is inclusive)
+    @param retainOrderOfEquivalentItems     if true, the order of items that the
+                            comparator deems the same will be maintained - this will be
+                            a slower algorithm than if they are allowed to be moved around.
+
+    @see sortArrayRetainingOrder
+*/
+template <class ElementType, class ElementComparator>
+static void sortArray (ElementComparator& comparator,
+                       ElementType* const array,
+                       int firstElement,
+                       int lastElement,
+                       const bool retainOrderOfEquivalentItems)
+{
+    (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                        // avoids getting warning messages about the parameter being unused
+
+    if (lastElement > firstElement)
+    {
+        if (retainOrderOfEquivalentItems)
+        {
+            for (int i = firstElement; i < lastElement; ++i)
+            {
+                if (comparator.compareElements (array[i], array [i + 1]) > 0)
+                {
+                    const ElementType temp = array [i];
+                    array [i] = array[i + 1];
+                    array [i + 1] = temp;
+
+                    if (i > firstElement)
+                        i -= 2;
+                }
+            }
+        }
+        else
+        {
+            int fromStack[30], toStack[30];
+            int stackIndex = 0;
+
+            for (;;)
+            {
+                const int size = (lastElement - firstElement) + 1;
+
+                if (size <= 8)
+                {
+                    int j = lastElement;
+                    int maxIndex;
+
+                    while (j > firstElement)
+                    {
+                        maxIndex = firstElement;
+                        for (int k = firstElement + 1; k <= j; ++k)
+                            if (comparator.compareElements (array[k], array [maxIndex]) > 0)
+                                maxIndex = k;
+
+                        const ElementType temp = array [maxIndex];
+                        array [maxIndex] = array[j];
+                        array [j] = temp;
+
+                        --j;
+                    }
+                }
+                else
+                {
+                    const int mid = firstElement + (size >> 1);
+                    ElementType temp = array [mid];
+                    array [mid] = array [firstElement];
+                    array [firstElement] = temp;
+
+                    int i = firstElement;
+                    int j = lastElement + 1;
+
+                    for (;;)
+                    {
+                        while (++i <= lastElement
+                                && comparator.compareElements (array[i], array [firstElement]) <= 0)
+                        {}
+
+                        while (--j > firstElement
+                                && comparator.compareElements (array[j], array [firstElement]) >= 0)
+                        {}
+
+                        if (j < i)
+                            break;
+
+                        temp = array[i];
+                        array[i] = array[j];
+                        array[j] = temp;
+                    }
+
+                    temp = array [firstElement];
+                    array [firstElement] = array[j];
+                    array [j] = temp;
+
+                    if (j - 1 - firstElement >= lastElement - i)
+                    {
+                        if (firstElement + 1 < j)
+                        {
+                            fromStack [stackIndex] = firstElement;
+                            toStack [stackIndex] = j - 1;
+                            ++stackIndex;
+                        }
+
+                        if (i < lastElement)
+                        {
+                            firstElement = i;
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (i < lastElement)
+                        {
+                            fromStack [stackIndex] = i;
+                            toStack [stackIndex] = lastElement;
+                            ++stackIndex;
+                        }
+
+                        if (firstElement + 1 < j)
+                        {
+                            lastElement = j - 1;
+                            continue;
+                        }
+                    }
+                }
+
+                if (--stackIndex < 0)
+                    break;
+
+                jassert (stackIndex < numElementsInArray (fromStack));
+
+                firstElement = fromStack [stackIndex];
+                lastElement = toStack [stackIndex];
+            }
+        }
+    }
+}
+
+/**
+    Searches a sorted array of elements, looking for the index at which a specified value
+    should be inserted for it to be in the correct order.
+
+    The comparator object that is passed-in must define a public method with the following
+    signature:
+    @code
+    int compareElements (ElementType first, ElementType second);
+    @endcode
+
+    ..and this method must return:
+      - a value of < 0 if the first comes before the second
+      - a value of 0 if the two objects are equivalent
+      - a value of > 0 if the second comes before the first
+
+    To improve performance, the compareElements() method can be declared as static or const.
+
+    @param comparator       an object which defines a compareElements() method
+    @param array            the array to search
+    @param newElement       the value that is going to be inserted
+    @param firstElement     the index of the first element to search
+    @param lastElement      the index of the last element in the range (this is non-inclusive)
+*/
+template <class ElementType, class ElementComparator>
+static int findInsertIndexInSortedArray (ElementComparator& comparator,
+                                         ElementType* const array,
+                                         const ElementType newElement,
+                                         int firstElement,
+                                         int lastElement)
+{
+    jassert (firstElement <= lastElement);
+
+    (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                        // avoids getting warning messages about the parameter being unused
+
+    while (firstElement < lastElement)
+    {
+        if (comparator.compareElements (newElement, array [firstElement]) == 0)
+        {
+            ++firstElement;
+            break;
+        }
+        else
+        {
+            const int halfway = (firstElement + lastElement) >> 1;
+
+            if (halfway == firstElement)
+            {
+                if (comparator.compareElements (newElement, array [halfway]) >= 0)
+                    ++firstElement;
+
+                break;
+            }
+            else if (comparator.compareElements (newElement, array [halfway]) >= 0)
+            {
+                firstElement = halfway;
+            }
+            else
+            {
+                lastElement = halfway;
+            }
+        }
+    }
+
+    return firstElement;
+}
+
+/**
+    A simple ElementComparator class that can be used to sort an array of
+    integer primitive objects.
+
+    Example: @code
+    Array <int> myArray;
+
+    IntegerElementComparator<int> sorter;
+    myArray.sort (sorter);
+    @endcode
+
+    For floating point values, see the FloatElementComparator class instead.
+
+    @see FloatElementComparator, ElementComparator
+*/
+template <class ElementType>
+class IntegerElementComparator
+{
+public:
+    static int compareElements (const ElementType first,
+                                const ElementType second) throw()
+    {
+        return (first < second) ? -1 : ((first == second) ? 0 : 1);
+    }
+};
+
+/**
+    A simple ElementComparator class that can be used to sort an array of numeric
+    double or floating point primitive objects.
+
+    Example: @code
+    Array <double> myArray;
+
+    FloatElementComparator<double> sorter;
+    myArray.sort (sorter);
+    @endcode
+
+    For integer values, see the IntegerElementComparator class instead.
+
+    @see IntegerElementComparator, ElementComparator
+*/
+template <class ElementType>
+class FloatElementComparator
+{
+public:
+    static int compareElements (const ElementType first,
+                                const ElementType second) throw()
+    {
+        return (first < second) ? -1 : ((first == second) ? 0 : 1);
+    }
+};
+
+#endif   // __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+/********* End of inlined file: juce_ElementComparator.h *********/
 
 /**
     Holds a list of primitive objects, such as ints, doubles, or pointers.
@@ -5541,6 +5126,1230 @@ private:
 
 #endif   // __JUCE_ARRAY_JUCEHEADER__
 /********* End of inlined file: juce_Array.h *********/
+
+class MemoryBlock;
+
+/**
+    An array of on/off bits, also usable to store large binary integers.
+
+    A BitArray acts like an arbitrarily large integer whose bits can be set or
+    cleared, and some basic mathematical operations can be done on the number as
+    a whole.
+*/
+class JUCE_API  BitArray
+{
+public:
+
+    /** Creates an empty BitArray */
+    BitArray() throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 32 bits of the array are initialised with this value.
+    */
+    BitArray (const unsigned int value) throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 32 bits of the array are initialised with the absolute value
+        passed in, and its sign is set to reflect the sign of the number.
+    */
+    BitArray (const int value) throw();
+
+    /** Creates a BitArray containing an integer value in its low bits.
+
+        The low 64 bits of the array are initialised with the absolute value
+        passed in, and its sign is set to reflect the sign of the number.
+    */
+    BitArray (int64 value) throw();
+
+    /** Creates a copy of another BitArray. */
+    BitArray (const BitArray& other) throw();
+
+    /** Destructor. */
+    ~BitArray() throw();
+
+    /** Copies another BitArray onto this one. */
+    const BitArray& operator= (const BitArray& other) throw();
+
+    /** Two arrays are the same if the same bits are set. */
+    bool operator== (const BitArray& other) const throw();
+    /** Two arrays are the same if the same bits are set. */
+    bool operator!= (const BitArray& other) const throw();
+
+    /** Clears all bits in the BitArray to 0. */
+    void clear() throw();
+
+    /** Clears a particular bit in the array. */
+    void clearBit (const int bitNumber) throw();
+
+    /** Sets a specified bit to 1.
+
+        If the bit number is high, this will grow the array to accomodate it.
+    */
+    void setBit (const int bitNumber) throw();
+
+    /** Sets or clears a specified bit. */
+    void setBit (const int bitNumber,
+                 const bool shouldBeSet) throw();
+
+    /** Sets a range of bits to be either on or off.
+
+        @param startBit     the first bit to change
+        @param numBits      the number of bits to change
+        @param shouldBeSet  whether to turn these bits on or off
+    */
+    void setRange (int startBit,
+                   int numBits,
+                   const bool shouldBeSet) throw();
+
+    /** Inserts a bit an a given position, shifting up any bits above it. */
+    void insertBit (const int bitNumber,
+                    const bool shouldBeSet) throw();
+
+    /** Returns the value of a specified bit in the array.
+
+        If the index is out-of-range, the result will be false.
+    */
+    bool operator[] (const int bit) const throw();
+
+    /** Returns true if no bits are set. */
+    bool isEmpty() const throw();
+
+    /** Returns a range of bits in the array as a new BitArray.
+
+        e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
+        @see getBitRangeAsInt
+    */
+    const BitArray getBitRange (int startBit, int numBits) const throw();
+
+    /** Returns a range of bits in the array as an integer value.
+
+        e.g. getBitRangeAsInt (0, 32) would return the lowest 32 bits.
+
+        Asking for more than 32 bits isn't allowed (obviously) - for that, use
+        getBitRange().
+    */
+    int getBitRangeAsInt (int startBit, int numBits) const throw();
+
+    /** Sets a range of bits in the array based on an integer value.
+
+        Copies the given integer into the array, starting at startBit,
+        and only using up to numBits of the available bits.
+    */
+    void setBitRangeAsInt (int startBit, int numBits,
+                           unsigned int valueToSet) throw();
+
+    /** Performs a bitwise OR with another BitArray.
+
+        The result ends up in this array.
+    */
+    void orWith (const BitArray& other) throw();
+
+    /** Performs a bitwise AND with another BitArray.
+
+        The result ends up in this array.
+    */
+    void andWith (const BitArray& other) throw();
+
+    /** Performs a bitwise XOR with another BitArray.
+
+        The result ends up in this array.
+    */
+    void xorWith (const BitArray& other) throw();
+
+    /** Adds another BitArray's value to this one.
+
+        Treating the two arrays as large positive integers, this
+        adds them up and puts the result in this array.
+    */
+    void add (const BitArray& other) throw();
+
+    /** Subtracts another BitArray's value from this one.
+
+        Treating the two arrays as large positive integers, this
+        subtracts them and puts the result in this array.
+
+        Note that if the result should be negative, this won't be
+        handled correctly.
+    */
+    void subtract (const BitArray& other) throw();
+
+    /** Multiplies another BitArray's value with this one.
+
+        Treating the two arrays as large positive integers, this
+        multiplies them and puts the result in this array.
+    */
+    void multiplyBy (const BitArray& other) throw();
+
+    /** Divides another BitArray's value into this one and also produces a remainder.
+
+        Treating the two arrays as large positive integers, this
+        divides this value by the other, leaving the quotient in this
+        array, and the remainder is copied into the other BitArray passed in.
+    */
+    void divideBy (const BitArray& divisor, BitArray& remainder) throw();
+
+    /** Returns the largest value that will divide both this value and the one
+        passed-in.
+    */
+    const BitArray findGreatestCommonDivisor (BitArray other) const throw();
+
+    /** Performs a modulo operation on this value.
+
+        The result is stored in this value.
+    */
+    void modulo (const BitArray& divisor) throw();
+
+    /** Performs a combined exponent and modulo operation.
+
+        This BitArray's value becomes (this ^ exponent) % modulus.
+    */
+    void exponentModulo (const BitArray& exponent, const BitArray& modulus) throw();
+
+    /** Performs an inverse modulo on the value.
+
+        i.e. the result is (this ^ -1) mod (modulus).
+    */
+    void inverseModulo (const BitArray& modulus) throw();
+
+    /** Shifts a section of bits left or right.
+
+        @param howManyBitsLeft  how far to move the bits (+ve numbers shift it left, -ve numbers shift it right).
+        @param startBit         the first bit to affect - if this is > 0, only bits above that index will be affected.
+    */
+    void shiftBits (int howManyBitsLeft,
+                    int startBit = 0) throw();
+
+    /** Does a signed comparison of two BitArrays.
+
+        Return values are:
+            - 0 if the numbers are the same
+            - < 0 if this number is smaller than the other
+            - > 0 if this number is bigger than the other
+    */
+    int compare (const BitArray& other) const throw();
+
+    /** Compares the magnitudes of two BitArrays, ignoring their signs.
+
+        Return values are:
+            - 0 if the numbers are the same
+            - < 0 if this number is smaller than the other
+            - > 0 if this number is bigger than the other
+    */
+    int compareAbsolute (const BitArray& other) const throw();
+
+    /** Returns true if the value is less than zero.
+
+        @see setNegative, negate
+    */
+    bool isNegative() const throw();
+
+    /** Changes the sign of the number to be positive or negative.
+
+        @see isNegative, negate
+    */
+    void setNegative (const bool shouldBeNegative) throw();
+
+    /** Inverts the sign of the number.
+
+        @see isNegative, setNegative
+    */
+    void negate() throw();
+
+    /** Counts the total number of set bits in the array. */
+    int countNumberOfSetBits() const throw();
+
+    /** Looks for the index of the next set bit after a given starting point.
+
+        searches from startIndex (inclusive) upwards for the first set bit,
+        and returns its index.
+
+        If no set bits are found, it returns -1.
+    */
+    int findNextSetBit (int startIndex = 0) const throw();
+
+    /** Looks for the index of the next clear bit after a given starting point.
+
+        searches from startIndex (inclusive) upwards for the first clear bit,
+        and returns its index.
+    */
+    int findNextClearBit (int startIndex = 0) const throw();
+
+    /** Returns the index of the highest set bit in the array.
+
+        If the array is empty, this will return -1.
+    */
+    int getHighestBit() const throw();
+
+    /** Converts the array to a number string.
+
+        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+
+        If minuimumNumCharacters is greater than 0, the returned string will be
+        padded with leading zeros to reach at least that length.
+    */
+    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
+
+    /** Converts a number string to an array.
+
+        Any non-valid characters will be ignored.
+
+        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
+    */
+    void parseString (const String& text,
+                      const int base) throw();
+
+    /** Turns the array into a block of binary data.
+
+        The data is arranged as little-endian, so the first byte of data is the low 8 bits
+        of the array, and so on.
+
+        @see loadFromMemoryBlock
+    */
+    const MemoryBlock toMemoryBlock() const throw();
+
+    /** Copies a block of raw data onto this array.
+
+        The data is arranged as little-endian, so the first byte of data is the low 8 bits
+        of the array, and so on.
+
+        @see toMemoryBlock
+    */
+    void loadFromMemoryBlock (const MemoryBlock& data) throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    void ensureSize (const int numVals) throw();
+    unsigned int* values;
+    int numValues, highestBit;
+    bool negative;
+};
+
+#endif   // __JUCE_BITARRAY_JUCEHEADER__
+/********* End of inlined file: juce_BitArray.h *********/
+
+/**
+    A simple pseudo-random number generator.
+*/
+class JUCE_API  Random
+{
+public:
+
+    /** Creates a Random object based on a seed value.
+
+        For a given seed value, the subsequent numbers generated by this object
+        will be predictable, so a good idea is to set this value based
+        on the time, e.g.
+
+        new Random (Time::currentTimeMillis())
+    */
+    Random (const int64 seedValue) throw();
+
+    /** Destructor. */
+    ~Random() throw();
+
+    /** Returns the next random 32 bit integer.
+
+        @returns a random integer from the full range 0x80000000 to 0x7fffffff
+    */
+    int nextInt() throw();
+
+    /** Returns the next random number, limited to a given range.
+
+        @returns a random integer between 0 (inclusive) and maxValue (exclusive).
+    */
+    int nextInt (const int maxValue) throw();
+
+    /** Returns the next 64-bit random number.
+
+        @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
+    */
+    int64 nextInt64() throw();
+
+    /** Returns the next random floating-point number.
+
+        @returns a random value in the range 0 to 1.0
+    */
+    float nextFloat() throw();
+
+    /** Returns the next random floating-point number.
+
+        @returns a random value in the range 0 to 1.0
+    */
+    double nextDouble() throw();
+
+    /** Returns the next random boolean value.
+    */
+    bool nextBool() throw();
+
+    /** Returns a BitArray containing a random number.
+
+        @returns a random value in the range 0 to (maximumValue - 1).
+    */
+    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
+
+    /** Sets a range of bits in a BitArray to random values. */
+    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
+
+    /** To avoid the overhead of having to create a new Random object whenever
+        you need a number, this is a shared application-wide object that
+        can be used.
+
+        It's not thread-safe though, so threads should use their own Random object.
+    */
+    static Random& getSystemRandom() throw();
+
+    /** Resets this Random object to a given seed value. */
+    void setSeed (const int64 newSeed) throw();
+
+    /** Reseeds this generator using a value generated from various semi-random system
+        properties like the current time, etc.
+
+        Because this function convolves the time with the last seed value, calling
+        it repeatedly will increase the randomness of the final result.
+    */
+    void setSeedRandomly();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int64 seed;
+};
+
+#endif   // __JUCE_RANDOM_JUCEHEADER__
+/********* End of inlined file: juce_Random.h *********/
+
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MEMORY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_LOGGER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+
+/********* Start of inlined file: juce_Initialisation.h *********/
+#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+#define __JUCE_INITIALISATION_JUCEHEADER__
+
+/** Initialises Juce's GUI classes.
+
+    If you're embedding Juce into an application that uses its own event-loop rather
+    than using the START_JUCE_APPLICATION macro, call this function before making any
+    Juce calls, to make sure things are initialised correctly.
+
+    Note that if you're creating a Juce DLL for Windows, you may also need to call the
+    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+
+    @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
+*/
+void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
+
+/** Clears up any static data being used by Juce's GUI classes.
+
+    If you're embedding Juce into an application that uses its own event-loop rather
+    than using the START_JUCE_APPLICATION macro, call this function in your shutdown
+    code to clean up any juce objects that might be lying around.
+
+    @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
+*/
+void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
+
+/** Initialises the core parts of Juce.
+
+    If you're embedding Juce into either a command-line program, call this function
+    at the start of your main() function to make sure that Juce is initialised correctly.
+
+    Note that if you're creating a Juce DLL for Windows, you may also need to call the
+    PlatformUtilities::setCurrentModuleInstanceHandle() method.
+
+    @see shutdownJuce_NonGUI, initialiseJuce_GUI
+*/
+void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
+
+/** Clears up any static data being used by Juce's non-gui core classes.
+
+    If you're embedding Juce into either a command-line program, call this function
+    at the end of your main() function if you want to make sure any Juce objects are
+    cleaned up correctly.
+
+    @see initialiseJuce_NonGUI, initialiseJuce_GUI
+*/
+void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+
+#endif   // __JUCE_INITIALISATION_JUCEHEADER__
+/********* End of inlined file: juce_Initialisation.h *********/
+
+#endif
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileLogger.h *********/
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
+#define __JUCE_FILELOGGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_File.h *********/
+#ifndef __JUCE_FILE_JUCEHEADER__
+#define __JUCE_FILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_OwnedArray.h *********/
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+#define __JUCE_OWNEDARRAY_JUCEHEADER__
+
+/** An array designed for holding objects.
+
+    This holds a list of pointers to objects, and will automatically
+    delete the objects when they are removed from the array, or when the
+    array is itself deleted.
+
+    Declare it in the form:  OwnedArray<MyObjectClass>
+
+    ..and then add new objects, e.g.   myOwnedArray.add (new MyObjectClass());
+
+    After adding objects, they are 'owned' by the array and will be deleted when
+    removed or replaced.
+
+    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
+    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+
+    @see Array, ReferenceCountedArray, StringArray, CriticalSection
+*/
+template <class ObjectClass,
+          class TypeOfCriticalSectionToUse = DummyCriticalSection>
+
+class OwnedArray   : private ArrayAllocationBase <ObjectClass*>
+{
+public:
+
+    /** Creates an empty array.
+
+        @param granularity  this is the size of increment by which the internal storage
+        used by the array will grow. Only change it from the default if you know the
+        array is going to be very big and needs to be able to grow efficiently.
+
+        @see ArrayAllocationBase
+    */
+    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity),
+          numUsed (0)
+    {
+    }
+
+    /** Deletes the array and also deletes any objects inside it.
+
+        To get rid of the array without deleting its objects, use its
+        clear (false) method before deleting it.
+    */
+    ~OwnedArray()
+    {
+        clear (true);
+    }
+
+    /** Clears the array, optionally deleting the objects inside it first. */
+    void clear (const bool deleteObjects = true)
+    {
+        lock.enter();
+
+        if (deleteObjects)
+        {
+            while (numUsed > 0)
+                delete this->elements [--numUsed];
+        }
+
+        this->setAllocatedSize (0);
+        numUsed = 0;
+        lock.exit();
+    }
+
+    /** Returns the number of items currently in the array.
+        @see operator[]
+    */
+    inline int size() const throw()
+    {
+        return numUsed;
+    }
+
+    /** Returns a pointer to the object at this index in the array.
+
+        If the index is out-of-range, this will return a null pointer, (and
+        it could be null anyway, because it's ok for the array to hold null
+        pointers as well as objects).
+
+        @see getUnchecked
+    */
+    inline ObjectClass* operator[] (const int index) const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
+                                            ? this->elements [index]
+                                            : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
+
+        This is a faster and less safe version of operator[] which doesn't check the index passed in, so
+        it can be used when you're sure the index if always going to be legal.
+    */
+    inline ObjectClass* getUnchecked (const int index) const throw()
+    {
+        lock.enter();
+        jassert (((unsigned int) index) < (unsigned int) numUsed);
+        ObjectClass* const result = this->elements [index];
+        lock.exit();
+
+        return result;
+    }
+
+    /** Returns a pointer to the first object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getLast
+    */
+    inline ObjectClass* getFirst() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+        return result;
+    }
+
+    /** Returns a pointer to the last object in the array.
+
+        This will return a null pointer if the array's empty.
+        @see getFirst
+    */
+    inline ObjectClass* getLast() const throw()
+    {
+        lock.enter();
+        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
+                                                  : (ObjectClass*) 0;
+        lock.exit();
+
+        return result;
+    }
+
+    /** Finds the index of an object which might be in the array.
+
+        @param objectToLookFor    the object to look for
+        @returns                  the index at which the object was found, or -1 if it's not found
+    */
+    int indexOf (const ObjectClass* const objectToLookFor) const throw()
+    {
+        int result = -1;
+
+        lock.enter();
+        ObjectClass* const* e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToLookFor == *e)
+            {
+                result = (int) (e - this->elements);
+                break;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+        return result;
+    }
+
+    /** Returns true if the array contains a specified object.
+
+        @param objectToLookFor      the object to look for
+        @returns                    true if the object is in the array
+    */
+    bool contains (const ObjectClass* const objectToLookFor) const throw()
+    {
+        lock.enter();
+
+        ObjectClass* const* e = this->elements;
+        int i = numUsed;
+
+        while (i >= 4)
+        {
+            if (objectToLookFor == *e
+                 || objectToLookFor == *++e
+                 || objectToLookFor == *++e
+                 || objectToLookFor == *++e)
+            {
+                lock.exit();
+                return true;
+            }
+
+            i -= 4;
+            ++e;
+        }
+
+        while (i > 0)
+        {
+            if (objectToLookFor == *e)
+            {
+                lock.exit();
+                return true;
+            }
+
+            --i;
+            ++e;
+        }
+
+        lock.exit();
+        return false;
+    }
+
+    /** Appends a new object to the end of the array.
+
+        Note that the this object will be deleted by the OwnedArray when it
+        is removed, so be careful not to delete it somewhere else.
+
+        Also be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param newObject       the new object to add to the array
+        @see set, insert, addIfNotAlreadyThere, addSorted
+    */
+    void add (const ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+        this->ensureAllocatedSize (numUsed + 1);
+        this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+        lock.exit();
+    }
+
+    /** Inserts a new object into the array at the given index.
+
+        Note that the this object will be deleted by the OwnedArray when it
+        is removed, so be careful not to delete it somewhere else.
+
+        If the index is less than 0 or greater than the size of the array, the
+        element will be added to the end of the array.
+        Otherwise, it will be inserted into the array, moving all the later elements
+        along to make room.
+
+        Be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param indexToInsertAt      the index at which the new element should be inserted
+        @param newObject            the new object to add to the array
+        @see add, addSorted, addIfNotAlreadyThere, set
+    */
+    void insert (int indexToInsertAt,
+                 const ObjectClass* const newObject) throw()
+    {
+        if (indexToInsertAt >= 0)
+        {
+            lock.enter();
+
+            if (indexToInsertAt > numUsed)
+                indexToInsertAt = numUsed;
+
+            this->ensureAllocatedSize (numUsed + 1);
+
+            ObjectClass** const e = this->elements + indexToInsertAt;
+            const int numToMove = numUsed - indexToInsertAt;
+
+            if (numToMove > 0)
+                memmove (e + 1, e, numToMove * sizeof (ObjectClass*));
+
+            *e = const_cast <ObjectClass*> (newObject);
+            ++numUsed;
+
+            lock.exit();
+        }
+        else
+        {
+            add (newObject);
+        }
+    }
+
+    /** Appends a new object at the end of the array as long as the array doesn't
+        already contain it.
+
+        If the array already contains a matching object, nothing will be done.
+
+        @param newObject   the new object to add to the array
+    */
+    void addIfNotAlreadyThere (const ObjectClass* const newObject) throw()
+    {
+        lock.enter();
+
+        if (! contains (newObject))
+            add (newObject);
+
+        lock.exit();
+    }
+
+    /** Replaces an object in the array with a different one.
+
+        If the index is less than zero, this method does nothing.
+        If the index is beyond the end of the array, the new object is added to the end of the array.
+
+        Be careful not to add the same object to the array more than once,
+        as this will obviously cause deletion of dangling pointers.
+
+        @param indexToChange        the index whose value you want to change
+        @param newObject            the new value to set for this index.
+        @param deleteOldElement     whether to delete the object that's being replaced with the new one
+        @see add, insert, remove
+    */
+    void set (const int indexToChange,
+              const ObjectClass* const newObject,
+              const bool deleteOldElement = true)
+    {
+        if (indexToChange >= 0)
+        {
+            ObjectClass* toDelete = 0;
+            lock.enter();
+
+            if (indexToChange < numUsed)
+            {
+                if (deleteOldElement)
+                {
+                    toDelete = this->elements [indexToChange];
+
+                    if (toDelete == newObject)
+                        toDelete = 0;
+                }
+
+                this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+            }
+            else
+            {
+                this->ensureAllocatedSize (numUsed + 1);
+                this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+            }
+
+            lock.exit();
+
+            delete toDelete;
+        }
+    }
+
+    /** Inserts a new object into the array assuming that the array is sorted.
+
+        This will use a comparator to find the position at which the new object
+        should go. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator   the comparator to use to compare the elements - see the sort method
+                            for details about this object's structure
+        @param newObject    the new object to insert to the array
+        @see add, sort, indexOfSorted
+    */
+    template <class ElementComparator>
+    void addSorted (ElementComparator& comparator,
+                    ObjectClass* const newObject) throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+        lock.enter();
+        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        lock.exit();
+    }
+
+    /** Finds the index of an object in the array, assuming that the array is sorted.
+
+        This will use a comparator to do a binary-chop to find the index of the given
+        element, if it exists. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param comparator           the comparator to use to compare the elements - see the sort()
+                                    method for details about the form this object should take
+        @param objectToLookFor      the object to search for
+        @returns                    the index of the element, or -1 if it's not found
+        @see addSorted, sort
+    */
+    template <class ElementComparator>
+    int indexOfSorted (ElementComparator& comparator,
+                       const ObjectClass* const objectToLookFor) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+        lock.enter();
+
+        int start = 0;
+        int end = numUsed;
+
+        for (;;)
+        {
+            if (start >= end)
+            {
+                lock.exit();
+                return -1;
+            }
+            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
+            {
+                lock.exit();
+                return start;
+            }
+            else
+            {
+                const int halfway = (start + end) >> 1;
+
+                if (halfway == start)
+                {
+                    lock.exit();
+                    return -1;
+                }
+                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
+                    start = halfway;
+                else
+                    end = halfway;
+            }
+        }
+    }
+
+    /** Removes an object from the array.
+
+        This will remove the object at a given index (optionally also
+        deleting it) and move back all the subsequent objects to close the gap.
+        If the index passed in is out-of-range, nothing will happen.
+
+        @param indexToRemove    the index of the element to remove
+        @param deleteObject     whether to delete the object that is removed
+        @see removeObject, removeRange
+    */
+    void remove (const int indexToRemove,
+                 const bool deleteObject = true)
+    {
+        lock.enter();
+        ObjectClass* toDelete = 0;
+
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        {
+            ObjectClass** const e = this->elements + indexToRemove;
+
+            if (deleteObject)
+                toDelete = *e;
+
+            --numUsed;
+            const int numToShift = numUsed - indexToRemove;
+
+            if (numToShift > 0)
+                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+
+        delete toDelete;
+    }
+
+    /** Removes a specified object from the array.
+
+        If the item isn't found, no action is taken.
+
+        @param objectToRemove   the object to try to remove
+        @param deleteObject     whether to delete the object (if it's found)
+        @see remove, removeRange
+    */
+    void removeObject (const ObjectClass* const objectToRemove,
+                       const bool deleteObject = true)
+    {
+        lock.enter();
+        ObjectClass** e = this->elements;
+
+        for (int i = numUsed; --i >= 0;)
+        {
+            if (objectToRemove == *e)
+            {
+                remove ((int) (e - this->elements), deleteObject);
+                break;
+            }
+
+            ++e;
+        }
+
+        lock.exit();
+    }
+
+    /** Removes a range of objects from the array.
+
+        This will remove a set of objects, starting from the given index,
+        and move any subsequent elements down to close the gap.
+
+        If the range extends beyond the bounds of the array, it will
+        be safely clipped to the size of the array.
+
+        @param startIndex       the index of the first object to remove
+        @param numberToRemove   how many objects should be removed
+        @param deleteObjects    whether to delete the objects that get removed
+        @see remove, removeObject
+    */
+    void removeRange (int startIndex,
+                      const int numberToRemove,
+                      const bool deleteObjects = true)
+    {
+        lock.enter();
+        const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
+        startIndex = jlimit (0, numUsed, startIndex);
+
+        if (endIndex > startIndex)
+        {
+            if (deleteObjects)
+            {
+                for (int i = startIndex; i < endIndex; ++i)
+                {
+                    delete this->elements [i];
+                    this->elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                }
+            }
+
+            const int rangeSize = endIndex - startIndex;
+            ObjectClass** e = this->elements + startIndex;
+            int numToShift = numUsed - endIndex;
+            numUsed -= rangeSize;
+
+            while (--numToShift >= 0)
+            {
+                *e = e [rangeSize];
+                ++e;
+            }
+
+            if ((numUsed << 1) < this->numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        lock.exit();
+    }
+
+    /** Removes the last n objects from the array.
+
+        @param howManyToRemove   how many objects to remove from the end of the array
+        @param deleteObjects     whether to also delete the objects that are removed
+        @see remove, removeObject, removeRange
+    */
+    void removeLast (int howManyToRemove = 1,
+                     const bool deleteObjects = true)
+    {
+        lock.enter();
+
+        if (howManyToRemove >= numUsed)
+        {
+            clear (deleteObjects);
+        }
+        else
+        {
+            while (--howManyToRemove >= 0)
+                remove (numUsed - 1, deleteObjects);
+        }
+
+        lock.exit();
+    }
+
+    /** Swaps a pair of objects in the array.
+
+        If either of the indexes passed in is out-of-range, nothing will happen,
+        otherwise the two objects at these positions will be exchanged.
+    */
+    void swap (const int index1,
+               const int index2) throw()
+    {
+        lock.enter();
+
+        if (((unsigned int) index1) < (unsigned int) numUsed
+             && ((unsigned int) index2) < (unsigned int) numUsed)
+        {
+            swapVariables (this->elements [index1],
+                           this->elements [index2]);
+        }
+
+        lock.exit();
+    }
+
+    /** Moves one of the objects to a different position.
+
+        This will move the object to a specified index, shuffling along
+        any intervening elements as required.
+
+        So for example, if you have the array { 0, 1, 2, 3, 4, 5 } then calling
+        move (2, 4) would result in { 0, 1, 3, 4, 2, 5 }.
+
+        @param currentIndex     the index of the object to be moved. If this isn't a
+                                valid index, then nothing will be done
+        @param newIndex         the index at which you'd like this object to end up. If this
+                                is less than zero, it will be moved to the end of the array
+    */
+    void move (const int currentIndex,
+               int newIndex) throw()
+    {
+        if (currentIndex != newIndex)
+        {
+            lock.enter();
+
+            if (((unsigned int) currentIndex) < (unsigned int) numUsed)
+            {
+                if (((unsigned int) newIndex) >= (unsigned int) numUsed)
+                    newIndex = numUsed - 1;
+
+                ObjectClass* const value = this->elements [currentIndex];
+
+                if (newIndex > currentIndex)
+                {
+                    memmove (this->elements + currentIndex,
+                             this->elements + currentIndex + 1,
+                             (newIndex - currentIndex) * sizeof (ObjectClass*));
+                }
+                else
+                {
+                    memmove (this->elements + newIndex + 1,
+                             this->elements + newIndex,
+                             (currentIndex - newIndex) * sizeof (ObjectClass*));
+                }
+
+                this->elements [newIndex] = value;
+            }
+
+            lock.exit();
+        }
+    }
+
+    /** This swaps the contents of this array with those of another array.
+
+        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
+        because it just swaps their internal pointers.
+    */
+    template <class OtherArrayType>
+    void swapWithArray (OtherArrayType& otherArray) throw()
+    {
+        lock.enter();
+        otherArray.lock.enter();
+        swapVariables <int> (this->numUsed, otherArray.numUsed);
+        swapVariables <ObjectClass**> (this->elements, otherArray.elements);
+        swapVariables <int> (this->numAllocated, otherArray.numAllocated);
+        otherArray.lock.exit();
+        lock.exit();
+    }
+
+    /** Reduces the amount of storage being used by the array.
+
+        Arrays typically allocate slightly more storage than they need, and after
+        removing elements, they may have quite a lot of unused space allocated.
+        This method will reduce the amount of allocated storage to a minimum.
+    */
+    void minimiseStorageOverheads() throw()
+    {
+        lock.enter();
+
+        if (numUsed == 0)
+        {
+            this->setAllocatedSize (0);
+        }
+        else
+        {
+            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+
+            if (newAllocation < this->numAllocated)
+                this->setAllocatedSize (newAllocation);
+        }
+
+        lock.exit();
+    }
+
+    /** Increases the array's internal storage to hold a minimum number of elements.
+
+        Calling this before adding a large known number of elements means that
+        the array won't have to keep dynamically resizing itself as the elements
+        are added, and it'll therefore be more efficient.
+    */
+    void ensureStorageAllocated (const int minNumElements) throw()
+    {
+        this->ensureAllocatedSize (minNumElements);
+    }
+
+    /** Sorts the elements in the array.
+
+        This will use a comparator object to sort the elements into order. The object
+        passed must have a method of the form:
+        @code
+        int compareElements (ElementType first, ElementType second);
+        @endcode
+
+        ..and this method must return:
+          - a value of < 0 if the first comes before the second
+          - a value of 0 if the two objects are equivalent
+          - a value of > 0 if the second comes before the first
+
+        To improve performance, the compareElements() method can be declared as static or const.
+
+        @param comparator   the comparator to use for comparing elements.
+        @param retainOrderOfEquivalentItems     if this is true, then items
+                            which the comparator says are equivalent will be
+                            kept in the order in which they currently appear
+                            in the array. This is slower to perform, but may
+                            be important in some cases. If it's false, a faster
+                            algorithm is used, but equivalent elements may be
+                            rearranged.
+        @see sortArray, indexOfSorted
+    */
+    template <class ElementComparator>
+    void sort (ElementComparator& comparator,
+               const bool retainOrderOfEquivalentItems = false) const throw()
+    {
+        (void) comparator;  // if you pass in an object with a static compareElements() method, this
+                            // avoids getting warning messages about the parameter being unused
+
+        lock.enter();
+        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        lock.exit();
+    }
+
+    /** Locks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see unlockArray
+    */
+    void lockArray() const throw()
+    {
+        lock.enter();
+    }
+
+    /** Unlocks the array's CriticalSection.
+
+        Of course if the type of section used is a DummyCriticalSection, this won't
+        have any effect.
+
+        @see lockArray
+    */
+    void unlockArray() const throw()
+    {
+        lock.exit();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int numUsed;
+    TypeOfCriticalSectionToUse lock;
+
+    // disallow copy constructor and assignment
+    OwnedArray (const OwnedArray&);
+    const OwnedArray& operator= (const OwnedArray&);
+};
+
+#endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
+/********* End of inlined file: juce_OwnedArray.h *********/
+
+/********* Start of inlined file: juce_StringArray.h *********/
+#ifndef __JUCE_STRINGARRAY_JUCEHEADER__
+#define __JUCE_STRINGARRAY_JUCEHEADER__
+
+/********* Start of inlined file: juce_VoidArray.h *********/
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
+#define __JUCE_VOIDARRAY_JUCEHEADER__
 
 /**
     A typedef for an Array of void*'s.
@@ -6963,1012 +7772,641 @@ private:
 /********* End of inlined file: juce_FileLogger.h *********/
 
 #endif
-#ifndef __JUCE_INITIALISATION_JUCEHEADER__
-
-/********* Start of inlined file: juce_Initialisation.h *********/
-#ifndef __JUCE_INITIALISATION_JUCEHEADER__
-#define __JUCE_INITIALISATION_JUCEHEADER__
-
-/** Initialises Juce's GUI classes.
-
-    If you're embedding Juce into an application that uses its own event-loop rather
-    than using the START_JUCE_APPLICATION macro, call this function before making any
-    Juce calls, to make sure things are initialised correctly.
-
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
-
-    @see shutdownJuce_GUI(), initialiseJuce_NonGUI()
-*/
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_GUI();
-
-/** Clears up any static data being used by Juce's GUI classes.
-
-    If you're embedding Juce into an application that uses its own event-loop rather
-    than using the START_JUCE_APPLICATION macro, call this function in your shutdown
-    code to clean up any juce objects that might be lying around.
-
-    @see initialiseJuce_GUI(), initialiseJuce_NonGUI()
-*/
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
-
-/** Initialises the core parts of Juce.
-
-    If you're embedding Juce into either a command-line program, call this function
-    at the start of your main() function to make sure that Juce is initialised correctly.
-
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
-    PlatformUtilities::setCurrentModuleInstanceHandle() method.
-
-    @see shutdownJuce_NonGUI, initialiseJuce_GUI
-*/
-void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
-
-/** Clears up any static data being used by Juce's non-gui core classes.
-
-    If you're embedding Juce into either a command-line program, call this function
-    at the end of your main() function if you want to make sure any Juce objects are
-    cleaned up correctly.
-
-    @see initialiseJuce_NonGUI, initialiseJuce_GUI
-*/
-void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
-
-#endif   // __JUCE_INITIALISATION_JUCEHEADER__
-/********* End of inlined file: juce_Initialisation.h *********/
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_LOGGER_JUCEHEADER__
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+/********* Start of inlined file: juce_Atomic.h *********/
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+#define __JUCE_ATOMIC_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
+// Atomic increment/decrement operations..
 
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+#if JUCE_MAC && ! DOXYGEN
 
-#endif
-#ifndef __JUCE_RANDOM_JUCEHEADER__
+  #if ! MACOS_10_3_OR_EARLIER
 
-/********* Start of inlined file: juce_Random.h *********/
-#ifndef __JUCE_RANDOM_JUCEHEADER__
-#define __JUCE_RANDOM_JUCEHEADER__
+    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
+    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+  #else
 
-/********* Start of inlined file: juce_BitArray.h *********/
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
-#define __JUCE_BITARRAY_JUCEHEADER__
+    forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (1, (SInt32*) &variable); }
+    forcedinline void atomicDecrement (int& variable) throw()           { OTAtomicAdd32 (-1, (SInt32*) &variable); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (-1, (SInt32*) &variable); }
+  #endif
 
-class MemoryBlock;
+#elif JUCE_GCC
 
-/**
-    An array of on/off bits, also usable to store large binary integers.
+  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
+    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
+    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
+  #else
 
-    A BitArray acts like an arbitrarily large integer whose bits can be set or
-    cleared, and some basic mathematical operations can be done on the number as
-    a whole.
-*/
-class JUCE_API  BitArray
-{
-public:
-
-    /** Creates an empty BitArray */
-    BitArray() throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 32 bits of the array are initialised with this value.
-    */
-    BitArray (const unsigned int value) throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 32 bits of the array are initialised with the absolute value
-        passed in, and its sign is set to reflect the sign of the number.
-    */
-    BitArray (const int value) throw();
-
-    /** Creates a BitArray containing an integer value in its low bits.
-
-        The low 64 bits of the array are initialised with the absolute value
-        passed in, and its sign is set to reflect the sign of the number.
-    */
-    BitArray (int64 value) throw();
-
-    /** Creates a copy of another BitArray. */
-    BitArray (const BitArray& other) throw();
-
-    /** Destructor. */
-    ~BitArray() throw();
-
-    /** Copies another BitArray onto this one. */
-    const BitArray& operator= (const BitArray& other) throw();
-
-    /** Two arrays are the same if the same bits are set. */
-    bool operator== (const BitArray& other) const throw();
-    /** Two arrays are the same if the same bits are set. */
-    bool operator!= (const BitArray& other) const throw();
-
-    /** Clears all bits in the BitArray to 0. */
-    void clear() throw();
-
-    /** Clears a particular bit in the array. */
-    void clearBit (const int bitNumber) throw();
-
-    /** Sets a specified bit to 1.
-
-        If the bit number is high, this will grow the array to accomodate it.
-    */
-    void setBit (const int bitNumber) throw();
-
-    /** Sets or clears a specified bit. */
-    void setBit (const int bitNumber,
-                 const bool shouldBeSet) throw();
-
-    /** Sets a range of bits to be either on or off.
-
-        @param startBit     the first bit to change
-        @param numBits      the number of bits to change
-        @param shouldBeSet  whether to turn these bits on or off
-    */
-    void setRange (int startBit,
-                   int numBits,
-                   const bool shouldBeSet) throw();
-
-    /** Inserts a bit an a given position, shifting up any bits above it. */
-    void insertBit (const int bitNumber,
-                    const bool shouldBeSet) throw();
-
-    /** Returns the value of a specified bit in the array.
-
-        If the index is out-of-range, the result will be false.
-    */
-    bool operator[] (const int bit) const throw();
-
-    /** Returns true if no bits are set. */
-    bool isEmpty() const throw();
-
-    /** Returns a range of bits in the array as a new BitArray.
-
-        e.g. getBitRangeAsInt (0, 64) would return the lowest 64 bits.
-        @see getBitRangeAsInt
-    */
-    const BitArray getBitRange (int startBit, int numBits) const throw();
-
-    /** Returns a range of bits in the array as an integer value.
-
-        e.g. getBitRangeAsInt (0, 32) would return the lowest 32 bits.
-
-        Asking for more than 32 bits isn't allowed (obviously) - for that, use
-        getBitRange().
-    */
-    int getBitRangeAsInt (int startBit, int numBits) const throw();
-
-    /** Sets a range of bits in the array based on an integer value.
-
-        Copies the given integer into the array, starting at startBit,
-        and only using up to numBits of the available bits.
-    */
-    void setBitRangeAsInt (int startBit, int numBits,
-                           unsigned int valueToSet) throw();
-
-    /** Performs a bitwise OR with another BitArray.
-
-        The result ends up in this array.
-    */
-    void orWith (const BitArray& other) throw();
-
-    /** Performs a bitwise AND with another BitArray.
-
-        The result ends up in this array.
-    */
-    void andWith (const BitArray& other) throw();
-
-    /** Performs a bitwise XOR with another BitArray.
-
-        The result ends up in this array.
-    */
-    void xorWith (const BitArray& other) throw();
-
-    /** Adds another BitArray's value to this one.
-
-        Treating the two arrays as large positive integers, this
-        adds them up and puts the result in this array.
-    */
-    void add (const BitArray& other) throw();
-
-    /** Subtracts another BitArray's value from this one.
-
-        Treating the two arrays as large positive integers, this
-        subtracts them and puts the result in this array.
-
-        Note that if the result should be negative, this won't be
-        handled correctly.
-    */
-    void subtract (const BitArray& other) throw();
-
-    /** Multiplies another BitArray's value with this one.
-
-        Treating the two arrays as large positive integers, this
-        multiplies them and puts the result in this array.
-    */
-    void multiplyBy (const BitArray& other) throw();
-
-    /** Divides another BitArray's value into this one and also produces a remainder.
-
-        Treating the two arrays as large positive integers, this
-        divides this value by the other, leaving the quotient in this
-        array, and the remainder is copied into the other BitArray passed in.
-    */
-    void divideBy (const BitArray& divisor, BitArray& remainder) throw();
-
-    /** Returns the largest value that will divide both this value and the one
-        passed-in.
-    */
-    const BitArray findGreatestCommonDivisor (BitArray other) const throw();
-
-    /** Performs a modulo operation on this value.
-
-        The result is stored in this value.
-    */
-    void modulo (const BitArray& divisor) throw();
-
-    /** Performs a combined exponent and modulo operation.
-
-        This BitArray's value becomes (this ^ exponent) % modulus.
-    */
-    void exponentModulo (const BitArray& exponent, const BitArray& modulus) throw();
-
-    /** Performs an inverse modulo on the value.
-
-        i.e. the result is (this ^ -1) mod (modulus).
-    */
-    void inverseModulo (const BitArray& modulus) throw();
-
-    /** Shifts a section of bits left or right.
-
-        @param howManyBitsLeft  how far to move the bits (+ve numbers shift it left, -ve numbers shift it right).
-        @param startBit         the first bit to affect - if this is > 0, only bits above that index will be affected.
-    */
-    void shiftBits (int howManyBitsLeft,
-                    int startBit = 0) throw();
-
-    /** Does a signed comparison of two BitArrays.
-
-        Return values are:
-            - 0 if the numbers are the same
-            - < 0 if this number is smaller than the other
-            - > 0 if this number is bigger than the other
-    */
-    int compare (const BitArray& other) const throw();
-
-    /** Compares the magnitudes of two BitArrays, ignoring their signs.
-
-        Return values are:
-            - 0 if the numbers are the same
-            - < 0 if this number is smaller than the other
-            - > 0 if this number is bigger than the other
-    */
-    int compareAbsolute (const BitArray& other) const throw();
-
-    /** Returns true if the value is less than zero.
-
-        @see setNegative, negate
-    */
-    bool isNegative() const throw();
-
-    /** Changes the sign of the number to be positive or negative.
-
-        @see isNegative, negate
-    */
-    void setNegative (const bool shouldBeNegative) throw();
-
-    /** Inverts the sign of the number.
-
-        @see isNegative, setNegative
-    */
-    void negate() throw();
-
-    /** Counts the total number of set bits in the array. */
-    int countNumberOfSetBits() const throw();
-
-    /** Looks for the index of the next set bit after a given starting point.
-
-        searches from startIndex (inclusive) upwards for the first set bit,
-        and returns its index.
-
-        If no set bits are found, it returns -1.
-    */
-    int findNextSetBit (int startIndex = 0) const throw();
-
-    /** Looks for the index of the next clear bit after a given starting point.
-
-        searches from startIndex (inclusive) upwards for the first clear bit,
-        and returns its index.
-    */
-    int findNextClearBit (int startIndex = 0) const throw();
-
-    /** Returns the index of the highest set bit in the array.
-
-        If the array is empty, this will return -1.
-    */
-    int getHighestBit() const throw();
-
-    /** Converts the array to a number string.
-
-        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
-
-        If minuimumNumCharacters is greater than 0, the returned string will be
-        padded with leading zeros to reach at least that length.
-    */
-    const String toString (const int base, const int minimumNumCharacters = 1) const throw();
-
-    /** Converts a number string to an array.
-
-        Any non-valid characters will be ignored.
-
-        Specify a base such as 2 (binary), 8 (octal), 10 (decimal), 16 (hex).
-    */
-    void parseString (const String& text,
-                      const int base) throw();
-
-    /** Turns the array into a block of binary data.
-
-        The data is arranged as little-endian, so the first byte of data is the low 8 bits
-        of the array, and so on.
-
-        @see loadFromMemoryBlock
-    */
-    const MemoryBlock toMemoryBlock() const throw();
-
-    /** Copies a block of raw data onto this array.
-
-        The data is arranged as little-endian, so the first byte of data is the low 8 bits
-        of the array, and so on.
-
-        @see toMemoryBlock
-    */
-    void loadFromMemoryBlock (const MemoryBlock& data) throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    void ensureSize (const int numVals) throw();
-    unsigned int* values;
-    int numValues, highestBit;
-    bool negative;
-};
-
-#endif   // __JUCE_BITARRAY_JUCEHEADER__
-/********* End of inlined file: juce_BitArray.h *********/
-
-/**
-    A simple pseudo-random number generator.
-*/
-class JUCE_API  Random
-{
-public:
-
-    /** Creates a Random object based on a seed value.
-
-        For a given seed value, the subsequent numbers generated by this object
-        will be predictable, so a good idea is to set this value based
-        on the time, e.g.
-
-        new Random (Time::currentTimeMillis())
-    */
-    Random (const int64 seedValue) throw();
-
-    /** Destructor. */
-    ~Random() throw();
-
-    /** Returns the next random 32 bit integer.
-
-        @returns a random integer from the full range 0x80000000 to 0x7fffffff
-    */
-    int nextInt() throw();
-
-    /** Returns the next random number, limited to a given range.
-
-        @returns a random integer between 0 (inclusive) and maxValue (exclusive).
-    */
-    int nextInt (const int maxValue) throw();
-
-    /** Returns the next 64-bit random number.
-
-        @returns a random integer from the full range 0x8000000000000000 to 0x7fffffffffffffff
-    */
-    int64 nextInt64() throw();
-
-    /** Returns the next random floating-point number.
-
-        @returns a random value in the range 0 to 1.0
-    */
-    float nextFloat() throw();
-
-    /** Returns the next random floating-point number.
-
-        @returns a random value in the range 0 to 1.0
-    */
-    double nextDouble() throw();
-
-    /** Returns the next random boolean value.
-    */
-    bool nextBool() throw();
-
-    /** Returns a BitArray containing a random number.
-
-        @returns a random value in the range 0 to (maximumValue - 1).
-    */
-    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
-
-    /** Sets a range of bits in a BitArray to random values. */
-    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
-
-    /** To avoid the overhead of having to create a new Random object whenever
-        you need a number, this is a shared application-wide object that
-        can be used.
-
-        It's not thread-safe though, so threads should use their own Random object.
-    */
-    static Random& getSystemRandom() throw();
-
-    /** Resets this Random object to a given seed value. */
-    void setSeed (const int64 newSeed) throw();
-
-    /** Reseeds this generator using a value generated from various semi-random system
-        properties like the current time, etc.
-
-        Because this function convolves the time with the last seed value, calling
-        it repeatedly will increase the randomness of the final result.
-    */
-    void setSeedRandomly();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int64 seed;
-};
-
-#endif   // __JUCE_RANDOM_JUCEHEADER__
-/********* End of inlined file: juce_Random.h *********/
-
-#endif
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_Singleton.h *********/
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-#define __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedLock.h *********/
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDLOCK_JUCEHEADER__
-
-/**
-    Automatically locks and unlocks a CriticalSection object.
-
-    Use one of these as a local variable to control access to a CriticalSection.
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void atomicIncrement (int& variable) throw()
     {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
-
-        ...do some stuff...
-
-        // myCriticalSection gets unlocked here.
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock incl (%%rax)"
+            :
+            : "a" (&variable)
+            : "cc", "memory");
+        #else
+            "lock incl %0"
+            : "=m" (variable)
+            : "m" (variable));
+        #endif
     }
-    @endcode
 
-    @see CriticalSection, ScopedUnlock
-*/
-class JUCE_API  ScopedLock
-{
-public:
-
-    /** Creates a ScopedLock.
-
-        As soon as it is created, this will lock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be unlocked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedLock() throw()                                { lock_.exit(); }
-
-private:
-
-    const CriticalSection& lock_;
-
-    ScopedLock (const ScopedLock&);
-    const ScopedLock& operator= (const ScopedLock&);
-};
-
-/**
-    Automatically unlocks and re-locks a CriticalSection object.
-
-    This is the reverse of a ScopedLock object - instead of locking the critical
-    section for the lifetime of this object, it unlocks it.
-
-    Make sure you don't try to unlock critical sections that aren't actually locked!
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int atomicIncrementAndReturn (int& variable) throw()
     {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
+        int result;
 
-        ... do some stuff with it locked ..
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock xaddl %%ebx, (%%rax) \n\
+             incl %%ebx"
+            : "=b" (result)
+            : "a" (&variable), "b" (1)
+            : "cc", "memory");
+        #else
+            "lock xaddl %%eax, (%%ecx) \n\
+             incl %%eax"
+            : "=a" (result)
+            : "c" (&variable), "a" (1)
+            : "memory");
+        #endif
 
-        while (xyz)
-        {
-            ... do some stuff with it locked ..
+        return result;
+    }
 
-            const ScopedUnlock unlocker (myCriticalSection);
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void atomicDecrement (int& variable) throw()
+    {
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock decl (%%rax)"
+            :
+            : "a" (&variable)
+            : "cc", "memory");
+        #else
+            "lock decl %0"
+            : "=m" (variable)
+            : "m" (variable));
+        #endif
+    }
 
-            // myCriticalSection is now unlocked for the remainder of this block,
-            // and re-locked at the end.
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int atomicDecrementAndReturn (int& variable) throw()
+    {
+        int result;
 
-            ...do some stuff with it unlocked ...
+        __asm__ __volatile__ (
+        #if JUCE_64BIT
+            "lock xaddl %%ebx, (%%rax) \n\
+             decl %%ebx"
+            : "=b" (result)
+            : "a" (&variable), "b" (-1)
+            : "cc", "memory");
+        #else
+            "lock xaddl %%eax, (%%ecx) \n\
+             decl %%eax"
+            : "=a" (result)
+            : "c" (&variable), "a" (-1)
+            : "memory");
+        #endif
+        return result;
+    }
+  #endif
+
+#elif JUCE_USE_INTRINSICS
+
+    #pragma intrinsic (_InterlockedIncrement)
+    #pragma intrinsic (_InterlockedDecrement)
+
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicIncrement (int& variable) throw()
+    {
+        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
+    {
+        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicDecrement (int& variable) throw()
+    {
+        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
+    }
+
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
+    {
+        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
+    }
+#else
+
+    /** Increments an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicIncrement (int& variable) throw()
+    {
+        __asm {
+            mov ecx, dword ptr [variable]
+            lock inc dword ptr [ecx]
+        }
+    }
+
+    /** Increments an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
+    {
+        int result;
+
+        __asm {
+            mov ecx, dword ptr [variable]
+            mov eax, 1
+            lock xadd dword ptr [ecx], eax
+            inc eax
+            mov result, eax
         }
 
-        // myCriticalSection gets unlocked here.
+        return result;
     }
-    @endcode
 
-    @see CriticalSection, ScopedLock
+    /** Decrememts an integer in a thread-safe way. */
+    forcedinline void __fastcall atomicDecrement (int& variable) throw()
+    {
+        __asm {
+            mov ecx, dword ptr [variable]
+            lock dec dword ptr [ecx]
+        }
+    }
+
+    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
+    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
+    {
+        int result;
+
+        __asm {
+            mov ecx, dword ptr [variable]
+            mov eax, -1
+            lock xadd dword ptr [ecx], eax
+            dec eax
+            mov result, eax
+        }
+
+        return result;
+    }
+#endif
+
+#endif   // __JUCE_ATOMIC_JUCEHEADER__
+/********* End of inlined file: juce_Atomic.h *********/
+
+#endif
+#ifndef __JUCE_UUID_JUCEHEADER__
+
+/********* Start of inlined file: juce_Uuid.h *********/
+#ifndef __JUCE_UUID_JUCEHEADER__
+#define __JUCE_UUID_JUCEHEADER__
+
+/**
+    A universally unique 128-bit identifier.
+
+    This class generates very random unique numbers based on the system time
+    and MAC addresses if any are available. It's extremely unlikely that two identical
+    UUIDs would ever be created by chance.
+
+    The class includes methods for saving the ID as a string or as raw binary data.
 */
-class ScopedUnlock
+class JUCE_API  Uuid
 {
 public:
 
-    /** Creates a ScopedUnlock.
+    /** Creates a new unique ID. */
+    Uuid();
 
-        As soon as it is created, this will unlock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be re-locked.
+    /** Destructor. */
+    ~Uuid() throw();
 
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
+    /** Creates a copy of another UUID. */
+    Uuid (const Uuid& other);
+
+    /** Copies another UUID. */
+    Uuid& operator= (const Uuid& other);
+
+    /** Returns true if the ID is zero. */
+    bool isNull() const throw();
+
+    /** Compares two UUIDs. */
+    bool operator== (const Uuid& other) const;
+
+    /** Compares two UUIDs. */
+    bool operator!= (const Uuid& other) const;
+
+    /** Returns a stringified version of this UUID.
+
+        A Uuid object can later be reconstructed from this string using operator= or
+        the constructor that takes a string parameter.
+
+        @returns a 32 character hex string.
     */
-    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
+    const String toString() const;
 
-    /** Destructor.
+    /** Creates an ID from an encoded string version.
 
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
+        @see toString
     */
-    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
+    Uuid (const String& uuidString);
+
+    /** Copies from a stringified UUID.
+
+        The string passed in should be one that was created with the toString() method.
+    */
+    Uuid& operator= (const String& uuidString);
+
+    /** Returns a pointer to the internal binary representation of the ID.
+
+        This is an array of 16 bytes. To reconstruct a Uuid from its data, use
+        the constructor or operator= method that takes an array of uint8s.
+    */
+    const uint8* getRawData() const throw()                 { return value.asBytes; }
+
+    /** Creates a UUID from a 16-byte array.
+
+        @see getRawData
+    */
+    Uuid (const uint8* const rawData);
+
+    /** Sets this UUID from 16-bytes of raw data. */
+    Uuid& operator= (const uint8* const rawData);
+
+    juce_UseDebuggingNewOperator
 
 private:
+    union
+    {
+        uint8 asBytes [16];
+        int asInt[4];
+        int64 asInt64[2];
 
-    const CriticalSection& lock_;
-
-    ScopedUnlock (const ScopedLock&);
-    const ScopedUnlock& operator= (const ScopedUnlock&);
+    } value;
 };
 
-#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedLock.h *********/
+#endif   // __JUCE_UUID_JUCEHEADER__
+/********* End of inlined file: juce_Uuid.h *********/
 
-/**
-    Macro to declare member variables and methods for a singleton class.
+#endif
+#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 
-    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
-    to the class's definition.
+/********* Start of inlined file: juce_PerformanceCounter.h *********/
+#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+#define __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 
-    If allowOnlyOneInstance == true, it won't allow the object to be created
-    more than once in the process's lifetime.
-
-    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
-    implementation code.
-
-    Clients can then call the static MyClass::getInstance() to get a pointer to the
-    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
-    is currently extant
-
-    it's a very good idea to also add the call clearSingletonInstance() to the
-    destructor of the class, in case it is deleted by other means than deleteInstance()
+/** A timer for measuring performance of code and dumping the results to a file.
 
     e.g. @code
 
-        class MySingleton
+        PerformanceCounter pc ("fish", 50, "/temp/myfishlog.txt");
+
+        for (;;)
         {
-        public:
-            MySingleton()
-            {
-            }
+            pc.start();
 
-            ~MySingleton()
-            {
-                // this ensures that no dangling pointers are left when the
-                // singleton is deleted.
-                clearSingletonInstance();
-            }
+            doSomethingFishy();
 
-            juce_DeclareSingleton (MySingleton, false)
-        };
-
-        juce_ImplementSingleton (MySingleton)
-
-        // example of usage:
-        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
-
-        ...
-
-        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
-
+            pc.stop();
+        }
     @endcode
 
-    If you know that your object will only be created and deleted by a single thread, you
-    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
-    of this one.
-
-    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
+    In this example, the time of each period between calling start/stop will be
+    measured and averaged over 50 runs, and the results printed to a file
+    every 50 times round the loop.
 */
-#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
-\
-    static classname* _singletonInstance;  \
-    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        {\
-            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-\
-            if (_singletonInstance == 0) \
-            { \
-                static bool alreadyInside = false; \
-                static bool createdOnceAlready = false; \
-\
-                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-                jassert (! problem); \
-                if (! problem) \
-                { \
-                    createdOnceAlready = true; \
-                    alreadyInside = true; \
-                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                    alreadyInside = false; \
-\
-                    _singletonInstance = newObject; \
-                } \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton macro.
-
-    After adding the juce_DeclareSingleton to the class definition, this macro has
-    to be used in the cpp file.
-*/
-#define juce_ImplementSingleton(classname) \
-\
-    classname* classname::_singletonInstance = 0; \
-    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
-    section to make access to it thread-safe. If you know that your object will
-    only ever be created or deleted by a single thread, then this is a
-    more efficient version to use.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
-*/
-#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        { \
-            static bool alreadyInside = false; \
-            static bool createdOnceAlready = false; \
-\
-            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
-            jassert (! problem); \
-            if (! problem) \
-            { \
-                createdOnceAlready = true; \
-                alreadyInside = true; \
-                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                alreadyInside = false; \
-\
-                _singletonInstance = newObject; \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
-    for recursion or repeated instantiation. It's intended for use as a lightweight
-    version of a singleton, where you're using it in very straightforward
-    circumstances and don't need the extra checking.
-
-    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
-    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
-*/
-#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-            _singletonInstance = new classname(); \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
-
-    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
-    to the class definition, this macro has to be used somewhere in the cpp file.
-*/
-#define juce_ImplementSingleton_SingleThreaded(classname) \
-\
-    classname* classname::_singletonInstance = 0;
-
-#endif   // __JUCE_SINGLETON_JUCEHEADER__
-/********* End of inlined file: juce_Singleton.h *********/
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemStats.h *********/
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
-#define __JUCE_SYSTEMSTATS_JUCEHEADER__
-
-/**
-    Contains methods for finding out about the current hardware and OS configuration.
-*/
-class JUCE_API  SystemStats
+class JUCE_API  PerformanceCounter
 {
 public:
 
-    /** Returns the current version of JUCE,
+    /** Creates a PerformanceCounter object.
 
-        (just in case you didn't already know at compile-time.)
-
-        See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
+        @param counterName      the name used when printing out the statistics
+        @param runsPerPrintout  the number of start/stop iterations before calling
+                                printStatistics()
+        @param loggingFile      a file to dump the results to - if this is File::nonexistent,
+                                the results are just written to the debugger output
     */
-    static const String getJUCEVersion() throw();
+    PerformanceCounter (const String& counterName,
+                        int runsPerPrintout = 100,
+                        const File& loggingFile = File::nonexistent);
 
-    /** The set of possible results of the getOperatingSystemType() method.
+    /** Destructor. */
+    ~PerformanceCounter();
+
+    /** Starts timing.
+
+        @see stop
     */
-    enum OperatingSystemType
-    {
-        UnknownOS   = 0,
+    void start();
 
-        MacOSX      = 0x1000,
-        Linux       = 0x2000,
+    /** Stops timing and prints out the results.
 
-        Win95       = 0x4001,
-        Win98       = 0x4002,
-        WinNT351    = 0x4103,
-        WinNT40     = 0x4104,
-        Win2000     = 0x4105,
-        WinXP       = 0x4106,
-        WinVista    = 0x4107,
+        The number of iterations before doing a printout of the
+        results is set in the constructor.
 
-        Windows     = 0x4000,   /**< To test whether any version of Windows is running,
-                                     you can use the expression ((getOperatingSystemType() & Windows) != 0). */
-        WindowsNT   = 0x0100,   /**< To test whether the platform is Windows NT or later (i.e. not Win95 or 98),
-                                     you can use the expression ((getOperatingSystemType() & WindowsNT) != 0). */
-    };
-
-    /** Returns the type of operating system we're running on.
-
-        @returns one of the values from the OperatingSystemType enum.
-        @see getOperatingSystemName
+        @see start
     */
-    static OperatingSystemType getOperatingSystemType() throw();
+    void stop();
 
-    /** Returns the name of the type of operating system we're running on.
+    /** Dumps the current metrics to the debugger output and to a file.
 
-        @returns a string describing the OS type.
-        @see getOperatingSystemType
+        As well as using Logger::outputDebugString to print the results,
+        this will write then to the file specified in the constructor (if
+        this was valid).
     */
-    static const String getOperatingSystemName() throw();
+    void printStatistics();
 
-    /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
-    */
-    static bool isOperatingSystem64Bit() throw();
+    juce_UseDebuggingNewOperator
 
-    // CPU and memory information..
+private:
 
-    /** Returns the approximate CPU speed.
-
-        @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
-                    what year you're reading this...)
-    */
-    static int getCpuSpeedInMegaherz() throw();
-
-    /** Returns a string to indicate the CPU vendor.
-
-        Might not be known on some systems.
-    */
-    static const String getCpuVendor() throw();
-
-    /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() throw();
-
-    /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() throw();
-
-    /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() throw();
-
-    /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() throw();
-
-    /** Returns the number of CPUs.
-    */
-    static int getNumCpus() throw();
-
-    /** Returns a clock-cycle tick counter, if available.
-
-        If the machine can do it, this will return a tick-count
-        where each tick is one cpu clock cycle - used for profiling
-        code.
-
-        @returns    the tick count, or zero if not available.
-    */
-    static int64 getClockCycleCounter() throw();
-
-    /** Finds out how much RAM is in the machine.
-
-        @returns    the approximate number of megabytes of memory, or zero if
-                    something goes wrong when finding out.
-    */
-    static int getMemorySizeInMegabytes() throw();
-
-    /** Returns the system page-size.
-
-        This is only used by programmers with beards.
-    */
-    static int getPageSize() throw();
-
-    /** Returns a list of MAC addresses found on this machine.
-
-        @param  addresses   an array into which the MAC addresses should be copied
-        @param  maxNum      the number of elements in this array
-        @param littleEndian the endianness of the numbers to return. Note that
-                            the default values of this parameter are different on
-                            Mac/PC to avoid breaking old software that was written
-                            before this parameter was added (when the two systems
-                            defaulted to using different endiannesses). In newer
-                            software you probably want to specify an explicit value
-                            for this.
-        @returns            the number of MAC addresses that were found
-    */
-    static int getMACAddresses (int64* addresses, int maxNum,
-#if JUCE_MAC
-                                const bool littleEndian = true) throw();
-#else
-                                const bool littleEndian = false) throw();
-#endif
-
-    // not-for-public-use platform-specific method gets called at startup to initialise things.
-    static void initialiseStats() throw();
+    String name;
+    int numRuns, runsPerPrint;
+    double totalTime;
+    int64 started;
+    File outputFile;
 };
 
-#endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
-/********* End of inlined file: juce_SystemStats.h *********/
+#endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+/********* End of inlined file: juce_PerformanceCounter.h *********/
 
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/********* Start of inlined file: juce_PlatformUtilities.h *********/
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/**
+    A collection of miscellaneous platform-specific utilities.
+
+*/
+class JUCE_API  PlatformUtilities
+{
+public:
+
+    /** Plays the operating system's default alert 'beep' sound. */
+    static void beep();
+
+    static bool launchEmailWithAttachments (const String& targetEmailAddress,
+                                            const String& emailSubject,
+                                            const String& bodyText,
+                                            const StringArray& filesToAttach);
+
+#if JUCE_MAC || DOXYGEN
+
+    /** MAC ONLY - Turns a Core CF String into a juce one. */
+    static const String cfStringToJuceString (CFStringRef cfString);
+
+    /** MAC ONLY - Turns a juce string into a Core CF one. */
+    static CFStringRef juceStringToCFString (const String& s);
+
+    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
+    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
+
+    /** MAC ONLY - Turns an FSRef into a juce string path. */
+    static const String makePathFromFSRef (FSRef* file);
+
+    /** MAC ONLY - Converts any decomposed unicode characters in a string into
+        their precomposed equivalents.
+    */
+    static const String convertToPrecomposedUnicode (const String& s);
+
+    /** MAC ONLY - Gets the type of a file from the file's resources. */
+    static OSType getTypeOfFile (const String& filename);
+
+    /** MAC ONLY - Returns true if this file is actually a bundle. */
+    static bool isBundle (const String& filename);
+
+    /** MAC ONLY - Adds an item to the dock */
+    static void addItemToDock (const File& file);
+#endif
+
+#if JUCE_WIN32 || DOXYGEN
+
+    // Some registry helper functions:
+
+    /** WIN32 ONLY - Returns a string from the registry.
+
+        The path is a string for the entire path of a value in the registry,
+        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+    */
+    static const String getRegistryValue (const String& regValuePath,
+                                          const String& defaultValue = String::empty);
+
+    /** WIN32 ONLY - Sets a registry value as a string.
+
+        This will take care of creating any groups needed to get to the given
+        registry value.
+    */
+    static void setRegistryValue (const String& regValuePath,
+                                  const String& value);
+
+    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
+    static bool registryValueExists (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry value. */
+    static void deleteRegistryValue (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
+    static void deleteRegistryKey (const String& regKeyPath);
+
+    /** WIN32 ONLY - Creates a file association in the registry.
+
+        This lets you set the exe that should be launched by a given file extension.
+        @param fileExtension        the file extension to associate, including the
+                                    initial dot, e.g. ".txt"
+        @param symbolicDescription  a space-free short token to identify the file type
+        @param fullDescription      a human-readable description of the file type
+        @param targetExecutable     the executable that should be launched
+        @param iconResourceNumber   the icon that gets displayed for the file type will be
+                                    found by looking up this resource number in the
+                                    executable. Pass 0 here to not use an icon
+    */
+    static void registerFileAssociation (const String& fileExtension,
+                                         const String& symbolicDescription,
+                                         const String& fullDescription,
+                                         const File& targetExecutable,
+                                         int iconResourceNumber);
+
+    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
+
+        In a normal Juce application this will be set to the module handle
+        of the application executable.
+
+        If you're writing a DLL using Juce and plan to use any Juce messaging or
+        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
+        to set the correct module handle in your DllMain() function, because
+        the win32 system relies on the correct instance handle when opening windows.
+    */
+    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
+
+    /** WIN32 ONLY - Sets a new module handle to be used by the library.
+
+        @see getCurrentModuleInstanceHandle()
+    */
+    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
+
+    /** WIN32 ONLY - Gets the command-line params as a string.
+
+        This is needed to avoid unicode problems with the argc type params.
+    */
+    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
+#endif
+
+    /** Clears the floating point unit's flags.
+
+        Only has an effect under win32, currently.
+    */
+    static void fpuReset();
+
+#if JUCE_LINUX || JUCE_WIN32
+
+    /** Loads a dynamically-linked library into the process's address space.
+
+        @param pathOrFilename   the platform-dependent name and search path
+        @returns                a handle which can be used by getProcedureEntryPoint(), or
+                                zero if it fails.
+        @see freeDynamicLibrary, getProcedureEntryPoint
+    */
+    static void* loadDynamicLibrary (const String& pathOrFilename);
+
+    /** Frees a dynamically-linked library.
+
+        @param libraryHandle   a handle created by loadDynamicLibrary
+        @see loadDynamicLibrary, getProcedureEntryPoint
+    */
+    static void freeDynamicLibrary (void* libraryHandle);
+
+    /** Finds a procedure call in a dynamically-linked library.
+
+        @param libraryHandle    a library handle returned by loadDynamicLibrary
+        @param procedureName    the name of the procedure call to try to load
+        @returns                a pointer to the function if found, or 0 if it fails
+        @see loadDynamicLibrary
+    */
+    static void* getProcedureEntryPoint (void* libraryHandle,
+                                         const String& procedureName);
+#endif
+
+#if JUCE_LINUX || DOXYGEN
+
+#endif
+};
+
+#if JUCE_MAC
+
+/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
+    using RAII.
+*/
+class ScopedAutoReleasePool
+{
+public:
+    ScopedAutoReleasePool();
+    ~ScopedAutoReleasePool();
+
+private:
+    void* pool;
+};
+
+/**
+    A wrapper class for picking up events from an Apple IR remote control device.
+
+    To use it, just create a subclass of this class, implementing the buttonPressed()
+    callback, then call start() and stop() to start or stop receiving events.
+*/
+class JUCE_API  AppleRemoteDevice
+{
+public:
+
+    AppleRemoteDevice();
+    virtual ~AppleRemoteDevice();
+
+    /** The set of buttons that may be pressed.
+        @see buttonPressed
+    */
+    enum ButtonType
+    {
+        menuButton = 0,     /**< The menu button (if it's held for a short time). */
+        playButton,         /**< The play button. */
+        plusButton,         /**< The plus or volume-up button. */
+        minusButton,        /**< The minus or volume-down button. */
+        rightButton,        /**< The right button (if it's held for a short time). */
+        leftButton,         /**< The left button (if it's held for a short time). */
+        rightButton_Long,   /**< The right button (if it's held for a long time). */
+        leftButton_Long,    /**< The menu button (if it's held for a long time). */
+        menuButton_Long,    /**< The menu button (if it's held for a long time). */
+        playButtonSleepMode,
+        switched
+    };
+
+    /** Override this method to receive the callback about a button press.
+
+        The callback will happen on the application's message thread.
+
+        Some buttons trigger matching up and down events, in which the isDown parameter
+        will be true and then false. Others only send a single event when the
+        button is pressed.
+    */
+    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+
+    /** Starts the device running and responding to events.
+
+        Returns true if it managed to open the device.
+
+        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
+                                and will not be available to any other part of the system. If
+                                false, it will be shared with other apps.
+        @see stop
+    */
+    bool start (const bool inExclusiveMode) throw();
+
+    /** Stops the device running.
+        @see start
+    */
+    void stop() throw();
+
+    /** Returns true if the device has been started successfully.
+    */
+    bool isActive() const throw();
+
+    /** Returns the ID number of the remote, if it has sent one.
+    */
+    int getRemoteId() const throw()             { return remoteId; }
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void handleCallbackInternal();
+
+private:
+    void* device;
+    void* queue;
+    int remoteId;
+
+    bool open (const bool openInExclusiveMode) throw();
+};
+
+#endif
+
+#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+/********* End of inlined file: juce_PlatformUtilities.h *********/
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
@@ -9716,10 +10154,10 @@ public:
 
     /** Creates a copy of another array */
     ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
-        : ArrayAllocationBase <ObjectClass*> (other.granularity),
-          numUsed (other.numUsed)
+        : ArrayAllocationBase <ObjectClass*> (other.granularity)
     {
         other.lockArray();
+        numUsed = other.numUsed;
         this->setAllocatedSize (numUsed);
         memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
 
@@ -11586,12 +12024,6 @@ private:
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 
 /********* Start of inlined file: juce_DirectoryIterator.h *********/
@@ -12013,6 +12445,188 @@ private:
 
 #endif   // __JUCE_NAMEDPIPE_JUCEHEADER__
 /********* End of inlined file: juce_NamedPipe.h *********/
+
+#endif
+#ifndef __JUCE_ZIPFILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_ZipFile.h *********/
+#ifndef __JUCE_ZIPFILE_JUCEHEADER__
+#define __JUCE_ZIPFILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_InputSource.h *********/
+#ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
+#define __JUCE_INPUTSOURCE_JUCEHEADER__
+
+/**
+    A lightweight object that can create a stream to read some kind of resource.
+
+    This may be used to refer to a file, or some other kind of source, allowing a
+    caller to create an input stream that can read from it when required.
+
+    @see FileInputSource
+*/
+class JUCE_API  InputSource
+{
+public:
+
+    InputSource() throw()       {}
+
+    /** Destructor. */
+    virtual ~InputSource()      {}
+
+    /** Returns a new InputStream to read this item.
+
+        @returns            an inputstream that the caller will delete, or 0 if
+                            the filename isn't found.
+    */
+    virtual InputStream* createInputStream() = 0;
+
+    /** Returns a new InputStream to read an item, relative.
+
+        @param relatedItemPath  the relative pathname of the resource that is required
+        @returns            an inputstream that the caller will delete, or 0 if
+                            the item isn't found.
+    */
+    virtual InputStream* createInputStreamFor (const String& relatedItemPath) = 0;
+
+    /** Returns a hash code that uniquely represents this item.
+    */
+    virtual int64 hashCode() const = 0;
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_INPUTSOURCE_JUCEHEADER__
+/********* End of inlined file: juce_InputSource.h *********/
+
+/**
+    Decodes a ZIP file from a stream.
+
+    This can enumerate the items in a ZIP file and can create suitable stream objects
+    to read each one.
+*/
+class JUCE_API  ZipFile
+{
+public:
+
+    /** Creates a ZipFile for a given stream.
+
+        @param inputStream                  the stream to read from
+        @param deleteStreamWhenDestroyed    if set to true, the object passed-in
+                                            will be deleted when this ZipFile object is deleted
+    */
+    ZipFile (InputStream* const inputStream,
+             const bool deleteStreamWhenDestroyed) throw();
+
+    /** Creates a ZipFile based for a file. */
+    ZipFile (const File& file);
+
+    /** Creates a ZipFile for an input source.
+
+        The inputSource object will be owned by the zip file, which will delete
+        it later when not needed.
+    */
+    ZipFile (InputSource* const inputSource);
+
+    /** Destructor. */
+    ~ZipFile() throw();
+
+    /**
+        Contains information about one of the entries in a ZipFile.
+
+        @see ZipFile::getEntry
+    */
+    struct ZipEntry
+    {
+        /** The name of the file, which may also include a partial pathname. */
+        String filename;
+
+        /** The file's original size. */
+        unsigned int uncompressedSize;
+
+        /** The last time the file was modified. */
+        Time fileTime;
+    };
+
+    /** Returns the number of items in the zip file. */
+    int getNumEntries() const throw();
+
+    /** Returns a structure that describes one of the entries in the zip file.
+
+        This may return zero if the index is out of range.
+
+        @see ZipFile::ZipEntry
+    */
+    const ZipEntry* getEntry (const int index) const throw();
+
+    /** Returns the index of the first entry with a given filename.
+
+        This uses a case-sensitive comparison to look for a filename in the
+        list of entries. It might return -1 if no match is found.
+
+        @see ZipFile::ZipEntry
+    */
+    int getIndexOfFileName (const String& fileName) const throw();
+
+    /** Returns a structure that describes one of the entries in the zip file.
+
+        This uses a case-sensitive comparison to look for a filename in the
+        list of entries. It might return 0 if no match is found.
+
+        @see ZipFile::ZipEntry
+    */
+    const ZipEntry* getEntry (const String& fileName) const throw();
+
+    /** Sorts the list of entries, based on the filename.
+    */
+    void sortEntriesByFilename();
+
+    /** Creates a stream that can read from one of the zip file's entries.
+
+        The stream that is returned must be deleted by the caller (and
+        zero might be returned if a stream can't be opened for some reason).
+
+        The stream must not be used after the ZipFile object that created
+        has been deleted.
+    */
+    InputStream* createStreamForEntry (const int index);
+
+    /** Uncompresses all of the files in the zip file.
+
+        This will expand all the entires into a target directory. The relative
+        paths of the entries are used.
+
+        @param targetDirectory      the root folder to uncompress to
+        @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
+    */
+    void uncompressTo (const File& targetDirectory,
+                       const bool shouldOverwriteFiles = true);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    VoidArray entries;
+    friend class ZipInputStream;
+    CriticalSection lock;
+    InputStream* inputStream;
+    InputSource* inputSource;
+
+    bool deleteStreamWhenDestroyed;
+    int numEntries, centralRecStart;
+
+#ifdef JUCE_DEBUG
+    int numOpenStreams;
+#endif
+
+    void init();
+    int findEndOfZipEntryTable (InputStream* in);
+
+    ZipFile (const ZipFile&);
+    const ZipFile& operator= (const ZipFile&);
+};
+
+#endif   // __JUCE_ZIPFILE_JUCEHEADER__
+/********* End of inlined file: juce_ZipFile.h *********/
 
 #endif
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
@@ -12867,52 +13481,6 @@ private:
 #ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
 #define __JUCE_FILEINPUTSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_InputSource.h *********/
-#ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
-#define __JUCE_INPUTSOURCE_JUCEHEADER__
-
-/**
-    A lightweight object that can create a stream to read some kind of resource.
-
-    This may be used to refer to a file, or some other kind of source, allowing a
-    caller to create an input stream that can read from it when required.
-
-    @see FileInputSource
-*/
-class JUCE_API  InputSource
-{
-public:
-
-    InputSource() throw()       {}
-
-    /** Destructor. */
-    virtual ~InputSource()      {}
-
-    /** Returns a new InputStream to read this item.
-
-        @returns            an inputstream that the caller will delete, or 0 if
-                            the filename isn't found.
-    */
-    virtual InputStream* createInputStream() = 0;
-
-    /** Returns a new InputStream to read an item, relative.
-
-        @param relatedItemPath  the relative pathname of the resource that is required
-        @returns            an inputstream that the caller will delete, or 0 if
-                            the item isn't found.
-    */
-    virtual InputStream* createInputStreamFor (const String& relatedItemPath) = 0;
-
-    /** Returns a hash code that uniquely represents this item.
-    */
-    virtual int64 hashCode() const = 0;
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_INPUTSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_InputSource.h *********/
-
 /**
     A type of InputSource that represents a normal file.
 
@@ -13249,578 +13817,10 @@ private:
 /********* End of inlined file: juce_SubregionStream.h *********/
 
 #endif
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_PerformanceCounter.h *********/
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-#define __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-
-/** A timer for measuring performance of code and dumping the results to a file.
-
-    e.g. @code
-
-        PerformanceCounter pc ("fish", 50, "/temp/myfishlog.txt");
-
-        for (;;)
-        {
-            pc.start();
-
-            doSomethingFishy();
-
-            pc.stop();
-        }
-    @endcode
-
-    In this example, the time of each period between calling start/stop will be
-    measured and averaged over 50 runs, and the results printed to a file
-    every 50 times round the loop.
-*/
-class JUCE_API  PerformanceCounter
-{
-public:
-
-    /** Creates a PerformanceCounter object.
-
-        @param counterName      the name used when printing out the statistics
-        @param runsPerPrintout  the number of start/stop iterations before calling
-                                printStatistics()
-        @param loggingFile      a file to dump the results to - if this is File::nonexistent,
-                                the results are just written to the debugger output
-    */
-    PerformanceCounter (const String& counterName,
-                        int runsPerPrintout = 100,
-                        const File& loggingFile = File::nonexistent);
-
-    /** Destructor. */
-    ~PerformanceCounter();
-
-    /** Starts timing.
-
-        @see stop
-    */
-    void start();
-
-    /** Stops timing and prints out the results.
-
-        The number of iterations before doing a printout of the
-        results is set in the constructor.
-
-        @see start
-    */
-    void stop();
-
-    /** Dumps the current metrics to the debugger output and to a file.
-
-        As well as using Logger::outputDebugString to print the results,
-        this will write then to the file specified in the constructor (if
-        this was valid).
-    */
-    void printStatistics();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    String name;
-    int numRuns, runsPerPrint;
-    double totalTime;
-    int64 started;
-    File outputFile;
-};
-
-#endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-/********* End of inlined file: juce_PerformanceCounter.h *********/
+#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/********* Start of inlined file: juce_PlatformUtilities.h *********/
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/**
-    A collection of miscellaneous platform-specific utilities.
-
-*/
-class JUCE_API  PlatformUtilities
-{
-public:
-
-    /** Plays the operating system's default alert 'beep' sound. */
-    static void beep();
-
-    static bool launchEmailWithAttachments (const String& targetEmailAddress,
-                                            const String& emailSubject,
-                                            const String& bodyText,
-                                            const StringArray& filesToAttach);
-
-#if JUCE_MAC || DOXYGEN
-
-    /** MAC ONLY - Turns a Core CF String into a juce one. */
-    static const String cfStringToJuceString (CFStringRef cfString);
-
-    /** MAC ONLY - Turns a juce string into a Core CF one. */
-    static CFStringRef juceStringToCFString (const String& s);
-
-    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
-    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
-
-    /** MAC ONLY - Turns an FSRef into a juce string path. */
-    static const String makePathFromFSRef (FSRef* file);
-
-    /** MAC ONLY - Converts any decomposed unicode characters in a string into
-        their precomposed equivalents.
-    */
-    static const String convertToPrecomposedUnicode (const String& s);
-
-    /** MAC ONLY - Gets the type of a file from the file's resources. */
-    static OSType getTypeOfFile (const String& filename);
-
-    /** MAC ONLY - Returns true if this file is actually a bundle. */
-    static bool isBundle (const String& filename);
-
-    /** MAC ONLY - Adds an item to the dock */
-    static void addItemToDock (const File& file);
-#endif
-
-#if JUCE_WIN32 || DOXYGEN
-
-    // Some registry helper functions:
-
-    /** WIN32 ONLY - Returns a string from the registry.
-
-        The path is a string for the entire path of a value in the registry,
-        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
-    */
-    static const String getRegistryValue (const String& regValuePath,
-                                          const String& defaultValue = String::empty);
-
-    /** WIN32 ONLY - Sets a registry value as a string.
-
-        This will take care of creating any groups needed to get to the given
-        registry value.
-    */
-    static void setRegistryValue (const String& regValuePath,
-                                  const String& value);
-
-    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
-    static bool registryValueExists (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry value. */
-    static void deleteRegistryValue (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
-    static void deleteRegistryKey (const String& regKeyPath);
-
-    /** WIN32 ONLY - Creates a file association in the registry.
-
-        This lets you set the exe that should be launched by a given file extension.
-        @param fileExtension        the file extension to associate, including the
-                                    initial dot, e.g. ".txt"
-        @param symbolicDescription  a space-free short token to identify the file type
-        @param fullDescription      a human-readable description of the file type
-        @param targetExecutable     the executable that should be launched
-        @param iconResourceNumber   the icon that gets displayed for the file type will be
-                                    found by looking up this resource number in the
-                                    executable. Pass 0 here to not use an icon
-    */
-    static void registerFileAssociation (const String& fileExtension,
-                                         const String& symbolicDescription,
-                                         const String& fullDescription,
-                                         const File& targetExecutable,
-                                         int iconResourceNumber);
-
-    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
-
-        In a normal Juce application this will be set to the module handle
-        of the application executable.
-
-        If you're writing a DLL using Juce and plan to use any Juce messaging or
-        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
-        to set the correct module handle in your DllMain() function, because
-        the win32 system relies on the correct instance handle when opening windows.
-    */
-    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
-
-    /** WIN32 ONLY - Sets a new module handle to be used by the library.
-
-        @see getCurrentModuleInstanceHandle()
-    */
-    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
-
-    /** WIN32 ONLY - Gets the command-line params as a string.
-
-        This is needed to avoid unicode problems with the argc type params.
-    */
-    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
-#endif
-
-    /** Clears the floating point unit's flags.
-
-        Only has an effect under win32, currently.
-    */
-    static void fpuReset();
-
-#if JUCE_LINUX || JUCE_WIN32
-
-    /** Loads a dynamically-linked library into the process's address space.
-
-        @param pathOrFilename   the platform-dependent name and search path
-        @returns                a handle which can be used by getProcedureEntryPoint(), or
-                                zero if it fails.
-        @see freeDynamicLibrary, getProcedureEntryPoint
-    */
-    static void* loadDynamicLibrary (const String& pathOrFilename);
-
-    /** Frees a dynamically-linked library.
-
-        @param libraryHandle   a handle created by loadDynamicLibrary
-        @see loadDynamicLibrary, getProcedureEntryPoint
-    */
-    static void freeDynamicLibrary (void* libraryHandle);
-
-    /** Finds a procedure call in a dynamically-linked library.
-
-        @param libraryHandle    a library handle returned by loadDynamicLibrary
-        @param procedureName    the name of the procedure call to try to load
-        @returns                a pointer to the function if found, or 0 if it fails
-        @see loadDynamicLibrary
-    */
-    static void* getProcedureEntryPoint (void* libraryHandle,
-                                         const String& procedureName);
-#endif
-
-#if JUCE_LINUX || DOXYGEN
-
-#endif
-};
-
-#if JUCE_MAC
-
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
-    using RAII.
-*/
-class ScopedAutoReleasePool
-{
-public:
-    ScopedAutoReleasePool();
-    ~ScopedAutoReleasePool();
-
-private:
-    void* pool;
-};
-
-/**
-    A wrapper class for picking up events from an Apple IR remote control device.
-
-    To use it, just create a subclass of this class, implementing the buttonPressed()
-    callback, then call start() and stop() to start or stop receiving events.
-*/
-class JUCE_API  AppleRemoteDevice
-{
-public:
-
-    AppleRemoteDevice();
-    virtual ~AppleRemoteDevice();
-
-    /** The set of buttons that may be pressed.
-        @see buttonPressed
-    */
-    enum ButtonType
-    {
-        menuButton = 0,     /**< The menu button (if it's held for a short time). */
-        playButton,         /**< The play button. */
-        plusButton,         /**< The plus or volume-up button. */
-        minusButton,        /**< The minus or volume-down button. */
-        rightButton,        /**< The right button (if it's held for a short time). */
-        leftButton,         /**< The left button (if it's held for a short time). */
-        rightButton_Long,   /**< The right button (if it's held for a long time). */
-        leftButton_Long,    /**< The menu button (if it's held for a long time). */
-        menuButton_Long,    /**< The menu button (if it's held for a long time). */
-        playButtonSleepMode,
-        switched
-    };
-
-    /** Override this method to receive the callback about a button press.
-
-        The callback will happen on the application's message thread.
-
-        Some buttons trigger matching up and down events, in which the isDown parameter
-        will be true and then false. Others only send a single event when the
-        button is pressed.
-    */
-    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
-
-    /** Starts the device running and responding to events.
-
-        Returns true if it managed to open the device.
-
-        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
-                                and will not be available to any other part of the system. If
-                                false, it will be shared with other apps.
-        @see stop
-    */
-    bool start (const bool inExclusiveMode) throw();
-
-    /** Stops the device running.
-        @see start
-    */
-    void stop() throw();
-
-    /** Returns true if the device has been started successfully.
-    */
-    bool isActive() const throw();
-
-    /** Returns the ID number of the remote, if it has sent one.
-    */
-    int getRemoteId() const throw()             { return remoteId; }
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void handleCallbackInternal();
-
-private:
-    void* device;
-    void* queue;
-    int remoteId;
-
-    bool open (const bool openInExclusiveMode) throw();
-};
-
-#endif
-
-#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-/********* End of inlined file: juce_PlatformUtilities.h *********/
-
-#endif
-#ifndef __JUCE_UUID_JUCEHEADER__
-
-/********* Start of inlined file: juce_Uuid.h *********/
-#ifndef __JUCE_UUID_JUCEHEADER__
-#define __JUCE_UUID_JUCEHEADER__
-
-/**
-    A universally unique 128-bit identifier.
-
-    This class generates very random unique numbers based on the system time
-    and MAC addresses if any are available. It's extremely unlikely that two identical
-    UUIDs would ever be created by chance.
-
-    The class includes methods for saving the ID as a string or as raw binary data.
-*/
-class JUCE_API  Uuid
-{
-public:
-
-    /** Creates a new unique ID. */
-    Uuid();
-
-    /** Destructor. */
-    ~Uuid() throw();
-
-    /** Creates a copy of another UUID. */
-    Uuid (const Uuid& other);
-
-    /** Copies another UUID. */
-    Uuid& operator= (const Uuid& other);
-
-    /** Returns true if the ID is zero. */
-    bool isNull() const throw();
-
-    /** Compares two UUIDs. */
-    bool operator== (const Uuid& other) const;
-
-    /** Compares two UUIDs. */
-    bool operator!= (const Uuid& other) const;
-
-    /** Returns a stringified version of this UUID.
-
-        A Uuid object can later be reconstructed from this string using operator= or
-        the constructor that takes a string parameter.
-
-        @returns a 32 character hex string.
-    */
-    const String toString() const;
-
-    /** Creates an ID from an encoded string version.
-
-        @see toString
-    */
-    Uuid (const String& uuidString);
-
-    /** Copies from a stringified UUID.
-
-        The string passed in should be one that was created with the toString() method.
-    */
-    Uuid& operator= (const String& uuidString);
-
-    /** Returns a pointer to the internal binary representation of the ID.
-
-        This is an array of 16 bytes. To reconstruct a Uuid from its data, use
-        the constructor or operator= method that takes an array of uint8s.
-    */
-    const uint8* getRawData() const throw()                 { return value.asBytes; }
-
-    /** Creates a UUID from a 16-byte array.
-
-        @see getRawData
-    */
-    Uuid (const uint8* const rawData);
-
-    /** Sets this UUID from 16-bytes of raw data. */
-    Uuid& operator= (const uint8* const rawData);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    union
-    {
-        uint8 asBytes [16];
-        int asInt[4];
-        int64 asInt64[2];
-
-    } value;
-};
-
-#endif   // __JUCE_UUID_JUCEHEADER__
-/********* End of inlined file: juce_Uuid.h *********/
-
-#endif
-#ifndef __JUCE_ZIPFILE_JUCEHEADER__
-
-/********* Start of inlined file: juce_ZipFile.h *********/
-#ifndef __JUCE_ZIPFILE_JUCEHEADER__
-#define __JUCE_ZIPFILE_JUCEHEADER__
-
-/**
-    Decodes a ZIP file from a stream.
-
-    This can enumerate the items in a ZIP file and can create suitable stream objects
-    to read each one.
-*/
-class JUCE_API  ZipFile
-{
-public:
-
-    /** Creates a ZipFile for a given stream.
-
-        @param inputStream                  the stream to read from
-        @param deleteStreamWhenDestroyed    if set to true, the object passed-in
-                                            will be deleted when this ZipFile object is deleted
-    */
-    ZipFile (InputStream* const inputStream,
-             const bool deleteStreamWhenDestroyed) throw();
-
-    /** Creates a ZipFile based for a file. */
-    ZipFile (const File& file);
-
-    /** Creates a ZipFile for an input source.
-
-        The inputSource object will be owned by the zip file, which will delete
-        it later when not needed.
-    */
-    ZipFile (InputSource* const inputSource);
-
-    /** Destructor. */
-    ~ZipFile() throw();
-
-    /**
-        Contains information about one of the entries in a ZipFile.
-
-        @see ZipFile::getEntry
-    */
-    struct ZipEntry
-    {
-        /** The name of the file, which may also include a partial pathname. */
-        String filename;
-
-        /** The file's original size. */
-        unsigned int uncompressedSize;
-
-        /** The last time the file was modified. */
-        Time fileTime;
-    };
-
-    /** Returns the number of items in the zip file. */
-    int getNumEntries() const throw();
-
-    /** Returns a structure that describes one of the entries in the zip file.
-
-        This may return zero if the index is out of range.
-
-        @see ZipFile::ZipEntry
-    */
-    const ZipEntry* getEntry (const int index) const throw();
-
-    /** Returns the index of the first entry with a given filename.
-
-        This uses a case-sensitive comparison to look for a filename in the
-        list of entries. It might return -1 if no match is found.
-
-        @see ZipFile::ZipEntry
-    */
-    int getIndexOfFileName (const String& fileName) const throw();
-
-    /** Returns a structure that describes one of the entries in the zip file.
-
-        This uses a case-sensitive comparison to look for a filename in the
-        list of entries. It might return 0 if no match is found.
-
-        @see ZipFile::ZipEntry
-    */
-    const ZipEntry* getEntry (const String& fileName) const throw();
-
-    /** Sorts the list of entries, based on the filename.
-    */
-    void sortEntriesByFilename();
-
-    /** Creates a stream that can read from one of the zip file's entries.
-
-        The stream that is returned must be deleted by the caller (and
-        zero might be returned if a stream can't be opened for some reason).
-
-        The stream must not be used after the ZipFile object that created
-        has been deleted.
-    */
-    InputStream* createStreamForEntry (const int index);
-
-    /** Uncompresses all of the files in the zip file.
-
-        This will expand all the entires into a target directory. The relative
-        paths of the entries are used.
-
-        @param targetDirectory      the root folder to uncompress to
-        @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
-    */
-    void uncompressTo (const File& targetDirectory,
-                       const bool shouldOverwriteFiles = true);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    VoidArray entries;
-    friend class ZipInputStream;
-    CriticalSection lock;
-    InputStream* inputStream;
-    InputSource* inputSource;
-
-    bool deleteStreamWhenDestroyed;
-    int numEntries, centralRecStart;
-
-#ifdef JUCE_DEBUG
-    int numOpenStreams;
-#endif
-
-    void init();
-    int findEndOfZipEntryTable (InputStream* in);
-
-    ZipFile (const ZipFile&);
-    const ZipFile& operator= (const ZipFile&);
-};
-
-#endif   // __JUCE_ZIPFILE_JUCEHEADER__
-/********* End of inlined file: juce_ZipFile.h *********/
+#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
@@ -18930,7 +18930,7 @@ public:
     /** Creates a colour from a 32-bit ARGB value.
 
         The format of this number is:
-            ((alpha << 24) | (red << 16) | (green << 16) | blue).
+            ((alpha << 24) | (red << 16) | (green << 8) | blue).
 
         All components in the range 0x00 to 0xff.
         An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
@@ -25106,39 +25106,6 @@ private:
 
 #endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
 /********* End of inlined file: juce_ApplicationProperties.h *********/
-
-#endif
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemClipboard.h *********/
-#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
-#define __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
-
-/**
-    Handles reading/writing to the system's clipboard.
-*/
-class JUCE_API  SystemClipboard
-{
-public:
-    /** Copies a string of text onto the clipboard */
-    static void copyTextToClipboard (const String& text) throw();
-
-    /** Gets the current clipboard's contents.
-
-        Obviously this might have come from another app, so could contain
-        anything..
-    */
-    static const String getTextFromClipboard() throw();
-};
-
-#endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
-/********* End of inlined file: juce_SystemClipboard.h *********/
 
 #endif
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
@@ -39128,9 +39095,6 @@ private:
 #ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COLOUR_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 
 #endif
@@ -39138,6 +39102,9 @@ private:
 
 #endif
 #ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_COLOUR_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__
@@ -54449,6 +54416,178 @@ private:
 /********* End of inlined file: juce_OldSchoolLookAndFeel.h *********/
 
 #endif
+#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemClipboard.h *********/
+#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
+#define __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
+
+/**
+    Handles reading/writing to the system's clipboard.
+*/
+class JUCE_API  SystemClipboard
+{
+public:
+    /** Copies a string of text onto the clipboard */
+    static void copyTextToClipboard (const String& text) throw();
+
+    /** Gets the current clipboard's contents.
+
+        Obviously this might have come from another app, so could contain
+        anything..
+    */
+    static const String getTextFromClipboard() throw();
+};
+
+#endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
+/********* End of inlined file: juce_SystemClipboard.h *********/
+
+#endif
+#ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+
+/********* Start of inlined file: juce_RecentlyOpenedFilesList.h *********/
+#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+#define __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+
+/**
+    Manages a set of files for use as a list of recently-opened documents.
+
+    This is a handy class for holding your list of recently-opened documents, with
+    helpful methods for things like purging any non-existent files, automatically
+    adding them to a menu, and making persistence easy.
+
+    @see File, FileBasedDocument
+*/
+class JUCE_API  RecentlyOpenedFilesList
+{
+public:
+
+    /** Creates an empty list.
+    */
+    RecentlyOpenedFilesList();
+
+    /** Destructor. */
+    ~RecentlyOpenedFilesList();
+
+    /** Sets a limit for the number of files that will be stored in the list.
+
+        When addFile() is called, then if there is no more space in the list, the
+        least-recently added file will be dropped.
+
+        @see getMaxNumberOfItems
+    */
+    void setMaxNumberOfItems (const int newMaxNumber);
+
+    /** Returns the number of items that this list will store.
+        @see setMaxNumberOfItems
+    */
+    int getMaxNumberOfItems() const throw()                             { return maxNumberOfItems; }
+
+    /** Returns the number of files in the list.
+
+        The most recently added file is always at index 0.
+    */
+    int getNumFiles() const;
+
+    /** Returns one of the files in the list.
+
+        The most recently added file is always at index 0.
+    */
+    const File getFile (const int index) const;
+
+    /** Returns an array of all the absolute pathnames in the list.
+    */
+    const StringArray& getAllFilenames() const throw()                  { return files; }
+
+    /** Clears all the files from the list. */
+    void clear();
+
+    /** Adds a file to the list.
+
+        The file will be added at index 0. If this file is already in the list, it will
+        be moved up to index 0, but a file can only appear once in the list.
+
+        If the list already contains the maximum number of items that is permitted, the
+        least-recently added file will be dropped from the end.
+    */
+    void addFile (const File& file);
+
+    /** Checks each of the files in the list, removing any that don't exist.
+
+        You might want to call this after reloading a list of files, or before putting them
+        on a menu.
+    */
+    void removeNonExistentFiles();
+
+    /** Adds entries to a menu, representing each of the files in the list.
+
+        This is handy for creating an "open recent file..." menu in your app. The
+        menu items are numbered consecutively starting with the baseItemId value,
+        and can either be added as complete pathnames, or just the last part of the
+        filename.
+
+        If dontAddNonExistentFiles is true, then each file will be checked and only those
+        that exist will be added.
+
+        If filesToAvoid is non-zero, then it is considered to be a zero-terminated array of
+        pointers to file objects. Any files that appear in this list will not be added to the
+        menu - the reason for this is that you might have a number of files already open, so
+        might not want these to be shown in the menu.
+
+        It returns the number of items that were added.
+    */
+    int createPopupMenuItems (PopupMenu& menuToAddItemsTo,
+                              const int baseItemId,
+                              const bool showFullPaths,
+                              const bool dontAddNonExistentFiles,
+                              const File** filesToAvoid = 0);
+
+    /** Returns a string that encapsulates all the files in the list.
+
+        The string that is returned can later be passed into restoreFromString() in
+        order to recreate the list. This is handy for persisting your list, e.g. in
+        a PropertiesFile object.
+
+        @see restoreFromString
+    */
+    const String toString() const;
+
+    /** Restores the list from a previously stringified version of the list.
+
+        Pass in a stringified version created with toString() in order to persist/restore
+        your list.
+
+        @see toString
+    */
+    void restoreFromString (const String& stringifiedVersion);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    StringArray files;
+    int maxNumberOfItems;
+};
+
+#endif   // __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+/********* End of inlined file: juce_RecentlyOpenedFilesList.h *********/
+
+#endif
 #ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileBasedDocument.h *********/
@@ -54713,145 +54852,6 @@ private:
 
 #endif   // __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
 /********* End of inlined file: juce_FileBasedDocument.h *********/
-
-#endif
-#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-
-/********* Start of inlined file: juce_RecentlyOpenedFilesList.h *********/
-#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-#define __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-
-/**
-    Manages a set of files for use as a list of recently-opened documents.
-
-    This is a handy class for holding your list of recently-opened documents, with
-    helpful methods for things like purging any non-existent files, automatically
-    adding them to a menu, and making persistence easy.
-
-    @see File, FileBasedDocument
-*/
-class JUCE_API  RecentlyOpenedFilesList
-{
-public:
-
-    /** Creates an empty list.
-    */
-    RecentlyOpenedFilesList();
-
-    /** Destructor. */
-    ~RecentlyOpenedFilesList();
-
-    /** Sets a limit for the number of files that will be stored in the list.
-
-        When addFile() is called, then if there is no more space in the list, the
-        least-recently added file will be dropped.
-
-        @see getMaxNumberOfItems
-    */
-    void setMaxNumberOfItems (const int newMaxNumber);
-
-    /** Returns the number of items that this list will store.
-        @see setMaxNumberOfItems
-    */
-    int getMaxNumberOfItems() const throw()                             { return maxNumberOfItems; }
-
-    /** Returns the number of files in the list.
-
-        The most recently added file is always at index 0.
-    */
-    int getNumFiles() const;
-
-    /** Returns one of the files in the list.
-
-        The most recently added file is always at index 0.
-    */
-    const File getFile (const int index) const;
-
-    /** Returns an array of all the absolute pathnames in the list.
-    */
-    const StringArray& getAllFilenames() const throw()                  { return files; }
-
-    /** Clears all the files from the list. */
-    void clear();
-
-    /** Adds a file to the list.
-
-        The file will be added at index 0. If this file is already in the list, it will
-        be moved up to index 0, but a file can only appear once in the list.
-
-        If the list already contains the maximum number of items that is permitted, the
-        least-recently added file will be dropped from the end.
-    */
-    void addFile (const File& file);
-
-    /** Checks each of the files in the list, removing any that don't exist.
-
-        You might want to call this after reloading a list of files, or before putting them
-        on a menu.
-    */
-    void removeNonExistentFiles();
-
-    /** Adds entries to a menu, representing each of the files in the list.
-
-        This is handy for creating an "open recent file..." menu in your app. The
-        menu items are numbered consecutively starting with the baseItemId value,
-        and can either be added as complete pathnames, or just the last part of the
-        filename.
-
-        If dontAddNonExistentFiles is true, then each file will be checked and only those
-        that exist will be added.
-
-        If filesToAvoid is non-zero, then it is considered to be a zero-terminated array of
-        pointers to file objects. Any files that appear in this list will not be added to the
-        menu - the reason for this is that you might have a number of files already open, so
-        might not want these to be shown in the menu.
-
-        It returns the number of items that were added.
-    */
-    int createPopupMenuItems (PopupMenu& menuToAddItemsTo,
-                              const int baseItemId,
-                              const bool showFullPaths,
-                              const bool dontAddNonExistentFiles,
-                              const File** filesToAvoid = 0);
-
-    /** Returns a string that encapsulates all the files in the list.
-
-        The string that is returned can later be passed into restoreFromString() in
-        order to recreate the list. This is handy for persisting your list, e.g. in
-        a PropertiesFile object.
-
-        @see restoreFromString
-    */
-    const String toString() const;
-
-    /** Restores the list from a previously stringified version of the list.
-
-        Pass in a stringified version created with toString() in order to persist/restore
-        your list.
-
-        @see toString
-    */
-    void restoreFromString (const String& stringifiedVersion);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    StringArray files;
-    int maxNumberOfItems;
-};
-
-#endif   // __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-/********* End of inlined file: juce_RecentlyOpenedFilesList.h *********/
-
-#endif
-#ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
 
 #endif
 
