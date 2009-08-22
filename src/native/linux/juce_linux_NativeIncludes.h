@@ -33,7 +33,7 @@
     way of the rest of the codebase.
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "../../../src/core/juce_StandardHeader.h"
 
 #include <sched.h>
 #include <pthread.h>

@@ -137,19 +137,6 @@ DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
 
-#include "../../../src/juce_appframework/audio/devices/juce_AudioIODeviceType.h"
-#include "../../../src/juce_appframework/audio/devices/juce_AudioDeviceManager.h"
-#include "../../../src/juce_appframework/application/juce_Application.h"
-#include "../../../src/juce_appframework/gui/components/windows/juce_AlertWindow.h"
-#include "../../../src/juce_core/threads/juce_Thread.h"
-#include "../../../src/juce_core/basics/juce_Singleton.h"
-#include "../../../src/juce_core/basics/juce_Time.h"
-#include "../../../src/juce_core/containers/juce_OwnedArray.h"
-#include "../../../src/juce_core/text/juce_LocalisedStrings.h"
-#include "../../../src/juce_appframework/gui/components/buttons/juce_TextButton.h"
-#include "../../../src/juce_appframework/gui/components/special/juce_AudioDeviceSelectorComponent.h"
-
-
 static const String getDSErrorMessage (HRESULT hr)
 {
     const char* result = 0;

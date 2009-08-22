@@ -33,7 +33,7 @@
     the rest of the codebase.
 */
 
-#include "../../../src/juce_core/basics/juce_StandardHeader.h"
+#include "../../core/juce_StandardHeader.h"
 
 #import <Cocoa/Cocoa.h>
 #import <CoreAudio/HostTime.h>

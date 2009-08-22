@@ -389,7 +389,10 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
         MapiRecipDesc recip;
         zerostruct (recip);
         recip.ulRecipClass = MAPI_TO;
-        recip.lpszName = (LPSTR) (LPCSTR) targetEmailAddress;
+        String targetEmailAddress_ (targetEmailAddress);
+        if (targetEmailAddress_.isEmpty())
+            targetEmailAddress_ = " "; // (Windows Mail can't deal with a blank address)
+        recip.lpszName = (LPSTR) (LPCSTR) targetEmailAddress_;
         message.nRecipCount = 1;
         message.lpRecips = &recip;
 
