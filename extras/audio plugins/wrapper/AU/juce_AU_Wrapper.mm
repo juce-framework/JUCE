@@ -67,9 +67,17 @@ static const int numChannelConfigs = numElementsInArray (channelConfigs);
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 //==============================================================================
-#define CONCAT_MACRO(Part1, Part2) Part1 ## Part2
-#define JuceUICreationClass  CONCAT_MACRO (JucePlugin_AUExportPrefix, _UICreationClass)
+#define appendMacro1(a, b, c, d) a ## _ ## b ## _ ## c ## _ ## d
+#define appendMacro2(a, b, c, d) appendMacro1(a, b, c, d)
+#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JucePlugin_AUExportPrefix)
 
+#define JuceUICreationClass     MakeObjCClassName(JuceUICreationClass)
+#define JuceUIViewClass         MakeObjCClassName(JuceUIViewClass)
+
+class JuceAU;
+class EditorCompHolder;
+
+//==============================================================================
 @interface JuceUICreationClass   : NSObject <AUCocoaUIBase>
 {
 }
@@ -80,6 +88,25 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 - (NSString *) description;
 - (NSView*) uiViewForAudioUnit: (AudioUnit) inAudioUnit
                       withSize: (NSSize) inPreferredSize;
+@end
+
+//==============================================================================
+@interface JuceUIViewClass : NSView
+{
+    AudioProcessor* filter;
+    JuceAU* au;
+    EditorCompHolder* editorComp;
+}
+
+- (JuceUIViewClass*) initWithFilter: (AudioProcessor*) filter
+                             withAU: (JuceAU*) au
+                      withComponent: (AudioProcessorEditor*) editorComp;
+- (void) dealloc;
+- (void) viewDidMoveToWindow;
+- (BOOL) mouseDownCanMoveWindow;
+- (void) filterBeingDeleted: (JuceAU*) au_;
+- (void) deleteEditor;
+
 @end
 
 
@@ -128,6 +155,9 @@ public:
 
     ~JuceAU()
     {
+        for (int i = activeUIs.size(); --i >= 0;)
+            [((JuceUIViewClass*) activeUIs.getUnchecked(i)) filterBeingDeleted: this];
+        
         delete juceFilter;
         juceFilter = 0;
 
@@ -959,22 +989,6 @@ public:
 };
 
 //==============================================================================
-@interface JuceUIViewClass : NSView
-{
-    AudioProcessor* filter;
-    JuceAU* au;
-    EditorCompHolder* editorComp;
-}
-
-- (JuceUIViewClass*) initWithFilter: (AudioProcessor*) filter
-                             withAU: (JuceAU*) au
-                      withComponent: (AudioProcessorEditor*) editorComp;
-- (void) dealloc;
-- (void) viewDidMoveToWindow;
-- (BOOL) mouseDownCanMoveWindow;
-
-@end
-
 @implementation JuceUIViewClass
 
 - (JuceUIViewClass*) initWithFilter: (AudioProcessor*) filter_
@@ -1003,14 +1017,7 @@ public:
     // is trying to delete our plugin..
     jassert (Component::getCurrentlyModalComponent() == 0);
 
-    if (editorComp != 0 && editorComp->isValidComponent())
-    {
-        if (editorComp->getChildComponent(0) != 0)
-            if (activePlugins.contains ((void*) filter)) // plugin may have been deleted before the UI
-                filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
-
-        deleteAndZero (editorComp);
-    }
+    [self deleteEditor];
 
     jassert (activeUIs.contains (self));
     activeUIs.removeValue (self);
@@ -1036,8 +1043,29 @@ public:
     return NO;
 }
 
+- (void) deleteEditor
+{
+    if (editorComp != 0 && editorComp->isValidComponent())
+    {
+        if (editorComp->getChildComponent(0) != 0)
+            if (activePlugins.contains ((void*) au)) // plugin may have been deleted before the UI
+                filter->editorBeingDeleted ((AudioProcessorEditor*) editorComp->getChildComponent(0));
+
+        deleteAndZero (editorComp);
+    }
+    
+    editorComp = 0;
+}
+
+- (void) filterBeingDeleted: (JuceAU*) au_
+{
+    if (au_ == au)
+        [self deleteEditor];
+}
+
 @end
 
+//==============================================================================
 @implementation JuceUICreationClass
 
 - (JuceUICreationClass*) init
@@ -1164,6 +1192,14 @@ private:
             juceFilter->editorBeingDeleted ((AudioProcessorEditor*) windowComp->getChildComponent(0));
 
         deleteAndZero (windowComp);
+
+        // The event loop needs to be run between closing the window and deleting the plugin,
+        // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
+        // in Reaper when you delete the plugin with its window open.
+        // (Doing it this way rather than using a single longer timout means that we can guarantee
+        // how many messages will be dispatched, which seems to be vital in Reaper)
+        for (int i = 20; --i >= 0;)
+            MessageManager::getInstance()->runDispatchLoopUntil (1);
     }
 
     //==============================================================================

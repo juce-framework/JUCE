@@ -346,7 +346,7 @@ private:
         case WM_WINDOWPOSCHANGING:
             if ((((WINDOWPOS*) lParam)->flags & SWP_NOSIZE) == 0)
             {
-                BrowserPluginHolderComponent* const comp = (BrowserPluginHolderComponent*) GetWindowLong (hWnd, GWL_USERDATA);
+                BrowserPluginHolderComponent* const comp = (BrowserPluginHolderComponent*) GetWindowLongPtr (hWnd, GWL_USERDATA);
                 comp->resizeToParentWindow();
             }
             break;
@@ -383,14 +383,14 @@ public:
                 HWND ourHWND = (HWND) getWindowHandle();
                 SetParent (ourHWND, parentHWND);
 
-                DWORD val = GetWindowLong (ourHWND, GWL_STYLE);
+                DWORD val = GetWindowLongPtr (ourHWND, GWL_STYLE);
                 val = (val & ~WS_POPUP) | WS_CHILD;
-                SetWindowLong (ourHWND, GWL_STYLE, val);
+                SetWindowLongPtr (ourHWND, GWL_STYLE, val);
 
                 setVisible (true);
 
                 oldWinProc = SubclassWindow (parentHWND, (WNDPROC) interceptingWinProc);
-                SetWindowLong (parentHWND, GWL_USERDATA, (LONG) this);
+                SetWindowLongPtr (parentHWND, GWL_USERDATA, (LONG_PTR) this);
 
                 resizeToParentWindow();
             }
