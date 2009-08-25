@@ -29,12 +29,11 @@
 #if JucePlugin_Build_VST
 
 #include <Cocoa/Cocoa.h>
-
-#define ADD_CARBON_BODGE 1   // see note below..
-
 #include <Carbon/Carbon.h>
 
 #include "../juce_PluginHeaders.h"
+
+#define ADD_CARBON_BODGE 1   // see note below..
 
 //==============================================================================
 BEGIN_JUCE_NAMESPACE

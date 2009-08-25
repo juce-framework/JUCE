@@ -1182,24 +1182,19 @@ public:
 private:
     void deleteUI()
     {
-        PopupMenu::dismissAllActiveMenus();
+        if (windowComp != 0)
+        {
+            PopupMenu::dismissAllActiveMenus();
 
-        // there's some kind of component currently modal, but the host
-        // is trying to delete our plugin..
-        jassert (Component::getCurrentlyModalComponent() == 0);
+            // there's some kind of component currently modal, but the host
+            // is trying to delete our plugin..
+            jassert (Component::getCurrentlyModalComponent() == 0);
 
-        if (windowComp != 0 && windowComp->getChildComponent(0) != 0)
-            juceFilter->editorBeingDeleted ((AudioProcessorEditor*) windowComp->getChildComponent(0));
+            if (windowComp != 0 && windowComp->getChildComponent(0) != 0)
+                juceFilter->editorBeingDeleted ((AudioProcessorEditor*) windowComp->getChildComponent(0));
 
-        deleteAndZero (windowComp);
-
-        // The event loop needs to be run between closing the window and deleting the plugin,
-        // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-        // in Reaper when you delete the plugin with its window open.
-        // (Doing it this way rather than using a single longer timout means that we can guarantee
-        // how many messages will be dispatched, which seems to be vital in Reaper)
-        for (int i = 20; --i >= 0;)
-            MessageManager::getInstance()->runDispatchLoopUntil (1);
+            deleteAndZero (windowComp);
+        }
     }
 
     //==============================================================================

@@ -803,7 +803,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         window = [[JuceNSWindow alloc] initWithContentRect: r
                                                  styleMask: style
                                                    backing: NSBackingStoreBuffered
-                                                     defer: YES ];
+                                                     defer: YES];
 
         [((JuceNSWindow*) window) setOwner: this];
         [window orderOut: nil];
@@ -817,7 +817,12 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
         [window setContentView: view];
         [window setAutodisplay: YES];
         [window setAcceptsMouseMovedEvents: YES];
+
+        // We'll both retain and also release this on closing because plugin hosts can unexpectedly
+        // close the window for us, and also tend to get cause trouble if setReleasedWhenClosed is NO.
         [window setReleasedWhenClosed: YES];
+        [window retain];
+
         [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
         [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
     }
@@ -835,6 +840,7 @@ NSViewComponentPeer::~NSViewComponentPeer()
     {
         [((JuceNSWindow*) window) setOwner: 0];
         [window close];
+        [window release];
     }
 }
 
