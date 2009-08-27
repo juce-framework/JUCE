@@ -164,6 +164,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
+            startSampleInFile += numToDo;
 
             float bufmin, bufmax;
             findMaxMin ((float*) tempBuffer[0], numToDo, bufmax, bufmin);
@@ -202,7 +203,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             read ((int**) tempBuffer, 2, startSampleInFile, numToDo, false);
 
             numSamples -= numToDo;
-
+            startSampleInFile += numToDo;
+ 
             for (int j = numChannels; --j >= 0;)
             {
                 int bufMax = INT_MIN;
