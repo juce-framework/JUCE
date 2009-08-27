@@ -111,12 +111,15 @@ public:
         Graphics& g;
         AffineTransform transform;
         float opacity;
+
+    private:
+        const RenderingContext& operator= (const RenderingContext&);
     };
 
     /** Renders this Drawable object.
-        @see drawWithin
+        @see draw
     */
-    virtual void draw (const RenderingContext& context) const = 0;
+    virtual void render (const RenderingContext& context) const = 0;
 
     //==============================================================================
     /** Returns the smallest rectangle that can contain this Drawable object.

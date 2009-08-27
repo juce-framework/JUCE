@@ -84,7 +84,7 @@ void DrawableComposite::bringToFront (const int index)
     }
 }
 
-void DrawableComposite::draw (const Drawable::RenderingContext& context) const
+void DrawableComposite::render (const Drawable::RenderingContext& context) const
 {
     if (drawables.size() > 1)
     {
@@ -98,7 +98,7 @@ void DrawableComposite::draw (const Drawable::RenderingContext& context) const
                 contextCopy.transform = (t == 0) ? context.transform
                                                  : t->followedBy (context.transform);
 
-                drawables.getUnchecked(i)->draw (context);
+                drawables.getUnchecked(i)->render (context);
             }
         }
         else
@@ -113,7 +113,7 @@ void DrawableComposite::draw (const Drawable::RenderingContext& context) const
                 Graphics tempG (tempImage);
                 tempG.setOrigin (-clipBounds.getX(), -clipBounds.getY());
                 Drawable::RenderingContext tempContext (tempG, context.transform, 1.0f);
-                draw (tempContext);
+                render (tempContext);
             }
 
             context.g.setOpacity (context.opacity);
@@ -122,7 +122,7 @@ void DrawableComposite::draw (const Drawable::RenderingContext& context) const
     }
     else if (drawables.size() > 0)
     {
-        drawables.getUnchecked(0)->draw (context);
+        drawables.getUnchecked(0)->render (context);
     }
 }
 
