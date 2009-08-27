@@ -27,8 +27,8 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_DrawableComposite.h"
+#include "../imaging/juce_Image.h"
 
 
 //==============================================================================
@@ -84,14 +84,45 @@ void DrawableComposite::bringToFront (const int index)
     }
 }
 
-void DrawableComposite::draw (Graphics& g, const AffineTransform& transform) const
+void DrawableComposite::draw (const Drawable::RenderingContext& context) const
 {
-    for (int i = 0; i < drawables.size(); ++i)
+    if (drawables.size() > 1)
     {
-        const AffineTransform* const t = transforms.getUnchecked(i);
+        Drawable::RenderingContext contextCopy (context);
 
-        drawables.getUnchecked(i)->draw (g, t == 0 ? transform
-                                                   : t->followedBy (transform));
+        if (context.opacity >= 1.0f)
+        {
+            for (int i = 0; i < drawables.size(); ++i)
+            {
+                const AffineTransform* const t = transforms.getUnchecked(i);
+                contextCopy.transform = (t == 0) ? context.transform
+                                                 : t->followedBy (context.transform);
+
+                drawables.getUnchecked(i)->draw (context);
+            }
+        }
+        else
+        {
+            // To correctly render a whole composite layer with an overall transparency,
+            // we need to render everything opaquely into a temp buffer, then blend that
+            // with the target opacity...
+            const Rectangle clipBounds (context.g.getClipBounds());
+            Image tempImage (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true);
+
+            {
+                Graphics tempG (tempImage);
+                tempG.setOrigin (-clipBounds.getX(), -clipBounds.getY());
+                Drawable::RenderingContext tempContext (tempG, context.transform, 1.0f);
+                draw (tempContext);
+            }
+
+            context.g.setOpacity (context.opacity);
+            context.g.drawImageAt (&tempImage, clipBounds.getX(), clipBounds.getY());
+        }
+    }
+    else if (drawables.size() > 0)
+    {
+        drawables.getUnchecked(0)->draw (context);
     }
 }
 

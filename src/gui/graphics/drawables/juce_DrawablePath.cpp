@@ -83,18 +83,15 @@ void DrawablePath::setOutline (const PathStrokeType& strokeType_, const Brush& n
 
 
 //==============================================================================
-void DrawablePath::draw (Graphics& g, const AffineTransform& transform) const
+void DrawablePath::draw (const Drawable::RenderingContext& context) const
 {
-    const Colour oldColour (g.getCurrentColour()); // save this so we can restore it later
-    const float currentOpacity = oldColour.getFloatAlpha();
-
     {
         Brush* const tempBrush = fillBrush->createCopy();
-        tempBrush->applyTransform (transform);
-        tempBrush->multiplyOpacity (currentOpacity);
+        tempBrush->applyTransform (context.transform);
+        tempBrush->multiplyOpacity (context.opacity);
 
-        g.setBrush (tempBrush);
-        g.fillPath (path, transform);
+        context.g.setBrush (tempBrush);
+        context.g.fillPath (path, context.transform);
 
         delete tempBrush;
     }
@@ -102,16 +99,14 @@ void DrawablePath::draw (Graphics& g, const AffineTransform& transform) const
     if (strokeBrush != 0 && strokeType.getStrokeThickness() > 0.0f)
     {
         Brush* const tempBrush = strokeBrush->createCopy();
-        tempBrush->applyTransform (transform);
-        tempBrush->multiplyOpacity (currentOpacity);
+        tempBrush->applyTransform (context.transform);
+        tempBrush->multiplyOpacity (context.opacity);
 
-        g.setBrush (tempBrush);
-        g.fillPath (outline, transform);
+        context.g.setBrush (tempBrush);
+        context.g.fillPath (outline, context.transform);
 
         delete tempBrush;
     }
-
-    g.setColour (oldColour);
 }
 
 void DrawablePath::updateOutline()

@@ -509,6 +509,8 @@ void AudioDeviceManager::stopDevice()
 {
     if (currentAudioDevice != 0)
         currentAudioDevice->stop();
+
+    deleteAndZero (testSound);
 }
 
 void AudioDeviceManager::closeAudioDevice()

@@ -54,6 +54,18 @@ public:
     /** Destructor. */
     ~ImageBrush() throw();
 
+    //==============================================================================
+    /** Returns the image currently being used. */
+    Image* getImage() const throw()             { return image; }
+
+    /** Returns the current anchor X position. */
+    int getAnchorX() const throw()              { return anchorX; }
+
+    /** Returns the current anchor Y position. */
+    int getAnchorY() const throw()              { return anchorY; }
+
+    /** Returns the current opacity. */
+    float getOpacity() const throw()            { return opacity; }
 
     //==============================================================================
     Brush* createCopy() const throw();

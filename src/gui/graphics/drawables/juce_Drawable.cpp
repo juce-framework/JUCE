@@ -33,6 +33,15 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_XmlDocument.h"
 #include "../../../io/files/juce_FileInputStream.h"
 
+//==============================================================================
+Drawable::RenderingContext::RenderingContext (Graphics& g_, 
+                                              const AffineTransform& transform_,
+                                              const float opacity_) throw()
+    : g (g_),
+      transform (transform_),
+      opacity (opacity_)
+{
+}
 
 //==============================================================================
 Drawable::Drawable()
@@ -41,6 +50,13 @@ Drawable::Drawable()
 
 Drawable::~Drawable()
 {
+}
+
+void Drawable::draw (Graphics& g,
+                     const AffineTransform& transform) const
+{
+    const RenderingContext context (g, transform, g.getCurrentColour().getFloatAlpha());
+    draw (context);
 }
 
 void Drawable::drawAt (Graphics& g, const float x, const float y) const

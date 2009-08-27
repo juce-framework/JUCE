@@ -86,31 +86,25 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
 }
 
 //==============================================================================
-void DrawableImage::draw (Graphics& g, const AffineTransform& transform) const
+void DrawableImage::draw (const Drawable::RenderingContext& context) const
 {
     if (image != 0)
     {
-        const Colour oldColour (g.getCurrentColour()); // save this so we can restore it later
-
         if (opacity > 0.0f && ! overlayColour.isOpaque())
         {
-            g.setColour (oldColour.withMultipliedAlpha (opacity));
-
-            g.drawImageTransformed (image,
-                                    0, 0, image->getWidth(), image->getHeight(),
-                                    transform, false);
+            context.g.setOpacity (context.opacity * opacity);
+            context.g.drawImageTransformed (image,
+                                            0, 0, image->getWidth(), image->getHeight(),
+                                            context.transform, false);
         }
 
         if (! overlayColour.isTransparent())
         {
-            g.setColour (overlayColour.withMultipliedAlpha (oldColour.getFloatAlpha()));
-
-            g.drawImageTransformed (image,
-                                    0, 0, image->getWidth(), image->getHeight(),
-                                    transform, true);
+            context.g.setColour (overlayColour.withMultipliedAlpha (context.opacity));
+            context.g.drawImageTransformed (image,
+                                            0, 0, image->getWidth(), image->getHeight(),
+                                            context.transform, true);
         }
-
-        g.setColour (oldColour);
     }
 }
 

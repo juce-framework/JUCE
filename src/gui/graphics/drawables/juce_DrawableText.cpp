@@ -59,14 +59,10 @@ void DrawableText::setColour (const Colour& newColour)
 }
 
 //==============================================================================
-void DrawableText::draw (Graphics& g, const AffineTransform& transform) const
+void DrawableText::draw (const Drawable::RenderingContext& context) const
 {
-    const Colour oldColour (g.getCurrentColour()); // save this so we can restore it later
-
-    g.setColour (colour.withMultipliedAlpha (oldColour.getFloatAlpha()));
-    text.draw (g, transform);
-
-    g.setColour (oldColour);
+    context.g.setColour (colour.withMultipliedAlpha (context.opacity));
+    text.draw (context.g, context.transform);
 }
 
 void DrawableText::getBounds (float& x, float& y, float& width, float& height) const

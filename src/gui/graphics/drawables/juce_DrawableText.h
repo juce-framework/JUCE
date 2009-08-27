@@ -70,7 +70,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void draw (Graphics& g, const AffineTransform& transform) const;
+    void draw (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */

@@ -59,13 +59,10 @@ public:
 
     //==============================================================================
     /** Renders this Drawable object.
-
-        This is the main rendering method you should call to render a Drawable.
-
         @see drawWithin
     */
-    virtual void draw (Graphics& g,
-                       const AffineTransform& transform = AffineTransform::identity) const = 0;
+    void draw (Graphics& g,
+               const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
@@ -101,6 +98,25 @@ public:
                      const int destHeight,
                      const RectanglePlacement& placement) const;
 
+
+    //==============================================================================
+    /** Holds the information needed when telling a drawable to render itself.
+        @see Drawable::draw
+    */
+    class RenderingContext
+    {
+    public:
+        RenderingContext (Graphics& g, const AffineTransform& transform, const float opacity) throw();
+
+        Graphics& g;
+        AffineTransform transform;
+        float opacity;
+    };
+
+    /** Renders this Drawable object.
+        @see drawWithin
+    */
+    virtual void draw (const RenderingContext& context) const = 0;
 
     //==============================================================================
     /** Returns the smallest rectangle that can contain this Drawable object.

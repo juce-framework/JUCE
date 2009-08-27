@@ -76,6 +76,10 @@ public:
     ~GradientBrush() throw();
 
     //==============================================================================
+    /** Returns the current gradient information */
+    const ColourGradient& getGradient() const throw()       { return gradient; }
+    
+    //==============================================================================
     Brush* createCopy() const throw();
 
     void applyTransform (const AffineTransform& transform) throw();

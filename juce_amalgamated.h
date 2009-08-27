@@ -38743,6 +38743,9 @@ public:
     /** Destructor. */
     ~GradientBrush() throw();
 
+    /** Returns the current gradient information */
+    const ColourGradient& getGradient() const throw()       { return gradient; }
+
     Brush* createCopy() const throw();
 
     void applyTransform (const AffineTransform& transform) throw();
@@ -39055,6 +39058,18 @@ public:
 
     /** Destructor. */
     ~ImageBrush() throw();
+
+    /** Returns the image currently being used. */
+    Image* getImage() const throw()             { return image; }
+
+    /** Returns the current anchor X position. */
+    int getAnchorX() const throw()              { return anchorX; }
+
+    /** Returns the current anchor Y position. */
+    int getAnchorY() const throw()              { return anchorY; }
+
+    /** Returns the current opacity. */
+    float getOpacity() const throw()            { return opacity; }
 
     Brush* createCopy() const throw();
 
@@ -41135,13 +41150,10 @@ public:
     virtual Drawable* createCopy() const = 0;
 
     /** Renders this Drawable object.
-
-        This is the main rendering method you should call to render a Drawable.
-
         @see drawWithin
     */
-    virtual void draw (Graphics& g,
-                       const AffineTransform& transform = AffineTransform::identity) const = 0;
+    void draw (Graphics& g,
+               const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
@@ -41176,6 +41188,24 @@ public:
                      const int destWidth,
                      const int destHeight,
                      const RectanglePlacement& placement) const;
+
+    /** Holds the information needed when telling a drawable to render itself.
+        @see Drawable::draw
+    */
+    class RenderingContext
+    {
+    public:
+        RenderingContext (Graphics& g, const AffineTransform& transform, const float opacity) throw();
+
+        Graphics& g;
+        AffineTransform transform;
+        float opacity;
+    };
+
+    /** Renders this Drawable object.
+        @see drawWithin
+    */
+    virtual void draw (const RenderingContext& context) const = 0;
 
     /** Returns the smallest rectangle that can contain this Drawable object.
 
@@ -41345,7 +41375,7 @@ public:
     void bringToFront (const int index);
 
     /** @internal */
-    void draw (Graphics& g, const AffineTransform& transform) const;
+    void draw (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41440,7 +41470,7 @@ public:
     const Colour& getOverlayColour() const throw()              { return overlayColour; }
 
     /** @internal */
-    void draw (Graphics& g, const AffineTransform& transform) const;
+    void draw (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41540,7 +41570,7 @@ public:
     Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
 
     /** @internal */
-    void draw (Graphics& g, const AffineTransform& transform) const;
+    void draw (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41608,7 +41638,7 @@ public:
     const Colour& getColour() const throw()                 { return colour; }
 
     /** @internal */
-    void draw (Graphics& g, const AffineTransform& transform) const;
+    void draw (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
