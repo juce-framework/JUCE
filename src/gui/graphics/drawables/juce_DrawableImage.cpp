@@ -86,7 +86,7 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
 }
 
 //==============================================================================
-void DrawableImage::draw (const Drawable::RenderingContext& context) const
+void DrawableImage::render (const Drawable::RenderingContext& context) const
 {
     if (image != 0)
     {

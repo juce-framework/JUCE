@@ -56,7 +56,7 @@ void Drawable::draw (Graphics& g,
                      const AffineTransform& transform) const
 {
     const RenderingContext context (g, transform, g.getCurrentColour().getFloatAlpha());
-    draw (context);
+    render (context);
 }
 
 void Drawable::drawAt (Graphics& g, const float x, const float y) const

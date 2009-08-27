@@ -41203,9 +41203,9 @@ public:
     };
 
     /** Renders this Drawable object.
-        @see drawWithin
+        @see draw
     */
-    virtual void draw (const RenderingContext& context) const = 0;
+    virtual void render (const RenderingContext& context) const = 0;
 
     /** Returns the smallest rectangle that can contain this Drawable object.
 
@@ -41375,7 +41375,7 @@ public:
     void bringToFront (const int index);
 
     /** @internal */
-    void draw (const Drawable::RenderingContext& context) const;
+    void render (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41470,7 +41470,7 @@ public:
     const Colour& getOverlayColour() const throw()              { return overlayColour; }
 
     /** @internal */
-    void draw (const Drawable::RenderingContext& context) const;
+    void render (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41570,7 +41570,7 @@ public:
     Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
 
     /** @internal */
-    void draw (const Drawable::RenderingContext& context) const;
+    void render (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */
@@ -41638,7 +41638,7 @@ public:
     const Colour& getColour() const throw()                 { return colour; }
 
     /** @internal */
-    void draw (const Drawable::RenderingContext& context) const;
+    void render (const Drawable::RenderingContext& context) const;
     /** @internal */
     void getBounds (float& x, float& y, float& width, float& height) const;
     /** @internal */

@@ -83,7 +83,7 @@ void DrawablePath::setOutline (const PathStrokeType& strokeType_, const Brush& n
 
 
 //==============================================================================
-void DrawablePath::draw (const Drawable::RenderingContext& context) const
+void DrawablePath::render (const Drawable::RenderingContext& context) const
 {
     {
         Brush* const tempBrush = fillBrush->createCopy();

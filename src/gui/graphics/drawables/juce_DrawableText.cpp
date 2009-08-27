@@ -59,7 +59,7 @@ void DrawableText::setColour (const Colour& newColour)
 }
 
 //==============================================================================
-void DrawableText::draw (const Drawable::RenderingContext& context) const
+void DrawableText::render (const Drawable::RenderingContext& context) const
 {
     context.g.setColour (colour.withMultipliedAlpha (context.opacity));
     text.draw (context.g, context.transform);
