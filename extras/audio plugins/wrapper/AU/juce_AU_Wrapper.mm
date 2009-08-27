@@ -157,7 +157,7 @@ public:
     {
         for (int i = activeUIs.size(); --i >= 0;)
             [((JuceUIViewClass*) activeUIs.getUnchecked(i)) filterBeingDeleted: this];
-        
+
         delete juceFilter;
         juceFilter = 0;
 
@@ -1053,7 +1053,7 @@ public:
 
         deleteAndZero (editorComp);
     }
-    
+
     editorComp = 0;
 }
 

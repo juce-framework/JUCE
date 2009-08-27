@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../io/files/juce_FileInputStream.h"
 
 //==============================================================================
-Drawable::RenderingContext::RenderingContext (Graphics& g_, 
+Drawable::RenderingContext::RenderingContext (Graphics& g_,
                                               const AffineTransform& transform_,
                                               const float opacity_) throw()
     : g (g_),

@@ -281,6 +281,9 @@
 #ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
  #include "gui/graphics/brushes/juce_SolidColourBrush.h"
 #endif
+#ifndef __JUCE_COLOUR_JUCEHEADER__
+ #include "gui/graphics/colour/juce_Colour.h"
+#endif
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
  #include "gui/graphics/colour/juce_ColourGradient.h"
 #endif
@@ -289,9 +292,6 @@
 #endif
 #ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
  #include "gui/graphics/colour/juce_PixelFormats.h"
-#endif
-#ifndef __JUCE_COLOUR_JUCEHEADER__
- #include "gui/graphics/colour/juce_Colour.h"
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__
  #include "gui/graphics/fonts/juce_Font.h"
@@ -437,9 +437,6 @@
 #ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
  #include "gui/graphics/effects/juce_ReduceOpacityEffect.h"
 #endif
-#ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
- #include "gui/components/keyboard/juce_KeyboardFocusTraverser.h"
-#endif
 #ifndef __JUCE_KEYLISTENER_JUCEHEADER__
  #include "gui/components/keyboard/juce_KeyListener.h"
 #endif
@@ -451,6 +448,9 @@
 #endif
 #ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
  #include "gui/components/keyboard/juce_KeyPressMappingSet.h"
+#endif
+#ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
+ #include "gui/components/keyboard/juce_KeyboardFocusTraverser.h"
 #endif
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
  #include "gui/components/keyboard/juce_ModifierKeys.h"
@@ -626,9 +626,6 @@
 #ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FileListComponent.h"
 #endif
-#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
- #include "gui/components/filebrowser/juce_FilenameComponent.h"
-#endif
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FilePreviewComponent.h"
 #endif
@@ -637,6 +634,9 @@
 #endif
 #ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FileTreeComponent.h"
+#endif
+#ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
+ #include "gui/components/filebrowser/juce_FilenameComponent.h"
 #endif
 #ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_ImagePreviewComponent.h"
@@ -719,29 +719,29 @@
 #ifndef __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
  #include "gui/components/lookandfeel/juce_OldSchoolLookAndFeel.h"
 #endif
-#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
- #include "utilities/juce_UndoManager.h"
+#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+ #include "utilities/juce_DeletedAtShutdown.h"
 #endif
-#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
- #include "utilities/juce_SystemClipboard.h"
+#ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
+ #include "utilities/juce_FileBasedDocument.h"
 #endif
 #ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
  #include "utilities/juce_PropertiesFile.h"
 #endif
-#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
- #include "utilities/juce_UndoableAction.h"
+#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
+ #include "utilities/juce_RecentlyOpenedFilesList.h"
 #endif
 #ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
  #include "utilities/juce_SelectedItemSet.h"
 #endif
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
- #include "utilities/juce_DeletedAtShutdown.h"
+#ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
+ #include "utilities/juce_SystemClipboard.h"
 #endif
-#ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
- #include "utilities/juce_RecentlyOpenedFilesList.h"
+#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
+ #include "utilities/juce_UndoManager.h"
 #endif
-#ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
- #include "utilities/juce_FileBasedDocument.h"
+#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
+ #include "utilities/juce_UndoableAction.h"
 #endif
 
 #endif

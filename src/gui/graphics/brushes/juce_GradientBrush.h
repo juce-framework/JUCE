@@ -78,7 +78,7 @@ public:
     //==============================================================================
     /** Returns the current gradient information */
     const ColourGradient& getGradient() const throw()       { return gradient; }
-    
+
     //==============================================================================
     Brush* createCopy() const throw();
 

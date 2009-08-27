@@ -11,26 +11,14 @@ namespace BinaryData
     extern const char*  camerademo_cpp;
     const int           camerademo_cppSize = 7155;
 
-    extern const char*  cello_wav;
-    const int           cello_wavSize = 46348;
-
-    extern const char*  demo_table_data_xml;
-    const int           demo_table_data_xmlSize = 5239;
-
     extern const char*  draganddropdemo_cpp;
     const int           draganddropdemo_cppSize = 7724;
 
     extern const char*  fontsandtextdemo_cpp;
     const int           fontsandtextdemo_cppSize = 8851;
 
-    extern const char*  icons_zip;
-    const int           icons_zipSize = 83876;
-
     extern const char*  interprocesscommsdemo_cpp;
     const int           interprocesscommsdemo_cppSize = 12418;
-
-    extern const char*  juce_png;
-    const int           juce_pngSize = 15290;
 
     extern const char*  opengldemo_cpp;
     const int           opengldemo_cppSize = 9362;
@@ -50,9 +38,6 @@ namespace BinaryData
     extern const char*  threadingdemo_cpp;
     const int           threadingdemo_cppSize = 10271;
 
-    extern const char*  treedemo_xml;
-    const int           treedemo_xmlSize = 1126;
-
     extern const char*  treeviewdemo_cpp;
     const int           treeviewdemo_cppSize = 8502;
 
@@ -61,6 +46,21 @@ namespace BinaryData
 
     extern const char*  widgetsdemo_cpp;
     const int           widgetsdemo_cppSize = 53176;
+
+    extern const char*  cello_wav;
+    const int           cello_wavSize = 46348;
+
+    extern const char*  demo_table_data_xml;
+    const int           demo_table_data_xmlSize = 5239;
+
+    extern const char*  icons_zip;
+    const int           icons_zipSize = 83876;
+
+    extern const char*  juce_png;
+    const int           juce_pngSize = 15290;
+
+    extern const char*  treedemo_xml;
+    const int           treedemo_xmlSize = 1126;
 
 };
 
