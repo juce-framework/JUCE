@@ -807,7 +807,7 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
 
         [((JuceNSWindow*) window) setOwner: this];
         [window orderOut: nil];
-        [window setDelegate: window];
+        [window setDelegate: (JuceNSWindow*) window];
         [window setOpaque: component->isOpaque()];
         [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 

@@ -563,6 +563,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 846929130A49DB9C00314975 /* juce.xcconfig */;
 			buildSettings = {
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = ../../../../bin;
@@ -574,6 +575,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 846929130A49DB9C00314975 /* juce.xcconfig */;
 			buildSettings = {
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = ../../../../bin;

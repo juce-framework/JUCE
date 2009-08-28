@@ -497,14 +497,14 @@ void juce_findFileClose (void* handle) throw()
 //==============================================================================
 bool juce_launchExecutable (const String& pathAndArguments) throw()
 {
-    char* const argv[4] = { "/bin/sh", "-c", (char*) (const char*) pathAndArguments, 0 };
+    const char* const argv[4] = { "/bin/sh", "-c", (const char*) pathAndArguments, 0 };
 
     const int cpid = fork();
 
     if (cpid == 0)
     {
         // Child process
-        if (execve (argv[0], argv, 0) < 0)
+        if (execve (argv[0], (char**) argv, 0) < 0)
             exit (0);
     }
     else

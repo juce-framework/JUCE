@@ -57,7 +57,7 @@
 		847F4EA20E8BA9C300F64426 /* ThreadingDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadingDemo.cpp; path = ../../src/demos/ThreadingDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EA30E8BA9C300F64426 /* TreeViewDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreeViewDemo.cpp; path = ../../src/demos/TreeViewDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EA40E8BA9C300F64426 /* WidgetsDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WidgetsDemo.cpp; path = ../../src/demos/WidgetsDemo.cpp; sourceTree = SOURCE_ROOT; };
-		847F4EB00E8BA9DD00F64426 /* ApplicationStartup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ApplicationStartup.cpp; path = ../../src/ApplicationStartup.cpp; sourceTree = SOURCE_ROOT; };
+		847F4EB00E8BA9DD00F64426 /* ApplicationStartup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; name = ApplicationStartup.cpp; path = ../../src/ApplicationStartup.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EB10E8BA9DD00F64426 /* BinaryData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../src/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EB20E8BA9DD00F64426 /* BinaryData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../src/BinaryData.h; sourceTree = SOURCE_ROOT; };
 		847F4EB30E8BA9DD00F64426 /* juce_AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_AppConfig.h; path = ../../src/juce_AppConfig.h; sourceTree = SOURCE_ROOT; };
@@ -286,6 +286,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -299,6 +300,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
