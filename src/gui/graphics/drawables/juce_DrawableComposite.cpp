@@ -86,19 +86,19 @@ void DrawableComposite::bringToFront (const int index)
 
 void DrawableComposite::render (const Drawable::RenderingContext& context) const
 {
-    if (drawables.size() > 1)
+    if (drawables.size() > 0 && context.opacity > 0)
     {
-        Drawable::RenderingContext contextCopy (context);
-
-        if (context.opacity >= 1.0f)
+        if (context.opacity >= 1.0f || drawables.size() == 1)
         {
+            Drawable::RenderingContext contextCopy (context);
+
             for (int i = 0; i < drawables.size(); ++i)
             {
                 const AffineTransform* const t = transforms.getUnchecked(i);
                 contextCopy.transform = (t == 0) ? context.transform
                                                  : t->followedBy (context.transform);
 
-                drawables.getUnchecked(i)->render (context);
+                drawables.getUnchecked(i)->render (contextCopy);
             }
         }
         else
@@ -119,10 +119,6 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
             context.g.setOpacity (context.opacity);
             context.g.drawImageAt (&tempImage, clipBounds.getX(), clipBounds.getY());
         }
-    }
-    else if (drawables.size() > 0)
-    {
-        drawables.getUnchecked(0)->render (context);
     }
 }
 
