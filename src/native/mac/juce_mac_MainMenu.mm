@@ -258,6 +258,7 @@ public:
             [item setEnabled: iter.isEnabled];
 
             NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
+            [sub setDelegate: nil];
             [menuToAddTo setSubmenu: sub forItem: item];
         }
         else
@@ -465,6 +466,8 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
 {
     if (getMacMainMenu() != newMenuBarModel)
     {
+        const ScopedAutoReleasePool pool;
+
         if (newMenuBarModel == 0)
         {
             delete JuceMainMenuHandler::instance;
