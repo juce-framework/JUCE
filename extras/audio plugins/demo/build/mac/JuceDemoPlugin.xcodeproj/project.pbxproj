@@ -10,6 +10,7 @@
 		3EEA126E089847F5002C6BFC /* CAVectorUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EEA126B089847F5002C6BFC /* CAVectorUnit.cpp */; };
 		3EEA126F089847F5002C6BFC /* CAVectorUnit.h in Headers */ = {isa = PBXBuildFile; fileRef = 3EEA126C089847F5002C6BFC /* CAVectorUnit.h */; };
 		3EEA1270089847F5002C6BFC /* CAVectorUnitTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 3EEA126D089847F5002C6BFC /* CAVectorUnitTypes.h */; };
+		8412B0331048273000072EA3 /* CADebugMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 8412B0321048273000072EA3 /* CADebugMacros.h */; };
 		843792AA0EFBF14B002A2725 /* DemoEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843792A20EFBF14B002A2725 /* DemoEditorComponent.cpp */; };
 		843792AB0EFBF14B002A2725 /* DemoEditorComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 843792A30EFBF14B002A2725 /* DemoEditorComponent.h */; };
 		843792AC0EFBF14B002A2725 /* DemoJuceFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843792A40EFBF14B002A2725 /* DemoJuceFilter.cpp */; };
@@ -118,6 +119,7 @@
 		3EEA126B089847F5002C6BFC /* CAVectorUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CAVectorUnit.cpp; sourceTree = "<group>"; };
 		3EEA126C089847F5002C6BFC /* CAVectorUnit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAVectorUnit.h; sourceTree = "<group>"; };
 		3EEA126D089847F5002C6BFC /* CAVectorUnitTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAVectorUnitTypes.h; sourceTree = "<group>"; };
+		8412B0321048273000072EA3 /* CADebugMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CADebugMacros.h; sourceTree = "<group>"; };
 		843792A20EFBF14B002A2725 /* DemoEditorComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoEditorComponent.cpp; path = ../../src/DemoEditorComponent.cpp; sourceTree = SOURCE_ROOT; };
 		843792A30EFBF14B002A2725 /* DemoEditorComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoEditorComponent.h; path = ../../src/DemoEditorComponent.h; sourceTree = SOURCE_ROOT; };
 		843792A40EFBF14B002A2725 /* DemoJuceFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoJuceFilter.cpp; path = ../../src/DemoJuceFilter.cpp; sourceTree = SOURCE_ROOT; };
@@ -138,14 +140,14 @@
 		8437956B0EFBF323002A2725 /* DiscRecording.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiscRecording.framework; path = /System/Library/Frameworks/DiscRecording.framework; sourceTree = "<absolute>"; };
 		8437956C0EFBF323002A2725 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		8437956D0EFBF323002A2725 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
-		8437965F0EFBF357002A2725 /* AUMIDIBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUMIDIBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIBase.cpp; sourceTree = DEVELOPER_DIR; };
-		843796600EFBF357002A2725 /* AUMIDIBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUMIDIBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIBase.h; sourceTree = DEVELOPER_DIR; };
-		843796610EFBF357002A2725 /* AUMIDIEffectBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUMIDIEffectBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.cpp; sourceTree = DEVELOPER_DIR; };
-		843796620EFBF357002A2725 /* AUMIDIEffectBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUMIDIEffectBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUMIDIEffectBase.h; sourceTree = DEVELOPER_DIR; };
-		843796630EFBF357002A2725 /* AUOutputBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUOutputBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUOutputBase.cpp; sourceTree = DEVELOPER_DIR; };
-		843796640EFBF357002A2725 /* AUOutputBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUOutputBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/AUOutputBase.h; sourceTree = DEVELOPER_DIR; };
-		843796670EFBF357002A2725 /* MusicDeviceBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MusicDeviceBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.cpp; sourceTree = DEVELOPER_DIR; };
-		843796680EFBF357002A2725 /* MusicDeviceBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MusicDeviceBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/OtherBases/MusicDeviceBase.h; sourceTree = DEVELOPER_DIR; };
+		8437965F0EFBF357002A2725 /* AUMIDIBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AUMIDIBase.cpp; sourceTree = "<group>"; };
+		843796600EFBF357002A2725 /* AUMIDIBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AUMIDIBase.h; sourceTree = "<group>"; };
+		843796610EFBF357002A2725 /* AUMIDIEffectBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AUMIDIEffectBase.cpp; sourceTree = "<group>"; };
+		843796620EFBF357002A2725 /* AUMIDIEffectBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AUMIDIEffectBase.h; sourceTree = "<group>"; };
+		843796630EFBF357002A2725 /* AUOutputBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AUOutputBase.cpp; sourceTree = "<group>"; };
+		843796640EFBF357002A2725 /* AUOutputBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AUOutputBase.h; sourceTree = "<group>"; };
+		843796670EFBF357002A2725 /* MusicDeviceBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MusicDeviceBase.cpp; sourceTree = "<group>"; };
+		843796680EFBF357002A2725 /* MusicDeviceBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDeviceBase.h; sourceTree = "<group>"; };
 		8437967D0EFBF5E4002A2725 /* juce_VST_Wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_VST_Wrapper.cpp; path = ../../../wrapper/VST/juce_VST_Wrapper.cpp; sourceTree = SOURCE_ROOT; };
 		8437967E0EFBF5E4002A2725 /* juce_VST_Wrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 2; name = juce_VST_Wrapper.mm; path = ../../../wrapper/VST/juce_VST_Wrapper.mm; sourceTree = SOURCE_ROOT; };
 		843796D50EFBFD16002A2725 /* juce_RTAS_DigiCode1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RTAS_DigiCode1.cpp; path = ../../../wrapper/RTAS/juce_RTAS_DigiCode1.cpp; sourceTree = SOURCE_ROOT; };
@@ -159,14 +161,14 @@
 		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
 		84978758103561A60020003B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewBase.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.cpp; sourceTree = DEVELOPER_DIR; };
-		84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewBase.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewBase.h; sourceTree = DEVELOPER_DIR; };
-		84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CarbonEventHandler.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.cpp; sourceTree = DEVELOPER_DIR; };
-		84D3AB660FCC74B300EA8080 /* CarbonEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CarbonEventHandler.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/CarbonEventHandler.h; sourceTree = DEVELOPER_DIR; };
-		84D3AB6A0FCC74DA00EA8080 /* AUCarbonViewControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewControl.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.cpp; sourceTree = DEVELOPER_DIR; };
-		84D3AB6B0FCC74DA00EA8080 /* AUCarbonViewControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewControl.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewControl.h; sourceTree = DEVELOPER_DIR; };
-		84D3AB6F0FCC74F400EA8080 /* AUCarbonViewDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewDispatch.cpp; path = Examples/CoreAudio/AudioUnits/AUPublic/AUCarbonViewBase/AUCarbonViewDispatch.cpp; sourceTree = DEVELOPER_DIR; };
-		84D3AB730FCC759700EA8080 /* AUViewLocalizedStringKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewLocalizedStringKeys.h; path = Examples/CoreAudio/AudioUnits/AUPublic/AUViewBase/AUViewLocalizedStringKeys.h; sourceTree = DEVELOPER_DIR; };
+		84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewBase.cpp; path = AUCarbonViewBase/AUCarbonViewBase.cpp; sourceTree = "<group>"; };
+		84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewBase.h; path = AUCarbonViewBase/AUCarbonViewBase.h; sourceTree = "<group>"; };
+		84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CarbonEventHandler.cpp; path = AUCarbonViewBase/CarbonEventHandler.cpp; sourceTree = "<group>"; };
+		84D3AB660FCC74B300EA8080 /* CarbonEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CarbonEventHandler.h; path = AUCarbonViewBase/CarbonEventHandler.h; sourceTree = "<group>"; };
+		84D3AB6A0FCC74DA00EA8080 /* AUCarbonViewControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewControl.cpp; path = AUCarbonViewBase/AUCarbonViewControl.cpp; sourceTree = "<group>"; };
+		84D3AB6B0FCC74DA00EA8080 /* AUCarbonViewControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewControl.h; path = AUCarbonViewBase/AUCarbonViewControl.h; sourceTree = "<group>"; };
+		84D3AB6F0FCC74F400EA8080 /* AUCarbonViewDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewDispatch.cpp; path = AUCarbonViewBase/AUCarbonViewDispatch.cpp; sourceTree = "<group>"; };
+		84D3AB730FCC759700EA8080 /* AUViewLocalizedStringKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUViewLocalizedStringKeys.h; path = AUViewBase/AUViewLocalizedStringKeys.h; sourceTree = "<group>"; };
 		8BA05A7F072073D200365D66 /* AUBase.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AUBase.cpp; sourceTree = "<group>"; };
 		8BA05A80072073D200365D66 /* AUBase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AUBase.h; sourceTree = "<group>"; };
 		8BA05A81072073D200365D66 /* AUDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AUDispatch.cpp; sourceTree = "<group>"; };
@@ -381,7 +383,7 @@
 				8BA05AA6072073D200365D66 /* Utility */,
 			);
 			name = AUPublic;
-			path = Examples/CoreAudio/AudioUnits/AUPublic;
+			path = Extras/CoreAudio/AudioUnits/AUPublic;
 			sourceTree = DEVELOPER_DIR;
 		};
 		8BA05A7E072073D200365D66 /* AUBase */ = {
@@ -438,6 +440,7 @@
 		8BA05AEB0720742700365D66 /* PublicUtility */ = {
 			isa = PBXGroup;
 			children = (
+				8412B0321048273000072EA3 /* CADebugMacros.h */,
 				8BA05B050720754400365D66 /* CAAUParameter.cpp */,
 				8BA05B060720754400365D66 /* CAAUParameter.h */,
 				8BA05ADF0720742100365D66 /* CAAudioChannelLayout.cpp */,
@@ -451,7 +454,7 @@
 				3EEA126C089847F5002C6BFC /* CAVectorUnit.h */,
 			);
 			name = PublicUtility;
-			path = Examples/CoreAudio/PublicUtility;
+			path = Extras/CoreAudio/PublicUtility;
 			sourceTree = DEVELOPER_DIR;
 		};
 /* End PBXGroup section */
@@ -493,6 +496,7 @@
 				84D3AB680FCC74B300EA8080 /* CarbonEventHandler.h in Headers */,
 				84D3AB6D0FCC74DA00EA8080 /* AUCarbonViewControl.h in Headers */,
 				84D3AB740FCC759700EA8080 /* AUViewLocalizedStringKeys.h in Headers */,
+				8412B0331048273000072EA3 /* CADebugMacros.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -647,7 +651,7 @@
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = "-bundle";
-				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Examples/CoreAudio/AudioUnits/AUPublic/AUBase\"";
+				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_NAME = JuceDemoPlugin;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -672,7 +676,7 @@
 				INSTALL_PATH = "$(HOME)/Library/Audio/Plug-Ins/Components/";
 				LIBRARY_STYLE = Bundle;
 				OTHER_LDFLAGS = "-bundle";
-				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Examples/CoreAudio/AudioUnits/AUPublic/AUBase\"";
+				OTHER_REZFLAGS = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers -I \"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\"";
 				PRODUCT_NAME = JuceDemoPlugin;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -688,6 +692,7 @@
 			baseConfigurationReference = 843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				GCC_VERSION = 4.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx10.5;
 			};
@@ -699,6 +704,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_VERSION = 4.0;
 				SDKROOT = macosx10.5;
 			};
 			name = Release;

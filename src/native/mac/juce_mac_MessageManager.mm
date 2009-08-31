@@ -264,6 +264,7 @@ void MessageManager::stopDispatchLoop()
     quitMessagePosted = true;
     [NSApp stop: nil];
     [NSApp activateIgnoringOtherApps: YES]; // (if the app is inactive, it sits there and ignores the quit request until the next time it gets activated)
+    [NSEvent startPeriodicEventsAfterDelay: 0 withPeriod: 0.1];
 }
 
 static bool isEventBlockedByModalComps (NSEvent* e)

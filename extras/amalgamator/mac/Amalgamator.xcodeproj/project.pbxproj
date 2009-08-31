@@ -39,7 +39,7 @@
 		844B0AB20F52DCCD00B2F1FD /* juce_LibrarySource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_LibrarySource.mm; path = ../juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
 		844B0AC20F52DEB900B2F1FD /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		844B0ACB0F52DECD00B2F1FD /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = /System/Library/Frameworks/CoreAudio.framework; sourceTree = "<absolute>"; };
-		8DD76FB20486AB0100D96B5E /* Amalgamator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Amalgamator; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* amalgamator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = amalgamator; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +82,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FB20486AB0100D96B5E /* Amalgamator */,
+				8DD76FB20486AB0100D96B5E /* amalgamator */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -118,7 +118,7 @@
 			name = Amalgamator;
 			productInstallPath = "$(HOME)/bin";
 			productName = Amalgamator;
-			productReference = 8DD76FB20486AB0100D96B5E /* Amalgamator */;
+			productReference = 8DD76FB20486AB0100D96B5E /* amalgamator */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */

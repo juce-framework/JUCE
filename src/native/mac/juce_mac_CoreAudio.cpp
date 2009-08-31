@@ -58,9 +58,6 @@
   #define OK(a) (a == noErr)
 #endif
 
-//==============================================================================
-static const int maxNumChans = 96;
-
 
 //==============================================================================
 class CoreAudioInternal  : public Timer
@@ -83,7 +80,11 @@ public:
          numOutputChans (0),
          callbacksAllowed (true),
          numInputChannelInfos (0),
-         numOutputChannelInfos (0)
+         numOutputChannelInfos (0),
+         tempInputBuffers (0),
+         tempOutputBuffers (0),
+         inputChannelInfo (0),
+         outputChannelInfo (0)
     {
         sampleRate = 0;
         bufferSize = 512;
@@ -115,6 +116,10 @@ public:
         stop (false);
 
         juce_free (audioBuffer);
+        juce_free (tempInputBuffers);
+        juce_free (tempOutputBuffers);
+        juce_free (inputChannelInfo);
+        juce_free (outputChannelInfo);
         delete inputDevice;
     }
 
@@ -124,8 +129,10 @@ public:
         juce_free (audioBuffer);
         audioBuffer = (float*) juce_calloc ((numInputChans + numOutputChans) * tempBufSize * sizeof (float));
 
-        zeromem (tempInputBuffers, sizeof (tempInputBuffers));
-        zeromem (tempOutputBuffers, sizeof (tempOutputBuffers));
+        juce_free (tempInputBuffers);
+        tempInputBuffers = (float**) juce_calloc (sizeof (float*) * (numInputChans + 2));
+        juce_free (tempOutputBuffers);
+        tempOutputBuffers = (float**) juce_calloc (sizeof (float*) * (numOutputChans + 2));
 
         int i, count = 0;
         for (i = 0; i < numInputChans; ++i)
@@ -136,9 +143,9 @@ public:
     }
 
     // returns the number of actual available channels
-    void fillInChannelInfo (bool input)
+    void fillInChannelInfo (const bool input)
     {
-        int chanNum = 0, activeChans = 0;
+        int chanNum = 0;
         UInt32 size;
 
         if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, 0)))
@@ -155,31 +162,47 @@ public:
 
                     for (unsigned int j = 0; j < b.mNumberChannels; ++j)
                     {
+                        String name;
+
+                        {
+                            uint8 channelName [256];
+                            zerostruct (channelName);
+                            UInt32 nameSize = sizeof (channelName);
+
+                            if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelName, 
+                                                        &nameSize, &channelName) == noErr)
+                                name = String::fromUTF8 (channelName, nameSize);
+                        }
+
                         if (input)
                         {
                             if (activeInputChans[chanNum])
                             {
-                                inputChannelInfo [activeChans].streamNum = i;
-                                inputChannelInfo [activeChans].dataOffsetSamples = j;
-                                inputChannelInfo [activeChans].dataStrideSamples = b.mNumberChannels;
-                                ++activeChans;
-                                numInputChannelInfos = activeChans;
+                                inputChannelInfo [numInputChannelInfos].streamNum = i;
+                                inputChannelInfo [numInputChannelInfos].dataOffsetSamples = j;
+                                inputChannelInfo [numInputChannelInfos].dataStrideSamples = b.mNumberChannels;
+                                ++numInputChannelInfos;
                             }
 
-                            inChanNames.add (T("input ") + String (chanNum + 1));
+                            if (name.isEmpty())
+                                name << "Input " << (chanNum + 1);
+
+                            inChanNames.add (name);
                         }
                         else
                         {
                             if (activeOutputChans[chanNum])
                             {
-                                outputChannelInfo [activeChans].streamNum = i;
-                                outputChannelInfo [activeChans].dataOffsetSamples = j;
-                                outputChannelInfo [activeChans].dataStrideSamples = b.mNumberChannels;
-                                ++activeChans;
-                                numOutputChannelInfos = activeChans;
+                                outputChannelInfo [numOutputChannelInfos].streamNum = i;
+                                outputChannelInfo [numOutputChannelInfos].dataOffsetSamples = j;
+                                outputChannelInfo [numOutputChannelInfos].dataStrideSamples = b.mNumberChannels;
+                                ++numOutputChannelInfos;
                             }
 
-                            outChanNames.add (T("output ") + String (chanNum + 1));
+                            if (name.isEmpty())
+                                name << "Output " << (chanNum + 1);
+
+                            outChanNames.add (name);
                         }
 
                         ++chanNum;
@@ -298,8 +321,13 @@ public:
         inChanNames.clear();
         outChanNames.clear();
 
-        zeromem (inputChannelInfo, sizeof (inputChannelInfo));
-        zeromem (outputChannelInfo, sizeof (outputChannelInfo));
+        juce_free (inputChannelInfo);
+        inputChannelInfo = (CallbackDetailsForChannel*) juce_calloc (sizeof (CallbackDetailsForChannel) * (numInputChans + 2));
+        numInputChannelInfos = 0;
+
+        juce_free (outputChannelInfo);
+        outputChannelInfo = (CallbackDetailsForChannel*) juce_calloc (sizeof (CallbackDetailsForChannel) * (numOutputChans + 2));
+        numOutputChannelInfos = 0;
 
         fillInChannelInfo (true);
         fillInChannelInfo (false);
@@ -755,10 +783,10 @@ private:
     };
 
     int numInputChannelInfos, numOutputChannelInfos;
-    CallbackDetailsForChannel inputChannelInfo [maxNumChans];
-    CallbackDetailsForChannel outputChannelInfo [maxNumChans];
-    float* tempInputBuffers [maxNumChans];
-    float* tempOutputBuffers [maxNumChans];
+    CallbackDetailsForChannel* inputChannelInfo;
+    CallbackDetailsForChannel* outputChannelInfo;
+    float** tempInputBuffers;
+    float** tempOutputBuffers;
 
     CoreAudioInternal (const CoreAudioInternal&);
     const CoreAudioInternal& operator= (const CoreAudioInternal&);
