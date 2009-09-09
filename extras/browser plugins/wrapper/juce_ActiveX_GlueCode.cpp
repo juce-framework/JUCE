@@ -568,11 +568,11 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
             // try the 1200 codepage (Unicode)
             String queryStr ("\\StringFileInfo\\040904B0\\" + fieldName);
 
-            if (! VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen))
+            if (! VerQueryValue (exeInfo, (LPTSTR) (LPCTSTR) queryStr, (void**) &result, &resultLen))
             {
                 // try the 1252 codepage (Windows Multilingual)
                 queryStr = "\\StringFileInfo\\040904E4\\" + fieldName;
-                VerQueryValue (exeInfo, queryStr, (void**) &result, &resultLen);
+                VerQueryValue (exeInfo, (LPTSTR) (LPCTSTR) queryStr, (void**) &result, &resultLen);
             }
 
             resultString = String (result, resultLen);
@@ -721,7 +721,7 @@ public:
         return S_OK;
     }
 
-    HRESULT __stdcall GetWindow (__RPC__deref_out_opt HWND* phwnd)
+    HRESULT __stdcall GetWindow (HWND* phwnd)
     {
         if (holderComp == 0)
             return E_NOTIMPL;
