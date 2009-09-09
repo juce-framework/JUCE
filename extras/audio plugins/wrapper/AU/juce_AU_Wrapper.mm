@@ -978,7 +978,6 @@ public:
 
             NSView* view = (NSView*) getWindowHandle();
             NSRect r = [[view superview] frame];
-            r.origin.y = r.origin.y + r.size.height - component.getHeight();
             r.size.width = component.getWidth();
             r.size.height = component.getHeight();
             [[view superview] setFrame: r];
