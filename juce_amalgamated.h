@@ -118,6 +118,18 @@
   #define JUCE_ASIO 1
 #endif
 
+/** Comment out this macro to disable the Windows WASAPI audio device type.
+*/
+#ifndef JUCE_WASAPI
+//  #define JUCE_WASAPI 1
+#endif
+
+/** Comment out this macro to disable the Windows WASAPI audio device type.
+*/
+#ifndef JUCE_DIRECTSOUND
+  #define JUCE_DIRECTSOUND 1
+#endif
+
 /** Comment out this macro to disable building of ALSA device support on Linux.
 */
 #ifndef JUCE_ALSA
@@ -8206,6 +8218,7 @@ public:
         Win2000     = 0x4105,
         WinXP       = 0x4106,
         WinVista    = 0x4107,
+        Windows7    = 0x4108,
 
         Windows     = 0x4000,   /**< To test whether any version of Windows is running,
                                      you can use the expression ((getOperatingSystemType() & Windows) != 0). */
@@ -37168,72 +37181,6 @@ private:
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/**
-    This class is used to wrap an AudioFormatReader and only read from a
-    subsection of the file.
-
-    So if you have a reader which can read a 1000 sample file, you could wrap it
-    in one of these to only access, e.g. samples 100 to 200, and any samples
-    outside that will come back as 0. Accessing sample 0 from this reader will
-    actually read the first sample from the other's subsection, which might
-    be at a non-zero position.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
-{
-public:
-
-    /** Creates a AudioSubsectionReader for a given data source.
-
-        @param sourceReader             the source reader from which we'll be taking data
-        @param subsectionStartSample    the sample within the source reader which will be
-                                        mapped onto sample 0 for this reader.
-        @param subsectionLength         the number of samples from the source that will
-                                        make up the subsection. If this reader is asked for
-                                        any samples beyond this region, it will return zero.
-        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
-                                        this object is deleted.
-    */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
-
-    /** Destructor. */
-    ~AudioSubsectionReader();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatReader* const source;
-    int64 startSample, length;
-    const bool deleteSourceWhenDeleted;
-
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
-};
-
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
-
-#endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioThumbnail.h *********/
@@ -37388,6 +37335,72 @@ private:
 /********* End of inlined file: juce_AudioThumbnail.h *********/
 
 #endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/**
+    This class is used to wrap an AudioFormatReader and only read from a
+    subsection of the file.
+
+    So if you have a reader which can read a 1000 sample file, you could wrap it
+    in one of these to only access, e.g. samples 100 to 200, and any samples
+    outside that will come back as 0. Accessing sample 0 from this reader will
+    actually read the first sample from the other's subsection, which might
+    be at a non-zero position.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
+{
+public:
+
+    /** Creates a AudioSubsectionReader for a given data source.
+
+        @param sourceReader             the source reader from which we'll be taking data
+        @param subsectionStartSample    the sample within the source reader which will be
+                                        mapped onto sample 0 for this reader.
+        @param subsectionLength         the number of samples from the source that will
+                                        make up the subsection. If this reader is asked for
+                                        any samples beyond this region, it will return zero.
+        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
+                                        this object is deleted.
+    */
+    AudioSubsectionReader (AudioFormatReader* const sourceReader,
+                           const int64 subsectionStartSample,
+                           const int64 subsectionLength,
+                           const bool deleteSourceWhenDeleted);
+
+    /** Destructor. */
+    ~AudioSubsectionReader();
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    void readMaxLevels (int64 startSample,
+                        int64 numSamples,
+                        float& lowestLeft,
+                        float& highestLeft,
+                        float& lowestRight,
+                        float& highestRight);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatReader* const source;
+    int64 startSample, length;
+    const bool deleteSourceWhenDeleted;
+
+    AudioSubsectionReader (const AudioSubsectionReader&);
+    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+};
+
+#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioSubsectionReader.h *********/
+
+#endif
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioThumbnailCache.h *********/
@@ -37500,114 +37513,6 @@ public:
 #endif
 #endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
-/**
-    Reads and writes the Ogg-Vorbis audio format.
-
-    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the Vorbis and Ogg header files and static libraries.
-
-    @see AudioFormat,
-*/
-class JUCE_API  OggVorbisAudioFormat : public AudioFormat
-{
-public:
-
-    OggVorbisAudioFormat();
-    ~OggVorbisAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    const StringArray getQualityOptions();
-
-    /** Tries to estimate the quality level of an ogg file based on its size.
-
-        If it can't read the file for some reason, this will just return 1 (medium quality),
-        otherwise it will return the approximate quality setting that would have been used
-        to create the file.
-
-        @see getQualityOptions
-    */
-    int estimateOggFileQuality (const File& source);
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_QUICKTIME
-
-/**
-    Uses QuickTime to read the audio track a movie or media file.
-
-    As well as QuickTime movies, this should also manage to open other audio
-    files that quicktime can understand, like mp3, m4a, etc.
-
-    @see AudioFormat
-*/
-class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    QuickTimeAudioFormat();
-
-    /** Destructor. */
-    ~QuickTimeAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
@@ -37730,6 +37635,114 @@ public:
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_WavAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+
+/**
+    Reads and writes the Ogg-Vorbis audio format.
+
+    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the Vorbis and Ogg header files and static libraries.
+
+    @see AudioFormat,
+*/
+class JUCE_API  OggVorbisAudioFormat : public AudioFormat
+{
+public:
+
+    OggVorbisAudioFormat();
+    ~OggVorbisAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+    const StringArray getQualityOptions();
+
+    /** Tries to estimate the quality level of an ogg file based on its size.
+
+        If it can't read the file for some reason, this will just return 1 (medium quality),
+        otherwise it will return the approximate quality setting that would have been used
+        to create the file.
+
+        @see getQualityOptions
+    */
+    int estimateOggFileQuality (const File& source);
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_QUICKTIME
+
+/**
+    Uses QuickTime to read the audio track a movie or media file.
+
+    As well as QuickTime movies, this should also manage to open other audio
+    files that quicktime can understand, like mp3, m4a, etc.
+
+    @see AudioFormat
+*/
+class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    QuickTimeAudioFormat();
+
+    /** Destructor. */
+    ~QuickTimeAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -41118,7 +41131,11 @@ private:
 /********* End of inlined file: juce_ImageFileFormat.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
+#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawableComposite.h *********/
+#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+#define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 
 /********* Start of inlined file: juce_Drawable.h *********/
 #ifndef __JUCE_DRAWABLE_JUCEHEADER__
@@ -41274,13 +41291,6 @@ private:
 #endif   // __JUCE_DRAWABLE_JUCEHEADER__
 /********* End of inlined file: juce_Drawable.h *********/
 
-#endif
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawableComposite.h *********/
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-#define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-
 /**
     A drawable object which acts as a container for a set of other Drawables.
 
@@ -41398,6 +41408,9 @@ private:
 
 #endif   // __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 /********* End of inlined file: juce_DrawableComposite.h *********/
+
+#endif
+#ifndef __JUCE_DRAWABLE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__

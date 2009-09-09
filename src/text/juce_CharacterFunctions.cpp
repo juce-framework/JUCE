@@ -431,15 +431,161 @@ int64 CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
 #endif
 }
 
+//==============================================================================
+static double juce_mulexp10 (const double value, int exponent) throw()
+{
+    if (exponent == 0)
+        return value;
+
+    if (value == 0)
+        return 0;
+
+    const bool negative = (exponent < 0);
+    if (negative)
+        exponent = -exponent;
+
+    double result = 1.0, power = 10.0;
+    for (int bit = 1; exponent != 0; bit <<= 1)
+    {
+        if ((exponent & bit) != 0)
+        {
+            exponent ^= bit;
+            result *= power;
+            if (exponent == 0)
+                break;
+        }
+        power *= power;
+    }
+
+    return negative ? (value / result) : (value * result);
+}
+
+template <class CharType>
+double juce_atof (const CharType* const original) throw()
+{
+    double result[3] = { 0, 0, 0 }, accumulator[2] = { 0, 0 };
+    int exponentAdjustment[2] = { 0, 0 }, exponentAccumulator[2] = { -1, -1 };
+    int exponent = 0, decPointIndex = 0, digit = 0;
+    int lastDigit = 0, numSignificantDigits = 0;
+    bool isNegative = false, digitsFound = false;
+    const int maxSignificantDigits = 15 + 2;
+
+    const CharType* s = original;
+    while (CharacterFunctions::isWhitespace (*s))
+        ++s;
+
+    switch (*s)
+    {
+        case '-':   isNegative = true; // fall-through..
+        case '+':   ++s;
+    }
+
+    if (*s == 'n' || *s == 'N' || *s == 'i' || *s == 'I')
+        return atof (String (original)); // Let the c library deal with NAN and INF
+
+    for (;;)
+    {
+        if (CharacterFunctions::isDigit (*s))
+        {
+            lastDigit = digit;
+            digit = *s++ - '0';
+            digitsFound = true;
+
+            if (decPointIndex != 0)
+                exponentAdjustment[1]++;
+
+            if (numSignificantDigits == 0 && digit == 0)
+                continue;
+
+            if (++numSignificantDigits > maxSignificantDigits)
+            {
+                if (digit > 5)
+                    ++accumulator [decPointIndex];
+                else if (digit == 5 && (lastDigit & 1) != 0)
+                    ++accumulator [decPointIndex];
+
+                if (decPointIndex > 0)
+                    exponentAdjustment[1]--;
+                else
+                    exponentAdjustment[0]++;
+
+                while (CharacterFunctions::isDigit (*s))
+                {
+                    ++s;
+                    if (decPointIndex == 0)
+                        exponentAdjustment[0]++;
+                }
+            }
+            else
+            {
+                const double maxAccumulatorValue = (double) ((UINT_MAX - 9) / 10);
+                if (accumulator [decPointIndex] > maxAccumulatorValue)
+                {
+                    result [decPointIndex] = juce_mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
+                                                + accumulator [decPointIndex];
+                    accumulator [decPointIndex] = 0;
+                    exponentAccumulator [decPointIndex] = 0;
+                }
+
+                accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
+                exponentAccumulator [decPointIndex]++;
+            }
+        }
+        else if (decPointIndex == 0 && *s == '.')
+        {
+            ++s;
+            decPointIndex = 1;
+
+            if (numSignificantDigits > maxSignificantDigits)
+            {
+                while (CharacterFunctions::isDigit (*s))
+                    ++s;
+                break;
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    result[0] = juce_mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
+
+    if (decPointIndex != 0)
+        result[1] = juce_mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
+
+    if ((*s == 'e' || *s == 'E') && digitsFound)
+    {
+        bool negativeExponent = false;
+
+        switch (*++s)
+        {
+            case '-':   negativeExponent = true; // fall-through..
+            case '+':   ++s;
+        }
+
+        while (CharacterFunctions::isDigit (*s))
+            exponent = (exponent * 10) + (*s++ - '0');
+
+        if (negativeExponent)
+            exponent = -exponent;
+    }
+
+    double r = juce_mulexp10 (result[0], exponent + exponentAdjustment[0]);
+    if (decPointIndex != 0)
+        r += juce_mulexp10 (result[1], exponent - exponentAdjustment[1]);
+
+    return isNegative ? -r : r;
+}
+
 double CharacterFunctions::getDoubleValue (const char* const s) throw()
 {
-    return atof (s);
+    return juce_atof <char> (s);
 }
 
 double CharacterFunctions::getDoubleValue (const juce_wchar* const s) throw()
 {
-    wchar_t* endChar;
-    return wcstod (s, &endChar);
+    return juce_atof <juce_wchar> (s);
 }
 
 //==============================================================================

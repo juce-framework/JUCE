@@ -6,6 +6,11 @@
 *.ncb
 *.suo
 *.obj
+*.ilk
+*.pch
+*.pdb
+*.dep
+*.idb
 extras/juce demo/build/macosx/build
 extras/juce demo/build/win32_vc8/Debug
 extras/juce demo/build/win32_vc8/Release

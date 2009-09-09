@@ -25,7 +25,7 @@
 
 // (This file gets included by juce_win32_NativeCode.cpp, rather than being
 // compiled on its own).
-#if JUCE_INCLUDED_FILE
+#if JUCE_INCLUDED_FILE && JUCE_DIRECTSOUND
 
 //==============================================================================
 END_JUCE_NAMESPACE
@@ -1492,12 +1492,6 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createDefaultAudioIODeviceType()
-{
-    return new DSoundAudioIODeviceType();
-}
-
-//==============================================================================
 const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
                                               const BitArray& outputChannels,
                                               double sampleRate_,
@@ -1631,6 +1625,12 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
     SetPriorityClass (GetCurrentProcess(), oldProcPri);
 
     return error;
+}
+
+//==============================================================================
+AudioIODeviceType* juce_createAudioIODeviceType_DirectSound()
+{
+    return new DSoundAudioIODeviceType();
 }
 
 

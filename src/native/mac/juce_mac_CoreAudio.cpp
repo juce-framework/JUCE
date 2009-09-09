@@ -169,7 +169,7 @@ public:
                             zerostruct (channelName);
                             UInt32 nameSize = sizeof (channelName);
 
-                            if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelName, 
+                            if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelName,
                                                         &nameSize, &channelName) == noErr)
                                 name = String::fromUTF8 (channelName, nameSize);
                         }
@@ -1310,7 +1310,7 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createDefaultAudioIODeviceType()
+AudioIODeviceType* juce_createAudioIODeviceType_CoreAudio()
 {
     return new CoreAudioIODeviceType();
 }

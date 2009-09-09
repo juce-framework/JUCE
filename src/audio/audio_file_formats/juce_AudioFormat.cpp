@@ -204,7 +204,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
 
             numSamples -= numToDo;
             startSampleInFile += numToDo;
- 
+
             for (int j = numChannels; --j >= 0;)
             {
                 int bufMax = INT_MIN;

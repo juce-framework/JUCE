@@ -105,6 +105,7 @@ BEGIN_JUCE_NAMESPACE
  #include "windows/juce_win32_Midi.cpp"
  #include "windows/juce_win32_ASIO.cpp"
  #include "windows/juce_win32_DirectSound.cpp"
+ #include "windows/juce_win32_WASAPI.cpp"
  #include "windows/juce_win32_CameraDevice.cpp"
 #endif
 

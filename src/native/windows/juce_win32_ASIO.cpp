@@ -1949,7 +1949,7 @@ private:
     const ASIOAudioIODeviceType& operator= (const ASIOAudioIODeviceType&);
 };
 
-AudioIODeviceType* juce_createASIOAudioIODeviceType()
+AudioIODeviceType* juce_createAudioIODeviceType_ASIO()
 {
     return new ASIOAudioIODeviceType();
 }

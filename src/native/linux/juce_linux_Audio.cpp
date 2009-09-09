@@ -25,9 +25,7 @@
 
 // (This file gets included by juce_linux_NativeCode.cpp, rather than being
 // compiled on its own).
-#ifdef JUCE_INCLUDED_FILE
-
-#if JUCE_ALSA
+#ifdef JUCE_INCLUDED_FILE && JUCE_ALSA
 
 //==============================================================================
 static const int maxNumChans = 64;
@@ -992,18 +990,9 @@ private:
 };
 
 //==============================================================================
-AudioIODeviceType* juce_createDefaultAudioIODeviceType()
+AudioIODeviceType* juce_createAudioIODeviceType_ALSA()
 {
     return new ALSAAudioIODeviceType();
 }
 
-//==============================================================================
-#else  // if ALSA is turned off..
-
-AudioIODeviceType* juce_createDefaultAudioIODeviceType()
-{
-    return 0;
-}
-
-#endif
 #endif

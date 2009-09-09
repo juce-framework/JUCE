@@ -134,6 +134,14 @@
 #endif
 
 //==============================================================================
+#if JUCE_WASAPI
+ #include <MMReg.h>
+ #include <mmdeviceapi.h>
+ #include <Audioclient.h>
+ #include <functiondiscoverykeys.h>
+#endif
+
+//==============================================================================
 #if JUCE_QUICKTIME
 
  /* If you've got an include error here, you probably need to install the QuickTime SDK and

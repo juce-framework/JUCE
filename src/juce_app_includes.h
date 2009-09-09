@@ -203,11 +203,11 @@
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioFormatWriter.h"
 #endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
-#endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioThumbnail.h"
+#endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioThumbnailCache.h"
@@ -215,14 +215,14 @@
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_WavAudioFormat.h"
+#endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
 #endif
 #ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_QuickTimeAudioFormat.h"
-#endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
- #include "audio/audio_file_formats/juce_WavAudioFormat.h"
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
  #include "events/juce_ActionBroadcaster.h"
@@ -371,11 +371,11 @@
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
  #include "gui/graphics/imaging/juce_ImageFileFormat.h"
 #endif
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
- #include "gui/graphics/drawables/juce_Drawable.h"
-#endif
 #ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
  #include "gui/graphics/drawables/juce_DrawableComposite.h"
+#endif
+#ifndef __JUCE_DRAWABLE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_Drawable.h"
 #endif
 #ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
  #include "gui/graphics/drawables/juce_DrawableImage.h"

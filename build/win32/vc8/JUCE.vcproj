@@ -851,7 +851,7 @@
 				</Filter>
 			</Filter>
 			<Filter
-				Name="native windows code"
+				Name="windows native code"
 				>
 				<File
 					RelativePath="..\..\..\src\native\windows\juce_win32_ActiveXComponent.cpp"
@@ -939,6 +939,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\src\native\windows\juce_win32_Threads.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\native\windows\juce_win32_WASAPI.cpp"
 					>
 				</File>
 				<File

@@ -258,7 +258,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
             return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
 
         case 6:
-            return WinVista;
+            return (info.dwMinorVersion == 0) ? WinVista : Windows7;
 
         default:
             jassertfalse // !! not a supported OS!

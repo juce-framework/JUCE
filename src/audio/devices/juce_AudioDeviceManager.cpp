@@ -107,30 +107,36 @@ const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceType
 }
 
 //==============================================================================
-extern AudioIODeviceType* juce_createDefaultAudioIODeviceType();
-
-#if JUCE_WIN32 && JUCE_ASIO
-  extern AudioIODeviceType* juce_createASIOAudioIODeviceType();
-#endif
-
-#if JUCE_WIN32 && JUCE_WDM_AUDIO
-  extern AudioIODeviceType* juce_createWDMAudioIODeviceType();
-#endif
+AudioIODeviceType* juce_createAudioIODeviceType_CoreAudio();
+AudioIODeviceType* juce_createAudioIODeviceType_WASAPI();
+AudioIODeviceType* juce_createAudioIODeviceType_DirectSound();
+AudioIODeviceType* juce_createAudioIODeviceType_ASIO();
+AudioIODeviceType* juce_createAudioIODeviceType_ALSA();
 
 void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
-    AudioIODeviceType* const defaultDeviceType = juce_createDefaultAudioIODeviceType();
+    #if JUCE_WIN32
+     #if JUCE_WASAPI
+     if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
+        list.add (juce_createAudioIODeviceType_WASAPI());
+     #endif
 
-    if (defaultDeviceType != 0)
-        list.add (defaultDeviceType);
+     #if JUCE_DIRECTSOUND
+     list.add (juce_createAudioIODeviceType_DirectSound());
+     #endif
 
-#if JUCE_WIN32 && JUCE_ASIO
-    list.add (juce_createASIOAudioIODeviceType());
-#endif
+     #if JUCE_ASIO
+     list.add (juce_createAudioIODeviceType_ASIO());
+     #endif
+    #endif
 
-#if JUCE_WIN32 && JUCE_WDM_AUDIO
-    list.add (juce_createWDMAudioIODeviceType());
-#endif
+    #if JUCE_MAC
+     list.add (juce_createAudioIODeviceType_CoreAudio());
+    #endif
+
+    #if JUCE_LINUX && JUCE_ALSA
+     list.add (juce_createAudioIODeviceType_ALSA());
+    #endif
 }
 
 //==============================================================================
