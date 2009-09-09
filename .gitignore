@@ -17,6 +17,9 @@ extras/juce demo/build/win32_vc8/Release
 extras/the jucer/build/mac/build
 extras/audio plugin host/build/mac/build
 extras/binarybuilder/mac/build
+extras/prebuilt/Jucer.app
+extras/prebuilt/jucedemo.app
+extras/prebuilt/PluginHost.app
 bin/intermediate*
 bin/lib*
 bin/jucelib*
