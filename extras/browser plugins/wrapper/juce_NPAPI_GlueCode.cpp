@@ -318,13 +318,24 @@ private:
     HWND parentHWND;
     WNDPROC oldWinProc;
 
-    void resizeToParentWindow()
+    void resizeToParentWindow (const int requestedWidth = 0, const int requestedHeight = 0)
     {
         if (IsWindow (parentHWND))
         {
             RECT r;
             GetWindowRect (parentHWND, &r);
-            setBounds (0, 0, r.right - r.left, r.bottom - r.top);
+
+            int w = r.right - r.left;
+            int h = r.bottom - r.top;
+
+            if (w == 0 || h == 0)
+            {
+                w = requestedWidth;  // On Safari, the HWND can have a zero-size, so we might need to
+                h = requestedHeight; // force it to the size that the NPAPI call asked for..
+                MoveWindow (parentHWND, r.left, r.top, w, h, TRUE);
+            }
+
+            setBounds (0, 0, w, h);
         }
     }
 
@@ -392,7 +403,7 @@ public:
                 oldWinProc = SubclassWindow (parentHWND, (WNDPROC) interceptingWinProc);
                 SetWindowLongPtr (parentHWND, GWL_USERDATA, (LONG_PTR) this);
 
-                resizeToParentWindow();
+                resizeToParentWindow (window->width, window->height);
             }
         }
     }
