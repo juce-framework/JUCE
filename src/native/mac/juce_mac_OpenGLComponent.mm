@@ -29,6 +29,8 @@
 
 END_JUCE_NAMESPACE
 
+#define ThreadSafeNSOpenGLView MakeObjCClassName(ThreadSafeNSOpenGLView)
+
 //==============================================================================
 @interface ThreadSafeNSOpenGLView  : NSOpenGLView
 {
