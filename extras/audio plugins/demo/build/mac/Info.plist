@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>EXECUTABLE_NAME</string>
+	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleGetInfoString</key>
-	<string>VERSION_STR</string>
+	<string>${VERSION_STR}</string>
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>com.rawmaterialsoftware.PRODUCT_NAME</string>
+	<string>com.rawmaterialsoftware.${PRODUCT_NAME}</string>
 	<key>CFBundleName</key>
-	<string>PRODUCT_NAME</string>
+	<string>${PRODUCT_NAME}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -23,7 +23,7 @@
 	<key>CFBundleSignature</key>
 	<string>PTul</string>
 	<key>CFBundleVersion</key>
-	<string>VERSION_NUM</string>
+	<string>${VERSION_NUM}</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 </dict>
