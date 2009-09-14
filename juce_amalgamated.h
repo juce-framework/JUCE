@@ -41279,6 +41279,31 @@ public:
     */
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
+    /**
+    */
+    static Drawable* readFromBinaryStream (InputStream& input);
+
+    /**
+    */
+    bool writeToBinaryStream (OutputStream& output) const;
+
+    /**
+    */
+    static Drawable* readFromXml (const XmlElement& xml);
+
+    /**
+    */
+    XmlElement* createXml() const;
+
+    /** @internal */
+    virtual bool readBinary (InputStream& input) = 0;
+    /** @internal */
+    virtual bool writeBinary (OutputStream& output) const = 0;
+    /** @internal */
+    virtual bool readXml (const XmlElement& xml) = 0;
+    /** @internal */
+    virtual void writeXml (XmlElement& xml) const = 0;
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -41348,9 +41373,11 @@ public:
 
         @param index    the index of the drawable to delete, between 0
                         and (getNumDrawables() - 1).
+        @param deleteDrawable   if this is true, the drawable that is removed will also
+                        be deleted. If false, it'll just be removed.
         @see insertDrawable, getNumDrawables
     */
-    void removeDrawable (const int index);
+    void removeDrawable (const int index, const bool deleteDrawable = true);
 
     /** Returns the number of drawables contained inside this one.
 
@@ -41395,6 +41422,14 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
 
     juce_UseDebuggingNewOperator
 
@@ -41493,6 +41528,14 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
 
     juce_UseDebuggingNewOperator
 
@@ -41593,6 +41636,14 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
 
     juce_UseDebuggingNewOperator
 
@@ -41661,6 +41712,14 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
 
     juce_UseDebuggingNewOperator
 

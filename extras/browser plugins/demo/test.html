@@ -41,12 +41,20 @@ function sendCallbackObjectToPlugin()
 
 </script>
 
-<object id="plugin"
-        type="application/npjucedemo-plugin"
-        classid="CLSID:F683B990-3ADF-11DE-BDFE-F9CB55D89593"
-        width="80%" height="400">
-        <embed src="" type="application/npjucedemo-plugin" width="80%" height="400"></embed>
-</object>
+<script>
+if (navigator.appName == "Microsoft Internet Explorer")
+{
+    document.write('<object id="plugin" type="application/npjucedemo-plugin" classid="CLSID:F683B990-3ADF-11DE-BDFE-F9CB55D89593" width="80%" height="400"></object>');
+}
+else
+{
+    document.write('<embed id="plugin" src="" type="application/npjucedemo-plugin" width="80%" height="400"></embed>');
+}
+</script>
+
+<noscript>
+ <embed id="plugin" src="" type="application/npjucedemo-plugin" width="80%" height="400"></embed>
+</noscript>
 
 <br>
 <form name="formname">

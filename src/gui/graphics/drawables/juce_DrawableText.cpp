@@ -87,5 +87,29 @@ Drawable* DrawableText::createCopy() const
     return dt;
 }
 
+//==============================================================================
+bool DrawableText::readBinary (InputStream& input)
+{
+    jassertfalse; //xxx TODO
+    return false;
+}
+
+bool DrawableText::writeBinary (OutputStream& output) const
+{
+    jassertfalse; //xxx TODO
+    return false;
+}
+
+bool DrawableText::readXml (const XmlElement& xml)
+{
+    jassertfalse; //xxx TODO
+    return false;
+}
+
+void DrawableText::writeXml (XmlElement& xml) const
+{
+    jassertfalse; //xxx TODO
+}
+
 
 END_JUCE_NAMESPACE

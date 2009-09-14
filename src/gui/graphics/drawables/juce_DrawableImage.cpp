@@ -30,7 +30,8 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawableImage.h"
 #include "../imaging/juce_ImageCache.h"
-
+#include "../imaging/juce_ImageFileFormat.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
 
 //==============================================================================
 DrawableImage::DrawableImage()
@@ -155,5 +156,87 @@ Drawable* DrawableImage::createCopy() const
     return di;
 }
 
+//==============================================================================
+bool DrawableImage::readBinary (InputStream& input)
+{
+    opacity = input.readFloat();
+    overlayColour = Colour (input.readInt());
+    
+    const int dataLen = input.readInt();
+    
+    if (dataLen > 0)
+    {
+        MemoryBlock imageData;
+        input.readIntoMemoryBlock (imageData, dataLen);
+
+        Image* im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
+        if (im == 0)
+            return false;
+        
+        setImage (im, true);
+    }
+
+    return true;
+}
+
+bool DrawableImage::writeBinary (OutputStream& output) const
+{
+    MemoryOutputStream imageData;
+    
+    if (image != 0)
+    {
+        PNGImageFormat pngFormat;
+        if (! pngFormat.writeImageToStream (*image, imageData))
+            return false;
+    }
+
+    output.writeFloat (opacity);
+    output.writeInt (overlayColour.getARGB());
+    output.writeInt (imageData.getDataSize());
+    output.write (imageData.getData(), imageData.getDataSize());
+    return true;
+}
+
+bool DrawableImage::readXml (const XmlElement& xml)
+{
+    opacity = (float) xml.getDoubleAttribute (T("opacity"), 1.0);
+    overlayColour = Colour (xml.getStringAttribute (T("overlay"), T("0")).getHexValue32());
+    
+    MemoryBlock imageData;
+    if (imageData.fromBase64Encoding (xml.getAllSubText()))
+    {
+        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
+        if (im == 0)
+            return false;
+        
+        setImage (im, true);
+    }
+
+    return true;
+}
+
+void DrawableImage::writeXml (XmlElement& xml) const
+{
+    if (opacity < 1.0f)
+        xml.setAttribute (T("opacity"), (double) opacity);
+    
+    if (! overlayColour.isTransparent())
+        xml.setAttribute (T("overlay"), String::toHexString ((int) overlayColour.getARGB()));
+
+    if (image != 0)
+    {
+        MemoryOutputStream imageData;
+        PNGImageFormat pngFormat;
+        if (pngFormat.writeImageToStream (*image, imageData))
+        {
+            String base64 (MemoryBlock (imageData.getData(), imageData.getDataSize()).toBase64Encoding());
+
+            for (int i = (base64.length() & ~127); i >= 0; i -= 128)
+                base64 = base64.substring (0, i) + "\n" + base64.substring (i);
+
+            xml.addTextElement (base64);
+        }
+    }
+}
 
 END_JUCE_NAMESPACE

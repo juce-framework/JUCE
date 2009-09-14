@@ -375,6 +375,7 @@ bool MemoryBlock::fromBase64Encoding (const String& s) throw()
 
     const int numChars = s.length() - startPos;
     const tchar* const srcChars = ((const tchar*) s) + startPos;
+    int pos = 0;
 
     for (int i = 0; i < numChars; ++i)
     {
@@ -384,7 +385,8 @@ bool MemoryBlock::fromBase64Encoding (const String& s) throw()
         {
             if (encodingTable[j] == c)
             {
-                setBitRange (i * 6, 6, j);
+                setBitRange (pos, 6, j);
+                pos += 6;
                 break;
             }
         }

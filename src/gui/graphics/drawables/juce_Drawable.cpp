@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Drawable.h"
+#include "juce_DrawableComposite.h"
 #include "juce_DrawableImage.h"
 #include "../imaging/juce_ImageFileFormat.h"
 #include "../../../text/juce_XmlDocument.h"
@@ -138,6 +139,65 @@ Drawable* Drawable::createFromImageFile (const File& file)
     delete fin;
 
     return d;
+}
+
+//==============================================================================
+Drawable* Drawable::readFromBinaryStream (InputStream& input)
+{
+    char header[8];
+    if (input.read (header, sizeof (header)) != sizeof (header))
+        return 0;
+
+    DrawableComposite* result = 0;
+    
+    if (memcmp (header, "JuceDrw1", sizeof (header)) == 0)
+    {
+        result = new DrawableComposite();
+        
+        if (! result->readBinary (input))
+            deleteAndZero (result);
+    }
+    
+    return result;
+}
+
+bool Drawable::writeToBinaryStream (OutputStream& output) const
+{
+    output.write ("JuceDrw1", 8);
+    return writeBinary (output);
+}
+
+Drawable* Drawable::readFromXml (const XmlElement& xml)
+{
+    DrawableComposite* result = 0;
+
+    if (xml.hasTagName (T("JuceDrawable")))
+    {
+        result = new DrawableComposite();
+
+        if (! result->readXml (xml))
+            deleteAndZero (result);
+    }
+
+    return result;
+}
+
+XmlElement* Drawable::createXml() const
+{
+    if (dynamic_cast <const DrawableComposite*> (this) == 0)
+    {
+        DrawableComposite tempDC;
+        tempDC.insertDrawable (const_cast <Drawable*> (this));
+        XmlElement* result = tempDC.createXml();
+        tempDC.removeDrawable (0, false);
+        return result;
+    }
+    else
+    {
+        XmlElement* e = new XmlElement (T("JuceDrawable"));
+        writeXml (*e);
+        return e;
+    }
 }
 
 

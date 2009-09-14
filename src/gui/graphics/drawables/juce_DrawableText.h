@@ -77,6 +77,14 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

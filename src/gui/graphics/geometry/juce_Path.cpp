@@ -1390,17 +1390,17 @@ const String Path::toString() const
 
 static const String nextToken (const tchar*& t)
 {
-    while (*t == T(' '))
+    while (CharacterFunctions::isWhitespace (*t))
         ++t;
 
     const tchar* const start = t;
 
-    while (*t != 0 && *t != T(' '))
+    while (*t != 0 && ! CharacterFunctions::isWhitespace (*t))
         ++t;
 
     const int length = (int) (t - start);
 
-    while (*t == T(' '))
+    while (CharacterFunctions::isWhitespace (*t))
         ++t;
 
     return String (start, length);

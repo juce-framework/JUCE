@@ -176,6 +176,32 @@ public:
     */
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
+    //==============================================================================
+    /**
+    */
+    static Drawable* readFromBinaryStream (InputStream& input);
+
+    /**
+    */
+    bool writeToBinaryStream (OutputStream& output) const;
+    
+    /**
+    */
+    static Drawable* readFromXml (const XmlElement& xml);
+    
+    /**
+    */
+    XmlElement* createXml() const;
+
+    //==============================================================================
+    /** @internal */
+    virtual bool readBinary (InputStream& input) = 0;
+    /** @internal */
+    virtual bool writeBinary (OutputStream& output) const = 0;
+    /** @internal */
+    virtual bool readXml (const XmlElement& xml) = 0;
+    /** @internal */
+    virtual void writeXml (XmlElement& xml) const = 0;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

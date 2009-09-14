@@ -54,10 +54,10 @@ ColourGradient::ColourGradient (const Colour& colour1,
       colours (4)
 {
     colours.add (0);
-    colours.add (colour1.getPixelARGB().getARGB());
+    colours.add (colour1.getARGB());
 
     colours.add (1 << 16);
-    colours.add (colour2.getPixelARGB().getARGB());
+    colours.add (colour2.getARGB());
 }
 
 ColourGradient::~ColourGradient() throw()
@@ -84,16 +84,15 @@ void ColourGradient::addColour (const double proportionAlongGradient,
             break;
 
     colours.insert (i, pos);
-    colours.insert (i + 1, colour.getPixelARGB().getARGB());
+    colours.insert (i + 1, colour.getARGB());
 }
 
 void ColourGradient::multiplyOpacity (const float multiplier) throw()
 {
     for (int i = 1; i < colours.size(); i += 2)
     {
-        PixelARGB pix (colours.getUnchecked(i));
-        pix.multiplyAlpha (multiplier);
-        colours.set (i, pix.getARGB());
+        const Colour c (colours.getUnchecked(i));
+        colours.set (i, c.withMultipliedAlpha (multiplier).getARGB());
     }
 }
 
@@ -105,14 +104,12 @@ int ColourGradient::getNumColours() const throw()
 
 double ColourGradient::getColourPosition (const int index) const throw()
 {
-    return colours [index << 1];
-}
+    return jlimit (0.0, 1.0, colours [index << 1] / 65535.0);
+ }
 
 const Colour ColourGradient::getColour (const int index) const throw()
 {
-    PixelARGB pix (colours [(index << 1) + 1]);
-    pix.unpremultiply();
-    return Colour (pix.getARGB());
+    return Colour (colours [(index << 1) + 1]);
 }
 
 //==============================================================================
@@ -140,12 +137,14 @@ PixelARGB* ColourGradient::createLookupTable (int& numEntries) const throw()
         jassert (colours.getUnchecked (0) == 0); // the first colour specified has to go at position 0
 
         PixelARGB pix1 (colours.getUnchecked (1));
+        pix1.premultiply();
         int index = 0;
 
         for (int j = 2; j < colours.size(); j += 2)
         {
             const int numToDo = ((colours.getUnchecked (j) * (numEntries - 1)) >> 16) - index;
-            const PixelARGB pix2 (colours.getUnchecked (j + 1));
+            PixelARGB pix2 (colours.getUnchecked (j + 1));
+            pix2.premultiply();
 
             for (int i = 0; i < numToDo; ++i)
             {
