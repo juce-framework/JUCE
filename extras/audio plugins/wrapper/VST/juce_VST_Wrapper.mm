@@ -62,6 +62,30 @@ static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, v
 }
 #endif
 
+static void updateComponentPos (Component* const comp)
+{
+    HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                            comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
+    
+    HIRect r;
+    HIViewGetFrame (dummyView, &r);
+    HIViewRef root;
+    HIViewFindByID (HIViewGetRoot (HIViewGetWindow (dummyView)), kHIViewWindowContentID, &root);
+    HIViewConvertRect (&r, HIViewGetSuperview (dummyView), root);
+
+    Rect windowPos;
+    GetWindowBounds (HIViewGetWindow (dummyView), kWindowContentRgn, &windowPos);
+
+    comp->setTopLeftPosition ((int) (windowPos.left + r.origin.x),
+                              (int) (windowPos.top + r.origin.y));
+}
+
+static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
+{
+    updateComponentPos ((Component*) user);
+    return noErr;
+}
+
 //==============================================================================
 void initialiseMac()
 {
@@ -77,11 +101,41 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     [hostWindow setCanHide: YES];
     [hostWindow setReleasedWhenClosed: YES];
 
-    NSView* content = [hostWindow contentView];
-    NSRect f = [content frame];
-    NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
-    windowPos.y = [[NSScreen mainScreen] frame].size.height - (windowPos.y + f.size.height);
-    comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);
+    HIViewRef parentView = 0;
+
+    WindowAttributes attributes;
+    GetWindowAttributes ((WindowRef) windowRef, &attributes);
+    if ((attributes & kWindowCompositingAttribute) != 0)
+    {
+        HIViewRef root = HIViewGetRoot ((WindowRef) windowRef);
+        HIViewFindByID (root, kHIViewWindowContentID, &parentView);
+
+        if (parentView == 0)
+            parentView = root;
+    }
+    else
+    {
+        GetRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
+
+        if (parentView == 0)
+            CreateRootControl ((WindowRef) windowRef, (ControlRef*) &parentView);
+    }
+
+    // It seems that the only way to successfully position our overlaid window is by putting a dummy
+    // HIView into the host's carbon window, and then catching events to see when it gets repositioned
+    HIViewRef dummyView = 0;
+    HIImageViewCreate (0, &dummyView);
+    HIRect r = { {0, 0}, {comp->getWidth(), comp->getHeight()} };
+    HIViewSetFrame (dummyView, &r);
+    HIViewAddSubview (parentView, dummyView);
+    comp->setComponentProperty ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
+
+    EventHandlerRef ref;
+    const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
+    InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
+    comp->setComponentProperty ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+
+    updateComponentPos (comp);
 
 #if ! JucePlugin_EditorRequiresKeyboardFocus
     comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
@@ -110,7 +164,6 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
         { kEventClassWindow, kEventWindowHidden }
     };
 
-    EventHandlerRef ref;
     InstallWindowEventHandler ((WindowRef) windowRef,
                                NewEventHandlerUPP (windowVisibilityBodge),
                                GetEventTypeCount (eventsToCatch), eventsToCatch,
@@ -126,11 +179,19 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
     {
         const ScopedAutoReleasePool pool;
 
-#if ADD_CARBON_BODGE
         EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                                    comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
+                                    comp->getComponentProperty ("boundsEventRef", false, String::empty).getHexValue64();
+        RemoveEventHandler (ref);
+
+#if ADD_CARBON_BODGE
+        ref = (EventHandlerRef) (void*) (pointer_sized_int)
+                  comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
         RemoveEventHandler (ref);
 #endif
+
+        HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
+                                comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
+        CFRelease (dummyView);
 
         NSWindow* hostWindow = (NSWindow*) nsWindow;
         NSView* pluginView = (NSView*) comp->getWindowHandle();
@@ -165,7 +226,9 @@ void setNativeHostWindowSize (void* nsWindow, Component* component, int newWidth
         r.bottom += newHeight - component->getHeight();
         SetWindowBounds ((WindowRef) [hostWindow windowRef], kWindowContentRgn, &r);
 
-        [[hostWindow contentView] setNeedsDisplay: YES];
+        r.left = r.top = 0;
+        InvalWindowRect ((WindowRef) [hostWindow windowRef], &r);
+        //[[hostWindow contentView] setNeedsDisplay: YES];
     }
 }
 
