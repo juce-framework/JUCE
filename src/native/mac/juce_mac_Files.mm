@@ -151,9 +151,15 @@ bool juce_copyFile (const String& src, const String& dst) throw()
     NSFileManager* fm = [NSFileManager defaultManager];
 
     return [fm fileExistsAtPath: juceStringToNS (src)]
+#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+            && [fm copyItemAtPath: juceStringToNS (src)
+                           toPath: juceStringToNS (dst)
+                            error: nil];
+#else
             && [fm copyPath: juceStringToNS (src)
                      toPath: juceStringToNS (dst)
                     handler: nil];
+#endif
 }
 
 const StringArray juce_getFileSystemRoots() throw()

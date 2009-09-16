@@ -149,7 +149,9 @@ void Desktop::setMousePosition (int x, int y) throw()
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
+#if (! defined (MAC_OS_X_VERSION_10_6)) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
     CGSetLocalEventsSuppressionInterval (0);
+#endif
 
     CGPoint pos = { x, y };
     CGWarpMouseCursorPosition (pos);
@@ -215,8 +217,13 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
     {
         if (screenSaverDisablerID == 0)
         {
-            IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep,
-                                 kIOPMAssertionLevelOn, &screenSaverDisablerID);
+#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+            IOPMAssertionCreateWithName (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
+                                         CFSTR ("Juce"), &screenSaverDisablerID);
+#else
+            IOPMAssertionCreate (kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
+                                 &screenSaverDisablerID);
+#endif
         }
     }
 }

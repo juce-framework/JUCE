@@ -91,7 +91,11 @@ END_JUCE_NAMESPACE
 //==============================================================================
 #define JuceNSWindow MakeObjCClassName(JuceNSWindow)
 
+#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+@interface JuceNSWindow : NSWindow <NSWindowDelegate>
+#else
 @interface JuceNSWindow : NSWindow
+#endif
 {
 @private
     NSViewComponentPeer* owner;

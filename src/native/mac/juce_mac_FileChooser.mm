@@ -33,7 +33,11 @@ using namespace JUCE_NAMESPACE;
 
 #define JuceFileChooserDelegate MakeObjCClassName(JuceFileChooserDelegate)
 
+#if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+@interface JuceFileChooserDelegate   : NSObject <NSOpenSavePanelDelegate>
+#else
 @interface JuceFileChooserDelegate   : NSObject
+#endif
 {
     StringArray* filters;
 }

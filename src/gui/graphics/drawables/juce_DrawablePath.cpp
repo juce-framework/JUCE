@@ -371,7 +371,7 @@ bool DrawablePath::readXml (const XmlElement& xml)
 
     const String jointStyle (xml.getStringAttribute (T("jointStyle"), String::empty));
     const String endStyle (xml.getStringAttribute (T("capStyle"), String::empty));
-    strokeType = PathStrokeType (xml.getDoubleAttribute (T("strokeWidth"), 0.0),
+    strokeType = PathStrokeType ((float) xml.getDoubleAttribute (T("strokeWidth"), 0.0),
                                  jointStyle.equalsIgnoreCase (T("curved")) ? PathStrokeType::curved
                                                                            : (jointStyle.equalsIgnoreCase (T("bevel")) ? PathStrokeType::beveled
                                                                                                                        : PathStrokeType::mitered),
