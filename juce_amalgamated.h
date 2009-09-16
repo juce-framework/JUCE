@@ -37216,7 +37216,9 @@ public:
     /** Creates an audio thumbnail.
 
         @param sourceSamplesPerThumbnailSample  when creating a stored, low-res version
-                        of the audio data, this is the scale at which it should be done
+                        of the audio data, this is the scale at which it should be done. (This
+                        number is the number of original samples that will be averaged for each
+                        low-res sample)
         @param formatManagerToUse   the audio format manager that is used to open the file
         @param cacheToUse   an instance of an AudioThumbnailCache - this provides a background
                             thread and storage that is used to by the thumbnail, and the cache
@@ -37261,7 +37263,7 @@ public:
     */
     int getNumChannels() const throw();
 
-    /** Returns the length of the audio file.
+    /** Returns the length of the audio file, in seconds.
     */
     double getTotalLength() const throw();
 
@@ -37277,8 +37279,8 @@ public:
     */
     void drawChannel (Graphics& g,
                       int x, int y, int w, int h,
-                      double startTime,
-                      double endTime,
+                      double startTimeSeconds,
+                      double endTimeSeconds,
                       int channelNum,
                       const float verticalZoomFactor);
 

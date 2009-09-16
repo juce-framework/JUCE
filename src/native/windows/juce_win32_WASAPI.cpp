@@ -557,17 +557,15 @@ class WASAPIAudioIODevice  : public AudioIODevice,
 {
 public:
     WASAPIAudioIODevice (const String& deviceName,
-                         const int outputDeviceIndex_, const String& outputDeviceId_,
-                         const int inputDeviceIndex_, const String& inputDeviceId_)
+                         const String& outputDeviceId_,
+                         const String& inputDeviceId_)
         : AudioIODevice (deviceName, "Windows Audio"),
           Thread ("Juce WASAPI"),
           isOpen_ (false),
           isStarted (false),
           outputDevice (0),
-          outputDeviceIndex (outputDeviceIndex_),
           outputDeviceId (outputDeviceId_),
           inputDevice (0),
-          inputDeviceIndex (inputDeviceIndex_),
           inputDeviceId (inputDeviceId_),
           currentBufferSizeSamples (0),
           currentSampleRate (0),
@@ -620,12 +618,10 @@ public:
             int n = 64;
             for (int i = 0; i < 40; ++i)
             {
-                if (n >= minBufferSize && ! bufferSizes.contains (n))
+                if (n >= minBufferSize && n <= 2048 && ! bufferSizes.contains (n))
                     bufferSizes.addSorted (comparator, n);
 
-                n += (n < 512) ? 32
-                               : ((n < 1024) ? 64
-                                             : ((n < 2048) ? 128 : 256));
+                n += (n < 512) ? 32 : (n < 1024 ? 64 : 128);
             }
 
             return true;
@@ -694,19 +690,27 @@ public:
             return lastError;
         }
 
+        if (inputDevice != 0)
+            ResetEvent (inputDevice->clientEvent);
+        if (outputDevice != 0)
+            ResetEvent (outputDevice->clientEvent);
+
+        startThread (8);
+        Thread::sleep (5);
+
         if (inputDevice != 0 && inputDevice->client != 0)
         {
+            latencyIn = inputDevice->latencySamples + inputDevice->actualBufferSize + inputDevice->minBufferSize;
             HRESULT hr = inputDevice->client->Start();
             logFailure (hr); //xxx handle this
         }
 
         if (outputDevice != 0 && outputDevice->client != 0)
         {
+            latencyOut = outputDevice->latencySamples + outputDevice->actualBufferSize + outputDevice->minBufferSize;
             HRESULT hr = outputDevice->client->Start();
             logFailure (hr); //xxx handle this
         }
-
-        startThread (8);
 
         isOpen_ = true;
         return lastError;
@@ -835,7 +839,6 @@ public:
     juce_UseDebuggingNewOperator
 
     //==============================================================================
-    int outputDeviceIndex, inputDeviceIndex;
     String outputDeviceId, inputDeviceId;
     String lastError;
 
@@ -990,7 +993,7 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         return wantInputNames ? inputDeviceNames
-                               : outputDeviceNames;
+                              : outputDeviceNames;
     }
 
     int getDefaultDeviceIndex (const bool /*forInput*/) const
@@ -1002,9 +1005,9 @@ public:
     int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
-
         WASAPIAudioIODevice* const d = dynamic_cast <WASAPIAudioIODevice*> (device);
-        return (d == 0) ? -1 : (asInput ? d->inputDeviceIndex : d->outputDeviceIndex);
+        return d == 0 ? -1 : (asInput ? inputDeviceIds.indexOf (d->inputDeviceId)
+                                      : outputDeviceIds.indexOf (d->outputDeviceId));
     }
 
     bool hasSeparateInputsAndOutputs() const    { return true; }
@@ -1023,8 +1026,8 @@ public:
         {
             d = new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
                                                                        : inputDeviceName,
-                                         outputIndex, outputDeviceIds [outputIndex],
-                                         inputIndex, inputDeviceIds [inputIndex]);
+                                         outputDeviceIds [outputIndex],
+                                         inputDeviceIds [inputIndex]);
 
             if (! d->initialise())
                 deleteAndZero (d);
