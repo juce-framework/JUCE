@@ -312,7 +312,7 @@ bool DrawableComposite::readXml (const XmlElement& xml)
         }
 
         d->setName (e->getStringAttribute (T("id")));
-        
+
         if (! d->readXml (*e))
         {
             jassertfalse;
@@ -322,13 +322,13 @@ bool DrawableComposite::readXml (const XmlElement& xml)
 
         AffineTransform transform;
         const String transformAtt (e->getStringAttribute (T("transform")));
-    
+
         if (transformAtt.isNotEmpty())
         {
             StringArray tokens;
             tokens.addTokens (transformAtt.trim(), false);
             tokens.removeEmptyStrings (true);
-            
+
             if (tokens.size() == 6)
             {
                 float f[6];
@@ -338,7 +338,7 @@ bool DrawableComposite::readXml (const XmlElement& xml)
                 transform = AffineTransform (f[0], f[1], f[2], f[3], f[4], f[5]);
             }
         }
-        
+
         insertDrawable (d, transform);
     }
 
@@ -371,7 +371,7 @@ void DrawableComposite::writeXml (XmlElement& xml) const
         if (transform != 0)
         {
             String t;
-            t <<  transform->mat00 << " " << transform->mat01 << " " << transform->mat02 << " " 
+            t <<  transform->mat00 << " " << transform->mat01 << " " << transform->mat02 << " "
               << transform->mat10 << " " << transform->mat11 << " " << transform->mat12;
 
             e->setAttribute (T("transform"), t);

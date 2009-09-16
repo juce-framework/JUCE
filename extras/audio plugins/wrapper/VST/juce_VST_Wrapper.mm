@@ -66,7 +66,7 @@ static void updateComponentPos (Component* const comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                             comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
-    
+
     HIRect r;
     HIViewGetFrame (dummyView, &r);
     HIViewRef root;

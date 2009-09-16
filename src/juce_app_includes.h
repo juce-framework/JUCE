@@ -203,20 +203,20 @@
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioFormatWriter.h"
 #endif
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioThumbnail.h"
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioThumbnailCache.h"
 #endif
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioThumbnailCache.h"
 #endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_WavAudioFormat.h"
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioThumbnail.h"
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
@@ -371,20 +371,20 @@
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
  #include "gui/graphics/imaging/juce_ImageFileFormat.h"
 #endif
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
- #include "gui/graphics/drawables/juce_DrawableComposite.h"
-#endif
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
- #include "gui/graphics/drawables/juce_Drawable.h"
-#endif
-#ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
- #include "gui/graphics/drawables/juce_DrawableImage.h"
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_DrawableText.h"
 #endif
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
  #include "gui/graphics/drawables/juce_DrawablePath.h"
 #endif
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
- #include "gui/graphics/drawables/juce_DrawableText.h"
+#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_DrawableComposite.h"
+#endif
+#ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_DrawableImage.h"
+#endif
+#ifndef __JUCE_DRAWABLE_JUCEHEADER__
+ #include "gui/graphics/drawables/juce_Drawable.h"
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
  #include "gui/components/juce_Component.h"

@@ -184,11 +184,11 @@ public:
     /**
     */
     bool writeToBinaryStream (OutputStream& output) const;
-    
+
     /**
     */
     static Drawable* readFromXml (const XmlElement& xml);
-    
+
     /**
     */
     XmlElement* createXml() const;

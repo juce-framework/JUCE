@@ -160,7 +160,7 @@ static Brush* readBrushFromBinary (InputStream& input)
             gradient.x2 = input.readFloat();
             gradient.y2 = input.readFloat();
             gradient.isRadial = input.readByte() != 0;
-            
+
             const int numColours = input.readCompressedInt();
             for (int i = 0; i < numColours; ++i)
             {
@@ -215,7 +215,7 @@ static void writeBrushToBinary (OutputStream& output, const Brush* const brush)
         output.writeByte (g.isRadial ? 1 : 0);
 
         output.writeCompressedInt (g.getNumColours());
-        
+
         for (int i = 0; i < g.getNumColours(); ++i)
         {
             output.writeFloat ((float) g.getColourPosition (i));
@@ -274,7 +274,7 @@ static XmlElement* writeBrushToXml (const String& tagName, const Brush* brush)
         return 0;
 
     XmlElement* const xml = new XmlElement (tagName);
-    
+
     const SolidColourBrush* cb;
     const GradientBrush* gb;
     const ImageBrush* ib;
@@ -307,7 +307,7 @@ static XmlElement* writeBrushToXml (const String& tagName, const Brush* brush)
 
         jassertfalse; //xxx TODO
     }
-    
+
     return xml;
 }
 
@@ -322,7 +322,7 @@ bool DrawablePath::readBinary (InputStream& input)
     const float strokeThickness = input.readFloat();
     const int jointStyle = input.readByte();
     const int endStyle = input.readByte();
-    
+
     strokeType = PathStrokeType (strokeThickness,
                                  jointStyle == 1 ? PathStrokeType::curved
                                                  : (jointStyle == 2 ? PathStrokeType::beveled
@@ -378,7 +378,7 @@ bool DrawablePath::readXml (const XmlElement& xml)
                                  endStyle.equalsIgnoreCase (T("square")) ? PathStrokeType::square
                                                                          : (endStyle.equalsIgnoreCase (T("round")) ? PathStrokeType::rounded
                                                                                                                    : PathStrokeType::butt));
-    
+
     path.clear();
     path.restoreFromString (xml.getAllSubText());
     updateOutline();
@@ -391,10 +391,10 @@ void DrawablePath::writeXml (XmlElement& xml) const
     xml.addChildElement (writeBrushToXml (T("stroke"), strokeBrush));
 
     xml.setAttribute (T("strokeWidth"), (double) strokeType.getStrokeThickness());
-    xml.setAttribute (T("jointStyle"), 
+    xml.setAttribute (T("jointStyle"),
                       strokeType.getJointStyle() == PathStrokeType::mitered ? T("miter")
                         : (strokeType.getJointStyle() == PathStrokeType::curved ? T("curved") : T("bevel")));
-    xml.setAttribute (T("capStyle"), 
+    xml.setAttribute (T("capStyle"),
                       strokeType.getEndStyle() == PathStrokeType::butt ? T("butt")
                         : (strokeType.getEndStyle() == PathStrokeType::square ? T("square") : T("round")));
 

@@ -2930,6 +2930,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = jucedebug;
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				SYMROOT = ../../bin;
 				USER_HEADER_SEARCH_PATHS = "~/stuff/vstsdk2.4 $(inherited)";
 			};
@@ -2951,6 +2952,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = juce;
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				SYMROOT = ../../bin;
 				USER_HEADER_SEARCH_PATHS = "~/stuff/vstsdk2.4 $(inherited)";
 			};

@@ -66,7 +66,7 @@ public:
 
     void paint (Graphics& g)
     {
-        getLookAndFeel().drawLevelMeter (g, getWidth(), getHeight(), 
+        getLookAndFeel().drawLevelMeter (g, getWidth(), getHeight(),
                                          (float) exp (log (level) / 3.0)); // (add a bit of a skew to make the level more obvious)
     }
 

@@ -943,6 +943,7 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
 
 #if JUCE_MAC
     browser.setvalue (npp, (NPPVariable) NPNVpluginDrawingModel, (void*) NPDrawingModelCoreGraphics);
+    browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, 0 /*NPEventModelCarbon*/);
 #endif
 
     if (numPluginInstances++ == 0)
@@ -1016,10 +1017,10 @@ NPError NPP_GetValue (NPP npp, NPPVariable variable, void* value)
     switch (variable)
     {
     case NPPVpluginNameString:
-        *((char**) value) = JuceBrowserPlugin_Name;
+        *((const char**) value) = JuceBrowserPlugin_Name;
         break;
     case NPPVpluginDescriptionString:
-        *((char**) value) = JuceBrowserPlugin_Desc;
+        *((const char**) value) = JuceBrowserPlugin_Desc;
         break;
     case NPPVpluginScriptableNPObject:
         *((NPObject**) value) = p->getScriptableObject();

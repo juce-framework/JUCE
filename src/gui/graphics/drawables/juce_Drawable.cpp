@@ -149,15 +149,15 @@ Drawable* Drawable::readFromBinaryStream (InputStream& input)
         return 0;
 
     DrawableComposite* result = 0;
-    
+
     if (memcmp (header, "JuceDrw1", sizeof (header)) == 0)
     {
         result = new DrawableComposite();
-        
+
         if (! result->readBinary (input))
             deleteAndZero (result);
     }
-    
+
     return result;
 }
 

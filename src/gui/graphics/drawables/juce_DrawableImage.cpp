@@ -161,9 +161,9 @@ bool DrawableImage::readBinary (InputStream& input)
 {
     opacity = input.readFloat();
     overlayColour = Colour (input.readInt());
-    
+
     const int dataLen = input.readInt();
-    
+
     if (dataLen > 0)
     {
         MemoryBlock imageData;
@@ -172,7 +172,7 @@ bool DrawableImage::readBinary (InputStream& input)
         Image* im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
         if (im == 0)
             return false;
-        
+
         setImage (im, true);
     }
 
@@ -182,7 +182,7 @@ bool DrawableImage::readBinary (InputStream& input)
 bool DrawableImage::writeBinary (OutputStream& output) const
 {
     MemoryOutputStream imageData;
-    
+
     if (image != 0)
     {
         PNGImageFormat pngFormat;
@@ -201,14 +201,14 @@ bool DrawableImage::readXml (const XmlElement& xml)
 {
     opacity = (float) xml.getDoubleAttribute (T("opacity"), 1.0);
     overlayColour = Colour (xml.getStringAttribute (T("overlay"), T("0")).getHexValue32());
-    
+
     MemoryBlock imageData;
     if (imageData.fromBase64Encoding (xml.getAllSubText()))
     {
         Image* const im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
         if (im == 0)
             return false;
-        
+
         setImage (im, true);
     }
 
@@ -219,7 +219,7 @@ void DrawableImage::writeXml (XmlElement& xml) const
 {
     if (opacity < 1.0f)
         xml.setAttribute (T("opacity"), (double) opacity);
-    
+
     if (! overlayColour.isTransparent())
         xml.setAttribute (T("overlay"), String::toHexString ((int) overlayColour.getARGB()));
 
