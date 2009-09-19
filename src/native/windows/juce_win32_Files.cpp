@@ -450,6 +450,9 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
     switch (type)
     {
     case userHomeDirectory:
+        csidlType = CSIDL_PROFILE;
+        break;
+
     case userDocumentsDirectory:
         csidlType = CSIDL_PERSONAL;
         break;

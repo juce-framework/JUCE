@@ -1338,14 +1338,14 @@
 				84F1E70210403614006A1807 /* juce_AudioThumbnail.h */,
 				84F1E70310403614006A1807 /* juce_AudioThumbnailCache.cpp */,
 				84F1E70410403614006A1807 /* juce_AudioThumbnailCache.h */,
-				84F1E70510403614006A1807 /* juce_FlacAudioFormat.h */,
-				84F1E70610403614006A1807 /* juce_OggVorbisAudioFormat.h */,
-				84F1E70710403614006A1807 /* juce_QuickTimeAudioFormat.h */,
-				84F1E70810403614006A1807 /* juce_WavAudioFormat.h */,
-				84F1E70910403614006A1807 /* juce_WavAudioFormat.cpp */,
-				84F1E70A10403614006A1807 /* juce_QuickTimeAudioFormat.cpp */,
 				84F1E70B10403614006A1807 /* juce_FlacAudioFormat.cpp */,
+				84F1E70510403614006A1807 /* juce_FlacAudioFormat.h */,
 				84F1E70C10403614006A1807 /* juce_OggVorbisAudioFormat.cpp */,
+				84F1E70610403614006A1807 /* juce_OggVorbisAudioFormat.h */,
+				84F1E70A10403614006A1807 /* juce_QuickTimeAudioFormat.cpp */,
+				84F1E70710403614006A1807 /* juce_QuickTimeAudioFormat.h */,
+				84F1E70910403614006A1807 /* juce_WavAudioFormat.cpp */,
+				84F1E70810403614006A1807 /* juce_WavAudioFormat.h */,
 			);
 			name = audio_file_formats;
 			path = ../../src/audio/audio_file_formats;

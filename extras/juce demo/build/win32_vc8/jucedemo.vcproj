@@ -303,26 +303,52 @@
 				Name="demos"
 				>
 				<File
-					RelativePath="..\..\src\demos\AudioDemo.cpp"
+					RelativePath="..\..\src\demos\AudioDemoLatencyPage.cpp"
 					>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoLatencyPage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoPlaybackPage.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoPlaybackPage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoRecordPage.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoRecordPage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoSetupPage.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoSetupPage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoSynthPage.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoSynthPage.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoTabComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\AudioDemoTabComponent.h"
+					>
 				</File>
 				<File
 					RelativePath="..\..\src\demos\CameraDemo.cpp"

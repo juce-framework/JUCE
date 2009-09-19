@@ -28,57 +28,6 @@
 
 
 //==============================================================================
-class SourceCodeWindow;
-static SourceCodeWindow* sourceWindow = 0;
-
-
-//==============================================================================
-class SourceCodeWindow  : public DialogWindow
-{
-    TextEditor* textBox;
-
-public:
-    SourceCodeWindow()
-        : DialogWindow (T("JUCE Demo Source Code!"),
-                        Colours::floralwhite,
-                        false)
-    {
-        setContentComponent (textBox = new TextEditor());
-
-        textBox->setColour (TextEditor::backgroundColourId, Colours::white);
-        textBox->setMultiLine (true, false);
-        textBox->setReturnKeyStartsNewLine (true);
-
-        setResizable (true, true); // we'll choose a corner-resizer component for this window,
-                                   // as a contrast to the resizable border on the main window
-    }
-
-    ~SourceCodeWindow()
-    {
-        // the text editor gets deleted automatically because it's the
-        // window's content component.
-
-        sourceWindow = 0;
-    }
-
-    void closeButtonPressed()
-    {
-        delete this;
-    }
-
-    void updateSourceCode (const String& text)
-    {
-        Font font (14.0f);
-        font.setTypefaceName (Font::getDefaultMonospacedFontName());
-        textBox->setFont (font);
-
-        textBox->setText (text);
-
-        toFront (true);
-    }
-};
-
-//==============================================================================
 class ContentComp  : public Component,
                      public MenuBarModel,
                      public ApplicationCommandTarget
@@ -90,7 +39,6 @@ class ContentComp  : public Component,
 
     Component* currentDemo;
     int currentDemoId;
-    const char* demoSourceCodeText;
 
     TooltipWindow tooltipWindow; // to add tooltips to an application, you
                                  // just need to create one of these and leave it
@@ -112,8 +60,6 @@ class ContentComp  : public Component,
         showCamera                 = 0x2011,
         showWebBrowser             = 0x2012,
 
-        showSourceCode             = 0x200a,
-
         setDefaultLookAndFeel      = 0x200b,
         setOldSchoolLookAndFeel    = 0x200c,
         useNativeTitleBar          = 0x200d,
@@ -126,8 +72,7 @@ public:
     ContentComp (MainDemoWindow* mainWindow_)
         : mainWindow (mainWindow_),
           currentDemo (0),
-          currentDemoId (0),
-          demoSourceCodeText (0)
+          currentDemoId (0)
     {
         invokeDirectly (showPathsAndTransforms, true);
     }
@@ -139,8 +84,6 @@ public:
         LookAndFeel::setDefaultLookAndFeel (0);
 
         deleteAllChildren();
-
-        deleteAndZero (sourceWindow);
     }
 
     //==============================================================================
@@ -151,33 +94,19 @@ public:
     }
 
     //==============================================================================
-    void showDemo (Component* demoComp, const char* sourceCodeText)
+    void showDemo (Component* demoComp)
     {
         delete currentDemo;
         currentDemo = demoComp;
 
         addAndMakeVisible (currentDemo);
         resized();
-
-        demoSourceCodeText = sourceCodeText;
-    }
-
-    void showSource()
-    {
-        if (sourceWindow == 0)
-        {
-            sourceWindow = new SourceCodeWindow();
-            sourceWindow->centreAroundComponent (this, 750, 600);
-            sourceWindow->setVisible (true);
-        }
-
-        sourceWindow->updateSourceCode (demoSourceCodeText);
     }
 
     //==============================================================================
     const StringArray getMenuBarNames()
     {
-        const tchar* const names[] = { T("Demo"), T("Source Code"), T("Look-and-feel"), 0 };
+        const tchar* const names[] = { T("Demo"), T("Look-and-feel"), 0 };
 
         return StringArray ((const tchar**) names);
     }
@@ -209,10 +138,6 @@ public:
             menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
         }
         else if (menuIndex == 1)
-        {
-            menu.addCommandItem (commandManager, showSourceCode);
-        }
-        else if (menuIndex == 2)
         {
             menu.addCommandItem (commandManager, setDefaultLookAndFeel);
             menu.addCommandItem (commandManager, setOldSchoolLookAndFeel);
@@ -266,7 +191,6 @@ public:
                                   showCamera,
                                   showWebBrowser,
                                   showInterprocessComms,
-                                  showSourceCode,
                                   setDefaultLookAndFeel,
                                   setOldSchoolLookAndFeel,
                                   useNativeTitleBar
@@ -381,11 +305,6 @@ public:
             result.setTicked (currentDemoId == showInterprocessComms);
             break;
 
-        case showSourceCode:
-            result.setInfo (T("Show the source code for this demo"), T("Opens a window containing this demo's source code"), generalCategory, 0);
-            result.addDefaultKeypress (T('s'), ModifierKeys::commandModifier);
-            break;
-
         case setDefaultLookAndFeel:
             result.setInfo (T("Use default look-and-feel"), String::empty, generalCategory, 0);
             result.setTicked ((typeid (LookAndFeel) == typeid (getLookAndFeel())) != 0);
@@ -426,80 +345,76 @@ public:
         switch (info.commandID)
         {
         case showPathsAndTransforms:
-            showDemo (createPathsAndTransformsDemo(), BinaryData::pathsandtransformsdemo_cpp);
+            showDemo (createPathsAndTransformsDemo());
             currentDemoId = showPathsAndTransforms;
             break;
 
         case showFontsAndText:
-            showDemo (createFontsAndTextDemo(), BinaryData::fontsandtextdemo_cpp);
+            showDemo (createFontsAndTextDemo());
             currentDemoId = showFontsAndText;
             break;
 
         case showWidgets:
-            showDemo (createWidgetsDemo (mainWindow->commandManager), BinaryData::widgetsdemo_cpp);
+            showDemo (createWidgetsDemo (mainWindow->commandManager));
             currentDemoId = showWidgets;
             break;
 
         case showThreading:
-            showDemo (createThreadingDemo(), BinaryData::threadingdemo_cpp);
+            showDemo (createThreadingDemo());
             currentDemoId = showThreading;
             break;
 
         case showTreeView:
-            showDemo (createTreeViewDemo(), BinaryData::treeviewdemo_cpp);
+            showDemo (createTreeViewDemo());
             currentDemoId = showTreeView;
             break;
 
         case showTable:
-            showDemo (createTableDemo(), BinaryData::tabledemo_cpp);
+            showDemo (createTableDemo());
             currentDemoId = showTable;
             break;
 
         case showAudio:
-            showDemo (createAudioDemo(), BinaryData::audiodemo_cpp);
+            showDemo (createAudioDemo());
             currentDemoId = showAudio;
             break;
 
         case showDragAndDrop:
-            showDemo (createDragAndDropDemo(), BinaryData::draganddropdemo_cpp);
+            showDemo (createDragAndDropDemo());
             currentDemoId = showDragAndDrop;
             break;
 
         case showOpenGL:
 #if JUCE_OPENGL
-            showDemo (createOpenGLDemo(), BinaryData::opengldemo_cpp);
+            showDemo (createOpenGLDemo());
             currentDemoId = showOpenGL;
 #endif
             break;
 
         case showQuicktime:
 #if JUCE_QUICKTIME && ! JUCE_LINUX
-            showDemo (createQuickTimeDemo(), BinaryData::quicktimedemo_cpp);
+            showDemo (createQuickTimeDemo());
             currentDemoId = showQuicktime;
 #endif
             break;
 
         case showCamera:
 #if JUCE_USE_CAMERA
-            showDemo (createCameraDemo(), BinaryData::camerademo_cpp);
+            showDemo (createCameraDemo());
             currentDemoId = showCamera;
 #endif
             break;
 
         case showWebBrowser:
 #if JUCE_WEB_BROWSER
-            showDemo (createWebBrowserDemo(), BinaryData::webbrowserdemo_cpp);
+            showDemo (createWebBrowserDemo());
             currentDemoId = showWebBrowser;
 #endif
             break;
 
         case showInterprocessComms:
-            showDemo (createInterprocessCommsDemo(), BinaryData::interprocesscommsdemo_cpp);
+            showDemo (createInterprocessCommsDemo());
             currentDemoId = showInterprocessComms;
-            break;
-
-        case showSourceCode:
-            showSource();
             break;
 
         case setDefaultLookAndFeel:

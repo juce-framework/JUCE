@@ -41,8 +41,10 @@
 //#define JUCE_ONLY_BUILD_CORE_LIBRARY   1
 //#define JUCE_FORCE_DEBUG  1
 //#define JUCE_LOG_ASSERTIONS  1
+#define JUCE_WASAPI  1
 //#define JUCE_ASIO  1
 //#define JUCE_ALSA  1
+
 #ifdef _MSC_VER
  #define JUCE_QUICKTIME  0   // (This is disabled here by default because on windows it requires the QT SDK,
                              // but you can turn it on again if you've got the SDK)
