@@ -1054,6 +1054,12 @@ void AudioDeviceSelectorComponent::resized()
         midiOutputSelector->setBounds (lx, y, w, h);
 }
 
+void AudioDeviceSelectorComponent::childBoundsChanged (Component* child)
+{
+    if (child == audioDeviceSettingsComp)
+        resized();
+}
+
 void AudioDeviceSelectorComponent::buttonClicked (Button*)
 {
     AudioIODevice* const device = deviceManager.getCurrentAudioDevice();

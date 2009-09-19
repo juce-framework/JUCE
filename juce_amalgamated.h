@@ -32438,9 +32438,6 @@ private:
 #ifndef __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ToneGeneratorAudioSource.h *********/
@@ -32490,6 +32487,9 @@ private:
 
 #endif   // __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 /********* End of inlined file: juce_ToneGeneratorAudioSource.h *********/
+
+#endif
+#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
@@ -37181,7 +37181,11 @@ private:
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioThumbnailCache.h *********/
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+#define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioThumbnail.h *********/
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
@@ -37336,79 +37340,6 @@ private:
 #endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 /********* End of inlined file: juce_AudioThumbnail.h *********/
 
-#endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/**
-    This class is used to wrap an AudioFormatReader and only read from a
-    subsection of the file.
-
-    So if you have a reader which can read a 1000 sample file, you could wrap it
-    in one of these to only access, e.g. samples 100 to 200, and any samples
-    outside that will come back as 0. Accessing sample 0 from this reader will
-    actually read the first sample from the other's subsection, which might
-    be at a non-zero position.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
-{
-public:
-
-    /** Creates a AudioSubsectionReader for a given data source.
-
-        @param sourceReader             the source reader from which we'll be taking data
-        @param subsectionStartSample    the sample within the source reader which will be
-                                        mapped onto sample 0 for this reader.
-        @param subsectionLength         the number of samples from the source that will
-                                        make up the subsection. If this reader is asked for
-                                        any samples beyond this region, it will return zero.
-        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
-                                        this object is deleted.
-    */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
-
-    /** Destructor. */
-    ~AudioSubsectionReader();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatReader* const source;
-    int64 startSample, length;
-    const bool deleteSourceWhenDeleted;
-
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
-};
-
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioThumbnailCache.h *********/
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-#define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-
 struct ThumbnailCacheEntry;
 
 /**
@@ -37515,6 +37446,72 @@ public:
 #endif
 #endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/**
+    This class is used to wrap an AudioFormatReader and only read from a
+    subsection of the file.
+
+    So if you have a reader which can read a 1000 sample file, you could wrap it
+    in one of these to only access, e.g. samples 100 to 200, and any samples
+    outside that will come back as 0. Accessing sample 0 from this reader will
+    actually read the first sample from the other's subsection, which might
+    be at a non-zero position.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
+{
+public:
+
+    /** Creates a AudioSubsectionReader for a given data source.
+
+        @param sourceReader             the source reader from which we'll be taking data
+        @param subsectionStartSample    the sample within the source reader which will be
+                                        mapped onto sample 0 for this reader.
+        @param subsectionLength         the number of samples from the source that will
+                                        make up the subsection. If this reader is asked for
+                                        any samples beyond this region, it will return zero.
+        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
+                                        this object is deleted.
+    */
+    AudioSubsectionReader (AudioFormatReader* const sourceReader,
+                           const int64 subsectionStartSample,
+                           const int64 subsectionLength,
+                           const bool deleteSourceWhenDeleted);
+
+    /** Destructor. */
+    ~AudioSubsectionReader();
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    void readMaxLevels (int64 startSample,
+                        int64 numSamples,
+                        float& lowestLeft,
+                        float& highestLeft,
+                        float& lowestRight,
+                        float& highestRight);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatReader* const source;
+    int64 startSample, length;
+    const bool deleteSourceWhenDeleted;
+
+    AudioSubsectionReader (const AudioSubsectionReader&);
+    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+};
+
+#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioSubsectionReader.h *********/
 
 #endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
@@ -37637,6 +37634,9 @@ public:
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_WavAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
@@ -41133,11 +41133,11 @@ private:
 /********* End of inlined file: juce_ImageFileFormat.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableComposite.h *********/
-#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-#define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+/********* Start of inlined file: juce_DrawableText.h *********/
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+#define __JUCE_DRAWABLETEXT_JUCEHEADER__
 
 /********* Start of inlined file: juce_Drawable.h *********/
 #ifndef __JUCE_DRAWABLE_JUCEHEADER__
@@ -41319,6 +41319,188 @@ private:
 /********* End of inlined file: juce_Drawable.h *********/
 
 /**
+    A drawable object which renders a line of text.
+
+    @see Drawable
+*/
+class JUCE_API  DrawableText  : public Drawable
+{
+public:
+
+    /** Creates a DrawableText object. */
+    DrawableText();
+
+    /** Destructor. */
+    virtual ~DrawableText();
+
+    /** Sets the block of text to render */
+    void setText (const GlyphArrangement& newText);
+
+    /** Sets a single line of text to render.
+
+        This is a convenient method of adding a single line - for
+        more complex text, use the setText() that takes a
+        GlyphArrangement instead.
+    */
+    void setText (const String& newText, const Font& fontToUse);
+
+    /** Returns the text arrangement that was set with setText(). */
+    const GlyphArrangement& getText() const throw()         { return text; }
+
+    /** Sets the colour of the text. */
+    void setColour (const Colour& newColour);
+
+    /** Returns the current text colour. */
+    const Colour& getColour() const throw()                 { return colour; }
+
+    /** @internal */
+    void render (const Drawable::RenderingContext& context) const;
+    /** @internal */
+    void getBounds (float& x, float& y, float& width, float& height) const;
+    /** @internal */
+    bool hitTest (float x, float y) const;
+    /** @internal */
+    Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    GlyphArrangement text;
+    Colour colour;
+
+    DrawableText (const DrawableText&);
+    const DrawableText& operator= (const DrawableText&);
+};
+
+#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
+/********* End of inlined file: juce_DrawableText.h *********/
+
+#endif
+#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawablePath.h *********/
+#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
+#define __JUCE_DRAWABLEPATH_JUCEHEADER__
+
+/**
+    A drawable object which renders a filled or outlined shape.
+
+    @see Drawable
+*/
+class JUCE_API  DrawablePath  : public Drawable
+{
+public:
+
+    /** Creates a DrawablePath.
+    */
+    DrawablePath();
+
+    /** Destructor. */
+    virtual ~DrawablePath();
+
+    /** Changes the path that will be drawn.
+
+        @see setSolidFill, setOutline
+    */
+    void setPath (const Path& newPath);
+
+    /** Returns the current path. */
+    const Path& getPath() const throw()                         { return path; }
+
+    /** Sets a colour to fill the path with.
+
+        This colour is used to fill the path - if you don't want the path to be
+        filled (e.g. if you're just drawing an outline), set this colour to be
+        transparent.
+
+        @see setPath, setOutline
+    */
+    void setSolidFill (const Colour& newColour);
+
+    /** Sets a custom brush to use to fill the path.
+
+        @see setSolidFill
+    */
+    void setFillBrush (const Brush& newBrush);
+
+    /** Returns the brush currently being used to fill the shape. */
+    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
+
+    /** Changes the properties of the outline that will be drawn around the path.
+
+        If the thickness value is 0, no outline will be drawn. If one is drawn, the
+        colour passed-in here will be used for it.
+
+        @see setPath, setSolidFill
+    */
+    void setOutline (const float thickness,
+                     const Colour& outlineColour);
+
+    /** Changes the properties of the outline that will be drawn around the path.
+
+        If the stroke type has 0 thickness, no outline will be drawn.
+
+        @see setPath, setSolidFill
+    */
+    void setOutline (const PathStrokeType& strokeType,
+                     const Brush& strokeBrush);
+
+    /** Returns the current outline style. */
+    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
+
+    /** Returns the brush currently being used to draw the outline. */
+    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
+
+    /** @internal */
+    void render (const Drawable::RenderingContext& context) const;
+    /** @internal */
+    void getBounds (float& x, float& y, float& width, float& height) const;
+    /** @internal */
+    bool hitTest (float x, float y) const;
+    /** @internal */
+    Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Path path, outline;
+    Brush* fillBrush;
+    Brush* strokeBrush;
+    PathStrokeType strokeType;
+
+    void updateOutline();
+
+    DrawablePath (const DrawablePath&);
+    const DrawablePath& operator= (const DrawablePath&);
+};
+
+#endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
+/********* End of inlined file: juce_DrawablePath.h *********/
+
+#endif
+#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawableComposite.h *********/
+#ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+#define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
+
+/**
     A drawable object which acts as a container for a set of other Drawables.
 
     @see Drawable
@@ -41447,9 +41629,6 @@ private:
 /********* End of inlined file: juce_DrawableComposite.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
 
 /********* Start of inlined file: juce_DrawableImage.h *********/
@@ -41555,186 +41734,7 @@ private:
 /********* End of inlined file: juce_DrawableImage.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawablePath.h *********/
-#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
-#define __JUCE_DRAWABLEPATH_JUCEHEADER__
-
-/**
-    A drawable object which renders a filled or outlined shape.
-
-    @see Drawable
-*/
-class JUCE_API  DrawablePath  : public Drawable
-{
-public:
-
-    /** Creates a DrawablePath.
-    */
-    DrawablePath();
-
-    /** Destructor. */
-    virtual ~DrawablePath();
-
-    /** Changes the path that will be drawn.
-
-        @see setSolidFill, setOutline
-    */
-    void setPath (const Path& newPath);
-
-    /** Returns the current path. */
-    const Path& getPath() const throw()                         { return path; }
-
-    /** Sets a colour to fill the path with.
-
-        This colour is used to fill the path - if you don't want the path to be
-        filled (e.g. if you're just drawing an outline), set this colour to be
-        transparent.
-
-        @see setPath, setOutline
-    */
-    void setSolidFill (const Colour& newColour);
-
-    /** Sets a custom brush to use to fill the path.
-
-        @see setSolidFill
-    */
-    void setFillBrush (const Brush& newBrush);
-
-    /** Returns the brush currently being used to fill the shape. */
-    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
-
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the thickness value is 0, no outline will be drawn. If one is drawn, the
-        colour passed-in here will be used for it.
-
-        @see setPath, setSolidFill
-    */
-    void setOutline (const float thickness,
-                     const Colour& outlineColour);
-
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the stroke type has 0 thickness, no outline will be drawn.
-
-        @see setPath, setSolidFill
-    */
-    void setOutline (const PathStrokeType& strokeType,
-                     const Brush& strokeBrush);
-
-    /** Returns the current outline style. */
-    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
-
-    /** Returns the brush currently being used to draw the outline. */
-    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
-
-    /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
-    Drawable* createCopy() const;
-    /** @internal */
-    bool readBinary (InputStream& input);
-    /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Path path, outline;
-    Brush* fillBrush;
-    Brush* strokeBrush;
-    PathStrokeType strokeType;
-
-    void updateOutline();
-
-    DrawablePath (const DrawablePath&);
-    const DrawablePath& operator= (const DrawablePath&);
-};
-
-#endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
-/********* End of inlined file: juce_DrawablePath.h *********/
-
-#endif
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawableText.h *********/
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
-#define __JUCE_DRAWABLETEXT_JUCEHEADER__
-
-/**
-    A drawable object which renders a line of text.
-
-    @see Drawable
-*/
-class JUCE_API  DrawableText  : public Drawable
-{
-public:
-
-    /** Creates a DrawableText object. */
-    DrawableText();
-
-    /** Destructor. */
-    virtual ~DrawableText();
-
-    /** Sets the block of text to render */
-    void setText (const GlyphArrangement& newText);
-
-    /** Sets a single line of text to render.
-
-        This is a convenient method of adding a single line - for
-        more complex text, use the setText() that takes a
-        GlyphArrangement instead.
-    */
-    void setText (const String& newText, const Font& fontToUse);
-
-    /** Returns the text arrangement that was set with setText(). */
-    const GlyphArrangement& getText() const throw()         { return text; }
-
-    /** Sets the colour of the text. */
-    void setColour (const Colour& newColour);
-
-    /** Returns the current text colour. */
-    const Colour& getColour() const throw()                 { return colour; }
-
-    /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
-    Drawable* createCopy() const;
-    /** @internal */
-    bool readBinary (InputStream& input);
-    /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    GlyphArrangement text;
-    Colour colour;
-
-    DrawableText (const DrawableText&);
-    const DrawableText& operator= (const DrawableText&);
-};
-
-#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
-/********* End of inlined file: juce_DrawableText.h *********/
+#ifndef __JUCE_DRAWABLE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
@@ -52082,6 +52082,8 @@ public:
     void buttonClicked (Button*);
     /** @internal */
     void changeListenerCallback (void*);
+    /** @internal */
+    void childBoundsChanged (Component*);
 
     juce_UseDebuggingNewOperator
 
@@ -52243,115 +52245,6 @@ private:
 /********* End of inlined file: juce_BubbleComponent.h *********/
 
 #endif
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_BubbleMessageComponent.h *********/
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-#define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-
-/**
-    A speech-bubble component that displays a short message.
-
-    This can be used to show a message with the tail of the speech bubble
-    pointing to a particular component or location on the screen.
-
-    @see BubbleComponent
-*/
-class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
-                                          private Timer
-{
-public:
-
-    /** Creates a bubble component.
-
-        After creating one a BubbleComponent, do the following:
-        - add it to an appropriate parent component, or put it on the
-          desktop with Component::addToDesktop (0).
-        - use the showAt() method to show a message.
-        - it will make itself invisible after it times-out (and can optionally
-          also delete itself), or you can reuse it somewhere else by calling
-          showAt() again.
-    */
-    BubbleMessageComponent (const int fadeOutLengthMs = 150);
-
-    /** Destructor. */
-    ~BubbleMessageComponent();
-
-    /** Shows a message bubble at a particular position.
-
-        This shows the bubble with its stem pointing to the given location
-        (co-ordinates being relative to its parent component).
-
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
-
-        @param x                                the x co-ordinate of end of the bubble's tail
-        @param y                                the y co-ordinate of end of the bubble's tail
-        @param message                          the text to display
-        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
-                                                will stay there until manually removed.
-        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
-                                                mouse button is pressed (anywhere on the screen)
-        @param deleteSelfAfterUse               if true, then the component will delete itself after
-                                                it becomes invisible
-    */
-    void showAt (int x, int y,
-                 const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
-
-    /** Shows a message bubble next to a particular component.
-
-        This shows the bubble with its stem pointing at the given component.
-
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
-
-        @param component                        the component that you want to point at
-        @param message                          the text to display
-        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
-                                                will stay there until manually removed.
-        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
-                                                mouse button is pressed (anywhere on the screen)
-        @param deleteSelfAfterUse               if true, then the component will delete itself after
-                                                it becomes invisible
-    */
-    void showAt (Component* const component,
-                 const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
-
-    /** @internal */
-    void getContentSize (int& w, int& h);
-    /** @internal */
-    void paintContent (Graphics& g, int w, int h);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int fadeOutLength, mouseClickCounter;
-    TextLayout textLayout;
-    int64 expiryTime;
-    bool deleteAfterUse;
-
-    void init (const int numMillisecondsBeforeRemoving,
-               const bool removeWhenMouseClicked,
-               const bool deleteSelfAfterUse);
-
-    BubbleMessageComponent (const BubbleMessageComponent&);
-    const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
-};
-
-#endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_BubbleMessageComponent.h *********/
-
-#endif
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
 
 /********* Start of inlined file: juce_ColourSelector.h *********/
@@ -52488,6 +52381,115 @@ private:
 /********* End of inlined file: juce_ColourSelector.h *********/
 
 #endif
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_BubbleMessageComponent.h *********/
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+#define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+
+/**
+    A speech-bubble component that displays a short message.
+
+    This can be used to show a message with the tail of the speech bubble
+    pointing to a particular component or location on the screen.
+
+    @see BubbleComponent
+*/
+class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
+                                          private Timer
+{
+public:
+
+    /** Creates a bubble component.
+
+        After creating one a BubbleComponent, do the following:
+        - add it to an appropriate parent component, or put it on the
+          desktop with Component::addToDesktop (0).
+        - use the showAt() method to show a message.
+        - it will make itself invisible after it times-out (and can optionally
+          also delete itself), or you can reuse it somewhere else by calling
+          showAt() again.
+    */
+    BubbleMessageComponent (const int fadeOutLengthMs = 150);
+
+    /** Destructor. */
+    ~BubbleMessageComponent();
+
+    /** Shows a message bubble at a particular position.
+
+        This shows the bubble with its stem pointing to the given location
+        (co-ordinates being relative to its parent component).
+
+        For details about exactly how it decides where to position itself, see
+        BubbleComponent::updatePosition().
+
+        @param x                                the x co-ordinate of end of the bubble's tail
+        @param y                                the y co-ordinate of end of the bubble's tail
+        @param message                          the text to display
+        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
+                                                from its parent compnent. If this is 0 or less, it
+                                                will stay there until manually removed.
+        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
+                                                mouse button is pressed (anywhere on the screen)
+        @param deleteSelfAfterUse               if true, then the component will delete itself after
+                                                it becomes invisible
+    */
+    void showAt (int x, int y,
+                 const String& message,
+                 const int numMillisecondsBeforeRemoving,
+                 const bool removeWhenMouseClicked = true,
+                 const bool deleteSelfAfterUse = false);
+
+    /** Shows a message bubble next to a particular component.
+
+        This shows the bubble with its stem pointing at the given component.
+
+        For details about exactly how it decides where to position itself, see
+        BubbleComponent::updatePosition().
+
+        @param component                        the component that you want to point at
+        @param message                          the text to display
+        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
+                                                from its parent compnent. If this is 0 or less, it
+                                                will stay there until manually removed.
+        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
+                                                mouse button is pressed (anywhere on the screen)
+        @param deleteSelfAfterUse               if true, then the component will delete itself after
+                                                it becomes invisible
+    */
+    void showAt (Component* const component,
+                 const String& message,
+                 const int numMillisecondsBeforeRemoving,
+                 const bool removeWhenMouseClicked = true,
+                 const bool deleteSelfAfterUse = false);
+
+    /** @internal */
+    void getContentSize (int& w, int& h);
+    /** @internal */
+    void paintContent (Graphics& g, int w, int h);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int fadeOutLength, mouseClickCounter;
+    TextLayout textLayout;
+    int64 expiryTime;
+    bool deleteAfterUse;
+
+    void init (const int numMillisecondsBeforeRemoving,
+               const bool removeWhenMouseClicked,
+               const bool deleteSelfAfterUse);
+
+    BubbleMessageComponent (const BubbleMessageComponent&);
+    const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+};
+
+#endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_BubbleMessageComponent.h *********/
+
+#endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
 
 #endif
@@ -52582,6 +52584,74 @@ private:
 
 #endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_MagnifierComponent.h *********/
+
+#endif
+#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_NSViewComponent.h *********/
+#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+
+#if ! DOXYGEN
+ class NSViewComponentInternal;
+#endif
+
+#if JUCE_MAC || DOXYGEN
+
+/**
+    A Mac-specific class that can create and embed an NSView inside itself.
+
+    To use it, create one of these, put it in place and make sure it's visible in a
+    window, then use setView() to assign an NSView to it. The view will then be
+    moved and resized to follow the movements of this component.
+
+    Of course, since the view is a native object, it'll obliterate any
+    juce components that may overlap this component, but that's life.
+*/
+class JUCE_API  NSViewComponent   : public Component
+{
+public:
+
+    /** Create an initially-empty container. */
+    NSViewComponent();
+
+    /** Destructor. */
+    ~NSViewComponent();
+
+    /** Assigns an NSView to this peer.
+
+        The view will be retained and released by this component for as long as
+        it is needed. To remove the current view, just call setView (0).
+
+        Note: a void* is used here to avoid including the cocoa headers as
+        part of the juce.h, but the method expects an NSView*.
+    */
+    void setView (void* nsView);
+
+    /** Returns the current NSView.
+
+        Note: a void* is returned here to avoid including the cocoa headers as
+        a requirement of juce.h, so you should just cast the object to an NSView*.
+    */
+    void* getView() const;
+
+    /** @internal */
+    void paint (Graphics& g);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class NSViewComponentInternal;
+    NSViewComponentInternal* info;
+
+    NSViewComponent (const NSViewComponent&);
+    const NSViewComponent& operator= (const NSViewComponent&);
+};
+
+#endif
+
+#endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_NSViewComponent.h *********/
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
@@ -52966,74 +53036,6 @@ private:
 
 #endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_MidiKeyboardComponent.h *********/
-
-#endif
-#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_NSViewComponent.h *********/
-#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-
-#if ! DOXYGEN
- class NSViewComponentInternal;
-#endif
-
-#if JUCE_MAC || DOXYGEN
-
-/**
-    A Mac-specific class that can create and embed an NSView inside itself.
-
-    To use it, create one of these, put it in place and make sure it's visible in a
-    window, then use setView() to assign an NSView to it. The view will then be
-    moved and resized to follow the movements of this component.
-
-    Of course, since the view is a native object, it'll obliterate any
-    juce components that may overlap this component, but that's life.
-*/
-class JUCE_API  NSViewComponent   : public Component
-{
-public:
-
-    /** Create an initially-empty container. */
-    NSViewComponent();
-
-    /** Destructor. */
-    ~NSViewComponent();
-
-    /** Assigns an NSView to this peer.
-
-        The view will be retained and released by this component for as long as
-        it is needed. To remove the current view, just call setView (0).
-
-        Note: a void* is used here to avoid including the cocoa headers as
-        part of the juce.h, but the method expects an NSView*.
-    */
-    void setView (void* nsView);
-
-    /** Returns the current NSView.
-
-        Note: a void* is returned here to avoid including the cocoa headers as
-        a requirement of juce.h, so you should just cast the object to an NSView*.
-    */
-    void* getView() const;
-
-    /** @internal */
-    void paint (Graphics& g);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class NSViewComponentInternal;
-    NSViewComponentInternal* info;
-
-    NSViewComponent (const NSViewComponent&);
-    const NSViewComponent& operator= (const NSViewComponent&);
-};
-
-#endif
-
-#endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_NSViewComponent.h *********/
 
 #endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
@@ -53640,64 +53642,6 @@ private:
 /********* End of inlined file: juce_QuickTimeMovieComponent.h *********/
 
 #endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-#if JUCE_WIN32 || JUCE_LINUX
-
-/**
-    On Windows only, this component sits in the taskbar tray as a small icon.
-
-    To use it, just create one of these components, but don't attempt to make it
-    visible, add it to a parent, or put it on the desktop.
-
-    You can then call setIconImage() to create an icon for it in the taskbar.
-
-    To change the icon's tooltip, you can use setIconTooltip().
-
-    To respond to mouse-events, you can override the normal mouseDown(),
-    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
-    position will not be valid, you can use this to respond to clicks. Traditionally
-    you'd use a left-click to show your application's window, and a right-click
-    to show a pop-up menu.
-*/
-class JUCE_API  SystemTrayIconComponent  : public Component
-{
-public:
-
-    SystemTrayIconComponent();
-
-    /** Destructor. */
-    ~SystemTrayIconComponent();
-
-    /** Changes the image shown in the taskbar.
-    */
-    void setIconImage (const Image& newImage);
-
-    /** Changes the tooltip that Windows shows above the icon. */
-    void setIconTooltip (const String& tooltip);
-
-#if JUCE_LINUX
-    /** @internal */
-    void paint (Graphics& g);
-#endif
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
-};
-
-#endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
-
-#endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_WebBrowserComponent.h *********/
@@ -53795,6 +53739,64 @@ private:
 #endif
 #endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_WebBrowserComponent.h *********/
+
+#endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+#if JUCE_WIN32 || JUCE_LINUX
+
+/**
+    On Windows only, this component sits in the taskbar tray as a small icon.
+
+    To use it, just create one of these components, but don't attempt to make it
+    visible, add it to a parent, or put it on the desktop.
+
+    You can then call setIconImage() to create an icon for it in the taskbar.
+
+    To change the icon's tooltip, you can use setIconTooltip().
+
+    To respond to mouse-events, you can override the normal mouseDown(),
+    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
+    position will not be valid, you can use this to respond to clicks. Traditionally
+    you'd use a left-click to show your application's window, and a right-click
+    to show a pop-up menu.
+*/
+class JUCE_API  SystemTrayIconComponent  : public Component
+{
+public:
+
+    SystemTrayIconComponent();
+
+    /** Destructor. */
+    ~SystemTrayIconComponent();
+
+    /** Changes the image shown in the taskbar.
+    */
+    void setIconImage (const Image& newImage);
+
+    /** Changes the tooltip that Windows shows above the icon. */
+    void setIconTooltip (const String& tooltip);
+
+#if JUCE_LINUX
+    /** @internal */
+    void paint (Graphics& g);
+#endif
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    SystemTrayIconComponent (const SystemTrayIconComponent&);
+    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+};
+
+#endif
+#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
 
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__

@@ -460,11 +460,11 @@ public:
         const ScopedAutoReleasePool pool;
 
         log ("setWindow");
-        
+
         NSView* parentView = 0;
         NP_CGContext* const cgContext = (window != 0) ? (NP_CGContext*) window->window : 0;
         log ("NP_CGContext: " + String::toHexString ((pointer_sized_int) cgContext));
-        
+
 #ifndef __LP64__
         WindowRef windowRef = cgContext != 0 ? (WindowRef) cgContext->window : 0;
 
@@ -957,7 +957,7 @@ NPError NPP_New (NPMIMEType pluginType, NPP npp, ::uint16 mode, ::int16 argc, ch
 
 #if JUCE_MAC
     browser.setvalue (npp, (NPPVariable) NPNVpluginDrawingModel, (void*) NPDrawingModelCoreGraphics);
-    
+
     #ifdef __LP64__
     browser.setvalue (npp, (NPPVariable) 1001 /*NPPVpluginEventModel*/, (void*) 1 /*NPEventModelCocoa*/);
     #else

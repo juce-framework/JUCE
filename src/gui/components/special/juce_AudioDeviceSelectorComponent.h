@@ -88,6 +88,8 @@ public:
     void buttonClicked (Button*);
     /** @internal */
     void changeListenerCallback (void*);
+    /** @internal */
+    void childBoundsChanged (Component*);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

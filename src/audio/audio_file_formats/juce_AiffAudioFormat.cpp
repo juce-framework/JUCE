@@ -155,7 +155,16 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples)
     {
-        numSamples = (int) jmin ((int64) numSamples, lengthInSamples - startSampleInFile);
+        const int64 samplesAvailable = lengthInSamples - startSampleInFile;
+
+        if (samplesAvailable < numSamples)
+        {
+            for (int i = numDestChannels; --i >= 0;)
+                if (destSamples[i] != 0)
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (int) * numSamples);
+
+            numSamples = (int) samplesAvailable;
+        }
 
         if (numSamples <= 0)
             return true;

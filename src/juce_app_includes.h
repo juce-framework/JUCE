@@ -119,11 +119,11 @@
 #ifndef __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
  #include "audio/audio_sources/juce_PositionableAudioSource.h"
 #endif
-#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
- #include "audio/audio_sources/juce_ResamplingAudioSource.h"
-#endif
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
  #include "audio/audio_sources/juce_ToneGeneratorAudioSource.h"
+#endif
+#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
+ #include "audio/audio_sources/juce_ResamplingAudioSource.h"
 #endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
  #include "audio/devices/juce_AudioDeviceManager.h"
@@ -206,11 +206,11 @@
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioThumbnailCache.h"
 #endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
-#endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_FlacAudioFormat.h"
+#endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
 #endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_WavAudioFormat.h"
@@ -680,11 +680,11 @@
 #ifndef __JUCE_BUBBLECOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_BubbleComponent.h"
 #endif
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_BubbleMessageComponent.h"
-#endif
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
  #include "gui/components/special/juce_ColourSelector.h"
+#endif
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_BubbleMessageComponent.h"
 #endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
  #include "gui/components/special/juce_DropShadower.h"
@@ -692,11 +692,11 @@
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_MagnifierComponent.h"
 #endif
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_MidiKeyboardComponent.h"
-#endif
 #ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_NSViewComponent.h"
+#endif
+#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_MidiKeyboardComponent.h"
 #endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_OpenGLComponent.h"
@@ -707,11 +707,11 @@
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_QuickTimeMovieComponent.h"
 #endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_SystemTrayIconComponent.h"
-#endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_WebBrowserComponent.h"
+#endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_SystemTrayIconComponent.h"
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
  #include "gui/components/lookandfeel/juce_LookAndFeel.h"

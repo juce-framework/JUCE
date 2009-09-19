@@ -97,21 +97,23 @@ public:
         {
             updateDetailsFromDevice();
 
-            AudioDeviceAddPropertyListener (deviceID,
-                                            kAudioPropertyWildcardChannel,
-                                            kAudioPropertyWildcardSection,
-                                            kAudioPropertyWildcardPropertyID,
-                                            deviceListenerProc, this);
+            AudioObjectPropertyAddress pa;
+            pa.mSelector = kAudioObjectPropertySelectorWildcard;
+            pa.mScope = kAudioObjectPropertyScopeWildcard;
+            pa.mElement = kAudioObjectPropertyElementWildcard;
+
+            AudioObjectAddPropertyListener (deviceID, &pa, deviceListenerProc, this);
         }
     }
 
     ~CoreAudioInternal()
     {
-        AudioDeviceRemovePropertyListener (deviceID,
-                                           kAudioPropertyWildcardChannel,
-                                           kAudioPropertyWildcardSection,
-                                           kAudioPropertyWildcardPropertyID,
-                                           deviceListenerProc);
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertySelectorWildcard;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
+
+        AudioObjectRemovePropertyListener (deviceID, &pa, deviceListenerProc, this);
 
         stop (false);
 
@@ -148,11 +150,16 @@ public:
         int chanNum = 0;
         UInt32 size;
 
-        if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, 0)))
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyStreamConfiguration;
+        pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
             AudioBufferList* const bufList = (AudioBufferList*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, bufList)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
             {
                 const int numStreams = bufList->mNumberBuffers;
 
@@ -168,9 +175,10 @@ public:
                             uint8 channelName [256];
                             zerostruct (channelName);
                             UInt32 nameSize = sizeof (channelName);
+                            UInt32 channelNum = chanNum + 1;
+                            pa.mSelector = kAudioDevicePropertyChannelName;
 
-                            if (AudioDeviceGetProperty (deviceID, chanNum + 1, input, kAudioDevicePropertyChannelName,
-                                                        &nameSize, &channelName) == noErr)
+                            if (AudioObjectGetPropertyData (deviceID, &pa, sizeof (channelNum), &channelNum, &nameSize, channelName) == noErr)
                                 name = String::fromUTF8 (channelName, nameSize);
                         }
 
@@ -225,13 +233,20 @@ public:
 
         Float64 sr;
         UInt32 size = sizeof (Float64);
-        if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyNominalSampleRate, &size, &sr)))
+
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyNominalSampleRate;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &sr)))
             sampleRate = sr;
 
         UInt32 framesPerBuf;
         size = sizeof (framesPerBuf);
 
-        if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyBufferFrameSize, &size, &framesPerBuf)))
+        pa.mSelector = kAudioDevicePropertyBufferFrameSize;
+        if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &framesPerBuf)))
         {
             bufferSize = framesPerBuf;
             allocateTempBuffers();
@@ -239,11 +254,13 @@ public:
 
         bufferSizes.clear();
 
-        if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, false, kAudioDevicePropertyBufferFrameSizeRange, &size, 0)))
+        pa.mSelector = kAudioDevicePropertyBufferFrameSizeRange;
+
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
             AudioValueRange* ranges = (AudioValueRange*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyBufferFrameSizeRange, &size, ranges)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
             {
                 bufferSizes.add ((int) ranges[0].mMinimum);
 
@@ -273,11 +290,13 @@ public:
         const double possibleRates[] = { 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
         String rates;
 
-        if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size, 0)))
+        pa.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
+
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
             AudioValueRange* ranges = (AudioValueRange*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size, ranges)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
             {
                 for (int i = 0; i < numElementsInArray (possibleRates); ++i)
                 {
@@ -309,11 +328,17 @@ public:
         inputLatency = 0;
         outputLatency = 0;
         UInt32 lat;
-        size = sizeof (UInt32);
-        if (AudioDeviceGetProperty (deviceID, 0, true, kAudioDevicePropertyLatency, &size, &lat) == noErr)
+        size = sizeof (lat);
+        pa.mSelector = kAudioDevicePropertyLatency;
+        pa.mScope = kAudioDevicePropertyScopeInput;
+        //if (AudioDeviceGetProperty (deviceID, 0, true, kAudioDevicePropertyLatency, &size, &lat) == noErr)
+        if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &lat) == noErr)
             inputLatency = (int) lat;
 
-        if (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyLatency, &size, &lat) == noErr)
+        pa.mScope = kAudioDevicePropertyScopeOutput;
+        size = sizeof (lat);
+
+        if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &lat) == noErr)
             outputLatency = (int) lat;
 
         log (T("lat: ") + String (inputLatency) + T(" ") + String (outputLatency));
@@ -353,7 +378,13 @@ public:
                 avt.mOutputDataSize = 256;
 
                 UInt32 transSize = sizeof (avt);
-                if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyDataSourceNameForID, &transSize, &avt)))
+
+                AudioObjectPropertyAddress pa;
+                pa.mSelector = kAudioDevicePropertyDataSourceNameForID;
+                pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+                pa.mElement = kAudioObjectPropertyElementMaster;
+
+                if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &transSize, &avt)))
                 {
                     DBG (buffer);
                     s.add (buffer);
@@ -369,13 +400,17 @@ public:
     int getCurrentSourceIndex (bool input) const
     {
         OSType currentSourceID = 0;
-        UInt32 size = 0;
+        UInt32 size = sizeof (currentSourceID);
         int result = -1;
 
-        if (deviceID != 0
-             && OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyDataSource, &size, 0)))
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyDataSource;
+        pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (deviceID != 0)
         {
-            if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyDataSource, &size, &currentSourceID)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &currentSourceID)))
             {
                 int num = 0;
                 OSType* const types = getAllDataSourcesForDevice (deviceID, input, num);
@@ -410,8 +445,14 @@ public:
             {
                 if (((unsigned int) index) < (unsigned int) num)
                 {
+                    AudioObjectPropertyAddress pa;
+                    pa.mSelector = kAudioDevicePropertyDataSource;
+                    pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+                    pa.mElement = kAudioObjectPropertyElementMaster;
+
                     OSType typeId = types[index];
-                    AudioDeviceSetProperty (deviceID, 0, 0, input, kAudioDevicePropertyDataSource, sizeof (typeId), &typeId);
+
+                    OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (typeId), &typeId));
                 }
 
                 juce_free (types);
@@ -449,15 +490,20 @@ public:
         // set sample rate
         Float64 sr = newSampleRate;
         UInt32 size = sizeof (sr);
-        OK (AudioDeviceSetProperty (deviceID, 0, 0, false, kAudioDevicePropertyNominalSampleRate, size, &sr));
-        OK (AudioDeviceSetProperty (deviceID, 0, 0, true, kAudioDevicePropertyNominalSampleRate, size, &sr));
+
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyNominalSampleRate;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, size, &sr));
 
         // change buffer size
         UInt32 framesPerBuf = bufferSizeSamples;
         size = sizeof (framesPerBuf);
 
-        OK (AudioDeviceSetProperty (deviceID, 0, 0, false, kAudioDevicePropertyBufferFrameSize, size, &framesPerBuf));
-        OK (AudioDeviceSetProperty (deviceID, 0, 0, true, kAudioDevicePropertyBufferFrameSize, size, &framesPerBuf));
+        pa.mSelector = kAudioDevicePropertyBufferFrameSize;
+        OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, size, &framesPerBuf));
 
         // wait for the changes to happen (on some devices)
         int i = 30;
@@ -564,7 +610,14 @@ public:
 
                 UInt32 running = 0;
                 UInt32 size = sizeof (running);
-                OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyDeviceIsRunning, &size, &running));
+
+                AudioObjectPropertyAddress pa;
+                pa.mSelector = kAudioDevicePropertyDeviceIsRunning;
+                pa.mScope = kAudioObjectPropertyScopeWildcard;
+                pa.mElement = kAudioObjectPropertyElementMaster;
+
+                OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &running));
+
                 if (running == 0)
                     break;
             }
@@ -712,13 +765,18 @@ public:
         UInt32 size = 0;
         CoreAudioInternal* result = 0;
 
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyRelatedDevices;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
         if (deviceID != 0
-             && AudioDeviceGetPropertyInfo (deviceID, 0, false, kAudioDevicePropertyRelatedDevices, &size, 0) == noErr
+             && AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size) == noErr
              && size > 0)
         {
             AudioDeviceID* devs = (AudioDeviceID*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, false, kAudioDevicePropertyRelatedDevices, &size, devs)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, devs)))
             {
                 for (unsigned int i = 0; i < size / sizeof (AudioDeviceID); ++i)
                 {
@@ -804,15 +862,11 @@ private:
         return noErr;
     }
 
-    static OSStatus deviceListenerProc (AudioDeviceID inDevice,
-                                        UInt32 inLine,
-                                        Boolean isInput,
-                                        AudioDevicePropertyID inPropertyID,
-                                        void* inClientData)
+    static OSStatus deviceListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
     {
         CoreAudioInternal* const intern = (CoreAudioInternal*) inClientData;
 
-        switch (inPropertyID)
+        switch (pa->mSelector)
         {
             case kAudioDevicePropertyBufferSize:
             case kAudioDevicePropertyBufferFrameSize:
@@ -841,12 +895,17 @@ private:
         UInt32 size = 0;
         num = 0;
 
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyDataSources;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
         if (deviceID != 0
-             && OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyDataSources, &size, 0)))
+             && OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
             types = (OSType*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyDataSources, &size, types)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, types)))
             {
                 num = size / sizeof (OSType);
             }
@@ -918,14 +977,22 @@ public:
 
         internal = device;
 
-        AudioHardwareAddPropertyListener (kAudioPropertyWildcardPropertyID,
-                                          hardwareListenerProc, internal);
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertySelectorWildcard;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
+
+        AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
     }
 
     ~CoreAudioIODevice()
     {
-        AudioHardwareRemovePropertyListener (kAudioPropertyWildcardPropertyID,
-                                             hardwareListenerProc);
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertySelectorWildcard;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
+
+        AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
 
         delete internal;
     }
@@ -1099,11 +1166,11 @@ private:
     bool isOpen_, isStarted;
     String lastError;
 
-    static OSStatus hardwareListenerProc (AudioHardwarePropertyID inPropertyID, void* inClientData)
+    static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
     {
         CoreAudioInternal* const intern = (CoreAudioInternal*) inClientData;
 
-        switch (inPropertyID)
+        switch (pa->mSelector)
         {
             case kAudioHardwarePropertyDevices:
                 intern->deviceDetailsChanged();
@@ -1148,19 +1215,27 @@ public:
         outputIds.clear();
 
         UInt32 size;
-        if (OK (AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &size, 0)))
+
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioHardwarePropertyDevices;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (OK (AudioObjectGetPropertyDataSize (kAudioObjectSystemObject, &pa, 0, 0, &size)))
         {
             AudioDeviceID* const devs = (AudioDeviceID*) juce_calloc (size);
 
-            if (OK (AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &size, devs)))
+            if (OK (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, devs)))
             {
                 static bool alreadyLogged = false;
                 const int num = size / sizeof (AudioDeviceID);
                 for (int i = 0; i < num; ++i)
                 {
-                    char name[1024];
+                    char name [1024];
                     size = sizeof (name);
-                    if (OK (AudioDeviceGetProperty (devs[i], 0, false, kAudioDevicePropertyDeviceName, &size, name)))
+                    pa.mSelector = kAudioDevicePropertyDeviceName;
+
+                    if (OK (AudioObjectGetPropertyData (devs[i], &pa, 0, 0, &size, name)))
                     {
                         const String nameString (String::fromUTF8 ((const uint8*) name, strlen (name)));
 
@@ -1213,9 +1288,13 @@ public:
 
         // if they're asking for any input channels at all, use the default input, so we
         // get the built-in mic rather than the built-in output with no inputs..
-        if (AudioHardwareGetProperty (forInput ? kAudioHardwarePropertyDefaultInputDevice
-                                               : kAudioHardwarePropertyDefaultOutputDevice,
-                                      &size, &deviceID) == noErr)
+
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = forInput ? kAudioHardwarePropertyDefaultInputDevice : kAudioHardwarePropertyDefaultOutputDevice;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, &deviceID) == noErr)
         {
             if (forInput)
             {
@@ -1284,11 +1363,16 @@ private:
         int total = 0;
         UInt32 size;
 
-        if (OK (AudioDeviceGetPropertyInfo (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, 0)))
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioDevicePropertyStreamConfiguration;
+        pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+        pa.mElement = kAudioObjectPropertyElementMaster;
+
+        if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
             AudioBufferList* const bufList = (AudioBufferList*) juce_calloc (size);
 
-            if (OK (AudioDeviceGetProperty (deviceID, 0, input, kAudioDevicePropertyStreamConfiguration, &size, bufList)))
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
             {
                 const int numStreams = bufList->mNumberBuffers;
 

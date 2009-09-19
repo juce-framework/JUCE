@@ -318,20 +318,20 @@ bool BufferingAudioSource::readNextBufferChunk()
         if (bufferIndexStart < bufferIndexEnd)
         {
             readBufferSection (sectionToReadStart,
-                                sectionToReadEnd - sectionToReadStart,
-                                bufferIndexStart);
+                               sectionToReadEnd - sectionToReadStart,
+                               bufferIndexStart);
         }
         else
         {
             const int initialSize = buffer.getNumSamples() - bufferIndexStart;
 
             readBufferSection (sectionToReadStart,
-                                initialSize,
-                                bufferIndexStart);
+                               initialSize,
+                               bufferIndexStart);
 
             readBufferSection (sectionToReadStart + initialSize,
-                                (sectionToReadEnd - sectionToReadStart) - initialSize,
-                                0);
+                               (sectionToReadEnd - sectionToReadStart) - initialSize,
+                               0);
         }
 
         const ScopedLock sl2 (bufferStartPosLock);
