@@ -48,9 +48,9 @@
 		843796E00EFBFD16002A2725 /* juce_RTAS_MacResources.r in Rez */ = {isa = PBXBuildFile; fileRef = 843796D90EFBFD16002A2725 /* juce_RTAS_MacResources.r */; };
 		843796E10EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 843796DA0EFBFD16002A2725 /* juce_RTAS_MacUtilities.mm */; };
 		843796E20EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */; };
-		843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 843797030EFC022E002A2725 /* libPluginLibrary.a */; };
+		8473149910663AB2001B84CC /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8473149610663A94001B84CC /* libPluginLibrary.a */; };
 		84978759103561A60020003B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84978758103561A60020003B /* AudioToolbox.framework */; };
-		849817021010B3C500297ECA /* JuceDemoPlugin.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8D01CCD20486CAD60068D4B7 /* JuceDemoPlugin.component */; };
+		849817021010B3C500297ECA /* JuceDemoPlugin.component in Copy to AU plugins folder */ = {isa = PBXBuildFile; fileRef = 8D01CCD20486CAD60068D4B7 /* JuceDemoPlugin.component */; };
 		84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */; };
 		84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */; };
 		84D3AB670FCC74B300EA8080 /* CarbonEventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */; };
@@ -88,34 +88,33 @@
 		8BA05AEA0720742100365D66 /* CAStreamBasicDescription.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BA05AE40720742100365D66 /* CAStreamBasicDescription.h */; };
 		8BA05B070720754400365D66 /* CAAUParameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BA05B050720754400365D66 /* CAAUParameter.cpp */; };
 		8BA05B080720754400365D66 /* CAAUParameter.h in Headers */ = {isa = PBXBuildFile; fileRef = 8BA05B060720754400365D66 /* CAAUParameter.h */; };
-		8D01CCCA0486CAD60068D4B7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		843797020EFC022E002A2725 /* PBXContainerItemProxy */ = {
+		8473149510663A94001B84CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */;
+			containerPortal = 8473148E10663A94001B84CC /* PluginLibrary.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = B65B09B30860FB0800FE2E6A;
+			remoteGlobalIDString = B65B09B30860FB0800FE2E6A /* libPluginLibrary.a */;
 			remoteInfo = "Plugin Library";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		849817161010B3D100297ECA /* CopyFiles */ = {
+		849817161010B3D100297ECA /* Copy to AU plugins folder */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "~/Library/Audio/Plug-Ins/Components";
 			dstSubfolderSpec = 0;
 			files = (
-				849817021010B3C500297ECA /* JuceDemoPlugin.component in CopyFiles */,
+				849817021010B3C500297ECA /* JuceDemoPlugin.component in Copy to AU plugins folder */,
 			);
+			name = "Copy to AU plugins folder";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3EEA126B089847F5002C6BFC /* CAVectorUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CAVectorUnit.cpp; sourceTree = "<group>"; };
 		3EEA126C089847F5002C6BFC /* CAVectorUnit.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAVectorUnit.h; sourceTree = "<group>"; };
 		3EEA126D089847F5002C6BFC /* CAVectorUnitTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAVectorUnitTypes.h; sourceTree = "<group>"; };
@@ -159,7 +158,7 @@
 		843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RTAS_Wrapper.cpp; path = ../../../wrapper/RTAS/juce_RTAS_Wrapper.cpp; sourceTree = SOURCE_ROOT; };
 		843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonDebugSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonDebugSettings.xcconfig; sourceTree = "<absolute>"; };
 		843796F50EFC0102002A2725 /* CommonReleaseSettings.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CommonReleaseSettings.xcconfig; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/common/Mac/CommonReleaseSettings.xcconfig; sourceTree = "<absolute>"; };
-		843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/stuff/PT_73_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
+		8473148E10663A94001B84CC /* PluginLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = PluginLibrary.xcodeproj; path = /Users/jules/SDKs/PT_80_SDK/AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild/PluginLibrary.xcodeproj; sourceTree = "<absolute>"; };
 		84978758103561A60020003B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AUCarbonViewBase.cpp; path = AUCarbonViewBase/AUCarbonViewBase.cpp; sourceTree = "<group>"; };
 		84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AUCarbonViewBase.h; path = AUCarbonViewBase/AUCarbonViewBase.h; sourceTree = "<group>"; };
@@ -208,7 +207,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				843797050EFC0269002A2725 /* libPluginLibrary.a in Frameworks */,
+				8473149910663AB2001B84CC /* libPluginLibrary.a in Frameworks */,
 				8437956F0EFBF323002A2725 /* AudioUnit.framework in Frameworks */,
 				843795700EFBF323002A2725 /* Cocoa.framework in Frameworks */,
 				843795710EFBF323002A2725 /* OpenGL.framework in Frameworks */,
@@ -242,7 +241,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */,
+				8473148E10663A94001B84CC /* PluginLibrary.xcodeproj */,
 				843795640EFBF323002A2725 /* AudioUnit.framework */,
 				84978758103561A60020003B /* AudioToolbox.framework */,
 				843795650EFBF323002A2725 /* Cocoa.framework */,
@@ -262,7 +261,6 @@
 			isa = PBXGroup;
 			children = (
 				8D01CCD10486CAD60068D4B7 /* Info.plist */,
-				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -343,10 +341,10 @@
 			name = "Juce RTAS Wrapper";
 			sourceTree = "<group>";
 		};
-		843796FF0EFC022E002A2725 /* Products */ = {
+		8473148F10663A94001B84CC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				843797030EFC022E002A2725 /* libPluginLibrary.a */,
+				8473149610663A94001B84CC /* libPluginLibrary.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -512,7 +510,7 @@
 				8D01CCCB0486CAD60068D4B7 /* Sources */,
 				8D01CCCD0486CAD60068D4B7 /* Frameworks */,
 				8D01CCCF0486CAD60068D4B7 /* Rez */,
-				849817161010B3D100297ECA /* CopyFiles */,
+				849817161010B3D100297ECA /* Copy to AU plugins folder */,
 			);
 			buildRules = (
 			);
@@ -536,8 +534,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 843796FF0EFC022E002A2725 /* Products */;
-					ProjectRef = 843796FE0EFC022E002A2725 /* PluginLibrary.xcodeproj */;
+					ProductGroup = 8473148F10663A94001B84CC /* Products */;
+					ProjectRef = 8473148E10663A94001B84CC /* PluginLibrary.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -548,11 +546,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		843797030EFC022E002A2725 /* libPluginLibrary.a */ = {
+		8473149610663A94001B84CC /* libPluginLibrary.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libPluginLibrary.a;
-			remoteRef = 843797020EFC022E002A2725 /* PBXContainerItemProxy */;
+			remoteRef = 8473149510663A94001B84CC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -562,7 +560,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8D01CCCA0486CAD60068D4B7 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -623,17 +620,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-		089C167DFE841241C02AAC07 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				089C167EFE841241C02AAC07 /* English */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		3E4BA244089833B7007656EC /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -692,7 +678,12 @@
 			baseConfigurationReference = 843796F40EFC0102002A2725 /* CommonDebugSettings.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_VERSION = 4.0;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_PREPROCESS = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx10.5;
 			};
@@ -705,6 +696,8 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_VERSION = 4.0;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_PREPROCESS = YES;
 				SDKROOT = macosx10.5;
 			};
 			name = Release;

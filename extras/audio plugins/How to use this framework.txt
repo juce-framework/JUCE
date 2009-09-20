@@ -206,6 +206,9 @@ any compilation problems if, for example, you don't have the appropriate SDK for
                             ==========================================
 
 
+- Some of the RTAS SDK files in the demo project might be highlighted red to indicate that they're 
+  missing - if you're not bulding an RTAS, then you can just delete them from the project. If you are
+  building an RTAS and have the SDK, you might need to update their paths to match your SDK location.
 - For an AU, make sure that the JucePlugin_Build_AU is enabled in your JucePluginCharacteristics.h
 - In XCode, create a new project based on the "Audio Unit Effect" template
 - XCode will create a bunch of template source files for you - you can remove all of these from the project
