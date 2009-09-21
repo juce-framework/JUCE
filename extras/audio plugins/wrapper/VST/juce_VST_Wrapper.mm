@@ -191,7 +191,9 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
 
         HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                                 comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
-        CFRelease (dummyView);
+
+        if (HIViewIsValid (dummyView))
+            CFRelease (dummyView);
 
         NSWindow* hostWindow = (NSWindow*) nsWindow;
         NSView* pluginView = (NSView*) comp->getWindowHandle();

@@ -254,21 +254,14 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
     {
         switch (info.dwMajorVersion)
         {
-        case 5:
-            return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
-
-        case 6:
-            return (info.dwMinorVersion == 0) ? WinVista : Windows7;
-
-        default:
-            jassertfalse // !! not a supported OS!
-            break;
+            case 5:     return (info.dwMinorVersion == 0) ? Win2000 : WinXP;
+            case 6:     return (info.dwMinorVersion == 0) ? WinVista : Windows7;
+            default:    jassertfalse; break; // !! not a supported OS!
         }
     }
     else if (info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
     {
         jassert (info.dwMinorVersion != 0); // !! still running on Windows 95??
-
         return Win98;
     }
 
@@ -281,25 +274,12 @@ const String SystemStats::getOperatingSystemName() throw()
 
     switch (getOperatingSystemType())
     {
-    case WinVista:
-        name = "Windows Vista";
-        break;
-
-    case WinXP:
-        name = "Windows XP";
-        break;
-
-    case Win2000:
-        name = "Windows 2000";
-        break;
-
-    case Win98:
-        name = "Windows 98";
-        break;
-
-    default:
-        jassertfalse // !! new type of OS?
-        break;
+        case Windows7:          name = "Windows 7";         break;
+        case WinVista:          name = "Windows Vista";     break;
+        case WinXP:             name = "Windows XP";        break;
+        case Win2000:           name = "Windows 2000";      break;
+        case Win98:             name = "Windows 98";        break;
+        default:                jassertfalse; break; // !! new type of OS?
     }
 
     return name;
@@ -310,7 +290,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #ifdef _WIN64
     return true;
 #else
-    typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+    typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
     LPFN_ISWOW64PROCESS fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandle (L"kernel32"), "IsWow64Process");
 
@@ -326,9 +306,10 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 //==============================================================================
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
-    MEMORYSTATUS mem;
-    GlobalMemoryStatus (&mem);
-    return (int) (mem.dwTotalPhys / (1024 * 1024)) + 1;
+    MEMORYSTATUSEX mem;
+    mem.dwLength = sizeof (mem); 
+    GlobalMemoryStatusEx (&mem);
+    return (int) (mem.ullTotalPhys / (1024 * 1024)) + 1;
 }
 
 int SystemStats::getNumCpus() throw()

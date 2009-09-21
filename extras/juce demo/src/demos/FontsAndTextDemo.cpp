@@ -63,7 +63,7 @@ public:
 
         textBox->setMultiLine (true, true);
         textBox->setReturnKeyStartsNewLine (true);
-        textBox->setText (T("The Quick Brown Fox Jumped Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789"));
+        textBox->setText (T("The Quick Brown Fox Jumps Over The Lazy Dog\n\nAa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz 0123456789"));
 
         addAndMakeVisible (boldButton = new ToggleButton (T("bold")));
         boldButton->addButtonListener (this);
