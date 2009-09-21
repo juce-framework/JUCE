@@ -175,14 +175,12 @@ public:
 
     void updateComponents()
     {
-        int xAdjust = 0, yAdjust = 0;
-
         const int visibleTop = -getY();
         const int visibleBottom = visibleTop + getParentHeight();
 
         BitArray itemsToKeep;
         TreeViewItem* item = owner->rootItem;
-        int y = -yAdjust;
+        int y = (item != 0 && !owner->rootItemVisible) ? -item->itemHeight : 0;
 
         while (item != 0 && y < visibleBottom)
         {
@@ -228,7 +226,7 @@ public:
                     const TreeViewItem* const item = (TreeViewItem*) rowComponentItems.getUnchecked(i);
 
                     Rectangle pos (item->getItemPosition (false));
-                    pos.setSize (pos.getWidth() + xAdjust, item->itemHeight);
+                    pos.setSize (pos.getWidth(), item->itemHeight);
 
                     if (pos.getBottom() >= visibleTop && pos.getY() < visibleBottom)
                     {

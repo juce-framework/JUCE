@@ -57,7 +57,8 @@ public:
         {
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
             addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                            | ComponentPeer::windowIsTemporary);
+                            | ComponentPeer::windowIsTemporary
+                            | ComponentPeer::windowIgnoresKeyPresses);
         }
         else if (owner_->getParentComponent() != 0)
         {

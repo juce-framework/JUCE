@@ -948,7 +948,6 @@ public:
 #if ! JucePlugin_EditorRequiresKeyboardFocus
         setWantsKeyboardFocus (false);
 #else
-        setComponentProperty ("juce_disallowFocus", true);
         setWantsKeyboardFocus (true);
 #endif
     }
@@ -1230,7 +1229,6 @@ private:
 #if ! JucePlugin_EditorRequiresKeyboardFocus
             addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
             setWantsKeyboardFocus (false);
-            setComponentProperty ("juce_disallowFocus", true);
 #else
             addToDesktop (ComponentPeer::windowIsTemporary);
             setWantsKeyboardFocus (true);
@@ -1338,6 +1336,19 @@ private:
 
                 recursive = false;
             }
+        }
+        
+        bool keyPressed (const KeyPress& kp)
+        {
+            if (! kp.getModifiers().isCommandDown())
+            {
+                // If we have an unused keypress, move the key-focus to a host window
+                // and re-inject the event..
+                [[hostWindow parentWindow] makeKeyWindow];
+                [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+            }
+
+            return false;
         }
 
     private:

@@ -240,6 +240,14 @@ void checkWindowVisibility (void* nsWindow, Component* comp)
     comp->setVisible ([hostWindow isVisible]);
 }
 
+void forwardCurrentKeyEventToHost (Component* comp)
+{
+    NSWindow* win = [(NSView*) comp->getWindowHandle() window];
+    [[win parentWindow] makeKeyWindow];
+    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+}
+
+
 END_JUCE_NAMESPACE
 
 #endif

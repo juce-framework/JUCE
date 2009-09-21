@@ -434,7 +434,8 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                     dic->setOpaque (true);
 
                 dic->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                    | ComponentPeer::windowIsTemporary);
+                                    | ComponentPeer::windowIsTemporary
+                                    | ComponentPeer::windowIgnoresKeyPresses);
             }
             else
                 thisComp->addChildComponent (dic);

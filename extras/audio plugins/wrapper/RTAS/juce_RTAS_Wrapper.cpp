@@ -118,6 +118,7 @@
 #else
   extern void* attachSubWindow (void* hostWindowRef, JUCE_NAMESPACE::Component* comp);
   extern void removeSubWindow (void* nsWindow, JUCE_NAMESPACE::Component* comp);
+  extern void forwardCurrentKeyEventToHostWindow();
 #endif
 
 const int midiBufferSize = 1024;
@@ -327,10 +328,8 @@ public:
                   titleW (0),
                   titleH (0)
             {
-#if JucePlugin_EditorRequiresKeyboardFocus
-                setWantsKeyboardFocus (true);
-#else
-                setComponentProperty ("juce_disallowFocus", true);
+#if ! JucePlugin_EditorRequiresKeyboardFocus
+                setMouseClickGrabsKeyboardFocus (false);
                 setWantsKeyboardFocus (false);
 #endif
                 setOpaque (true);
@@ -401,6 +400,14 @@ public:
             {
             }
 
+#if JUCE_MAC && JucePlugin_EditorRequiresKeyboardFocus
+            bool keyPressed (const KeyPress& kp)
+            {
+                owner->updateSize();
+                forwardCurrentKeyEventToHostWindow();
+                return true;
+            }
+#endif
             //==============================================================================
             juce_UseDebuggingNewOperator
 

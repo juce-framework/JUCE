@@ -105,7 +105,8 @@ void TooltipWindow::showFor (Component* const c, const String& tip)
     if (getParentComponent() == 0)
     {
         addToDesktop (ComponentPeer::windowHasDropShadow
-                        | ComponentPeer::windowIsTemporary);
+                        | ComponentPeer::windowIsTemporary
+                        | ComponentPeer::windowIgnoresKeyPresses);
     }
 
     toFront (false);

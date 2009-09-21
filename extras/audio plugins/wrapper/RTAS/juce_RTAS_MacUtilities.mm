@@ -110,4 +110,38 @@ void removeSubWindow (void* nsWindow, Component* comp)
     [hostWindow release];
 }
 
+static bool isJuceWindow (WindowRef w) throw()
+{
+    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+    {
+        ComponentPeer* peer = ComponentPeer::getPeer(i);
+        NSView* view = (NSView*) peer->getNativeHandle();
+        
+        if ([[view window] windowRef] == w)
+            return true;
+    }
+    
+    return false;
+}
+
+void forwardCurrentKeyEventToHostWindow()
+{
+    WindowRef w = FrontNonFloatingWindow();
+    WindowRef original = w;
+
+    while (IsValidWindowPtr (w) && isJuceWindow (w))
+    {
+        w = GetNextWindowOfClass (w, kDocumentWindowClass, true);
+     
+        if (w == original)
+            break;
+    }
+
+    if (! isJuceWindow (w))
+    {
+        ActivateWindow (w, true);
+        [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+    }
+}
+
 #endif

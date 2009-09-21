@@ -154,6 +154,7 @@ BEGIN_JUCE_NAMESPACE
   extern void detachComponentFromWindowRef (Component* component, void* nsWindow);
   extern void setNativeHostWindowSize (void* nsWindow, Component* editorComp, int newWidth, int newHeight);
   extern void checkWindowVisibility (void* nsWindow, Component* component);
+  extern void forwardCurrentKeyEventToHost (Component* component);
  #endif
 
  #if JUCE_LINUX
@@ -279,10 +280,6 @@ public:
         editor->setTopLeftPosition (0, 0);
         addAndMakeVisible (editor);
 
-#if ! JucePlugin_EditorRequiresKeyboardFocus
-        setComponentProperty ("juce_disallowFocus", true);
-#endif
-
 #if JUCE_WIN32
         addMouseListener (this, true);
 #endif
@@ -305,6 +302,16 @@ public:
         // waiting.
         triggerAsyncUpdate();
     }
+
+#if JUCE_MAC
+    bool keyPressed (const KeyPress& kp)
+    {
+        // If we have an unused keypress, move the key-focus to a host window
+        // and re-inject the event..
+        forwardCurrentKeyEventToHost (this);
+        return true;
+    }
+#endif
 
     AudioProcessorEditor* getEditorComp() const
     {
