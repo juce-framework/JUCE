@@ -6,6 +6,16 @@
 
 -----------------------------------------------------------------------------------------------------
 
+This file contains as much detail as I could possibly think of about the sometimes fiddly process of setting
+up your build environment to build plugins...
+
+If you follow all these steps and still hit a build error, don't despair! There's a thread at the juce
+forum where we'll post any extra hints, tips, or problems that people have stumbled upon:
+http://www.rawmaterialsoftware.com/juceforum/viewtopic.php?p=23546
+
+
+-----------------------------------------------------------------------------------------------------
+
 The purpose of this framework is to make is simple to write an audio plugin in a generic
 way, which can then be compiled as a VST, AudioUnit, RTAS, or any combination of these. 
 
@@ -67,6 +77,7 @@ I'd recommend NOT putting your own plugin code inside the demo plugin directory 
 much neater to keep it somewhere separate and to alter the projects to point to your 
 files instead of the demo ones. That way when new versions of this library come out, it'll 
 make it easier to update to the latest code.
+
 
 -----------------------------------------------------------------------------------------------------
 
@@ -209,6 +220,12 @@ any compilation problems if, for example, you don't have the appropriate SDK for
 - Some of the RTAS SDK files in the demo project might be highlighted red to indicate that they're 
   missing - if you're not bulding an RTAS, then you can just delete them from the project. If you are
   building an RTAS and have the SDK, you might need to update their paths to match your SDK location.
+- For an AU, there are a bunch of Apple cpp files that need to be included directly in your project - these
+  used to be found in /Developer/Examples/CoreAudio/ but in the 10.6 SDK, Apple have moved them to a slightly
+  more sensible location at /Developer/Extras/CoreAudio. The Juce demo is hardwired to refer to their new
+  10.6 location, so if you haven't yet installed the 10.6 SDK, the easiest way to make it all happy is just 
+  to duplicate your /Developer/Examples/CoreAudio folder as /Developer/Extras/CoreAudio. That way old and new
+  juce plugin projects will all compile without changing any project paths.
 - For an AU, make sure that the JucePlugin_Build_AU is enabled in your JucePluginCharacteristics.h
 - In XCode, create a new project based on the "Audio Unit Effect" template
 - XCode will create a bunch of template source files for you - you can remove all of these from the project

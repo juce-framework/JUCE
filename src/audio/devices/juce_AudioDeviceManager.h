@@ -99,6 +99,8 @@ public:
         bool operator== (const AudioDeviceSetup& other) const;
 
         /** The name of the audio device used for output.
+            The name has to be one of the ones listed by the AudioDeviceManager's currently
+            selected device type.
             This may be the same as the input device.
         */
         String outputDeviceName;
@@ -224,6 +226,12 @@ public:
     */
     const String getCurrentAudioDeviceType() const throw()              { return currentDeviceType; }
 
+    /** Returns the currently active audio device type object.
+        Don't keep a copy of this pointer - it's owned by the device manager and could
+        change at any time.
+    */
+    AudioIODeviceType* getCurrentDeviceTypeObject() const;
+
     /** Changes the class of audio device being used.
 
         This switches between, e.g. ASIO and DirectSound. On the Mac you probably won't ever call
@@ -234,6 +242,7 @@ public:
     void setCurrentAudioDeviceType (const String& type,
                                     const bool treatAsChosenDevice);
 
+    
     /** Closes the currently-open device.
 
         You can call restartLastAudioDevice() later to reopen it in the same state
@@ -480,7 +489,6 @@ private:
     void scanDevicesIfNeeded();
     void deleteCurrentDevice();
     double chooseBestSampleRate (double preferred) const;
-    AudioIODeviceType* getCurrentDeviceTypeObject() const;
     void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
