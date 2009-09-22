@@ -259,6 +259,13 @@ You should now be able to build a functional AU! If you want VST support as well
 Now, if you compile, the resulting bundle should work as both a VST and AU - you can simply copy or rename it,
 changing the suffix to ".vst", and put it in your VST folder.
 
+NOTE! In order to copy and rename the plugin to the various different plugin folders, the demo plugin project
+contains a VERY useful script, which you'll almost certainly want to copy into your own projects - have
+a look in the demo target for the build phase called "Copy into the different plugin folders", and use the
+inspector to have a look at the script. It uses advanced cunningness to copy only to the correct target
+folders for the types of plugin you're targeting, and should be able to be used in your own project 
+without needing to edit it.
+
 NOTE! If you use the Finder to rename your xyz.component file to xyz.vst, it might look like it's done
 exactly this... but in fact, the Finder may have secretly renamed it as "xyz.vst.component", even though 
 it shows "xyz.vst" as the name on the screen. I have wasted quite a lot of time angrily wondering why my VSTs 

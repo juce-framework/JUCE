@@ -50,7 +50,6 @@
 		843796E20EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843796DB0EFBFD16002A2725 /* juce_RTAS_Wrapper.cpp */; };
 		8473149910663AB2001B84CC /* libPluginLibrary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8473149610663A94001B84CC /* libPluginLibrary.a */; };
 		84978759103561A60020003B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84978758103561A60020003B /* AudioToolbox.framework */; };
-		849817021010B3C500297ECA /* JuceDemoPlugin.component in Copy to AU plugins folder */ = {isa = PBXBuildFile; fileRef = 8D01CCD20486CAD60068D4B7 /* JuceDemoPlugin.component */; };
 		84D3AB5F0FCC744600EA8080 /* AUCarbonViewBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB5E0FCC744600EA8080 /* AUCarbonViewBase.cpp */; };
 		84D3AB630FCC749100EA8080 /* AUCarbonViewBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 84D3AB620FCC749100EA8080 /* AUCarbonViewBase.h */; };
 		84D3AB670FCC74B300EA8080 /* CarbonEventHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84D3AB650FCC74B300EA8080 /* CarbonEventHandler.cpp */; };
@@ -95,24 +94,10 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 8473148E10663A94001B84CC /* PluginLibrary.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = B65B09B30860FB0800FE2E6A /* libPluginLibrary.a */;
+			remoteGlobalIDString = B65B09B30860FB0800FE2E6A;
 			remoteInfo = "Plugin Library";
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		849817161010B3D100297ECA /* Copy to AU plugins folder */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "~/Library/Audio/Plug-Ins/Components";
-			dstSubfolderSpec = 0;
-			files = (
-				849817021010B3C500297ECA /* JuceDemoPlugin.component in Copy to AU plugins folder */,
-			);
-			name = "Copy to AU plugins folder";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3EEA126B089847F5002C6BFC /* CAVectorUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CAVectorUnit.cpp; sourceTree = "<group>"; };
@@ -510,7 +495,7 @@
 				8D01CCCB0486CAD60068D4B7 /* Sources */,
 				8D01CCCD0486CAD60068D4B7 /* Frameworks */,
 				8D01CCCF0486CAD60068D4B7 /* Rez */,
-				849817161010B3D100297ECA /* Copy to AU plugins folder */,
+				847A7D6510694C5500DD8999 /* Copy into the different plugin folders */,
 			);
 			buildRules = (
 			);
@@ -576,6 +561,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXRezBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		847A7D6510694C5500DD8999 /* Copy into the different plugin folders */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy into the different plugin folders";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\n# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \n# which plugin types you've built\n\noriginal=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\n\n# this looks inside the binary to detect which platforms are needed.. \ncopyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\ncopyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\ncopyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\n\nif [ $copyAU -gt 0 ]; then\n  echo \"Copying to AudioUnit folder...\"\n  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\n  if [ -d \"$AU\" ]; then \n    rm -r \"$AU\"\n  fi\n\n  cp -r \"$original\" \"$AU\"\n  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\n  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\nfi\n\nif [ $copyVST -gt 0 ]; then\n  echo \"Copying to VST folder...\"\n  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\n  if [ -d \"$VST\" ]; then \n    rm -r \"$VST\"\n  fi\n\n  cp -r \"$original\" \"$VST\"\n  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\n  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\nfi\n\nif [ $copyRTAS -gt 0 ]; then\n  echo \"Copying to RTAS folder...\"\n  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\n  if [ -d \"$RTAS\" ]; then\n    rm -r \"$RTAS\"\n  fi\n\n  cp -r \"$original\" \"$RTAS\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D01CCCB0486CAD60068D4B7 /* Sources */ = {
