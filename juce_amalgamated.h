@@ -25228,7 +25228,17 @@ public:
 
     /** Returns the timestamp associated with this message.
 
-        The units for the timestamp will be application-specific.
+        The exact meaning of this time and its units will vary, as messages are used in
+        a variety of different contexts.
+
+        If you're getting the message from a midi file, this could be a time in seconds, or
+        a number of ticks - see MidiFile::convertTimestampTicksToSeconds().
+
+        If the message is being used in a MidiBuffer, it might indicate the number of
+        audio samples from the start of the buffer.
+
+        If the message was created by a MidiInput, see MidiInputCallback::handleIncomingMidiMessage()
+        for details of the way that it initialises this value.
 
         @see setTimeStamp, addToTimeStamp
     */
@@ -25236,7 +25246,7 @@ public:
 
     /** Changes the message's associated timestamp.
 
-        The units for the timestamp will be application-specific.
+        The units for the timestamp will be application-specific - see the notes for getTimeStamp().
 
         @see addToTimeStamp, getTimeStamp
     */
@@ -34425,6 +34435,8 @@ public:
         bool operator== (const AudioDeviceSetup& other) const;
 
         /** The name of the audio device used for output.
+            The name has to be one of the ones listed by the AudioDeviceManager's currently
+            selected device type.
             This may be the same as the input device.
         */
         String outputDeviceName;
@@ -34545,6 +34557,12 @@ public:
         @see setCurrentAudioDeviceType
     */
     const String getCurrentAudioDeviceType() const throw()              { return currentDeviceType; }
+
+    /** Returns the currently active audio device type object.
+        Don't keep a copy of this pointer - it's owned by the device manager and could
+        change at any time.
+    */
+    AudioIODeviceType* getCurrentDeviceTypeObject() const;
 
     /** Changes the class of audio device being used.
 
@@ -34794,7 +34812,6 @@ private:
     void scanDevicesIfNeeded();
     void deleteCurrentDevice();
     double chooseBestSampleRate (double preferred) const;
-    AudioIODeviceType* getCurrentDeviceTypeObject() const;
     void insertDefaultDeviceNames (AudioDeviceSetup& setup) const;
 
     AudioIODeviceType* findType (const String& inputName, const String& outputName);

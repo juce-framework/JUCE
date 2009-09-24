@@ -180,11 +180,10 @@ public:
                 if (startSampleInFile < reservoirStart
                      || startSampleInFile > reservoirStart + jmax (samplesInReservoir, 511))
                 {
+                    samplesInReservoir = 0;
+
                     if (startSampleInFile >= (int) lengthInSamples)
-                    {
-                        samplesInReservoir = 0;
                         break;
-                    }
 
                     // had some problems with flac crashing if the read pos is aligned more
                     // accurately than this. Probably fixed in newer versions of the library, though.
@@ -194,11 +193,9 @@ public:
                 else
                 {
                     reservoirStart += samplesInReservoir;
+                    samplesInReservoir = 0;
+                    FLAC__stream_decoder_process_single (decoder);
                 }
-
-                samplesInReservoir = 0;
-
-                FLAC__stream_decoder_process_single (decoder);
 
                 if (samplesInReservoir == 0)
                     break;

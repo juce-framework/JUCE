@@ -2100,12 +2100,12 @@
 			isa = PBXGroup;
 			children = (
 				84F1EB2410403709006A1807 /* juce_Colour.cpp */,
+				84F1EB2A10403709006A1807 /* juce_Colour.h */,
 				84F1EB2510403709006A1807 /* juce_ColourGradient.cpp */,
 				84F1EB2610403709006A1807 /* juce_ColourGradient.h */,
 				84F1EB2710403709006A1807 /* juce_Colours.cpp */,
 				84F1EB2810403709006A1807 /* juce_Colours.h */,
 				84F1EB2910403709006A1807 /* juce_PixelFormats.h */,
-				84F1EB2A10403709006A1807 /* juce_Colour.h */,
 			);
 			name = colour;
 			path = ../../src/gui/graphics/colour;

@@ -119,13 +119,14 @@ const Colour Colour::fromRGBAFloat (const uint8 red,
 }
 
 //==============================================================================
-static void convertHSBtoRGB (float h, const float s, float v,
+static void convertHSBtoRGB (float h, float s, float v,
                              uint8& r, uint8& g, uint8& b) throw()
 {
+    v = jlimit (0.0f, 1.0f, v);
     v *= 255.0f;
     const uint8 intV = (uint8) roundFloatToInt (v);
 
-    if (s == 0)
+    if (s <= 0)
     {
         r = intV;
         g = intV;
@@ -133,6 +134,8 @@ static void convertHSBtoRGB (float h, const float s, float v,
     }
     else
     {
+        s = jmin (1.0f, s);
+        h = jlimit (0.0f, 1.0f, h);
         h = (h - floorf (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
         const float f = h - floorf (h);
 

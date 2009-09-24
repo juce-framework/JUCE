@@ -420,7 +420,7 @@ public:
     ComponentResult Version()                   { return JucePlugin_VersionCode; }
 
     bool SupportsTail()                         { return true; }
-    Float64 GetTailTime()                       { return 0; }
+    Float64 GetTailTime()                       { return (JucePlugin_TailLengthSeconds); }
 
     Float64 GetSampleRate()
     {
