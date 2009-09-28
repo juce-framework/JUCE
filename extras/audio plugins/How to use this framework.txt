@@ -241,6 +241,9 @@ any compilation problems if, for example, you don't have the appropriate SDK for
 - As for the PC, you'll need to make sure your project contains a correctly set-up JucePluginCharacteristics.h
   file - start with a copy of the one in the demo plugin project, and go through it making sure that
   all the values make sense for your plugin.
+- The JucePluginCharacteristics.h file is included not only by the code, but also by the resources files - so it
+  needs to be locatable on both your normal header search path, and also on your resource include path, which is
+  the project setting called 'Rez Search Paths'
 - Because of the flat naming structure used by Objective-C, if a host loads several different plugins which
   all contain slightly different versions of the juce library, you can get nasty situations where all their obj-C
   classes are cross-linked to the similarly-named class in other modules, and everything turns into a big mess...

@@ -129,11 +129,13 @@ private:
     DWORD adviseCookie;
 
     //==============================================================================
-    class EventHandler  : public IDispatch
+    class EventHandler  : public IDispatch,
+                          public ComponentMovementWatcher
     {
     public:
         EventHandler (WebBrowserComponent* owner_)
-            : owner (owner_),
+            : ComponentMovementWatcher (owner_),
+              owner (owner_),
               refCount (0)
         {
         }
@@ -193,6 +195,14 @@ private:
             }
 
             return E_NOTIMPL;
+        }
+
+        void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) {}
+        void componentPeerChanged() {}
+
+        void componentVisibilityChanged (Component&)
+        {
+            owner->visibilityChanged();
         }
 
         //==============================================================================

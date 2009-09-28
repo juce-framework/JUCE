@@ -202,6 +202,18 @@ public:
         setEmbeddedWindowToOurSize();
     }
 
+    static void recursiveHIViewRepaint (HIViewRef view) throw()
+    {
+        HIViewSetNeedsDisplay (view, true);
+        HIViewRef child = HIViewGetFirstSubview (view);
+
+        while (child != 0)
+        {
+            recursiveHIViewRepaint (child);
+            child = HIViewGetNextView (child);
+        }
+    }
+    
     void timerCallback()
     {
         setOurSizeToEmbeddedViewSize();
@@ -209,7 +221,7 @@ public:
         // To avoid strange overpainting problems when the UI is first opened, we'll
         // repaint it a few times during the first second that it's on-screen..
         if ((Time::getCurrentTime() - creationTime).inMilliseconds() < 1000)
-            HIViewSetNeedsDisplay (embeddedView, true);
+            recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
     }
 
     OSStatus carbonEventHandler (EventHandlerCallRef nextHandlerRef,

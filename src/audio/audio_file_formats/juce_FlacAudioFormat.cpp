@@ -177,17 +177,17 @@ public:
             }
             else
             {
-                if (startSampleInFile < reservoirStart
-                     || startSampleInFile > reservoirStart + jmax (samplesInReservoir, 511))
+                if (startSampleInFile >= (int) lengthInSamples)
                 {
                     samplesInReservoir = 0;
-
-                    if (startSampleInFile >= (int) lengthInSamples)
-                        break;
-
+                }
+                else if (startSampleInFile < reservoirStart
+                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, 511))
+                {
                     // had some problems with flac crashing if the read pos is aligned more
                     // accurately than this. Probably fixed in newer versions of the library, though.
                     reservoirStart = (int) (startSampleInFile & ~511);
+                    samplesInReservoir = 0;
                     FLAC__stream_decoder_seek_absolute (decoder, (FLAC__uint64) reservoirStart);
                 }
                 else
@@ -454,9 +454,13 @@ public:
         return FLAC__STREAM_ENCODER_SEEK_STATUS_UNSUPPORTED;
     }
 
-    static FLAC__StreamEncoderTellStatus encodeTellCallback (const FLAC__StreamEncoder*, FLAC__uint64*, void*)
+    static FLAC__StreamEncoderTellStatus encodeTellCallback (const FLAC__StreamEncoder*, FLAC__uint64* absolute_byte_offset, void* client_data)
     {
-        return FLAC__STREAM_ENCODER_TELL_STATUS_UNSUPPORTED;
+        if (client_data == 0)
+            return FLAC__STREAM_ENCODER_TELL_STATUS_UNSUPPORTED;
+
+        *absolute_byte_offset = (FLAC__uint64) ((FlacWriter*) client_data)->output->getPosition();
+        return FLAC__STREAM_ENCODER_TELL_STATUS_OK;
     }
 
     static void encodeMetadataCallback (const FLAC__StreamEncoder*,

@@ -151,29 +151,19 @@ void Viewport::updateVisibleRegion()
             verticalScrollBar->setVisible (false);
         }
 
-        if ((contentComp->getWidth() > 0) && showHScrollbar
-             && getHeight() > getScrollBarThickness())
-        {
-            horizontalScrollBar->setRangeLimits (0.0, contentComp->getWidth());
-            horizontalScrollBar->setCurrentRange (newVX, getMaximumVisibleWidth());
-            horizontalScrollBar->setSingleStepSize (singleStepX);
-        }
-        else
-        {
-            horizontalScrollBar->setVisible (false);
-        }
+        horizontalScrollBar->setRangeLimits (0.0, contentComp->getWidth());
+        horizontalScrollBar->setCurrentRange (newVX, getMaximumVisibleWidth());
+        horizontalScrollBar->setSingleStepSize (singleStepX);
 
-        if ((contentComp->getHeight() > 0) && showVScrollbar
-             && getWidth() > getScrollBarThickness())
-        {
-            verticalScrollBar->setRangeLimits (0.0, contentComp->getHeight());
-            verticalScrollBar->setCurrentRange (newVY, getMaximumVisibleHeight());
-            verticalScrollBar->setSingleStepSize (singleStepY);
-        }
-        else
-        {
+        if (! (contentComp->getWidth() > 0 && showHScrollbar && getHeight() > getScrollBarThickness()))
+            horizontalScrollBar->setVisible (false);
+
+        verticalScrollBar->setRangeLimits (0.0, contentComp->getHeight());
+        verticalScrollBar->setCurrentRange (newVY, getMaximumVisibleHeight());
+        verticalScrollBar->setSingleStepSize (singleStepY);
+
+        if (! (contentComp->getHeight() > 0 && showVScrollbar && getWidth() > getScrollBarThickness()))
             verticalScrollBar->setVisible (false);
-        }
 
         if (verticalScrollBar->isVisible())
         {
