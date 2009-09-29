@@ -53665,9 +53665,11 @@ private:
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
-#if JUCE_WEB_BROWSER
+#if JUCE_WEB_BROWSER || DOXYGEN
 
-class WebBrowserComponentInternal;
+#if ! DOXYGEN
+ class WebBrowserComponentInternal;
+#endif
 
 /**
     A component that displays an embedded web browser.
@@ -53683,8 +53685,14 @@ public:
     /** Creates a WebBrowserComponent.
 
         Once it's created and visible, send the browser to a URL using goToURL().
+
+        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
+                            component is taken offscreen, it'll clear the current page
+                            and replace it with a blank page - this can be handy to stop
+                            the browser using resources in the background when it's not
+                            actually being used.
     */
-    WebBrowserComponent();
+    WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden = true);
 
     /** Destructor. */
     ~WebBrowserComponent();
@@ -53740,8 +53748,7 @@ public:
 
 private:
     WebBrowserComponentInternal* browser;
-    bool blankPageShown;
-
+    bool blankPageShown, unloadPageWhenBrowserIsHidden;
     String lastURL;
     StringArray lastHeaders;
     MemoryBlock lastPostData;
@@ -53764,7 +53771,7 @@ private:
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 #define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WIN32 || JUCE_LINUX || DOXYGEN
 
 /**
     On Windows only, this component sits in the taskbar tray as a small icon.

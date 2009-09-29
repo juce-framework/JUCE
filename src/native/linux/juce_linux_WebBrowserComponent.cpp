@@ -34,9 +34,10 @@
 */
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent()
+WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
     : browser (0),
-      blankPageShown (false)
+      blankPageShown (false),
+      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
 }
