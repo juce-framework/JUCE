@@ -153,9 +153,10 @@ private:
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent()
+WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
     : browser (0),
-      blankPageShown (false)
+      blankPageShown (false),
+      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
 
@@ -217,10 +218,6 @@ void WebBrowserComponent::paint (Graphics& g)
 
 void WebBrowserComponent::checkWindowAssociation()
 {
-    // when the component becomes invisible, some stuff like flash
-    // carries on playing audio, so we need to force it onto a blank
-    // page to avoid this, (and send it back when it's made visible again).
-
     if (isShowing())
     {
         if (blankPageShown)
@@ -228,8 +225,12 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (! blankPageShown)
+        if (unloadPageWhenBrowserIsHidden && ! blankPageShown)
         {
+            // when the component becomes invisible, some stuff like flash
+            // carries on playing audio, so we need to force it onto a blank
+            // page to avoid this, (and send it back when it's made visible again).
+
             blankPageShown = true;
             browser->goToURL ("about:blank", 0, 0);
         }

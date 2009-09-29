@@ -220,9 +220,10 @@ private:
 
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent()
+WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
     : browser (0),
-      blankPageShown (false)
+      blankPageShown (false),
+      unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
     addAndMakeVisible (browser = new WebBrowserComponentInternal());
@@ -306,7 +307,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (browser != 0 && ! blankPageShown)
+        if (browser != 0 && unloadPageWhenBrowserIsHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

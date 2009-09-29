@@ -167,6 +167,7 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
                     {
                         threads[i]->startThread (priority);
                         startedOne = true;
+                        break;
                     }
                 }
 

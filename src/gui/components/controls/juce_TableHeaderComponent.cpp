@@ -657,8 +657,6 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
     {
         if (e.y >= -50 && e.y < getHeight() + 50)
         {
-            beginDrag (e);
-
             if (dragOverlayComp != 0)
             {
                 dragOverlayComp->setVisible (true);
