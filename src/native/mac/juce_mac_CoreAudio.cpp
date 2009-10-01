@@ -75,6 +75,8 @@ public:
          isSlaveDevice (false),
          deviceID (id),
          started (false),
+         sampleRate (0),
+         bufferSize (512),
          audioBuffer (0),
          numInputChans (0),
          numOutputChans (0),
@@ -86,24 +88,16 @@ public:
          inputChannelInfo (0),
          outputChannelInfo (0)
     {
-        sampleRate = 0;
-        bufferSize = 512;
+        jassert (deviceID != 0);
 
-        if (deviceID == 0)
-        {
-            error = TRANS("can't open device");
-        }
-        else
-        {
-            updateDetailsFromDevice();
+        updateDetailsFromDevice();
 
-            AudioObjectPropertyAddress pa;
-            pa.mSelector = kAudioObjectPropertySelectorWildcard;
-            pa.mScope = kAudioObjectPropertyScopeWildcard;
-            pa.mElement = kAudioObjectPropertyElementWildcard;
+        AudioObjectPropertyAddress pa;
+        pa.mSelector = kAudioObjectPropertySelectorWildcard;
+        pa.mScope = kAudioObjectPropertyScopeWildcard;
+        pa.mElement = kAudioObjectPropertyElementWildcard;
 
-            AudioObjectAddPropertyListener (deviceID, &pa, deviceListenerProc, this);
-        }
+        AudioObjectAddPropertyListener (deviceID, &pa, deviceListenerProc, this);
     }
 
     ~CoreAudioInternal()
@@ -116,13 +110,13 @@ public:
         AudioObjectRemovePropertyListener (deviceID, &pa, deviceListenerProc, this);
 
         stop (false);
+        delete inputDevice;
 
         juce_free (audioBuffer);
         juce_free (tempInputBuffers);
         juce_free (tempOutputBuffers);
         juce_free (inputChannelInfo);
         juce_free (outputChannelInfo);
-        delete inputDevice;
     }
 
     void allocateTempBuffers()
@@ -466,7 +460,7 @@ public:
                          double newSampleRate,
                          int bufferSizeSamples)
     {
-        error = String::empty;
+        String error;
         log ("CoreAudio reopen");
         callbacksAllowed = false;
         stopTimer();
@@ -474,12 +468,11 @@ public:
         stop (false);
 
         activeInputChans = inputChannels;
-        activeOutputChans = outputChannels;
-
         activeInputChans.setRange (inChanNames.size(),
                                    activeInputChans.getHighestBit() + 1 - inChanNames.size(),
                                    false);
 
+        activeOutputChans = outputChannels;
         activeOutputChans.setRange (outChanNames.size(),
                                     activeOutputChans.getHighestBit() + 1 - outChanNames.size(),
                                     false);
@@ -488,52 +481,49 @@ public:
         numOutputChans = activeOutputChans.countNumberOfSetBits();
 
         // set sample rate
-        Float64 sr = newSampleRate;
-        UInt32 size = sizeof (sr);
-
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyNominalSampleRate;
         pa.mScope = kAudioObjectPropertyScopeWildcard;
         pa.mElement = kAudioObjectPropertyElementMaster;
+        Float64 sr = newSampleRate;
 
-        OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, size, &sr));
-
-        // change buffer size
-        UInt32 framesPerBuf = bufferSizeSamples;
-        size = sizeof (framesPerBuf);
-
-        pa.mSelector = kAudioDevicePropertyBufferFrameSize;
-        OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, size, &framesPerBuf));
-
-        // wait for the changes to happen (on some devices)
-        int i = 30;
-        while (--i >= 0)
+        if (! OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (sr), &sr)))
         {
-            updateDetailsFromDevice();
+            error = "Couldn't change sample rate";
+        }
+        else
+        {
+            // change buffer size
+            UInt32 framesPerBuf = bufferSizeSamples;
+            pa.mSelector = kAudioDevicePropertyBufferFrameSize;
 
-            if (sampleRate == newSampleRate && bufferSizeSamples == bufferSize)
-                break;
+            if (! OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (framesPerBuf), &framesPerBuf)))
+            {
+                error = "Couldn't change buffer size";
+            }
+            else
+            {
+                // Annoyingly, after changing the rate and buffer size, some devices fail to
+                // correctly report their new settings until some random time in the future, so 
+                // after calling updateDetailsFromDevice, we need to manually bodge these values
+                // to make sure we're using the correct numbers..
+                updateDetailsFromDevice();
+                sampleRate = newSampleRate;
+                bufferSize = bufferSizeSamples;
 
-            Thread::sleep (100);
+                if (sampleRates.size() == 0)
+                    error = "Device has no available sample-rates";
+                else if (bufferSizes.size() == 0)
+                    error = "Device has no available buffer-sizes";
+                else if (inputDevice != 0)
+                    error = inputDevice->reopen (inputChannels,
+                                                 outputChannels,
+                                                 newSampleRate,
+                                                 bufferSizeSamples);
+            }
         }
 
-        if (i < 0)
-            error = "Couldn't change sample rate/buffer size";
-
-        if (sampleRates.size() == 0)
-            error = "Device has no available sample-rates";
-
-        if (bufferSizes.size() == 0)
-            error = "Device has no available buffer-sizes";
-
-        if (inputDevice != 0 && error.isEmpty())
-            error = inputDevice->reopen (inputChannels,
-                                         outputChannels,
-                                         newSampleRate,
-                                         bufferSizeSamples);
-
         callbacksAllowed = true;
-
         return error;
     }
 
@@ -784,16 +774,13 @@ public:
                     {
                         result = new CoreAudioInternal (devs[i]);
 
-                        if (result->error.isEmpty())
-                        {
-                            const bool thisIsInput = inChanNames.size() > 0 && outChanNames.size() == 0;
-                            const bool otherIsInput = result->inChanNames.size() > 0 && result->outChanNames.size() == 0;
+                        const bool thisIsInput = inChanNames.size() > 0 && outChanNames.size() == 0;
+                        const bool otherIsInput = result->inChanNames.size() > 0 && result->outChanNames.size() == 0;
 
-                            if (thisIsInput != otherIsInput
-                                 || (inChanNames.size() + outChanNames.size() == 0)
-                                 || (result->inChanNames.size() + result->outChanNames.size()) == 0)
-                                break;
-                        }
+                        if (thisIsInput != otherIsInput
+                             || (inChanNames.size() + outChanNames.size() == 0)
+                             || (result->inChanNames.size() + result->outChanNames.size()) == 0)
+                            break;
 
                         deleteAndZero (result);
                     }
@@ -809,7 +796,6 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-    String error;
     int inputLatency, outputLatency;
     BitArray activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
@@ -944,34 +930,17 @@ public:
             jassert (inputDeviceId != 0);
 
             device = new CoreAudioInternal (inputDeviceId);
-            lastError = device->error;
-
-            if (lastError.isNotEmpty())
-                deleteAndZero (device);
         }
         else
         {
             device = new CoreAudioInternal (outputDeviceId);
-            lastError = device->error;
 
-            if (lastError.isNotEmpty())
-            {
-                deleteAndZero (device);
-            }
-            else if (inputDeviceId != 0)
+            if (inputDeviceId != 0)
             {
                 CoreAudioInternal* secondDevice = new CoreAudioInternal (inputDeviceId);
-                lastError = device->error;
 
-                if (lastError.isNotEmpty())
-                {
-                    delete secondDevice;
-                }
-                else
-                {
-                    device->inputDevice = secondDevice;
-                    secondDevice->isSlaveDevice = true;
-                }
+                device->inputDevice = secondDevice;
+                secondDevice->isSlaveDevice = true;
             }
         }
 
@@ -1049,14 +1018,15 @@ public:
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
 
-        internal->reopen (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
-        lastError = internal->error;
+        lastError = internal->reopen (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
+        isOpen_ = lastError.isEmpty();
         return lastError;
     }
 
     void close()
     {
         isOpen_ = false;
+        internal->stop (false);
     }
 
     bool isOpen()

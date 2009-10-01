@@ -599,7 +599,6 @@ public:
                 defaultBufferSize = jmax (inputDevice->defaultBufferSize, outputDevice->defaultBufferSize);
                 sampleRates = inputDevice->rates;
                 sampleRates.removeValuesNotIn (outputDevice->rates);
-                jassert (sampleRates.size() > 0); // in and out devices don't share any common sample rates!
             }
             else
             {
@@ -673,6 +672,12 @@ public:
     {
         close();
         lastError = String::empty;
+
+        if (sampleRates.size() == 0 && inputDevice != 0 && outputDevice != 0)
+        {
+            lastError = "The input and output devices don't share a common sample rate!";
+            return lastError;
+        }
 
         currentBufferSizeSamples = bufferSizeSamples <= 0 ? defaultBufferSize : jmax (bufferSizeSamples, minBufferSize);
         currentSampleRate = sampleRate > 0 ? sampleRate : defaultSampleRate;
