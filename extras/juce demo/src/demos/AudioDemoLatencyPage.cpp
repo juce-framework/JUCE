@@ -37,7 +37,6 @@ public:
           recordedSound (1, 1),
           playingSampleNum (0),
           recordedSampleNum (-1),
-          sineWaveFrequency (300.0),
           isRunning (false),
           resultsBox (resultsBox_)
     {
@@ -53,6 +52,7 @@ public:
         startTimer (50);
 
         const ScopedLock sl (lock);
+        createTestSound();
         recordedSound.clear();
         playingSampleNum = recordedSampleNum = 0;
         isRunning = true;
@@ -73,13 +73,13 @@ public:
             if (latencySamples >= 0)
             {
                 message << "\n\nLatency test results:\n"
-                        << latencySamples << " samples (" << (latencySamples * 1000.0 / sampleRate) << " milliseconds)\n"
+                        << latencySamples << " samples (" << String (latencySamples * 1000.0 / sampleRate, 1) << " milliseconds)\n"
                         << "The audio device reports an input latency of "
                         << deviceInputLatency << " samples, output latency of "
                         << deviceOutputLatency << " samples."
                         << "\nSo the corrected latency = "
                         << (latencySamples - deviceInputLatency - deviceOutputLatency)
-                        << " samples (" << ((latencySamples - deviceInputLatency - deviceOutputLatency) * 1000.0 / sampleRate)
+                        << " samples (" << String ((latencySamples - deviceInputLatency - deviceOutputLatency) * 1000.0 / sampleRate, 2)
                         << " milliseconds)";
             }
             else
@@ -101,8 +101,6 @@ public:
         deviceInputLatency = device->getInputLatencyInSamples();
         deviceOutputLatency = device->getOutputLatencyInSamples();
         playingSampleNum = recordedSampleNum = 0;
-
-        createTestSound();
 
         recordedSound.setSize (1, (int) (1.5 * sampleRate));
         recordedSound.clear();
@@ -161,12 +159,13 @@ private:
     AudioSampleBuffer testSound, recordedSound;
     int playingSampleNum, recordedSampleNum;
     CriticalSection lock;
-    const double sineWaveFrequency;
     double sampleRate;
     bool isRunning;
     TextEditor* resultsBox;
     int deviceInputLatency, deviceOutputLatency;
 
+    Array <int> spikes;
+    
     void createTestSound()
     {
         const int length = ((int) sampleRate) / 4;
@@ -174,61 +173,89 @@ private:
         testSound.clear();
         float* s = testSound.getSampleData (0, 0);
 
-        const double scale = 2.0 * double_Pi / (sampleRate / sineWaveFrequency);
-        int n = 0;
+        IntegerElementComparator<int> comp;
+        spikes.clear();
 
-        for (int i = 512; i < length; ++i)
-            s[i] = 0.95f * sinf ((float) (scale * n++));
+        for (int i = 0; i < 50; ++i)
+        {
+            const int spikePos = Random::getSystemRandom().nextInt (length - 20) + 10;
+            spikes.addSorted (comp, spikePos);
 
-        testSound.applyGainRamp (0, length - length / 3, length / 3, 1.0f, 0.0f);
+            s [spikePos] = 0.99f;
+            s [spikePos + 1] = -0.99f;
+        }
     }
 
-    int findStartSampleOfSineWave (const AudioSampleBuffer& buffer, const double sampleRate) const
+    // Searches a buffer for a set of spikes that matches those in the test sound 
+    int findOffsetOfSpikes (const AudioSampleBuffer& buffer) const
     {
+        const float minSpikeLevel = 5.0f;
+        const double smooth = 0.975;
         const float* s = buffer.getSampleData (0, 0);
+        const int spikeDriftAllowed = 5;
 
-        const double damping = 0.995;
-        double avG = 0;
+        Array <int> spikesFound (100);
+        double runningAverage = 0;
+        int lastSpike = 0;
 
-        for (int i = 0; i < buffer.getNumSamples(); i += 2)
+        for (int i = 0; i < buffer.getNumSamples() - 10; ++i)
         {
-            const int num = jmin (512, buffer.getNumSamples() - i);
+            const float samp = fabsf (s[i]);
 
-            const double g = calcGoertzel (s + i, num, sampleRate, sineWaveFrequency);
-            avG = avG * damping  + (1.0 - damping) * g * g;
+            if (samp > runningAverage * minSpikeLevel && i > lastSpike + 20)
+            {
+                lastSpike = i;
+                spikesFound.add (i);
+            }
 
-            if (avG > 3)
-                return i;
+            runningAverage = runningAverage * smooth + (1.0 - smooth) * samp;
         }
 
-        return -1;
-    }
+        int bestMatch = -1;
+        int bestNumMatches = spikes.size() / 3; // the minimum number of matches required
 
-    static double calcGoertzel (const float* const samples, const int numSamples,
-                                const double sampleRate, const double frequency) throw()
-    {
-        double n = 0, n1 = 0;
-        const double pi2freqOverRate = (2.0 * double_Pi) * frequency / sampleRate;
-        const double multiplier = 2.0 * cos (pi2freqOverRate);
+        if (spikesFound.size() < bestNumMatches)
+            return -1;
 
-        for (int i = 0; i < numSamples; ++i)
+        for (int offsetToTest = 0; offsetToTest < buffer.getNumSamples() - 2048; ++offsetToTest)
         {
-            const double n2 = n1;
-            n1 = n;
-            n = multiplier * n1 - n2 + samples[i];
+            int numMatchesHere = 0;
+            int foundIndex = 0;
+
+            for (int refIndex = 0; refIndex < spikes.size(); ++refIndex)
+            {
+                const int referenceSpike = spikes.getUnchecked (refIndex) + offsetToTest;
+                int spike = 0;
+
+                while ((spike = spikesFound.getUnchecked (foundIndex)) < referenceSpike - spikeDriftAllowed
+                         && foundIndex < spikesFound.size() - 1)
+                    ++foundIndex;
+
+                if (spike >= referenceSpike - spikeDriftAllowed && spike <= referenceSpike + spikeDriftAllowed)
+                    ++numMatchesHere;
+            }
+
+            if (numMatchesHere > bestNumMatches)
+            {
+                bestNumMatches = numMatchesHere;
+                bestMatch = offsetToTest;
+
+                if (numMatchesHere == spikes.size())
+                    break;
+            }
         }
 
-        return n - n1 * exp (-pi2freqOverRate);
+        return bestMatch;
     }
 
     int calculateLatencySamples() const
     {
         // Detect the sound in both our test sound and the recording of it, and measure the difference
         // in their start times..
-        const int referenceStart = findStartSampleOfSineWave (testSound, sampleRate);
+        const int referenceStart = findOffsetOfSpikes (testSound);
         jassert (referenceStart >= 0);
 
-        const int recordedStart = findStartSampleOfSineWave (recordedSound, sampleRate);
+        const int recordedStart = findOffsetOfSpikes (recordedSound);
 
         return (recordedStart < 0) ? -1 : (recordedStart - referenceStart);
     }
