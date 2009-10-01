@@ -53,14 +53,14 @@
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
  #include "audio/midi/juce_MidiKeyboardState.h"
 #endif
-#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
- #include "audio/midi/juce_MidiMessage.h"
+#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+ #include "audio/midi/juce_MidiMessageSequence.h"
 #endif
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
  #include "audio/midi/juce_MidiMessageCollector.h"
 #endif
-#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
- #include "audio/midi/juce_MidiMessageSequence.h"
+#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
+ #include "audio/midi/juce_MidiMessage.h"
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
  #include "audio/dsp/juce_AudioDataConverters.h"
@@ -125,9 +125,6 @@
 #ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
  #include "audio/audio_sources/juce_ResamplingAudioSource.h"
 #endif
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
- #include "audio/devices/juce_AudioDeviceManager.h"
-#endif
 #ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
  #include "audio/devices/juce_AudioIODevice.h"
 #endif
@@ -139,6 +136,9 @@
 #endif
 #ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
  #include "audio/devices/juce_MidiOutput.h"
+#endif
+#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+ #include "audio/devices/juce_AudioDeviceManager.h"
 #endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
  #include "audio/synthesisers/juce_Sampler.h"
@@ -527,11 +527,11 @@
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
  #include "gui/components/controls/juce_Toolbar.h"
 #endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
- #include "gui/components/controls/juce_ToolbarItemComponent.h"
-#endif
 #ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
  #include "gui/components/controls/juce_ToolbarItemFactory.h"
+#endif
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+ #include "gui/components/controls/juce_ToolbarItemComponent.h"
 #endif
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
  #include "gui/components/controls/juce_ToolbarItemPalette.h"
@@ -689,6 +689,9 @@
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
  #include "gui/components/special/juce_DropShadower.h"
 #endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_WebBrowserComponent.h"
+#endif
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_MagnifierComponent.h"
 #endif
@@ -706,9 +709,6 @@
 #endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_QuickTimeMovieComponent.h"
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_WebBrowserComponent.h"
 #endif
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_SystemTrayIconComponent.h"

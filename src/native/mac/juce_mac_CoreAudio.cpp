@@ -504,7 +504,7 @@ public:
             else
             {
                 // Annoyingly, after changing the rate and buffer size, some devices fail to
-                // correctly report their new settings until some random time in the future, so 
+                // correctly report their new settings until some random time in the future, so
                 // after calling updateDetailsFromDevice, we need to manually bodge these values
                 // to make sure we're using the correct numbers..
                 updateDetailsFromDevice();

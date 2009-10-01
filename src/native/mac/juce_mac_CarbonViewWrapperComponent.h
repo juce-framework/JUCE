@@ -213,7 +213,7 @@ public:
             child = HIViewGetNextView (child);
         }
     }
-    
+
     void timerCallback()
     {
         setOurSizeToEmbeddedViewSize();

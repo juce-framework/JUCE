@@ -1337,7 +1337,7 @@ private:
                 recursive = false;
             }
         }
-        
+
         bool keyPressed (const KeyPress& kp)
         {
             if (! kp.getModifiers().isCommandDown())

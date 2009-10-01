@@ -165,7 +165,7 @@ private:
     int deviceInputLatency, deviceOutputLatency;
 
     Array <int> spikes;
-    
+
     void createTestSound()
     {
         const int length = ((int) sampleRate) / 4;
@@ -186,7 +186,7 @@ private:
         }
     }
 
-    // Searches a buffer for a set of spikes that matches those in the test sound 
+    // Searches a buffer for a set of spikes that matches those in the test sound
     int findOffsetOfSpikes (const AudioSampleBuffer& buffer) const
     {
         const float minSpikeLevel = 5.0f;

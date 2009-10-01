@@ -116,11 +116,11 @@ static bool isJuceWindow (WindowRef w) throw()
     {
         ComponentPeer* peer = ComponentPeer::getPeer(i);
         NSView* view = (NSView*) peer->getNativeHandle();
-        
+
         if ([[view window] windowRef] == w)
             return true;
     }
-    
+
     return false;
 }
 
@@ -132,7 +132,7 @@ void forwardCurrentKeyEventToHostWindow()
     while (IsValidWindowPtr (w) && isJuceWindow (w))
     {
         w = GetNextWindowOfClass (w, kDocumentWindowClass, true);
-     
+
         if (w == original)
             break;
     }

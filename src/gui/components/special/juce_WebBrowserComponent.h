@@ -49,8 +49,8 @@ public:
     /** Creates a WebBrowserComponent.
 
         Once it's created and visible, send the browser to a URL using goToURL().
-     
-        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser 
+
+        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
                             component is taken offscreen, it'll clear the current page
                             and replace it with a blank page - this can be handy to stop
                             the browser using resources in the background when it's not

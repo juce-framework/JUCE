@@ -154,7 +154,7 @@
 */
 #define JucePlugin_SilenceInProducesSilenceOut      0
 
-/** If your plugin has a tail, you can set the length here and this information 
+/** If your plugin has a tail, you can set the length here and this information
     will be passed on to the host.
     (Not all formats/hosts might actually use this, though)
 */

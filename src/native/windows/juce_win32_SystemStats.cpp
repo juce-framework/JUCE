@@ -307,7 +307,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 int SystemStats::getMemorySizeInMegabytes() throw()
 {
     MEMORYSTATUSEX mem;
-    mem.dwLength = sizeof (mem); 
+    mem.dwLength = sizeof (mem);
     GlobalMemoryStatusEx (&mem);
     return (int) (mem.ullTotalPhys / (1024 * 1024)) + 1;
 }

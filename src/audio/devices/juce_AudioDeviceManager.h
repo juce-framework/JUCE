@@ -242,7 +242,7 @@ public:
     void setCurrentAudioDeviceType (const String& type,
                                     const bool treatAsChosenDevice);
 
-    
+
     /** Closes the currently-open device.
 
         You can call restartLastAudioDevice() later to reopen it in the same state
