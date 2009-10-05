@@ -127,7 +127,7 @@ BEGIN_JUCE_NAMESPACE
 
 using namespace jpeglibNamespace;
 
-#if ! JUCE_WIN32
+#if ! JUCE_MSVC
  using jpeglibNamespace::boolean;
 #endif
 

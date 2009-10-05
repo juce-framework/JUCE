@@ -361,11 +361,14 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
         sendChangeMessage (this);
 
     stopDevice();
+
+    const String newInputDeviceName (numInputChansNeeded == 0 ? String::empty : newSetup.inputDeviceName);
+    const String newOutputDeviceName (numOutputChansNeeded == 0 ? String::empty : newSetup.outputDeviceName);
+
     String error;
     AudioIODeviceType* type = getCurrentDeviceTypeObject();
 
-    if (type == 0 || (newSetup.inputDeviceName.isEmpty()
-                       && newSetup.outputDeviceName.isEmpty()))
+    if (type == 0 || (newInputDeviceName.isEmpty() && newOutputDeviceName.isEmpty()))
     {
         deleteCurrentDevice();
 
@@ -374,9 +377,6 @@ const String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& ne
 
         return String::empty;
     }
-
-    const String newInputDeviceName (numInputChansNeeded == 0 ? String::empty : newSetup.inputDeviceName);
-    const String newOutputDeviceName (numOutputChansNeeded == 0 ? String::empty : newSetup.outputDeviceName);
 
     if (currentSetup.inputDeviceName != newInputDeviceName
          || currentSetup.outputDeviceName != newOutputDeviceName

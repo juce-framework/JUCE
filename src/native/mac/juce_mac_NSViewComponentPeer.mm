@@ -763,7 +763,9 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
                                           NSView* viewToAttachTo)
     : ComponentPeer (component, windowStyleFlags),
       window (0),
-      view (0)
+      view (0),
+      isSharedWindow (viewToAttachTo != 0),
+      fullScreen (false)
 {
     NSRect r;
     r.origin.x = 0;
@@ -774,17 +776,15 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
     view = [[JuceNSView alloc] initWithOwner: this withFrame: r];
     [view setPostsFrameChangedNotifications: YES];
 
-    if (viewToAttachTo != 0)
+    if (isSharedWindow)
     {
         window = [viewToAttachTo window];
         [viewToAttachTo addSubview: view];
-        isSharedWindow = true;
 
         setVisible (component->isVisible());
     }
     else
     {
-        isSharedWindow = false;
         r.origin.x = (float) component->getX();
         r.origin.y = (float) component->getY();
         r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - (r.origin.y + r.size.height);

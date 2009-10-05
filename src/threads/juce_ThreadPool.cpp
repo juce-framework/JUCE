@@ -109,12 +109,11 @@ ThreadPool::ThreadPool (const int numThreads_,
     threads = (Thread**) juce_calloc (sizeof (Thread*) * numThreads);
 
     for (int i = numThreads; --i >= 0;)
-    {
         threads[i] = new ThreadPoolThread (*this);
 
-        if (! startThreadsOnlyWhenNeeded)
+    if (! startThreadsOnlyWhenNeeded)
+        for (int i = numThreads; --i >= 0;)
             threads[i]->startThread (priority);
-    }
 }
 
 ThreadPool::~ThreadPool()
