@@ -239,7 +239,8 @@ public:
     int getDesktopWindowStyleFlags() const;
     /** @internal */
     void parentHierarchyChanged();
-
+    /** @internal */
+    const Rectangle getTitleBarArea();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -262,7 +263,6 @@ private:
 
     } buttonListener;
 
-    int getBorderSize() const;
     void repaintTitleBar();
 
     DocumentWindow (const DocumentWindow&);

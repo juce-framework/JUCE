@@ -141,6 +141,9 @@ public:
     */
     void setStatusMessage (const String& newStatusMessage);
 
+    /** Returns the AlertWindow that is being used.
+    */
+    AlertWindow* getAlertWindow() const throw()         { return alertWindow; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator

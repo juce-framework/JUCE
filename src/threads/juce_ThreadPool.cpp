@@ -49,17 +49,17 @@ ThreadPoolJob::~ThreadPoolJob()
     jassert (pool == 0 || ! pool->contains (this));
 }
 
-const String ThreadPoolJob::getJobName() const
+const String ThreadPoolJob::getJobName() const throw()
 {
     return jobName;
 }
 
-void ThreadPoolJob::setJobName (const String& newName)
+void ThreadPoolJob::setJobName (const String& newName) throw()
 {
     jobName = newName;
 }
 
-void ThreadPoolJob::signalJobShouldExit()
+void ThreadPoolJob::signalJobShouldExit() throw()
 {
     shouldStop = true;
 }
@@ -171,7 +171,7 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
                 }
 
                 if (! startedOne)
-                    Thread::sleep (5);
+                    Thread::sleep (2);
             }
         }
 
@@ -187,7 +187,7 @@ int ThreadPool::getNumJobs() const throw()
     return jobs.size();
 }
 
-ThreadPoolJob* ThreadPool::getJob (const int index) const
+ThreadPoolJob* ThreadPool::getJob (const int index) const throw()
 {
     const ScopedLock sl (lock);
     return (ThreadPoolJob*) jobs [index];
@@ -196,14 +196,12 @@ ThreadPoolJob* ThreadPool::getJob (const int index) const
 bool ThreadPool::contains (const ThreadPoolJob* const job) const throw()
 {
     const ScopedLock sl (lock);
-
     return jobs.contains ((void*) job);
 }
 
 bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
-
     return jobs.contains ((void*) job) && job->isActive;
 }
 
@@ -219,7 +217,7 @@ bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job,
             if (timeOutMs >= 0 && Time::getMillisecondCounter() >= start + timeOutMs)
                 return false;
 
-            Thread::sleep (2);
+            jobFinishedSignal.wait (2);
         }
     }
 
@@ -290,13 +288,13 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
         if (timeOutMs >= 0 && Time::getMillisecondCounter() >= start + timeOutMs)
             return false;
 
-        Thread::sleep (2);
+        jobFinishedSignal.wait (2);
     }
 
     return true;
 }
 
-const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const
+const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const throw()
 {
     StringArray s;
     const ScopedLock sl (lock);
@@ -367,6 +365,8 @@ bool ThreadPool::runNextJob()
 
                     if (result == ThreadPoolJob::jobHasFinishedAndShouldBeDeleted)
                         delete job;
+
+                    jobFinishedSignal.signal();
                 }
                 else
                 {
@@ -391,15 +391,11 @@ bool ThreadPool::runNextJob()
         if (threadStopTimeout > 0
              && Time::getApproximateMillisecondCounter() > lastJobEndTime + threadStopTimeout)
         {
-            lock.enter();
+            const ScopedLock sl (lock);
 
             if (jobs.size() == 0)
-            {
                 for (int i = numThreads; --i >= 0;)
                     threads[i]->signalThreadShouldExit();
-            }
-
-            lock.exit();
         }
         else
         {

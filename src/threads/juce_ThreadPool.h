@@ -65,12 +65,12 @@ public:
     /** Returns the name of this job.
         @see setJobName
     */
-    const String getJobName() const;
+    const String getJobName() const throw();
 
     /** Changes the job's name.
         @see getJobName
     */
-    void setJobName (const String& newName);
+    void setJobName (const String& newName) throw();
 
     //==============================================================================
     /** These are the values that can be returned by the runJob() method.
@@ -122,7 +122,7 @@ public:
 
         @see shouldExit()
     */
-    void signalJobShouldExit();
+    void signalJobShouldExit() throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -232,7 +232,7 @@ public:
         Note that this can be a very volatile list as jobs might be continuously getting shifted
         around in the list, and this method may return 0 if the index is currently out-of-range.
     */
-    ThreadPoolJob* getJob (const int index) const;
+    ThreadPoolJob* getJob (const int index) const throw();
 
     /** Returns true if the given job is currently queued or running.
 
@@ -259,7 +259,7 @@ public:
 
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
-    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const;
+    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const throw();
 
     /** Changes the priority of all the threads.
 
@@ -280,6 +280,7 @@ private:
 
     CriticalSection lock;
     uint32 lastJobEndTime;
+    WaitableEvent jobFinishedSignal;
 
     friend class ThreadPoolThread;
     bool runNextJob();

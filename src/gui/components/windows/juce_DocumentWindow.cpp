@@ -71,8 +71,9 @@ DocumentWindow::~DocumentWindow()
 //==============================================================================
 void DocumentWindow::repaintTitleBar()
 {
-    const int border = getBorderSize();
-    repaint (border, border, getWidth() - border * 2, getTitleBarHeight());
+    const Rectangle titleBarArea (getTitleBarArea());
+    repaint (titleBarArea.getX(), titleBarArea.getY(), 
+             titleBarArea.getWidth(), titleBarArea.getHeight());
 }
 
 void DocumentWindow::setName (const String& newName)
@@ -174,19 +175,24 @@ void DocumentWindow::paint (Graphics& g)
 {
     ResizableWindow::paint (g);
 
-    if (resizableBorder == 0 && getBorderSize() == 1)
+    if (resizableBorder == 0)
     {
         g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
-        g.drawRect (0, 0, getWidth(), getHeight());
+        
+        const BorderSize border (getBorderThickness());
+        
+        g.fillRect (0, 0, getWidth(), border.getTop());
+        g.fillRect (0, border.getTop(), border.getLeft(), getHeight() - border.getTopAndBottom());
+        g.fillRect (getWidth() - border.getRight(), border.getTop(), border.getRight(), getHeight() - border.getTopAndBottom());
+        g.fillRect (0, getHeight() - border.getBottom(), getWidth(), border.getBottom());
     }
 
-    const int border = getBorderSize();
-
-    g.setOrigin (border, border);
-    g.reduceClipRegion (0, 0, getWidth() - border * 2, getTitleBarHeight());
+    const Rectangle titleBarArea (getTitleBarArea());
+    g.setOrigin (titleBarArea.getX(), titleBarArea.getY());
+    g.reduceClipRegion (0, 0, titleBarArea.getWidth(), titleBarArea.getHeight());
 
     int titleSpaceX1 = 6;
-    int titleSpaceX2 = getWidth() - 6;
+    int titleSpaceX2 = titleBarArea.getWidth() - 6;
 
     for (int i = 0; i < 3; ++i)
     {
@@ -199,12 +205,13 @@ void DocumentWindow::paint (Graphics& g)
         }
     }
 
-    getLookAndFeel()
-        .drawDocumentWindowTitleBar (*this, g,
-                                     getWidth() - border * 2,
-                                     getTitleBarHeight(),
-                                     titleSpaceX1, jmax (1, titleSpaceX2 - titleSpaceX1),
-                                     titleBarIcon, ! drawTitleTextCentred);
+    getLookAndFeel().drawDocumentWindowTitleBar (*this, g,
+                                                 titleBarArea.getWidth(),
+                                                 titleBarArea.getHeight(),
+                                                 titleSpaceX1, 
+                                                 jmax (1, titleSpaceX2 - titleSpaceX1),
+                                                 titleBarIcon, 
+                                                 ! drawTitleTextCentred);
 }
 
 void DocumentWindow::resized()
@@ -214,19 +221,51 @@ void DocumentWindow::resized()
     if (titleBarButtons[1] != 0)
         titleBarButtons[1]->setToggleState (isFullScreen(), false);
 
-    const int border = getBorderSize();
+    const Rectangle titleBarArea (getTitleBarArea());
+    
     getLookAndFeel()
         .positionDocumentWindowButtons (*this,
-                                        border, border,
-                                        getWidth() - border * 2, getTitleBarHeight(),
+                                        titleBarArea.getX(), titleBarArea.getY(),
+                                        titleBarArea.getWidth(), titleBarArea.getHeight(),
                                         titleBarButtons[0],
                                         titleBarButtons[1],
                                         titleBarButtons[2],
                                         positionTitleBarButtonsOnLeft);
 
     if (menuBar != 0)
-        menuBar->setBounds (border, border + getTitleBarHeight(),
-                            getWidth() - border * 2, menuBarHeight);
+        menuBar->setBounds (titleBarArea.getX(), titleBarArea.getBottom(),
+                            titleBarArea.getWidth(), menuBarHeight);
+}
+
+const BorderSize DocumentWindow::getBorderThickness()
+{
+    return BorderSize ((isFullScreen() || isUsingNativeTitleBar())
+                            ? 0 : (resizableBorder != 0 ? 4 : 1));
+}
+
+const BorderSize DocumentWindow::getContentComponentBorder()
+{
+    BorderSize border (getBorderThickness());
+
+    border.setTop (border.getTop()
+                        + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
+                        + (menuBar != 0 ? menuBarHeight : 0));
+    
+    return border;
+}
+
+int DocumentWindow::getTitleBarHeight() const
+{
+    return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
+}
+
+const Rectangle DocumentWindow::getTitleBarArea()
+{
+    const BorderSize border (getBorderThickness());
+
+    return Rectangle (border.getLeft(), border.getTop(),
+                      getWidth() - border.getLeftAndRight(), 
+                      getTitleBarHeight());
 }
 
 Button* DocumentWindow::getCloseButton() const throw()
@@ -322,29 +361,9 @@ void DocumentWindow::activeWindowStatusChanged()
         menuBar->setEnabled (isActiveWindow());
 }
 
-const BorderSize DocumentWindow::getBorderThickness()
-{
-    return BorderSize (getBorderSize());
-}
-
-const BorderSize DocumentWindow::getContentComponentBorder()
-{
-    const int size = getBorderSize();
-
-    return BorderSize (size
-                        + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
-                        + (menuBar != 0 ? menuBarHeight : 0),
-                       size, size, size);
-}
-
 void DocumentWindow::mouseDoubleClick (const MouseEvent& e)
 {
-    const int border = getBorderSize();
-
-    if (e.x >= border
-         && e.y >= border
-         && e.x < getWidth() - border
-         && e.y < border + getTitleBarHeight()
+    if (getTitleBarArea().contains (e.x, e.y)
          && getMaximiseButton() != 0)
     {
         getMaximiseButton()->triggerClick();
@@ -354,17 +373,6 @@ void DocumentWindow::mouseDoubleClick (const MouseEvent& e)
 void DocumentWindow::userTriedToCloseWindow()
 {
     closeButtonPressed();
-}
-
-//==============================================================================
-int DocumentWindow::getTitleBarHeight() const
-{
-    return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
-}
-
-int DocumentWindow::getBorderSize() const
-{
-    return (isFullScreen() || isUsingNativeTitleBar()) ? 0 : (resizableBorder != 0 ? 4 : 1);
 }
 
 //==============================================================================

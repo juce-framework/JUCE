@@ -991,6 +991,9 @@ public:
                 inputDeviceNames.insert (index, name);
             }
         }
+
+        inputDeviceNames.appendNumbersToDuplicates (false, false);
+        outputDeviceNames.appendNumbersToDuplicates (false, false);
     }
 
     const StringArray getDeviceNames (const bool wantInputNames) const

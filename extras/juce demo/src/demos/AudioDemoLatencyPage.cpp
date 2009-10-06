@@ -173,16 +173,26 @@ private:
         testSound.clear();
         float* s = testSound.getSampleData (0, 0);
 
-        IntegerElementComparator<int> comp;
+        Random rand (0);
+        rand.setSeedRandomly();
+
+        for (int i = 0; i < length; ++i)
+            s[i] = (rand.nextFloat() - rand.nextFloat() + rand.nextFloat() - rand.nextFloat()) * 0.06f;
+
         spikes.clear();
 
-        for (int i = 0; i < 50; ++i)
+        int spikePos = 0;
+        int spikeDelta = 50;
+
+        while (spikePos < length)
         {
-            const int spikePos = Random::getSystemRandom().nextInt (length - 20) + 10;
-            spikes.addSorted (comp, spikePos);
+            spikes.add (spikePos);
 
             s [spikePos] = 0.99f;
             s [spikePos + 1] = -0.99f;
+
+            spikePos += spikeDelta;
+            spikeDelta += spikeDelta / 6 + rand.nextInt (5);
         }
     }
 
