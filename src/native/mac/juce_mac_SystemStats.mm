@@ -27,7 +27,8 @@
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
-static int64 highResTimerFrequency;
+static int64 highResTimerFrequency = 0;
+static double highResTimerToMillisecRatio = 0;
 
 #if JUCE_INTEL
 
@@ -83,11 +84,13 @@ void SystemStats::initialiseStats() throw()
     {
         initialised = true;
 
+#if JUCE_MAC
         // extremely annoying: adding this line stops the apple menu items from working. Of
         // course, not adding it means that carbon windows (e.g. in plugins) won't get
         // any events.
         //NSApplicationLoad();
         [NSApplication sharedApplication];
+#endif
 
 #if JUCE_INTEL
         {
@@ -101,7 +104,10 @@ void SystemStats::initialiseStats() throw()
         }
 #endif
 
-        highResTimerFrequency = (int64) AudioGetHostClockFrequency();
+        mach_timebase_info_data_t timebase;
+        (void) mach_timebase_info (&timebase);
+        highResTimerFrequency = (int64) (1.0e9 * timebase.denom / timebase.numer);
+        highResTimerToMillisecRatio = timebase.numer / (1.0e6 * timebase.denom);
 
         String s (SystemStats::getJUCEVersion());
 
@@ -213,27 +219,19 @@ int SystemStats::getNumCpus() throw()
 }
 
 //==============================================================================
-static int64 juce_getMicroseconds() throw()
-{
-    UnsignedWide t;
-    Microseconds (&t);
-    return (((int64) t.hi) << 32) | t.lo;
-}
-
 uint32 juce_millisecondsSinceStartup() throw()
 {
-    return (uint32) (juce_getMicroseconds() / 1000);
+    return (uint32) (mach_absolute_time() * highResTimerToMillisecRatio);
 }
 
 double Time::getMillisecondCounterHiRes() throw()
 {
-    // xxx might be more accurate to use a scaled AudioGetCurrentHostTime?
-    return juce_getMicroseconds() * 0.001;
+    return mach_absolute_time() * highResTimerToMillisecRatio;
 }
 
 int64 Time::getHighResolutionTicks() throw()
 {
-    return (int64) AudioGetCurrentHostTime();
+    return (int64) mach_absolute_time();
 }
 
 int64 Time::getHighResolutionTicksPerSecond() throw()
@@ -243,7 +241,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
 
 int64 SystemStats::getClockCycleCounter() throw()
 {
-    return (int64) AudioGetCurrentHostTime();
+    return (int64) mach_absolute_time();
 }
 
 bool Time::setSystemTimeToThisTime() const throw()

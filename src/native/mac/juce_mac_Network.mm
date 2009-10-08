@@ -28,84 +28,42 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-static bool getEthernetIterator (io_iterator_t* matchingServices) throw()
-{
-    mach_port_t masterPort;
-
-    if (IOMasterPort (MACH_PORT_NULL, &masterPort) == KERN_SUCCESS)
-    {
-        CFMutableDictionaryRef dict = IOServiceMatching (kIOEthernetInterfaceClass);
-
-        if (dict != 0)
-        {
-            CFMutableDictionaryRef propDict = CFDictionaryCreateMutable (kCFAllocatorDefault,
-                                                                         0,
-                                                                         &kCFTypeDictionaryKeyCallBacks,
-                                                                         &kCFTypeDictionaryValueCallBacks);
-
-            if (propDict != 0)
-            {
-                CFDictionarySetValue (propDict, CFSTR (kIOPrimaryInterface), kCFBooleanTrue);
-
-                CFDictionarySetValue (dict, CFSTR (kIOPropertyMatchKey), propDict);
-                CFRelease (propDict);
-            }
-        }
-
-        return IOServiceGetMatchingServices (masterPort, dict, matchingServices) == KERN_SUCCESS;
-    }
-
-    return false;
-}
-
 int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
+    #ifndef IFT_ETHER
+     #define IFT_ETHER 6
+    #endif
+
+    ifaddrs* addrs = 0;
     int numResults = 0;
-    io_iterator_t it;
 
-    if (getEthernetIterator (&it))
+    if (getifaddrs (&addrs) == 0)
     {
-        io_object_t i;
+        const ifaddrs* cursor = addrs;
 
-        while ((i = IOIteratorNext (it)) != 0)
+        while (cursor != 0 && numResults < maxNum)
         {
-            io_object_t controller;
-
-            if (IORegistryEntryGetParentEntry (i, kIOServicePlane, &controller) == KERN_SUCCESS)
+            if (cursor->ifa_addr->sa_family == AF_LINK)
             {
-                CFTypeRef data = IORegistryEntryCreateCFProperty (controller,
-                                                                  CFSTR (kIOMACAddress),
-                                                                  kCFAllocatorDefault,
-                                                                  0);
-                if (data != 0)
+                const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
+
+                if (sadd->sdl_type == IFT_ETHER)
                 {
-                    UInt8 addr [kIOEthernetAddressSize];
-                    zeromem (addr, sizeof (addr));
+                    const uint8* const addr = ((const uint8*) sadd->sdl_data) + sadd->sdl_nlen;
 
-                    CFDataGetBytes ((CFDataRef) data, CFRangeMake (0, sizeof (addr)), addr);
-                    CFRelease (data);
-
-                    int64 a = 0;
+                    uint64 a = 0;
                     for (int i = 6; --i >= 0;)
-                        a = (a << 8) | addr[i];
+                        a = (a << 8) | addr [littleEndian ? i : (5 - i)];
 
-                    if (! littleEndian)
-                        a = (int64) swapByteOrder ((uint64) a);
-
-                    if (numResults < maxNum)
-                    {
-                        *addresses++ = a;
-                        ++numResults;
-                    }
+                    *addresses++ = (int64) a;
+                    ++numResults;
                 }
-
-                IOObjectRelease (controller);
             }
 
-            IOObjectRelease (i);
+            cursor = cursor->ifa_next;
         }
 
-        IOObjectRelease (it);
+        freeifaddrs (addrs);
     }
 
     return numResults;
@@ -117,6 +75,11 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
+#if JUCE_IPHONE
+    //xxx probably need to use MFMailComposeViewController
+    jassertfalse
+    return false;
+#else
     const ScopedAutoReleasePool pool;
 
     String script;
@@ -152,6 +115,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     [s release];
 
     return ok;
+#endif
 }
 
 //==============================================================================

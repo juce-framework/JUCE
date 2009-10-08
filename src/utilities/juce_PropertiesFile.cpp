@@ -268,7 +268,7 @@ const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationN
     // mustn't have illegal characters in this name..
     jassert (applicationName == File::createLegalFileName (applicationName));
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
     File dir (commonToAllUsers ? "/Library/Preferences"
                                : "~/Library/Preferences");
 

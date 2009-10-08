@@ -147,10 +147,12 @@ public:
 
         @param  addresses   an array into which the MAC addresses should be copied
         @param  maxNum      the number of elements in this array
-        @param littleEndian the endianness of the numbers to return. Note that
-                            the default values of this parameter are different on
-                            Mac/PC to avoid breaking old software that was written
-                            before this parameter was added (when the two systems
+        @param littleEndian the endianness of the numbers to return. If this is true, 
+                            the least-significant byte of each number is the first byte
+                            of the mac address. If false, the least significant byte is
+                            the last number. Note that the default values of this parameter
+                            are different on Mac/PC to avoid breaking old software that was
+                            written before this parameter was added (when the two systems
                             defaulted to using different endiannesses). In newer
                             software you probably want to specify an explicit value
                             for this.

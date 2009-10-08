@@ -46,9 +46,6 @@
 #import <IOKit/IOCFPlugIn.h>
 #import <IOKit/hid/IOHIDLib.h>
 #import <IOKit/hid/IOHIDKeys.h>
-#import <IOKit/network/IOEthernetInterface.h>
-#import <IOKit/network/IONetworkInterface.h>
-#import <IOKit/network/IOEthernetController.h>
 #import <IOKit/pwr_mgt/IOPMLib.h>
 
 #include <sys/sysctl.h>
@@ -59,6 +56,9 @@
 #include <fnmatch.h>
 #include <utime.h>
 #include <dlfcn.h>
+#include <ifaddrs.h>
+#include <net/if_dl.h>
+#include <mach/mach_time.h>
 
 #if MACOS_10_4_OR_EARLIER
  #include <GLUT/glut.h>

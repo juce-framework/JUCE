@@ -103,6 +103,10 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 
 const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 {
+#if JUCE_IPHONE
+    const ScopedAutoReleasePool pool;
+    return nsStringToJuce ([juceStringToNS (s) precomposedStringWithCanonicalMapping]);
+#else
     UnicodeMapping map;
 
     map.unicodeEncoding = CreateTextEncoding (kTextEncodingUnicodeDefault,
@@ -156,6 +160,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
     }
 
     return result;
+#endif
 }
 
 //==============================================================================
@@ -163,16 +168,25 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
 void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
+#if JUCE_IPHONE
+    [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
+                             forPasteboardType: (NSString*) kUTTypePlainText];
+#else
     [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
                                              owner: nil];
 
     [[NSPasteboard generalPasteboard] setString: juceStringToNS (text)
                                         forType: NSStringPboardType];
+#endif
 }
 
 const String SystemClipboard::getTextFromClipboard() throw()
 {
+#if JUCE_IPHONE
+    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: (NSString*) kUTTypePlainText];
+#else
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
+#endif
 
     return text == 0 ? String::empty
                      : nsStringToJuce (text);

@@ -141,7 +141,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height)
     {
-        if (file != File::nonexistent && ! isDirectory)
+        if (file != File::nonexistent)
         {
             updateIcon (true);
 

@@ -145,7 +145,7 @@
     On Windows, if you enable this, you'll need to have the QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
+#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || defined (TARGET_OS_IPHONE) || defined (TARGET_IPHONE_SIMULATOR) || (defined (_WIN32) && ! defined (_MSC_VER)))
   #define JUCE_QUICKTIME 1
 #endif
 
@@ -326,6 +326,8 @@
 #else
   #if defined (LINUX) || defined (__linux__)
     #define     JUCE_LINUX 1
+  #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    #define     JUCE_IPHONE 1
   #else
     #define     JUCE_MAC 1
   #endif
@@ -386,6 +388,20 @@
 
   #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
     #define MACOS_10_4_OR_EARLIER 1
+  #endif
+#endif
+
+#if JUCE_IPHONE
+  #include <CoreFoundation/CoreFoundation.h>
+
+  #ifndef NDEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  #ifdef __LITTLE_ENDIAN__
+    #define JUCE_LITTLE_ENDIAN 1
+  #else
+    #define JUCE_BIG_ENDIAN 1
   #endif
 #endif
 
@@ -494,6 +510,8 @@
     #endif
   #elif JUCE_MAC
     #define juce_breakDebugger              Debugger();
+  #elif JUCE_IPHONE
+    #define juce_breakDebugger              assert (false);
   #elif JUCE_LINUX
     #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif
@@ -1079,7 +1097,7 @@ const float   float_Pi   = 3.14159265358979323846f;
 /** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
 forcedinline uint32 swapByteOrder (uint32 n) throw()
 {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
     // Mac version
     return CFSwapInt32 (n);
 #elif JUCE_GCC
@@ -1113,7 +1131,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
     return CFSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);
@@ -2536,7 +2554,7 @@ BEGIN_JUCE_NAMESPACE
 
 // Atomic increment/decrement operations..
 
-#if JUCE_MAC && ! DOXYGEN
+#if (JUCE_MAC || JUCE_IPHONE) && ! DOXYGEN
 
   #if ! MACOS_10_3_OR_EARLIER
 
@@ -7147,7 +7165,7 @@ public:
                                             const String& bodyText,
                                             const StringArray& filesToAttach);
 
-#if JUCE_MAC || DOXYGEN
+#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
 
     /** MAC ONLY - Turns a Core CF String into a juce one. */
     static const String cfStringToJuceString (CFStringRef cfString);
@@ -7288,7 +7306,7 @@ public:
 #endif
 };
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
 
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
     using RAII.
@@ -7302,6 +7320,10 @@ public:
 private:
     void* pool;
 };
+
+#endif
+
+#if JUCE_MAC
 
 /**
     A wrapper class for picking up events from an Apple IR remote control device.
@@ -8302,10 +8324,12 @@ public:
 
         @param  addresses   an array into which the MAC addresses should be copied
         @param  maxNum      the number of elements in this array
-        @param littleEndian the endianness of the numbers to return. Note that
-                            the default values of this parameter are different on
-                            Mac/PC to avoid breaking old software that was written
-                            before this parameter was added (when the two systems
+        @param littleEndian the endianness of the numbers to return. If this is true,
+                            the least-significant byte of each number is the first byte
+                            of the mac address. If false, the least significant byte is
+                            the last number. Note that the default values of this parameter
+                            are different on Mac/PC to avoid breaking old software that was
+                            written before this parameter was added (when the two systems
                             defaulted to using different endiannesses). In newer
                             software you probably want to specify an explicit value
                             for this.

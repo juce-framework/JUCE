@@ -46,7 +46,7 @@ public:
                                             const String& bodyText,
                                             const StringArray& filesToAttach);
 
-#if JUCE_MAC || DOXYGEN
+#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
     //==============================================================================
     /** MAC ONLY - Turns a Core CF String into a juce one. */
     static const String cfStringToJuceString (CFStringRef cfString);
@@ -191,7 +191,7 @@ public:
 };
 
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
 
 //==============================================================================
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
@@ -206,6 +206,10 @@ public:
 private:
     void* pool;
 };
+
+#endif
+
+#if JUCE_MAC
 
 //==============================================================================
 /**

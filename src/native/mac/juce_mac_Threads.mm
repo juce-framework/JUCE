@@ -97,7 +97,11 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
 //==============================================================================
 bool Process::isForegroundProcess() throw()
 {
+#if JUCE_MAC
     return [NSApp isActive];
+#else
+    return true; // xxx change this if more than one app is ever possible on the iPhone!
+#endif
 }
 
 void Process::raisePrivilege()

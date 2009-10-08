@@ -101,7 +101,7 @@
     On Windows, if you enable this, you'll need to have the QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || (defined (_WIN32) && ! defined (_MSC_VER)))
+#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || defined (TARGET_OS_IPHONE) || defined (TARGET_IPHONE_SIMULATOR) || (defined (_WIN32) && ! defined (_MSC_VER)))
   #define JUCE_QUICKTIME 1
 #endif
 

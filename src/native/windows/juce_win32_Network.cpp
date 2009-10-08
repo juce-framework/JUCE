@@ -338,12 +338,9 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool l
                 {
                     if (astat.adapt.adapter_type == 0xfe)
                     {
-                        int64 mac = 0;
-                        for (unsigned int i = 0; i < 6; ++i)
-                            mac = (mac << 8) | astat.adapt.adapter_address[i];
-
-                        if (littleEndian)
-                            mac = (int64) swapByteOrder ((uint64) mac);
+                        uint64 mac = 0;
+                        for (int i = 6; --i >= 0;)
+                            mac = (mac << 8) | astat.adapt.adapter_address [littleEndian ? i : (5 - i)];
 
                         if (numFound < maxNum && mac != 0)
                             addresses [numFound++] = mac;

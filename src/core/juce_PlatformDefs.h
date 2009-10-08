@@ -48,6 +48,8 @@
 #else
   #if defined (LINUX) || defined (__linux__)
     #define     JUCE_LINUX 1
+  #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    #define     JUCE_IPHONE 1
   #else
     #define     JUCE_MAC 1
   #endif
@@ -110,6 +112,21 @@
 
   #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
     #define MACOS_10_4_OR_EARLIER 1
+  #endif
+#endif
+
+//==============================================================================
+#if JUCE_IPHONE
+  #include <CoreFoundation/CoreFoundation.h>
+
+  #ifndef NDEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  #ifdef __LITTLE_ENDIAN__
+    #define JUCE_LITTLE_ENDIAN 1
+  #else
+    #define JUCE_BIG_ENDIAN 1
   #endif
 #endif
 
@@ -223,6 +240,8 @@
     #endif
   #elif JUCE_MAC
     #define juce_breakDebugger              Debugger();
+  #elif JUCE_IPHONE
+    #define juce_breakDebugger              assert (false);
   #elif JUCE_LINUX
     #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif

@@ -33,28 +33,6 @@
 */
 
 //==============================================================================
-const unsigned int macTimeToUnixTimeDiff = 0x7c25be90;
-
-static uint64 utcDateTimeToUnixTime (const UTCDateTime& d) throw()
-{
-    if (d.highSeconds == 0 && d.lowSeconds == 0 && d.fraction == 0)
-        return  0;
-
-    return (((((uint64) d.highSeconds) << 32) | (uint64) d.lowSeconds) * 1000)
-            + ((d.fraction * 1000) >> 16)
-            - 2082844800000ll;
-}
-
-static void unixTimeToUtcDateTime (uint64 t, UTCDateTime& d) throw()
-{
-    if (t != 0)
-        t += 2082844800000ll;
-
-    d.highSeconds = (t / 1000) >> 32;
-    d.lowSeconds = (t / 1000) & (uint64) 0xffffffff;
-    d.fraction = ((t % 1000) << 16) / 1000;
-}
-
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
@@ -64,24 +42,13 @@ void juce_getFileTimes (const String& fileName,
     accessTime = 0;
     creationTime = 0;
 
-    FSRef fileRef;
-    if (PlatformUtilities::makeFSRefFromPath (&fileRef, fileName))
+    struct stat info;
+    const int res = stat (fileName.toUTF8(), &info);
+    if (res == 0)
     {
-        FSRefParam info;
-        zerostruct (info);
-
-        info.ref = &fileRef;
-        info.whichInfo = kFSCatInfoAllDates;
-
-        FSCatalogInfo catInfo;
-        info.catInfo = &catInfo;
-
-        if (PBGetCatalogInfoSync (&info) == noErr)
-        {
-            creationTime = utcDateTimeToUnixTime (catInfo.createDate);
-            accessTime = utcDateTimeToUnixTime (catInfo.accessDate);
-            modificationTime = utcDateTimeToUnixTime (catInfo.contentModDate);
-        }
+        modificationTime = (int64) info.st_mtime * 1000;
+        accessTime = (int64) info.st_atime * 1000;
+        creationTime = (int64) info.st_ctime * 1000;
     }
 }
 
@@ -90,59 +57,29 @@ bool juce_setFileTimes (const String& fileName,
                         int64 accessTime,
                         int64 creationTime) throw()
 {
-    FSRef fileRef;
-    if (PlatformUtilities::makeFSRefFromPath (&fileRef, fileName))
-    {
-        FSRefParam info;
-        zerostruct (info);
+    struct utimbuf times;
+    times.actime = (time_t) (accessTime / 1000);
+    times.modtime = (time_t) (modificationTime / 1000);
 
-        info.ref = &fileRef;
-        info.whichInfo = kFSCatInfoAllDates;
-
-        FSCatalogInfo catInfo;
-        info.catInfo = &catInfo;
-
-        if (PBGetCatalogInfoSync (&info) == noErr)
-        {
-            if (creationTime != 0)
-                unixTimeToUtcDateTime (creationTime, catInfo.createDate);
-
-            if (modificationTime != 0)
-                unixTimeToUtcDateTime (modificationTime, catInfo.contentModDate);
-
-            if (accessTime != 0)
-                unixTimeToUtcDateTime (accessTime, catInfo.accessDate);
-
-            return PBSetCatalogInfoSync (&info) == noErr;
-        }
-    }
-
-    return false;
+    return utime (fileName.toUTF8(), &times) == 0;
 }
 
 bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
 {
-    const char* const fileNameUTF8 = fileName.toUTF8();
-
     struct stat info;
-    const int res = stat (fileNameUTF8, &info);
+    const int res = stat (fileName.toUTF8(), &info);
+    if (res != 0)
+        return false;
 
-    bool ok = false;
+    info.st_mode &= 0777;   // Just permissions
 
-    if (res == 0)
-    {
-        info.st_mode &= 0777;   // Just permissions
+    if (isReadOnly)
+        info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
+    else
+        // Give everybody write permission?
+        info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
 
-        if (isReadOnly)
-            info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
-        else
-            // Give everybody write permission?
-            info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
-
-        ok = chmod (fileNameUTF8, info.st_mode) == 0;
-    }
-
-    return ok;
+    return chmod (fileName.toUTF8(), info.st_mode) == 0;
 }
 
 bool juce_copyFile (const String& src, const String& dst) throw()
@@ -202,22 +139,29 @@ bool File::isOnHardDisk() const throw()
 
 bool File::isOnRemovableDrive() const throw()
 {
-   const ScopedAutoReleasePool pool;
-   BOOL removable = false;
+#if JUCE_IPHONE
+    return false; // xxx is this possible?
+#else
+    const ScopedAutoReleasePool pool;
+    BOOL removable = false;
 
-   [[NSWorkspace sharedWorkspace]
-          getFileSystemInfoForPath: juceStringToNS (getFullPathName())
-                       isRemovable: &removable
-                        isWritable: nil
-                     isUnmountable: nil
-                       description: nil
-                              type: nil];
+    [[NSWorkspace sharedWorkspace]
+           getFileSystemInfoForPath: juceStringToNS (getFullPathName())
+                        isRemovable: &removable
+                         isWritable: nil
+                      isUnmountable: nil
+                        description: nil
+                               type: nil];
 
     return removable;
+#endif
 }
 
 static bool juce_isHiddenFile (const String& path) throw()
 {
+#if JUCE_IPHONE
+    return File (path).getFileName().startsWithChar (T('.'));
+#else
     FSRef ref;
     if (! PlatformUtilities::makeFSRefFromPath (&ref, path))
         return false;
@@ -229,6 +173,7 @@ static bool juce_isHiddenFile (const String& path) throw()
         return (((FolderInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
 
     return (((FileInfo*) &info.finderInfo)->finderFlags & kIsInvisible) != 0;
+#endif
 }
 
 bool File::isHidden() const throw()
@@ -350,15 +295,10 @@ const String File::getVersion() const throw()
 //==============================================================================
 const File File::getLinkedTarget() const throw()
 {
-    FSRef ref;
-    Boolean targetIsAFolder, wasAliased;
+    NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
 
-    if (PlatformUtilities::makeFSRefFromPath (&ref, getFullPathName())
-         && (FSResolveAliasFileWithMountFlags (&ref, true, &targetIsAFolder, &wasAliased, 0) == noErr)
-         && wasAliased)
-    {
-        return File (PlatformUtilities::makePathFromFSRef (&ref));
-    }
+    if (dest != nil)
+        return File (nsStringToJuce (dest));
 
     return *this;
 }
@@ -369,6 +309,9 @@ bool File::moveToTrash() const throw()
     if (! exists())
         return true;
 
+#if JUCE_IPHONE
+    return deleteFile(); //xxx is there a trashcan on the iPhone?
+#else
     const ScopedAutoReleasePool pool;
 
     NSString* p = juceStringToNS (getFullPathName());
@@ -379,100 +322,36 @@ bool File::moveToTrash() const throw()
                          destination: @""
                                files: [NSArray arrayWithObject: [p lastPathComponent]]
                                  tag: nil ];
+#endif
 }
 
 //==============================================================================
 struct FindFileStruct
 {
-    String parentDir, wildCard;
-    DIR* dir;
-
-    bool getNextMatch (String& result, bool* const isDir, bool* const isHidden, int64* const fileSize,
-                       Time* const modTime, Time* const creationTime, bool* const isReadOnly) throw()
-    {
-        const char* const wildCardUTF8 = wildCard.toUTF8();
-
-        for (;;)
-        {
-            struct dirent* const de = readdir (dir);
-
-            if (de == 0)
-                break;
-
-            if (fnmatch (wildCardUTF8, de->d_name, 0) == 0)
-            {
-                result = String::fromUTF8 ((const uint8*) de->d_name);
-
-                const String path (parentDir + result);
-
-                if (isDir != 0 || fileSize != 0)
-                {
-                    struct stat info;
-                    const bool statOk = juce_stat (path, info);
-
-                    if (isDir != 0)
-                        *isDir = path.isEmpty() || (statOk && ((info.st_mode & S_IFDIR) != 0));
-
-                    if (isHidden != 0)
-                        *isHidden = (de->d_name[0] == '.')
-                                      || juce_isHiddenFile (path);
-
-                    if (fileSize != 0)
-                        *fileSize = statOk ? info.st_size : 0;
-                }
-
-                if (modTime != 0 || creationTime != 0)
-                {
-                    int64 m, a, c;
-                    juce_getFileTimes (path, m, a, c);
-
-                    if (modTime != 0)
-                        *modTime = m;
-
-                    if (creationTime != 0)
-                        *creationTime = c;
-                }
-
-                if (isReadOnly != 0)
-                    *isReadOnly = ! juce_canWriteToFile (path);
-
-                return true;
-            }
-        }
-
-        return false;
-    }
+    NSDirectoryEnumerator* enumerator;
+    String parentDir;
 };
 
-// returns 0 on failure
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
                           Time* creationTime, bool* isReadOnly) throw()
 {
-    DIR* const d = opendir (directory.toUTF8());
+    NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
 
-    if (d != 0)
+    if (e != 0)
     {
-        FindFileStruct* const ff = new FindFileStruct();
+        FindFileStruct* ff = new FindFileStruct();
+        ff->enumerator = [e retain];
         ff->parentDir = directory;
 
-        if (!ff->parentDir.endsWithChar (File::separator))
+        if (! ff->parentDir.endsWithChar (File::separator))
             ff->parentDir += File::separator;
 
-        ff->wildCard = wildCard;
-        ff->dir = d;
-
-        if (ff->getNextMatch (firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
-        {
+        if (juce_findFileNext (ff, firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
             return ff;
-        }
-        else
-        {
-            firstResultFile = String::empty;
-            isDir = false;
-            closedir (d);
-            delete ff;
-        }
+
+        [e release];
+        delete ff;
     }
 
     return 0;
@@ -481,23 +360,55 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
 {
-    FindFileStruct* const ff = (FindFileStruct*) handle;
+    FindFileStruct* ff = (FindFileStruct*) handle;
+    NSString* file;
 
-    if (ff != 0)
-        return ff->getNextMatch (resultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
+    if (ff == 0 || (file = [ff->enumerator nextObject]) == 0)
+        return false;
 
-    return false;
+    [ff->enumerator skipDescendents];
+    resultFile = nsStringToJuce (file);
+    
+    const String path (ff->parentDir + resultFile);
+
+    if (isDir != 0 || fileSize != 0)
+    {
+        struct stat info;
+        const bool statOk = juce_stat (path, info);
+
+        if (isDir != 0)
+            *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+
+        if (isHidden != 0)
+            *isHidden = juce_isHiddenFile (path);
+
+        if (fileSize != 0)
+            *fileSize = statOk ? info.st_size : 0;
+    }
+
+    if (modTime != 0 || creationTime != 0)
+    {
+        int64 m, a, c;
+        juce_getFileTimes (path, m, a, c);
+
+        if (modTime != 0)
+            *modTime = m;
+
+        if (creationTime != 0)
+            *creationTime = c;
+    }
+
+    if (isReadOnly != 0)
+        *isReadOnly = ! juce_canWriteToFile (path);
+    
+    return true;
 }
 
 void juce_findFileClose (void* handle) throw()
 {
-    FindFileStruct* const ff = (FindFileStruct*)handle;
-
-    if (ff != 0)
-    {
-        closedir (ff->dir);
-        delete ff;
-    }
+    FindFileStruct* ff = (FindFileStruct*) handle;
+    [ff->enumerator release];
+    delete ff;
 }
 
 //==============================================================================
@@ -525,6 +436,9 @@ bool juce_launchExecutable (const String& pathAndArguments) throw()
 bool juce_launchFile (const String& fileName,
                       const String& parameters) throw()
 {
+#if JUCE_IPHONE
+    return false;  // is this possible?
+#else
     const ScopedAutoReleasePool pool;
 
     if (parameters.isEmpty())
@@ -560,9 +474,11 @@ bool juce_launchFile (const String& fileName,
     }
 
     return ok;
+#endif
 }
 
 //==============================================================================
+#if ! JUCE_IPHONE
 bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
 {
     return FSPathMakeRef ((const UInt8*) path.toUTF8(), destFSRef, 0) == noErr;
@@ -580,18 +496,24 @@ const String PlatformUtilities::makePathFromFSRef (FSRef* file)
 
     return PlatformUtilities::convertToPrecomposedUnicode (result);
 }
+#endif
 
 //==============================================================================
 OSType PlatformUtilities::getTypeOfFile (const String& filename)
 {
     const ScopedAutoReleasePool pool;
-    return NSHFSTypeCodeFromFileType (NSHFSTypeOfFile (juceStringToNS (filename)));
+    NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
+    return (OSType) [fileDict objectForKey: NSFileHFSTypeCode];
 }
 
 bool PlatformUtilities::isBundle (const String& filename)
 {
+#if JUCE_IPHONE
+    return false; // xxx can't find a sensible way to do this without trying to open the bundle..
+#else
     const ScopedAutoReleasePool pool;
     return [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (filename)];
+#endif
 }
 
 #endif

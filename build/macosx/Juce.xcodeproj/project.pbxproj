@@ -35,6 +35,7 @@
 		8484E9D5103C9595008B7C6C /* juce_mac_WebBrowserComponent.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9BD103C9595008B7C6C /* juce_mac_WebBrowserComponent.mm */; };
 		8484E9D8103C95A6008B7C6C /* juce_posix_SharedCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */; };
 		8484E9D9103C95A6008B7C6C /* juce_posix_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */; };
+		84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
 		84F1E6E810403605006A1807 /* juce_Application.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DD10403605006A1807 /* juce_Application.h */; };
 		84F1E6E910403605006A1807 /* juce_ApplicationCommandID.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */; };
@@ -631,6 +632,7 @@
 		8484E9BD103C9595008B7C6C /* juce_mac_WebBrowserComponent.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_mac_WebBrowserComponent.mm; path = ../../src/native/mac/juce_mac_WebBrowserComponent.mm; sourceTree = SOURCE_ROOT; };
 		8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_posix_SharedCode.h; path = ../../src/native/common/juce_posix_SharedCode.h; sourceTree = SOURCE_ROOT; };
 		8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_posix_NamedPipe.cpp; path = ../../src/native/common/juce_posix_NamedPipe.cpp; sourceTree = SOURCE_ROOT; };
+		84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_mac_ObjCSuffix.h; sourceTree = "<group>"; };
 		84F1E6DC10403605006A1807 /* juce_Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Application.cpp; path = ../../src/application/juce_Application.cpp; sourceTree = SOURCE_ROOT; };
 		84F1E6DD10403605006A1807 /* juce_Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Application.h; path = ../../src/application/juce_Application.h; sourceTree = SOURCE_ROOT; };
 		84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ApplicationCommandID.h; path = ../../src/application/juce_ApplicationCommandID.h; sourceTree = SOURCE_ROOT; };
@@ -1251,7 +1253,6 @@
 		84A4881C08A22E2400752A2B /* native mac code */ = {
 			isa = PBXGroup;
 			children = (
-				8484E9A4103C958A008B7C6C /* juce_mac_NativeCode.mm */,
 				8484E9A6103C9595008B7C6C /* juce_mac_AppleRemote.mm */,
 				8484E9A7103C9595008B7C6C /* juce_mac_AudioCDBurner.mm */,
 				8484E9A8103C9595008B7C6C /* juce_mac_CameraDevice.mm */,
@@ -1266,10 +1267,12 @@
 				8484E9B1103C9595008B7C6C /* juce_mac_MessageManager.mm */,
 				8484E9B2103C9595008B7C6C /* juce_mac_MiscUtilities.mm */,
 				8484E9B3103C9595008B7C6C /* juce_mac_MouseCursor.mm */,
+				8484E9A4103C958A008B7C6C /* juce_mac_NativeCode.mm */,
 				8484E9B4103C9595008B7C6C /* juce_mac_NativeIncludes.h */,
 				8484E9B5103C9595008B7C6C /* juce_mac_Network.mm */,
 				8484E9B6103C9595008B7C6C /* juce_mac_NSViewComponent.mm */,
 				8484E9B7103C9595008B7C6C /* juce_mac_NSViewComponentPeer.mm */,
+				84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */,
 				8484E9B8103C9595008B7C6C /* juce_mac_OpenGLComponent.mm */,
 				8484E9B9103C9595008B7C6C /* juce_mac_QuickTimeMovieComponent.mm */,
 				8484E9BA103C9595008B7C6C /* juce_mac_Strings.mm */,
@@ -2560,6 +2563,7 @@
 				84F1ECE41040370A006A1807 /* juce_ImageConvolutionKernel.h in Headers */,
 				84F1ECE61040370A006A1807 /* juce_ImageFileFormat.h in Headers */,
 				84F1ECE81040370A006A1807 /* juce_GIFLoader.h in Headers */,
+				84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

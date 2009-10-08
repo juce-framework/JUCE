@@ -38,7 +38,7 @@
 /** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
 forcedinline uint32 swapByteOrder (uint32 n) throw()
 {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
     // Mac version
     return CFSwapInt32 (n);
 #elif JUCE_GCC
@@ -72,7 +72,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
     return CFSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);

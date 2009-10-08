@@ -45,6 +45,8 @@
  #include "native/windows/juce_win32_NativeIncludes.h"
 #elif defined (LINUX)
  #include "native/linux/juce_linux_NativeIncludes.h"
+#elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+ #include "native/mac/juce_iphone_NativeIncludes.h"
 #else
  #include "native/mac/juce_mac_NativeIncludes.h"
 #endif
@@ -346,4 +348,8 @@
 
 #if JUCE_MAC
  #include "native/juce_mac_NativeCode.mm"
+#endif
+
+#if JUCE_IPHONE
+ #include "native/juce_iphone_NativeCode.mm"
 #endif
