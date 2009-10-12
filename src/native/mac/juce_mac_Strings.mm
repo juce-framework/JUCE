@@ -170,7 +170,7 @@ void SystemClipboard::copyTextToClipboard (const String& text) throw()
 {
 #if JUCE_IPHONE
     [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
-                             forPasteboardType: (NSString*) kUTTypePlainText];
+                             forPasteboardType: @"public.text"];
 #else
     [[NSPasteboard generalPasteboard] declareTypes: [NSArray arrayWithObject: NSStringPboardType]
                                              owner: nil];
@@ -183,7 +183,7 @@ void SystemClipboard::copyTextToClipboard (const String& text) throw()
 const String SystemClipboard::getTextFromClipboard() throw()
 {
 #if JUCE_IPHONE
-    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: (NSString*) kUTTypePlainText];
+    NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
 #else
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];
 #endif

@@ -35,10 +35,11 @@
 
   #if ! MACOS_10_3_OR_EARLIER
     //==============================================================================
-    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+    #include <libkern/OSAtomic.h>
+    static forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
+    static forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
+    static forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
+    static forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
   #else
     //==============================================================================
     forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }

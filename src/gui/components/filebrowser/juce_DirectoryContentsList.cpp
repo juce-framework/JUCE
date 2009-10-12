@@ -249,7 +249,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInfo* const first,
                                             const DirectoryContentsList::FileInfo* const second) throw()
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     if (first->isDirectory != second->isDirectory)
         return first->isDirectory ? -1 : 1;
 #endif

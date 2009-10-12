@@ -113,7 +113,7 @@ bool FileChooser::showDialog (const bool isDirectory,
     jassert (previewComponent == 0 || (previewComponent->getWidth() > 10
                                         && previewComponent->getHeight() > 10));
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     if (useNativeDialogBox)
 #else
     if (useNativeDialogBox && (previewComponent == 0))

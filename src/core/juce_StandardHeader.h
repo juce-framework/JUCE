@@ -46,6 +46,8 @@
 
 
 //==============================================================================
+#include "juce_TargetPlatform.h"  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
+
 #include "../../juce_Config.h"
 
 //==============================================================================
@@ -58,7 +60,6 @@
 #endif
 
 //==============================================================================
-// This sets up the JUCE_WIN32, JUCE_MAC, or JUCE_LINUX macros
 #include "juce_PlatformDefs.h"
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).

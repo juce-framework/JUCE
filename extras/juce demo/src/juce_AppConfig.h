@@ -38,6 +38,8 @@
     to an explicit 0 or 1 in here.
 */
 
+#include "../../../src/core/juce_TargetPlatform.h"
+
 //#define JUCE_ONLY_BUILD_CORE_LIBRARY   1
 //#define JUCE_FORCE_DEBUG  1
 //#define JUCE_LOG_ASSERTIONS  1
@@ -45,12 +47,17 @@
 //#define JUCE_ASIO  1
 //#define JUCE_ALSA  1
 
-#ifdef _MSC_VER
+#if JUCE_WINDOWS || JUCE_IPHONE
  #define JUCE_QUICKTIME  0   // (This is disabled here by default because on windows it requires the QT SDK,
                              // but you can turn it on again if you've got the SDK)
 #endif
 
-#define JUCE_OPENGL  1
+#if JUCE_IPHONE
+ #define JUCE_OPENGL  0
+#else
+ #define JUCE_OPENGL  1
+#endif
+
 //#define JUCE_USE_FLAC  1
 //#define JUCE_USE_OGGVORBIS  1
 //#define JUCE_USE_CDBURNER  1
@@ -60,8 +67,8 @@
 #define JUCE_PLUGINHOST_VST  0
 #define JUCE_PLUGINHOST_AU  0
 
-#ifndef LINUX
- #define JUCE_USE_CAMERA 1
+#if JUCE_LINUX || JUCE_IPHONE
+ #define JUCE_USE_CAMERA 0
 #endif
 
 //#define JUCE_CHECK_MEMORY_LEAKS  1

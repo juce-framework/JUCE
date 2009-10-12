@@ -38,17 +38,18 @@
  #error
 #endif
 
+#include "core/juce_TargetPlatform.h" // FORCE_AMALGAMATOR_INCLUDE
 #include "../juce_Config.h"  // FORCE_AMALGAMATOR_INCLUDE
 
 //==============================================================================
-#ifdef _WIN32
+#if JUCE_WINDOWS
  #include "native/windows/juce_win32_NativeIncludes.h"
-#elif defined (LINUX)
+#elif JUCE_LINUX
  #include "native/linux/juce_linux_NativeIncludes.h"
-#elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
- #include "native/mac/juce_iphone_NativeIncludes.h"
-#else
+#elif JUCE_MAC || JUCE_IPHONE
  #include "native/mac/juce_mac_NativeIncludes.h"
+#else
+ #error "Unknown platform!"
 #endif
 
 //==============================================================================
@@ -338,7 +339,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
  #include "native/juce_win32_NativeCode.cpp"
 #endif
 
@@ -346,10 +347,6 @@
  #include "native/juce_linux_NativeCode.cpp"
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
  #include "native/juce_mac_NativeCode.mm"
-#endif
-
-#if JUCE_IPHONE
- #include "native/juce_iphone_NativeCode.mm"
 #endif

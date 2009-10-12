@@ -25,7 +25,7 @@
 
 #include "../../../core/juce_StandardHeader.h"
 
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
 
 BEGIN_JUCE_NAMESPACE
 

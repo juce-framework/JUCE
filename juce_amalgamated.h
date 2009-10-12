@@ -72,6 +72,147 @@
 */
 #define JUCE_VERSION            ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8))
 
+/********* Start of inlined file: juce_TargetPlatform.h *********/
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
+#define __JUCE_TARGETPLATFORM_JUCEHEADER__
+
+/*  This file figures out which platform is being built, and defines some macros
+    that the rest of the code can use for OS-specific compilation.
+
+    Macros that will be set here are:
+
+    - One of JUCE_WINDOWS, JUCE_MAC or JUCE_LINUX.
+    - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
+    - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
+    - Either JUCE_INTEL or JUCE_PPC
+    - Either JUCE_GCC or JUCE_MSVC
+*/
+
+#if (defined (_WIN32) || defined (_WIN64))
+  #define       JUCE_WIN32 1
+  #define       JUCE_WINDOWS 1
+#elif defined (LINUX) || defined (__linux__)
+  #define     JUCE_LINUX 1
+#elif defined(__APPLE_CPP__) || defined(__APPLE_CC__)
+  #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
+
+  #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+    #define     JUCE_IPHONE 1
+  #else
+    #define     JUCE_MAC 1
+  #endif
+#else
+  #error "Unknown platform!"
+#endif
+
+#if JUCE_WINDOWS
+  #ifdef _MSC_VER
+    #ifdef _WIN64
+      #define JUCE_64BIT 1
+    #else
+      #define JUCE_32BIT 1
+    #endif
+  #endif
+
+  #ifdef _DEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  /** If defined, this indicates that the processor is little-endian. */
+  #define JUCE_LITTLE_ENDIAN 1
+
+  #define JUCE_INTEL 1
+#endif
+
+#if JUCE_MAC
+
+  #ifndef NDEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  #ifdef __LITTLE_ENDIAN__
+    #define JUCE_LITTLE_ENDIAN 1
+  #else
+    #define JUCE_BIG_ENDIAN 1
+  #endif
+
+  #if defined (__ppc__) || defined (__ppc64__)
+    #define JUCE_PPC 1
+  #else
+    #define JUCE_INTEL 1
+  #endif
+
+  #ifdef __LP64__
+    #define JUCE_64BIT 1
+  #else
+    #define JUCE_32BIT 1
+  #endif
+
+  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
+    #error "Building for OSX 10.2 is no longer supported!"
+  #endif
+
+  #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
+    #define MACOS_10_3_OR_EARLIER 1
+  #endif
+
+  #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
+    #define MACOS_10_4_OR_EARLIER 1
+  #endif
+#endif
+
+#if JUCE_IPHONE
+
+  #ifndef NDEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  #ifdef __LITTLE_ENDIAN__
+    #define JUCE_LITTLE_ENDIAN 1
+  #else
+    #define JUCE_BIG_ENDIAN 1
+  #endif
+#endif
+
+#if JUCE_LINUX
+
+  #ifdef _DEBUG
+    #define JUCE_DEBUG 1
+  #endif
+
+  // Allow override for big-endian Linux platforms
+  #ifndef JUCE_BIG_ENDIAN
+    #define JUCE_LITTLE_ENDIAN 1
+  #endif
+
+  #if defined (__LP64__) || defined (_LP64)
+    #define JUCE_64BIT 1
+  #else
+    #define JUCE_32BIT 1
+  #endif
+
+  #define JUCE_INTEL 1
+#endif
+
+// Compiler type macros.
+
+#ifdef __GNUC__
+  #define JUCE_GCC 1
+#elif defined (_MSC_VER)
+  #define JUCE_MSVC 1
+
+  #if _MSC_VER >= 1400
+    #define JUCE_USE_INTRINSICS 1
+  #endif
+#else
+  #error unknown compiler
+#endif
+
+#endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
+/********* End of inlined file: juce_TargetPlatform.h *********/
+
+  // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
+
 /********* Start of inlined file: juce_Config.h *********/
 #ifndef __JUCE_CONFIG_JUCEHEADER__
 #define __JUCE_CONFIG_JUCEHEADER__
@@ -145,7 +286,7 @@
     On Windows, if you enable this, you'll need to have the QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || defined (TARGET_OS_IPHONE) || defined (TARGET_IPHONE_SIMULATOR) || (defined (_WIN32) && ! defined (_MSC_VER)))
+#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
   #define JUCE_QUICKTIME 1
 #endif
 
@@ -173,7 +314,7 @@
 /** This flag lets you enable support for CD-burning. You might want to disable
     it to build without the MS SDK under windows.
 */
-#if (! defined (JUCE_USE_CDBURNER)) && ! (defined (_WIN32) && ! defined (_MSC_VER))
+#if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
   #define JUCE_USE_CDBURNER 1
 #endif
 
@@ -300,130 +441,12 @@
   #define END_JUCE_NAMESPACE
 #endif
 
-// This sets up the JUCE_WIN32, JUCE_MAC, or JUCE_LINUX macros
-
 /********* Start of inlined file: juce_PlatformDefs.h *********/
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
 #define __JUCE_PLATFORMDEFS_JUCEHEADER__
 
-/*  This file figures out which platform is being built, and defines some macros
-    that the rest of the code can use for OS-specific compilation.
-
-    Macros that will be set here are:
-
-    - One of JUCE_WIN32, JUCE_MAC or JUCE_LINUX.
-    - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
-    - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
-    - Either JUCE_INTEL or JUCE_PPC
-    - Either JUCE_GCC or JUCE_MSVC
-
-    It also includes a set of macros for debug console output and assertions.
-
+/*  This file defines miscellaneous macros for debugging, assertions, etc.
 */
-
-#if (defined (_WIN32) || defined (_WIN64))
-  #define       JUCE_WIN32 1
-#else
-  #if defined (LINUX) || defined (__linux__)
-    #define     JUCE_LINUX 1
-  #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-    #define     JUCE_IPHONE 1
-  #else
-    #define     JUCE_MAC 1
-  #endif
-#endif
-
-#if JUCE_WIN32
-  #ifdef _MSC_VER
-    #ifdef _WIN64
-      #define JUCE_64BIT 1
-    #else
-      #define JUCE_32BIT 1
-    #endif
-  #endif
-
-  #ifdef _DEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  /** If defined, this indicates that the processor is little-endian. */
-  #define JUCE_LITTLE_ENDIAN 1
-
-  #define JUCE_INTEL 1
-#endif
-
-#if JUCE_MAC
-
-  #include <CoreFoundation/CoreFoundation.h>
-
-  #ifndef NDEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-    #define JUCE_LITTLE_ENDIAN 1
-  #else
-    #define JUCE_BIG_ENDIAN 1
-  #endif
-
-  #if defined (__ppc__) || defined (__ppc64__)
-    #define JUCE_PPC 1
-  #else
-    #define JUCE_INTEL 1
-  #endif
-
-  #ifdef __LP64__
-    #define JUCE_64BIT 1
-  #else
-    #define JUCE_32BIT 1
-  #endif
-
-  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #error "Building for OSX 10.2 is no longer supported!"
-  #endif
-
-  #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
-    #define MACOS_10_3_OR_EARLIER 1
-  #endif
-
-  #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
-    #define MACOS_10_4_OR_EARLIER 1
-  #endif
-#endif
-
-#if JUCE_IPHONE
-  #include <CoreFoundation/CoreFoundation.h>
-
-  #ifndef NDEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-    #define JUCE_LITTLE_ENDIAN 1
-  #else
-    #define JUCE_BIG_ENDIAN 1
-  #endif
-#endif
-
-#if JUCE_LINUX
-
-  #ifdef _DEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  // Allow override for big-endian Linux platforms
-  #ifndef JUCE_BIG_ENDIAN
-    #define JUCE_LITTLE_ENDIAN 1
-  #endif
-
-  #if defined (__LP64__) || defined (_LP64)
-    #define JUCE_64BIT 1
-  #else
-    #define JUCE_32BIT 1
-  #endif
-
-  #define JUCE_INTEL 1
-#endif
 
 #ifdef JUCE_FORCE_DEBUG
   #undef JUCE_DEBUG
@@ -431,20 +454,6 @@
   #if JUCE_FORCE_DEBUG
     #define JUCE_DEBUG 1
   #endif
-#endif
-
-// Compiler type macros.
-
-#ifdef __GNUC__
-  #define JUCE_GCC 1
-#elif defined (_MSC_VER)
-  #define JUCE_MSVC 1
-
-  #if _MSC_VER >= 1400
-    #define JUCE_USE_INTRINSICS 1
-  #endif
-#else
-  #error unknown compiler
 #endif
 
 /** This macro defines the C calling convention used as the standard for Juce calls. */
@@ -487,7 +496,7 @@
 
   // Assertions..
 
-  #if JUCE_WIN32 || DOXYGEN
+  #if JUCE_WINDOWS || DOXYGEN
 
     #if JUCE_USE_INTRINSICS
       #pragma intrinsic (__debugbreak)
@@ -511,7 +520,7 @@
   #elif JUCE_MAC
     #define juce_breakDebugger              Debugger();
   #elif JUCE_IPHONE
-    #define juce_breakDebugger              assert (false);
+    #define juce_breakDebugger              kill (0, SIGTRAP);
   #elif JUCE_LINUX
     #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif
@@ -1027,7 +1036,7 @@ inline void swapVariables (Type& variable1, Type& variable2) throw()
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-#if JUCE_WIN32 || defined (DOXYGEN)
+#if JUCE_WINDOWS || defined (DOXYGEN)
   /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
       versions of these functions of various platforms and compilers. */
   forcedinline double juce_hypot (double a, double b)           { return _hypot (a, b); }
@@ -1075,7 +1084,7 @@ const float   float_Pi   = 3.14159265358979323846f;
   #else
     #define juce_isfinite(v)    std::isfinite(v)
   #endif
-#elif JUCE_WIN32 && ! defined (isfinite)
+#elif JUCE_WINDOWS && ! defined (isfinite)
   #define juce_isfinite(v)      _finite(v)
 #else
   #define juce_isfinite(v)      isfinite(v)
@@ -1094,12 +1103,20 @@ const float   float_Pi   = 3.14159265358979323846f;
 
 // Endianness conversions..
 
+#if JUCE_IPHONE
+// a gcc compiler error seems to mean that these functions only work properly
+// on the iPhone if they are declared static..
+static forcedinline uint32 swapByteOrder (uint32 n) throw();
+static inline uint16 swapByteOrder (const uint16 n) throw();
+static inline uint64 swapByteOrder (const uint64 value) throw();
+#endif
+
 /** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
 forcedinline uint32 swapByteOrder (uint32 n) throw()
 {
 #if JUCE_MAC || JUCE_IPHONE
     // Mac version
-    return CFSwapInt32 (n);
+    return OSSwapInt32 (n);
 #elif JUCE_GCC
     // Inpenetrable GCC version..
     asm("bswap %%eax" : "=a"(n) : "a"(n));
@@ -1132,7 +1149,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
 #if JUCE_MAC || JUCE_IPHONE
-    return CFSwapInt64 (value);
+    return OSSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);
 #else
@@ -2534,7 +2551,7 @@ BEGIN_JUCE_NAMESPACE
   #pragma warning (disable: 4786) // (old vc6 warning about long class names)
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
   #pragma align=natural
 #endif
 
@@ -2558,10 +2575,11 @@ BEGIN_JUCE_NAMESPACE
 
   #if ! MACOS_10_3_OR_EARLIER
 
-    forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+    #include <libkern/OSAtomic.h>
+    static forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
+    static forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
+    static forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
+    static forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
   #else
 
     forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
@@ -7194,7 +7212,7 @@ public:
     static void addItemToDock (const File& file);
 #endif
 
-#if JUCE_WIN32 || DOXYGEN
+#if JUCE_WINDOWS || DOXYGEN
 
     // Some registry helper functions:
 
@@ -7272,7 +7290,7 @@ public:
     */
     static void fpuReset();
 
-#if JUCE_LINUX || JUCE_WIN32
+#if JUCE_LINUX || JUCE_WINDOWS
 
     /** Loads a dynamically-linked library into the process's address space.
 
@@ -23872,7 +23890,12 @@ private:
     String commandLineParameters;
     int appReturnValue;
     bool stillInitialising;
+    InterProcessLock* appLock;
 
+public:
+    /** @internal */
+    bool initialiseApp (String& commandLine);
+    /** @internal */
     static int shutdownAppAndClearUp();
 };
 
@@ -37075,7 +37098,7 @@ public:
     static int compareElements (const File* const, const File* const) throw();
 private:
 
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
     int numTracks;
     int trackStarts[100];
     bool audioTracks [100];
@@ -51964,7 +51987,7 @@ private:
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 #define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 
-#if JUCE_WIN32 || DOXYGEN
+#if JUCE_WINDOWS || DOXYGEN
 
 /**
     A Windows-specific class that can create and embed an ActiveX control inside
@@ -53629,7 +53652,7 @@ private:
 // this is used to disable QuickTime, and is defined in juce_Config.h
 #if JUCE_QUICKTIME || DOXYGEN
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
 
   typedef ActiveXControlComponent QTCompBaseClass;
 #else
@@ -53773,7 +53796,7 @@ private:
     File movieFile;
     bool movieLoaded, controllerVisible, looping;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
@@ -53801,7 +53824,7 @@ private:
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 #define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 
-#if JUCE_WIN32 || JUCE_LINUX || DOXYGEN
+#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
 
 /**
     On Windows only, this component sits in the taskbar tray as a small icon.
@@ -55028,7 +55051,7 @@ public:
   #pragma pack (pop)
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
   #pragma align=reset
 #endif
 
@@ -55063,7 +55086,7 @@ END_JUCE_NAMESPACE
      files, you may need to use the juce_WithoutMacros.h file - see the comments in that
      file for more information.
   */
-  #if JUCE_WIN32 && ! JUCE_DONT_DEFINE_MACROS
+  #if JUCE_WINDOWS && ! JUCE_DONT_DEFINE_MACROS
     #define Rectangle       JUCE_NAMESPACE::Rectangle
   #endif
 #endif
@@ -55164,7 +55187,7 @@ END_JUCE_NAMESPACE
         return JUCE_NAMESPACE::JUCEApplication::main (argc, argv, new AppClass()); \
     }
 
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
 
   #ifdef _CONSOLE
     #define START_JUCE_APPLICATION(AppClass) \

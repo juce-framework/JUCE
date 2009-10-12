@@ -26,17 +26,17 @@
 // This file is included at the start of each FLAC .c file, just to do a few housekeeping
 // tasks..
 
-
+#include "../../../../core/juce_TargetPlatform.h"
 #include "../../../../../juce_Config.h"
 
 #define VERSION "1.2.1"
 
 #define FLAC__NO_DLL 1
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312)
 #endif
 
-#if ! (defined (_WIN32) || defined (_WIN64) || defined (LINUX))
+#if JUCE_MAC
  #define FLAC__SYS_DARWIN 1
 #endif

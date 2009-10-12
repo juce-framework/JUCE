@@ -35,22 +35,33 @@
 
 #include "../../core/juce_StandardHeader.h"
 
-#import <Cocoa/Cocoa.h>
-#import <CoreAudio/HostTime.h>
-#import <CoreAudio/AudioHardware.h>
-#import <CoreMIDI/MIDIServices.h>
-#import <QTKit/QTKit.h>
-#import <WebKit/WebKit.h>
-#import <DiscRecording/DiscRecording.h>
-#import <IOKit/IOKitLib.h>
-#import <IOKit/IOCFPlugIn.h>
-#import <IOKit/hid/IOHIDLib.h>
-#import <IOKit/hid/IOHIDKeys.h>
-#import <IOKit/pwr_mgt/IOPMLib.h>
+#if JUCE_IPHONE
+ #import <Foundation/Foundation.h>
+ #import <UIKit/UIKit.h>
+ #import <AudioToolbox/AudioToolbox.h>
+ #import <AVFoundation/AVFoundation.h>
+ #import <CoreData/CoreData.h>
+ #import <MobileCoreServices/MobileCoreServices.h>
+ #include <sys/fcntl.h>
+#else
+ #import <Cocoa/Cocoa.h>
+ #import <CoreAudio/HostTime.h>
+ #import <CoreAudio/AudioHardware.h>
+ #import <CoreMIDI/MIDIServices.h>
+ #import <QTKit/QTKit.h>
+ #import <WebKit/WebKit.h>
+ #import <DiscRecording/DiscRecording.h>
+ #import <IOKit/IOKitLib.h>
+ #import <IOKit/IOCFPlugIn.h>
+ #import <IOKit/hid/IOHIDLib.h>
+ #import <IOKit/hid/IOHIDKeys.h>
+ #import <IOKit/pwr_mgt/IOPMLib.h>
+ #include <sys/dir.h>
+ #include <sys/socket.h>
+#endif
 
 #include <sys/sysctl.h>
 #include <sys/stat.h>
-#include <sys/dir.h>
 #include <sys/param.h>
 #include <sys/mount.h>
 #include <fnmatch.h>

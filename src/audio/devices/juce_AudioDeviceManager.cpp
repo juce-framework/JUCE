@@ -115,10 +115,10 @@ AudioIODeviceType* juce_createAudioIODeviceType_ALSA();
 
 void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
-    #if JUCE_WIN32
+    #if JUCE_WINDOWS
      #if JUCE_WASAPI
      if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
-        list.add (juce_createAudioIODeviceType_WASAPI());
+         list.add (juce_createAudioIODeviceType_WASAPI());
      #endif
 
      #if JUCE_DIRECTSOUND

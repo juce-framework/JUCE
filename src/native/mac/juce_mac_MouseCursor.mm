@@ -27,6 +27,8 @@
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
+#if JUCE_MAC
+
 //==============================================================================
 static NSImage* juceImageToNSImage (const Image& image)
 {
@@ -186,5 +188,15 @@ void MouseCursor::showInWindow (ComponentPeer*) const throw()
     NSCursor* const c = (NSCursor*) getHandle();
     [c set];
 }
+
+#else
+
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()  { return 0; }
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()             { return 0; }
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()           {}
+void MouseCursor::showInAllWindows() const throw()                                              {}
+void MouseCursor::showInWindow (ComponentPeer*) const throw()                                   {}
+
+#endif
 
 #endif

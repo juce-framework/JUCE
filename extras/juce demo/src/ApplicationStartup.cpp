@@ -26,7 +26,6 @@
 #include "jucedemo_headers.h"
 #include "MainDemoWindow.h"
 
-
 //==============================================================================
 class JUCEDemoApplication : public JUCEApplication
 {
@@ -63,7 +62,13 @@ public:
     {
         // just create the main window...
         theMainWindow = new MainDemoWindow();
+        
+#if JUCE_IPHONE
+        theMainWindow->setVisible (true);
+        theMainWindow->setBounds (0, 20, 320, 460);
+#else
         theMainWindow->centreWithSize (700, 600);
+#endif
         theMainWindow->setVisible (true);
 
         // this little function just demonstrates a few system info calls

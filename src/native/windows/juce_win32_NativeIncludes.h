@@ -28,6 +28,7 @@
 #define __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__
 
 
+#include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
 
 #ifndef STRICT

@@ -27,6 +27,8 @@
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
+#if JUCE_MAC
+
 //==============================================================================
 #undef log
 #define log(a) Logger::writeToLog(a)
@@ -585,5 +587,51 @@ void MidiInput::stop()
 }
 
 #undef log
+
+#else
+
+MidiOutput::~MidiOutput()
+{
+}
+
+void MidiOutput::reset()
+{
+}
+
+bool MidiOutput::getVolume (float& leftVol, float& rightVol)
+{
+    return false;
+}
+
+void MidiOutput::setVolume (float leftVol, float rightVol)
+{
+}
+
+void MidiOutput::sendMessageNow (const MidiMessage& message)
+{
+}
+
+const StringArray MidiOutput::getDevices()
+{
+    return StringArray();
+}
+
+MidiOutput* MidiOutput::openDevice (int index)
+{
+    return 0;
+}
+
+const StringArray MidiInput::getDevices()
+{
+    return StringArray();
+}
+
+MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
+{
+    return 0;
+}
+
+
+#endif
 
 #endif

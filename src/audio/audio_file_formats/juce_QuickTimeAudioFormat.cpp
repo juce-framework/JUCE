@@ -23,18 +23,19 @@
   ==============================================================================
 */
 
+#include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
 
-#if JUCE_QUICKTIME
+#if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IPHONE)
 
-#if ! defined (_WIN32)
+#if ! JUCE_WINDOWS
  #include <QuickTime/Movies.h>
  #include <QuickTime/QTML.h>
  #include <QuickTime/QuickTimeComponents.h>
  #include <QuickTime/MediaHandlers.h>
  #include <QuickTime/ImageCodec.h>
 #else
- #ifdef _MSC_VER
+ #if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable : 4100)
  #endif
@@ -51,14 +52,12 @@
  #include <MediaHandlers.h>
  #include <ImageCodec.h>
 
- #ifdef _MSC_VER
+ #if JUCE_MSVC
    #pragma warning (pop)
  #endif
 #endif
 
 #include "../../core/juce_StandardHeader.h"
-
-#if ! (JUCE_MAC && JUCE_64BIT)
 
 BEGIN_JUCE_NAMESPACE
 
@@ -403,5 +402,4 @@ AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*stream
 
 END_JUCE_NAMESPACE
 
-#endif
 #endif

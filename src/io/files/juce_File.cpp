@@ -30,7 +30,7 @@
 
 #include "../../core/juce_StandardHeader.h"
 
-#ifndef JUCE_WIN32
+#if ! JUCE_WINDOWS
   #include <pwd.h>
 #endif
 
@@ -103,7 +103,7 @@ static const String parseAbsolutePath (String path) throw()
     if (path.isEmpty())
         return String::empty;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     // Windows..
     path = path.replaceCharacter (T('/'), T('\\'));
 
@@ -271,7 +271,7 @@ bool File::hasWriteAccess() const throw()
     if (exists())
         return juce_canWriteToFile (fullPath);
 
-#ifndef JUCE_WIN32
+#if ! JUCE_WINDOWS
     else if ((! isDirectory()) && fullPath.containsChar (separator))
         return getParentDirectory().hasWriteAccess();
     else
@@ -444,7 +444,7 @@ bool File::isAChildOf (const File& potentialParent) const throw()
 bool File::isAbsolutePath (const String& path) throw()
 {
     return path.startsWithChar (T('/')) || path.startsWithChar (T('\\'))
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             || (path.isNotEmpty() && ((const String&) path)[1] == T(':'));
 #else
             || path.startsWithChar (T('~'));
@@ -465,7 +465,7 @@ const File File::getChildFile (String relativePath) const throw()
 
         if (relativePath[0] == T('.'))
         {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             relativePath = relativePath.replaceCharacter (T('/'), T('\\')).trimStart();
 #else
             relativePath = relativePath.replaceCharacter (T('\\'), T('/')).trimStart();
@@ -1100,7 +1100,7 @@ const String File::getRelativePathFrom (const File& dir)  const throw()
 
     while (dirPath.isNotEmpty())
     {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         thisPath = T("..\\") + thisPath;
 #else
         thisPath = T("../") + thisPath;

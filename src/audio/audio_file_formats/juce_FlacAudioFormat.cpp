@@ -23,12 +23,14 @@
   ==============================================================================
 */
 
+#include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
-#ifdef _MSC_VER
- #include <windows.h>
-#endif
 
 #if JUCE_USE_FLAC
+
+#if JUCE_WINDOWS
+ #include <windows.h>
+#endif
 
 #include "../../core/juce_StandardHeader.h"
 

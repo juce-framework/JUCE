@@ -1262,6 +1262,8 @@ public:
                         = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                                         T("This is an ok/cancel AlertWindow"),
                                                         T("And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah."));
+
+                    (void) userPickedOk; // (just avoids a compiler warning about unused variables)
                 }
                 else if (result == 111)
                 {
@@ -1285,6 +1287,8 @@ public:
                     {
                         // this is the item they chose in the drop-down list..
                         const int optionIndexChosen = w.getComboBoxComponent (T("option"))->getSelectedItemIndex();
+                        (void) optionIndexChosen; // (just avoids a compiler warning about unused variables)
+
 
                         // this is the text they entered..
                         String text = w.getTextEditorContents (T("text"));

@@ -45,7 +45,7 @@ BEGIN_JUCE_NAMESPACE
   #pragma warning (disable: 4786) // (old vc6 warning about long class names)
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
   #pragma align=natural
 #endif
 
@@ -65,7 +65,7 @@ BEGIN_JUCE_NAMESPACE
   #pragma pack (pop)
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
   #pragma align=reset
 #endif
 
@@ -102,7 +102,7 @@ END_JUCE_NAMESPACE
      files, you may need to use the juce_WithoutMacros.h file - see the comments in that 
      file for more information.
   */
-  #if JUCE_WIN32 && ! JUCE_DONT_DEFINE_MACROS
+  #if JUCE_WINDOWS && ! JUCE_DONT_DEFINE_MACROS
     #define Rectangle       JUCE_NAMESPACE::Rectangle
   #endif
 #endif
@@ -176,7 +176,7 @@ END_JUCE_NAMESPACE
         return JUCE_NAMESPACE::JUCEApplication::main (argc, argv, new AppClass()); \
     }
 
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
 
   #ifdef _CONSOLE
     #define START_JUCE_APPLICATION(AppClass) \

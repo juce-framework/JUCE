@@ -76,7 +76,7 @@ public:
 #endif
 
 
-#if JUCE_WIN32 || DOXYGEN
+#if JUCE_WINDOWS || DOXYGEN
     //==============================================================================
     // Some registry helper functions:
 
@@ -155,7 +155,7 @@ public:
     static void fpuReset();
 
 
-#if JUCE_LINUX || JUCE_WIN32
+#if JUCE_LINUX || JUCE_WINDOWS
     //==============================================================================
     /** Loads a dynamically-linked library into the process's address space.
 

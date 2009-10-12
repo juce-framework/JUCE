@@ -26,8 +26,6 @@
 #ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
 #define __JUCE_DATACONVERSIONS_JUCEHEADER__
 
-#include "juce_PlatformDefs.h"
-
 #if JUCE_USE_INTRINSICS
   #pragma intrinsic (_byteswap_ulong)
 #endif
@@ -35,12 +33,20 @@
 //==============================================================================
 // Endianness conversions..
 
+#if JUCE_IPHONE
+// a gcc compiler error seems to mean that these functions only work properly 
+// on the iPhone if they are declared static..
+static forcedinline uint32 swapByteOrder (uint32 n) throw();
+static inline uint16 swapByteOrder (const uint16 n) throw();
+static inline uint64 swapByteOrder (const uint64 value) throw();
+#endif
+
 /** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
 forcedinline uint32 swapByteOrder (uint32 n) throw()
 {
 #if JUCE_MAC || JUCE_IPHONE
     // Mac version
-    return CFSwapInt32 (n);
+    return OSSwapInt32 (n);
 #elif JUCE_GCC
     // Inpenetrable GCC version..
     asm("bswap %%eax" : "=a"(n) : "a"(n));
@@ -73,7 +79,7 @@ inline uint16 swapByteOrder (const uint16 n) throw()
 inline uint64 swapByteOrder (const uint64 value) throw()
 {
 #if JUCE_MAC || JUCE_IPHONE
-    return CFSwapInt64 (value);
+    return OSSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);
 #else

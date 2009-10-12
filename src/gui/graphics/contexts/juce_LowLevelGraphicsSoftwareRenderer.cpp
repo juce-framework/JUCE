@@ -35,11 +35,11 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_Rectangle.h"
 #include "../../../core/juce_SystemStats.h"
 
-#if ! (defined (JUCE_MAC) || (defined (JUCE_WIN32) && defined (JUCE_64BIT)))
+#if (JUCE_WINDOWS || JUCE_LINUX) && ! JUCE_64BIT
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
-#if defined (JUCE_DEBUG) && JUCE_MSVC
+#if JUCE_DEBUG && JUCE_MSVC
  #pragma warning (disable: 4714)
 #endif
 
@@ -163,7 +163,7 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
         if (alpha <= 0)
             return;
 
-#if defined (JUCE_USE_SSE_INSTRUCTIONS) && ! JUCE_64BIT
+#if JUCE_USE_SSE_INSTRUCTIONS
         if (SystemStats::hasSSE())
         {
             int64 rgb0 = (((int64) blendColour.getRed()) << 32)

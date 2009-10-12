@@ -295,8 +295,13 @@ const String File::getVersion() const throw()
 //==============================================================================
 const File File::getLinkedTarget() const throw()
 {
+#if JUCE_IPHONE || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
 
+#else
+    NSString* dest = [[NSFileManager defaultManager] pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
+#endif
+    
     if (dest != nil)
         return File (nsStringToJuce (dest));
 
@@ -331,31 +336,6 @@ struct FindFileStruct
     NSDirectoryEnumerator* enumerator;
     String parentDir;
 };
-
-void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly) throw()
-{
-    NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
-
-    if (e != 0)
-    {
-        FindFileStruct* ff = new FindFileStruct();
-        ff->enumerator = [e retain];
-        ff->parentDir = directory;
-
-        if (! ff->parentDir.endsWithChar (File::separator))
-            ff->parentDir += File::separator;
-
-        if (juce_findFileNext (ff, firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
-            return ff;
-
-        [e release];
-        delete ff;
-    }
-
-    return 0;
-}
 
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
@@ -404,6 +384,31 @@ bool juce_findFileNext (void* handle, String& resultFile,
     return true;
 }
 
+void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
+                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
+                          Time* creationTime, bool* isReadOnly) throw()
+{
+    NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
+
+    if (e != 0)
+    {
+        FindFileStruct* ff = new FindFileStruct();
+        ff->enumerator = [e retain];
+        ff->parentDir = directory;
+
+        if (! ff->parentDir.endsWithChar (File::separator))
+            ff->parentDir += File::separator;
+
+        if (juce_findFileNext (ff, firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
+            return ff;
+
+        [e release];
+        delete ff;
+    }
+
+    return 0;
+}
+
 void juce_findFileClose (void* handle) throw()
 {
     FindFileStruct* ff = (FindFileStruct*) handle;
@@ -437,7 +442,7 @@ bool juce_launchFile (const String& fileName,
                       const String& parameters) throw()
 {
 #if JUCE_IPHONE
-    return false;  // is this possible?
+    return [[UIApplication sharedApplication] openURL: [NSURL fileURLWithPath: juceStringToNS (fileName)]];
 #else
     const ScopedAutoReleasePool pool;
 
@@ -502,7 +507,12 @@ const String PlatformUtilities::makePathFromFSRef (FSRef* file)
 OSType PlatformUtilities::getTypeOfFile (const String& filename)
 {
     const ScopedAutoReleasePool pool;
+    
+#if JUCE_IPHONE || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
+    NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (filename) error: nil];
+#else
     NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
+#endif
     return (OSType) [fileDict objectForKey: NSFileHFSTypeCode];
 }
 

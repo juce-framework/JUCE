@@ -29,6 +29,46 @@
 
 
 //==============================================================================
+static JUCEApplication* juce_intialisingApp;
+
+END_JUCE_NAMESPACE
+
+@interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
+{
+}
+
+- (void) applicationDidFinishLaunching: (UIApplication*) application;
+- (void) applicationWillResignActive: (UIApplication*) application;
+
+@end
+
+@implementation JuceAppStartupDelegate
+
+- (void) applicationDidFinishLaunching: (UIApplication*) application
+{
+    String dummy;
+    if (! juce_intialisingApp->initialiseApp (dummy))
+    {
+        // (should quit)
+    }
+}
+
+- (void) applicationWillResignActive: (UIApplication*) application
+{
+    JUCEApplication::shutdownAppAndClearUp();
+}
+
+@end
+
+BEGIN_JUCE_NAMESPACE
+
+int juce_IPhoneMain (int argc, char* argv[], JUCEApplication* app)
+{
+    juce_intialisingApp = app;
+    return UIApplicationMain (argc, argv, nil, @"JuceAppStartupDelegate");
+}
+
+//==============================================================================
 ScopedAutoReleasePool::ScopedAutoReleasePool()
 {
     pool = [[NSAutoreleasePool alloc] init];

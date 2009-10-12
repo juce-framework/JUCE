@@ -23,7 +23,9 @@
   ==============================================================================
 */
 
-#ifdef _WIN32
+#include "../../core/juce_TargetPlatform.h"
+
+#if JUCE_WINDOWS
   #include <winsock2.h>
 
   #ifdef _MSC_VER
@@ -31,16 +33,14 @@
   #endif
 
 #else
-  #if defined (LINUX) || defined (__linux__)
+  #if JUCE_LINUX
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <sys/errno.h>
     #include <unistd.h>
     #include <netinet/in.h>
-  #else
-    #if (MACOSX_DEPLOYMENT_TARGET <= MAC_OS_X_VERSION_10_4) && ! (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
-      #include <CoreServices/CoreServices.h>
-    #endif
+  #elif (MACOSX_DEPLOYMENT_TARGET <= MAC_OS_X_VERSION_10_4) && ! JUCE_IPHONE
+    #include <CoreServices/CoreServices.h>
   #endif
 
   #include <fcntl.h>
@@ -65,7 +65,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
 
 typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
 juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib = 0;
@@ -126,7 +126,7 @@ static int readSocket (const int handle,
     {
         int bytesThisTime;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         bytesThisTime = recv (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
 #else
         while ((bytesThisTime = ::read (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead)) < 0
@@ -179,7 +179,7 @@ static int waitForReadiness (const int handle, const bool forReading,
     fd_set* const prset = forReading ? &rset : 0;
     fd_set* const pwset = forReading ? 0 : &wset;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     if (select (handle + 1, prset, pwset, 0, timeoutp) < 0)
         return -1;
 #else
@@ -213,7 +213,7 @@ static int waitForReadiness (const int handle, const bool forReading,
 
 static bool setSocketBlockingState (const int handle, const bool shouldBlock) throw()
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     u_long nonBlocking = shouldBlock ? 0 : 1;
 
     if (ioctlsocket (handle, FIONBIO, &nonBlocking) != 0)
@@ -279,7 +279,7 @@ static bool connectSocket (int volatile& handle,
 
     if (result < 0)
     {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK)
 #else
         if (errno == EINPROGRESS)
@@ -306,7 +306,7 @@ StreamingSocket::StreamingSocket()
       connected (false),
       isListener (false)
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     initWin32Sockets();
 #endif
 }
@@ -320,7 +320,7 @@ StreamingSocket::StreamingSocket (const String& hostName_,
       connected (true),
       isListener (false)
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     initWin32Sockets();
 #endif
 
@@ -344,7 +344,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     if (isListener || ! connected)
         return -1;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     return send (handle, (const char*) sourceBuffer, numBytesToWrite, 0);
 #else
     int result;
@@ -403,7 +403,7 @@ bool StreamingSocket::connect (const String& remoteHostName,
 
 void StreamingSocket::close()
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     closesocket (handle);
     connected = false;
 #else
@@ -497,7 +497,7 @@ DatagramSocket::DatagramSocket (const int localPortNumber, const bool allowBroad
       allowBroadcast (allowBroadcast_),
       serverAddress (0)
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     initWin32Sockets();
 #endif
 
@@ -514,7 +514,7 @@ DatagramSocket::DatagramSocket (const String& hostName_, const int portNumber_,
       allowBroadcast (false),
       serverAddress (0)
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     initWin32Sockets();
 #endif
 
@@ -532,7 +532,7 @@ DatagramSocket::~DatagramSocket()
 
 void DatagramSocket::close()
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     closesocket (handle);
     connected = false;
 #else

@@ -207,7 +207,7 @@ inline void swapVariables (Type& variable1, Type& variable2) throw()
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-#if JUCE_WIN32 || defined (DOXYGEN)
+#if JUCE_WINDOWS || defined (DOXYGEN)
   /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
       versions of these functions of various platforms and compilers. */
   forcedinline double juce_hypot (double a, double b)           { return _hypot (a, b); }
@@ -259,7 +259,7 @@ const float   float_Pi   = 3.14159265358979323846f;
   #else
     #define juce_isfinite(v)    std::isfinite(v)
   #endif
-#elif JUCE_WIN32 && ! defined (isfinite)
+#elif JUCE_WINDOWS && ! defined (isfinite)
   #define juce_isfinite(v)      _finite(v)
 #else
   #define juce_isfinite(v)      isfinite(v)

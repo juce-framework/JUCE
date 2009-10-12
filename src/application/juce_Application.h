@@ -28,6 +28,7 @@
 
 #include "juce_ApplicationCommandTarget.h"
 #include "../events/juce_ActionListener.h"
+#include "../threads/juce_InterProcessLock.h"
 
 
 //==============================================================================
@@ -288,7 +289,12 @@ private:
     String commandLineParameters;
     int appReturnValue;
     bool stillInitialising;
+    InterProcessLock* appLock;
 
+public:
+    /** @internal */
+    bool initialiseApp (String& commandLine);
+    /** @internal */
     static int shutdownAppAndClearUp();
 };
 

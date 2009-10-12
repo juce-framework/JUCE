@@ -158,7 +158,7 @@ public:
     static int compareElements (const File* const, const File* const) throw();
 private:
 
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
     int numTracks;
     int trackStarts[100];
     bool audioTracks [100];

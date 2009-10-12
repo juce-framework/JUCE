@@ -28,7 +28,7 @@
 
 #include "../juce_Component.h"
 
-#if JUCE_WIN32 || DOXYGEN
+#if JUCE_WINDOWS || DOXYGEN
 
 //==============================================================================
 /**

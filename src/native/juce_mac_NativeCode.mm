@@ -86,25 +86,44 @@ BEGIN_JUCE_NAMESPACE
 #include "mac/juce_mac_Threads.mm"
 #include "common/juce_posix_SharedCode.h"
 #include "mac/juce_mac_Files.mm"
-#include "mac/juce_mac_MiscUtilities.mm"
+
+#if JUCE_IPHONE
+ #include "mac/juce_iphone_MiscUtilities.mm"
+#else
+ #include "mac/juce_mac_MiscUtilities.mm"
+#endif
+
 #include "mac/juce_mac_Debugging.mm"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #include "mac/juce_mac_NSViewComponentPeer.mm"
- #include "mac/juce_mac_MouseCursor.mm"
- #include "mac/juce_mac_NSViewComponent.mm"
- #include "mac/juce_mac_AppleRemote.mm"
- #include "mac/juce_mac_OpenGLComponent.mm"
- #include "mac/juce_mac_MainMenu.mm"
- #include "mac/juce_mac_FileChooser.mm"
- #include "mac/juce_mac_QuickTimeMovieComponent.mm"
- #include "mac/juce_mac_AudioCDBurner.mm"
- #include "mac/juce_mac_Fonts.mm"
- #include "mac/juce_mac_MessageManager.mm"
- #include "mac/juce_mac_WebBrowserComponent.mm"
- #include "mac/juce_mac_CoreAudio.cpp"
- #include "mac/juce_mac_CoreMidi.cpp"
- #include "mac/juce_mac_CameraDevice.mm"
+ #if JUCE_IPHONE
+  #include "mac/juce_iphone_UIViewComponentPeer.mm"
+  #include "mac/juce_iphone_Fonts.mm"
+  #include "mac/juce_iphone_MessageManager.mm"
+  #include "mac/juce_mac_FileChooser.mm"
+  #include "mac/juce_mac_OpenGLComponent.mm"
+  #include "mac/juce_mac_MouseCursor.mm"
+  #include "mac/juce_mac_WebBrowserComponent.mm"
+  //#include "mac/juce_mac_CoreAudio.cpp"
+  //#include "mac/juce_mac_CameraDevice.mm"
+  #include "mac/juce_mac_CoreMidi.cpp"
+ #else
+  #include "mac/juce_mac_NSViewComponentPeer.mm"
+  #include "mac/juce_mac_MouseCursor.mm"
+  #include "mac/juce_mac_NSViewComponent.mm"
+  #include "mac/juce_mac_AppleRemote.mm"
+  #include "mac/juce_mac_OpenGLComponent.mm"
+  #include "mac/juce_mac_MainMenu.mm"
+  #include "mac/juce_mac_FileChooser.mm"
+  #include "mac/juce_mac_QuickTimeMovieComponent.mm"
+  #include "mac/juce_mac_AudioCDBurner.mm"
+  #include "mac/juce_mac_Fonts.mm"
+  #include "mac/juce_mac_MessageManager.mm"
+  #include "mac/juce_mac_WebBrowserComponent.mm"
+  #include "mac/juce_mac_CoreAudio.cpp"
+  #include "mac/juce_mac_CoreMidi.cpp"
+  #include "mac/juce_mac_CameraDevice.mm"
+ #endif
 #endif
 
 END_JUCE_NAMESPACE

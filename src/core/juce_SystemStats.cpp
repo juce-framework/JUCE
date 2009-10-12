@@ -52,7 +52,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
     {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
         const ScopedAutoReleasePool pool;
 #endif
 
@@ -84,7 +84,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
     }
 }
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
  // This is imported from the sockets code..
  typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
  extern juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib;
@@ -98,11 +98,11 @@ void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
         const ScopedAutoReleasePool pool;
 #endif
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         // need to shut down sockets if they were used..
         if (juce_CloseWin32SocketLib != 0)
             (*juce_CloseWin32SocketLib)();

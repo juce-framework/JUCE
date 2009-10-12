@@ -44,7 +44,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Time.h"
 #include "../core/juce_Initialisation.h"
 #include "../threads/juce_Process.h"
-#include "../threads/juce_InterProcessLock.h"
 #include "../core/juce_PlatformUtilities.h"
 
 void juce_setCurrentThreadName (const String& name) throw();
@@ -55,12 +54,18 @@ static JUCEApplication* appInstance = 0;
 //==============================================================================
 JUCEApplication::JUCEApplication()
     : appReturnValue (0),
-      stillInitialising (true)
+      stillInitialising (true),
+      appLock (0)
 {
 }
 
 JUCEApplication::~JUCEApplication()
 {
+    if (appLock != 0)
+    {
+        appLock->exit();
+        delete appLock;
+    }
 }
 
 JUCEApplication* JUCEApplication::getInstance() throw()
@@ -157,54 +162,13 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 //==============================================================================
 int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
 {
-    jassert (appInstance == 0);
-    appInstance = app;
+    if (! app->initialiseApp (commandLine))
+        return 0;
 
-    app->commandLineParameters = commandLine.trim();
-    commandLine = String::empty;
-
-    initialiseJuce_GUI();
-
-    InterProcessLock* appLock = 0;
-
-    if (! app->moreThanOneInstanceAllowed())
-    {
-        appLock = new InterProcessLock ("juceAppLock_" + app->getApplicationName());
-
-        if (! appLock->enter(0))
-        {
-            MessageManager::broadcastMessage (app->getApplicationName() + "/" + app->commandLineParameters);
-
-            delete appInstance;
-            appInstance = 0;
-
-            DBG ("Another instance is running - quitting...");
-            return 0;
-        }
-    }
-
+    // now loop until a quit message is received..
     JUCE_TRY
     {
-        juce_setCurrentThreadName ("Juce Message Thread");
-
-        // let the app do its setting-up..
-        app->initialise (app->commandLineParameters);
-
-        // register for broadcast new app messages
-        MessageManager::getInstance()->registerBroadcastListener (app);
-
-        app->stillInitialising = false;
-
-        // now loop until a quit message is received..
         MessageManager::getInstance()->runDispatchLoop();
-
-        MessageManager::getInstance()->deregisterBroadcastListener (app);
-
-        if (appLock != 0)
-        {
-            appLock->exit();
-            delete appLock;
-        }
     }
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
     catch (const std::exception& e)
@@ -220,11 +184,51 @@ int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
     return shutdownAppAndClearUp();
 }
 
+bool JUCEApplication::initialiseApp (String& commandLine)
+{
+    jassert (appInstance == 0);
+    appInstance = this;
+
+    commandLineParameters = commandLine.trim();
+    commandLine = String::empty;
+
+    initialiseJuce_GUI();
+
+    InterProcessLock* appLock = 0;
+
+    if (! moreThanOneInstanceAllowed())
+    {
+        appLock = new InterProcessLock ("juceAppLock_" + getApplicationName());
+
+        if (! appLock->enter(0))
+        {
+            MessageManager::broadcastMessage (getApplicationName() + "/" + commandLineParameters);
+
+            delete appInstance;
+            appInstance = 0;
+
+            DBG ("Another instance is running - quitting...");
+            return false;
+        }
+    }
+
+    // let the app do its setting-up..
+    initialise (commandLineParameters);
+
+    // register for broadcast new app messages
+    MessageManager::getInstance()->registerBroadcastListener (this);
+
+    stillInitialising = false;
+    return true;
+}
+
 int JUCEApplication::shutdownAppAndClearUp()
 {
     jassert (appInstance != 0);
     JUCEApplication* const app = appInstance;
     int returnValue = 0;
+
+    MessageManager::getInstance()->deregisterBroadcastListener (app);
 
     static bool reentrancyCheck = false;
 
@@ -265,9 +269,18 @@ int JUCEApplication::shutdownAppAndClearUp()
     return returnValue;
 }
 
+#if JUCE_IPHONE
+ extern int juce_IPhoneMain (int argc, char* argv[], JUCEApplication* app);
+#endif
+
 int JUCEApplication::main (int argc, char* argv[],
                            JUCEApplication* const newApp)
 {
+#if JUCE_IPHONE
+    const ScopedAutoReleasePool pool;
+    return juce_IPhoneMain (argc, argv, newApp);
+#else
+
 #if JUCE_MAC
     const ScopedAutoReleasePool pool;
 #endif
@@ -277,6 +290,7 @@ int JUCEApplication::main (int argc, char* argv[],
         cmd << String::fromUTF8 ((const uint8*) argv[i]) << T(' ');
 
     return JUCEApplication::main (cmd, newApp);
+#endif
 }
 
 void JUCEApplication::actionListenerCallback (const String& message)
@@ -293,7 +307,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
 {
     if (! juceInitialisedGUI)
     {
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
         const ScopedAutoReleasePool pool;
 #endif
         juceInitialisedGUI = true;
@@ -301,8 +315,9 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
         initialiseJuce_NonGUI();
         MessageManager::getInstance();
         LookAndFeel::setDefaultLookAndFeel (0);
+        juce_setCurrentThreadName ("Juce Message Thread");
 
-#if JUCE_WIN32 && JUCE_DEBUG
+#if JUCE_WINDOWS && JUCE_DEBUG
         // This section is just for catching people who mess up their project settings and
         // turn RTTI off..
         try

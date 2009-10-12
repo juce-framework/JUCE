@@ -27,129 +27,8 @@
 #define __JUCE_PLATFORMDEFS_JUCEHEADER__
 
 //==============================================================================
-/*  This file figures out which platform is being built, and defines some macros
-    that the rest of the code can use for OS-specific compilation.
-
-    Macros that will be set here are:
-
-    - One of JUCE_WIN32, JUCE_MAC or JUCE_LINUX.
-    - Either JUCE_32BIT or JUCE_64BIT, depending on the architecture.
-    - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
-    - Either JUCE_INTEL or JUCE_PPC
-    - Either JUCE_GCC or JUCE_MSVC
-
-    It also includes a set of macros for debug console output and assertions.
-
+/*  This file defines miscellaneous macros for debugging, assertions, etc.
 */
-
-//==============================================================================
-#if (defined (_WIN32) || defined (_WIN64))
-  #define       JUCE_WIN32 1
-#else
-  #if defined (LINUX) || defined (__linux__)
-    #define     JUCE_LINUX 1
-  #elif TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-    #define     JUCE_IPHONE 1
-  #else
-    #define     JUCE_MAC 1
-  #endif
-#endif
-
-//==============================================================================
-#if JUCE_WIN32
-  #ifdef _MSC_VER
-    #ifdef _WIN64
-      #define JUCE_64BIT 1
-    #else
-      #define JUCE_32BIT 1
-    #endif
-  #endif
-
-  #ifdef _DEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  /** If defined, this indicates that the processor is little-endian. */
-  #define JUCE_LITTLE_ENDIAN 1
-
-  #define JUCE_INTEL 1
-#endif
-
-//==============================================================================
-#if JUCE_MAC
-
-  #include <CoreFoundation/CoreFoundation.h>
-
-  #ifndef NDEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-    #define JUCE_LITTLE_ENDIAN 1
-  #else
-    #define JUCE_BIG_ENDIAN 1
-  #endif
-
-  #if defined (__ppc__) || defined (__ppc64__)
-    #define JUCE_PPC 1
-  #else
-    #define JUCE_INTEL 1
-  #endif
-
-  #ifdef __LP64__
-    #define JUCE_64BIT 1
-  #else
-    #define JUCE_32BIT 1
-  #endif
-
-  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #error "Building for OSX 10.2 is no longer supported!"
-  #endif
-
-  #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
-    #define MACOS_10_3_OR_EARLIER 1
-  #endif
-
-  #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
-    #define MACOS_10_4_OR_EARLIER 1
-  #endif
-#endif
-
-//==============================================================================
-#if JUCE_IPHONE
-  #include <CoreFoundation/CoreFoundation.h>
-
-  #ifndef NDEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  #ifdef __LITTLE_ENDIAN__
-    #define JUCE_LITTLE_ENDIAN 1
-  #else
-    #define JUCE_BIG_ENDIAN 1
-  #endif
-#endif
-
-//==============================================================================
-#if JUCE_LINUX
-
-  #ifdef _DEBUG
-    #define JUCE_DEBUG 1
-  #endif
-
-  // Allow override for big-endian Linux platforms
-  #ifndef JUCE_BIG_ENDIAN
-    #define JUCE_LITTLE_ENDIAN 1
-  #endif
-
-  #if defined (__LP64__) || defined (_LP64)
-    #define JUCE_64BIT 1
-  #else
-    #define JUCE_32BIT 1
-  #endif
-
-  #define JUCE_INTEL 1
-#endif
 
 //==============================================================================
 #ifdef JUCE_FORCE_DEBUG
@@ -158,21 +37,6 @@
   #if JUCE_FORCE_DEBUG
     #define JUCE_DEBUG 1
   #endif
-#endif
-
-//==============================================================================
-// Compiler type macros.
-
-#ifdef __GNUC__
-  #define JUCE_GCC 1
-#elif defined (_MSC_VER)
-  #define JUCE_MSVC 1
-
-  #if _MSC_VER >= 1400
-    #define JUCE_USE_INTRINSICS 1
-  #endif
-#else
-  #error unknown compiler
 #endif
 
 /** This macro defines the C calling convention used as the standard for Juce calls. */
@@ -217,7 +81,7 @@
   //==============================================================================
   // Assertions..
 
-  #if JUCE_WIN32 || DOXYGEN
+  #if JUCE_WINDOWS || DOXYGEN
 
     #if JUCE_USE_INTRINSICS
       #pragma intrinsic (__debugbreak)
@@ -241,7 +105,7 @@
   #elif JUCE_MAC
     #define juce_breakDebugger              Debugger();
   #elif JUCE_IPHONE
-    #define juce_breakDebugger              assert (false);
+    #define juce_breakDebugger              kill (0, SIGTRAP);
   #elif JUCE_LINUX
     #define juce_breakDebugger              kill (0, SIGTRAP);
   #endif

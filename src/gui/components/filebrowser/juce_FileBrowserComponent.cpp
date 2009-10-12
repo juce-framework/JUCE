@@ -342,7 +342,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
 
 bool FileBrowserComponent::keyPressed (const KeyPress& key)
 {
-#if JUCE_LINUX || JUCE_WIN32
+#if JUCE_LINUX || JUCE_WINDOWS
     if (key.getModifiers().isCommandDown()
          && (key.getKeyCode() == 'H' || key.getKeyCode() == 'h'))
     {
@@ -441,7 +441,7 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
 {
     BitArray separators;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     OwnedArray<File> roots;
     File::findFileSystemRoots (roots);
     rootPaths.clear();

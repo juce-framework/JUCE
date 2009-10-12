@@ -27,6 +27,8 @@
 // compiled on its own).
 #ifdef JUCE_INCLUDED_FILE
 
+#if JUCE_MAC
+
 //==============================================================================
 END_JUCE_NAMESPACE
 using namespace JUCE_NAMESPACE;
@@ -146,5 +148,25 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
 
     [panel setDelegate: nil];
 }
+
+#else
+
+//==============================================================================
+void FileChooser::showPlatformDialog (OwnedArray<File>& results,
+                                      const String& title,
+                                      const File& currentFileOrDirectory,
+                                      const String& filter,
+                                      bool selectsDirectory,
+                                      bool isSaveDialogue,
+                                      bool warnAboutOverwritingExistingFiles,
+                                      bool selectMultipleFiles,
+                                      FilePreviewComponent* extraInfoComponent)
+{
+    const ScopedAutoReleasePool pool;
+    
+    jassertfalse //xxx to do
+}
+
+#endif
 
 #endif

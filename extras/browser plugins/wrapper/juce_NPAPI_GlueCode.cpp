@@ -120,10 +120,10 @@ NPError NP_GetValue (void* future, NPPVariable variable, void* value)
     return NPP_GetValue ((NPP_t*) future, variable, value);
 }
 
-#if JUCE_WIN32 || JUCE_MAC
+#if JUCE_WINDOWS || JUCE_MAC
 NPError OSCALL NP_GetEntryPoints (NPPluginFuncs* funcs)
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
 #endif
 
@@ -162,7 +162,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
                               #endif
                               )
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
 #endif
 
@@ -201,7 +201,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
 
 NPError OSCALL NP_Shutdown()
 {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     #pragma EXPORTED_FUNCTION
 #endif
 
@@ -269,7 +269,7 @@ public:
           child (0)
     {
         log ("BrowserPluginHolderComponent created");
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         parentHWND = 0;
         oldWinProc = 0;
 #else
@@ -314,7 +314,7 @@ public:
 private:
 
     //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     HWND parentHWND;
     WNDPROC oldWinProc;
 
@@ -1160,7 +1160,7 @@ const String BrowserPluginComponent::getBrowserVersion() const
 }
 
 //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
 extern const String getActiveXBrowserURL (const BrowserPluginComponent* comp);
 #endif
 
@@ -1168,7 +1168,7 @@ const String BrowserPluginComponent::getBrowserURL() const
 {
     String result;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     result = getActiveXBrowserURL (this);
 
     if (result.isNotEmpty())

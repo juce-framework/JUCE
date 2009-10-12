@@ -101,7 +101,7 @@
     On Windows, if you enable this, you'll need to have the QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || defined (LINUX) || defined (TARGET_OS_IPHONE) || defined (TARGET_IPHONE_SIMULATOR) || (defined (_WIN32) && ! defined (_MSC_VER)))
+#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
   #define JUCE_QUICKTIME 1
 #endif
 
@@ -133,7 +133,7 @@
 /** This flag lets you enable support for CD-burning. You might want to disable
     it to build without the MS SDK under windows.
 */
-#if (! defined (JUCE_USE_CDBURNER)) && ! (defined (_WIN32) && ! defined (_MSC_VER))
+#if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
   #define JUCE_USE_CDBURNER 1
 #endif
 

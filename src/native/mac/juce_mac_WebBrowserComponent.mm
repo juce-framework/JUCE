@@ -27,6 +27,8 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_WEB_BROWSER
 
+#if JUCE_MAC
+
 //==============================================================================
 END_JUCE_NAMESPACE
 
@@ -265,5 +267,71 @@ bool WebBrowserComponent::pageAboutToLoad (const String& url)
 {
     return true;
 }
+
+#else
+
+//==============================================================================
+WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
+{
+}
+
+WebBrowserComponent::~WebBrowserComponent()
+{
+}
+
+//==============================================================================
+void WebBrowserComponent::goToURL (const String& url,
+                                   const StringArray* headers,
+                                   const MemoryBlock* postData)
+{
+}
+
+void WebBrowserComponent::stop()
+{
+}
+
+void WebBrowserComponent::goBack()
+{
+}
+
+void WebBrowserComponent::goForward()
+{
+}
+
+void WebBrowserComponent::refresh()
+{
+}
+
+//==============================================================================
+void WebBrowserComponent::paint (Graphics& g)
+{
+}
+
+void WebBrowserComponent::checkWindowAssociation()
+{
+}
+
+void WebBrowserComponent::reloadLastURL()
+{
+}
+
+void WebBrowserComponent::parentHierarchyChanged()
+{
+}
+
+void WebBrowserComponent::resized()
+{
+}
+
+void WebBrowserComponent::visibilityChanged()
+{
+}
+
+bool WebBrowserComponent::pageAboutToLoad (const String& url)
+{
+    return true;
+}
+
+#endif
 
 #endif

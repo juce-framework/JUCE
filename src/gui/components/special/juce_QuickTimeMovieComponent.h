@@ -31,7 +31,7 @@
 // this is used to disable QuickTime, and is defined in juce_Config.h
 #if JUCE_QUICKTIME || DOXYGEN
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
   #include "juce_ActiveXControlComponent.h"
   typedef ActiveXControlComponent QTCompBaseClass;
 #else
@@ -179,7 +179,7 @@ private:
     File movieFile;
     bool movieLoaded, controllerVisible, looping;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */

@@ -27,7 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_QUICKTIME && JUCE_USE_CAMERA
 
-
 //==============================================================================
 #define QTCaptureCallbackDelegate MakeObjCClassName(QTCaptureCallbackDelegate)
 
@@ -398,6 +397,5 @@ CameraDevice* CameraDevice::openDevice (int index,
     delete d;
     return 0;
 }
-
 
 #endif

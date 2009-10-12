@@ -27,6 +27,8 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_OPENGL
 
+#if JUCE_MAC
+
 END_JUCE_NAMESPACE
 
 #define ThreadSafeNSOpenGLView MakeObjCClassName(ThreadSafeNSOpenGLView)
@@ -314,5 +316,22 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
 
     //jassertfalse  //xxx can't see how you do this in cocoa!
 }
+
+#else
+//==============================================================================
+
+OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
+                                                      const OpenGLPixelFormat& pixelFormat,
+                                                      const OpenGLContext* const contextToShareWith)
+{
+    return 0;
+}
+
+void juce_glViewport (const int w, const int h)
+{
+    //glViewport (0, 0, w, h);
+}
+
+#endif
 
 #endif

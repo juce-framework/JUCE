@@ -30,7 +30,7 @@
 
 #include "juce_StandardHeader.h"
 
-#ifndef JUCE_WIN32
+#ifndef JUCE_WINDOWS
   #include <sys/time.h>
 #else
   #include <ctime>
@@ -90,7 +90,7 @@ static void millisToLocal (const int64 millis, struct tm& result) throw()
     {
         time_t now = (time_t) (seconds);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
   #ifdef USE_NEW_SECURE_TIME_FNS
         if (now >= 0 && now <= 0x793406fff)
             localtime_s (&result, &now);
@@ -195,7 +195,7 @@ int64 Time::currentTimeMillis() throw()
         {
             // get the time once using normal library calls, and store the difference needed to
             // turn the millisecond counter into a real time.
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             struct _timeb t;
   #ifdef USE_NEW_SECURE_TIME_FNS
             _ftime_s (&t);
@@ -446,7 +446,7 @@ const String Time::getTimeZone() const throw()
 {
     String zone[2];
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     _tzset();
 
   #ifdef USE_NEW_SECURE_TIME_FNS
