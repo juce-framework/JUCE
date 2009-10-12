@@ -188,9 +188,6 @@
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioCDBurner.h"
 #endif
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioCDReader.h"
-#endif
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioFormat.h"
 #endif
@@ -209,14 +206,17 @@
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_FlacAudioFormat.h"
 #endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
- #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
-#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_WavAudioFormat.h"
 #endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioSubsectionReader.h"
+#endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
  #include "audio/audio_file_formats/juce_AudioThumbnail.h"
+#endif
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+ #include "audio/audio_file_formats/juce_AudioCDReader.h"
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
  #include "audio/audio_file_formats/juce_OggVorbisAudioFormat.h"
@@ -629,11 +629,11 @@
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FilePreviewComponent.h"
 #endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
- #include "gui/components/filebrowser/juce_FileSearchPathListComponent.h"
-#endif
 #ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FileTreeComponent.h"
+#endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+ #include "gui/components/filebrowser/juce_FileSearchPathListComponent.h"
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
  #include "gui/components/filebrowser/juce_FilenameComponent.h"
@@ -662,17 +662,14 @@
 #ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
  #include "gui/components/windows/juce_SplashScreen.h"
 #endif
-#ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
- #include "gui/components/windows/juce_ThreadWithProgressWindow.h"
-#endif
 #ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
  #include "gui/components/windows/juce_TooltipWindow.h"
 #endif
 #ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
  #include "gui/components/windows/juce_TopLevelWindow.h"
 #endif
-#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_ActiveXControlComponent.h"
+#ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
+ #include "gui/components/windows/juce_ThreadWithProgressWindow.h"
 #endif
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_AudioDeviceSelectorComponent.h"
@@ -683,11 +680,11 @@
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
  #include "gui/components/special/juce_ColourSelector.h"
 #endif
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_BubbleMessageComponent.h"
-#endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
  #include "gui/components/special/juce_DropShadower.h"
+#endif
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_BubbleMessageComponent.h"
 #endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_WebBrowserComponent.h"
@@ -698,11 +695,11 @@
 #ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_NSViewComponent.h"
 #endif
-#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
- #include "gui/components/special/juce_MidiKeyboardComponent.h"
-#endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_OpenGLComponent.h"
+#endif
+#ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_MidiKeyboardComponent.h"
 #endif
 #ifndef __JUCE_PREFERENCESPANEL_JUCEHEADER__
  #include "gui/components/special/juce_PreferencesPanel.h"
@@ -712,6 +709,9 @@
 #endif
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
  #include "gui/components/special/juce_SystemTrayIconComponent.h"
+#endif
+#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+ #include "gui/components/special/juce_ActiveXControlComponent.h"
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
  #include "gui/components/lookandfeel/juce_LookAndFeel.h"

@@ -163,7 +163,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       FilePreviewComponent* extraInfoComponent)
 {
     const ScopedAutoReleasePool pool;
-    
+
     jassertfalse //xxx to do
 }
 

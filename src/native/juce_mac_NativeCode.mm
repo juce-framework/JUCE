@@ -104,8 +104,7 @@ BEGIN_JUCE_NAMESPACE
   #include "mac/juce_mac_OpenGLComponent.mm"
   #include "mac/juce_mac_MouseCursor.mm"
   #include "mac/juce_mac_WebBrowserComponent.mm"
-  //#include "mac/juce_mac_CoreAudio.cpp"
-  //#include "mac/juce_mac_CameraDevice.mm"
+  #include "mac/juce_iphone_Audio.cpp"
   #include "mac/juce_mac_CoreMidi.cpp"
  #else
   #include "mac/juce_mac_NSViewComponentPeer.mm"

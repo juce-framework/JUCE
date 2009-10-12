@@ -108,7 +108,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                            otherButtonTitles: (isOkCancel ? @"Cancel" : nil), nil] autorelease];
     alert.cancelButtonIndex = alert.firstOtherButtonIndex;
     [alert show];
-    
+
     // xxx need to use a delegate to find which button was clicked
     return false;
 }

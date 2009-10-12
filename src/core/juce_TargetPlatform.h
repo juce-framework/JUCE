@@ -166,4 +166,4 @@
 #endif
 
 
-#endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
+#endif   // __JUCE_TARGETPLATFORM_JUCEHEADER__

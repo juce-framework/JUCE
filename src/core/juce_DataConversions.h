@@ -34,7 +34,7 @@
 // Endianness conversions..
 
 #if JUCE_IPHONE
-// a gcc compiler error seems to mean that these functions only work properly 
+// a gcc compiler error seems to mean that these functions only work properly
 // on the iPhone if they are declared static..
 static forcedinline uint32 swapByteOrder (uint32 n) throw();
 static inline uint16 swapByteOrder (const uint16 n) throw();

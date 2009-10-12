@@ -72,7 +72,7 @@ DocumentWindow::~DocumentWindow()
 void DocumentWindow::repaintTitleBar()
 {
     const Rectangle titleBarArea (getTitleBarArea());
-    repaint (titleBarArea.getX(), titleBarArea.getY(), 
+    repaint (titleBarArea.getX(), titleBarArea.getY(),
              titleBarArea.getWidth(), titleBarArea.getHeight());
 }
 
@@ -178,9 +178,9 @@ void DocumentWindow::paint (Graphics& g)
     if (resizableBorder == 0)
     {
         g.setColour (getBackgroundColour().overlaidWith (Colour (0x80000000)));
-        
+
         const BorderSize border (getBorderThickness());
-        
+
         g.fillRect (0, 0, getWidth(), border.getTop());
         g.fillRect (0, border.getTop(), border.getLeft(), getHeight() - border.getTopAndBottom());
         g.fillRect (getWidth() - border.getRight(), border.getTop(), border.getRight(), getHeight() - border.getTopAndBottom());
@@ -208,9 +208,9 @@ void DocumentWindow::paint (Graphics& g)
     getLookAndFeel().drawDocumentWindowTitleBar (*this, g,
                                                  titleBarArea.getWidth(),
                                                  titleBarArea.getHeight(),
-                                                 titleSpaceX1, 
+                                                 titleSpaceX1,
                                                  jmax (1, titleSpaceX2 - titleSpaceX1),
-                                                 titleBarIcon, 
+                                                 titleBarIcon,
                                                  ! drawTitleTextCentred);
 }
 
@@ -222,7 +222,7 @@ void DocumentWindow::resized()
         titleBarButtons[1]->setToggleState (isFullScreen(), false);
 
     const Rectangle titleBarArea (getTitleBarArea());
-    
+
     getLookAndFeel()
         .positionDocumentWindowButtons (*this,
                                         titleBarArea.getX(), titleBarArea.getY(),
@@ -250,7 +250,7 @@ const BorderSize DocumentWindow::getContentComponentBorder()
     border.setTop (border.getTop()
                         + (isUsingNativeTitleBar() ? 0 : titleBarHeight)
                         + (menuBar != 0 ? menuBarHeight : 0));
-    
+
     return border;
 }
 
@@ -264,7 +264,7 @@ const Rectangle DocumentWindow::getTitleBarArea()
     const BorderSize border (getBorderThickness());
 
     return Rectangle (border.getLeft(), border.getTop(),
-                      getWidth() - border.getLeftAndRight(), 
+                      getWidth() - border.getLeftAndRight(),
                       getTitleBarHeight());
 }
 

@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-
 /** This suffix is used for naming all Obj-C classes that are used inside juce.
 
     Because of the flat naming structure used by Obj-C, you can get horrible situations where

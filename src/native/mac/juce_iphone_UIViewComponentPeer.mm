@@ -189,12 +189,12 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
-	NSArray* const t = [[event touchesForView: self] allObjects];
+    NSArray* const t = [[event touchesForView: self] allObjects];
 
-	switch ([t count])
-	{
-		case 1:     // One finger..
-		{
+    switch ([t count])
+    {
+        case 1:     // One finger..
+        {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
             currentModifiers |= getModifierForButtonNumber (0);
 
@@ -209,12 +209,12 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
-	NSArray* const t = [[event touchesForView: self] allObjects];
+    NSArray* const t = [[event touchesForView: self] allObjects];
 
-	switch ([t count])
-	{
-		case 1:     // One finger..
-		{
+    switch ([t count])
+    {
+        case 1:     // One finger..
+        {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
             owner->handleMouseDrag (p.x, p.y, getMouseTime (event));
         }
@@ -227,12 +227,12 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
-	NSArray* const t = [[event touchesForView: self] allObjects];
+    NSArray* const t = [[event touchesForView: self] allObjects];
 
-	switch ([t count])
-	{
-		case 1:     // One finger..
-		{
+    switch ([t count])
+    {
+        case 1:     // One finger..
+        {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
             const int oldMods = currentModifiers;
             currentModifiers &= ~getModifierForButtonNumber (0);
@@ -312,9 +312,9 @@ public:
                                                        lineStride, pixelStride);
 
         CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
-        
-        imageRef = CGImageCreate (width, height, 
-                                  8, pixelStride * 8, lineStride, 
+
+        imageRef = CGImageCreate (width, height,
+                                  8, pixelStride * 8, lineStride,
                                   CGColorSpaceCreateDeviceRGB(),
                                   hasAlpha ? (kCGImageAlphaFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault,
                                   provider,
@@ -322,7 +322,7 @@ public:
                                   true, kCGRenderingIntentDefault);
 
         juceImage.releasePixelDataReadWrite (imageData);
-        
+
         uiImage = [[UIImage imageWithCGImage: imageRef] retain];
     }
 
@@ -360,7 +360,7 @@ public:
 
         if (juceImage.hasAlphaChannel())
             swapRGBOrder (0, 0, juceImage.getWidth(), juceImage.getHeight());*/
-        
+
     }
 
 private:
@@ -793,7 +793,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
         return;
 
     DBG (Rectangle (r.origin.x, r.origin.y, r.size.width, r.size.height).toString());
-    
+
     const float y = r.origin.y;//[view frame].size.height - (r.origin.y + r.size.height);
 
     JuceUIImage temp ((int) (r.size.width + 0.5f),
@@ -806,7 +806,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
     context.setOrigin (originX, originY);
 
     handlePaint (context);
-    
+
     //CGContextClipToRect (UIGraphicsGetCurrentContext(), r);
     temp.draw (r.origin.x, r.origin.y);
 }

@@ -301,7 +301,7 @@ const File File::getLinkedTarget() const throw()
 #else
     NSString* dest = [[NSFileManager defaultManager] pathContentOfSymbolicLinkAtPath: juceStringToNS (getFullPathName())];
 #endif
-    
+
     if (dest != nil)
         return File (nsStringToJuce (dest));
 
@@ -348,7 +348,7 @@ bool juce_findFileNext (void* handle, String& resultFile,
 
     [ff->enumerator skipDescendents];
     resultFile = nsStringToJuce (file);
-    
+
     const String path (ff->parentDir + resultFile);
 
     if (isDir != 0 || fileSize != 0)
@@ -380,7 +380,7 @@ bool juce_findFileNext (void* handle, String& resultFile,
 
     if (isReadOnly != 0)
         *isReadOnly = ! juce_canWriteToFile (path);
-    
+
     return true;
 }
 
@@ -507,7 +507,7 @@ const String PlatformUtilities::makePathFromFSRef (FSRef* file)
 OSType PlatformUtilities::getTypeOfFile (const String& filename)
 {
     const ScopedAutoReleasePool pool;
-    
+
 #if JUCE_IPHONE || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSDictionary* fileDict = [[NSFileManager defaultManager] attributesOfItemAtPath: juceStringToNS (filename) error: nil];
 #else

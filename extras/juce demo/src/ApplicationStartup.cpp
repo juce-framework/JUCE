@@ -62,7 +62,7 @@ public:
     {
         // just create the main window...
         theMainWindow = new MainDemoWindow();
-        
+
 #if JUCE_IPHONE
         theMainWindow->setVisible (true);
         theMainWindow->setBounds (0, 20, 320, 460);
