@@ -208,7 +208,7 @@
   #error unknown compiler
 #endif
 
-#endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
+#endif   // __JUCE_TARGETPLATFORM_JUCEHEADER__
 /********* End of inlined file: juce_TargetPlatform.h *********/
 
   // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
@@ -2758,9 +2758,6 @@ BEGIN_JUCE_NAMESPACE
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
 /********* End of inlined file: juce_Atomic.h *********/
-
-#endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
@@ -7069,9 +7066,6 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_MEMORY_JUCEHEADER__
 
 #endif
@@ -7156,275 +7150,6 @@ private:
 
 #endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 /********* End of inlined file: juce_PerformanceCounter.h *********/
-
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/********* Start of inlined file: juce_PlatformUtilities.h *********/
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/**
-    A collection of miscellaneous platform-specific utilities.
-
-*/
-class JUCE_API  PlatformUtilities
-{
-public:
-
-    /** Plays the operating system's default alert 'beep' sound. */
-    static void beep();
-
-    static bool launchEmailWithAttachments (const String& targetEmailAddress,
-                                            const String& emailSubject,
-                                            const String& bodyText,
-                                            const StringArray& filesToAttach);
-
-#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
-
-    /** MAC ONLY - Turns a Core CF String into a juce one. */
-    static const String cfStringToJuceString (CFStringRef cfString);
-
-    /** MAC ONLY - Turns a juce string into a Core CF one. */
-    static CFStringRef juceStringToCFString (const String& s);
-
-    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
-    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
-
-    /** MAC ONLY - Turns an FSRef into a juce string path. */
-    static const String makePathFromFSRef (FSRef* file);
-
-    /** MAC ONLY - Converts any decomposed unicode characters in a string into
-        their precomposed equivalents.
-    */
-    static const String convertToPrecomposedUnicode (const String& s);
-
-    /** MAC ONLY - Gets the type of a file from the file's resources. */
-    static OSType getTypeOfFile (const String& filename);
-
-    /** MAC ONLY - Returns true if this file is actually a bundle. */
-    static bool isBundle (const String& filename);
-
-    /** MAC ONLY - Adds an item to the dock */
-    static void addItemToDock (const File& file);
-#endif
-
-#if JUCE_WINDOWS || DOXYGEN
-
-    // Some registry helper functions:
-
-    /** WIN32 ONLY - Returns a string from the registry.
-
-        The path is a string for the entire path of a value in the registry,
-        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
-    */
-    static const String getRegistryValue (const String& regValuePath,
-                                          const String& defaultValue = String::empty);
-
-    /** WIN32 ONLY - Sets a registry value as a string.
-
-        This will take care of creating any groups needed to get to the given
-        registry value.
-    */
-    static void setRegistryValue (const String& regValuePath,
-                                  const String& value);
-
-    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
-    static bool registryValueExists (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry value. */
-    static void deleteRegistryValue (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
-    static void deleteRegistryKey (const String& regKeyPath);
-
-    /** WIN32 ONLY - Creates a file association in the registry.
-
-        This lets you set the exe that should be launched by a given file extension.
-        @param fileExtension        the file extension to associate, including the
-                                    initial dot, e.g. ".txt"
-        @param symbolicDescription  a space-free short token to identify the file type
-        @param fullDescription      a human-readable description of the file type
-        @param targetExecutable     the executable that should be launched
-        @param iconResourceNumber   the icon that gets displayed for the file type will be
-                                    found by looking up this resource number in the
-                                    executable. Pass 0 here to not use an icon
-    */
-    static void registerFileAssociation (const String& fileExtension,
-                                         const String& symbolicDescription,
-                                         const String& fullDescription,
-                                         const File& targetExecutable,
-                                         int iconResourceNumber);
-
-    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
-
-        In a normal Juce application this will be set to the module handle
-        of the application executable.
-
-        If you're writing a DLL using Juce and plan to use any Juce messaging or
-        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
-        to set the correct module handle in your DllMain() function, because
-        the win32 system relies on the correct instance handle when opening windows.
-    */
-    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
-
-    /** WIN32 ONLY - Sets a new module handle to be used by the library.
-
-        @see getCurrentModuleInstanceHandle()
-    */
-    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
-
-    /** WIN32 ONLY - Gets the command-line params as a string.
-
-        This is needed to avoid unicode problems with the argc type params.
-    */
-    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
-#endif
-
-    /** Clears the floating point unit's flags.
-
-        Only has an effect under win32, currently.
-    */
-    static void fpuReset();
-
-#if JUCE_LINUX || JUCE_WINDOWS
-
-    /** Loads a dynamically-linked library into the process's address space.
-
-        @param pathOrFilename   the platform-dependent name and search path
-        @returns                a handle which can be used by getProcedureEntryPoint(), or
-                                zero if it fails.
-        @see freeDynamicLibrary, getProcedureEntryPoint
-    */
-    static void* loadDynamicLibrary (const String& pathOrFilename);
-
-    /** Frees a dynamically-linked library.
-
-        @param libraryHandle   a handle created by loadDynamicLibrary
-        @see loadDynamicLibrary, getProcedureEntryPoint
-    */
-    static void freeDynamicLibrary (void* libraryHandle);
-
-    /** Finds a procedure call in a dynamically-linked library.
-
-        @param libraryHandle    a library handle returned by loadDynamicLibrary
-        @param procedureName    the name of the procedure call to try to load
-        @returns                a pointer to the function if found, or 0 if it fails
-        @see loadDynamicLibrary
-    */
-    static void* getProcedureEntryPoint (void* libraryHandle,
-                                         const String& procedureName);
-#endif
-
-#if JUCE_LINUX || DOXYGEN
-
-#endif
-};
-
-#if JUCE_MAC || JUCE_IPHONE
-
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
-    using RAII.
-*/
-class ScopedAutoReleasePool
-{
-public:
-    ScopedAutoReleasePool();
-    ~ScopedAutoReleasePool();
-
-private:
-    void* pool;
-};
-
-#endif
-
-#if JUCE_MAC
-
-/**
-    A wrapper class for picking up events from an Apple IR remote control device.
-
-    To use it, just create a subclass of this class, implementing the buttonPressed()
-    callback, then call start() and stop() to start or stop receiving events.
-*/
-class JUCE_API  AppleRemoteDevice
-{
-public:
-
-    AppleRemoteDevice();
-    virtual ~AppleRemoteDevice();
-
-    /** The set of buttons that may be pressed.
-        @see buttonPressed
-    */
-    enum ButtonType
-    {
-        menuButton = 0,     /**< The menu button (if it's held for a short time). */
-        playButton,         /**< The play button. */
-        plusButton,         /**< The plus or volume-up button. */
-        minusButton,        /**< The minus or volume-down button. */
-        rightButton,        /**< The right button (if it's held for a short time). */
-        leftButton,         /**< The left button (if it's held for a short time). */
-        rightButton_Long,   /**< The right button (if it's held for a long time). */
-        leftButton_Long,    /**< The menu button (if it's held for a long time). */
-        menuButton_Long,    /**< The menu button (if it's held for a long time). */
-        playButtonSleepMode,
-        switched
-    };
-
-    /** Override this method to receive the callback about a button press.
-
-        The callback will happen on the application's message thread.
-
-        Some buttons trigger matching up and down events, in which the isDown parameter
-        will be true and then false. Others only send a single event when the
-        button is pressed.
-    */
-    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
-
-    /** Starts the device running and responding to events.
-
-        Returns true if it managed to open the device.
-
-        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
-                                and will not be available to any other part of the system. If
-                                false, it will be shared with other apps.
-        @see stop
-    */
-    bool start (const bool inExclusiveMode) throw();
-
-    /** Stops the device running.
-        @see start
-    */
-    void stop() throw();
-
-    /** Returns true if the device has been started successfully.
-    */
-    bool isActive() const throw();
-
-    /** Returns the ID number of the remote, if it has sent one.
-    */
-    int getRemoteId() const throw()             { return remoteId; }
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void handleCallbackInternal();
-
-private:
-    void* device;
-    void* queue;
-    int remoteId;
-
-    bool open (const bool openInExclusiveMode) throw();
-};
-
-#endif
-
-#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-/********* End of inlined file: juce_PlatformUtilities.h *********/
 
 #endif
 #ifndef __JUCE_RANDOM_JUCEHEADER__
@@ -7832,6 +7557,9 @@ private:
 /********* End of inlined file: juce_Random.h *********/
 
 #endif
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
@@ -8218,7 +7946,7 @@ private:
 /********* End of inlined file: juce_Singleton.h *********/
 
 #endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+#ifndef __JUCE_TIME_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
@@ -8368,9 +8096,6 @@ public:
 /********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_UUID_JUCEHEADER__
 
 /********* Start of inlined file: juce_Uuid.h *********/
@@ -8462,6 +8187,284 @@ private:
 
 #endif   // __JUCE_UUID_JUCEHEADER__
 /********* End of inlined file: juce_Uuid.h *********/
+
+#endif
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/********* Start of inlined file: juce_PlatformUtilities.h *********/
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/**
+    A collection of miscellaneous platform-specific utilities.
+
+*/
+class JUCE_API  PlatformUtilities
+{
+public:
+
+    /** Plays the operating system's default alert 'beep' sound. */
+    static void beep();
+
+    static bool launchEmailWithAttachments (const String& targetEmailAddress,
+                                            const String& emailSubject,
+                                            const String& bodyText,
+                                            const StringArray& filesToAttach);
+
+#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
+
+    /** MAC ONLY - Turns a Core CF String into a juce one. */
+    static const String cfStringToJuceString (CFStringRef cfString);
+
+    /** MAC ONLY - Turns a juce string into a Core CF one. */
+    static CFStringRef juceStringToCFString (const String& s);
+
+    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
+    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
+
+    /** MAC ONLY - Turns an FSRef into a juce string path. */
+    static const String makePathFromFSRef (FSRef* file);
+
+    /** MAC ONLY - Converts any decomposed unicode characters in a string into
+        their precomposed equivalents.
+    */
+    static const String convertToPrecomposedUnicode (const String& s);
+
+    /** MAC ONLY - Gets the type of a file from the file's resources. */
+    static OSType getTypeOfFile (const String& filename);
+
+    /** MAC ONLY - Returns true if this file is actually a bundle. */
+    static bool isBundle (const String& filename);
+
+    /** MAC ONLY - Adds an item to the dock */
+    static void addItemToDock (const File& file);
+#endif
+
+#if JUCE_WINDOWS || DOXYGEN
+
+    // Some registry helper functions:
+
+    /** WIN32 ONLY - Returns a string from the registry.
+
+        The path is a string for the entire path of a value in the registry,
+        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+    */
+    static const String getRegistryValue (const String& regValuePath,
+                                          const String& defaultValue = String::empty);
+
+    /** WIN32 ONLY - Sets a registry value as a string.
+
+        This will take care of creating any groups needed to get to the given
+        registry value.
+    */
+    static void setRegistryValue (const String& regValuePath,
+                                  const String& value);
+
+    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
+    static bool registryValueExists (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry value. */
+    static void deleteRegistryValue (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
+    static void deleteRegistryKey (const String& regKeyPath);
+
+    /** WIN32 ONLY - Creates a file association in the registry.
+
+        This lets you set the exe that should be launched by a given file extension.
+        @param fileExtension        the file extension to associate, including the
+                                    initial dot, e.g. ".txt"
+        @param symbolicDescription  a space-free short token to identify the file type
+        @param fullDescription      a human-readable description of the file type
+        @param targetExecutable     the executable that should be launched
+        @param iconResourceNumber   the icon that gets displayed for the file type will be
+                                    found by looking up this resource number in the
+                                    executable. Pass 0 here to not use an icon
+    */
+    static void registerFileAssociation (const String& fileExtension,
+                                         const String& symbolicDescription,
+                                         const String& fullDescription,
+                                         const File& targetExecutable,
+                                         int iconResourceNumber);
+
+    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
+
+        In a normal Juce application this will be set to the module handle
+        of the application executable.
+
+        If you're writing a DLL using Juce and plan to use any Juce messaging or
+        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
+        to set the correct module handle in your DllMain() function, because
+        the win32 system relies on the correct instance handle when opening windows.
+    */
+    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
+
+    /** WIN32 ONLY - Sets a new module handle to be used by the library.
+
+        @see getCurrentModuleInstanceHandle()
+    */
+    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
+
+    /** WIN32 ONLY - Gets the command-line params as a string.
+
+        This is needed to avoid unicode problems with the argc type params.
+    */
+    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
+#endif
+
+    /** Clears the floating point unit's flags.
+
+        Only has an effect under win32, currently.
+    */
+    static void fpuReset();
+
+#if JUCE_LINUX || JUCE_WINDOWS
+
+    /** Loads a dynamically-linked library into the process's address space.
+
+        @param pathOrFilename   the platform-dependent name and search path
+        @returns                a handle which can be used by getProcedureEntryPoint(), or
+                                zero if it fails.
+        @see freeDynamicLibrary, getProcedureEntryPoint
+    */
+    static void* loadDynamicLibrary (const String& pathOrFilename);
+
+    /** Frees a dynamically-linked library.
+
+        @param libraryHandle   a handle created by loadDynamicLibrary
+        @see loadDynamicLibrary, getProcedureEntryPoint
+    */
+    static void freeDynamicLibrary (void* libraryHandle);
+
+    /** Finds a procedure call in a dynamically-linked library.
+
+        @param libraryHandle    a library handle returned by loadDynamicLibrary
+        @param procedureName    the name of the procedure call to try to load
+        @returns                a pointer to the function if found, or 0 if it fails
+        @see loadDynamicLibrary
+    */
+    static void* getProcedureEntryPoint (void* libraryHandle,
+                                         const String& procedureName);
+#endif
+
+#if JUCE_LINUX || DOXYGEN
+
+#endif
+};
+
+#if JUCE_MAC || JUCE_IPHONE
+
+/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
+    using RAII.
+*/
+class ScopedAutoReleasePool
+{
+public:
+    ScopedAutoReleasePool();
+    ~ScopedAutoReleasePool();
+
+private:
+    void* pool;
+};
+
+#endif
+
+#if JUCE_MAC
+
+/**
+    A wrapper class for picking up events from an Apple IR remote control device.
+
+    To use it, just create a subclass of this class, implementing the buttonPressed()
+    callback, then call start() and stop() to start or stop receiving events.
+*/
+class JUCE_API  AppleRemoteDevice
+{
+public:
+
+    AppleRemoteDevice();
+    virtual ~AppleRemoteDevice();
+
+    /** The set of buttons that may be pressed.
+        @see buttonPressed
+    */
+    enum ButtonType
+    {
+        menuButton = 0,     /**< The menu button (if it's held for a short time). */
+        playButton,         /**< The play button. */
+        plusButton,         /**< The plus or volume-up button. */
+        minusButton,        /**< The minus or volume-down button. */
+        rightButton,        /**< The right button (if it's held for a short time). */
+        leftButton,         /**< The left button (if it's held for a short time). */
+        rightButton_Long,   /**< The right button (if it's held for a long time). */
+        leftButton_Long,    /**< The menu button (if it's held for a long time). */
+        menuButton_Long,    /**< The menu button (if it's held for a long time). */
+        playButtonSleepMode,
+        switched
+    };
+
+    /** Override this method to receive the callback about a button press.
+
+        The callback will happen on the application's message thread.
+
+        Some buttons trigger matching up and down events, in which the isDown parameter
+        will be true and then false. Others only send a single event when the
+        button is pressed.
+    */
+    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+
+    /** Starts the device running and responding to events.
+
+        Returns true if it managed to open the device.
+
+        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
+                                and will not be available to any other part of the system. If
+                                false, it will be shared with other apps.
+        @see stop
+    */
+    bool start (const bool inExclusiveMode) throw();
+
+    /** Stops the device running.
+        @see start
+    */
+    void stop() throw();
+
+    /** Returns true if the device has been started successfully.
+    */
+    bool isActive() const throw();
+
+    /** Returns the ID number of the remote, if it has sent one.
+    */
+    int getRemoteId() const throw()             { return remoteId; }
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void handleCallbackInternal();
+
+private:
+    void* device;
+    void* queue;
+    int remoteId;
+
+    bool open (const bool openInExclusiveMode) throw();
+};
+
+#endif
+
+#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+/********* End of inlined file: juce_PlatformUtilities.h *********/
+
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
@@ -36965,162 +36968,6 @@ private:
 /********* End of inlined file: juce_AudioCDBurner.h *********/
 
 #endif
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioCDReader.h *********/
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-#define __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-#if JUCE_MAC
-
-#endif
-
-/**
-    A type of AudioFormatReader that reads from an audio CD.
-
-    One of these can be used to read a CD as if it's one big audio stream. Use the
-    getPositionOfTrackStart() method to find where the individual tracks are
-    within the stream.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioCDReader  : public AudioFormatReader
-{
-public:
-
-    /** Returns a list of names of Audio CDs currently available for reading.
-
-        If there's a CD drive but no CD in it, this might return an empty list, or
-        possibly a device that can be opened but which has no tracks, depending
-        on the platform.
-
-        @see createReaderForCD
-    */
-    static const StringArray getAvailableCDNames();
-
-    /** Tries to create an AudioFormatReader that can read from an Audio CD.
-
-        @param index    the index of one of the available CDs - use getAvailableCDNames()
-                        to find out how many there are.
-        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
-                        caller will be responsible for deleting the object returned.
-    */
-    static AudioCDReader* createReaderForCD (const int index);
-
-    /** Destructor. */
-    ~AudioCDReader();
-
-    /** Implementation of the AudioFormatReader method. */
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    /** Checks whether the CD has been removed from the drive.
-    */
-    bool isCDStillPresent() const;
-
-    /** Returns the total number of tracks (audio + data).
-    */
-    int getNumTracks() const;
-
-    /** Finds the sample offset of the start of a track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    int getPositionOfTrackStart (int trackNum) const;
-
-    /** Returns true if a given track is an audio track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    bool isTrackAudio (int trackNum) const;
-
-    /** Refreshes the object's table of contents.
-
-        If the disc has been ejected and a different one put in since this
-        object was created, this will cause it to update its idea of how many tracks
-        there are, etc.
-    */
-    void refreshTrackLengths();
-
-    /** Enables scanning for indexes within tracks.
-
-        @see getLastIndex
-    */
-    void enableIndexScanning (bool enabled);
-
-    /** Returns the index number found during the last read() call.
-
-        Index scanning is turned off by default - turn it on with enableIndexScanning().
-
-        Then when the read() method is called, if it comes across an index within that
-        block, the index number is stored and returned by this method.
-
-        Some devices might not support indexes, of course.
-
-        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
-
-        @see enableIndexScanning
-    */
-    int getLastIndex() const;
-
-    /** Scans a track to find the position of any indexes within it.
-
-        @param trackNumber  the track to look in, where 0 is the first track on the disc
-        @returns    an array of sample positions of any index points found (not including
-                    the index that marks the start of the track)
-    */
-    const Array <int> findIndexesInTrack (const int trackNumber);
-
-    /** Returns the CDDB id number for the CD.
-
-        It's not a great way of identifying a disc, but it's traditional.
-    */
-    int getCDDBId();
-
-    /** Tries to eject the disk.
-
-        Of course this might not be possible, if some other process is using it.
-    */
-    void ejectDisk();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-#if JUCE_MAC
-    File volumeDir;
-    OwnedArray<File> tracks;
-    Array <int> trackStartSamples;
-    int currentReaderTrack;
-    AudioFormatReader* reader;
-    AudioCDReader (const File& volume);
-public:
-    static int compareElements (const File* const, const File* const) throw();
-private:
-
-#elif JUCE_WINDOWS
-    int numTracks;
-    int trackStarts[100];
-    bool audioTracks [100];
-    void* handle;
-    bool indexingEnabled;
-    int lastIndex, firstFrameInBuffer, samplesInBuffer;
-    MemoryBlock buffer;
-    AudioCDReader (void* handle);
-    int getIndexAt (int samplePos);
-
-#elif JUCE_LINUX
-    AudioCDReader();
-#endif
-
-    AudioCDReader (const AudioCDReader&);
-    const AudioCDReader& operator= (const AudioCDReader&);
-};
-
-#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDReader.h *********/
-
-#endif
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
 
 #endif
@@ -37513,72 +37360,6 @@ public:
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
 
 #endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/**
-    This class is used to wrap an AudioFormatReader and only read from a
-    subsection of the file.
-
-    So if you have a reader which can read a 1000 sample file, you could wrap it
-    in one of these to only access, e.g. samples 100 to 200, and any samples
-    outside that will come back as 0. Accessing sample 0 from this reader will
-    actually read the first sample from the other's subsection, which might
-    be at a non-zero position.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
-{
-public:
-
-    /** Creates a AudioSubsectionReader for a given data source.
-
-        @param sourceReader             the source reader from which we'll be taking data
-        @param subsectionStartSample    the sample within the source reader which will be
-                                        mapped onto sample 0 for this reader.
-        @param subsectionLength         the number of samples from the source that will
-                                        make up the subsection. If this reader is asked for
-                                        any samples beyond this region, it will return zero.
-        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
-                                        this object is deleted.
-    */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
-
-    /** Destructor. */
-    ~AudioSubsectionReader();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatReader* const source;
-    int64 startSample, length;
-    const bool deleteSourceWhenDeleted;
-
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
-};
-
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
-
-#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_WavAudioFormat.h *********/
@@ -37701,7 +37482,229 @@ public:
 /********* End of inlined file: juce_WavAudioFormat.h *********/
 
 #endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/**
+    This class is used to wrap an AudioFormatReader and only read from a
+    subsection of the file.
+
+    So if you have a reader which can read a 1000 sample file, you could wrap it
+    in one of these to only access, e.g. samples 100 to 200, and any samples
+    outside that will come back as 0. Accessing sample 0 from this reader will
+    actually read the first sample from the other's subsection, which might
+    be at a non-zero position.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
+{
+public:
+
+    /** Creates a AudioSubsectionReader for a given data source.
+
+        @param sourceReader             the source reader from which we'll be taking data
+        @param subsectionStartSample    the sample within the source reader which will be
+                                        mapped onto sample 0 for this reader.
+        @param subsectionLength         the number of samples from the source that will
+                                        make up the subsection. If this reader is asked for
+                                        any samples beyond this region, it will return zero.
+        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
+                                        this object is deleted.
+    */
+    AudioSubsectionReader (AudioFormatReader* const sourceReader,
+                           const int64 subsectionStartSample,
+                           const int64 subsectionLength,
+                           const bool deleteSourceWhenDeleted);
+
+    /** Destructor. */
+    ~AudioSubsectionReader();
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    void readMaxLevels (int64 startSample,
+                        int64 numSamples,
+                        float& lowestLeft,
+                        float& highestLeft,
+                        float& lowestRight,
+                        float& highestRight);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatReader* const source;
+    int64 startSample, length;
+    const bool deleteSourceWhenDeleted;
+
+    AudioSubsectionReader (const AudioSubsectionReader&);
+    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+};
+
+#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioSubsectionReader.h *********/
+
+#endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioCDReader.h *********/
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+#define __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+#if JUCE_MAC
+
+#endif
+
+/**
+    A type of AudioFormatReader that reads from an audio CD.
+
+    One of these can be used to read a CD as if it's one big audio stream. Use the
+    getPositionOfTrackStart() method to find where the individual tracks are
+    within the stream.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioCDReader  : public AudioFormatReader
+{
+public:
+
+    /** Returns a list of names of Audio CDs currently available for reading.
+
+        If there's a CD drive but no CD in it, this might return an empty list, or
+        possibly a device that can be opened but which has no tracks, depending
+        on the platform.
+
+        @see createReaderForCD
+    */
+    static const StringArray getAvailableCDNames();
+
+    /** Tries to create an AudioFormatReader that can read from an Audio CD.
+
+        @param index    the index of one of the available CDs - use getAvailableCDNames()
+                        to find out how many there are.
+        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
+                        caller will be responsible for deleting the object returned.
+    */
+    static AudioCDReader* createReaderForCD (const int index);
+
+    /** Destructor. */
+    ~AudioCDReader();
+
+    /** Implementation of the AudioFormatReader method. */
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    /** Checks whether the CD has been removed from the drive.
+    */
+    bool isCDStillPresent() const;
+
+    /** Returns the total number of tracks (audio + data).
+    */
+    int getNumTracks() const;
+
+    /** Finds the sample offset of the start of a track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    int getPositionOfTrackStart (int trackNum) const;
+
+    /** Returns true if a given track is an audio track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    bool isTrackAudio (int trackNum) const;
+
+    /** Refreshes the object's table of contents.
+
+        If the disc has been ejected and a different one put in since this
+        object was created, this will cause it to update its idea of how many tracks
+        there are, etc.
+    */
+    void refreshTrackLengths();
+
+    /** Enables scanning for indexes within tracks.
+
+        @see getLastIndex
+    */
+    void enableIndexScanning (bool enabled);
+
+    /** Returns the index number found during the last read() call.
+
+        Index scanning is turned off by default - turn it on with enableIndexScanning().
+
+        Then when the read() method is called, if it comes across an index within that
+        block, the index number is stored and returned by this method.
+
+        Some devices might not support indexes, of course.
+
+        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
+
+        @see enableIndexScanning
+    */
+    int getLastIndex() const;
+
+    /** Scans a track to find the position of any indexes within it.
+
+        @param trackNumber  the track to look in, where 0 is the first track on the disc
+        @returns    an array of sample positions of any index points found (not including
+                    the index that marks the start of the track)
+    */
+    const Array <int> findIndexesInTrack (const int trackNumber);
+
+    /** Returns the CDDB id number for the CD.
+
+        It's not a great way of identifying a disc, but it's traditional.
+    */
+    int getCDDBId();
+
+    /** Tries to eject the disk.
+
+        Of course this might not be possible, if some other process is using it.
+    */
+    void ejectDisk();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+#if JUCE_MAC
+    File volumeDir;
+    OwnedArray<File> tracks;
+    Array <int> trackStartSamples;
+    int currentReaderTrack;
+    AudioFormatReader* reader;
+    AudioCDReader (const File& volume);
+public:
+    static int compareElements (const File* const, const File* const) throw();
+private:
+
+#elif JUCE_WINDOWS
+    int numTracks;
+    int trackStarts[100];
+    bool audioTracks [100];
+    void* handle;
+    bool indexingEnabled;
+    int lastIndex, firstFrameInBuffer, samplesInBuffer;
+    MemoryBlock buffer;
+    AudioCDReader (void* handle);
+    int getIndexAt (int samplePos);
+
+#elif JUCE_LINUX
+    AudioCDReader();
+#endif
+
+    AudioCDReader (const AudioCDReader&);
+    const AudioCDReader& operator= (const AudioCDReader&);
+};
+
+#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioCDReader.h *********/
 
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
@@ -50800,6 +50803,78 @@ private:
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
+
+#endif
 #ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
@@ -50899,78 +50974,6 @@ private:
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileSearchPathListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -51839,6 +51842,12 @@ private:
 /********* End of inlined file: juce_SplashScreen.h *********/
 
 #endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
@@ -51973,121 +51982,6 @@ private:
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
-
-#endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_ActiveXControlComponent.h *********/
-#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-#define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-
-#if JUCE_WINDOWS || DOXYGEN
-
-/**
-    A Windows-specific class that can create and embed an ActiveX control inside
-    itself.
-
-    To use it, create one of these, put it in place and make sure it's visible in a
-    window, then use createControl() to instantiate an ActiveX control. The control
-    will then be moved and resized to follow the movements of this component.
-
-    Of course, since the control is a heavyweight window, it'll obliterate any
-    juce components that may overlap this component, but that's life.
-*/
-class JUCE_API  ActiveXControlComponent   : public Component
-{
-public:
-
-    /** Create an initially-empty container. */
-    ActiveXControlComponent();
-
-    /** Destructor. */
-    ~ActiveXControlComponent();
-
-    /** Tries to create an ActiveX control and embed it in this peer.
-
-        The peer controlIID is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
-        have included windows.h first, in which case IID wouldn't be defined.
-
-        e.g. @code
-        const IID myIID = __uuidof (QTControl);
-        myControlComp->createControl (&myIID);
-        @endcode
-    */
-    bool createControl (const void* controlIID);
-
-    /** Deletes the ActiveX control, if one has been created.
-    */
-    void deleteControl();
-
-    /** Returns true if a control is currently in use. */
-    bool isControlOpen() const throw()                  { return control != 0; }
-
-    /** Does a QueryInterface call on the embedded control object.
-
-        This allows you to cast the control to whatever type of COM object you need.
-
-        The iid parameter is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
-        have included windows.h first, in which case IID wouldn't be defined, but
-        you should just pass a pointer to an IID.
-
-        e.g. @code
-        const IID iid = __uuidof (IOleWindow);
-
-        IOleWindow* oleWindow = (IOleWindow*) myControlComp->queryInterface (&iid);
-
-        if (oleWindow != 0)
-        {
-            HWND hwnd;
-            oleWindow->GetWindow (&hwnd);
-
-            ...
-
-            oleWindow->Release();
-        }
-        @endcode
-    */
-    void* queryInterface (const void* iid) const;
-
-    /** Set this to false to stop mouse events being allowed through to the control.
-    */
-    void setMouseEventsAllowed (const bool eventsCanReachControl);
-
-    /** Returns true if mouse events are allowed to get through to the control.
-    */
-    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void* originalWndProc;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class ActiveXControlData;
-    void* control;
-    bool mouseEventsAllowed;
-
-    ActiveXControlComponent (const ActiveXControlComponent&);
-    const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
-
-    void setControlBounds (const Rectangle& bounds) const;
-    void setControlVisible (const bool b) const;
-};
-
-#endif
-
-#endif   // __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ActiveXControlComponent.h *********/
 
 #endif
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
@@ -52451,6 +52345,9 @@ private:
 /********* End of inlined file: juce_ColourSelector.h *********/
 
 #endif
+#ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_BubbleMessageComponent.h *********/
@@ -52558,9 +52455,6 @@ private:
 
 #endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_BubbleMessageComponent.h *********/
-
-#endif
-#ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
@@ -52828,6 +52722,317 @@ private:
 
 #endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_NSViewComponent.h *********/
+
+#endif
+#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OpenGLComponent.h *********/
+#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+#define __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+
+// this is used to disable OpenGL, and is defined in juce_Config.h
+#if JUCE_OPENGL || DOXYGEN
+
+class OpenGLComponentWatcher;
+
+/**
+    Represents the various properties of an OpenGL bitmap format.
+
+    @see OpenGLComponent::setPixelFormat
+*/
+struct OpenGLPixelFormat
+{
+
+    /** Creates an OpenGLPixelFormat.
+
+        The default constructor just initialises the object as a simple 8-bit
+        RGBA format.
+    */
+    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
+                       const int alphaBits = 8,
+                       const int depthBufferBits = 16,
+                       const int stencilBufferBits = 0) throw();
+
+    int redBits;          /**< The number of bits per pixel to use for the red channel. */
+    int greenBits;        /**< The number of bits per pixel to use for the green channel. */
+    int blueBits;         /**< The number of bits per pixel to use for the blue channel. */
+    int alphaBits;        /**< The number of bits per pixel to use for the alpha channel. */
+
+    int depthBufferBits;      /**< The number of bits per pixel to use for a depth buffer. */
+    int stencilBufferBits;    /**< The number of bits per pixel to use for a stencil buffer. */
+
+    int accumulationBufferRedBits;    /**< The number of bits per pixel to use for an accumulation buffer's red channel. */
+    int accumulationBufferGreenBits;  /**< The number of bits per pixel to use for an accumulation buffer's green channel. */
+    int accumulationBufferBlueBits;   /**< The number of bits per pixel to use for an accumulation buffer's blue channel. */
+    int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
+
+    uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
+
+    /** Returns a list of all the pixel formats that can be used in this system.
+
+        A reference component is needed in case there are multiple screens with different
+        capabilities - in which case, the one that the component is on will be used.
+    */
+    static void getAvailablePixelFormats (Component* component,
+                                          OwnedArray <OpenGLPixelFormat>& results);
+
+    bool operator== (const OpenGLPixelFormat&) const throw();
+
+    juce_UseDebuggingNewOperator
+};
+
+/**
+    A base class for types of OpenGL context.
+
+    An OpenGLComponent will supply its own context for drawing in its window.
+*/
+class OpenGLContext
+{
+public:
+
+    /** Destructor. */
+    virtual ~OpenGLContext();
+
+    /** Makes this context the currently active one. */
+    virtual bool makeActive() const throw() = 0;
+    /** If this context is currently active, it is disactivated. */
+    virtual bool makeInactive() const throw() = 0;
+    /** Returns true if this context is currently active. */
+    virtual bool isActive() const throw() = 0;
+
+    /** Swaps the buffers (if the context can do this). */
+    virtual void swapBuffers() = 0;
+
+    /** Sets whether the context checks the vertical sync before swapping.
+
+        The value is the number of frames to allow between buffer-swapping. This is
+        fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
+        and greater numbers indicate that it should swap less often.
+
+        Returns true if it sets the value successfully.
+    */
+    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
+
+    /** Returns the current swap-sync interval.
+        See setSwapInterval() for info about the value returned.
+    */
+    virtual int getSwapInterval() const = 0;
+
+    /** Returns the pixel format being used by this context. */
+    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
+
+    /** For windowed contexts, this moves the context within the bounds of
+        its parent window.
+    */
+    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
+
+    /** For windowed contexts, this triggers a repaint of the window.
+
+        (Not relevent on all platforms).
+    */
+    virtual void repaint() = 0;
+
+    /** Returns an OS-dependent handle to the raw GL context.
+
+        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
+        a GLXContext.
+    */
+    virtual void* getRawContext() const throw() = 0;
+
+    /** This tries to create a context that can be used for drawing into the
+        area occupied by the specified component.
+
+        Note that you probably shouldn't use this method directly unless you know what
+        you're doing - the OpenGLComponent calls this and manages the context for you.
+    */
+    static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
+                                                  const OpenGLPixelFormat& pixelFormat,
+                                                  const OpenGLContext* const contextToShareWith);
+
+    /** Returns the context that's currently in active use by the calling thread.
+
+        Returns 0 if there isn't an active context.
+    */
+    static OpenGLContext* getCurrentContext();
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    OpenGLContext() throw();
+};
+
+/**
+    A component that contains an OpenGL canvas.
+
+    Override this, add it to whatever component you want to, and use the renderOpenGL()
+    method to draw its contents.
+
+*/
+class JUCE_API  OpenGLComponent  : public Component
+{
+public:
+
+    /** Creates an OpenGLComponent.
+    */
+    OpenGLComponent();
+
+    /** Destructor. */
+    ~OpenGLComponent();
+
+    /** Changes the pixel format used by this component.
+
+        @see OpenGLPixelFormat::getAvailablePixelFormats()
+    */
+    void setPixelFormat (const OpenGLPixelFormat& formatToUse);
+
+    /** Returns the pixel format that this component is currently using. */
+    const OpenGLPixelFormat getPixelFormat() const;
+
+    /** Specifies an OpenGL context which should be shared with the one that this
+        component is using.
+
+        This is an OpenGL feature that lets two contexts share their texture data.
+
+        Note that this pointer is stored by the component, and when the component
+        needs to recreate its internal context for some reason, the same context
+        will be used again to share lists. So if you pass a context in here,
+        don't delete the context while this component is still using it! You can
+        call shareWith (0) to stop this component from sharing with it.
+    */
+    void shareWith (OpenGLContext* contextToShareListsWith);
+
+    /** Returns the context that this component is sharing with.
+        @see shareWith
+    */
+    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
+
+    /** Flips the openGL buffers over. */
+    void swapBuffers();
+
+    /** This replaces the normal paint() callback - use it to draw your openGL stuff.
+
+        When this is called, makeCurrentContextActive() will already have been called
+        for you, so you just need to draw.
+    */
+    virtual void renderOpenGL() = 0;
+
+    /** This method is called when the component creates a new OpenGL context.
+
+        A new context may be created when the component is first used, or when it
+        is moved to a different window, or when the window is hidden and re-shown,
+        etc.
+
+        You can use this callback as an opportunity to set up things like textures
+        that your context needs.
+
+        New contexts are created on-demand by the makeCurrentContextActive() method - so
+        if the context is deleted, e.g. by changing the pixel format or window, no context
+        will be created until the next call to makeCurrentContextActive(), which will
+        synchronously create one and call this method. This means that if you're using
+        a non-GUI thread for rendering, you can make sure this method is be called by
+        your renderer thread.
+
+        When this callback happens, the context will already have been made current
+        using the makeCurrentContextActive() method, so there's no need to call it
+        again in your code.
+    */
+    virtual void newOpenGLContextCreated() = 0;
+
+    /** Returns the context that will draw into this component.
+
+        This may return 0 if the component is currently invisible or hasn't currently
+        got a context. The context object can be deleted and a new one created during
+        the lifetime of this component, and there may be times when it doesn't have one.
+
+        @see newOpenGLContextCreated()
+    */
+    OpenGLContext* getCurrentContext() const throw()            { return context; }
+
+    /** Makes this component the current openGL context.
+
+        You might want to use this in things like your resize() method, before calling
+        GL commands.
+
+        If this returns false, then the context isn't active, so you should avoid
+        making any calls.
+
+        This call may actually create a context if one isn't currently initialised. If
+        it does this, it will also synchronously call the newOpenGLContextCreated()
+        method to let you initialise it as necessary.
+
+        @see OpenGLContext::makeActive
+    */
+    bool makeCurrentContextActive();
+
+    /** Stops the current component being the active OpenGL context.
+
+        This is the opposite of makeCurrentContextActive()
+
+        @see OpenGLContext::makeInactive
+    */
+    void makeCurrentContextInactive();
+
+    /** Returns true if this component is the active openGL context for the
+        current thread.
+
+        @see OpenGLContext::isActive
+    */
+    bool isActiveContext() const throw();
+
+    /** Calls the rendering callback, and swaps the buffers afterwards.
+
+        This is called automatically by paint() when the component needs to be rendered.
+
+        It can be overridden if you need to decouple the rendering from the paint callback
+        and render with a custom thread.
+
+        Returns true if the operation succeeded.
+    */
+    virtual bool renderAndSwapBuffers();
+
+    /** This returns a critical section that can be used to lock the current context.
+
+        Because the context that is used by this component can change, e.g. when the
+        component is shown or hidden, then if you're rendering to it on a background
+        thread, this allows you to lock the context for the duration of your rendering
+        routine.
+    */
+    CriticalSection& getContextLock() throw()       { return contextLock; }
+
+    /** @internal */
+    void paint (Graphics& g);
+
+    /** Returns the native handle of an embedded heavyweight window, if there is one.
+
+        E.g. On windows, this will return the HWND of the sub-window containing
+        the opengl context, on the mac it'll be the NSOpenGLView.
+    */
+    void* getNativeWindowHandle() const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class OpenGLComponentWatcher;
+    OpenGLComponentWatcher* componentWatcher;
+
+    OpenGLContext* context;
+    OpenGLContext* contextToShareListsWith;
+
+    CriticalSection contextLock;
+    OpenGLPixelFormat preferredPixelFormat;
+    bool needToUpdateViewport;
+
+    void deleteContext();
+    void updateContextPosition();
+    void internalRepaint (int x, int y, int w, int h);
+
+    OpenGLComponent (const OpenGLComponent&);
+    const OpenGLComponent& operator= (const OpenGLComponent&);
+};
+
+#endif
+#endif   // __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_OpenGLComponent.h *********/
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
@@ -53214,317 +53419,6 @@ private:
 /********* End of inlined file: juce_MidiKeyboardComponent.h *********/
 
 #endif
-#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OpenGLComponent.h *********/
-#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-#define __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-
-// this is used to disable OpenGL, and is defined in juce_Config.h
-#if JUCE_OPENGL || DOXYGEN
-
-class OpenGLComponentWatcher;
-
-/**
-    Represents the various properties of an OpenGL bitmap format.
-
-    @see OpenGLComponent::setPixelFormat
-*/
-struct OpenGLPixelFormat
-{
-
-    /** Creates an OpenGLPixelFormat.
-
-        The default constructor just initialises the object as a simple 8-bit
-        RGBA format.
-    */
-    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
-                       const int alphaBits = 8,
-                       const int depthBufferBits = 16,
-                       const int stencilBufferBits = 0) throw();
-
-    int redBits;          /**< The number of bits per pixel to use for the red channel. */
-    int greenBits;        /**< The number of bits per pixel to use for the green channel. */
-    int blueBits;         /**< The number of bits per pixel to use for the blue channel. */
-    int alphaBits;        /**< The number of bits per pixel to use for the alpha channel. */
-
-    int depthBufferBits;      /**< The number of bits per pixel to use for a depth buffer. */
-    int stencilBufferBits;    /**< The number of bits per pixel to use for a stencil buffer. */
-
-    int accumulationBufferRedBits;    /**< The number of bits per pixel to use for an accumulation buffer's red channel. */
-    int accumulationBufferGreenBits;  /**< The number of bits per pixel to use for an accumulation buffer's green channel. */
-    int accumulationBufferBlueBits;   /**< The number of bits per pixel to use for an accumulation buffer's blue channel. */
-    int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
-
-    uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
-
-    /** Returns a list of all the pixel formats that can be used in this system.
-
-        A reference component is needed in case there are multiple screens with different
-        capabilities - in which case, the one that the component is on will be used.
-    */
-    static void getAvailablePixelFormats (Component* component,
-                                          OwnedArray <OpenGLPixelFormat>& results);
-
-    bool operator== (const OpenGLPixelFormat&) const throw();
-
-    juce_UseDebuggingNewOperator
-};
-
-/**
-    A base class for types of OpenGL context.
-
-    An OpenGLComponent will supply its own context for drawing in its window.
-*/
-class OpenGLContext
-{
-public:
-
-    /** Destructor. */
-    virtual ~OpenGLContext();
-
-    /** Makes this context the currently active one. */
-    virtual bool makeActive() const throw() = 0;
-    /** If this context is currently active, it is disactivated. */
-    virtual bool makeInactive() const throw() = 0;
-    /** Returns true if this context is currently active. */
-    virtual bool isActive() const throw() = 0;
-
-    /** Swaps the buffers (if the context can do this). */
-    virtual void swapBuffers() = 0;
-
-    /** Sets whether the context checks the vertical sync before swapping.
-
-        The value is the number of frames to allow between buffer-swapping. This is
-        fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
-        and greater numbers indicate that it should swap less often.
-
-        Returns true if it sets the value successfully.
-    */
-    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
-
-    /** Returns the current swap-sync interval.
-        See setSwapInterval() for info about the value returned.
-    */
-    virtual int getSwapInterval() const = 0;
-
-    /** Returns the pixel format being used by this context. */
-    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
-
-    /** For windowed contexts, this moves the context within the bounds of
-        its parent window.
-    */
-    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
-
-    /** For windowed contexts, this triggers a repaint of the window.
-
-        (Not relevent on all platforms).
-    */
-    virtual void repaint() = 0;
-
-    /** Returns an OS-dependent handle to the raw GL context.
-
-        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
-        a GLXContext.
-    */
-    virtual void* getRawContext() const throw() = 0;
-
-    /** This tries to create a context that can be used for drawing into the
-        area occupied by the specified component.
-
-        Note that you probably shouldn't use this method directly unless you know what
-        you're doing - the OpenGLComponent calls this and manages the context for you.
-    */
-    static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
-                                                  const OpenGLPixelFormat& pixelFormat,
-                                                  const OpenGLContext* const contextToShareWith);
-
-    /** Returns the context that's currently in active use by the calling thread.
-
-        Returns 0 if there isn't an active context.
-    */
-    static OpenGLContext* getCurrentContext();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    OpenGLContext() throw();
-};
-
-/**
-    A component that contains an OpenGL canvas.
-
-    Override this, add it to whatever component you want to, and use the renderOpenGL()
-    method to draw its contents.
-
-*/
-class JUCE_API  OpenGLComponent  : public Component
-{
-public:
-
-    /** Creates an OpenGLComponent.
-    */
-    OpenGLComponent();
-
-    /** Destructor. */
-    ~OpenGLComponent();
-
-    /** Changes the pixel format used by this component.
-
-        @see OpenGLPixelFormat::getAvailablePixelFormats()
-    */
-    void setPixelFormat (const OpenGLPixelFormat& formatToUse);
-
-    /** Returns the pixel format that this component is currently using. */
-    const OpenGLPixelFormat getPixelFormat() const;
-
-    /** Specifies an OpenGL context which should be shared with the one that this
-        component is using.
-
-        This is an OpenGL feature that lets two contexts share their texture data.
-
-        Note that this pointer is stored by the component, and when the component
-        needs to recreate its internal context for some reason, the same context
-        will be used again to share lists. So if you pass a context in here,
-        don't delete the context while this component is still using it! You can
-        call shareWith (0) to stop this component from sharing with it.
-    */
-    void shareWith (OpenGLContext* contextToShareListsWith);
-
-    /** Returns the context that this component is sharing with.
-        @see shareWith
-    */
-    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
-
-    /** Flips the openGL buffers over. */
-    void swapBuffers();
-
-    /** This replaces the normal paint() callback - use it to draw your openGL stuff.
-
-        When this is called, makeCurrentContextActive() will already have been called
-        for you, so you just need to draw.
-    */
-    virtual void renderOpenGL() = 0;
-
-    /** This method is called when the component creates a new OpenGL context.
-
-        A new context may be created when the component is first used, or when it
-        is moved to a different window, or when the window is hidden and re-shown,
-        etc.
-
-        You can use this callback as an opportunity to set up things like textures
-        that your context needs.
-
-        New contexts are created on-demand by the makeCurrentContextActive() method - so
-        if the context is deleted, e.g. by changing the pixel format or window, no context
-        will be created until the next call to makeCurrentContextActive(), which will
-        synchronously create one and call this method. This means that if you're using
-        a non-GUI thread for rendering, you can make sure this method is be called by
-        your renderer thread.
-
-        When this callback happens, the context will already have been made current
-        using the makeCurrentContextActive() method, so there's no need to call it
-        again in your code.
-    */
-    virtual void newOpenGLContextCreated() = 0;
-
-    /** Returns the context that will draw into this component.
-
-        This may return 0 if the component is currently invisible or hasn't currently
-        got a context. The context object can be deleted and a new one created during
-        the lifetime of this component, and there may be times when it doesn't have one.
-
-        @see newOpenGLContextCreated()
-    */
-    OpenGLContext* getCurrentContext() const throw()            { return context; }
-
-    /** Makes this component the current openGL context.
-
-        You might want to use this in things like your resize() method, before calling
-        GL commands.
-
-        If this returns false, then the context isn't active, so you should avoid
-        making any calls.
-
-        This call may actually create a context if one isn't currently initialised. If
-        it does this, it will also synchronously call the newOpenGLContextCreated()
-        method to let you initialise it as necessary.
-
-        @see OpenGLContext::makeActive
-    */
-    bool makeCurrentContextActive();
-
-    /** Stops the current component being the active OpenGL context.
-
-        This is the opposite of makeCurrentContextActive()
-
-        @see OpenGLContext::makeInactive
-    */
-    void makeCurrentContextInactive();
-
-    /** Returns true if this component is the active openGL context for the
-        current thread.
-
-        @see OpenGLContext::isActive
-    */
-    bool isActiveContext() const throw();
-
-    /** Calls the rendering callback, and swaps the buffers afterwards.
-
-        This is called automatically by paint() when the component needs to be rendered.
-
-        It can be overridden if you need to decouple the rendering from the paint callback
-        and render with a custom thread.
-
-        Returns true if the operation succeeded.
-    */
-    virtual bool renderAndSwapBuffers();
-
-    /** This returns a critical section that can be used to lock the current context.
-
-        Because the context that is used by this component can change, e.g. when the
-        component is shown or hidden, then if you're rendering to it on a background
-        thread, this allows you to lock the context for the duration of your rendering
-        routine.
-    */
-    CriticalSection& getContextLock() throw()       { return contextLock; }
-
-    /** @internal */
-    void paint (Graphics& g);
-
-    /** Returns the native handle of an embedded heavyweight window, if there is one.
-
-        E.g. On windows, this will return the HWND of the sub-window containing
-        the opengl context, on the mac it'll be the NSOpenGLView.
-    */
-    void* getNativeWindowHandle() const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class OpenGLComponentWatcher;
-    OpenGLComponentWatcher* componentWatcher;
-
-    OpenGLContext* context;
-    OpenGLContext* contextToShareListsWith;
-
-    CriticalSection contextLock;
-    OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport;
-
-    void deleteContext();
-    void updateContextPosition();
-    void internalRepaint (int x, int y, int w, int h);
-
-    OpenGLComponent (const OpenGLComponent&);
-    const OpenGLComponent& operator= (const OpenGLComponent&);
-};
-
-#endif
-#endif   // __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_OpenGLComponent.h *********/
-
-#endif
 #ifndef __JUCE_PREFERENCESPANEL_JUCEHEADER__
 
 /********* Start of inlined file: juce_PreferencesPanel.h *********/
@@ -53653,6 +53547,112 @@ private:
 #if JUCE_QUICKTIME || DOXYGEN
 
 #if JUCE_WINDOWS
+
+/********* Start of inlined file: juce_ActiveXControlComponent.h *********/
+#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+#define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+
+#if JUCE_WINDOWS || DOXYGEN
+
+/**
+    A Windows-specific class that can create and embed an ActiveX control inside
+    itself.
+
+    To use it, create one of these, put it in place and make sure it's visible in a
+    window, then use createControl() to instantiate an ActiveX control. The control
+    will then be moved and resized to follow the movements of this component.
+
+    Of course, since the control is a heavyweight window, it'll obliterate any
+    juce components that may overlap this component, but that's life.
+*/
+class JUCE_API  ActiveXControlComponent   : public Component
+{
+public:
+
+    /** Create an initially-empty container. */
+    ActiveXControlComponent();
+
+    /** Destructor. */
+    ~ActiveXControlComponent();
+
+    /** Tries to create an ActiveX control and embed it in this peer.
+
+        The peer controlIID is a pointer to an IID structure - it's treated
+        as a void* because when including the Juce headers, you might not always
+        have included windows.h first, in which case IID wouldn't be defined.
+
+        e.g. @code
+        const IID myIID = __uuidof (QTControl);
+        myControlComp->createControl (&myIID);
+        @endcode
+    */
+    bool createControl (const void* controlIID);
+
+    /** Deletes the ActiveX control, if one has been created.
+    */
+    void deleteControl();
+
+    /** Returns true if a control is currently in use. */
+    bool isControlOpen() const throw()                  { return control != 0; }
+
+    /** Does a QueryInterface call on the embedded control object.
+
+        This allows you to cast the control to whatever type of COM object you need.
+
+        The iid parameter is a pointer to an IID structure - it's treated
+        as a void* because when including the Juce headers, you might not always
+        have included windows.h first, in which case IID wouldn't be defined, but
+        you should just pass a pointer to an IID.
+
+        e.g. @code
+        const IID iid = __uuidof (IOleWindow);
+
+        IOleWindow* oleWindow = (IOleWindow*) myControlComp->queryInterface (&iid);
+
+        if (oleWindow != 0)
+        {
+            HWND hwnd;
+            oleWindow->GetWindow (&hwnd);
+
+            ...
+
+            oleWindow->Release();
+        }
+        @endcode
+    */
+    void* queryInterface (const void* iid) const;
+
+    /** Set this to false to stop mouse events being allowed through to the control.
+    */
+    void setMouseEventsAllowed (const bool eventsCanReachControl);
+
+    /** Returns true if mouse events are allowed to get through to the control.
+    */
+    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void* originalWndProc;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class ActiveXControlData;
+    void* control;
+    bool mouseEventsAllowed;
+
+    ActiveXControlComponent (const ActiveXControlComponent&);
+    const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
+
+    void setControlBounds (const Rectangle& bounds) const;
+    void setControlVisible (const bool b) const;
+};
+
+#endif
+
+#endif   // __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ActiveXControlComponent.h *********/
 
   typedef ActiveXControlComponent QTCompBaseClass;
 #else
@@ -53874,6 +53874,9 @@ private:
 #endif
 #endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_SystemTrayIconComponent.h *********/
+
+#endif
+#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
