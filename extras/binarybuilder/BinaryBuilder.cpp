@@ -17,7 +17,7 @@
 
 //==============================================================================
 static int addFile (const File& file,
-                    const String& classname, 
+                    const String& classname,
                     OutputStream& headerStream,
                     OutputStream& cppStream)
 {
@@ -29,7 +29,7 @@ static int addFile (const File& file,
                            .replaceCharacter ('.', '_')
                            .retainCharacters (T("abcdefghijklmnopqrstuvwxyz_0123456789")));
 
-    printf ("Adding %s: %d bytes\n", 
+    printf ("Adding %s: %d bytes\n",
             (const char*) name,
             mb.getSize());
 
@@ -59,8 +59,8 @@ static int addFile (const File& file,
     cppStream.printf ("%d,0,0};\r\n", (int) data[i]);
 
     cppStream.printf ("const char* %s::%s = (const char*) temp%d;\r\n\r\n",
-                      (const char*) classname, 
-                      (const char*) name, 
+                      (const char*) classname,
+                      (const char*) name,
                       tempNum);
 
     return mb.getSize();
@@ -78,7 +78,7 @@ static bool isHiddenFile (const File& f, const File& root)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // If you're running a command-line app, you need to initialise juce manually 
+    // If you're running a command-line app, you need to initialise juce manually
     // before calling any Juce functionality..
     initialiseJuce_NonGUI();
 
@@ -128,15 +128,15 @@ int main (int argc, char* argv[])
     const File cppFile    (destDirectory.getChildFile (className).withFileExtension (T(".cpp")));
 
     String message;
-    message << "Creating " << headerFile.getFullPathName() 
+    message << "Creating " << headerFile.getFullPathName()
             << " and " << cppFile.getFullPathName()
-            << " from files in " << sourceDirectory.getFullPathName() 
+            << " from files in " << sourceDirectory.getFullPathName()
             << "...\n\n";
 
     printf ((const char*) message);
 
     OwnedArray <File> files;
-    sourceDirectory.findChildFiles (files, File::findFiles, true, 
+    sourceDirectory.findChildFiles (files, File::findFiles, true,
                                     (argc > 4) ? argv[4] : "*");
 
     if (files.size() == 0)

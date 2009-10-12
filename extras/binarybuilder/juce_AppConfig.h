@@ -1,5 +1,5 @@
 /*
-    This file contains settings that you might want to explicitly apply to 
+    This file contains settings that you might want to explicitly apply to
     your Juce build.
 
     These flags enable or disable juce features - if you're linking to juce as
@@ -8,7 +8,7 @@
     just include this file before including your juce_amalgamated.cpp file to
     have the same effect.
 
-    If you leave any of these commented-out, they'll take on the default value 
+    If you leave any of these commented-out, they'll take on the default value
     assigned to them in juce_Config.h, so to force them on or off, just set them
     to an explicit 0 or 1 in here.
 */

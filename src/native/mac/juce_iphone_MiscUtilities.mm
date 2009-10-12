@@ -145,7 +145,7 @@ void Desktop::setMousePosition (int x, int y) throw()
 //==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
-	[[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];
+    [[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];
 }
 
 bool Desktop::isScreenSaverEnabled() throw()

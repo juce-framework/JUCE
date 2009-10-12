@@ -71,8 +71,8 @@ static bool canFileBeReincluded (const File& f)
 //==============================================================================
 static bool parseFile (const File& rootFolder,
                        const File& newTargetFile,
-                       StringArray& dest, 
-                       const File& file, 
+                       StringArray& dest,
+                       const File& file,
                        StringArray& alreadyIncludedFiles,
                        const StringArray& includesToIgnore,
                        const StringArray& wildcards,
@@ -133,18 +133,18 @@ static bool parseFile (const File& rootFolder,
                             alreadyIncludedFiles.add (targetFile.getFullPathName());
 
                         dest.add (String::empty);
-                        dest.add (T("/********* Start of inlined file: ") 
+                        dest.add (T("/********* Start of inlined file: ")
                                     + targetFile.getFileName()
                                     + T(" *********/"));
 
-                        if (! parseFile (rootFolder, newTargetFile, 
+                        if (! parseFile (rootFolder, newTargetFile,
                                          dest, targetFile, alreadyIncludedFiles, includesToIgnore,
                                          wildcards, false, stripUnnecessaryStuff))
                         {
                             return false;
                         }
 
-                        dest.add (T("/********* End of inlined file: ") 
+                        dest.add (T("/********* End of inlined file: ")
                                     + targetFile.getFileName()
                                     + T(" *********/"));
                         dest.add (String::empty);
@@ -192,9 +192,9 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
     wildcards.trim();
     wildcards.removeEmptyStrings();
 
-    if (! parseFile (targetFile.getParentDirectory(), 
+    if (! parseFile (targetFile.getParentDirectory(),
                      targetFile,
-                     lines, templateFile, 
+                     lines, templateFile,
                      alreadyIncludedFiles,
                      includesToIgnore,
                      wildcards,
@@ -296,7 +296,7 @@ static void mungeJuce (const File& juceFolder)
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // If you're running a command-line app, you need to initialise juce manually 
+    // If you're running a command-line app, you need to initialise juce manually
     // before calling any Juce functionality..
     initialiseJuce_NonGUI();
 
@@ -327,10 +327,9 @@ int main (int argc, char* argv[])
                 " ignoring any repeated instances of it.\n\n"
                 " The wildcard lets you specify what kind of files will be replaced, so\n"
                 " \"*.cpp;*.h\" would replace only includes that reference a .cpp or .h file.\n\n"
-                " Or: just run 'amalgamator YourJuceDirectory' to rebuild the juce files." 
+                " Or: just run 'amalgamator YourJuceDirectory' to rebuild the juce files."
                 );
     }
 
     return 0;
 }
-

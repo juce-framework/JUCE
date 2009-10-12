@@ -334,7 +334,7 @@ bool File::moveToTrash() const throw()
 struct FindFileStruct
 {
     NSDirectoryEnumerator* enumerator;
-    String parentDir;
+    String parentDir, wildCard;
 };
 
 bool juce_findFileNext (void* handle, String& resultFile,
@@ -342,46 +342,53 @@ bool juce_findFileNext (void* handle, String& resultFile,
 {
     FindFileStruct* ff = (FindFileStruct*) handle;
     NSString* file;
+    const char* const wildcardUTF8 = ff->wildCard.toUTF8();
 
-    if (ff == 0 || (file = [ff->enumerator nextObject]) == 0)
-        return false;
-
-    [ff->enumerator skipDescendents];
-    resultFile = nsStringToJuce (file);
-
-    const String path (ff->parentDir + resultFile);
-
-    if (isDir != 0 || fileSize != 0)
+    for (;;)
     {
-        struct stat info;
-        const bool statOk = juce_stat (path, info);
+        if (ff == 0 || (file = [ff->enumerator nextObject]) == 0)
+            return false;
 
-        if (isDir != 0)
-            *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+        [ff->enumerator skipDescendents];
+        resultFile = nsStringToJuce (file);
 
-        if (isHidden != 0)
-            *isHidden = juce_isHiddenFile (path);
+        if (fnmatch (wildcardUTF8, resultFile.toUTF8(), FNM_CASEFOLD) != 0)
+            continue;
 
-        if (fileSize != 0)
-            *fileSize = statOk ? info.st_size : 0;
+        const String path (ff->parentDir + resultFile);
+
+        if (isDir != 0 || fileSize != 0)
+        {
+            struct stat info;
+            const bool statOk = juce_stat (path, info);
+
+            if (isDir != 0)
+                *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+
+            if (isHidden != 0)
+                *isHidden = juce_isHiddenFile (path);
+
+            if (fileSize != 0)
+                *fileSize = statOk ? info.st_size : 0;
+        }
+
+        if (modTime != 0 || creationTime != 0)
+        {
+            int64 m, a, c;
+            juce_getFileTimes (path, m, a, c);
+
+            if (modTime != 0)
+                *modTime = m;
+
+            if (creationTime != 0)
+                *creationTime = c;
+        }
+
+        if (isReadOnly != 0)
+            *isReadOnly = ! juce_canWriteToFile (path);
+
+        return true;
     }
-
-    if (modTime != 0 || creationTime != 0)
-    {
-        int64 m, a, c;
-        juce_getFileTimes (path, m, a, c);
-
-        if (modTime != 0)
-            *modTime = m;
-
-        if (creationTime != 0)
-            *creationTime = c;
-    }
-
-    if (isReadOnly != 0)
-        *isReadOnly = ! juce_canWriteToFile (path);
-
-    return true;
 }
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
@@ -395,6 +402,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
         FindFileStruct* ff = new FindFileStruct();
         ff->enumerator = [e retain];
         ff->parentDir = directory;
+        ff->wildCard = wildCard;
 
         if (! ff->parentDir.endsWithChar (File::separator))
             ff->parentDir += File::separator;

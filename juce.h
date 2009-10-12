@@ -98,8 +98,8 @@ END_JUCE_NAMESPACE
   /* "Rectangle" is defined in some of the newer windows header files, so this makes
      it easier to use the juce version explicitly.
 
-     If you run into difficulties where this macro interferes with other 3rd party header 
-     files, you may need to use the juce_WithoutMacros.h file - see the comments in that 
+     If you run into difficulties where this macro interferes with other 3rd party header
+     files, you may need to use the juce_WithoutMacros.h file - see the comments in that
      file for more information.
   */
   #if JUCE_WINDOWS && ! JUCE_DONT_DEFINE_MACROS

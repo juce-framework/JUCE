@@ -45,7 +45,7 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     void releaseResources();
 
-	void processBlock (AudioSampleBuffer& buffer,
+    void processBlock (AudioSampleBuffer& buffer,
                        MidiBuffer& midiMessages);
 
     //==============================================================================
