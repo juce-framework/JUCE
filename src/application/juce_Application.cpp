@@ -194,7 +194,7 @@ bool JUCEApplication::initialiseApp (String& commandLine)
 
     initialiseJuce_GUI();
 
-    InterProcessLock* appLock = 0;
+    jassert (appLock == 0); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
     {
