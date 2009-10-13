@@ -28,9 +28,8 @@
 
 #include "../../../io/files/juce_File.h"
 
-// this is used to disable QuickTime, and is defined in juce_Config.h
-#if JUCE_QUICKTIME || DOXYGEN
-
+// (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
+// amalgamated build)
 #if JUCE_WINDOWS
   #include "juce_ActiveXControlComponent.h"
   typedef ActiveXControlComponent QTCompBaseClass;
@@ -38,6 +37,9 @@
   #include "juce_NSViewComponent.h"
   typedef NSViewComponent QTCompBaseClass;
 #endif
+
+// this is used to disable QuickTime, and is defined in juce_Config.h
+#if JUCE_QUICKTIME || DOXYGEN
 
 //==============================================================================
 /**

@@ -1595,6 +1595,11 @@ const String String::dropLastCharacters (const int numberToDrop) const throw()
                    jmax (0, CharacterFunctions::length (text->text) - numberToDrop));
 }
 
+const String String::getLastCharacters (const int numCharacters) const throw()
+{
+    return String (text->text + jmax (0, CharacterFunctions::length (text->text) - jmax (0, numCharacters)));
+}
+
 const String String::fromFirstOccurrenceOf (const tchar* const sub,
                                             const bool includeSubString,
                                             const bool ignoreCase) const throw()

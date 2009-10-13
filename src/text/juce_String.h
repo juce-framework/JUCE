@@ -510,7 +510,7 @@ public:
         @param startIndex   the index of the start of the substring needed
         @param endIndex     all characters from startIndex up to (but not including)
                             this index are returned
-        @see fromFirstOccurrenceOf, dropLastCharacters, upToFirstOccurrenceOf
+        @see fromFirstOccurrenceOf, dropLastCharacters, getLastCharacters, upToFirstOccurrenceOf
     */
     const String substring (int startIndex,
                             int endIndex) const throw();
@@ -521,7 +521,7 @@ public:
                             of the string, an empty string is returned. If it is zero or
                             less, the whole string is returned.
         @returns            the substring from startIndex up to the end of the string
-        @see dropLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
+        @see dropLastCharacters, getLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
     const String substring (const int startIndex) const throw();
 
@@ -535,6 +535,15 @@ public:
         @see substring, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf, getLastCharacter
     */
     const String dropLastCharacters (const int numberToDrop) const throw();
+
+    /** Returns a number of characters from the end of the string.
+
+        This returns the last numCharacters characters from the end of the string. If the
+        string is shorter than numCharacters, the whole string is returned.
+
+        @see substring, dropLastCharacters, getLastCharacter
+    */
+    const String getLastCharacters (const int numCharacters) const throw();
 
     //==============================================================================
     /** Returns a section of the string starting from a given substring.
@@ -588,6 +597,7 @@ public:
     /** Returns the start of this string, up to the last occurrence of a substring.
 
         Similar to upToFirstOccurrenceOf(), but this finds the last occurrence rather than the first.
+        If the substring isn't found, this will return an empty string.
 
         @see upToFirstOccurrenceOf, fromFirstOccurrenceOf
     */
