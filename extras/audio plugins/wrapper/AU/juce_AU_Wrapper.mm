@@ -237,7 +237,10 @@ public:
                 const ScopedAutoReleasePool pool;
 
                 AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) outData;
-                NSBundle* b = [NSBundle bundleForClass: [JuceUICreationClass class]];
+
+                const File bundleFile (File::getSpecialLocation (File::currentApplicationFile));
+                NSString* bundlePath = [NSString stringWithUTF8String: (const char*) bundleFile.getFullPathName().toUTF8()];
+                NSBundle* b = [NSBundle bundleWithPath: bundlePath];
 
                 info->mCocoaAUViewClass[0] = (CFStringRef) [[[JuceUICreationClass class] className] retain];
                 info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [b bundlePath]] retain];

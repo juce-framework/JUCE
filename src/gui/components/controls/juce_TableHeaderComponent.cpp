@@ -191,6 +191,12 @@ void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
     }
 }
 
+int TableHeaderComponent::getColumnWidth (const int columnId) const throw()
+{
+    const ColumnInfo* const ci = getInfoForId (columnId);
+    return ci != 0 ? ci->width : 0;
+}
+
 void TableHeaderComponent::setColumnWidth (const int columnId, const int newWidth)
 {
     ColumnInfo* const ci = getInfoForId (columnId);

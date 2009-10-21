@@ -193,6 +193,10 @@ public:
     */
     void moveColumn (const int columnId, int newVisibleIndex);
 
+    /** Returns the width of one of the columns.
+    */
+    int getColumnWidth (const int columnId) const throw();
+
     /** Changes the width of a column.
 
         This will cause an asynchronous callback to the tableColumnsResized() method of any registered listeners.

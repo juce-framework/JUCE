@@ -263,7 +263,23 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
 
         File chosen (fc.getResult());
         if (chosen.getFileExtension().isEmpty())
+        {
             chosen = chosen.withFileExtension (fileExtension);
+
+            if (chosen.exists())
+            {
+                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                                    TRANS("File already exists"),
+                                                    TRANS("There's already a file called:\n\n")
+                                                    + chosen.getFullPathName()
+                                                    + T("\n\nAre you sure you want to overwrite it?"),
+                                                    TRANS("overwrite"),
+                                                    TRANS("cancel")))
+                {
+                    return userCancelledSave;
+                }
+            }
+        }
 
         return saveAs (chosen, false, false, true);
     }
