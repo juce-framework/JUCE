@@ -218,8 +218,7 @@ public:
 
             bool keep = false;
 
-            if ((itemsToKeep[i] || (comp == Component::getComponentUnderMouse() && comp->isMouseButtonDown()))
-                && isParentOf (comp))
+            if (isParentOf (comp))
             {
                 if (itemsToKeep[i])
                 {
@@ -234,8 +233,13 @@ public:
                         comp->setBounds (pos);
                     }
                 }
-                else
+                
+                if ((! keep) 
+                     && Component::isMouseButtonDownAnywhere()
+                     && (comp == Component::getComponentUnderMouse()
+                          || comp->isParentOf (Component::getComponentUnderMouse())))
                 {
+                    keep = true;
                     comp->setSize (0, 0);
                 }
             }

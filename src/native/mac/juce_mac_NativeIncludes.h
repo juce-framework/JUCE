@@ -56,6 +56,7 @@
  #import <IOKit/hid/IOHIDLib.h>
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
+ #include <Carbon/Carbon.h>
  #include <sys/dir.h>
  #include <sys/socket.h>
 #endif

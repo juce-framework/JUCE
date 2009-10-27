@@ -25,7 +25,7 @@
 
 // (This file gets included by juce_linux_NativeCode.cpp, rather than being
 // compiled on its own).
-#ifdef JUCE_INCLUDED_FILE && JUCE_ALSA
+#if JUCE_INCLUDED_FILE && JUCE_ALSA
 
 //==============================================================================
 static const int maxNumChans = 64;

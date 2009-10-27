@@ -774,7 +774,7 @@ void LookAndFeel::drawScrollbar (Graphics& g,
         gy2 = y + height * 0.7f;
     }
 
-    const Colour thumbColour (scrollbar.findColour (ScrollBar::trackColourId));
+    const Colour thumbColour (scrollbar.findColour (ScrollBar::thumbColourId));
 
     GradientBrush gb (thumbColour.overlaidWith (Colour (0x44000000)),
                       gx1, gy1,

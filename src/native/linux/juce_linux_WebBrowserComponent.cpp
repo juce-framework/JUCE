@@ -25,9 +25,7 @@
 
 // (This file gets included by juce_linux_NativeCode.cpp, rather than being
 // compiled on its own).
-#ifdef JUCE_INCLUDED_FILE
-
-#if JUCE_WEB_BROWSER
+#if JUCE_INCLUDED_FILE && JUCE_WEB_BROWSER
 
 /*
     Sorry.. This class isn't implemented on Linux!
@@ -125,5 +123,4 @@ bool WebBrowserComponent::pageAboutToLoad (const String& url)
     return true;
 }
 
-#endif
 #endif

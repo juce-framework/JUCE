@@ -25,7 +25,7 @@
 
 // (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
-#ifdef JUCE_INCLUDED_FILE
+#if JUCE_INCLUDED_FILE
 
 /*
     Note that a lot of methods that you'd expect to find in this file actually
@@ -521,7 +521,8 @@ OSType PlatformUtilities::getTypeOfFile (const String& filename)
 #else
     NSDictionary* fileDict = [[NSFileManager defaultManager] fileAttributesAtPath: juceStringToNS (filename) traverseLink: NO];
 #endif
-    return (OSType) [fileDict objectForKey: NSFileHFSTypeCode];
+    //return (OSType) [fileDict objectForKey: NSFileHFSTypeCode];
+    return [fileDict fileHFSTypeCode];
 }
 
 bool PlatformUtilities::isBundle (const String& filename)

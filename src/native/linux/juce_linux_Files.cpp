@@ -25,7 +25,7 @@
 
 // (This file gets included by juce_linux_NativeCode.cpp, rather than being
 // compiled on its own).
-#ifdef JUCE_INCLUDED_FILE
+#if JUCE_INCLUDED_FILE
 
 #define U_ISOFS_SUPER_MAGIC     (short) 0x9660   // linux/iso_fs.h
 #define U_MSDOS_SUPER_MAGIC     (short) 0x4d44   // linux/msdos_fs.h
