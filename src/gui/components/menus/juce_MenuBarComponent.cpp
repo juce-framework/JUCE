@@ -223,6 +223,9 @@ void MenuBarComponent::showMenu (int index)
                 PopupMenu m (model->getMenuForIndex (itemUnderMouse,
                                                      menuNames [itemUnderMouse]));
 
+                if (m.lookAndFeel == 0)
+                    m.setLookAndFeel (&getLookAndFeel());
+                
                 currentPopup = m.createMenuComponent (x, getScreenY(),
                                                       w, getHeight(),
                                                       0, w, 0, 0,
