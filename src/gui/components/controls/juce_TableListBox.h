@@ -144,6 +144,10 @@ public:
     */
     virtual int getColumnAutoSizeWidth (int columnId);
 
+    /** Returns a tooltip for a particular cell in the table.
+    */
+    virtual const String getCellTooltip (int rowNumber, int columnId);
+
     //==============================================================================
     /** Override this to be informed when rows are selected or deselected.
 

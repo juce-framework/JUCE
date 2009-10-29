@@ -38,7 +38,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 static const tchar* const tableColumnPropertyTag = T("_tableColumnID");
 
-class TableListRowComp   : public Component
+class TableListRowComp   : public Component,
+                           public TooltipClient
 {
 public:
     TableListRowComp (TableListBox& owner_)
@@ -240,6 +241,19 @@ public:
 
         if (columnId != 0 && owner.getModel() != 0)
             owner.getModel()->cellDoubleClicked (row, columnId, e);
+    }
+
+    const String getTooltip()
+    {
+        int x, y;
+        getMouseXYRelative (x, y);
+
+        const int columnId = owner.getHeader()->getColumnIdAtX (x);
+
+        if (columnId != 0 && owner.getModel() != 0)
+            return owner.getModel()->getCellTooltip (row, columnId);
+
+        return String::empty;
     }
 
     juce_UseDebuggingNewOperator

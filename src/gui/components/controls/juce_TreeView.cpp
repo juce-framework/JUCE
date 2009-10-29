@@ -233,8 +233,8 @@ public:
                         comp->setBounds (pos);
                     }
                 }
-                
-                if ((! keep) 
+
+                if ((! keep)
                      && Component::isMouseButtonDownAnywhere()
                      && (comp == Component::getComponentUnderMouse()
                           || comp->isParentOf (Component::getComponentUnderMouse())))

@@ -1816,11 +1816,12 @@ public:
     AudioIODevice* createDevice (const String& outputDeviceName,
                                  const String& inputDeviceName)
     {
+        // ASIO can't open two different devices for input and output - they must be the same one.
         jassert (inputDeviceName == outputDeviceName || outputDeviceName.isEmpty() || inputDeviceName.isEmpty());
-        (void) inputDeviceName;
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        const int index = deviceNames.indexOf (outputDeviceName);
+        const int index = deviceNames.indexOf (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                             : inputDeviceName);
 
         if (index >= 0)
         {

@@ -39225,7 +39225,7 @@ private:
 #define __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
 
 /**
-    An glyph from a particular font, with a particular size, style,
+    A glyph from a particular font, with a particular size, style,
     typeface and position.
 
     @see GlyphArrangement, Font
@@ -47015,6 +47015,10 @@ public:
     */
     virtual int getColumnAutoSizeWidth (int columnId);
 
+    /** Returns a tooltip for a particular cell in the table.
+    */
+    virtual const String getCellTooltip (int rowNumber, int columnId);
+
     /** Override this to be informed when rows are selected or deselected.
 
         @see ListBox::selectedRowsChanged()
@@ -53668,7 +53672,7 @@ private:
 /********* End of inlined file: juce_ActiveXControlComponent.h *********/
 
   typedef ActiveXControlComponent QTCompBaseClass;
-#else
+#elif JUCE_MAC
 
   typedef NSViewComponent QTCompBaseClass;
 #endif

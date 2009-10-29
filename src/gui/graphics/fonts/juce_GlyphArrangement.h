@@ -32,7 +32,7 @@
 
 //==============================================================================
 /**
-    An glyph from a particular font, with a particular size, style,
+    A glyph from a particular font, with a particular size, style,
     typeface and position.
 
     @see GlyphArrangement, Font

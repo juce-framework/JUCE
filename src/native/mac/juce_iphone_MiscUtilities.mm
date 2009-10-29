@@ -95,34 +95,77 @@ void PlatformUtilities::addItemToDock (const File& file)
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
+END_JUCE_NAMESPACE
+
+@interface JuceAlertBoxDelegate  : NSObject
+{
+@public
+    bool clickedOk;
+}
+
+- (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex;
+
+@end
+
+@implementation JuceAlertBoxDelegate
+
+- (void) alertView: (UIAlertView*) alertView clickedButtonAtIndex: (NSInteger) buttonIndex
+{
+    clickedOk = (buttonIndex == 0);
+    alertView.hidden = true;
+}
+
+@end
+
+BEGIN_JUCE_NAMESPACE
+
+// (This function is used directly by other bits of code)
+bool juce_iPhoneShowModalAlert (const String& title,
+                                const String& bodyText,
+                                NSString* okButtonText,
+                                NSString* cancelButtonText)
+{
+    const ScopedAutoReleasePool pool;
+
+    JuceAlertBoxDelegate* callback = [[JuceAlertBoxDelegate alloc] init];
+
+    UIAlertView* alert = [[UIAlertView alloc] initWithTitle: juceStringToNS (title)
+                                                    message: juceStringToNS (bodyText)
+                                                   delegate: callback
+                                          cancelButtonTitle: okButtonText
+                                          otherButtonTitles: cancelButtonText, nil];
+    [alert retain];
+    [alert show];
+
+    while (! alert.hidden && alert.superview != nil)
+        [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
+
+    const bool result = callback->clickedOk;
+    [alert release];
+    [callback release];
+
+    return result;
+}
+
 bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
 {
-    const ScopedAutoReleasePool pool;
-
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle: juceStringToNS (title)
-                                                     message: juceStringToNS (title)
-                                                    delegate: nil
-                                           cancelButtonTitle: @"OK"
-                                           otherButtonTitles: (isOkCancel ? @"Cancel" : nil), nil] autorelease];
-    alert.cancelButtonIndex = alert.firstOtherButtonIndex;
-    [alert show];
-
-    // xxx need to use a delegate to find which button was clicked
-    return false;
+    return juce_iPhoneShowModalAlert (title, bodyText,
+                                      @"OK",
+                                      isOkCancel ? @"Cancel" : nil);
 }
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {
-    jassertfalse    // not implemented!
+    jassertfalse    // no such thing on the iphone!
     return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 {
-    jassertfalse    // not implemented!
+    jassertfalse    // no such thing on the iphone!
     return false;
 }
 

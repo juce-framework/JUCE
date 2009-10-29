@@ -33,7 +33,7 @@
 #if JUCE_WINDOWS
   #include "juce_ActiveXControlComponent.h"
   typedef ActiveXControlComponent QTCompBaseClass;
-#else
+#elif JUCE_MAC
   #include "juce_NSViewComponent.h"
   typedef NSViewComponent QTCompBaseClass;
 #endif

@@ -225,7 +225,7 @@ void MenuBarComponent::showMenu (int index)
 
                 if (m.lookAndFeel == 0)
                     m.setLookAndFeel (&getLookAndFeel());
-                
+
                 currentPopup = m.createMenuComponent (x, getScreenY(),
                                                       w, getHeight(),
                                                       0, w, 0, 0,
