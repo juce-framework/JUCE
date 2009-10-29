@@ -76,6 +76,8 @@ END_JUCE_NAMESPACE
 - (BOOL) resignFirstResponder;
 - (BOOL) acceptsFirstResponder;
 
+- (void) asyncRepaint: (id) rect;
+
 - (NSArray*) getSupportedDragTypes;
 - (BOOL) sendDragCallback: (int) type sender: (id <NSDraggingInfo>) sender;
 - (NSDragOperation) draggingEntered: (id <NSDraggingInfo>) sender;
@@ -202,7 +204,7 @@ public:
 
     NSWindow* window;
     JuceNSView* view;
-    bool isSharedWindow, fullScreen;
+    bool isSharedWindow, fullScreen, insideDrawRect;
 };
 
 //==============================================================================
@@ -362,6 +364,12 @@ END_JUCE_NAMESPACE
 {
     if (owner != 0)
         owner->redirectMovedOrResized();
+}
+
+- (void) asyncRepaint: (id) rect
+{
+    NSRect* r = (NSRect*) [((NSData*) rect) bytes];
+    [self setNeedsDisplayInRect: *r];
 }
 
 //==============================================================================
@@ -765,7 +773,8 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
       window (0),
       view (0),
       isSharedWindow (viewToAttachTo != 0),
-      fullScreen (false)
+      fullScreen (false),
+      insideDrawRect (false)
 {
     NSRect r;
     r.origin.x = 0;
@@ -1450,7 +1459,10 @@ void NSViewComponentPeer::drawRect (NSRect r)
 
     if (context.reduceClipRegion (clip))
     {
+        insideDrawRect = true;
         handlePaint (context);
+        insideDrawRect = false;
+
         temp.draw (r.origin.x, r.origin.y, clip, originX, originY);
     }
 }
@@ -1494,9 +1506,19 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 //==============================================================================
 void NSViewComponentPeer::repaint (int x, int y, int w, int h)
 {
-    [view setNeedsDisplayInRect:
-            NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
-                        (float) w, (float) h)];
+    NSRect r = NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
+                           (float) w, (float) h);
+
+    if (insideDrawRect)
+    {
+        [view performSelectorOnMainThread: @selector (asyncRepaint:) 
+                               withObject: [NSData dataWithBytes: &r length: sizeof (r)]
+                            waitUntilDone: NO];
+    }
+    else
+    {
+        [view setNeedsDisplayInRect: r];
+    }
 }
 
 void NSViewComponentPeer::performAnyPendingRepaintsNow()

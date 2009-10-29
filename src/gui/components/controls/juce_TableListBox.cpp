@@ -566,6 +566,11 @@ void TableListBoxModel::listWasScrolled()
 {
 }
 
+const String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)
+{
+    return String::empty;
+}
+
 const String TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)
 {
     return String::empty;
