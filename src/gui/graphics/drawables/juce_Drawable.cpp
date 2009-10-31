@@ -53,16 +53,15 @@ Drawable::~Drawable()
 {
 }
 
-void Drawable::draw (Graphics& g,
+void Drawable::draw (Graphics& g, const float opacity,
                      const AffineTransform& transform) const
 {
-    const RenderingContext context (g, transform, g.getCurrentColour().getFloatAlpha());
-    render (context);
+    render (RenderingContext (g, transform, opacity));
 }
 
-void Drawable::drawAt (Graphics& g, const float x, const float y) const
+void Drawable::drawAt (Graphics& g, const float x, const float y, const float opacity) const
 {
-    draw (g, AffineTransform::translation (x, y));
+    draw (g, opacity, AffineTransform::translation (x, y));
 }
 
 void Drawable::drawWithin (Graphics& g,
@@ -70,16 +69,18 @@ void Drawable::drawWithin (Graphics& g,
                            const int destY,
                            const int destW,
                            const int destH,
-                           const RectanglePlacement& placement) const
+                           const RectanglePlacement& placement,
+                           const float opacity) const
 {
     if (destW > 0 && destH > 0)
     {
         float x, y, w, h;
         getBounds (x, y, w, h);
 
-        draw (g, placement.getTransformToFit (x, y, w, h,
-                                              (float) destX, (float) destY,
-                                              (float) destW, (float) destH));
+        draw (g, opacity,
+              placement.getTransformToFit (x, y, w, h,
+                                           (float) destX, (float) destY,
+                                           (float) destW, (float) destH));
     }
 }
 

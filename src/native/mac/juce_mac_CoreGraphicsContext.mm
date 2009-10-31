@@ -240,35 +240,6 @@ public:
         CGImageRelease (image);
     }
 
-    void blendImageRescaling (const Image& sourceImage,
-                              int dx, int dy, int dw, int dh,
-                              int sx, int sy, int sw, int sh,
-                              float alpha, const Graphics::ResamplingQuality quality)
-    {
-        if (sw > 0 && sh > 0)
-        {
-            if (sw == dw && sh == dh)
-            {
-                blendImage (sourceImage,
-                            dx, dy, dw, dh,
-                            sx, sy, alpha);
-            }
-            else
-            {
-                blendImageWarping (sourceImage,
-                                   sx, sy, sw, sh,
-                                   AffineTransform::translation ((float) -sx,
-                                                                 (float) -sy)
-                                                   .scaled (dw / (float) sw,
-                                                            dh / (float) sh)
-                                                   .translated ((float) dx,
-                                                                (float) dy),
-                                   alpha,
-                                   quality);
-            }
-        }
-    }
-
     void blendImageWarping (const Image& sourceImage,
                             int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                             const AffineTransform& transform,

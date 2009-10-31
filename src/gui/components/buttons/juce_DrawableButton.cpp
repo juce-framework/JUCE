@@ -222,7 +222,7 @@ void DrawableButton::paintButton (Graphics& g,
     {
         if (style == ImageRaw)
         {
-            imageToDraw->draw (g);
+            imageToDraw->draw (g, 1.0f);
         }
         else
         {
@@ -231,7 +231,8 @@ void DrawableButton::paintButton (Graphics& g,
                                      imageSpace.getY(),
                                      imageSpace.getWidth(),
                                      imageSpace.getHeight(),
-                                     RectanglePlacement::centred);
+                                     RectanglePlacement::centred,
+                                     1.0f);
         }
     }
 }

@@ -102,11 +102,6 @@ public:
                              int destX, int destY, int destW, int destH, int sourceX, int sourceY,
                              float alpha) = 0;
 
-    virtual void blendImageRescaling (const Image& sourceImage,
-                                      int destX, int destY, int destW, int destH,
-                                      int sourceX, int sourceY, int sourceW, int sourceH,
-                                      float alpha, const Graphics::ResamplingQuality quality) = 0;
-
     virtual void blendImageWarping (const Image& sourceImage,
                                     int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                                     const AffineTransform& transform,

@@ -449,39 +449,6 @@ void LowLevelGraphicsPostScriptRenderer::fillAlphaChannelWithImage (const Image&
     notPossibleInPostscriptAssert   // you can disable this warning by setting the WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS flag at the top of this file
 }
 
-
-//==============================================================================
-void LowLevelGraphicsPostScriptRenderer::blendImageRescaling (const Image& sourceImage,
-                                                              int dx, int dy, int dw, int dh,
-                                                              int sx, int sy, int sw, int sh,
-                                                              float alpha,
-                                                              const Graphics::ResamplingQuality quality)
-{
-    if (sw > 0 && sh > 0)
-    {
-        jassert (sx >= 0 && sx + sw <= sourceImage.getWidth());
-        jassert (sy >= 0 && sy + sh <= sourceImage.getHeight());
-
-        if (sw == dw && sh == dh)
-        {
-            blendImage (sourceImage,
-                        dx, dy, dw, dh,
-                        sx, sy, alpha);
-        }
-        else
-        {
-            blendImageWarping (sourceImage,
-                               sx, sy, sw, sh,
-                               AffineTransform::scale (dw / (float) sw,
-                                                       dh / (float) sh)
-                                   .translated ((float) (dx - sx),
-                                                (float) (dy - sy)),
-                               alpha,
-                               quality);
-        }
-    }
-}
-
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::blendImage (const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy, float opacity)
 {

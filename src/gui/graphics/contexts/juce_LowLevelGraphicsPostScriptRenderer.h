@@ -79,10 +79,6 @@ public:
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
                      int sourceX, int sourceY, float alpha);
 
-    void blendImageRescaling (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                              int sourceX, int sourceY, int sourceW, int sourceH,
-                              float alpha, const Graphics::ResamplingQuality quality);
-
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                             const AffineTransform& transform,
                             float alpha, const Graphics::ResamplingQuality quality);

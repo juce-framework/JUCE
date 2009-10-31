@@ -213,25 +213,23 @@ public:
         }
         else if (type == 10)
         {
-            g.setOpacity ((float) opacitySlider->getValue());
-
             float x, y, w, h;
             drawable->getBounds (x, y, w, h);
 
-            drawable->draw (g, AffineTransform::translation (-x - 0.5f * w,
-                                                             -y - 0.5f * h)
-                                .followedBy (getTransform()));
+            drawable->draw (g, (float) opacitySlider->getValue(),
+                            AffineTransform::translation (-x - 0.5f * w,
+                                                          -y - 0.5f * h)
+                                            .followedBy (getTransform()));
         }
         else if (type == 11)
         {
-            g.setOpacity ((float) opacitySlider->getValue());
-
             float x, y, w, h;
             svgDrawable->getBounds (x, y, w, h);
 
-            svgDrawable->draw (g, AffineTransform::translation (-x - 0.5f * w,
-                                                                -y - 0.5f * h)
-                                   .followedBy (getTransform()));
+            svgDrawable->draw (g, (float) opacitySlider->getValue(),
+                               AffineTransform::translation (-x - 0.5f * w,
+                                                             -y - 0.5f * h)
+                                               .followedBy (getTransform()));
         }
     }
 

@@ -19695,23 +19695,14 @@ public:
         If a brush is being used when this method is called, the brush will be deselected,
         and any subsequent drawing will be done with a solid colour brush instead.
 
-        @see setOpacity, setBrush, getColour
+        @see setOpacity, setBrush
     */
     void setColour (const Colour& newColour) throw();
 
-    /** Returns the colour that's currently being used.
-
-        This will return the last colour set by setColour(), even if the colour's not
-        currently being used for drawing because a brush has been selected instead.
-
-        @see setColour
-    */
-    const Colour& getCurrentColour() const throw();
-
     /** Changes the opacity to use with the current colour.
 
-        If a solid colour is being used for drawing, this changes its opacity (and this
-        will be reflected by calls to the getColour() method).
+        If a solid colour is being used for drawing, this changes its opacity
+        to this new value (i.e. it doesn't multiply the colour's opacity by this amount).
 
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
@@ -19747,12 +19738,6 @@ public:
     */
     void setFont (const float newFontHeight,
                   const int fontStyleFlags = Font::plain) throw();
-
-    /** Returns the font that's currently being used for text operations.
-
-        @see setFont
-    */
-    const Font& getCurrentFont() const throw();
 
     /** Draws a one-line text string.
 
@@ -39997,11 +39982,6 @@ public:
                              int destX, int destY, int destW, int destH, int sourceX, int sourceY,
                              float alpha) = 0;
 
-    virtual void blendImageRescaling (const Image& sourceImage,
-                                      int destX, int destY, int destW, int destH,
-                                      int sourceX, int sourceY, int sourceW, int sourceH,
-                                      float alpha, const Graphics::ResamplingQuality quality) = 0;
-
     virtual void blendImageWarping (const Image& sourceImage,
                                     int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                                     const AffineTransform& transform,
@@ -40068,10 +40048,6 @@ public:
 
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
                      int sourceX, int sourceY, float alpha);
-
-    void blendImageRescaling (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                              int sourceX, int sourceY, int sourceW, int sourceH,
-                              float alpha, const Graphics::ResamplingQuality quality);
 
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                             const AffineTransform& transform,
@@ -40172,10 +40148,6 @@ public:
 
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
                      int sourceX, int sourceY, float alpha);
-
-    void blendImageRescaling (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                              int sourceX, int sourceY, int sourceW, int sourceH,
-                              float alpha, const Graphics::ResamplingQuality quality);
 
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                             const AffineTransform& transform,
@@ -41264,7 +41236,7 @@ public:
     /** Renders this Drawable object.
         @see drawWithin
     */
-    void draw (Graphics& g,
+    void draw (Graphics& g, const float opacity,
                const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
@@ -41278,7 +41250,8 @@ public:
     */
     void drawAt (Graphics& g,
                  const float x,
-                 const float y) const;
+                 const float y,
+                 const float opacity) const;
 
     /** Renders the Drawable within a rectangle, scaling it to fit neatly inside without
         changing its aspect-ratio.
@@ -41293,13 +41266,15 @@ public:
         @param destHeight               size of the target rectangle to fit the image into
         @param placement                defines the alignment and rescaling to use to fit
                                         this object within the target rectangle.
+        @param opacity                  the opacity to use, in the range 0 to 1.0
     */
     void drawWithin (Graphics& g,
                      const int destX,
                      const int destY,
                      const int destWidth,
                      const int destHeight,
-                     const RectanglePlacement& placement) const;
+                     const RectanglePlacement& placement,
+                     const float opacity) const;
 
     /** Holds the information needed when telling a drawable to render itself.
         @see Drawable::draw
@@ -54088,7 +54063,8 @@ public:
     // Draws a small image that spins to indicate that something's happening..
     // This method should use the current time to animate itself, so just keep
     // repainting it every so often.
-    virtual void drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, int h);
+    virtual void drawSpinningWaitAnimation (Graphics& g, const Colour& colour,
+                                            int x, int y, int w, int h);
 
     /** Draws one of the buttons on a scrollbar.
 

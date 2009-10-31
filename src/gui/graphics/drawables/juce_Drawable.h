@@ -61,7 +61,7 @@ public:
     /** Renders this Drawable object.
         @see drawWithin
     */
-    void draw (Graphics& g,
+    void draw (Graphics& g, const float opacity,
                const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
@@ -75,7 +75,8 @@ public:
     */
     void drawAt (Graphics& g,
                  const float x,
-                 const float y) const;
+                 const float y,
+                 const float opacity) const;
 
     /** Renders the Drawable within a rectangle, scaling it to fit neatly inside without
         changing its aspect-ratio.
@@ -90,13 +91,15 @@ public:
         @param destHeight               size of the target rectangle to fit the image into
         @param placement                defines the alignment and rescaling to use to fit
                                         this object within the target rectangle.
+        @param opacity                  the opacity to use, in the range 0 to 1.0
     */
     void drawWithin (Graphics& g,
                      const int destX,
                      const int destY,
                      const int destWidth,
                      const int destHeight,
-                     const RectanglePlacement& placement) const;
+                     const RectanglePlacement& placement,
+                     const float opacity) const;
 
 
     //==============================================================================

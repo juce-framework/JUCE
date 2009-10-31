@@ -195,11 +195,6 @@ void Graphics::setColour (const Colour& newColour) throw()
     deleteAndZero (state->brush);
 }
 
-const Colour& Graphics::getCurrentColour() const throw()
-{
-    return state->colour;
-}
-
 void Graphics::setOpacity (const float newOpacity) throw()
 {
     saveStateIfPending();
@@ -250,11 +245,6 @@ void Graphics::setFont (const float newFontHeight,
 {
     saveStateIfPending();
     state->font.setSizeAndStyle (newFontHeight, newFontStyleFlags, 1.0f, 0.0f);
-}
-
-const Font& Graphics::getCurrentFont() const throw()
-{
-    return state->font;
 }
 
 //==============================================================================
@@ -891,11 +881,16 @@ void Graphics::drawImage (const Image* const imageToDraw,
         }
         else
         {
-            context->blendImageRescaling (*imageToDraw,
-                                          dx, dy, dw, dh,
-                                          sx, sy, sw, sh,
-                                          state->colour.getFloatAlpha(),
-                                          state->quality);
+            context->blendImageWarping (*imageToDraw,
+                                        sx, sy, sw, sh,
+                                        AffineTransform::translation ((float) -sx,
+                                                                      (float) -sy)
+                                                        .scaled (dw / (float) sw,
+                                                                 dh / (float) sh)
+                                                        .translated ((float) dx,
+                                                                     (float) dy),
+                                        state->colour.getFloatAlpha(),
+                                        state->quality);
         }
     }
 }

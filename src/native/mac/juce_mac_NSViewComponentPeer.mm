@@ -1436,8 +1436,12 @@ void NSViewComponentPeer::drawRect (NSRect r)
         return;
 
 #if USE_COREGRAPHICS_RENDERING
-    CoreGraphicsContext context ((CGContextRef) [[NSGraphicsContext currentContext] graphicsPort],
-                                 [view frame].size.height);
+    CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+
+    if (! component->isOpaque())
+        CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
+
+    CoreGraphicsContext context (cg, [view frame].size.height);
     handlePaint (context);
 #else
     const float y = [view frame].size.height - (r.origin.y + r.size.height);

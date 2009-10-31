@@ -367,14 +367,15 @@ const Font LookAndFeel::getFontForTextButton (TextButton& button)
 void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
                                   bool /*isMouseOverButton*/, bool /*isButtonDown*/)
 {
-    g.setFont (getFontForTextButton (button));
+    Font font (getFontForTextButton (button));
+    g.setFont (font);
     g.setColour (button.findColour (TextButton::textColourId)
                        .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
 
     const int yIndent = jmin (4, button.proportionOfHeight (0.3f));
     const int cornerSize = jmin (button.getHeight(), button.getWidth()) / 2;
 
-    const int fontHeight = roundFloatToInt (g.getCurrentFont().getHeight() * 0.6f);
+    const int fontHeight = roundFloatToInt (font.getHeight() * 0.6f);
     const int leftIndent  = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnLeft() ? 4 : 2));
     const int rightIndent = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnRight() ? 4 : 2));
 
@@ -655,7 +656,7 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
     }
 }
 
-void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, int h)
+void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, const Colour& colour, int x, int y, int w, int h)
 {
     const float radius = jmin (w, h) * 0.4f;
     const float thickness = radius * 0.15f;
@@ -668,12 +669,11 @@ void LookAndFeel::drawSpinningWaitAnimation (Graphics& g, int x, int y, int w, i
     const float cy = y + h * 0.5f;
 
     const uint32 animationIndex = (Time::getMillisecondCounter() / (1000 / 10)) % 12;
-    const Colour col (g.getCurrentColour());
 
     for (int i = 0; i < 12; ++i)
     {
         const int n = (i + 12 - animationIndex) % 12;
-        g.setColour (col.withMultipliedAlpha ((n + 1) / 12.0f));
+        g.setColour (colour.withMultipliedAlpha ((n + 1) / 12.0f));
 
         g.fillPath (p, AffineTransform::rotation (i * (float_Pi / 6.0f))
                                        .translated (cx, cy));
@@ -1099,7 +1099,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
 
         if (shortcutKeyText.isNotEmpty())
         {
-            Font f2 (g.getCurrentFont());
+            Font f2 (font);
             f2.setHeight (f2.getHeight() * 0.75f);
             f2.setHorizontalScale (0.95f);
             g.setFont (f2);
@@ -1777,15 +1777,16 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
     g.setBrush (&gb);
     g.fillAll();
 
-    g.setFont (h * 0.65f, Font::bold);
+    Font font (h * 0.65f, Font::bold);
+    g.setFont (font);
 
-    int textW = g.getCurrentFont().getStringWidth (window.getName());
+    int textW = font.getStringWidth (window.getName());
     int iconW = 0;
     int iconH = 0;
 
     if (icon != 0)
     {
-        iconH = (int) g.getCurrentFont().getHeight();
+        iconH = (int) font.getHeight();
         iconW = icon->getWidth() * iconH / icon->getHeight() + 4;
     }
 
@@ -2515,7 +2516,7 @@ void LookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height,
     g.setColour (Colours::black);
 
     if (! component.isEnabled())
-        g.setOpacity (g.getCurrentColour().getFloatAlpha() * 0.6f);
+        g.setOpacity (0.6f);
 
     g.setFont (jmin (height, 24) * 0.65f);
 
