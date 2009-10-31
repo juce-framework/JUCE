@@ -128,6 +128,10 @@ public:
                                int newHeight = -1,
                                const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
+    /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
+    */
+    virtual Image* createCopyOfAlphaChannel() const;
+
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.
 

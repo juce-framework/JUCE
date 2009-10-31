@@ -45,7 +45,8 @@
 //#define JUCE_LOG_ASSERTIONS  1
 #define JUCE_WASAPI  1
 //#define JUCE_ASIO  1
-//#define JUCE_ALSA  1
+#define JUCE_ALSA  1
+#define JUCE_JACK  1
 
 #if JUCE_WINDOWS || JUCE_IPHONE
  #define JUCE_QUICKTIME  0   // (This is disabled here by default because on windows it requires the QT SDK,

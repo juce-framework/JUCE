@@ -277,6 +277,12 @@
   #define JUCE_ALSA 1
 #endif
 
+/** Comment out this macro to disable building of JACK device support on Linux.
+*/
+#ifndef JUCE_JACK
+  #define JUCE_JACK 1
+#endif
+
 /** Comment out this macro if you don't want to enable QuickTime or if you don't
     have the SDK installed.
 
@@ -38755,6 +38761,11 @@ public:
     */
     const Colour getColour (const int index) const throw();
 
+    /** Returns the an interpolated colour at any position along the gradient.
+        @param position     the position along the gradient, between 0 and 1
+    */
+    const Colour getColourAtPosition (const float position) const throw();
+
     /** Creates a set of interpolated premultiplied ARGB values.
 
         The caller must delete the array that is returned using juce_free().
@@ -38974,6 +38985,10 @@ public:
     virtual Image* createCopy (int newWidth = -1,
                                int newHeight = -1,
                                const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+
+    /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
+    */
+    virtual Image* createCopyOfAlphaChannel() const;
 
     /** Returns the colour of one of the pixels in the image.
 

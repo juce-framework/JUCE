@@ -107,6 +107,7 @@ BEGIN_JUCE_NAMESPACE
   #include "mac/juce_iphone_Audio.cpp"
   #include "mac/juce_mac_CoreMidi.cpp"
  #else
+  #include "mac/juce_mac_CoreGraphicsContext.mm"
   #include "mac/juce_mac_NSViewComponentPeer.mm"
   #include "mac/juce_mac_MouseCursor.mm"
   #include "mac/juce_mac_NSViewComponent.mm"

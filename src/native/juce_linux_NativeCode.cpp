@@ -104,6 +104,7 @@ BEGIN_JUCE_NAMESPACE
  #include "linux/juce_linux_Fonts.cpp"
  #include "linux/juce_linux_Windowing.cpp"
  #include "linux/juce_linux_Audio.cpp"
+ #include "linux/juce_linux_JackAudio.cpp"
  #include "linux/juce_linux_Midi.cpp"
  #include "linux/juce_linux_AudioCDReader.cpp"
  #include "linux/juce_linux_FileChooser.cpp"

@@ -111,6 +111,19 @@
  #include <alsa/asoundlib.h>
 #endif
 
+#if JUCE_JACK
+ /* Got an include error here? If so, you've either not got jack-audio-connection-kit
+    installed, or you've not got your paths set up correctly to find its header files.
+
+    The package you need to install to get JACK support is "libjack-dev".
+
+    If you don't have the jack-audio-connection-kit library and don't want to build
+    Juce with low latency audio support, just disable the JUCE_JACK flag in juce_Config.h
+ */
+ #include <jack/jack.h>
+ //#include <jack/transport.h>
+#endif
+
 #undef SIZEOF
 
 #endif   // __JUCE_LINUX_NATIVEINCLUDES_JUCEHEADER__

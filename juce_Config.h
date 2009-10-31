@@ -91,6 +91,12 @@
   #define JUCE_ALSA 1
 #endif
 
+/** Comment out this macro to disable building of JACK device support on Linux.
+*/
+#ifndef JUCE_JACK
+  #define JUCE_JACK 1
+#endif
+
 //=============================================================================
 /** Comment out this macro if you don't want to enable QuickTime or if you don't
     have the SDK installed.

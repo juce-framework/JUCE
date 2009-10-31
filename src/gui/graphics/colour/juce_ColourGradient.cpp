@@ -112,6 +112,36 @@ const Colour ColourGradient::getColour (const int index) const throw()
     return Colour (colours [(index << 1) + 1]);
 }
 
+const Colour ColourGradient::getColourAtPosition (const float position) const throw()
+{
+    jassert (colours.getUnchecked (0) == 0); // the first colour specified has to go at position 0
+
+    const int integerPos = jlimit (0, 65535, roundFloatToInt (position * 65536.0f));
+
+    if (integerPos <= 0 || colours.size() <= 2)
+        return getColour (0);
+
+    int i = colours.size() - 2;
+    while (integerPos < colours.getUnchecked(i))
+        i -= 2;
+
+    if (i >= colours.size() - 2)
+        return Colour (colours.getUnchecked(i));
+
+    const int pos1 = colours.getUnchecked (i);
+    PixelARGB pix1 (colours.getUnchecked (i + 1));
+    pix1.premultiply();
+
+    const int pos2 = colours.getUnchecked (i + 2);
+    PixelARGB pix2 (colours.getUnchecked (i + 3));
+    pix2.premultiply();
+
+    pix1.tween (pix2, ((integerPos - pos1) << 8) / (pos2 - pos1));
+    pix1.unpremultiply();
+
+    return Colour (pix1.getARGB());
+}
+
 //==============================================================================
 PixelARGB* ColourGradient::createLookupTable (int& numEntries) const throw()
 {

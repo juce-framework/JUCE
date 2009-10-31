@@ -112,6 +112,7 @@ AudioIODeviceType* juce_createAudioIODeviceType_WASAPI();
 AudioIODeviceType* juce_createAudioIODeviceType_DirectSound();
 AudioIODeviceType* juce_createAudioIODeviceType_ASIO();
 AudioIODeviceType* juce_createAudioIODeviceType_ALSA();
+AudioIODeviceType* juce_createAudioIODeviceType_JACK();
 
 void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
@@ -136,6 +137,10 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
 
     #if JUCE_LINUX && JUCE_ALSA
      list.add (juce_createAudioIODeviceType_ALSA());
+    #endif
+
+    #if JUCE_LINUX && JUCE_JACK
+     list.add (juce_createAudioIODeviceType_JACK());
     #endif
 }
 

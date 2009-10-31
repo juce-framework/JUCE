@@ -116,6 +116,11 @@ public:
     */
     const Colour getColour (const int index) const throw();
 
+    /** Returns the an interpolated colour at any position along the gradient.
+        @param position     the position along the gradient, between 0 and 1
+    */
+    const Colour getColourAtPosition (const float position) const throw();
+
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.
 

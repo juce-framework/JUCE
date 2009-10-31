@@ -639,6 +639,7 @@
 		8484E9D8103C95A6008B7C6C /* juce_posix_SharedCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */; };
 		8484E9D9103C95A6008B7C6C /* juce_posix_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */; };
 		84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */; };
+		84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
 		84F1E6E810403605006A1807 /* juce_Application.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DD10403605006A1807 /* juce_Application.h */; };
 		84F1E6E910403605006A1807 /* juce_ApplicationCommandID.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */; };
@@ -1243,6 +1244,7 @@
 		8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_posix_SharedCode.h; path = ../../src/native/common/juce_posix_SharedCode.h; sourceTree = SOURCE_ROOT; };
 		8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_posix_NamedPipe.cpp; path = ../../src/native/common/juce_posix_NamedPipe.cpp; sourceTree = SOURCE_ROOT; };
 		84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_mac_ObjCSuffix.h; sourceTree = "<group>"; };
+		84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_CoreGraphicsContext.mm; sourceTree = "<group>"; };
 		84F1E6DC10403605006A1807 /* juce_Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Application.cpp; path = ../../src/application/juce_Application.cpp; sourceTree = SOURCE_ROOT; };
 		84F1E6DD10403605006A1807 /* juce_Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Application.h; path = ../../src/application/juce_Application.h; sourceTree = SOURCE_ROOT; };
 		84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ApplicationCommandID.h; path = ../../src/application/juce_ApplicationCommandID.h; sourceTree = SOURCE_ROOT; };
@@ -1877,6 +1879,7 @@
 				8484E9A9103C9595008B7C6C /* juce_mac_CarbonViewWrapperComponent.h */,
 				8484E9AA103C9595008B7C6C /* juce_mac_CoreAudio.cpp */,
 				8484E9AB103C9595008B7C6C /* juce_mac_CoreMidi.cpp */,
+				84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */,
 				8484E9AC103C9595008B7C6C /* juce_mac_Debugging.mm */,
 				8484E9AD103C9595008B7C6C /* juce_mac_FileChooser.mm */,
 				8484E9AE103C9595008B7C6C /* juce_mac_Files.mm */,
@@ -4146,6 +4149,7 @@
 				84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */,
 				84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */,
 				84816E5C10809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */,
+				84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

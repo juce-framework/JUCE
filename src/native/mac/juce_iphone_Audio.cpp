@@ -482,7 +482,6 @@ private:
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Input, 0, &layout, sizeof (layout));
         AudioUnitSetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, kAudioUnitScope_Output, 0, &layout, sizeof (layout));
 
-
         AURenderCallbackStruct inputProc;
         inputProc.inputProc = processStatic;
         inputProc.inputProcRefCon = this;

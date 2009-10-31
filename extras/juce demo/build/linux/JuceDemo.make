@@ -40,10 +40,15 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/ApplicationStartup.o \
-	$(OBJDIR)/juce_LibrarySource.o \
-	$(OBJDIR)/MainDemoWindow.o \
 	$(OBJDIR)/BinaryData.o \
-	$(OBJDIR)/AudioDemo.o \
+	$(OBJDIR)/MainDemoWindow.o \
+	$(OBJDIR)/juce_LibrarySource.o \
+	$(OBJDIR)/AudioDemoLatencyPage.o \
+	$(OBJDIR)/AudioDemoPlaybackPage.o \
+	$(OBJDIR)/AudioDemoRecordPage.o \
+	$(OBJDIR)/AudioDemoSetupPage.o \
+	$(OBJDIR)/AudioDemoSynthPage.o \
+	$(OBJDIR)/AudioDemoTabComponent.o \
 	$(OBJDIR)/CameraDemo.o \
 	$(OBJDIR)/DragAndDropDemo.o \
 	$(OBJDIR)/FontsAndTextDemo.o \
@@ -102,7 +107,7 @@ $(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
+$(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -112,12 +117,37 @@ $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/BinaryData.o: ../../src/BinaryData.cpp
+$(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemo.o: ../../src/demos/AudioDemo.cpp
+$(OBJDIR)/AudioDemoLatencyPage.o: ../../src/demos/AudioDemoLatencyPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoPlaybackPage.o: ../../src/demos/AudioDemoPlaybackPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoRecordPage.o: ../../src/demos/AudioDemoRecordPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoSetupPage.o: ../../src/demos/AudioDemoSetupPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoSynthPage.o: ../../src/demos/AudioDemoSynthPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoTabComponent.o: ../../src/demos/AudioDemoTabComponent.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

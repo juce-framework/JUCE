@@ -312,14 +312,18 @@ public:
                                                        lineStride, pixelStride);
 
         CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
+        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
 
-        imageRef = CGImageCreate (width, height,
+        CGImageRef imageRef = CGImageCreate (width, height,
                                   8, pixelStride * 8, lineStride,
-                                  CGColorSpaceCreateDeviceRGB(),
+                                  colourSpace,
                                   hasAlpha ? (kCGImageAlphaFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault,
                                   provider,
                                   0,
                                   true, kCGRenderingIntentDefault);
+
+        CGColorSpaceRelease (colourSpace);
+        CGDataProviderRelease (provider);
 
         juceImage.releasePixelDataReadWrite (imageData);
 
@@ -329,7 +333,7 @@ public:
     ~JuceUIImage()
     {
         [uiImage release];
-        CFRelease (imageRef);
+        CGImageRelease (imageRef);
     }
 
     Image& getJuceImage() throw()     { return juceImage; }

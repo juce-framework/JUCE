@@ -27,6 +27,8 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+#define USE_COREGRAPHICS_RENDERING 1
+
 class NSViewComponentPeer;
 
 //==============================================================================
@@ -1433,6 +1435,11 @@ void NSViewComponentPeer::drawRect (NSRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
+#if USE_COREGRAPHICS_RENDERING
+    CoreGraphicsContext context ((CGContextRef) [[NSGraphicsContext currentContext] graphicsPort],
+                                 [view frame].size.height);
+    handlePaint (context);
+#else
     const float y = [view frame].size.height - (r.origin.y + r.size.height);
 
     JuceNSImage temp ((int) (r.size.width + 0.5f),
@@ -1465,6 +1472,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
 
         temp.draw (r.origin.x, r.origin.y, clip, originX, originY);
     }
+#endif
 }
 
 bool NSViewComponentPeer::canBecomeKeyWindow()
@@ -1511,7 +1519,7 @@ void NSViewComponentPeer::repaint (int x, int y, int w, int h)
 
     if (insideDrawRect)
     {
-        [view performSelectorOnMainThread: @selector (asyncRepaint:) 
+        [view performSelectorOnMainThread: @selector (asyncRepaint:)
                                withObject: [NSData dataWithBytes: &r length: sizeof (r)]
                             waitUntilDone: NO];
     }

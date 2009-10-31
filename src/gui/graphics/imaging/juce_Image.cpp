@@ -218,6 +218,43 @@ Image* Image::createCopy (int newWidth, int newHeight,
     return newImage;
 }
 
+Image* Image::createCopyOfAlphaChannel() const
+{
+    jassert (format != SingleChannel);
+
+    Image* const newImage = new Image (SingleChannel, imageWidth, imageHeight, false);
+
+    if (! hasAlphaChannel())
+    {
+        newImage->clear (0, 0, imageWidth, imageHeight, Colours::black);
+    }
+    else
+    {
+        int dls, dps;
+        uint8* dstData = newImage->lockPixelDataReadWrite (0, 0, imageWidth, imageHeight, dls, dps);
+
+        int sls, sps;
+        const uint8* srcData = lockPixelDataReadOnly (0, 0, imageWidth, imageHeight, sls, sps);
+
+        for (int y = 0; y < imageHeight; ++y)
+        {
+            const PixelARGB* src = (const PixelARGB*) (srcData + y * sls);
+            uint8* dst = dstData + y * dls;
+
+            for (int x = imageWidth; --x >= 0;)
+            {
+                *dst++ = src->getAlpha();
+                ++src;
+            }
+        }
+
+        releasePixelDataReadOnly (srcData);
+        newImage->releasePixelDataReadWrite (dstData);
+    }
+
+    return newImage;
+}
+
 //==============================================================================
 const Colour Image::getPixelAt (const int x, const int y) const
 {
