@@ -122,7 +122,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
         return getColour (0);
 
     int i = colours.size() - 2;
-    while (integerPos < colours.getUnchecked(i))
+    while (integerPos < (int) colours.getUnchecked(i))
         i -= 2;
 
     if (i >= colours.size() - 2)

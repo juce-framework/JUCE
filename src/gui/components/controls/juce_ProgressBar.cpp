@@ -98,6 +98,10 @@ void ProgressBar::timerCallback()
 {
     double newProgress = progress;
 
+    const uint32 now = Time::getMillisecondCounter();
+    const int timeSinceLastCallback = (int) (now - lastCallbackTime);
+    lastCallbackTime = now;
+
     if (currentValue != newProgress
          || newProgress < 0 || newProgress >= 1.0
          || currentMessage != displayedMessage)
@@ -106,11 +110,7 @@ void ProgressBar::timerCallback()
              && newProgress >= 0 && newProgress < 1.0
              && currentValue >= 0 && currentValue < 1.0)
         {
-            const uint32 now = Time::getMillisecondCounter();
-            const int timeSinceLastCallback = (int) (now - lastCallbackTime);
-            lastCallbackTime = now;
-
-            newProgress = jmin (currentValue + 0.00018 * timeSinceLastCallback,
+            newProgress = jmin (currentValue + 0.0008 * timeSinceLastCallback,
                                 newProgress);
         }
 

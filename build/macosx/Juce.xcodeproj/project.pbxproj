@@ -639,6 +639,13 @@
 		8484E9D8103C95A6008B7C6C /* juce_posix_SharedCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */; };
 		8484E9D9103C95A6008B7C6C /* juce_posix_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */; };
 		84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */; };
+		84AB91FB10A078190048FC39 /* juce_CodeDocument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F510A078190048FC39 /* juce_CodeDocument.cpp */; };
+		84AB91FC10A078190048FC39 /* juce_CodeDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91F610A078190048FC39 /* juce_CodeDocument.h */; };
+		84AB91FD10A078190048FC39 /* juce_CodeEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F710A078190048FC39 /* juce_CodeEditorComponent.cpp */; };
+		84AB91FE10A078190048FC39 /* juce_CodeEditorComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91F810A078190048FC39 /* juce_CodeEditorComponent.h */; };
+		84AB91FF10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */; };
+		84AB920010A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */; };
+		84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */; };
 		84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
 		84F1E6E810403605006A1807 /* juce_Application.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DD10403605006A1807 /* juce_Application.h */; };
@@ -1244,6 +1251,13 @@
 		8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_posix_SharedCode.h; path = ../../src/native/common/juce_posix_SharedCode.h; sourceTree = SOURCE_ROOT; };
 		8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_posix_NamedPipe.cpp; path = ../../src/native/common/juce_posix_NamedPipe.cpp; sourceTree = SOURCE_ROOT; };
 		84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_mac_ObjCSuffix.h; sourceTree = "<group>"; };
+		84AB91F510A078190048FC39 /* juce_CodeDocument.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CodeDocument.cpp; path = components/code_editor/juce_CodeDocument.cpp; sourceTree = "<group>"; };
+		84AB91F610A078190048FC39 /* juce_CodeDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CodeDocument.h; path = components/code_editor/juce_CodeDocument.h; sourceTree = "<group>"; };
+		84AB91F710A078190048FC39 /* juce_CodeEditorComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CodeEditorComponent.cpp; path = components/code_editor/juce_CodeEditorComponent.cpp; sourceTree = "<group>"; };
+		84AB91F810A078190048FC39 /* juce_CodeEditorComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CodeEditorComponent.h; path = components/code_editor/juce_CodeEditorComponent.h; sourceTree = "<group>"; };
+		84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CPlusPlusCodeTokeniser.cpp; path = components/code_editor/juce_CPlusPlusCodeTokeniser.cpp; sourceTree = "<group>"; };
+		84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CPlusPlusCodeTokeniser.h; path = components/code_editor/juce_CPlusPlusCodeTokeniser.h; sourceTree = "<group>"; };
+		84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CodeTokeniser.h; path = components/code_editor/juce_CodeTokeniser.h; sourceTree = "<group>"; };
 		84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_CoreGraphicsContext.mm; sourceTree = "<group>"; };
 		84F1E6DC10403605006A1807 /* juce_Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Application.cpp; path = ../../src/application/juce_Application.cpp; sourceTree = SOURCE_ROOT; };
 		84F1E6DD10403605006A1807 /* juce_Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Application.h; path = ../../src/application/juce_Application.h; sourceTree = SOURCE_ROOT; };
@@ -1912,6 +1926,21 @@
 			path = ../../src/native/mac;
 			sourceTree = SOURCE_ROOT;
 		};
+		84AB91EA10A077E60048FC39 /* code editor */ = {
+			isa = PBXGroup;
+			children = (
+				84AB91F510A078190048FC39 /* juce_CodeDocument.cpp */,
+				84AB91F610A078190048FC39 /* juce_CodeDocument.h */,
+				84AB91F710A078190048FC39 /* juce_CodeEditorComponent.cpp */,
+				84AB91F810A078190048FC39 /* juce_CodeEditorComponent.h */,
+				84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */,
+				84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */,
+				84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */,
+			);
+			name = "code editor";
+			path = ..;
+			sourceTree = "<group>";
+		};
 		84F1E6DB10403605006A1807 /* application */ = {
 			isa = PBXGroup;
 			children = (
@@ -2399,6 +2428,7 @@
 				84F1EA4B10403708006A1807 /* juce_Desktop.cpp */,
 				84F1EA4C10403708006A1807 /* juce_Desktop.h */,
 				84F1EA4D10403708006A1807 /* buttons */,
+				84AB91EA10A077E60048FC39 /* code editor */,
 				84F1EA6010403709006A1807 /* controls */,
 				84F1EA7B10403709006A1807 /* filebrowser */,
 				84F1EA9610403709006A1807 /* keyboard */,
@@ -3513,6 +3543,10 @@
 				84F1ECE81040370A006A1807 /* juce_GIFLoader.h in Headers */,
 				84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */,
 				8481730F10832513008FEC33 /* juce_TargetPlatform.h in Headers */,
+				84AB91FC10A078190048FC39 /* juce_CodeDocument.h in Headers */,
+				84AB91FE10A078190048FC39 /* juce_CodeEditorComponent.h in Headers */,
+				84AB920010A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h in Headers */,
+				84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4150,6 +4184,9 @@
 				84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */,
 				84816E5C10809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */,
 				84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */,
+				84AB91FB10A078190048FC39 /* juce_CodeDocument.cpp in Sources */,
+				84AB91FD10A078190048FC39 /* juce_CodeEditorComponent.cpp in Sources */,
+				84AB91FF10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

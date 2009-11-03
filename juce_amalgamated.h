@@ -2776,6 +2776,9 @@ BEGIN_JUCE_NAMESPACE
 /********* End of inlined file: juce_Atomic.h *********/
 
 #endif
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileLogger.h *********/
@@ -7082,6 +7085,9 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_MEMORY_JUCEHEADER__
 
 #endif
@@ -7166,6 +7172,275 @@ private:
 
 #endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 /********* End of inlined file: juce_PerformanceCounter.h *********/
+
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/********* Start of inlined file: juce_PlatformUtilities.h *********/
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+
+/**
+    A collection of miscellaneous platform-specific utilities.
+
+*/
+class JUCE_API  PlatformUtilities
+{
+public:
+
+    /** Plays the operating system's default alert 'beep' sound. */
+    static void beep();
+
+    static bool launchEmailWithAttachments (const String& targetEmailAddress,
+                                            const String& emailSubject,
+                                            const String& bodyText,
+                                            const StringArray& filesToAttach);
+
+#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
+
+    /** MAC ONLY - Turns a Core CF String into a juce one. */
+    static const String cfStringToJuceString (CFStringRef cfString);
+
+    /** MAC ONLY - Turns a juce string into a Core CF one. */
+    static CFStringRef juceStringToCFString (const String& s);
+
+    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
+    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
+
+    /** MAC ONLY - Turns an FSRef into a juce string path. */
+    static const String makePathFromFSRef (FSRef* file);
+
+    /** MAC ONLY - Converts any decomposed unicode characters in a string into
+        their precomposed equivalents.
+    */
+    static const String convertToPrecomposedUnicode (const String& s);
+
+    /** MAC ONLY - Gets the type of a file from the file's resources. */
+    static OSType getTypeOfFile (const String& filename);
+
+    /** MAC ONLY - Returns true if this file is actually a bundle. */
+    static bool isBundle (const String& filename);
+
+    /** MAC ONLY - Adds an item to the dock */
+    static void addItemToDock (const File& file);
+#endif
+
+#if JUCE_WINDOWS || DOXYGEN
+
+    // Some registry helper functions:
+
+    /** WIN32 ONLY - Returns a string from the registry.
+
+        The path is a string for the entire path of a value in the registry,
+        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
+    */
+    static const String getRegistryValue (const String& regValuePath,
+                                          const String& defaultValue = String::empty);
+
+    /** WIN32 ONLY - Sets a registry value as a string.
+
+        This will take care of creating any groups needed to get to the given
+        registry value.
+    */
+    static void setRegistryValue (const String& regValuePath,
+                                  const String& value);
+
+    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
+    static bool registryValueExists (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry value. */
+    static void deleteRegistryValue (const String& regValuePath);
+
+    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
+    static void deleteRegistryKey (const String& regKeyPath);
+
+    /** WIN32 ONLY - Creates a file association in the registry.
+
+        This lets you set the exe that should be launched by a given file extension.
+        @param fileExtension        the file extension to associate, including the
+                                    initial dot, e.g. ".txt"
+        @param symbolicDescription  a space-free short token to identify the file type
+        @param fullDescription      a human-readable description of the file type
+        @param targetExecutable     the executable that should be launched
+        @param iconResourceNumber   the icon that gets displayed for the file type will be
+                                    found by looking up this resource number in the
+                                    executable. Pass 0 here to not use an icon
+    */
+    static void registerFileAssociation (const String& fileExtension,
+                                         const String& symbolicDescription,
+                                         const String& fullDescription,
+                                         const File& targetExecutable,
+                                         int iconResourceNumber);
+
+    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
+
+        In a normal Juce application this will be set to the module handle
+        of the application executable.
+
+        If you're writing a DLL using Juce and plan to use any Juce messaging or
+        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
+        to set the correct module handle in your DllMain() function, because
+        the win32 system relies on the correct instance handle when opening windows.
+    */
+    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
+
+    /** WIN32 ONLY - Sets a new module handle to be used by the library.
+
+        @see getCurrentModuleInstanceHandle()
+    */
+    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
+
+    /** WIN32 ONLY - Gets the command-line params as a string.
+
+        This is needed to avoid unicode problems with the argc type params.
+    */
+    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
+#endif
+
+    /** Clears the floating point unit's flags.
+
+        Only has an effect under win32, currently.
+    */
+    static void fpuReset();
+
+#if JUCE_LINUX || JUCE_WINDOWS
+
+    /** Loads a dynamically-linked library into the process's address space.
+
+        @param pathOrFilename   the platform-dependent name and search path
+        @returns                a handle which can be used by getProcedureEntryPoint(), or
+                                zero if it fails.
+        @see freeDynamicLibrary, getProcedureEntryPoint
+    */
+    static void* loadDynamicLibrary (const String& pathOrFilename);
+
+    /** Frees a dynamically-linked library.
+
+        @param libraryHandle   a handle created by loadDynamicLibrary
+        @see loadDynamicLibrary, getProcedureEntryPoint
+    */
+    static void freeDynamicLibrary (void* libraryHandle);
+
+    /** Finds a procedure call in a dynamically-linked library.
+
+        @param libraryHandle    a library handle returned by loadDynamicLibrary
+        @param procedureName    the name of the procedure call to try to load
+        @returns                a pointer to the function if found, or 0 if it fails
+        @see loadDynamicLibrary
+    */
+    static void* getProcedureEntryPoint (void* libraryHandle,
+                                         const String& procedureName);
+#endif
+
+#if JUCE_LINUX || DOXYGEN
+
+#endif
+};
+
+#if JUCE_MAC || JUCE_IPHONE
+
+/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
+    using RAII.
+*/
+class ScopedAutoReleasePool
+{
+public:
+    ScopedAutoReleasePool();
+    ~ScopedAutoReleasePool();
+
+private:
+    void* pool;
+};
+
+#endif
+
+#if JUCE_MAC
+
+/**
+    A wrapper class for picking up events from an Apple IR remote control device.
+
+    To use it, just create a subclass of this class, implementing the buttonPressed()
+    callback, then call start() and stop() to start or stop receiving events.
+*/
+class JUCE_API  AppleRemoteDevice
+{
+public:
+
+    AppleRemoteDevice();
+    virtual ~AppleRemoteDevice();
+
+    /** The set of buttons that may be pressed.
+        @see buttonPressed
+    */
+    enum ButtonType
+    {
+        menuButton = 0,     /**< The menu button (if it's held for a short time). */
+        playButton,         /**< The play button. */
+        plusButton,         /**< The plus or volume-up button. */
+        minusButton,        /**< The minus or volume-down button. */
+        rightButton,        /**< The right button (if it's held for a short time). */
+        leftButton,         /**< The left button (if it's held for a short time). */
+        rightButton_Long,   /**< The right button (if it's held for a long time). */
+        leftButton_Long,    /**< The menu button (if it's held for a long time). */
+        menuButton_Long,    /**< The menu button (if it's held for a long time). */
+        playButtonSleepMode,
+        switched
+    };
+
+    /** Override this method to receive the callback about a button press.
+
+        The callback will happen on the application's message thread.
+
+        Some buttons trigger matching up and down events, in which the isDown parameter
+        will be true and then false. Others only send a single event when the
+        button is pressed.
+    */
+    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
+
+    /** Starts the device running and responding to events.
+
+        Returns true if it managed to open the device.
+
+        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
+                                and will not be available to any other part of the system. If
+                                false, it will be shared with other apps.
+        @see stop
+    */
+    bool start (const bool inExclusiveMode) throw();
+
+    /** Stops the device running.
+        @see start
+    */
+    void stop() throw();
+
+    /** Returns true if the device has been started successfully.
+    */
+    bool isActive() const throw();
+
+    /** Returns the ID number of the remote, if it has sent one.
+    */
+    int getRemoteId() const throw()             { return remoteId; }
+
+    juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void handleCallbackInternal();
+
+private:
+    void* device;
+    void* queue;
+    int remoteId;
+
+    bool open (const bool openInExclusiveMode) throw();
+};
+
+#endif
+
+#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+/********* End of inlined file: juce_PlatformUtilities.h *********/
 
 #endif
 #ifndef __JUCE_RANDOM_JUCEHEADER__
@@ -7573,9 +7848,6 @@ private:
 /********* End of inlined file: juce_Random.h *********/
 
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
@@ -7962,7 +8234,7 @@ private:
 /********* End of inlined file: juce_Singleton.h *********/
 
 #endif
-#ifndef __JUCE_TIME_JUCEHEADER__
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
@@ -8112,6 +8384,12 @@ public:
 /********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TIME_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_UUID_JUCEHEADER__
 
 /********* Start of inlined file: juce_Uuid.h *********/
@@ -8203,284 +8481,6 @@ private:
 
 #endif   // __JUCE_UUID_JUCEHEADER__
 /********* End of inlined file: juce_Uuid.h *********/
-
-#endif
-#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/********* Start of inlined file: juce_PlatformUtilities.h *********/
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-#define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-
-/**
-    A collection of miscellaneous platform-specific utilities.
-
-*/
-class JUCE_API  PlatformUtilities
-{
-public:
-
-    /** Plays the operating system's default alert 'beep' sound. */
-    static void beep();
-
-    static bool launchEmailWithAttachments (const String& targetEmailAddress,
-                                            const String& emailSubject,
-                                            const String& bodyText,
-                                            const StringArray& filesToAttach);
-
-#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
-
-    /** MAC ONLY - Turns a Core CF String into a juce one. */
-    static const String cfStringToJuceString (CFStringRef cfString);
-
-    /** MAC ONLY - Turns a juce string into a Core CF one. */
-    static CFStringRef juceStringToCFString (const String& s);
-
-    /** MAC ONLY - Turns a file path into an FSRef, returning true if it succeeds. */
-    static bool makeFSRefFromPath (FSRef* destFSRef, const String& path);
-
-    /** MAC ONLY - Turns an FSRef into a juce string path. */
-    static const String makePathFromFSRef (FSRef* file);
-
-    /** MAC ONLY - Converts any decomposed unicode characters in a string into
-        their precomposed equivalents.
-    */
-    static const String convertToPrecomposedUnicode (const String& s);
-
-    /** MAC ONLY - Gets the type of a file from the file's resources. */
-    static OSType getTypeOfFile (const String& filename);
-
-    /** MAC ONLY - Returns true if this file is actually a bundle. */
-    static bool isBundle (const String& filename);
-
-    /** MAC ONLY - Adds an item to the dock */
-    static void addItemToDock (const File& file);
-#endif
-
-#if JUCE_WINDOWS || DOXYGEN
-
-    // Some registry helper functions:
-
-    /** WIN32 ONLY - Returns a string from the registry.
-
-        The path is a string for the entire path of a value in the registry,
-        e.g. "HKEY_CURRENT_USER\Software\foo\bar"
-    */
-    static const String getRegistryValue (const String& regValuePath,
-                                          const String& defaultValue = String::empty);
-
-    /** WIN32 ONLY - Sets a registry value as a string.
-
-        This will take care of creating any groups needed to get to the given
-        registry value.
-    */
-    static void setRegistryValue (const String& regValuePath,
-                                  const String& value);
-
-    /** WIN32 ONLY - Returns true if the given value exists in the registry. */
-    static bool registryValueExists (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry value. */
-    static void deleteRegistryValue (const String& regValuePath);
-
-    /** WIN32 ONLY - Deletes a registry key (which is registry-talk for 'folder'). */
-    static void deleteRegistryKey (const String& regKeyPath);
-
-    /** WIN32 ONLY - Creates a file association in the registry.
-
-        This lets you set the exe that should be launched by a given file extension.
-        @param fileExtension        the file extension to associate, including the
-                                    initial dot, e.g. ".txt"
-        @param symbolicDescription  a space-free short token to identify the file type
-        @param fullDescription      a human-readable description of the file type
-        @param targetExecutable     the executable that should be launched
-        @param iconResourceNumber   the icon that gets displayed for the file type will be
-                                    found by looking up this resource number in the
-                                    executable. Pass 0 here to not use an icon
-    */
-    static void registerFileAssociation (const String& fileExtension,
-                                         const String& symbolicDescription,
-                                         const String& fullDescription,
-                                         const File& targetExecutable,
-                                         int iconResourceNumber);
-
-    /** WIN32 ONLY - This returns the HINSTANCE of the current module.
-
-        In a normal Juce application this will be set to the module handle
-        of the application executable.
-
-        If you're writing a DLL using Juce and plan to use any Juce messaging or
-        windows, you'll need to make sure you use the setCurrentModuleInstanceHandle()
-        to set the correct module handle in your DllMain() function, because
-        the win32 system relies on the correct instance handle when opening windows.
-    */
-    static void* JUCE_CALLTYPE getCurrentModuleInstanceHandle() throw();
-
-    /** WIN32 ONLY - Sets a new module handle to be used by the library.
-
-        @see getCurrentModuleInstanceHandle()
-    */
-    static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) throw();
-
-    /** WIN32 ONLY - Gets the command-line params as a string.
-
-        This is needed to avoid unicode problems with the argc type params.
-    */
-    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
-#endif
-
-    /** Clears the floating point unit's flags.
-
-        Only has an effect under win32, currently.
-    */
-    static void fpuReset();
-
-#if JUCE_LINUX || JUCE_WINDOWS
-
-    /** Loads a dynamically-linked library into the process's address space.
-
-        @param pathOrFilename   the platform-dependent name and search path
-        @returns                a handle which can be used by getProcedureEntryPoint(), or
-                                zero if it fails.
-        @see freeDynamicLibrary, getProcedureEntryPoint
-    */
-    static void* loadDynamicLibrary (const String& pathOrFilename);
-
-    /** Frees a dynamically-linked library.
-
-        @param libraryHandle   a handle created by loadDynamicLibrary
-        @see loadDynamicLibrary, getProcedureEntryPoint
-    */
-    static void freeDynamicLibrary (void* libraryHandle);
-
-    /** Finds a procedure call in a dynamically-linked library.
-
-        @param libraryHandle    a library handle returned by loadDynamicLibrary
-        @param procedureName    the name of the procedure call to try to load
-        @returns                a pointer to the function if found, or 0 if it fails
-        @see loadDynamicLibrary
-    */
-    static void* getProcedureEntryPoint (void* libraryHandle,
-                                         const String& procedureName);
-#endif
-
-#if JUCE_LINUX || DOXYGEN
-
-#endif
-};
-
-#if JUCE_MAC || JUCE_IPHONE
-
-/** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
-    using RAII.
-*/
-class ScopedAutoReleasePool
-{
-public:
-    ScopedAutoReleasePool();
-    ~ScopedAutoReleasePool();
-
-private:
-    void* pool;
-};
-
-#endif
-
-#if JUCE_MAC
-
-/**
-    A wrapper class for picking up events from an Apple IR remote control device.
-
-    To use it, just create a subclass of this class, implementing the buttonPressed()
-    callback, then call start() and stop() to start or stop receiving events.
-*/
-class JUCE_API  AppleRemoteDevice
-{
-public:
-
-    AppleRemoteDevice();
-    virtual ~AppleRemoteDevice();
-
-    /** The set of buttons that may be pressed.
-        @see buttonPressed
-    */
-    enum ButtonType
-    {
-        menuButton = 0,     /**< The menu button (if it's held for a short time). */
-        playButton,         /**< The play button. */
-        plusButton,         /**< The plus or volume-up button. */
-        minusButton,        /**< The minus or volume-down button. */
-        rightButton,        /**< The right button (if it's held for a short time). */
-        leftButton,         /**< The left button (if it's held for a short time). */
-        rightButton_Long,   /**< The right button (if it's held for a long time). */
-        leftButton_Long,    /**< The menu button (if it's held for a long time). */
-        menuButton_Long,    /**< The menu button (if it's held for a long time). */
-        playButtonSleepMode,
-        switched
-    };
-
-    /** Override this method to receive the callback about a button press.
-
-        The callback will happen on the application's message thread.
-
-        Some buttons trigger matching up and down events, in which the isDown parameter
-        will be true and then false. Others only send a single event when the
-        button is pressed.
-    */
-    virtual void buttonPressed (const ButtonType buttonId, const bool isDown) = 0;
-
-    /** Starts the device running and responding to events.
-
-        Returns true if it managed to open the device.
-
-        @param inExclusiveMode  if true, the remote will be grabbed exclusively for this app,
-                                and will not be available to any other part of the system. If
-                                false, it will be shared with other apps.
-        @see stop
-    */
-    bool start (const bool inExclusiveMode) throw();
-
-    /** Stops the device running.
-        @see start
-    */
-    void stop() throw();
-
-    /** Returns true if the device has been started successfully.
-    */
-    bool isActive() const throw();
-
-    /** Returns the ID number of the remote, if it has sent one.
-    */
-    int getRemoteId() const throw()             { return remoteId; }
-
-    juce_UseDebuggingNewOperator
-
-    /** @internal */
-    void handleCallbackInternal();
-
-private:
-    void* device;
-    void* queue;
-    int remoteId;
-
-    bool open (const bool openInExclusiveMode) throw();
-};
-
-#endif
-
-#endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-/********* End of inlined file: juce_PlatformUtilities.h *********/
-
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
@@ -13897,7 +13897,7 @@ private:
 /********* End of inlined file: juce_SubregionStream.h *********/
 
 #endif
-#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+#ifndef __JUCE_STRING_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
@@ -14063,7 +14063,7 @@ private:
 /********* End of inlined file: juce_LocalisedStrings.h *********/
 
 #endif
-#ifndef __JUCE_STRING_JUCEHEADER__
+#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_STRINGARRAY_JUCEHEADER__
@@ -26835,7 +26835,7 @@ private:
 /********* End of inlined file: juce_MidiKeyboardState.h *********/
 
 #endif
-#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
@@ -27072,7 +27072,7 @@ private:
 /********* End of inlined file: juce_MidiMessageCollector.h *********/
 
 #endif
-#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
+#ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -32500,6 +32500,9 @@ private:
 #ifndef __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ToneGeneratorAudioSource.h *********/
@@ -32551,13 +32554,11 @@ private:
 /********* End of inlined file: juce_ToneGeneratorAudioSource.h *********/
 
 #endif
-#ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
+#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+/********* Start of inlined file: juce_AudioDeviceManager.h *********/
+#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
+#define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioIODeviceType.h *********/
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
@@ -32675,12 +32676,6 @@ private:
 
 #endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 /********* End of inlined file: juce_AudioIODeviceType.h *********/
-
-#endif
-#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 /********* Start of inlined file: juce_MidiOutput.h *********/
 #ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
@@ -32821,13 +32816,6 @@ protected:
 
 #endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
 /********* End of inlined file: juce_MidiOutput.h *********/
-
-#endif
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioDeviceManager.h *********/
-#ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-#define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
 /********* Start of inlined file: juce_ComboBox.h *********/
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
@@ -34886,6 +34874,18 @@ private:
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 /********* End of inlined file: juce_AudioDeviceManager.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIINPUT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
@@ -36969,589 +36969,6 @@ private:
 /********* End of inlined file: juce_AudioCDBurner.h *********/
 
 #endif
-#ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioFormatManager.h *********/
-#ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
-#define __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
-
-/**
-    A class for keeping a list of available audio formats, and for deciding which
-    one to use to open a given file.
-
-    You can either use this class as a singleton object, or create instances of it
-    yourself. Once created, use its registerFormat() method to tell it which
-    formats it should use.
-
-    @see AudioFormat
-*/
-class JUCE_API  AudioFormatManager
-{
-public:
-
-    /** Creates an empty format manager.
-
-        Before it'll be any use, you'll need to call registerFormat() with all the
-        formats you want it to be able to recognise.
-    */
-    AudioFormatManager();
-
-    /** Destructor. */
-    ~AudioFormatManager();
-
-    juce_DeclareSingleton (AudioFormatManager, false);
-
-    /** Adds a format to the manager's list of available file types.
-
-        The object passed-in will be deleted by this object, so don't keep a pointer
-        to it!
-
-        If makeThisTheDefaultFormat is true, then the getDefaultFormat() method will
-        return this one when called.
-    */
-    void registerFormat (AudioFormat* newFormat,
-                         const bool makeThisTheDefaultFormat);
-
-    /** Handy method to make it easy to register the formats that come with Juce.
-
-        Currently, this will add WAV and AIFF to the list.
-    */
-    void registerBasicFormats();
-
-    /** Clears the list of known formats. */
-    void clearFormats();
-
-    /** Returns the number of currently registered file formats. */
-    int getNumKnownFormats() const;
-
-    /** Returns one of the registered file formats. */
-    AudioFormat* getKnownFormat (const int index) const;
-
-    /** Looks for which of the known formats is listed as being for a given file
-        extension.
-
-        The extension may have a dot before it, so e.g. ".wav" or "wav" are both ok.
-    */
-    AudioFormat* findFormatForFileExtension (const String& fileExtension) const;
-
-    /** Returns the format which has been set as the default one.
-
-        You can set a format as being the default when it is registered. It's useful
-        when you want to write to a file, because the best format may change between
-        platforms, e.g. AIFF is preferred on the Mac, WAV on Windows.
-
-        If none has been set as the default, this method will just return the first
-        one in the list.
-    */
-    AudioFormat* getDefaultFormat() const;
-
-    /** Returns a set of wildcards for file-matching that contains the extensions for
-        all known formats.
-
-        E.g. if might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
-    */
-    const String getWildcardForAllFormats() const;
-
-    /** Searches through the known formats to try to create a suitable reader for
-        this file.
-
-        If none of the registered formats can open the file, it'll return 0. If it
-        returns a reader, it's the caller's responsibility to delete the reader.
-    */
-    AudioFormatReader* createReaderFor (const File& audioFile);
-
-    /** Searches through the known formats to try to create a suitable reader for
-        this stream.
-
-        The stream object that is passed-in will be deleted by this method or by the
-        reader that is returned, so the caller should not keep any references to it.
-
-        The stream that is passed-in must be capable of being repositioned so
-        that all the formats can have a go at opening it.
-
-        If none of the registered formats can open the stream, it'll return 0. If it
-        returns a reader, it's the caller's responsibility to delete the reader.
-    */
-    AudioFormatReader* createReaderFor (InputStream* audioFileStream);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    VoidArray knownFormats;
-    int defaultFormatIndex;
-};
-
-#endif   // __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormatManager.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioThumbnailCache.h *********/
-#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-#define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioThumbnail.h *********/
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-#define __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-
-class AudioThumbnailCache;
-
-/**
-    Makes it easy to quickly draw scaled views of the waveform shape of an
-    audio file.
-
-    To use this class, just create an AudioThumbNail class for the file you want
-    to draw, call setSource to tell it which file or resource to use, then call
-    drawChannel() to draw it.
-
-    The class will asynchronously scan the wavefile to create its scaled-down view,
-    so you should make your UI repaint itself as this data comes in. To do this, the
-    AudioThumbnail is a ChangeBroadcaster, and will broadcast a message when its
-    listeners should repaint themselves.
-
-    The thumbnail stores an internal low-res version of the wave data, and this can
-    be loaded and saved to avoid having to scan the file again.
-
-    @see AudioThumbnailCache
-*/
-class JUCE_API  AudioThumbnail    : public ChangeBroadcaster,
-                                    public TimeSliceClient,
-                                    private Timer
-{
-public:
-
-    /** Creates an audio thumbnail.
-
-        @param sourceSamplesPerThumbnailSample  when creating a stored, low-res version
-                        of the audio data, this is the scale at which it should be done. (This
-                        number is the number of original samples that will be averaged for each
-                        low-res sample)
-        @param formatManagerToUse   the audio format manager that is used to open the file
-        @param cacheToUse   an instance of an AudioThumbnailCache - this provides a background
-                            thread and storage that is used to by the thumbnail, and the cache
-                            object can be shared between multiple thumbnails
-    */
-    AudioThumbnail (const int sourceSamplesPerThumbnailSample,
-                    AudioFormatManager& formatManagerToUse,
-                    AudioThumbnailCache& cacheToUse);
-
-    /** Destructor. */
-    ~AudioThumbnail();
-
-    /** Specifies the file or stream that contains the audio file.
-
-        For a file, just call
-        @code
-        setSource (new FileInputSource (file))
-        @endcode
-
-        You can pass a zero in here to clear the thumbnail.
-
-        The source that is passed in will be deleted by this object when it is no
-        longer needed
-    */
-    void setSource (InputSource* const newSource);
-
-    /** Reloads the low res thumbnail data from an input stream.
-
-        The thumb will automatically attempt to reload itself from its
-        AudioThumbnailCache.
-    */
-    void loadFrom (InputStream& input);
-
-    /** Saves the low res thumbnail data to an output stream.
-
-        The thumb will automatically attempt to save itself to its
-        AudioThumbnailCache after it finishes scanning the wave file.
-    */
-    void saveTo (OutputStream& output) const;
-
-    /** Returns the number of channels in the file.
-    */
-    int getNumChannels() const throw();
-
-    /** Returns the length of the audio file, in seconds.
-    */
-    double getTotalLength() const throw();
-
-    /** Renders the waveform shape for a channel.
-
-        The waveform will be drawn within  the specified rectangle, where startTime
-        and endTime specify the times within the audio file that should be positioned
-        at the left and right edges of the rectangle.
-
-        The waveform will be scaled vertically so that a full-volume sample will fill
-        the rectangle vertically, but you can also specify an extra vertical scale factor
-        with the verticalZoomFactor parameter.
-    */
-    void drawChannel (Graphics& g,
-                      int x, int y, int w, int h,
-                      double startTimeSeconds,
-                      double endTimeSeconds,
-                      int channelNum,
-                      const float verticalZoomFactor);
-
-    /** Returns true if the low res preview is fully generated.
-    */
-    bool isFullyLoaded() const throw();
-
-    /** @internal */
-    bool useTimeSlice();
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatManager& formatManagerToUse;
-    AudioThumbnailCache& cache;
-    InputSource* source;
-
-    CriticalSection readerLock;
-    AudioFormatReader* reader;
-
-    MemoryBlock data, cachedLevels;
-    int orginalSamplesPerThumbnailSample;
-
-    int numChannelsCached, numSamplesCached;
-    double cachedStart, cachedTimePerPixel;
-    bool cacheNeedsRefilling;
-
-    void clear();
-
-    AudioFormatReader* createReader() const;
-
-    void generateSection (AudioFormatReader& reader,
-                          int64 startSample,
-                          int numSamples);
-
-    char* getChannelData (int channel) const;
-
-    void refillCache (const int numSamples,
-                      double startTime,
-                      const double timePerPixel);
-
-    friend class AudioThumbnailCache;
-
-    // true if it needs more callbacks from the readNextBlockFromAudioFile() method
-    bool initialiseFromAudioFile (AudioFormatReader& reader);
-
-    // returns true if more needs to be read
-    bool readNextBlockFromAudioFile (AudioFormatReader& reader);
-};
-
-#endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-/********* End of inlined file: juce_AudioThumbnail.h *********/
-
-struct ThumbnailCacheEntry;
-
-/**
-    An instance of this class is used to manage multiple AudioThumbnail objects.
-
-    The cache runs a single background thread that is shared by all the thumbnails
-    that need it, and it maintains a set of low-res previews in memory, to avoid
-    having to re-scan audio files too often.
-
-    @see AudioThumbnail
-*/
-class JUCE_API  AudioThumbnailCache   : public TimeSliceThread
-{
-public:
-
-    /** Creates a cache object.
-
-        The maxNumThumbsToStore parameter lets you specify how many previews should
-        be kept in memory at once.
-    */
-    AudioThumbnailCache (const int maxNumThumbsToStore);
-
-    /** Destructor. */
-    ~AudioThumbnailCache();
-
-    /** Clears out any stored thumbnails.
-    */
-    void clear();
-
-    /** Reloads the specified thumb if this cache contains the appropriate stored
-        data.
-
-        This is called automatically by the AudioThumbnail class, so you shouldn't
-        normally need to call it directly.
-    */
-    bool loadThumb (AudioThumbnail& thumb, const int64 hashCode);
-
-    /** Stores the cachable data from the specified thumb in this cache.
-
-        This is called automatically by the AudioThumbnail class, so you shouldn't
-        normally need to call it directly.
-    */
-    void storeThumb (const AudioThumbnail& thumb, const int64 hashCode);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    OwnedArray <ThumbnailCacheEntry> thumbs;
-    int maxNumThumbsToStore;
-
-    friend class AudioThumbnail;
-    void addThumbnail (AudioThumbnail* const thumb);
-    void removeThumbnail (AudioThumbnail* const thumb);
-};
-
-#endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-/********* End of inlined file: juce_AudioThumbnailCache.h *********/
-
-#endif
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FlacAudioFormat.h *********/
-#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_FLAC || defined (DOXYGEN)
-
-/**
-    Reads and writes the lossless-compression FLAC audio format.
-
-    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the FLAC header files and static libraries.
-
-    @see AudioFormat
-*/
-class JUCE_API  FlacAudioFormat    : public AudioFormat
-{
-public:
-
-    FlacAudioFormat();
-    ~FlacAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_FlacAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WavAudioFormat.h *********/
-#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-
-/**
-    Reads and Writes WAV format audio files.
-
-    @see AudioFormat
-*/
-class JUCE_API  WavAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    WavAudioFormat();
-
-    /** Destructor. */
-    ~WavAudioFormat();
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavDescription;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginator;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginatorRef;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Date format is: yyyy-mm-dd
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationDate;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        Time format is: hh-mm-ss
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavOriginationTime;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is the number of samples from the start of an edit that the
-        file is supposed to begin at. Seems like an obvious mistake to
-        only allow a file to occur in an edit once, but that's the way
-        it is..
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavTimeReference;
-
-    /** Metadata property name used by wav readers and writers for adding
-        a BWAV chunk to the file.
-
-        This is a
-
-        @see AudioFormatReader::metadataValues, createWriterFor
-    */
-    static const tchar* const bwavCodingHistory;
-
-    /** Utility function to fill out the appropriate metadata for a BWAV file.
-
-        This just makes it easier than using the property names directly, and it
-        fills out the time and date in the right format.
-    */
-    static const StringPairArray createBWAVMetadata (const String& description,
-                                                     const String& originator,
-                                                     const String& originatorRef,
-                                                     const Time& dateAndTime,
-                                                     const int64 timeReferenceSamples,
-                                                     const String& codingHistory);
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    /** Utility function to replace the metadata in a wav file with a new set of values.
-
-        If possible, this cheats by overwriting just the metadata region of the file, rather
-        than by copying the whole file again.
-    */
-    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_WavAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
-#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-
-/**
-    This class is used to wrap an AudioFormatReader and only read from a
-    subsection of the file.
-
-    So if you have a reader which can read a 1000 sample file, you could wrap it
-    in one of these to only access, e.g. samples 100 to 200, and any samples
-    outside that will come back as 0. Accessing sample 0 from this reader will
-    actually read the first sample from the other's subsection, which might
-    be at a non-zero position.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
-{
-public:
-
-    /** Creates a AudioSubsectionReader for a given data source.
-
-        @param sourceReader             the source reader from which we'll be taking data
-        @param subsectionStartSample    the sample within the source reader which will be
-                                        mapped onto sample 0 for this reader.
-        @param subsectionLength         the number of samples from the source that will
-                                        make up the subsection. If this reader is asked for
-                                        any samples beyond this region, it will return zero.
-        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
-                                        this object is deleted.
-    */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
-
-    /** Destructor. */
-    ~AudioSubsectionReader();
-
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    void readMaxLevels (int64 startSample,
-                        int64 numSamples,
-                        float& lowestLeft,
-                        float& highestLeft,
-                        float& lowestRight,
-                        float& highestRight);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioFormatReader* const source;
-    int64 startSample, length;
-    const bool deleteSourceWhenDeleted;
-
-    AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
-};
-
-#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 
 /********* Start of inlined file: juce_AudioCDReader.h *********/
@@ -37708,6 +37125,467 @@ private:
 /********* End of inlined file: juce_AudioCDReader.h *********/
 
 #endif
+#ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioFormatManager.h *********/
+#ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
+#define __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
+
+/**
+    A class for keeping a list of available audio formats, and for deciding which
+    one to use to open a given file.
+
+    You can either use this class as a singleton object, or create instances of it
+    yourself. Once created, use its registerFormat() method to tell it which
+    formats it should use.
+
+    @see AudioFormat
+*/
+class JUCE_API  AudioFormatManager
+{
+public:
+
+    /** Creates an empty format manager.
+
+        Before it'll be any use, you'll need to call registerFormat() with all the
+        formats you want it to be able to recognise.
+    */
+    AudioFormatManager();
+
+    /** Destructor. */
+    ~AudioFormatManager();
+
+    juce_DeclareSingleton (AudioFormatManager, false);
+
+    /** Adds a format to the manager's list of available file types.
+
+        The object passed-in will be deleted by this object, so don't keep a pointer
+        to it!
+
+        If makeThisTheDefaultFormat is true, then the getDefaultFormat() method will
+        return this one when called.
+    */
+    void registerFormat (AudioFormat* newFormat,
+                         const bool makeThisTheDefaultFormat);
+
+    /** Handy method to make it easy to register the formats that come with Juce.
+
+        Currently, this will add WAV and AIFF to the list.
+    */
+    void registerBasicFormats();
+
+    /** Clears the list of known formats. */
+    void clearFormats();
+
+    /** Returns the number of currently registered file formats. */
+    int getNumKnownFormats() const;
+
+    /** Returns one of the registered file formats. */
+    AudioFormat* getKnownFormat (const int index) const;
+
+    /** Looks for which of the known formats is listed as being for a given file
+        extension.
+
+        The extension may have a dot before it, so e.g. ".wav" or "wav" are both ok.
+    */
+    AudioFormat* findFormatForFileExtension (const String& fileExtension) const;
+
+    /** Returns the format which has been set as the default one.
+
+        You can set a format as being the default when it is registered. It's useful
+        when you want to write to a file, because the best format may change between
+        platforms, e.g. AIFF is preferred on the Mac, WAV on Windows.
+
+        If none has been set as the default, this method will just return the first
+        one in the list.
+    */
+    AudioFormat* getDefaultFormat() const;
+
+    /** Returns a set of wildcards for file-matching that contains the extensions for
+        all known formats.
+
+        E.g. if might return "*.wav;*.aiff" if it just knows about wavs and aiffs.
+    */
+    const String getWildcardForAllFormats() const;
+
+    /** Searches through the known formats to try to create a suitable reader for
+        this file.
+
+        If none of the registered formats can open the file, it'll return 0. If it
+        returns a reader, it's the caller's responsibility to delete the reader.
+    */
+    AudioFormatReader* createReaderFor (const File& audioFile);
+
+    /** Searches through the known formats to try to create a suitable reader for
+        this stream.
+
+        The stream object that is passed-in will be deleted by this method or by the
+        reader that is returned, so the caller should not keep any references to it.
+
+        The stream that is passed-in must be capable of being repositioned so
+        that all the formats can have a go at opening it.
+
+        If none of the registered formats can open the stream, it'll return 0. If it
+        returns a reader, it's the caller's responsibility to delete the reader.
+    */
+    AudioFormatReader* createReaderFor (InputStream* audioFileStream);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    VoidArray knownFormats;
+    int defaultFormatIndex;
+};
+
+#endif   // __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
+/********* End of inlined file: juce_AudioFormatManager.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+#ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+#define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+
+/**
+    This class is used to wrap an AudioFormatReader and only read from a
+    subsection of the file.
+
+    So if you have a reader which can read a 1000 sample file, you could wrap it
+    in one of these to only access, e.g. samples 100 to 200, and any samples
+    outside that will come back as 0. Accessing sample 0 from this reader will
+    actually read the first sample from the other's subsection, which might
+    be at a non-zero position.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
+{
+public:
+
+    /** Creates a AudioSubsectionReader for a given data source.
+
+        @param sourceReader             the source reader from which we'll be taking data
+        @param subsectionStartSample    the sample within the source reader which will be
+                                        mapped onto sample 0 for this reader.
+        @param subsectionLength         the number of samples from the source that will
+                                        make up the subsection. If this reader is asked for
+                                        any samples beyond this region, it will return zero.
+        @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
+                                        this object is deleted.
+    */
+    AudioSubsectionReader (AudioFormatReader* const sourceReader,
+                           const int64 subsectionStartSample,
+                           const int64 subsectionLength,
+                           const bool deleteSourceWhenDeleted);
+
+    /** Destructor. */
+    ~AudioSubsectionReader();
+
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    void readMaxLevels (int64 startSample,
+                        int64 numSamples,
+                        float& lowestLeft,
+                        float& highestLeft,
+                        float& lowestRight,
+                        float& highestRight);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatReader* const source;
+    int64 startSample, length;
+    const bool deleteSourceWhenDeleted;
+
+    AudioSubsectionReader (const AudioSubsectionReader&);
+    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+};
+
+#endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioSubsectionReader.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioThumbnail.h *********/
+#ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+#define __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+
+class AudioThumbnailCache;
+
+/**
+    Makes it easy to quickly draw scaled views of the waveform shape of an
+    audio file.
+
+    To use this class, just create an AudioThumbNail class for the file you want
+    to draw, call setSource to tell it which file or resource to use, then call
+    drawChannel() to draw it.
+
+    The class will asynchronously scan the wavefile to create its scaled-down view,
+    so you should make your UI repaint itself as this data comes in. To do this, the
+    AudioThumbnail is a ChangeBroadcaster, and will broadcast a message when its
+    listeners should repaint themselves.
+
+    The thumbnail stores an internal low-res version of the wave data, and this can
+    be loaded and saved to avoid having to scan the file again.
+
+    @see AudioThumbnailCache
+*/
+class JUCE_API  AudioThumbnail    : public ChangeBroadcaster,
+                                    public TimeSliceClient,
+                                    private Timer
+{
+public:
+
+    /** Creates an audio thumbnail.
+
+        @param sourceSamplesPerThumbnailSample  when creating a stored, low-res version
+                        of the audio data, this is the scale at which it should be done. (This
+                        number is the number of original samples that will be averaged for each
+                        low-res sample)
+        @param formatManagerToUse   the audio format manager that is used to open the file
+        @param cacheToUse   an instance of an AudioThumbnailCache - this provides a background
+                            thread and storage that is used to by the thumbnail, and the cache
+                            object can be shared between multiple thumbnails
+    */
+    AudioThumbnail (const int sourceSamplesPerThumbnailSample,
+                    AudioFormatManager& formatManagerToUse,
+                    AudioThumbnailCache& cacheToUse);
+
+    /** Destructor. */
+    ~AudioThumbnail();
+
+    /** Specifies the file or stream that contains the audio file.
+
+        For a file, just call
+        @code
+        setSource (new FileInputSource (file))
+        @endcode
+
+        You can pass a zero in here to clear the thumbnail.
+
+        The source that is passed in will be deleted by this object when it is no
+        longer needed
+    */
+    void setSource (InputSource* const newSource);
+
+    /** Reloads the low res thumbnail data from an input stream.
+
+        The thumb will automatically attempt to reload itself from its
+        AudioThumbnailCache.
+    */
+    void loadFrom (InputStream& input);
+
+    /** Saves the low res thumbnail data to an output stream.
+
+        The thumb will automatically attempt to save itself to its
+        AudioThumbnailCache after it finishes scanning the wave file.
+    */
+    void saveTo (OutputStream& output) const;
+
+    /** Returns the number of channels in the file.
+    */
+    int getNumChannels() const throw();
+
+    /** Returns the length of the audio file, in seconds.
+    */
+    double getTotalLength() const throw();
+
+    /** Renders the waveform shape for a channel.
+
+        The waveform will be drawn within  the specified rectangle, where startTime
+        and endTime specify the times within the audio file that should be positioned
+        at the left and right edges of the rectangle.
+
+        The waveform will be scaled vertically so that a full-volume sample will fill
+        the rectangle vertically, but you can also specify an extra vertical scale factor
+        with the verticalZoomFactor parameter.
+    */
+    void drawChannel (Graphics& g,
+                      int x, int y, int w, int h,
+                      double startTimeSeconds,
+                      double endTimeSeconds,
+                      int channelNum,
+                      const float verticalZoomFactor);
+
+    /** Returns true if the low res preview is fully generated.
+    */
+    bool isFullyLoaded() const throw();
+
+    /** @internal */
+    bool useTimeSlice();
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioFormatManager& formatManagerToUse;
+    AudioThumbnailCache& cache;
+    InputSource* source;
+
+    CriticalSection readerLock;
+    AudioFormatReader* reader;
+
+    MemoryBlock data, cachedLevels;
+    int orginalSamplesPerThumbnailSample;
+
+    int numChannelsCached, numSamplesCached;
+    double cachedStart, cachedTimePerPixel;
+    bool cacheNeedsRefilling;
+
+    void clear();
+
+    AudioFormatReader* createReader() const;
+
+    void generateSection (AudioFormatReader& reader,
+                          int64 startSample,
+                          int numSamples);
+
+    char* getChannelData (int channel) const;
+
+    void refillCache (const int numSamples,
+                      double startTime,
+                      const double timePerPixel);
+
+    friend class AudioThumbnailCache;
+
+    // true if it needs more callbacks from the readNextBlockFromAudioFile() method
+    bool initialiseFromAudioFile (AudioFormatReader& reader);
+
+    // returns true if more needs to be read
+    bool readNextBlockFromAudioFile (AudioFormatReader& reader);
+};
+
+#endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
+/********* End of inlined file: juce_AudioThumbnail.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioThumbnailCache.h *********/
+#ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+#define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+
+struct ThumbnailCacheEntry;
+
+/**
+    An instance of this class is used to manage multiple AudioThumbnail objects.
+
+    The cache runs a single background thread that is shared by all the thumbnails
+    that need it, and it maintains a set of low-res previews in memory, to avoid
+    having to re-scan audio files too often.
+
+    @see AudioThumbnail
+*/
+class JUCE_API  AudioThumbnailCache   : public TimeSliceThread
+{
+public:
+
+    /** Creates a cache object.
+
+        The maxNumThumbsToStore parameter lets you specify how many previews should
+        be kept in memory at once.
+    */
+    AudioThumbnailCache (const int maxNumThumbsToStore);
+
+    /** Destructor. */
+    ~AudioThumbnailCache();
+
+    /** Clears out any stored thumbnails.
+    */
+    void clear();
+
+    /** Reloads the specified thumb if this cache contains the appropriate stored
+        data.
+
+        This is called automatically by the AudioThumbnail class, so you shouldn't
+        normally need to call it directly.
+    */
+    bool loadThumb (AudioThumbnail& thumb, const int64 hashCode);
+
+    /** Stores the cachable data from the specified thumb in this cache.
+
+        This is called automatically by the AudioThumbnail class, so you shouldn't
+        normally need to call it directly.
+    */
+    void storeThumb (const AudioThumbnail& thumb, const int64 hashCode);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    OwnedArray <ThumbnailCacheEntry> thumbs;
+    int maxNumThumbsToStore;
+
+    friend class AudioThumbnail;
+    void addThumbnail (AudioThumbnail* const thumb);
+    void removeThumbnail (AudioThumbnail* const thumb);
+};
+
+#endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
+/********* End of inlined file: juce_AudioThumbnailCache.h *********/
+
+#endif
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FlacAudioFormat.h *********/
+#ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_FLAC || defined (DOXYGEN)
+
+/**
+    Reads and writes the lossless-compression FLAC audio format.
+
+    To compile this, you'll need to set the JUCE_USE_FLAC flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the FLAC header files and static libraries.
+
+    @see AudioFormat
+*/
+class JUCE_API  FlacAudioFormat    : public AudioFormat
+{
+public:
+
+    FlacAudioFormat();
+    ~FlacAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_FlacAudioFormat.h *********/
+
+#endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
@@ -37814,6 +37692,128 @@ public:
 #endif
 #endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WavAudioFormat.h *********/
+#ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+
+/**
+    Reads and Writes WAV format audio files.
+
+    @see AudioFormat
+*/
+class JUCE_API  WavAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    WavAudioFormat();
+
+    /** Destructor. */
+    ~WavAudioFormat();
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavDescription;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginator;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginatorRef;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Date format is: yyyy-mm-dd
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationDate;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        Time format is: hh-mm-ss
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavOriginationTime;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is the number of samples from the start of an edit that the
+        file is supposed to begin at. Seems like an obvious mistake to
+        only allow a file to occur in an edit once, but that's the way
+        it is..
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavTimeReference;
+
+    /** Metadata property name used by wav readers and writers for adding
+        a BWAV chunk to the file.
+
+        This is a
+
+        @see AudioFormatReader::metadataValues, createWriterFor
+    */
+    static const tchar* const bwavCodingHistory;
+
+    /** Utility function to fill out the appropriate metadata for a BWAV file.
+
+        This just makes it easier than using the property names directly, and it
+        fills out the time and date in the right format.
+    */
+    static const StringPairArray createBWAVMetadata (const String& description,
+                                                     const String& originator,
+                                                     const String& originatorRef,
+                                                     const Time& dateAndTime,
+                                                     const int64 timeReferenceSamples,
+                                                     const String& codingHistory);
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    /** Utility function to replace the metadata in a wav file with a new set of values.
+
+        If possible, this cheats by overwriting just the metadata region of the file, rather
+        than by copying the whole file again.
+    */
+    bool replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_WavAudioFormat.h *********/
 
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -39203,19 +39203,141 @@ private:
 #ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COLOUR_JUCEHEADER__
+#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
+#ifndef __JUCE_COLOUR_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_COLOURS_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
+#ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
+
+/********* Start of inlined file: juce_TextLayout.h *********/
+#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
+#define __JUCE_TEXTLAYOUT_JUCEHEADER__
+
+class Graphics;
+
+/**
+    A laid-out arrangement of text.
+
+    You can add text in different fonts to a TextLayout object, then call its
+    layout() method to word-wrap it into lines. The layout can then be drawn
+    using a graphics context.
+
+    It's handy if you've got a message to display, because you can format it,
+    measure the extent of the layout, and then create a suitably-sized window
+    to show it in.
+
+    @see Font, Graphics::drawFittedText, GlyphArrangement
+*/
+class JUCE_API  TextLayout
+{
+public:
+
+    /** Creates an empty text layout.
+
+        Text can then be appended using the appendText() method.
+    */
+    TextLayout() throw();
+
+    /** Creates a copy of another layout object. */
+    TextLayout (const TextLayout& other) throw();
+
+    /** Creates a text layout from an initial string and font. */
+    TextLayout (const String& text, const Font& font) throw();
+
+    /** Destructor. */
+    ~TextLayout() throw();
+
+    /** Copies another layout onto this one. */
+    const TextLayout& operator= (const TextLayout& layoutToCopy) throw();
+
+    /** Clears the layout, removing all its text. */
+    void clear() throw();
+
+    /** Adds a string to the end of the arrangement.
+
+        The string will be broken onto new lines wherever it contains
+        carriage-returns or linefeeds. After adding it, you can call layout()
+        to wrap long lines into a paragraph and justify it.
+    */
+    void appendText (const String& textToAppend,
+                     const Font& fontToUse) throw();
+
+    /** Replaces all the text with a new string.
+
+        This is equivalent to calling clear() followed by appendText().
+    */
+    void setText (const String& newText,
+                  const Font& fontToUse) throw();
+
+    /** Breaks the text up to form a paragraph with the given width.
+
+        @param maximumWidth                 any text wider than this will be split
+                                            across multiple lines
+        @param justification                how the lines are to be laid-out horizontally
+        @param attemptToBalanceLineLengths  if true, it will try to split the lines at a
+                                            width that keeps all the lines of text at a
+                                            similar length - this is good when you're displaying
+                                            a short message and don't want it to get split
+                                            onto two lines with only a couple of words on
+                                            the second line, which looks untidy.
+    */
+    void layout (int maximumWidth,
+                 const Justification& justification,
+                 const bool attemptToBalanceLineLengths) throw();
+
+    /** Returns the overall width of the entire text layout. */
+    int getWidth() const throw();
+
+    /** Returns the overall height of the entire text layout. */
+    int getHeight() const throw();
+
+    /** Returns the total number of lines of text. */
+    int getNumLines() const throw()                 { return totalLines; }
+
+    /** Returns the width of a particular line of text.
+
+        @param lineNumber   the line, from 0 to (getNumLines() - 1)
+    */
+    int getLineWidth (const int lineNumber) const throw();
+
+    /** Renders the text at a specified position using a graphics context.
+    */
+    void draw (Graphics& g,
+               const int topLeftX,
+               const int topLeftY) const throw();
+
+    /** Renders the text within a specified rectangle using a graphics context.
+
+        The justification flags dictate how the block of text should be positioned
+        within the rectangle.
+    */
+    void drawWithin (Graphics& g,
+                     int x, int y, int w, int h,
+                     const Justification& layoutFlags) const throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    VoidArray tokens;
+    int totalLines;
+};
+
+#endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
+/********* End of inlined file: juce_TextLayout.h *********/
+
+#endif
+#ifndef __JUCE_TYPEFACE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
@@ -39507,128 +39629,6 @@ private:
 /********* End of inlined file: juce_GlyphArrangement.h *********/
 
 #endif
-#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
-
-/********* Start of inlined file: juce_TextLayout.h *********/
-#ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
-#define __JUCE_TEXTLAYOUT_JUCEHEADER__
-
-class Graphics;
-
-/**
-    A laid-out arrangement of text.
-
-    You can add text in different fonts to a TextLayout object, then call its
-    layout() method to word-wrap it into lines. The layout can then be drawn
-    using a graphics context.
-
-    It's handy if you've got a message to display, because you can format it,
-    measure the extent of the layout, and then create a suitably-sized window
-    to show it in.
-
-    @see Font, Graphics::drawFittedText, GlyphArrangement
-*/
-class JUCE_API  TextLayout
-{
-public:
-
-    /** Creates an empty text layout.
-
-        Text can then be appended using the appendText() method.
-    */
-    TextLayout() throw();
-
-    /** Creates a copy of another layout object. */
-    TextLayout (const TextLayout& other) throw();
-
-    /** Creates a text layout from an initial string and font. */
-    TextLayout (const String& text, const Font& font) throw();
-
-    /** Destructor. */
-    ~TextLayout() throw();
-
-    /** Copies another layout onto this one. */
-    const TextLayout& operator= (const TextLayout& layoutToCopy) throw();
-
-    /** Clears the layout, removing all its text. */
-    void clear() throw();
-
-    /** Adds a string to the end of the arrangement.
-
-        The string will be broken onto new lines wherever it contains
-        carriage-returns or linefeeds. After adding it, you can call layout()
-        to wrap long lines into a paragraph and justify it.
-    */
-    void appendText (const String& textToAppend,
-                     const Font& fontToUse) throw();
-
-    /** Replaces all the text with a new string.
-
-        This is equivalent to calling clear() followed by appendText().
-    */
-    void setText (const String& newText,
-                  const Font& fontToUse) throw();
-
-    /** Breaks the text up to form a paragraph with the given width.
-
-        @param maximumWidth                 any text wider than this will be split
-                                            across multiple lines
-        @param justification                how the lines are to be laid-out horizontally
-        @param attemptToBalanceLineLengths  if true, it will try to split the lines at a
-                                            width that keeps all the lines of text at a
-                                            similar length - this is good when you're displaying
-                                            a short message and don't want it to get split
-                                            onto two lines with only a couple of words on
-                                            the second line, which looks untidy.
-    */
-    void layout (int maximumWidth,
-                 const Justification& justification,
-                 const bool attemptToBalanceLineLengths) throw();
-
-    /** Returns the overall width of the entire text layout. */
-    int getWidth() const throw();
-
-    /** Returns the overall height of the entire text layout. */
-    int getHeight() const throw();
-
-    /** Returns the total number of lines of text. */
-    int getNumLines() const throw()                 { return totalLines; }
-
-    /** Returns the width of a particular line of text.
-
-        @param lineNumber   the line, from 0 to (getNumLines() - 1)
-    */
-    int getLineWidth (const int lineNumber) const throw();
-
-    /** Renders the text at a specified position using a graphics context.
-    */
-    void draw (Graphics& g,
-               const int topLeftX,
-               const int topLeftY) const throw();
-
-    /** Renders the text within a specified rectangle using a graphics context.
-
-        The justification flags dictate how the block of text should be positioned
-        within the rectangle.
-    */
-    void drawWithin (Graphics& g,
-                     int x, int y, int w, int h,
-                     const Justification& layoutFlags) const throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    VoidArray tokens;
-    int totalLines;
-};
-
-#endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
-/********* End of inlined file: juce_TextLayout.h *********/
-
-#endif
-#ifndef __JUCE_TYPEFACE_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_EDGETABLE_JUCEHEADER__
 
 /********* Start of inlined file: juce_EdgeTable.h *********/
@@ -39905,9 +39905,6 @@ private:
 /********* End of inlined file: juce_EdgeTable.h *********/
 
 #endif
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
 
 #endif
@@ -39995,107 +39992,6 @@ public:
 
 #endif   // __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 /********* End of inlined file: juce_LowLevelGraphicsContext.h *********/
-
-#endif
-#ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
-
-/********* Start of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
-#ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
-#define __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
-
-/**
-    An implementation of LowLevelGraphicsContext that turns the drawing operations
-    into a PostScript document.
-
-*/
-class JUCE_API  LowLevelGraphicsPostScriptRenderer    : public LowLevelGraphicsContext
-{
-public:
-
-    LowLevelGraphicsPostScriptRenderer (OutputStream& resultingPostScript,
-                                        const String& documentTitle,
-                                        const int totalWidth,
-                                        const int totalHeight);
-
-    ~LowLevelGraphicsPostScriptRenderer();
-
-    bool isVectorDevice() const;
-    void setOrigin (int x, int y);
-
-    bool reduceClipRegion (int x, int y, int w, int h);
-    bool reduceClipRegion (const RectangleList& clipRegion);
-    void excludeClipRegion (int x, int y, int w, int h);
-
-    void saveState();
-    void restoreState();
-
-    bool clipRegionIntersects (int x, int y, int w, int h);
-    const Rectangle getClipBounds() const;
-    bool isClipEmpty() const;
-
-    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient);
-
-    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
-    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
-    void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
-
-    void fillAlphaChannelWithColour (const Image& alphaImage, int imageX, int imageY, const Colour& colour);
-    void fillAlphaChannelWithGradient (const Image& alphaImage, int imageX, int imageY, const ColourGradient& gradient);
-    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
-
-    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY, float alpha);
-
-    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform,
-                            float alpha, const Graphics::ResamplingQuality quality);
-
-    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour);
-
-    void drawVerticalLine (const int x, double top, double bottom, const Colour& col);
-    void drawHorizontalLine (const int x, double top, double bottom, const Colour& col);
-
-    juce_UseDebuggingNewOperator
-
-protected:
-
-    OutputStream& out;
-    RectangleList* clip;
-    int totalWidth, totalHeight, xOffset, yOffset;
-    bool needToClip;
-    Colour lastColour;
-
-    struct SavedState
-    {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset);
-        ~SavedState();
-
-        RectangleList* clip;
-        const int xOffset, yOffset;
-
-    private:
-        SavedState (const SavedState&);
-        const SavedState& operator= (const SavedState&);
-    };
-
-    OwnedArray <SavedState> stateStack;
-
-    void writeClip();
-    void writeColour (const Colour& colour);
-    void writePath (const Path& path) const;
-    void writeXY (const float x, const float y) const;
-    void writeTransform (const AffineTransform& trans) const;
-    void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
-
-    LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
-    const LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
-};
-
-#endif   // __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
-/********* End of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
@@ -40225,6 +40121,110 @@ protected:
 
 #endif
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_GRAPHICS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
+
+/********* Start of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
+#ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
+#define __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
+
+/**
+    An implementation of LowLevelGraphicsContext that turns the drawing operations
+    into a PostScript document.
+
+*/
+class JUCE_API  LowLevelGraphicsPostScriptRenderer    : public LowLevelGraphicsContext
+{
+public:
+
+    LowLevelGraphicsPostScriptRenderer (OutputStream& resultingPostScript,
+                                        const String& documentTitle,
+                                        const int totalWidth,
+                                        const int totalHeight);
+
+    ~LowLevelGraphicsPostScriptRenderer();
+
+    bool isVectorDevice() const;
+    void setOrigin (int x, int y);
+
+    bool reduceClipRegion (int x, int y, int w, int h);
+    bool reduceClipRegion (const RectangleList& clipRegion);
+    void excludeClipRegion (int x, int y, int w, int h);
+
+    void saveState();
+    void restoreState();
+
+    bool clipRegionIntersects (int x, int y, int w, int h);
+    const Rectangle getClipBounds() const;
+    bool isClipEmpty() const;
+
+    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
+    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient);
+
+    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
+    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
+    void fillPathWithImage (const Path& path, const AffineTransform& transform,
+                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+
+    void fillAlphaChannelWithColour (const Image& alphaImage, int imageX, int imageY, const Colour& colour);
+    void fillAlphaChannelWithGradient (const Image& alphaImage, int imageX, int imageY, const ColourGradient& gradient);
+    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
+                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
+
+    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
+                     int sourceX, int sourceY, float alpha);
+
+    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
+                            const AffineTransform& transform,
+                            float alpha, const Graphics::ResamplingQuality quality);
+
+    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour);
+
+    void drawVerticalLine (const int x, double top, double bottom, const Colour& col);
+    void drawHorizontalLine (const int x, double top, double bottom, const Colour& col);
+
+    juce_UseDebuggingNewOperator
+
+protected:
+
+    OutputStream& out;
+    RectangleList* clip;
+    int totalWidth, totalHeight, xOffset, yOffset;
+    bool needToClip;
+    Colour lastColour;
+
+    struct SavedState
+    {
+        SavedState (RectangleList* const clip, const int xOffset, const int yOffset);
+        ~SavedState();
+
+        RectangleList* clip;
+        const int xOffset, yOffset;
+
+    private:
+        SavedState (const SavedState&);
+        const SavedState& operator= (const SavedState&);
+    };
+
+    OwnedArray <SavedState> stateStack;
+
+    void writeClip();
+    void writeColour (const Colour& colour);
+    void writePath (const Path& path) const;
+    void writeXY (const float x, const float y) const;
+    void writeTransform (const AffineTransform& trans) const;
+    void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
+
+    LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
+    const LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
+};
+
+#endif   // __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
+/********* End of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
 
 #endif
 #ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
@@ -40931,109 +40931,6 @@ private:
 /********* End of inlined file: juce_ImageCache.h *********/
 
 #endif
-#ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImageConvolutionKernel.h *********/
-#ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
-#define __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
-
-/**
-    Represents a filter kernel to use in convoluting an image.
-
-    @see Image::applyConvolution
-*/
-class JUCE_API  ImageConvolutionKernel
-{
-public:
-
-    /** Creates an empty convulution kernel.
-
-        @param size     the length of each dimension of the kernel, so e.g. if the size
-                        is 5, it will create a 5x5 kernel
-    */
-    ImageConvolutionKernel (const int size) throw();
-
-    /** Destructor. */
-    ~ImageConvolutionKernel() throw();
-
-    /** Resets all values in the kernel to zero.
-    */
-    void clear() throw();
-
-    /** Sets the value of a specific cell in the kernel.
-
-        The x and y parameters must be in the range 0 < x < getKernelSize().
-
-        @see setOverallSum
-    */
-    void setKernelValue (const int x,
-                         const int y,
-                         const float value) throw();
-
-    /** Rescales all values in the kernel to make the total add up to a fixed value.
-
-        This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
-    */
-    void setOverallSum (const float desiredTotalSum) throw();
-
-    /** Multiplies all values in the kernel by a value. */
-    void rescaleAllValues (const float multiplier) throw();
-
-    /** Intialises the kernel for a gaussian blur.
-
-        @param blurRadius   this may be larger or smaller than the kernel's actual
-                            size but this will obviously be wasteful or clip at the
-                            edges. Ideally the kernel should be just larger than
-                            (blurRadius * 2).
-    */
-    void createGaussianBlur (const float blurRadius) throw();
-
-    /** Returns the size of the kernel.
-
-        E.g. if it's a 3x3 kernel, this returns 3.
-    */
-    int getKernelSize() const throw()       { return size; }
-
-    /** Returns a 2-dimensional array of the kernel's values.
-
-        The size of each dimension of the array will be getKernelSize().
-    */
-    float** getValues() const throw()       { return values; }
-
-    /** Applies the kernel to an image.
-
-        @param destImage        the image that will receive the resultant convoluted pixels.
-        @param sourceImage      an optional source image to read from - if this is 0, then the
-                                destination image will be used as the source. If an image is
-                                specified, it must be exactly the same size and type as the destination
-                                image.
-        @param x                the region of the image to apply the filter to
-        @param y                the region of the image to apply the filter to
-        @param width            the region of the image to apply the filter to
-        @param height           the region of the image to apply the filter to
-    */
-    void applyToImage (Image& destImage,
-                       const Image* sourceImage,
-                       int x,
-                       int y,
-                       int width,
-                       int height) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    float** values;
-    int size;
-
-    // no reason not to implement these one day..
-    ImageConvolutionKernel (const ImageConvolutionKernel&);
-    const ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
-};
-
-#endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
-/********* End of inlined file: juce_ImageConvolutionKernel.h *********/
-
-#endif
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_ImageFileFormat.h *********/
@@ -41198,11 +41095,110 @@ private:
 /********* End of inlined file: juce_ImageFileFormat.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+#ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableText.h *********/
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
-#define __JUCE_DRAWABLETEXT_JUCEHEADER__
+/********* Start of inlined file: juce_ImageConvolutionKernel.h *********/
+#ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
+#define __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
+
+/**
+    Represents a filter kernel to use in convoluting an image.
+
+    @see Image::applyConvolution
+*/
+class JUCE_API  ImageConvolutionKernel
+{
+public:
+
+    /** Creates an empty convulution kernel.
+
+        @param size     the length of each dimension of the kernel, so e.g. if the size
+                        is 5, it will create a 5x5 kernel
+    */
+    ImageConvolutionKernel (const int size) throw();
+
+    /** Destructor. */
+    ~ImageConvolutionKernel() throw();
+
+    /** Resets all values in the kernel to zero.
+    */
+    void clear() throw();
+
+    /** Sets the value of a specific cell in the kernel.
+
+        The x and y parameters must be in the range 0 < x < getKernelSize().
+
+        @see setOverallSum
+    */
+    void setKernelValue (const int x,
+                         const int y,
+                         const float value) throw();
+
+    /** Rescales all values in the kernel to make the total add up to a fixed value.
+
+        This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
+    */
+    void setOverallSum (const float desiredTotalSum) throw();
+
+    /** Multiplies all values in the kernel by a value. */
+    void rescaleAllValues (const float multiplier) throw();
+
+    /** Intialises the kernel for a gaussian blur.
+
+        @param blurRadius   this may be larger or smaller than the kernel's actual
+                            size but this will obviously be wasteful or clip at the
+                            edges. Ideally the kernel should be just larger than
+                            (blurRadius * 2).
+    */
+    void createGaussianBlur (const float blurRadius) throw();
+
+    /** Returns the size of the kernel.
+
+        E.g. if it's a 3x3 kernel, this returns 3.
+    */
+    int getKernelSize() const throw()       { return size; }
+
+    /** Returns a 2-dimensional array of the kernel's values.
+
+        The size of each dimension of the array will be getKernelSize().
+    */
+    float** getValues() const throw()       { return values; }
+
+    /** Applies the kernel to an image.
+
+        @param destImage        the image that will receive the resultant convoluted pixels.
+        @param sourceImage      an optional source image to read from - if this is 0, then the
+                                destination image will be used as the source. If an image is
+                                specified, it must be exactly the same size and type as the destination
+                                image.
+        @param x                the region of the image to apply the filter to
+        @param y                the region of the image to apply the filter to
+        @param width            the region of the image to apply the filter to
+        @param height           the region of the image to apply the filter to
+    */
+    void applyToImage (Image& destImage,
+                       const Image* sourceImage,
+                       int x,
+                       int y,
+                       int width,
+                       int height) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    float** values;
+    int size;
+
+    // no reason not to implement these one day..
+    ImageConvolutionKernel (const ImageConvolutionKernel&);
+    const ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
+};
+
+#endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
+/********* End of inlined file: juce_ImageConvolutionKernel.h *********/
+
+#endif
+#ifndef __JUCE_DRAWABLE_JUCEHEADER__
 
 /********* Start of inlined file: juce_Drawable.h *********/
 #ifndef __JUCE_DRAWABLE_JUCEHEADER__
@@ -41385,181 +41381,6 @@ private:
 
 #endif   // __JUCE_DRAWABLE_JUCEHEADER__
 /********* End of inlined file: juce_Drawable.h *********/
-
-/**
-    A drawable object which renders a line of text.
-
-    @see Drawable
-*/
-class JUCE_API  DrawableText  : public Drawable
-{
-public:
-
-    /** Creates a DrawableText object. */
-    DrawableText();
-
-    /** Destructor. */
-    virtual ~DrawableText();
-
-    /** Sets the block of text to render */
-    void setText (const GlyphArrangement& newText);
-
-    /** Sets a single line of text to render.
-
-        This is a convenient method of adding a single line - for
-        more complex text, use the setText() that takes a
-        GlyphArrangement instead.
-    */
-    void setText (const String& newText, const Font& fontToUse);
-
-    /** Returns the text arrangement that was set with setText(). */
-    const GlyphArrangement& getText() const throw()         { return text; }
-
-    /** Sets the colour of the text. */
-    void setColour (const Colour& newColour);
-
-    /** Returns the current text colour. */
-    const Colour& getColour() const throw()                 { return colour; }
-
-    /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
-    Drawable* createCopy() const;
-    /** @internal */
-    bool readBinary (InputStream& input);
-    /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    GlyphArrangement text;
-    Colour colour;
-
-    DrawableText (const DrawableText&);
-    const DrawableText& operator= (const DrawableText&);
-};
-
-#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
-/********* End of inlined file: juce_DrawableText.h *********/
-
-#endif
-#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawablePath.h *********/
-#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
-#define __JUCE_DRAWABLEPATH_JUCEHEADER__
-
-/**
-    A drawable object which renders a filled or outlined shape.
-
-    @see Drawable
-*/
-class JUCE_API  DrawablePath  : public Drawable
-{
-public:
-
-    /** Creates a DrawablePath.
-    */
-    DrawablePath();
-
-    /** Destructor. */
-    virtual ~DrawablePath();
-
-    /** Changes the path that will be drawn.
-
-        @see setSolidFill, setOutline
-    */
-    void setPath (const Path& newPath);
-
-    /** Returns the current path. */
-    const Path& getPath() const throw()                         { return path; }
-
-    /** Sets a colour to fill the path with.
-
-        This colour is used to fill the path - if you don't want the path to be
-        filled (e.g. if you're just drawing an outline), set this colour to be
-        transparent.
-
-        @see setPath, setOutline
-    */
-    void setSolidFill (const Colour& newColour);
-
-    /** Sets a custom brush to use to fill the path.
-
-        @see setSolidFill
-    */
-    void setFillBrush (const Brush& newBrush);
-
-    /** Returns the brush currently being used to fill the shape. */
-    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
-
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the thickness value is 0, no outline will be drawn. If one is drawn, the
-        colour passed-in here will be used for it.
-
-        @see setPath, setSolidFill
-    */
-    void setOutline (const float thickness,
-                     const Colour& outlineColour);
-
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the stroke type has 0 thickness, no outline will be drawn.
-
-        @see setPath, setSolidFill
-    */
-    void setOutline (const PathStrokeType& strokeType,
-                     const Brush& strokeBrush);
-
-    /** Returns the current outline style. */
-    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
-
-    /** Returns the brush currently being used to draw the outline. */
-    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
-
-    /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
-    Drawable* createCopy() const;
-    /** @internal */
-    bool readBinary (InputStream& input);
-    /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Path path, outline;
-    Brush* fillBrush;
-    Brush* strokeBrush;
-    PathStrokeType strokeType;
-
-    void updateOutline();
-
-    DrawablePath (const DrawablePath&);
-    const DrawablePath& operator= (const DrawablePath&);
-};
-
-#endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
-/********* End of inlined file: juce_DrawablePath.h *********/
 
 #endif
 #ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
@@ -41802,7 +41623,186 @@ private:
 /********* End of inlined file: juce_DrawableImage.h *********/
 
 #endif
-#ifndef __JUCE_DRAWABLE_JUCEHEADER__
+#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawablePath.h *********/
+#ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
+#define __JUCE_DRAWABLEPATH_JUCEHEADER__
+
+/**
+    A drawable object which renders a filled or outlined shape.
+
+    @see Drawable
+*/
+class JUCE_API  DrawablePath  : public Drawable
+{
+public:
+
+    /** Creates a DrawablePath.
+    */
+    DrawablePath();
+
+    /** Destructor. */
+    virtual ~DrawablePath();
+
+    /** Changes the path that will be drawn.
+
+        @see setSolidFill, setOutline
+    */
+    void setPath (const Path& newPath);
+
+    /** Returns the current path. */
+    const Path& getPath() const throw()                         { return path; }
+
+    /** Sets a colour to fill the path with.
+
+        This colour is used to fill the path - if you don't want the path to be
+        filled (e.g. if you're just drawing an outline), set this colour to be
+        transparent.
+
+        @see setPath, setOutline
+    */
+    void setSolidFill (const Colour& newColour);
+
+    /** Sets a custom brush to use to fill the path.
+
+        @see setSolidFill
+    */
+    void setFillBrush (const Brush& newBrush);
+
+    /** Returns the brush currently being used to fill the shape. */
+    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
+
+    /** Changes the properties of the outline that will be drawn around the path.
+
+        If the thickness value is 0, no outline will be drawn. If one is drawn, the
+        colour passed-in here will be used for it.
+
+        @see setPath, setSolidFill
+    */
+    void setOutline (const float thickness,
+                     const Colour& outlineColour);
+
+    /** Changes the properties of the outline that will be drawn around the path.
+
+        If the stroke type has 0 thickness, no outline will be drawn.
+
+        @see setPath, setSolidFill
+    */
+    void setOutline (const PathStrokeType& strokeType,
+                     const Brush& strokeBrush);
+
+    /** Returns the current outline style. */
+    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
+
+    /** Returns the brush currently being used to draw the outline. */
+    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
+
+    /** @internal */
+    void render (const Drawable::RenderingContext& context) const;
+    /** @internal */
+    void getBounds (float& x, float& y, float& width, float& height) const;
+    /** @internal */
+    bool hitTest (float x, float y) const;
+    /** @internal */
+    Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Path path, outline;
+    Brush* fillBrush;
+    Brush* strokeBrush;
+    PathStrokeType strokeType;
+
+    void updateOutline();
+
+    DrawablePath (const DrawablePath&);
+    const DrawablePath& operator= (const DrawablePath&);
+};
+
+#endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
+/********* End of inlined file: juce_DrawablePath.h *********/
+
+#endif
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawableText.h *********/
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+#define __JUCE_DRAWABLETEXT_JUCEHEADER__
+
+/**
+    A drawable object which renders a line of text.
+
+    @see Drawable
+*/
+class JUCE_API  DrawableText  : public Drawable
+{
+public:
+
+    /** Creates a DrawableText object. */
+    DrawableText();
+
+    /** Destructor. */
+    virtual ~DrawableText();
+
+    /** Sets the block of text to render */
+    void setText (const GlyphArrangement& newText);
+
+    /** Sets a single line of text to render.
+
+        This is a convenient method of adding a single line - for
+        more complex text, use the setText() that takes a
+        GlyphArrangement instead.
+    */
+    void setText (const String& newText, const Font& fontToUse);
+
+    /** Returns the text arrangement that was set with setText(). */
+    const GlyphArrangement& getText() const throw()         { return text; }
+
+    /** Sets the colour of the text. */
+    void setColour (const Colour& newColour);
+
+    /** Returns the current text colour. */
+    const Colour& getColour() const throw()                 { return colour; }
+
+    /** @internal */
+    void render (const Drawable::RenderingContext& context) const;
+    /** @internal */
+    void getBounds (float& x, float& y, float& width, float& height) const;
+    /** @internal */
+    bool hitTest (float x, float y) const;
+    /** @internal */
+    Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    GlyphArrangement text;
+    Colour colour;
+
+    DrawableText (const DrawableText&);
+    const DrawableText& operator= (const DrawableText&);
+};
+
+#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
+/********* End of inlined file: juce_DrawableText.h *********/
 
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
@@ -44435,6 +44435,533 @@ private:
 
 #endif
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_CodeEditorComponent.h *********/
+#ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+#define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_CodeDocument.h *********/
+#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
+#define __JUCE_CODEDOCUMENT_JUCEHEADER__
+
+class CodeDocumentLine;
+
+/**
+    A class for storing and manipulating a source code file.
+
+    When using a CodeEditorComponent, it takes one of these as its source object.
+
+    The CodeDocument stores its content as an array of lines, which makes it
+    quick to insert and delete.
+
+    @see CodeEditorComponent
+*/
+class JUCE_API  CodeDocument
+{
+public:
+    /**
+    */
+    CodeDocument();
+
+    /**
+    */
+    ~CodeDocument();
+
+    /** A position in a code document.
+
+        Using this class you can find a position in a code document and quickly get its
+        character position, line, and index. By calling setPositionMaintained (true), the
+        position is automatically updated when text is inserted or deleted in the document,
+        so that it maintains its original place in the text.
+    */
+    class JUCE_API  Position
+    {
+    public:
+        Position() throw();
+        Position (const CodeDocument* const ownerDocument, const int line, const int indexInLine) throw();
+        Position (const CodeDocument* const ownerDocument, const int characterPos) throw();
+        Position (const Position& other) throw();
+        ~Position() throw();
+
+        const Position& operator= (const Position& other) throw();
+        bool operator== (const Position& other) const throw();
+        bool operator!= (const Position& other) const throw();
+
+        /**
+        */
+        void setLineAndIndex (const int newLine, const int newIndexInLine) throw();
+
+        /**
+        */
+        void setPosition (const int newPosition) throw();
+
+        /**
+        */
+        int getPosition() const throw()             { return characterPos; }
+
+        /**
+        */
+        int getLineNumber() const throw()           { return line; }
+
+        /**
+        */
+        int getIndexInLine() const throw()          { return indexInLine; }
+
+        /**
+        */
+        void updateLineAndIndexFromPosition() throw();
+
+        /**
+        */
+        void setPositionMaintained (const bool isMaintained) throw();
+
+        /**
+        */
+        void moveBy (int characterDelta) throw();
+
+        /**
+        */
+        const Position movedBy (const int characterDelta) const throw();
+
+        /**
+        */
+        const Position movedByLines (const int deltaLines) const throw();
+
+        /**
+        */
+        const tchar getCharacter() const throw();
+
+        /**
+        */
+        const String getLineText() const throw();
+
+    private:
+        CodeDocument* owner;
+        int characterPos, line, indexInLine;
+        bool positionMaintained;
+    };
+
+    /**
+    */
+    const String getAllContent() const throw();
+
+    /**
+    */
+    const String getTextBetween (const Position& start, const Position& end) const throw();
+
+    /**
+    */
+    const String getLine (const int lineIndex) const throw();
+
+    /**
+    */
+    int getNumCharacters() const throw();
+
+    /**
+    */
+    int getNumLines() const throw()                     { return lines.size(); }
+
+    /**
+    */
+    int getMaximumLineLength() throw();
+
+    /**
+    */
+    void deleteSection (const Position& startPosition, const Position& endPosition);
+
+    /**
+    */
+    void insertText (const Position& position, const String& text);
+
+    /**
+    */
+    void replaceAllContent (const String& newContent);
+
+    /**
+    */
+    void newTransaction();
+
+    /**
+    */
+    void undo();
+
+    /**
+    */
+    void redo();
+
+    /**
+    */
+    void clearUndoManager();
+
+    /**
+    */
+    void setSavePoint() throw();
+
+    /**
+    */
+    bool hasChangedSinceSavePoint() const throw();
+
+    /**
+    */
+    const Position findWordBreakAfter (const Position& position) const throw();
+
+    /**
+    */
+    const Position findWordBreakBefore (const Position& position) const throw();
+
+    /** An object that receives callbacks from the CodeDocument when its text changes.
+        @see CodeDocument::addListener, CodeDocument::removeListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        Listener() {}
+        virtual ~Listener() {}
+
+        /**
+        */
+        virtual void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
+                                          const CodeDocument::Position& affectedTextEnd) = 0;
+    };
+
+    /**
+    */
+    void addListener (Listener* const listener);
+
+    /**
+    */
+    void removeListener (Listener* const listener);
+
+    /** Iterates the text in a CodeDocument.
+
+        This class lets you read characters from a CodeDocument. It's designed to be used
+        by a SyntaxAnalyser object.
+
+        @see CodeDocument, SyntaxAnalyser
+    */
+    class Iterator
+    {
+    public:
+        Iterator (CodeDocument* const document) throw();
+        Iterator (const Iterator& other);
+        const Iterator& operator= (const Iterator& other) throw();
+        ~Iterator() throw();
+
+        /**
+        */
+        juce_wchar nextChar() throw();
+
+        /**
+        */
+        juce_wchar peekNextChar() const throw();
+
+        /**
+        */
+        void skip() throw();
+
+        /**
+        */
+        int getPosition() const throw()         { return position; }
+
+        /**
+        */
+        void skipWhitespace();
+
+        /**
+        */
+        void skipToEndOfLine();
+
+        /**
+        */
+        int getLine() const throw()             { return line; }
+
+        /**
+        */
+        bool isEOF() const throw();
+
+    private:
+        CodeDocument* document;
+        int line, position;
+    };
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class CodeDocumentInsertAction;
+    friend class CodeDocumentDeleteAction;
+    friend class CodeDocument::Iterator;
+
+    OwnedArray <CodeDocumentLine> lines;
+    Array <Position*> positionsToMaintain;
+    UndoManager undoManager;
+    int currentActionIndex, indexOfSavedState;
+    int maximumLineLength;
+    VoidArray listeners;
+
+    void sendListenerChangeMessage (const int startLine, const int endLine);
+
+    void insert (const String& text, const int insertPos, const bool undoable);
+    void remove (const int startPos, const int endPos, const bool undoable);
+
+    CodeDocument (const CodeDocument&);
+    const CodeDocument& operator= (const CodeDocument&);
+};
+
+#endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
+/********* End of inlined file: juce_CodeDocument.h *********/
+
+/********* Start of inlined file: juce_CodeTokeniser.h *********/
+#ifndef __JUCE_CODETOKENISER_JUCEHEADER__
+#define __JUCE_CODETOKENISER_JUCEHEADER__
+
+/**
+    A base class for tokenising code so that the syntax can be displayed in a
+    code editor.
+
+    @see CodeDocument, CodeEditorComponent
+*/
+class JUCE_API  CodeTokeniser
+{
+public:
+    CodeTokeniser()                 {}
+    virtual ~CodeTokeniser()        {}
+
+    /** Reads the next token from the source and returns its token type.
+
+        This must leave the source pointing to the first character in the
+        next token.
+    */
+    virtual int readNextToken (CodeDocument::Iterator& source) = 0;
+
+    /** Returns a list of the names of the token types this analyser uses.
+
+        The index in this list must match the token type numbers that are
+        returned by readNextToken().
+    */
+    virtual const StringArray getTokenTypes() = 0;
+
+    /** Returns a suggested syntax highlighting colour for a specified
+        token type.
+    */
+    virtual const Colour getDefaultColour (const int tokenType) = 0;
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_CODETOKENISER_JUCEHEADER__
+/********* End of inlined file: juce_CodeTokeniser.h *********/
+
+class CodeEditorLine;
+
+/**
+    A text editor component designed specifically for source code.
+
+    This is designed to handle syntax highlighting and fast editing of very large
+    files.
+*/
+class JUCE_API  CodeEditorComponent   : public Component,
+                                        public Timer,
+                                        public ScrollBarListener,
+                                        public CodeDocument::Listener
+{
+public:
+
+    CodeEditorComponent (CodeDocument& document, CodeTokeniser* const codeTokeniser);
+    ~CodeEditorComponent();
+
+    CodeDocument& getDocument() const throw()           { return document; }
+
+    void loadContent (const String& newContent);
+
+    void insertTextAtCaret (const String& newText);
+    void insertTabAtCaret();
+    void cut();
+    void copy();
+    void copyThenCut();
+    void paste();
+    void backspace (const bool moveInWholeWordSteps);
+    void deleteForward (const bool moveInWholeWordSteps);
+
+    void cursorLeft (const bool moveInWholeWordSteps, const bool selecting);
+    void cursorRight (const bool moveInWholeWordSteps, const bool selecting);
+    void cursorDown (const bool selecting);
+    void cursorUp (const bool selecting);
+    void pageDown (const bool selecting);
+    void pageUp (const bool selecting);
+    void scrollDown();
+    void scrollUp();
+    void goToStart (const bool selecting);
+    void goToStartOfLine (const bool selecting);
+    void goToEnd (const bool selecting);
+    void goToEndOfLine (const bool selecting);
+    void selectAll();
+
+    void undo();
+    void redo();
+
+    float getCharWidth() const throw()                          { return charWidth; }
+    int getLineHeight() const throw()                           { return lineHeight; }
+    int getNumLinesOnScreen() const throw()                     { return linesOnScreen; }
+    int getNumColumnsOnScreen() const throw()                   { return columnsOnScreen; }
+
+    const CodeDocument::Position getCaretPos() const            { return caretPos; }
+    void moveCaretTo (const CodeDocument::Position& newPos, const bool highlighting);
+
+    void deselectAll();
+    void scrollToLine (int firstLineOnScreen);
+    void scrollToColumn (int firstColumnOnScreen);
+    void scrollBy (int deltaLines);
+    void scrollToKeepCaretOnScreen();
+
+    const Rectangle getCharacterBounds (const CodeDocument::Position& pos) const throw();
+    const CodeDocument::Position getPositionAt (int x, int y);
+
+    void setTabSize (const int numSpaces, const bool insertSpaces);
+    int getTabSize() const throw()                      { return spacesPerTab; }
+    bool areSpacesInsertedForTabs() const               { return useSpacesForTabs; }
+
+    void setFont (const Font& newFont);
+
+    void setDefaultColours();
+    void setColourForTokenCategory (const int tokenCategory, const Colour& colour);
+    const Colour getColourForTokenCategory (const int tokenCategory) const;
+
+    /** A set of colour IDs to use to change the colour of various aspects of the editor.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId          = 0x1004500,  /**< A colour to use to fill the editor's background. */
+        caretColourId               = 0x1004501,  /**< The colour to draw the caret. */
+        highlightColourId           = 0x1004502,  /**< The colour to use for the highlighted background under
+                                                       selected text. */
+        defaultTextColourId         = 0x1004503   /**< The colour to use for text when no syntax colouring is
+                                                       enabled. */
+    };
+
+    void resized();
+    void paint (Graphics& g);
+    bool keyPressed (const KeyPress& key);
+    void mouseDown (const MouseEvent& e);
+    void mouseDrag (const MouseEvent& e);
+    void mouseUp (const MouseEvent& e);
+    void mouseDoubleClick (const MouseEvent& e);
+    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    void timerCallback();
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart);
+    void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
+                              const CodeDocument::Position& affectedTextEnd);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    CodeDocument& document;
+
+    Font font;
+    int firstLineOnScreen, gutter, spacesPerTab;
+    float charWidth;
+    int lineHeight, linesOnScreen, columnsOnScreen;
+    int scrollbarThickness;
+    bool useSpacesForTabs;
+    double xOffset;
+
+    CodeDocument::Position caretPos;
+    CodeDocument::Position selectionStart, selectionEnd;
+    Component* caret;
+    ScrollBar* verticalScrollBar;
+    ScrollBar* horizontalScrollBar;
+
+    enum DragType
+    {
+        notDragging,
+        draggingSelectionStart,
+        draggingSelectionEnd
+    };
+
+    DragType dragType;
+
+    CodeTokeniser* codeTokeniser;
+    Array <Colour> coloursForTokenCategories;
+
+    OwnedArray <CodeEditorLine> lines;
+    void rebuildLineTokens();
+
+    OwnedArray <CodeDocument::Iterator> cachedIterators;
+    void clearCachedIterators (const int firstLineToBeInvalid) throw();
+    void updateCachedIterators (int maxLineNum);
+    void getIteratorForPosition (int position, CodeDocument::Iterator& result);
+
+    void updateScrollBars();
+    void scrollToLineInternal (int line);
+    void scrollToColumnInternal (double column);
+    void newTransaction();
+
+    int indexToColumn (int line, int index) const throw();
+    int columnToIndex (int line, int column) const throw();
+
+    CodeEditorComponent (const CodeEditorComponent&);
+    const CodeEditorComponent& operator= (const CodeEditorComponent&);
+};
+
+#endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_CodeEditorComponent.h *********/
+
+#endif
+#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+
+/********* Start of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
+#ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+#define __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+
+/**
+    A simple lexical analyser for syntax colouring of C++ code.
+
+    @see SyntaxAnalyser, CodeEditorComponent, CodeDocument
+*/
+class JUCE_API  CPlusPlusCodeTokeniser    : public CodeTokeniser
+{
+public:
+
+    CPlusPlusCodeTokeniser();
+    ~CPlusPlusCodeTokeniser();
+
+    enum TokenType
+    {
+        tokenType_error = 0,
+        tokenType_comment,
+        tokenType_builtInKeyword,
+        tokenType_identifier,
+        tokenType_integerLiteral,
+        tokenType_floatLiteral,
+        tokenType_stringLiteral,
+        tokenType_operator,
+        tokenType_bracket,
+        tokenType_punctuation,
+        tokenType_preprocessor
+    };
+
+    int readNextToken (CodeDocument::Iterator& source);
+    const StringArray getTokenTypes();
+    const Colour getDefaultColour (const int tokenType);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
+/********* End of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
+
+#endif
+#ifndef __JUCE_CODETOKENISER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
@@ -47269,9 +47796,6 @@ public:
 /********* End of inlined file: juce_ToolbarItemFactory.h *********/
 
 #endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ToolbarItemPalette.h *********/
@@ -47325,6 +47849,9 @@ private:
 
 #endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 /********* End of inlined file: juce_ToolbarItemPalette.h *********/
+
+#endif
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
@@ -50811,78 +51338,6 @@ private:
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
-
-#endif
 #ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
@@ -50982,6 +51437,78 @@ private:
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -51850,12 +52377,6 @@ private:
 /********* End of inlined file: juce_SplashScreen.h *********/
 
 #endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
@@ -51990,6 +52511,121 @@ private:
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
+
+#endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_ActiveXControlComponent.h *********/
+#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+#define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+
+#if JUCE_WINDOWS || DOXYGEN
+
+/**
+    A Windows-specific class that can create and embed an ActiveX control inside
+    itself.
+
+    To use it, create one of these, put it in place and make sure it's visible in a
+    window, then use createControl() to instantiate an ActiveX control. The control
+    will then be moved and resized to follow the movements of this component.
+
+    Of course, since the control is a heavyweight window, it'll obliterate any
+    juce components that may overlap this component, but that's life.
+*/
+class JUCE_API  ActiveXControlComponent   : public Component
+{
+public:
+
+    /** Create an initially-empty container. */
+    ActiveXControlComponent();
+
+    /** Destructor. */
+    ~ActiveXControlComponent();
+
+    /** Tries to create an ActiveX control and embed it in this peer.
+
+        The peer controlIID is a pointer to an IID structure - it's treated
+        as a void* because when including the Juce headers, you might not always
+        have included windows.h first, in which case IID wouldn't be defined.
+
+        e.g. @code
+        const IID myIID = __uuidof (QTControl);
+        myControlComp->createControl (&myIID);
+        @endcode
+    */
+    bool createControl (const void* controlIID);
+
+    /** Deletes the ActiveX control, if one has been created.
+    */
+    void deleteControl();
+
+    /** Returns true if a control is currently in use. */
+    bool isControlOpen() const throw()                  { return control != 0; }
+
+    /** Does a QueryInterface call on the embedded control object.
+
+        This allows you to cast the control to whatever type of COM object you need.
+
+        The iid parameter is a pointer to an IID structure - it's treated
+        as a void* because when including the Juce headers, you might not always
+        have included windows.h first, in which case IID wouldn't be defined, but
+        you should just pass a pointer to an IID.
+
+        e.g. @code
+        const IID iid = __uuidof (IOleWindow);
+
+        IOleWindow* oleWindow = (IOleWindow*) myControlComp->queryInterface (&iid);
+
+        if (oleWindow != 0)
+        {
+            HWND hwnd;
+            oleWindow->GetWindow (&hwnd);
+
+            ...
+
+            oleWindow->Release();
+        }
+        @endcode
+    */
+    void* queryInterface (const void* iid) const;
+
+    /** Set this to false to stop mouse events being allowed through to the control.
+    */
+    void setMouseEventsAllowed (const bool eventsCanReachControl);
+
+    /** Returns true if mouse events are allowed to get through to the control.
+    */
+    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void* originalWndProc;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class ActiveXControlData;
+    void* control;
+    bool mouseEventsAllowed;
+
+    ActiveXControlComponent (const ActiveXControlComponent&);
+    const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
+
+    void setControlBounds (const Rectangle& bounds) const;
+    void setControlVisible (const bool b) const;
+};
+
+#endif
+
+#endif   // __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ActiveXControlComponent.h *********/
 
 #endif
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
@@ -52217,6 +52853,115 @@ private:
 /********* End of inlined file: juce_BubbleComponent.h *********/
 
 #endif
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_BubbleMessageComponent.h *********/
+#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+#define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+
+/**
+    A speech-bubble component that displays a short message.
+
+    This can be used to show a message with the tail of the speech bubble
+    pointing to a particular component or location on the screen.
+
+    @see BubbleComponent
+*/
+class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
+                                          private Timer
+{
+public:
+
+    /** Creates a bubble component.
+
+        After creating one a BubbleComponent, do the following:
+        - add it to an appropriate parent component, or put it on the
+          desktop with Component::addToDesktop (0).
+        - use the showAt() method to show a message.
+        - it will make itself invisible after it times-out (and can optionally
+          also delete itself), or you can reuse it somewhere else by calling
+          showAt() again.
+    */
+    BubbleMessageComponent (const int fadeOutLengthMs = 150);
+
+    /** Destructor. */
+    ~BubbleMessageComponent();
+
+    /** Shows a message bubble at a particular position.
+
+        This shows the bubble with its stem pointing to the given location
+        (co-ordinates being relative to its parent component).
+
+        For details about exactly how it decides where to position itself, see
+        BubbleComponent::updatePosition().
+
+        @param x                                the x co-ordinate of end of the bubble's tail
+        @param y                                the y co-ordinate of end of the bubble's tail
+        @param message                          the text to display
+        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
+                                                from its parent compnent. If this is 0 or less, it
+                                                will stay there until manually removed.
+        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
+                                                mouse button is pressed (anywhere on the screen)
+        @param deleteSelfAfterUse               if true, then the component will delete itself after
+                                                it becomes invisible
+    */
+    void showAt (int x, int y,
+                 const String& message,
+                 const int numMillisecondsBeforeRemoving,
+                 const bool removeWhenMouseClicked = true,
+                 const bool deleteSelfAfterUse = false);
+
+    /** Shows a message bubble next to a particular component.
+
+        This shows the bubble with its stem pointing at the given component.
+
+        For details about exactly how it decides where to position itself, see
+        BubbleComponent::updatePosition().
+
+        @param component                        the component that you want to point at
+        @param message                          the text to display
+        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
+                                                from its parent compnent. If this is 0 or less, it
+                                                will stay there until manually removed.
+        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
+                                                mouse button is pressed (anywhere on the screen)
+        @param deleteSelfAfterUse               if true, then the component will delete itself after
+                                                it becomes invisible
+    */
+    void showAt (Component* const component,
+                 const String& message,
+                 const int numMillisecondsBeforeRemoving,
+                 const bool removeWhenMouseClicked = true,
+                 const bool deleteSelfAfterUse = false);
+
+    /** @internal */
+    void getContentSize (int& w, int& h);
+    /** @internal */
+    void paintContent (Graphics& g, int w, int h);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    int fadeOutLength, mouseClickCounter;
+    TextLayout textLayout;
+    int64 expiryTime;
+    bool deleteAfterUse;
+
+    void init (const int numMillisecondsBeforeRemoving,
+               const bool removeWhenMouseClicked,
+               const bool deleteSelfAfterUse);
+
+    BubbleMessageComponent (const BubbleMessageComponent&);
+    const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+};
+
+#endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_BubbleMessageComponent.h *********/
+
+#endif
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
 
 /********* Start of inlined file: juce_ColourSelector.h *********/
@@ -52356,221 +53101,6 @@ private:
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_BubbleMessageComponent.h *********/
-#ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-#define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-
-/**
-    A speech-bubble component that displays a short message.
-
-    This can be used to show a message with the tail of the speech bubble
-    pointing to a particular component or location on the screen.
-
-    @see BubbleComponent
-*/
-class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
-                                          private Timer
-{
-public:
-
-    /** Creates a bubble component.
-
-        After creating one a BubbleComponent, do the following:
-        - add it to an appropriate parent component, or put it on the
-          desktop with Component::addToDesktop (0).
-        - use the showAt() method to show a message.
-        - it will make itself invisible after it times-out (and can optionally
-          also delete itself), or you can reuse it somewhere else by calling
-          showAt() again.
-    */
-    BubbleMessageComponent (const int fadeOutLengthMs = 150);
-
-    /** Destructor. */
-    ~BubbleMessageComponent();
-
-    /** Shows a message bubble at a particular position.
-
-        This shows the bubble with its stem pointing to the given location
-        (co-ordinates being relative to its parent component).
-
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
-
-        @param x                                the x co-ordinate of end of the bubble's tail
-        @param y                                the y co-ordinate of end of the bubble's tail
-        @param message                          the text to display
-        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
-                                                will stay there until manually removed.
-        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
-                                                mouse button is pressed (anywhere on the screen)
-        @param deleteSelfAfterUse               if true, then the component will delete itself after
-                                                it becomes invisible
-    */
-    void showAt (int x, int y,
-                 const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
-
-    /** Shows a message bubble next to a particular component.
-
-        This shows the bubble with its stem pointing at the given component.
-
-        For details about exactly how it decides where to position itself, see
-        BubbleComponent::updatePosition().
-
-        @param component                        the component that you want to point at
-        @param message                          the text to display
-        @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
-                                                will stay there until manually removed.
-        @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
-                                                mouse button is pressed (anywhere on the screen)
-        @param deleteSelfAfterUse               if true, then the component will delete itself after
-                                                it becomes invisible
-    */
-    void showAt (Component* const component,
-                 const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
-
-    /** @internal */
-    void getContentSize (int& w, int& h);
-    /** @internal */
-    void paintContent (Graphics& g, int w, int h);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    int fadeOutLength, mouseClickCounter;
-    TextLayout textLayout;
-    int64 expiryTime;
-    bool deleteAfterUse;
-
-    void init (const int numMillisecondsBeforeRemoving,
-               const bool removeWhenMouseClicked,
-               const bool deleteSelfAfterUse);
-
-    BubbleMessageComponent (const BubbleMessageComponent&);
-    const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
-};
-
-#endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_BubbleMessageComponent.h *********/
-
-#endif
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_WebBrowserComponent.h *********/
-#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-
-#if JUCE_WEB_BROWSER || DOXYGEN
-
-#if ! DOXYGEN
- class WebBrowserComponentInternal;
-#endif
-
-/**
-    A component that displays an embedded web browser.
-
-    The browser itself will be platform-dependent. On the Mac, probably Safari, on
-    Windows, probably IE.
-
-*/
-class JUCE_API  WebBrowserComponent      : public Component
-{
-public:
-
-    /** Creates a WebBrowserComponent.
-
-        Once it's created and visible, send the browser to a URL using goToURL().
-
-        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
-                            component is taken offscreen, it'll clear the current page
-                            and replace it with a blank page - this can be handy to stop
-                            the browser using resources in the background when it's not
-                            actually being used.
-    */
-    WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden = true);
-
-    /** Destructor. */
-    ~WebBrowserComponent();
-
-    /** Sends the browser to a particular URL.
-
-        @param url      the URL to go to.
-        @param headers  an optional set of parameters to put in the HTTP header. If
-                        you supply this, it should be a set of string in the form
-                        "HeaderKey: HeaderValue"
-        @param postData an optional block of data that will be attached to the HTTP
-                        POST request
-    */
-    void goToURL (const String& url,
-                  const StringArray* headers = 0,
-                  const MemoryBlock* postData = 0);
-
-    /** Stops the current page loading.
-    */
-    void stop();
-
-    /** Sends the browser back one page.
-    */
-    void goBack();
-
-    /** Sends the browser forward one page.
-    */
-    void goForward();
-
-    /** Refreshes the browser.
-    */
-    void refresh();
-
-    /** This callback is called when the browser is about to navigate
-        to a new location.
-
-        You can override this method to perform some action when the user
-        tries to go to a particular URL. To allow the operation to carry on,
-        return true, or return false to stop the navigation happening.
-    */
-    virtual bool pageAboutToLoad (const String& newURL);
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void parentHierarchyChanged();
-    /** @internal */
-    void visibilityChanged();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    WebBrowserComponentInternal* browser;
-    bool blankPageShown, unloadPageWhenBrowserIsHidden;
-    String lastURL;
-    StringArray lastHeaders;
-    MemoryBlock lastPostData;
-
-    void reloadLastURL();
-    void checkWindowAssociation();
-
-    WebBrowserComponent (const WebBrowserComponent&);
-    const WebBrowserComponent& operator= (const WebBrowserComponent&);
-};
-
-#endif
-#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_WebBrowserComponent.h *********/
-
-#endif
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_MagnifierComponent.h *********/
@@ -52662,385 +53192,6 @@ private:
 
 #endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_MagnifierComponent.h *********/
-
-#endif
-#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_NSViewComponent.h *********/
-#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-
-#if ! DOXYGEN
- class NSViewComponentInternal;
-#endif
-
-#if JUCE_MAC || DOXYGEN
-
-/**
-    A Mac-specific class that can create and embed an NSView inside itself.
-
-    To use it, create one of these, put it in place and make sure it's visible in a
-    window, then use setView() to assign an NSView to it. The view will then be
-    moved and resized to follow the movements of this component.
-
-    Of course, since the view is a native object, it'll obliterate any
-    juce components that may overlap this component, but that's life.
-*/
-class JUCE_API  NSViewComponent   : public Component
-{
-public:
-
-    /** Create an initially-empty container. */
-    NSViewComponent();
-
-    /** Destructor. */
-    ~NSViewComponent();
-
-    /** Assigns an NSView to this peer.
-
-        The view will be retained and released by this component for as long as
-        it is needed. To remove the current view, just call setView (0).
-
-        Note: a void* is used here to avoid including the cocoa headers as
-        part of the juce.h, but the method expects an NSView*.
-    */
-    void setView (void* nsView);
-
-    /** Returns the current NSView.
-
-        Note: a void* is returned here to avoid including the cocoa headers as
-        a requirement of juce.h, so you should just cast the object to an NSView*.
-    */
-    void* getView() const;
-
-    /** @internal */
-    void paint (Graphics& g);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class NSViewComponentInternal;
-    NSViewComponentInternal* info;
-
-    NSViewComponent (const NSViewComponent&);
-    const NSViewComponent& operator= (const NSViewComponent&);
-};
-
-#endif
-
-#endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_NSViewComponent.h *********/
-
-#endif
-#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OpenGLComponent.h *********/
-#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-#define __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-
-// this is used to disable OpenGL, and is defined in juce_Config.h
-#if JUCE_OPENGL || DOXYGEN
-
-class OpenGLComponentWatcher;
-
-/**
-    Represents the various properties of an OpenGL bitmap format.
-
-    @see OpenGLComponent::setPixelFormat
-*/
-struct OpenGLPixelFormat
-{
-
-    /** Creates an OpenGLPixelFormat.
-
-        The default constructor just initialises the object as a simple 8-bit
-        RGBA format.
-    */
-    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
-                       const int alphaBits = 8,
-                       const int depthBufferBits = 16,
-                       const int stencilBufferBits = 0) throw();
-
-    int redBits;          /**< The number of bits per pixel to use for the red channel. */
-    int greenBits;        /**< The number of bits per pixel to use for the green channel. */
-    int blueBits;         /**< The number of bits per pixel to use for the blue channel. */
-    int alphaBits;        /**< The number of bits per pixel to use for the alpha channel. */
-
-    int depthBufferBits;      /**< The number of bits per pixel to use for a depth buffer. */
-    int stencilBufferBits;    /**< The number of bits per pixel to use for a stencil buffer. */
-
-    int accumulationBufferRedBits;    /**< The number of bits per pixel to use for an accumulation buffer's red channel. */
-    int accumulationBufferGreenBits;  /**< The number of bits per pixel to use for an accumulation buffer's green channel. */
-    int accumulationBufferBlueBits;   /**< The number of bits per pixel to use for an accumulation buffer's blue channel. */
-    int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
-
-    uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
-
-    /** Returns a list of all the pixel formats that can be used in this system.
-
-        A reference component is needed in case there are multiple screens with different
-        capabilities - in which case, the one that the component is on will be used.
-    */
-    static void getAvailablePixelFormats (Component* component,
-                                          OwnedArray <OpenGLPixelFormat>& results);
-
-    bool operator== (const OpenGLPixelFormat&) const throw();
-
-    juce_UseDebuggingNewOperator
-};
-
-/**
-    A base class for types of OpenGL context.
-
-    An OpenGLComponent will supply its own context for drawing in its window.
-*/
-class OpenGLContext
-{
-public:
-
-    /** Destructor. */
-    virtual ~OpenGLContext();
-
-    /** Makes this context the currently active one. */
-    virtual bool makeActive() const throw() = 0;
-    /** If this context is currently active, it is disactivated. */
-    virtual bool makeInactive() const throw() = 0;
-    /** Returns true if this context is currently active. */
-    virtual bool isActive() const throw() = 0;
-
-    /** Swaps the buffers (if the context can do this). */
-    virtual void swapBuffers() = 0;
-
-    /** Sets whether the context checks the vertical sync before swapping.
-
-        The value is the number of frames to allow between buffer-swapping. This is
-        fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
-        and greater numbers indicate that it should swap less often.
-
-        Returns true if it sets the value successfully.
-    */
-    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
-
-    /** Returns the current swap-sync interval.
-        See setSwapInterval() for info about the value returned.
-    */
-    virtual int getSwapInterval() const = 0;
-
-    /** Returns the pixel format being used by this context. */
-    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
-
-    /** For windowed contexts, this moves the context within the bounds of
-        its parent window.
-    */
-    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
-
-    /** For windowed contexts, this triggers a repaint of the window.
-
-        (Not relevent on all platforms).
-    */
-    virtual void repaint() = 0;
-
-    /** Returns an OS-dependent handle to the raw GL context.
-
-        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
-        a GLXContext.
-    */
-    virtual void* getRawContext() const throw() = 0;
-
-    /** This tries to create a context that can be used for drawing into the
-        area occupied by the specified component.
-
-        Note that you probably shouldn't use this method directly unless you know what
-        you're doing - the OpenGLComponent calls this and manages the context for you.
-    */
-    static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
-                                                  const OpenGLPixelFormat& pixelFormat,
-                                                  const OpenGLContext* const contextToShareWith);
-
-    /** Returns the context that's currently in active use by the calling thread.
-
-        Returns 0 if there isn't an active context.
-    */
-    static OpenGLContext* getCurrentContext();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    OpenGLContext() throw();
-};
-
-/**
-    A component that contains an OpenGL canvas.
-
-    Override this, add it to whatever component you want to, and use the renderOpenGL()
-    method to draw its contents.
-
-*/
-class JUCE_API  OpenGLComponent  : public Component
-{
-public:
-
-    /** Creates an OpenGLComponent.
-    */
-    OpenGLComponent();
-
-    /** Destructor. */
-    ~OpenGLComponent();
-
-    /** Changes the pixel format used by this component.
-
-        @see OpenGLPixelFormat::getAvailablePixelFormats()
-    */
-    void setPixelFormat (const OpenGLPixelFormat& formatToUse);
-
-    /** Returns the pixel format that this component is currently using. */
-    const OpenGLPixelFormat getPixelFormat() const;
-
-    /** Specifies an OpenGL context which should be shared with the one that this
-        component is using.
-
-        This is an OpenGL feature that lets two contexts share their texture data.
-
-        Note that this pointer is stored by the component, and when the component
-        needs to recreate its internal context for some reason, the same context
-        will be used again to share lists. So if you pass a context in here,
-        don't delete the context while this component is still using it! You can
-        call shareWith (0) to stop this component from sharing with it.
-    */
-    void shareWith (OpenGLContext* contextToShareListsWith);
-
-    /** Returns the context that this component is sharing with.
-        @see shareWith
-    */
-    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
-
-    /** Flips the openGL buffers over. */
-    void swapBuffers();
-
-    /** This replaces the normal paint() callback - use it to draw your openGL stuff.
-
-        When this is called, makeCurrentContextActive() will already have been called
-        for you, so you just need to draw.
-    */
-    virtual void renderOpenGL() = 0;
-
-    /** This method is called when the component creates a new OpenGL context.
-
-        A new context may be created when the component is first used, or when it
-        is moved to a different window, or when the window is hidden and re-shown,
-        etc.
-
-        You can use this callback as an opportunity to set up things like textures
-        that your context needs.
-
-        New contexts are created on-demand by the makeCurrentContextActive() method - so
-        if the context is deleted, e.g. by changing the pixel format or window, no context
-        will be created until the next call to makeCurrentContextActive(), which will
-        synchronously create one and call this method. This means that if you're using
-        a non-GUI thread for rendering, you can make sure this method is be called by
-        your renderer thread.
-
-        When this callback happens, the context will already have been made current
-        using the makeCurrentContextActive() method, so there's no need to call it
-        again in your code.
-    */
-    virtual void newOpenGLContextCreated() = 0;
-
-    /** Returns the context that will draw into this component.
-
-        This may return 0 if the component is currently invisible or hasn't currently
-        got a context. The context object can be deleted and a new one created during
-        the lifetime of this component, and there may be times when it doesn't have one.
-
-        @see newOpenGLContextCreated()
-    */
-    OpenGLContext* getCurrentContext() const throw()            { return context; }
-
-    /** Makes this component the current openGL context.
-
-        You might want to use this in things like your resize() method, before calling
-        GL commands.
-
-        If this returns false, then the context isn't active, so you should avoid
-        making any calls.
-
-        This call may actually create a context if one isn't currently initialised. If
-        it does this, it will also synchronously call the newOpenGLContextCreated()
-        method to let you initialise it as necessary.
-
-        @see OpenGLContext::makeActive
-    */
-    bool makeCurrentContextActive();
-
-    /** Stops the current component being the active OpenGL context.
-
-        This is the opposite of makeCurrentContextActive()
-
-        @see OpenGLContext::makeInactive
-    */
-    void makeCurrentContextInactive();
-
-    /** Returns true if this component is the active openGL context for the
-        current thread.
-
-        @see OpenGLContext::isActive
-    */
-    bool isActiveContext() const throw();
-
-    /** Calls the rendering callback, and swaps the buffers afterwards.
-
-        This is called automatically by paint() when the component needs to be rendered.
-
-        It can be overridden if you need to decouple the rendering from the paint callback
-        and render with a custom thread.
-
-        Returns true if the operation succeeded.
-    */
-    virtual bool renderAndSwapBuffers();
-
-    /** This returns a critical section that can be used to lock the current context.
-
-        Because the context that is used by this component can change, e.g. when the
-        component is shown or hidden, then if you're rendering to it on a background
-        thread, this allows you to lock the context for the duration of your rendering
-        routine.
-    */
-    CriticalSection& getContextLock() throw()       { return contextLock; }
-
-    /** @internal */
-    void paint (Graphics& g);
-
-    /** Returns the native handle of an embedded heavyweight window, if there is one.
-
-        E.g. On windows, this will return the HWND of the sub-window containing
-        the opengl context, on the mac it'll be the NSOpenGLView.
-    */
-    void* getNativeWindowHandle() const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class OpenGLComponentWatcher;
-    OpenGLComponentWatcher* componentWatcher;
-
-    OpenGLContext* context;
-    OpenGLContext* contextToShareListsWith;
-
-    CriticalSection contextLock;
-    OpenGLPixelFormat preferredPixelFormat;
-    bool needToUpdateViewport;
-
-    void deleteContext();
-    void updateContextPosition();
-    void internalRepaint (int x, int y, int w, int h);
-
-    OpenGLComponent (const OpenGLComponent&);
-    const OpenGLComponent& operator= (const OpenGLComponent&);
-};
-
-#endif
-#endif   // __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_OpenGLComponent.h *********/
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
@@ -53427,6 +53578,385 @@ private:
 /********* End of inlined file: juce_MidiKeyboardComponent.h *********/
 
 #endif
+#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_NSViewComponent.h *********/
+#ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+
+#if ! DOXYGEN
+ class NSViewComponentInternal;
+#endif
+
+#if JUCE_MAC || DOXYGEN
+
+/**
+    A Mac-specific class that can create and embed an NSView inside itself.
+
+    To use it, create one of these, put it in place and make sure it's visible in a
+    window, then use setView() to assign an NSView to it. The view will then be
+    moved and resized to follow the movements of this component.
+
+    Of course, since the view is a native object, it'll obliterate any
+    juce components that may overlap this component, but that's life.
+*/
+class JUCE_API  NSViewComponent   : public Component
+{
+public:
+
+    /** Create an initially-empty container. */
+    NSViewComponent();
+
+    /** Destructor. */
+    ~NSViewComponent();
+
+    /** Assigns an NSView to this peer.
+
+        The view will be retained and released by this component for as long as
+        it is needed. To remove the current view, just call setView (0).
+
+        Note: a void* is used here to avoid including the cocoa headers as
+        part of the juce.h, but the method expects an NSView*.
+    */
+    void setView (void* nsView);
+
+    /** Returns the current NSView.
+
+        Note: a void* is returned here to avoid including the cocoa headers as
+        a requirement of juce.h, so you should just cast the object to an NSView*.
+    */
+    void* getView() const;
+
+    /** @internal */
+    void paint (Graphics& g);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class NSViewComponentInternal;
+    NSViewComponentInternal* info;
+
+    NSViewComponent (const NSViewComponent&);
+    const NSViewComponent& operator= (const NSViewComponent&);
+};
+
+#endif
+
+#endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_NSViewComponent.h *********/
+
+#endif
+#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OpenGLComponent.h *********/
+#ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+#define __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+
+// this is used to disable OpenGL, and is defined in juce_Config.h
+#if JUCE_OPENGL || DOXYGEN
+
+class OpenGLComponentWatcher;
+
+/**
+    Represents the various properties of an OpenGL bitmap format.
+
+    @see OpenGLComponent::setPixelFormat
+*/
+struct OpenGLPixelFormat
+{
+
+    /** Creates an OpenGLPixelFormat.
+
+        The default constructor just initialises the object as a simple 8-bit
+        RGBA format.
+    */
+    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
+                       const int alphaBits = 8,
+                       const int depthBufferBits = 16,
+                       const int stencilBufferBits = 0) throw();
+
+    int redBits;          /**< The number of bits per pixel to use for the red channel. */
+    int greenBits;        /**< The number of bits per pixel to use for the green channel. */
+    int blueBits;         /**< The number of bits per pixel to use for the blue channel. */
+    int alphaBits;        /**< The number of bits per pixel to use for the alpha channel. */
+
+    int depthBufferBits;      /**< The number of bits per pixel to use for a depth buffer. */
+    int stencilBufferBits;    /**< The number of bits per pixel to use for a stencil buffer. */
+
+    int accumulationBufferRedBits;    /**< The number of bits per pixel to use for an accumulation buffer's red channel. */
+    int accumulationBufferGreenBits;  /**< The number of bits per pixel to use for an accumulation buffer's green channel. */
+    int accumulationBufferBlueBits;   /**< The number of bits per pixel to use for an accumulation buffer's blue channel. */
+    int accumulationBufferAlphaBits;  /**< The number of bits per pixel to use for an accumulation buffer's alpha channel. */
+
+    uint8 fullSceneAntiAliasingNumSamples;      /**< The number of samples to use in full-scene anti-aliasing (if available). */
+
+    /** Returns a list of all the pixel formats that can be used in this system.
+
+        A reference component is needed in case there are multiple screens with different
+        capabilities - in which case, the one that the component is on will be used.
+    */
+    static void getAvailablePixelFormats (Component* component,
+                                          OwnedArray <OpenGLPixelFormat>& results);
+
+    bool operator== (const OpenGLPixelFormat&) const throw();
+
+    juce_UseDebuggingNewOperator
+};
+
+/**
+    A base class for types of OpenGL context.
+
+    An OpenGLComponent will supply its own context for drawing in its window.
+*/
+class OpenGLContext
+{
+public:
+
+    /** Destructor. */
+    virtual ~OpenGLContext();
+
+    /** Makes this context the currently active one. */
+    virtual bool makeActive() const throw() = 0;
+    /** If this context is currently active, it is disactivated. */
+    virtual bool makeInactive() const throw() = 0;
+    /** Returns true if this context is currently active. */
+    virtual bool isActive() const throw() = 0;
+
+    /** Swaps the buffers (if the context can do this). */
+    virtual void swapBuffers() = 0;
+
+    /** Sets whether the context checks the vertical sync before swapping.
+
+        The value is the number of frames to allow between buffer-swapping. This is
+        fairly system-dependent, but 0 turns off syncing, 1 makes it swap on frame-boundaries,
+        and greater numbers indicate that it should swap less often.
+
+        Returns true if it sets the value successfully.
+    */
+    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
+
+    /** Returns the current swap-sync interval.
+        See setSwapInterval() for info about the value returned.
+    */
+    virtual int getSwapInterval() const = 0;
+
+    /** Returns the pixel format being used by this context. */
+    virtual const OpenGLPixelFormat getPixelFormat() const = 0;
+
+    /** For windowed contexts, this moves the context within the bounds of
+        its parent window.
+    */
+    virtual void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight) = 0;
+
+    /** For windowed contexts, this triggers a repaint of the window.
+
+        (Not relevent on all platforms).
+    */
+    virtual void repaint() = 0;
+
+    /** Returns an OS-dependent handle to the raw GL context.
+
+        On win32, this will be a HGLRC; on the Mac, an AGLContext; on Linux,
+        a GLXContext.
+    */
+    virtual void* getRawContext() const throw() = 0;
+
+    /** This tries to create a context that can be used for drawing into the
+        area occupied by the specified component.
+
+        Note that you probably shouldn't use this method directly unless you know what
+        you're doing - the OpenGLComponent calls this and manages the context for you.
+    */
+    static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
+                                                  const OpenGLPixelFormat& pixelFormat,
+                                                  const OpenGLContext* const contextToShareWith);
+
+    /** Returns the context that's currently in active use by the calling thread.
+
+        Returns 0 if there isn't an active context.
+    */
+    static OpenGLContext* getCurrentContext();
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    OpenGLContext() throw();
+};
+
+/**
+    A component that contains an OpenGL canvas.
+
+    Override this, add it to whatever component you want to, and use the renderOpenGL()
+    method to draw its contents.
+
+*/
+class JUCE_API  OpenGLComponent  : public Component
+{
+public:
+
+    /** Creates an OpenGLComponent.
+    */
+    OpenGLComponent();
+
+    /** Destructor. */
+    ~OpenGLComponent();
+
+    /** Changes the pixel format used by this component.
+
+        @see OpenGLPixelFormat::getAvailablePixelFormats()
+    */
+    void setPixelFormat (const OpenGLPixelFormat& formatToUse);
+
+    /** Returns the pixel format that this component is currently using. */
+    const OpenGLPixelFormat getPixelFormat() const;
+
+    /** Specifies an OpenGL context which should be shared with the one that this
+        component is using.
+
+        This is an OpenGL feature that lets two contexts share their texture data.
+
+        Note that this pointer is stored by the component, and when the component
+        needs to recreate its internal context for some reason, the same context
+        will be used again to share lists. So if you pass a context in here,
+        don't delete the context while this component is still using it! You can
+        call shareWith (0) to stop this component from sharing with it.
+    */
+    void shareWith (OpenGLContext* contextToShareListsWith);
+
+    /** Returns the context that this component is sharing with.
+        @see shareWith
+    */
+    OpenGLContext* getShareContext() const throw()    { return contextToShareListsWith; }
+
+    /** Flips the openGL buffers over. */
+    void swapBuffers();
+
+    /** This replaces the normal paint() callback - use it to draw your openGL stuff.
+
+        When this is called, makeCurrentContextActive() will already have been called
+        for you, so you just need to draw.
+    */
+    virtual void renderOpenGL() = 0;
+
+    /** This method is called when the component creates a new OpenGL context.
+
+        A new context may be created when the component is first used, or when it
+        is moved to a different window, or when the window is hidden and re-shown,
+        etc.
+
+        You can use this callback as an opportunity to set up things like textures
+        that your context needs.
+
+        New contexts are created on-demand by the makeCurrentContextActive() method - so
+        if the context is deleted, e.g. by changing the pixel format or window, no context
+        will be created until the next call to makeCurrentContextActive(), which will
+        synchronously create one and call this method. This means that if you're using
+        a non-GUI thread for rendering, you can make sure this method is be called by
+        your renderer thread.
+
+        When this callback happens, the context will already have been made current
+        using the makeCurrentContextActive() method, so there's no need to call it
+        again in your code.
+    */
+    virtual void newOpenGLContextCreated() = 0;
+
+    /** Returns the context that will draw into this component.
+
+        This may return 0 if the component is currently invisible or hasn't currently
+        got a context. The context object can be deleted and a new one created during
+        the lifetime of this component, and there may be times when it doesn't have one.
+
+        @see newOpenGLContextCreated()
+    */
+    OpenGLContext* getCurrentContext() const throw()            { return context; }
+
+    /** Makes this component the current openGL context.
+
+        You might want to use this in things like your resize() method, before calling
+        GL commands.
+
+        If this returns false, then the context isn't active, so you should avoid
+        making any calls.
+
+        This call may actually create a context if one isn't currently initialised. If
+        it does this, it will also synchronously call the newOpenGLContextCreated()
+        method to let you initialise it as necessary.
+
+        @see OpenGLContext::makeActive
+    */
+    bool makeCurrentContextActive();
+
+    /** Stops the current component being the active OpenGL context.
+
+        This is the opposite of makeCurrentContextActive()
+
+        @see OpenGLContext::makeInactive
+    */
+    void makeCurrentContextInactive();
+
+    /** Returns true if this component is the active openGL context for the
+        current thread.
+
+        @see OpenGLContext::isActive
+    */
+    bool isActiveContext() const throw();
+
+    /** Calls the rendering callback, and swaps the buffers afterwards.
+
+        This is called automatically by paint() when the component needs to be rendered.
+
+        It can be overridden if you need to decouple the rendering from the paint callback
+        and render with a custom thread.
+
+        Returns true if the operation succeeded.
+    */
+    virtual bool renderAndSwapBuffers();
+
+    /** This returns a critical section that can be used to lock the current context.
+
+        Because the context that is used by this component can change, e.g. when the
+        component is shown or hidden, then if you're rendering to it on a background
+        thread, this allows you to lock the context for the duration of your rendering
+        routine.
+    */
+    CriticalSection& getContextLock() throw()       { return contextLock; }
+
+    /** @internal */
+    void paint (Graphics& g);
+
+    /** Returns the native handle of an embedded heavyweight window, if there is one.
+
+        E.g. On windows, this will return the HWND of the sub-window containing
+        the opengl context, on the mac it'll be the NSOpenGLView.
+    */
+    void* getNativeWindowHandle() const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class OpenGLComponentWatcher;
+    OpenGLComponentWatcher* componentWatcher;
+
+    OpenGLContext* context;
+    OpenGLContext* contextToShareListsWith;
+
+    CriticalSection contextLock;
+    OpenGLPixelFormat preferredPixelFormat;
+    bool needToUpdateViewport;
+
+    void deleteContext();
+    void updateContextPosition();
+    void internalRepaint (int x, int y, int w, int h);
+
+    OpenGLComponent (const OpenGLComponent&);
+    const OpenGLComponent& operator= (const OpenGLComponent&);
+};
+
+#endif
+#endif   // __JUCE_OPENGLCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_OpenGLComponent.h *********/
+
+#endif
 #ifndef __JUCE_PREFERENCESPANEL_JUCEHEADER__
 
 /********* Start of inlined file: juce_PreferencesPanel.h *********/
@@ -53545,6 +54075,170 @@ private:
 /********* End of inlined file: juce_PreferencesPanel.h *********/
 
 #endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
+
+/**
+    On Windows only, this component sits in the taskbar tray as a small icon.
+
+    To use it, just create one of these components, but don't attempt to make it
+    visible, add it to a parent, or put it on the desktop.
+
+    You can then call setIconImage() to create an icon for it in the taskbar.
+
+    To change the icon's tooltip, you can use setIconTooltip().
+
+    To respond to mouse-events, you can override the normal mouseDown(),
+    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
+    position will not be valid, you can use this to respond to clicks. Traditionally
+    you'd use a left-click to show your application's window, and a right-click
+    to show a pop-up menu.
+*/
+class JUCE_API  SystemTrayIconComponent  : public Component
+{
+public:
+
+    SystemTrayIconComponent();
+
+    /** Destructor. */
+    ~SystemTrayIconComponent();
+
+    /** Changes the image shown in the taskbar.
+    */
+    void setIconImage (const Image& newImage);
+
+    /** Changes the tooltip that Windows shows above the icon. */
+    void setIconTooltip (const String& tooltip);
+
+#if JUCE_LINUX
+    /** @internal */
+    void paint (Graphics& g);
+#endif
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    SystemTrayIconComponent (const SystemTrayIconComponent&);
+    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+};
+
+#endif
+#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
+
+#endif
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_WebBrowserComponent.h *********/
+#ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+#define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+
+#if JUCE_WEB_BROWSER || DOXYGEN
+
+#if ! DOXYGEN
+ class WebBrowserComponentInternal;
+#endif
+
+/**
+    A component that displays an embedded web browser.
+
+    The browser itself will be platform-dependent. On the Mac, probably Safari, on
+    Windows, probably IE.
+
+*/
+class JUCE_API  WebBrowserComponent      : public Component
+{
+public:
+
+    /** Creates a WebBrowserComponent.
+
+        Once it's created and visible, send the browser to a URL using goToURL().
+
+        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
+                            component is taken offscreen, it'll clear the current page
+                            and replace it with a blank page - this can be handy to stop
+                            the browser using resources in the background when it's not
+                            actually being used.
+    */
+    WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden = true);
+
+    /** Destructor. */
+    ~WebBrowserComponent();
+
+    /** Sends the browser to a particular URL.
+
+        @param url      the URL to go to.
+        @param headers  an optional set of parameters to put in the HTTP header. If
+                        you supply this, it should be a set of string in the form
+                        "HeaderKey: HeaderValue"
+        @param postData an optional block of data that will be attached to the HTTP
+                        POST request
+    */
+    void goToURL (const String& url,
+                  const StringArray* headers = 0,
+                  const MemoryBlock* postData = 0);
+
+    /** Stops the current page loading.
+    */
+    void stop();
+
+    /** Sends the browser back one page.
+    */
+    void goBack();
+
+    /** Sends the browser forward one page.
+    */
+    void goForward();
+
+    /** Refreshes the browser.
+    */
+    void refresh();
+
+    /** This callback is called when the browser is about to navigate
+        to a new location.
+
+        You can override this method to perform some action when the user
+        tries to go to a particular URL. To allow the operation to carry on,
+        return true, or return false to stop the navigation happening.
+    */
+    virtual bool pageAboutToLoad (const String& newURL);
+
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void parentHierarchyChanged();
+    /** @internal */
+    void visibilityChanged();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    WebBrowserComponentInternal* browser;
+    bool blankPageShown, unloadPageWhenBrowserIsHidden;
+    String lastURL;
+    StringArray lastHeaders;
+    MemoryBlock lastPostData;
+
+    void reloadLastURL();
+    void checkWindowAssociation();
+
+    WebBrowserComponent (const WebBrowserComponent&);
+    const WebBrowserComponent& operator= (const WebBrowserComponent&);
+};
+
+#endif
+#endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_WebBrowserComponent.h *********/
+
+#endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_QuickTimeMovieComponent.h *********/
@@ -53554,112 +54248,6 @@ private:
 // (NB: This stuff mustn't go inside the "#if QUICKTIME" block, or it'll break the
 // amalgamated build)
 #if JUCE_WINDOWS
-
-/********* Start of inlined file: juce_ActiveXControlComponent.h *********/
-#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-#define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-
-#if JUCE_WINDOWS || DOXYGEN
-
-/**
-    A Windows-specific class that can create and embed an ActiveX control inside
-    itself.
-
-    To use it, create one of these, put it in place and make sure it's visible in a
-    window, then use createControl() to instantiate an ActiveX control. The control
-    will then be moved and resized to follow the movements of this component.
-
-    Of course, since the control is a heavyweight window, it'll obliterate any
-    juce components that may overlap this component, but that's life.
-*/
-class JUCE_API  ActiveXControlComponent   : public Component
-{
-public:
-
-    /** Create an initially-empty container. */
-    ActiveXControlComponent();
-
-    /** Destructor. */
-    ~ActiveXControlComponent();
-
-    /** Tries to create an ActiveX control and embed it in this peer.
-
-        The peer controlIID is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
-        have included windows.h first, in which case IID wouldn't be defined.
-
-        e.g. @code
-        const IID myIID = __uuidof (QTControl);
-        myControlComp->createControl (&myIID);
-        @endcode
-    */
-    bool createControl (const void* controlIID);
-
-    /** Deletes the ActiveX control, if one has been created.
-    */
-    void deleteControl();
-
-    /** Returns true if a control is currently in use. */
-    bool isControlOpen() const throw()                  { return control != 0; }
-
-    /** Does a QueryInterface call on the embedded control object.
-
-        This allows you to cast the control to whatever type of COM object you need.
-
-        The iid parameter is a pointer to an IID structure - it's treated
-        as a void* because when including the Juce headers, you might not always
-        have included windows.h first, in which case IID wouldn't be defined, but
-        you should just pass a pointer to an IID.
-
-        e.g. @code
-        const IID iid = __uuidof (IOleWindow);
-
-        IOleWindow* oleWindow = (IOleWindow*) myControlComp->queryInterface (&iid);
-
-        if (oleWindow != 0)
-        {
-            HWND hwnd;
-            oleWindow->GetWindow (&hwnd);
-
-            ...
-
-            oleWindow->Release();
-        }
-        @endcode
-    */
-    void* queryInterface (const void* iid) const;
-
-    /** Set this to false to stop mouse events being allowed through to the control.
-    */
-    void setMouseEventsAllowed (const bool eventsCanReachControl);
-
-    /** Returns true if mouse events are allowed to get through to the control.
-    */
-    bool areMouseEventsAllowed() const throw()                  { return mouseEventsAllowed; }
-
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void* originalWndProc;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class ActiveXControlData;
-    void* control;
-    bool mouseEventsAllowed;
-
-    ActiveXControlComponent (const ActiveXControlComponent&);
-    const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
-
-    void setControlBounds (const Rectangle& bounds) const;
-    void setControlVisible (const bool b) const;
-};
-
-#endif
-
-#endif   // __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ActiveXControlComponent.h *********/
 
   typedef ActiveXControlComponent QTCompBaseClass;
 #elif JUCE_MAC
@@ -53826,67 +54414,6 @@ private:
 #endif
 #endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_QuickTimeMovieComponent.h *********/
-
-#endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
-
-/**
-    On Windows only, this component sits in the taskbar tray as a small icon.
-
-    To use it, just create one of these components, but don't attempt to make it
-    visible, add it to a parent, or put it on the desktop.
-
-    You can then call setIconImage() to create an icon for it in the taskbar.
-
-    To change the icon's tooltip, you can use setIconTooltip().
-
-    To respond to mouse-events, you can override the normal mouseDown(),
-    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
-    position will not be valid, you can use this to respond to clicks. Traditionally
-    you'd use a left-click to show your application's window, and a right-click
-    to show a pop-up menu.
-*/
-class JUCE_API  SystemTrayIconComponent  : public Component
-{
-public:
-
-    SystemTrayIconComponent();
-
-    /** Destructor. */
-    ~SystemTrayIconComponent();
-
-    /** Changes the image shown in the taskbar.
-    */
-    void setIconImage (const Image& newImage);
-
-    /** Changes the tooltip that Windows shows above the icon. */
-    void setIconTooltip (const String& tooltip);
-
-#if JUCE_LINUX
-    /** @internal */
-    void paint (Graphics& g);
-#endif
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
-};
-
-#endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
-
-#endif
-#ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
@@ -55048,10 +55575,10 @@ public:
 /********* End of inlined file: juce_SystemClipboard.h *********/
 
 #endif
-#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
+#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
+#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
 
 #endif
 

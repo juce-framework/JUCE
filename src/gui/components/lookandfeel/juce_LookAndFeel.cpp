@@ -49,6 +49,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ToolbarItemComponent.h"
 #include "../controls/juce_ProgressBar.h"
 #include "../controls/juce_TreeView.h"
+#include "../code_editor/juce_CodeEditorComponent.h"
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
 #include "../filebrowser/juce_FileSearchPathListComponent.h"
@@ -210,6 +211,11 @@ LookAndFeel::LookAndFeel()
         MidiKeyboardComponent::textLabelColourId,                0xff000000,
         MidiKeyboardComponent::upDownButtonBackgroundColourId,   0xffd3d3d3,
         MidiKeyboardComponent::upDownButtonArrowColourId,        0xff000000,
+
+        CodeEditorComponent::backgroundColourId,    0xffffffff,
+        CodeEditorComponent::caretColourId,         0xff000000,
+        CodeEditorComponent::highlightColourId,     textHighlightColour,
+        CodeEditorComponent::defaultTextColourId,   0xff000000,
 
         ColourSelector::backgroundColourId,         0xffe5e5e5,
         ColourSelector::labelTextColourId,          0xff000000,

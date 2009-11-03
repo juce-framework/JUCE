@@ -103,6 +103,8 @@ package.files = { matchfiles (
     "../../src/gui/components/buttons/*.h",
     "../../src/gui/components/controls/*.cpp",
     "../../src/gui/components/controls/*.h",
+    "../../src/gui/components/code_editor/*.cpp",
+    "../../src/gui/components/code_editor/*.h",
     "../../src/gui/components/filebrowser/*.cpp",
     "../../src/gui/components/filebrowser/*.h",
     "../../src/gui/components/keyboard/*.cpp",

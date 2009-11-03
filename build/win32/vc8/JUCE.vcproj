@@ -2132,6 +2132,38 @@
 							>
 						</File>
 					</Filter>
+					<Filter
+						Name="code editor"
+						>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CodeDocument.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CodeDocument.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CodeEditorComponent.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CodeEditorComponent.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CodeTokeniser.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.h"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="graphics"
