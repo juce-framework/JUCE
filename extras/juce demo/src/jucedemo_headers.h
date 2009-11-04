@@ -50,6 +50,7 @@ Component* createTableDemo();
 Component* createAudioDemo();
 Component* createDragAndDropDemo();
 Component* createInterprocessCommsDemo();
+Component* createCodeEditorDemo();
 
 #if JUCE_QUICKTIME && ! JUCE_LINUX
  Component* createQuickTimeDemo();

@@ -369,18 +369,14 @@ void CodeDocument::Position::setPosition (const int newPosition) throw()
     }
 }
 
-void CodeDocument::Position::updateLineAndIndexFromPosition() throw()
-{
-    setPosition (getPosition());
-}
-
 void CodeDocument::Position::moveBy (int characterDelta) throw()
 {
     jassert (owner != 0);
 
-    updateLineAndIndexFromPosition();
     if (characterDelta == 1)
     {
+        setPosition (getPosition());
+
         // If moving right, make sure we don't get stuck between the \r and \n characters..
         CodeDocumentLine* const l = owner->lines.getUnchecked (line);
         if (indexInLine + characterDelta < l->lineLength
@@ -444,7 +440,8 @@ CodeDocument::CodeDocument()
     : undoManager (INT_MAX, 10000),
       currentActionIndex (0),
       indexOfSavedState (-1),
-      maximumLineLength (-1)
+      maximumLineLength (-1),
+      newLineChars ("\r\n")
 {
 }
 
@@ -550,6 +547,12 @@ void CodeDocument::replaceAllContent (const String& newContent)
     insert (newContent, 0, true);
 }
 
+void CodeDocument::setNewLineCharacters (const String& newLine) throw()
+{
+    jassert (newLine == T("\r\n") || newLine == T("\n") || newLine == T("\r"));
+    newLineChars = newLine;
+}
+
 void CodeDocument::newTransaction()
 {
     undoManager.beginNewTransaction (String::empty);
@@ -566,7 +569,7 @@ void CodeDocument::redo()
     undoManager.redo();
 }
 
-void CodeDocument::clearUndoManager()
+void CodeDocument::clearUndoHistory()
 {
     undoManager.clearUndoHistory();
 }
@@ -668,12 +671,12 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
 
 
 //==============================================================================
-void CodeDocument::addListener (CodeDocument::Listener* const listener)
+void CodeDocument::addListener (CodeDocument::Listener* const listener) throw()
 {
     listeners.addIfNotAlreadyThere (listener);
 }
 
-void CodeDocument::removeListener (CodeDocument::Listener* const listener)
+void CodeDocument::removeListener (CodeDocument::Listener* const listener) throw()
 {
     listeners.removeValue (listener);
 }
@@ -775,11 +778,12 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             lastAffectedLine = lines.size();
         }
 
-        for (int i = firstAffectedLine + 1; i < lines.size(); ++i)
+        int lineStart = newFirstLine->lineStartInFile;
+        for (int i = firstAffectedLine; i < lines.size(); ++i)
         {
             CodeDocumentLine* const l = lines.getUnchecked (i);
-            const CodeDocumentLine* const previousLine = lines.getUnchecked (i - 1);
-            l->lineStartInFile = previousLine->lineStartInFile + previousLine->lineLength;
+            l->lineStartInFile = lineStart;
+            lineStart += l->lineLength;
         }
 
         const int newTextLength = text.length();
@@ -788,7 +792,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             CodeDocument::Position* const p = positionsToMaintain.getUnchecked(i);
 
             if (p->getPosition() >= insertPos)
-                p->moveBy (newTextLength);
+                p->setPosition (p->getPosition() + newTextLength);
         }
 
         sendListenerChangeMessage (firstAffectedLine, lastAffectedLine);
@@ -889,7 +893,7 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
             CodeDocument::Position* p = positionsToMaintain.getUnchecked(i);
 
             if (p->getPosition() > startPosition.getPosition())
-                p->setPosition (jmax (startPos, startPos - endPos));
+                p->setPosition (jmax (startPos, p->getPosition() + startPos - endPos));
 
             if (p->getPosition() > totalChars)
                 p->setPosition (totalChars);

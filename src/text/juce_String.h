@@ -859,14 +859,14 @@ public:
     explicit String (const double doubleValue,
                      const int numberOfDecimalPlaces = 0) throw();
 
-    /** Parses this string to find its numerical value (up to 32 bits in size).
+    /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
         @returns the value of the string as a 32 bit signed base-10 integer.
         @see getTrailingIntValue, getHexValue32, getHexValue64
     */
     int getIntValue() const throw();
 
-    /** Parses this string to find its numerical value (up to 64 bits in size).
+    /** Reads the value of the string as a decimal number (up to 64 bits in size).
 
         @returns the value of the string as a 64 bit signed base-10 integer.
     */

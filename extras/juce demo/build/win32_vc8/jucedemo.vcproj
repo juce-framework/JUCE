@@ -355,6 +355,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\demos\CodeEditorDemo.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\demos\DragAndDropDemo.cpp"
 					>
 				</File>

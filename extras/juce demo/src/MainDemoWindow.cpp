@@ -59,6 +59,7 @@ class ContentComp  : public Component,
         showTable                  = 0x2010,
         showCamera                 = 0x2011,
         showWebBrowser             = 0x2012,
+        showCodeEditor             = 0x2013,
 
         setDefaultLookAndFeel      = 0x200b,
         setOldSchoolLookAndFeel    = 0x200c,
@@ -133,6 +134,7 @@ public:
             menu.addCommandItem (commandManager, showInterprocessComms);
             menu.addCommandItem (commandManager, showCamera);
             menu.addCommandItem (commandManager, showWebBrowser);
+            menu.addCommandItem (commandManager, showCodeEditor);
 
             menu.addSeparator();
             menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
@@ -190,6 +192,7 @@ public:
                                   showQuicktime,
                                   showCamera,
                                   showWebBrowser,
+                                  showCodeEditor,
                                   showInterprocessComms,
                                   setDefaultLookAndFeel,
                                   setOldSchoolLookAndFeel,
@@ -297,6 +300,12 @@ public:
 #if (! JUCE_WEB_BROWSER) || JUCE_LINUX
             result.setActive (false);
 #endif
+            break;
+
+        case showCodeEditor:
+            result.setInfo (T("Code Editor"), T("Shows the code editor demo"), demosCategory, 0);
+            result.addDefaultKeypress (T('e'), ModifierKeys::commandModifier);
+            result.setTicked (currentDemoId == showCodeEditor);
             break;
 
         case showInterprocessComms:
@@ -410,6 +419,11 @@ public:
             showDemo (createWebBrowserDemo());
             currentDemoId = showWebBrowser;
 #endif
+            break;
+
+        case showCodeEditor:
+            showDemo (createCodeEditorDemo());
+            currentDemoId = showCodeEditor;
             break;
 
         case showInterprocessComms:

@@ -2251,14 +2251,14 @@ public:
     explicit String (const double doubleValue,
                      const int numberOfDecimalPlaces = 0) throw();
 
-    /** Parses this string to find its numerical value (up to 32 bits in size).
+    /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
         @returns the value of the string as a 32 bit signed base-10 integer.
         @see getTrailingIntValue, getHexValue32, getHexValue64
     */
     int getIntValue() const throw();
 
-    /** Parses this string to find its numerical value (up to 64 bits in size).
+    /** Reads the value of the string as a decimal number (up to 64 bits in size).
 
         @returns the value of the string as a 64 bit signed base-10 integer.
     */
@@ -44462,12 +44462,11 @@ class CodeDocumentLine;
 class JUCE_API  CodeDocument
 {
 public:
-    /**
+    /** Creates a new, empty document.
     */
     CodeDocument();
 
-    /**
-    */
+    /** Destructor. */
     ~CodeDocument();
 
     /** A position in a code document.
@@ -44480,61 +44479,118 @@ public:
     class JUCE_API  Position
     {
     public:
+        /** Creates an uninitialised postion.
+            Don't attempt to call any methods on this until you've given it an owner document
+            to refer to!
+        */
         Position() throw();
-        Position (const CodeDocument* const ownerDocument, const int line, const int indexInLine) throw();
-        Position (const CodeDocument* const ownerDocument, const int characterPos) throw();
+
+        /** Creates a position based on a line and index in a document.
+
+            Note that this index is NOT the column number, it's the number of characters from the
+            start of the line. The "column" number isn't quite the same, because if the line
+            contains any tab characters, the relationship of the index to its visual column depends on
+            the number of spaces per tab being used!
+
+            Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
+            they will be adjusted to keep them within its limits.
+        */
+        Position (const CodeDocument* const ownerDocument,
+                  const int line, const int indexInLine) throw();
+
+        /** Creates a position based on a character index in a document.
+            This position is placed at the specified number of characters from the start of the
+            document. The line and column are auto-calculated.
+
+            If the position is beyond the range of the document, it'll be adjusted to keep it
+            inside.
+        */
+        Position (const CodeDocument* const ownerDocument,
+                  const int charactersFromStartOfDocument) throw();
+
+        /** Creates a copy of another position.
+
+            This will copy the position, but the new object will not be set to maintain its position,
+            even if the source object was set to do so.
+        */
         Position (const Position& other) throw();
+
+        /** Destructor. */
         ~Position() throw();
 
         const Position& operator= (const Position& other) throw();
         bool operator== (const Position& other) const throw();
         bool operator!= (const Position& other) const throw();
 
-        /**
-        */
-        void setLineAndIndex (const int newLine, const int newIndexInLine) throw();
+        /** Points this object at a new position within the document.
 
-        /**
+            If the position is beyond the range of the document, it'll be adjusted to keep it
+            inside.
+            @see getPosition, setLineAndIndex
         */
-        void setPosition (const int newPosition) throw();
+        void setPosition (const int charactersFromStartOfDocument) throw();
 
-        /**
+        /** Returns the position as the number of characters from the start of the document.
+            @see setPosition, getLineNumber, getIndexInLine
         */
         int getPosition() const throw()             { return characterPos; }
 
-        /**
+        /** Moves the position to a new line and index within the line.
+
+            Note that the index is NOT the column at which the position appears in an editor.
+            If the line contains any tab characters, the relationship of the index to its
+            visual position depends on the number of spaces per tab being used!
+
+            Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
+            they will be adjusted to keep them within its limits.
+        */
+        void setLineAndIndex (const int newLine, const int newIndexInLine) throw();
+
+        /** Returns the line number of this position.
+            The first line in the document is numbered zero, not one!
         */
         int getLineNumber() const throw()           { return line; }
 
-        /**
+        /** Returns the number of characters from the start of the line.
+
+            Note that this value is NOT the column at which the position appears in an editor.
+            If the line contains any tab characters, the relationship of the index to its
+            visual position depends on the number of spaces per tab being used!
         */
         int getIndexInLine() const throw()          { return indexInLine; }
 
-        /**
-        */
-        void updateLineAndIndexFromPosition() throw();
+        /** Allows the position to be automatically updated when the document changes.
 
-        /**
+            If this is set to true, the positon will register with its document so that
+            when the document has text inserted or deleted, this position will be automatically
+            moved to keep it at the same position in the text.
         */
         void setPositionMaintained (const bool isMaintained) throw();
 
-        /**
+        /** Moves the position forwards or backwards by the specified number of characters.
+            @see movedBy
         */
         void moveBy (int characterDelta) throw();
 
-        /**
+        /** Returns a position which is the same as this one, moved by the specified number of
+            characters.
+            @see moveBy
         */
         const Position movedBy (const int characterDelta) const throw();
 
-        /**
+        /** Returns a position which is the same as this one, moved up or down by the specified
+            number of lines.
+            @see movedBy
         */
         const Position movedByLines (const int deltaLines) const throw();
 
-        /**
+        /** Returns the character in the document at this position.
+            @see getLineText
         */
         const tchar getCharacter() const throw();
 
-        /**
+        /** Returns the line from the document that this position is within.
+            @see getCharacter, getLineNumber
         */
         const String getLineText() const throw();
 
@@ -44544,72 +44600,103 @@ public:
         bool positionMaintained;
     };
 
-    /**
-    */
+    /** Returns the full text of the document. */
     const String getAllContent() const throw();
 
-    /**
-    */
+    /** Returns a section of the document's text. */
     const String getTextBetween (const Position& start, const Position& end) const throw();
 
-    /**
-    */
+    /** Returns a line from the document. */
     const String getLine (const int lineIndex) const throw();
 
-    /**
-    */
+    /** Returns the number of characters in the document. */
     int getNumCharacters() const throw();
 
-    /**
-    */
+    /** Returns the number of lines in the document. */
     int getNumLines() const throw()                     { return lines.size(); }
 
-    /**
-    */
+    /** Returns the number of characters in the longest line of the document. */
     int getMaximumLineLength() throw();
 
-    /**
+    /** Deletes a section of the text.
+
+        This operation is undoable.
     */
     void deleteSection (const Position& startPosition, const Position& endPosition);
 
-    /**
+    /** Inserts some text into the document at a given position.
+
+        This operation is undoable.
     */
     void insertText (const Position& position, const String& text);
 
-    /**
+    /** Clears the document and replaces it with some new text.
+
+        This operation is undoable - if you're trying to completely reset the document, you
+        might want to also call clearUndoHistory() and setSavePoint() after using this method.
     */
     void replaceAllContent (const String& newContent);
 
-    /**
+    /** Returns the preferred new-line characters for the document.
+        This will be either "\n", "\r\n", or (rarely) "\r".
+        @see setNewLineCharacters
+    */
+    const String getNewLineCharacters() const throw()           { return newLineChars; }
+
+    /** Sets the new-line characters that the document should use.
+        The string must be either "\n", "\r\n", or (rarely) "\r".
+        @see getNewLineCharacters
+    */
+    void setNewLineCharacters (const String& newLine) throw();
+
+    /** Begins a new undo transaction.
+
+        The document itself will not call this internally, so relies on whatever is using the
+        document to periodically call this to break up the undo sequence into sensible chunks.
+        @see UndoManager::beginNewTransaction
     */
     void newTransaction();
 
-    /**
+    /** Undo the last operation.
+        @see UndoManager::undo
     */
     void undo();
 
-    /**
+    /** Redo the last operation.
+        @see UndoManager::redo
     */
     void redo();
 
-    /**
+    /** Clears the undo history.
+        @see UndoManager::clearUndoHistory
     */
-    void clearUndoManager();
+    void clearUndoHistory();
 
-    /**
+    /** Returns the document's UndoManager */
+    UndoManager& getUndoManager() throw()               { return undoManager; }
+
+    /** Makes a note that the document's current state matches the one that is saved.
+
+        After this has been called, hasChangedSinceSavePoint() will return false until
+        the document has been altered, and then it'll start returning true. If the document is
+        altered, but then undone until it gets back to this state, hasChangedSinceSavePoint()
+        will again return false.
+
+        @see hasChangedSinceSavePoint
     */
     void setSavePoint() throw();
 
-    /**
+    /** Returns true if the state of the document differs from the state it was in when
+        setSavePoint() was last called.
+
+        @see setSavePoint
     */
     bool hasChangedSinceSavePoint() const throw();
 
-    /**
-    */
+    /** Searches for a word-break. */
     const Position findWordBreakAfter (const Position& position) const throw();
 
-    /**
-    */
+    /** Searches for a word-break. */
     const Position findWordBreakBefore (const Position& position) const throw();
 
     /** An object that receives callbacks from the CodeDocument when its text changes.
@@ -44621,19 +44708,22 @@ public:
         Listener() {}
         virtual ~Listener() {}
 
-        /**
+        /** Called by a CodeDocument when it is altered.
         */
         virtual void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
                                           const CodeDocument::Position& affectedTextEnd) = 0;
     };
 
-    /**
+    /** Registers a listener object to receive callbacks when the document changes.
+        If the listener is already registered, this method has no effect.
+        @see removeListener
     */
-    void addListener (Listener* const listener);
+    void addListener (Listener* const listener) throw();
 
-    /**
+    /** Deregisters a listener.
+        @see addListener
     */
-    void removeListener (Listener* const listener);
+    void removeListener (Listener* const listener) throw();
 
     /** Iterates the text in a CodeDocument.
 
@@ -44650,36 +44740,32 @@ public:
         const Iterator& operator= (const Iterator& other) throw();
         ~Iterator() throw();
 
-        /**
+        /** Reads the next character and returns it.
+            @see peekNextChar
         */
         juce_wchar nextChar() throw();
 
-        /**
-        */
+        /** Reads the next character without advancing the current position. */
         juce_wchar peekNextChar() const throw();
 
-        /**
-        */
+        /** Advances the position by one character. */
         void skip() throw();
 
-        /**
+        /** Returns the position of the next character as its position within the
+            whole document.
         */
         int getPosition() const throw()         { return position; }
 
-        /**
-        */
+        /** Skips over any whitespace characters until the next character is non-whitespace. */
         void skipWhitespace();
 
-        /**
-        */
+        /** Skips forward until the next character will be the first character on the next line */
         void skipToEndOfLine();
 
-        /**
-        */
+        /** Returns the line number of the next character. */
         int getLine() const throw()             { return line; }
 
-        /**
-        */
+        /** Returns true if the iterator has reached the end of the document. */
         bool isEOF() const throw();
 
     private:
@@ -44700,6 +44786,7 @@ private:
     int currentActionIndex, indexOfSavedState;
     int maximumLineLength;
     VoidArray listeners;
+    String newLineChars;
 
     void sendListenerChangeMessage (const int startLine, const int endLine);
 
@@ -44765,18 +44852,95 @@ class CodeEditorLine;
 class JUCE_API  CodeEditorComponent   : public Component,
                                         public Timer,
                                         public ScrollBarListener,
-                                        public CodeDocument::Listener
+                                        public CodeDocument::Listener,
+                                        public AsyncUpdater
 {
 public:
 
-    CodeEditorComponent (CodeDocument& document, CodeTokeniser* const codeTokeniser);
+    /** Creates an editor for a document.
+
+        The tokeniser object is optional - pass 0 to disable syntax highlighting.
+        The object that you pass in is not owned or deleted by the editor - you must
+        make sure that it doesn't get deleted while this component is still using it.
+
+        @see CodeDocument
+    */
+    CodeEditorComponent (CodeDocument& document,
+                         CodeTokeniser* const codeTokeniser);
+
+    /** Destructor. */
     ~CodeEditorComponent();
 
+    /** Returns the code document that this component is editing. */
     CodeDocument& getDocument() const throw()           { return document; }
 
+    /** Loads the given content into the document.
+        This will completely reset the CodeDocument object, clear its undo history,
+        and fill it with this text.
+    */
     void loadContent (const String& newContent);
 
-    void insertTextAtCaret (const String& newText);
+    /** Returns the standard character width. */
+    float getCharWidth() const throw()                          { return charWidth; }
+
+    /** Returns the height of a line of text, in pixels. */
+    int getLineHeight() const throw()                           { return lineHeight; }
+
+    /** Returns the number of whole lines visible on the screen,
+        This doesn't include a cut-off line that might be visible at the bottom if the
+        component's height isn't an exact multiple of the line-height.
+    */
+    int getNumLinesOnScreen() const throw()                     { return linesOnScreen; }
+
+    /** Returns the number of whole columns visible on the screen.
+        This doesn't include any cut-off columns at the right-hand edge.
+    */
+    int getNumColumnsOnScreen() const throw()                   { return columnsOnScreen; }
+
+    /** Returns the current caret position. */
+    const CodeDocument::Position getCaretPos() const            { return caretPos; }
+
+    /** Moves the caret.
+        If selecting is true, the section of the document between the current
+        caret position and the new one will become selected. If false, any currently
+        selected region will be deselected.
+    */
+    void moveCaretTo (const CodeDocument::Position& newPos, const bool selecting);
+
+    /** Returns the on-screen position of a character in the document.
+        The rectangle returned is relative to this component's top-left origin.
+    */
+    const Rectangle getCharacterBounds (const CodeDocument::Position& pos) const throw();
+
+    /** Finds the character at a given on-screen position.
+        The co-ordinates are relative to this component's top-left origin.
+    */
+    const CodeDocument::Position getPositionAt (int x, int y);
+
+    void cursorLeft (const bool moveInWholeWordSteps, const bool selecting);
+    void cursorRight (const bool moveInWholeWordSteps, const bool selecting);
+    void cursorDown (const bool selecting);
+    void cursorUp (const bool selecting);
+
+    void pageDown (const bool selecting);
+    void pageUp (const bool selecting);
+
+    void scrollDown();
+    void scrollUp();
+    void scrollToLine (int newFirstLineOnScreen);
+    void scrollBy (int deltaLines);
+    void scrollToColumn (int newFirstColumnOnScreen);
+    void scrollToKeepCaretOnScreen();
+
+    void goToStartOfDocument (const bool selecting);
+    void goToStartOfLine (const bool selecting);
+    void goToEndOfDocument (const bool selecting);
+    void goToEndOfLine (const bool selecting);
+
+    void deselectAll();
+    void selectAll();
+
+    void insertTextAtCaret (const String& textToInsert);
     void insertTabAtCaret();
     void cut();
     void copy();
@@ -44785,49 +44949,50 @@ public:
     void backspace (const bool moveInWholeWordSteps);
     void deleteForward (const bool moveInWholeWordSteps);
 
-    void cursorLeft (const bool moveInWholeWordSteps, const bool selecting);
-    void cursorRight (const bool moveInWholeWordSteps, const bool selecting);
-    void cursorDown (const bool selecting);
-    void cursorUp (const bool selecting);
-    void pageDown (const bool selecting);
-    void pageUp (const bool selecting);
-    void scrollDown();
-    void scrollUp();
-    void goToStart (const bool selecting);
-    void goToStartOfLine (const bool selecting);
-    void goToEnd (const bool selecting);
-    void goToEndOfLine (const bool selecting);
-    void selectAll();
-
     void undo();
     void redo();
 
-    float getCharWidth() const throw()                          { return charWidth; }
-    int getLineHeight() const throw()                           { return lineHeight; }
-    int getNumLinesOnScreen() const throw()                     { return linesOnScreen; }
-    int getNumColumnsOnScreen() const throw()                   { return columnsOnScreen; }
+    /** Changes the current tab settings.
+        This lets you change the tab size and whether pressing the tab key inserts a
+        tab character, or its equivalent number of spaces.
+    */
+    void setTabSize (const int numSpacesPerTab,
+                     const bool insertSpacesInsteadOfTabCharacters) throw();
 
-    const CodeDocument::Position getCaretPos() const            { return caretPos; }
-    void moveCaretTo (const CodeDocument::Position& newPos, const bool highlighting);
-
-    void deselectAll();
-    void scrollToLine (int firstLineOnScreen);
-    void scrollToColumn (int firstColumnOnScreen);
-    void scrollBy (int deltaLines);
-    void scrollToKeepCaretOnScreen();
-
-    const Rectangle getCharacterBounds (const CodeDocument::Position& pos) const throw();
-    const CodeDocument::Position getPositionAt (int x, int y);
-
-    void setTabSize (const int numSpaces, const bool insertSpaces);
+    /** Returns the current number of spaces per tab.
+        @see setTabSize
+    */
     int getTabSize() const throw()                      { return spacesPerTab; }
+
+    /** Returns true if the tab key will insert spaces instead of actual tab characters.
+        @see setTabSize
+    */
     bool areSpacesInsertedForTabs() const               { return useSpacesForTabs; }
 
+    /** Changes the font.
+        Make sure you only use a fixed-width font, or this component will look pretty nasty!
+    */
     void setFont (const Font& newFont);
 
-    void setDefaultColours();
-    void setColourForTokenCategory (const int tokenCategory, const Colour& colour);
-    const Colour getColourForTokenCategory (const int tokenCategory) const;
+    /** Resets the syntax highlighting colours to the default ones provided by the
+        code tokeniser.
+        @see CodeTokeniser::getDefaultColour
+    */
+    void resetToDefaultColours();
+
+    /** Changes one of the syntax highlighting colours.
+        The token type values are dependent on the tokeniser being used - use
+        CodeTokeniser::getTokenTypes() to get a list of the token types.
+        @see getColourForTokenType
+    */
+    void setColourForTokenType (const int tokenType, const Colour& colour);
+
+    /** Returns one of the syntax highlighting colours.
+        The token type values are dependent on the tokeniser being used - use
+        CodeTokeniser::getTokenTypes() to get a list of the token types.
+        @see setColourForTokenType
+    */
+    const Colour getColourForTokenType (const int tokenType) const throw();
 
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
 
@@ -44846,16 +45011,29 @@ public:
                                                        enabled. */
     };
 
+    /** @internal */
     void resized();
+    /** @internal */
     void paint (Graphics& g);
+    /** @internal */
     bool keyPressed (const KeyPress& key);
+    /** @internal */
     void mouseDown (const MouseEvent& e);
+    /** @internal */
     void mouseDrag (const MouseEvent& e);
+    /** @internal */
     void mouseUp (const MouseEvent& e);
+    /** @internal */
     void mouseDoubleClick (const MouseEvent& e);
+    /** @internal */
     void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    /** @internal */
     void timerCallback();
+    /** @internal */
     void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart);
+    /** @internal */
+    void handleAsyncUpdate();
+    /** @internal */
     void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
                               const CodeDocument::Position& affectedTextEnd);
 
