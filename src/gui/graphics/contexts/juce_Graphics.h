@@ -31,6 +31,7 @@
 #include "../geometry/juce_PathStrokeType.h"
 #include "../geometry/juce_Line.h"
 #include "../colour/juce_Colours.h"
+#include "../colour/juce_ColourGradient.h"
 #include "../brushes/juce_SolidColourBrush.h"
 #include "juce_RectanglePlacement.h"
 class LowLevelGraphicsContext;
@@ -102,6 +103,19 @@ public:
         @see SolidColourBrush, GradientBrush, ImageBrush, Brush
     */
     void setBrush (const Brush* const newBrush) throw();
+
+    /** Sets the context to use a gradient for its fill pattern.
+    */
+    void setGradientFill (const ColourGradient& gradient) throw();
+
+    /** Sets the context to use a tiled image pattern for filling.
+        Make sure that you don't delete this image while it's still being used by
+        this context!
+    */
+    void setTiledImageFill (Image& imageToUse,
+                            const int anchorX,
+                            const int anchorY,
+                            const float opacity) throw();
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.

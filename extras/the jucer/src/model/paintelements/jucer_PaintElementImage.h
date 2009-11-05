@@ -76,12 +76,11 @@ public:
 
         if (image != 0)
         {
-            g.setColour (Colours::black.withAlpha ((float) opacity));
-
             image->drawWithin (g, r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                mode == stretched ? RectanglePlacement::stretchToFit
                                                  : (mode == proportionalReducingOnly ? (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                                                                     : RectanglePlacement::centred));
+                                                                                     : RectanglePlacement::centred),
+                               (float) opacity);
         }
         else
         {

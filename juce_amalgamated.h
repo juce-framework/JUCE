@@ -19374,6 +19374,134 @@ private:
 #endif   // __JUCE_COLOURS_JUCEHEADER__
 /********* End of inlined file: juce_Colours.h *********/
 
+/********* Start of inlined file: juce_ColourGradient.h *********/
+#ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
+#define __JUCE_COLOURGRADIENT_JUCEHEADER__
+
+/**
+    Describes the layout and colours that should be used to paint a colour gradient.
+
+    @see Graphics::setGradientFill
+*/
+class JUCE_API  ColourGradient
+{
+public:
+
+    /** Creates a gradient object.
+
+        (x1, y1) is the location to draw with colour1. Likewise (x2, y2) is where
+        colour2 should be. In between them there's a gradient.
+
+        If isRadial is true, the colours form a circular gradient with (x1, y1) at
+        its centre.
+
+        The alpha transparencies of the colours are used, so note that
+        if you blend from transparent to a solid colour, the RGB of the transparent
+        colour will become visible in parts of the gradient. e.g. blending
+        from Colour::transparentBlack to Colours::white will produce a
+        muddy grey colour midway, but Colour::transparentWhite to Colours::white
+        will be white all the way across.
+
+        @see ColourGradient
+    */
+    ColourGradient (const Colour& colour1,
+                    const float x1,
+                    const float y1,
+                    const Colour& colour2,
+                    const float x2,
+                    const float y2,
+                    const bool isRadial) throw();
+
+    /** Creates an uninitialised gradient.
+
+        If you use this constructor instead of the other one, be sure to set all the
+        object's public member variables before using it!
+    */
+    ColourGradient() throw();
+
+    /** Destructor */
+    ~ColourGradient() throw();
+
+    /** Removes any colours that have been added.
+
+        This will also remove any start and end colours, so the gradient won't work. You'll
+        need to add more colours with addColour().
+    */
+    void clearColours() throw();
+
+    /** Adds a colour at a point along the length of the gradient.
+
+        This allows the gradient to go through a spectrum of colours, instead of just a
+        start and end colour.
+
+        @param proportionAlongGradient      a value between 0 and 1.0, which is the proportion
+                                            of the distance along the line between the two points
+                                            at which the colour should occur.
+        @param colour                       the colour that should be used at this point
+    */
+    void addColour (const double proportionAlongGradient,
+                    const Colour& colour) throw();
+
+    /** Multiplies the alpha value of all the colours by the given scale factor */
+    void multiplyOpacity (const float multiplier) throw();
+
+    /** Returns the number of colour-stops that have been added. */
+    int getNumColours() const throw();
+
+    /** Returns the position along the length of the gradient of the colour with this index.
+
+        The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
+    */
+    double getColourPosition (const int index) const throw();
+
+    /** Returns the colour that was added with a given index.
+
+        The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
+    */
+    const Colour getColour (const int index) const throw();
+
+    /** Returns the an interpolated colour at any position along the gradient.
+        @param position     the position along the gradient, between 0 and 1
+    */
+    const Colour getColourAtPosition (const float position) const throw();
+
+    /** Creates a set of interpolated premultiplied ARGB values.
+
+        The caller must delete the array that is returned using juce_free().
+    */
+    PixelARGB* createLookupTable (int& numEntries) const throw();
+
+    /** Returns true if all colours are opaque. */
+    bool isOpaque() const throw();
+
+    /** Returns true if all colours are completely transparent. */
+    bool isInvisible() const throw();
+
+    float x1;
+    float y1;
+
+    float x2;
+    float y2;
+
+    /** If true, the gradient should be filled circularly, centred around
+        (x1, y1), with (x2, y2) defining a point on the circumference.
+
+        If false, the gradient is linear between the two points.
+    */
+    bool isRadial;
+
+    /** A transform to apply to the resultant gradient shape */
+    AffineTransform transform;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Array <uint32> colours;
+};
+
+#endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
+/********* End of inlined file: juce_ColourGradient.h *********/
+
 /********* Start of inlined file: juce_SolidColourBrush.h *********/
 #ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
 #define __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
@@ -19719,6 +19847,19 @@ public:
         @see SolidColourBrush, GradientBrush, ImageBrush, Brush
     */
     void setBrush (const Brush* const newBrush) throw();
+
+    /** Sets the context to use a gradient for its fill pattern.
+    */
+    void setGradientFill (const ColourGradient& gradient) throw();
+
+    /** Sets the context to use a tiled image pattern for filling.
+        Make sure that you don't delete this image while it's still being used by
+        this context!
+    */
+    void setTiledImageFill (Image& imageToUse,
+                            const int anchorX,
+                            const int anchorY,
+                            const float opacity) throw();
 
     /** Changes the font to use for subsequent text-drawing functions.
 
@@ -38660,134 +38801,6 @@ private:
 #ifndef __JUCE_GRADIENTBRUSH_JUCEHEADER__
 #define __JUCE_GRADIENTBRUSH_JUCEHEADER__
 
-/********* Start of inlined file: juce_ColourGradient.h *********/
-#ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
-#define __JUCE_COLOURGRADIENT_JUCEHEADER__
-
-/**
-    Structure used to define a colour gradient for painting areas.
-
-    @see GradientBrush
-*/
-class JUCE_API  ColourGradient
-{
-public:
-
-    /** Creates a gradient object.
-
-        (x1, y1) is the location to draw with colour1. Likewise (x2, y2) is where
-        colour2 should be. In between them there's a gradient.
-
-        If isRadial is true, the colours form a circular gradient with (x1, y1) at
-        its centre.
-
-        The alpha transparencies of the colours are used, so note that
-        if you blend from transparent to a solid colour, the RGB of the transparent
-        colour will become visible in parts of the gradient. e.g. blending
-        from Colour::transparentBlack to Colours::white will produce a
-        muddy grey colour midway, but Colour::transparentWhite to Colours::white
-        will be white all the way across.
-
-        @see ColourGradient
-    */
-    ColourGradient (const Colour& colour1,
-                    const float x1,
-                    const float y1,
-                    const Colour& colour2,
-                    const float x2,
-                    const float y2,
-                    const bool isRadial) throw();
-
-    /** Creates an uninitialised gradient.
-
-        If you use this constructor instead of the other one, be sure to set all the
-        object's public member variables before using it!
-    */
-    ColourGradient() throw();
-
-    /** Destructor */
-    ~ColourGradient() throw();
-
-    /** Removes any colours that have been added.
-
-        This will also remove any start and end colours, so the gradient won't work. You'll
-        need to add more colours with addColour().
-    */
-    void clearColours() throw();
-
-    /** Adds a colour at a point along the length of the gradient.
-
-        This allows the gradient to go through a spectrum of colours, instead of just a
-        start and end colour.
-
-        @param proportionAlongGradient      a value between 0 and 1.0, which is the proportion
-                                            of the distance along the line between the two points
-                                            at which the colour should occur.
-        @param colour                       the colour that should be used at this point
-    */
-    void addColour (const double proportionAlongGradient,
-                    const Colour& colour) throw();
-
-    /** Multiplies the alpha value of all the colours by the given scale factor */
-    void multiplyOpacity (const float multiplier) throw();
-
-    /** Returns the number of colour-stops that have been added. */
-    int getNumColours() const throw();
-
-    /** Returns the position along the length of the gradient of the colour with this index.
-
-        The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
-    */
-    double getColourPosition (const int index) const throw();
-
-    /** Returns the colour that was added with a given index.
-
-        The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
-    */
-    const Colour getColour (const int index) const throw();
-
-    /** Returns the an interpolated colour at any position along the gradient.
-        @param position     the position along the gradient, between 0 and 1
-    */
-    const Colour getColourAtPosition (const float position) const throw();
-
-    /** Creates a set of interpolated premultiplied ARGB values.
-
-        The caller must delete the array that is returned using juce_free().
-    */
-    PixelARGB* createLookupTable (int& numEntries) const throw();
-
-    /** Returns true if all colours are opaque. */
-    bool isOpaque() const throw();
-
-    /** Returns true if all colours are completely transparent. */
-    bool isInvisible() const throw();
-
-    float x1;
-    float y1;
-
-    float x2;
-    float y2;
-
-    /** If true, the gradient should be filled circularly, centred around
-        (x1, y1), with (x2, y2) defining a point on the circumference.
-
-        If false, the gradient is linear between the two points.
-    */
-    bool isRadial;
-
-    /** A transform to apply to the resultant gradient shape */
-    AffineTransform transform;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Array <uint32> colours;
-};
-
-#endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
-/********* End of inlined file: juce_ColourGradient.h *********/
-
 /**
     A Brush that fills areas with a colour gradient.
 
@@ -41647,9 +41660,9 @@ public:
 
     /** Changes the path that will be drawn.
 
-        @see setSolidFill, setOutline
+        @see setFillColour, setStrokeType
     */
-    void setPath (const Path& newPath);
+    void setPath (const Path& newPath) throw();
 
     /** Returns the current path. */
     const Path& getPath() const throw()                         { return path; }
@@ -41660,43 +41673,38 @@ public:
         filled (e.g. if you're just drawing an outline), set this colour to be
         transparent.
 
-        @see setPath, setOutline
+        @see setPath, setOutlineColour, setFillGradient
     */
-    void setSolidFill (const Colour& newColour);
+    void setFillColour (const Colour& newColour) throw();
 
-    /** Sets a custom brush to use to fill the path.
-
-        @see setSolidFill
+    /** Sets a gradient to use to fill the path.
     */
-    void setFillBrush (const Brush& newBrush);
+    void setFillGradient (const ColourGradient& newGradient) throw();
 
-    /** Returns the brush currently being used to fill the shape. */
-    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
+    /** Sets the colour with which the outline will be drawn.
+        @see setStrokeGradient
+    */
+    void setStrokeColour (const Colour& newStrokeColour) throw();
+
+    /** Sets a gradient with with the outline will be drawn.
+        @see setStrokeColour
+    */
+    void setStrokeGradient (const ColourGradient& newStrokeGradient) throw();
 
     /** Changes the properties of the outline that will be drawn around the path.
+        If the stroke has 0 thickness, no stroke will be drawn.
 
-        If the thickness value is 0, no outline will be drawn. If one is drawn, the
-        colour passed-in here will be used for it.
-
-        @see setPath, setSolidFill
+        @see setStrokeThickness, setStrokeColour
     */
-    void setOutline (const float thickness,
-                     const Colour& outlineColour);
+    void setStrokeType (const PathStrokeType& newStrokeType) throw();
 
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the stroke type has 0 thickness, no outline will be drawn.
-
-        @see setPath, setSolidFill
+    /** Changes the stroke thickness.
+        This is a shortcut for calling setStrokeType.
     */
-    void setOutline (const PathStrokeType& strokeType,
-                     const Brush& strokeBrush);
+    void setStrokeThickness (const float newThickness) throw();
 
     /** Returns the current outline style. */
-    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
-
-    /** Returns the brush currently being used to draw the outline. */
-    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
+    const PathStrokeType& getStrokeType() const throw()      { return strokeType; }
 
     /** @internal */
     void render (const Drawable::RenderingContext& context) const;
@@ -41719,8 +41727,9 @@ public:
 
 private:
     Path path, outline;
-    Brush* fillBrush;
-    Brush* strokeBrush;
+    Colour fillColour, strokeColour;
+    ColourGradient* fillGradient;
+    ColourGradient* strokeGradient;
     PathStrokeType strokeType;
 
     void updateOutline();
@@ -53840,8 +53849,9 @@ class OpenGLComponentWatcher;
 
     @see OpenGLComponent::setPixelFormat
 */
-struct OpenGLPixelFormat
+class JUCE_API  OpenGLPixelFormat
 {
+public:
 
     /** Creates an OpenGLPixelFormat.
 
@@ -53886,7 +53896,7 @@ struct OpenGLPixelFormat
 
     An OpenGLComponent will supply its own context for drawing in its window.
 */
-class OpenGLContext
+class JUCE_API  OpenGLContext
 {
 public:
 

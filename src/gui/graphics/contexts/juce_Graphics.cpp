@@ -32,7 +32,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_PathStrokeType.h"
 #include "juce_EdgeTable.h"
 #include "juce_LowLevelGraphicsContext.h"
-
+#include "../brushes/juce_GradientBrush.h"
+#include "../brushes/juce_ImageBrush.h"
 
 static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
 
@@ -210,6 +211,23 @@ void Graphics::setBrush (const Brush* const newBrush) throw()
         state->brush = newBrush->createCopy();
     else
         state->brush = 0;
+}
+
+void Graphics::setGradientFill (const ColourGradient& gradient) throw()
+{
+    saveStateIfPending();
+    delete state->brush;
+    state->brush = new GradientBrush (gradient);
+}
+
+void Graphics::setTiledImageFill (Image& imageToUse,
+                                  const int anchorX,
+                                  const int anchorY,
+                                  const float opacity) throw()
+{
+    saveStateIfPending();
+    delete state->brush;
+    state->brush = new ImageBrush (&imageToUse, anchorX, anchorY, opacity);
 }
 
 //==============================================================================

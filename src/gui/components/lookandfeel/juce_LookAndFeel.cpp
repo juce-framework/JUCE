@@ -58,8 +58,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
-#include "../../graphics/brushes/juce_GradientBrush.h"
-#include "../../graphics/brushes/juce_ImageBrush.h"
 #include "../../graphics/fonts/juce_GlyphArrangement.h"
 #include "../../graphics/drawables/juce_DrawableComposite.h"
 #include "../../graphics/drawables/juce_DrawablePath.h"
@@ -647,9 +645,7 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
                               true, true, true, true);
         }
 
-        ImageBrush ib (&im, 0, 0, 0.85f);
-        g.setBrush (&ib);
-
+        g.setTiledImageFill (im, 0, 0, 0.85f);
         g.fillPath (p);
     }
 
@@ -782,12 +778,8 @@ void LookAndFeel::drawScrollbar (Graphics& g,
 
     const Colour thumbColour (scrollbar.findColour (ScrollBar::thumbColourId));
 
-    GradientBrush gb (thumbColour.overlaidWith (Colour (0x44000000)),
-                      gx1, gy1,
-                      thumbColour.overlaidWith (Colour (0x19000000)),
-                      gx2, gy2, false);
-
-    g.setBrush (&gb);
+    g.setGradientFill (ColourGradient (thumbColour.overlaidWith (Colour (0x44000000)), gx1, gy1,
+                                       thumbColour.overlaidWith (Colour (0x19000000)), gx2, gy2, false));
     g.fillPath (slotPath);
 
     if (isScrollbarVertical)
@@ -801,24 +793,17 @@ void LookAndFeel::drawScrollbar (Graphics& g,
         gy2 = (float) y + height;
     }
 
-    GradientBrush gb2 (Colours::transparentBlack,
-                       gx1, gy1,
-                       Colour (0x19000000),
-                       gx2, gy2, false);
-
-    g.setBrush (&gb2);
+    g.setGradientFill (ColourGradient (Colours::transparentBlack,gx1, gy1,
+                       Colour (0x19000000), gx2, gy2, false));
     g.fillPath (slotPath);
 
     g.setColour (thumbColour);
     g.fillPath (thumbPath);
 
-    GradientBrush gb3 (Colour (0x10000000),
-                       gx1, gy1,
-                       Colours::transparentBlack,
-                       gx2, gy2, false);
+    g.setGradientFill (ColourGradient (Colour (0x10000000), gx1, gy1,
+                       Colours::transparentBlack, gx2, gy2, false));
 
     g.saveState();
-    g.setBrush (&gb3);
 
     if (isScrollbarVertical)
         g.reduceClipRegion (x + width / 2, y, width, height);
@@ -1003,13 +988,11 @@ void LookAndFeel::drawPopupMenuUpDownArrow (Graphics& g,
 {
     const Colour background (findColour (PopupMenu::backgroundColourId));
 
-    GradientBrush gb (background,
-                      0.0f, height * 0.5f,
-                      background.withAlpha (0.0f),
-                      0.0f, isScrollUpArrow ? ((float) height) : 0.0f,
-                      false);
+    g.setGradientFill (ColourGradient (background, 0.0f, height * 0.5f,
+                                       background.withAlpha (0.0f),
+                                       0.0f, isScrollUpArrow ? ((float) height) : 0.0f,
+                                       false));
 
-    g.setBrush (&gb);
     g.fillRect (1, 1, width - 2, height - 2);
 
     const float hw = width * 0.5f;
@@ -1357,9 +1340,8 @@ void LookAndFeel::drawLinearSliderBackground (Graphics& g,
         const float iy = y + height * 0.5f - sliderRadius * 0.5f;
         const float ih = sliderRadius;
 
-        GradientBrush gb (gradCol1, 0.0f, iy,
-                          gradCol2, 0.0f, iy + ih, false);
-        g.setBrush (&gb);
+        g.setGradientFill (ColourGradient (gradCol1, 0.0f, iy,
+                                           gradCol2, 0.0f, iy + ih, false));
 
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
                                     width + sliderRadius, ih,
@@ -1371,9 +1353,8 @@ void LookAndFeel::drawLinearSliderBackground (Graphics& g,
         const float ix = x + width * 0.5f - sliderRadius * 0.5f;
         const float iw = sliderRadius;
 
-        GradientBrush gb (gradCol1, ix, 0.0f,
-                          gradCol2, ix + iw, 0.0f, false);
-        g.setBrush (&gb);
+        g.setGradientFill (ColourGradient (gradCol1, ix, 0.0f,
+                                           gradCol2, ix + iw, 0.0f, false));
 
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
                                     iw, height + sliderRadius,
@@ -1776,11 +1757,10 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
 {
     const bool isActive = window.isActiveWindow();
 
-    GradientBrush gb (window.getBackgroundColour(),
-                      0.0f, 0.0f,
-                      window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f),
-                      0.0f, (float) h, false);
-    g.setBrush (&gb);
+    g.setGradientFill (ColourGradient (window.getBackgroundColour(),
+                                       0.0f, 0.0f,
+                                       window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f),
+                                       0.0f, (float) h, false));
     g.fillAll();
 
     Font font (h * 0.65f, Font::bold);
@@ -1864,10 +1844,8 @@ public:
         y += diam * 0.05f;
         diam *= 0.9f;
 
-        GradientBrush gb1 (Colour::greyLevel (0.9f).withAlpha (alpha), 0, y + diam,
-                           Colour::greyLevel (0.6f).withAlpha (alpha), 0, y, false);
-
-        g.setBrush (&gb1);
+        g.setGradientFill (ColourGradient (Colour::greyLevel (0.9f).withAlpha (alpha), 0, y + diam,
+                                           Colour::greyLevel (0.6f).withAlpha (alpha), 0, y, false));
         g.fillEllipse (x, y, diam, diam);
 
         x += 2.0f;
@@ -2000,11 +1978,10 @@ void LookAndFeel::drawStretchableLayoutResizerBar (Graphics& g,
     const float cy = h * 0.5f;
     const float cr = jmin (w, h) * 0.4f;
 
-    GradientBrush gb (Colours::white.withAlpha (alpha), cx + cr * 0.1f, cy + cr,
-                      Colours::black.withAlpha (alpha), cx, cy - cr * 4.0f,
-                      true);
+    g.setGradientFill (ColourGradient (Colours::white.withAlpha (alpha), cx + cr * 0.1f, cy + cr,
+                                       Colours::black.withAlpha (alpha), cx, cy - cr * 4.0f,
+                                       true));
 
-    g.setBrush (&gb);
     g.fillEllipse (cx - cr, cy - cr, cr * 2.0f, cr * 2.0f);
 }
 
@@ -2324,11 +2301,9 @@ void LookAndFeel::drawTabAreaBehindFrontButton (Graphics& g,
         shadowRect.setBounds (0, (int) y2, w, h - (int) y2);
     }
 
-    GradientBrush gb (Colours::black.withAlpha (tabBar.isEnabled() ? 0.3f : 0.15f), x1, y1,
-                      Colours::transparentBlack, x2, y2,
-                      false);
+    g.setGradientFill (ColourGradient (Colours::black.withAlpha (tabBar.isEnabled() ? 0.3f : 0.15f), x1, y1,
+                                       Colours::transparentBlack, x2, y2, false));
 
-    g.setBrush (&gb);
     shadowRect.expand (2, 2);
     g.fillRect (shadowRect);
 
@@ -2362,7 +2337,7 @@ Button* LookAndFeel::createTabBarExtrasButton()
 
     DrawablePath ellipse;
     ellipse.setPath (p);
-    ellipse.setSolidFill (Colour (0x99ffffff));
+    ellipse.setFillColour (Colour (0x99ffffff));
 
     p.clear();
     p.addEllipse (0.0f, 0.0f, 100.0f, 100.0f);
@@ -2373,13 +2348,13 @@ Button* LookAndFeel::createTabBarExtrasButton()
 
     DrawablePath dp;
     dp.setPath (p);
-    dp.setSolidFill (Colour (0x59000000));
+    dp.setFillColour (Colour (0x59000000));
 
     DrawableComposite normalImage;
     normalImage.insertDrawable (ellipse);
     normalImage.insertDrawable (dp);
 
-    dp.setSolidFill (Colour (0xcc000000));
+    dp.setFillColour (Colour (0xcc000000));
 
     DrawableComposite overImage;
     overImage.insertDrawable (ellipse);
@@ -2399,11 +2374,9 @@ void LookAndFeel::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& 
     const int w = header.getWidth();
     const int h = header.getHeight();
 
-    GradientBrush gb (Colour (0xffe8ebf9), 0.0f, h * 0.5f,
-                      Colour (0xfff6f8f9), 0.0f, h - 1.0f,
-                      false);
-
-    g.setBrush (&gb);
+    g.setGradientFill (ColourGradient (Colour (0xffe8ebf9), 0.0f, h * 0.5f,
+                                       Colour (0xfff6f8f9), 0.0f, h - 1.0f,
+                                       false));
     g.fillRect (0, h / 2, w, h);
 
     g.setColour (Colour (0x33000000));
@@ -2453,13 +2426,11 @@ void LookAndFeel::paintToolbarBackground (Graphics& g, int w, int h, Toolbar& to
 {
     const Colour background (toolbar.findColour (Toolbar::backgroundColourId));
 
-    GradientBrush gb (background, 0.0f, 0.0f,
-                      background.darker (0.1f),
-                      toolbar.isVertical() ? w - 1.0f : 0.0f,
-                      toolbar.isVertical() ? 0.0f : h - 1.0f,
-                      false);
-
-    g.setBrush (&gb);
+    g.setGradientFill (ColourGradient (background, 0.0f, 0.0f,
+                                       background.darker (0.1f),
+                                       toolbar.isVertical() ? w - 1.0f : 0.0f,
+                                       toolbar.isVertical() ? 0.0f : h - 1.0f,
+                                       false));
     g.fillAll();
 }
 
@@ -2630,7 +2601,7 @@ Button* LookAndFeel::createFileBrowserGoUpButton()
     arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
-    arrowImage.setSolidFill (Colours::black.withAlpha (0.4f));
+    arrowImage.setFillColour (Colours::black.withAlpha (0.4f));
     arrowImage.setPath (arrowPath);
 
     goUpButton->setImages (&arrowImage);
@@ -2866,8 +2837,7 @@ void LookAndFeel::drawShinyButtonShape (Graphics& g,
     cg.addColour (0.5, baseColour.overlaidWith (Colour (0x33ffffff)));
     cg.addColour (0.51, baseColour.overlaidWith (Colour (0x110000ff)));
 
-    GradientBrush gb (cg);
-    g.setBrush (&gb);
+    g.setGradientFill (cg);
     g.fillPath (outline);
 
     g.setColour (Colour (0x80000000));
@@ -2893,32 +2863,24 @@ void LookAndFeel::drawGlassSphere (Graphics& g,
 
         cg.addColour (0.4, Colours::white.overlaidWith (colour));
 
-        GradientBrush gb (cg);
-        g.setBrush (&gb);
+        g.setGradientFill (cg);
         g.fillPath (p);
     }
 
-    {
-        GradientBrush gb (Colours::white, 0, y + diameter * 0.06f,
-                          Colours::transparentWhite, 0, y + diameter * 0.3f, false);
+    g.setGradientFill (ColourGradient (Colours::white, 0, y + diameter * 0.06f,
+                                       Colours::transparentWhite, 0, y + diameter * 0.3f, false));
+    g.fillEllipse (x + diameter * 0.2f, y + diameter * 0.05f, diameter * 0.6f, diameter * 0.4f);
 
-        g.setBrush (&gb);
-        g.fillEllipse (x + diameter * 0.2f, y + diameter * 0.05f, diameter * 0.6f, diameter * 0.4f);
-    }
+    ColourGradient cg (Colours::transparentBlack,
+                       x + diameter * 0.5f, y + diameter * 0.5f,
+                       Colours::black.withAlpha (0.5f * outlineThickness * colour.getFloatAlpha()),
+                       x, y + diameter * 0.5f, true);
 
-    {
-        ColourGradient cg (Colours::transparentBlack,
-                           x + diameter * 0.5f, y + diameter * 0.5f,
-                           Colours::black.withAlpha (0.5f * outlineThickness * colour.getFloatAlpha()),
-                           x, y + diameter * 0.5f, true);
+    cg.addColour (0.7, Colours::transparentBlack);
+    cg.addColour (0.8, Colours::black.withAlpha (0.1f * outlineThickness));
 
-        cg.addColour (0.7, Colours::transparentBlack);
-        cg.addColour (0.8, Colours::black.withAlpha (0.1f * outlineThickness));
-
-        GradientBrush gb (cg);
-        g.setBrush (&gb);
-        g.fillPath (p);
-    }
+    g.setGradientFill (cg);
+    g.fillPath (p);
 
     g.setColour (Colours::black.withAlpha (0.5f * colour.getFloatAlpha()));
     g.drawEllipse (x, y, diameter, diameter, outlineThickness);
@@ -2950,24 +2912,20 @@ void LookAndFeel::drawGlassPointer (Graphics& g,
 
         cg.addColour (0.4, Colours::white.overlaidWith (colour));
 
-        GradientBrush gb (cg);
-        g.setBrush (&gb);
+        g.setGradientFill (cg);
         g.fillPath (p);
     }
 
-    {
-        ColourGradient cg (Colours::transparentBlack,
-                           x + diameter * 0.5f, y + diameter * 0.5f,
-                           Colours::black.withAlpha (0.5f * outlineThickness * colour.getFloatAlpha()),
-                           x - diameter * 0.2f, y + diameter * 0.5f, true);
+    ColourGradient cg (Colours::transparentBlack,
+                       x + diameter * 0.5f, y + diameter * 0.5f,
+                       Colours::black.withAlpha (0.5f * outlineThickness * colour.getFloatAlpha()),
+                       x - diameter * 0.2f, y + diameter * 0.5f, true);
 
-        cg.addColour (0.5, Colours::transparentBlack);
-        cg.addColour (0.7, Colours::black.withAlpha (0.07f * outlineThickness));
+    cg.addColour (0.5, Colours::transparentBlack);
+    cg.addColour (0.7, Colours::black.withAlpha (0.07f * outlineThickness));
 
-        GradientBrush gb (cg);
-        g.setBrush (&gb);
-        g.fillPath (p);
-    }
+    g.setGradientFill (cg);
+    g.fillPath (p);
 
     g.setColour (Colours::black.withAlpha (0.5f * colour.getFloatAlpha()));
     g.strokePath (p, PathStrokeType (outlineThickness));
@@ -3012,8 +2970,7 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
         cg.addColour (0.4, colour);
         cg.addColour (0.97, colour.withMultipliedAlpha (0.3f));
 
-        GradientBrush gb (cg);
-        g.setBrush (&gb);
+        g.setGradientFill (cg);
         g.fillPath (outline);
     }
 
@@ -3025,10 +2982,8 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
 
     if (! (flatOnLeft || flatOnTop || flatOnBottom))
     {
-        GradientBrush gb (cg);
-
         g.saveState();
-        g.setBrush (&gb);
+        g.setGradientFill (cg);
         g.reduceClipRegion (intX, intY, intEdge, intH);
         g.fillPath (outline);
         g.restoreState();
@@ -3038,10 +2993,9 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
     {
         cg.x1 = x + width - edgeBlurRadius;
         cg.x2 = x + width;
-        GradientBrush gb (cg);
 
         g.saveState();
-        g.setBrush (&gb);
+        g.setGradientFill (cg);
         g.reduceClipRegion (intX + intW - intEdge, intY, 2 + intEdge, intH);
         g.fillPath (outline);
         g.restoreState();
@@ -3062,10 +3016,8 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
                            ! (flatOnLeft || flatOnBottom),
                            ! (flatOnRight || flatOnBottom));
 
-        GradientBrush gb (colour.brighter (10.0f), 0, y + height * 0.06f,
-                          Colours::transparentWhite, 0, y + height * 0.4f, false);
-
-        g.setBrush (&gb);
+        g.setGradientFill (ColourGradient (colour.brighter (10.0f), 0, y + height * 0.06f,
+                                           Colours::transparentWhite, 0, y + height * 0.4f, false));
         g.fillPath (highlight);
     }
 

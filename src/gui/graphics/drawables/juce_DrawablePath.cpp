@@ -28,86 +28,98 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawablePath.h"
-#include "../brushes/juce_SolidColourBrush.h"
-#include "../brushes/juce_GradientBrush.h"
-#include "../brushes/juce_ImageBrush.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
 DrawablePath::DrawablePath()
-    : fillBrush (new SolidColourBrush (Colours::black)),
-      strokeBrush (0),
+    : fillColour (0xff000000),
+      fillGradient (0),
+      strokeGradient (0),
       strokeType (0.0f)
 {
 }
 
 DrawablePath::~DrawablePath()
 {
-    delete fillBrush;
-    delete strokeBrush;
+    delete fillGradient;
+    delete strokeGradient;
 }
 
 //==============================================================================
-void DrawablePath::setPath (const Path& newPath)
+void DrawablePath::setPath (const Path& newPath) throw()
 {
     path = newPath;
     updateOutline();
 }
 
-void DrawablePath::setSolidFill (const Colour& newColour)
+void DrawablePath::setFillColour (const Colour& newColour) throw()
 {
-    delete fillBrush;
-    fillBrush = new SolidColourBrush (newColour);
+    deleteAndZero (fillGradient);
+    fillColour = newColour;
 }
 
-void DrawablePath::setFillBrush (const Brush& newBrush)
+void DrawablePath::setFillGradient (const ColourGradient& gradient) throw()
 {
-    delete fillBrush;
-    fillBrush = newBrush.createCopy();
+    delete fillGradient;
+    fillGradient = new ColourGradient (gradient);
 }
 
-void DrawablePath::setOutline (const float thickness, const Colour& colour)
+void DrawablePath::setStrokeType (const PathStrokeType& newStrokeType) throw()
 {
-    strokeType = PathStrokeType (thickness);
-    delete strokeBrush;
-    strokeBrush = new SolidColourBrush (colour);
+    strokeType = newStrokeType;
     updateOutline();
 }
 
-void DrawablePath::setOutline (const PathStrokeType& strokeType_, const Brush& newStrokeBrush)
+void DrawablePath::setStrokeThickness (const float newThickness) throw()
 {
-    strokeType = strokeType_;
-    delete strokeBrush;
-    strokeBrush = newStrokeBrush.createCopy();
-    updateOutline();
+    setStrokeType (PathStrokeType (newThickness, strokeType.getJointStyle(), strokeType.getEndStyle()));
 }
 
+void DrawablePath::setStrokeColour (const Colour& newStrokeColour) throw()
+{
+    deleteAndZero (strokeGradient);
+    strokeColour = newStrokeColour;
+}
+
+void DrawablePath::setStrokeGradient (const ColourGradient& newStrokeGradient) throw()
+{
+    delete strokeGradient;
+    strokeGradient = new ColourGradient (newStrokeGradient);
+}
 
 //==============================================================================
 void DrawablePath::render (const Drawable::RenderingContext& context) const
 {
+    if (fillGradient != 0)
     {
-        Brush* const tempBrush = fillBrush->createCopy();
-        tempBrush->applyTransform (context.transform);
-        tempBrush->multiplyOpacity (context.opacity);
-
-        context.g.setBrush (tempBrush);
-        context.g.fillPath (path, context.transform);
-
-        delete tempBrush;
+        ColourGradient cg (*fillGradient);
+        cg.transform = cg.transform.followedBy (context.transform);
+        cg.multiplyOpacity (context.opacity);
+        context.g.setGradientFill (cg);
+    }
+    else
+    {
+        context.g.setColour (fillColour);
     }
 
-    if (strokeBrush != 0 && strokeType.getStrokeThickness() > 0.0f)
+    context.g.fillPath (path, context.transform);
+
+    if (strokeType.getStrokeThickness() > 0.0f)
     {
-        Brush* const tempBrush = strokeBrush->createCopy();
-        tempBrush->applyTransform (context.transform);
-        tempBrush->multiplyOpacity (context.opacity);
+        if (strokeGradient != 0)
+        {
+            ColourGradient cg (*strokeGradient);
+            cg.transform = cg.transform.followedBy (context.transform);
+            cg.multiplyOpacity (context.opacity);
+            context.g.setGradientFill (cg);
+        }
+        else
+        {
+            context.g.setColour (strokeColour);
+        }
 
-        context.g.setBrush (tempBrush);
         context.g.fillPath (outline, context.transform);
-
-        delete tempBrush;
     }
 }
 
@@ -136,176 +148,140 @@ Drawable* DrawablePath::createCopy() const
     DrawablePath* const dp = new DrawablePath();
 
     dp->path = path;
-    dp->setFillBrush (*fillBrush);
-
-    if (strokeBrush != 0)
-        dp->setOutline (strokeType, *strokeBrush);
-
+    dp->outline = outline;
+    dp->fillColour = fillColour;
+    dp->strokeColour = strokeColour;
+    dp->fillGradient = (fillGradient != 0) ? new ColourGradient (*fillGradient) : 0;
+    dp->strokeGradient = (strokeGradient != 0) ? new ColourGradient (*strokeGradient) : 0;
+    dp->strokeType = strokeType;
     return dp;
 }
 
 //==============================================================================
-static Brush* readBrushFromBinary (InputStream& input)
+static const Colour readColourFromBinary (InputStream& input, ColourGradient*& gradient)
 {
+    deleteAndZero (gradient);
+
     switch (input.readByte())
     {
         case 1:
-            return new SolidColourBrush (Colour ((uint32) input.readInt()));
+            return Colour ((uint32) input.readInt());
 
         case 2:
         {
-            ColourGradient gradient;
-            gradient.x1 = input.readFloat();
-            gradient.y1 = input.readFloat();
-            gradient.x2 = input.readFloat();
-            gradient.y2 = input.readFloat();
-            gradient.isRadial = input.readByte() != 0;
+            gradient = new ColourGradient();
+            gradient->x1 = input.readFloat();
+            gradient->y1 = input.readFloat();
+            gradient->x2 = input.readFloat();
+            gradient->y2 = input.readFloat();
+            gradient->isRadial = input.readByte() != 0;
 
             const int numColours = input.readCompressedInt();
             for (int i = 0; i < numColours; ++i)
             {
                 double proportion = (double) input.readFloat();
-                const Colour colour ((uint32) input.readInt());
-                gradient.addColour (proportion, colour);
+                const Colour col ((uint32) input.readInt());
+                gradient->addColour (proportion, col);
             }
 
-            return new GradientBrush (gradient);
-        }
-
-        case 3:
-        {
-            jassertfalse; //xxx TODO
-
-            return new ImageBrush (0, 0, 0, 0);
+            break;
         }
 
         default:
             break;
     }
 
-    return 0;
+    return Colours::black;
 }
 
-static void writeBrushToBinary (OutputStream& output, const Brush* const brush)
+static void writeColourToBinary (OutputStream& output, const Colour& colour, const ColourGradient* const gradient)
 {
-    if (brush == 0)
-    {
-        output.writeByte (0);
-        return;
-    }
-
-    const SolidColourBrush* cb;
-    const GradientBrush* gb;
-    const ImageBrush* ib;
-
-    if ((cb = dynamic_cast <const SolidColourBrush*> (brush)) != 0)
+    if (gradient == 0)
     {
         output.writeByte (1);
-        output.writeInt ((int) cb->getColour().getARGB());
+        output.writeInt ((int) colour.getARGB());
     }
-    else if ((gb = dynamic_cast <const GradientBrush*> (brush)) != 0)
+    else
     {
         output.writeByte (2);
 
-        const ColourGradient& g = gb->getGradient();
-        output.writeFloat (g.x1);
-        output.writeFloat (g.y1);
-        output.writeFloat (g.x2);
-        output.writeFloat (g.y2);
-        output.writeByte (g.isRadial ? 1 : 0);
+        output.writeFloat (gradient->x1);
+        output.writeFloat (gradient->y1);
+        output.writeFloat (gradient->x2);
+        output.writeFloat (gradient->y2);
+        output.writeByte (gradient->isRadial ? 1 : 0);
 
-        output.writeCompressedInt (g.getNumColours());
+        output.writeCompressedInt (gradient->getNumColours());
 
-        for (int i = 0; i < g.getNumColours(); ++i)
+        for (int i = 0; i < gradient->getNumColours(); ++i)
         {
-            output.writeFloat ((float) g.getColourPosition (i));
-            output.writeInt ((int) g.getColour (i).getARGB());
+            output.writeFloat ((float) gradient->getColourPosition (i));
+            output.writeInt ((int) gradient->getColour (i).getARGB());
         }
     }
-    else if ((ib = dynamic_cast <const ImageBrush*> (brush)) != 0)
-    {
-        output.writeByte (3);
-        jassertfalse; //xxx TODO
-    }
 }
 
-static Brush* readBrushFromXml (const XmlElement* xml)
+static const Colour readColourFromXml (const XmlElement* xml, ColourGradient*& gradient)
 {
-    if (xml == 0)
-        return 0;
+    deleteAndZero (gradient);
 
-    const String type (xml->getStringAttribute (T("type")));
-
-    if (type.equalsIgnoreCase (T("solid")))
-        return new SolidColourBrush (Colour ((uint32) xml->getStringAttribute (T("colour"), T("ff000000")).getHexValue32()));
-
-    if (type.equalsIgnoreCase (T("gradient")))
+    if (xml != 0)
     {
-        ColourGradient gradient;
-        gradient.x1 = (float) xml->getDoubleAttribute (T("x1"));
-        gradient.y1 = (float) xml->getDoubleAttribute (T("y1"));
-        gradient.x2 = (float) xml->getDoubleAttribute (T("x2"));
-        gradient.y2 = (float) xml->getDoubleAttribute (T("y2"));
-        gradient.isRadial = xml->getBoolAttribute (T("radial"), false);
+        const String type (xml->getStringAttribute (T("type")));
 
-        StringArray colours;
-        colours.addTokens (xml->getStringAttribute (T("colours")), false);
+        if (type.equalsIgnoreCase (T("solid")))
+        {
+            return Colour ((uint32) xml->getStringAttribute (T("colour"), T("ff000000")).getHexValue32());
+        }
+        else if (type.equalsIgnoreCase (T("gradient")))
+        {
+            gradient = new ColourGradient();
+            gradient->x1 = (float) xml->getDoubleAttribute (T("x1"));
+            gradient->y1 = (float) xml->getDoubleAttribute (T("y1"));
+            gradient->x2 = (float) xml->getDoubleAttribute (T("x2"));
+            gradient->y2 = (float) xml->getDoubleAttribute (T("y2"));
+            gradient->isRadial = xml->getBoolAttribute (T("radial"), false);
 
-        for (int i = 0; i < colours.size() / 2; ++i)
-            gradient.addColour (colours[i * 2].getDoubleValue(),
-                                Colour ((uint32)  colours[i * 2 + 1].getHexValue32()));
+            StringArray colours;
+            colours.addTokens (xml->getStringAttribute (T("colours")), false);
 
-        return new GradientBrush (gradient);
+            for (int i = 0; i < colours.size() / 2; ++i)
+                gradient->addColour (colours[i * 2].getDoubleValue(),
+                                     Colour ((uint32)  colours[i * 2 + 1].getHexValue32()));
+        }
+        else
+        {
+            jassertfalse
+        }
     }
 
-    if (type.equalsIgnoreCase (T("image")))
-    {
-        jassertfalse; //xxx TODO
-
-        return new ImageBrush (0, 0, 0, 0);
-    }
-
-    return 0;
+    return Colours::black;
 }
 
-static XmlElement* writeBrushToXml (const String& tagName, const Brush* brush)
+static XmlElement* writeColourToXml (const String& tagName, const Colour& colour, const ColourGradient* const gradient)
 {
-    if (brush == 0)
-        return 0;
-
     XmlElement* const xml = new XmlElement (tagName);
 
-    const SolidColourBrush* cb;
-    const GradientBrush* gb;
-    const ImageBrush* ib;
-
-    if ((cb = dynamic_cast <const SolidColourBrush*> (brush)) != 0)
+    if (gradient == 0)
     {
         xml->setAttribute (T("type"), T("solid"));
-        xml->setAttribute (T("colour"), String::toHexString ((int) cb->getColour().getARGB()));
+        xml->setAttribute (T("colour"), String::toHexString ((int) colour.getARGB()));
     }
-    else if ((gb = dynamic_cast <const GradientBrush*> (brush)) != 0)
+    else
     {
         xml->setAttribute (T("type"), T("gradient"));
 
-        const ColourGradient& g = gb->getGradient();
-        xml->setAttribute (T("x1"), g.x1);
-        xml->setAttribute (T("y1"), g.y1);
-        xml->setAttribute (T("x2"), g.x2);
-        xml->setAttribute (T("y2"), g.y2);
-        xml->setAttribute (T("radial"), g.isRadial);
+        xml->setAttribute (T("x1"), gradient->x1);
+        xml->setAttribute (T("y1"), gradient->y1);
+        xml->setAttribute (T("x2"), gradient->x2);
+        xml->setAttribute (T("y2"), gradient->y2);
+        xml->setAttribute (T("radial"), gradient->isRadial);
 
         String s;
-        for (int i = 0; i < g.getNumColours(); ++i)
-            s << " " << g.getColourPosition (i) << " " << String::toHexString ((int) g.getColour(i).getARGB());
+        for (int i = 0; i < gradient->getNumColours(); ++i)
+            s << " " << gradient->getColourPosition (i) << " " << String::toHexString ((int) gradient->getColour(i).getARGB());
 
         xml->setAttribute (T("colours"), s.trimStart());
-    }
-    else if ((ib = dynamic_cast <const ImageBrush*> (brush)) != 0)
-    {
-        xml->setAttribute (T("type"), T("image"));
-
-        jassertfalse; //xxx TODO
     }
 
     return xml;
@@ -313,11 +289,8 @@ static XmlElement* writeBrushToXml (const String& tagName, const Brush* brush)
 
 bool DrawablePath::readBinary (InputStream& input)
 {
-    delete fillBrush;
-    fillBrush = readBrushFromBinary (input);
-
-    delete strokeBrush;
-    strokeBrush = readBrushFromBinary (input);
+    fillColour = readColourFromBinary (input, fillGradient);
+    strokeColour = readColourFromBinary (input, strokeGradient);
 
     const float strokeThickness = input.readFloat();
     const int jointStyle = input.readByte();
@@ -346,8 +319,8 @@ bool DrawablePath::readBinary (InputStream& input)
 
 bool DrawablePath::writeBinary (OutputStream& output) const
 {
-    writeBrushToBinary (output, fillBrush);
-    writeBrushToBinary (output, strokeBrush);
+    writeColourToBinary (output, fillColour, fillGradient);
+    writeColourToBinary (output, strokeColour, strokeGradient);
 
     output.writeFloat (strokeType.getStrokeThickness());
     output.writeByte (strokeType.getJointStyle() == PathStrokeType::mitered ? 0
@@ -364,10 +337,8 @@ bool DrawablePath::writeBinary (OutputStream& output) const
 
 bool DrawablePath::readXml (const XmlElement& xml)
 {
-    delete fillBrush;
-    fillBrush = readBrushFromXml (xml.getChildByName (T("fill")));
-    delete strokeBrush;
-    strokeBrush = readBrushFromXml (xml.getChildByName (T("stroke")));
+    fillColour = readColourFromXml (xml.getChildByName (T("fill")), fillGradient);
+    strokeColour = readColourFromXml (xml.getChildByName (T("stroke")), strokeGradient);
 
     const String jointStyle (xml.getStringAttribute (T("jointStyle"), String::empty));
     const String endStyle (xml.getStringAttribute (T("capStyle"), String::empty));
@@ -387,8 +358,8 @@ bool DrawablePath::readXml (const XmlElement& xml)
 
 void DrawablePath::writeXml (XmlElement& xml) const
 {
-    xml.addChildElement (writeBrushToXml (T("fill"), fillBrush));
-    xml.addChildElement (writeBrushToXml (T("stroke"), strokeBrush));
+    xml.addChildElement (writeColourToXml (T("fill"), fillColour, fillGradient));
+    xml.addChildElement (writeColourToXml (T("stroke"), strokeColour, strokeGradient));
 
     xml.setAttribute (T("strokeWidth"), (double) strokeType.getStrokeThickness());
     xml.setAttribute (T("jointStyle"),

@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Drawable.h"
 #include "juce_DrawableComposite.h"
 #include "juce_DrawablePath.h"
-#include "../brushes/juce_GradientBrush.h"
 
 
 //==============================================================================
@@ -608,7 +607,7 @@ private:
 
         DrawablePath* dp = new DrawablePath();
         dp->setName (xml.getStringAttribute (T("id")));
-        dp->setSolidFill (Colours::transparentBlack);
+        dp->setFillColour (Colours::transparentBlack);
 
         path.applyTransform (transform);
         dp->setPath (path);
@@ -625,47 +624,49 @@ private:
             }
         }
 
-        Brush* const fillBrush
-            = getBrushForFill (path,
-                               getStyleAttribute (&xml, T("fill")),
-                               getStyleAttribute (&xml, T("fill-opacity")),
-                               getStyleAttribute (&xml, T("opacity")),
-                               containsClosedSubPath ? Colours::black
-                                                     : Colours::transparentBlack);
+        ColourGradient* fillGradient = 0;
+        const Colour fillColour (getPathFillType (path,
+                                                  getStyleAttribute (&xml, T("fill")),
+                                                  getStyleAttribute (&xml, T("fill-opacity")),
+                                                  getStyleAttribute (&xml, T("opacity")),
+                                                  containsClosedSubPath ? Colours::black
+                                                                        : Colours::transparentBlack,
+                                                  fillGradient));
 
-        if (fillBrush != 0)
+        if (fillGradient != 0)
         {
-            if (! fillBrush->isInvisible())
-            {
-                fillBrush->applyTransform (transform);
-                dp->setFillBrush (*fillBrush);
-            }
-
-            delete fillBrush;
+            fillGradient->transform = fillGradient->transform.followedBy (transform);
+            dp->setFillGradient (*fillGradient);
+            delete fillGradient;
+        }
+        else
+        {
+            dp->setFillColour (fillColour);
         }
 
         const String strokeType (getStyleAttribute (&xml, T("stroke")));
 
         if (strokeType.isNotEmpty() && ! strokeType.equalsIgnoreCase (T("none")))
         {
-            Brush* const strokeBrush
-                = getBrushForFill (path, strokeType,
-                                   getStyleAttribute (&xml, T("stroke-opacity")),
-                                   getStyleAttribute (&xml, T("opacity")),
-                                   Colours::transparentBlack);
+            ColourGradient* strokeGradient = 0;
+            const Colour strokeColour (getPathFillType (path, strokeType,
+                                                        getStyleAttribute (&xml, T("stroke-opacity")),
+                                                        getStyleAttribute (&xml, T("opacity")),
+                                                        Colours::transparentBlack,
+                                                        strokeGradient));
 
-            if (strokeBrush != 0)
+            if (strokeGradient != 0)
             {
-                const PathStrokeType stroke (getStrokeFor (&xml));
-
-                if (! strokeBrush->isInvisible())
-                {
-                    strokeBrush->applyTransform (transform);
-                    dp->setOutline (stroke, *strokeBrush);
-                }
-
-                delete strokeBrush;
+                strokeGradient->transform = strokeGradient->transform.followedBy (transform);
+                dp->setStrokeGradient (*strokeGradient);
+                delete strokeGradient;
             }
+            else
+            {
+                dp->setStrokeColour (strokeColour);
+            }
+
+            dp->setStrokeType (getStrokeFor (&xml));
         }
 
         return dp;
@@ -703,11 +704,12 @@ private:
         }
     }
 
-    Brush* getBrushForFill (const Path& path,
-                            const String& fill,
-                            const String& fillOpacity,
-                            const String& overallOpacity,
-                            const Colour& defaultColour) const
+    const Colour getPathFillType (const Path& path,
+                                  const String& fill,
+                                  const String& fillOpacity,
+                                  const String& overallOpacity,
+                                  const Colour& defaultColour,
+                                  ColourGradient*& gradient) const
     {
         float opacity = 1.0f;
 
@@ -730,29 +732,29 @@ private:
             {
                 const XmlElement* inheritedFrom = findLinkedElement (fillXml);
 
-                ColourGradient cg;
+                gradient = new ColourGradient();
 
-                addGradientStopsIn (cg, inheritedFrom);
-                addGradientStopsIn (cg, fillXml);
+                addGradientStopsIn (*gradient, inheritedFrom);
+                addGradientStopsIn (*gradient, fillXml);
 
-                if (cg.getNumColours() > 0)
+                if (gradient->getNumColours() > 0)
                 {
-                    cg.addColour (0.0, cg.getColour (0));
-                    cg.addColour (1.0, cg.getColour (cg.getNumColours() - 1));
+                    gradient->addColour (0.0, gradient->getColour (0));
+                    gradient->addColour (1.0, gradient->getColour (gradient->getNumColours() - 1));
                 }
                 else
                 {
-                    cg.addColour (0.0, Colours::black);
-                    cg.addColour (1.0, Colours::black);
+                    gradient->addColour (0.0, Colours::black);
+                    gradient->addColour (1.0, Colours::black);
                 }
 
                 if (overallOpacity.isNotEmpty())
-                    cg.multiplyOpacity (overallOpacity.getFloatValue());
+                    gradient->multiplyOpacity (overallOpacity.getFloatValue());
 
-                jassert (cg.getNumColours() > 0);
+                jassert (gradient->getNumColours() > 0);
 
-                cg.isRadial = fillXml->hasTagName (T("radialGradient"));
-                cg.transform = parseTransform (fillXml->getStringAttribute (T("gradientTransform")));
+                gradient->isRadial = fillXml->hasTagName (T("radialGradient"));
+                gradient->transform = parseTransform (fillXml->getStringAttribute (T("gradientTransform")));
 
                 float width = viewBoxW;
                 float height = viewBoxH;
@@ -764,42 +766,44 @@ private:
                 if (! userSpace)
                     path.getBounds (dx, dy, width, height);
 
-                if (cg.isRadial)
+                if (gradient->isRadial)
                 {
-                    cg.x1 = dx + getCoordLength (fillXml->getStringAttribute (T("cx"), T("50%")), width);
-                    cg.y1 = dy + getCoordLength (fillXml->getStringAttribute (T("cy"), T("50%")), height);
+                    gradient->x1 = dx + getCoordLength (fillXml->getStringAttribute (T("cx"), T("50%")), width);
+                    gradient->y1 = dy + getCoordLength (fillXml->getStringAttribute (T("cy"), T("50%")), height);
 
                     const float radius = getCoordLength (fillXml->getStringAttribute (T("r"), T("50%")), width);
 
-                    cg.x2 = cg.x1 + radius;
-                    cg.y2 = cg.y1;
+                    gradient->x2 = gradient->x1 + radius;
+                    gradient->y2 = gradient->y1;
 
                     //xxx (the fx, fy focal point isn't handled properly here..)
                 }
                 else
                 {
-                    cg.x1 = dx + getCoordLength (fillXml->getStringAttribute (T("x1"), T("0%")), width);
-                    cg.y1 = dy + getCoordLength (fillXml->getStringAttribute (T("y1"), T("0%")), height);
+                    gradient->x1 = dx + getCoordLength (fillXml->getStringAttribute (T("x1"), T("0%")), width);
+                    gradient->y1 = dy + getCoordLength (fillXml->getStringAttribute (T("y1"), T("0%")), height);
 
-                    cg.x2 = dx + getCoordLength (fillXml->getStringAttribute (T("x2"), T("100%")), width);
-                    cg.y2 = dy + getCoordLength (fillXml->getStringAttribute (T("y2"), T("0%")), height);
+                    gradient->x2 = dx + getCoordLength (fillXml->getStringAttribute (T("x2"), T("100%")), width);
+                    gradient->y2 = dy + getCoordLength (fillXml->getStringAttribute (T("y2"), T("0%")), height);
 
-                    if (cg.x1 == cg.x2 && cg.y1 == cg.y2)
-                        return new SolidColourBrush (cg.getColour (cg.getNumColours() - 1));
+                    if (gradient->x1 == gradient->x2 && gradient->y1 == gradient->y2)
+                    {
+                        const Colour col (gradient->getColour (gradient->getNumColours() - 1));
+                        deleteAndZero (gradient);
+                        return col;
+                    }
                 }
 
-                return new GradientBrush (cg);
+                return defaultColour;
             }
         }
 
         if (fill.equalsIgnoreCase (T("none")))
-            return new SolidColourBrush (Colours::transparentBlack);
+            return Colours::transparentBlack;
 
         int i = 0;
         Colour colour (parseColour (fill, i, defaultColour));
-        colour = colour.withMultipliedAlpha (opacity);
-
-        return new SolidColourBrush (colour);
+        return colour.withMultipliedAlpha (opacity);
     }
 
     const PathStrokeType getStrokeFor (const XmlElement* const xml) const

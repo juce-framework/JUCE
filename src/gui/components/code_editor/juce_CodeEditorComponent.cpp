@@ -144,18 +144,15 @@ public:
         return true;
     }
 
-    void draw (Graphics& g, const Font& font,
+    void draw (CodeEditorComponent& owner, Graphics& g, const Font& font,
                float x, const int y, const int baselineOffset, const int lineHeight,
-               const Array <Colour>& coloursForTokenCategories,
-               const Colour& defaultColour,
-               const Colour& highlightColour,
-               const float charWidth) const throw()
+               const Colour& highlightColour) const throw()
     {
         if (highlightColumnStart < highlightColumnEnd)
         {
             g.setColour (highlightColour);
-            g.fillRect (roundFloatToInt (x + highlightColumnStart * charWidth), y,
-                        roundFloatToInt ((highlightColumnEnd - highlightColumnStart) * charWidth), lineHeight);
+            g.fillRect (roundFloatToInt (x + highlightColumnStart * owner.getCharWidth()), y,
+                        roundFloatToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
         }
 
         int lastType = INT_MIN;
@@ -167,11 +164,7 @@ public:
             if (lastType != token->tokenType)
             {
                 lastType = token->tokenType;
-
-                if (((unsigned int) lastType) < (unsigned int) coloursForTokenCategories.size())
-                    g.setColour (coloursForTokenCategories [lastType]);
-                else
-                    g.setColour (defaultColour);
+                g.setColour (owner.getColourForTokenType (lastType));
             }
 
             g.drawSingleLineText (token->text, roundFloatToInt (x), y + baselineOffset);
@@ -392,12 +385,17 @@ void CodeEditorComponent::paint (Graphics& g)
     const Colour defaultColour (findColour (CodeEditorComponent::defaultTextColourId));
     const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
-    for (int j = 0; j < lines.size(); ++j)
-        lines.getUnchecked(j)->draw (g, font,
+    const Rectangle clip (g.getClipBounds());
+    const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
+    const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
+
+    for (int j = firstLineToDraw; j < lastLineToDraw; ++j)
+    {
+        lines.getUnchecked(j)->draw (*this, g, font,
                                      (float) (gutter - xOffset * charWidth),
                                      lineHeight * j, baselineOffset, lineHeight,
-                                     coloursForTokenCategories, defaultColour,
-                                     highlightColour, charWidth);
+                                     highlightColour);
+    }
 }
 
 void CodeEditorComponent::handleAsyncUpdate()
@@ -408,7 +406,11 @@ void CodeEditorComponent::handleAsyncUpdate()
 void CodeEditorComponent::rebuildLineTokens()
 {
     cancelPendingUpdate();
+
     const int numNeeded = linesOnScreen + 1;
+
+    int minLineToRepaint = numNeeded;
+    int maxLineToRepaint = 0;
 
     if (numNeeded != lines.size())
     {
@@ -417,7 +419,8 @@ void CodeEditorComponent::rebuildLineTokens()
         for (int i = numNeeded; --i >= 0;)
             lines.add (new CodeEditorLine());
 
-        repaint();
+        minLineToRepaint = 0;
+        maxLineToRepaint = numNeeded;
     }
 
     jassert (numNeeded == lines.size());
@@ -429,8 +432,19 @@ void CodeEditorComponent::rebuildLineTokens()
     {
         CodeEditorLine* const line = lines.getUnchecked(i);
 
-        if (line->update (document, firstLineOnScreen + i, source, codeTokeniser, spacesPerTab, selectionStart, selectionEnd))
-            repaint (0, lineHeight * i, getWidth(), lineHeight);
+        if (line->update (document, firstLineOnScreen + i, source, codeTokeniser, spacesPerTab,
+                          selectionStart, selectionEnd))
+        {
+            minLineToRepaint = jmin (minLineToRepaint, i);
+            maxLineToRepaint = jmax (maxLineToRepaint, i);
+        }
+    }
+
+    if (minLineToRepaint <= maxLineToRepaint)
+    {
+        repaint (gutter, lineHeight * minLineToRepaint - 1,
+                 verticalScrollBar->getX() - gutter,
+                 lineHeight * (1 + maxLineToRepaint - minLineToRepaint) + 2);
     }
 }
 

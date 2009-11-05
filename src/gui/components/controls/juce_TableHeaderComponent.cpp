@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_TableHeaderComponent.h"
 #include "../../graphics/imaging/juce_Image.h"
-#include "../../graphics/brushes/juce_GradientBrush.h"
 #include "../../../text/juce_XmlDocument.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../layout/juce_StretchableObjectResizer.h"

@@ -50,9 +50,9 @@ public:
     //==============================================================================
     /** Changes the path that will be drawn.
 
-        @see setSolidFill, setOutline
+        @see setFillColour, setStrokeType
     */
-    void setPath (const Path& newPath);
+    void setPath (const Path& newPath) throw();
 
     /** Returns the current path. */
     const Path& getPath() const throw()                         { return path; }
@@ -63,43 +63,38 @@ public:
         filled (e.g. if you're just drawing an outline), set this colour to be
         transparent.
 
-        @see setPath, setOutline
+        @see setPath, setOutlineColour, setFillGradient
     */
-    void setSolidFill (const Colour& newColour);
+    void setFillColour (const Colour& newColour) throw();
 
-    /** Sets a custom brush to use to fill the path.
-
-        @see setSolidFill
+    /** Sets a gradient to use to fill the path.
     */
-    void setFillBrush (const Brush& newBrush);
+    void setFillGradient (const ColourGradient& newGradient) throw();
 
-    /** Returns the brush currently being used to fill the shape. */
-    Brush* getCurrentBrush() const throw()                      { return fillBrush; }
+    /** Sets the colour with which the outline will be drawn.
+        @see setStrokeGradient
+    */
+    void setStrokeColour (const Colour& newStrokeColour) throw();
+
+    /** Sets a gradient with with the outline will be drawn.
+        @see setStrokeColour
+    */
+    void setStrokeGradient (const ColourGradient& newStrokeGradient) throw();
 
     /** Changes the properties of the outline that will be drawn around the path.
+        If the stroke has 0 thickness, no stroke will be drawn.
 
-        If the thickness value is 0, no outline will be drawn. If one is drawn, the
-        colour passed-in here will be used for it.
-
-        @see setPath, setSolidFill
+        @see setStrokeThickness, setStrokeColour
     */
-    void setOutline (const float thickness,
-                     const Colour& outlineColour);
+    void setStrokeType (const PathStrokeType& newStrokeType) throw();
 
-    /** Changes the properties of the outline that will be drawn around the path.
-
-        If the stroke type has 0 thickness, no outline will be drawn.
-
-        @see setPath, setSolidFill
+    /** Changes the stroke thickness.
+        This is a shortcut for calling setStrokeType.
     */
-    void setOutline (const PathStrokeType& strokeType,
-                     const Brush& strokeBrush);
+    void setStrokeThickness (const float newThickness) throw();
 
     /** Returns the current outline style. */
-    const PathStrokeType& getOutlineStroke() const throw()      { return strokeType; }
-
-    /** Returns the brush currently being used to draw the outline. */
-    Brush* getOutlineBrush() const throw()                      { return strokeBrush; }
+    const PathStrokeType& getStrokeType() const throw()      { return strokeType; }
 
 
     //==============================================================================
@@ -125,8 +120,9 @@ public:
 
 private:
     Path path, outline;
-    Brush* fillBrush;
-    Brush* strokeBrush;
+    Colour fillColour, strokeColour;
+    ColourGradient* fillGradient;
+    ColourGradient* strokeGradient;
     PathStrokeType strokeType;
 
     void updateOutline();

@@ -303,12 +303,11 @@ private:
         DrawablePath dp;
         dp.setPath (shape);
 
-        dp.setOutline (4.0f, Colours::blue);
+        dp.setStrokeThickness (4.0f);
+        dp.setStrokeColour (Colours::blue);
 
-        GradientBrush gb (ColourGradient (Colours::red.withAlpha (0.4f), -100.0f, -100.0f,
-                                          Colours::green.withAlpha (0.6f), 100.0f, 100.0f, false));
-
-        dp.setFillBrush (gb);
+        dp.setFillGradient (ColourGradient (Colours::red.withAlpha (0.4f), -100.0f, -100.0f,
+                                            Colours::green.withAlpha (0.6f), 100.0f, 100.0f, false));
 
         dc->insertDrawable (dp);
 

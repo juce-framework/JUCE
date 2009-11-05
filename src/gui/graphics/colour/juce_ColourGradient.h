@@ -33,9 +33,9 @@
 
 //==============================================================================
 /**
-    Structure used to define a colour gradient for painting areas.
+    Describes the layout and colours that should be used to paint a colour gradient.
 
-    @see GradientBrush
+    @see Graphics::setGradientFill
 */
 class JUCE_API  ColourGradient
 {

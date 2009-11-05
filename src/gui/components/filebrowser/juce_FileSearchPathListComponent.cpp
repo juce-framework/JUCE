@@ -62,7 +62,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
         Path arrowPath;
         arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
         DrawablePath arrowImage;
-        arrowImage.setSolidFill (Colours::black.withAlpha (0.4f));
+        arrowImage.setFillColour (Colours::black.withAlpha (0.4f));
         arrowImage.setPath (arrowPath);
 
         ((DrawableButton*) upButton)->setImages (&arrowImage);
@@ -75,7 +75,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
         Path arrowPath;
         arrowPath.addArrow (50.0f, 0.0f, 50.0f, 100.0f, 40.0f, 100.0f, 50.0f);
         DrawablePath arrowImage;
-        arrowImage.setSolidFill (Colours::black.withAlpha (0.4f));
+        arrowImage.setFillColour (Colours::black.withAlpha (0.4f));
         arrowImage.setPath (arrowPath);
 
         ((DrawableButton*) downButton)->setImages (&arrowImage);

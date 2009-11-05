@@ -422,12 +422,14 @@ static Component* createRadioButtonPage()
         Path p;
         p.addStar (0.0f, 0.0f, i + 5, 20.0f, 50.0f, -0.2f);
         normal.setPath (p);
-        normal.setSolidFill (Colours::lightblue);
-        normal.setOutline (4.0f, Colours::black);
+        normal.setFillColour (Colours::lightblue);
+        normal.setStrokeColour (Colours::black);
+        normal.setStrokeThickness (4.0f);
 
         over.setPath (p);
-        over.setSolidFill (Colours::blue);
-        over.setOutline (4.0f, Colours::black);
+        over.setFillColour (Colours::blue);
+        over.setStrokeColour (Colours::black);
+        over.setStrokeThickness (4.0f);
 
         DrawableButton* db = new DrawableButton (String (i + 5) + T(" points"), DrawableButton::ImageAboveTextLabel);
         db->setImages (&normal, &over, 0);
@@ -478,13 +480,14 @@ public:
         Path p;
         p.addStar (0.0f, 0.0f, 5, 20.0f, 50.0f, 0.2f);
         normal.setPath (p);
-        normal.setSolidFill (Colours::red);
+        normal.setFillColour (Colours::red);
 
         p.clear();
         p.addStar (0.0f, 0.0f, 7, 30.0f, 50.0f, 0.0f);
         over.setPath (p);
-        over.setSolidFill (Colours::pink);
-        over.setOutline (5.0f, Colours::black);
+        over.setFillColour (Colours::pink);
+        over.setStrokeColour (Colours::black);
+        over.setStrokeThickness (5.0f);
 
         DrawableImage down;
         down.setImage (ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize), true);

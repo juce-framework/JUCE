@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_MidiKeyboardComponent.h"
-#include "../../graphics/brushes/juce_GradientBrush.h"
 
 
 //==============================================================================
@@ -381,9 +380,8 @@ void MidiKeyboardComponent::paint (Graphics& g)
     else
         y2 = 5.0f;
 
-    GradientBrush gb (Colours::black.withAlpha (0.3f), x1, y1,
-                      Colours::transparentBlack, x2, y2, false);
-    g.setBrush (&gb);
+    g.setGradientFill (ColourGradient (Colours::black.withAlpha (0.3f), x1, y1,
+                                       Colours::transparentBlack, x2, y2, false));
 
     getKeyPos (rangeEnd, x, w);
     x += w;

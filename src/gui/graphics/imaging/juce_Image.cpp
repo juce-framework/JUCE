@@ -31,7 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Image.h"
 #include "../contexts/juce_Graphics.h"
 #include "../contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
-#include "../brushes/juce_GradientBrush.h"
 #include "../colour/juce_PixelFormats.h"
 #include "../../../containers/juce_SparseSet.h"
 

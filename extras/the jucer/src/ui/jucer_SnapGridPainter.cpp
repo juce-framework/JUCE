@@ -85,8 +85,7 @@ void SnapGridPainter::draw (Graphics& g, PaintRoutine* backgroundGraphics)
 
     if (backgroundFill != 0)
     {
-        ImageBrush ib (backgroundFill, 0, 0, 1.0f);
-        g.setBrush (&ib);
+        g.setTiledImageFill (*backgroundFill, 0, 0, 1.0f);
         g.fillAll();
     }
 }

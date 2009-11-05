@@ -41,7 +41,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ListBox.h"
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../juce_Desktop.h"
-#include "../../graphics/brushes/juce_GradientBrush.h"
 #include "../../graphics/drawables/juce_DrawableComposite.h"
 #include "../../graphics/drawables/juce_DrawablePath.h"
 
@@ -558,7 +557,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
         DrawableButton* b = new DrawableButton ("minimise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
-        dp.setSolidFill (Colours::black.withAlpha (0.3f));
+        dp.setFillColour (Colours::black.withAlpha (0.3f));
         b->setImages (&dp);
         return b;
     }
@@ -570,7 +569,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
         DrawableButton* b = new DrawableButton ("maximise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
-        dp.setSolidFill (Colours::black.withAlpha (0.3f));
+        dp.setFillColour (Colours::black.withAlpha (0.3f));
         b->setImages (&dp);
         return b;
     }

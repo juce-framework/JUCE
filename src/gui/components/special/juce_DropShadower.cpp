@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DropShadower.h"
-#include "../../graphics/brushes/juce_ImageBrush.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../graphics/imaging/juce_ImageConvolutionKernel.h"
 #include "../../graphics/imaging/juce_Image.h"
@@ -75,7 +74,6 @@ public:
         Image* const topLeft      = shadowImageSections [type * 3];
         Image* const bottomRight  = shadowImageSections [type * 3 + 1];
         Image* const filler       = shadowImageSections [type * 3 + 2];
-        ImageBrush fillBrush (filler, 0, 0, 1.0f);
 
         g.setOpacity (1.0f);
 
@@ -91,7 +89,7 @@ public:
                          0, getHeight() - imH, bottomRight->getWidth(), imH,
                          0, bottomRight->getHeight() - imH, bottomRight->getWidth(), imH);
 
-            g.setBrush (&fillBrush);
+            g.setTiledImageFill (*filler, 0, 0, 1.0f);
             g.fillRect (0, topLeft->getHeight(), getWidth(), getHeight() - (topLeft->getHeight() + bottomRight->getHeight()));
         }
         else
@@ -106,7 +104,7 @@ public:
                          getWidth() - imW, 0, imW, bottomRight->getHeight(),
                          bottomRight->getWidth() - imW, 0, imW, bottomRight->getHeight());
 
-            g.setBrush (&fillBrush);
+            g.setTiledImageFill (*filler, 0, 0, 1.0f);
             g.fillRect (topLeft->getWidth(), 0, getWidth() - (topLeft->getWidth() + bottomRight->getWidth()), getHeight());
         }
     }

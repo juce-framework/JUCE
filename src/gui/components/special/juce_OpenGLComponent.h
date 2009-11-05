@@ -40,8 +40,9 @@ class OpenGLComponentWatcher;
 
     @see OpenGLComponent::setPixelFormat
 */
-struct OpenGLPixelFormat
+class JUCE_API  OpenGLPixelFormat
 {
+public:
     //==============================================================================
     /** Creates an OpenGLPixelFormat.
 
@@ -90,7 +91,7 @@ struct OpenGLPixelFormat
 
     An OpenGLComponent will supply its own context for drawing in its window.
 */
-class OpenGLContext
+class JUCE_API  OpenGLContext
 {
 public:
     //==============================================================================
