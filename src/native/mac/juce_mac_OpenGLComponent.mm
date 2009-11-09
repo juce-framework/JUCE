@@ -177,7 +177,7 @@ public:
     ~WindowedGLContext()
     {
         makeInactive();
-        [renderContext setView: nil];
+        [renderContext clearDrawable];
         delete viewHolder;
     }
 

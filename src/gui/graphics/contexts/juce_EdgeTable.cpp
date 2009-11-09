@@ -27,24 +27,20 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_EdgeTable.h"
 #include "../geometry/juce_PathIterator.h"
 
+const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
-EdgeTable::EdgeTable (const int top_,
-                      const int height_,
-                      const OversamplingLevel oversampling_,
-                      const int expectedEdgesPerLine) throw()
+EdgeTable::EdgeTable (const int top_, const int height_) throw()
    : top (top_),
      height (height_),
-     maxEdgesPerLine (expectedEdgesPerLine),
-     lineStrideElements ((expectedEdgesPerLine << 1) + 1),
-     oversampling (oversampling_)
+     maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
+     nonZeroWinding (true)
 {
-    table = (int*) juce_calloc ((height << (int)oversampling_)
-                                  * lineStrideElements * sizeof (int));
+    table = (int*) juce_calloc (height * lineStrideElements * sizeof (int));
 }
 
 EdgeTable::EdgeTable (const EdgeTable& other) throw()
@@ -61,11 +57,9 @@ const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
     height = other.height;
     maxEdgesPerLine = other.maxEdgesPerLine;
     lineStrideElements = other.lineStrideElements;
-    oversampling = other.oversampling;
+    nonZeroWinding = other.nonZeroWinding;
 
-    const int tableSize = (height << (int)oversampling)
-                            * lineStrideElements * sizeof (int);
-
+    const int tableSize = height * lineStrideElements * sizeof (int);
     table = (int*) juce_malloc (tableSize);
     memcpy (table, other.table, tableSize);
 
@@ -85,10 +79,9 @@ void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
         maxEdgesPerLine = newNumEdgesPerLine;
 
         const int newLineStrideElements = maxEdgesPerLine * 2 + 1;
-        int* const newTable = (int*) juce_malloc ((height << (int) oversampling)
-                                                    * newLineStrideElements * sizeof (int));
+        int* const newTable = (int*) juce_malloc (height * newLineStrideElements * sizeof (int));
 
-        for (int i = 0; i < (height << (int) oversampling); ++i)
+        for (int i = 0; i < height; ++i)
         {
             const int* srcLine = table + lineStrideElements * i;
             int* dstLine = newTable + newLineStrideElements * i;
@@ -121,7 +114,7 @@ void EdgeTable::optimiseTable() throw()
 //==============================================================================
 void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw()
 {
-    jassert (y >= 0 && y < (height << oversampling))
+    jassert (y >= 0 && y < height)
 
     int* lineStart = table + lineStrideElements * y;
     int n = lineStart[0];
@@ -159,39 +152,28 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
 void EdgeTable::addPath (const Path& path,
                          const AffineTransform& transform) throw()
 {
-    const int windingAmount = 256 / (1 << (int) oversampling);
-    const float timesOversampling = (float) (1 << (int) oversampling);
-
-    const int bottomLimit = (height << (int) oversampling);
+    nonZeroWinding = path.isUsingNonZeroWinding();
+    const int bottomLimit = height << 8;
 
     PathFlatteningIterator iter (path, transform);
 
     while (iter.next())
     {
-        int y1 = roundFloatToInt (iter.y1 * timesOversampling) - (top << (int) oversampling);
-        int y2 = roundFloatToInt (iter.y2 * timesOversampling) - (top << (int) oversampling);
+        int y1 = roundFloatToInt (iter.y1 * 256.0f) - (top << 8);
+        int y2 = roundFloatToInt (iter.y2 * 256.0f) - (top << 8);
 
         if (y1 != y2)
         {
             const double x1 = 256.0 * iter.x1;
             const double x2 = 256.0 * iter.x2;
-
             const double multiplier = (x2 - x1) / (y2 - y1);
-
-            const int oldY1 = y1;
-            int winding;
+            int winding = -1;
 
             if (y1 > y2)
             {
                 swapVariables (y1, y2);
-                winding = windingAmount;
+                winding = 1;
             }
-            else
-            {
-                winding = -windingAmount;
-            }
-
-            jassert (y1 < y2);
 
             if (y1 < 0)
                 y1 = 0;
@@ -199,45 +181,32 @@ void EdgeTable::addPath (const Path& path,
             if (y2 > bottomLimit)
                 y2 = bottomLimit;
 
+            const int oldY1 = y1;
+            const int stepSize = jlimit (1, 256, 256 / (1 + abs ((int) multiplier)));
+
             while (y1 < y2)
             {
+                const int step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
+
                 addEdgePoint (roundDoubleToInt (x1 + multiplier * (y1 - oldY1)),
-                              y1,
-                              winding);
+                              y1 >> 8, winding * step);
 
-                ++y1;
-            }
-        }
-    }
-
-    if (! path.isUsingNonZeroWinding())
-    {
-        // if it's an alternate-winding path, we need to go through and
-        // make sure all the windings are alternating.
-
-        int* lineStart = table;
-
-        for (int i = height << (int) oversampling; --i >= 0;)
-        {
-            int* line = lineStart;
-            lineStart += lineStrideElements;
-
-            int num = *line;
-
-            while (--num >= 0)
-            {
-                line += 2;
-                *line = abs (*line);
-
-                if (--num >= 0)
-                {
-                    line += 2;
-                    *line = -abs (*line);
-                }
+                y1 += step;
             }
         }
     }
 }
 
+/*void EdgeTable::clipToRectangle (const Rectangle& r) throw()
+{
+}
+
+void EdgeTable::intersectWith (const EdgeTable& other)
+{
+}
+
+void EdgeTable::generateFromImageAlpha (Image& image, int x, int y) throw()
+{
+}*/
 
 END_JUCE_NAMESPACE

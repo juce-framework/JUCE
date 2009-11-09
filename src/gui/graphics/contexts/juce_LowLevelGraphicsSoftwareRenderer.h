@@ -68,10 +68,10 @@ public:
 
     //==============================================================================
     void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void fillPath (const Path& path, const AffineTransform& transform);
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY);
 
     void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
@@ -141,9 +141,9 @@ protected:
 
     void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
 
-    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform);
     void clippedFillPathWithImage (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform,
-                                   const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+                                   const Image& image, int imageX, int imageY, float alpha);
 
     void clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY);
     void clippedFillAlphaChannelWithImage (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY,

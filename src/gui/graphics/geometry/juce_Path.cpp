@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_PathIterator.h"
 #include "juce_Line.h"
 #include "../../../io/streams/juce_MemoryInputStream.h"
+#include "../imaging/juce_Image.h"
 
 // tests that some co-ords aren't NaNs
 #define CHECK_COORDS_ARE_VALID(x, y) \
@@ -1546,6 +1547,74 @@ bool Path::Iterator::next()
     }
 
     return false;
+}
+
+//==============================================================================
+class MaskBitmapRenderer
+{
+public:
+    MaskBitmapRenderer (uint8* const data_, const int stride_) throw()
+        : data (data_), stride (stride_)
+    {
+    }
+
+    forcedinline void setEdgeTableYPos (const int y) throw()
+    {
+        lineStart = data + (stride * y);
+    }
+
+    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
+    {
+        lineStart [x] = (uint8) alphaLevel;
+    }
+
+    forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
+    {
+        uint8* d = lineStart + x;
+
+        while (--width >= 0)
+            *d++ = (uint8) alphaLevel;
+    }
+
+private:
+    uint8* const data;
+    const int stride;
+    uint8* lineStart;
+
+    MaskBitmapRenderer (const MaskBitmapRenderer&);
+    const MaskBitmapRenderer& operator= (const MaskBitmapRenderer&);
+};
+
+Image* Path::createMaskBitmap (const AffineTransform& transform,
+                               const Rectangle& clipRegion,
+                               Rectangle& imagePosition) const throw()
+{
+    if (isEmpty())
+        return 0;
+
+    float px, py, pw, ph;
+    getBoundsTransformed (transform, px, py, pw, ph);
+
+    imagePosition = clipRegion.getIntersection (Rectangle ((int) floorf (px), (int) floorf (py),
+                                                           roundFloatToInt (pw) + 2, roundFloatToInt (ph) + 2));
+
+    if (imagePosition.isEmpty())
+        return 0;
+
+    Image* im = new Image (Image::SingleChannel, imagePosition.getWidth(), imagePosition.getHeight(), true);
+
+    EdgeTable edgeTable (0, imagePosition.getHeight());
+    edgeTable.addPath (*this, transform.translated (-imagePosition.getX(), -imagePosition.getY()));
+
+    int stride, pixelStride;
+    uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, imagePosition.getWidth(), imagePosition.getHeight(), stride, pixelStride);
+
+    jassert (pixelStride == 1);
+    MaskBitmapRenderer renderer (pixels, stride);
+    edgeTable.iterate (renderer, 0, 0, imagePosition.getWidth(), imagePosition.getHeight(), 0);
+
+    im->releasePixelDataReadWrite (pixels);
+    return im;
 }
 
 

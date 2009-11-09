@@ -450,7 +450,7 @@ void Graphics::fillPath (const Path& path,
     if ((! context->isClipEmpty()) && ! path.isEmpty())
     {
         if (state->brush == 0)
-            context->fillPath (path, transform, EdgeTable::Oversampling_4times);
+            context->fillPath (path, transform);
         else
             state->brush->paintPath (*context, path, transform);
     }

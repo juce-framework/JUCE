@@ -435,27 +435,27 @@ class FontGlyphAlphaMap
 public:
     //==============================================================================
     FontGlyphAlphaMap() throw()
-        : glyph (0), lastAccessCount (0),
-          bitmap1 (0), bitmap2 (0)
+        : glyph (0), lastAccessCount (0)
     {
+        bitmap[0] = bitmap[1] = 0;
     }
 
     ~FontGlyphAlphaMap() throw()
     {
-        delete bitmap1;
-        delete bitmap2;
+        delete bitmap[0];
+        delete bitmap[1];
     }
 
     void draw (LowLevelGraphicsContext& g, float x, const float y) const throw()
     {
-        if (bitmap1 != 0)
+        if (bitmap[0] != 0)
         {
-            x += xOrigin;
             const float xFloor = floorf (x);
-            const int intX = (int) xFloor;
+            const int bitmapToUse = ((x - xFloor) >= 0.5f && bitmap[1] != 0) ? 1 : 0;
 
-            g.fillAlphaChannel (((x - xFloor) >= 0.5f && bitmap2 != 0) ? *bitmap2 : *bitmap1,
-                                intX, (int) floorf (y + yOrigin));
+            g.fillAlphaChannel (*bitmap [bitmapToUse],
+                                xOrigin [bitmapToUse] + (int) xFloor,
+                                yOrigin [bitmapToUse] + (int) floorf (y));
         }
     }
 
@@ -464,8 +464,8 @@ public:
         font = font_;
         glyph = glyph_;
 
-        deleteAndZero (bitmap1);
-        deleteAndZero (bitmap2);
+        deleteAndZero (bitmap[0]);
+        deleteAndZero (bitmap[1]);
 
         Path glyphPath;
         font.getTypeface()->getOutlineForGlyph (glyph_, glyphPath);
@@ -474,15 +474,19 @@ public:
         {
             const float fontHeight = font.getHeight();
             const float fontHScale = fontHeight * font.getHorizontalScale();
+            AffineTransform transform (AffineTransform::scale (fontHScale, fontHeight));
+            Rectangle clip (-2048, -2048, 4096, 4096), pos;
 
-            bitmap1 = createAlphaMapFromPath (glyphPath, xOrigin, yOrigin, fontHScale, fontHeight, 0.0f);
+            bitmap[0] = glyphPath.createMaskBitmap (transform, clip, pos);
+            xOrigin[0] = pos.getX();
+            yOrigin[0] = pos.getY();
 
-            if (fontHScale < 24.0f)
-                bitmap2 = createAlphaMapFromPath (glyphPath, xOrigin, yOrigin, fontHScale, fontHeight, 0.5f);
-        }
-        else
-        {
-            xOrigin = yOrigin = 0;
+            if (fontHScale < 30.0f)
+            {
+                bitmap[1] = glyphPath.createMaskBitmap (transform.translated (0.5f, 0.0f), clip, pos);
+                xOrigin[1] = pos.getX();
+                yOrigin[1] = pos.getY();
+            }
         }
     }
 
@@ -493,78 +497,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Image* bitmap1;
-    Image* bitmap2;
-    float xOrigin, yOrigin;
-
-    class AlphaBitmapRenderer
-    {
-    public:
-        AlphaBitmapRenderer (uint8* const data_, const int stride_) throw()
-            : data (data_), stride (stride_)
-        {
-        }
-
-        forcedinline void setEdgeTableYPos (const int y) throw()
-        {
-            lineStart = data + (stride * y);
-        }
-
-        forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
-        {
-            lineStart [x] = (uint8) alphaLevel;
-        }
-
-        forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
-        {
-            uint8* d = lineStart + x;
-
-            while (--width >= 0)
-                *d++ = (uint8) alphaLevel;
-        }
-
-    private:
-        uint8* const data;
-        const int stride;
-        uint8* lineStart;
-
-        AlphaBitmapRenderer (const AlphaBitmapRenderer&);
-        const AlphaBitmapRenderer& operator= (const AlphaBitmapRenderer&);
-    };
-
-    Image* createAlphaMapFromPath (const Path& path,
-                                   float& topLeftX, float& topLeftY,
-                                   float xScale, float yScale,
-                                   const float subPixelOffsetX) throw()
-    {
-        Image* im = 0;
-
-        float px, py, pw, ph;
-        path.getBounds (px, py, pw, ph);
-
-        topLeftX = floorf (px * xScale);
-        topLeftY = floorf (py * yScale);
-
-        const int bitmapWidth = roundFloatToInt (pw * xScale) + 2;
-        const int bitmapHeight = roundFloatToInt (ph * yScale) + 2;
-
-        im = new Image (Image::SingleChannel, bitmapWidth, bitmapHeight, true);
-
-        EdgeTable edgeTable (0, bitmapHeight, EdgeTable::Oversampling_16times);
-
-        edgeTable.addPath (path, AffineTransform::scale (xScale, yScale)
-                                                 .translated (subPixelOffsetX - topLeftX, -topLeftY));
-
-        int stride, pixelStride;
-        uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, bitmapWidth, bitmapHeight, stride, pixelStride);
-
-        jassert (pixelStride == 1);
-        AlphaBitmapRenderer renderer (pixels, stride);
-        edgeTable.iterate (renderer, 0, 0, bitmapWidth, bitmapHeight, 0);
-
-        im->releasePixelDataReadWrite (pixels);
-        return im;
-    }
+    Image* bitmap[2];
+    int xOrigin[2], yOrigin[2];
 
     FontGlyphAlphaMap (const FontGlyphAlphaMap&);
     const FontGlyphAlphaMap& operator= (const FontGlyphAlphaMap&);
@@ -677,8 +611,7 @@ void Font::renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, c
     getTypeface()->getOutlineForGlyph (glyphNumber, p);
 
     g.fillPath (p, AffineTransform::scale (font->height * font->horizontalScale, font->height)
-                                   .followedBy (transform),
-                EdgeTable::Oversampling_16times);
+                                   .followedBy (transform));
 }
 
 

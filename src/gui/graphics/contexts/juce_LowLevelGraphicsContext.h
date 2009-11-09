@@ -73,6 +73,9 @@ public:
     /** Cliping co-ords are relative to the origin. */
     virtual bool reduceClipRegion (const RectangleList& clipRegion) = 0;
 
+    //virtual bool clipToPath (const Path& path) = 0;
+    //virtual bool clipToImageAlpha (Image& image, int imageX, int imageY) = 0;
+
     /** Cliping co-ords are relative to the origin. */
     virtual void excludeClipRegion (int x, int y, int w, int h) = 0;
 
@@ -91,10 +94,10 @@ public:
 
     //==============================================================================
     virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
-    virtual void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality) = 0;
+    virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
     virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality) = 0;
+                                    const Image& image, int imageX, int imageY) = 0;
 
     virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
     virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,

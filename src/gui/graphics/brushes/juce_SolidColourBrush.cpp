@@ -70,7 +70,7 @@ void SolidColourBrush::paintPath (LowLevelGraphicsContext& context,
                                   const Path& path, const AffineTransform& transform) throw()
 {
     context.setColour (colour);
-    context.fillPath (path, transform, EdgeTable::Oversampling_4times);
+    context.fillPath (path, transform);
 }
 
 void SolidColourBrush::paintRectangle (LowLevelGraphicsContext& context,

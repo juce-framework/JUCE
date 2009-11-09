@@ -697,6 +697,33 @@ public:
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
 
+    //==============================================================================
+    /*class FillType
+    {
+    public:
+        FillType (const Colour& colour) throw();
+        FillType (const ColourGradient& gradient) throw();
+        FillType (Image* image, int x, int y) throw();
+        FillType (const FillType& other) throw();
+        const FillType& operator= (const FillType& other) throw();
+        ~FillType() throw();
+
+        bool isColour() const throw()       { return gradient == 0 && image == 0; }
+        bool isGradient() const throw()     { return gradient != 0; }
+        bool isTiledImage() const throw()   { return image != 0; }
+
+        void setColour (const Colour& newColour) throw();
+        void setGradient (const ColourGradient& newGradient) throw();
+        void setTiledImage (Image* image, const int imageX, const int imageY) throw();
+
+        Colour colour;
+        ColourGradient* gradient;
+        Image* image;
+        int imageX, imageY;
+
+        juce_UseDebuggingNewOperator
+    };*/
+
 private:
     //==============================================================================
     LowLevelGraphicsContext* const context;

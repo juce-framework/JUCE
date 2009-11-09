@@ -187,7 +187,7 @@ public:
         }
     }
 
-    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality)
+    void fillPath (const Path& path, const AffineTransform& transform)
     {
         CGContextSaveGState (context);
 
@@ -211,7 +211,7 @@ public:
     }
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality)
+                            const Image& image, int imageX, int imageY)
     {
         CGContextSaveGState (context);
         createPath (path, transform);

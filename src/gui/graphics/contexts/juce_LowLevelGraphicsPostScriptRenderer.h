@@ -69,10 +69,10 @@ public:
 
     //==============================================================================
     void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void fillPath (const Path& path, const AffineTransform& transform);
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY);
 
     void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,

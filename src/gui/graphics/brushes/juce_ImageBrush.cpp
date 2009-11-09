@@ -171,7 +171,7 @@ void ImageBrush::paintPath (LowLevelGraphicsContext& context,
 
             while (x < right)
             {
-                context.fillPathWithImage (path, transform, *image, x, y, EdgeTable::Oversampling_4times);
+                context.fillPathWithImage (path, transform, *image, x, y);
                 x += iw;
             }
 

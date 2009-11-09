@@ -374,14 +374,13 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (int x, int y, int w, int h, c
     {
         Path p;
         p.addRectangle ((float) x, (float) y, (float) w, (float) h);
-        fillPath (p, AffineTransform::identity, EdgeTable::Oversampling_256times);
+        fillPath (p, AffineTransform::identity);
     }
 
 }
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const AffineTransform& t,
-                                                    EdgeTable::OversamplingLevel /*quality*/)
+void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const AffineTransform& t)
 {
     if (gradient == 0)
     {
@@ -424,8 +423,7 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
 
 void LowLevelGraphicsPostScriptRenderer::fillPathWithImage (const Path& path, const AffineTransform& transform,
                                                             const Image& sourceImage,
-                                                            int imageX, int imageY,
-                                                            EdgeTable::OversamplingLevel /*quality*/)
+                                                            int imageX, int imageY)
 {
     writeClip();
 
@@ -593,7 +591,7 @@ void LowLevelGraphicsPostScriptRenderer::drawLine (double x1, double y1, double 
 {
     Path p;
     p.addLineSegment ((float) x1, (float) y1, (float) x2, (float) y2, 1.0f);
-    fillPath (p, AffineTransform::identity, EdgeTable::Oversampling_256times);
+    fillPath (p, AffineTransform::identity);
 }
 
 void LowLevelGraphicsPostScriptRenderer::drawVerticalLine (const int x, double top, double bottom)

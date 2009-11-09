@@ -1059,6 +1059,80 @@ static void renderAlphaMap (DestPixelType* destPixels,
 }
 
 //==============================================================================
+/*class ClippingPath
+{
+public:
+    ClippingPath (const Rectangle& r) throw()
+        : rectangles (r)
+    {
+    }
+
+    ClippingPath (const ClippingPath& other) throw()
+        : rectangles (other.rectangles), mask (other.mask)
+    {
+    }
+
+    ~ClippingPath() throw()
+    {
+        delete mask;
+    }
+
+    bool reduce (int x, int y, int w, int h) throw()
+    {
+        return clip.clipTo (Rectangle (x, y, w, h));
+    }
+
+    bool exclude (int x, int y, int w, int h) throw()
+    {
+        return clip.subtract (Rectangle (x, y, w, h));
+    }
+
+    bool reduce (const Path& p, const AffineTransform& transform)
+    {
+        float px, py, pw, ph;
+        p.getBoundsTransformed (transform, px, py, pw, ph);
+
+        Rectangle pathBounds ((int) px - 1, (int) py - 1, (int) pw + 3, (int) ph + 3);
+
+        if (clip.clipTo (pathBounds))
+        {
+        }
+    }
+
+    bool reduce (Image& image, int x, int y)
+    {
+    }
+
+    bool reduce (Image& image, const AffineTransform& transform)
+    {
+    }
+
+    class MaskImage  : public ReferenceCountedObject
+    {
+    public:
+        MaskImage (int x_, int y_, int w, int h) throw()
+            : x (x_), y (y_)
+        {
+            image = new Image (Image::SingleChannel, w, h, true);
+        }
+
+        ~MaskImage() throw()
+        {
+            delete image;
+        }
+
+        Image* image;
+        int x, y;
+    };
+
+    RectangleList clip;
+    ReferenceCountedObjectPtr<MaskImage> mask;
+
+private:
+};
+*/
+
+//==============================================================================
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image_)
     : image (image_),
       xOffset (0),
@@ -1207,7 +1281,7 @@ void LowLevelGraphicsSoftwareRenderer::fillRect (int x, int y, int w, int h, con
 
         Path p;
         p.addRectangle ((float) x, (float) y, (float) w, (float) h);
-        fillPath (p, AffineTransform::identity, EdgeTable::Oversampling_none);
+        fillPath (p, AffineTransform::identity);
     }
     else
     {
@@ -1269,26 +1343,26 @@ bool LowLevelGraphicsSoftwareRenderer::getPathBounds (int clipX, int clipY, int 
     return Rectangle::intersectRectangles (x, y, w, h, clipX, clipY, clipW, clipH);
 }
 
-void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality)
+void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform)
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
         const Rectangle& r = *i.getRectangle();
 
         clippedFillPath (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                         path, transform, quality);
+                         path, transform);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path,
-                                                        const AffineTransform& t, EdgeTable::OversamplingLevel quality)
+                                                        const AffineTransform& t)
 {
     const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
     int cx, cy, cw, ch;
 
     if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
     {
-        EdgeTable edgeTable (0, ch, quality);
+        EdgeTable edgeTable (0, ch);
         edgeTable.addPath (path, transform.translated ((float) -cx, (float) -cy));
 
         int stride, pixelStride;
@@ -1396,7 +1470,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                                          const Image& sourceImage, int imageX, int imageY, EdgeTable::OversamplingLevel quality)
+                                                          const Image& sourceImage, int imageX, int imageY)
 {
     imageX += xOffset;
     imageY += yOffset;
@@ -1407,16 +1481,16 @@ void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, cons
 
         clippedFillPathWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                   path, transform, sourceImage, imageX, imageY,
-                                  colour.getFloatAlpha(), quality);
+                                  colour.getFloatAlpha());
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, int w, int h, const Path& path, const AffineTransform& transform,
-                                                                 const Image& sourceImage, int imageX, int imageY, float opacity, EdgeTable::OversamplingLevel quality)
+                                                                 const Image& sourceImage, int imageX, int imageY, float opacity)
 {
     if (Rectangle::intersectRectangles (x, y, w, h, imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight()))
     {
-        EdgeTable edgeTable (0, h, quality);
+        EdgeTable edgeTable (0, h);
         edgeTable.addPath (path, transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
 
         int stride, pixelStride;

@@ -80,7 +80,7 @@ void GradientBrush::paintPath (LowLevelGraphicsContext& context,
                                const Path& path, const AffineTransform& transform) throw()
 {
     context.setGradient (gradient);
-    context.fillPath (path, transform, EdgeTable::Oversampling_4times);
+    context.fillPath (path, transform);
 }
 
 void GradientBrush::paintRectangle (LowLevelGraphicsContext& context,

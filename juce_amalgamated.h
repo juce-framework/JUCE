@@ -12934,7 +12934,13 @@ public:
         Call this on the public key object to encode some data, then use the matching
         private key object to decode it.
 
-        Returns false if the operation failed, e.g. if this object isn't a valid key.
+        Returns false if the operation couldn't be completed, e.g. if this key hasn't been
+        initialised correctly.
+
+        NOTE: This method dumbly applies this key to this data. If you encode some data
+        and then try to decode it with a key that doesn't match, this method will still
+        happily do its job and return true, but the result won't be what you were expecting.
+        It's your responsibility to check that the result is what you wanted.
     */
     bool applyToValue (BitArray& value) const throw();
 
@@ -16699,6 +16705,229 @@ private:
 #endif   // __JUCE_POINT_JUCEHEADER__
 /********* End of inlined file: juce_Point.h *********/
 
+/********* Start of inlined file: juce_Rectangle.h *********/
+#ifndef __JUCE_RECTANGLE_JUCEHEADER__
+#define __JUCE_RECTANGLE_JUCEHEADER__
+
+/**
+    A rectangle, specified using integer co-ordinates.
+
+    @see RectangleList, Path, Line, Point
+*/
+class JUCE_API  Rectangle
+{
+public:
+
+    /** Creates a rectangle of zero size.
+
+        The default co-ordinates will be (0, 0, 0, 0).
+    */
+    Rectangle() throw();
+
+    /** Creates a copy of another rectangle. */
+    Rectangle (const Rectangle& other) throw();
+
+    /** Creates a rectangle with a given position and size. */
+    Rectangle (const int x, const int y,
+               const int width, const int height) throw();
+
+    /** Creates a rectangle with a given size, and a position of (0, 0). */
+    Rectangle (const int width, const int height) throw();
+
+    /** Destructor. */
+    ~Rectangle() throw();
+
+    /** Returns the x co-ordinate of the rectangle's left-hand-side. */
+    inline int getX() const throw()                         { return x; }
+
+    /** Returns the y co-ordinate of the rectangle's top edge. */
+    inline int getY() const throw()                         { return y; }
+
+    /** Returns the width of the rectangle. */
+    inline int getWidth() const throw()                     { return w; }
+
+    /** Returns the height of the rectangle. */
+    inline int getHeight() const throw()                    { return h; }
+
+    /** Returns the x co-ordinate of the rectangle's right-hand-side. */
+    inline int getRight() const throw()                     { return x + w; }
+
+    /** Returns the y co-ordinate of the rectangle's bottom edge. */
+    inline int getBottom() const throw()                    { return y + h; }
+
+    /** Returns the x co-ordinate of the rectangle's centre. */
+    inline int getCentreX() const throw()                   { return x + (w >> 1); }
+
+    /** Returns the y co-ordinate of the rectangle's centre. */
+    inline int getCentreY() const throw()                   { return y + (h >> 1); }
+
+    /** Returns true if the rectangle's width and height are both zero or less */
+    bool isEmpty() const throw();
+
+    /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
+    void setPosition (const int x, const int y) throw();
+
+    /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
+    void setSize (const int w, const int h) throw();
+
+    /** Changes all the rectangle's co-ordinates. */
+    void setBounds (const int newX, const int newY,
+                    const int newWidth, const int newHeight) throw();
+
+    /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
+        If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
+    */
+    void setLeft (const int newLeft) throw();
+
+    /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
+        If the y is moved to be below the current bottom edge, the height will be set to zero.
+    */
+    void setTop (const int newTop) throw();
+
+    /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
+        If the new right is below the current X value, the X will be pushed down to match it.
+        @see getRight
+    */
+    void setRight (const int newRight) throw();
+
+    /** Adjusts the height so that the bottom edge of the rectangle has this new value.
+        If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
+        @see getBottom
+    */
+    void setBottom (const int newBottom) throw();
+
+    /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
+    void translate (const int deltaX,
+                    const int deltaY) throw();
+
+    /** Returns a rectangle which is the same as this one moved by a given amount. */
+    const Rectangle translated (const int deltaX,
+                                const int deltaY) const throw();
+
+    /** Expands the rectangle by a given amount.
+
+        Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
+        @see expanded, reduce, reduced
+    */
+    void expand (const int deltaX,
+                 const int deltaY) throw();
+
+    /** Returns a rectangle that is larger than this one by a given amount.
+
+        Effectively, the rectangle returned is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
+        @see expand, reduce, reduced
+    */
+    const Rectangle expanded (const int deltaX,
+                              const int deltaY) const throw();
+
+    /** Shrinks the rectangle by a given amount.
+
+        Effectively, its new size is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
+        @see reduced, expand, expanded
+    */
+    void reduce (const int deltaX,
+                 const int deltaY) throw();
+
+    /** Returns a rectangle that is smaller than this one by a given amount.
+
+        Effectively, the rectangle returned is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
+        @see reduce, expand, expanded
+    */
+    const Rectangle reduced (const int deltaX,
+                             const int deltaY) const throw();
+
+    /** Returns true if the two rectangles are identical. */
+    bool operator== (const Rectangle& other) const throw();
+
+    /** Returns true if the two rectangles are not identical. */
+    bool operator!= (const Rectangle& other) const throw();
+
+    /** Returns true if this co-ordinate is inside the rectangle. */
+    bool contains (const int x, const int y) const throw();
+
+    /** Returns true if this other rectangle is completely inside this one. */
+    bool contains (const Rectangle& other) const throw();
+
+    /** Returns true if any part of another rectangle overlaps this one. */
+    bool intersects (const Rectangle& other) const throw();
+
+    /** Returns the region that is the overlap between this and another rectangle.
+
+        If the two rectangles don't overlap, the rectangle returned will be empty.
+    */
+    const Rectangle getIntersection (const Rectangle& other) const throw();
+
+    /** Clips a rectangle so that it lies only within this one.
+
+        This is a non-static version of intersectRectangles().
+
+        Returns false if the two regions didn't overlap.
+    */
+    bool intersectRectangle (int& x, int& y, int& w, int& h) const throw();
+
+    /** Returns the smallest rectangle that contains both this one and the one
+        passed-in.
+    */
+    const Rectangle getUnion (const Rectangle& other) const throw();
+
+    /** If this rectangle merged with another one results in a simple rectangle, this
+        will set this rectangle to the result, and return true.
+
+        Returns false and does nothing to this rectangle if the two rectangles don't overlap,
+        or if they form a complex region.
+    */
+    bool enlargeIfAdjacent (const Rectangle& other) throw();
+
+    /** If after removing another rectangle from this one the result is a simple rectangle,
+        this will set this object's bounds to be the result, and return true.
+
+        Returns false and does nothing to this rectangle if the two rectangles don't overlap,
+        or if removing the other one would form a complex region.
+    */
+    bool reduceIfPartlyContainedIn (const Rectangle& other) throw();
+
+    /** Static utility to intersect two sets of rectangular co-ordinates.
+
+        Returns false if the two regions didn't overlap.
+
+        @see intersectRectangle
+    */
+    static bool intersectRectangles (int& x1, int& y1, int& w1, int& h1,
+                                     int x2, int y2, int w2, int h2) throw();
+
+    /** Creates a string describing this rectangle.
+
+        The string will be of the form "x y width height", e.g. "100 100 400 200".
+
+        Coupled with the fromString() method, this is very handy for things like
+        storing rectangles (particularly component positions) in XML attributes.
+
+        @see fromString
+    */
+    const String toString() const throw();
+
+    /** Parses a string containing a rectangle's details.
+
+        The string should contain 4 integer tokens, in the form "x y width height". They
+        can be comma or whitespace separated.
+
+        This method is intended to go with the toString() method, to form an easy way
+        of saving/loading rectangles as strings.
+
+        @see toString
+    */
+    static const Rectangle fromString (const String& stringVersion);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class RectangleList;
+    int x, y, w, h;
+};
+
+#endif   // __JUCE_RECTANGLE_JUCEHEADER__
+/********* End of inlined file: juce_Rectangle.h *********/
+
 /********* Start of inlined file: juce_Justification.h *********/
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
 #define __JUCE_JUSTIFICATION_JUCEHEADER__
@@ -16840,6 +17069,219 @@ private:
 
 #endif   // __JUCE_JUSTIFICATION_JUCEHEADER__
 /********* End of inlined file: juce_Justification.h *********/
+
+/********* Start of inlined file: juce_EdgeTable.h *********/
+#ifndef __JUCE_EDGETABLE_JUCEHEADER__
+#define __JUCE_EDGETABLE_JUCEHEADER__
+
+class Path;
+class Image;
+class Rectangle;
+
+/**
+    A table of horizontal scan-line segments - used for rasterising Paths.
+
+    @see Path, Graphics
+*/
+class JUCE_API  EdgeTable
+{
+public:
+
+    /** Creates an empty edge table ready to have paths added.
+
+        A table is created with a fixed vertical size, and only sections of paths
+        which lie within their range will be added to the table.
+
+        @param topY                     the lowest y co-ordinate that the table can contain
+        @param height                   the number of horizontal lines it can contain
+    */
+    EdgeTable (const int topY, const int height) throw();
+
+    /** Creates a copy of another edge table. */
+    EdgeTable (const EdgeTable& other) throw();
+
+    /** Copies from another edge table. */
+    const EdgeTable& operator= (const EdgeTable& other) throw();
+
+    /** Destructor. */
+    ~EdgeTable() throw();
+
+    /** Adds edges to the table for a path.
+
+        This will add horizontal lines to the edge table for any parts of the path
+        which lie within the vertical bounds for which this table was created.
+
+        @param path         the path to add
+        @param transform    an optional transform to apply to the path while it's
+                            being added
+    */
+    void addPath (const Path& path,
+                  const AffineTransform& transform) throw();
+
+    /*void clipToRectangle (const Rectangle& r) throw();
+    void intersectWith (const EdgeTable& other);
+    void generateFromImageAlpha (Image& image, int x, int y) throw();*/
+
+    /** Reduces the amount of space the table has allocated.
+
+        This will shrink the table down to use as little memory as possible - useful for
+        read-only tables that get stored and re-used for rendering.
+    */
+    void optimiseTable() throw();
+
+    /** Iterates the lines in the table, for rendering.
+
+        This function will iterate each line in the table, and call a user-defined class
+        to render each pixel or continuous line of pixels that the table contains.
+
+        @param iterationCallback    this templated class must contain the following methods:
+                                        @code
+                                        inline void setEdgeTableYPos (int y);
+                                        inline void handleEdgeTablePixel (int x, int alphaLevel) const;
+                                        inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
+                                        @endcode
+                                        (these don't necessarily have to be 'const', but it might help it go faster)
+        @param clipLeft             the left-hand edge of the rectangle which should be iterated
+        @param clipTop              the top edge of the rectangle which should be iterated
+        @param clipRight            the right-hand edge of the rectangle which should be iterated
+        @param clipBottom           the bottom edge of the rectangle which should be iterated
+        @param subPixelXOffset      a fraction of 1 pixel by which to shift the table rightwards, in the range 0 to 255
+    */
+    template <class EdgeTableIterationCallback>
+    void iterate (EdgeTableIterationCallback& iterationCallback,
+                  const int clipLeft, int clipTop,
+                  const int clipRight, int clipBottom,
+                  const int subPixelXOffset) const throw()
+    {
+        if (clipTop < top)
+            clipTop = top;
+
+        if (clipBottom > top + height)
+            clipBottom = top + height;
+
+        const int* lineStart = table + lineStrideElements * (clipTop - top);
+
+        for (int y = clipTop; y < clipBottom; ++y)
+        {
+            const int* line = lineStart;
+            lineStart += lineStrideElements;
+            int numPoints = line[0];
+
+            if (--numPoints > 0)
+            {
+                int x = subPixelXOffset + *++line;
+                int level = *++line;
+                int levelAccumulator = 0;
+
+                iterationCallback.setEdgeTableYPos (y);
+
+                while (--numPoints >= 0)
+                {
+                    int correctedLevel = abs (level);
+                    if (correctedLevel >> 8)
+                    {
+                        if (nonZeroWinding)
+                        {
+                            correctedLevel = 0xff;
+                        }
+                        else
+                        {
+                            correctedLevel &= 511;
+                            if (correctedLevel >> 8)
+                                correctedLevel = 511 - correctedLevel;
+                        }
+                    }
+
+                    const int endX = subPixelXOffset + *++line;
+                    jassert (endX >= x);
+                    int endOfRun = (endX >> 8);
+
+                    if (endOfRun == (x >> 8))
+                    {
+                        // small segment within the same pixel, so just save it for the next
+                        // time round..
+                        levelAccumulator += (endX - x) * correctedLevel;
+                    }
+                    else
+                    {
+                        // plot the fist pixel of this segment, including any accumulated
+                        // levels from smaller segments that haven't been drawn yet
+                        levelAccumulator += (0xff - (x & 0xff)) * correctedLevel;
+
+                        x >>= 8;
+                        if (x >= clipRight)
+                        {
+                            levelAccumulator = 0;
+                            break;
+                        }
+
+                        if (x >= clipLeft)
+                        {
+                            levelAccumulator >>= 8;
+                            if (levelAccumulator > 0)
+                                iterationCallback.handleEdgeTablePixel (x, jmin (0xff, levelAccumulator));
+                        }
+
+                        if (++x >= clipRight)
+                        {
+                            levelAccumulator = 0;
+                            break;
+                        }
+
+                        // if there's a segment of solid pixels, do it all in one go..
+                        if (correctedLevel > 0 && endOfRun > x)
+                        {
+                            if (x < clipLeft)
+                                x = clipLeft;
+
+                            if (endOfRun > clipRight)
+                                endOfRun = clipRight;
+
+                            const int numPix = endOfRun - x;
+
+                            if (numPix > 0)
+                                iterationCallback.handleEdgeTableLine (x, numPix,
+                                                                       jmin (correctedLevel, 0xff));
+                        }
+
+                        // save the bit at the end to be drawn next time round the loop.
+                        levelAccumulator = (endX & 0xff) * correctedLevel;
+                    }
+
+                    level += *++line;
+                    x = endX;
+                }
+
+                if (levelAccumulator > 0)
+                {
+                    levelAccumulator >>= 8;
+                    if (levelAccumulator >> 8)
+                        levelAccumulator = 0xff;
+
+                    x >>= 8;
+                    if (x >= clipLeft && x < clipRight)
+                        iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                }
+            }
+        }
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
+    int* table;
+    int top, height, maxEdgesPerLine, lineStrideElements;
+    bool nonZeroWinding;
+
+    void addEdgePoint (const int x, const int y, const int winding) throw();
+    void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
+};
+
+#endif   // __JUCE_EDGETABLE_JUCEHEADER__
+/********* End of inlined file: juce_EdgeTable.h *********/
+
+class Image;
 
 /**
     A path is a sequence of lines and curves that may either form a closed shape
@@ -17408,6 +17850,21 @@ public:
     */
     void restoreFromString (const String& stringVersion);
 
+    /** Creates a single-channel bitmap containing a mask of this path.
+
+        The smallest bitmap that contains the path will be created, and on return, the
+        imagePosition rectangle indicates the position of the newly created image, relative
+        to the path's origin.
+
+        Only the intersection of the path's bounds with the specified clipRegion rectangle
+        will be rendered.
+
+        If the path is empty or doesn't intersect the clip region, this may return 0.
+    */
+    Image* createMaskBitmap (const AffineTransform& transform,
+                             const Rectangle& clipRegion,
+                             Rectangle& imagePosition) const throw();
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -17961,229 +18418,6 @@ private:
 
 #endif   // __JUCE_FONT_JUCEHEADER__
 /********* End of inlined file: juce_Font.h *********/
-
-/********* Start of inlined file: juce_Rectangle.h *********/
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
-#define __JUCE_RECTANGLE_JUCEHEADER__
-
-/**
-    A rectangle, specified using integer co-ordinates.
-
-    @see RectangleList, Path, Line, Point
-*/
-class JUCE_API  Rectangle
-{
-public:
-
-    /** Creates a rectangle of zero size.
-
-        The default co-ordinates will be (0, 0, 0, 0).
-    */
-    Rectangle() throw();
-
-    /** Creates a copy of another rectangle. */
-    Rectangle (const Rectangle& other) throw();
-
-    /** Creates a rectangle with a given position and size. */
-    Rectangle (const int x, const int y,
-               const int width, const int height) throw();
-
-    /** Creates a rectangle with a given size, and a position of (0, 0). */
-    Rectangle (const int width, const int height) throw();
-
-    /** Destructor. */
-    ~Rectangle() throw();
-
-    /** Returns the x co-ordinate of the rectangle's left-hand-side. */
-    inline int getX() const throw()                         { return x; }
-
-    /** Returns the y co-ordinate of the rectangle's top edge. */
-    inline int getY() const throw()                         { return y; }
-
-    /** Returns the width of the rectangle. */
-    inline int getWidth() const throw()                     { return w; }
-
-    /** Returns the height of the rectangle. */
-    inline int getHeight() const throw()                    { return h; }
-
-    /** Returns the x co-ordinate of the rectangle's right-hand-side. */
-    inline int getRight() const throw()                     { return x + w; }
-
-    /** Returns the y co-ordinate of the rectangle's bottom edge. */
-    inline int getBottom() const throw()                    { return y + h; }
-
-    /** Returns the x co-ordinate of the rectangle's centre. */
-    inline int getCentreX() const throw()                   { return x + (w >> 1); }
-
-    /** Returns the y co-ordinate of the rectangle's centre. */
-    inline int getCentreY() const throw()                   { return y + (h >> 1); }
-
-    /** Returns true if the rectangle's width and height are both zero or less */
-    bool isEmpty() const throw();
-
-    /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const int x, const int y) throw();
-
-    /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
-    void setSize (const int w, const int h) throw();
-
-    /** Changes all the rectangle's co-ordinates. */
-    void setBounds (const int newX, const int newY,
-                    const int newWidth, const int newHeight) throw();
-
-    /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
-        If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
-    */
-    void setLeft (const int newLeft) throw();
-
-    /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
-        If the y is moved to be below the current bottom edge, the height will be set to zero.
-    */
-    void setTop (const int newTop) throw();
-
-    /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
-        If the new right is below the current X value, the X will be pushed down to match it.
-        @see getRight
-    */
-    void setRight (const int newRight) throw();
-
-    /** Adjusts the height so that the bottom edge of the rectangle has this new value.
-        If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
-        @see getBottom
-    */
-    void setBottom (const int newBottom) throw();
-
-    /** Moves the rectangle's position by adding amount to its x and y co-ordinates. */
-    void translate (const int deltaX,
-                    const int deltaY) throw();
-
-    /** Returns a rectangle which is the same as this one moved by a given amount. */
-    const Rectangle translated (const int deltaX,
-                                const int deltaY) const throw();
-
-    /** Expands the rectangle by a given amount.
-
-        Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
-        @see expanded, reduce, reduced
-    */
-    void expand (const int deltaX,
-                 const int deltaY) throw();
-
-    /** Returns a rectangle that is larger than this one by a given amount.
-
-        Effectively, the rectangle returned is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
-        @see expand, reduce, reduced
-    */
-    const Rectangle expanded (const int deltaX,
-                              const int deltaY) const throw();
-
-    /** Shrinks the rectangle by a given amount.
-
-        Effectively, its new size is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
-        @see reduced, expand, expanded
-    */
-    void reduce (const int deltaX,
-                 const int deltaY) throw();
-
-    /** Returns a rectangle that is smaller than this one by a given amount.
-
-        Effectively, the rectangle returned is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
-        @see reduce, expand, expanded
-    */
-    const Rectangle reduced (const int deltaX,
-                             const int deltaY) const throw();
-
-    /** Returns true if the two rectangles are identical. */
-    bool operator== (const Rectangle& other) const throw();
-
-    /** Returns true if the two rectangles are not identical. */
-    bool operator!= (const Rectangle& other) const throw();
-
-    /** Returns true if this co-ordinate is inside the rectangle. */
-    bool contains (const int x, const int y) const throw();
-
-    /** Returns true if this other rectangle is completely inside this one. */
-    bool contains (const Rectangle& other) const throw();
-
-    /** Returns true if any part of another rectangle overlaps this one. */
-    bool intersects (const Rectangle& other) const throw();
-
-    /** Returns the region that is the overlap between this and another rectangle.
-
-        If the two rectangles don't overlap, the rectangle returned will be empty.
-    */
-    const Rectangle getIntersection (const Rectangle& other) const throw();
-
-    /** Clips a rectangle so that it lies only within this one.
-
-        This is a non-static version of intersectRectangles().
-
-        Returns false if the two regions didn't overlap.
-    */
-    bool intersectRectangle (int& x, int& y, int& w, int& h) const throw();
-
-    /** Returns the smallest rectangle that contains both this one and the one
-        passed-in.
-    */
-    const Rectangle getUnion (const Rectangle& other) const throw();
-
-    /** If this rectangle merged with another one results in a simple rectangle, this
-        will set this rectangle to the result, and return true.
-
-        Returns false and does nothing to this rectangle if the two rectangles don't overlap,
-        or if they form a complex region.
-    */
-    bool enlargeIfAdjacent (const Rectangle& other) throw();
-
-    /** If after removing another rectangle from this one the result is a simple rectangle,
-        this will set this object's bounds to be the result, and return true.
-
-        Returns false and does nothing to this rectangle if the two rectangles don't overlap,
-        or if removing the other one would form a complex region.
-    */
-    bool reduceIfPartlyContainedIn (const Rectangle& other) throw();
-
-    /** Static utility to intersect two sets of rectangular co-ordinates.
-
-        Returns false if the two regions didn't overlap.
-
-        @see intersectRectangle
-    */
-    static bool intersectRectangles (int& x1, int& y1, int& w1, int& h1,
-                                     int x2, int y2, int w2, int h2) throw();
-
-    /** Creates a string describing this rectangle.
-
-        The string will be of the form "x y width height", e.g. "100 100 400 200".
-
-        Coupled with the fromString() method, this is very handy for things like
-        storing rectangles (particularly component positions) in XML attributes.
-
-        @see fromString
-    */
-    const String toString() const throw();
-
-    /** Parses a string containing a rectangle's details.
-
-        The string should contain 4 integer tokens, in the form "x y width height". They
-        can be comma or whitespace separated.
-
-        This method is intended to go with the toString() method, to form an easy way
-        of saving/loading rectangles as strings.
-
-        @see toString
-    */
-    static const Rectangle fromString (const String& stringVersion);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class RectangleList;
-    int x, y, w, h;
-};
-
-#endif   // __JUCE_RECTANGLE_JUCEHEADER__
-/********* End of inlined file: juce_Rectangle.h *********/
 
 /********* Start of inlined file: juce_PathStrokeType.h *********/
 #ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
@@ -20365,6 +20599,32 @@ public:
 
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
+
+    /*class FillType
+    {
+    public:
+        FillType (const Colour& colour) throw();
+        FillType (const ColourGradient& gradient) throw();
+        FillType (Image* image, int x, int y) throw();
+        FillType (const FillType& other) throw();
+        const FillType& operator= (const FillType& other) throw();
+        ~FillType() throw();
+
+        bool isColour() const throw()       { return gradient == 0 && image == 0; }
+        bool isGradient() const throw()     { return gradient != 0; }
+        bool isTiledImage() const throw()   { return image != 0; }
+
+        void setColour (const Colour& newColour) throw();
+        void setGradient (const ColourGradient& newGradient) throw();
+        void setTiledImage (Image* image, const int imageX, const int imageY) throw();
+
+        Colour colour;
+        ColourGradient* gradient;
+        Image* image;
+        int imageX, imageY;
+
+        juce_UseDebuggingNewOperator
+    };*/
 
 private:
 
@@ -39573,279 +39833,6 @@ private:
 #endif
 #ifndef __JUCE_EDGETABLE_JUCEHEADER__
 
-/********* Start of inlined file: juce_EdgeTable.h *********/
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
-#define __JUCE_EDGETABLE_JUCEHEADER__
-
-class Path;
-
-static const int juce_edgeTableDefaultEdgesPerLine = 10;
-
-/**
-    A table of horizontal scan-line segments - used for rasterising Paths.
-
-    @see Path, Graphics
-*/
-class JUCE_API  EdgeTable
-{
-public:
-
-    /** Indicates the quality at which the edge table should be generated.
-
-        Higher values will have better quality anti-aliasing, but will take
-        longer to generate the edge table and to render it.
-    */
-    enum OversamplingLevel
-    {
-        Oversampling_none       = 0,    /**< No vertical anti-aliasing at all. */
-        Oversampling_4times     = 2,    /**< Anti-aliased with 4 levels of grey - good enough for normal use. */
-        Oversampling_16times    = 4,    /**< Anti-aliased with 16 levels of grey - very good quality. */
-        Oversampling_32times    = 5,    /**< Anti-aliased with 32 levels of grey - very good quality but slower. */
-        Oversampling_256times   = 8     /**< Anti-aliased with 256 levels of grey - best quality, but too slow for
-                                             normal user-interface use. */
-    };
-
-    /** Creates an empty edge table ready to have paths added.
-
-        A table is created with a fixed vertical size, and only sections of paths
-        which lie within their range will be added to the table.
-
-        @param topY                     the lowest y co-ordinate that the table can contain
-        @param height                   the number of horizontal lines it can contain
-        @param verticalOversampling     the amount of oversampling used for anti-aliasing
-        @param expectedEdgesPerLine     used to optimise the table's internal data usage - it's not
-                                        worth changing this except for very special purposes
-    */
-    EdgeTable (const int topY,
-               const int height,
-               const OversamplingLevel verticalOversampling = Oversampling_4times,
-               const int expectedEdgesPerLine = juce_edgeTableDefaultEdgesPerLine) throw();
-
-    /** Creates a copy of another edge table. */
-    EdgeTable (const EdgeTable& other) throw();
-
-    /** Copies from another edge table. */
-    const EdgeTable& operator= (const EdgeTable& other) throw();
-
-    /** Destructor. */
-    ~EdgeTable() throw();
-
-    /** Adds edges to the table for a path.
-
-        This will add horizontal lines to the edge table for any parts of the path
-        which lie within the vertical bounds for which this table was created.
-
-        @param path         the path to add
-        @param transform    an optional transform to apply to the path while it's
-                            being added
-    */
-    void addPath (const Path& path,
-                  const AffineTransform& transform) throw();
-
-    /** Reduces the amount of space the table has allocated.
-
-        This will shrink the table down to use as little memory as possible - useful for
-        read-only tables that get stored and re-used for rendering.
-    */
-    void optimiseTable() throw();
-
-    /** Iterates the lines in the table, for rendering.
-
-        This function will iterate each line in the table, and call a user-defined class
-        to render each pixel or continuous line of pixels that the table contains.
-
-        @param iterationCallback    this templated class must contain the following methods:
-                                        @code
-                                        inline void setEdgeTableYPos (int y);
-                                        inline void handleEdgeTablePixel (int x, int alphaLevel) const;
-                                        inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
-                                        @endcode
-                                        (these don't necessarily have to be 'const', but it might help it go faster)
-        @param clipLeft             the left-hand edge of the rectangle which should be iterated
-        @param clipTop              the top edge of the rectangle which should be iterated
-        @param clipRight            the right-hand edge of the rectangle which should be iterated
-        @param clipBottom           the bottom edge of the rectangle which should be iterated
-        @param subPixelXOffset      a fraction of 1 pixel by which to shift the table rightwards, in the range 0 to 255
-    */
-    template <class EdgeTableIterationCallback>
-    void iterate (EdgeTableIterationCallback& iterationCallback,
-                  const int clipLeft,
-                  int clipTop,
-                  const int clipRight,
-                  int clipBottom,
-                  const int subPixelXOffset) const
-    {
-        if (clipTop < top)
-            clipTop = top;
-
-        if (clipBottom > top + height)
-            clipBottom = top + height;
-
-        const int* singleLine = table + lineStrideElements
-                                          * ((clipTop - top) << (int) oversampling);
-
-        int mergedLineAllocation = 128;
-        MemoryBlock temp (mergedLineAllocation * (2 * sizeof (int)));
-        int* mergedLine = (int*) temp.getData();
-
-        const int timesOverSampling = 1 << (int) oversampling;
-
-        for (int y = clipTop; y < clipBottom; ++y)
-        {
-            int numMergedPoints = 0;
-
-            // sort all the oversampled lines into a single merged line ready to draw..
-            for (int over = timesOverSampling; --over >= 0;)
-            {
-                const int* l = singleLine;
-                singleLine += lineStrideElements;
-
-                int num = *l;
-                jassert (num >= 0);
-
-                if (num > 0)
-                {
-                    if (numMergedPoints + num >= mergedLineAllocation)
-                    {
-                        mergedLineAllocation = (numMergedPoints + num + 0x100) & ~0xff;
-                        temp.setSize (mergedLineAllocation * (2 * sizeof (int)), false);
-                        mergedLine = (int*) temp.getData();
-                    }
-
-                    while (--num >= 0)
-                    {
-                        const int x = *++l;
-                        const int winding = *++l;
-
-                        int n = numMergedPoints << 1;
-
-                        while (n > 0)
-                        {
-                            const int cx = mergedLine [n - 2];
-
-                            if (cx <= x)
-                                break;
-
-                            mergedLine [n] = cx;
-                            --n;
-                            mergedLine [n + 2] = mergedLine [n];
-                            --n;
-                        }
-
-                        mergedLine [n] = x;
-                        mergedLine [n + 1] = winding;
-
-                        ++numMergedPoints;
-                    }
-                }
-            }
-
-            if (--numMergedPoints > 0)
-            {
-                const int* line = mergedLine;
-                int x = subPixelXOffset + *line;
-                int level = *++line;
-                int levelAccumulator = 0;
-
-                iterationCallback.setEdgeTableYPos (y);
-
-                while (--numMergedPoints >= 0)
-                {
-                    const int endX = subPixelXOffset + *++line;
-                    jassert (endX >= x);
-
-                    const int absLevel = abs (level);
-                    int endOfRun = (endX >> 8);
-
-                    if (endOfRun == (x >> 8))
-                    {
-                        // small segment within the same pixel, so just save it for the next
-                        // time round..
-                        levelAccumulator += (endX - x) * absLevel;
-                    }
-                    else
-                    {
-                        // plot the fist pixel of this segment, including any accumulated
-                        // levels from smaller segments that haven't been drawn yet
-                        levelAccumulator += (0xff - (x & 0xff)) * absLevel;
-
-                        levelAccumulator >>= 8;
-                        if (levelAccumulator > 0xff)
-                            levelAccumulator = 0xff;
-
-                        x >>= 8;
-
-                        if (x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
-                        }
-
-                        if (x >= clipLeft && x < clipRight && levelAccumulator > 0)
-                            iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-
-                        if (++x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
-                        }
-
-                        // if there's a segment of solid pixels, do it all in one go..
-                        if (absLevel > 0 && endOfRun > x)
-                        {
-                            if (x < clipLeft)
-                                x = clipLeft;
-
-                            if (endOfRun > clipRight)
-                                endOfRun = clipRight;
-
-                            const int numPix = endOfRun - x;
-
-                            if (numPix > 0)
-                                iterationCallback.handleEdgeTableLine (x, numPix,
-                                                                       jmin (absLevel, 0xff));
-                        }
-
-                        // save the bit at the end to be drawn next time round the loop.
-                        levelAccumulator = (endX & 0xff) * absLevel;
-                    }
-
-                    level += *++line;
-                    x = endX;
-                }
-
-                if (levelAccumulator > 0)
-                {
-                    levelAccumulator >>= 8;
-                    if (levelAccumulator > 0xff)
-                        levelAccumulator = 0xff;
-
-                    x >>= 8;
-                    if (x >= clipLeft && x < clipRight)
-                        iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-                }
-            }
-        }
-    }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-    int* table;
-    int top, height, maxEdgesPerLine, lineStrideElements;
-    OversamplingLevel oversampling;
-
-    // this will assume that the y co-ord is within bounds, and will avoid checking
-    // this for speed.
-    void addEdgePoint (const int x, const int y, const int winding) throw();
-
-    void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
-};
-
-#endif   // __JUCE_EDGETABLE_JUCEHEADER__
-/********* End of inlined file: juce_EdgeTable.h *********/
-
 #endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
 
@@ -39894,6 +39881,9 @@ public:
     /** Cliping co-ords are relative to the origin. */
     virtual bool reduceClipRegion (const RectangleList& clipRegion) = 0;
 
+    //virtual bool clipToPath (const Path& path) = 0;
+    //virtual bool clipToImageAlpha (Image& image, int imageX, int imageY) = 0;
+
     /** Cliping co-ords are relative to the origin. */
     virtual void excludeClipRegion (int x, int y, int w, int h) = 0;
 
@@ -39910,10 +39900,10 @@ public:
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
     virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
-    virtual void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality) = 0;
+    virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
     virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality) = 0;
+                                    const Image& image, int imageX, int imageY) = 0;
 
     virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
     virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
@@ -39980,10 +39970,10 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void fillPath (const Path& path, const AffineTransform& transform);
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY);
 
     void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
@@ -40048,9 +40038,9 @@ protected:
 
     void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
 
-    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform);
     void clippedFillPathWithImage (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform,
-                                   const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+                                   const Image& image, int imageX, int imageY, float alpha);
 
     void clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY);
     void clippedFillAlphaChannelWithImage (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY,
@@ -40124,10 +40114,10 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
-    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+    void fillPath (const Path& path, const AffineTransform& transform);
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY);
 
     void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
