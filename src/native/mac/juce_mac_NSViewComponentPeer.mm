@@ -66,6 +66,7 @@ END_JUCE_NAMESPACE
 - (void) scrollWheel: (NSEvent*) ev;
 - (BOOL) acceptsFirstMouse: (NSEvent*) ev;
 - (void) frameChanged: (NSNotification*) n;
+- (void) viewDidMoveToWindow;
 
 - (void) keyDown: (NSEvent*) ev;
 - (void) keyUp: (NSEvent*) ev;
@@ -186,6 +187,8 @@ public:
     virtual bool windowShouldClose();
 
     virtual void redirectMovedOrResized();
+    virtual void viewMovedToWindow();
+
     virtual NSRect constrainRect (NSRect r);
 
     static void showArrowCursorIfNeeded();
@@ -366,6 +369,12 @@ END_JUCE_NAMESPACE
 {
     if (owner != 0)
         owner->redirectMovedOrResized();
+}
+
+- (void) viewDidMoveToWindow
+{
+   if (owner != 0)
+       owner->viewMovedToWindow();
 }
 
 - (void) asyncRepaint: (id) rect
@@ -1496,6 +1505,12 @@ bool NSViewComponentPeer::windowShouldClose()
 void NSViewComponentPeer::redirectMovedOrResized()
 {
     handleMovedOrResized();
+}
+
+void NSViewComponentPeer::viewMovedToWindow()
+{
+    if (isSharedWindow)
+        window = [view window];
 }
 
 //==============================================================================

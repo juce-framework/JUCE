@@ -302,10 +302,7 @@ public:
         : document (document_),
           isHeader (showHeaderFileFirst)
     {
-        addAndMakeVisible (editor = new TextEditor());
-        editor->setMultiLine (true, false);
-        editor->setReadOnly (true);
-        editor->setFont (Font (Font::getDefaultMonospacedFontName(), 13.0f, Font::plain));
+        addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, &tokeniser));
 
         addAndMakeVisible (switchButton = new TextButton (String::empty));
         switchButton->addButtonListener (this);
@@ -322,7 +319,7 @@ public:
     void showFile (const bool isHeader_)
     {
         isHeader = isHeader_;
-        editor->setText (isHeader ? h : cpp, false);
+        editor->loadContent (isHeader ? h : cpp);
         switchButton->setButtonText (isHeader ? T("Show .cpp") : T("Show .h"));
     }
 
@@ -351,7 +348,9 @@ private:
     JucerDocument& document;
     String h, cpp;
     bool isHeader;
-    TextEditor* editor;
+    CodeDocument codeDocument;
+    CPlusPlusCodeTokeniser tokeniser;
+    CodeEditorComponent* editor;
     TextButton* switchButton;
 
     static bool showHeaderFileFirst;

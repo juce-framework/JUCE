@@ -13,6 +13,8 @@
 *.idb
 *.manifest
 *.manifest.res
+*.o
+*.d
 extras/juce demo/build/macosx/build
 extras/juce demo/build/win32_vc8/Debug
 extras/juce demo/build/win32_vc8/Release
