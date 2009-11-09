@@ -185,6 +185,11 @@ bool FileBrowserComponent::currentFileIsValid() const
     return false;
 }
 
+const File FileBrowserComponent::getHighlightedFile() const throw()
+{
+    return fileListComponent->getSelectedFile();
+}
+
 //==============================================================================
 const File FileBrowserComponent::getRoot() const
 {

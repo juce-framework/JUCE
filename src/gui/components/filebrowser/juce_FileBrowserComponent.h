@@ -99,7 +99,8 @@ public:
     ~FileBrowserComponent();
 
     //==============================================================================
-    /**
+    /** Returns the file that the user has currently chosen.
+        @see getHighlightedFile
     */
     const File getCurrentFile() const throw();
 
@@ -111,6 +112,13 @@ public:
         exists. In a "save" mode, a non-existent file would also be valid.
     */
     bool currentFileIsValid() const;
+
+    /** This returns the item in the view that is currently highlighted.
+        This may be different from getCurrentFile(), which returns the value
+        that is shown in the filename box.
+        @see getCurrentFile
+    */
+    const File getHighlightedFile() const throw();
 
     //==============================================================================
     /** Returns the directory whose contents are currently being shown in the listbox. */
