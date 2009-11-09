@@ -947,11 +947,10 @@ public:
         const int inputIndex = inputNames.indexOf (inputDeviceName);
         const int outputIndex = outputNames.indexOf (outputDeviceName);
 
-        String deviceName (outputDeviceName);
-        if (deviceName.isEmpty())
-            deviceName = inputDeviceName;
+        String deviceName (outputIndex >= 0 ? outputDeviceName
+                                            : inputDeviceName);
 
-        if (index >= 0)
+        if (inputIndex >= 0 || outputIndex >= 0)
             return new ALSAAudioIODevice (deviceName,
                                           inputIds [inputIndex],
                                           outputIds [outputIndex]);
