@@ -38,12 +38,13 @@ class FontsAndTextDemo  : public Component,
     ToggleButton* boldButton;
     ToggleButton* italicButton;
     Slider* sizeSlider;
+    Slider* kerningSlider;
+    Slider* horizontalScaleSlider;
 
     StretchableLayoutManager verticalLayout;
     StretchableLayoutManager horizontalLayout;
 
     StretchableLayoutResizerBar* verticalDividerBar;
-    StretchableLayoutResizerBar* horizontalDividerBar;
 
 public:
     //==============================================================================
@@ -71,12 +72,33 @@ public:
         addAndMakeVisible (italicButton = new ToggleButton (T("italic")));
         italicButton->addButtonListener (this);
 
-        addAndMakeVisible (sizeSlider = new Slider (T("size")));
+        addAndMakeVisible (sizeSlider = new Slider ("Size"));
         sizeSlider->setRange (3.0, 150.0, 0.1);
         sizeSlider->setValue (20.0);
         sizeSlider->addListener (this);
+        (new Label (String::empty, sizeSlider->getName()))->attachToComponent (sizeSlider, true);
 
-        listBox->selectRow (0);
+        addAndMakeVisible (kerningSlider = new Slider ("Kerning"));
+        kerningSlider->setRange (-1.0, 1.0, 0.01);
+        kerningSlider->setValue (0.0);
+        kerningSlider->addListener (this);
+        (new Label (String::empty, kerningSlider->getName()))->attachToComponent (kerningSlider, true);
+
+        addAndMakeVisible (horizontalScaleSlider = new Slider ("Stretch"));
+        horizontalScaleSlider->setRange (0.1, 4.0, 0.01);
+        horizontalScaleSlider->setValue (1.0);
+        horizontalScaleSlider->addListener (this);
+        (new Label (String::empty, horizontalScaleSlider->getName()))->attachToComponent (horizontalScaleSlider, true);
+
+        for (int i = 0; i < fonts.size(); ++i)
+        {
+            if (fonts[i]->getTypefaceName().startsWithIgnoreCase (T("Arial")))
+            {
+                listBox->selectRow (i);
+                break;
+            }
+        }
+
         listBox->setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.5f));
         listBox->setOutlineThickness (1);
 
@@ -106,9 +128,6 @@ public:
                                                                // space left over - this will stop the
                                                                // sliders from always sticking to the
                                                                // bottom of the window
-
-        horizontalDividerBar = new StretchableLayoutResizerBar (&horizontalLayout, 1, false);
-        addAndMakeVisible (horizontalDividerBar);
     }
 
     ~FontsAndTextDemo()
@@ -127,18 +146,14 @@ public:
                                          true);     // resize the components' heights as well as widths
 
         // now lay out the text box and the controls below it..
-        Component* hcomps[] = { textBox, horizontalDividerBar, 0,
-                                boldButton, 0,
-                                italicButton, 0,
-                                sizeSlider };
-
-        horizontalLayout.layOutComponents (hcomps, 8,
-                                           4 + verticalLayout.getItemCurrentPosition (2), // for their widths, refer to the vertical layout state
-                                           4,
-                                           verticalLayout.getItemCurrentAbsoluteSize (2),
-                                           getHeight() - 8,
-                                           true,    // lay out above each other
-                                           true);   // resize the components' widths as well as heights
+        int x = verticalLayout.getItemCurrentPosition (2);
+        textBox->setBounds (x, 0, getWidth() - x, getHeight() - 110);
+        x += 70;
+        sizeSlider->setBounds (x, getHeight() - 106, getWidth() - x, 22);
+        kerningSlider->setBounds (x, getHeight() - 82, getWidth() - x, 22);
+        horizontalScaleSlider->setBounds (x, getHeight() - 58, getWidth() - x, 22);
+        boldButton->setBounds (x, getHeight() - 34, (getWidth() - x) / 2, 22);
+        italicButton->setBounds (x + (getWidth() - x) / 2, getHeight() - 34, (getWidth() - x) / 2, 22);
     }
 
     // implements the ListBoxModel method
@@ -162,8 +177,16 @@ public:
             font.setHeight (height * 0.7f);
 
             g.setFont (font);
+            g.setColour (Colours::black);
             g.drawText (font.getTypefaceName(),
                         4, 0, width - 4, height,
+                        Justification::centredLeft, true);
+
+            int x = jmax (0, font.getStringWidth (font.getTypefaceName())) + 12;
+            g.setFont (Font (11.0f, Font::italic));
+            g.setColour (Colours::grey);
+            g.drawText (font.getTypefaceName(),
+                        x, 0, width - x - 2, height,
                         Justification::centredLeft, true);
         }
     }
@@ -179,6 +202,8 @@ public:
             font.setHeight ((float) sizeSlider->getValue());
             font.setBold (boldButton->getToggleState());
             font.setItalic (italicButton->getToggleState());
+            font.setExtraKerningFactor ((float) kerningSlider->getValue());
+            font.setHorizontalScale ((float) horizontalScaleSlider->getValue());
 
             textBox->applyFontToAllText (font);
         }

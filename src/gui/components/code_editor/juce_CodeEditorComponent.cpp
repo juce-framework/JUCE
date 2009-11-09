@@ -398,6 +398,15 @@ void CodeEditorComponent::paint (Graphics& g)
     }
 }
 
+void CodeEditorComponent::setScrollbarThickness (const int thickness) throw()
+{
+    if (scrollbarThickness != thickness)
+    {
+        scrollbarThickness = thickness;
+        resized();
+    }
+}
+
 void CodeEditorComponent::handleAsyncUpdate()
 {
     rebuildLineTokens();

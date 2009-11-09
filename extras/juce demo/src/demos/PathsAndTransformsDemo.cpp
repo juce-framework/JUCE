@@ -75,7 +75,7 @@ public:
         typeChooser->addItem (T("image - high quality"), 5);
         typeChooser->addItem (T("image - colour-filled alpha channel"), 6);
         typeChooser->addItem (T("image - gradient-filled alpha channel"), 7);
-        typeChooser->addItem (T("image - alphamap-filled alpha channel"), 9);
+        typeChooser->addItem (T("image - tiled-image-filled alpha channel"), 9);
         typeChooser->addItem (T("drawable object"), 10);
         typeChooser->addItem (T("SVG object"), 11);
         typeChooser->setSelectedId (11);

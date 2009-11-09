@@ -30,7 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ColourSelector.h"
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../menus/juce_PopupMenu.h"
-
+#include "../../graphics/imaging/juce_Image.h"
 
 static const int swatchesPerRow = 8;
 static const int swatchHeight = 22;
@@ -108,7 +108,8 @@ public:
         : owner (owner_),
           h (h_), s (s_), v (v_),
           lastHue (0.0f),
-          edge (edgeSize)
+          edge (edgeSize),
+          colours (0)
     {
         addAndMakeVisible (marker = new ColourSpaceMarker());
         setMouseCursor (MouseCursor::CrosshairCursor);
@@ -117,32 +118,40 @@ public:
     ~ColourSpaceView()
     {
         deleteAllChildren();
+        delete colours;
     }
 
     void paint (Graphics& g)
     {
-        const float hue = h;
-
-        const float xScale = 1.0f / (getWidth() - edge * 2);
-        const float yScale = 1.0f / (getHeight() - edge * 2);
-
-        const Rectangle clip (g.getClipBounds());
-        const int x1 = jmax (clip.getX(), edge) & ~1;
-        const int x2 = jmin (clip.getRight(), getWidth() - edge) | 1;
-        const int y1 = jmax (clip.getY(), edge) & ~1;
-        const int y2 = jmin (clip.getBottom(), getHeight() - edge) | 1;
-
-        for (int y = y1; y < y2; y += 2)
+        if (colours == 0)
         {
-            const float v = jlimit (0.0f, 1.0f, 1.0f - (y - edge) * yScale);
+            const int width = getWidth() / 2;
+            const int height = getHeight() / 2;
+            colours = new Image (Image::RGB, width, height, false);
 
-            for (int x = x1; x < x2; x += 2)
+            int ls, ps;
+            char* data = (char*) colours->lockPixelDataReadWrite (0, 0, width, height, ls, ps);
+
+            for (int y = 0; y < height; ++y)
             {
-                const float s = jlimit (0.0f, 1.0f, (x - edge) * xScale);
-                g.setColour (Colour (hue, s, v, 1.0f));
-                g.fillRect (x, y, 2, 2);
+                const float v = 1.0f - y / (float) height;
+
+                for (int x = 0; x < width; ++x)
+                {
+                    const float s = x / (float) width;
+                    const Colour col (h, s, v, 1.0f);
+
+                    PixelRGB* const pix = (PixelRGB*) (data + ls * y + ps * x);
+                    pix->set (col.getPixelARGB());
+                }
             }
+
+            colours->releasePixelDataReadWrite (data);
         }
+
+        g.setOpacity (1.0f);
+        g.drawImage (colours, edge, edge, getWidth() - edge * 2, getHeight() - edge * 2,
+                     0, 0, colours->getWidth(), colours->getHeight());
     }
 
     void mouseDown (const MouseEvent& e)
@@ -163,20 +172,29 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
+            deleteAndZero (colours);
             repaint();
         }
 
-        resized();
+        updateMarker();
     }
 
     void resized()
+    {
+        deleteAndZero (colours);
+        updateMarker();
+    }
+
+private:
+    Image* colours;
+
+    void updateMarker() const throw()
     {
         marker->setBounds (roundFloatToInt ((getWidth() - edge * 2) * s),
                            roundFloatToInt ((getHeight() - edge * 2) * (1.0f - v)),
                            edge * 2, edge * 2);
     }
 
-private:
     ColourSpaceView (const ColourSpaceView&);
     const ColourSpaceView& operator= (const ColourSpaceView&);
 };

@@ -208,6 +208,10 @@ public:
     };
 
     //==============================================================================
+    /** Changes the size of the scrollbars. */
+    void setScrollbarThickness (const int thickness) throw();
+
+    //==============================================================================
     /** @internal */
     void resized();
     /** @internal */
