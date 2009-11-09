@@ -79,13 +79,15 @@ bool GradientBrush::isInvisible() const throw()
 void GradientBrush::paintPath (LowLevelGraphicsContext& context,
                                const Path& path, const AffineTransform& transform) throw()
 {
-    context.fillPathWithGradient (path, transform, gradient, EdgeTable::Oversampling_4times);
+    context.setGradient (gradient);
+    context.fillPath (path, transform, EdgeTable::Oversampling_4times);
 }
 
 void GradientBrush::paintRectangle (LowLevelGraphicsContext& context,
                                     int x, int y, int w, int h) throw()
 {
-    context.fillRectWithGradient (x, y, w, h, gradient);
+    context.setGradient (gradient);
+    context.fillRect (x, y, w, h, false);
 }
 
 void GradientBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
@@ -95,7 +97,10 @@ void GradientBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
     context.saveState();
 
     if (context.reduceClipRegion (x, y, w, h))
-        context.fillAlphaChannelWithGradient (alphaChannelImage, imageX, imageY, gradient);
+    {
+        context.setGradient (gradient);
+        context.fillAlphaChannel (alphaChannelImage, imageX, imageY);
+    }
 
     context.restoreState();
 }

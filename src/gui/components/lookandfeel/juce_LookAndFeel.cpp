@@ -225,7 +225,7 @@ LookAndFeel::LookAndFeel()
         setColour (standardColours [i], Colour (standardColours [i + 1]));
 
     if (defaultSansName.isEmpty())
-        Typeface::getDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName);
+        Font::getPlatformDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName);
 
     defaultSans = defaultSansName;
     defaultSerif = defaultSerifName;
@@ -313,14 +313,16 @@ const Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 {
     String faceName (font.getTypefaceName());
 
-    if (faceName == Typeface::defaultTypefaceNameSans)
+    if (faceName == Font::getDefaultSansSerifFontName())
         faceName = defaultSans;
-    else if (faceName == Typeface::defaultTypefaceNameSerif)
+    else if (faceName == Font::getDefaultSerifFontName())
         faceName = defaultSerif;
-    else if (faceName == Typeface::defaultTypefaceNameMono)
+    else if (faceName == Font::getDefaultMonospacedFontName())
         faceName = defaultFixed;
 
-    return new Typeface (faceName, font.isBold(), font.isItalic());
+    Font f (font);
+    f.setTypefaceName (faceName);
+    return Typeface::createSystemTypefaceFor (f);
 }
 
 void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)

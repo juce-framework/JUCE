@@ -30,6 +30,7 @@
 #include "../../../text/juce_StringArray.h"
 #include "../../../containers/juce_ReferenceCountedObject.h"
 #include "../../../containers/juce_OwnedArray.h"
+class LowLevelGraphicsContext;
 
 
 //==============================================================================
@@ -85,12 +86,8 @@ public:
     /** Creates a copy of another Font object. */
     Font (const Font& other) throw();
 
-    /** Creates a font based on a typeface.
-
-        The font object stores its own internal copy of the typeface, so you can safely
-        delete the one passed in after calling this.
-    */
-    Font (const Typeface& typeface) throw();
+    /** Creates a font for a typeface. */
+    Font (const Typeface::Ptr& typeface) throw();
 
     /** Creates a basic sans-serif font at a default height.
 
@@ -114,9 +111,11 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
-        This may also be set to Typeface::defaultTypefaceNameSans, Typeface::defaultTypefaceNameSerif,
-        or Typeface::defaultTypefaceNameMono, which are not actual platform-specific font names, but
-        are generic names that are used to represent the various default fonts.
+        This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+        or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+        but are generic names that are used to represent the various default fonts.
+        If you need to know the exact typeface name being used, you can call
+        Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
 
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
@@ -126,13 +125,14 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
-        Note that this may also be one of the values: Typeface::defaultTypefaceNameSans,
-        Typeface::defaultTypefaceNameSerif, or Typeface::defaultTypefaceNameMono, which are not actual
-        platform-specific font names, but are generic names that are used to represent the various
-        default fonts. If you need to know the exact typeface name being used, you can call
+        This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+        or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+        but are generic names that are used to represent the various default fonts.
+
+        If you need to know the exact typeface name being used, you can call
         Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
     */
-    const String& getTypefaceName() const throw()               { return typefaceName; }
+    const String& getTypefaceName() const throw()               { return font->typefaceName; }
 
     //==============================================================================
     /** Returns a typeface name that represents the default sans-serif font.
@@ -140,30 +140,36 @@ public:
         This is also the typeface that will be used when a font is created without
         specifying any typeface details.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameSans,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        sans-serif font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameSans, setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName,
+        @see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSansSerifFontName() throw()       { return Typeface::defaultTypefaceNameSans; }
+    static const String getDefaultSansSerifFontName() throw();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameSerif,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        serif font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameSerif, setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
+        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSerifFontName() throw()           { return Typeface::defaultTypefaceNameSerif; }
+    static const String getDefaultSerifFontName() throw();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameMono,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        monospaced font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameMono, setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
+        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
     */
-    static const String getDefaultMonospacedFontName() throw()      { return Typeface::defaultTypefaceNameMono; }
+    static const String getDefaultMonospacedFontName() throw();
+
+    /** Returns the typeface names of the default fonts on the current platform. */
+    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
 
     //==============================================================================
     /** Returns the total height of this font.
@@ -173,7 +179,7 @@ public:
 
         @see setHeight, setHeightWithoutChangingWidth, getAscent
     */
-    float getHeight() const throw()                             { return height; }
+    float getHeight() const throw()                             { return font->height; }
 
     /** Changes the font's height.
 
@@ -211,7 +217,7 @@ public:
 
         @see FontStyleFlags
     */
-    int getStyleFlags() const throw()                           { return styleFlags; }
+    int getStyleFlags() const throw()                           { return font->styleFlags; }
 
     /** Changes the font's style.
 
@@ -252,7 +258,7 @@ public:
 
         @see setHorizontalScale
     */
-    float getHorizontalScale() const throw()                { return horizontalScale; }
+    float getHorizontalScale() const throw()                { return font->horizontalScale; }
 
     /** Changes the font's kerning.
 
@@ -271,23 +277,15 @@ public:
         A value of zero is normal spacing, positive values will spread the letters
         out more, and negative values make them closer together.
     */
-    float getExtraKerningFactor() const throw()             { return kerning; }
+    float getExtraKerningFactor() const throw()             { return font->kerning; }
 
 
     //==============================================================================
     /** Changes all the font's characteristics with one call. */
-    void setSizeAndStyle (const float newHeight,
+    void setSizeAndStyle (float newHeight,
                           const int newStyleFlags,
                           const float newHorizontalScale,
                           const float newKerningAmount) throw();
-
-    /** Resets this font's characteristics.
-
-        This is basically like saying "myFont = Font();", because it resets the
-        typeface, size, style, etc to a default state. Not very useful to most
-        people, its raison d'etre is to help the Graphics class be more efficient.
-    */
-    void resetToDefaultState() throw();
 
     //==============================================================================
     /** Returns the total width of a string as it would be drawn using this font.
@@ -301,6 +299,31 @@ public:
         @see getStringWidth
     */
     float getStringWidthFloat (const String& text) const throw();
+
+    /** Returns the series of glyph numbers and their x offsets needed to represent a string.
+
+        An extra x offset is added at the end of the run, to indicate where the right hand
+        edge of the last character is.
+    */
+    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw();
+
+    //==============================================================================
+    /** Renders a glyph in a context without using methods other than the context's glyph-rendering
+        methods.
+
+        For smaller fonts, this uses an internal cache of glyph images to speed things up, and renders
+        them using the context's image blending methods. For larger fonts, it gets the glyph's path
+        from the typeface and renders it as a shape.
+
+        This method is primarily called by graphics contexts as a way of drawing a glyph if they can't do
+        it by native means.
+    */
+    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, float x, float y);
+
+    /** Renders a transformed glyph using path-filling techniques rather than calling a context's
+        actual glyph-rendering methods.
+    */
+    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, const AffineTransform& transform);
 
     //==============================================================================
     /** Returns the typeface used by this font.
@@ -348,11 +371,22 @@ private:
     friend class FontGlyphAlphaMap;
     friend class TypefaceCache;
 
-    String typefaceName;
-    float height, horizontalScale, kerning;
-    mutable float ascent;
-    int styleFlags;
-    mutable Typeface::Ptr typeface;
+    class SharedFontInternal  : public ReferenceCountedObject
+    {
+    public:
+        SharedFontInternal (const String& typefaceName, const float height, const float horizontalScale,
+                            const float kerning, const float ascent, const int styleFlags,
+                            Typeface* const typeface) throw();
+        SharedFontInternal (const SharedFontInternal& other) throw();
+
+        String typefaceName;
+        float height, horizontalScale, kerning, ascent;
+        int styleFlags;
+        Typeface::Ptr typeface;
+    };
+
+    ReferenceCountedObjectPtr <SharedFontInternal> font;
+    void dupeInternalIfShared() throw();
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__

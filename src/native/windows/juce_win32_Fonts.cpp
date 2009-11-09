@@ -104,9 +104,7 @@ const StringArray Font::findAllTypefaceNames() throw()
 
 extern bool juce_IsRunningInWine() throw();
 
-void Typeface::getDefaultFontNames (String& defaultSans,
-                                    String& defaultSerif,
-                                    String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     if (juce_IsRunningInWine())
     {
@@ -123,30 +121,15 @@ void Typeface::getDefaultFontNames (String& defaultSans,
     }
 }
 
+
 //==============================================================================
 class FontDCHolder  : private DeletedAtShutdown
 {
-    HDC dc;
-    String fontName;
-    KERNINGPAIR* kps;
-    int numKPs;
-    bool bold, italic;
-    int size;
-
-    FontDCHolder (const FontDCHolder&);
-    const FontDCHolder& operator= (const FontDCHolder&);
-
 public:
-    HFONT fontH;
-
     //==============================================================================
     FontDCHolder() throw()
-        : dc (0),
-          kps (0),
-          numKPs (0),
-          bold (false),
-          italic (false),
-          size (0)
+        : dc (0), kps (0), numKPs (0), size (0),
+          bold (false), italic (false)
     {
     }
 
@@ -165,10 +148,7 @@ public:
     juce_DeclareSingleton_SingleThreaded_Minimal (FontDCHolder);
 
     //==============================================================================
-    HDC loadFont (const String& fontName_,
-                  const bool bold_,
-                  const bool italic_,
-                  const int size_) throw()
+    HDC loadFont (const String& fontName_, const bool bold_, const bool italic_, const int size_) throw()
     {
         if (fontName != fontName_ || bold != bold_ || italic != italic_ || size != size_)
         {
@@ -181,7 +161,6 @@ public:
             {
                 DeleteDC (dc);
                 DeleteObject (fontH);
-
                 juce_free (kps);
                 kps = 0;
             }
@@ -253,243 +232,170 @@ public:
         numKPs_ = numKPs;
         return kps;
     }
+
+
+private:
+    //==============================================================================
+    HFONT fontH;
+    HDC dc;
+    String fontName;
+    KERNINGPAIR* kps;
+    int numKPs, size;
+    bool bold, italic;
+
+    FontDCHolder (const FontDCHolder&);
+    const FontDCHolder& operator= (const FontDCHolder&);
 };
 
 juce_ImplementSingleton_SingleThreaded (FontDCHolder);
 
 
 //==============================================================================
-static bool addGlyphToTypeface (HDC dc,
-                                juce_wchar character,
-                                Typeface& dest,
-                                bool addKerning)
+class WindowsTypeface   : public CustomTypeface
 {
-    Path destShape;
-    GLYPHMETRICS gm;
-
-    float height;
-    BOOL ok = false;
-
+public:
+    WindowsTypeface (const Font& font)
     {
-        const WCHAR charToTest[] = { (WCHAR) character, 0 };
-        WORD index = 0;
+        HDC dc = FontDCHolder::getInstance()->loadFont (font.getTypefaceName(),
+                                                        font.isBold(), font.isItalic(), 0);
 
-        if (GetGlyphIndices (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
-             && index == 0xffff)
-        {
-            return false;
-        }
+        TEXTMETRIC tm;
+        tm.tmAscent = tm.tmHeight = 1;
+        tm.tmDefaultChar = 0;
+        GetTextMetrics (dc, &tm);
+
+        setCharacteristics (font.getTypefaceName(),
+                            tm.tmAscent / (float) tm.tmHeight,
+                            font.isBold(), font.isItalic(),
+                            tm.tmDefaultChar);
     }
 
-    TEXTMETRIC tm;
-    ok = GetTextMetrics (dc, &tm);
-
-    height = (float) tm.tmHeight;
-
-    if (! ok)
+    bool loadGlyphIfPossible (const juce_wchar character)
     {
-        dest.addGlyph (character, destShape, 0);
-        return true;
-    }
+        HDC dc = FontDCHolder::getInstance()->loadFont (name, isBold, isItalic, 0);
 
-    const float scaleX = 1.0f / height;
-    const float scaleY = -1.0f / height;
-    static const MAT2 identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
+        GLYPHMETRICS gm;
 
-    const int bufSize = GetGlyphOutline (dc, character, GGO_NATIVE,
-                                          &gm, 0, 0, &identityMatrix);
-
-    if (bufSize > 0)
-    {
-        char* const data = (char*) juce_malloc (bufSize);
-
-        GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
-                         bufSize, data, &identityMatrix);
-
-        const TTPOLYGONHEADER* pheader = (TTPOLYGONHEADER*) data;
-
-        while ((char*) pheader < data + bufSize)
         {
-            #define remapX(v) (scaleX * (v).x.value)
-            #define remapY(v) (scaleY * (v).y.value)
+            const WCHAR charToTest[] = { (WCHAR) character, 0 };
+            WORD index = 0;
 
-            float x = remapX (pheader->pfxStart);
-            float y = remapY (pheader->pfxStart);
-
-            destShape.startNewSubPath (x, y);
-
-            const TTPOLYCURVE* curve = (const TTPOLYCURVE*) ((const char*) pheader + sizeof (TTPOLYGONHEADER));
-            const char* const curveEnd = ((const char*) pheader) + pheader->cb;
-
-            while ((const char*) curve < curveEnd)
+            if (GetGlyphIndices (dc, charToTest, 1, &index, GGI_MARK_NONEXISTING_GLYPHS) != GDI_ERROR
+                 && index == 0xffff)
             {
-                if (curve->wType == TT_PRIM_LINE)
+                return false;
+            }
+        }
+
+        Path glyphPath;
+
+        TEXTMETRIC tm;
+        if (! GetTextMetrics (dc, &tm))
+        {
+            addGlyph (character, glyphPath, 0);
+            return true;
+        }
+
+        const float height = (float) tm.tmHeight;
+        static const MAT2 identityMatrix = { { 0, 1 }, { 0, 0 }, { 0, 0 }, { 0, 1 } };
+
+        const int bufSize = GetGlyphOutline (dc, character, GGO_NATIVE,
+                                             &gm, 0, 0, &identityMatrix);
+
+        if (bufSize > 0)
+        {
+            char* const data = (char*) juce_malloc (bufSize);
+
+            GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
+                             bufSize, data, &identityMatrix);
+
+            const TTPOLYGONHEADER* pheader = (TTPOLYGONHEADER*) data;
+
+            const float scaleX = 1.0f / height;
+            const float scaleY = -1.0f / height;
+
+            while ((char*) pheader < data + bufSize)
+            {
+                #define remapX(v) (scaleX * (v).x.value)
+                #define remapY(v) (scaleY * (v).y.value)
+
+                float x = remapX (pheader->pfxStart);
+                float y = remapY (pheader->pfxStart);
+
+                glyphPath.startNewSubPath (x, y);
+
+                const TTPOLYCURVE* curve = (const TTPOLYCURVE*) ((const char*) pheader + sizeof (TTPOLYGONHEADER));
+                const char* const curveEnd = ((const char*) pheader) + pheader->cb;
+
+                while ((const char*) curve < curveEnd)
                 {
-                    for (int i = 0; i < curve->cpfx; ++i)
+                    if (curve->wType == TT_PRIM_LINE)
                     {
-                        x = remapX (curve->apfx [i]);
-                        y = remapY (curve->apfx [i]);
+                        for (int i = 0; i < curve->cpfx; ++i)
+                        {
+                            x = remapX (curve->apfx [i]);
+                            y = remapY (curve->apfx [i]);
 
-                        destShape.lineTo (x, y);
+                            glyphPath.lineTo (x, y);
+                        }
                     }
-                }
-                else if (curve->wType == TT_PRIM_QSPLINE)
-                {
-                    for (int i = 0; i < curve->cpfx - 1; ++i)
+                    else if (curve->wType == TT_PRIM_QSPLINE)
                     {
-                        const float x2 = remapX (curve->apfx [i]);
-                        const float y2 = remapY (curve->apfx [i]);
-                        float x3, y3;
-
-                        if (i < curve->cpfx - 2)
+                        for (int i = 0; i < curve->cpfx - 1; ++i)
                         {
-                            x3 = 0.5f * (x2 + remapX (curve->apfx [i + 1]));
-                            y3 = 0.5f * (y2 + remapY (curve->apfx [i + 1]));
-                        }
-                        else
-                        {
-                            x3 = remapX (curve->apfx [i + 1]);
-                            y3 = remapY (curve->apfx [i + 1]);
-                        }
+                            const float x2 = remapX (curve->apfx [i]);
+                            const float y2 = remapY (curve->apfx [i]);
+                            float x3, y3;
 
-                        destShape.quadraticTo (x2, y2, x3, y3);
+                            if (i < curve->cpfx - 2)
+                            {
+                                x3 = 0.5f * (x2 + remapX (curve->apfx [i + 1]));
+                                y3 = 0.5f * (y2 + remapY (curve->apfx [i + 1]));
+                            }
+                            else
+                            {
+                                x3 = remapX (curve->apfx [i + 1]);
+                                y3 = remapY (curve->apfx [i + 1]);
+                            }
 
-                        x = x3;
-                        y = y3;
+                            glyphPath.quadraticTo (x2, y2, x3, y3);
+
+                            x = x3;
+                            y = y3;
+                        }
                     }
+
+                    curve = (const TTPOLYCURVE*) &(curve->apfx [curve->cpfx]);
                 }
 
-                curve = (const TTPOLYCURVE*) &(curve->apfx [curve->cpfx]);
+                pheader = (const TTPOLYGONHEADER*) curve;
+
+                glyphPath.closeSubPath();
             }
 
-            pheader = (const TTPOLYGONHEADER*) curve;
-
-            destShape.closeSubPath();
+            juce_free (data);
         }
 
-        juce_free (data);
-    }
+        addGlyph (character, glyphPath, gm.gmCellIncX / height);
 
-    dest.addGlyph (character, destShape, gm.gmCellIncX / height);
-
-    if (addKerning)
-    {
         int numKPs;
         const KERNINGPAIR* const kps = FontDCHolder::getInstance()->getKerningPairs (numKPs);
 
         for (int i = 0; i < numKPs; ++i)
         {
             if (kps[i].wFirst == character)
-            {
-                dest.addKerningPair (kps[i].wFirst,
-                                     kps[i].wSecond,
-                                     kps[i].iKernAmount / height);
-            }
-        }
-    }
-
-    return true;
-}
-
-//==============================================================================
-bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
-{
-    HDC dc = FontDCHolder::getInstance()->loadFont (getName(), isBold(), isItalic(), 0);
-    return addGlyphToTypeface (dc, character, *this, true);
-}
-
-/*Image* Typeface::renderGlyphToImage (juce_wchar character, float& topLeftX, float& topLeftY)
-{
-    HDC dc = FontDCHolder::getInstance()->loadFont (getName(), isBold(), isItalic(), hintingSize);
-
-    int bufSize;
-    GLYPHMETRICS gm;
-
-    const UINT format = GGO_GRAY2_BITMAP;
-    const int shift = 6;
-
-    if (wGetGlyphOutlineW != 0)
-        bufSize = wGetGlyphOutlineW (dc, character, format, &gm, 0, 0, &identityMatrix);
-    else
-        bufSize = GetGlyphOutline (dc, character, format, &gm, 0, 0, &identityMatrix);
-
-    Image* im = new Image (Image::SingleChannel, jmax (1, gm.gmBlackBoxX), jmax (1, gm.gmBlackBoxY), true);
-
-    if (bufSize > 0)
-    {
-        topLeftX = (float) gm.gmptGlyphOrigin.x;
-        topLeftY = (float) -gm.gmptGlyphOrigin.y;
-
-        uint8* const data = (uint8*) juce_calloc (bufSize);
-
-        if (wGetGlyphOutlineW != 0)
-            wGetGlyphOutlineW (dc, character, format, &gm, bufSize, data, &identityMatrix);
-        else
-            GetGlyphOutline (dc, character, format, &gm, bufSize, data, &identityMatrix);
-
-        const int stride = ((gm.gmBlackBoxX + 3) & ~3);
-
-        for (int y = gm.gmBlackBoxY; --y >= 0;)
-        {
-            for (int x = gm.gmBlackBoxX; --x >= 0;)
-            {
-                const int level = data [x + y * stride] << shift;
-
-                if (level > 0)
-                    im->setPixelAt (x, y, Colour ((uint8) 0xff, (uint8) 0xff, (uint8) 0xff, (uint8) jmin (0xff, level)));
-            }
+                addKerningPair (kps[i].wFirst, kps[i].wSecond,
+                                kps[i].iKernAmount / height);
         }
 
-        juce_free (data);
+        return true;
     }
+};
 
-    return im;
-}*/
-
-//==============================================================================
-void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
-                                                  bool bold,
-                                                  bool italic,
-                                                  bool addAllGlyphsToFont) throw()
+const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
-    clear();
-
-    HDC dc = FontDCHolder::getInstance()->loadFont (fontName, bold, italic, 0);
-
-    float height;
-    int firstChar, lastChar;
-
-    {
-        TEXTMETRIC tm;
-        GetTextMetrics (dc, &tm);
-
-        height = (float) tm.tmHeight;
-        firstChar = tm.tmFirstChar;
-        lastChar = tm.tmLastChar;
-
-        setAscent (tm.tmAscent / height);
-        setDefaultCharacter (tm.tmDefaultChar);
-    }
-
-    setName (fontName);
-    setBold (bold);
-    setItalic (italic);
-
-    if (addAllGlyphsToFont)
-    {
-        for (int character = firstChar; character <= lastChar; ++character)
-            addGlyphToTypeface (dc, (juce_wchar) character, *this, false);
-
-        int numKPs;
-        const KERNINGPAIR* const kps = FontDCHolder::getInstance()->getKerningPairs (numKPs);
-
-        for (int i = 0; i < numKPs; ++i)
-        {
-            addKerningPair (kps[i].wFirst,
-                            kps[i].wSecond,
-                            kps[i].iKernAmount / height);
-        }
-    }
+    return new WindowsTypeface (font);
 }
+
 
 #endif

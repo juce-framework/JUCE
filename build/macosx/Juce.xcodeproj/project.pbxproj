@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		840F80BC092B399D005E7B4E /* juce.h in Headers */ = {isa = PBXBuildFile; fileRef = 840F80BB092B399D005E7B4E /* juce.h */; };
 		84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
-		84816E5810809D07008FEC33 /* juce_iphone_Fonts.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5210809D07008FEC33 /* juce_iphone_Fonts.mm */; };
 		84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
 		84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */; };
 		84816E5C10809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5610809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm */; };
@@ -448,7 +447,6 @@
 		8481700E10809E00008FEC33 /* juce_InterprocessConnectionServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E959104036B3006A1807 /* juce_InterprocessConnectionServer.cpp */; };
 		8481700F10809E00008FEC33 /* juce_InterProcessLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E9DA104036D6006A1807 /* juce_InterProcessLock.cpp */; };
 		8481701010809E00008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
-		8481701110809E00008FEC33 /* juce_iphone_Fonts.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5210809D07008FEC33 /* juce_iphone_Fonts.mm */; };
 		8481701210809E00008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
 		8481701310809E00008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */; };
 		8481701410809E00008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5610809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm */; };
@@ -1218,7 +1216,6 @@
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
 		84816E3510809B4F008FEC33 /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_iphone_Audio.cpp; sourceTree = "<group>"; };
-		84816E5210809D07008FEC33 /* juce_iphone_Fonts.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_Fonts.mm; sourceTree = "<group>"; };
 		84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_MessageManager.mm; sourceTree = "<group>"; };
 		84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_MiscUtilities.mm; sourceTree = "<group>"; };
 		84816E5610809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_UIViewComponentPeer.mm; sourceTree = "<group>"; };
@@ -1917,7 +1914,6 @@
 				8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */,
 				8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */,
 				84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */,
-				84816E5210809D07008FEC33 /* juce_iphone_Fonts.mm */,
 				84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */,
 				84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */,
 				84816E5610809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm */,
@@ -3731,7 +3727,6 @@
 				8481700E10809E00008FEC33 /* juce_InterprocessConnectionServer.cpp in Sources */,
 				8481700F10809E00008FEC33 /* juce_InterProcessLock.cpp in Sources */,
 				8481701010809E00008FEC33 /* juce_iphone_Audio.cpp in Sources */,
-				8481701110809E00008FEC33 /* juce_iphone_Fonts.mm in Sources */,
 				8481701210809E00008FEC33 /* juce_iphone_MessageManager.mm in Sources */,
 				8481701310809E00008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */,
 				8481701410809E00008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */,
@@ -4179,7 +4174,6 @@
 				84F1ECE91040370A006A1807 /* juce_JPEGLoader.cpp in Sources */,
 				84F1ECEA1040370A006A1807 /* juce_PNGLoader.cpp in Sources */,
 				84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */,
-				84816E5810809D07008FEC33 /* juce_iphone_Fonts.mm in Sources */,
 				84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */,
 				84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */,
 				84816E5C10809D07008FEC33 /* juce_iphone_UIViewComponentPeer.mm in Sources */,

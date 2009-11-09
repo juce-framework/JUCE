@@ -47,40 +47,35 @@ public:
     };
 
     //==============================================================================
-    FreeTypeFontFace (const String& familyName)
+    FreeTypeFontFace (const String& familyName) throw()
       : hasSerif (false),
         monospaced (false)
     {
         family = familyName;
     }
 
-    void setFileName (const String& name,
-                      const int faceIndex,
-                      FontStyle style)
+    void setFileName (const String& name, const int faceIndex, FontStyle style) throw()
     {
-        if (names[(int) style].fileName.isEmpty())
+        if (names [(int) style].fileName.isEmpty())
         {
-            names[(int) style].fileName = name;
-            names[(int) style].faceIndex = faceIndex;
+            names [(int) style].fileName = name;
+            names [(int) style].faceIndex = faceIndex;
         }
     }
 
-    const String& getFamilyName() const throw()
-    {
-        return family;
-    }
+    const String& getFamilyName() const throw()     { return family; }
 
-    const String& getFileName (int style, int* faceIndex) const throw()
+    const String& getFileName (const int style, int& faceIndex) const throw()
     {
-        *faceIndex = names [style].faceIndex;
+        faceIndex = names[style].faceIndex;
         return names[style].fileName;
     }
 
-    void setMonospaced (bool mono)               { monospaced = mono; }
-    bool getMonospaced () const throw()          { return monospaced; }
+    void setMonospaced (bool mono) throw()      { monospaced = mono; }
+    bool getMonospaced() const throw()          { return monospaced; }
 
-    void setSerif (const bool serif)             { hasSerif = serif; }
-    bool getSerif () const throw()               { return hasSerif; }
+    void setSerif (const bool serif) throw()    { hasSerif = serif; }
+    bool getSerif() const throw()               { return hasSerif; }
 
 private:
     //==============================================================================
@@ -203,23 +198,13 @@ public:
                                 style |= (int) FreeTypeFontFace::Italic;
 
                             newFace->setFileName (possible.getFullPathName(), faceIndex, (FreeTypeFontFace::FontStyle) style);
-
-                            if ((face->face_flags & FT_FACE_FLAG_FIXED_WIDTH) != 0)
-                                newFace->setMonospaced (true);
-                            else
-                                newFace->setMonospaced (false);
+                            newFace->setMonospaced ((face->face_flags & FT_FACE_FLAG_FIXED_WIDTH) != 0);
 
                             // Surely there must be a better way to do this?
-                            if (String (face->family_name).containsIgnoreCase (T("Sans"))
-                                || String (face->family_name).containsIgnoreCase (T("Verdana"))
-                                || String (face->family_name).containsIgnoreCase (T("Arial")))
-                            {
-                                newFace->setSerif (false);
-                            }
-                            else
-                            {
-                                newFace->setSerif (true);
-                            }
+                            const String name (face->family_name);
+                            newFace->setSerif (! (name.containsIgnoreCase (T("Sans"))
+                                                   || name.containsIgnoreCase (T("Verdana"))
+                                                   || name.containsIgnoreCase (T("Arial"))));
                         }
 
                         FT_Done_Face (face);
@@ -237,7 +222,7 @@ public:
                            const bool bold,
                            const bool italic) throw()
     {
-        FT_Face face = NULL;
+        FT_Face face = 0;
 
         if (fontName == lastFontName && bold == lastBold && italic == lastItalic)
         {
@@ -245,10 +230,10 @@ public:
         }
         else
         {
-            if (lastFace)
+            if (lastFace != 0)
             {
                 FT_Done_Face (lastFace);
-                lastFace = NULL;
+                lastFace = 0;
             }
 
             lastFontName = fontName;
@@ -268,25 +253,25 @@ public:
                     style |= (int) FreeTypeFontFace::Italic;
 
                 int faceIndex;
-                String fileName (ftFace->getFileName (style, &faceIndex));
+                String fileName (ftFace->getFileName (style, faceIndex));
 
                 if (fileName.isEmpty())
                 {
                     style ^= (int) FreeTypeFontFace::Bold;
 
-                    fileName = ftFace->getFileName (style, &faceIndex);
+                    fileName = ftFace->getFileName (style, faceIndex);
 
                     if (fileName.isEmpty())
                     {
                         style ^= (int) FreeTypeFontFace::Bold;
                         style ^= (int) FreeTypeFontFace::Italic;
 
-                        fileName = ftFace->getFileName (style, &faceIndex);
+                        fileName = ftFace->getFileName (style, faceIndex);
 
                         if (! fileName.length())
                         {
                             style ^= (int) FreeTypeFontFace::Bold;
-                            fileName = ftFace->getFileName (style, &faceIndex);
+                            fileName = ftFace->getFileName (style, faceIndex);
                         }
                     }
                 }
@@ -301,10 +286,11 @@ public:
                 }
             }
         }
+
         return face;
     }
 
-    bool addGlyph (FT_Face face, Typeface& dest, uint32 character) throw()
+    bool addGlyph (FT_Face face, CustomTypeface& dest, uint32 character) throw()
     {
         const unsigned int glyphIndex = FT_Get_Char_Index (face, character);
         const float height = (float) (face->ascender - face->descender);
@@ -315,10 +301,8 @@ public:
         #define CONVERTX(val) (scaleX * (val).x)
         #define CONVERTY(val) (scaleY * (val).y)
 
-        if (FT_Load_Glyph (face, glyphIndex, FT_LOAD_NO_SCALE
-                                              | FT_LOAD_NO_BITMAP
-                                              | FT_LOAD_IGNORE_TRANSFORM) != 0
-              || face->glyph->format != ft_glyph_format_outline)
+        if (FT_Load_Glyph (face, glyphIndex, FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP | FT_LOAD_IGNORE_TRANSFORM) != 0
+             || face->glyph->format != ft_glyph_format_outline)
         {
             return false;
         }
@@ -407,7 +391,7 @@ public:
             destShape.closeSubPath();
         }
 
-        dest.addGlyph (character, destShape, face->glyph->metrics.horiAdvance/height);
+        dest.addGlyph (character, destShape, face->glyph->metrics.horiAdvance / height);
 
         if ((face->face_flags & FT_FACE_FLAG_KERNING) != 0)
             addKerning (face, dest, character, glyphIndex);
@@ -415,7 +399,7 @@ public:
         return true;
     }
 
-    void addKerning (FT_Face face, Typeface& dest, const uint32 character, const uint32 glyphIndex) throw()
+    void addKerning (FT_Face face, CustomTypeface& dest, const uint32 character, const uint32 glyphIndex) throw()
     {
         const float height = (float) (face->ascender - face->descender);
 
@@ -439,7 +423,7 @@ public:
     // Add a glyph to a font
     bool addGlyphToFont (const uint32 character,
                          const tchar* fontName, bool bold, bool italic,
-                         Typeface& dest) throw()
+                         CustomTypeface& dest) throw()
     {
         FT_Face face = createFT_Face (fontName, bold, italic);
 
@@ -447,49 +431,6 @@ public:
             return addGlyph (face, dest, character);
 
         return false;
-    }
-
-    // Create a Typeface object for given name/style
-    bool createTypeface (const String& fontName,
-                         const bool bold, const bool italic,
-                         Typeface& dest,
-                         const bool addAllGlyphs) throw()
-    {
-        dest.clear();
-        dest.setName (fontName);
-        dest.setBold (bold);
-        dest.setItalic (italic);
-
-        FT_Face face = createFT_Face (fontName, bold, italic);
-
-        if (face == 0)
-        {
-#ifdef JUCE_DEBUG
-            String msg (T("Failed to create typeface: "));
-            msg << fontName << " " << (bold ? 'B' : ' ') << (italic ? 'I' : ' ');
-            DBG (msg);
-#endif
-            return face;
-        }
-
-        const float height = (float) (face->ascender - face->descender);
-
-        dest.setAscent (face->ascender / height);
-        dest.setDefaultCharacter (L' ');
-
-        if (addAllGlyphs)
-        {
-            uint32 glyphIndex;
-            uint32 charCode = FT_Get_First_Char (face, &glyphIndex);
-
-            while (glyphIndex != 0)
-            {
-                addGlyph (face, dest, charCode);
-                charCode = FT_Get_Next_Char (face, charCode, &glyphIndex);
-            }
-        }
-
-        return true;
     }
 
     //==============================================================================
@@ -535,20 +476,44 @@ juce_ImplementSingleton_SingleThreaded (FreeTypeInterface)
 
 
 //==============================================================================
-void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
-                                                  bool bold, bool italic,
-                                                  bool addAllGlyphsToFont) throw()
+class FreetypeTypeface   : public CustomTypeface
 {
-    FreeTypeInterface::getInstance()
-        ->createTypeface (fontName, bold, italic, *this, addAllGlyphsToFont);
+public:
+    FreetypeTypeface (const Font& font)
+    {
+        FT_Face face = FreeTypeInterface::getInstance()
+                            ->createFT_Face (font.getTypefaceName(), font.isBold(), font.isItalic());
+
+        if (face == 0)
+        {
+#ifdef JUCE_DEBUG
+            String msg (T("Failed to create typeface: "));
+            msg << font.getTypefaceName() << " " << (font.isBold() ? 'B' : ' ') << (font.isItalic() ? 'I' : ' ');
+            DBG (msg);
+#endif
+        }
+        else
+        {
+            setCharacteristics (font.getTypefaceName(),
+                                face->ascender / (float) (face->ascender - face->descender),
+                                font.isBold(), font.isItalic(),
+                                L' ');
+        }
+    }
+
+    bool loadGlyphIfPossible (const juce_wchar character)
+    {
+        return FreeTypeInterface::getInstance()
+                    ->addGlyphToFont (character, name, isBold, isItalic, *this);
+    }
+};
+
+const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
+{
+    return new FreetypeTypeface (font);
 }
 
-bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
-{
-    return FreeTypeInterface::getInstance()
-        ->addGlyphToFont (character, getName(), isBold(), isItalic(), *this);
-}
-
+//==============================================================================
 const StringArray Font::findAllTypefaceNames() throw()
 {
     StringArray s;
@@ -607,7 +572,7 @@ static const String linux_getDefaultMonospacedFontName()
     return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
 }
 
-void Typeface::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans = linux_getDefaultSansSerifFontName();
     defaultSerif = linux_getDefaultSerifFontName();

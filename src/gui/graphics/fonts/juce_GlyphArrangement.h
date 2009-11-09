@@ -42,9 +42,9 @@ class JUCE_API  PositionedGlyph
 public:
     //==============================================================================
     /** Returns the character the glyph represents. */
-    juce_wchar getCharacter() const throw()     { return glyphInfo->getCharacter(); }
+    juce_wchar getCharacter() const throw()     { return character; }
     /** Checks whether the glyph is actually empty. */
-    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (glyphInfo->getCharacter()); }
+    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (character); }
 
     /** Returns the position of the glyph's left-hand edge. */
     float getLeft() const throw()               { return x; }
@@ -53,9 +53,9 @@ public:
     /** Returns the y position of the glyph's baseline. */
     float getBaselineY() const throw()          { return y; }
     /** Returns the y position of the top of the glyph. */
-    float getTop() const throw()                { return y - fontAscent; }
+    float getTop() const throw()                { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
-    float getBottom() const throw()             { return y + fontHeight - fontAscent; }
+    float getBottom() const throw()             { return y + font.getDescent(); }
 
     //==============================================================================
     /** Shifts the glyph's position by a relative amount. */
@@ -85,9 +85,9 @@ private:
     //==============================================================================
     friend class GlyphArrangement;
     float x, y, w;
-    float fontHeight, fontAscent, fontHorizontalScale;
-    bool isUnderlined;
-    const TypefaceGlyphInfo* glyphInfo;
+    Font font;
+    juce_wchar character;
+    int glyph;
 
     PositionedGlyph() throw();
 };
@@ -124,7 +124,7 @@ public:
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const throw()                            { return numGlyphs; }
+    int getNumGlyphs() const throw()                            { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 
@@ -310,16 +310,9 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    int numGlyphs, numAllocated;
-    PositionedGlyph* glyphs;
+    OwnedArray <PositionedGlyph> glyphs;
 
-    void ensureNumGlyphsAllocated (int minGlyphs) throw();
-    void removeLast() throw();
     void appendEllipsis (const Font& font, const float maxXPixels) throw();
-
-    void incGlyphRefCount (const int index) const throw();
-    void decGlyphRefCount (const int index) const throw();
-
     void spreadOutLine (const int start, const int numGlyphs, const float targetWidth) throw();
 };
 

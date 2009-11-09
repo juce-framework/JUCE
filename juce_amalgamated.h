@@ -17428,292 +17428,196 @@ private:
 /********* End of inlined file: juce_Path.h *********/
 
 class Font;
-class Typeface;
+class CustomTypefaceGlyphInfo;
 
-/**
-    Stores information about the shape and kerning of one of the glyphs in a Typeface.
+/** A typeface represents a size-independent font.
 
-    @see Typeface, PositionedGlyph, GlyphArrangement
-*/
-class JUCE_API  TypefaceGlyphInfo
-{
-public:
+    This base class is abstract, but calling createSystemTypefaceFor() will return
+    a platform-specific subclass that can be used.
 
-    /** Returns the path that describes the glyph's outline.
+    The CustomTypeface subclass allow you to build your own typeface, and to
+    load and save it in the Juce typeface format.
 
-        This is normalised to a height of 1.0, and its origin is the
-        left-hand edge of the glyph's baseline.
-    */
-    const Path& getPath() const throw()             { return path; }
+    Normally you should never need to deal directly with Typeface objects - the Font
+    class does everything you typically need for rendering text.
 
-    /** Returns the unicode character that this glyph represents. */
-    juce_wchar getCharacter() const throw()         { return character; }
-
-    bool isWhitespace() const throw()               { return CharacterFunctions::isWhitespace (character); }
-
-    /** Returns the distance to leave between this and a following character.
-
-        The value returned is expressed as a proportion of the font's height.
-    */
-    float getHorizontalSpacing (const juce_wchar subsequentCharacter) const throw();
-
-    /** Returns the typeface that this glyph belongs to. */
-    Typeface* getTypeface() const throw()           { return typeface; }
-
-private:
-
-    friend class Typeface;
-
-    struct KerningPair
-    {
-        juce_wchar character2;
-        float kerningAmount;
-    };
-
-    const juce_wchar character;
-    const Path path;
-    float width;
-    MemoryBlock kerningPairs;
-    Typeface* const typeface;
-
-    TypefaceGlyphInfo (const juce_wchar character,
-                       const Path& shape,
-                       const float horizontalSeparation,
-                       Typeface* const typeface) throw();
-    ~TypefaceGlyphInfo() throw();
-
-    KerningPair& getKerningPair (const int index) const throw();
-    int getNumKerningPairs() const throw();
-
-    void addKerningPair (const juce_wchar subsequentCharacter,
-                         const float extraKerningAmount) throw();
-
-    const TypefaceGlyphInfo& operator= (const TypefaceGlyphInfo&);
-};
-
-/**
-    Represents a size-independent system font.
-
-    A Font object represents a particular Typeface along with a specific size,
-    style, kerning, scale, etc, wheras the Typeface is just a generalised description
-    of the shapes of the glyphs and their properties.
-
+    @see CustomTypeface, Font
 */
 class JUCE_API  Typeface  : public ReferenceCountedObject
 {
 public:
 
-    /** Tries to load a named system font and to initialise all the glyphs
-        appropriately from it.
+    /** A handy typedef for a pointer to a typeface. */
+    typedef ReferenceCountedObjectPtr <Typeface> Ptr;
 
-        @param faceName     the name of the typeface, e.g. "Times"
-        @param bold         whether to try to find a bold version of the font (may not always be available)
-        @param italic       whether to try to find an italicised version of the font (may not always be available)
+    /** Returns the name of the typeface.
+        @see Font::getTypefaceName
     */
-    Typeface (const String& faceName,
-              const bool bold,
-              const bool italic);
+    const String getName() const throw()       { return name; }
 
-    /** Creates a copy of another typeface */
-    Typeface (const Typeface& other);
+    /** Creates a new system typeface. */
+    static const Ptr createSystemTypefaceFor (const Font& font);
 
     /** Destructor. */
-    ~Typeface();
+    virtual ~Typeface();
 
-    /** Copies another typeface over this one. */
-    const Typeface& operator= (const Typeface& other) throw();
-
-    /** Returns a unique ID for the typeface.
-
-        This is based on the name and style, so can be used to compare two Typeface objects.
+    /** Returns the ascent of the font, as a proportion of its height.
+        The height is considered to always be normalised as 1.0, so this will be a
+        value less that 1.0, indicating the proportion of the font that lies above
+        its baseline.
     */
-    int hashCode() const throw()                    { return hash; }
+    virtual float getAscent() const = 0;
 
-    /** Returns the name of the typeface, e.g. "Times", "Verdana", etc */
-    const String& getName() const throw()           { return typefaceName; }
-
-    /** Returns the font's ascent as a proportion of its height. */
-    float getAscent() const throw()                 { return ascent; }
-
-    /** Returns true if the font is flagged as being bold. */
-    bool isBold() const throw()                     { return bold; }
-
-    /** Returns true if the typeface's 'italic' flag is set. */
-    bool isItalic() const throw()                   { return italic; }
-
-    /** Finds the Path that describes the outline shape of a character.
-
-        The height of the path is normalised to 1.0 (i.e. a distance of 1.0 is the
-        height of the font).
-
-        This may return 0 if the typeface has no characters, but if the character
-        that is asked for is not found, it will first try to return a default
-        character instead.
+    /** Returns the descent of the font, as a proportion of its height.
+        The height is considered to always be normalised as 1.0, so this will be a
+        value less that 1.0, indicating the proportion of the font that lies below
+        its baseline.
     */
-    const Path* getOutlineForGlyph (const juce_wchar character) throw();
+    virtual float getDescent() const = 0;
 
-    /** Tries to find the information describing a glyph for this character.
+    /** Measures the width of a line of text.
 
-        If there isn't a glyph specifically for the character it will return
-        a default glyph instead; if the typeface is empty, it may return a null
-        pointer.
+        The distance returned is based on the font having an normalised height of 1.0.
+
+        You should never need to call this directly! Use Font::getStringWidth() instead!
     */
-    const TypefaceGlyphInfo* getGlyph (const juce_wchar character) throw();
+    virtual float getStringWidth (const String& text) = 0;
 
-    /** Deletes all the glyphs and kerning data fom the typeface. */
-    void clear() throw();
+    /** Converts a line of text into its glyph numbers and their positions.
 
-    /** Adds a glyph to the typeface.
+        The distances returned are based on the font having an normalised height of 1.0.
 
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font.
+        You should never need to call this directly! Use Font::getGlyphPositions() instead!
     */
-    void addGlyph (const juce_wchar character,
-                   const Path& path,
-                   const float horizontalSpacing) throw();
+    virtual void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets) = 0;
 
-    /** Adds a kerning distance to the typeface.
+    /** Returns the outline for a glyph.
 
-        The extra amount passed in is expressed as a proportion of the font's
-        height, normalised to 1.0.
-
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font.
+        The path returned will be normalised to a font height of 1.0.
     */
-    void addKerningPair (const juce_wchar firstChar,
-                         const juce_wchar secondChar,
-                         const float extraAmount) throw();
-
-    /** Sets the typeface's name.
-
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font. Calling this method won't actually affect
-        the underlying font being used.
-    */
-    void setName (const String& name) throw();
-
-    /** Sets the font's ascent value, as a proportion of the font height.
-
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font.
-    */
-    void setAscent (const float newAscent) throw();
-
-    /** Sets the typeface's 'bold' flag.
-
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font.
-    */
-    void setBold (const bool shouldBeBold) throw();
-
-    /** Sets the typeface's 'italic' flag.
-
-        This is typically only called by the platform-specific code that generates
-        the typeface from a system font.
-    */
-    void setItalic (const bool shouldBeItalic) throw();
-
-    /** Changes the character index to use as the default character.
-
-        This is the character that gets returned for characters which don't have a
-        glyph set for them.
-    */
-    void setDefaultCharacter (const juce_wchar newDefaultCharacter) throw();
-
-    /** Creates a typeface from data created using Typeface::serialise().
-
-        This will attempt to load a compressed typeface that was created using
-        the Typeface::serialise() method. This is handy if you want to store
-        a typeface in your application as a binary blob, and use it without
-        having to actually install it on the computer.
-
-        @see Typeface::serialise()
-    */
-    Typeface (InputStream& serialisedTypefaceStream);
-
-    /** Writes the typeface to a stream (using a proprietary format).
-
-        This lets you save a typeface and reload it using the
-        Typeface::Typeface (InputStream&) constructor. The data's saved in
-        a compressed format.
-
-        @see Typeface::Typeface (InputStream&)
-    */
-    void serialise (OutputStream& outputStream);
-
-    /** A name that represents the default sans-serif typeface name.
-
-        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
-        is a generic string that represents whatever that font is, such as "DefaultSans".
-
-        If you try to create a typeface with this name, the global default LookAndFeel
-        object will be asked to provide an appropriate typeface.
-    */
-    static const tchar* defaultTypefaceNameSans;
-
-    /** A name that represents the default serif typeface name.
-
-        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
-        is a generic string that represents it, such as "DefaultSans".
-
-        If you try to create a typeface with this name, the global default LookAndFeel
-        object will be asked to provide an appropriate typeface.
-    */
-    static const tchar* defaultTypefaceNameSerif;
-
-    /** A name that represents the default monospaced typeface name.
-
-        Note that this is NOT the platform-specific typeface name (e.g. "Times"), but
-        is a generic string that represents it, such as "DefaultSans".
-
-        If you try to create a typeface with this name, the global default LookAndFeel
-        object will be asked to provide an appropriate typeface.
-    */
-    static const tchar* defaultTypefaceNameMono;
-
-    /** A handy typedef to make it easy to use ref counted pointers to this class. */
-    typedef ReferenceCountedObjectPtr <Typeface> Ptr;
+    virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
     juce_UseDebuggingNewOperator
 
+protected:
+    String name;
+
+    Typeface (const String& name) throw();
+
 private:
-    VoidArray glyphs;
+    Typeface (const Typeface&);
+    const Typeface& operator= (const Typeface&);
+};
+
+/** A typeface that can be populated with custom glyphs.
+
+    You can create a CustomTypeface if you need one that contains your own glyphs,
+    or if you need to load a typeface from a Juce-formatted binary stream.
+
+    If you want to create a copy of a native face, you can use addGlyphsFromOtherTypeface()
+    to copy glyphs into this face.
+
+    @see Typeface, Font
+*/
+class JUCE_API  CustomTypeface  : public Typeface
+{
+public:
+
+    /** Creates a new, empty typeface. */
+    CustomTypeface();
+
+    /** Loads a typeface from a previously saved stream.
+        The stream must have been created by writeToStream().
+        @see writeToStream
+    */
+    CustomTypeface (InputStream& serialisedTypefaceStream);
+
+    /** Destructor. */
+    ~CustomTypeface();
+
+    /** Resets this typeface, deleting all its glyphs and settings. */
+    void clear();
+
+    /** Sets the vital statistics for the typeface.
+        @param name     the typeface's name
+        @param ascent   the ascent - this is normalised to a height of 1.0 and this is
+                        the value that will be returned by Typeface::getAscent(). The
+                        descent is assumed to be (1.0 - ascent)
+        @param isBold   should be true if the typeface is bold
+        @param isItalic should be true if the typeface is italic
+        @param defaultCharacter     the character to be used as a replacement if there's
+                        no glyph available for the character that's being drawn
+    */
+    void setCharacteristics (const String& name, const float ascent,
+                             const bool isBold, const bool isItalic,
+                             const juce_wchar defaultCharacter) throw();
+
+    /** Adds a glyph to the typeface.
+
+        The path that is passed in is normalised so that the font height is 1.0, and its
+        origin is the anchor point of the character on its baseline.
+
+        The width is the nominal width of the character, and any extra kerning values that
+        are specified will be added to this width.
+    */
+    void addGlyph (const juce_wchar character, const Path& path, const float width) throw();
+
+    /** Specifies an extra kerning amount to be used between a pair of characters.
+        The amount will be added to the nominal width of the first character when laying out a string.
+    */
+    void addKerningPair (const juce_wchar char1, const juce_wchar char2, const float extraAmount) throw();
+
+    /** Adds a range of glyphs from another typeface.
+        This will attempt to pull in the paths and kerning information from another typeface and
+        add it to this one.
+    */
+    void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) throw();
+
+    /** Saves this typeface as a Juce-formatted font file.
+        A CustomTypeface can be created to reload the data that is written - see the CustomTypeface
+        constructor.
+    */
+    bool writeToStream (OutputStream& outputStream);
+
+    // The following methods implement the basic Typeface behaviour.
+    float getAscent() const;
+    float getDescent() const;
+    float getStringWidth (const String& text);
+    void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets);
+    bool getOutlineForGlyph (int glyphNumber, Path& path);
+    int getGlyphForCharacter (juce_wchar character);
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    juce_wchar defaultCharacter;
+    float ascent;
+    bool isBold, isItalic;
+
+    /** If a subclass overrides this, it can load glyphs into the font on-demand.
+        When methods such as getGlyphPositions() or getOutlineForGlyph() are asked for a
+        particular character and there's no corresponding glyph, they'll call this
+        method so that a subclass can try to add that glyph, returning true if it
+        manages to do so.
+    */
+    virtual bool loadGlyphIfPossible (const juce_wchar characterNeeded);
+
+private:
+
+    OwnedArray <CustomTypefaceGlyphInfo> glyphs;
     short lookupTable [128];
 
-    String typefaceName;
-    int hash;
-    float ascent; // as a proportion of the height
-    bool bold, italic, isFullyPopulated;
-    juce_wchar defaultCharacter; // the char to use if a matching glyph can't be found.
+    CustomTypeface (const CustomTypeface&);
+    const CustomTypeface& operator= (const CustomTypeface&);
 
-    Typeface() throw();
-    void addGlyphCopy (const TypefaceGlyphInfo* const glyphInfoToCopy) throw();
-
-    friend class Font;
-    friend class TypefaceCache;
-    friend class FontGlyphAlphaMap;
-
-    static const Ptr getTypefaceFor (const Font& font) throw();
-
-    // this is a platform-dependent method that will look for the given typeface
-    // and set up its kerning tables, etc. accordingly.
-    // If addAllGlyphsToFont is true, it should also add all the glyphs in the font
-    // to the typeface immediately, rather than having to add them later on-demand.
-    void initialiseTypefaceCharacteristics (const String& fontName,
-                                            bool bold, bool italic,
-                                            bool addAllGlyphsToFont) throw();
-
-    // platform-specific routine to look up and add a glyph to this typeface
-    bool findAndAddSystemGlyph (juce_wchar character) throw();
-
-    void updateHashCode() throw();
-
-    friend class LookAndFeel;
-    static void getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
+    CustomTypefaceGlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
+    CustomTypefaceGlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
 /********* End of inlined file: juce_Typeface.h *********/
+
+class LowLevelGraphicsContext;
 
 /**
     Represents a particular font, including its size, style, etc.
@@ -17766,12 +17670,8 @@ public:
     /** Creates a copy of another Font object. */
     Font (const Font& other) throw();
 
-    /** Creates a font based on a typeface.
-
-        The font object stores its own internal copy of the typeface, so you can safely
-        delete the one passed in after calling this.
-    */
-    Font (const Typeface& typeface) throw();
+    /** Creates a font for a typeface. */
+    Font (const Typeface::Ptr& typeface) throw();
 
     /** Creates a basic sans-serif font at a default height.
 
@@ -17794,9 +17694,11 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
-        This may also be set to Typeface::defaultTypefaceNameSans, Typeface::defaultTypefaceNameSerif,
-        or Typeface::defaultTypefaceNameMono, which are not actual platform-specific font names, but
-        are generic names that are used to represent the various default fonts.
+        This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+        or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+        but are generic names that are used to represent the various default fonts.
+        If you need to know the exact typeface name being used, you can call
+        Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
 
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
@@ -17806,43 +17708,50 @@ public:
 
         e.g. "Arial", "Courier", etc.
 
-        Note that this may also be one of the values: Typeface::defaultTypefaceNameSans,
-        Typeface::defaultTypefaceNameSerif, or Typeface::defaultTypefaceNameMono, which are not actual
-        platform-specific font names, but are generic names that are used to represent the various
-        default fonts. If you need to know the exact typeface name being used, you can call
+        This may also be set to Font::getDefaultSansSerifFontName(), Font::getDefaultSerifFontName(),
+        or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font names,
+        but are generic names that are used to represent the various default fonts.
+
+        If you need to know the exact typeface name being used, you can call
         Font::getTypeface()->getTypefaceName(), which will give you the platform-specific name.
     */
-    const String& getTypefaceName() const throw()               { return typefaceName; }
+    const String& getTypefaceName() const throw()               { return font->typefaceName; }
 
     /** Returns a typeface name that represents the default sans-serif font.
 
         This is also the typeface that will be used when a font is created without
         specifying any typeface details.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameSans,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        sans-serif font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameSans, setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName,
+        @see setTypefaceName, getDefaultSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSansSerifFontName() throw()       { return Typeface::defaultTypefaceNameSans; }
+    static const String getDefaultSansSerifFontName() throw();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameSerif,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        serif font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameSerif, setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
+        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultMonospacedFontName
     */
-    static const String getDefaultSerifFontName() throw()           { return Typeface::defaultTypefaceNameSerif; }
+    static const String getDefaultSerifFontName() throw();
 
     /** Returns a typeface name that represents the default sans-serif font.
 
-        Note that this method just returns the same value as Typeface::defaultTypefaceNameMono,
-        which is a generic placeholder string, and not a platform-specific font name.
+        Note that this method just returns a generic placeholder string that means "the default
+        monospaced font" - it's not the actual name of this font. To get the actual name, use
+        getPlatformDefaultFontNames() or LookAndFeel::getTypefaceForFont().
 
-        @see Typeface::defaultTypefaceNameMono, setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
+        @see setTypefaceName, getDefaultSansSerifFontName, getDefaultSerifFontName
     */
-    static const String getDefaultMonospacedFontName() throw()      { return Typeface::defaultTypefaceNameMono; }
+    static const String getDefaultMonospacedFontName() throw();
+
+    /** Returns the typeface names of the default fonts on the current platform. */
+    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
 
     /** Returns the total height of this font.
 
@@ -17851,7 +17760,7 @@ public:
 
         @see setHeight, setHeightWithoutChangingWidth, getAscent
     */
-    float getHeight() const throw()                             { return height; }
+    float getHeight() const throw()                             { return font->height; }
 
     /** Changes the font's height.
 
@@ -17888,7 +17797,7 @@ public:
 
         @see FontStyleFlags
     */
-    int getStyleFlags() const throw()                           { return styleFlags; }
+    int getStyleFlags() const throw()                           { return font->styleFlags; }
 
     /** Changes the font's style.
 
@@ -17927,7 +17836,7 @@ public:
 
         @see setHorizontalScale
     */
-    float getHorizontalScale() const throw()                { return horizontalScale; }
+    float getHorizontalScale() const throw()                { return font->horizontalScale; }
 
     /** Changes the font's kerning.
 
@@ -17946,21 +17855,13 @@ public:
         A value of zero is normal spacing, positive values will spread the letters
         out more, and negative values make them closer together.
     */
-    float getExtraKerningFactor() const throw()             { return kerning; }
+    float getExtraKerningFactor() const throw()             { return font->kerning; }
 
     /** Changes all the font's characteristics with one call. */
-    void setSizeAndStyle (const float newHeight,
+    void setSizeAndStyle (float newHeight,
                           const int newStyleFlags,
                           const float newHorizontalScale,
                           const float newKerningAmount) throw();
-
-    /** Resets this font's characteristics.
-
-        This is basically like saying "myFont = Font();", because it resets the
-        typeface, size, style, etc to a default state. Not very useful to most
-        people, its raison d'etre is to help the Graphics class be more efficient.
-    */
-    void resetToDefaultState() throw();
 
     /** Returns the total width of a string as it would be drawn using this font.
 
@@ -17973,6 +17874,30 @@ public:
         @see getStringWidth
     */
     float getStringWidthFloat (const String& text) const throw();
+
+    /** Returns the series of glyph numbers and their x offsets needed to represent a string.
+
+        An extra x offset is added at the end of the run, to indicate where the right hand
+        edge of the last character is.
+    */
+    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw();
+
+    /** Renders a glyph in a context without using methods other than the context's glyph-rendering
+        methods.
+
+        For smaller fonts, this uses an internal cache of glyph images to speed things up, and renders
+        them using the context's image blending methods. For larger fonts, it gets the glyph's path
+        from the typeface and renders it as a shape.
+
+        This method is primarily called by graphics contexts as a way of drawing a glyph if they can't do
+        it by native means.
+    */
+    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, float x, float y);
+
+    /** Renders a transformed glyph using path-filling techniques rather than calling a context's
+        actual glyph-rendering methods.
+    */
+    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, const AffineTransform& transform);
 
     /** Returns the typeface used by this font.
 
@@ -18016,11 +17941,22 @@ private:
     friend class FontGlyphAlphaMap;
     friend class TypefaceCache;
 
-    String typefaceName;
-    float height, horizontalScale, kerning;
-    mutable float ascent;
-    int styleFlags;
-    mutable Typeface::Ptr typeface;
+    class SharedFontInternal  : public ReferenceCountedObject
+    {
+    public:
+        SharedFontInternal (const String& typefaceName, const float height, const float horizontalScale,
+                            const float kerning, const float ascent, const int styleFlags,
+                            Typeface* const typeface) throw();
+        SharedFontInternal (const SharedFontInternal& other) throw();
+
+        String typefaceName;
+        float height, horizontalScale, kerning, ascent;
+        int styleFlags;
+        Typeface::Ptr typeface;
+    };
+
+    ReferenceCountedObjectPtr <SharedFontInternal> font;
+    void dupeInternalIfShared() throw();
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__
@@ -19832,6 +19768,8 @@ public:
         If a solid colour is being used for drawing, this changes its opacity
         to this new value (i.e. it doesn't multiply the colour's opacity by this amount).
 
+        If a gradient is being used, this will have no effect on it.
+
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
     void setOpacity (const float newOpacity) throw();
@@ -20439,10 +20377,8 @@ private:
         GraphicsState (const GraphicsState&) throw();
         ~GraphicsState() throw();
 
-        Colour colour;
         Brush* brush;
         Font font;
-        ResamplingQuality quality;
     };
 
     GraphicsState* state;
@@ -39370,9 +39306,9 @@ class JUCE_API  PositionedGlyph
 public:
 
     /** Returns the character the glyph represents. */
-    juce_wchar getCharacter() const throw()     { return glyphInfo->getCharacter(); }
+    juce_wchar getCharacter() const throw()     { return character; }
     /** Checks whether the glyph is actually empty. */
-    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (glyphInfo->getCharacter()); }
+    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (character); }
 
     /** Returns the position of the glyph's left-hand edge. */
     float getLeft() const throw()               { return x; }
@@ -39381,9 +39317,9 @@ public:
     /** Returns the y position of the glyph's baseline. */
     float getBaselineY() const throw()          { return y; }
     /** Returns the y position of the top of the glyph. */
-    float getTop() const throw()                { return y - fontAscent; }
+    float getTop() const throw()                { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
-    float getBottom() const throw()             { return y + fontHeight - fontAscent; }
+    float getBottom() const throw()             { return y + font.getDescent(); }
 
     /** Shifts the glyph's position by a relative amount. */
     void moveBy (const float deltaX,
@@ -39410,9 +39346,9 @@ private:
 
     friend class GlyphArrangement;
     float x, y, w;
-    float fontHeight, fontAscent, fontHorizontalScale;
-    bool isUnderlined;
-    const TypefaceGlyphInfo* glyphInfo;
+    Font font;
+    juce_wchar character;
+    int glyph;
 
     PositionedGlyph() throw();
 };
@@ -39446,7 +39382,7 @@ public:
     ~GlyphArrangement() throw();
 
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const throw()                            { return numGlyphs; }
+    int getNumGlyphs() const throw()                            { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 
@@ -39625,16 +39561,9 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    int numGlyphs, numAllocated;
-    PositionedGlyph* glyphs;
+    OwnedArray <PositionedGlyph> glyphs;
 
-    void ensureNumGlyphsAllocated (int minGlyphs) throw();
-    void removeLast() throw();
     void appendEllipsis (const Font& font, const float maxXPixels) throw();
-
-    void incGlyphRefCount (const int index) const throw();
-    void decGlyphRefCount (const int index) const throw();
-
     void spreadOutLine (const int start, const int numGlyphs, const float targetWidth) throw();
 };
 
@@ -39975,32 +39904,35 @@ public:
     virtual const Rectangle getClipBounds() const = 0;
     virtual bool isClipEmpty() const = 0;
 
-    virtual void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents) = 0;
-    virtual void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient) = 0;
+    virtual void setColour (const Colour& colour) = 0;
+    virtual void setGradient (const ColourGradient& gradient) = 0;
+    virtual void setOpacity (float opacity) = 0;
+    virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
-    virtual void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality) = 0;
-    virtual void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality) = 0;
+    virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
+    virtual void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality) = 0;
+
     virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality) = 0;
+                                    const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality) = 0;
 
-    virtual void fillAlphaChannelWithColour (const Image& alphaImage, int alphaImageX, int alphaImageY, const Colour& colour) = 0;
-    virtual void fillAlphaChannelWithGradient (const Image& alphaImage, int alphaImageX, int alphaImageY, const ColourGradient& gradient) = 0;
+    virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
     virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                            const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha) = 0;
+                                            const Image& fillerImage, int fillerImageX, int fillerImageY) = 0;
 
     virtual void blendImage (const Image& sourceImage,
-                             int destX, int destY, int destW, int destH, int sourceX, int sourceY,
-                             float alpha) = 0;
+                             int destX, int destY, int destW, int destH, int sourceX, int sourceY) = 0;
 
     virtual void blendImageWarping (const Image& sourceImage,
                                     int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                    const AffineTransform& transform,
-                                    float alpha, const Graphics::ResamplingQuality quality) = 0;
+                                    const AffineTransform& transform) = 0;
 
-    virtual void drawLine (double x1, double y1, double x2, double y2, const Colour& colour) = 0;
+    virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
+    virtual void drawVerticalLine (const int x, double top, double bottom) = 0;
+    virtual void drawHorizontalLine (const int y, double left, double right) = 0;
 
-    virtual void drawVerticalLine (const int x, double top, double bottom, const Colour& col) = 0;
-    virtual void drawHorizontalLine (const int y, double left, double right, const Colour& col) = 0;
+    virtual void setFont (const Font& newFont) = 0;
+    virtual void drawGlyph (int glyphNumber, float x, float y) = 0;
+    virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
@@ -40042,30 +39974,35 @@ public:
     const Rectangle getClipBounds() const;
     bool isClipEmpty() const;
 
-    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient);
+    void setColour (const Colour& colour);
+    void setGradient (const ColourGradient& gradient);
+    void setOpacity (float opacity);
+    void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
-    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
+    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
 
-    void fillAlphaChannelWithColour (const Image& alphaImage, int imageX, int imageY, const Colour& colour);
-    void fillAlphaChannelWithGradient (const Image& alphaImage, int imageX, int imageY, const ColourGradient& gradient);
+    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
+                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
 
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY, float alpha);
+                     int sourceX, int sourceY);
 
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform,
-                            float alpha, const Graphics::ResamplingQuality quality);
+                            const AffineTransform& transform);
 
-    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour);
+    void drawLine (double x1, double y1, double x2, double y2);
 
-    void drawVerticalLine (const int x, double top, double bottom, const Colour& col);
-    void drawHorizontalLine (const int x, double top, double bottom, const Colour& col);
+    void drawVerticalLine (const int x, double top, double bottom);
+    void drawHorizontalLine (const int x, double top, double bottom);
+
+    void setFont (const Font& newFont);
+    void drawGlyph (int glyphNumber, float x, float y);
+    void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     RectangleList* getRawClipRegion() throw()                   { return clip; }
 
@@ -40076,14 +40013,24 @@ protected:
     Image& image;
     RectangleList* clip;
     int xOffset, yOffset;
+    Font font;
+    Colour colour;
+    ColourGradient* gradient;
+    Graphics::ResamplingQuality interpolationQuality;
 
     struct SavedState
     {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset);
+        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
+                    const Font& font, const Colour& colour, ColourGradient* gradient,
+                    Graphics::ResamplingQuality interpolationQuality);
         ~SavedState();
 
         RectangleList* clip;
         const int xOffset, yOffset;
+        Font font;
+        Colour colour;
+        ColourGradient* gradient;
+        Graphics::ResamplingQuality interpolationQuality;
 
     private:
         SavedState (const SavedState&);
@@ -40092,8 +40039,8 @@ protected:
 
     OwnedArray <SavedState> stateStack;
 
-    void drawVertical (const int x, const double top, const double bottom, const Colour& col);
-    void drawHorizontal (const int y, const double top, const double bottom, const Colour& col);
+    void drawVertical (const int x, const double top, const double bottom);
+    void drawHorizontal (const int y, const double top, const double bottom);
 
     bool getPathBounds (int clipX, int clipY, int clipW, int clipH,
                         const Path& path, const AffineTransform& transform,
@@ -40101,29 +40048,25 @@ protected:
 
     void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
 
-    void clippedFillPathWithColour (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
-    void clippedFillPathWithGradient (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
+    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
     void clippedFillPathWithImage (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform,
                                    const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
 
-    void clippedFillAlphaChannelWithColour (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY, const Colour& colour);
-    void clippedFillAlphaChannelWithGradient (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY, const ColourGradient& gradient);
+    void clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY);
     void clippedFillAlphaChannelWithImage (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                           const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
+                                           const Image& fillerImage, int fillerImageX, int fillerImageY, const float opacity);
 
     void clippedBlendImage (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
-                            int destX, int destY, int destW, int destH, int sourceX, int sourceY,
-                            float alpha);
+                            int destX, int destY, int destW, int destH, int sourceX, int sourceY);
 
     void clippedBlendImageWarping (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
                                    int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                   const AffineTransform& transform,
-                                   float alpha, const Graphics::ResamplingQuality quality);
+                                   const AffineTransform& transform);
 
-    void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2, const Colour& colour);
+    void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2);
 
-    void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom, const Colour& col);
-    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom, const Colour& col);
+    void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
+    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
@@ -40175,30 +40118,35 @@ public:
     const Rectangle getClipBounds() const;
     bool isClipEmpty() const;
 
-    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient);
+    void setColour (const Colour& colour);
+    void setGradient (const ColourGradient& gradient);
+    void setOpacity (float opacity);
+    void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
-    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
+    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
 
-    void fillAlphaChannelWithColour (const Image& alphaImage, int imageX, int imageY, const Colour& colour);
-    void fillAlphaChannelWithGradient (const Image& alphaImage, int imageX, int imageY, const ColourGradient& gradient);
+    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
+                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
 
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY, float alpha);
+                     int sourceX, int sourceY);
 
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform,
-                            float alpha, const Graphics::ResamplingQuality quality);
+                            const AffineTransform& transform);
 
-    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour);
+    void drawLine (double x1, double y1, double x2, double y2);
 
-    void drawVerticalLine (const int x, double top, double bottom, const Colour& col);
-    void drawHorizontalLine (const int x, double top, double bottom, const Colour& col);
+    void drawVerticalLine (const int x, double top, double bottom);
+    void drawHorizontalLine (const int x, double top, double bottom);
+
+    void setFont (const Font& newFont);
+    void drawGlyph (int glyphNumber, float x, float y);
+    void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     juce_UseDebuggingNewOperator
 
@@ -40208,15 +40156,21 @@ protected:
     RectangleList* clip;
     int totalWidth, totalHeight, xOffset, yOffset;
     bool needToClip;
-    Colour lastColour;
+    Colour lastColour, colour;
+    ColourGradient* gradient;
+    Font font;
 
     struct SavedState
     {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset);
+        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
+                    const Colour& colour, ColourGradient* const gradient, const Font& font);
         ~SavedState();
 
         RectangleList* clip;
         const int xOffset, yOffset;
+        Colour colour;
+        ColourGradient* gradient;
+        Font font;
 
     private:
         SavedState (const SavedState&);
@@ -45019,6 +44973,9 @@ public:
         defaultTextColourId         = 0x1004503   /**< The colour to use for text when no syntax colouring is
                                                        enabled. */
     };
+
+    /** Changes the size of the scrollbars. */
+    void setScrollbarThickness (const int thickness) throw();
 
     /** @internal */
     void resized();
@@ -51058,7 +51015,8 @@ public:
     /** Destructor. */
     ~FileBrowserComponent();
 
-    /**
+    /** Returns the file that the user has currently chosen.
+        @see getHighlightedFile
     */
     const File getCurrentFile() const throw();
 
@@ -51070,6 +51028,13 @@ public:
         exists. In a "save" mode, a non-existent file would also be valid.
     */
     bool currentFileIsValid() const;
+
+    /** This returns the item in the view that is currently highlighted.
+        This may be different from getCurrentFile(), which returns the value
+        that is shown in the filename box.
+        @see getCurrentFile
+    */
+    const File getHighlightedFile() const throw();
 
     /** Returns the directory whose contents are currently being shown in the listbox. */
     const File getRoot() const;

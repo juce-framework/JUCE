@@ -69,15 +69,15 @@ bool SolidColourBrush::isInvisible() const throw()
 void SolidColourBrush::paintPath (LowLevelGraphicsContext& context,
                                   const Path& path, const AffineTransform& transform) throw()
 {
-    if (! colour.isTransparent())
-        context.fillPathWithColour (path, transform, colour, EdgeTable::Oversampling_4times);
+    context.setColour (colour);
+    context.fillPath (path, transform, EdgeTable::Oversampling_4times);
 }
 
 void SolidColourBrush::paintRectangle (LowLevelGraphicsContext& context,
                                        int x, int y, int w, int h) throw()
 {
-    if (! colour.isTransparent())
-        context.fillRectWithColour (x, y, w, h, colour, false);
+    context.setColour (colour);
+    context.fillRect (x, y, w, h, false);
 }
 
 void SolidColourBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
@@ -89,7 +89,10 @@ void SolidColourBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
         context.saveState();
 
         if (context.reduceClipRegion (x, y, w, h))
-            context.fillAlphaChannelWithColour (alphaChannelImage, imageX, imageY, colour);
+        {
+            context.setColour (colour);
+            context.fillAlphaChannel (alphaChannelImage, imageX, imageY);
+        }
 
         context.restoreState();
     }
@@ -98,19 +101,22 @@ void SolidColourBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
 void SolidColourBrush::paintVerticalLine (LowLevelGraphicsContext& context,
                                           int x, float y1, float y2) throw()
 {
-    context.drawVerticalLine (x, y1, y2, colour);
+    context.setColour (colour);
+    context.drawVerticalLine (x, y1, y2);
 }
 
 void SolidColourBrush::paintHorizontalLine (LowLevelGraphicsContext& context,
                                             int y, float x1, float x2) throw()
 {
-    context.drawHorizontalLine (y, x1, x2, colour);
+    context.setColour (colour);
+    context.drawHorizontalLine (y, x1, x2);
 }
 
 void SolidColourBrush::paintLine (LowLevelGraphicsContext& context,
                                   float x1, float y1, float x2, float y2) throw()
 {
-    context.drawLine (x1, y1, x2, y2, colour);
+    context.setColour (colour);
+    context.drawLine (x1, y1, x2, y2);
 }
 
 

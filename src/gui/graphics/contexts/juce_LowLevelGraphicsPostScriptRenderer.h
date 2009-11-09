@@ -62,33 +62,39 @@ public:
     bool isClipEmpty() const;
 
     //==============================================================================
-    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient);
+    void setColour (const Colour& colour);
+    void setGradient (const ColourGradient& gradient);
+    void setOpacity (float opacity);
+    void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality);
-    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality);
+    //==============================================================================
+    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality);
+
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality);
+                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality);
 
-    void fillAlphaChannelWithColour (const Image& alphaImage, int imageX, int imageY, const Colour& colour);
-    void fillAlphaChannelWithGradient (const Image& alphaImage, int imageX, int imageY, const ColourGradient& gradient);
+    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha);
+                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
 
     //==============================================================================
     void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY, float alpha);
+                     int sourceX, int sourceY);
 
     void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform,
-                            float alpha, const Graphics::ResamplingQuality quality);
+                            const AffineTransform& transform);
 
     //==============================================================================
-    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour);
+    void drawLine (double x1, double y1, double x2, double y2);
 
-    void drawVerticalLine (const int x, double top, double bottom, const Colour& col);
-    void drawHorizontalLine (const int x, double top, double bottom, const Colour& col);
+    void drawVerticalLine (const int x, double top, double bottom);
+    void drawHorizontalLine (const int x, double top, double bottom);
 
+    //==============================================================================
+    void setFont (const Font& newFont);
+    void drawGlyph (int glyphNumber, float x, float y);
+    void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -99,15 +105,21 @@ protected:
     RectangleList* clip;
     int totalWidth, totalHeight, xOffset, yOffset;
     bool needToClip;
-    Colour lastColour;
+    Colour lastColour, colour;
+    ColourGradient* gradient;
+    Font font;
 
     struct SavedState
     {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset);
+        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
+                    const Colour& colour, ColourGradient* const gradient, const Font& font);
         ~SavedState();
 
         RectangleList* clip;
         const int xOffset, yOffset;
+        Colour colour;
+        ColourGradient* gradient;
+        Font font;
 
     private:
         SavedState (const SavedState&);

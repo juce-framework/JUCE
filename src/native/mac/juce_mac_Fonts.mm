@@ -29,303 +29,338 @@
 
 
 //==============================================================================
-class FontHelper
+class MacTypeface  : public Typeface
 {
-    NSFont* font;
-
 public:
-    String name;
-    bool isBold, isItalic, needsItalicTransform;
-    float fontSize, totalSize, ascent;
-    int refCount;
-    NSMutableDictionary* attributes;
-
-    FontHelper (const String& name_,
-                const bool bold_,
-                const bool italic_,
-                const float size_)
-        : font (0),
-          name (name_),
-          isBold (bold_),
-          isItalic (italic_),
-          needsItalicTransform (false),
-          fontSize (size_),
-          refCount (1)
-    {
-        attributes = [[NSMutableDictionary dictionaryWithObject: [NSNumber numberWithInt: 0]
-                                                         forKey: NSLigatureAttributeName] retain];
-
-        font = [NSFont fontWithName: juceStringToNS (name_) size: size_];
-
-        if (italic_)
-        {
-            NSFont* newFont = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSItalicFontMask];
-
-            if (newFont == font)
-                needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
-
-            font = newFont;
-        }
-
-        if (bold_)
-            font = [[NSFontManager sharedFontManager] convertFont: font toHaveTrait: NSBoldFontMask];
-
-        [font retain];
-
-        ascent = fabsf ([font ascender]);
-        totalSize = ascent + fabsf ([font descender]);
-    }
-
-    ~FontHelper()
-    {
-        [font release];
-        [attributes release];
-    }
-
-    bool getPathAndKerning (const juce_wchar char1,
-                            const juce_wchar char2,
-                            Path* path,
-                            float& kerning,
-                            float* ascent,
-                            float* descent)
+    //==============================================================================
+    MacTypeface (const Font& font)
+        : Typeface (font.getTypefaceName()),
+          charToGlyphMapper (0)
     {
         const ScopedAutoReleasePool pool;
+        renderingTransform = CGAffineTransformIdentity;
 
-        if (font == 0
-             || ! [[font coveredCharacterSet] longCharacterIsMember: (UTF32Char) char1])
-            return false;
+        bool needsItalicTransform = false;
 
-        String chars;
-        chars << ' ' << char1 << char2;
+#if JUCE_IPHONE
+        NSString* fontName = juceStringToNS (font.getTypefaceName());
 
-        NSTextStorage* textStorage = [[[NSTextStorage alloc] initWithString: juceStringToNS (chars)
-                                                                 attributes: attributes] autorelease];
-        NSLayoutManager* layoutManager = [[[NSLayoutManager alloc] init] autorelease];
-        NSTextContainer* textContainer = [[[NSTextContainer alloc] init] autorelease];
-        [layoutManager addTextContainer: textContainer];
-        [textStorage addLayoutManager: layoutManager];
-        [textStorage setFont: font];
-
-        unsigned int glyphIndex = [layoutManager glyphRangeForCharacterRange: NSMakeRange (1, 1)
-                                                        actualCharacterRange: 0].location;
-        NSPoint p1 = [layoutManager locationForGlyphAtIndex: glyphIndex];
-        NSPoint p2 = [layoutManager locationForGlyphAtIndex: glyphIndex + 1];
-        kerning = p2.x - p1.x;
-
-        if (ascent != 0)
-            *ascent = this->ascent;
-
-        if (descent != 0)
-            *descent = fabsf ([font descender]);
-
-        if (path != 0)
+        if (font.isItalic() || font.isBold())
         {
-            NSBezierPath* bez = [NSBezierPath bezierPath];
-            [bez moveToPoint: NSMakePoint (0, 0)];
-            [bez appendBezierPathWithGlyph: [layoutManager glyphAtIndex: glyphIndex]
-                                                                 inFont: font];
+            NSArray* familyFonts = [UIFont fontNamesForFamilyName: juceStringToNS (font.getTypefaceName())];
 
-            for (int i = 0; i < [bez elementCount]; ++i)
+            for (NSString* i in familyFonts)
             {
-                NSPoint p[3];
-                switch ([bez elementAtIndex: i associatedPoints: p])
+                const String fn (nsStringToJuce (i));
+                const String afterDash (fn.fromFirstOccurrenceOf (T("-"), false, false));
+
+                const bool probablyBold = afterDash.containsIgnoreCase (T("bold")) || fn.endsWithIgnoreCase (T("bold"));
+                const bool probablyItalic = afterDash.containsIgnoreCase (T("oblique"))
+                                             || afterDash.containsIgnoreCase (T("italic"))
+                                             || fn.endsWithIgnoreCase (T("oblique"))
+                                             || fn.endsWithIgnoreCase (T("italic"));
+
+                if (probablyBold == font.isBold()
+                     && probablyItalic == font.isItalic())
                 {
-                case NSMoveToBezierPathElement:
-                    path->startNewSubPath (p[0].x, -p[0].y);
+                    fontName = i;
+                    needsItalicTransform = false;
                     break;
-                case NSLineToBezierPathElement:
-                    path->lineTo (p[0].x, -p[0].y);
-                    break;
-                case NSCurveToBezierPathElement:
-                    path->cubicTo (p[0].x, -p[0].y, p[1].x, -p[1].y, p[2].x, -p[2].y);
-                    break;
-                case NSClosePathBezierPathElement:
-                    path->closeSubPath();
-                    break;
-                default:
-                    jassertfalse
-                    break;
+                }
+                else if (probablyBold && (! probablyItalic) && probablyBold == font.isBold())
+                {
+                    fontName = i;
+                    needsItalicTransform = true; // not ideal, so carry on in case we find a better one
                 }
             }
 
             if (needsItalicTransform)
-                path->applyTransform (AffineTransform::identity.sheared (-0.15, 0));
+                renderingTransform.c = 0.15f;
         }
 
-        return kerning != 0;
-    }
+        fontRef = CGFontCreateWithFontName ((CFStringRef) fontName);
 
-    juce_wchar getDefaultChar()
-    {
-        return 0;
-    }
-};
+#else
+        nsFont = [NSFont fontWithName: juceStringToNS (font.getTypefaceName()) size: 1024];
 
-//==============================================================================
-class FontHelperCache  : public Timer,
-                         public DeletedAtShutdown
-{
-    VoidArray cache;
-
-public:
-    FontHelperCache()
-    {
-    }
-
-    ~FontHelperCache()
-    {
-        for (int i = cache.size(); --i >= 0;)
+        if (font.isItalic())
         {
-            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
-            delete f;
+            NSFont* newFont = [[NSFontManager sharedFontManager] convertFont: nsFont
+                                                                 toHaveTrait: NSItalicFontMask];
+
+            if (newFont == nsFont)
+                needsItalicTransform = true; // couldn't find a proper italic version, so fake it with a transform..
+
+            nsFont = newFont;
         }
 
-        clearSingletonInstance();
+        if (font.isBold())
+            nsFont = [[NSFontManager sharedFontManager] convertFont: nsFont toHaveTrait: NSBoldFontMask];
+
+        [nsFont retain];
+
+        ascent = fabsf ([nsFont ascender]);
+        float totalSize = ascent + fabsf ([nsFont descender]);
+        ascent /= totalSize;
+
+        pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
+
+        if (needsItalicTransform)
+        {
+            pathTransform = pathTransform.sheared (-0.15, 0);
+            renderingTransform.c = 0.15f;
+        }
+
+        fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
+#endif
+
+        const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
+        unitsToHeightScaleFactor = 1.0f / totalHeight;
+        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
     }
 
-    FontHelper* getFont (const String& name,
-                         const bool bold,
-                         const bool italic,
-                         const float size = 1024)
+    ~MacTypeface()
     {
-        for (int i = cache.size(); --i >= 0;)
-        {
-            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
+        [nsFont release];
+        CGFontRelease (fontRef);
+        delete charToGlyphMapper;
+    }
 
-            if (f->name == name
-                && f->isBold == bold
-                && f->isItalic == italic
-                && f->fontSize == size)
+    float getAscent() const
+    {
+        return ascent;
+    }
+
+    float getDescent() const
+    {
+        return 1.0f - ascent;
+    }
+
+    float getStringWidth (const String& text)
+    {
+        if (fontRef == 0)
+            return 0;
+
+        Array <int> glyphs (128);
+        createGlyphsForString (text, glyphs);
+
+        if (glyphs.size() == 0)
+            return 0;
+
+        int x = 0;
+        int* const advances = (int*) juce_malloc (glyphs.size() * 2 * sizeof (int));
+
+        if (CGFontGetGlyphAdvances (fontRef, (CGGlyph*) &glyphs.getReference(0), glyphs.size() * 2, advances))
+            for (int i = 0; i < glyphs.size(); ++i)
+                x += advances [i * 2];
+
+        juce_free (advances);
+        return x * unitsToHeightScaleFactor;
+    }
+
+    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets)
+    {
+        if (fontRef == 0)
+            return;
+
+        createGlyphsForString (text, glyphs);
+
+        xOffsets.add (0);
+        if (glyphs.size() == 0)
+            return;
+
+        int* const advances = (int*) juce_malloc (glyphs.size() * 2 * sizeof (int));
+
+        if (CGFontGetGlyphAdvances (fontRef, (CGGlyph*) &glyphs.getReference(0), glyphs.size() * 2, advances))
+        {
+            int x = 0;
+            for (int i = 0; i < glyphs.size(); ++i)
             {
-                f->refCount++;
-                return f;
+                x += advances [i * 2];
+                xOffsets.add (x * unitsToHeightScaleFactor);
             }
         }
 
-        FontHelper* const f = new FontHelper (name, bold, italic, size);
-        cache.add (f);
-        return f;
+        juce_free (advances);
     }
 
-    void releaseFont (FontHelper* f)
+    bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
-        for (int i = cache.size(); --i >= 0;)
+#if JUCE_IPHONE
+        return false;
+#else
+        if (nsFont == 0)
+            return false;
+
+        // we might need to apply a transform to the path, so it mustn't have anything else in it
+        jassert (path.isEmpty());
+
+        const ScopedAutoReleasePool pool;
+
+        NSBezierPath* bez = [NSBezierPath bezierPath];
+        [bez moveToPoint: NSMakePoint (0, 0)];
+        [bez appendBezierPathWithGlyph: (NSGlyph) glyphNumber
+                                inFont: nsFont];
+
+        for (int i = 0; i < [bez elementCount]; ++i)
         {
-            FontHelper* const f2 = (FontHelper*) cache.getUnchecked(i);
-
-            if (f == f2)
+            NSPoint p[3];
+            switch ([bez elementAtIndex: i associatedPoints: p])
             {
-                f->refCount--;
-
-                if (f->refCount == 0)
-                    startTimer (5000);
-
+            case NSMoveToBezierPathElement:
+                path.startNewSubPath (p[0].x, -p[0].y);
+                break;
+            case NSLineToBezierPathElement:
+                path.lineTo (p[0].x, -p[0].y);
+                break;
+            case NSCurveToBezierPathElement:
+                path.cubicTo (p[0].x, -p[0].y, p[1].x, -p[1].y, p[2].x, -p[2].y);
+                break;
+            case NSClosePathBezierPathElement:
+                path.closeSubPath();
+                break;
+            default:
+                jassertfalse
                 break;
             }
         }
+
+        path.applyTransform (pathTransform);
+        return true;
+#endif
     }
 
-    void timerCallback()
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+    CGFontRef fontRef;
+    float fontHeightToCGSizeFactor;
+    CGAffineTransform renderingTransform;
+
+private:
+    float ascent, unitsToHeightScaleFactor;
+
+#if JUCE_IPHONE
+
+#else
+    NSFont* nsFont;
+    AffineTransform pathTransform;
+#endif
+
+    void createGlyphsForString (const String& text, Array <int>& dest) throw()
     {
-        stopTimer();
+        if (charToGlyphMapper == 0)
+            charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
-        for (int i = cache.size(); --i >= 0;)
+        const juce_wchar* t = (const juce_wchar*) text;
+
+        while (*t != 0)
+            dest.add (charToGlyphMapper->getGlyphForCharacter (*t++));
+    }
+
+    // Reads a CGFontRef's character map table to convert unicode into glyph numbers
+    class CharToGlyphMapper
+    {
+    public:
+        CharToGlyphMapper (CGFontRef fontRef) throw()
+            : segCount (0), endCode (0), startCode (0), idDelta (0),
+              idRangeOffset (0), glyphIndexes (0)
         {
-            FontHelper* const f = (FontHelper*) cache.getUnchecked(i);
+            CFDataRef cmapTable = CGFontCopyTableForTag (fontRef, 'cmap');
 
-            if (f->refCount == 0)
+            if (cmapTable != 0)
             {
-                cache.remove (i);
-                delete f;
+                const int numSubtables = getValue16 (cmapTable, 2);
+
+                for (int i = 0; i < numSubtables; ++i)
+                {
+                    if (getValue16 (cmapTable, i * 8 + 4) == 0) // check for platform ID of 0
+                    {
+                        const int offset = getValue32 (cmapTable, i * 8 + 8);
+
+                        if (getValue16 (cmapTable, offset) == 4) // check that it's format 4..
+                        {
+                            const int length = getValue16 (cmapTable, offset + 2);
+                            const int segCountX2 =  getValue16 (cmapTable, offset + 6);
+                            segCount = segCountX2 / 2;
+                            const int endCodeOffset = offset + 14;
+                            const int startCodeOffset = endCodeOffset + 2 + segCountX2;
+                            const int idDeltaOffset = startCodeOffset + segCountX2;
+                            const int idRangeOffsetOffset = idDeltaOffset + segCountX2;
+                            const int glyphIndexesOffset = idRangeOffsetOffset + segCountX2;
+
+                            endCode = CFDataCreate (kCFAllocatorDefault, CFDataGetBytePtr (cmapTable) + endCodeOffset, segCountX2);
+                            startCode = CFDataCreate (kCFAllocatorDefault, CFDataGetBytePtr (cmapTable) + startCodeOffset, segCountX2);
+                            idDelta = CFDataCreate (kCFAllocatorDefault, CFDataGetBytePtr (cmapTable) + idDeltaOffset, segCountX2);
+                            idRangeOffset = CFDataCreate (kCFAllocatorDefault, CFDataGetBytePtr (cmapTable) + idRangeOffsetOffset, segCountX2);
+                            glyphIndexes = CFDataCreate (kCFAllocatorDefault, CFDataGetBytePtr (cmapTable) + glyphIndexesOffset, offset + length - glyphIndexesOffset);
+                        }
+
+                        break;
+                    }
+                }
+
+                CFRelease (cmapTable);
             }
         }
 
-        if (cache.size() == 0)
-            delete this;
-    }
+        ~CharToGlyphMapper() throw()
+        {
+            if (endCode != 0)
+            {
+                CFRelease (endCode);
+                CFRelease (startCode);
+                CFRelease (idDelta);
+                CFRelease (idRangeOffset);
+                CFRelease (glyphIndexes);
+            }
+        }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (FontHelperCache)
+        int getGlyphForCharacter (const juce_wchar c) const throw()
+        {
+            for (int i = 0; i < segCount; ++i)
+            {
+                if (getValue16 (endCode, i * 2) >= c)
+                {
+                    const int start = getValue16 (startCode, i * 2);
+                    if (start > c)
+                        break;
+
+                    const int delta = getValue16 (idDelta, i * 2);
+                    const int rangeOffset = getValue16 (idRangeOffset, i * 2);
+
+                    if (rangeOffset == 0)
+                        return delta + c;
+                    else
+                        return getValue16 (glyphIndexes, 2 * ((rangeOffset / 2) + (c - start) - (segCount - i)));
+                }
+            }
+
+            // If we failed to find it "properly", this dodgy fall-back seems to do the trick for most fonts!
+            return jmax (-1, c - 29);
+        }
+
+    private:
+        int segCount;
+        CFDataRef endCode, startCode, idDelta, idRangeOffset, glyphIndexes;
+
+        static uint16 getValue16 (CFDataRef data, const int index) throw()
+        {
+            return CFSwapInt16BigToHost (*(UInt16*) (CFDataGetBytePtr (data) + index));
+        }
+
+        static uint32 getValue32 (CFDataRef data, const int index) throw()
+        {
+            return CFSwapInt32BigToHost (*(UInt32*) (CFDataGetBytePtr (data) + index));
+        }
+    };
+
+    CharToGlyphMapper* charToGlyphMapper;
 };
 
-juce_ImplementSingleton_SingleThreaded (FontHelperCache)
-
-//==============================================================================
-void Typeface::initialiseTypefaceCharacteristics (const String& fontName,
-                                                  bool bold,
-                                                  bool italic,
-                                                  bool addAllGlyphsToFont) throw()
+const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 {
-    // This method is only safe to be called from the normal UI thread..
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
-    FontHelper* const helper = FontHelperCache::getInstance()
-                                  ->getFont (fontName, bold, italic);
-
-    clear();
-    setAscent (helper->ascent / helper->totalSize);
-    setName (fontName);
-    setDefaultCharacter (helper->getDefaultChar());
-    setBold (bold);
-    setItalic (italic);
-
-    if (addAllGlyphsToFont)
-    {
-        //xxx
-        jassertfalse
-    }
-
-    FontHelperCache::getInstance()->releaseFont (helper);
-}
-
-bool Typeface::findAndAddSystemGlyph (juce_wchar character) throw()
-{
-    // This method is only safe to be called from the normal UI thread..
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
-    if (character == 0)
-        return false;
-
-    FontHelper* const helper = FontHelperCache::getInstance()
-                                  ->getFont (getName(), isBold(), isItalic());
-
-    Path path;
-    float width;
-    bool foundOne = false;
-
-    if (helper->getPathAndKerning (character, T('I'), &path, width, 0, 0))
-    {
-        path.applyTransform (AffineTransform::scale (1.0f / helper->totalSize,
-                                                     1.0f / helper->totalSize));
-
-        addGlyph (character, path, width / helper->totalSize);
-
-        for (int i = 0; i < glyphs.size(); ++i)
-        {
-            const TypefaceGlyphInfo* const g = (const TypefaceGlyphInfo*) glyphs.getUnchecked(i);
-
-            float kerning;
-            if (helper->getPathAndKerning (character, g->getCharacter(), 0, kerning, 0, 0))
-            {
-                kerning = (kerning - width) / helper->totalSize;
-
-                if (kerning != 0)
-                    addKerningPair (character, g->getCharacter(), kerning);
-            }
-
-            if (helper->getPathAndKerning (g->getCharacter(), character, 0, kerning, 0, 0))
-            {
-                kerning = kerning / helper->totalSize - g->width;
-
-                if (kerning != 0)
-                    addKerningPair (g->getCharacter(), character, kerning);
-            }
-        }
-
-        foundOne = true;
-    }
-
-    FontHelperCache::getInstance()->releaseFont (helper);
-    return foundOne;
+    return new MacTypeface (font);
 }
 
 //==============================================================================
@@ -334,7 +369,12 @@ const StringArray Font::findAllTypefaceNames() throw()
     StringArray names;
 
     const ScopedAutoReleasePool pool;
+
+#if JUCE_IPHONE
+    NSArray* fonts = [UIFont familyNames];
+#else
     NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
+#endif
 
     for (unsigned int i = 0; i < [fonts count]; ++i)
         names.add (nsStringToJuce ((NSString*) [fonts objectAtIndex: i]));
@@ -343,7 +383,7 @@ const StringArray Font::findAllTypefaceNames() throw()
     return names;
 }
 
-void Typeface::getDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
     defaultSans  = "Lucida Grande";
     defaultSerif = "Times New Roman";

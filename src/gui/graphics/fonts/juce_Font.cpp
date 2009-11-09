@@ -29,6 +29,10 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Font.h"
 #include "juce_GlyphArrangement.h"
+#include "../../components/lookandfeel/juce_LookAndFeel.h"
+#include "../../graphics/contexts/juce_LowLevelGraphicsContext.h"
+#include "../../../utilities/juce_DeletedAtShutdown.h"
+#include "../../../core/juce_Singleton.h"
 
 
 //==============================================================================
@@ -36,53 +40,27 @@ static const float minFontHeight = 0.1f;
 static const float maxFontHeight = 10000.0f;
 static const float defaultFontHeight = 14.0f;
 
+static const tchar* const juce_defaultFontNameSans = T("<Sans-Serif>");
+static const tchar* const juce_defaultFontNameSerif = T("<Serif>");
+static const tchar* const juce_defaultFontNameMono = T("<Monospaced>");
+
+void clearUpDefaultFontNames() throw(); // in juce_LookAndFeel.cpp
 
 //==============================================================================
-Font::Font() throw()
-    : typefaceName (Typeface::defaultTypefaceNameSans),
-      height (defaultFontHeight),
-      horizontalScale (1.0f),
-      kerning (0),
-      ascent (0),
-      styleFlags (Font::plain)
-{
-}
-
-void Font::resetToDefaultState() throw()
-{
-    typefaceName = Typeface::defaultTypefaceNameSans;
-    height = defaultFontHeight;
-    horizontalScale = 1.0f;
-    kerning = 0;
-    ascent = 0;
-    styleFlags = Font::plain;
-    typeface = 0;
-}
-
-Font::Font (const float fontHeight,
-            const int styleFlags_) throw()
-    : typefaceName (Typeface::defaultTypefaceNameSans),
-      height (jlimit (minFontHeight, maxFontHeight, fontHeight)),
-      horizontalScale (1.0f),
-      kerning (0),
-      ascent (0),
-      styleFlags (styleFlags_)
-{
-}
-
-Font::Font (const String& typefaceName_,
-            const float fontHeight,
-            const int styleFlags_) throw()
+Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const float horizontalScale_,
+                                              const float kerning_, const float ascent_, const int styleFlags_,
+                                              Typeface* const typeface_) throw()
     : typefaceName (typefaceName_),
-      height (jlimit (minFontHeight, maxFontHeight, fontHeight)),
-      horizontalScale (1.0f),
-      kerning (0),
-      ascent (0),
-      styleFlags (styleFlags_)
+      height (height_),
+      horizontalScale (horizontalScale_),
+      kerning (kerning_),
+      ascent (ascent_),
+      styleFlags (styleFlags_),
+      typeface (typeface_)
 {
 }
 
-Font::Font (const Font& other) throw()
+Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) throw()
     : typefaceName (other.typefaceName),
       height (other.height),
       horizontalScale (other.horizontalScale),
@@ -93,19 +71,36 @@ Font::Font (const Font& other) throw()
 {
 }
 
+
+//==============================================================================
+Font::Font() throw()
+    : font (new SharedFontInternal (juce_defaultFontNameSans, defaultFontHeight,
+                                    1.0f, 0, 0, Font::plain, 0))
+{
+}
+
+Font::Font (const float fontHeight, const int styleFlags_) throw()
+    : font (new SharedFontInternal (juce_defaultFontNameSans, jlimit (minFontHeight, maxFontHeight, fontHeight),
+                                    1.0f, 0, 0, styleFlags_, 0))
+{
+}
+
+Font::Font (const String& typefaceName_,
+            const float fontHeight,
+            const int styleFlags_) throw()
+    : font (new SharedFontInternal (typefaceName_, jlimit (minFontHeight, maxFontHeight, fontHeight),
+                                    1.0f, 0, 0, styleFlags_, 0))
+{
+}
+
+Font::Font (const Font& other) throw()
+    : font (other.font)
+{
+}
+
 const Font& Font::operator= (const Font& other) throw()
 {
-    if (this != &other)
-    {
-        typefaceName = other.typefaceName;
-        height = other.height;
-        styleFlags = other.styleFlags;
-        horizontalScale = other.horizontalScale;
-        kerning = other.kerning;
-        ascent = other.ascent;
-        typeface = other.typeface;
-    }
-
+    font = other.font;
     return *this;
 }
 
@@ -113,26 +108,20 @@ Font::~Font() throw()
 {
 }
 
-Font::Font (const Typeface& face) throw()
-    : height (11.0f),
-      horizontalScale (1.0f),
-      kerning (0),
-      ascent (0),
-      styleFlags (plain)
+Font::Font (const Typeface::Ptr& typeface) throw()
+    : font (new SharedFontInternal (typeface->getName(), defaultFontHeight,
+                                    1.0f, 0, 0, Font::plain, typeface))
 {
-    typefaceName = face.getName();
-    setBold (face.isBold());
-    setItalic (face.isItalic());
-    typeface = new Typeface (face);
 }
 
 bool Font::operator== (const Font& other) const throw()
 {
-    return height == other.height
-            && horizontalScale == other.horizontalScale
-            && kerning == other.kerning
-            && styleFlags == other.styleFlags
-            && typefaceName == other.typefaceName;
+    return font == other.font
+            || (font->height == other.font->height
+                && font->styleFlags == other.font->styleFlags
+                && font->horizontalScale == other.font->horizontalScale
+                && font->kerning == other.font->kerning
+                && font->typefaceName == other.font->typefaceName);
 }
 
 bool Font::operator!= (const Font& other) const throw()
@@ -140,12 +129,37 @@ bool Font::operator!= (const Font& other) const throw()
     return ! operator== (other);
 }
 
+void Font::dupeInternalIfShared() throw()
+{
+    if (font->getReferenceCount() > 1)
+        font = new SharedFontInternal (*font);
+}
+
 //==============================================================================
+const String Font::getDefaultSansSerifFontName() throw()
+{
+    return juce_defaultFontNameSans;
+}
+
+const String Font::getDefaultSerifFontName() throw()
+{
+    return juce_defaultFontNameSerif;
+}
+
+const String Font::getDefaultMonospacedFontName() throw()
+{
+    return juce_defaultFontNameMono;
+}
+
 void Font::setTypefaceName (const String& faceName) throw()
 {
-    typefaceName = faceName;
-    typeface = 0;
-    ascent = 0;
+    if (faceName != font->typefaceName)
+    {
+        dupeInternalIfShared();
+        font->typefaceName = faceName;
+        font->typeface = 0;
+        font->ascent = 0;
+    }
 }
 
 //==============================================================================
@@ -164,92 +178,114 @@ void Font::setFallbackFontName (const String& name) throw()
 //==============================================================================
 void Font::setHeight (float newHeight) throw()
 {
-    height = jlimit (minFontHeight, maxFontHeight, newHeight);
+    newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
+
+    if (font->height != newHeight)
+    {
+        dupeInternalIfShared();
+        font->height = newHeight;
+    }
 }
 
 void Font::setHeightWithoutChangingWidth (float newHeight) throw()
 {
     newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
-    horizontalScale *= (height / newHeight);
-    height = newHeight;
+
+    if (font->height != newHeight)
+    {
+        dupeInternalIfShared();
+        font->horizontalScale *= (font->height / newHeight);
+        font->height = newHeight;
+    }
 }
 
 void Font::setStyleFlags (const int newFlags) throw()
 {
-    if (styleFlags != newFlags)
+    if (font->styleFlags != newFlags)
     {
-        styleFlags = newFlags;
-        typeface = 0;
-        ascent = 0;
+        dupeInternalIfShared();
+        font->styleFlags = newFlags;
+        font->typeface = 0;
+        font->ascent = 0;
     }
 }
 
-void Font::setSizeAndStyle (const float newHeight,
+void Font::setSizeAndStyle (float newHeight,
                             const int newStyleFlags,
                             const float newHorizontalScale,
                             const float newKerningAmount) throw()
 {
-    height = jlimit (minFontHeight, maxFontHeight, newHeight);
-    horizontalScale = newHorizontalScale;
-    kerning = newKerningAmount;
+    newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
+
+    if (font->height != newHeight
+         || font->horizontalScale != newHorizontalScale
+         || font->kerning != newKerningAmount)
+    {
+        dupeInternalIfShared();
+        font->height = newHeight;
+        font->horizontalScale = newHorizontalScale;
+        font->kerning = newKerningAmount;
+    }
 
     setStyleFlags (newStyleFlags);
 }
 
 void Font::setHorizontalScale (const float scaleFactor) throw()
 {
-    horizontalScale = scaleFactor;
+    dupeInternalIfShared();
+    font->horizontalScale = scaleFactor;
 }
 
 void Font::setExtraKerningFactor (const float extraKerning) throw()
 {
-    kerning = extraKerning;
+    dupeInternalIfShared();
+    font->kerning = extraKerning;
 }
 
 void Font::setBold (const bool shouldBeBold) throw()
 {
-    setStyleFlags (shouldBeBold ? (styleFlags | bold)
-                                : (styleFlags & ~bold));
+    setStyleFlags (shouldBeBold ? (font->styleFlags | bold)
+                                : (font->styleFlags & ~bold));
 }
 
 bool Font::isBold() const throw()
 {
-    return (styleFlags & bold) != 0;
+    return (font->styleFlags & bold) != 0;
 }
 
 void Font::setItalic (const bool shouldBeItalic) throw()
 {
-    setStyleFlags (shouldBeItalic ? (styleFlags | italic)
-                                  : (styleFlags & ~italic));
+    setStyleFlags (shouldBeItalic ? (font->styleFlags | italic)
+                                  : (font->styleFlags & ~italic));
 }
 
 bool Font::isItalic() const throw()
 {
-    return (styleFlags & italic) != 0;
+    return (font->styleFlags & italic) != 0;
 }
 
 void Font::setUnderline (const bool shouldBeUnderlined) throw()
 {
-    setStyleFlags (shouldBeUnderlined ? (styleFlags | underlined)
-                                      : (styleFlags & ~underlined));
+    setStyleFlags (shouldBeUnderlined ? (font->styleFlags | underlined)
+                                      : (font->styleFlags & ~underlined));
 }
 
 bool Font::isUnderlined() const throw()
 {
-    return (styleFlags & underlined) != 0;
+    return (font->styleFlags & underlined) != 0;
 }
 
 float Font::getAscent() const throw()
 {
-    if (ascent == 0)
-        ascent = getTypeface()->getAscent();
+    if (font->ascent == 0)
+        font->ascent = getTypeface()->getAscent();
 
-    return height * ascent;
+    return font->height * font->ascent;
 }
 
 float Font::getDescent() const throw()
 {
-    return height - getAscent();
+    return font->height - getAscent();
 }
 
 int Font::getStringWidth (const String& text) const throw()
@@ -259,35 +295,32 @@ int Font::getStringWidth (const String& text) const throw()
 
 float Font::getStringWidthFloat (const String& text) const throw()
 {
-    float x = 0.0f;
+    float w = getTypeface()->getStringWidth (text);
 
-    if (text.isNotEmpty())
-    {
-        Typeface* const typeface = getTypeface();
-        const juce_wchar* t = (const juce_wchar*) text;
+    if (font->kerning != 0)
+        w += font->kerning * text.length();
 
-        do
-        {
-            const TypefaceGlyphInfo* const glyph = typeface->getGlyph (*t++);
-
-            if (glyph != 0)
-                x += kerning + glyph->getHorizontalSpacing (*t);
-        }
-        while (*t != 0);
-
-        x *= height;
-        x *= horizontalScale;
-    }
-
-    return x;
+    return w * font->height * font->horizontalScale;
 }
 
-Typeface* Font::getTypeface() const throw()
+void Font::getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw()
 {
-    if (typeface == 0)
-        typeface = Typeface::getTypefaceFor (*this);
+    getTypeface()->getGlyphPositions (text, glyphs, xOffsets);
 
-    return typeface;
+    const float scale = font->height * font->horizontalScale;
+    const int num = xOffsets.size();
+    float* const x = &(xOffsets.getReference(0));
+
+    if (font->kerning != 0)
+    {
+        for (int i = 0; i < num; ++i)
+            x[i] = (x[i] + i * font->kerning) * scale;
+    }
+    else
+    {
+        for (int i = 0; i < num; ++i)
+            x[i] *= scale;
+    }
 }
 
 void Font::findFonts (OwnedArray<Font>& destArray) throw()
@@ -297,5 +330,356 @@ void Font::findFonts (OwnedArray<Font>& destArray) throw()
     for (int i = 0; i < names.size(); ++i)
         destArray.add (new Font (names[i], defaultFontHeight, Font::plain));
 }
+
+
+//==============================================================================
+class TypefaceCache  : public DeletedAtShutdown
+{
+public:
+    TypefaceCache (int numToCache = 10) throw()
+        : counter (1),
+          faces (2)
+    {
+        while (--numToCache >= 0)
+            faces.add (new CachedFace());
+    }
+
+    ~TypefaceCache()
+    {
+        clearUpDefaultFontNames();
+        clearSingletonInstance();
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (TypefaceCache)
+
+    const Typeface::Ptr findTypefaceFor (const Font& font) throw()
+    {
+        const int flags = font.getStyleFlags() & (Font::bold | Font::italic);
+        const String faceName (font.getTypefaceName());
+
+        int i;
+        for (i = faces.size(); --i >= 0;)
+        {
+            CachedFace* const face = faces.getUnchecked(i);
+
+            if (face->flags == flags
+                 && face->typefaceName == faceName)
+            {
+                face->lastUsageCount = ++counter;
+                return face->typeFace;
+            }
+        }
+
+        int replaceIndex = 0;
+        int bestLastUsageCount = INT_MAX;
+
+        for (i = faces.size(); --i >= 0;)
+        {
+            const int lu = faces.getUnchecked(i)->lastUsageCount;
+
+            if (bestLastUsageCount > lu)
+            {
+                bestLastUsageCount = lu;
+                replaceIndex = i;
+            }
+        }
+
+        CachedFace* const face = faces.getUnchecked (replaceIndex);
+        face->typefaceName = faceName;
+        face->flags = flags;
+        face->lastUsageCount = ++counter;
+        face->typeFace = LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
+        jassert (face->typeFace != 0); // the look and feel must return a typeface!
+
+        return face->typeFace;
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    struct CachedFace
+    {
+        CachedFace() throw()
+            : lastUsageCount (0), flags (-1)
+        {
+        }
+
+        String typefaceName;
+        int lastUsageCount;
+        int flags;
+        Typeface::Ptr typeFace;
+    };
+
+    int counter;
+    OwnedArray <CachedFace> faces;
+
+    TypefaceCache (const TypefaceCache&);
+    const TypefaceCache& operator= (const TypefaceCache&);
+};
+
+juce_ImplementSingleton_SingleThreaded (TypefaceCache)
+
+
+Typeface* Font::getTypeface() const throw()
+{
+    if (font->typeface == 0)
+        font->typeface = TypefaceCache::getInstance()->findTypefaceFor (*this);
+
+    return font->typeface;
+}
+
+
+//==============================================================================
+class FontGlyphAlphaMap
+{
+public:
+    //==============================================================================
+    FontGlyphAlphaMap() throw()
+        : glyph (0), lastAccessCount (0),
+          bitmap1 (0), bitmap2 (0)
+    {
+    }
+
+    ~FontGlyphAlphaMap() throw()
+    {
+        delete bitmap1;
+        delete bitmap2;
+    }
+
+    void draw (LowLevelGraphicsContext& g, float x, const float y) const throw()
+    {
+        if (bitmap1 != 0)
+        {
+            x += xOrigin;
+            const float xFloor = floorf (x);
+            const int intX = (int) xFloor;
+
+            g.fillAlphaChannel (((x - xFloor) >= 0.5f && bitmap2 != 0) ? *bitmap2 : *bitmap1,
+                                intX, (int) floorf (y + yOrigin));
+        }
+    }
+
+    void generate (const Font& font_, const int glyph_) throw()
+    {
+        font = font_;
+        glyph = glyph_;
+
+        deleteAndZero (bitmap1);
+        deleteAndZero (bitmap2);
+
+        Path glyphPath;
+        font.getTypeface()->getOutlineForGlyph (glyph_, glyphPath);
+
+        if (! glyphPath.isEmpty())
+        {
+            const float fontHeight = font.getHeight();
+            const float fontHScale = fontHeight * font.getHorizontalScale();
+
+            bitmap1 = createAlphaMapFromPath (glyphPath, xOrigin, yOrigin, fontHScale, fontHeight, 0.0f);
+
+            if (fontHScale < 24.0f)
+                bitmap2 = createAlphaMapFromPath (glyphPath, xOrigin, yOrigin, fontHScale, fontHeight, 0.5f);
+        }
+        else
+        {
+            xOrigin = yOrigin = 0;
+        }
+    }
+
+    int glyph, lastAccessCount;
+    Font font;
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    Image* bitmap1;
+    Image* bitmap2;
+    float xOrigin, yOrigin;
+
+    class AlphaBitmapRenderer
+    {
+    public:
+        AlphaBitmapRenderer (uint8* const data_, const int stride_) throw()
+            : data (data_), stride (stride_)
+        {
+        }
+
+        forcedinline void setEdgeTableYPos (const int y) throw()
+        {
+            lineStart = data + (stride * y);
+        }
+
+        forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
+        {
+            lineStart [x] = (uint8) alphaLevel;
+        }
+
+        forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
+        {
+            uint8* d = lineStart + x;
+
+            while (--width >= 0)
+                *d++ = (uint8) alphaLevel;
+        }
+
+    private:
+        uint8* const data;
+        const int stride;
+        uint8* lineStart;
+
+        AlphaBitmapRenderer (const AlphaBitmapRenderer&);
+        const AlphaBitmapRenderer& operator= (const AlphaBitmapRenderer&);
+    };
+
+    Image* createAlphaMapFromPath (const Path& path,
+                                   float& topLeftX, float& topLeftY,
+                                   float xScale, float yScale,
+                                   const float subPixelOffsetX) throw()
+    {
+        Image* im = 0;
+
+        float px, py, pw, ph;
+        path.getBounds (px, py, pw, ph);
+
+        topLeftX = floorf (px * xScale);
+        topLeftY = floorf (py * yScale);
+
+        const int bitmapWidth = roundFloatToInt (pw * xScale) + 2;
+        const int bitmapHeight = roundFloatToInt (ph * yScale) + 2;
+
+        im = new Image (Image::SingleChannel, bitmapWidth, bitmapHeight, true);
+
+        EdgeTable edgeTable (0, bitmapHeight, EdgeTable::Oversampling_16times);
+
+        edgeTable.addPath (path, AffineTransform::scale (xScale, yScale)
+                                                 .translated (subPixelOffsetX - topLeftX, -topLeftY));
+
+        int stride, pixelStride;
+        uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, bitmapWidth, bitmapHeight, stride, pixelStride);
+
+        jassert (pixelStride == 1);
+        AlphaBitmapRenderer renderer (pixels, stride);
+        edgeTable.iterate (renderer, 0, 0, bitmapWidth, bitmapHeight, 0);
+
+        im->releasePixelDataReadWrite (pixels);
+        return im;
+    }
+
+    FontGlyphAlphaMap (const FontGlyphAlphaMap&);
+    const FontGlyphAlphaMap& operator= (const FontGlyphAlphaMap&);
+};
+
+
+//==============================================================================
+class GlyphCache  : private DeletedAtShutdown
+{
+public:
+    GlyphCache() throw()
+        : accessCounter (0)
+    {
+        setCacheSize (120);
+    }
+
+    ~GlyphCache() throw()
+    {
+        clearSingletonInstance();
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (GlyphCache);
+
+    //==============================================================================
+    void drawGlyph (LowLevelGraphicsContext& g, const Font& font, int glyphNumber, float x, float y) throw()
+    {
+        ++accessCounter;
+
+        int oldestCounter = INT_MAX;
+        FontGlyphAlphaMap* oldest = 0;
+
+        for (int i = glyphs.size(); --i >= 0;)
+        {
+            FontGlyphAlphaMap* const glyph = glyphs.getUnchecked (i);
+
+            if (glyph->glyph == glyphNumber
+                 && glyph->font == font)
+            {
+                ++hits;
+                glyph->lastAccessCount = accessCounter;
+                glyph->draw (g, x, y);
+                return;
+            }
+
+            if (glyph->lastAccessCount <= oldestCounter)
+            {
+                oldestCounter = glyph->lastAccessCount;
+                oldest = glyph;
+            }
+        }
+
+        ++misses;
+
+        if (hits + misses > (glyphs.size() << 4))
+        {
+            if (misses * 2 > hits)
+                setCacheSize (glyphs.size() + 32);
+
+            hits = 0;
+            misses = 0;
+            oldest = glyphs.getUnchecked (0);
+        }
+
+        jassert (oldest != 0);
+        oldest->lastAccessCount = accessCounter;
+        oldest->generate (font, glyphNumber);
+        oldest->draw (g, x, y);
+    }
+
+    void setCacheSize (int num) throw()
+    {
+        if (glyphs.size() != num)
+        {
+            glyphs.clear();
+
+            while (--num >= 0)
+                glyphs.add (new FontGlyphAlphaMap());
+
+            hits = 0;
+            misses = 0;
+        }
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    OwnedArray <FontGlyphAlphaMap> glyphs;
+    int accessCounter, hits, misses;
+
+    GlyphCache (const GlyphCache&);
+    const GlyphCache& operator= (const GlyphCache&);
+};
+
+juce_ImplementSingleton_SingleThreaded (GlyphCache);
+
+
+//==============================================================================
+void Font::renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, float x, float y)
+{
+    if (font->height < 80.0f)
+        GlyphCache::getInstance()->drawGlyph (g, *this, glyphNumber, x, y);
+    else
+        renderGlyphIndirectly (g, glyphNumber, AffineTransform::translation (x, y));
+}
+
+void Font::renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, const AffineTransform& transform)
+{
+    Path p;
+    getTypeface()->getOutlineForGlyph (glyphNumber, p);
+
+    g.fillPath (p, AffineTransform::scale (font->height * font->horizontalScale, font->height)
+                                   .followedBy (transform),
+                EdgeTable::Oversampling_16times);
+}
+
 
 END_JUCE_NAMESPACE

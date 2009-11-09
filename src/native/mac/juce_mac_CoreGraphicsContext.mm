@@ -37,11 +37,15 @@ public:
           flipHeight (flipHeight_)
     {
         CGContextRetain (context);
+        CGContextSetShouldSmoothFonts (context, true);
+        CGContextSetBlendMode (context, kCGBlendModeNormal);
+        state = new SavedState();
     }
 
     ~CoreGraphicsContext()
     {
         CGContextRelease (context);
+        delete state;
     }
 
     //==============================================================================
@@ -84,11 +88,25 @@ public:
     void saveState()
     {
         CGContextSaveGState (context);
+        stateStack.add (new SavedState (*state));
     }
 
     void restoreState()
     {
         CGContextRestoreGState (context);
+
+        SavedState* const top = stateStack.getLast();
+
+        if (top != 0)
+        {
+            delete state;
+            state = top;
+            stateStack.removeLast (1, false);
+        }
+        else
+        {
+            jassertfalse // trying to pop with an empty stack!
+        }
     }
 
     bool clipRegionIntersects (int x, int y, int w, int h)
@@ -112,95 +130,117 @@ public:
     }
 
     //==============================================================================
-    void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents)
+    void setColour (const Colour& colour)
     {
-        CGContextSetBlendMode (context, replaceExistingContents ? kCGBlendModeCopy : kCGBlendModeNormal);
+        state->colour = colour;
+        deleteAndZero (state->gradient);
+
+        CGContextSetRGBFillColor (context,
+                                  colour.getFloatRed(), colour.getFloatGreen(),
+                                  colour.getFloatBlue(), colour.getFloatAlpha());
         CGContextSetAlpha (context, 1.0f);
-        setColour (colour);
-        CGContextFillRect (context, CGRectMake (x, flipHeight - (y + h), w, h));
     }
 
-    void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient)
+    void setGradient (const ColourGradient& gradient)
     {
-        CGContextSaveGState (context);
-        CGContextClipToRect (context, CGRectMake (x, flipHeight - (y + h), w, h));
-        flip();
-        drawGradient (gradient);
-        CGContextRestoreGState (context);
+        if (state->gradient == 0)
+            state->gradient = new ColourGradient (gradient);
+        else
+            *state->gradient = gradient;
     }
 
-    void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel /*quality*/)
+    void setOpacity (float opacity)
     {
-        CGContextSetAlpha (context, 1.0f);
-        CGContextSaveGState (context);
-        flip();
-        applyTransform (transform);
-        createPath (path);
-        setColour (colour);
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
-        CGContextFillPath (context);
-        CGContextRestoreGState (context);
+        setColour (state->colour.withAlpha (opacity));
     }
 
-    void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality)
+    void setInterpolationQuality (Graphics::ResamplingQuality quality)
+    {
+        CGContextSetInterpolationQuality (context, quality == Graphics::lowResamplingQuality
+                                                    ? kCGInterpolationLow
+                                                    : kCGInterpolationHigh);
+    }
+
+    //==============================================================================
+    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents)
+    {
+        if (replaceExistingContents)
+        {
+            CGContextSetBlendMode (context, kCGBlendModeCopy);
+            fillRect (x, y, w, h, false);
+            CGContextSetBlendMode (context, kCGBlendModeNormal);
+        }
+        else
+        {
+            if (state->gradient == 0)
+            {
+                CGContextFillRect (context, CGRectMake (x, flipHeight - (y + h), w, h));
+            }
+            else
+            {
+                CGContextSaveGState (context);
+                CGContextClipToRect (context, CGRectMake (x, flipHeight - (y + h), w, h));
+                flip();
+                drawGradient();
+                CGContextRestoreGState (context);
+            }
+        }
+    }
+
+    void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality)
     {
         CGContextSaveGState (context);
-        createPath (path, transform);
-        CGContextClip (context);
-        flip();
-        applyTransform (gradient.transform);
-        drawGradient (gradient);
+
+        if (state->gradient == 0)
+        {
+            flip();
+            applyTransform (transform);
+            createPath (path);
+            CGContextFillPath (context);
+        }
+        else
+        {
+            createPath (path, transform);
+            CGContextClip (context);
+            flip();
+            applyTransform (state->gradient->transform);
+            drawGradient();
+        }
+
         CGContextRestoreGState (context);
     }
 
     void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel /*quality*/)
+                            const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality)
     {
         CGContextSaveGState (context);
         createPath (path, transform);
         CGContextClip (context);
-        blendImage (image, imageX, imageY, image.getWidth(), image.getHeight(), 0, 0, alpha);
+        blendImage (image, imageX, imageY, image.getWidth(), image.getHeight(), 0, 0);
         CGContextRestoreGState (context);
     }
 
-    void fillAlphaChannelWithColour (const Image& alphaImage, int alphaImageX, int alphaImageY, const Colour& colour)
+    void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY)
     {
         Image* singleChannelImage = createAlphaChannelImage (alphaImage);
         CGImageRef image = createImage (*singleChannelImage, true);
 
+        CGContextSaveGState (context);
         CGContextSetAlpha (context, 1.0f);
-        CGContextSaveGState (context);
+
         CGRect r = CGRectMake (alphaImageX, flipHeight - (alphaImageY + alphaImage.getHeight()),
                                alphaImage.getWidth(), alphaImage.getHeight());
         CGContextClipToMask (context, r, image);
-        setColour (colour);
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
-        CGContextFillRect (context, r);
+
+        fillRect (alphaImageX, alphaImageY, alphaImage.getWidth(), alphaImage.getHeight(), false);
+
         CGContextRestoreGState (context);
-
-        CGImageRelease (image);
-        deleteAlphaChannelImage (alphaImage, singleChannelImage);
-    }
-
-    void fillAlphaChannelWithGradient (const Image& alphaImage, int alphaImageX, int alphaImageY, const ColourGradient& gradient)
-    {
-        Image* singleChannelImage = createAlphaChannelImage (alphaImage);
-        CGImageRef image = createImage (*singleChannelImage, true);
-
-        CGContextSaveGState (context);
-        CGRect r = CGRectMake (alphaImageX, flipHeight - (alphaImageY + alphaImage.getHeight()),
-                               alphaImage.getWidth(), alphaImage.getHeight());
-        CGContextClipToMask (context, r, image);
-        flip();
-        drawGradient (gradient);
-        CGContextRestoreGState (context);
-
         CGImageRelease (image);
         deleteAlphaChannelImage (alphaImage, singleChannelImage);
     }
 
     void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha)
+                                    const Image& fillerImage, int fillerImageX, int fillerImageY)
     {
         Image* singleChannelImage = createAlphaChannelImage (alphaImage);
         CGImageRef image = createImage (*singleChannelImage, true);
@@ -212,7 +252,7 @@ public:
 
         blendImage (fillerImage, fillerImageX, fillerImageY,
                     fillerImage.getWidth(), fillerImage.getHeight(),
-                    0, 0, alpha);
+                    0, 0);
 
         CGContextRestoreGState (context);
 
@@ -222,15 +262,13 @@ public:
 
     //==============================================================================
     void blendImage (const Image& sourceImage,
-                     int destX, int destY, int destW, int destH, int sourceX, int sourceY,
-                     float alpha)
+                     int destX, int destY, int destW, int destH, int sourceX, int sourceY)
     {
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
         CGImageRef image = createImage (sourceImage, false);
 
         CGContextSaveGState (context);
         CGContextClipToRect (context, CGRectMake (destX, flipHeight - (destY + destH), destW, destH));
-        CGContextSetAlpha (context, alpha);
+        CGContextSetAlpha (context, state->colour.getFloatAlpha());
         CGContextDrawImage (context, CGRectMake (destX - sourceX,
                                                  flipHeight - ((destY - sourceY) + sourceImage.getHeight()),
                                                  sourceImage.getWidth(),
@@ -242,24 +280,18 @@ public:
 
     void blendImageWarping (const Image& sourceImage,
                             int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform,
-                            float alpha, const Graphics::ResamplingQuality quality)
+                            const AffineTransform& transform)
     {
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
         CGImageRef fullImage = createImage (sourceImage, false);
         CGImageRef image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClipX, sourceImage.getHeight() - (srcClipY + srcClipH),
                                                                                 srcClipW, srcClipH));
         CGImageRelease (fullImage);
 
         CGContextSaveGState (context);
-        CGContextSetAlpha (context, alpha);
         flip();
         applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
 
-        CGContextSetInterpolationQuality (context, quality == Graphics::lowResamplingQuality
-                                                    ? kCGInterpolationLow
-                                                    : kCGInterpolationHigh);
-
+        CGContextSetAlpha (context, state->colour.getFloatAlpha());
         CGContextDrawImage (context, CGRectMake (0, 0, sourceImage.getWidth(),
                                                  sourceImage.getHeight()), image);
 
@@ -268,43 +300,123 @@ public:
     }
 
     //==============================================================================
-    void drawLine (double x1, double y1, double x2, double y2, const Colour& colour)
+    void drawLine (double x1, double y1, double x2, double y2)
     {
-        CGContextSetAlpha (context, 1.0f);
-        CGContextSetRGBStrokeColor (context, colour.getFloatRed(), colour.getFloatGreen(),
-                                    colour.getFloatBlue(), colour.getFloatAlpha());
         CGContextSetLineCap (context, kCGLineCapSquare);
         CGContextSetLineWidth (context, 1.0f);
+        CGContextSetRGBStrokeColor (context,
+                                    state->colour.getFloatRed(), state->colour.getFloatGreen(),
+                                    state->colour.getFloatBlue(), state->colour.getFloatAlpha());
 
         CGPoint line[] = { { x1 + 0.5f, flipHeight - (y1 + 0.5f) },
                            { x2 + 0.5f, flipHeight - (y2 + 0.5f) } };
+
         CGContextStrokeLineSegments (context, line, 1);
     }
 
-    void drawVerticalLine (const int x, double top, double bottom, const Colour& colour)
+    void drawVerticalLine (const int x, double top, double bottom)
     {
-        setColour (colour);
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
         CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
     }
 
-    void drawHorizontalLine (const int y, double left, double right, const Colour& colour)
+    void drawHorizontalLine (const int y, double left, double right)
     {
-        setColour (colour);
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
         CGContextFillRect (context, CGRectMake (left, y, right - left, 1.0f));
+    }
+
+    void setFont (const Font& newFont)
+    {
+        if (state->font != newFont)
+        {
+            state->fontRef = 0;
+            state->font = newFont;
+
+            MacTypeface* mf = dynamic_cast <MacTypeface*> ((Typeface*) state->font.getTypeface());
+
+            if (mf != 0)
+            {
+                state->fontRef = mf->fontRef;
+                CGContextSetFont (context, state->fontRef);
+                CGContextSetFontSize (context, state->font.getHeight() * mf->fontHeightToCGSizeFactor);
+
+                state->fontTransform = mf->renderingTransform;
+                state->fontTransform.a *= state->font.getHorizontalScale();
+                CGContextSetTextMatrix (context, state->fontTransform);
+            }
+        }
+    }
+
+    void drawGlyph (int glyphNumber, float x, float y)
+    {
+        if (state->fontRef != 0)
+        {
+            CGGlyph g = glyphNumber;
+            CGContextShowGlyphsAtPoint (context, x, flipHeight - y, &g, 1);
+        }
+        else
+        {
+            state->font.renderGlyphIndirectly (*this, glyphNumber, x, y);
+        }
+    }
+
+    void drawGlyph (int glyphNumber, const AffineTransform& transform)
+    {
+        if (state->fontRef != 0)
+        {
+            CGContextSaveGState (context);
+            flip();
+            applyTransform (transform);
+
+            CGAffineTransform t = state->fontTransform;
+            t.d = -t.d;
+            CGContextSetTextMatrix (context, t);
+
+            CGGlyph g = glyphNumber;
+            CGContextShowGlyphsAtPoint (context, 0, 0, &g, 1);
+
+            CGContextSetTextMatrix (context, state->fontTransform);
+            CGContextRestoreGState (context);
+        }
+        else
+        {
+            state->font.renderGlyphIndirectly (*this, glyphNumber, transform);
+        }
     }
 
 private:
     CGContextRef context;
     const float flipHeight;
 
-    void setColour (const Colour& colour) const throw()
+    struct SavedState
     {
-        CGContextSetRGBFillColor (context,
-                                  colour.getFloatRed(), colour.getFloatGreen(),
-                                  colour.getFloatBlue(), colour.getFloatAlpha());
-    }
+        SavedState() throw()
+            : gradient (0), font (1.0f), fontRef (0),
+              fontTransform (CGAffineTransformIdentity)
+        {
+        }
+
+        SavedState (const SavedState& other) throw()
+            : colour (other.colour),
+              gradient (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0),
+              font (other.font), fontRef (other.fontRef),
+              fontTransform (other.fontTransform)
+        {
+        }
+
+        ~SavedState() throw()
+        {
+            delete gradient;
+        }
+
+        Colour colour;
+        ColourGradient* gradient;
+        Font font;
+        CGFontRef fontRef;
+        CGAffineTransform fontTransform;
+    };
+
+    SavedState* state;
+    OwnedArray <SavedState> stateStack;
 
     static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
     {
@@ -316,26 +428,26 @@ private:
         outData[3] = c.getFloatAlpha();
     }
 
-    CGShadingRef createGradient (const ColourGradient& gradient) const throw()
+    static CGShadingRef createGradient (const ColourGradient* const gradient) throw()
     {
         CGShadingRef result = 0;
         CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
 
         CGFunctionCallbacks callbacks = { 0, gradientCallback, 0 };
-        CGFunctionRef function = CGFunctionCreate ((void*) &gradient, 1, 0, 4, 0, &callbacks);
-        CGPoint p1 = CGPointMake (gradient.x1, gradient.y1);
+        CGFunctionRef function = CGFunctionCreate ((void*) gradient, 1, 0, 4, 0, &callbacks);
+        CGPoint p1 = CGPointMake (gradient->x1, gradient->y1);
 
-        if (gradient.isRadial)
+        if (gradient->isRadial)
         {
             result = CGShadingCreateRadial (colourSpace,
                                             p1, 0,
-                                            p1, hypotf (gradient.x1 - gradient.x2, gradient.y1 - gradient.y2),
+                                            p1, hypotf (gradient->x1 - gradient->x2, gradient->y1 - gradient->y2),
                                             function, true, true);
         }
         else
         {
             result = CGShadingCreateAxial (colourSpace, p1,
-                                           CGPointMake (gradient.x2, gradient.y2),
+                                           CGPointMake (gradient->x2, gradient->y2),
                                            function, true, true);
         }
 
@@ -344,11 +456,10 @@ private:
         return result;
     }
 
-    void drawGradient (const ColourGradient& gradient) const throw()
+    void drawGradient() const throw()
     {
-        CGContextSetBlendMode (context, kCGBlendModeNormal);
         CGContextSetAlpha (context, 1.0f);
-        CGShadingRef shading = createGradient (gradient);
+        CGShadingRef shading = createGradient (state->gradient);
         CGContextDrawShading (context, shading);
         CGShadingRelease (shading);
     }

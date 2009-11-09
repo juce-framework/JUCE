@@ -97,8 +97,8 @@ BEGIN_JUCE_NAMESPACE
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #if JUCE_IPHONE
+  #include "mac/juce_mac_Fonts.mm"
   #include "mac/juce_iphone_UIViewComponentPeer.mm"
-  #include "mac/juce_iphone_Fonts.mm"
   #include "mac/juce_iphone_MessageManager.mm"
   #include "mac/juce_mac_FileChooser.mm"
   #include "mac/juce_mac_OpenGLComponent.mm"
@@ -107,6 +107,7 @@ BEGIN_JUCE_NAMESPACE
   #include "mac/juce_iphone_Audio.cpp"
   #include "mac/juce_mac_CoreMidi.cpp"
  #else
+  #include "mac/juce_mac_Fonts.mm" // (must go before juce_mac_CoreGraphicsContext.mm)
   #include "mac/juce_mac_CoreGraphicsContext.mm"
   #include "mac/juce_mac_NSViewComponentPeer.mm"
   #include "mac/juce_mac_MouseCursor.mm"
@@ -117,7 +118,6 @@ BEGIN_JUCE_NAMESPACE
   #include "mac/juce_mac_FileChooser.mm"
   #include "mac/juce_mac_QuickTimeMovieComponent.mm"
   #include "mac/juce_mac_AudioCDBurner.mm"
-  #include "mac/juce_mac_Fonts.mm"
   #include "mac/juce_mac_MessageManager.mm"
   #include "mac/juce_mac_WebBrowserComponent.mm"
   #include "mac/juce_mac_CoreAudio.cpp"

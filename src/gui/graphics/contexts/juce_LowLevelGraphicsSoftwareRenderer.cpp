@@ -34,6 +34,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_PathStrokeType.h"
 #include "../geometry/juce_Rectangle.h"
 #include "../../../core/juce_SystemStats.h"
+#include "../../../utilities/juce_DeletedAtShutdown.h"
 
 #if (JUCE_WINDOWS || JUCE_LINUX) && ! JUCE_64BIT
  #define JUCE_USE_SSE_INSTRUCTIONS 1
@@ -904,7 +905,7 @@ static void transformedImageRender (Image& destImage,
                         if (((unsigned int) iy) < (unsigned int) srcClipHeight)
                         {
                             const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
-                            dest->set (*src);
+                            dest->blend (*src);
                         }
                     }
 
@@ -1062,7 +1063,9 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image
     : image (image_),
       xOffset (0),
       yOffset (0),
-      stateStack (20)
+      stateStack (20),
+      colour (0xff000000),
+      gradient (0)
 {
     clip = new RectangleList (Rectangle (0, 0, image_.getWidth(), image_.getHeight()));
 }
@@ -1070,6 +1073,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
 {
     delete clip;
+    delete gradient;
 }
 
 bool LowLevelGraphicsSoftwareRenderer::isVectorDevice() const
@@ -1119,21 +1123,30 @@ bool LowLevelGraphicsSoftwareRenderer::isClipEmpty() const
 
 //==============================================================================
 LowLevelGraphicsSoftwareRenderer::SavedState::SavedState (RectangleList* const clip_,
-                                                          const int xOffset_, const int yOffset_)
+                                                          const int xOffset_, const int yOffset_,
+                                                          const Font& font_, const Colour& colour_, ColourGradient* gradient_,
+                                                          Graphics::ResamplingQuality interpolationQuality_)
     : clip (clip_),
       xOffset (xOffset_),
-      yOffset (yOffset_)
+      yOffset (yOffset_),
+      font (font_),
+      colour (colour_),
+      gradient (gradient_),
+      interpolationQuality (interpolationQuality_)
 {
 }
 
 LowLevelGraphicsSoftwareRenderer::SavedState::~SavedState()
 {
     delete clip;
+    delete gradient;
 }
 
 void LowLevelGraphicsSoftwareRenderer::saveState()
 {
-    stateStack.add (new SavedState (new RectangleList (*clip), xOffset, yOffset));
+    stateStack.add (new SavedState (new RectangleList (*clip), xOffset, yOffset,
+                                    font, colour, gradient != 0 ? new ColourGradient (*gradient) : 0,
+                                    interpolationQuality));
 }
 
 void LowLevelGraphicsSoftwareRenderer::restoreState()
@@ -1142,10 +1155,13 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 
     if (top != 0)
     {
-        clip->swapWith (*top->clip);
-
+        swapVariables (clip, top->clip);
         xOffset = top->xOffset;
         yOffset = top->yOffset;
+        font = top->font;
+        colour = top->colour;
+        swapVariables (gradient, top->gradient);
+        interpolationQuality = top->interpolationQuality;
 
         stateStack.removeLast();
     }
@@ -1156,14 +1172,50 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents)
+void LowLevelGraphicsSoftwareRenderer::setColour (const Colour& colour_)
 {
-    x += xOffset;
-    y += yOffset;
+    deleteAndZero (gradient);
+    colour = colour_;
+}
 
-    for (RectangleList::Iterator i (*clip); i.next();)
+void LowLevelGraphicsSoftwareRenderer::setGradient (const ColourGradient& gradient_)
+{
+    delete gradient;
+    gradient = new ColourGradient (gradient_);
+}
+
+void LowLevelGraphicsSoftwareRenderer::setOpacity (float opacity)
+{
+    colour = colour.withAlpha (opacity);
+}
+
+void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::ResamplingQuality quality)
+{
+    interpolationQuality = quality;
+}
+
+//==============================================================================
+void LowLevelGraphicsSoftwareRenderer::fillRect (int x, int y, int w, int h, const bool replaceExistingContents)
+{
+    if (gradient != 0)
     {
-        clippedFillRectWithColour (*i.getRectangle(), x, y, w, h, colour, replaceExistingContents);
+        if (replaceExistingContents && ! gradient->isOpaque())
+        {
+            for (RectangleList::Iterator i (*clip); i.next();)
+                clippedFillRectWithColour (*i.getRectangle(), x + xOffset, y + yOffset, w, h, Colours::transparentBlack, true);
+        }
+
+        Path p;
+        p.addRectangle ((float) x, (float) y, (float) w, (float) h);
+        fillPath (p, AffineTransform::identity, EdgeTable::Oversampling_none);
+    }
+    else
+    {
+        x += xOffset;
+        y += yOffset;
+
+        for (RectangleList::Iterator i (*clip); i.next();)
+            clippedFillRectWithColour (*i.getRectangle(), x, y, w, h, colour, replaceExistingContents);
     }
 }
 
@@ -1198,13 +1250,6 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillRectWithColour (const Rectangl
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient)
-{
-    Path p;
-    p.addRectangle ((float) x, (float) y, (float) w, (float) h);
-    fillPathWithGradient (p, AffineTransform::identity, gradient, EdgeTable::Oversampling_none);
-}
-
 //==============================================================================
 bool LowLevelGraphicsSoftwareRenderer::getPathBounds (int clipX, int clipY, int clipW, int clipH,
                                                       const Path& path, const AffineTransform& transform,
@@ -1224,19 +1269,19 @@ bool LowLevelGraphicsSoftwareRenderer::getPathBounds (int clipX, int clipY, int 
     return Rectangle::intersectRectangles (x, y, w, h, clipX, clipY, clipW, clipH);
 }
 
-void LowLevelGraphicsSoftwareRenderer::fillPathWithColour (const Path& path, const AffineTransform& t,
-                                                           const Colour& colour, EdgeTable::OversamplingLevel quality)
+void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality)
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
         const Rectangle& r = *i.getRectangle();
 
-        clippedFillPathWithColour (r.getX(), r.getY(), r.getWidth(), r.getHeight(), path, t, colour, quality);
+        clippedFillPath (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+                         path, transform, quality);
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithColour (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& t,
-                                                                  const Colour& colour, EdgeTable::OversamplingLevel quality)
+void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path,
+                                                        const AffineTransform& t, EdgeTable::OversamplingLevel quality)
 {
     const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
     int cx, cy, cw, ch;
@@ -1244,139 +1289,114 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithColour (int clipX, int
     if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
     {
         EdgeTable edgeTable (0, ch, quality);
-
         edgeTable.addPath (path, transform.translated ((float) -cx, (float) -cy));
 
         int stride, pixelStride;
         uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (cx, cy, cw, ch, stride, pixelStride);
 
-        if (image.getFormat() == Image::RGB)
+        if (gradient != 0)
         {
-            jassert (pixelStride == 3);
-            SolidColourEdgeTableRenderer <PixelRGB> renderer (pixels, stride, colour);
-            edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-        }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            jassert (pixelStride == 4);
-            SolidColourEdgeTableRenderer <PixelARGB> renderer (pixels, stride, colour);
-            edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-        }
-        else if (image.getFormat() == Image::SingleChannel)
-        {
-            jassert (pixelStride == 1);
-            AlphaBitmapRenderer renderer (pixels, stride);
-            edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-        }
+            ColourGradient g2 (*gradient);
 
-        image.releasePixelDataReadWrite (pixels);
-    }
-}
+            const bool isIdentity = g2.transform.isIdentity();
+            if (isIdentity)
+            {
+                g2.x1 += xOffset - cx;
+                g2.x2 += xOffset - cx;
+                g2.y1 += yOffset - cy;
+                g2.y2 += yOffset - cy;
+            }
+            else
+            {
+                g2.transform = g2.transform.translated ((float) (xOffset - cx),
+                                                        (float) (yOffset - cy));
+            }
 
-void LowLevelGraphicsSoftwareRenderer::fillPathWithGradient (const Path& path, const AffineTransform& t, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality)
-{
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
+            int numLookupEntries;
+            PixelARGB* const lookupTable = g2.createLookupTable (numLookupEntries);
+            jassert (numLookupEntries > 0);
 
-        clippedFillPathWithGradient (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                     path, t, gradient, quality);
-    }
-}
+            if (image.getFormat() == Image::RGB)
+            {
+                jassert (pixelStride == 3);
 
-void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithGradient (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& t,
-                                                                    const ColourGradient& gradient, EdgeTable::OversamplingLevel quality)
-{
-    const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
-    int cx, cy, cw, ch;
+                if (g2.isRadial)
+                {
+                    if (isIdentity)
+                    {
+                        GradientEdgeTableRenderer <PixelRGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    }
+                    else
+                    {
+                        GradientEdgeTableRenderer <PixelRGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    }
+                }
+                else
+                {
+                    GradientEdgeTableRenderer <PixelRGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                }
+            }
+            else if (image.getFormat() == Image::ARGB)
+            {
+                jassert (pixelStride == 4);
 
-    if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
-    {
-        int stride, pixelStride;
-        uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (cx, cy, cw, ch, stride, pixelStride);
+                if (g2.isRadial)
+                {
+                    if (isIdentity)
+                    {
+                        GradientEdgeTableRenderer <PixelARGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    }
+                    else
+                    {
+                        GradientEdgeTableRenderer <PixelARGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    }
+                }
+                else
+                {
+                    GradientEdgeTableRenderer <PixelARGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                }
+            }
+            else if (image.getFormat() == Image::SingleChannel)
+            {
+                jassertfalse // not done!
+            }
 
-        ColourGradient g2 (gradient);
-
-        const bool isIdentity = g2.transform.isIdentity();
-        if (isIdentity)
-        {
-            g2.x1 += xOffset - cx;
-            g2.x2 += xOffset - cx;
-            g2.y1 += yOffset - cy;
-            g2.y2 += yOffset - cy;
+            juce_free (lookupTable);
         }
         else
         {
-            g2.transform = g2.transform.translated ((float) (xOffset - cx),
-                                                    (float) (yOffset - cy));
-        }
-
-        int numLookupEntries;
-        PixelARGB* const lookupTable = g2.createLookupTable (numLookupEntries);
-        jassert (numLookupEntries > 0);
-
-        EdgeTable edgeTable (0, ch, quality);
-
-        edgeTable.addPath (path, transform.translated ((float) -cx, (float) -cy));
-
-        if (image.getFormat() == Image::RGB)
-        {
-            jassert (pixelStride == 3);
-
-            if (g2.isRadial)
+            if (image.getFormat() == Image::RGB)
             {
-                if (isIdentity)
-                {
-                    GradientEdgeTableRenderer <PixelRGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-                }
-                else
-                {
-                    GradientEdgeTableRenderer <PixelRGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-                }
+                jassert (pixelStride == 3);
+                SolidColourEdgeTableRenderer <PixelRGB> renderer (pixels, stride, colour);
+                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
             }
-            else
+            else if (image.getFormat() == Image::ARGB)
             {
-                GradientEdgeTableRenderer <PixelRGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
+                jassert (pixelStride == 4);
+                SolidColourEdgeTableRenderer <PixelARGB> renderer (pixels, stride, colour);
+                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+            }
+            else if (image.getFormat() == Image::SingleChannel)
+            {
+                jassert (pixelStride == 1);
+                AlphaBitmapRenderer renderer (pixels, stride);
                 edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
             }
         }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            jassert (pixelStride == 4);
 
-            if (g2.isRadial)
-            {
-                if (isIdentity)
-                {
-                    GradientEdgeTableRenderer <PixelARGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-                }
-                else
-                {
-                    GradientEdgeTableRenderer <PixelARGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-                }
-            }
-            else
-            {
-                GradientEdgeTableRenderer <PixelARGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
-            }
-        }
-        else if (image.getFormat() == Image::SingleChannel)
-        {
-            jassertfalse // not done!
-        }
-
-        juce_free (lookupTable);
         image.releasePixelDataReadWrite (pixels);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                                          const Image& sourceImage, int imageX, int imageY, float opacity, EdgeTable::OversamplingLevel quality)
+                                                          const Image& sourceImage, int imageX, int imageY, EdgeTable::OversamplingLevel quality)
 {
     imageX += xOffset;
     imageY += yOffset;
@@ -1386,7 +1406,8 @@ void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, cons
         const Rectangle& r = *i.getRectangle();
 
         clippedFillPathWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                  path, transform, sourceImage, imageX, imageY, opacity, quality);
+                                  path, transform, sourceImage, imageX, imageY,
+                                  colour.getFloatAlpha(), quality);
     }
 }
 
@@ -1459,7 +1480,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, i
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithColour (const Image& clipImage, int x, int y, const Colour& colour)
+void LowLevelGraphicsSoftwareRenderer::fillAlphaChannel (const Image& clipImage, int x, int y)
 {
     x += xOffset;
     y += yOffset;
@@ -1468,114 +1489,101 @@ void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithColour (const Image& 
     {
         const Rectangle& r = *i.getRectangle();
 
-        clippedFillAlphaChannelWithColour (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                           clipImage, x, y, colour);
+        clippedFillAlphaChannel (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+                                 clipImage, x, y);
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithColour (int clipX, int clipY, int clipW, int clipH, const Image& clipImage, int x, int y, const Colour& colour)
+void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& clipImage, int x, int y)
 {
-    int w = clipImage.getWidth();
-    int h = clipImage.getHeight();
-    int sx = 0;
-    int sy = 0;
-
-    if (x < clipX)
+    if (gradient != 0)
     {
-        sx = clipX - x;
-        w -= clipX - x;
-        x = clipX;
+        if (Rectangle::intersectRectangles (clipX, clipY, clipW, clipH, x, y, clipImage.getWidth(), clipImage.getHeight()))
+        {
+            ColourGradient g2 (*gradient);
+            g2.x1 += xOffset - clipX;
+            g2.x2 += xOffset - clipX;
+            g2.y1 += yOffset - clipY;
+            g2.y2 += yOffset - clipY;
+
+            Image temp (g2.isOpaque() ? Image::RGB : Image::ARGB, clipW, clipH, true);
+            LowLevelGraphicsSoftwareRenderer tempG (temp);
+            tempG.setGradient (g2);
+            tempG.fillRect (0, 0, clipW, clipH, false);
+
+            clippedFillAlphaChannelWithImage (clipX, clipY, clipW, clipH,
+                                              clipImage, x, y,
+                                              temp, clipX, clipY, 1.0f);
+        }
     }
-
-    if (y < clipY)
+    else
     {
-        sy = clipY - y;
-        h -= clipY - y;
-        y = clipY;
-    }
+        int w = clipImage.getWidth();
+        int h = clipImage.getHeight();
+        int sx = 0;
+        int sy = 0;
 
-    if (x + w > clipX + clipW)
-        w = clipX + clipW - x;
+        if (x < clipX)
+        {
+            sx = clipX - x;
+            w -= clipX - x;
+            x = clipX;
+        }
 
-    if (y + h > clipY + clipH)
-        h = clipY + clipH - y;
+        if (y < clipY)
+        {
+            sy = clipY - y;
+            h -= clipY - y;
+            y = clipY;
+        }
 
-    if (w > 0 && h > 0)
-    {
-        int stride, alphaStride, pixelStride;
-        uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
+        if (x + w > clipX + clipW)
+            w = clipX + clipW - x;
 
-        const uint8* const alphaValues
-            = clipImage.lockPixelDataReadOnly (sx, sy, w, h, alphaStride, pixelStride);
+        if (y + h > clipY + clipH)
+            h = clipY + clipH - y;
+
+        if (w > 0 && h > 0)
+        {
+            int stride, alphaStride, pixelStride;
+            uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
+
+            const uint8* const alphaValues
+                = clipImage.lockPixelDataReadOnly (sx, sy, w, h, alphaStride, pixelStride);
 
 #if JUCE_BIG_ENDIAN
-        const uint8* const alphas = alphaValues;
+            const uint8* const alphas = alphaValues;
 #else
-        const uint8* const alphas = alphaValues + (clipImage.getFormat() == Image::ARGB ? 3 : 0);
+            const uint8* const alphas = alphaValues + (clipImage.getFormat() == Image::ARGB ? 3 : 0);
 #endif
 
-        if (image.getFormat() == Image::RGB)
-        {
-            blendAlphaMapRGB (pixels, stride,
-                              alphas, w, h,
-                              pixelStride, alphaStride,
-                              colour);
+            if (image.getFormat() == Image::RGB)
+            {
+                blendAlphaMapRGB (pixels, stride,
+                                  alphas, w, h,
+                                  pixelStride, alphaStride,
+                                  colour);
+            }
+            else if (image.getFormat() == Image::ARGB)
+            {
+                blendAlphaMapARGB (pixels, stride,
+                                   alphas, w, h,
+                                   pixelStride, alphaStride,
+                                   colour);
+            }
+            else
+            {
+                jassertfalse // not done!
+            }
+
+            clipImage.releasePixelDataReadOnly (alphaValues);
+            image.releasePixelDataReadWrite (pixels);
         }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            blendAlphaMapARGB (pixels, stride,
-                               alphas, w, h,
-                               pixelStride, alphaStride,
-                               colour);
-        }
-        else
-        {
-            jassertfalse // not done!
-        }
-
-        clipImage.releasePixelDataReadOnly (alphaValues);
-        image.releasePixelDataReadWrite (pixels);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithGradient (const Image& alphaChannelImage, int imageX, int imageY, const ColourGradient& gradient)
-{
-    imageX += xOffset;
-    imageY += yOffset;
-
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedFillAlphaChannelWithGradient (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                             alphaChannelImage, imageX, imageY, gradient);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithGradient (int x, int y, int w, int h,
-                                                                            const Image& alphaChannelImage,
-                                                                            int imageX, int imageY, const ColourGradient& gradient)
-{
-    if (Rectangle::intersectRectangles (x, y, w, h, imageX, imageY, alphaChannelImage.getWidth(), alphaChannelImage.getHeight()))
-    {
-        ColourGradient g2 (gradient);
-        g2.x1 += xOffset - x;
-        g2.x2 += xOffset - x;
-        g2.y1 += yOffset - y;
-        g2.y2 += yOffset - y;
-
-        Image temp (g2.isOpaque() ? Image::RGB : Image::ARGB, w, h, true);
-        LowLevelGraphicsSoftwareRenderer tempG (temp);
-        tempG.fillRectWithGradient (0, 0, w, h, g2);
-
-        clippedFillAlphaChannelWithImage (x, y, w, h,
-                                          alphaChannelImage, imageX, imageY,
-                                          temp, x, y, 1.0f);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                                                  const Image& fillerImage, int fillerImageX, int fillerImageY, float opacity)
+                                                                  const Image& fillerImage, int fillerImageX, int fillerImageY)
 {
     alphaImageX += xOffset;
     alphaImageY += yOffset;
@@ -1589,7 +1597,8 @@ void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithImage (const Image& a
 
         clippedFillAlphaChannelWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                           alphaImage, alphaImageX, alphaImageY,
-                                          fillerImage, fillerImageX, fillerImageY, opacity);
+                                          fillerImage, fillerImageX, fillerImageY,
+                                          colour.getFloatAlpha());
     }
 }
 
@@ -1659,7 +1668,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithImage (int x, 
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::blendImage (const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy, float opacity)
+void LowLevelGraphicsSoftwareRenderer::blendImage (const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy)
 {
     dx += xOffset;
     dy += yOffset;
@@ -1669,12 +1678,12 @@ void LowLevelGraphicsSoftwareRenderer::blendImage (const Image& sourceImage, int
         const Rectangle& r = *i.getRectangle();
 
         clippedBlendImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                           sourceImage, dx, dy, dw, dh, sx, sy, opacity);
+                           sourceImage, dx, dy, dw, dh, sx, sy);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedBlendImage (int clipX, int clipY, int clipW, int clipH,
-                                                          const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy, float opacity)
+                                                          const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy)
 {
     if (dx < clipX)
     {
@@ -1699,7 +1708,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImage (int clipX, int clipY, 
     if (dw <= 0 || dh <= 0)
         return;
 
-    const uint8 alpha = (uint8) jlimit (0, 0xff, roundDoubleToInt (opacity * 256.0f));
+    const uint8 alpha = (uint8) colour.getAlpha();
 
     if (alpha == 0)
         return;
@@ -1760,9 +1769,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImage (int clipX, int clipY, 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::blendImageWarping (const Image& sourceImage,
                                                           int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                                          const AffineTransform& t,
-                                                          float opacity,
-                                                          const Graphics::ResamplingQuality quality)
+                                                          const AffineTransform& t)
 {
     const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
 
@@ -1772,18 +1779,16 @@ void LowLevelGraphicsSoftwareRenderer::blendImageWarping (const Image& sourceIma
 
         clippedBlendImageWarping (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                                   sourceImage, srcClipX, srcClipY, srcClipW, srcClipH,
-                                  transform, opacity, quality);
+                                  transform);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, int destClipY, int destClipW, int destClipH,
                                                                  const Image& sourceImage,
                                                                  int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                                                 const AffineTransform& transform,
-                                                                 float opacity,
-                                                                 const Graphics::ResamplingQuality quality)
+                                                                 const AffineTransform& transform)
 {
-    if (opacity > 0 && destClipW > 0 && destClipH > 0 && ! transform.isSingularity())
+    if ((! colour.isTransparent()) && destClipW > 0 && destClipH > 0 && ! transform.isSingularity())
     {
         Rectangle::intersectRectangles (srcClipX, srcClipY, srcClipW, srcClipH,
                                         0, 0, sourceImage.getWidth(), sourceImage.getHeight());
@@ -1805,7 +1810,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             1 + roundDoubleToInt (imW),
                                             1 + roundDoubleToInt (imH)))
         {
-            const uint8 alpha = (uint8) jlimit (0, 0xff, roundDoubleToInt (opacity * 256.0f));
+            const uint8 alpha = (uint8) colour.getAlpha();
 
             float srcX1 = (float) destClipX;
             float srcY1 = (float) destClipY;
@@ -1832,7 +1837,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             destClipX, destClipY, destClipW, destClipH,
                                             srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, quality, (PixelARGB*)0, (PixelARGB*)0);
+                                            alpha, interpolationQuality, (PixelARGB*)0, (PixelARGB*)0);
                 }
                 else if (sourceImage.getFormat() == Image::RGB)
                 {
@@ -1840,7 +1845,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             destClipX, destClipY, destClipW, destClipH,
                                             srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, quality, (PixelARGB*)0, (PixelRGB*)0);
+                                            alpha, interpolationQuality, (PixelARGB*)0, (PixelRGB*)0);
                 }
                 else
                 {
@@ -1855,7 +1860,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             destClipX, destClipY, destClipW, destClipH,
                                             srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, quality, (PixelRGB*)0, (PixelARGB*)0);
+                                            alpha, interpolationQuality, (PixelRGB*)0, (PixelARGB*)0);
                 }
                 else if (sourceImage.getFormat() == Image::RGB)
                 {
@@ -1863,7 +1868,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
                                             destClipX, destClipY, destClipW, destClipH,
                                             srcClipX, srcClipY, srcClipW, srcClipH,
                                             srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, quality, (PixelRGB*)0, (PixelRGB*)0);
+                                            alpha, interpolationQuality, (PixelRGB*)0, (PixelRGB*)0);
                 }
                 else
                 {
@@ -1879,7 +1884,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, 
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2, double y2, const Colour& colour)
+void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2, double y2)
 {
     x1 += xOffset;
     y1 += yOffset;
@@ -1891,11 +1896,11 @@ void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2
         const Rectangle& r = *i.getRectangle();
 
         clippedDrawLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                         x1, y1, x2, y2, colour);
+                         x1, y1, x2, y2);
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2, const Colour& colour)
+void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2)
 {
     if (clipW > 0 && clipH > 0)
     {
@@ -1904,14 +1909,14 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, in
             if (y2 < y1)
                 swapVariables (y1, y2);
 
-            clippedDrawVerticalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (x1), y1, y2, colour);
+            clippedDrawVerticalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (x1), y1, y2);
         }
         else if (y1 == y2)
         {
             if (x2 < x1)
                 swapVariables (x1, x2);
 
-            clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (y1), x1, x2, colour);
+            clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (y1), x1, x2);
         }
         else
         {
@@ -1931,7 +1936,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, in
                 while (y < endY)
                 {
                     const double x = x1 + gradient * (y - startY);
-                    clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, y, x, x + 1.0, colour);
+                    clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, y, x, x + 1.0);
                     ++y;
                 }
             }
@@ -1947,7 +1952,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, in
                 while (x < endX)
                 {
                     const double y = y1 + gradient * (x - startX);
-                    clippedDrawVerticalLine (clipX, clipY, clipW, clipH, x, y, y + 1.0, colour);
+                    clippedDrawVerticalLine (clipX, clipY, clipW, clipH, x, y, y + 1.0);
                     ++x;
                 }
             }
@@ -1955,19 +1960,19 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, in
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top, double bottom, const Colour& col)
+void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top, double bottom)
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
         const Rectangle& r = *i.getRectangle();
 
         clippedDrawVerticalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                 x + xOffset, top + yOffset, bottom + yOffset, col);
+                                 x + xOffset, top + yOffset, bottom + yOffset);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH,
-                                                                const int x, double top, double bottom, const Colour& col)
+                                                                const int x, double top, double bottom)
 {
     jassert (top <= bottom);
 
@@ -1983,23 +1988,23 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawVerticalLine (int clipX, int c
             bottom = clipY + clipH;
 
         if (bottom > top)
-            drawVertical (x, top, bottom, col);
+            drawVertical (x, top, bottom);
     }
 }
 
-void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double left, double right, const Colour& col)
+void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double left, double right)
 {
     for (RectangleList::Iterator i (*clip); i.next();)
     {
         const Rectangle& r = *i.getRectangle();
 
         clippedDrawHorizontalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                   y + yOffset, left + xOffset, right + xOffset, col);
+                                   y + yOffset, left + xOffset, right + xOffset);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH,
-                                                                  const int y, double left, double right, const Colour& col)
+                                                                  const int y, double left, double right)
 {
     jassert (left <= right);
 
@@ -2015,14 +2020,13 @@ void LowLevelGraphicsSoftwareRenderer::clippedDrawHorizontalLine (int clipX, int
             right = clipX + clipW;
 
         if (right > left)
-            drawHorizontal (y, left, right, col);
+            drawHorizontal (y, left, right);
     }
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawVertical (const int x,
                                                      const double top,
-                                                     const double bottom,
-                                                     const Colour& col)
+                                                     const double bottom)
 {
     int wholeStart = (int) top;
     const int wholeEnd = (int) bottom;
@@ -2037,7 +2041,7 @@ void LowLevelGraphicsSoftwareRenderer::drawVertical (const int x,
     uint8* const dstPixels = image.lockPixelDataReadWrite (x, wholeStart, 1, totalPixels, lineStride, dstPixelStride);
     uint8* dest = dstPixels;
 
-    PixelARGB colour (col.getPixelARGB());
+    PixelARGB colour (this->colour.getPixelARGB());
 
     if (wholeEnd == wholeStart)
     {
@@ -2123,8 +2127,7 @@ void LowLevelGraphicsSoftwareRenderer::drawVertical (const int x,
 
 void LowLevelGraphicsSoftwareRenderer::drawHorizontal (const int y,
                                                        const double top,
-                                                       const double bottom,
-                                                       const Colour& col)
+                                                       const double bottom)
 {
     int wholeStart = (int) top;
     const int wholeEnd = (int) bottom;
@@ -2139,7 +2142,7 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontal (const int y,
     uint8* const dstPixels = image.lockPixelDataReadWrite (wholeStart, y, totalPixels, 1, lineStride, dstPixelStride);
     uint8* dest = dstPixels;
 
-    PixelARGB colour (col.getPixelARGB());
+    PixelARGB colour (this->colour.getPixelARGB());
 
     if (wholeEnd == wholeStart)
     {
@@ -2223,6 +2226,21 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontal (const int y,
     image.releasePixelDataReadWrite (dstPixels);
 }
 
+//==============================================================================
+void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)
+{
+    font = newFont;
+}
+
+void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, float x, float y)
+{
+    font.renderGlyphIndirectly (*this, glyphNumber, x, y);
+}
+
+void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
+{
+    font.renderGlyphIndirectly (*this, glyphNumber, transform);
+}
 
 
 END_JUCE_NAMESPACE

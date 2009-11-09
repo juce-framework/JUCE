@@ -124,7 +124,8 @@ void ImageBrush::paintRectangle (LowLevelGraphicsContext& context,
 
             while (x < right)
             {
-                context.blendImage (*image, x, y, iw, ih, 0, 0, opacity);
+                context.setOpacity (opacity);
+                context.blendImage (*image, x, y, iw, ih, 0, 0);
                 x += iw;
             }
 
@@ -141,6 +142,7 @@ void ImageBrush::paintPath (LowLevelGraphicsContext& context,
     if (image != 0)
     {
         Rectangle clip (context.getClipBounds());
+        context.setOpacity (opacity);
 
         {
             float x, y, w, h;
@@ -169,7 +171,7 @@ void ImageBrush::paintPath (LowLevelGraphicsContext& context,
 
             while (x < right)
             {
-                context.fillPathWithImage (path, transform, *image, x, y, opacity, EdgeTable::Oversampling_4times);
+                context.fillPathWithImage (path, transform, *image, x, y, EdgeTable::Oversampling_4times);
                 x += iw;
             }
 
@@ -186,6 +188,7 @@ void ImageBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
 
     if (image != 0 && context.reduceClipRegion (x, y, w, h))
     {
+        context.setOpacity (opacity);
         const Rectangle clip (context.getClipBounds());
         x = clip.getX();
         y = clip.getY();
@@ -206,7 +209,7 @@ void ImageBrush::paintAlphaChannel (LowLevelGraphicsContext& context,
             {
                 context.fillAlphaChannelWithImage (alphaChannelImage,
                                                    imageX, imageY, *image,
-                                                   x, y, opacity);
+                                                   x, y);
                 x += iw;
             }
 

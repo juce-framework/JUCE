@@ -84,34 +84,38 @@ public:
     virtual bool isClipEmpty() const = 0;
 
     //==============================================================================
-    virtual void fillRectWithColour (int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents) = 0;
-    virtual void fillRectWithGradient (int x, int y, int w, int h, const ColourGradient& gradient) = 0;
+    virtual void setColour (const Colour& colour) = 0;
+    virtual void setGradient (const ColourGradient& gradient) = 0;
+    virtual void setOpacity (float opacity) = 0;
+    virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
-    virtual void fillPathWithColour (const Path& path, const AffineTransform& transform, const Colour& colour, EdgeTable::OversamplingLevel quality) = 0;
-    virtual void fillPathWithGradient (const Path& path, const AffineTransform& transform, const ColourGradient& gradient, EdgeTable::OversamplingLevel quality) = 0;
+    //==============================================================================
+    virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
+    virtual void fillPath (const Path& path, const AffineTransform& transform, EdgeTable::OversamplingLevel quality) = 0;
+
     virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY, float alpha, EdgeTable::OversamplingLevel quality) = 0;
+                                    const Image& image, int imageX, int imageY, EdgeTable::OversamplingLevel quality) = 0;
 
-    virtual void fillAlphaChannelWithColour (const Image& alphaImage, int alphaImageX, int alphaImageY, const Colour& colour) = 0;
-    virtual void fillAlphaChannelWithGradient (const Image& alphaImage, int alphaImageX, int alphaImageY, const ColourGradient& gradient) = 0;
+    virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
     virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                            const Image& fillerImage, int fillerImageX, int fillerImageY, float alpha) = 0;
+                                            const Image& fillerImage, int fillerImageX, int fillerImageY) = 0;
 
     //==============================================================================
     virtual void blendImage (const Image& sourceImage,
-                             int destX, int destY, int destW, int destH, int sourceX, int sourceY,
-                             float alpha) = 0;
+                             int destX, int destY, int destW, int destH, int sourceX, int sourceY) = 0;
 
     virtual void blendImageWarping (const Image& sourceImage,
                                     int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                    const AffineTransform& transform,
-                                    float alpha, const Graphics::ResamplingQuality quality) = 0;
+                                    const AffineTransform& transform) = 0;
 
     //==============================================================================
-    virtual void drawLine (double x1, double y1, double x2, double y2, const Colour& colour) = 0;
+    virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
+    virtual void drawVerticalLine (const int x, double top, double bottom) = 0;
+    virtual void drawHorizontalLine (const int y, double left, double right) = 0;
 
-    virtual void drawVerticalLine (const int x, double top, double bottom, const Colour& col) = 0;
-    virtual void drawHorizontalLine (const int y, double left, double right, const Colour& col) = 0;
+    virtual void setFont (const Font& newFont) = 0;
+    virtual void drawGlyph (int glyphNumber, float x, float y) = 0;
+    virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 };
 
 
