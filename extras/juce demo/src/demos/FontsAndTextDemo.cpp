@@ -146,7 +146,7 @@ public:
                                          true);     // resize the components' heights as well as widths
 
         // now lay out the text box and the controls below it..
-        int x = verticalLayout.getItemCurrentPosition (2);
+        int x = verticalLayout.getItemCurrentPosition (2) + 4;
         textBox->setBounds (x, 0, getWidth() - x, getHeight() - 110);
         x += 70;
         sizeSlider->setBounds (x, getHeight() - 106, getWidth() - x, 22);

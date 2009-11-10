@@ -33,13 +33,121 @@ BEGIN_JUCE_NAMESPACE
 const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
-EdgeTable::EdgeTable (const int top_, const int height_) throw()
+EdgeTable::EdgeTable (const int top_, const int height_,
+                      const Path& path, const AffineTransform& transform) throw()
    : top (top_),
      height (height_),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
 {
-    table = (int*) juce_calloc (height * lineStrideElements * sizeof (int));
+    table = (int*) juce_malloc (height_ * lineStrideElements * sizeof (int));
+    int* t = table;
+    for (int i = height_; --i >= 0;)
+    {
+        *t = 0;
+        t += lineStrideElements;
+    }
+
+    const int topLimit = top << 8;
+    const int bottomLimit = height << 8;
+    PathFlatteningIterator iter (path, transform);
+
+    while (iter.next())
+    {
+        int y1 = roundFloatToInt (iter.y1 * 256.0f);
+        int y2 = roundFloatToInt (iter.y2 * 256.0f);
+
+        if (y1 != y2)
+        {
+            y1 -= topLimit;
+            y2 -= topLimit;
+
+            const double startX = 256.0f * iter.x1;
+            const int startY = y1;
+            const double multiplier = (iter.x2 - iter.x1) / (iter.y2 - iter.y1);
+            int winding = -1;
+
+            if (y1 > y2)
+            {
+                swapVariables (y1, y2);
+                winding = 1;
+            }
+
+            if (y1 < 0)
+                y1 = 0;
+
+            if (y2 > bottomLimit)
+                y2 = bottomLimit;
+
+            const int stepSize = jlimit (1, 256, 256 / (1 + (int) fabs (multiplier)));
+
+            while (y1 < y2)
+            {
+                const int step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
+
+                addEdgePoint (roundDoubleToInt (startX + multiplier * (y1 - startY)),
+                              y1 >> 8, winding * step);
+
+                y1 += step;
+            }
+        }
+    }
+
+    if (! path.isUsingNonZeroWinding())
+    {
+        int* lineStart = table;
+
+        for (int i = height; --i >= 0;)
+        {
+            int* line = lineStart;
+            lineStart += lineStrideElements;
+            int num = *line;
+            int level = 0;
+            int lastCorrected = 0;
+
+            while (--num >= 0)
+            {
+                line += 2;
+                level += *line;
+                int corrected = abs (level);
+                if (corrected >> 8)
+                {
+                    corrected &= 511;
+                    if (corrected >> 8)
+                        corrected = 511 - corrected;
+                }
+
+                *line = corrected - lastCorrected;
+                lastCorrected = corrected;
+            }
+        }
+    }
+}
+
+EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
+   : top (rectangleToAdd.getY()),
+     height (jmax (1, rectangleToAdd.getHeight())),
+     maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
+{
+    jassert (! rectangleToAdd.isEmpty());
+
+    table = (int*) juce_malloc (height * lineStrideElements * sizeof (int));
+    *table = 0;
+
+    const int x1 = rectangleToAdd.getX();
+    const int x2 = rectangleToAdd.getRight();
+
+    int* t = table;
+    for (int i = rectangleToAdd.getHeight(); --i >= 0;)
+    {
+        t[0] = 2;
+        t[1] = x1;
+        t[2] = 256;
+        t[3] = x2;
+        t[4] = -256;
+        t += lineStrideElements;
+    }
 }
 
 EdgeTable::EdgeTable (const EdgeTable& other) throw()
@@ -109,7 +217,6 @@ void EdgeTable::optimiseTable() throw()
     remapTableForNumEdges (maxLineElements);
 }
 
-//==============================================================================
 void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw()
 {
     jassert (y >= 0 && y < height)
@@ -146,93 +253,47 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
     lineStart[0]++;
 }
 
+void EdgeTable::clearLineSection (const int y, int minX, int maxX) throw()
+{
+//    int* line = table + lineStrideElements * y;
+
+
+}
+
 //==============================================================================
-void EdgeTable::addPath (const Path& path, const AffineTransform& transform) throw()
+void EdgeTable::clipToRectangle (const Rectangle& r) throw()
 {
-    const int bottomLimit = height << 8;
+    const int rectTop = jmax (0, r.getY() - top);
+    const int rectBottom = jmin (height, r.getBottom() - top);
 
-    PathFlatteningIterator iter (path, transform);
+    for (int i = rectTop - 1; --i >= 0;)
+        table [lineStrideElements * i] = 0;
 
-    while (iter.next())
+    for (int i = rectBottom; i < height; ++i)
+        table [lineStrideElements * i] = 0;
+
+    for (int i = rectTop; i < rectBottom; ++i)
     {
-        int y1 = roundFloatToInt (iter.y1 * 256.0f) - (top << 8);
-        int y2 = roundFloatToInt (iter.y2 * 256.0f) - (top << 8);
-
-        if (y1 != y2)
-        {
-            const int oldY1 = y1;
-            const double x1 = 256.0 * iter.x1;
-            const double x2 = 256.0 * iter.x2;
-            const double multiplier = (x2 - x1) / (y2 - y1);
-            int winding = -1;
-
-            if (y1 > y2)
-            {
-                swapVariables (y1, y2);
-                winding = 1;
-            }
-
-            if (y1 < 0)
-                y1 = 0;
-
-            if (y2 > bottomLimit)
-                y2 = bottomLimit;
-
-            const int stepSize = jlimit (1, 256, 256 / (1 + abs ((int) multiplier)));
-
-            while (y1 < y2)
-            {
-                const int step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
-
-                addEdgePoint (roundDoubleToInt (x1 + multiplier * (y1 - oldY1)),
-                              y1 >> 8, winding * step);
-
-                y1 += step;
-            }
-        }
-    }
-
-    if (! path.isUsingNonZeroWinding())
-    {
-        int* lineStart = table;
-
-        for (int i = height; --i >= 0;)
-        {
-            int* line = lineStart;
-            lineStart += lineStrideElements;
-            int num = *line;
-            int level = 0;
-            int lastCorrected = 0;
-
-            while (--num >= 0)
-            {
-                line += 2;
-                level += *line;
-                int corrected = abs (level);
-                if (corrected >> 8)
-                {
-                    corrected &= 511;
-                    if (corrected >> 8)
-                        corrected = 511 - corrected;
-                }
-
-                *line = corrected - lastCorrected;
-                lastCorrected = corrected;
-            }
-        }
+        clearLineSection (i, -INT_MAX, r.getX());
+        clearLineSection (i, r.getRight(), INT_MAX);
     }
 }
 
-/*void EdgeTable::clipToRectangle (const Rectangle& r) throw()
+void EdgeTable::excludeRectangle (const Rectangle& r) throw()
+{
+    const int rectTop = jmax (0, r.getY() - top);
+    const int rectBottom = jmin (height, r.getBottom() - top);
+
+    for (int i = rectTop; i < rectBottom; ++i)
+        clearLineSection (i, r.getX(), r.getRight());
+}
+
+void EdgeTable::clipToEdgeTable (const EdgeTable& other)
 {
 }
 
-void EdgeTable::intersectWith (const EdgeTable& other)
+void EdgeTable::clipToImageAlpha (Image& image, int x, int y) throw()
 {
 }
-
-void EdgeTable::generateFromImageAlpha (Image& image, int x, int y) throw()
-{
-}*/
 
 END_JUCE_NAMESPACE

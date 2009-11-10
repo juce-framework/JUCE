@@ -1362,8 +1362,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
 
     if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
     {
-        EdgeTable edgeTable (0, ch);
-        edgeTable.addPath (path, transform.translated ((float) -cx, (float) -cy));
+        EdgeTable edgeTable (0, ch, path, transform.translated ((float) -cx, (float) -cy));
 
         int stride, pixelStride;
         uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (cx, cy, cw, ch, stride, pixelStride);
@@ -1490,8 +1489,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, i
 {
     if (Rectangle::intersectRectangles (x, y, w, h, imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight()))
     {
-        EdgeTable edgeTable (0, h);
-        edgeTable.addPath (path, transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
+        EdgeTable edgeTable (0, h, path, transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
 
         int stride, pixelStride;
         uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);

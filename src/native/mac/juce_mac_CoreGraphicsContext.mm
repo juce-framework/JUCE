@@ -355,7 +355,7 @@ public:
         if (state->fontRef != 0)
         {
             CGGlyph g = glyphNumber;
-            CGContextShowGlyphsAtPoint (context, x, flipHeight - y, &g, 1);
+            CGContextShowGlyphsAtPoint (context, x, flipHeight - roundFloatToInt (y), &g, 1);
         }
         else
         {

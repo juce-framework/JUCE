@@ -309,17 +309,21 @@ void Font::getGlyphPositions (const String& text, Array <int>& glyphs, Array <fl
 
     const float scale = font->height * font->horizontalScale;
     const int num = xOffsets.size();
-    float* const x = &(xOffsets.getReference(0));
 
-    if (font->kerning != 0)
+    if (num > 0)
     {
-        for (int i = 0; i < num; ++i)
-            x[i] = (x[i] + i * font->kerning) * scale;
-    }
-    else
-    {
-        for (int i = 0; i < num; ++i)
-            x[i] *= scale;
+        float* const x = &(xOffsets.getReference(0));
+
+        if (font->kerning != 0)
+        {
+            for (int i = 0; i < num; ++i)
+                x[i] = (x[i] + i * font->kerning) * scale;
+        }
+        else
+        {
+            for (int i = 0; i < num; ++i)
+                x[i] *= scale;
+        }
     }
 }
 
@@ -455,7 +459,7 @@ public:
 
             g.fillAlphaChannel (*bitmap [bitmapToUse],
                                 xOrigin [bitmapToUse] + (int) xFloor,
-                                yOrigin [bitmapToUse] + (int) floorf (y));
+                                yOrigin [bitmapToUse] + roundFloatToInt(y));
         }
     }
 

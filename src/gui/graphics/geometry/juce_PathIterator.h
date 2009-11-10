@@ -56,7 +56,7 @@ public:
     */
     PathFlatteningIterator (const Path& path,
                             const AffineTransform& transform = AffineTransform::identity,
-                            float tolerence = 9.0f) throw();
+                            float tolerence = 6.0f) throw();
 
     /** Destructor. */
     ~PathFlatteningIterator() throw();

@@ -239,20 +239,47 @@ static void addEdgeAndJoint (Path& destPath,
             else
             {
                 // curved joints
-                float angle  = atan2f (x2 - midX, y2 - midY);
+                float angle1 = atan2f (x2 - midX, y2 - midY);
                 float angle2 = atan2f (x3 - midX, y3 - midY);
-
-                while (angle < angle2 - 0.01f)
-                    angle2 -= float_Pi * 2.0f;
+                const float angleIncrement = 0.1f;
 
                 destPath.lineTo (x2, y2);
 
-                while (angle > angle2)
+                if (fabs (angle1 - angle2) > angleIncrement)
                 {
-                    destPath.lineTo (midX + width * sinf (angle),
-                                     midY + width * cosf (angle));
+                    if (angle2 > angle1 + float_Pi
+                         || (angle2 < angle1 && angle2 >= angle1 - float_Pi))
+                    {
+                        if (angle2 > angle1)
+                            angle2 -= float_Pi * 2.0f;
 
-                    angle -= 0.1f;
+                        jassert (angle1 <= angle2 + float_Pi);
+
+                        angle1 -= angleIncrement;
+                        while (angle1 > angle2)
+                        {
+                            destPath.lineTo (midX + width * sinf (angle1),
+                                             midY + width * cosf (angle1));
+
+                            angle1 -= angleIncrement;
+                        }
+                    }
+                    else
+                    {
+                        if (angle1 > angle2)
+                            angle1 -= float_Pi * 2.0f;
+
+                        jassert (angle1 >= angle2 - float_Pi);
+
+                        angle1 += angleIncrement;
+                        while (angle1 < angle2)
+                        {
+                            destPath.lineTo (midX + width * sinf (angle1),
+                                             midY + width * cosf (angle1));
+
+                            angle1 += angleIncrement;
+                        }
+                    }
                 }
 
                 destPath.lineTo (x3, y3);

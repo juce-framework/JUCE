@@ -27,6 +27,16 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+  #define SUPPORT_10_4_FONTS 1
+  #define NEW_CGFONT_FUNCTIONS_UNAVAILABLE (CGFontCreateWithFontName == 0)
+
+  END_JUCE_NAMESPACE
+  @interface NSFont (PrivateHack)
+    - (NSGlyph) _defaultGlyphForChar: (unichar) theChar;
+  @end
+  BEGIN_JUCE_NAMESPACE
+#endif
 
 //==============================================================================
 class MacTypeface  : public Typeface
@@ -80,6 +90,9 @@ public:
 
         fontRef = CGFontCreateWithFontName ((CFStringRef) fontName);
 
+        const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
+        unitsToHeightScaleFactor = 1.0f / totalHeight;
+        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
 #else
         nsFont = [NSFont fontWithName: juceStringToNS (font.getTypefaceName()) size: 1024];
 
@@ -111,18 +124,40 @@ public:
             renderingTransform.c = 0.15f;
         }
 
-        fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
-#endif
+#if SUPPORT_10_4_FONTS
+        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
+        {
+            ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
 
-        const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
-        unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+            if (atsFont == 0)
+                atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
+
+            fontRef = CGFontCreateWithPlatformFont ((void*) &atsFont);
+
+            const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
+            unitsToHeightScaleFactor = 1.0f / totalHeight;
+            fontHeightToCGSizeFactor = 1024.0f / totalHeight;
+        }
+        else
+#endif
+        {
+            fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
+
+            const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
+            unitsToHeightScaleFactor = 1.0f / totalHeight;
+            fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+        }
+
+#endif
     }
 
     ~MacTypeface()
     {
         [nsFont release];
-        CGFontRelease (fontRef);
+
+        if (fontRef != 0)
+            CGFontRelease (fontRef);
+
         delete charToGlyphMapper;
     }
 
@@ -138,50 +173,88 @@ public:
 
     float getStringWidth (const String& text)
     {
-        if (fontRef == 0)
+        if (fontRef == 0 || text.isEmpty())
             return 0;
 
-        Array <int> glyphs (128);
-        createGlyphsForString (text, glyphs);
-
-        if (glyphs.size() == 0)
-            return 0;
+        const int length = text.length();
+        CGGlyph* const glyphs = createGlyphsForString (text, length);
 
         int x = 0;
-        int* const advances = (int*) juce_malloc (glyphs.size() * 2 * sizeof (int));
 
-        if (CGFontGetGlyphAdvances (fontRef, (CGGlyph*) &glyphs.getReference(0), glyphs.size() * 2, advances))
-            for (int i = 0; i < glyphs.size(); ++i)
-                x += advances [i * 2];
+#if SUPPORT_10_4_FONTS
+        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
+        {
+            NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+            [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
-        juce_free (advances);
+            for (int i = 0; i < length; ++i)
+                x += advances[i].width;
+
+            juce_free (advances);
+        }
+        else
+#endif
+        {
+            int* const advances = (int*) juce_malloc (length * sizeof (int));
+
+            if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
+                for (int i = 0; i < length; ++i)
+                    x += advances[i];
+
+            juce_free (advances);
+        }
+
+        juce_free (glyphs);
+
         return x * unitsToHeightScaleFactor;
     }
 
-    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets)
+    void getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array <float>& xOffsets)
     {
-        if (fontRef == 0)
-            return;
-
-        createGlyphsForString (text, glyphs);
-
         xOffsets.add (0);
-        if (glyphs.size() == 0)
+
+        if (fontRef == 0 || text.isEmpty())
             return;
 
-        int* const advances = (int*) juce_malloc (glyphs.size() * 2 * sizeof (int));
+        const int length = text.length();
+        CGGlyph* const glyphs = createGlyphsForString (text, length);
 
-        if (CGFontGetGlyphAdvances (fontRef, (CGGlyph*) &glyphs.getReference(0), glyphs.size() * 2, advances))
+#if SUPPORT_10_4_FONTS
+        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
+            NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+            [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+
             int x = 0;
-            for (int i = 0; i < glyphs.size(); ++i)
+            for (int i = 0; i < length; ++i)
             {
-                x += advances [i * 2];
+                x += advances[i].width;
                 xOffsets.add (x * unitsToHeightScaleFactor);
+                resultGlyphs.add (((NSGlyph*) glyphs)[i]);
             }
+
+            juce_free (advances);
+        }
+        else
+#endif
+        {
+            int* const advances = (int*) juce_malloc (length * sizeof (int));
+
+            if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
+            {
+                int x = 0;
+                for (int i = 0; i < length; ++i)
+                {
+                    x += advances [i];
+                    xOffsets.add (x * unitsToHeightScaleFactor);
+                    resultGlyphs.add (glyphs[i]);
+                }
+            }
+
+            juce_free (advances);
         }
 
-        juce_free (advances);
+        juce_free (glyphs);
     }
 
     bool getOutlineForGlyph (int glyphNumber, Path& path)
@@ -247,15 +320,28 @@ private:
     AffineTransform pathTransform;
 #endif
 
-    void createGlyphsForString (const String& text, Array <int>& dest) throw()
+    CGGlyph* createGlyphsForString (const juce_wchar* const text, const int length) throw()
     {
+#if SUPPORT_10_4_FONTS
+        if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
+        {
+            NSGlyph* const g = (NSGlyph*) juce_malloc (sizeof (NSGlyph) * length);
+
+            for (int i = 0; i < length; ++i)
+                g[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text[i]];
+
+            return (CGGlyph*) g;
+        }
+#endif
         if (charToGlyphMapper == 0)
             charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
-        const juce_wchar* t = (const juce_wchar*) text;
+        CGGlyph* const g = (CGGlyph*) juce_malloc (sizeof (CGGlyph) * length);
 
-        while (*t != 0)
-            dest.add (charToGlyphMapper->getGlyphForCharacter (*t++));
+        for (int i = 0; i < length; ++i)
+            g[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text[i]);
+
+        return g;
     }
 
     // Reads a CGFontRef's character map table to convert unicode into glyph numbers

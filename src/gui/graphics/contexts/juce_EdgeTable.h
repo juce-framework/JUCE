@@ -42,15 +42,22 @@ class JUCE_API  EdgeTable
 {
 public:
     //==============================================================================
-    /** Creates an empty edge table ready to have paths added.
+    /** Creates an edge table containing a path.
 
-        A table is created with a fixed vertical size, and only sections of paths
-        which lie within their range will be added to the table.
+        A table is created with a fixed vertical range, and only sections of the path
+        which lie within this range will be added to the table.
 
-        @param y                        the lowest y co-ordinate that the table can contain
+        @param y                        the top y co-ordinate that the table can contain
         @param height                   the number of horizontal lines it contains
+        @param pathToAdd                the path to add to the table
+        @param transform                a transform to apply to the path being added
     */
-    EdgeTable (const int y, const int height) throw();
+    EdgeTable (const int y, const int height,
+               const Path& pathToAdd, const AffineTransform& transform) throw();
+
+    /** Creates an edge table containing a rectangle.
+    */
+    EdgeTable (const Rectangle& rectangleToAdd) throw();
 
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other) throw();
@@ -62,21 +69,10 @@ public:
     ~EdgeTable() throw();
 
     //==============================================================================
-    /** Adds edges to the table for a path.
-
-        This will add horizontal lines to the edge table for any parts of the path
-        which lie within the vertical bounds for which this table was created.
-
-        @param path         the path to add
-        @param transform    an optional transform to apply to the path while it's
-                            being added
-    */
-    void addPath (const Path& path,
-                  const AffineTransform& transform) throw();
-
-    /*void clipToRectangle (const Rectangle& r) throw();
-    void intersectWith (const EdgeTable& other);
-    void generateFromImageAlpha (Image& image, int x, int y) throw();*/
+    void clipToRectangle (const Rectangle& r) throw();
+    void excludeRectangle (const Rectangle& r) throw();
+    void clipToEdgeTable (const EdgeTable& other);
+    void clipToImageAlpha (Image& image, int x, int y) throw();
 
     /** Reduces the amount of space the table has allocated.
 
@@ -166,7 +162,12 @@ public:
                         {
                             levelAccumulator >>= 8;
                             if (levelAccumulator > 0)
-                                iterationCallback.handleEdgeTablePixel (x, jmin (0xff, levelAccumulator));
+                            {
+                                if (levelAccumulator >> 8)
+                                    levelAccumulator = 0xff;
+
+                                iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                            }
                         }
 
                         if (++x >= clipRight)
@@ -187,8 +188,7 @@ public:
                             const int numPix = endOfRun - x;
 
                             if (numPix > 0)
-                                iterationCallback.handleEdgeTableLine (x, numPix,
-                                                                       jmin (correctedLevel, 0xff));
+                                iterationCallback.handleEdgeTableLine (x, numPix, correctedLevel);
                         }
 
                         // save the bit at the end to be drawn next time round the loop.
@@ -220,10 +220,10 @@ private:
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
     int* table;
     int top, height, maxEdgesPerLine, lineStrideElements;
-    bool nonZeroWinding;
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
+    void clearLineSection (const int y, int minX, int maxX) throw();
 };
 
 
