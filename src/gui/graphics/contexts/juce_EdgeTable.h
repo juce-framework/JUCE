@@ -47,10 +47,10 @@ public:
         A table is created with a fixed vertical size, and only sections of paths
         which lie within their range will be added to the table.
 
-        @param topY                     the lowest y co-ordinate that the table can contain
-        @param height                   the number of horizontal lines it can contain
+        @param y                        the lowest y co-ordinate that the table can contain
+        @param height                   the number of horizontal lines it contains
     */
-    EdgeTable (const int topY, const int height) throw();
+    EdgeTable (const int y, const int height) throw();
 
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other) throw();
@@ -137,18 +137,7 @@ public:
                 {
                     int correctedLevel = abs (level);
                     if (correctedLevel >> 8)
-                    {
-                        if (nonZeroWinding)
-                        {
-                            correctedLevel = 0xff;
-                        }
-                        else
-                        {
-                            correctedLevel &= 511;
-                            if (correctedLevel >> 8)
-                                correctedLevel = 511 - correctedLevel;
-                        }
-                    }
+                        correctedLevel = 0xff;
 
                     const int endX = subPixelXOffset + *++line;
                     jassert (endX >= x);

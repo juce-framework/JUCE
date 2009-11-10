@@ -37,8 +37,7 @@ EdgeTable::EdgeTable (const int top_, const int height_) throw()
    : top (top_),
      height (height_),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
-     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
-     nonZeroWinding (true)
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
 {
     table = (int*) juce_calloc (height * lineStrideElements * sizeof (int));
 }
@@ -57,7 +56,6 @@ const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
     height = other.height;
     maxEdgesPerLine = other.maxEdgesPerLine;
     lineStrideElements = other.lineStrideElements;
-    nonZeroWinding = other.nonZeroWinding;
 
     const int tableSize = height * lineStrideElements * sizeof (int);
     table = (int*) juce_malloc (tableSize);
@@ -149,10 +147,8 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
 }
 
 //==============================================================================
-void EdgeTable::addPath (const Path& path,
-                         const AffineTransform& transform) throw()
+void EdgeTable::addPath (const Path& path, const AffineTransform& transform) throw()
 {
-    nonZeroWinding = path.isUsingNonZeroWinding();
     const int bottomLimit = height << 8;
 
     PathFlatteningIterator iter (path, transform);
@@ -164,6 +160,7 @@ void EdgeTable::addPath (const Path& path,
 
         if (y1 != y2)
         {
+            const int oldY1 = y1;
             const double x1 = 256.0 * iter.x1;
             const double x2 = 256.0 * iter.x2;
             const double multiplier = (x2 - x1) / (y2 - y1);
@@ -181,7 +178,6 @@ void EdgeTable::addPath (const Path& path,
             if (y2 > bottomLimit)
                 y2 = bottomLimit;
 
-            const int oldY1 = y1;
             const int stepSize = jlimit (1, 256, 256 / (1 + abs ((int) multiplier)));
 
             while (y1 < y2)
@@ -192,6 +188,36 @@ void EdgeTable::addPath (const Path& path,
                               y1 >> 8, winding * step);
 
                 y1 += step;
+            }
+        }
+    }
+
+    if (! path.isUsingNonZeroWinding())
+    {
+        int* lineStart = table;
+
+        for (int i = height; --i >= 0;)
+        {
+            int* line = lineStart;
+            lineStart += lineStrideElements;
+            int num = *line;
+            int level = 0;
+            int lastCorrected = 0;
+
+            while (--num >= 0)
+            {
+                line += 2;
+                level += *line;
+                int corrected = abs (level);
+                if (corrected >> 8)
+                {
+                    corrected &= 511;
+                    if (corrected >> 8)
+                        corrected = 511 - corrected;
+                }
+
+                *line = corrected - lastCorrected;
+                lastCorrected = corrected;
             }
         }
     }

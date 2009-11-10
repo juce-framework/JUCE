@@ -196,7 +196,11 @@ public:
             flip();
             applyTransform (transform);
             createPath (path);
-            CGContextFillPath (context);
+
+            if (path.isUsingNonZeroWinding())
+                CGContextFillPath (context);
+            else
+                CGContextEOFillPath (context);
         }
         else
         {
