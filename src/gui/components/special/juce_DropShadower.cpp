@@ -242,7 +242,7 @@ void DropShadower::updateShadows()
 
         if (bigIm == 0)
         {
-            bigIm = new Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true);
+            bigIm = Image::createNativeImage (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true);
 
             Graphics bigG (*bigIm);
             bigG.setColour (Colours::black.withAlpha (alpha));

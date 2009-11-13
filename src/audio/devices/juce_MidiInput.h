@@ -125,8 +125,8 @@ public:
     static MidiInput* openDevice (int deviceIndex,
                                   MidiInputCallback* callback);
 
-#if JUCE_LINUX || DOXYGEN
-    /** LINUX ONLY - This will try to create a new midi input device.
+#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+    /** This will try to create a new midi input device (Not available on Windows).
 
         This will attempt to create a new midi input device with the specified name,
         for other apps to connect to.

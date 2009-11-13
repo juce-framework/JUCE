@@ -1727,9 +1727,9 @@ void Component::paintEntireComponent (Graphics& originalContext)
 
     if (effect_ != 0)
     {
-        effectImage = new Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                 getWidth(), getHeight(),
-                                 ! flags.opaqueFlag);
+        effectImage = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                getWidth(), getHeight(),
+                                                ! flags.opaqueFlag);
 
         g = new Graphics (*effectImage);
     }
@@ -1750,8 +1750,8 @@ void Component::paintEntireComponent (Graphics& originalContext)
             {
                 if (bufferedImage_ == 0)
                 {
-                    bufferedImage_ = new Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                getWidth(), getHeight(), ! flags.opaqueFlag);
+                    bufferedImage_ = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                               getWidth(), getHeight(), ! flags.opaqueFlag);
 
                     Graphics imG (*bufferedImage_);
                     paint (imG);
@@ -1832,10 +1832,10 @@ Image* Component::createComponentSnapshot (const Rectangle& areaToGrab,
     if (clipImageToComponentBounds)
         r = r.getIntersection (Rectangle (0, 0, getWidth(), getHeight()));
 
-    Image* const componentImage = new Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                             jmax (1, r.getWidth()),
-                                             jmax (1, r.getHeight()),
-                                             true);
+    Image* const componentImage = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                            jmax (1, r.getWidth()),
+                                                            jmax (1, r.getHeight()),
+                                                            true);
 
     Graphics imageContext (*componentImage);
     imageContext.setOrigin (-r.getX(),

@@ -204,7 +204,7 @@ Image* Image::createCopy (int newWidth, int newHeight,
     if (newHeight < 0)
         newHeight = imageHeight;
 
-    Image* const newImage = new Image (format, newWidth, newHeight, true);
+    Image* const newImage = Image::createNativeImage (format, newWidth, newHeight, true);
 
     Graphics g (*newImage);
     g.setImageResamplingQuality (quality);
@@ -221,7 +221,7 @@ Image* Image::createCopyOfAlphaChannel() const
 {
     jassert (format != SingleChannel);
 
-    Image* const newImage = new Image (SingleChannel, imageWidth, imageHeight, false);
+    Image* const newImage = Image::createNativeImage (SingleChannel, imageWidth, imageHeight, false);
 
     if (! hasAlphaChannel())
     {

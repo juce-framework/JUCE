@@ -102,8 +102,8 @@ GIFLoader::GIFLoader (InputStream& in)
             if (! readPalette (numColours))
                 break;
 
-        image = new Image ((transparent >= 0) ? Image::ARGB : Image::RGB,
-                           imageWidth, imageHeight, (transparent >= 0));
+        image = Image::createNativeImage ((transparent >= 0) ? Image::ARGB : Image::RGB,
+                                          imageWidth, imageHeight, (transparent >= 0));
 
         readImage (imageWidth, imageHeight,
                    (buf[8] & 0x40) != 0,

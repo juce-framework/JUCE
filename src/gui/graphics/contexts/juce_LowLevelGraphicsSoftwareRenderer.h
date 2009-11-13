@@ -53,6 +53,9 @@ public:
     bool reduceClipRegion (const RectangleList& clipRegion);
     void excludeClipRegion (int x, int y, int w, int h);
 
+    void clipToPath (const Path& path, const AffineTransform& transform);
+    void clipToImage (Image& image, int imageX, int imageY);
+
     void saveState();
     void restoreState();
 

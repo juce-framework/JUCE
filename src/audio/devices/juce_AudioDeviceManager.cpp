@@ -108,6 +108,7 @@ const OwnedArray <AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceType
 
 //==============================================================================
 AudioIODeviceType* juce_createAudioIODeviceType_CoreAudio();
+AudioIODeviceType* juce_createAudioIODeviceType_iPhoneAudio();
 AudioIODeviceType* juce_createAudioIODeviceType_WASAPI();
 AudioIODeviceType* juce_createAudioIODeviceType_DirectSound();
 AudioIODeviceType* juce_createAudioIODeviceType_ASIO();
@@ -133,6 +134,10 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
 
     #if JUCE_MAC
      list.add (juce_createAudioIODeviceType_CoreAudio());
+    #endif
+
+    #if JUCE_IPHONE
+     list.add (juce_createAudioIODeviceType_iPhoneAudio());
     #endif
 
     #if JUCE_LINUX && JUCE_ALSA

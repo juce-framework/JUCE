@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  19 Sep 2009 12:36:23 pm
+  Creation date:  13 Nov 2009 3:52:50 pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -19,8 +19,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_9632FFAA__
-#define __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_9632FFAA__
+#ifndef __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__
+#define __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__
 
 //[Headers]     -- You can add your own extra header files here --
 #include "../jucedemo_headers.h"
@@ -77,4 +77,4 @@ private:
 };
 
 
-#endif   // __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_9632FFAA__
+#endif   // __JUCER_HEADER_AUDIODEMORECORDPAGE_AUDIODEMORECORDPAGE_4FF281BF__

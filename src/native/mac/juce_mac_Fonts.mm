@@ -31,6 +31,10 @@
   #define SUPPORT_10_4_FONTS 1
   #define NEW_CGFONT_FUNCTIONS_UNAVAILABLE (CGFontCreateWithFontName == 0)
 
+  #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+    #define SUPPORT_ONLY_10_4_FONTS 1
+  #endif
+
   END_JUCE_NAMESPACE
   @interface NSFont (PrivateHack)
     - (NSGlyph) _defaultGlyphForChar: (unichar) theChar;
@@ -44,8 +48,10 @@ class MacTypeface  : public Typeface
 public:
     //==============================================================================
     MacTypeface (const Font& font)
-        : Typeface (font.getTypefaceName()),
-          charToGlyphMapper (0)
+        : Typeface (font.getTypefaceName())
+#if ! SUPPORT_ONLY_10_4_FONTS
+          , charToGlyphMapper (0)
+#endif
     {
         const ScopedAutoReleasePool pool;
         renderingTransform = CGAffineTransformIdentity;
@@ -90,9 +96,11 @@ public:
 
         fontRef = CGFontCreateWithFontName ((CFStringRef) fontName);
 
-        const int totalHeight = abs (CGFontGetAscent (fontRef)) + abs (CGFontGetDescent (fontRef));
+        const int ascender = abs (CGFontGetAscent (fontRef));
+        const float totalHeight = ascender + abs (CGFontGetDescent (fontRef));
+        ascent = ascender / totalHeight;
         unitsToHeightScaleFactor = 1.0f / totalHeight;
-        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
+        fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / totalHeight;
 #else
         nsFont = [NSFont fontWithName: juceStringToNS (font.getTypefaceName()) size: 1024];
 
@@ -124,7 +132,19 @@ public:
             renderingTransform.c = 0.15f;
         }
 
-#if SUPPORT_10_4_FONTS
+#if SUPPORT_ONLY_10_4_FONTS
+        ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
+
+        if (atsFont == 0)
+            atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
+
+        fontRef = CGFontCreateWithPlatformFont ((void*) &atsFont);
+
+        const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
+        unitsToHeightScaleFactor = 1.0f / totalHeight;
+        fontHeightToCGSizeFactor = 1024.0f / totalHeight;
+#else
+  #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             ATSFontRef atsFont = ATSFontFindFromName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
@@ -139,7 +159,7 @@ public:
             fontHeightToCGSizeFactor = 1024.0f / totalHeight;
         }
         else
-#endif
+  #endif
         {
             fontRef = CGFontCreateWithFontName ((CFStringRef) [nsFont fontName]);
 
@@ -147,18 +167,22 @@ public:
             unitsToHeightScaleFactor = 1.0f / totalHeight;
             fontHeightToCGSizeFactor = CGFontGetUnitsPerEm (fontRef) / (float) totalHeight;
         }
+#endif
 
 #endif
     }
 
     ~MacTypeface()
     {
+#if ! JUCE_IPHONE
         [nsFont release];
-
+#endif
         if (fontRef != 0)
             CGFontRelease (fontRef);
 
+#if ! SUPPORT_ONLY_10_4_FONTS
         delete charToGlyphMapper;
+#endif
     }
 
     float getAscent() const
@@ -181,7 +205,16 @@ public:
 
         int x = 0;
 
-#if SUPPORT_10_4_FONTS
+#if SUPPORT_ONLY_10_4_FONTS
+        NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+        [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+
+        for (int i = 0; i < length; ++i)
+            x += advances[i].width;
+
+        juce_free (advances);
+#else
+  #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
@@ -193,7 +226,7 @@ public:
             juce_free (advances);
         }
         else
-#endif
+  #endif
         {
             int* const advances = (int*) juce_malloc (length * sizeof (int));
 
@@ -203,6 +236,7 @@ public:
 
             juce_free (advances);
         }
+#endif
 
         juce_free (glyphs);
 
@@ -219,7 +253,21 @@ public:
         const int length = text.length();
         CGGlyph* const glyphs = createGlyphsForString (text, length);
 
-#if SUPPORT_10_4_FONTS
+#if SUPPORT_ONLY_10_4_FONTS
+        NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+        [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+
+        int x = 0;
+        for (int i = 0; i < length; ++i)
+        {
+            x += advances[i].width;
+            xOffsets.add (x * unitsToHeightScaleFactor);
+            resultGlyphs.add (((NSGlyph*) glyphs)[i]);
+        }
+
+        juce_free (advances);
+#else
+  #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
@@ -236,7 +284,7 @@ public:
             juce_free (advances);
         }
         else
-#endif
+  #endif
         {
             int* const advances = (int*) juce_malloc (length * sizeof (int));
 
@@ -253,6 +301,7 @@ public:
 
             juce_free (advances);
         }
+#endif
 
         juce_free (glyphs);
     }
@@ -323,7 +372,9 @@ private:
     CGGlyph* createGlyphsForString (const juce_wchar* const text, const int length) throw()
     {
 #if SUPPORT_10_4_FONTS
+  #if ! SUPPORT_ONLY_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
+  #endif
         {
             NSGlyph* const g = (NSGlyph*) juce_malloc (sizeof (NSGlyph) * length);
 
@@ -333,6 +384,8 @@ private:
             return (CGGlyph*) g;
         }
 #endif
+
+#if ! SUPPORT_ONLY_10_4_FONTS
         if (charToGlyphMapper == 0)
             charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
@@ -342,8 +395,10 @@ private:
             g[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text[i]);
 
         return g;
+#endif
     }
 
+#if ! SUPPORT_ONLY_10_4_FONTS
     // Reads a CGFontRef's character map table to convert unicode into glyph numbers
     class CharToGlyphMapper
     {
@@ -442,6 +497,7 @@ private:
     };
 
     CharToGlyphMapper* charToGlyphMapper;
+#endif
 };
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
@@ -471,9 +527,15 @@ const StringArray Font::findAllTypefaceNames() throw()
 
 void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {
+#if JUCE_IPHONE
+    defaultSans  = "Helvetica";
+    defaultSerif = "Times New Roman";
+    defaultFixed = "Courier New";
+#else
     defaultSans  = "Lucida Grande";
     defaultSerif = "Times New Roman";
     defaultFixed = "Monaco";
+#endif
 }
 
 #endif

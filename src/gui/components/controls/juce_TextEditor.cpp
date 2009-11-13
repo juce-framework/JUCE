@@ -1838,7 +1838,7 @@ void TextEditor::mouseUp (const MouseEvent& e)
 
     if (wasFocused || ! selectAllTextWhenFocused)
     {
-        if (! (popupMenuEnabled && e.mods.isPopupMenu()))
+        if (e.mouseWasClicked() && ! (popupMenuEnabled && e.mods.isPopupMenu()))
         {
             moveCaret (getTextIndexAt (e.x, e.y));
         }

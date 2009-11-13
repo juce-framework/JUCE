@@ -2902,6 +2902,11 @@ Image* juce_createIconForFile (const File& file)
     return 0;
 }
 
+Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+{
+    return new Image (format, imageWidth, imageHeight, clearImage);
+}
+
 
 //==============================================================================
 #if JUCE_OPENGL

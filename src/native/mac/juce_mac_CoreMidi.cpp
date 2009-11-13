@@ -233,8 +233,23 @@ static bool makeSureClientExists()
     return hasGlobalClientBeenCreated;
 }
 
-struct MidiPortAndEndpoint
+class MidiPortAndEndpoint
 {
+public:
+    MidiPortAndEndpoint (MIDIPortRef port, MIDIEndpointRef endpoint) throw()
+        : port (port), endPoint (endpoint)
+    {
+    }
+
+    ~MidiPortAndEndpoint() throw()
+    {
+        if (port != 0)
+            MIDIPortDispose (port);
+
+        if (endPoint != 0)
+            MIDIEndpointDispose (endPoint);
+    }
+
     MIDIPortRef port;
     MIDIEndpointRef endPoint;
 };
@@ -258,12 +273,8 @@ MidiOutput* MidiOutput::openDevice (int index)
 
                 if (OK (MIDIOutputPortCreate (globalMidiClient, pname, &port)))
                 {
-                    MidiPortAndEndpoint* mpe = new MidiPortAndEndpoint();
-                    mpe->port = port;
-                    mpe->endPoint = endPoint;
-
                     mo = new MidiOutput();
-                    mo->internal = (void*)mpe;
+                    mo->internal = (void*) new MidiPortAndEndpoint (port, endPoint);
                 }
             }
 
@@ -274,10 +285,30 @@ MidiOutput* MidiOutput::openDevice (int index)
     return mo;
 }
 
+MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
+{
+    MidiOutput* mo = 0;
+
+    if (makeSureClientExists())
+    {
+        MIDIEndpointRef endPoint;
+        CFStringRef name = PlatformUtilities::juceStringToCFString (deviceName);
+
+        if (OK (MIDISourceCreate (globalMidiClient, name, &endPoint)))
+        {
+            mo = new MidiOutput();
+            mo->internal = (void*) new MidiPortAndEndpoint (0, endPoint);
+        }
+
+        CFRelease (name);
+    }
+
+    return mo;
+}
+
 MidiOutput::~MidiOutput()
 {
-    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*)internal;
-    MIDIPortDispose (mpe->port);
+    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*) internal;
     delete mpe;
 }
 
@@ -296,7 +327,7 @@ void MidiOutput::setVolume (float leftVol, float rightVol)
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*)internal;
+    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*) internal;
 
     if (message.isSysEx())
     {
@@ -318,7 +349,11 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
             p = MIDIPacketNext (p);
         }
 
-        MIDISend (mpe->port, mpe->endPoint, packets);
+        if (mpe->port != 0)
+            MIDISend (mpe->port, mpe->endPoint, packets);
+        else
+            MIDIReceived (mpe->endPoint, packets);
+
         juce_free (packets);
     }
     else
@@ -329,7 +364,10 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         packets.packet[0].length = message.getRawDataSize();
         *(int*) (packets.packet[0].data) = *(const int*) message.getRawData();
 
-        MIDISend (mpe->port, mpe->endPoint, &packets);
+        if (mpe->port != 0)
+            MIDISend (mpe->port, mpe->endPoint, &packets);
+        else
+            MIDIReceived (mpe->endPoint, &packets);
     }
 }
 
@@ -370,8 +408,7 @@ int MidiInput::getDefaultDeviceIndex()
 struct MidiPortAndCallback
 {
     MidiInput* input;
-    MIDIPortRef port;
-    MIDIEndpointRef endPoint;
+    MidiPortAndEndpoint* portAndEndpoint;
     MidiInputCallback* callback;
     MemoryBlock pendingData;
     int pendingBytes;
@@ -382,26 +419,26 @@ struct MidiPortAndCallback
 static CriticalSection callbackLock;
 static VoidArray activeCallbacks;
 
-static void processSysex (MidiPortAndCallback* const mpe, const uint8*& d, int& size, const double time)
+static void processSysex (MidiPortAndCallback* const mpc, const uint8*& d, int& size, const double time)
 {
     if (*d == 0xf0)
     {
-        mpe->pendingBytes = 0;
-        mpe->pendingDataTime = time;
+        mpc->pendingBytes = 0;
+        mpc->pendingDataTime = time;
     }
 
-    mpe->pendingData.ensureSize (mpe->pendingBytes + size, false);
-    uint8* totalMessage = (uint8*) mpe->pendingData.getData();
+    mpc->pendingData.ensureSize (mpc->pendingBytes + size, false);
+    uint8* totalMessage = (uint8*) mpc->pendingData.getData();
 
-    uint8* dest = totalMessage + mpe->pendingBytes;
+    uint8* dest = totalMessage + mpc->pendingBytes;
 
     while (size > 0)
     {
-        if (mpe->pendingBytes > 0 && *d >= 0x80)
+        if (mpc->pendingBytes > 0 && *d >= 0x80)
         {
             if (*d >= 0xfa || *d == 0xf8)
             {
-                mpe->callback->handleIncomingMidiMessage (mpe->input, MidiMessage (*d, time));
+                mpc->callback->handleIncomingMidiMessage (mpc->input, MidiMessage (*d, time));
                 ++d;
                 --size;
             }
@@ -410,7 +447,7 @@ static void processSysex (MidiPortAndCallback* const mpe, const uint8*& d, int& 
                 if (*d == 0xf7)
                 {
                     *dest++ = *d++;
-                    mpe->pendingBytes++;
+                    mpc->pendingBytes++;
                     --size;
                 }
 
@@ -420,24 +457,24 @@ static void processSysex (MidiPortAndCallback* const mpe, const uint8*& d, int& 
         else
         {
             *dest++ = *d++;
-            mpe->pendingBytes++;
+            mpc->pendingBytes++;
             --size;
         }
     }
 
-    if (totalMessage [mpe->pendingBytes - 1] == 0xf7)
+    if (totalMessage [mpc->pendingBytes - 1] == 0xf7)
     {
-        mpe->callback->handleIncomingMidiMessage (mpe->input, MidiMessage (totalMessage,
-                                                                           mpe->pendingBytes,
-                                                                           mpe->pendingDataTime));
-        mpe->pendingBytes = 0;
+        mpc->callback->handleIncomingMidiMessage (mpc->input, MidiMessage (totalMessage,
+                                                                           mpc->pendingBytes,
+                                                                           mpc->pendingDataTime));
+        mpc->pendingBytes = 0;
     }
     else
     {
-        mpe->callback->handlePartialSysexMessage (mpe->input,
+        mpc->callback->handlePartialSysexMessage (mpc->input,
                                                   totalMessage,
-                                                  mpe->pendingBytes,
-                                                  mpe->pendingDataTime);
+                                                  mpc->pendingBytes,
+                                                  mpc->pendingDataTime);
     }
 }
 
@@ -448,10 +485,10 @@ static void midiInputProc (const MIDIPacketList* pktlist,
     double time = Time::getMillisecondCounterHiRes() * 0.001;
     const double originalTime = time;
 
-    MidiPortAndCallback* const mpe = (MidiPortAndCallback*) readProcRefCon;
+    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) readProcRefCon;
     const ScopedLock sl (callbackLock);
 
-    if (activeCallbacks.contains (mpe) && mpe->active)
+    if (activeCallbacks.contains (mpc) && mpc->active)
     {
         const MIDIPacket* packet = &pktlist->packet[0];
 
@@ -464,9 +501,9 @@ static void midiInputProc (const MIDIPacketList* pktlist,
             {
                 time = originalTime;
 
-                if (mpe->pendingBytes > 0 || d[0] == 0xf0)
+                if (mpc->pendingBytes > 0 || d[0] == 0xf0)
                 {
-                    processSysex (mpe, d, size, time);
+                    processSysex (mpc, d, size, time);
                 }
                 else
                 {
@@ -480,7 +517,7 @@ static void midiInputProc (const MIDIPacketList* pktlist,
                     }
                     else
                     {
-                        mpe->callback->handleIncomingMidiMessage (mpe->input, m);
+                        mpc->callback->handleIncomingMidiMessage (mpc->input, m);
                     }
 
                     size -= used;
@@ -513,41 +550,76 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                 {
                     MIDIPortRef port;
 
-                    MidiPortAndCallback* const mpe = new MidiPortAndCallback();
-                    mpe->active = false;
+                    MidiPortAndCallback* const mpc = new MidiPortAndCallback();
+                    mpc->active = false;
 
-                    if (OK (MIDIInputPortCreate (globalMidiClient, pname, midiInputProc, mpe, &port)))
+                    if (OK (MIDIInputPortCreate (globalMidiClient, pname, midiInputProc, mpc, &port)))
                     {
                         if (OK (MIDIPortConnectSource (port, endPoint, 0)))
                         {
-                            mpe->port = port;
-                            mpe->endPoint = endPoint;
-                            mpe->callback = callback;
-                            mpe->pendingBytes = 0;
-                            mpe->pendingData.ensureSize (128);
+                            mpc->portAndEndpoint = new MidiPortAndEndpoint (port, endPoint);
+                            mpc->callback = callback;
+                            mpc->pendingBytes = 0;
+                            mpc->pendingData.ensureSize (128);
 
                             mi = new MidiInput (getDevices() [index]);
-                            mpe->input = mi;
-                            mi->internal = (void*) mpe;
+                            mpc->input = mi;
+                            mi->internal = (void*) mpc;
 
                             const ScopedLock sl (callbackLock);
-                            activeCallbacks.add (mpe);
+                            activeCallbacks.add (mpc);
                         }
                         else
                         {
                             OK (MIDIPortDispose (port));
-                            delete mpe;
+                            delete mpc;
                         }
                     }
                     else
                     {
-                        delete mpe;
+                        delete mpc;
                     }
                 }
             }
 
             CFRelease (pname);
         }
+    }
+
+    return mi;
+}
+
+MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallback* callback)
+{
+    MidiInput* mi = 0;
+
+    if (makeSureClientExists())
+    {
+        MidiPortAndCallback* const mpc = new MidiPortAndCallback();
+        mpc->active = false;
+
+        MIDIEndpointRef endPoint;
+        CFStringRef name = PlatformUtilities::juceStringToCFString(deviceName);
+        if (OK (MIDIDestinationCreate (globalMidiClient, name, midiInputProc, mpc, &endPoint)))
+        {
+            mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
+            mpc->callback = callback;
+            mpc->pendingBytes = 0;
+            mpc->pendingData.ensureSize (128);
+
+            mi = new MidiInput (deviceName);
+            mpc->input = mi;
+            mi->internal = (void*) mpc;
+
+            const ScopedLock sl (callbackLock);
+            activeCallbacks.add (mpc);
+        }
+        else
+        {
+            delete mpc;
+        }
+
+        CFRelease (name);
     }
 
     return mi;
@@ -560,30 +632,32 @@ MidiInput::MidiInput (const String& name_)
 
 MidiInput::~MidiInput()
 {
-    MidiPortAndCallback* const mpe = (MidiPortAndCallback*) internal;
-    mpe->active = false;
+    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
+    mpc->active = false;
 
     callbackLock.enter();
-    activeCallbacks.removeValue (mpe);
+    activeCallbacks.removeValue (mpc);
     callbackLock.exit();
 
-    OK (MIDIPortDisconnectSource (mpe->port, mpe->endPoint));
-    OK (MIDIPortDispose (mpe->port));
-    delete mpe;
+    if (mpc->portAndEndpoint->port != 0)
+        OK (MIDIPortDisconnectSource (mpc->portAndEndpoint->port, mpc->portAndEndpoint->endPoint));
+
+    delete mpc->portAndEndpoint;
+    delete mpc;
 }
 
 void MidiInput::start()
 {
-    MidiPortAndCallback* const mpe = (MidiPortAndCallback*) internal;
+    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
     const ScopedLock sl (callbackLock);
-    mpe->active = true;
+    mpc->active = true;
 }
 
 void MidiInput::stop()
 {
-    MidiPortAndCallback* const mpe = (MidiPortAndCallback*) internal;
+    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
     const ScopedLock sl (callbackLock);
-    mpe->active = false;
+    mpc->active = false;
 }
 
 #undef log

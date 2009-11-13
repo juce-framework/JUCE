@@ -897,7 +897,7 @@ void ListBox::repaintRow (const int rowNumber) throw()
 
 Image* ListBox::createSnapshotOfSelectedRows()
 {
-    Image* snapshot = new Image (Image::ARGB, getWidth(), getHeight(), true);
+    Image* snapshot = Image::createNativeImage (Image::ARGB, getWidth(), getHeight(), true);
     Graphics g (*snapshot);
 
     const int firstRow = getRowContainingPosition (0, 0);

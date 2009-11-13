@@ -246,19 +246,8 @@ const float   float_Pi   = 3.14159265358979323846f;
 /** The isfinite() method seems to vary greatly between platforms, so this is a
     platform-independent macro for it.
 */
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_MAC || JUCE_IPHONE
   #define juce_isfinite(v)      std::isfinite(v)
-#elif JUCE_MAC
-  #if MACOS_10_3_OR_EARLIER
-    #ifdef isfinite
-      #define juce_isfinite(v)    isfinite(v)
-    #else
-      // no idea why the isfinite macro is sometimes impossible to include, so just copy the built-in one..
-      static __inline__ int juce_isfinite (double __x) { return __x == __x && __builtin_fabs (__x) != __builtin_inf(); }
-    #endif
-  #else
-    #define juce_isfinite(v)    std::isfinite(v)
-  #endif
 #elif JUCE_WINDOWS && ! defined (isfinite)
   #define juce_isfinite(v)      _finite(v)
 #else

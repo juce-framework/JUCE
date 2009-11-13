@@ -156,6 +156,9 @@ public:
     /** Returns true if this transform maps to a singularity - i.e. if it has no inverse. */
     bool isSingularity() const throw();
 
+    /** Returns true if the transform only translates, and doesn't scale or rotate the
+        points. */
+    bool isOnlyTranslation() const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

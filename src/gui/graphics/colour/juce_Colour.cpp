@@ -299,6 +299,16 @@ const Colour Colour::overlaidWith (const Colour& src) const throw()
     }
 }
 
+const Colour Colour::interpolatedWith (const Colour& other, float proportionOfOther) const throw()
+{
+    const int amount = jlimit (0, 256, (int) (proportionOfOther * 256.0f));
+
+    return Colour ((uint8) (getRed() + (((other.getRed() - getRed()) * amount) >> 8)),
+                   (uint8) (getGreen() + (((other.getGreen() - getGreen()) * amount) >> 8)),
+                   (uint8) (getBlue() + (((other.getBlue() - getBlue()) * amount) >> 8)),
+                   (uint8) (getAlpha() + (((other.getAlpha() - getAlpha()) * amount) >> 8)));
+}
+
 //==============================================================================
 float Colour::getFloatRed() const throw()
 {

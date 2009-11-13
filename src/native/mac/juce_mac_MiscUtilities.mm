@@ -149,18 +149,12 @@ void Desktop::setMousePosition (int x, int y) throw()
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
-#if (! defined (MAC_OS_X_VERSION_10_6)) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
-    CGSetLocalEventsSuppressionInterval (0);
-#endif
-
-    CGPoint pos = { x, y };
-    CGWarpMouseCursorPosition (pos);
-
+    CGWarpMouseCursorPosition (CGPointMake (x, y));
     CGAssociateMouseAndMouseCursorPosition (true);
 }
 
 //==============================================================================
-#if MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 class ScreenSaverDefeater   : public Timer,
                               public DeletedAtShutdown
 {

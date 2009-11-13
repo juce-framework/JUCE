@@ -1541,14 +1541,15 @@ void LookAndFeel::drawRotarySlider (Graphics& g,
         }
 
         if (slider.isEnabled())
-        {
             g.setColour (slider.findColour (Slider::rotarySliderOutlineColourId));
-            Path outlineArc;
-            outlineArc.addPieSegment (rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, thickness);
-            outlineArc.closeSubPath();
+        else
+            g.setColour (Colour (0x80808080));
 
-            g.strokePath (outlineArc, PathStrokeType (slider.isEnabled() ? (isMouseOver ? 2.0f : 1.2f) : 0.3f));
-        }
+        Path outlineArc;
+        outlineArc.addPieSegment (rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, thickness);
+        outlineArc.closeSubPath();
+
+        g.strokePath (outlineArc, PathStrokeType (slider.isEnabled() ? (isMouseOver ? 2.0f : 1.2f) : 0.3f));
     }
     else
     {

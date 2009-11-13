@@ -1180,6 +1180,14 @@ void LowLevelGraphicsSoftwareRenderer::excludeClipRegion (int x, int y, int w, i
     clip->subtract (Rectangle (x + xOffset, y + yOffset, w, h));
 }
 
+void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const AffineTransform& transform)
+{
+}
+
+void LowLevelGraphicsSoftwareRenderer::clipToImage (Image& image, int imageX, int imageY)
+{
+}
+
 bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (int x, int y, int w, int h)
 {
     return clip->intersectsRectangle (Rectangle (x + xOffset, y + yOffset, w, h));
@@ -1362,7 +1370,7 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
 
     if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
     {
-        EdgeTable edgeTable (0, ch, path, transform.translated ((float) -cx, (float) -cy));
+        EdgeTable edgeTable (Rectangle (0, 0, cw, ch), path, transform.translated ((float) -cx, (float) -cy));
 
         int stride, pixelStride;
         uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (cx, cy, cw, ch, stride, pixelStride);
@@ -1398,18 +1406,18 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
                     if (isIdentity)
                     {
                         GradientEdgeTableRenderer <PixelRGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                        edgeTable.iterate (renderer);
                     }
                     else
                     {
                         GradientEdgeTableRenderer <PixelRGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                        edgeTable.iterate (renderer);
                     }
                 }
                 else
                 {
                     GradientEdgeTableRenderer <PixelRGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    edgeTable.iterate (renderer);
                 }
             }
             else if (image.getFormat() == Image::ARGB)
@@ -1421,18 +1429,18 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
                     if (isIdentity)
                     {
                         GradientEdgeTableRenderer <PixelARGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                        edgeTable.iterate (renderer);
                     }
                     else
                     {
                         GradientEdgeTableRenderer <PixelARGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                        edgeTable.iterate (renderer);
                     }
                 }
                 else
                 {
                     GradientEdgeTableRenderer <PixelARGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                    edgeTable.iterate (renderer);
                 }
             }
             else if (image.getFormat() == Image::SingleChannel)
@@ -1448,19 +1456,19 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, in
             {
                 jassert (pixelStride == 3);
                 SolidColourEdgeTableRenderer <PixelRGB> renderer (pixels, stride, colour);
-                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                edgeTable.iterate (renderer);
             }
             else if (image.getFormat() == Image::ARGB)
             {
                 jassert (pixelStride == 4);
                 SolidColourEdgeTableRenderer <PixelARGB> renderer (pixels, stride, colour);
-                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                edgeTable.iterate (renderer);
             }
             else if (image.getFormat() == Image::SingleChannel)
             {
                 jassert (pixelStride == 1);
                 AlphaBitmapRenderer renderer (pixels, stride);
-                edgeTable.iterate (renderer, 0, 0, cw, ch, 0);
+                edgeTable.iterate (renderer);
             }
         }
 
@@ -1489,7 +1497,8 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, i
 {
     if (Rectangle::intersectRectangles (x, y, w, h, imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight()))
     {
-        EdgeTable edgeTable (0, h, path, transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
+        EdgeTable edgeTable (Rectangle (0, 0, w, h), path,
+                             transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
 
         int stride, pixelStride;
         uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
@@ -1506,14 +1515,14 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, i
                 ImageFillEdgeTableRenderer <PixelRGB, PixelRGB> renderer (pixels, stride,
                                                                           srcPix, srcStride,
                                                                           alpha, (PixelRGB*) 0);
-                edgeTable.iterate (renderer, 0, 0, w, h, 0);
+                edgeTable.iterate (renderer);
             }
             else if (sourceImage.getFormat() == Image::ARGB)
             {
                 ImageFillEdgeTableRenderer <PixelRGB, PixelARGB> renderer (pixels, stride,
                                                                            srcPix, srcStride,
                                                                            alpha, (PixelARGB*) 0);
-                edgeTable.iterate (renderer, 0, 0, w, h, 0);
+                edgeTable.iterate (renderer);
             }
             else
             {
@@ -1527,14 +1536,14 @@ void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, i
                 ImageFillEdgeTableRenderer <PixelARGB, PixelRGB> renderer (pixels, stride,
                                                                            srcPix, srcStride,
                                                                            alpha, (PixelRGB*) 0);
-                edgeTable.iterate (renderer, 0, 0, w, h, 0);
+                edgeTable.iterate (renderer);
             }
             else if (sourceImage.getFormat() == Image::ARGB)
             {
                 ImageFillEdgeTableRenderer <PixelARGB, PixelARGB> renderer (pixels, stride,
                                                                             srcPix, srcStride,
                                                                             alpha, (PixelARGB*) 0);
-                edgeTable.iterate (renderer, 0, 0, w, h, 0);
+                edgeTable.iterate (renderer);
             }
             else
             {

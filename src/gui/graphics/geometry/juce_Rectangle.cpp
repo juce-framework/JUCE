@@ -100,6 +100,16 @@ void Rectangle::setSize (const int w_,
     h = h_;
 }
 
+void Rectangle::setWidth (const int newWidth) throw()
+{
+    w = newWidth;
+}
+
+void Rectangle::setHeight (const int newHeight) throw()
+{
+    h = newHeight;
+}
+
 void Rectangle::setLeft (const int newLeft) throw()
 {
     w = jmax (0, x + w - newLeft);

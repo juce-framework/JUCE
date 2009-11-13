@@ -217,11 +217,7 @@ static const int quitMessageId = 0xfffff321;
 
 void MessageManager::stopDispatchLoop()
 {
-    Message* const m = new Message (quitMessageId, 0, 0, 0);
-    m->messageRecipient = 0;
-    postMessageToQueue (m);
-
-    quitMessagePosted = true;
+    exit (0); // iPhone apps get no mercy..
 }
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)

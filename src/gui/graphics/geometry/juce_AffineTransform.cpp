@@ -137,8 +137,8 @@ const AffineTransform AffineTransform::followedBy (const float omat00,
 const AffineTransform AffineTransform::translated (const float dx,
                                                    const float dy) const throw()
 {
-    return followedBy (1.0f, 0, dx,
-                       0, 1.0f, dy);
+    return AffineTransform (mat00, mat01, mat02 + dx,
+                            mat10, mat11, mat12 + dy);
 }
 
 const AffineTransform AffineTransform::translation (const float dx,
@@ -231,6 +231,14 @@ const AffineTransform AffineTransform::inverted() const throw()
 bool AffineTransform::isSingularity() const throw()
 {
     return (mat00 * mat11 - mat10 * mat01) == 0.0;
+}
+
+bool AffineTransform::isOnlyTranslation() const throw()
+{
+    return (mat01 == 0)
+        && (mat10 == 0)
+        && (mat00 == 1.0f)
+        && (mat11 == 1.0f);
 }
 
 //==============================================================================

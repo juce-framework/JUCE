@@ -54,10 +54,6 @@ BEGIN_JUCE_NAMESPACE
 
 #if JUCE_MAC
 
-#if MACOS_10_3_OR_EARLIER
- #define kAudioUnitType_Generator 'augn'
-#endif
-
 // Change this to disable logging of various activities
 #ifndef AU_LOGGING
   #define AU_LOGGING 1

@@ -192,8 +192,8 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
 
         // now convert the data to a juce image format..
-        image = new Image (hasAlphaChan ? Image::ARGB : Image::RGB,
-                           width, height, hasAlphaChan);
+        image = Image::createNativeImage (hasAlphaChan ? Image::ARGB : Image::RGB,
+                                          width, height, hasAlphaChan);
 
         int stride, pixelStride;
         uint8* const pixels = image->lockPixelDataReadWrite (0, 0, width, height, stride, pixelStride);

@@ -2337,6 +2337,12 @@ void Desktop::setMousePosition (int x, int y) throw()
 }
 
 //==============================================================================
+Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+{
+    return new Image (format, imageWidth, imageHeight, clearImage);
+}
+
+//==============================================================================
 class ScreenSaverDefeater   : public Timer,
                               public DeletedAtShutdown
 {

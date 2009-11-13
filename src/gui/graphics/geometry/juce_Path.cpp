@@ -1601,17 +1601,17 @@ Image* Path::createMaskBitmap (const AffineTransform& transform,
     if (imagePosition.isEmpty())
         return 0;
 
-    Image* im = new Image (Image::SingleChannel, imagePosition.getWidth(), imagePosition.getHeight(), true);
+    Image* im = Image::createNativeImage (Image::SingleChannel, imagePosition.getWidth(), imagePosition.getHeight(), true);
 
-    EdgeTable edgeTable (0, imagePosition.getHeight(), *this,
-                         transform.translated (-imagePosition.getX(), -imagePosition.getY()));
+    EdgeTable edgeTable (Rectangle (0, 0, imagePosition.getWidth(), imagePosition.getHeight()),
+                         *this, transform.translated (-imagePosition.getX(), -imagePosition.getY()));
 
     int stride, pixelStride;
     uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, imagePosition.getWidth(), imagePosition.getHeight(), stride, pixelStride);
 
     jassert (pixelStride == 1);
     MaskBitmapRenderer renderer (pixels, stride);
-    edgeTable.iterate (renderer, 0, 0, imagePosition.getWidth(), imagePosition.getHeight(), 0);
+    edgeTable.iterate (renderer);
 
     im->releasePixelDataReadWrite (pixels);
     return im;

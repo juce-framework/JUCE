@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		840F1DA110AD674C002A03A6 /* juce_CodeDocument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F510A078190048FC39 /* juce_CodeDocument.cpp */; };
+		840F1DA210AD674D002A03A6 /* juce_CodeDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91F610A078190048FC39 /* juce_CodeDocument.h */; };
+		840F1DA310AD674D002A03A6 /* juce_CodeEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F710A078190048FC39 /* juce_CodeEditorComponent.cpp */; };
+		840F1DA410AD674E002A03A6 /* juce_CodeEditorComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91F810A078190048FC39 /* juce_CodeEditorComponent.h */; };
+		840F1DA510AD674F002A03A6 /* juce_CodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */; };
+		840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */; };
+		840F1DA710AD6750002A03A6 /* juce_CPlusPlusCodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */; };
 		840F80BC092B399D005E7B4E /* juce.h in Headers */ = {isa = PBXBuildFile; fileRef = 840F80BB092B399D005E7B4E /* juce.h */; };
 		84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
 		84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
@@ -3217,6 +3224,10 @@
 				84816F9510809DCB008FEC33 /* juce_XmlDocument.h in Headers */,
 				84816F9610809DCB008FEC33 /* juce_XmlElement.h in Headers */,
 				84816F9710809DCB008FEC33 /* juce_ZipFile.h in Headers */,
+				840F1DA210AD674D002A03A6 /* juce_CodeDocument.h in Headers */,
+				840F1DA410AD674E002A03A6 /* juce_CodeEditorComponent.h in Headers */,
+				840F1DA510AD674F002A03A6 /* juce_CodeTokeniser.h in Headers */,
+				840F1DA710AD6750002A03A6 /* juce_CPlusPlusCodeTokeniser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3888,6 +3899,9 @@
 				848170B010809E00008FEC33 /* juce_XmlDocument.cpp in Sources */,
 				848170B110809E00008FEC33 /* juce_XmlElement.cpp in Sources */,
 				848170B210809E00008FEC33 /* juce_ZipFile.cpp in Sources */,
+				840F1DA110AD674C002A03A6 /* juce_CodeDocument.cpp in Sources */,
+				840F1DA310AD674D002A03A6 /* juce_CodeEditorComponent.cpp in Sources */,
+				840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4219,7 +4233,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 			};
 			name = Debug;
 		};

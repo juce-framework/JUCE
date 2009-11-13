@@ -98,6 +98,7 @@ BEGIN_JUCE_NAMESPACE
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #if JUCE_IPHONE
   #include "mac/juce_mac_Fonts.mm"
+  #include "mac/juce_mac_CoreGraphicsContext.mm"
   #include "mac/juce_iphone_UIViewComponentPeer.mm"
   #include "mac/juce_iphone_MessageManager.mm"
   #include "mac/juce_mac_FileChooser.mm"

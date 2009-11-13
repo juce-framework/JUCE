@@ -308,8 +308,8 @@ private:
             }
             else
             {
-                zeromem (inputChannels[0], sizeof (float) * inNumberFrames);
-                zeromem (inputChannels[1], sizeof (float) * inNumberFrames);
+                for (int i = numInputChannels; --i >= 0;)
+                    zeromem (inputChannels[i], sizeof (float) * inNumberFrames);
             }
 
             callback->audioDeviceIOCallback ((const float**) inputChannels, numInputChannels,
@@ -543,7 +543,7 @@ public:
     const StringArray getDeviceNames (const bool wantInputNames) const
     {
         StringArray s;
-        s.add (wantInputNames ? "Microphone" : "Speaker");
+        s.add ("iPhone Audio");
         return s;
     }
 

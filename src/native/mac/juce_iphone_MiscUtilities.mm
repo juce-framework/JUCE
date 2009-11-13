@@ -170,22 +170,6 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 }
 
 //==============================================================================
-bool Desktop::canUseSemiTransparentWindows() throw()
-{
-    return true;
-}
-
-void Desktop::getMousePosition (int& x, int& y) throw()
-{
-    x = 0;
-    y = 0;
-}
-
-void Desktop::setMousePosition (int x, int y) throw()
-{
-}
-
-//==============================================================================
 void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
 {
     [[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];

@@ -27,6 +27,41 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+//==============================================================================
+class CoreGraphicsImage : public Image
+{
+public:
+    CoreGraphicsImage (const PixelFormat format,
+                       const int imageWidth,
+                       const int imageHeight,
+                       const bool clearImage)
+        : Image (format, imageWidth, imageHeight, clearImage)
+    {
+        CGColorSpaceRef colourSpace = format == Image::SingleChannel ? CGColorSpaceCreateDeviceGray()
+                                                                     : CGColorSpaceCreateDeviceRGB();
+
+        context = CGBitmapContextCreate (imageData, imageWidth, imageHeight, 8, lineStride,
+                                         colourSpace,
+                                         format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
+                                                               : kCGBitmapByteOrderDefault);
+
+        CGColorSpaceRelease (colourSpace);
+    }
+
+    ~CoreGraphicsImage()
+    {
+        CGContextRelease (context);
+    }
+
+    LowLevelGraphicsContext* createLowLevelContext();
+
+    CGContextRef context;
+};
+
+Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+{
+    return new CoreGraphicsImage (format == RGB ? ARGB : format, imageWidth, imageHeight, clearImage);
+}
 
 //==============================================================================
 class CoreGraphicsContext   : public LowLevelGraphicsContext
@@ -39,12 +74,19 @@ public:
         CGContextRetain (context);
         CGContextSetShouldSmoothFonts (context, true);
         CGContextSetBlendMode (context, kCGBlendModeNormal);
+        rgbColourSpace = CGColorSpaceCreateDeviceRGB();
+        greyColourSpace = CGColorSpaceCreateDeviceGray();
+        gradientCallbacks.version = 0;
+        gradientCallbacks.evaluate = gradientCallback;
+        gradientCallbacks.releaseInfo = 0;
         state = new SavedState();
     }
 
     ~CoreGraphicsContext()
     {
         CGContextRelease (context);
+        CGColorSpaceRelease (rgbColourSpace);
+        CGColorSpaceRelease (greyColourSpace);
         delete state;
     }
 
@@ -166,7 +208,17 @@ public:
     {
         if (replaceExistingContents)
         {
-            CGContextSetBlendMode (context, kCGBlendModeCopy);
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+            CGContextClearRect (context, CGRectMake (x, y, w, h));
+#else
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+            if (CGContextDrawLinearGradient == 0) // (just a way of checking whether we're running in 10.5 or later)
+                CGContextClearRect (context, CGRectMake (x, y, w, h));
+            else
+  #endif
+                CGContextSetBlendMode (context, kCGBlendModeCopy);
+#endif
+
             fillRect (x, y, w, h, false);
             CGContextSetBlendMode (context, kCGBlendModeNormal);
         }
@@ -352,7 +404,7 @@ public:
 
     void drawGlyph (int glyphNumber, float x, float y)
     {
-        if (state->fontRef != 0)
+        if (state->fontRef != 0 && state->gradient == 0)
         {
             CGGlyph g = glyphNumber;
             CGContextShowGlyphsAtPoint (context, x, flipHeight - roundFloatToInt (y), &g, 1);
@@ -390,6 +442,8 @@ public:
 private:
     CGContextRef context;
     const float flipHeight;
+    CGColorSpaceRef rgbColourSpace, greyColourSpace;
+    CGFunctionCallbacks gradientCallbacks;
 
     struct SavedState
     {
@@ -422,6 +476,10 @@ private:
     SavedState* state;
     OwnedArray <SavedState> stateStack;
 
+#if ! CGFLOAT_DEFINED
+    #define CGFloat float
+#endif
+
     static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
     {
         const ColourGradient* const g = (const ColourGradient*) info;
@@ -432,30 +490,25 @@ private:
         outData[3] = c.getFloatAlpha();
     }
 
-    static CGShadingRef createGradient (const ColourGradient* const gradient) throw()
+    CGShadingRef createGradient (const ColourGradient* const gradient) const throw()
     {
         CGShadingRef result = 0;
-        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-
-        CGFunctionCallbacks callbacks = { 0, gradientCallback, 0 };
-        CGFunctionRef function = CGFunctionCreate ((void*) gradient, 1, 0, 4, 0, &callbacks);
-        CGPoint p1 = CGPointMake (gradient->x1, gradient->y1);
+        CGFunctionRef function = CGFunctionCreate ((void*) gradient, 1, 0, 4, 0, &gradientCallbacks);
+        CGPoint p1 (CGPointMake (gradient->x1, gradient->y1));
 
         if (gradient->isRadial)
         {
-            result = CGShadingCreateRadial (colourSpace,
-                                            p1, 0,
+            result = CGShadingCreateRadial (rgbColourSpace, p1, 0,
                                             p1, hypotf (gradient->x1 - gradient->x2, gradient->y1 - gradient->y2),
                                             function, true, true);
         }
         else
         {
-            result = CGShadingCreateAxial (colourSpace, p1,
+            result = CGShadingCreateAxial (rgbColourSpace, p1,
                                            CGPointMake (gradient->x2, gradient->y2),
                                            function, true, true);
         }
 
-        CGColorSpaceRelease (colourSpace);
         CGFunctionRelease (function);
         return result;
     }
@@ -537,30 +590,37 @@ private:
 
     CGImageRef createImage (const Image& juceImage, const bool forAlpha) const throw()
     {
-        int lineStride = 0;
-        int pixelStride = 0;
-        const uint8* imageData = juceImage.lockPixelDataReadOnly (0, 0, juceImage.getWidth(), juceImage.getHeight(),
-                                                                  lineStride, pixelStride);
+        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (&juceImage);
 
-        CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
+        if (nativeImage != 0 && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
+        {
+            return CGBitmapContextCreateImage (nativeImage->context);
+        }
+        else
+        {
+            int lineStride = 0;
+            int pixelStride = 0;
+            const uint8* imageData = juceImage.lockPixelDataReadOnly (0, 0, juceImage.getWidth(), juceImage.getHeight(),
+                                                                      lineStride, pixelStride);
 
-        CGColorSpaceRef colourSpace = forAlpha ? CGColorSpaceCreateDeviceGray()
-                                               : CGColorSpaceCreateDeviceRGB();
+            CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
 
-        CGImageRef imageRef = CGImageCreate (juceImage.getWidth(), juceImage.getHeight(),
-                                  8, pixelStride * 8, lineStride,
-                                  colourSpace,
-                                  (juceImage.hasAlphaChannel() && ! forAlpha)
-                                             ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
-                                             : kCGBitmapByteOrderDefault,
-                                  provider,
-                                  0, true, kCGRenderingIntentDefault);
+            CGColorSpaceRef colourSpace = forAlpha ? greyColourSpace : rgbColourSpace;
 
-        CGColorSpaceRelease (colourSpace);
-        CGDataProviderRelease (provider);
+            CGImageRef imageRef = CGImageCreate (juceImage.getWidth(), juceImage.getHeight(),
+                                      8, pixelStride * 8, lineStride,
+                                      colourSpace,
+                                      (juceImage.hasAlphaChannel() && ! forAlpha)
+                                                 ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
+                                                 : kCGBitmapByteOrderDefault,
+                                      provider,
+                                      0, true, kCGRenderingIntentDefault);
 
-        juceImage.releasePixelDataReadOnly (imageData);
-        return imageRef;
+            CGDataProviderRelease (provider);
+
+            juceImage.releasePixelDataReadOnly (imageData);
+            return imageRef;
+        }
     }
 
     static Image* createAlphaChannelImage (const Image& im) throw()
@@ -593,7 +653,16 @@ private:
         t.ty = transform.mat12;
         CGContextConcatCTM (context, t);
     }
+
+    float flipY (float y) const throw()
+    {
+        return flipHeight - y;
+    }
 };
 
+LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()
+{
+    return new CoreGraphicsContext (context, imageHeight);
+}
 
 #endif

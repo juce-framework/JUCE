@@ -66,6 +66,8 @@ public:
     //==============================================================================
     /** Creates an in-memory image with a specified size and format.
 
+        To create an image that can use native OS rendering methods, see createNativeImage().
+
         @param format           the number of colour channels in the image
         @param imageWidth       the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a width of 1 will be used)
@@ -88,6 +90,17 @@ public:
 
     /** Destructor. */
     virtual ~Image();
+
+    //==============================================================================
+    /** Tries to create an image that is uses native drawing methods when you render
+        onto it.
+
+        On some platforms this will just return a normal software-based image.
+    */
+    static Image* createNativeImage (const PixelFormat format,
+                                     const int imageWidth,
+                                     const int imageHeight,
+                                     const bool clearImage);
 
     //==============================================================================
     /** Returns the image's width (in pixels). */

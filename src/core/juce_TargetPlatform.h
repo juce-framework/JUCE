@@ -102,17 +102,14 @@
     #define JUCE_32BIT 1
   #endif
 
-  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #error "Building for OSX 10.2 is no longer supported!"
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
+    #error "Building for OSX 10.3 is no longer supported!"
   #endif
 
-  #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
-    #define MACOS_10_3_OR_EARLIER 1
+  #ifndef MAC_OS_X_VERSION_10_5
+    #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
   #endif
 
-  #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
-    #define MACOS_10_4_OR_EARLIER 1
-  #endif
 #endif
 
 //==============================================================================

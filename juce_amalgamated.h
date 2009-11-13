@@ -148,17 +148,14 @@
     #define JUCE_32BIT 1
   #endif
 
-  #if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_3)
-    #error "Building for OSX 10.2 is no longer supported!"
+  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4
+    #error "Building for OSX 10.3 is no longer supported!"
   #endif
 
-  #if (! defined (MAC_OS_X_VERSION_10_4)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_4)
-    #define MACOS_10_3_OR_EARLIER 1
+  #ifndef MAC_OS_X_VERSION_10_5
+    #error "To build with 10.4 compatibility, use a 10.5 or 10.6 SDK and set the deployment target to 10.4"
   #endif
 
-  #if (! defined (MAC_OS_X_VERSION_10_5)) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5)
-    #define MACOS_10_4_OR_EARLIER 1
-  #endif
 #endif
 
 #if JUCE_IPHONE
@@ -679,11 +676,7 @@
 #endif
 
 #if JUCE_MAC
-  #if MACOS_10_3_OR_EARLIER
-    #include <CoreServices/CoreServices.h>
-  #else
-    #include <libkern/OSAtomic.h>
-  #endif
+  #include <libkern/OSAtomic.h>
 #endif
 
 #if JUCE_LINUX
@@ -1077,19 +1070,8 @@ const float   float_Pi   = 3.14159265358979323846f;
 /** The isfinite() method seems to vary greatly between platforms, so this is a
     platform-independent macro for it.
 */
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_MAC || JUCE_IPHONE
   #define juce_isfinite(v)      std::isfinite(v)
-#elif JUCE_MAC
-  #if MACOS_10_3_OR_EARLIER
-    #ifdef isfinite
-      #define juce_isfinite(v)    isfinite(v)
-    #else
-      // no idea why the isfinite macro is sometimes impossible to include, so just copy the built-in one..
-      static __inline__ int juce_isfinite (double __x) { return __x == __x && __builtin_fabs (__x) != __builtin_inf(); }
-    #endif
-  #else
-    #define juce_isfinite(v)    std::isfinite(v)
-  #endif
 #elif JUCE_WINDOWS && ! defined (isfinite)
   #define juce_isfinite(v)      _finite(v)
 #else
@@ -2589,20 +2571,11 @@ BEGIN_JUCE_NAMESPACE
 
 #if (JUCE_MAC || JUCE_IPHONE) && ! DOXYGEN
 
-  #if ! MACOS_10_3_OR_EARLIER
-
     #include <libkern/OSAtomic.h>
     static forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
     static forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
     static forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
     static forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
-  #else
-
-    forcedinline void atomicIncrement (int& variable) throw()           { OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (1, (SInt32*) &variable); }
-    forcedinline void atomicDecrement (int& variable) throw()           { OTAtomicAdd32 (-1, (SInt32*) &variable); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OTAtomicAdd32 (-1, (SInt32*) &variable); }
-  #endif
 
 #elif JUCE_GCC
 
@@ -6837,6 +6810,9 @@ public:
 
             On the mac this will return the unix binary, not the package folder - see
             currentApplicationFile for that.
+
+            See also invokedExecutableFile, which is similar, but if the exe was launched from a
+            file link, invokedExecutableFile will return the name of the link.
         */
         currentExecutableFile,
 
@@ -6849,6 +6825,13 @@ public:
             that's inside it - compare with currentExecutableFile.
         */
         currentApplicationFile,
+
+        /** Returns the file that was invoked to launch this executable.
+            This may differ from currentExecutableFile if the app was started from e.g. a link - this
+            will return the name of the link that was used, whereas currentExecutableFile will return
+            the actual location of the target executable.
+        */
+        invokedExecutableFile,
 
         /** The directory in which applications normally get installed.
 
@@ -16628,6 +16611,10 @@ public:
     /** Returns true if this transform maps to a singularity - i.e. if it has no inverse. */
     bool isSingularity() const throw();
 
+    /** Returns true if the transform only translates, and doesn't scale or rotate the
+        points. */
+    bool isOnlyTranslation() const throw();
+
     juce_UseDebuggingNewOperator
 
     /* The transform matrix is:
@@ -16773,6 +16760,12 @@ public:
     /** Changes all the rectangle's co-ordinates. */
     void setBounds (const int newX, const int newY,
                     const int newWidth, const int newHeight) throw();
+
+    /** Changes the rectangle's width */
+    void setWidth (const int newWidth) throw();
+
+    /** Changes the rectangle's height */
+    void setHeight (const int newHeight) throw();
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
@@ -17076,7 +17069,6 @@ private:
 
 class Path;
 class Image;
-class Rectangle;
 
 /**
     A table of horizontal scan-line segments - used for rasterising Paths.
@@ -17092,13 +17084,13 @@ public:
         A table is created with a fixed vertical range, and only sections of the path
         which lie within this range will be added to the table.
 
-        @param y                        the top y co-ordinate that the table can contain
-        @param height                   the number of horizontal lines it contains
+        @param clipLimits               only the region of the path that lies within this area will be added
         @param pathToAdd                the path to add to the table
         @param transform                a transform to apply to the path being added
     */
-    EdgeTable (const int y, const int height,
-               const Path& pathToAdd, const AffineTransform& transform) throw();
+    EdgeTable (const Rectangle& clipLimits,
+               const Path& pathToAdd,
+               const AffineTransform& transform) throw();
 
     /** Creates an edge table containing a rectangle.
     */
@@ -17113,10 +17105,10 @@ public:
     /** Destructor. */
     ~EdgeTable() throw();
 
-    void clipToRectangle (const Rectangle& r) throw();
+    /*void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (Image& image, int x, int y) throw();
+    void clipToImageAlpha (Image& image, int x, int y) throw();*/
 
     /** Reduces the amount of space the table has allocated.
 
@@ -17137,27 +17129,13 @@ public:
                                         inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
                                         @endcode
                                         (these don't necessarily have to be 'const', but it might help it go faster)
-        @param clipLeft             the left-hand edge of the rectangle which should be iterated
-        @param clipTop              the top edge of the rectangle which should be iterated
-        @param clipRight            the right-hand edge of the rectangle which should be iterated
-        @param clipBottom           the bottom edge of the rectangle which should be iterated
-        @param subPixelXOffset      a fraction of 1 pixel by which to shift the table rightwards, in the range 0 to 255
     */
     template <class EdgeTableIterationCallback>
-    void iterate (EdgeTableIterationCallback& iterationCallback,
-                  const int clipLeft, int clipTop,
-                  const int clipRight, int clipBottom,
-                  const int subPixelXOffset) const throw()
+    void iterate (EdgeTableIterationCallback& iterationCallback) const throw()
     {
-        if (clipTop < top)
-            clipTop = top;
+        const int* lineStart = table;
 
-        if (clipBottom > top + height)
-            clipBottom = top + height;
-
-        const int* lineStart = table + lineStrideElements * (clipTop - top);
-
-        for (int y = clipTop; y < clipBottom; ++y)
+        for (int y = 0; y < bounds.getHeight(); ++y)
         {
             const int* line = lineStart;
             lineStart += lineStrideElements;
@@ -17165,7 +17143,8 @@ public:
 
             if (--numPoints > 0)
             {
-                int x = subPixelXOffset + *++line;
+                int x = *++line;
+                jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
                 int level = *++line;
                 int levelAccumulator = 0;
 
@@ -17177,9 +17156,9 @@ public:
                     if (correctedLevel >> 8)
                         correctedLevel = 0xff;
 
-                    const int endX = subPixelXOffset + *++line;
+                    const int endX = *++line;
                     jassert (endX >= x);
-                    int endOfRun = (endX >> 8);
+                    const int endOfRun = (endX >> 8);
 
                     if (endOfRun == (x >> 8))
                     {
@@ -17192,42 +17171,22 @@ public:
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
                         levelAccumulator += (0xff - (x & 0xff)) * correctedLevel;
-
+                        levelAccumulator >>= 8;
                         x >>= 8;
-                        if (x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
-                        }
 
-                        if (x >= clipLeft)
+                        if (levelAccumulator > 0)
                         {
-                            levelAccumulator >>= 8;
-                            if (levelAccumulator > 0)
-                            {
-                                if (levelAccumulator >> 8)
-                                    levelAccumulator = 0xff;
+                            if (levelAccumulator >> 8)
+                                levelAccumulator = 0xff;
 
-                                iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-                            }
-                        }
-
-                        if (++x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
+                            iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                         }
 
                         // if there's a segment of solid pixels, do it all in one go..
-                        if (correctedLevel > 0 && endOfRun > x)
+                        if (correctedLevel > 0)
                         {
-                            if (x < clipLeft)
-                                x = clipLeft;
-
-                            if (endOfRun > clipRight)
-                                endOfRun = clipRight;
-
-                            const int numPix = endOfRun - x;
+                            jassert (endOfRun <= bounds.getRight());
+                            const int numPix = endOfRun - ++x;
 
                             if (numPix > 0)
                                 iterationCallback.handleEdgeTableLine (x, numPix, correctedLevel);
@@ -17248,8 +17207,8 @@ public:
                         levelAccumulator = 0xff;
 
                     x >>= 8;
-                    if (x >= clipLeft && x < clipRight)
-                        iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                    jassert (x >= bounds.getX() && x < bounds.getRight());
+                    iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                 }
             }
         }
@@ -17260,11 +17219,13 @@ public:
 private:
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
     int* table;
-    int top, height, maxEdgesPerLine, lineStrideElements;
+    Rectangle bounds;
+    int maxEdgesPerLine, lineStrideElements;
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
     void clearLineSection (const int y, int minX, int maxX) throw();
+    void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
 };
 
 #endif   // __JUCE_EDGETABLE_JUCEHEADER__
@@ -19343,6 +19304,13 @@ public:
         accordingly.
     */
     const Colour overlaidWith (const Colour& foregroundColour) const throw();
+
+    /** Returns a colour that lies somewhere between this one and another.
+
+        If amountOfOther is zero, the result is 100% this colour, if amountOfOther
+        is 1.0, the result is 100% of the other colour.
+    */
+    const Colour interpolatedWith (const Colour& other, float proportionOfOther) const throw();
 
     /** Returns the colour's hue component.
         The value returned is in the range 0.0 to 1.0
@@ -27267,8 +27235,8 @@ public:
     static MidiInput* openDevice (int deviceIndex,
                                   MidiInputCallback* callback);
 
-#if JUCE_LINUX || DOXYGEN
-    /** LINUX ONLY - This will try to create a new midi input device.
+#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+    /** This will try to create a new midi input device (Not available on Windows).
 
         This will attempt to create a new midi input device with the specified name,
         for other apps to connect to.
@@ -33046,8 +33014,8 @@ public:
     */
     static MidiOutput* openDevice (int deviceIndex);
 
-#if JUCE_LINUX || DOXYGEN
-    /** LINUX ONLY - This will try to create a new midi output device.
+#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+    /** This will try to create a new midi output device (Not available on Windows).
 
         This will attempt to create a new midi output device that other apps can connect
         to and use as their midi input.
@@ -39109,6 +39077,8 @@ public:
 
     /** Creates an in-memory image with a specified size and format.
 
+        To create an image that can use native OS rendering methods, see createNativeImage().
+
         @param format           the number of colour channels in the image
         @param imageWidth       the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a width of 1 will be used)
@@ -39131,6 +39101,16 @@ public:
 
     /** Destructor. */
     virtual ~Image();
+
+    /** Tries to create an image that is uses native drawing methods when you render
+        onto it.
+
+        On some platforms this will just return a normal software-based image.
+    */
+    static Image* createNativeImage (const PixelFormat format,
+                                     const int imageWidth,
+                                     const int imageHeight,
+                                     const bool clearImage);
 
     /** Returns the image's width (in pixels). */
     int getWidth() const throw()                    { return imageWidth; }
@@ -39945,6 +39925,9 @@ public:
     bool reduceClipRegion (int x, int y, int w, int h);
     bool reduceClipRegion (const RectangleList& clipRegion);
     void excludeClipRegion (int x, int y, int w, int h);
+
+    void clipToPath (const Path& path, const AffineTransform& transform);
+    void clipToImage (Image& image, int imageX, int imageY);
 
     void saveState();
     void restoreState();
@@ -54414,7 +54397,7 @@ public:
     */
     static bool isQuickTimeAvailable() throw();
 
-    /** Tries to load a QuickTime movie into the player.
+    /** Tries to load a QuickTime movie from a file into the player.
 
         It's best to call this function once you've added the component to a window,
         (or put it on the desktop as a heavyweight window). Loading a movie when the
@@ -54428,6 +54411,33 @@ public:
     bool loadMovie (const File& movieFile,
                     const bool isControllerVisible);
 
+    /** Tries to load a QuickTime movie from a URL into the player.
+
+        It's best to call this function once you've added the component to a window,
+        (or put it on the desktop as a heavyweight window). Loading a movie when the
+        component isn't visible can cause problems, because QuickTime needs a window
+        handle to do its stuff.
+
+        @param movieFile    the .mov file to open
+        @param isControllerVisible  whether to show a controller bar at the bottom
+        @returns true if the movie opens successfully
+    */
+    bool loadMovie (const URL& movieURL,
+                    const bool isControllerVisible);
+
+    /** Tries to load a QuickTime movie from a stream into the player.
+
+        It's best to call this function once you've added the component to a window,
+        (or put it on the desktop as a heavyweight window). Loading a movie when the
+        component isn't visible can cause problems, because QuickTime needs a window
+        handle to do its stuff.
+
+        @param movieStream    a stream containing a .mov file. The component may try
+                              to read the whole stream before playing, rather than
+                              streaming from it.
+        @param isControllerVisible  whether to show a controller bar at the bottom
+        @returns true if the movie opens successfully
+    */
     bool loadMovie (InputStream* movieStream,
                     const bool isControllerVisible);
 

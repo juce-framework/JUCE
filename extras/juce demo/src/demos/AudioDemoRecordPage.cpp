@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  19 Sep 2009 12:36:23 pm
+  Creation date:  13 Nov 2009 3:52:50 pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -246,7 +246,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
     addAndMakeVisible (explanationLabel = new Label (String::empty,
-                                                     T("This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file to your desktop.")));
+                                                     T("This page demonstrates how to record a wave file from the live audio input..\n\nPressing record will start recording a file in your \"Documents\" folder.")));
     explanationLabel->setFont (Font (15.0000f, Font::plain));
     explanationLabel->setJustificationType (Justification::topLeft);
     explanationLabel->setEditable (false, false, false);
@@ -304,7 +304,7 @@ void AudioDemoRecordPage::paint (Graphics& g)
 void AudioDemoRecordPage::resized()
 {
     liveAudioDisplayComp->setBounds (8, 8, getWidth() - 16, 64);
-    explanationLabel->setBounds (184, 88, getWidth() - 194, 120);
+    explanationLabel->setBounds (160, 88, getWidth() - 169, 216);
     recordButton->setBounds (8, 88, 136, 40);
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
@@ -324,7 +324,7 @@ void AudioDemoRecordPage::buttonClicked (Button* buttonThatWasClicked)
         }
         else
         {
-            File file (File::getSpecialLocation (File::userDesktopDirectory)
+            File file (File::getSpecialLocation (File::userDocumentsDirectory)
                        .getNonexistentChildFile ("Juce Demo Audio Recording", ".wav"));
 
             recorder->startRecording (file);
@@ -377,8 +377,8 @@ BEGIN_JUCER_METADATA
                     virtualName="" explicitFocusOrder="0" pos="8 8 16M 64" class="LiveAudioInputDisplayComp"
                     params=""/>
   <LABEL name="" id="1162fb2599a768b4" memberName="explanationLabel" virtualName=""
-         explicitFocusOrder="0" pos="184 88 194M 120" edTextCol="ff000000"
-         edBkgCol="0" labelText="This page demonstrates how to record a wave file from the live audio input..&#10;&#10;Pressing record will start recording a file to your desktop."
+         explicitFocusOrder="0" pos="160 88 169M 216" edTextCol="ff000000"
+         edBkgCol="0" labelText="This page demonstrates how to record a wave file from the live audio input..&#10;&#10;Pressing record will start recording a file in your &quot;Documents&quot; folder."
          editableSingleClick="0" editableDoubleClick="0" focusDiscardsChanges="0"
          fontname="Default font" fontsize="15" bold="0" italic="0" justification="9"/>
   <TEXTBUTTON name="" id="2c10a0ba9fad39da" memberName="recordButton" virtualName=""

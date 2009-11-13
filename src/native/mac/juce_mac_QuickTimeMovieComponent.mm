@@ -89,6 +89,12 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
     return movie;
 }
 
+bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
+                                         const bool isControllerVisible)
+{
+    return loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible);
+}
+
 bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
                                          const bool controllerVisible)
 {
@@ -103,6 +109,36 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
     }
 
     movie = openMovieFromStream (movieStream, movieFile);
+
+    [theMovie retain];
+    QTMovieView* view = (QTMovieView*) getView();
+    [view setMovie: theMovie];
+    [view setControllerVisible: controllerVisible];
+    setLooping (looping);
+
+    return movie != nil;
+}
+
+bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
+                                         const bool isControllerVisible)
+{
+    // unfortunately, QTMovie objects can only be created on the main thread..
+    jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
+    closeMovie();
+
+    if (getPeer() == 0)
+    {
+        // To open a movie, this component must be visible inside a functioning window, so that
+        // the QT control can be assigned to the window.
+        jassertfalse
+        return false;
+    }
+
+    NSURL* url = [NSURL URLWithString: juceStringToNS (movieURL.toString (true))];
+    NSError* err;
+    if ([QTMovie canInitWithURL: url])
+        movie = [QTMovie movieWithURL: url error: &err];
 
     [theMovie retain];
     QTMovieView* view = (QTMovieView*) getView();
@@ -232,14 +268,6 @@ bool QuickTimeMovieComponent::isControllerVisible() const
 }
 
 //==============================================================================
-bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
-                                         const bool isControllerVisible)
-{
-    const bool ok = loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible);
-    movieFile = movieFile_;
-    return ok;
-}
-
 void QuickTimeMovieComponent::goToStart()
 {
     setPosition (0.0);

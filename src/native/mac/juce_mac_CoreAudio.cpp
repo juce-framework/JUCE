@@ -68,7 +68,7 @@ public:
        : inputLatency (0),
          outputLatency (0),
          callback (0),
-#if ! MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
          audioProcID (0),
 #endif
          inputDevice (0),
@@ -535,7 +535,7 @@ public:
 
             if (deviceID != 0)
             {
-#if MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                 if (OK (AudioDeviceAddIOProc (deviceID, audioIOProc, (void*) this)))
 #else
                 if (OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, (void*) this, &audioProcID)))
@@ -547,7 +547,7 @@ public:
                     }
                     else
                     {
-#if MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
                         OK (AudioDeviceRemoveIOProc (deviceID, audioIOProc));
 #else
                         OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
@@ -582,7 +582,7 @@ public:
         {
             OK (AudioDeviceStop (deviceID, audioIOProc));
 
-#if MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
             OK (AudioDeviceRemoveIOProc (deviceID, audioIOProc));
 #else
             OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
@@ -802,7 +802,7 @@ public:
     Array <double> sampleRates;
     Array <int> bufferSizes;
     AudioIODeviceCallback* callback;
-#if ! MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
     AudioDeviceIOProcID audioProcID;
 #endif
 

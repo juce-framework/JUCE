@@ -54,6 +54,8 @@ END_JUCE_NAMESPACE
 - (BOOL) resignFirstResponder;
 - (BOOL) canBecomeFirstResponder;
 
+- (void) asyncRepaint: (id) rect;
+
 @end
 
 //==============================================================================
@@ -186,9 +188,14 @@ static int getModifierForButtonNumber (const int num) throw()
 
 static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0; }
 
+int juce_lastMouseX = 0, juce_lastMouseY = 0;
+
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    if (owner == 0)
+        return;
+
     NSArray* const t = [[event touchesForView: self] allObjects];
 
     switch ([t count])
@@ -198,7 +205,15 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
             currentModifiers |= getModifierForButtonNumber (0);
 
-            owner->handleMouseDown (p.x, p.y, getMouseTime (event));
+            int x, y, w, h;
+            owner->getBounds (x, y, w, h, true);
+            juce_lastMouseX = p.x + x;
+            juce_lastMouseY = p.y + y;
+
+            owner->handleMouseMove (p.x, p.y, getMouseTime (event));
+
+            if (owner != 0)
+                owner->handleMouseDown (p.x, p.y, getMouseTime (event));
         }
 
         default:
@@ -209,6 +224,9 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    if (owner == 0)
+        return;
+
     NSArray* const t = [[event touchesForView: self] allObjects];
 
     switch ([t count])
@@ -216,6 +234,12 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
         case 1:     // One finger..
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
+
+            int x, y, w, h;
+            owner->getBounds (x, y, w, h, true);
+            juce_lastMouseX = p.x + x;
+            juce_lastMouseY = p.y + y;
+
             owner->handleMouseDrag (p.x, p.y, getMouseTime (event));
         }
 
@@ -227,6 +251,9 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    if (owner == 0)
+        return;
+
     NSArray* const t = [[event touchesForView: self] allObjects];
 
     switch ([t count])
@@ -234,6 +261,12 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
         case 1:     // One finger..
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
+
+            int x, y, w, h;
+            owner->getBounds (x, y, w, h, true);
+            juce_lastMouseX = p.x + x;
+            juce_lastMouseY = p.y + y;
+
             const int oldMods = currentModifiers;
             currentModifiers &= ~getModifierForButtonNumber (0);
             owner->handleMouseUp (oldMods, p.x, p.y, getMouseTime (event));
@@ -272,6 +305,11 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
     return owner != 0 && owner->canBecomeKeyWindow();
 }
 
+- (void) asyncRepaint: (id) rect
+{
+    CGRect* r = (CGRect*) [((NSData*) rect) bytes];
+    [self setNeedsDisplayInRect: *r];
+}
 
 @end
 
@@ -297,119 +335,6 @@ static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0;
 //==============================================================================
 //==============================================================================
 BEGIN_JUCE_NAMESPACE
-
-//==============================================================================
-class JuceUIImage
-{
-public:
-    JuceUIImage (const int width, const int height, const bool hasAlpha)
-        : juceImage (hasAlpha ? Image::ARGB : Image::RGB,
-                     width, height, hasAlpha)
-    {
-        lineStride = 0;
-        pixelStride = 0;
-        imageData = juceImage.lockPixelDataReadWrite (0, 0, width, height,
-                                                       lineStride, pixelStride);
-
-        CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
-        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-
-        CGImageRef imageRef = CGImageCreate (width, height,
-                                  8, pixelStride * 8, lineStride,
-                                  colourSpace,
-                                  hasAlpha ? (kCGImageAlphaFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault,
-                                  provider,
-                                  0,
-                                  true, kCGRenderingIntentDefault);
-
-        CGColorSpaceRelease (colourSpace);
-        CGDataProviderRelease (provider);
-
-        juceImage.releasePixelDataReadWrite (imageData);
-
-        uiImage = [[UIImage imageWithCGImage: imageRef] retain];
-    }
-
-    ~JuceUIImage()
-    {
-        [uiImage release];
-        CGImageRelease (imageRef);
-    }
-
-    Image& getJuceImage() throw()     { return juceImage; }
-
-    void draw (const float x, const float y) const
-    {
-        [uiImage drawAtPoint: CGPointMake (x, y)
-                   blendMode: kCGBlendModeCopy
-                       alpha: 1.0f];
-    }
-
-    void drawUIImage (UIImage* imageToDraw)
-    {
-        const ScopedAutoReleasePool pool;
-
-        jassertfalse
-        /*[NSGraphicsContext saveGraphicsState];
-        [NSGraphicsContext setCurrentContext:
-            [NSGraphicsContext graphicsContextWithBitmapImageRep: imageRep]];
-
-        [imageToDraw drawAtPoint: NSZeroPoint
-                        fromRect: NSMakeRect (0, 0, [imageToDraw size].width, [imageToDraw size].height)
-                       operation: NSCompositeSourceOver
-                        fraction: 1.0f];
-
-        [[NSGraphicsContext currentContext] flushGraphics];
-        [NSGraphicsContext restoreGraphicsState];
-
-        if (juceImage.hasAlphaChannel())
-            swapRGBOrder (0, 0, juceImage.getWidth(), juceImage.getHeight());*/
-
-    }
-
-private:
-    Image juceImage;
-    CGImageRef imageRef;
-    CGDataProviderRef provider;
-    UIImage* uiImage;
-    uint8* imageData;
-    int pixelStride, lineStride;
-
-/*    void swapRGBOrder (const int x, const int y, const int w, int h) const
-    {
-#if JUCE_BIG_ENDIAN
-        jassert (pixelStride == 4);
-#endif
-        jassert (Rectangle (0, 0, juceImage.getWidth(), juceImage.getHeight())
-                 .contains (Rectangle (x, y, w, h)));
-
-        uint8* start = imageData + x * pixelStride + y * lineStride;
-
-        while (--h >= 0)
-        {
-            uint8* p = start;
-            start += lineStride;
-
-            for (int i = w; --i >= 0;)
-            {
-#if JUCE_BIG_ENDIAN
-                const uint8 oldp3 = p[3];
-                const uint8 oldp1 = p[1];
-                p[3] = p[0];
-                p[0] = oldp1;
-                p[1] = p[2];
-                p[2] = oldp3;
-#else
-                const uint8 oldp0 = p[0];
-                p[0] = p[2];
-                p[2] = oldp0;
-#endif
-
-                p += pixelStride;
-            }
-        }
-    }*/
-};
 
 //==============================================================================
 UIViewComponentPeer::UIViewComponentPeer (Component* const component,
@@ -444,6 +369,12 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
 
         window = [[JuceUIWindow alloc] init];
         window.frame = r;
+
+        window.opaque = component->isOpaque();
+        view.opaque = component->isOpaque();
+        window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
+        view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
+
         [((JuceUIWindow*) window) setOwner: this];
 
         if (component->isAlwaysOnTop())
@@ -451,6 +382,9 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
 
         [window addSubview: view];
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
+
+        view.hidden = ! component->isVisible();
+        window.hidden = ! component->isVisible();
     }
 
     setTitle (component->getName());
@@ -478,6 +412,9 @@ void* UIViewComponentPeer::getNativeHandle() const
 void UIViewComponentPeer::setVisible (bool shouldBeVisible)
 {
     view.hidden = ! shouldBeVisible;
+
+    if (! isSharedWindow)
+        window.hidden = ! shouldBeVisible;
 }
 
 void UIViewComponentPeer::setTitle (const String& title)
@@ -519,8 +456,6 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     }
     else
     {
-        //r.origin.y = [[UIScreen mainScreen] bounds].size.height - (r.origin.y + r.size.height);
-
         window.frame = r;
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
     }
@@ -536,15 +471,10 @@ void UIViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool 
         CGRect wr = [[view window] frame];
         r.origin.x += wr.origin.x;
         r.origin.y += wr.origin.y;
-
-        y = (int) ([[UIScreen mainScreen] bounds].size.height - r.origin.y - r.size.height);
-    }
-    else
-    {
-        y = (int) ([[view superview] frame].size.height - r.origin.y - r.size.height);
     }
 
     x = (int) r.origin.x;
+    y = (int) r.origin.y;
     w = (int) r.size.width;
     h = (int) r.size.height;
 }
@@ -796,23 +726,14 @@ void UIViewComponentPeer::drawRect (CGRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
-    DBG (Rectangle (r.origin.x, r.origin.y, r.size.width, r.size.height).toString());
+    CGContextRef cg = UIGraphicsGetCurrentContext();
 
-    const float y = r.origin.y;//[view frame].size.height - (r.origin.y + r.size.height);
+    if (! component->isOpaque())
+        CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
-    JuceUIImage temp ((int) (r.size.width + 0.5f),
-                      (int) (r.size.height + 0.5f),
-                      true);//! getComponent()->isOpaque());
-
-    LowLevelGraphicsSoftwareRenderer context (temp.getJuceImage());
-    const int originX = -roundFloatToInt (r.origin.x);
-    const int originY = -roundFloatToInt (y);
-    context.setOrigin (originX, originY);
-
-    handlePaint (context);
-
-    //CGContextClipToRect (UIGraphicsGetCurrentContext(), r);
-    temp.draw (r.origin.x, r.origin.y);
+    CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, view.bounds.size.height));
+    CoreGraphicsContext g (cg, view.bounds.size.height);
+    handlePaint (g);
 }
 
 bool UIViewComponentPeer::canBecomeKeyWindow()
@@ -842,9 +763,18 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 //==============================================================================
 void UIViewComponentPeer::repaint (int x, int y, int w, int h)
 {
-    [view setNeedsDisplayInRect:
-            CGRectMake ((float) x, (float) y,//([view frame].size.height - (y + h)),
-                        (float) w, (float) h)];
+    CGRect r = CGRectMake ((float) x, (float) y, (float) w, (float) h);
+
+    if (! MessageManager::getInstance()->isThisTheMessageThread())
+    {
+        [view performSelectorOnMainThread: @selector (asyncRepaint:)
+                               withObject: [NSData dataWithBytes: &r length: sizeof (r)]
+                            waitUntilDone: NO];
+    }
+    else
+    {
+        [view setNeedsDisplayInRect: r];
+    }
 }
 
 void UIViewComponentPeer::performAnyPendingRepaintsNow()
@@ -857,19 +787,25 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-static Image* UIImageToJuceImage (UIImage* image)
-{
-    JuceUIImage juceIm ((int) [image size].width,
-                        (int) [image size].height,
-                        true);
-
-    juceIm.drawUIImage (image);
-    return juceIm.getJuceImage().createCopy();
-}
-
 Image* juce_createIconForFile (const File& file)
 {
     return 0;
+}
+
+//==============================================================================
+bool Desktop::canUseSemiTransparentWindows() throw()
+{
+    return true;
+}
+
+void Desktop::getMousePosition (int& x, int& y) throw()
+{
+    x = juce_lastMouseX;
+    y = juce_lastMouseY;
+}
+
+void Desktop::setMousePosition (int x, int y) throw()
+{
 }
 
 //==============================================================================

@@ -231,6 +231,13 @@ public:
     */
     const Colour overlaidWith (const Colour& foregroundColour) const throw();
 
+    /** Returns a colour that lies somewhere between this one and another.
+
+        If amountOfOther is zero, the result is 100% this colour, if amountOfOther
+        is 1.0, the result is 100% of the other colour.
+    */
+    const Colour interpolatedWith (const Colour& other, float proportionOfOther) const throw();
+
     //==============================================================================
     /** Returns the colour's hue component.
         The value returned is in the range 0.0 to 1.0

@@ -73,8 +73,8 @@ public:
     static MidiOutput* openDevice (int deviceIndex);
 
 
-#if JUCE_LINUX || DOXYGEN
-    /** LINUX ONLY - This will try to create a new midi output device.
+#if JUCE_LINUX || JUCE_MAC || DOXYGEN
+    /** This will try to create a new midi output device (Not available on Windows).
 
         This will attempt to create a new midi output device that other apps can connect
         to and use as their midi input.

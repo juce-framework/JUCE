@@ -83,11 +83,7 @@
 #endif
 
 #if JUCE_MAC
-  #if MACOS_10_3_OR_EARLIER
-    #include <CoreServices/CoreServices.h>
-  #else
-    #include <libkern/OSAtomic.h>
-  #endif
+  #include <libkern/OSAtomic.h>
 #endif
 
 #if JUCE_LINUX

@@ -67,7 +67,7 @@ public:
     static bool isQuickTimeAvailable() throw();
 
     //==============================================================================
-    /** Tries to load a QuickTime movie into the player.
+    /** Tries to load a QuickTime movie from a file into the player.
 
         It's best to call this function once you've added the component to a window,
         (or put it on the desktop as a heavyweight window). Loading a movie when the
@@ -81,6 +81,33 @@ public:
     bool loadMovie (const File& movieFile,
                     const bool isControllerVisible);
 
+    /** Tries to load a QuickTime movie from a URL into the player.
+
+        It's best to call this function once you've added the component to a window,
+        (or put it on the desktop as a heavyweight window). Loading a movie when the
+        component isn't visible can cause problems, because QuickTime needs a window
+        handle to do its stuff.
+
+        @param movieFile    the .mov file to open
+        @param isControllerVisible  whether to show a controller bar at the bottom
+        @returns true if the movie opens successfully
+    */
+    bool loadMovie (const URL& movieURL,
+                    const bool isControllerVisible);
+
+    /** Tries to load a QuickTime movie from a stream into the player.
+
+        It's best to call this function once you've added the component to a window,
+        (or put it on the desktop as a heavyweight window). Loading a movie when the
+        component isn't visible can cause problems, because QuickTime needs a window
+        handle to do its stuff.
+
+        @param movieStream    a stream containing a .mov file. The component may try
+                              to read the whole stream before playing, rather than
+                              streaming from it.
+        @param isControllerVisible  whether to show a controller bar at the bottom
+        @returns true if the movie opens successfully
+    */
     bool loadMovie (InputStream* movieStream,
                     const bool isControllerVisible);
 

@@ -211,7 +211,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
 
 int SystemStats::getNumCpus() throw()
 {
-#if MACOS_10_4_OR_EARLIER
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
     return MPProcessors();
 #else
     return [[NSProcessInfo processInfo] activeProcessorCount];

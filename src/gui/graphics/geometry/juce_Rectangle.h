@@ -96,6 +96,12 @@ public:
     void setBounds (const int newX, const int newY,
                     const int newWidth, const int newHeight) throw();
 
+    /** Changes the rectangle's width */
+    void setWidth (const int newWidth) throw();
+
+    /** Changes the rectangle's height */
+    void setHeight (const int newHeight) throw();
+
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
     */

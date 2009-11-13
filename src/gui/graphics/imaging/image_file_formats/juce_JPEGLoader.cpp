@@ -221,7 +221,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
 
             if (jpeg_start_decompress (&jpegDecompStruct))
             {
-                image = new Image (Image::RGB, width, height, false);
+                image = Image::createNativeImage (Image::RGB, width, height, false);
 
                 for (int y = 0; y < height; ++y)
                 {

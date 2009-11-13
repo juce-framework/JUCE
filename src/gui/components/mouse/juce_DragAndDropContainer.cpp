@@ -380,7 +380,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
 
                 if (im->getFormat() != Image::ARGB)
                 {
-                    Image* newIm = new Image (Image::ARGB, im->getWidth(), im->getHeight(), true);
+                    Image* newIm = Image::createNativeImage (Image::ARGB, im->getWidth(), im->getHeight(), true);
                     Graphics g2 (*newIm);
                     g2.drawImageAt (im, 0, 0);
 

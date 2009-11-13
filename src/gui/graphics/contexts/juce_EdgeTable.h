@@ -27,10 +27,11 @@
 #define __JUCE_EDGETABLE_JUCEHEADER__
 
 #include "../geometry/juce_AffineTransform.h"
+#include "../geometry/juce_Rectangle.h"
 #include "../../../containers/juce_MemoryBlock.h"
 class Path;
 class Image;
-class Rectangle;
+
 
 //==============================================================================
 /**
@@ -47,13 +48,13 @@ public:
         A table is created with a fixed vertical range, and only sections of the path
         which lie within this range will be added to the table.
 
-        @param y                        the top y co-ordinate that the table can contain
-        @param height                   the number of horizontal lines it contains
+        @param clipLimits               only the region of the path that lies within this area will be added
         @param pathToAdd                the path to add to the table
         @param transform                a transform to apply to the path being added
     */
-    EdgeTable (const int y, const int height,
-               const Path& pathToAdd, const AffineTransform& transform) throw();
+    EdgeTable (const Rectangle& clipLimits,
+               const Path& pathToAdd,
+               const AffineTransform& transform) throw();
 
     /** Creates an edge table containing a rectangle.
     */
@@ -69,10 +70,10 @@ public:
     ~EdgeTable() throw();
 
     //==============================================================================
-    void clipToRectangle (const Rectangle& r) throw();
+    /*void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (Image& image, int x, int y) throw();
+    void clipToImageAlpha (Image& image, int x, int y) throw();*/
 
     /** Reduces the amount of space the table has allocated.
 
@@ -95,27 +96,13 @@ public:
                                         inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
                                         @endcode
                                         (these don't necessarily have to be 'const', but it might help it go faster)
-        @param clipLeft             the left-hand edge of the rectangle which should be iterated
-        @param clipTop              the top edge of the rectangle which should be iterated
-        @param clipRight            the right-hand edge of the rectangle which should be iterated
-        @param clipBottom           the bottom edge of the rectangle which should be iterated
-        @param subPixelXOffset      a fraction of 1 pixel by which to shift the table rightwards, in the range 0 to 255
     */
     template <class EdgeTableIterationCallback>
-    void iterate (EdgeTableIterationCallback& iterationCallback,
-                  const int clipLeft, int clipTop,
-                  const int clipRight, int clipBottom,
-                  const int subPixelXOffset) const throw()
+    void iterate (EdgeTableIterationCallback& iterationCallback) const throw()
     {
-        if (clipTop < top)
-            clipTop = top;
+        const int* lineStart = table;
 
-        if (clipBottom > top + height)
-            clipBottom = top + height;
-
-        const int* lineStart = table + lineStrideElements * (clipTop - top);
-
-        for (int y = clipTop; y < clipBottom; ++y)
+        for (int y = 0; y < bounds.getHeight(); ++y)
         {
             const int* line = lineStart;
             lineStart += lineStrideElements;
@@ -123,7 +110,8 @@ public:
 
             if (--numPoints > 0)
             {
-                int x = subPixelXOffset + *++line;
+                int x = *++line;
+                jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
                 int level = *++line;
                 int levelAccumulator = 0;
 
@@ -135,9 +123,9 @@ public:
                     if (correctedLevel >> 8)
                         correctedLevel = 0xff;
 
-                    const int endX = subPixelXOffset + *++line;
+                    const int endX = *++line;
                     jassert (endX >= x);
-                    int endOfRun = (endX >> 8);
+                    const int endOfRun = (endX >> 8);
 
                     if (endOfRun == (x >> 8))
                     {
@@ -150,42 +138,22 @@ public:
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
                         levelAccumulator += (0xff - (x & 0xff)) * correctedLevel;
-
+                        levelAccumulator >>= 8;
                         x >>= 8;
-                        if (x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
-                        }
 
-                        if (x >= clipLeft)
+                        if (levelAccumulator > 0)
                         {
-                            levelAccumulator >>= 8;
-                            if (levelAccumulator > 0)
-                            {
-                                if (levelAccumulator >> 8)
-                                    levelAccumulator = 0xff;
+                            if (levelAccumulator >> 8)
+                                levelAccumulator = 0xff;
 
-                                iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-                            }
-                        }
-
-                        if (++x >= clipRight)
-                        {
-                            levelAccumulator = 0;
-                            break;
+                            iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                         }
 
                         // if there's a segment of solid pixels, do it all in one go..
-                        if (correctedLevel > 0 && endOfRun > x)
+                        if (correctedLevel > 0)
                         {
-                            if (x < clipLeft)
-                                x = clipLeft;
-
-                            if (endOfRun > clipRight)
-                                endOfRun = clipRight;
-
-                            const int numPix = endOfRun - x;
+                            jassert (endOfRun <= bounds.getRight());
+                            const int numPix = endOfRun - ++x;
 
                             if (numPix > 0)
                                 iterationCallback.handleEdgeTableLine (x, numPix, correctedLevel);
@@ -206,8 +174,8 @@ public:
                         levelAccumulator = 0xff;
 
                     x >>= 8;
-                    if (x >= clipLeft && x < clipRight)
-                        iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+                    jassert (x >= bounds.getX() && x < bounds.getRight());
+                    iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                 }
             }
         }
@@ -219,11 +187,13 @@ public:
 private:
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
     int* table;
-    int top, height, maxEdgesPerLine, lineStrideElements;
+    Rectangle bounds;
+    int maxEdgesPerLine, lineStrideElements;
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
     void clearLineSection (const int y, int minX, int maxX) throw();
+    void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
 };
 
 

@@ -772,14 +772,7 @@ int CharacterFunctions::vprintf (char* const dest, const int maxLength, const ch
 
 int CharacterFunctions::vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw()
 {
-#if MACOS_10_3_OR_EARLIER
-    const String formatTemp (format);
-    size_t num = vprintf ((char*) dest, maxLength, formatTemp, args);
-    String temp ((char*) dest);
-    temp.copyToBuffer (dest, num);
-    dest [num] = 0;
-    return (int) num;
-#elif defined (JUCE_WIN32)
+#if defined (JUCE_WIN32)
     return (int) _vsnwprintf (dest, maxLength, format, args);
 #else
     return (int) vswprintf (dest, maxLength, format, args);

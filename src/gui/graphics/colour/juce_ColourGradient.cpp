@@ -129,17 +129,12 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
         return Colour (colours.getUnchecked(i));
 
     const int pos1 = colours.getUnchecked (i);
-    PixelARGB pix1 (colours.getUnchecked (i + 1));
-    pix1.premultiply();
+    const Colour col1 (colours.getUnchecked (i + 1));
 
     const int pos2 = colours.getUnchecked (i + 2);
-    PixelARGB pix2 (colours.getUnchecked (i + 3));
-    pix2.premultiply();
+    const Colour col2 (colours.getUnchecked (i + 3));
 
-    pix1.tween (pix2, ((integerPos - pos1) << 8) / (pos2 - pos1));
-    pix1.unpremultiply();
-
-    return Colour (pix1.getARGB());
+    return col1.interpolatedWith (col2, (integerPos - pos1) / (float) (pos2 - pos1));
 }
 
 //==============================================================================

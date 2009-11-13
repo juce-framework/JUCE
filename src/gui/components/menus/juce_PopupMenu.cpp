@@ -908,8 +908,8 @@ private:
                 y = jmax (mon.getY(), maxY - heightToUse);
         }
 
-        x = jlimit (mon.getX() + 1, mon.getRight() - (widthToUse + 6), x);
-        y = jlimit (mon.getY() + 1, mon.getBottom() - (heightToUse + 6), y);
+        x = jmax (mon.getX() + 1, jmin (mon.getRight() - (widthToUse + 6), x));
+        y = jmax (mon.getY() + 1, jmin (mon.getBottom() - (heightToUse + 6), y));
 
         windowPos.setBounds (x, y, widthToUse, heightToUse);
 
