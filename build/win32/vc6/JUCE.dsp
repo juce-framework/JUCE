@@ -93,67 +93,47 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_Application.cpp
+SOURCE=..\..\..\src\application\juce_Application.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_Application.h
+SOURCE=..\..\..\src\application\juce_Application.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandID.h
+SOURCE=..\..\..\src\application\juce_ApplicationCommandID.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandInfo.cpp
+SOURCE=..\..\..\src\application\juce_ApplicationCommandInfo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandInfo.h
+SOURCE=..\..\..\src\application\juce_ApplicationCommandInfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandManager.cpp
+SOURCE=..\..\..\src\application\juce_ApplicationCommandManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandManager.h
+SOURCE=..\..\..\src\application\juce_ApplicationCommandManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandTarget.cpp
+SOURCE=..\..\..\src\application\juce_ApplicationCommandTarget.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationCommandTarget.h
+SOURCE=..\..\..\src\application\juce_ApplicationCommandTarget.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationProperties.cpp
+SOURCE=..\..\..\src\application\juce_ApplicationProperties.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\application\juce_ApplicationProperties.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\application\juce_DeletedAtShutdown.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\application\juce_DeletedAtShutdown.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\application\juce_PropertiesFile.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\application\juce_PropertiesFile.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_appframework\application\juce_SystemClipboard.h
+SOURCE=..\..\..\src\application\juce_ApplicationProperties.h
 # End Source File
 # End Group
 # Begin Group "audio"
@@ -164,99 +144,99 @@ SOURCE=..\..\..\src\juce_appframework\application\juce_SystemClipboard.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AiffAudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AiffAudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioCDReader.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioCDReader.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioCDReader.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormatManager.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormatManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormatManager.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormatManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormatReader.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormatReader.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioFormatWriter.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioFormatWriter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioSubsectionReader.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioSubsectionReader.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioSubsectionReader.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioThumbnail.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnail.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioThumbnail.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_AudioThumbnailCache.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_AudioThumbnailCache.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_FlacAudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_FlacAudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_FlacAudioFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_OggVorbisAudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_OggVorbisAudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_OggVorbisAudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_OggVorbisAudioFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_QuickTimeAudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_QuickTimeAudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_QuickTimeAudioFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioFormat.cpp
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_WavAudioFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioFormat.h
+SOURCE=..\..\..\src\audio\audio_file_formats\juce_WavAudioFormat.h
 # End Source File
 # End Group
 # Begin Group "audio_sources"
@@ -264,75 +244,75 @@ SOURCE=..\..\..\src\juce_appframework\audio\audio_file_formats\juce_WavAudioForm
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioFormatReaderSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioFormatReaderSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioFormatReaderSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioFormatReaderSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioSourcePlayer.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioSourcePlayer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioSourcePlayer.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioSourcePlayer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioTransportSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioTransportSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_AudioTransportSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_AudioTransportSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_BufferingAudioSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_BufferingAudioSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_BufferingAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_BufferingAudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ChannelRemappingAudioSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_ChannelRemappingAudioSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ChannelRemappingAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_ChannelRemappingAudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_MixerAudioSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_MixerAudioSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_MixerAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_MixerAudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_PositionableAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_PositionableAudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ResamplingAudioSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_ResamplingAudioSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ResamplingAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_ResamplingAudioSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ToneGeneratorAudioSource.cpp
+SOURCE=..\..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ToneGeneratorAudioSource.h
+SOURCE=..\..\..\src\audio\audio_sources\juce_ToneGeneratorAudioSource.h
 # End Source File
 # End Group
 # Begin Group "devices"
@@ -340,39 +320,39 @@ SOURCE=..\..\..\src\juce_appframework\audio\audio_sources\juce_ToneGeneratorAudi
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioDeviceManager.cpp
+SOURCE=..\..\..\src\audio\devices\juce_AudioDeviceManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioDeviceManager.h
+SOURCE=..\..\..\src\audio\devices\juce_AudioDeviceManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioIODevice.cpp
+SOURCE=..\..\..\src\audio\devices\juce_AudioIODevice.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioIODevice.h
+SOURCE=..\..\..\src\audio\devices\juce_AudioIODevice.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioIODeviceType.cpp
+SOURCE=..\..\..\src\audio\devices\juce_AudioIODeviceType.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_AudioIODeviceType.h
+SOURCE=..\..\..\src\audio\devices\juce_AudioIODeviceType.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiInput.h
+SOURCE=..\..\..\src\audio\devices\juce_MidiInput.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.cpp
+SOURCE=..\..\..\src\audio\devices\juce_MidiOutput.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.h
+SOURCE=..\..\..\src\audio\devices\juce_MidiOutput.h
 # End Source File
 # End Group
 # Begin Group "midi"
@@ -380,51 +360,51 @@ SOURCE=..\..\..\src\juce_appframework\audio\devices\juce_MidiOutput.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiBuffer.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiBuffer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiBuffer.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiBuffer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiFile.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiFile.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiFile.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiFile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiKeyboardState.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiKeyboardState.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiKeyboardState.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiKeyboardState.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessage.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessage.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessage.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessageCollector.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessageCollector.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessageCollector.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessageCollector.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessageSequence.cpp
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessageSequence.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessageSequence.h
+SOURCE=..\..\..\src\audio\midi\juce_MidiMessageSequence.h
 # End Source File
 # End Group
 # Begin Group "synthesisers"
@@ -432,19 +412,19 @@ SOURCE=..\..\..\src\juce_appframework\audio\midi\juce_MidiMessageSequence.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\synthesisers\juce_Sampler.cpp
+SOURCE=..\..\..\src\audio\synthesisers\juce_Sampler.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\synthesisers\juce_Sampler.h
+SOURCE=..\..\..\src\audio\synthesisers\juce_Sampler.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\synthesisers\juce_Synthesiser.cpp
+SOURCE=..\..\..\src\audio\synthesisers\juce_Synthesiser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\synthesisers\juce_Synthesiser.h
+SOURCE=..\..\..\src\audio\synthesisers\juce_Synthesiser.h
 # End Source File
 # End Group
 # Begin Group "dsp"
@@ -452,27 +432,27 @@ SOURCE=..\..\..\src\juce_appframework\audio\synthesisers\juce_Synthesiser.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_AudioDataConverters.cpp
+SOURCE=..\..\..\src\audio\dsp\juce_AudioDataConverters.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_AudioDataConverters.h
+SOURCE=..\..\..\src\audio\dsp\juce_AudioDataConverters.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_AudioSampleBuffer.cpp
+SOURCE=..\..\..\src\audio\dsp\juce_AudioSampleBuffer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_AudioSampleBuffer.h
+SOURCE=..\..\..\src\audio\dsp\juce_AudioSampleBuffer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_IIRFilter.cpp
+SOURCE=..\..\..\src\audio\dsp\juce_IIRFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_IIRFilter.h
+SOURCE=..\..\..\src\audio\dsp\juce_IIRFilter.h
 # End Source File
 # End Group
 # Begin Group "processors"
@@ -480,51 +460,51 @@ SOURCE=..\..\..\src\juce_appframework\audio\dsp\juce_IIRFilter.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioPlayHead.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioPlayHead.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.cpp
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessor.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.cpp
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorEditor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorEditor.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorEditor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.cpp
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorGraph.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorGraph.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorGraph.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorListener.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.cpp
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorPlayer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_AudioProcessorPlayer.h
+SOURCE=..\..\..\src\audio\processors\juce_AudioProcessorPlayer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.cpp
+SOURCE=..\..\..\src\audio\processors\juce_GenericAudioProcessorEditor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcessorEditor.h
+SOURCE=..\..\..\src\audio\processors\juce_GenericAudioProcessorEditor.h
 # End Source File
 # End Group
 # Begin Group "plugins"
@@ -535,76 +515,76 @@ SOURCE=..\..\..\src\juce_appframework\audio\processors\juce_GenericAudioProcesso
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_DirectXPluginFormat.h
+SOURCE=..\..\..\src\audio\plugins\formats\juce_DirectXPluginFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_LADSPAPluginFormat.h
+SOURCE=..\..\..\src\audio\plugins\formats\juce_LADSPAPluginFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.cpp
+SOURCE=..\..\..\src\audio\plugins\formats\juce_VSTPluginFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\formats\juce_VSTPluginFormat.h
+SOURCE=..\..\..\src\audio\plugins\formats\juce_VSTPluginFormat.h
 # End Source File
 # End Group
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormat.h
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginFormat.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginFormatManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginFormatManager.h
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginFormatManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginInstance.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_AudioPluginInstance.h
+SOURCE=..\..\..\src\audio\plugins\juce_AudioPluginInstance.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_KnownPluginList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_KnownPluginList.h
+SOURCE=..\..\..\src\audio\plugins\juce_KnownPluginList.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_PluginDescription.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDescription.h
+SOURCE=..\..\..\src\audio\plugins\juce_PluginDescription.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_PluginDirectoryScanner.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginDirectoryScanner.h
+SOURCE=..\..\..\src\audio\plugins\juce_PluginDirectoryScanner.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.cpp
+SOURCE=..\..\..\src\audio\plugins\juce_PluginListComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.h
+SOURCE=..\..\..\src\audio\plugins\juce_PluginListComponent.h
 # End Source File
 # End Group
 # End Group
@@ -613,107 +593,107 @@ SOURCE=..\..\..\src\juce_appframework\audio\plugins\juce_PluginListComponent.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ActionBroadcaster.cpp
+SOURCE=..\..\..\src\events\juce_ActionBroadcaster.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ActionBroadcaster.h
+SOURCE=..\..\..\src\events\juce_ActionBroadcaster.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ActionListener.h
+SOURCE=..\..\..\src\events\juce_ActionListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ActionListenerList.cpp
+SOURCE=..\..\..\src\events\juce_ActionListenerList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ActionListenerList.h
+SOURCE=..\..\..\src\events\juce_ActionListenerList.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_AsyncUpdater.cpp
+SOURCE=..\..\..\src\events\juce_AsyncUpdater.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_AsyncUpdater.h
+SOURCE=..\..\..\src\events\juce_AsyncUpdater.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ChangeBroadcaster.cpp
+SOURCE=..\..\..\src\events\juce_ChangeBroadcaster.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ChangeBroadcaster.h
+SOURCE=..\..\..\src\events\juce_ChangeBroadcaster.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ChangeListener.h
+SOURCE=..\..\..\src\events\juce_ChangeListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ChangeListenerList.cpp
+SOURCE=..\..\..\src\events\juce_ChangeListenerList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_ChangeListenerList.h
+SOURCE=..\..\..\src\events\juce_ChangeListenerList.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_InterprocessConnection.cpp
+SOURCE=..\..\..\src\events\juce_InterprocessConnection.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_InterprocessConnection.h
+SOURCE=..\..\..\src\events\juce_InterprocessConnection.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_InterprocessConnectionServer.cpp
+SOURCE=..\..\..\src\events\juce_InterprocessConnectionServer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_InterprocessConnectionServer.h
+SOURCE=..\..\..\src\events\juce_InterprocessConnectionServer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_Message.cpp
+SOURCE=..\..\..\src\events\juce_Message.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_Message.h
+SOURCE=..\..\..\src\events\juce_Message.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MessageListener.cpp
+SOURCE=..\..\..\src\events\juce_MessageListener.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MessageListener.h
+SOURCE=..\..\..\src\events\juce_MessageListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MessageManager.cpp
+SOURCE=..\..\..\src\events\juce_MessageManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MessageManager.h
+SOURCE=..\..\..\src\events\juce_MessageManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MultiTimer.cpp
+SOURCE=..\..\..\src\events\juce_MultiTimer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_MultiTimer.h
+SOURCE=..\..\..\src\events\juce_MultiTimer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_Timer.cpp
+SOURCE=..\..\..\src\events\juce_Timer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\events\juce_Timer.h
+SOURCE=..\..\..\src\events\juce_Timer.h
 # End Source File
 # End Group
 # Begin Group "gui"
@@ -727,35 +707,35 @@ SOURCE=..\..\..\src\juce_appframework\events\juce_Timer.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_Brush.cpp
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_Brush.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_Brush.h
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_Brush.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_GradientBrush.cpp
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_GradientBrush.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_GradientBrush.h
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_GradientBrush.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_ImageBrush.cpp
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_ImageBrush.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_ImageBrush.h
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_ImageBrush.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_SolidColourBrush.cpp
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_SolidColourBrush.h
+SOURCE=..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.h
 # End Source File
 # End Group
 # Begin Group "colour"
@@ -763,31 +743,31 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\brushes\juce_SolidColourBrush
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_Colour.cpp
+SOURCE=..\..\..\src\gui\graphics\colour\juce_Colour.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_Colour.h
+SOURCE=..\..\..\src\gui\graphics\colour\juce_Colour.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_ColourGradient.cpp
+SOURCE=..\..\..\src\gui\graphics\colour\juce_ColourGradient.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_ColourGradient.h
+SOURCE=..\..\..\src\gui\graphics\colour\juce_ColourGradient.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_Colours.cpp
+SOURCE=..\..\..\src\gui\graphics\colour\juce_Colours.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_Colours.h
+SOURCE=..\..\..\src\gui\graphics\colour\juce_Colours.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_PixelFormats.h
+SOURCE=..\..\..\src\gui\graphics\colour\juce_PixelFormats.h
 # End Source File
 # End Group
 # Begin Group "contexts"
@@ -795,55 +775,55 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\colour\juce_PixelFormats.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_EdgeTable.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_EdgeTable.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_EdgeTable.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_EdgeTable.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_Graphics.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_Graphics.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_Graphics.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_Graphics.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_Justification.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_Justification.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_Justification.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_Justification.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_LowLevelGraphicsContext.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsContext.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_RectanglePlacement.cpp
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_RectanglePlacement.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_RectanglePlacement.h
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_RectanglePlacement.h
 # End Source File
 # End Group
 # Begin Group "fonts"
@@ -851,35 +831,35 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\contexts\juce_RectanglePlacem
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_Font.cpp
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_Font.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_Font.h
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_Font.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_GlyphArrangement.cpp
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_GlyphArrangement.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_GlyphArrangement.h
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_GlyphArrangement.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_TextLayout.cpp
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_TextLayout.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_TextLayout.h
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_TextLayout.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_Typeface.cpp
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_Typeface.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_TypeFace.h
+SOURCE=..\..\..\src\gui\graphics\fonts\juce_TypeFace.h
 # End Source File
 # End Group
 # Begin Group "geometry"
@@ -887,83 +867,83 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\fonts\juce_TypeFace.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_AffineTransform.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_AffineTransform.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_AffineTransform.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_AffineTransform.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_BorderSize.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_BorderSize.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_BorderSize.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_BorderSize.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Line.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Line.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Line.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Line.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Path.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Path.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Path.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Path.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PathIterator.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PathIterator.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PathIterator.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PathIterator.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PathStrokeType.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PathStrokeType.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PathStrokeType.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PathStrokeType.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Point.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Point.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Point.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Point.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PositionedRectangle.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PositionedRectangle.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_PositionedRectangle.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Rectangle.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Rectangle.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_Rectangle.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_Rectangle.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_RectangleList.cpp
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_RectangleList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_RectangleList.h
+SOURCE=..\..\..\src\gui\graphics\geometry\juce_RectangleList.h
 # End Source File
 # End Group
 # Begin Group "imaging"
@@ -974,51 +954,51 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\geometry\juce_RectangleList.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\image_file_formats\juce_GIFLoader.cpp
 # ADD CPP /W1
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\juce_JPEGLoader.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\image_file_formats\juce_JPEGLoader.cpp
 # ADD CPP /W1
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\image_file_formats\juce_PNGLoader.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\image_file_formats\juce_PNGLoader.cpp
 # ADD CPP /W1
 # End Source File
 # End Group
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_Image.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_Image.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_Image.h
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_Image.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageCache.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageCache.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageCache.h
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageCache.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageConvolutionKernel.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageConvolutionKernel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageConvolutionKernel.h
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageConvolutionKernel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageFileFormat.cpp
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageFileFormat.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageFileFormat.h
+SOURCE=..\..\..\src\gui\graphics\imaging\juce_ImageFileFormat.h
 # End Source File
 # End Group
 # Begin Group "effects"
@@ -1026,31 +1006,31 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\imaging\juce_ImageFileFormat.
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_DropShadowEffect.cpp
+SOURCE=..\..\..\src\gui\graphics\effects\juce_DropShadowEffect.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_DropShadowEffect.h
+SOURCE=..\..\..\src\gui\graphics\effects\juce_DropShadowEffect.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_GlowEffect.cpp
+SOURCE=..\..\..\src\gui\graphics\effects\juce_GlowEffect.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_GlowEffect.h
+SOURCE=..\..\..\src\gui\graphics\effects\juce_GlowEffect.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_ImageEffectFilter.h
+SOURCE=..\..\..\src\gui\graphics\effects\juce_ImageEffectFilter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_ReduceOpacityEffect.cpp
+SOURCE=..\..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_ReduceOpacityEffect.h
+SOURCE=..\..\..\src\gui\graphics\effects\juce_ReduceOpacityEffect.h
 # End Source File
 # End Group
 # Begin Group "drawables"
@@ -1058,47 +1038,47 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\effects\juce_ReduceOpacityEff
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_Drawable.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_Drawable.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_Drawable.h
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_Drawable.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableComposite.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableComposite.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableComposite.h
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableComposite.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableImage.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableImage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableImage.h
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableImage.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawablePath.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawablePath.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawablePath.h
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawablePath.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableText.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableText.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_DrawableText.h
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_DrawableText.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_SVGParser.cpp
+SOURCE=..\..\..\src\gui\graphics\drawables\juce_SVGParser.cpp
 # End Source File
 # End Group
 # End Group
@@ -1110,75 +1090,75 @@ SOURCE=..\..\..\src\juce_appframework\gui\graphics\drawables\juce_SVGParser.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ArrowButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_ArrowButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ArrowButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_ArrowButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_Button.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_Button.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_Button.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_Button.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_DrawableButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_DrawableButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_DrawableButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_DrawableButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_HyperlinkButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_HyperlinkButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_HyperlinkButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_HyperlinkButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ImageButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_ImageButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ImageButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_ImageButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ShapeButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_ShapeButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ShapeButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_ShapeButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_TextButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_TextButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_TextButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_TextButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ToggleButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_ToggleButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ToggleButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_ToggleButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ToolbarButton.cpp
+SOURCE=..\..\..\src\gui\components\buttons\juce_ToolbarButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ToolbarButton.h
+SOURCE=..\..\..\src\gui\components\buttons\juce_ToolbarButton.h
 # End Source File
 # End Group
 # Begin Group "controls"
@@ -1186,103 +1166,103 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\buttons\juce_ToolbarButton.
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ComboBox.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_ComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ComboBox.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Label.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_Label.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Label.h
+SOURCE=..\..\..\src\gui\components\controls\juce_Label.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ListBox.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_ListBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ListBox.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ListBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ProgressBar.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_ProgressBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ProgressBar.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ProgressBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Slider.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_Slider.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Slider.h
+SOURCE=..\..\..\src\gui\components\controls\juce_Slider.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TableHeaderComponent.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_TableHeaderComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TableHeaderComponent.h
+SOURCE=..\..\..\src\gui\components\controls\juce_TableHeaderComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TableListBox.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_TableListBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TableListBox.h
+SOURCE=..\..\..\src\gui\components\controls\juce_TableListBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TextEditor.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_TextEditor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TextEditor.h
+SOURCE=..\..\..\src\gui\components\controls\juce_TextEditor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Toolbar.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_Toolbar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_Toolbar.h
+SOURCE=..\..\..\src\gui\components\controls\juce_Toolbar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ToolbarItemComponent.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_ToolbarItemComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ToolbarItemComponent.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ToolbarItemComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ToolbarItemFactory.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ToolbarItemFactory.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ToolbarItemPalette.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_ToolbarItemPalette.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_ToolbarItemPalette.h
+SOURCE=..\..\..\src\gui\components\controls\juce_ToolbarItemPalette.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TreeView.cpp
+SOURCE=..\..\..\src\gui\components\controls\juce_TreeView.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TreeView.h
+SOURCE=..\..\..\src\gui\components\controls\juce_TreeView.h
 # End Source File
 # End Group
 # Begin Group "keyboard"
@@ -1290,51 +1270,51 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\controls\juce_TreeView.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyboardFocusTraverser.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyboardFocusTraverser.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyboardFocusTraverser.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyListener.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyListener.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyListener.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyMappingEditorComponent.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyMappingEditorComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyMappingEditorComponent.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyMappingEditorComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyPress.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyPress.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyPress.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyPress.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyPressMappingSet.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyPressMappingSet.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_KeyPressMappingSet.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_KeyPressMappingSet.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_ModifierKeys.cpp
+SOURCE=..\..\..\src\gui\components\keyboard\juce_ModifierKeys.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_ModifierKeys.h
+SOURCE=..\..\..\src\gui\components\keyboard\juce_ModifierKeys.h
 # End Source File
 # End Group
 # Begin Group "layout"
@@ -1342,119 +1322,119 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\keyboard\juce_ModifierKeys.
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentAnimator.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentAnimator.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentAnimator.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentAnimator.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentBoundsConstrainer.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentBoundsConstrainer.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentBoundsConstrainer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentMovementWatcher.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentMovementWatcher.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ComponentMovementWatcher.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ComponentMovementWatcher.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_GroupComponent.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_GroupComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_GroupComponent.h
+SOURCE=..\..\..\src\gui\components\layout\juce_GroupComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_MultiDocumentPanel.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_MultiDocumentPanel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_MultiDocumentPanel.h
+SOURCE=..\..\..\src\gui\components\layout\juce_MultiDocumentPanel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ResizableBase.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ResizableBase.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ResizableBorderComponent.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ResizableBorderComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ResizableBorderComponent.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ResizableBorderComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ResizableCornerComponent.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ResizableCornerComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ResizableCornerComponent.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ResizableCornerComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ScrollBar.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_ScrollBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_ScrollBar.h
+SOURCE=..\..\..\src\gui\components\layout\juce_ScrollBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableLayoutManager.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableLayoutManager.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableLayoutManager.h
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableLayoutManager.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableLayoutResizerBar.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableLayoutResizerBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableLayoutResizerBar.h
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableLayoutResizerBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableObjectResizer.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableObjectResizer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_StretchableObjectResizer.h
+SOURCE=..\..\..\src\gui\components\layout\juce_StretchableObjectResizer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_TabbedButtonBar.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_TabbedButtonBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_TabbedButtonBar.h
+SOURCE=..\..\..\src\gui\components\layout\juce_TabbedButtonBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_TabbedComponent.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_TabbedComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_TabbedComponent.h
+SOURCE=..\..\..\src\gui\components\layout\juce_TabbedComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_Viewport.cpp
+SOURCE=..\..\..\src\gui\components\layout\juce_Viewport.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_Viewport.h
+SOURCE=..\..\..\src\gui\components\layout\juce_Viewport.h
 # End Source File
 # End Group
 # Begin Group "lookandfeel"
@@ -1462,19 +1442,19 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\layout\juce_Viewport.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_LookAndFeel.cpp
+SOURCE=..\..\..\src\gui\components\lookandfeel\juce_LookAndFeel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_LookAndFeel.h
+SOURCE=..\..\..\src\gui\components\lookandfeel\juce_LookAndFeel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.cpp
+SOURCE=..\..\..\src\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.h
+SOURCE=..\..\..\src\gui\components\lookandfeel\juce_OldSchoolLookAndFeel.h
 # End Source File
 # End Group
 # Begin Group "menus"
@@ -1482,31 +1462,31 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\lookandfeel\juce_OldSchoolL
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_MenuBarComponent.cpp
+SOURCE=..\..\..\src\gui\components\menus\juce_MenuBarComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_MenuBarComponent.h
+SOURCE=..\..\..\src\gui\components\menus\juce_MenuBarComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_MenuBarModel.cpp
+SOURCE=..\..\..\src\gui\components\menus\juce_MenuBarModel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_MenuBarModel.h
+SOURCE=..\..\..\src\gui\components\menus\juce_MenuBarModel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_PopupMenu.cpp
+SOURCE=..\..\..\src\gui\components\menus\juce_PopupMenu.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_PopupMenu.h
+SOURCE=..\..\..\src\gui\components\menus\juce_PopupMenu.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_PopupMenuCustomComponent.h
+SOURCE=..\..\..\src\gui\components\menus\juce_PopupMenuCustomComponent.h
 # End Source File
 # End Group
 # Begin Group "mouse"
@@ -1514,67 +1494,67 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\menus\juce_PopupMenuCustomC
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_ComponentDragger.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_ComponentDragger.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_ComponentDragger.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_ComponentDragger.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_DragAndDropContainer.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_DragAndDropContainer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_DragAndDropContainer.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_DragAndDropContainer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_DragAndDropTarget.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_DragAndDropTarget.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_FileDragAndDropTarget.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_FileDragAndDropTarget.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_LassoComponent.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_LassoComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseCursor.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseCursor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseCursor.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseCursor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseEvent.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseEvent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseEvent.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseEvent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseHoverDetector.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseHoverDetector.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseHoverDetector.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseHoverDetector.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseListener.cpp
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseListener.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_MouseListener.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_TooltipClient.h
+SOURCE=..\..\..\src\gui\components\mouse\juce_TooltipClient.h
 # End Source File
 # End Group
 # Begin Group "special"
@@ -1582,87 +1562,87 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\mouse\juce_TooltipClient.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_ActiveXControlComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_ActiveXControlComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_AudioDeviceSelectorComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_AudioDeviceSelectorComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_AudioDeviceSelectorComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_AudioDeviceSelectorComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_BubbleComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_BubbleComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_BubbleComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_BubbleComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_BubbleMessageComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_BubbleMessageComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_BubbleMessageComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_BubbleMessageComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_ColourSelector.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_ColourSelector.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_ColourSelector.h
+SOURCE=..\..\..\src\gui\components\special\juce_ColourSelector.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_DropShadower.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_DropShadower.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_DropShadower.h
+SOURCE=..\..\..\src\gui\components\special\juce_DropShadower.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_MagnifierComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_MagnifierComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_MagnifierComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_MagnifierComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_MidiKeyboardComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_MidiKeyboardComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_MidiKeyboardComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_MidiKeyboardComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_OpenGLComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_OpenGLComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_OpenGLComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_OpenGLComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_PreferencesPanel.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_PreferencesPanel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_PreferencesPanel.h
+SOURCE=..\..\..\src\gui\components\special\juce_PreferencesPanel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_SystemTrayIconComponent.cpp
+SOURCE=..\..\..\src\gui\components\special\juce_SystemTrayIconComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_SystemTrayIconComponent.h
+SOURCE=..\..\..\src\gui\components\special\juce_SystemTrayIconComponent.h
 # End Source File
 # End Group
 # Begin Group "windows"
@@ -1670,75 +1650,75 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\special\juce_SystemTrayIcon
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_AlertWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_AlertWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_AlertWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_AlertWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ComponentPeer.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_ComponentPeer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ComponentPeer.h
+SOURCE=..\..\..\src\gui\components\windows\juce_ComponentPeer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_DialogWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_DialogWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_DialogWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_DialogWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_DocumentWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_DocumentWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_DocumentWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_DocumentWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ResizableWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_ResizableWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ResizableWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_ResizableWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_SplashScreen.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_SplashScreen.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_SplashScreen.h
+SOURCE=..\..\..\src\gui\components\windows\juce_SplashScreen.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ThreadWithProgressWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_ThreadWithProgressWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ThreadWithProgressWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_ThreadWithProgressWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ToolTipWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_ToolTipWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_ToolTipWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_ToolTipWindow.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_TopLevelWindow.cpp
+SOURCE=..\..\..\src\gui\components\windows\juce_TopLevelWindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_TopLevelWindow.h
+SOURCE=..\..\..\src\gui\components\windows\juce_TopLevelWindow.h
 # End Source File
 # End Group
 # Begin Group "filebrowser"
@@ -1746,107 +1726,107 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\windows\juce_TopLevelWindow
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_DirectoryContentsDisplayComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsList.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_DirectoryContentsList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_DirectoryContentsList.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_DirectoryContentsList.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileBrowserComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileBrowserComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileBrowserComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileBrowserComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileBrowserListener.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileBrowserListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileChooser.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileChooser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileChooser.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileChooser.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileChooserDialogBox.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileChooserDialogBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileChooserDialogBox.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileChooserDialogBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileFilter.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileFilter.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileFilter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileListComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileListComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileListComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileListComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilenameComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FilenameComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilenameComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FilenameComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FilePreviewComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FilePreviewComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileSearchPathListComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileSearchPathListComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileSearchPathListComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileTreeComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_FileTreeComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_FileTreeComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_ImagePreviewComponent.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_ImagePreviewComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_ImagePreviewComponent.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_ImagePreviewComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_WildcardFileFilter.cpp
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_WildcardFileFilter.h
+SOURCE=..\..\..\src\gui\components\filebrowser\juce_WildcardFileFilter.h
 # End Source File
 # End Group
 # Begin Group "properties"
@@ -1854,88 +1834,88 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\filebrowser\juce_WildcardFi
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_BooleanPropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_BooleanPropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_BooleanPropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_BooleanPropertyComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_ButtonPropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_ButtonPropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_ButtonPropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_ButtonPropertyComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_ChoicePropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_ChoicePropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_ChoicePropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_ChoicePropertyComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_PropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_PropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_PropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_PropertyComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_PropertyPanel.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_PropertyPanel.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_PropertyPanel.h
+SOURCE=..\..\..\src\gui\components\properties\juce_PropertyPanel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_SliderPropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_SliderPropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_SliderPropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_SliderPropertyComponent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_TextPropertyComponent.cpp
+SOURCE=..\..\..\src\gui\components\properties\juce_TextPropertyComponent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\properties\juce_TextPropertyComponent.h
+SOURCE=..\..\..\src\gui\components\properties\juce_TextPropertyComponent.h
 # End Source File
 # End Group
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_Component.cpp
+SOURCE=..\..\..\src\gui\components\juce_Component.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_Component.h
+SOURCE=..\..\..\src\gui\components\juce_Component.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_ComponentDeletionWatcher.h
+SOURCE=..\..\..\src\gui\components\juce_ComponentDeletionWatcher.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_ComponentListener.cpp
+SOURCE=..\..\..\src\gui\components\juce_ComponentListener.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_ComponentListener.h
+SOURCE=..\..\..\src\gui\components\juce_ComponentListener.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_Desktop.cpp
+SOURCE=..\..\..\src\gui\components\juce_Desktop.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\gui\components\juce_Desktop.h
+SOURCE=..\..\..\src\gui\components\juce_Desktop.h
 # End Source File
 # End Group
 # End Group
@@ -1944,35 +1924,55 @@ SOURCE=..\..\..\src\juce_appframework\gui\components\juce_Desktop.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_FileBasedDocument.cpp
+SOURCE=..\..\..\src\utilities\juce_DeletedAtShutdown.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_FileBasedDocument.h
+SOURCE=..\..\..\src\utilities\juce_DeletedAtShutdown.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_RecentlyOpenedFilesList.cpp
+SOURCE=..\..\..\src\utilities\juce_FileBasedDocument.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_RecentlyOpenedFilesList.h
+SOURCE=..\..\..\src\utilities\juce_FileBasedDocument.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_SelectedItemSet.h
+SOURCE=..\..\..\src\utilities\juce_PropertiesFile.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_UndoableAction.h
+SOURCE=..\..\..\src\utilities\juce_PropertiesFile.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_UndoManager.cpp
+SOURCE=..\..\..\src\utilities\juce_RecentlyOpenedFilesList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_appframework\documents\juce_UndoManager.h
+SOURCE=..\..\..\src\utilities\juce_RecentlyOpenedFilesList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\utilities\juce_SelectedItemSet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\utilities\juce_SystemClipboard.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\utilities\juce_UndoableAction.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\utilities\juce_UndoManager.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\utilities\juce_UndoManager.h
 # End Source File
 # End Group
 # End Group
@@ -1984,79 +1984,107 @@ SOURCE=..\..\..\src\juce_appframework\documents\juce_UndoManager.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Atomic.h
+SOURCE=..\..\..\src\core\juce_Atomic.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_DataConversions.h
+SOURCE=..\..\..\src\core\juce_DataConversions.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_FileLogger.cpp
+SOURCE=..\..\..\src\core\juce_FileLogger.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_FileLogger.h
+SOURCE=..\..\..\src\core\juce_FileLogger.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Logger.cpp
+SOURCE=..\..\..\src\core\juce_Initialisation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Logger.h
+SOURCE=..\..\..\src\core\juce_Logger.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_MathsFunctions.h
+SOURCE=..\..\..\src\core\juce_Logger.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Memory.h
+SOURCE=..\..\..\src\core\juce_MathsFunctions.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_PlatformDefs.h
+SOURCE=..\..\..\src\core\juce_Memory.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Random.cpp
+SOURCE=..\..\..\src\core\juce_PerformanceCounter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Random.h
+SOURCE=..\..\..\src\core\juce_PerformanceCounter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_RelativeTime.cpp
+SOURCE=..\..\..\src\core\juce_PlatformDefs.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_RelativeTime.h
+SOURCE=..\..\..\src\core\juce_PlatformUtilities.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Singleton.h
+SOURCE=..\..\..\src\core\juce_Random.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_StandardHeader.h
+SOURCE=..\..\..\src\core\juce_Random.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_SystemStats.cpp
+SOURCE=..\..\..\src\core\juce_RelativeTime.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_SystemStats.h
+SOURCE=..\..\..\src\core\juce_RelativeTime.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Time.cpp
+SOURCE=..\..\..\src\core\juce_Singleton.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\basics\juce_Time.h
+SOURCE=..\..\..\src\core\juce_StandardHeader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_SystemStats.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_SystemStats.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_TargetPlatform.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_Time.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_Time.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_Uuid.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\core\juce_Uuid.h
 # End Source File
 # End Group
 # Begin Group "containers"
@@ -2064,63 +2092,71 @@ SOURCE=..\..\..\src\juce_core\basics\juce_Time.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_Array.h
+SOURCE=..\..\..\src\containers\juce_Array.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_ArrayAllocationBase.h
+SOURCE=..\..\..\src\containers\juce_ArrayAllocationBase.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_BitArray.cpp
+SOURCE=..\..\..\src\containers\juce_BitArray.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_BitArray.h
+SOURCE=..\..\..\src\containers\juce_BitArray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_ElementComparator.h
+SOURCE=..\..\..\src\containers\juce_ElementComparator.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_MemoryBlock.cpp
+SOURCE=..\..\..\src\containers\juce_MemoryBlock.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_MemoryBlock.h
+SOURCE=..\..\..\src\containers\juce_MemoryBlock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_OwnedArray.h
+SOURCE=..\..\..\src\containers\juce_OwnedArray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_PropertySet.cpp
+SOURCE=..\..\..\src\containers\juce_PropertySet.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_PropertySet.h
+SOURCE=..\..\..\src\containers\juce_PropertySet.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_ReferenceCountedArray.h
+SOURCE=..\..\..\src\containers\juce_ReferenceCountedArray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_ReferenceCountedObject.h
+SOURCE=..\..\..\src\containers\juce_ReferenceCountedObject.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_SortedSet.h
+SOURCE=..\..\..\src\containers\juce_SortedSet.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_SparseSet.h
+SOURCE=..\..\..\src\containers\juce_SparseSet.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\containers\juce_VoidArray.h
+SOURCE=..\..\..\src\containers\juce_Variant.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_Variant.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_VoidArray.h
 # End Source File
 # End Group
 # Begin Group "io"
@@ -2131,51 +2167,59 @@ SOURCE=..\..\..\src\juce_core\containers\juce_VoidArray.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_DirectoryIterator.cpp
+SOURCE=..\..\..\src\io\files\juce_DirectoryIterator.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_DirectoryIterator.h
+SOURCE=..\..\..\src\io\files\juce_DirectoryIterator.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_File.cpp
+SOURCE=..\..\..\src\io\files\juce_File.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_File.h
+SOURCE=..\..\..\src\io\files\juce_File.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileInputStream.cpp
+SOURCE=..\..\..\src\io\files\juce_FileInputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileInputStream.h
+SOURCE=..\..\..\src\io\files\juce_FileInputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileOutputStream.cpp
+SOURCE=..\..\..\src\io\files\juce_FileOutputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileOutputStream.h
+SOURCE=..\..\..\src\io\files\juce_FileOutputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileSearchPath.cpp
+SOURCE=..\..\..\src\io\files\juce_FileSearchPath.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_FileSearchPath.h
+SOURCE=..\..\..\src\io\files\juce_FileSearchPath.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_NamedPipe.cpp
+SOURCE=..\..\..\src\io\files\juce_NamedPipe.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\files\juce_NamedPipe.h
+SOURCE=..\..\..\src\io\files\juce_NamedPipe.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\io\files\juce_ZipFile.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\io\files\juce_ZipFile.h
 # End Source File
 # End Group
 # Begin Group "network"
@@ -2183,19 +2227,19 @@ SOURCE=..\..\..\src\juce_core\io\files\juce_NamedPipe.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\network\juce_Socket.cpp
+SOURCE=..\..\..\src\io\network\juce_Socket.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\network\juce_Socket.h
+SOURCE=..\..\..\src\io\network\juce_Socket.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\network\juce_URL.cpp
+SOURCE=..\..\..\src\io\network\juce_URL.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\network\juce_URL.h
+SOURCE=..\..\..\src\io\network\juce_URL.h
 # End Source File
 # End Group
 # Begin Group "streams"
@@ -2203,112 +2247,80 @@ SOURCE=..\..\..\src\juce_core\io\network\juce_URL.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_BufferedInputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_BufferedInputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_BufferedInputStream.h
+SOURCE=..\..\..\src\io\streams\juce_BufferedInputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_GZIPCompressorOutputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_GZIPCompressorOutputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_GZIPCompressorOutputStream.h
+SOURCE=..\..\..\src\io\streams\juce_GZIPCompressorOutputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_GZIPDecompressorInputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_GZIPDecompressorInputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_GZIPDecompressorInputStream.h
+SOURCE=..\..\..\src\io\streams\juce_GZIPDecompressorInputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_MemoryInputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_InputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_MemoryInputStream.h
+SOURCE=..\..\..\src\io\streams\juce_InputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_MemoryOutputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_MemoryInputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_MemoryOutputStream.h
+SOURCE=..\..\..\src\io\streams\juce_MemoryInputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_SubregionStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_MemoryOutputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_SubregionStream.h
-# End Source File
-# End Group
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\io\streams\juce_FileInputSource.cpp
+SOURCE=..\..\..\src\io\streams\juce_MemoryOutputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_FileInputSource.h
+SOURCE=..\..\..\src\io\streams\juce_OutputStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\streams\juce_InputSource.h
+SOURCE=..\..\..\src\io\streams\juce_OutputStream.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\juce_InputStream.cpp
+SOURCE=..\..\..\src\io\streams\juce_SubregionStream.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\io\juce_InputStream.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\io\juce_OutputStream.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\io\juce_OutputStream.h
+SOURCE=..\..\..\src\io\streams\juce_SubregionStream.h
 # End Source File
 # End Group
-# Begin Group "misc"
-
-# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\misc\juce_PerformanceCounter.cpp
+SOURCE=..\..\..\src\io\streams\juce_FileInputSource.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\misc\juce_PerformanceCounter.h
+SOURCE=..\..\..\src\io\streams\juce_FileInputSource.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\misc\juce_PlatformUtilities.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\misc\juce_Uuid.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\misc\juce_Uuid.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\misc\juce_ZipFile.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\juce_core\misc\juce_ZipFile.h
+SOURCE=..\..\..\src\io\streams\juce_InputSource.h
 # End Source File
 # End Group
 # Begin Group "text"
@@ -2316,63 +2328,63 @@ SOURCE=..\..\..\src\juce_core\misc\juce_ZipFile.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_CharacterFunctions.cpp
+SOURCE=..\..\..\src\text\juce_CharacterFunctions.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_CharacterFunctions.h
+SOURCE=..\..\..\src\text\juce_CharacterFunctions.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_LocalisedStrings.cpp
+SOURCE=..\..\..\src\text\juce_LocalisedStrings.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_LocalisedStrings.h
+SOURCE=..\..\..\src\text\juce_LocalisedStrings.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_String.cpp
+SOURCE=..\..\..\src\text\juce_String.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_String.h
+SOURCE=..\..\..\src\text\juce_String.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_StringArray.cpp
+SOURCE=..\..\..\src\text\juce_StringArray.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_StringArray.h
+SOURCE=..\..\..\src\text\juce_StringArray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_StringPairArray.cpp
+SOURCE=..\..\..\src\text\juce_StringPairArray.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_StringPairArray.h
+SOURCE=..\..\..\src\text\juce_StringPairArray.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_TextFunctions.h
+SOURCE=..\..\..\src\text\juce_TextFunctions.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_XmlDocument.cpp
+SOURCE=..\..\..\src\text\juce_XmlDocument.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_XmlDocument.h
+SOURCE=..\..\..\src\text\juce_XmlDocument.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_XmlElement.cpp
+SOURCE=..\..\..\src\text\juce_XmlElement.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\text\juce_XmlElement.h
+SOURCE=..\..\..\src\text\juce_XmlElement.h
 # End Source File
 # End Group
 # Begin Group "threads"
@@ -2380,71 +2392,71 @@ SOURCE=..\..\..\src\juce_core\text\juce_XmlElement.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_CriticalSection.h
+SOURCE=..\..\..\src\threads\juce_CriticalSection.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_InterProcessLock.cpp
+SOURCE=..\..\..\src\threads\juce_InterProcessLock.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_InterProcessLock.h
+SOURCE=..\..\..\src\threads\juce_InterProcessLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_Process.h
+SOURCE=..\..\..\src\threads\juce_Process.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ReadWriteLock.cpp
+SOURCE=..\..\..\src\threads\juce_ReadWriteLock.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ReadWriteLock.h
+SOURCE=..\..\..\src\threads\juce_ReadWriteLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ScopedLock.h
+SOURCE=..\..\..\src\threads\juce_ScopedLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ScopedReadLock.h
+SOURCE=..\..\..\src\threads\juce_ScopedReadLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ScopedTryLock.h
+SOURCE=..\..\..\src\threads\juce_ScopedTryLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ScopedWriteLock.h
+SOURCE=..\..\..\src\threads\juce_ScopedWriteLock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_Thread.cpp
+SOURCE=..\..\..\src\threads\juce_Thread.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_Thread.h
+SOURCE=..\..\..\src\threads\juce_Thread.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ThreadPool.cpp
+SOURCE=..\..\..\src\threads\juce_ThreadPool.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_ThreadPool.h
+SOURCE=..\..\..\src\threads\juce_ThreadPool.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_TimeSliceThread.cpp
+SOURCE=..\..\..\src\threads\juce_TimeSliceThread.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_TimeSliceThread.h
+SOURCE=..\..\..\src\threads\juce_TimeSliceThread.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\threads\juce_WaitableEvent.h
+SOURCE=..\..\..\src\threads\juce_WaitableEvent.h
 # End Source File
 # End Group
 # Begin Group "cryptography"
@@ -2452,35 +2464,35 @@ SOURCE=..\..\..\src\juce_core\threads\juce_WaitableEvent.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_BlowFish.cpp
+SOURCE=..\..\..\src\cryptography\juce_BlowFish.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_BlowFish.h
+SOURCE=..\..\..\src\cryptography\juce_BlowFish.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_MD5.cpp
+SOURCE=..\..\..\src\cryptography\juce_MD5.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_MD5.h
+SOURCE=..\..\..\src\cryptography\juce_MD5.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_Primes.cpp
+SOURCE=..\..\..\src\cryptography\juce_Primes.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_Primes.h
+SOURCE=..\..\..\src\cryptography\juce_Primes.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_RSAKey.cpp
+SOURCE=..\..\..\src\cryptography\juce_RSAKey.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\juce_core\cryptography\juce_RSAKey.h
+SOURCE=..\..\..\src\cryptography\juce_RSAKey.h
 # End Source File
 # End Group
 # End Group
@@ -2533,7 +2545,7 @@ SOURCE=..\..\..\src\native\windows\juce_win32_Misc.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\native\windows\juce_win32_NativeCode.cpp
+SOURCE=..\..\..\src\native\juce_win32_NativeCode.cpp
 # End Source File
 # Begin Source File
 
