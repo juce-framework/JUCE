@@ -222,6 +222,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
             if (jpeg_start_decompress (&jpegDecompStruct))
             {
                 image = Image::createNativeImage (Image::RGB, width, height, false);
+                const bool hasAlphaChan = image->hasAlphaChannel();
 
                 for (int y = 0; y < height; ++y)
                 {
@@ -232,11 +233,24 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
                     const uint8* src = *buffer;
                     uint8* dest = pixels;
 
-                    for (int i = width; --i >= 0;)
+                    if (hasAlphaChan)
                     {
-                        ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
-                        dest += pixelStride;
-                        src += 3;
+                        for (int i = width; --i >= 0;)
+                        {
+                            ((PixelARGB*) dest)->setARGB (0xff, src[0], src[1], src[2]);
+                            ((PixelARGB*) dest)->premultiply();
+                            dest += pixelStride;
+                            src += 3;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = width; --i >= 0;)
+                        {
+                            ((PixelRGB*) dest)->setARGB (0xff, src[0], src[1], src[2]);
+                            dest += pixelStride;
+                            src += 3;
+                        }
                     }
 
                     image->releasePixelDataReadWrite (pixels);

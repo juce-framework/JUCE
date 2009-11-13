@@ -174,8 +174,8 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
 
         png_set_add_alpha (pngReadStruct, 0xff, PNG_FILLER_AFTER);
 
-        const bool hasAlphaChan = (colorType & PNG_COLOR_MASK_ALPHA) != 0
-                                    || pngInfoStruct->num_trans > 0;
+        bool hasAlphaChan = (colorType & PNG_COLOR_MASK_ALPHA) != 0
+                              || pngInfoStruct->num_trans > 0;
 
         // Load the image into a temp buffer in the pnglib format..
         uint8* const tempBuffer = (uint8*) juce_malloc (height * (width << 2));
@@ -194,6 +194,8 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         // now convert the data to a juce image format..
         image = Image::createNativeImage (hasAlphaChan ? Image::ARGB : Image::RGB,
                                           width, height, hasAlphaChan);
+
+        hasAlphaChan = image->hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
         int stride, pixelStride;
         uint8* const pixels = image->lockPixelDataReadWrite (0, 0, width, height, stride, pixelStride);
