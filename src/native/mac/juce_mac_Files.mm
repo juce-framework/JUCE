@@ -182,6 +182,8 @@ bool File::isHidden() const throw()
 }
 
 //==============================================================================
+const char* juce_Argv0 = 0;  // referenced from juce_Application.cpp
+
 const File File::getSpecialLocation (const SpecialLocationType type)
 {
     const ScopedAutoReleasePool pool;
@@ -229,6 +231,11 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         tmp.createDirectory();
         return tmp.getFullPathName();
     }
+
+    case invokedExecutableFile:
+        if (juce_Argv0 != 0)
+            return File (String::fromUTF8 ((const uint8*) juce_Argv0));
+        // deliberate fall-through...
 
     case currentExecutableFile:
         return juce_getExecutableFile();

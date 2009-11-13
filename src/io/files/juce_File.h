@@ -779,6 +779,9 @@ public:
 
             On the mac this will return the unix binary, not the package folder - see
             currentApplicationFile for that.
+
+            See also invokedExecutableFile, which is similar, but if the exe was launched from a
+            file link, invokedExecutableFile will return the name of the link.
         */
         currentExecutableFile,
 
@@ -791,6 +794,13 @@ public:
             that's inside it - compare with currentExecutableFile.
         */
         currentApplicationFile,
+
+        /** Returns the file that was invoked to launch this executable.
+            This may differ from currentExecutableFile if the app was started from e.g. a link - this
+            will return the name of the link that was used, whereas currentExecutableFile will return
+            the actual location of the target executable.
+        */
+        invokedExecutableFile,
 
         /** The directory in which applications normally get installed.
 

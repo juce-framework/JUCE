@@ -489,6 +489,7 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
             return File (String (dest));
         }
 
+    case invokedExecutableFile:
     case currentExecutableFile:
     case currentApplicationFile:
         {

@@ -273,9 +273,17 @@ int JUCEApplication::shutdownAppAndClearUp()
  extern int juce_IPhoneMain (int argc, char* argv[], JUCEApplication* app);
 #endif
 
+#if ! JUCE_WINDOWS
+extern const char* juce_Argv0;
+#endif
+
 int JUCEApplication::main (int argc, char* argv[],
                            JUCEApplication* const newApp)
 {
+#if ! JUCE_WINDOWS
+    juce_Argv0 = argv[0];
+#endif
+
 #if JUCE_IPHONE
     const ScopedAutoReleasePool pool;
     return juce_IPhoneMain (argc, argv, newApp);
