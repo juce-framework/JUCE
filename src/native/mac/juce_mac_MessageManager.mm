@@ -48,8 +48,36 @@ struct CallbackMessagePayload
 class AppDelegateRedirector
 {
 public:
-    AppDelegateRedirector() {}
-    virtual ~AppDelegateRedirector() {}
+    AppDelegateRedirector()
+    {
+        CFRunLoopTimerContext context;
+        zerostruct (context);
+        context.info = this;
+
+        timer = CFRunLoopTimerCreate (kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 60.0, 60.0, 0, 0,
+                                      AppDelegateRedirector::timerCallbackStatic, &context);
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
+        CFRunLoopAddTimer (CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
+#else
+        CFRunLoopAddTimer (CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes);
+#endif
+    }
+
+    virtual ~AppDelegateRedirector()
+    {
+        CFRunLoopTimerInvalidate (timer);
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
+        CFRunLoopRemoveTimer (CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
+#else
+        CFRunLoopRemoveTimer (CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes);
+#endif
+        CFRelease (timer);
+
+        while (messages.size() > 0)
+            delete ((Message*) messages.remove(0));
+    }
 
     virtual NSApplicationTerminateReply shouldTerminate()
     {
@@ -90,12 +118,6 @@ public:
         juce_HandleProcessFocusChange();
     }
 
-    virtual void deliverMessage (void* message)
-    {
-        // no need for an mm lock here - deliverMessage locks it
-        MessageManager::getInstance()->deliverMessage (message);
-    }
-
     virtual void performCallback (CallbackMessagePayload* pl)
     {
         pl->result = (*pl->function) (pl->parameter);
@@ -106,23 +128,54 @@ public:
     {
         delete this;
     }
+
+    void postMessage (void* m) throw()
+    {
+        messages.add (m);
+        CFRunLoopTimerSetNextFireDate (timer, CFAbsoluteTimeGetCurrent() - 0.5);
+    }
+
+private:
+    CFRunLoopTimerRef timer;
+    Array <void*, CriticalSection> messages;
+
+    void timerCallback() throw()
+    {
+        const int numToDispatch = jmin (4, messages.size());
+
+        for (int i = 0; i < numToDispatch; ++i)
+        {
+            void* const nextMessage = messages[i];
+
+            if (nextMessage != 0)
+                MessageManager::getInstance()->deliverMessage (nextMessage);
+        }
+
+        messages.removeRange (0, numToDispatch);
+
+        if (messages.size() > 0)
+            CFRunLoopTimerSetNextFireDate (timer, CFAbsoluteTimeGetCurrent() - 0.5);
+    }
+
+    static void timerCallbackStatic (CFRunLoopTimerRef, void* info)
+    {
+        ((AppDelegateRedirector*) info)->timerCallback();
+    }
 };
+
 
 END_JUCE_NAMESPACE
 using namespace JUCE_NAMESPACE;
 
 #define JuceAppDelegate MakeObjCClassName(JuceAppDelegate)
 
-static int numPendingMessages = 0;
-
 @interface JuceAppDelegate   : NSObject
 {
 @private
     id oldDelegate;
-    AppDelegateRedirector* redirector;
 
 @public
-    bool flushingMessages;
+    AppDelegateRedirector* redirector;
 }
 
 - (JuceAppDelegate*) init;
@@ -133,7 +186,6 @@ static int numPendingMessages = 0;
 - (void) applicationDidBecomeActive: (NSNotification*) aNotification;
 - (void) applicationDidResignActive: (NSNotification*) aNotification;
 - (void) applicationWillUnhide: (NSNotification*) aNotification;
-- (void) customEvent: (id) data;
 - (void) performCallback: (id) info;
 - (void) dummyMethod;
 @end
@@ -145,8 +197,6 @@ static int numPendingMessages = 0;
     [super init];
 
     redirector = new AppDelegateRedirector();
-    numPendingMessages = 0;
-    flushingMessages = false;
 
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
@@ -208,19 +258,6 @@ static int numPendingMessages = 0;
 - (void) applicationWillUnhide: (NSNotification*) aNotification
 {
     redirector->focusChanged();
-}
-
-- (void) customEvent: (id) n
-{
-    atomicDecrement (numPendingMessages);
-
-    NSData* data = (NSData*) n;
-    void* message = 0;
-    [data getBytes: &message length: sizeof (message)];
-    [data release];
-
-    if (message != 0 && ! flushingMessages)
-        redirector->deliverMessage (message);
 }
 
 - (void) performCallback: (id) info
@@ -400,18 +437,6 @@ void MessageManager::doPlatformSpecificShutdown()
     {
         [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
         [[NSNotificationCenter defaultCenter] removeObserver: juceAppDelegate];
-
-        // Annoyingly, cancelPerformSelectorsWithTarget can't actually cancel the messages
-        // sent by performSelectorOnMainThread, so need to manually flush these before quitting..
-        juceAppDelegate->flushingMessages = true;
-
-        for (int i = 100; --i >= 0 && numPendingMessages > 0;)
-        {
-            const ScopedAutoReleasePool pool;
-            [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
-                                     beforeDate: [NSDate dateWithTimeIntervalSinceNow: 5 * 0.001]];
-        }
-
         [juceAppDelegate release];
         juceAppDelegate = 0;
     }
@@ -419,11 +444,7 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool juce_postMessageToSystemQueue (void* message)
 {
-    atomicIncrement (numPendingMessages);
-
-    [juceAppDelegate performSelectorOnMainThread: @selector (customEvent:)
-                     withObject: (id) [[NSData alloc] initWithBytes: &message length: (int) sizeof (message)]
-                     waitUntilDone: NO];
+    juceAppDelegate->redirector->postMessage (message);
     return true;
 }
 

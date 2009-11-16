@@ -47,10 +47,9 @@ END_JUCE_NAMESPACE
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
     String dummy;
+
     if (! juce_intialisingApp->initialiseApp (dummy))
-    {
-        // (should quit)
-    }
+        exit (0);
 }
 
 - (void) applicationWillResignActive: (UIApplication*) application

@@ -194,6 +194,7 @@ bool JUCEApplication::initialiseApp (String& commandLine)
 
     initialiseJuce_GUI();
 
+#if ! JUCE_IPHONE
     jassert (appLock == 0); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
@@ -211,6 +212,7 @@ bool JUCEApplication::initialiseApp (String& commandLine)
             return false;
         }
     }
+#endif
 
     // let the app do its setting-up..
     initialise (commandLineParameters);
@@ -289,9 +291,9 @@ int JUCEApplication::main (int argc, char* argv[],
     return juce_IPhoneMain (argc, argv, newApp);
 #else
 
-#if JUCE_MAC
+  #if JUCE_MAC
     const ScopedAutoReleasePool pool;
-#endif
+  #endif
 
     String cmd;
     for (int i = 1; i < argc; ++i)

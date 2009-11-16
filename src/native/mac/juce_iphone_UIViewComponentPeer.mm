@@ -132,7 +132,7 @@ public:
 
     UIWindow* window;
     JuceUIView* view;
-    bool isSharedWindow, fullScreen;
+    bool isSharedWindow, fullScreen, insideDrawRect;
 };
 
 //==============================================================================
@@ -344,7 +344,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
       window (0),
       view (0),
       isSharedWindow (viewToAttachTo != 0),
-      fullScreen (false)
+      fullScreen (false),
+      insideDrawRect (false)
 {
     CGRect r;
     r.origin.x = 0;
@@ -733,7 +734,10 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, view.bounds.size.height));
     CoreGraphicsContext g (cg, view.bounds.size.height);
+
+    insideDrawRect = true;
     handlePaint (g);
+    insideDrawRect = false;
 }
 
 bool UIViewComponentPeer::canBecomeKeyWindow()
@@ -761,19 +765,33 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
+class AsyncRepaintMessage  : public CallbackMessage
+{
+public:
+    UIViewComponentPeer* const peer;
+    const Rectangle rect;
+
+    AsyncRepaintMessage (UIViewComponentPeer* const peer_, const Rectangle& rect_)
+        : peer (peer_), rect (rect_)
+    {
+    }
+
+    void messageCallback()
+    {
+        if (ComponentPeer::isValidPeer (peer))
+            peer->repaint (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+};
+
 void UIViewComponentPeer::repaint (int x, int y, int w, int h)
 {
-    CGRect r = CGRectMake ((float) x, (float) y, (float) w, (float) h);
-
-    if (! MessageManager::getInstance()->isThisTheMessageThread())
+    if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
     {
-        [view performSelectorOnMainThread: @selector (asyncRepaint:)
-                               withObject: [NSData dataWithBytes: &r length: sizeof (r)]
-                            waitUntilDone: NO];
+        (new AsyncRepaintMessage (this, Rectangle (x, y, w, h)))->post();
     }
     else
     {
-        [view setNeedsDisplayInRect: r];
+        [view setNeedsDisplayInRect: CGRectMake ((float) x, (float) y, (float) w, (float) h)];
     }
 }
 

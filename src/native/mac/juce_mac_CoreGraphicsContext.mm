@@ -377,7 +377,7 @@ public:
 
     void drawHorizontalLine (const int y, double left, double right)
     {
-        CGContextFillRect (context, CGRectMake (left, y, right - left, 1.0f));
+        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
     }
 
     void setFont (const Font& newFont)

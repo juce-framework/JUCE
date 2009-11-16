@@ -159,7 +159,7 @@ void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other) throw
 
 void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num) throw()
 {
-    glyphs.removeRange (startIndex, num);
+    glyphs.removeRange (startIndex, num < 0 ? glyphs.size() : num);
 }
 
 //==============================================================================
@@ -222,22 +222,13 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
 
 void GlyphArrangement::appendEllipsis (const Font& font, const float maxXPixels) throw()
 {
-    //const TypefaceGlyphInfo* const dotGlyph = font.getTypeface()->getGlyph (T('.'));
-
-    if (/*dotGlyph != 0 &&*/ glyphs.size() > 0)
+    if (glyphs.size() > 0)
     {
-        //PositionedGlyph* glyph = glyphs.getLast();
-        //const float fontHeight = glyph->font.getHeight();
-        //const float fontHorizontalScale = glyph->font.getHorizontalScale();
-
         Array<int> dotGlyphs;
         Array<float> dotXs;
         font.getGlyphPositions (T(".."), dotGlyphs, dotXs);
 
         const float dx = dotXs[1];
-        //fontHeight * fontHorizontalScale
-                          //  * (font.getExtraKerningFactor() + dotGlyph->getHorizontalSpacing (T('.')));
-
         float xOffset = 0.0f, yOffset = 0.0f;
 
         for (int dotPos = 3; --dotPos >= 0 && glyphs.size() > 0;)
@@ -558,7 +549,7 @@ void GlyphArrangement::addFittedText (const Font& f,
 
             if (startIndex < glyphs.size())
             {
-                glyphs.removeRange (startIndex, glyphs.size());
+                removeRangeOfGlyphs (startIndex, -1);
 
                 if (startIndex - originalStartIndex > 4)
                 {

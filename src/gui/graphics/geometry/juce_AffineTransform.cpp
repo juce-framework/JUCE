@@ -187,8 +187,8 @@ const AffineTransform AffineTransform::rotation (const float angle,
 const AffineTransform AffineTransform::scaled (const float factorX,
                                                const float factorY) const throw()
 {
-    return followedBy (factorX, 0, 0,
-                       0, factorY, 0);
+    return AffineTransform (factorX * mat00, factorX * mat01, factorX * mat02,
+                            factorY * mat10, factorY * mat11, factorY * mat12);
 }
 
 const AffineTransform AffineTransform::scale (const float factorX,

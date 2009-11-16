@@ -117,9 +117,12 @@ void MessageManager::deliverMessage (void* message)
             {
                 quitMessageReceived = true;
             }
-            else if (dynamic_cast <CallbackMessage*> (m) != 0)
+            else
             {
-                (dynamic_cast <CallbackMessage*> (m))->messageCallback();
+                CallbackMessage* const cm = dynamic_cast <CallbackMessage*> (m);
+
+                if (cm != 0)
+                    cm->messageCallback();
             }
         }
     }

@@ -686,6 +686,9 @@ public:
                          atom->getText (passwordCharacter),
                          atomX, 0.0f);
 
+        if (indexToFind - indexInText >= g.getNumGlyphs())
+            return atomRight;
+
         return jmin (atomRight, g.getGlyph (indexToFind - indexInText).getLeft());
     }
 
@@ -703,7 +706,7 @@ public:
                          atomX, 0.0f);
 
         int j;
-        for (j = 0; j < atom->numChars; ++j)
+        for (j = 0; j < g.getNumGlyphs(); ++j)
             if ((g.getGlyph(j).getLeft() + g.getGlyph(j).getRight()) / 2 > xToFind)
                 break;
 

@@ -92,8 +92,6 @@ WaitableEvent::~WaitableEvent() throw()
 bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
 {
     EventStruct* const es = (EventStruct*) internal;
-
-    bool ok = true;
     pthread_mutex_lock (&es->mutex);
 
     if (timeOutMillisecs < 0)
@@ -120,16 +118,15 @@ bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
 
             if (pthread_cond_timedwait (&es->condition, &es->mutex, &time) == ETIMEDOUT)
             {
-                ok = false;
-                break;
+                pthread_mutex_unlock (&es->mutex);
+                return false;
             }
         }
     }
 
     es->triggered = false;
-
     pthread_mutex_unlock (&es->mutex);
-    return ok;
+    return true;
 }
 
 void WaitableEvent::signal() const throw()

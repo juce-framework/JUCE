@@ -397,7 +397,7 @@ private:
 
     void interruptionListener (UInt32 inInterruption)
     {
-        if (inInterruption == kAudioSessionBeginInterruption)
+        /*if (inInterruption == kAudioSessionBeginInterruption)
         {
             isRunning = false;
             AudioOutputUnitStop (audioUnit);
@@ -410,7 +410,7 @@ private:
                 isRunning = true;
                 propertyChanged (0, 0, 0);
             }
-        }
+        }*/
 
         if (inInterruption == kAudioSessionEndInterruption)
         {

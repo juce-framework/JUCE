@@ -1531,20 +1531,34 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 }
 
 //==============================================================================
+class AsyncRepaintMessage  : public CallbackMessage
+{
+public:
+    NSViewComponentPeer* const peer;
+    const Rectangle rect;
+
+    AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle& rect_)
+        : peer (peer_), rect (rect_)
+    {
+    }
+
+    void messageCallback()
+    {
+        if (ComponentPeer::isValidPeer (peer))
+            peer->repaint (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+};
+
 void NSViewComponentPeer::repaint (int x, int y, int w, int h)
 {
-    NSRect r = NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
-                           (float) w, (float) h);
-
     if (insideDrawRect)
     {
-        [view performSelectorOnMainThread: @selector (asyncRepaint:)
-                               withObject: [NSData dataWithBytes: &r length: sizeof (r)]
-                            waitUntilDone: NO];
+        (new AsyncRepaintMessage (this, Rectangle (x, y, w, h)))->post();
     }
     else
     {
-        [view setNeedsDisplayInRect: r];
+        [view setNeedsDisplayInRect: NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
+                                                 (float) w, (float) h)];
     }
 }
 
