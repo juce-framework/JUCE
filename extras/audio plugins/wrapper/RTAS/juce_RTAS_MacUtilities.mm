@@ -69,13 +69,13 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
         GetWindowBounds ((WindowRef) hostWindowRef, kWindowContentRgn, &winBounds);
         NSRect w = [hostWindow frame];
         w.origin.x = winBounds.left;
-        w.origin.y = [[NSScreen mainScreen] frame].size.height - winBounds.bottom;
+        w.origin.y = [[hostWindow screen] frame].size.height - winBounds.bottom;
         [hostWindow setFrame: w display: NO animate: NO];
     }
 #endif
 
     NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
-    windowPos.y = [[NSScreen mainScreen] frame].size.height - (windowPos.y + f.size.height);
+    windowPos.y = [[hostWindow screen] frame].size.height - (windowPos.y + f.size.height);
 
     comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);
 
