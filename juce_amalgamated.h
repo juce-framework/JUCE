@@ -1994,6 +1994,22 @@ public:
     /** Returns a copy of this string with any whitespace characters removed from the end. */
     const String trimEnd() const throw();
 
+    /** Returns a copy of this string, having removed a specified set of characters from its start.
+        Characters are removed from the start of the string until it finds one that is not in the
+        specified set, and then it stops.
+        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @see trim, trimStart, trimCharactersAtEnd
+    */
+    const String trimCharactersAtStart (const tchar* charactersToTrim) const throw();
+
+    /** Returns a copy of this string, having removed a specified set of characters from its end.
+        Characters are removed from the end of the string until it finds one that is not in the
+        specified set, and then it stops.
+        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @see trim, trimEnd, trimCharactersAtStart
+    */
+    const String trimCharactersAtEnd (const tchar* charactersToTrim) const throw();
+
     /** Returns an upper-case version of this string. */
     const String toUpperCase() const throw();
 
@@ -13063,11 +13079,14 @@ public:
         which will spawn new sockets for each new connection, so that these can
         be handled in parallel by other threads.
 
-        This returns true if it manages to open the socket successfully.
+        @param portNumber       the port number to listen on
+        @param localHostName    the interface address to listen on - pass an empty
+                                string to listen on all addresses
+        @returns    true if it manages to open the socket successfully.
 
         @see waitForNextConnection
     */
-    bool createListener (const int portNumber);
+    bool createListener (const int portNumber, const String& localHostName = String::empty);
 
     /** When in "listener" mode, this waits for a connection and spawns it as a new
         socket.
@@ -44635,8 +44654,8 @@ public:
 
         /** Called by a CodeDocument when it is altered.
         */
-        virtual void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
-                                          const CodeDocument::Position& affectedTextEnd) = 0;
+        virtual void codeDocumentChanged (const Position& affectedTextStart,
+                                          const Position& affectedTextEnd) = 0;
     };
 
     /** Registers a listener object to receive callbacks when the document changes.
@@ -44703,7 +44722,8 @@ public:
 private:
     friend class CodeDocumentInsertAction;
     friend class CodeDocumentDeleteAction;
-    friend class CodeDocument::Iterator;
+    friend class Iterator;
+    friend class Position;
 
     OwnedArray <CodeDocumentLine> lines;
     Array <Position*> positionsToMaintain;

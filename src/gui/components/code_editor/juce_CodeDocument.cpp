@@ -778,8 +778,8 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             lastAffectedLine = lines.size();
         }
 
-        int lineStart = newFirstLine->lineStartInFile;
-        for (int i = firstAffectedLine; i < lines.size(); ++i)
+        int i, lineStart = newFirstLine->lineStartInFile;
+        for (i = firstAffectedLine; i < lines.size(); ++i)
         {
             CodeDocumentLine* const l = lines.getUnchecked (i);
             l->lineStartInFile = lineStart;
@@ -787,7 +787,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
         }
 
         const int newTextLength = text.length();
-        for (int i = 0; i < positionsToMaintain.size(); ++i)
+        for (i = 0; i < positionsToMaintain.size(); ++i)
         {
             CodeDocument::Position* const p = positionsToMaintain.getUnchecked(i);
 
@@ -879,7 +879,8 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
             lines.removeRange (firstAffectedLine + 1, numLinesToRemove);
         }
 
-        for (int i = firstAffectedLine + 1; i < lines.size(); ++i)
+        int i;
+        for (i = firstAffectedLine + 1; i < lines.size(); ++i)
         {
             CodeDocumentLine* const l = lines.getUnchecked (i);
             const CodeDocumentLine* const previousLine = lines.getUnchecked (i - 1);
@@ -888,7 +889,7 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
 
         const int totalChars = getNumCharacters();
 
-        for (int i = 0; i < positionsToMaintain.size(); ++i)
+        for (i = 0; i < positionsToMaintain.size(); ++i)
         {
             CodeDocument::Position* p = positionsToMaintain.getUnchecked(i);
 

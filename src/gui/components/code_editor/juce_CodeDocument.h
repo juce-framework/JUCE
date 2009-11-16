@@ -302,8 +302,8 @@ public:
 
         /** Called by a CodeDocument when it is altered.
         */
-        virtual void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
-                                          const CodeDocument::Position& affectedTextEnd) = 0;
+        virtual void codeDocumentChanged (const Position& affectedTextStart,
+                                          const Position& affectedTextEnd) = 0;
     };
 
     /** Registers a listener object to receive callbacks when the document changes.
@@ -372,7 +372,8 @@ public:
 private:
     friend class CodeDocumentInsertAction;
     friend class CodeDocumentDeleteAction;
-    friend class CodeDocument::Iterator;
+    friend class Iterator;
+    friend class Position;
 
     OwnedArray <CodeDocumentLine> lines;
     Array <Position*> positionsToMaintain;

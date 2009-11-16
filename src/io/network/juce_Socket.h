@@ -135,11 +135,14 @@ public:
         which will spawn new sockets for each new connection, so that these can
         be handled in parallel by other threads.
 
-        This returns true if it manages to open the socket successfully.
+        @param portNumber       the port number to listen on
+        @param localHostName    the interface address to listen on - pass an empty
+                                string to listen on all addresses
+        @returns    true if it manages to open the socket successfully.
 
         @see waitForNextConnection
     */
-    bool createListener (const int portNumber);
+    bool createListener (const int portNumber, const String& localHostName = String::empty);
 
     /** When in "listener" mode, this waits for a connection and spawns it as a new
         socket.

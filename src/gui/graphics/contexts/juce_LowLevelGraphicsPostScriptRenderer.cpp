@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_LowLevelGraphicsPostScriptRenderer.h"
-#include "juce_EdgeTable.h"
 #include "../imaging/juce_Image.h"
 #include "../colour/juce_PixelFormats.h"
 #include "../geometry/juce_PathStrokeType.h"

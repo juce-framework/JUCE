@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Graphics.h"
 #include "../fonts/juce_GlyphArrangement.h"
 #include "../geometry/juce_PathStrokeType.h"
-#include "juce_EdgeTable.h"
 #include "juce_LowLevelGraphicsContext.h"
 #include "../brushes/juce_GradientBrush.h"
 #include "../brushes/juce_ImageBrush.h"

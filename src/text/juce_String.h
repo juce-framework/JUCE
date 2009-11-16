@@ -613,6 +613,22 @@ public:
     /** Returns a copy of this string with any whitespace characters removed from the end. */
     const String trimEnd() const throw();
 
+    /** Returns a copy of this string, having removed a specified set of characters from its start.
+        Characters are removed from the start of the string until it finds one that is not in the
+        specified set, and then it stops.
+        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @see trim, trimStart, trimCharactersAtEnd
+    */
+    const String trimCharactersAtStart (const tchar* charactersToTrim) const throw();
+
+    /** Returns a copy of this string, having removed a specified set of characters from its end.
+        Characters are removed from the end of the string until it finds one that is not in the
+        specified set, and then it stops.
+        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @see trim, trimEnd, trimCharactersAtStart
+    */
+    const String trimCharactersAtEnd (const tchar* charactersToTrim) const throw();
+
     //==============================================================================
     /** Returns an upper-case version of this string. */
     const String toUpperCase() const throw();

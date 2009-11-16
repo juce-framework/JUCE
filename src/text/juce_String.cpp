@@ -1748,6 +1748,39 @@ const String String::trimEnd() const throw()
     return String (text->text, (int) (++endT - text->text));
 }
 
+const String String::trimCharactersAtStart (const tchar* charactersToTrim) const throw()
+{
+    jassert (charactersToTrim != 0);
+
+    if (isEmpty())
+        return empty;
+
+    const tchar* t = text->text;
+
+    while (CharacterFunctions::indexOfCharFast (charactersToTrim, *t) >= 0)
+        ++t;
+
+    if (t == text->text)
+        return *this;
+    else
+        return String (t);
+}
+
+const String String::trimCharactersAtEnd (const tchar* charactersToTrim) const throw()
+{
+    jassert (charactersToTrim != 0);
+
+    if (isEmpty())
+        return empty;
+
+    const tchar* endT = text->text + (CharacterFunctions::length (text->text) - 1);
+
+    while ((endT >= text->text) && CharacterFunctions::indexOfCharFast (charactersToTrim, *endT) >= 0)
+        --endT;
+
+    return String (text->text, (int) (++endT - text->text));
+}
+
 //==============================================================================
 const String String::retainCharacters (const tchar* const charactersToRetain) const throw()
 {

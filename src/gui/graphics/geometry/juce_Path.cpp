@@ -1604,7 +1604,7 @@ Image* Path::createMaskBitmap (const AffineTransform& transform,
     Image* im = Image::createNativeImage (Image::SingleChannel, imagePosition.getWidth(), imagePosition.getHeight(), true);
 
     EdgeTable edgeTable (Rectangle (0, 0, imagePosition.getWidth(), imagePosition.getHeight()),
-                         *this, transform.translated (-imagePosition.getX(), -imagePosition.getY()));
+                         *this, transform.translated ((float) -imagePosition.getX(), (float) -imagePosition.getY()));
 
     int stride, pixelStride;
     uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, imagePosition.getWidth(), imagePosition.getHeight(), stride, pixelStride);

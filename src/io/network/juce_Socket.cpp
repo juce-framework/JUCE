@@ -429,7 +429,7 @@ void StreamingSocket::close()
 }
 
 //==============================================================================
-bool StreamingSocket::createListener (const int newPortNumber)
+bool StreamingSocket::createListener (const int newPortNumber, const String& localHostName)
 {
     if (connected)
         close();
@@ -442,6 +442,10 @@ bool StreamingSocket::createListener (const int newPortNumber)
     zerostruct (servTmpAddr);
     servTmpAddr.sin_family = PF_INET;
     servTmpAddr.sin_addr.s_addr = htonl (INADDR_ANY);
+
+    if (localHostName.isNotEmpty())
+        servTmpAddr.sin_addr.s_addr = ::inet_addr (localHostName.toUTF8());
+
     servTmpAddr.sin_port = htons ((uint16) portNumber);
 
     handle = (int) socket (AF_INET, SOCK_STREAM, 0);

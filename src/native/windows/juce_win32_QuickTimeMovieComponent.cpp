@@ -477,7 +477,7 @@ bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
 bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
                                          const bool isControllerVisible)
 {
-    return loadMovie ((InputStream*) movieURL_.createInputStream (false), isControllerVisible);
+    return loadMovie ((InputStream*) movieURL.createInputStream (false), isControllerVisible);
 }
 
 void QuickTimeMovieComponent::goToStart()
