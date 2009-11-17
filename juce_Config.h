@@ -136,11 +136,18 @@
 #endif
 
 //=============================================================================
-/** This flag lets you enable support for CD-burning. You might want to disable
+/** This flag lets you enable the AudioCDBurner class. You might want to disable
     it to build without the MS SDK under windows.
 */
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
   #define JUCE_USE_CDBURNER 1
+#endif
+
+/** This flag lets you enable support for the AudioCDReader class. You might want to disable
+    it to build without the MS SDK under windows.
+*/
+#ifndef JUCE_USE_CDREADER
+  #define JUCE_USE_CDREADER 1
 #endif
 
 //=============================================================================

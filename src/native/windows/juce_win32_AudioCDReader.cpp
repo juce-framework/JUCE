@@ -25,8 +25,9 @@
 
 // (This file gets included by juce_win32_NativeCode.cpp, rather than being
 // compiled on its own).
-#if JUCE_INCLUDED_FILE && JUCE_USE_CDBURNER
+#if JUCE_INCLUDED_FILE
 
+#if JUCE_USE_CDREADER
 
 //***************************************************************************
 //       %%% TARGET STATUS VALUES %%%
@@ -2069,6 +2070,9 @@ void AudioCDReader::ejectDisk()
     ((CDDeviceWrapper*) handle)->cdH->openDrawer (true);
 }
 
+#endif
+
+#if JUCE_USE_CDBURNER
 
 //==============================================================================
 static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
@@ -2114,25 +2118,6 @@ static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMa
 
                 drEnum->Release();
             }
-
-            /*if (redbookFormat != 0)
-            {
-                IEnumDiscMasterFormats* mfEnum;
-
-                if (SUCCEEDED (dm->EnumDiscMasterFormats (&mfEnum)))
-                {
-                    IID formatIID;
-                    DWORD dummy;
-
-                    while (mfEnum->Next (1, &formatIID, &dummy) == S_OK)
-                    {
-                    }
-
-                    mfEnum->Release();
-                }
-
-                redbookFormat
-            }*/
 
             if (master == 0)
                 dm->Close();
@@ -2390,4 +2375,5 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
     return ok && hr == S_OK;
 }
 
+#endif
 #endif

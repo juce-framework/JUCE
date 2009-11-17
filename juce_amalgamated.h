@@ -314,11 +314,18 @@
   #define JUCE_USE_OGGVORBIS 1
 #endif
 
-/** This flag lets you enable support for CD-burning. You might want to disable
+/** This flag lets you enable the AudioCDBurner class. You might want to disable
     it to build without the MS SDK under windows.
 */
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
   #define JUCE_USE_CDBURNER 1
+#endif
+
+/** This flag lets you enable support for the AudioCDReader class. You might want to disable
+    it to build without the MS SDK under windows.
+*/
+#ifndef JUCE_USE_CDREADER
+  #define JUCE_USE_CDREADER 1
 #endif
 
 /** Enabling this provides support for cameras, using the CameraDevice class
@@ -7225,6 +7232,11 @@ public:
 
     /** MAC ONLY - Adds an item to the dock */
     static void addItemToDock (const File& file);
+
+    /** MAC ONLY - Returns the current OS version number.
+        E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
+    */
+    static int getOSXMinorVersionNumber() throw();
 #endif
 
 #if JUCE_WINDOWS || DOXYGEN
@@ -37208,6 +37220,8 @@ public:
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
 #define __JUCE_AUDIOCDBURNER_JUCEHEADER__
 
+#if JUCE_USE_CDBURNER
+
 /**
 */
 class AudioCDBurner
@@ -37278,6 +37292,7 @@ private:
     void* internal;
 };
 
+#endif
 #endif   // __JUCE_AUDIOCDBURNER_JUCEHEADER__
 /********* End of inlined file: juce_AudioCDBurner.h *********/
 
@@ -37287,6 +37302,8 @@ private:
 /********* Start of inlined file: juce_AudioCDReader.h *********/
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 #define __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+#if JUCE_USE_CDREADER
 
 #if JUCE_MAC
 
@@ -37434,6 +37451,7 @@ private:
     const AudioCDReader& operator= (const AudioCDReader&);
 };
 
+#endif
 #endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
 /********* End of inlined file: juce_AudioCDReader.h *********/
 

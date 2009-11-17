@@ -200,9 +200,15 @@ public:
             }
             else if (inID == kAudioUnitProperty_CocoaUI)
             {
-                outDataSize = sizeof (AudioUnitCocoaViewInfo);
-                outWritable = true;
-                return noErr;
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+                // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
+                if (PlatformUtilities::getOSXMinorVersionNumber() > 4)
+#endif
+                {
+                    outDataSize = sizeof (AudioUnitCocoaViewInfo);
+                    outWritable = true;
+                    return noErr;
+                }
             }
         }
 
@@ -234,18 +240,24 @@ public:
             }
             else if (inID == kAudioUnitProperty_CocoaUI)
             {
-                const ScopedAutoReleasePool pool;
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
+                // (On 10.4, there's a random obj-c dispatching crash when trying to load a cocoa UI)
+                if (PlatformUtilities::getOSXMinorVersionNumber() > 4)
+#endif
+                {
+                    const ScopedAutoReleasePool pool;
 
-                AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) outData;
+                    AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) outData;
 
-                const File bundleFile (File::getSpecialLocation (File::currentApplicationFile));
-                NSString* bundlePath = [NSString stringWithUTF8String: (const char*) bundleFile.getFullPathName().toUTF8()];
-                NSBundle* b = [NSBundle bundleWithPath: bundlePath];
+                    const File bundleFile (File::getSpecialLocation (File::currentApplicationFile));
+                    NSString* bundlePath = [NSString stringWithUTF8String: (const char*) bundleFile.getFullPathName().toUTF8()];
+                    NSBundle* b = [NSBundle bundleWithPath: bundlePath];
 
-                info->mCocoaAUViewClass[0] = (CFStringRef) [[[JuceUICreationClass class] className] retain];
-                info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [b bundlePath]] retain];
+                    info->mCocoaAUViewClass[0] = (CFStringRef) [[[JuceUICreationClass class] className] retain];
+                    info->mCocoaAUViewBundleLocation = (CFURLRef) [[NSURL fileURLWithPath: [b bundlePath]] retain];
 
-                return noErr;
+                    return noErr;
+                }
             }
         }
 

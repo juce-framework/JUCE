@@ -516,6 +516,8 @@ private:
     void drawGradient() const throw()
     {
         CGContextSetAlpha (context, 1.0f);
+        CGContextSetInterpolationQuality (context, kCGInterpolationDefault); // (This is required for 10.4, where there's a crash if
+                                                                             // you draw a gradient with high quality interp enabled).
         CGShadingRef shading = createGradient (state->gradient);
         CGContextDrawShading (context, shading);
         CGShadingRelease (shading);

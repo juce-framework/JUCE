@@ -26,6 +26,8 @@
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
 #define __JUCE_AUDIOCDBURNER_JUCEHEADER__
 
+#if JUCE_USE_CDBURNER
+
 #include "juce_AudioFormatReader.h"
 #include "../audio_sources/juce_AudioSource.h"
 
@@ -104,4 +106,5 @@ private:
 };
 
 
+#endif
 #endif   // __JUCE_AUDIOCDBURNER_JUCEHEADER__

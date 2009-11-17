@@ -26,6 +26,8 @@
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 #define __JUCE_AUDIOCDREADER_JUCEHEADER__
 
+#if JUCE_USE_CDREADER
+
 #include "juce_AudioFormatReader.h"
 #include "../../text/juce_StringArray.h"
 #if JUCE_MAC
@@ -177,4 +179,5 @@ private:
     const AudioCDReader& operator= (const AudioCDReader&);
 };
 
+#endif
 #endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__

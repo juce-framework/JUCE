@@ -71,9 +71,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/components/special/juce_SystemTrayIconComponent.h"
 #include "../gui/components/filebrowser/juce_FileChooser.h"
 #include "../gui/components/lookandfeel/juce_LookAndFeel.h"
-#if JUCE_USE_CDBURNER
 #include "../audio/audio_file_formats/juce_AudioCDBurner.h"
-#endif
 #include "../audio/audio_file_formats/juce_AudioCDReader.h"
 #include "../audio/audio_sources/juce_AudioSource.h"
 #include "../audio/dsp/juce_AudioDataConverters.h"

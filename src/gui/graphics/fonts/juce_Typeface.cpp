@@ -240,7 +240,7 @@ void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_
 {
     for (int i = 0; i < numCharacters; ++i)
     {
-        const juce_wchar c = characterStartIndex + i;
+        const juce_wchar c = (juce_wchar) (characterStartIndex + i);
 
         Array <int> glyphIndexes;
         Array <float> offsets;

@@ -27,7 +27,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#if JUCE_MAC
+#if JUCE_MAC && JUCE_USE_CDREADER
 
 //==============================================================================
 // Mac version doesn't need any native code because it's all done with files..

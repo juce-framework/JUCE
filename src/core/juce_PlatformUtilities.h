@@ -73,6 +73,11 @@ public:
 
     /** MAC ONLY - Adds an item to the dock */
     static void addItemToDock (const File& file);
+
+    /** MAC ONLY - Returns the current OS version number.
+        E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
+    */
+    static int getOSXMinorVersionNumber() throw();
 #endif
 
 
