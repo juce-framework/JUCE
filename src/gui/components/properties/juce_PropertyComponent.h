@@ -47,7 +47,7 @@ class EditableProperty;
     @see PropertyPanel, TextPropertyComponent, SliderPropertyComponent,
          ChoicePropertyComponent, ButtonPropertyComponent, BooleanPropertyComponent
 */
-class JUCE_API  PropertyComponent  : public Component, 
+class JUCE_API  PropertyComponent  : public Component,
                                      public SettableTooltipClient
 {
 public:

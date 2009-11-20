@@ -440,6 +440,17 @@
   #define JUCE_STRINGS_ARE_UNICODE 1
 #endif
 
+// If only building the core classes, we can explicitly turn off some features to avoid including them:
+#if JUCE_ONLY_BUILD_CORE_LIBRARY
+  #define JUCE_QUICKTIME 0
+  #define JUCE_OPENGL 0
+  #define JUCE_USE_CDBURNER 0
+  #define JUCE_USE_CDREADER 0
+  #define JUCE_WEB_BROWSER 0
+  #define JUCE_PLUGINHOST_AU 0
+  #define JUCE_PLUGINHOST_VST 0
+#endif
+
 #endif
 /********* End of inlined file: juce_Config.h *********/
 
@@ -30410,6 +30421,61 @@ private:
 
 class EditableProperty;
 
+/********* Start of inlined file: juce_TooltipClient.h *********/
+#ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+#define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+
+/**
+    Components that want to use pop-up tooltips should implement this interface.
+
+    A TooltipWindow will wait for the mouse to hover over a component that
+    implements the TooltipClient interface, and when it finds one, it will display
+    the tooltip returned by its getTooltip() method.
+
+    @see TooltipWindow, SettableTooltipClient
+*/
+class JUCE_API  TooltipClient
+{
+public:
+    /** Destructor. */
+    virtual ~TooltipClient()  {}
+
+    /** Returns the string that this object wants to show as its tooltip. */
+    virtual const String getTooltip() = 0;
+};
+
+/**
+    An implementation of TooltipClient that stores the tooltip string and a method
+    for changing it.
+
+    This makes it easy to add a tooltip to a custom component, by simply adding this
+    as a base class and calling setTooltip().
+
+    Many of the Juce widgets already use this as a base class to implement their
+    tooltips.
+
+    @see TooltipClient, TooltipWindow
+*/
+class JUCE_API  SettableTooltipClient   : public TooltipClient
+{
+public:
+
+    /** Destructor. */
+    virtual ~SettableTooltipClient()                                {}
+
+    virtual void setTooltip (const String& newTooltip)              { tooltipString = newTooltip; }
+
+    virtual const String getTooltip()                               { return tooltipString; }
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    String tooltipString;
+};
+
+#endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
+/********* End of inlined file: juce_TooltipClient.h *********/
+
 /**
     A base class for a component that goes in a PropertyPanel and displays one of
     an item's properties.
@@ -30425,7 +30491,8 @@ class EditableProperty;
     @see PropertyPanel, TextPropertyComponent, SliderPropertyComponent,
          ChoicePropertyComponent, ButtonPropertyComponent, BooleanPropertyComponent
 */
-class JUCE_API  PropertyComponent  : public Component
+class JUCE_API  PropertyComponent  : public Component,
+                                     public SettableTooltipClient
 {
 public:
 
@@ -30508,61 +30575,6 @@ protected:
 /********* Start of inlined file: juce_TooltipWindow.h *********/
 #ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
 #define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-/********* Start of inlined file: juce_TooltipClient.h *********/
-#ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-#define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-
-/**
-    Components that want to use pop-up tooltips should implement this interface.
-
-    A TooltipWindow will wait for the mouse to hover over a component that
-    implements the TooltipClient interface, and when it finds one, it will display
-    the tooltip returned by its getTooltip() method.
-
-    @see TooltipWindow, SettableTooltipClient
-*/
-class JUCE_API  TooltipClient
-{
-public:
-    /** Destructor. */
-    virtual ~TooltipClient()  {}
-
-    /** Returns the string that this object wants to show as its tooltip. */
-    virtual const String getTooltip() = 0;
-};
-
-/**
-    An implementation of TooltipClient that stores the tooltip string and a method
-    for changing it.
-
-    This makes it easy to add a tooltip to a custom component, by simply adding this
-    as a base class and calling setTooltip().
-
-    Many of the Juce widgets already use this as a base class to implement their
-    tooltips.
-
-    @see TooltipClient, TooltipWindow
-*/
-class JUCE_API  SettableTooltipClient   : public TooltipClient
-{
-public:
-
-    /** Destructor. */
-    virtual ~SettableTooltipClient()                                {}
-
-    virtual void setTooltip (const String& newTooltip)              { tooltipString = newTooltip; }
-
-    virtual const String getTooltip()                               { return tooltipString; }
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    String tooltipString;
-};
-
-#endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-/********* End of inlined file: juce_TooltipClient.h *********/
 
 /**
     A window that displays a pop-up tooltip when the mouse hovers over another component.
@@ -30841,9 +30853,7 @@ public:
         The button registers itself with its top-level parent component for keypresses.
 
         Note that a different way of linking buttons to keypresses is by using the
-        setKeyPressToTrigger() method to invoke a command - the difference being that
-        setting a shortcut allows the button to be temporarily linked to a keypress
-        only while it's on-screen.
+        setCommandToTrigger() method to invoke a command.
 
         @see clearShortcuts
     */
@@ -54456,7 +54466,7 @@ public:
         component isn't visible can cause problems, because QuickTime needs a window
         handle to do its stuff.
 
-        @param movieFile    the .mov file to open
+        @param movieURL    the .mov file to open
         @param isControllerVisible  whether to show a controller bar at the bottom
         @returns true if the movie opens successfully
     */
