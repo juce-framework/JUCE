@@ -71,8 +71,8 @@ extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 #define appendMacro2(a, b, c, d) appendMacro1(a, b, c, d)
 #define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JucePlugin_AUExportPrefix)
 
-#define JuceUICreationClass     MakeObjCClassName(JuceUICreationClass)
-#define JuceUIViewClass         MakeObjCClassName(JuceUIViewClass)
+#define JuceUICreationClass         JucePlugin_AUCocoaViewClassName
+#define JuceUIViewClass             MakeObjCClassName(JuceUIViewClass)
 
 class JuceAU;
 class EditorCompHolder;

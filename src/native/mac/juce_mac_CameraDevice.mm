@@ -265,7 +265,7 @@ END_JUCE_NAMESPACE
          fromConnection: (QTCaptureConnection*) connection
 {
     if (firstRecordedTime == 0)
-        firstRecordedTime = new Time (Time::getCurrentTime());
+        firstRecordedTime = new Time (Time::getCurrentTime() - RelativeTime::milliseconds (50));
 }
 
 @end

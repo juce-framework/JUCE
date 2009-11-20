@@ -2474,7 +2474,7 @@ void LookAndFeel::drawPropertyPanelSectionHeader (Graphics& g, const String& nam
     const int buttonSize = (height * 3) / 4;
     const int buttonIndent = (height - buttonSize) / 2;
 
-    drawTreeviewPlusMinusBox (g, buttonIndent, buttonIndent, buttonSize, buttonSize, ! isOpen);
+    drawTreeviewPlusMinusBox (g, buttonIndent, buttonIndent, buttonSize, buttonSize, ! isOpen, false);
 
     const int textX = buttonIndent * 2 + buttonSize + 2;
 

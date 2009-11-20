@@ -235,9 +235,7 @@ public:
         The button registers itself with its top-level parent component for keypresses.
 
         Note that a different way of linking buttons to keypresses is by using the
-        setKeyPressToTrigger() method to invoke a command - the difference being that
-        setting a shortcut allows the button to be temporarily linked to a keypress
-        only while it's on-screen.
+        setCommandToTrigger() method to invoke a command.
 
         @see clearShortcuts
     */

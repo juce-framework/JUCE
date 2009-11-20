@@ -88,7 +88,7 @@ public:
         component isn't visible can cause problems, because QuickTime needs a window
         handle to do its stuff.
 
-        @param movieFile    the .mov file to open
+        @param movieURL    the .mov file to open
         @param isControllerVisible  whether to show a controller bar at the bottom
         @returns true if the movie opens successfully
     */

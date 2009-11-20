@@ -102,7 +102,7 @@ public:
 
     bool moreThanOneInstanceAllowed()
     {
-        return false;
+        return true;
     }
 
     void anotherInstanceStarted (const String& commandLine)

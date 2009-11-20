@@ -29,7 +29,7 @@
 class EditableProperty;
 
 #include "../juce_Component.h"
-
+#include "../mouse/juce_TooltipClient.h"
 
 //==============================================================================
 /**
@@ -47,7 +47,8 @@ class EditableProperty;
     @see PropertyPanel, TextPropertyComponent, SliderPropertyComponent,
          ChoicePropertyComponent, ButtonPropertyComponent, BooleanPropertyComponent
 */
-class JUCE_API  PropertyComponent  : public Component
+class JUCE_API  PropertyComponent  : public Component, 
+                                     public SettableTooltipClient
 {
 public:
     //==============================================================================

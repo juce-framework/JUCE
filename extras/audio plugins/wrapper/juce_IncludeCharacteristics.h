@@ -102,4 +102,9 @@
  #error "You need to define the JucePlugin_WinBag_path value in your JucePluginCharacteristics.h file!"
 #endif
 
+#if JucePlugin_Build_AU && ! defined (JucePlugin_AUCocoaViewClassName)
+ #error "You need to define the JucePlugin_AUCocoaViewClassName value in your JucePluginCharacteristics.h file!"
+#endif
+
+
 #endif   // __JUCE_INCLUDECHARACTERISTICS_JUCEHEADER__

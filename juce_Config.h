@@ -272,5 +272,15 @@
 #endif
 
 //=============================================================================
+// If only building the core classes, we can explicitly turn off some features to avoid including them:
+#if JUCE_ONLY_BUILD_CORE_LIBRARY
+  #define JUCE_QUICKTIME 0
+  #define JUCE_OPENGL 0
+  #define JUCE_USE_CDBURNER 0
+  #define JUCE_USE_CDREADER 0
+  #define JUCE_WEB_BROWSER 0
+  #define JUCE_PLUGINHOST_AU 0
+  #define JUCE_PLUGINHOST_VST 0
+#endif
 
 #endif
