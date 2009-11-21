@@ -553,7 +553,6 @@
 		};
 		C0E91ACA08A95435008D54AB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 846929130A49DB9C00314975 /* juce.xcconfig */;
 			buildSettings = {
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -565,7 +564,6 @@
 		};
 		C0E91ACB08A95435008D54AB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 846929130A49DB9C00314975 /* juce.xcconfig */;
 			buildSettings = {
 				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;

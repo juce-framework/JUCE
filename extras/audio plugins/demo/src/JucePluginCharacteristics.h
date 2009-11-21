@@ -254,7 +254,7 @@
     actually show it to the user in a list (why??)... Anyway, this macro lets you
     provide a sensible name for that class to make it clear what plugin it refers to.
     Obviously this has to be a valid obj-C class name.
- 
+
     Just to make things a little more complicated, this name must also be unique to this
     precise version of your software. Otherwise, if the host loads two plugins that use the
     same class name, the obj-C linker will almost certainly connect the wrong modules together

@@ -105,7 +105,13 @@ public:
     {
         StringArray files;
         for (unsigned int i = 0; i < [filenames count]; ++i)
-            files.add (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
+        {
+            String filename (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
+            if (filename.containsChar (T(' ')))
+                filename = filename.quoted('"');
+
+            files.add (filename);
+        }
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)
         {

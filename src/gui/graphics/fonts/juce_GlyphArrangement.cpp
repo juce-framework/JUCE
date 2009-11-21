@@ -200,7 +200,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
             {
                 // curtail the string if it's too wide..
                 if (useEllipsis && textLen > 3 && glyphs.size() >= 3)
-                    appendEllipsis (font, xOffset + maxWidthPixels);
+                    insertEllipsis (font, xOffset + maxWidthPixels, 0, glyphs.size());
 
                 break;
             }
@@ -220,8 +220,11 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
     }
 }
 
-void GlyphArrangement::appendEllipsis (const Font& font, const float maxXPixels) throw()
+int GlyphArrangement::insertEllipsis (const Font& font, const float maxXPos,
+                                      const int startIndex, int endIndex) throw()
 {
+    int numDeleted = 0;
+
     if (glyphs.size() > 0)
     {
         Array<int> dotGlyphs;
@@ -231,15 +234,16 @@ void GlyphArrangement::appendEllipsis (const Font& font, const float maxXPixels)
         const float dx = dotXs[1];
         float xOffset = 0.0f, yOffset = 0.0f;
 
-        for (int dotPos = 3; --dotPos >= 0 && glyphs.size() > 0;)
+        while (endIndex > startIndex)
         {
-            const PositionedGlyph* pg = glyphs.getUnchecked (glyphs.size() - 1);
+            const PositionedGlyph* pg = glyphs.getUnchecked (--endIndex);
             xOffset = pg->x;
             yOffset = pg->y;
 
-            glyphs.removeLast();
+            glyphs.remove (endIndex);
+            ++numDeleted;
 
-            if (xOffset + dx * 3 <= maxXPixels)
+            if (xOffset + dx * 3 <= maxXPos)
                 break;
         }
 
@@ -252,11 +256,17 @@ void GlyphArrangement::appendEllipsis (const Font& font, const float maxXPixels)
             pg->font = font;
             pg->character = '.';
             pg->glyph = dotGlyphs.getFirst();
-            glyphs.add (pg);
+            glyphs.insert (endIndex++, pg);
+            --numDeleted;
 
             xOffset += dx;
+
+            if (xOffset > maxXPos)
+                break;
         }
     }
+
+    return numDeleted;
 }
 
 void GlyphArrangement::addJustifiedText (const Font& font,
@@ -343,8 +353,8 @@ void GlyphArrangement::addJustifiedText (const Font& font,
 
 void GlyphArrangement::addFittedText (const Font& f,
                                       const String& text,
-                                      float x, float y,
-                                      float width, float height,
+                                      const float x, const float y,
+                                      const float width, const float height,
                                       const Justification& layout,
                                       int maximumLines,
                                       const float minimumHorizontalScale) throw()
@@ -392,37 +402,24 @@ void GlyphArrangement::addFittedText (const Font& f,
         if (lineWidth * minimumHorizontalScale < width)
         {
             if (lineWidth > width)
-            {
                 stretchRangeOfGlyphs (startIndex, glyphs.size() - startIndex,
                                       width / lineWidth);
-
-            }
 
             justifyGlyphs (startIndex, glyphs.size() - startIndex,
                            x, y, width, height, layout);
         }
         else if (maximumLines <= 1)
         {
-            const float ratio = jmax (minimumHorizontalScale, width / lineWidth);
-
-            stretchRangeOfGlyphs (startIndex, glyphs.size() - startIndex, ratio);
-
-            while (glyphs.size() > 0 && glyphs.getUnchecked (glyphs.size() - 1)->getRight() >= x + width)
-                glyphs.removeLast();
-
-            appendEllipsis (f, x + width);
-
-            justifyGlyphs (startIndex, glyphs.size() - startIndex,
-                           x, y, width, height, layout);
+            fitLineIntoSpace (startIndex, glyphs.size() - startIndex,
+                              x, y, width, height, f, layout, minimumHorizontalScale);
         }
         else
         {
             Font font (f);
-
             String txt (text.trim());
             const int length = txt.length();
-            int numLines = 1;
             const int originalStartIndex = startIndex;
+            int numLines = 1;
 
             if (length <= 12 && ! txt.containsAnyOf (T(" -\t\r\n")))
                 maximumLines = 1;
@@ -435,23 +432,18 @@ void GlyphArrangement::addFittedText (const Font& f,
 
                 const float newFontHeight = height / (float) numLines;
 
-                if (newFontHeight < 8.0f)
-                    break;
-
                 if (newFontHeight < font.getHeight())
                 {
-                    font.setHeight (newFontHeight);
+                    font.setHeight (jmax (8.0f, newFontHeight));
 
-                    while (glyphs.size() > startIndex)
-                        glyphs.removeLast();
-
+                    removeRangeOfGlyphs (startIndex, -1);
                     addLineOfText (font, txt, x, y);
 
                     lineWidth = glyphs.getUnchecked (glyphs.size() - 1)->getRight()
                                     - glyphs.getUnchecked (startIndex)->getLeft();
                 }
 
-                if (numLines > lineWidth / width)
+                if (numLines > lineWidth / width || newFontHeight < 8.0f)
                     break;
             }
 
@@ -468,77 +460,78 @@ void GlyphArrangement::addFittedText (const Font& f,
                 lastLineStartIndex = i;
                 float lineStartX = glyphs.getUnchecked (startIndex)->getLeft();
 
-                while (i < glyphs.size())
+                if (line == numLines - 1)
                 {
-                    lineWidth = (glyphs.getUnchecked (i)->getRight() - lineStartX);
-
-                    if (lineWidth > widthPerLine)
+                    widthPerLine = width;
+                    i = glyphs.size();
+                }
+                else
+                {
+                    while (i < glyphs.size())
                     {
-                        // got to a point where the line's too long, so skip forward to find a
-                        // good place to break it..
-                        const int searchStartIndex = i;
+                        lineWidth = (glyphs.getUnchecked (i)->getRight() - lineStartX);
 
-                        while (i < glyphs.size())
+                        if (lineWidth > widthPerLine)
                         {
-                            if ((glyphs.getUnchecked (i)->getRight() - lineStartX) * minimumHorizontalScale < width)
-                            {
-                                if (glyphs.getUnchecked (i)->isWhitespace()
-                                     || glyphs.getUnchecked (i)->getCharacter() == T('-'))
-                                {
-                                    ++i;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                // can't find a suitable break, so try looking backwards..
-                                i = searchStartIndex;
+                            // got to a point where the line's too long, so skip forward to find a
+                            // good place to break it..
+                            const int searchStartIndex = i;
 
-                                for (int back = 1; back < jmin (5, i - startIndex - 1); ++back)
+                            while (i < glyphs.size())
+                            {
+                                if ((glyphs.getUnchecked (i)->getRight() - lineStartX) * minimumHorizontalScale < width)
                                 {
-                                    if (glyphs.getUnchecked (i - back)->isWhitespace()
-                                         || glyphs.getUnchecked (i - back)->getCharacter() == T('-'))
+                                    if (glyphs.getUnchecked (i)->isWhitespace()
+                                         || glyphs.getUnchecked (i)->getCharacter() == T('-'))
                                     {
-                                        i -= back - 1;
+                                        ++i;
                                         break;
                                     }
                                 }
+                                else
+                                {
+                                    // can't find a suitable break, so try looking backwards..
+                                    i = searchStartIndex;
 
-                                break;
+                                    for (int back = 1; back < jmin (5, i - startIndex - 1); ++back)
+                                    {
+                                        if (glyphs.getUnchecked (i - back)->isWhitespace()
+                                             || glyphs.getUnchecked (i - back)->getCharacter() == T('-'))
+                                        {
+                                            i -= back - 1;
+                                            break;
+                                        }
+                                    }
+
+                                    break;
+                                }
+
+                                ++i;
                             }
 
-                            ++i;
+                            break;
                         }
 
-                        break;
+                        ++i;
                     }
 
-                    ++i;
+                    int wsStart = i;
+                    while (wsStart > 0 && glyphs.getUnchecked (wsStart - 1)->isWhitespace())
+                        --wsStart;
+
+                    int wsEnd = i;
+
+                    while (wsEnd < glyphs.size() && glyphs.getUnchecked (wsEnd)->isWhitespace())
+                        ++wsEnd;
+
+                    removeRangeOfGlyphs (wsStart, wsEnd - wsStart);
+                    i = jmax (wsStart, startIndex + 1);
                 }
 
-                int wsStart = i;
-                while (wsStart > 0 && glyphs.getUnchecked (wsStart - 1)->isWhitespace())
-                    --wsStart;
-
-                int wsEnd = i;
-
-                while (wsEnd < glyphs.size() && glyphs.getUnchecked (wsEnd)->isWhitespace())
-                    ++wsEnd;
-
-                removeRangeOfGlyphs (wsStart, wsEnd - wsStart);
-                i = jmax (wsStart, startIndex + 1);
-
-                lineWidth = glyphs.getUnchecked (i - 1)->getRight() - lineStartX;
-
-                if (lineWidth > width)
-                {
-                    stretchRangeOfGlyphs (startIndex, i - startIndex,
-                                          width / lineWidth);
-                }
-
-                justifyGlyphs (startIndex, i - startIndex,
-                               x, lineY, width, font.getHeight(),
-                               layout.getOnlyHorizontalFlags() | Justification::verticallyCentred);
+                i -= fitLineIntoSpace (startIndex, i - startIndex,
+                                       x, lineY, width, font.getHeight(), font,
+                                       layout.getOnlyHorizontalFlags() | Justification::verticallyCentred,
+                                       minimumHorizontalScale);
 
                 startIndex = i;
                 lineY += font.getHeight();
@@ -547,32 +540,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                     break;
             }
 
-            if (startIndex < glyphs.size())
-            {
-                removeRangeOfGlyphs (startIndex, -1);
-
-                if (startIndex - originalStartIndex > 4)
-                {
-                    const float lineStartX = glyphs.getUnchecked (lastLineStartIndex)->getLeft();
-                    appendEllipsis (font, lineStartX + width);
-
-                    lineWidth = glyphs.getUnchecked (startIndex - 1)->getRight() - lineStartX;
-
-                    if (lineWidth > width)
-                    {
-                        stretchRangeOfGlyphs (lastLineStartIndex, startIndex - lastLineStartIndex,
-                                              width / lineWidth);
-                    }
-
-                    justifyGlyphs (lastLineStartIndex, startIndex - lastLineStartIndex,
-                                   x, lineY - font.getHeight(), width, font.getHeight(),
-                                   layout.getOnlyHorizontalFlags() | Justification::verticallyCentred);
-                }
-
-                startIndex = glyphs.size();
-            }
-
-            justifyGlyphs (originalStartIndex, startIndex - originalStartIndex,
+            justifyGlyphs (originalStartIndex, glyphs.size() - originalStartIndex,
                            x, y, width, height, layout.getFlags() & ~Justification::horizontallyJustified);
         }
     }
@@ -592,6 +560,32 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num,
         while (--num >= 0)
             glyphs.getUnchecked (startIndex++)->moveBy (dx, dy);
     }
+}
+
+int GlyphArrangement::fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
+                                        const Justification& justification, float minimumHorizontalScale) throw()
+{
+    int numDeleted = 0;
+    const float lineStartX = glyphs.getUnchecked (start)->getLeft();
+    float lineWidth = glyphs.getUnchecked (start + numGlyphs - 1)->getRight() - lineStartX;
+
+    if (lineWidth > w)
+    {
+        if (minimumHorizontalScale < 1.0f)
+        {
+            stretchRangeOfGlyphs (start, numGlyphs, jmax (minimumHorizontalScale, w / lineWidth));
+            lineWidth = glyphs.getUnchecked (start + numGlyphs - 1)->getRight() - lineStartX - 0.5f;
+        }
+
+        if (lineWidth > w)
+        {
+            numDeleted = insertEllipsis (font, lineStartX + w, start, start + numGlyphs);
+            numGlyphs -= numDeleted;
+        }
+    }
+
+    justifyGlyphs (start, numGlyphs, x, y, w, h, justification);
+    return numDeleted;
 }
 
 void GlyphArrangement::stretchRangeOfGlyphs (int startIndex, int num,

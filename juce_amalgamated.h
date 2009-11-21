@@ -39734,8 +39734,8 @@ public:
     */
     void addFittedText (const Font& font,
                         const String& text,
-                        float x, float y,
-                        float width, float height,
+                        const float x, const float y,
+                        const float width, const float height,
                         const Justification& layout,
                         int maximumLinesToUse,
                         const float minimumHorizontalScale = 0.7f) throw();
@@ -39839,7 +39839,9 @@ public:
 private:
     OwnedArray <PositionedGlyph> glyphs;
 
-    void appendEllipsis (const Font& font, const float maxXPixels) throw();
+    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex) throw();
+    int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
+                          const Justification& justification, float minimumHorizontalScale) throw();
     void spreadOutLine (const int start, const int numGlyphs, const float targetWidth) throw();
 };
 

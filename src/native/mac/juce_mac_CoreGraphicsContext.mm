@@ -73,6 +73,7 @@ public:
     {
         CGContextRetain (context);
         CGContextSetShouldSmoothFonts (context, true);
+        CGContextSetShouldAntialias (context, true);
         CGContextSetBlendMode (context, kCGBlendModeNormal);
         rgbColourSpace = CGColorSpaceCreateDeviceRGB();
         greyColourSpace = CGColorSpaceCreateDeviceGray();
