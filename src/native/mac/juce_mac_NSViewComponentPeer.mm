@@ -27,8 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-#define USE_COREGRAPHICS_RENDERING 1
-
 class NSViewComponentPeer;
 
 //==============================================================================
@@ -1451,7 +1449,10 @@ void NSViewComponentPeer::drawRect (NSRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CoreGraphicsContext context (cg, [view frame].size.height);
+
+    insideDrawRect = true;
     handlePaint (context);
+    insideDrawRect = false;
 #else
     const float y = [view frame].size.height - (r.origin.y + r.size.height);
 

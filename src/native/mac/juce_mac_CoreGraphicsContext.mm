@@ -60,7 +60,11 @@ public:
 
 Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
 {
+#if USE_COREGRAPHICS_RENDERING
     return new CoreGraphicsImage (format == RGB ? ARGB : format, imageWidth, imageHeight, clearImage);
+#else
+    return new Image (format, imageWidth, imageHeight, clearImage);
+#endif
 }
 
 //==============================================================================
@@ -476,10 +480,6 @@ private:
 
     SavedState* state;
     OwnedArray <SavedState> stateStack;
-
-#if ! CGFLOAT_DEFINED
-    #define CGFloat float
-#endif
 
     static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
     {

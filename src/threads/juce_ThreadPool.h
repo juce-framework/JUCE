@@ -133,6 +133,9 @@ private:
     String jobName;
     ThreadPool* pool;
     bool shouldStop, isActive, shouldBeDeleted;
+
+    ThreadPoolJob (const ThreadPoolJob&);
+    const ThreadPoolJob& operator= (const ThreadPoolJob&);
 };
 
 

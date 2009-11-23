@@ -186,7 +186,7 @@ static int getModifierForButtonNumber (const int num) throw()
                             : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
 }
 
-static int64 getMouseTime (UIEvent* e)  { return (int64) [e timestamp] * 1000.0; }
+static int64 getMouseTime (UIEvent* e)  { return (int64) ([e timestamp] * 1000.0); }
 
 int juce_lastMouseX = 0, juce_lastMouseY = 0;
 
@@ -207,13 +207,13 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
 
             int x, y, w, h;
             owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = p.x + x;
-            juce_lastMouseY = p.y + y;
+            juce_lastMouseX = x + (int) p.x;
+            juce_lastMouseY = y + (int) p.y;
 
-            owner->handleMouseMove (p.x, p.y, getMouseTime (event));
+            owner->handleMouseMove ((int) p.x, (int) p.y, getMouseTime (event));
 
             if (owner != 0)
-                owner->handleMouseDown (p.x, p.y, getMouseTime (event));
+                owner->handleMouseDown ((int) p.x, (int) p.y, getMouseTime (event));
         }
 
         default:
@@ -237,10 +237,10 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
 
             int x, y, w, h;
             owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = p.x + x;
-            juce_lastMouseY = p.y + y;
+            juce_lastMouseX = x + (int) p.x;
+            juce_lastMouseY = y + (int) p.y;
 
-            owner->handleMouseDrag (p.x, p.y, getMouseTime (event));
+            owner->handleMouseDrag ((int) p.x, (int) p.y, getMouseTime (event));
         }
 
         default:
@@ -264,12 +264,12 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
 
             int x, y, w, h;
             owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = p.x + x;
-            juce_lastMouseY = p.y + y;
+            juce_lastMouseX = x + (int) p.x;
+            juce_lastMouseY = y + (int) p.y;
 
             const int oldMods = currentModifiers;
             currentModifiers &= ~getModifierForButtonNumber (0);
-            owner->handleMouseUp (oldMods, p.x, p.y, getMouseTime (event));
+            owner->handleMouseUp (oldMods, (int) p.x, (int) p.y, getMouseTime (event));
         }
 
         default:

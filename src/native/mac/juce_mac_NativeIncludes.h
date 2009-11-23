@@ -35,6 +35,8 @@
 
 #include "../../core/juce_StandardHeader.h"
 
+#define USE_COREGRAPHICS_RENDERING 0
+
 #if JUCE_IPHONE
  #import <Foundation/Foundation.h>
  #import <UIKit/UIKit.h>
@@ -74,6 +76,10 @@
 
 #if MACOS_10_4_OR_EARLIER
  #include <GLUT/glut.h>
+#endif
+
+#if ! CGFLOAT_DEFINED
+  #define CGFloat float
 #endif
 
 #endif   // __JUCE_MAC_NATIVEINCLUDES_JUCEHEADER__
