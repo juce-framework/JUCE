@@ -1180,12 +1180,7 @@ private:
 
             WindowsBitmapImage* const offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
-            LowLevelGraphicsSoftwareRenderer context (*offscreenImage);
-
-            RectangleList* const contextClip = context.getRawClipRegion();
-            contextClip->clear();
-
-            context.setOrigin (-x, -y);
+            RectangleList contextClip;
 
             bool needToPaintAll = true;
 
@@ -1221,7 +1216,7 @@ private:
 
                             if (cx + cw - x <= w && cy + ch - y <= h)
                             {
-                                contextClip->addWithoutMerging (Rectangle (cx - x, cy - y, cw, ch));
+                                contextClip.addWithoutMerging (Rectangle (cx - x, cy - y, cw, ch));
                             }
                             else
                             {
@@ -1237,13 +1232,13 @@ private:
 
             if (needToPaintAll)
             {
-                contextClip->clear();
-                contextClip->addWithoutMerging (Rectangle (0, 0, w, h));
+                contextClip.clear();
+                contextClip.addWithoutMerging (Rectangle (0, 0, w, h));
             }
 
             if (transparent)
             {
-                RectangleList::Iterator i (*contextClip);
+                RectangleList::Iterator i (contextClip);
 
                 while (i.next())
                 {
@@ -1256,6 +1251,10 @@ private:
             jassert (Desktop::canUseSemiTransparentWindows() || component->isOpaque());
 
             updateCurrentModifiers();
+
+            LowLevelGraphicsSoftwareRenderer context (*offscreenImage);
+            context.reduceClipRegion (contextClip);
+            context.setOrigin (-x, -y);
 
             handlePaint (context);
 

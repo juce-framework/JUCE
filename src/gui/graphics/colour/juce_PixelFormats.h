@@ -37,6 +37,8 @@
   #define PACKED
 #endif
 
+class PixelRGB;
+
 /**
     Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
     operations with it.
@@ -84,6 +86,13 @@ public:
 
         argb = sargb;
     }
+
+    /** Blends another pixel onto this one.
+
+        This takes into account the opacity of the pixel being overlaid, and blends
+        it accordingly.
+    */
+    forcedinline void blend (const PixelRGB& src) throw();
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
@@ -301,6 +310,12 @@ public:
         set (src);
     }
 
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) throw()
+    {
+        blend (PixelARGB (src.getARGB()));
+    }
+
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
         The opacity of the pixel being overlaid is scaled by the extraAlpha factor before
@@ -390,6 +405,130 @@ private:
 
 } PACKED;
 
+forcedinline void PixelARGB::blend (const PixelRGB& src) throw()
+{
+    set (src);
+}
+
+//==============================================================================
+/**
+    Represents an 8-bit single-channel pixel, and can perform compositing operations on it.
+
+    This is used internally by the imaging classes.
+
+    @see PixelARGB, PixelRGB
+*/
+class JUCE_API  PixelAlpha
+{
+public:
+    /** Creates a pixel without defining its colour. */
+    PixelAlpha() throw() {}
+    ~PixelAlpha() throw() {}
+
+    /** Creates a pixel from a 32-bit argb value.
+
+        (The argb format is that used by PixelARGB)
+    */
+    PixelAlpha (const uint32 argb) throw()
+    {
+        a = (uint8) (argb >> 24);
+    }
+
+    forcedinline uint32 getARGB() const throw()     { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+    forcedinline uint32 getRB() const throw()       { return (((uint32) a) << 16) | a; }
+    forcedinline uint32 getAG() const throw()       { return (((uint32) a) << 16) | a; }
+
+    forcedinline uint8 getAlpha() const throw()     { return a; }
+    forcedinline uint8 getRed() const throw()       { return 0; }
+    forcedinline uint8 getGreen() const throw()     { return 0; }
+    forcedinline uint8 getBlue() const throw()      { return 0; }
+
+    /** Blends another pixel onto this one.
+
+        This takes into account the opacity of the pixel being overlaid, and blends
+        it accordingly.
+    */
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) throw()
+    {
+        const int srcA = src.getAlpha();
+        a = (uint8) ((a * (0x100 - srcA) >> 8) + srcA);
+    }
+
+    /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
+
+        The opacity of the pixel being overlaid is scaled by the extraAlpha factor before
+        being used, so this can blend semi-transparently from a PixelRGB argument.
+    */
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src, uint32 extraAlpha) throw()
+    {
+        ++extraAlpha;
+        const int srcAlpha = (extraAlpha * src.getAlpha()) >> 8;
+        a = (uint8) ((a * (0x100 - srcAlpha) >> 8) + srcAlpha);
+    }
+
+    /** Blends another pixel with this one, creating a colour that is somewhere
+        between the two, as specified by the amount.
+    */
+    template <class Pixel>
+    forcedinline void tween (const Pixel& src, const uint32 amount) throw()
+    {
+        a += ((src,getAlpha() - a) * amount) >> 8;
+    }
+
+    /** Copies another pixel colour over this one.
+
+        This doesn't blend it - this colour is simply replaced by the other one.
+    */
+    template <class Pixel>
+    forcedinline void set (const Pixel& src) throw()
+    {
+        a = src.getAlpha();
+    }
+
+    /** Replaces the colour's alpha value with another one. */
+    forcedinline void setAlpha (const uint8 newAlpha) throw()
+    {
+        a = newAlpha;
+    }
+
+    /** Multiplies the colour's alpha value with another one. */
+    forcedinline void multiplyAlpha (int multiplier) throw()
+    {
+        ++multiplier;
+        a = (uint8) ((a * multiplier) >> 8);
+    }
+
+    forcedinline void multiplyAlpha (const float multiplier) throw()
+    {
+        a = (uint8) (a * multiplier);
+    }
+
+    /** Sets the pixel's colour from individual components. */
+    forcedinline void setARGB (const uint8 a_, const uint8 r, const uint8 g, const uint8 b) throw()
+    {
+        a = a_;
+    }
+
+    /** Premultiplies the pixel's RGB values by its alpha. */
+    forcedinline void premultiply() throw()
+    {
+    }
+
+    /** Unpremultiplies the pixel's RGB values. */
+    forcedinline void unpremultiply() throw()
+    {
+    }
+
+    forcedinline void desaturate() throw()
+    {
+    }
+
+private:
+    //==============================================================================
+    uint8 a : 8;
+} PACKED;
 
 #if JUCE_MSVC
   #pragma pack (pop)

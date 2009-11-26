@@ -224,14 +224,14 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
                 image = Image::createNativeImage (Image::RGB, width, height, false);
                 const bool hasAlphaChan = image->hasAlphaChannel();
 
+                const Image::BitmapData destData (*image, 0, 0, width, height, true);
+
                 for (int y = 0; y < height; ++y)
                 {
                     jpeg_read_scanlines (&jpegDecompStruct, buffer, 1);
 
-                    int stride, pixelStride;
-                    uint8* pixels = image->lockPixelDataReadWrite (0, y, width, 1, stride, pixelStride);
                     const uint8* src = *buffer;
-                    uint8* dest = pixels;
+                    uint8* dest = destData.getLinePointer (y);
 
                     if (hasAlphaChan)
                     {
@@ -239,7 +239,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
                         {
                             ((PixelARGB*) dest)->setARGB (0xff, src[0], src[1], src[2]);
                             ((PixelARGB*) dest)->premultiply();
-                            dest += pixelStride;
+                            dest += destData.pixelStride;
                             src += 3;
                         }
                     }
@@ -248,12 +248,10 @@ Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
                         for (int i = width; --i >= 0;)
                         {
                             ((PixelRGB*) dest)->setARGB (0xff, src[0], src[1], src[2]);
-                            dest += pixelStride;
+                            dest += destData.pixelStride;
                             src += 3;
                         }
                     }
-
-                    image->releasePixelDataReadWrite (pixels);
                 }
 
                 jpeg_finish_decompress (&jpegDecompStruct);
@@ -363,11 +361,11 @@ bool juce_writeJPEGImageToStream (const Image& image,
                                                     JPOOL_IMAGE,
                                                     strideBytes, 1);
 
+    const Image::BitmapData srcData (image, 0, 0, jpegCompStruct.image_width, jpegCompStruct.image_height);
+
     while (jpegCompStruct.next_scanline < jpegCompStruct.image_height)
     {
-        int stride, pixelStride;
-        const uint8* pixels = image.lockPixelDataReadOnly (0, jpegCompStruct.next_scanline, jpegCompStruct.image_width, 1, stride, pixelStride);
-        const uint8* src = pixels;
+        const uint8* src = srcData.getLinePointer (jpegCompStruct.next_scanline);
         uint8* dst = *buffer;
 
         for (int i = jpegCompStruct.image_width; --i >= 0;)
@@ -375,11 +373,10 @@ bool juce_writeJPEGImageToStream (const Image& image,
             *dst++ = ((const PixelRGB*) src)->getRed();
             *dst++ = ((const PixelRGB*) src)->getGreen();
             *dst++ = ((const PixelRGB*) src)->getBlue();
-            src += pixelStride;
+            src += srcData.pixelStride;
         }
 
         jpeg_write_scanlines (&jpegCompStruct, buffer, 1);
-        image.releasePixelDataReadOnly (pixels);
     }
 
     jpeg_finish_compress (&jpegCompStruct);

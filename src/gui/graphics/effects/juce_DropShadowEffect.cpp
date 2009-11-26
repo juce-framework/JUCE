@@ -65,12 +65,10 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
     const int w = image.getWidth();
     const int h = image.getHeight();
 
-    int lineStride, pixelStride;
-    const PixelARGB* srcPixels = (const PixelARGB*) image.lockPixelDataReadOnly (0, 0, image.getWidth(), image.getHeight(), lineStride, pixelStride);
-
     Image shadowImage (Image::SingleChannel, w, h, false);
-    int destStride, destPixelStride;
-    uint8* const shadowChannel = (uint8*) shadowImage.lockPixelDataReadWrite (0, 0, w, h, destStride, destPixelStride);
+
+    const Image::BitmapData srcData (image, 0, 0, w, h);
+    const Image::BitmapData destData (shadowImage, 0, 0, w, h, true);
 
     const int filter = roundFloatToInt (63.0f / radius);
     const int radiusMinus1 = roundFloatToInt ((radius - 1.0f) * 63.0f);
@@ -79,23 +77,23 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
     {
         int shadowAlpha = 0;
 
-        const PixelARGB* src = srcPixels + x;
-        uint8* shadowPix = shadowChannel + x;
+        const PixelARGB* src = ((const PixelARGB*) srcData.data) + x;
+        uint8* shadowPix = destData.data + x;
 
         for (int y = h; --y >= 0;)
         {
             shadowAlpha = ((shadowAlpha * radiusMinus1 + (src->getAlpha() << 6)) * filter) >> 12;
 
             *shadowPix = (uint8) shadowAlpha;
-            src = (const PixelARGB*) (((const uint8*) src) + lineStride);
-            shadowPix += destStride;
+            src = (const PixelARGB*) (((const uint8*) src) + srcData.lineStride);
+            shadowPix += destData.lineStride;
         }
     }
 
     for (int y = h; --y >= 0;)
     {
         int shadowAlpha = 0;
-        uint8* shadowPix = shadowChannel + y * destStride;
+        uint8* shadowPix = destData.getLinePointer (y);
 
         for (int x = w; --x >= 0;)
         {
@@ -103,9 +101,6 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
             *shadowPix++ = (uint8) shadowAlpha;
         }
     }
-
-    image.releasePixelDataReadOnly (srcPixels);
-    shadowImage.releasePixelDataReadWrite (shadowChannel);
 
     g.setColour (Colours::black.withAlpha (opacity));
     g.drawImageAt (&shadowImage, offsetX, offsetY, true);

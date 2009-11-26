@@ -152,19 +152,17 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
     const int dx2 = dx + dw;
     const int dy2 = dy + dh;
 
-    int lineStride, pixelStride;
-    uint8* pixels = destImage.lockPixelDataReadWrite (dx, dy, dw, dh, lineStride, pixelStride);
-    uint8* line = pixels;
+    const Image::BitmapData destData (destImage, dx, dy, dw, dh, true);
+    uint8* line = destData.data;
 
-    int srcLineStride, srcPixelStride;
-    const uint8* srcPixels = sourceImage->lockPixelDataReadOnly (0, 0, sourceImage->getWidth(), sourceImage->getHeight(), srcLineStride, srcPixelStride);
+    const Image::BitmapData srcData (*sourceImage, 0, 0, sourceImage->getWidth(), sourceImage->getHeight());
 
-    if (pixelStride == 4)
+    if (destData.pixelStride == 4)
     {
         for (int y = dy; y < dy2; ++y)
         {
             uint8* dest = line;
-            line += lineStride;
+            line += destData.lineStride;
 
             for (int x = dx; x < dx2; ++x)
             {
@@ -183,7 +181,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     if (sy >= 0)
                     {
                         int sx = x - (size >> 1);
-                        const uint8* src = srcPixels + srcLineStride * sy + srcPixelStride * sx;
+                        const uint8* src = srcData.getPixelPointer (sx, sy);
 
                         for (int xx = 0; xx < size; ++xx)
                         {
@@ -215,12 +213,12 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
             }
         }
     }
-    else if (pixelStride == 3)
+    else if (destData.pixelStride == 3)
     {
         for (int y = dy; y < dy2; ++y)
         {
             uint8* dest = line;
-            line += lineStride;
+            line += destData.lineStride;
 
             for (int x = dx; x < dx2; ++x)
             {
@@ -238,7 +236,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     if (sy >= 0)
                     {
                         int sx = x - (size >> 1);
-                        const uint8* src = srcPixels + srcLineStride * sy + srcPixelStride * sx;
+                        const uint8* src = srcData.getPixelPointer (sx, sy);
 
                         for (int xx = 0; xx < size; ++xx)
                         {
@@ -269,11 +267,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
         }
     }
 
-    sourceImage->releasePixelDataReadOnly (srcPixels);
-    destImage.releasePixelDataReadWrite (pixels);
-
-    if (imageCreated != 0)
-        delete imageCreated;
+    delete imageCreated;
 }
 
 END_JUCE_NAMESPACE

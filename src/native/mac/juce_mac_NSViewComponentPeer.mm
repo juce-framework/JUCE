@@ -561,27 +561,21 @@ class JuceNSImage
 public:
     JuceNSImage (const int width, const int height, const bool hasAlpha)
         : juceImage (hasAlpha ? Image::ARGB : Image::RGB,
-                     width, height, hasAlpha)
+                     width, height, hasAlpha),
+          srcData (juceImage, 0, 0, width, height)
     {
-        lineStride = 0;
-        pixelStride = 0;
-        imageData = juceImage.lockPixelDataReadWrite (0, 0, width, height,
-                                                       lineStride, pixelStride);
-
         imageRep = [[NSBitmapImageRep alloc]
-            initWithBitmapDataPlanes: &imageData
+            initWithBitmapDataPlanes: (unsigned char**) &(srcData.data)
                           pixelsWide: width
                           pixelsHigh: height
                        bitsPerSample: 8
-                     samplesPerPixel: pixelStride
+                     samplesPerPixel: srcData.pixelStride
                             hasAlpha: hasAlpha
                             isPlanar: NO
                       colorSpaceName: NSCalibratedRGBColorSpace
                         bitmapFormat: /*NSAlphaFirstBitmapFormat*/ (NSBitmapFormat) 0
-                         bytesPerRow: lineStride
-                        bitsPerPixel: 8 * pixelStride ];
-
-        juceImage.releasePixelDataReadWrite (imageData);
+                         bytesPerRow: srcData.lineStride
+                        bitsPerPixel: 8 * srcData.pixelStride ];
     }
 
     ~JuceNSImage()
@@ -640,23 +634,22 @@ public:
 private:
     Image juceImage;
     NSBitmapImageRep* imageRep;
-    uint8* imageData;
-    int pixelStride, lineStride;
+    const Image::BitmapData srcData;
 
     void swapRGBOrder (const int x, const int y, const int w, int h) const
     {
 #if JUCE_BIG_ENDIAN
-        jassert (pixelStride == 4);
+        jassert (srcData.pixelStride == 4);
 #endif
         jassert (Rectangle (0, 0, juceImage.getWidth(), juceImage.getHeight())
                  .contains (Rectangle (x, y, w, h)));
 
-        uint8* start = imageData + x * pixelStride + y * lineStride;
+        uint8* start = srcData.getPixelPointer (x, y);
 
         while (--h >= 0)
         {
             uint8* p = start;
-            start += lineStride;
+            start += srcData.lineStride;
 
             for (int i = w; --i >= 0;)
             {
@@ -673,7 +666,7 @@ private:
                 p[2] = oldp0;
 #endif
 
-                p += pixelStride;
+                p += srcData.pixelStride;
             }
         }
     }

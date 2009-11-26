@@ -601,27 +601,21 @@ private:
         }
         else
         {
-            int lineStride = 0;
-            int pixelStride = 0;
-            const uint8* imageData = juceImage.lockPixelDataReadOnly (0, 0, juceImage.getWidth(), juceImage.getHeight(),
-                                                                      lineStride, pixelStride);
+            const Image::BitmapData srcData (juceImage, 0, 0, juceImage.getWidth(), juceImage.getHeight());
 
-            CGDataProviderRef provider = CGDataProviderCreateWithData (0, imageData, lineStride * pixelStride, 0);
-
+            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.pixelStride, 0);
             CGColorSpaceRef colourSpace = forAlpha ? greyColourSpace : rgbColourSpace;
 
-            CGImageRef imageRef = CGImageCreate (juceImage.getWidth(), juceImage.getHeight(),
-                                      8, pixelStride * 8, lineStride,
-                                      colourSpace,
-                                      (juceImage.hasAlphaChannel() && ! forAlpha)
-                                                 ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
-                                                 : kCGBitmapByteOrderDefault,
-                                      provider,
-                                      0, true, kCGRenderingIntentDefault);
+            CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
+                                                 8, srcData.pixelStride * 8, srcData.lineStride,
+                                                 colourSpace,
+                                                 (juceImage.hasAlphaChannel() && ! forAlpha)
+                                                     ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
+                                                     : kCGBitmapByteOrderDefault,
+                                                 provider,
+                                                 0, true, kCGRenderingIntentDefault);
 
             CGDataProviderRelease (provider);
-
-            juceImage.releasePixelDataReadOnly (imageData);
             return imageRef;
         }
     }

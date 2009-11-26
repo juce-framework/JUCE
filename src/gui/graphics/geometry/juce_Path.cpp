@@ -1553,14 +1553,14 @@ bool Path::Iterator::next()
 class MaskBitmapRenderer
 {
 public:
-    MaskBitmapRenderer (uint8* const data_, const int stride_) throw()
-        : data (data_), stride (stride_)
+    MaskBitmapRenderer (const Image::BitmapData& destData_) throw()
+        : destData (destData_)
     {
     }
 
     forcedinline void setEdgeTableYPos (const int y) throw()
     {
-        lineStart = data + (stride * y);
+        lineStart = destData.getLinePointer (y);
     }
 
     forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
@@ -1577,8 +1577,7 @@ public:
     }
 
 private:
-    uint8* const data;
-    const int stride;
+    const Image::BitmapData& destData;
     uint8* lineStart;
 
     MaskBitmapRenderer (const MaskBitmapRenderer&);
@@ -1606,14 +1605,12 @@ Image* Path::createMaskBitmap (const AffineTransform& transform,
     EdgeTable edgeTable (Rectangle (0, 0, imagePosition.getWidth(), imagePosition.getHeight()),
                          *this, transform.translated ((float) -imagePosition.getX(), (float) -imagePosition.getY()));
 
-    int stride, pixelStride;
-    uint8* const pixels = (uint8*) im->lockPixelDataReadWrite (0, 0, imagePosition.getWidth(), imagePosition.getHeight(), stride, pixelStride);
+    const Image::BitmapData destData (*im, 0, 0, imagePosition.getWidth(), imagePosition.getHeight(), true);
 
-    jassert (pixelStride == 1);
-    MaskBitmapRenderer renderer (pixels, stride);
+    jassert (destData.pixelStride == 1);
+    MaskBitmapRenderer renderer (destData);
     edgeTable.iterate (renderer);
 
-    im->releasePixelDataReadWrite (pixels);
     return im;
 }
 

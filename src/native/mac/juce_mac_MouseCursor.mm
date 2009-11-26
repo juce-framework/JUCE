@@ -33,26 +33,24 @@
 static NSImage* juceImageToNSImage (const Image& image)
 {
     const ScopedAutoReleasePool pool;
-    int lineStride, pixelStride;
-    const uint8* pixels = image.lockPixelDataReadOnly (0, 0, image.getWidth(), image.getHeight(),
-                                                       lineStride, pixelStride);
+
+    const Image::BitmapData srcData (image, 0, 0, image.getWidth(), image.getHeight());
 
     NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
         initWithBitmapDataPlanes: NULL
-                      pixelsWide: image.getWidth()
-                      pixelsHigh: image.getHeight()
+                      pixelsWide: srcData.width
+                      pixelsHigh: srcData.height
                    bitsPerSample: 8
                  samplesPerPixel: image.hasAlphaChannel() ? 4 : 3
                         hasAlpha: image.hasAlphaChannel()
                         isPlanar: NO
                   colorSpaceName: NSCalibratedRGBColorSpace
                     bitmapFormat: (NSBitmapFormat) 0
-                     bytesPerRow: lineStride
-                    bitsPerPixel: pixelStride * 8];
+                     bytesPerRow: srcData.lineStride
+                    bitsPerPixel: srcData.pixelStride * 8];
 
     unsigned char* newData = [rep bitmapData];
-    memcpy (newData, pixels, lineStride * image.getHeight());
-    image.releasePixelDataReadOnly (pixels);
+    memcpy (newData, srcData.data, srcData.lineStride * srcData.height);
 
     NSImage* im = [[NSImage alloc] init];
     [im addRepresentation: rep];

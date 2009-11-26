@@ -122,13 +122,11 @@ public:
 
         glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
-        int stride, pixStride;
-        const void* pixels = image->lockPixelDataReadOnly (0, 0, image->getWidth(), image->getHeight(), stride, pixStride);
+        Image::BitmapData srcData (*image, 0, 0, image->getWidth(), image->getHeight());
 
         glTexImage2D (GL_TEXTURE_2D, 0, 4, image->getWidth(), image->getHeight(),
                       0, GL_RGB,
-                      GL_UNSIGNED_BYTE, pixels);
-        image->releasePixelDataReadOnly (pixels);
+                      GL_UNSIGNED_BYTE, srcData.data);
 
         glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
         glHint (GL_POINT_SMOOTH_HINT, GL_NICEST);

@@ -40,102 +40,17 @@ BEGIN_JUCE_NAMESPACE
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
-#if JUCE_DEBUG && JUCE_MSVC
- #pragma warning (disable: 4714)
+#if JUCE_MSVC && JUCE_DEBUG
+ #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
 #endif
 
-#define MINIMUM_COORD -0x3fffffff
-#define MAXIMUM_COORD 0x3fffffff
-
-#undef ASSERT_COORDS_ARE_SENSIBLE_NUMBERS
-#define ASSERT_COORDS_ARE_SENSIBLE_NUMBERS(x, y, w, h) \
-    jassert ((int) x >= MINIMUM_COORD  \
-              && (int) x <= MAXIMUM_COORD \
-              && (int) y >= MINIMUM_COORD \
-              && (int) y <= MAXIMUM_COORD \
-              && (int) w >= 0 \
-              && (int) w < MAXIMUM_COORD \
-              && (int) h >= 0 \
-              && (int) h < MAXIMUM_COORD);
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4127) // "expression is constant" warning
+#endif
 
 //==============================================================================
-static void replaceRectRGB (uint8* pixels, const int w, int h, const int stride, const Colour& colour) throw()
-{
-    const PixelARGB blendColour (colour.getPixelARGB());
-
-    if (w < 32)
-    {
-        while (--h >= 0)
-        {
-            PixelRGB* dest = (PixelRGB*) pixels;
-
-            for (int i = w; --i >= 0;)
-                (dest++)->set (blendColour);
-
-            pixels += stride;
-        }
-    }
-    else
-    {
-        // for wider fills, it's worth using some optimisations..
-
-        const uint8 r = blendColour.getRed();
-        const uint8 g = blendColour.getGreen();
-        const uint8 b = blendColour.getBlue();
-
-        if (r == g && r == b)  // if all the component values are the same, we can cheat..
-        {
-            while (--h >= 0)
-            {
-                memset (pixels, r, w * 3);
-                pixels += stride;
-            }
-        }
-        else
-        {
-            PixelRGB filler [4];
-            filler[0].set (blendColour);
-            filler[1].set (blendColour);
-            filler[2].set (blendColour);
-            filler[3].set (blendColour);
-            const int* const intFiller = (const int*) filler;
-
-            while (--h >= 0)
-            {
-                uint8* dest = (uint8*) pixels;
-
-                int i = w;
-
-                while ((i > 8) && (((pointer_sized_int) dest & 7) != 0))
-                {
-                    ((PixelRGB*) dest)->set (blendColour);
-                    dest += 3;
-                    --i;
-                }
-
-                while (i >= 4)
-                {
-                    ((int*) dest) [0] = intFiller[0];
-                    ((int*) dest) [1] = intFiller[1];
-                    ((int*) dest) [2] = intFiller[2];
-
-                    dest += 12;
-                    i -= 4;
-                }
-
-                while (--i >= 0)
-                {
-                    ((PixelRGB*) dest)->set (blendColour);
-                    dest += 3;
-                }
-
-                pixels += stride;
-            }
-        }
-    }
-}
-
-static void replaceRectARGB (uint8* pixels, const int w, int h, const int stride, const Colour& colour) throw()
+/*static void replaceRectARGB (uint8* pixels, const int w, int h, const int stride, const Colour& colour) throw()
 {
     const PixelARGB blendColour (colour.getPixelARGB());
 
@@ -251,14 +166,14 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
                 "\tjg .lineLoop2            \n"
                 "\tpop %%ebx                \n"
                 "\temms                     \n"
-                : /* No output registers */
-                : [aaaa]   "m" (aaaa), /* Input registers */
+                : // No output registers
+                : [aaaa]   "m" (aaaa), // Input registers
                   [rgb0]   "m" (rgb0),
                   [w]      "m" (w),
                            "c" (h),
                   [stride] "D" (stride),
                   [pixels] "S" (pixels)
-                : "cc", "eax", "edx", "memory"    /* Clobber list */
+                : "cc", "eax", "edx", "memory"
             );
 #endif
         }
@@ -277,122 +192,39 @@ static void blendRectRGB (uint8* pixels, const int w, int h, const int stride, c
         }
     }
 }
-
-static void blendRectARGB (uint8* pixels, const int w, int h, const int stride, const Colour& colour) throw()
-{
-    if (colour.isOpaque())
-    {
-        replaceRectARGB (pixels, w, h, stride, colour);
-    }
-    else
-    {
-        const PixelARGB blendColour (colour.getPixelARGB());
-        const int alpha = blendColour.getAlpha();
-
-        if (alpha <= 0)
-            return;
-
-        while (--h >= 0)
-        {
-            PixelARGB* dest = (PixelARGB*) pixels;
-
-            for (int i = w; --i >= 0;)
-                (dest++)->blend (blendColour);
-
-            pixels += stride;
-        }
-    }
-}
+*/
 
 //==============================================================================
-static void blendAlphaMapARGB (uint8* destPixel, const int imageStride,
-                               const uint8* alphaValues, const int w, int h,
-                               const int pixelStride, const int lineStride,
-                               const Colour& colour) throw()
-{
-    const PixelARGB srcPix (colour.getPixelARGB());
-
-    while (--h >= 0)
-    {
-        PixelARGB* dest = (PixelARGB*) destPixel;
-        const uint8* src = alphaValues;
-
-        int i = w;
-        while (--i >= 0)
-        {
-            unsigned int srcAlpha = *src;
-            src += pixelStride;
-
-            if (srcAlpha > 0)
-                dest->blend (srcPix, srcAlpha);
-
-            ++dest;
-        }
-
-        alphaValues += lineStride;
-        destPixel += imageStride;
-    }
-}
-
-static void blendAlphaMapRGB (uint8* destPixel, const int imageStride,
-                              const uint8* alphaValues, int const width, int height,
-                              const int pixelStride, const int lineStride,
-                              const Colour& colour) throw()
-{
-    const PixelARGB srcPix (colour.getPixelARGB());
-
-    while (--height >= 0)
-    {
-        PixelRGB* dest = (PixelRGB*) destPixel;
-        const uint8* src = alphaValues;
-
-        int i = width;
-        while (--i >= 0)
-        {
-            unsigned int srcAlpha = *src;
-            src += pixelStride;
-
-            if (srcAlpha > 0)
-                dest->blend (srcPix, srcAlpha);
-
-            ++dest;
-        }
-
-        alphaValues += lineStride;
-        destPixel += imageStride;
-    }
-}
-
-//==============================================================================
-template <class PixelType>
+template <class PixelType, bool replaceExisting = false>
 class SolidColourEdgeTableRenderer
 {
-    uint8* const data;
-    const int stride;
-    PixelType* linePixels;
-    PixelARGB sourceColour;
-
-    SolidColourEdgeTableRenderer (const SolidColourEdgeTableRenderer&);
-    const SolidColourEdgeTableRenderer& operator= (const SolidColourEdgeTableRenderer&);
-
 public:
-    SolidColourEdgeTableRenderer (uint8* const data_,
-                                  const int stride_,
-                                  const Colour& colour) throw()
+    SolidColourEdgeTableRenderer (const Image::BitmapData& data_, const PixelARGB& colour) throw()
         : data (data_),
-          stride (stride_),
-          sourceColour (colour.getPixelARGB())
+          sourceColour (colour)
     {
+        if (sizeof (PixelType) == 3)
+        {
+            areRGBComponentsEqual = sourceColour.getRed() == sourceColour.getGreen()
+                                        && sourceColour.getGreen() == sourceColour.getBlue();
+            filler[0].set (sourceColour);
+            filler[1].set (sourceColour);
+            filler[2].set (sourceColour);
+            filler[3].set (sourceColour);
+        }
     }
 
     forcedinline void setEdgeTableYPos (const int y) throw()
     {
-        linePixels = (PixelType*) (data + stride * y);
+        linePixels = (PixelType*) data.getLinePointer (y);
     }
 
     forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
     {
-        linePixels[x].blend (sourceColour, alphaLevel);
+        if (replaceExisting)
+            linePixels[x].set (sourceColour);
+        else
+            linePixels[x].blend (sourceColour, alphaLevel);
     }
 
     forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
@@ -402,78 +234,88 @@ public:
 
         PixelType* dest = linePixels + x;
 
-        if (p.getAlpha() < 0xff)
-        {
-            do
-            {
-                dest->blend (p);
-                ++dest;
+        if (replaceExisting || p.getAlpha() >= 0xff)
+            replaceLine (dest, p, width);
+        else
+            blendLine (dest, p, width);
+    }
 
-            } while (--width > 0);
+private:
+    const Image::BitmapData& data;
+    PixelType* linePixels;
+    PixelARGB sourceColour;
+    PixelRGB filler [4];
+    bool areRGBComponentsEqual;
+
+    forcedinline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const throw()
+    {
+        do
+        {
+            dest->blend (colour);
+            ++dest;
+
+        } while (--width > 0);
+    }
+
+    forcedinline void replaceLine (PixelRGB* dest, const PixelARGB& colour, int width) const throw()
+    {
+        if (areRGBComponentsEqual)  // if all the component values are the same, we can cheat..
+        {
+            memset (dest, colour.getRed(), width * 3);
         }
         else
         {
-            do
+            if (width >> 5)
             {
-                dest->set (p);
-                ++dest;
+                const int* const intFiller = (const int*) filler;
 
-            } while (--width > 0);
+                while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
+                {
+                    dest->set (colour);
+                    ++dest;
+                    --width;
+                }
+
+                while (width > 4)
+                {
+                    ((int*) dest) [0] = intFiller[0];
+                    ((int*) dest) [1] = intFiller[1];
+                    ((int*) dest) [2] = intFiller[2];
+                    dest = (PixelRGB*) (((uint8*) dest) + 12);
+                    width -= 4;
+                }
+            }
+
+            while (--width >= 0)
+            {
+                dest->set (colour);
+                ++dest;
+            }
         }
     }
-};
 
-class AlphaBitmapRenderer
-{
-    uint8* data;
-    int stride;
-    uint8* lineStart;
-
-    AlphaBitmapRenderer (const AlphaBitmapRenderer&);
-    const AlphaBitmapRenderer& operator= (const AlphaBitmapRenderer&);
-
-public:
-    AlphaBitmapRenderer (uint8* const data_,
-                         const int stride_) throw()
-        : data (data_),
-          stride (stride_)
+    forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB& colour, int width) const throw()
     {
+        memset (dest, colour.getAlpha(), width);
     }
 
-    forcedinline void setEdgeTableYPos (const int y) throw()
+    forcedinline void replaceLine (PixelARGB* dest, const PixelARGB& colour, int width) const throw()
     {
-        lineStart = data + (stride * y);
+        do
+        {
+            dest->set (colour);
+            ++dest;
+
+        } while (--width > 0);
     }
 
-    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
-    {
-        lineStart [x] = (uint8) alphaLevel;
-    }
-
-    forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
-    {
-        uint8* d = lineStart + x;
-
-        while (--width >= 0)
-            *d++ = (uint8) alphaLevel;
-    }
+    SolidColourEdgeTableRenderer (const SolidColourEdgeTableRenderer&);
+    const SolidColourEdgeTableRenderer& operator= (const SolidColourEdgeTableRenderer&);
 };
 
 //==============================================================================
-static const int numScaleBits = 12;
-
 class LinearGradientPixelGenerator
 {
-    const PixelARGB* const lookupTable;
-    const int numEntries;
-    PixelARGB linePix;
-    int start, scale;
-    double grad, yTerm;
-    bool vertical, horizontal;
-
-    LinearGradientPixelGenerator (const LinearGradientPixelGenerator&);
-    const LinearGradientPixelGenerator& operator= (const LinearGradientPixelGenerator&);
-
 public:
     LinearGradientPixelGenerator (const ColourGradient& gradient,
                                   const PixelARGB* const lookupTable_, const int numEntries_)
@@ -510,19 +352,19 @@ public:
 
         if (vertical)
         {
-            scale = roundDoubleToInt ((numEntries << numScaleBits) / (double) (y2 - y1));
+            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (double) (y2 - y1));
             start = roundDoubleToInt (y1 * scale);
         }
         else if (horizontal)
         {
-            scale = roundDoubleToInt ((numEntries << numScaleBits) / (double) (x2 - x1));
+            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (double) (x2 - x1));
             start = roundDoubleToInt (x1 * scale);
         }
         else
         {
             grad = (y2 - y1) / (double) (x1 - x2);
             yTerm = y1 - x1 / grad;
-            scale = roundDoubleToInt ((numEntries << numScaleBits) / (yTerm * grad - (y2 * grad - x2)));
+            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (y2 * grad - x2)));
             grad *= scale;
         }
     }
@@ -530,7 +372,7 @@ public:
     forcedinline void setY (const int y) throw()
     {
         if (vertical)
-            linePix = lookupTable [jlimit (0, numEntries, (y * scale - start) >> numScaleBits)];
+            linePix = lookupTable [jlimit (0, numEntries, (y * scale - start) >> (int) numScaleBits)];
         else if (! horizontal)
             start = roundDoubleToInt ((y - yTerm) * grad);
     }
@@ -540,22 +382,25 @@ public:
         if (vertical)
             return linePix;
 
-        return lookupTable [jlimit (0, numEntries, (x * scale - start) >> numScaleBits)];
+        return lookupTable [jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
     }
-};
 
-class RadialGradientPixelGenerator
-{
-protected:
+private:
     const PixelARGB* const lookupTable;
     const int numEntries;
-    const double gx1, gy1;
-    double maxDist, invScale;
-    double dy;
+    PixelARGB linePix;
+    int start, scale;
+    double grad, yTerm;
+    bool vertical, horizontal;
+    enum { numScaleBits = 12 };
 
-    RadialGradientPixelGenerator (const RadialGradientPixelGenerator&);
-    const RadialGradientPixelGenerator& operator= (const RadialGradientPixelGenerator&);
+    LinearGradientPixelGenerator (const LinearGradientPixelGenerator&);
+    const LinearGradientPixelGenerator& operator= (const LinearGradientPixelGenerator&);
+};
 
+//==============================================================================
+class RadialGradientPixelGenerator
+{
 public:
     RadialGradientPixelGenerator (const ColourGradient& gradient,
                                   const PixelARGB* const lookupTable_, const int numEntries_) throw()
@@ -588,16 +433,20 @@ public:
         else
             return lookupTable [jmin (numEntries, roundDoubleToInt (sqrt (x) * invScale))];
     }
+
+protected:
+    const PixelARGB* const lookupTable;
+    const int numEntries;
+    const double gx1, gy1;
+    double maxDist, invScale, dy;
+
+    RadialGradientPixelGenerator (const RadialGradientPixelGenerator&);
+    const RadialGradientPixelGenerator& operator= (const RadialGradientPixelGenerator&);
 };
 
+//==============================================================================
 class TransformedRadialGradientPixelGenerator   : public RadialGradientPixelGenerator
 {
-    double tM10, tM00, lineYM01, lineYM11;
-    AffineTransform inverseTransform;
-
-    TransformedRadialGradientPixelGenerator (const TransformedRadialGradientPixelGenerator&);
-    const TransformedRadialGradientPixelGenerator& operator= (const TransformedRadialGradientPixelGenerator&);
-
 public:
     TransformedRadialGradientPixelGenerator (const ColourGradient& gradient,
                                              const PixelARGB* const lookupTable_, const int numEntries_) throw()
@@ -627,32 +476,30 @@ public:
         else
             return lookupTable [jmin (numEntries, roundDoubleToInt (sqrt (x) * invScale))];
     }
+
+private:
+    double tM10, tM00, lineYM01, lineYM11;
+    const AffineTransform inverseTransform;
+
+    TransformedRadialGradientPixelGenerator (const TransformedRadialGradientPixelGenerator&);
+    const TransformedRadialGradientPixelGenerator& operator= (const TransformedRadialGradientPixelGenerator&);
 };
 
+//==============================================================================
 template <class PixelType, class GradientType>
 class GradientEdgeTableRenderer  : public GradientType
 {
-    uint8* const data;
-    const int stride;
-    PixelType* linePixels;
-
-    GradientEdgeTableRenderer (const GradientEdgeTableRenderer&);
-    const GradientEdgeTableRenderer& operator= (const GradientEdgeTableRenderer&);
-
 public:
-    GradientEdgeTableRenderer (uint8* const data_,
-                               const int stride_,
-                               const ColourGradient& gradient,
+    GradientEdgeTableRenderer (const Image::BitmapData& destData_, const ColourGradient& gradient,
                                const PixelARGB* const lookupTable, const int numEntries) throw()
         : GradientType (gradient, lookupTable, numEntries - 1),
-          data (data_),
-          stride (stride_)
+          destData (destData_)
     {
     }
 
     forcedinline void setEdgeTableYPos (const int y) throw()
     {
-        linePixels = (PixelType*) (data + stride * y);
+        linePixels = (PixelType*) destData.getLinePointer (y);
         GradientType::setY (y);
     }
 
@@ -682,41 +529,33 @@ public:
             } while (--width > 0);
         }
     }
+
+private:
+    const Image::BitmapData& destData;
+    PixelType* linePixels;
+
+    GradientEdgeTableRenderer (const GradientEdgeTableRenderer&);
+    const GradientEdgeTableRenderer& operator= (const GradientEdgeTableRenderer&);
 };
 
 //==============================================================================
 template <class DestPixelType, class SrcPixelType>
 class ImageFillEdgeTableRenderer
 {
-    uint8* const destImageData;
-    const uint8* srcImageData;
-    int stride, srcStride, extraAlpha;
-
-    DestPixelType* linePixels;
-    SrcPixelType* sourceLineStart;
-
-    ImageFillEdgeTableRenderer (const ImageFillEdgeTableRenderer&);
-    const ImageFillEdgeTableRenderer& operator= (const ImageFillEdgeTableRenderer&);
-
 public:
-    ImageFillEdgeTableRenderer (uint8* const destImageData_,
-                                const int stride_,
-                                const uint8* srcImageData_,
-                                const int srcStride_,
-                                int extraAlpha_,
-                                SrcPixelType*) throw() // dummy param to avoid compiler error
-        : destImageData (destImageData_),
-          srcImageData (srcImageData_),
-          stride (stride_),
-          srcStride (srcStride_),
-          extraAlpha (extraAlpha_)
+    ImageFillEdgeTableRenderer (const Image::BitmapData& destData_,
+                                const Image::BitmapData& srcData_,
+                                const int extraAlpha_) throw()
+        : destData (destData_),
+          srcData (srcData_),
+          extraAlpha (extraAlpha_ + 1)
     {
     }
 
     forcedinline void setEdgeTableYPos (int y) throw()
     {
-        linePixels = (DestPixelType*) (destImageData + stride * y);
-        sourceLineStart = (SrcPixelType*) (srcImageData + srcStride * y);
+        linePixels = (DestPixelType*) destData.getLinePointer (y);
+        sourceLineStart = (SrcPixelType*) srcData.getLinePointer (y);
     }
 
     forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) const throw()
@@ -741,413 +580,824 @@ public:
         }
         else
         {
-            do
-            {
-                dest++ ->blend (sourceLineStart [x++]);
-
-            } while (--width > 0);
+            copyRow (dest, sourceLineStart + x, width);
         }
     }
+
+private:
+    const Image::BitmapData& destData;
+    const Image::BitmapData& srcData;
+    const int extraAlpha;
+    DestPixelType* linePixels;
+    SrcPixelType* sourceLineStart;
+
+    template <class PixelType1, class PixelType2>
+    forcedinline static void copyRow (PixelType1* dest, PixelType2* src, int width) throw()
+    {
+        do
+        {
+            dest++ ->blend (*src++);
+
+        } while (--width > 0);
+    }
+
+    forcedinline static void copyRow (PixelRGB* dest, PixelRGB* src, int width) throw()
+    {
+        memcpy (dest, src, width * sizeof (PixelRGB));
+    }
+
+    ImageFillEdgeTableRenderer (const ImageFillEdgeTableRenderer&);
+    const ImageFillEdgeTableRenderer& operator= (const ImageFillEdgeTableRenderer&);
 };
 
 //==============================================================================
-static void blendRowOfPixels (PixelARGB* dst,
-                              const PixelRGB* src,
-                              int width) throw()
-{
-    while (--width >= 0)
-        (dst++)->set (*src++);
-}
-
-static void blendRowOfPixels (PixelRGB* dst,
-                              const PixelRGB* src,
-                              int width) throw()
-{
-    memcpy (dst, src, 3 * width);
-}
-
-static void blendRowOfPixels (PixelRGB* dst,
-                              const PixelARGB* src,
-                              int width) throw()
-{
-    while (--width >= 0)
-        (dst++)->blend (*src++);
-}
-
-static void blendRowOfPixels (PixelARGB* dst,
-                              const PixelARGB* src,
-                              int width) throw()
-{
-    while (--width >= 0)
-        (dst++)->blend (*src++);
-}
-
-static void blendRowOfPixels (PixelARGB* dst,
-                              const PixelRGB* src,
-                              int width,
-                              const uint8 alpha) throw()
-{
-    while (--width >= 0)
-        (dst++)->blend (*src++, alpha);
-}
-
-static void blendRowOfPixels (PixelRGB* dst,
-                              const PixelRGB* src,
-                              int width,
-                              const uint8 alpha) throw()
-{
-    uint8* d = (uint8*) dst;
-    const uint8* s = (const uint8*) src;
-    const int inverseAlpha = 0xff - alpha;
-
-    while (--width >= 0)
-    {
-        d[0] = (uint8) (s[0] + (((d[0] - s[0]) * inverseAlpha) >> 8));
-        d[1] = (uint8) (s[1] + (((d[1] - s[1]) * inverseAlpha) >> 8));
-        d[2] = (uint8) (s[2] + (((d[2] - s[2]) * inverseAlpha) >> 8));
-
-        d += 3;
-        s += 3;
-    }
-}
-
-static void blendRowOfPixels (PixelRGB* dst,
-                              const PixelARGB* src,
-                              int width,
-                              const uint8 alpha) throw()
-{
-    while (--width >= 0)
-        (dst++)->blend (*src++, alpha);
-}
-
-static void blendRowOfPixels (PixelARGB* dst,
-                              const PixelARGB* src,
-                              int width,
-                              const uint8 alpha) throw()
-{
-    while (--width >= 0)
-        (dst++)->blend (*src++, alpha);
-}
-
 template <class DestPixelType, class SrcPixelType>
-static void overlayImage (DestPixelType* dest,
-                          const int destStride,
-                          const SrcPixelType* src,
-                          const int srcStride,
-                          const int width,
-                          int height,
-                          const uint8 alpha) throw()
-{
-    if (alpha < 0xff)
-    {
-        while (--height >= 0)
-        {
-            blendRowOfPixels (dest, src, width, alpha);
-
-            dest = (DestPixelType*) (((uint8*) dest) + destStride);
-            src = (const SrcPixelType*) (((const uint8*) src) + srcStride);
-        }
-    }
-    else
-    {
-        while (--height >= 0)
-        {
-            blendRowOfPixels (dest, src, width);
-
-            dest = (DestPixelType*) (((uint8*) dest) + destStride);
-            src = (const SrcPixelType*) (((const uint8*) src) + srcStride);
-        }
-    }
-}
-
-template <class DestPixelType, class SrcPixelType>
-static void transformedImageRender (Image& destImage,
-                                    const Image& sourceImage,
-                                    const int destClipX, const int destClipY,
-                                    const int destClipW, const int destClipH,
-                                    const int srcClipX, const int srcClipY,
-                                    const int srcClipWidth, const int srcClipHeight,
-                                    double srcX, double srcY,
-                                    const double lineDX, const double lineDY,
-                                    const double pixelDX, const double pixelDY,
-                                    const uint8 alpha,
-                                    const Graphics::ResamplingQuality quality,
-                                    DestPixelType*,
-                                    SrcPixelType*) throw() // forced by a compiler bug to include dummy
-                                                           // parameters of the templated classes to
-                                                           // make it use the correct instance of this function..
-{
-    int destStride, destPixelStride;
-    uint8* const destPixels = destImage.lockPixelDataReadWrite (destClipX, destClipY, destClipW, destClipH, destStride, destPixelStride);
-
-    int srcStride, srcPixelStride;
-    const uint8* const srcPixels = sourceImage.lockPixelDataReadOnly (srcClipX, srcClipY, srcClipWidth, srcClipHeight, srcStride, srcPixelStride);
-
-    if (quality == Graphics::lowResamplingQuality) // nearest-neighbour..
-    {
-        if (alpha == 255)
-        {
-            for (int y = 0; y < destClipH; ++y)
-            {
-                double sx = srcX;
-                double sy = srcY;
-
-                DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
-
-                for (int x = destClipW; --x >= 0;)
-                {
-                    const int ix = ((int) sx) - srcClipX;
-
-                    if (((unsigned int) ix) < (unsigned int) srcClipWidth)
-                    {
-                        const int iy = ((int) sy) - srcClipY;
-
-                        if (((unsigned int) iy) < (unsigned int) srcClipHeight)
-                        {
-                            const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
-                            dest->blend (*src);
-                        }
-                    }
-
-                    ++dest;
-                    sx += pixelDX;
-                    sy += pixelDY;
-                }
-
-                srcX += lineDX;
-                srcY += lineDY;
-            }
-        }
-        else
-        {
-            for (int y = 0; y < destClipH; ++y)
-            {
-                double sx = srcX;
-                double sy = srcY;
-
-                DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
-
-                for (int x = destClipW; --x >= 0;)
-                {
-                    const int ix = ((int) sx) - srcClipX;
-
-                    if (((unsigned int) ix) < (unsigned int) srcClipWidth)
-                    {
-                        const int iy = ((int) sy) - srcClipY;
-
-                        if (((unsigned int) iy) < (unsigned int) srcClipHeight)
-                        {
-                            const SrcPixelType* const src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
-                            dest->blend (*src, alpha);
-                        }
-                    }
-
-                    ++dest;
-                    sx += pixelDX;
-                    sy += pixelDY;
-                }
-
-                srcX += lineDX;
-                srcY += lineDY;
-            }
-        }
-    }
-    else
-    {
-        jassert (quality == Graphics::mediumResamplingQuality); // (only bilinear is implemented, so that's what you'll get here..)
-
-        for (int y = 0; y < destClipH; ++y)
-        {
-            double sx = srcX - (srcClipWidth == destClipW ? 0.0 : 0.5);
-            double sy = srcY - (srcClipHeight == destClipH ? 0.0 : 0.5);
-            DestPixelType* dest = (DestPixelType*) (destPixels + destStride * y);
-
-            for (int x = 0; x < destClipW; ++x)
-            {
-                const double fx = floor (sx);
-                const double fy = floor (sy);
-                const int ix = roundDoubleToInt (fx) - srcClipX;
-                const int iy = roundDoubleToInt (fy) - srcClipY;
-
-                if (ix < srcClipWidth && iy < srcClipHeight)
-                {
-                    PixelARGB p1 (0), p2 (0), p3 (0), p4 (0);
-
-                    const SrcPixelType* src = (const SrcPixelType*) (srcPixels + srcStride * iy + srcPixelStride * ix);
-
-                    if (iy >= 0)
-                    {
-                        if (ix >= 0)
-                            p1.set (src[0]);
-
-                        if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
-                            p2.set (src[1]);
-                    }
-
-                    if (((unsigned int) (iy + 1)) < (unsigned int) srcClipHeight)
-                    {
-                        src = (const SrcPixelType*) (((const uint8*) src) + srcStride);
-
-                        if (ix >= 0)
-                            p3.set (src[0]);
-
-                        if (((unsigned int) (ix + 1)) < (unsigned int) srcClipWidth)
-                            p4.set (src[1]);
-                    }
-
-                    const int dx = roundDoubleToInt ((sx - fx) * 255.0);
-                    p1.tween (p2, dx);
-                    p3.tween (p4, dx);
-                    p1.tween (p3, roundDoubleToInt ((sy - fy) * 255.0));
-
-                    if (p1.getAlpha() > 0)
-                        dest->blend (p1, alpha);
-                }
-
-                ++dest;
-                sx += pixelDX;
-                sy += pixelDY;
-            }
-
-            srcX += lineDX;
-            srcY += lineDY;
-        }
-    }
-
-    destImage.releasePixelDataReadWrite (destPixels);
-    sourceImage.releasePixelDataReadOnly (srcPixels);
-}
-
-template <class SrcPixelType, class DestPixelType>
-static void renderAlphaMap (DestPixelType* destPixels,
-                            int destStride,
-                            SrcPixelType* srcPixels,
-                            int srcStride,
-                            const uint8* alphaValues,
-                            const int lineStride, const int pixelStride,
-                            int width, int height,
-                            const int extraAlpha) throw()
-{
-    while (--height >= 0)
-    {
-        SrcPixelType* srcPix = srcPixels;
-        srcPixels = (SrcPixelType*) (((const uint8*) srcPixels) + srcStride);
-
-        DestPixelType* destPix = destPixels;
-        destPixels = (DestPixelType*) (((uint8*) destPixels) + destStride);
-
-        const uint8* alpha = alphaValues;
-        alphaValues += lineStride;
-
-        if (extraAlpha < 0x100)
-        {
-            for (int i = width; --i >= 0;)
-            {
-                destPix++ ->blend (*srcPix++, (extraAlpha * *alpha) >> 8);
-                alpha += pixelStride;
-            }
-        }
-        else
-        {
-            for (int i = width; --i >= 0;)
-            {
-                destPix++ ->blend (*srcPix++, *alpha);
-                alpha += pixelStride;
-            }
-        }
-    }
-}
-
-//==============================================================================
-/*class ClippingPath
+class TransformedImageFillEdgeTableRenderer
 {
 public:
-    ClippingPath (const Rectangle& r) throw()
-        : rectangles (r)
+    TransformedImageFillEdgeTableRenderer (const Image::BitmapData& destData_,
+                                           const Image::BitmapData& srcData_,
+                                           const AffineTransform& transform,
+                                           const int extraAlpha_,
+                                           const bool betterQuality_) throw()
+        : interpolator (transform),
+          destData (destData_),
+          srcData (srcData_),
+          extraAlpha (extraAlpha_ + 1),
+          betterQuality (betterQuality_),
+          pixelOffset (betterQuality_ ? 0.5f : 0.0f),
+          pixelOffsetInt (betterQuality_ ? -128 : 0),
+          maxX (srcData_.width - 1),
+          maxY (srcData_.height - 1)
     {
     }
 
-    ClippingPath (const ClippingPath& other) throw()
-        : rectangles (other.rectangles), mask (other.mask)
+    forcedinline void setEdgeTableYPos (const int newY) throw()
+    {
+        y = newY;
+        linePixels = (DestPixelType*) destData.getLinePointer (newY);
+    }
+
+    forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) throw()
+    {
+        alphaLevel *= extraAlpha;
+        alphaLevel >>= 8;
+
+        SrcPixelType p;
+        generate (&p, x, 1);
+
+        linePixels[x].blend (p, alphaLevel);
+    }
+
+    forcedinline void handleEdgeTableLine (const int x, int width, int alphaLevel) throw()
+    {
+        SrcPixelType* span = (SrcPixelType*) alloca (sizeof (SrcPixelType) * width);
+        generate (span, x, width);
+
+        DestPixelType* dest = linePixels + x;
+        alphaLevel *= extraAlpha;
+        alphaLevel >>= 8;
+
+        if (alphaLevel < 0xfe)
+        {
+            do
+            {
+                dest++ ->blend (*span++, alphaLevel);
+            } while (--width > 0);
+        }
+        else
+        {
+            do
+            {
+                dest++ ->blend (*span++);
+            } while (--width > 0);
+        }
+    }
+
+private:
+    //==============================================================================
+    void generate (PixelARGB* dest, const int x, int numPixels) throw()
+    {
+        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
+
+        do
+        {
+            int hiResX, hiResY;
+            this->interpolator.next (hiResX, hiResY);
+            hiResX += pixelOffsetInt;
+            hiResY += pixelOffsetInt;
+
+            int loResX = hiResX >> 8;
+            int loResY = hiResY >> 8;
+
+            if (betterQuality
+                 && ((unsigned int) loResX) < (unsigned int) maxX
+                 && ((unsigned int) loResY) < (unsigned int) maxY)
+            {
+                uint32 c[4] = { 256 * 128, 256 * 128, 256 * 128, 256 * 128 };
+                hiResX &= 255;
+                hiResY &= 255;
+
+                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
+
+                uint32 weight = (256 - hiResX) * (256 - hiResY);
+                c[0] += weight * src[0];
+                c[1] += weight * src[1];
+                c[2] += weight * src[2];
+                c[3] += weight * src[3];
+
+                weight = hiResX * (256 - hiResY);
+                c[0] += weight * src[4];
+                c[1] += weight * src[5];
+                c[2] += weight * src[6];
+                c[3] += weight * src[7];
+
+                src += this->srcData.lineStride;
+
+                weight = (256 - hiResX) * hiResY;
+                c[0] += weight * src[0];
+                c[1] += weight * src[1];
+                c[2] += weight * src[2];
+                c[3] += weight * src[3];
+
+                weight = hiResX * hiResY;
+                c[0] += weight * src[4];
+                c[1] += weight * src[5];
+                c[2] += weight * src[6];
+                c[3] += weight * src[7];
+
+                dest->setARGB ((uint8) (c[3] >> 16),
+                               (uint8) (c[2] >> 16),
+                               (uint8) (c[1] >> 16),
+                               (uint8) (c[0] >> 16));
+            }
+            else
+            {
+                // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
+                if (loResX < 0)     loResX = 0;
+                if (loResY < 0)     loResY = 0;
+                if (loResX > maxX)  loResX = maxX;
+                if (loResY > maxY)  loResY = maxY;
+
+                dest->set (*(const PixelARGB*) this->srcData.getPixelPointer (loResX, loResY));
+            }
+
+            ++dest;
+
+        } while (--numPixels > 0);
+    }
+
+    void generate (PixelRGB* dest, const int x, int numPixels) throw()
+    {
+        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
+
+        do
+        {
+            int hiResX, hiResY;
+            this->interpolator.next (hiResX, hiResY);
+            hiResX += pixelOffsetInt;
+            hiResY += pixelOffsetInt;
+            int loResX = hiResX >> 8;
+            int loResY = hiResY >> 8;
+
+            if (betterQuality
+                 && ((unsigned int) loResX) < (unsigned int) maxX
+                 && ((unsigned int) loResY) < (unsigned int) maxY)
+            {
+                uint32 c[3] = { 256 * 128, 256 * 128, 256 * 128 };
+                hiResX &= 255;
+                hiResY &= 255;
+
+                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
+
+                unsigned int weight = (256 - hiResX) * (256 - hiResY);
+                c[0] += weight * src[0];
+                c[1] += weight * src[1];
+                c[2] += weight * src[2];
+
+                weight = hiResX * (256 - hiResY);
+                c[0] += weight * src[3];
+                c[1] += weight * src[4];
+                c[2] += weight * src[5];
+
+                src += this->srcData.lineStride;
+
+                weight = (256 - hiResX) * hiResY;
+                c[0] += weight * src[0];
+                c[1] += weight * src[1];
+                c[2] += weight * src[2];
+
+                weight = hiResX * hiResY;
+                c[0] += weight * src[3];
+                c[1] += weight * src[4];
+                c[2] += weight * src[5];
+
+                dest->setARGB ((uint8) 255,
+                               (uint8) (c[0] >> 16),
+                               (uint8) (c[1] >> 16),
+                               (uint8) (c[2] >> 16));
+            }
+            else
+            {
+                // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
+                if (loResX < 0)     loResX = 0;
+                if (loResY < 0)     loResY = 0;
+                if (loResX > maxX)  loResX = maxX;
+                if (loResY > maxY)  loResY = maxY;
+
+                dest->set (*(const PixelRGB*) this->srcData.getPixelPointer (loResX, loResY));
+            }
+
+            ++dest;
+
+        } while (--numPixels > 0);
+    }
+
+    void generate (PixelAlpha* dest, const int x, int numPixels) throw()
+    {
+        this->interpolator.setStartOfLine (x + pixelOffset, y + pixelOffset, numPixels);
+
+        do
+        {
+            int hiResX, hiResY;
+            this->interpolator.next (hiResX, hiResY);
+            hiResX += pixelOffsetInt;
+            hiResY += pixelOffsetInt;
+            int loResX = hiResX >> 8;
+            int loResY = hiResY >> 8;
+
+            if (betterQuality
+                 && ((unsigned int) loResX) < (unsigned int) maxX
+                 && ((unsigned int) loResY) < (unsigned int) maxY)
+            {
+                hiResX &= 255;
+                hiResY &= 255;
+
+                uint32 c = 256 * 128;
+                const uint8* src = this->srcData.getPixelPointer (loResX, loResY);
+                c += src[0] * ((256 - hiResX) * (256 - hiResY));
+                c += src[1] * (hiResX * (256 - hiResY));
+                src += this->srcData.lineStride;
+                c += src[0] * ((256 - hiResX) * hiResY);
+                c += src[1] * (hiResX * hiResY);
+
+                *((uint8*) dest) = (uint8) c;
+            }
+            else
+            {
+                // Beyond the edges, just repeat the edge pixels and leave the anti-aliasing to be handled by the edgetable
+                if (loResX < 0)     loResX = 0;
+                if (loResY < 0)     loResY = 0;
+                if (loResX > maxX)  loResX = maxX;
+                if (loResY > maxY)  loResY = maxY;
+
+                *((uint8*) dest) = *(this->srcData.getPixelPointer (loResX, loResY));
+            }
+
+            ++dest;
+
+        } while (--numPixels > 0);
+    }
+
+    //==============================================================================
+    class TransformedImageSpanInterpolator
+    {
+    public:
+        TransformedImageSpanInterpolator (const AffineTransform& transform) throw()
+            : inverseTransform (transform.inverted())
+        {}
+
+        void setStartOfLine (float x, float y, const int numPixels) throw()
+        {
+            float x1 = x, y1 = y;
+            inverseTransform.transformPoint (x1, y1);
+            x += numPixels;
+            inverseTransform.transformPoint (x, y);
+
+            xBresenham.set ((int) (x1 * 256.0f), (int) (x * 256.0f), numPixels);
+            yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels);
+        }
+
+        void next (int& x, int& y) throw()
+        {
+            x = xBresenham.n;
+            xBresenham.stepToNext();
+            y = yBresenham.n;
+            yBresenham.stepToNext();
+        }
+
+    private:
+        class BresenhamInterpolator
+        {
+        public:
+            BresenhamInterpolator() throw() {}
+
+            void set (const int n1, const int n2, const int numSteps_) throw()
+            {
+                numSteps = jmax (1, numSteps_);
+                step = (n2 - n1) / numSteps;
+                remainder = modulo = (n2 - n1) % numSteps;
+                n = n1;
+
+                if (modulo <= 0)
+                {
+                    modulo += numSteps;
+                    remainder += numSteps;
+                    --step;
+                }
+
+                modulo -= numSteps;
+            }
+
+            forcedinline void stepToNext() throw()
+            {
+                modulo += remainder;
+                n += step;
+
+                if (modulo > 0)
+                {
+                    modulo -= numSteps;
+                    ++n;
+                }
+            }
+
+            int n;
+
+        private:
+            int numSteps, step, modulo, remainder;
+        };
+
+        const AffineTransform inverseTransform;
+        BresenhamInterpolator xBresenham, yBresenham;
+
+        TransformedImageSpanInterpolator (const TransformedImageSpanInterpolator&);
+        const TransformedImageSpanInterpolator& operator= (const TransformedImageSpanInterpolator&);
+    };
+
+    //==============================================================================
+    TransformedImageSpanInterpolator interpolator;
+    const Image::BitmapData& destData;
+    const Image::BitmapData& srcData;
+    const int extraAlpha;
+    const bool betterQuality;
+    const float pixelOffset;
+    const int pixelOffsetInt, maxX, maxY;
+    int y;
+    DestPixelType* linePixels;
+
+    TransformedImageFillEdgeTableRenderer (const TransformedImageFillEdgeTableRenderer&);
+    const TransformedImageFillEdgeTableRenderer& operator= (const TransformedImageFillEdgeTableRenderer&);
+};
+
+//==============================================================================
+class LLGCSavedState
+{
+public:
+    LLGCSavedState (const Rectangle& clip_,
+                    const int xOffset_, const int yOffset_,
+                    const Font& font_, const Colour& colour_, ColourGradient* const gradient_,
+                    const Graphics::ResamplingQuality interpolationQuality_) throw()
+        : edgeTable (new EdgeTableHolder (EdgeTable (clip_))),
+          xOffset (xOffset_),
+          yOffset (yOffset_),
+          font (font_),
+          colour (colour_),
+          gradient (gradient_),
+          interpolationQuality (interpolationQuality_)
     {
     }
 
-    ~ClippingPath() throw()
+    LLGCSavedState (const LLGCSavedState& other) throw()
+        : edgeTable (other.edgeTable),
+          xOffset (other.xOffset),
+          yOffset (other.yOffset),
+          font (other.font),
+          colour (other.colour),
+          gradient (other.gradient),
+          interpolationQuality (other.interpolationQuality)
     {
-        delete mask;
+        if (gradient != 0)
+            gradient = new ColourGradient (*gradient);
+    }
+
+    ~LLGCSavedState() throw()
+    {
+        delete gradient;
     }
 
     bool reduce (int x, int y, int w, int h) throw()
     {
-        return clip.clipTo (Rectangle (x, y, w, h));
+        dupeEdgeTableIfMultiplyReferenced();
+        edgeTable->edgeTable.clipToRectangle (Rectangle (x, y, w, h));
+        return ! edgeTable->edgeTable.isEmpty();
+    }
+
+    bool reduce (const RectangleList& r) throw()
+    {
+        dupeEdgeTableIfMultiplyReferenced();
+        RectangleList totalArea (edgeTable->edgeTable.getMaximumBounds());
+        totalArea.subtract (r);
+
+        for (RectangleList::Iterator i (totalArea); i.next();)
+            edgeTable->edgeTable.excludeRectangle (*i.getRectangle());
+
+        return ! edgeTable->edgeTable.isEmpty();
     }
 
     bool exclude (int x, int y, int w, int h) throw()
     {
-        return clip.subtract (Rectangle (x, y, w, h));
+        dupeEdgeTableIfMultiplyReferenced();
+        edgeTable->edgeTable.excludeRectangle (Rectangle (x, y, w, h));
+        return ! edgeTable->edgeTable.isEmpty();
     }
 
-    bool reduce (const Path& p, const AffineTransform& transform)
+    bool reduce (const Path& p, const AffineTransform& transform) throw()
     {
-        float px, py, pw, ph;
-        p.getBoundsTransformed (transform, px, py, pw, ph);
+        dupeEdgeTableIfMultiplyReferenced();
+        EdgeTable et (edgeTable->edgeTable.getMaximumBounds(), p, transform);
+        edgeTable->edgeTable.clipToEdgeTable (et);
+        return ! edgeTable->edgeTable.isEmpty();
+    }
 
-        Rectangle pathBounds ((int) px - 1, (int) py - 1, (int) pw + 3, (int) ph + 3);
+    bool reduce (const Image& image, int x, int y) throw()
+    {
+        dupeEdgeTableIfMultiplyReferenced();
+        edgeTable->edgeTable.clipToImageAlpha (image, x, y);
+        return ! edgeTable->edgeTable.isEmpty();
+    }
 
-        if (clip.clipTo (pathBounds))
+    bool reduce (const Image& image, const AffineTransform& transform) throw()
+    {
+        jassertfalse
+        return true;
+    }
+
+    void fillEdgeTable (Image& image, EdgeTable& et, const bool replaceContents = false) throw()
+    {
+        et.clipToEdgeTable (edgeTable->edgeTable);
+
+        Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
+
+        if (gradient != 0)
         {
+            jassert (! replaceContents); // that option is just for solid colours
+
+            ColourGradient g2 (*gradient);
+
+            const bool isIdentity = g2.transform.isOnlyTranslation();
+            if (isIdentity)
+            {
+                // If our translation doesn't involve any distortion, we can speed it up..
+                const float tx = g2.transform.getTranslationX() + xOffset;
+                const float ty = g2.transform.getTranslationY() + yOffset;
+
+                g2.x1 += tx;
+                g2.x2 += tx;
+                g2.y1 += ty;
+                g2.y2 += ty;
+            }
+            else
+            {
+                g2.transform = g2.transform.translated ((float) xOffset,
+                                                        (float) yOffset);
+            }
+
+            int numLookupEntries;
+            PixelARGB* const lookupTable = g2.createLookupTable (numLookupEntries);
+            jassert (numLookupEntries > 0);
+
+            if (image.getFormat() == Image::RGB)
+            {
+                jassert (destData.pixelStride == 3);
+
+                if (g2.isRadial)
+                {
+                    if (isIdentity)
+                    {
+                        GradientEdgeTableRenderer <PixelRGB, RadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                    else
+                    {
+                        GradientEdgeTableRenderer <PixelRGB, TransformedRadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                }
+                else
+                {
+                    GradientEdgeTableRenderer <PixelRGB, LinearGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                    et.iterate (renderer);
+                }
+            }
+            else if (image.getFormat() == Image::ARGB)
+            {
+                jassert (destData.pixelStride == 4);
+
+                if (g2.isRadial)
+                {
+                    if (isIdentity)
+                    {
+                        GradientEdgeTableRenderer <PixelARGB, RadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                    else
+                    {
+                        GradientEdgeTableRenderer <PixelARGB, TransformedRadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                }
+                else
+                {
+                    GradientEdgeTableRenderer <PixelARGB, LinearGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                    et.iterate (renderer);
+                }
+            }
+            else if (image.getFormat() == Image::SingleChannel)
+            {
+                jassert (destData.pixelStride == 4);
+
+                if (g2.isRadial)
+                {
+                    if (isIdentity)
+                    {
+                        GradientEdgeTableRenderer <PixelAlpha, RadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                    else
+                    {
+                        GradientEdgeTableRenderer <PixelAlpha, TransformedRadialGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                        et.iterate (renderer);
+                    }
+                }
+                else
+                {
+                    GradientEdgeTableRenderer <PixelAlpha, LinearGradientPixelGenerator> renderer (destData, g2, lookupTable, numLookupEntries);
+                    et.iterate (renderer);
+                }
+            }
+
+            juce_free (lookupTable);
+        }
+        else
+        {
+            const PixelARGB fillColour (colour.getPixelARGB());
+
+            if (replaceContents)
+            {
+                if (image.getFormat() == Image::RGB)
+                {
+                    jassert (destData.pixelStride == 3);
+                    SolidColourEdgeTableRenderer <PixelRGB, true> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+                else if (image.getFormat() == Image::ARGB)
+                {
+                    jassert (destData.pixelStride == 4);
+                    SolidColourEdgeTableRenderer <PixelARGB, true> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+                else if (image.getFormat() == Image::SingleChannel)
+                {
+                    jassert (destData.pixelStride == 1);
+                    SolidColourEdgeTableRenderer <PixelAlpha, true> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+            }
+            else
+            {
+                if (image.getFormat() == Image::RGB)
+                {
+                    jassert (destData.pixelStride == 3);
+                    SolidColourEdgeTableRenderer <PixelRGB, false> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+                else if (image.getFormat() == Image::ARGB)
+                {
+                    jassert (destData.pixelStride == 4);
+                    SolidColourEdgeTableRenderer <PixelARGB, false> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+                else if (image.getFormat() == Image::SingleChannel)
+                {
+                    jassert (destData.pixelStride == 1);
+                    SolidColourEdgeTableRenderer <PixelAlpha, false> renderer (destData, fillColour);
+                    et.iterate (renderer);
+                }
+            }
         }
     }
 
-    bool reduce (Image& image, int x, int y)
+    void renderImage (Image& destImage, const Image& sourceImage,
+                      int srcClipX, int srcClipY, int srcClipW, int srcClipH,
+                      const AffineTransform& t) throw()
     {
+        if (t.isSingularity())
+            return;
+
+        const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
+        const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
+
+        if (transform.isOnlyTranslation())
+        {
+            // If our translation doesn't involve any distortion, just use a simple blit..
+            const int tx = (int) (t.getTranslationX() * 256.0f);
+            const int ty = (int) (t.getTranslationY() * 256.0f);
+
+            if ((! betterQuality) || ((tx | ty) & 224) == 0)
+            {
+                renderImage (destImage, sourceImage, (tx + 128) >> 8, (ty + 128) >> 8);
+                return;
+            }
+        }
+
+        Path p;
+        p.addRectangle ((float) srcClipX, (float) srcClipY, (float) srcClipW, (float) srcClipH);
+
+        EdgeTable et (edgeTable->edgeTable.getMaximumBounds(), p, transform);
+        et.clipToEdgeTable (edgeTable->edgeTable);
+
+        Image::BitmapData destData (destImage, 0, 0, destImage.getWidth(), destImage.getHeight(), true);
+        Image::BitmapData srcData (sourceImage, 0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+
+        const int extraAlpha = colour.getAlpha();
+
+        switch (sourceImage.getFormat())
+        {
+        case Image::ARGB:
+            if (destImage.getFormat() == Image::ARGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else if (destImage.getFormat() == Image::RGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else
+            {
+                jassert (destImage.getFormat() == Image::SingleChannel)
+                TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            break;
+
+        case Image::RGB:
+            if (destImage.getFormat() == Image::ARGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else if (destImage.getFormat() == Image::RGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else
+            {
+                jassert (destImage.getFormat() == Image::SingleChannel)
+                TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            break;
+
+        default:
+            jassert (sourceImage.getFormat() == Image::SingleChannel);
+
+            if (destImage.getFormat() == Image::ARGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else if (destImage.getFormat() == Image::RGB)
+            {
+                TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            else
+            {
+                jassert (destImage.getFormat() == Image::SingleChannel)
+                TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha> renderer (destData, srcData, transform, extraAlpha, betterQuality);
+                et.iterate (renderer);
+            }
+            break;
+        }
     }
 
-    bool reduce (Image& image, const AffineTransform& transform)
+    void renderImage (Image& destImage, const Image& sourceImage, int imageX, int imageY) throw()
     {
+        EdgeTable et (Rectangle (imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight())
+                        .getIntersection (Rectangle (0, 0, destImage.getWidth(), destImage.getHeight())));
+        et.clipToEdgeTable (edgeTable->edgeTable);
+
+        if (et.isEmpty())
+            return;
+
+        Image::BitmapData destData (destImage, 0, 0, destImage.getWidth(), destImage.getHeight(), true);
+        Image::BitmapData srcData (sourceImage, 0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+        srcData.data = srcData.getPixelPointer (-imageX, -imageY);
+
+        const int alpha = colour.getAlpha();
+
+        switch (destImage.getFormat())
+        {
+        case Image::RGB:
+            if (sourceImage.getFormat() == Image::RGB)
+            {
+                ImageFillEdgeTableRenderer <PixelRGB, const PixelRGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else if (sourceImage.getFormat() == Image::ARGB)
+            {
+                ImageFillEdgeTableRenderer <PixelRGB, const PixelARGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else
+            {
+                ImageFillEdgeTableRenderer <PixelRGB, const PixelAlpha> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            break;
+
+        case Image::ARGB:
+            if (sourceImage.getFormat() == Image::RGB)
+            {
+                ImageFillEdgeTableRenderer <PixelARGB, const PixelRGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else if (sourceImage.getFormat() == Image::ARGB)
+            {
+                ImageFillEdgeTableRenderer <PixelARGB, const PixelARGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else
+            {
+                ImageFillEdgeTableRenderer <PixelARGB, const PixelAlpha> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            break;
+
+        default:
+            jassert (destImage.getFormat() == Image::SingleChannel);
+            if (sourceImage.getFormat() == Image::RGB)
+            {
+                ImageFillEdgeTableRenderer <PixelAlpha, const PixelRGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else if (sourceImage.getFormat() == Image::ARGB)
+            {
+                ImageFillEdgeTableRenderer <PixelAlpha, const PixelARGB> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            else
+            {
+                ImageFillEdgeTableRenderer <PixelAlpha, const PixelAlpha> renderer (destData, srcData, alpha);
+                et.iterate (renderer);
+            }
+            break;
+        }
     }
 
-    class MaskImage  : public ReferenceCountedObject
+    class EdgeTableHolder  : public ReferenceCountedObject
     {
     public:
-        MaskImage (int x_, int y_, int w, int h) throw()
-            : x (x_), y (y_)
-        {
-            image = new Image (Image::SingleChannel, w, h, true);
-        }
+        EdgeTableHolder (const EdgeTable& e) throw()
+            : edgeTable (e)
+        {}
 
-        ~MaskImage() throw()
-        {
-            delete image;
-        }
-
-        Image* image;
-        int x, y;
+        EdgeTable edgeTable;
     };
 
-    RectangleList clip;
-    ReferenceCountedObjectPtr<MaskImage> mask;
+    ReferenceCountedObjectPtr<EdgeTableHolder> edgeTable;
+    int xOffset, yOffset;
+    Font font;
+    Colour colour;
+    ColourGradient* gradient;
+    Graphics::ResamplingQuality interpolationQuality;
 
 private:
+    const LLGCSavedState& operator= (const LLGCSavedState&);
+
+    void dupeEdgeTableIfMultiplyReferenced() throw()
+    {
+        if (edgeTable->getReferenceCount() > 1)
+            edgeTable = new EdgeTableHolder (edgeTable->edgeTable);
+    }
 };
-*/
+
 
 //==============================================================================
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image_)
     : image (image_),
-      xOffset (0),
-      yOffset (0),
-      stateStack (20),
-      colour (0xff000000),
-      gradient (0)
+      stateStack (20)
 {
-    clip = new RectangleList (Rectangle (0, 0, image_.getWidth(), image_.getHeight()));
+    currentState = new LLGCSavedState (Rectangle (0, 0, image_.getWidth(), image_.getHeight()),
+                                       0, 0, Font(), Colours::black, 0, Graphics::mediumResamplingQuality);
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
 {
-    delete clip;
-    delete gradient;
+    delete currentState;
 }
 
 bool LowLevelGraphicsSoftwareRenderer::isVectorDevice() const
@@ -1158,26 +1408,26 @@ bool LowLevelGraphicsSoftwareRenderer::isVectorDevice() const
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setOrigin (int x, int y)
 {
-    xOffset += x;
-    yOffset += y;
+    currentState->xOffset += x;
+    currentState->yOffset += y;
 }
 
 bool LowLevelGraphicsSoftwareRenderer::reduceClipRegion (int x, int y, int w, int h)
 {
-    return clip->clipTo (Rectangle (x + xOffset, y + yOffset, w, h));
+    return currentState->reduce (x + currentState->xOffset, y + currentState->yOffset, w, h);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::reduceClipRegion (const RectangleList& clipRegion)
 {
     RectangleList temp (clipRegion);
-    temp.offsetAll (xOffset, yOffset);
+    temp.offsetAll (currentState->xOffset, currentState->yOffset);
 
-    return clip->clipTo (temp);
+    return currentState->reduce (temp);
 }
 
 void LowLevelGraphicsSoftwareRenderer::excludeClipRegion (int x, int y, int w, int h)
 {
-    clip->subtract (Rectangle (x + xOffset, y + yOffset, w, h));
+    currentState->exclude (x + currentState->xOffset, y + currentState->yOffset, w, h);
 }
 
 void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const AffineTransform& transform)
@@ -1190,62 +1440,35 @@ void LowLevelGraphicsSoftwareRenderer::clipToImage (Image& image, int imageX, in
 
 bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (int x, int y, int w, int h)
 {
-    return clip->intersectsRectangle (Rectangle (x + xOffset, y + yOffset, w, h));
+    return currentState->edgeTable->edgeTable.getMaximumBounds()
+                .intersects (Rectangle (x + currentState->xOffset, y + currentState->yOffset, w, h));
 }
 
 const Rectangle LowLevelGraphicsSoftwareRenderer::getClipBounds() const
 {
-    return clip->getBounds().translated (-xOffset, -yOffset);
+    return currentState->edgeTable->edgeTable.getMaximumBounds().translated (-currentState->xOffset, -currentState->yOffset);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::isClipEmpty() const
 {
-    return clip->isEmpty();
+    return currentState->edgeTable->edgeTable.isEmpty();
 }
 
 //==============================================================================
-LowLevelGraphicsSoftwareRenderer::SavedState::SavedState (RectangleList* const clip_,
-                                                          const int xOffset_, const int yOffset_,
-                                                          const Font& font_, const Colour& colour_, ColourGradient* gradient_,
-                                                          Graphics::ResamplingQuality interpolationQuality_)
-    : clip (clip_),
-      xOffset (xOffset_),
-      yOffset (yOffset_),
-      font (font_),
-      colour (colour_),
-      gradient (gradient_),
-      interpolationQuality (interpolationQuality_)
-{
-}
-
-LowLevelGraphicsSoftwareRenderer::SavedState::~SavedState()
-{
-    delete clip;
-    delete gradient;
-}
-
 void LowLevelGraphicsSoftwareRenderer::saveState()
 {
-    stateStack.add (new SavedState (new RectangleList (*clip), xOffset, yOffset,
-                                    font, colour, gradient != 0 ? new ColourGradient (*gradient) : 0,
-                                    interpolationQuality));
+    stateStack.add (new LLGCSavedState (*currentState));
 }
 
 void LowLevelGraphicsSoftwareRenderer::restoreState()
 {
-    SavedState* const top = stateStack.getLast();
+    LLGCSavedState* const top = stateStack.getLast();
 
     if (top != 0)
     {
-        swapVariables (clip, top->clip);
-        xOffset = top->xOffset;
-        yOffset = top->yOffset;
-        font = top->font;
-        colour = top->colour;
-        swapVariables (gradient, top->gradient);
-        interpolationQuality = top->interpolationQuality;
-
-        stateStack.removeLast();
+        delete currentState;
+        currentState = top;
+        stateStack.removeLast (1, false);
     }
     else
     {
@@ -1256,595 +1479,96 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setColour (const Colour& colour_)
 {
-    deleteAndZero (gradient);
-    colour = colour_;
+    deleteAndZero (currentState->gradient);
+    currentState->colour = colour_;
 }
 
 void LowLevelGraphicsSoftwareRenderer::setGradient (const ColourGradient& gradient_)
 {
-    delete gradient;
-    gradient = new ColourGradient (gradient_);
+    delete currentState->gradient;
+    currentState->gradient = new ColourGradient (gradient_);
 }
 
 void LowLevelGraphicsSoftwareRenderer::setOpacity (float opacity)
 {
-    colour = colour.withAlpha (opacity);
+    currentState->colour = currentState->colour.withAlpha (opacity);
 }
 
 void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::ResamplingQuality quality)
 {
-    interpolationQuality = quality;
+    currentState->interpolationQuality = quality;
 }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::fillRect (int x, int y, int w, int h, const bool replaceExistingContents)
 {
-    if (gradient != 0)
+    x += currentState->xOffset;
+    y += currentState->yOffset;
+
+    if (Rectangle::intersectRectangles (x, y, w, h, 0, 0, image.getWidth(), image.getHeight()))
     {
-        if (replaceExistingContents && ! gradient->isOpaque())
-        {
-            for (RectangleList::Iterator i (*clip); i.next();)
-                clippedFillRectWithColour (*i.getRectangle(), x + xOffset, y + yOffset, w, h, Colours::transparentBlack, true);
-        }
-
-        Path p;
-        p.addRectangle ((float) x, (float) y, (float) w, (float) h);
-        fillPath (p, AffineTransform::identity);
+        EdgeTable et (Rectangle (x, y, w, h));
+        currentState->fillEdgeTable (image, et, replaceExistingContents);
     }
-    else
-    {
-        x += xOffset;
-        y += yOffset;
-
-        for (RectangleList::Iterator i (*clip); i.next();)
-            clippedFillRectWithColour (*i.getRectangle(), x, y, w, h, colour, replaceExistingContents);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedFillRectWithColour (const Rectangle& clipRect,
-                                                                  int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents)
-{
-    if (clipRect.intersectRectangle (x, y, w, h))
-    {
-        int stride, pixelStride;
-        uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
-
-        if (image.getFormat() == Image::RGB)
-        {
-            if (replaceExistingContents)
-                replaceRectRGB (pixels, w, h, stride, colour);
-            else
-                blendRectRGB (pixels, w, h, stride, colour);
-        }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            if (replaceExistingContents)
-                replaceRectARGB (pixels, w, h, stride, colour);
-            else
-                blendRectARGB (pixels, w, h, stride, colour);
-        }
-        else
-        {
-            jassertfalse // not done!
-        }
-
-        image.releasePixelDataReadWrite (pixels);
-    }
-}
-
-//==============================================================================
-bool LowLevelGraphicsSoftwareRenderer::getPathBounds (int clipX, int clipY, int clipW, int clipH,
-                                                      const Path& path, const AffineTransform& transform,
-                                                      int& x, int& y, int& w, int& h) const
-{
-    float tx, ty, tw, th;
-    path.getBoundsTransformed (transform, tx, ty, tw, th);
-
-    x = roundDoubleToInt (tx) - 1;
-    y = roundDoubleToInt (ty) - 1;
-    w = roundDoubleToInt (tw) + 2;
-    h = roundDoubleToInt (th) + 2;
-
-    // seems like this operation is using some crazy out-of-range numbers..
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, w, h);
-
-    return Rectangle::intersectRectangles (x, y, w, h, clipX, clipY, clipW, clipH);
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineTransform& transform)
 {
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
+    EdgeTable et (currentState->edgeTable->edgeTable.getMaximumBounds(),
+                  path, transform.translated ((float) currentState->xOffset,
+                                              (float) currentState->yOffset));
 
-        clippedFillPath (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                         path, transform);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path,
-                                                        const AffineTransform& t)
-{
-    const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
-    int cx, cy, cw, ch;
-
-    if (getPathBounds (clipX, clipY, clipW, clipH, path, transform, cx, cy, cw, ch))
-    {
-        EdgeTable edgeTable (Rectangle (0, 0, cw, ch), path, transform.translated ((float) -cx, (float) -cy));
-
-        int stride, pixelStride;
-        uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (cx, cy, cw, ch, stride, pixelStride);
-
-        if (gradient != 0)
-        {
-            ColourGradient g2 (*gradient);
-
-            const bool isIdentity = g2.transform.isIdentity();
-            if (isIdentity)
-            {
-                g2.x1 += xOffset - cx;
-                g2.x2 += xOffset - cx;
-                g2.y1 += yOffset - cy;
-                g2.y2 += yOffset - cy;
-            }
-            else
-            {
-                g2.transform = g2.transform.translated ((float) (xOffset - cx),
-                                                        (float) (yOffset - cy));
-            }
-
-            int numLookupEntries;
-            PixelARGB* const lookupTable = g2.createLookupTable (numLookupEntries);
-            jassert (numLookupEntries > 0);
-
-            if (image.getFormat() == Image::RGB)
-            {
-                jassert (pixelStride == 3);
-
-                if (g2.isRadial)
-                {
-                    if (isIdentity)
-                    {
-                        GradientEdgeTableRenderer <PixelRGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer);
-                    }
-                    else
-                    {
-                        GradientEdgeTableRenderer <PixelRGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer);
-                    }
-                }
-                else
-                {
-                    GradientEdgeTableRenderer <PixelRGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer);
-                }
-            }
-            else if (image.getFormat() == Image::ARGB)
-            {
-                jassert (pixelStride == 4);
-
-                if (g2.isRadial)
-                {
-                    if (isIdentity)
-                    {
-                        GradientEdgeTableRenderer <PixelARGB, RadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer);
-                    }
-                    else
-                    {
-                        GradientEdgeTableRenderer <PixelARGB, TransformedRadialGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                        edgeTable.iterate (renderer);
-                    }
-                }
-                else
-                {
-                    GradientEdgeTableRenderer <PixelARGB, LinearGradientPixelGenerator> renderer (pixels, stride, g2, lookupTable, numLookupEntries);
-                    edgeTable.iterate (renderer);
-                }
-            }
-            else if (image.getFormat() == Image::SingleChannel)
-            {
-                jassertfalse // not done!
-            }
-
-            juce_free (lookupTable);
-        }
-        else
-        {
-            if (image.getFormat() == Image::RGB)
-            {
-                jassert (pixelStride == 3);
-                SolidColourEdgeTableRenderer <PixelRGB> renderer (pixels, stride, colour);
-                edgeTable.iterate (renderer);
-            }
-            else if (image.getFormat() == Image::ARGB)
-            {
-                jassert (pixelStride == 4);
-                SolidColourEdgeTableRenderer <PixelARGB> renderer (pixels, stride, colour);
-                edgeTable.iterate (renderer);
-            }
-            else if (image.getFormat() == Image::SingleChannel)
-            {
-                jassert (pixelStride == 1);
-                AlphaBitmapRenderer renderer (pixels, stride);
-                edgeTable.iterate (renderer);
-            }
-        }
-
-        image.releasePixelDataReadWrite (pixels);
-    }
+    currentState->fillEdgeTable (image, et);
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillPathWithImage (const Path& path, const AffineTransform& transform,
                                                           const Image& sourceImage, int imageX, int imageY)
 {
-    imageX += xOffset;
-    imageY += yOffset;
+    imageX += currentState->xOffset;
+    imageY += currentState->yOffset;
 
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedFillPathWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                  path, transform, sourceImage, imageX, imageY,
-                                  colour.getFloatAlpha());
-    }
+    saveState();
+    currentState->reduce (path, transform.translated ((float) currentState->xOffset, (float) currentState->yOffset));
+    currentState->renderImage (image, sourceImage, imageX, imageY);
+    restoreState();
 }
 
-void LowLevelGraphicsSoftwareRenderer::clippedFillPathWithImage (int x, int y, int w, int h, const Path& path, const AffineTransform& transform,
-                                                                 const Image& sourceImage, int imageX, int imageY, float opacity)
-{
-    if (Rectangle::intersectRectangles (x, y, w, h, imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight()))
-    {
-        EdgeTable edgeTable (Rectangle (0, 0, w, h), path,
-                             transform.translated ((float) (xOffset - x), (float) (yOffset - y)));
-
-        int stride, pixelStride;
-        uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
-
-        int srcStride, srcPixelStride;
-        const uint8* const srcPix = (const uint8*) sourceImage.lockPixelDataReadOnly (x - imageX, y - imageY, w, h, srcStride, srcPixelStride);
-
-        const int alpha = jlimit (0, 255, roundDoubleToInt (opacity * 255.0f));
-
-        if (image.getFormat() == Image::RGB)
-        {
-            if (sourceImage.getFormat() == Image::RGB)
-            {
-                ImageFillEdgeTableRenderer <PixelRGB, PixelRGB> renderer (pixels, stride,
-                                                                          srcPix, srcStride,
-                                                                          alpha, (PixelRGB*) 0);
-                edgeTable.iterate (renderer);
-            }
-            else if (sourceImage.getFormat() == Image::ARGB)
-            {
-                ImageFillEdgeTableRenderer <PixelRGB, PixelARGB> renderer (pixels, stride,
-                                                                           srcPix, srcStride,
-                                                                           alpha, (PixelARGB*) 0);
-                edgeTable.iterate (renderer);
-            }
-            else
-            {
-                jassertfalse // not done!
-            }
-        }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            if (sourceImage.getFormat() == Image::RGB)
-            {
-                ImageFillEdgeTableRenderer <PixelARGB, PixelRGB> renderer (pixels, stride,
-                                                                           srcPix, srcStride,
-                                                                           alpha, (PixelRGB*) 0);
-                edgeTable.iterate (renderer);
-            }
-            else if (sourceImage.getFormat() == Image::ARGB)
-            {
-                ImageFillEdgeTableRenderer <PixelARGB, PixelARGB> renderer (pixels, stride,
-                                                                            srcPix, srcStride,
-                                                                            alpha, (PixelARGB*) 0);
-                edgeTable.iterate (renderer);
-            }
-            else
-            {
-                jassertfalse // not done!
-            }
-        }
-        else
-        {
-            jassertfalse // not done!
-        }
-
-        sourceImage.releasePixelDataReadOnly (srcPix);
-        image.releasePixelDataReadWrite (pixels);
-    }
-}
-
-//==============================================================================
 void LowLevelGraphicsSoftwareRenderer::fillAlphaChannel (const Image& clipImage, int x, int y)
 {
-    x += xOffset;
-    y += yOffset;
+    x += currentState->xOffset;
+    y += currentState->yOffset;
 
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
+    Rectangle maxBounds (currentState->edgeTable->edgeTable.getMaximumBounds());
+    EdgeTable et (maxBounds.getIntersection (Rectangle (x, y, clipImage.getWidth(), clipImage.getHeight())));
+    et.clipToImageAlpha (clipImage, x, y);
 
-        clippedFillAlphaChannel (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                 clipImage, x, y);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& clipImage, int x, int y)
-{
-    if (gradient != 0)
-    {
-        if (Rectangle::intersectRectangles (clipX, clipY, clipW, clipH, x, y, clipImage.getWidth(), clipImage.getHeight()))
-        {
-            ColourGradient g2 (*gradient);
-            g2.x1 += xOffset - clipX;
-            g2.x2 += xOffset - clipX;
-            g2.y1 += yOffset - clipY;
-            g2.y2 += yOffset - clipY;
-
-            Image temp (g2.isOpaque() ? Image::RGB : Image::ARGB, clipW, clipH, true);
-            LowLevelGraphicsSoftwareRenderer tempG (temp);
-            tempG.setGradient (g2);
-            tempG.fillRect (0, 0, clipW, clipH, false);
-
-            clippedFillAlphaChannelWithImage (clipX, clipY, clipW, clipH,
-                                              clipImage, x, y,
-                                              temp, clipX, clipY, 1.0f);
-        }
-    }
-    else
-    {
-        int w = clipImage.getWidth();
-        int h = clipImage.getHeight();
-        int sx = 0;
-        int sy = 0;
-
-        if (x < clipX)
-        {
-            sx = clipX - x;
-            w -= clipX - x;
-            x = clipX;
-        }
-
-        if (y < clipY)
-        {
-            sy = clipY - y;
-            h -= clipY - y;
-            y = clipY;
-        }
-
-        if (x + w > clipX + clipW)
-            w = clipX + clipW - x;
-
-        if (y + h > clipY + clipH)
-            h = clipY + clipH - y;
-
-        if (w > 0 && h > 0)
-        {
-            int stride, alphaStride, pixelStride;
-            uint8* const pixels = (uint8*) image.lockPixelDataReadWrite (x, y, w, h, stride, pixelStride);
-
-            const uint8* const alphaValues
-                = clipImage.lockPixelDataReadOnly (sx, sy, w, h, alphaStride, pixelStride);
-
-#if JUCE_BIG_ENDIAN
-            const uint8* const alphas = alphaValues;
-#else
-            const uint8* const alphas = alphaValues + (clipImage.getFormat() == Image::ARGB ? 3 : 0);
-#endif
-
-            if (image.getFormat() == Image::RGB)
-            {
-                blendAlphaMapRGB (pixels, stride,
-                                  alphas, w, h,
-                                  pixelStride, alphaStride,
-                                  colour);
-            }
-            else if (image.getFormat() == Image::ARGB)
-            {
-                blendAlphaMapARGB (pixels, stride,
-                                   alphas, w, h,
-                                   pixelStride, alphaStride,
-                                   colour);
-            }
-            else
-            {
-                jassertfalse // not done!
-            }
-
-            clipImage.releasePixelDataReadOnly (alphaValues);
-            image.releasePixelDataReadWrite (pixels);
-        }
-    }
+    currentState->fillEdgeTable (image, et);
 }
 
 void LowLevelGraphicsSoftwareRenderer::fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
                                                                   const Image& fillerImage, int fillerImageX, int fillerImageY)
 {
-    alphaImageX += xOffset;
-    alphaImageY += yOffset;
+    alphaImageX += currentState->xOffset;
+    alphaImageY += currentState->yOffset;
+    fillerImageX += currentState->xOffset;
+    fillerImageY += currentState->yOffset;
 
-    fillerImageX += xOffset;
-    fillerImageY += yOffset;
-
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedFillAlphaChannelWithImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                          alphaImage, alphaImageX, alphaImageY,
-                                          fillerImage, fillerImageX, fillerImageY,
-                                          colour.getFloatAlpha());
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedFillAlphaChannelWithImage (int x, int y, int w, int h, const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                                                         const Image& fillerImage, int fillerImageX, int fillerImageY, float opacity)
-{
-    if (Rectangle::intersectRectangles (x, y, w, h, alphaImageX, alphaImageY, alphaImage.getWidth(), alphaImage.getHeight())
-         && Rectangle::intersectRectangles (x, y, w, h, fillerImageX, fillerImageY, fillerImage.getWidth(), fillerImage.getHeight()))
-    {
-        int dstStride, dstPixStride;
-        uint8* const dstPix = image.lockPixelDataReadWrite (x, y, w, h, dstStride, dstPixStride);
-
-        int srcStride, srcPixStride;
-        const uint8* const srcPix = fillerImage.lockPixelDataReadOnly (x - fillerImageX, y - fillerImageY, w, h, srcStride, srcPixStride);
-
-        int maskStride, maskPixStride;
-        const uint8* const alpha
-            = alphaImage.lockPixelDataReadOnly (x - alphaImageX, y - alphaImageY, w, h, maskStride, maskPixStride);
-
-#if JUCE_BIG_ENDIAN
-        const uint8* const alphaValues = alpha;
-#else
-        const uint8* const alphaValues = alpha + (alphaImage.getFormat() == Image::ARGB ? 3 : 0);
-#endif
-
-        const int extraAlpha = jlimit (0, 0x100, roundDoubleToInt (opacity * 256.0f));
-
-        if (image.getFormat() == Image::RGB)
-        {
-            if (fillerImage.getFormat() == Image::RGB)
-            {
-                renderAlphaMap ((PixelRGB*) dstPix, dstStride, (const PixelRGB*) srcPix, srcStride, alphaValues, maskStride, maskPixStride, w, h, extraAlpha);
-            }
-            else if (fillerImage.getFormat() == Image::ARGB)
-            {
-                renderAlphaMap ((PixelRGB*) dstPix, dstStride, (const PixelARGB*) srcPix, srcStride, alphaValues, maskStride, maskPixStride, w, h, extraAlpha);
-            }
-            else
-            {
-                jassertfalse // not done!
-            }
-        }
-        else if (image.getFormat() == Image::ARGB)
-        {
-            if (fillerImage.getFormat() == Image::RGB)
-            {
-                renderAlphaMap ((PixelARGB*) dstPix, dstStride, (const PixelRGB*) srcPix, srcStride, alphaValues, maskStride, maskPixStride, w, h, extraAlpha);
-            }
-            else if (fillerImage.getFormat() == Image::ARGB)
-            {
-                renderAlphaMap ((PixelARGB*) dstPix, dstStride, (const PixelARGB*) srcPix, srcStride, alphaValues, maskStride, maskPixStride, w, h, extraAlpha);
-            }
-            else
-            {
-                jassertfalse // not done!
-            }
-        }
-        else
-        {
-            jassertfalse // not done!
-        }
-
-        alphaImage.releasePixelDataReadOnly (alphaValues);
-        fillerImage.releasePixelDataReadOnly (srcPix);
-        image.releasePixelDataReadWrite (dstPix);
-    }
+    saveState();
+    currentState->reduce (alphaImage, alphaImageX, alphaImageY);
+    currentState->renderImage (image, fillerImage, fillerImageX, fillerImageY);
+    restoreState();
 }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::blendImage (const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy)
 {
-    dx += xOffset;
-    dy += yOffset;
+    dx += currentState->xOffset;
+    dy += currentState->yOffset;
 
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedBlendImage (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                           sourceImage, dx, dy, dw, dh, sx, sy);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedBlendImage (int clipX, int clipY, int clipW, int clipH,
-                                                          const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy)
-{
-    if (dx < clipX)
-    {
-        sx += clipX - dx;
-        dw -= clipX - dx;
-        dx = clipX;
-    }
-
-    if (dy < clipY)
-    {
-        sy += clipY - dy;
-        dh -= clipY - dy;
-        dy = clipY;
-    }
-
-    if (dx + dw > clipX + clipW)
-        dw = clipX + clipW - dx;
-
-    if (dy + dh > clipY + clipH)
-        dh = clipY + clipH - dy;
-
-    if (dw <= 0 || dh <= 0)
-        return;
-
-    const uint8 alpha = (uint8) colour.getAlpha();
-
-    if (alpha == 0)
-        return;
-
-    int dstStride, dstPixelStride;
-    uint8* const dstPixels = image.lockPixelDataReadWrite (dx, dy, dw, dh, dstStride, dstPixelStride);
-
-    int srcStride, srcPixelStride;
-    const uint8* const srcPixels = sourceImage.lockPixelDataReadOnly (sx, sy, dw, dh, srcStride, srcPixelStride);
-
-    if (image.getFormat() == Image::ARGB)
-    {
-        if (sourceImage.getFormat() == Image::ARGB)
-        {
-            overlayImage ((PixelARGB*) dstPixels, dstStride,
-                          (PixelARGB*) srcPixels, srcStride,
-                          dw, dh, alpha);
-        }
-        else if (sourceImage.getFormat() == Image::RGB)
-        {
-            overlayImage ((PixelARGB*) dstPixels, dstStride,
-                          (PixelRGB*) srcPixels, srcStride,
-                          dw, dh, alpha);
-        }
-        else
-        {
-            jassertfalse
-        }
-    }
-    else if (image.getFormat() == Image::RGB)
-    {
-        if (sourceImage.getFormat() == Image::ARGB)
-        {
-            overlayImage ((PixelRGB*) dstPixels, dstStride,
-                          (PixelARGB*) srcPixels, srcStride,
-                          dw, dh, alpha);
-        }
-        else if (sourceImage.getFormat() == Image::RGB)
-        {
-            overlayImage ((PixelRGB*) dstPixels, dstStride,
-                          (PixelRGB*) srcPixels, srcStride,
-                          dw, dh, alpha);
-        }
-        else
-        {
-            jassertfalse
-        }
-    }
-    else
-    {
-        jassertfalse
-    }
-
-    image.releasePixelDataReadWrite (dstPixels);
-    sourceImage.releasePixelDataReadOnly (srcPixels);
+    saveState();
+    currentState->reduce (dx, dy, dw, dh);
+    currentState->renderImage (image, sourceImage, dx - sx, dy - sy);
+    restoreState();
 }
 
 //==============================================================================
@@ -1852,476 +1576,48 @@ void LowLevelGraphicsSoftwareRenderer::blendImageWarping (const Image& sourceIma
                                                           int srcClipX, int srcClipY, int srcClipW, int srcClipH,
                                                           const AffineTransform& t)
 {
-    const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
-
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedBlendImageWarping (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                  sourceImage, srcClipX, srcClipY, srcClipW, srcClipH,
-                                  transform);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedBlendImageWarping (int destClipX, int destClipY, int destClipW, int destClipH,
-                                                                 const Image& sourceImage,
-                                                                 int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                                                 const AffineTransform& transform)
-{
-    if ((! colour.isTransparent()) && destClipW > 0 && destClipH > 0 && ! transform.isSingularity())
-    {
-        Rectangle::intersectRectangles (srcClipX, srcClipY, srcClipW, srcClipH,
-                                        0, 0, sourceImage.getWidth(), sourceImage.getHeight());
-
-        if (srcClipW <= 0 || srcClipH <= 0)
-            return;
-
-        jassert (srcClipX >= 0 && srcClipY >= 0);
-
-        Path imageBounds;
-        imageBounds.addRectangle ((float) srcClipX, (float) srcClipY, (float) srcClipW, (float) srcClipH);
-        imageBounds.applyTransform (transform);
-        float imX, imY, imW, imH;
-        imageBounds.getBounds (imX, imY, imW, imH);
-
-        if (Rectangle::intersectRectangles (destClipX, destClipY, destClipW, destClipH,
-                                            (int) floorf (imX),
-                                            (int) floorf (imY),
-                                            1 + roundDoubleToInt (imW),
-                                            1 + roundDoubleToInt (imH)))
-        {
-            const uint8 alpha = (uint8) colour.getAlpha();
-
-            float srcX1 = (float) destClipX;
-            float srcY1 = (float) destClipY;
-            float srcX2 = (float) (destClipX + destClipW);
-            float srcY2 = srcY1;
-            float srcX3 = srcX1;
-            float srcY3 = (float) (destClipY + destClipH);
-
-            AffineTransform inverse (transform.inverted());
-            inverse.transformPoint (srcX1, srcY1);
-            inverse.transformPoint (srcX2, srcY2);
-            inverse.transformPoint (srcX3, srcY3);
-
-            const double lineDX  = (double) (srcX3 - srcX1) / destClipH;
-            const double lineDY  = (double) (srcY3 - srcY1) / destClipH;
-            const double pixelDX = (double) (srcX2 - srcX1) / destClipW;
-            const double pixelDY = (double) (srcY2 - srcY1) / destClipW;
-
-            if (image.getFormat() == Image::ARGB)
-            {
-                if (sourceImage.getFormat() == Image::ARGB)
-                {
-                    transformedImageRender (image, sourceImage,
-                                            destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipW, srcClipH,
-                                            srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, interpolationQuality, (PixelARGB*)0, (PixelARGB*)0);
-                }
-                else if (sourceImage.getFormat() == Image::RGB)
-                {
-                    transformedImageRender (image, sourceImage,
-                                            destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipW, srcClipH,
-                                            srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, interpolationQuality, (PixelARGB*)0, (PixelRGB*)0);
-                }
-                else
-                {
-                    jassertfalse
-                }
-            }
-            else if (image.getFormat() == Image::RGB)
-            {
-                if (sourceImage.getFormat() == Image::ARGB)
-                {
-                    transformedImageRender (image, sourceImage,
-                                            destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipW, srcClipH,
-                                            srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, interpolationQuality, (PixelRGB*)0, (PixelARGB*)0);
-                }
-                else if (sourceImage.getFormat() == Image::RGB)
-                {
-                    transformedImageRender (image, sourceImage,
-                                            destClipX, destClipY, destClipW, destClipH,
-                                            srcClipX, srcClipY, srcClipW, srcClipH,
-                                            srcX1, srcY1, lineDX, lineDY, pixelDX, pixelDY,
-                                            alpha, interpolationQuality, (PixelRGB*)0, (PixelRGB*)0);
-                }
-                else
-                {
-                    jassertfalse
-                }
-            }
-            else
-            {
-                jassertfalse
-            }
-        }
-    }
+    currentState->renderImage (image, sourceImage, srcClipX, srcClipY, srcClipW, srcClipH, t);
 }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2, double y2)
 {
-    x1 += xOffset;
-    y1 += yOffset;
-    x2 += xOffset;
-    y2 += yOffset;
-
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedDrawLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                         x1, y1, x2, y2);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2)
-{
-    if (clipW > 0 && clipH > 0)
-    {
-        if (x1 == x2)
-        {
-            if (y2 < y1)
-                swapVariables (y1, y2);
-
-            clippedDrawVerticalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (x1), y1, y2);
-        }
-        else if (y1 == y2)
-        {
-            if (x2 < x1)
-                swapVariables (x1, x2);
-
-            clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, roundDoubleToInt (y1), x1, x2);
-        }
-        else
-        {
-            double gradient = (y2 - y1) / (x2 - x1);
-
-            if (fabs (gradient) > 1.0)
-            {
-                gradient = 1.0 / gradient;
-
-                int y = roundDoubleToInt (y1);
-                const int startY = y;
-                int endY = roundDoubleToInt (y2);
-
-                if (y > endY)
-                    swapVariables (y, endY);
-
-                while (y < endY)
-                {
-                    const double x = x1 + gradient * (y - startY);
-                    clippedDrawHorizontalLine (clipX, clipY, clipW, clipH, y, x, x + 1.0);
-                    ++y;
-                }
-            }
-            else
-            {
-                int x = roundDoubleToInt (x1);
-                const int startX = x;
-                int endX = roundDoubleToInt (x2);
-
-                if (x > endX)
-                    swapVariables (x, endX);
-
-                while (x < endX)
-                {
-                    const double y = y1 + gradient * (x - startX);
-                    clippedDrawVerticalLine (clipX, clipY, clipW, clipH, x, y, y + 1.0);
-                    ++x;
-                }
-            }
-        }
-    }
+    Path p;
+    p.addLineSegment ((float) x1, (float) y1, (float) x2, (float) y2, 1.0f);
+    fillPath (p, AffineTransform::identity);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top, double bottom)
 {
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedDrawVerticalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                 x + xOffset, top + yOffset, bottom + yOffset);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH,
-                                                                const int x, double top, double bottom)
-{
-    jassert (top <= bottom);
-
-    if (((unsigned int) (x - clipX)) < (unsigned int) clipW
-         && top < clipY + clipH
-         && bottom > clipY
-         && clipW > 0)
-    {
-        if (top < clipY)
-            top = clipY;
-
-        if (bottom > clipY + clipH)
-            bottom = clipY + clipH;
-
-        if (bottom > top)
-            drawVertical (x, top, bottom);
-    }
+    EdgeTable et ((float) (x + currentState->xOffset), (float) (top + currentState->yOffset), 1.0f, (float) (bottom - top));
+    currentState->fillEdgeTable (image, et);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double left, double right)
 {
-    for (RectangleList::Iterator i (*clip); i.next();)
-    {
-        const Rectangle& r = *i.getRectangle();
-
-        clippedDrawHorizontalLine (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                   y + yOffset, left + xOffset, right + xOffset);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH,
-                                                                  const int y, double left, double right)
-{
-    jassert (left <= right);
-
-    if (((unsigned int) (y - clipY)) < (unsigned int) clipH
-         && left < clipX + clipW
-         && right > clipX
-         && clipW > 0)
-    {
-        if (left < clipX)
-            left = clipX;
-
-        if (right > clipX + clipW)
-            right = clipX + clipW;
-
-        if (right > left)
-            drawHorizontal (y, left, right);
-    }
-}
-
-void LowLevelGraphicsSoftwareRenderer::drawVertical (const int x,
-                                                     const double top,
-                                                     const double bottom)
-{
-    int wholeStart = (int) top;
-    const int wholeEnd = (int) bottom;
-
-    const int lastAlpha = roundDoubleToInt (255.0 * (bottom - wholeEnd));
-    const int totalPixels = (wholeEnd - wholeStart) + (lastAlpha > 0 ? 1 : 0);
-
-    if (totalPixels <= 0)
-        return;
-
-    int lineStride, dstPixelStride;
-    uint8* const dstPixels = image.lockPixelDataReadWrite (x, wholeStart, 1, totalPixels, lineStride, dstPixelStride);
-    uint8* dest = dstPixels;
-
-    PixelARGB colour (this->colour.getPixelARGB());
-
-    if (wholeEnd == wholeStart)
-    {
-        if (image.getFormat() == Image::ARGB)
-            ((PixelARGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (bottom - top)));
-        else if (image.getFormat() == Image::RGB)
-            ((PixelRGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (bottom - top)));
-        else
-        {
-            jassertfalse
-        }
-    }
-    else
-    {
-        if (image.getFormat() == Image::ARGB)
-        {
-            ((PixelARGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (1.0 - (top - wholeStart))));
-            ++wholeStart;
-            dest += lineStride;
-
-            if (colour.getAlpha() == 0xff)
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelARGB*) dest)->set (colour);
-                    ++wholeStart;
-                    dest += lineStride;
-                }
-            }
-            else
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelARGB*) dest)->blend (colour);
-                    ++wholeStart;
-                    dest += lineStride;
-                }
-            }
-
-            if (lastAlpha > 0)
-            {
-                ((PixelARGB*) dest)->blend (colour, lastAlpha);
-            }
-        }
-        else if (image.getFormat() == Image::RGB)
-        {
-            ((PixelRGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (1.0 - (top - wholeStart))));
-            ++wholeStart;
-            dest += lineStride;
-
-            if (colour.getAlpha() == 0xff)
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelRGB*) dest)->set (colour);
-                    ++wholeStart;
-                    dest += lineStride;
-                }
-            }
-            else
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelRGB*) dest)->blend (colour);
-                    ++wholeStart;
-                    dest += lineStride;
-                }
-            }
-
-            if (lastAlpha > 0)
-            {
-                ((PixelRGB*) dest)->blend (colour, lastAlpha);
-            }
-        }
-        else
-        {
-            jassertfalse
-        }
-    }
-
-    image.releasePixelDataReadWrite (dstPixels);
-}
-
-void LowLevelGraphicsSoftwareRenderer::drawHorizontal (const int y,
-                                                       const double top,
-                                                       const double bottom)
-{
-    int wholeStart = (int) top;
-    const int wholeEnd = (int) bottom;
-
-    const int lastAlpha = roundDoubleToInt (255.0 * (bottom - wholeEnd));
-    const int totalPixels = (wholeEnd - wholeStart) + (lastAlpha > 0 ? 1 : 0);
-
-    if (totalPixels <= 0)
-        return;
-
-    int lineStride, dstPixelStride;
-    uint8* const dstPixels = image.lockPixelDataReadWrite (wholeStart, y, totalPixels, 1, lineStride, dstPixelStride);
-    uint8* dest = dstPixels;
-
-    PixelARGB colour (this->colour.getPixelARGB());
-
-    if (wholeEnd == wholeStart)
-    {
-        if (image.getFormat() == Image::ARGB)
-            ((PixelARGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (bottom - top)));
-        else if (image.getFormat() == Image::RGB)
-            ((PixelRGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (bottom - top)));
-        else
-        {
-            jassertfalse
-        }
-    }
-    else
-    {
-        if (image.getFormat() == Image::ARGB)
-        {
-            ((PixelARGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (1.0 - (top - wholeStart))));
-            dest += dstPixelStride;
-            ++wholeStart;
-
-            if (colour.getAlpha() == 0xff)
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelARGB*) dest)->set (colour);
-                    dest += dstPixelStride;
-                    ++wholeStart;
-                }
-            }
-            else
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelARGB*) dest)->blend (colour);
-                    dest += dstPixelStride;
-                    ++wholeStart;
-                }
-            }
-
-            if (lastAlpha > 0)
-            {
-                ((PixelARGB*) dest)->blend (colour, lastAlpha);
-            }
-        }
-        else if (image.getFormat() == Image::RGB)
-        {
-            ((PixelRGB*) dest)->blend (colour, roundDoubleToInt (255.0 * (1.0 - (top - wholeStart))));
-            dest += dstPixelStride;
-            ++wholeStart;
-
-            if (colour.getAlpha() == 0xff)
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelRGB*) dest)->set (colour);
-                    dest += dstPixelStride;
-                    ++wholeStart;
-                }
-            }
-            else
-            {
-                while (wholeEnd > wholeStart)
-                {
-                    ((PixelRGB*) dest)->blend (colour);
-                    dest += dstPixelStride;
-                    ++wholeStart;
-                }
-            }
-
-            if (lastAlpha > 0)
-            {
-                ((PixelRGB*) dest)->blend (colour, lastAlpha);
-            }
-        }
-        else
-        {
-            jassertfalse
-        }
-    }
-
-    image.releasePixelDataReadWrite (dstPixels);
+    EdgeTable et ((float) (left + currentState->xOffset), (float) (y + currentState->yOffset),
+                  (float) (right - left), 1.0f);
+    currentState->fillEdgeTable (image, et);
 }
 
 //==============================================================================
 void LowLevelGraphicsSoftwareRenderer::setFont (const Font& newFont)
 {
-    font = newFont;
+    currentState->font = newFont;
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, float x, float y)
 {
-    font.renderGlyphIndirectly (*this, glyphNumber, x, y);
+    currentState->font.renderGlyphIndirectly (*this, glyphNumber, x, y);
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
-    font.renderGlyphIndirectly (*this, glyphNumber, transform);
+    currentState->font.renderGlyphIndirectly (*this, glyphNumber, transform);
 }
 
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif
 
 END_JUCE_NAMESPACE

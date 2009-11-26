@@ -45,7 +45,9 @@ public:
         width (0),
         height (0),
         activeUsers (0),
-        recordNextFrameTime (false)
+        recordNextFrameTime (false),
+        activeImage (0),
+        loadingImage (0)
     {
         HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph, CLSCTX_INPROC);
         if (FAILED (hr))
@@ -147,7 +149,9 @@ public:
 
     ~DShowCameraDeviceInteral()
     {
-        mediaControl->Stop();
+        if (mediaControl != 0)
+            mediaControl->Stop();
+
         removeGraphFromRot();
 
         for (int i = viewerComps.size(); --i >= 0;)
@@ -190,16 +194,14 @@ public:
         }
 
         imageSwapLock.enter();
-        int ls, ps;
         const int lineStride = width * 3;
-        uint8* const dest = loadingImage->lockPixelDataReadWrite (0, 0, width, height, ls, ps);
+        const Image::BitmapData destData (*loadingImage, 0, 0, width, height, true);
 
         for (int i = 0; i < height; ++i)
-            memcpy (dest + ls * ((height - 1) - i),
+            memcpy (destData.getLinePointer ((height - 1) - i),
                     buffer + lineStride * i,
                     lineStride);
 
-        loadingImage->releasePixelDataReadWrite (dest);
         imageNeedsFlipping = true;
         imageSwapLock.exit();
 

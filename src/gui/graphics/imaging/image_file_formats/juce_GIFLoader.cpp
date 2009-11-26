@@ -387,9 +387,8 @@ bool GIFLoader::readImage (const int width, const int height,
     int index;
     int xpos = 0, ypos = 0, pass = 0;
 
-    int stride, pixelStride;
-    uint8* const pixels = image->lockPixelDataReadWrite (0, 0, width, height, stride, pixelStride);
-    uint8* p = pixels;
+    const Image::BitmapData destData (*image, 0, 0, width, height, true);
+    uint8* p = destData.data;
     const bool hasAlpha = image->hasAlphaChannel();
 
     while ((index = readLZWByte (false, c)) >= 0)
@@ -404,8 +403,6 @@ bool GIFLoader::readImage (const int width, const int height,
                                        paletteEntry[2]);
 
             ((PixelARGB*) p)->premultiply();
-
-            p += pixelStride;
         }
         else
         {
@@ -413,10 +410,9 @@ bool GIFLoader::readImage (const int width, const int height,
                                       paletteEntry[0],
                                       paletteEntry[1],
                                       paletteEntry[2]);
-
-            p += pixelStride;
         }
 
+        p += destData.pixelStride;
         ++xpos;
 
         if (xpos == width)
@@ -464,14 +460,13 @@ bool GIFLoader::readImage (const int width, const int height,
                 ++ypos;
             }
 
-            p = pixels + xpos * pixelStride + ypos * stride;
+            p = destData.getPixelPointer (xpos, ypos);
         }
 
         if (ypos >= height)
             break;
     }
 
-    image->releasePixelDataReadWrite (pixels);
     return true;
 }
 

@@ -487,16 +487,14 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
     const int h = jmin (maxH, im.getHeight());
 
     int charsOnLine = 0;
-    int lineStride, pixelStride;
-    const uint8* data = im.lockPixelDataReadOnly (0, 0, w, h, lineStride, pixelStride);
-
+    const Image::BitmapData srcData (im, 0, 0, w, h);
     Colour pixel;
 
     for (int y = h; --y >= 0;)
     {
         for (int x = 0; x < w; ++x)
         {
-            const uint8* pixelData = data + lineStride * y + pixelStride * x;
+            const uint8* pixelData = srcData.getPixelPointer (x, y);
 
             if (x >= sx && y >= sy)
             {
@@ -533,8 +531,6 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
             }
         }
     }
-
-    im.releasePixelDataReadOnly (data);
 
     out << "\n>}\n";
 }

@@ -60,6 +60,11 @@ public:
     */
     EdgeTable (const Rectangle& rectangleToAdd) throw();
 
+    /** Creates an edge table containing a rectangle.
+    */
+    EdgeTable (const float x, const float y,
+               const float w, const float h) throw();
+
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other) throw();
 
@@ -70,10 +75,12 @@ public:
     ~EdgeTable() throw();
 
     //==============================================================================
-    /*void clipToRectangle (const Rectangle& r) throw();
+    void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (Image& image, int x, int y) throw();*/
+    void clipToImageAlpha (const Image& image, int x, int y) throw();
+    bool isEmpty() const throw();
+    const Rectangle& getMaximumBounds() const throw()       { return bounds; }
 
     /** Reduces the amount of space the table has allocated.
 
@@ -112,17 +119,14 @@ public:
             {
                 int x = *++line;
                 jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
-                int level = *++line;
                 int levelAccumulator = 0;
 
-                iterationCallback.setEdgeTableYPos (y);
+                iterationCallback.setEdgeTableYPos (bounds.getY() + y);
 
                 while (--numPoints >= 0)
                 {
-                    int correctedLevel = abs (level);
-                    if (correctedLevel >> 8)
-                        correctedLevel = 0xff;
-
+                    const int level = *++line;
+                    jassert (((unsigned int) level) < (unsigned int) 256);
                     const int endX = *++line;
                     jassert (endX >= x);
                     const int endOfRun = (endX >> 8);
@@ -131,13 +135,13 @@ public:
                     {
                         // small segment within the same pixel, so just save it for the next
                         // time round..
-                        levelAccumulator += (endX - x) * correctedLevel;
+                        levelAccumulator += (endX - x) * level;
                     }
                     else
                     {
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
-                        levelAccumulator += (0xff - (x & 0xff)) * correctedLevel;
+                        levelAccumulator += (0xff - (x & 0xff)) * level;
                         levelAccumulator >>= 8;
                         x >>= 8;
 
@@ -149,21 +153,20 @@ public:
                             iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                         }
 
-                        // if there's a segment of solid pixels, do it all in one go..
-                        if (correctedLevel > 0)
+                        // if there's a run of similar pixels, do it all in one go..
+                        if (level > 0)
                         {
                             jassert (endOfRun <= bounds.getRight());
                             const int numPix = endOfRun - ++x;
 
                             if (numPix > 0)
-                                iterationCallback.handleEdgeTableLine (x, numPix, correctedLevel);
+                                iterationCallback.handleEdgeTableLine (x, numPix, level);
                         }
 
                         // save the bit at the end to be drawn next time round the loop.
-                        levelAccumulator = (endX & 0xff) * correctedLevel;
+                        levelAccumulator = (endX & 0xff) * level;
                     }
 
-                    level += *++line;
                     x = endX;
                 }
 
@@ -192,7 +195,6 @@ private:
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
-    void clearLineSection (const int y, int minX, int maxX) throw();
     void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
 };
 

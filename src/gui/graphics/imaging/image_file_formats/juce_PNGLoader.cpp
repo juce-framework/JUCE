@@ -197,17 +197,16 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
 
         hasAlphaChan = image->hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-        int stride, pixelStride;
-        uint8* const pixels = image->lockPixelDataReadWrite (0, 0, width, height, stride, pixelStride);
+        const Image::BitmapData destData (*image, 0, 0, width, height, true);
         uint8* srcRow = tempBuffer;
-        uint8* destRow = pixels;
+        uint8* destRow = destData.data;
 
         for (y = 0; y < (int) height; ++y)
         {
             const uint8* src = srcRow;
             srcRow += (width << 2);
             uint8* dest = destRow;
-            destRow += stride;
+            destRow += destData.lineStride;
 
             if (hasAlphaChan)
             {
@@ -215,7 +214,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
                 {
                     ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
                     ((PixelARGB*) dest)->premultiply();
-                    dest += pixelStride;
+                    dest += destData.pixelStride;
                     src += 4;
                 }
             }
@@ -224,13 +223,12 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
                 for (int i = width; --i >= 0;)
                 {
                     ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
-                    dest += pixelStride;
+                    dest += destData.pixelStride;
                     src += 4;
                 }
             }
         }
 
-        image->releasePixelDataReadWrite (pixels);
         juce_free (tempBuffer);
     }
 
@@ -289,12 +287,12 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
     png_set_shift (pngWriteStruct, &sig_bit);
     png_set_packing (pngWriteStruct);
 
+    const Image::BitmapData srcData (image, 0, 0, width, height);
+
     for (int y = 0; y < height; ++y)
     {
         uint8* dst = (uint8*) rowData;
-        int stride, pixelStride;
-        const uint8* pixels = image.lockPixelDataReadOnly (0, y, width, 1, stride, pixelStride);
-        const uint8* src = pixels;
+        const uint8* src = srcData.getLinePointer (y);
 
         if (image.hasAlphaChannel())
         {
@@ -307,7 +305,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
                 *dst++ = p.getGreen();
                 *dst++ = p.getBlue();
                 *dst++ = p.getAlpha();
-                src += pixelStride;
+                src += srcData.pixelStride;
             }
         }
         else
@@ -317,12 +315,11 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
                 *dst++ = ((const PixelRGB*) src)->getRed();
                 *dst++ = ((const PixelRGB*) src)->getGreen();
                 *dst++ = ((const PixelRGB*) src)->getBlue();
-                src += pixelStride;
+                src += srcData.pixelStride;
             }
         }
 
         png_write_rows (pngWriteStruct, &rowData, 1);
-        image.releasePixelDataReadOnly (pixels);
     }
 
     juce_free (rowData);

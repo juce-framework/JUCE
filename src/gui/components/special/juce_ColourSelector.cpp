@@ -129,8 +129,7 @@ public:
             const int height = getHeight() / 2;
             colours = new Image (Image::RGB, width, height, false);
 
-            int ls, ps;
-            char* data = (char*) colours->lockPixelDataReadWrite (0, 0, width, height, ls, ps);
+            Image::BitmapData pixels (*colours, 0, 0, width, height, true);
 
             for (int y = 0; y < height; ++y)
             {
@@ -141,12 +140,10 @@ public:
                     const float s = x / (float) width;
                     const Colour col (h, s, v, 1.0f);
 
-                    PixelRGB* const pix = (PixelRGB*) (data + ls * y + ps * x);
+                    PixelRGB* const pix = (PixelRGB*) pixels.getPixelPointer (x, y);
                     pix->set (col.getPixelARGB());
                 }
             }
-
-            colours->releasePixelDataReadWrite (data);
         }
 
         g.setOpacity (1.0f);

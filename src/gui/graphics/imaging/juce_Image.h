@@ -199,55 +199,44 @@ public:
     virtual void desaturate();
 
     //==============================================================================
-    /** Locks some of the pixels in the image so they can be read and written to.
+    /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
 
-        This returns a pointer to some memory containing the pixels in the given
-        rectangle. It also returns values for the line and pixel stride used within
-        the data. The format of the pixel data is the same as that of this image.
+        You should only use this class as a last resort - messing about with the internals of
+        an image is only recommended for people who really know what they're doing!
 
-        When you've finished reading and changing the data, you must call
-        releasePixelDataReadWrite() to give the pixels back to the image.
+        A BitmapData object should be used as a temporary, stack-based object. Don't keep one
+        hanging around while the image is being used elsewhere.
 
-        For images that are stored in memory, this method may just return a direct
-        pointer to the image's data, but other types of image may be stored elsewhere,
-        e.g. in video memory, and if so, this lockPixelDataReadWrite() and
-        releasePixelDataReadWrite() may need to create a temporary copy in main memory.
+        Depending on the way the image class is implemented, this may create a temporary buffer
+        which is copied back to the image when the object is deleted, or it may just get a pointer
+        directly into the image's raw data.
 
-        If you only need read-access to the pixel data, use lockPixelDataReadOnly()
-        instead.
-
-        @see releasePixelDataReadWrite, lockPixelDataReadOnly
+        You can use the stride and data values in this class directly, but don't alter them!
+        The actual format of the pixel data depends on the image's format - see Image::getFormat(),
+        and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
     */
-    virtual uint8* lockPixelDataReadWrite (int x, int y, int w, int h, int& lineStride, int& pixelStride);
+    class BitmapData
+    {
+    public:
+        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
+        BitmapData (const Image& image, int x, int y, int w, int h) throw();
+        ~BitmapData() throw();
 
-    /** Releases a block of memory that was locked with lockPixelDataReadWrite().
-    */
-    virtual void releasePixelDataReadWrite (void* sourceData);
+        /** Returns a pointer to the start of a line in the image.
+            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+            sure it's not out-of-range.
+        */
+        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
 
-    /** Locks some of the pixels in the image so they can be read.
+        /** Returns a pointer to a pixel in the image.
+            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+            not out-of-range.
+        */
+        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
 
-        This returns a pointer to some memory containing the pixels in the given
-        rectangle. It also returns values for the line and pixel stride used within
-        the data. The format of the pixel data is the same as that of this image.
-
-        When you've finished reading the data, you must call releasePixelDataReadOnly()
-        to let the image free the memory if necessary.
-
-        For images that are stored in memory, this method may just return a direct
-        pointer to the image's data, but other types of image may be stored elsewhere,
-        e.g. in video memory, and if so, this lockPixelDataReadWrite() and
-        releasePixelDataReadWrite() may need to create a temporary copy in main memory.
-
-        If you only need to read and write the pixel data, use lockPixelDataReadWrite()
-        instead.
-
-        @see releasePixelDataReadOnly, lockPixelDataReadWrite
-    */
-    virtual const uint8* lockPixelDataReadOnly (int x, int y, int w, int h, int& lineStride, int& pixelStride) const;
-
-    /** Releases a block of memory that was locked with lockPixelDataReadOnly().
-    */
-    virtual void releasePixelDataReadOnly (const void* sourceData) const;
+        uint8* data;
+        int lineStride, pixelStride, width, height;
+    };
 
     /** Copies some pixel values to a rectangle of the image.
 
@@ -283,6 +272,7 @@ public:
     virtual LowLevelGraphicsContext* createLowLevelContext();
 
 protected:
+    friend class BitmapData;
     const PixelFormat format;
     const int imageWidth, imageHeight;
 

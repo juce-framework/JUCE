@@ -595,17 +595,16 @@ public:
             const uint32 bShiftL = jmax (0, getShiftNeeded (bMask));
             const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
 
-            int ls, ps;
-            const uint8* const pixels = lockPixelDataReadOnly (0, 0, getWidth(), getHeight(), ls, ps);
+            const Image::BitmapData srcData (*this, 0, 0, getWidth(), getHeight());
 
             for (int y = sy; y < sy + dh; ++y)
             {
-                const uint8* p = pixels + y * ls + sx * ps;
+                const uint8* p = srcData.getPixelPointer (sx, y);
 
                 for (int x = sx; x < sx + dw; ++x)
                 {
                     const PixelRGB* const pixel = (const PixelRGB*) p;
-                    p += ps;
+                    p += srcData.pixelStride;
 
                     XPutPixel (xImage, x, y,
                                (((((uint32) pixel->getRed()) << rShiftL) >> rShiftR) & rMask)
@@ -613,8 +612,6 @@ public:
                                  | (((((uint32) pixel->getBlue()) << bShiftL) >> bShiftR) & bMask));
                 }
             }
-
-            releasePixelDataReadOnly (pixels);
         }
 
         // blit results to screen.

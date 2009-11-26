@@ -1562,9 +1562,15 @@ public:
     /** Appends a decimal number at the end of this string. */
     String& operator<< (const short number) throw();
     /** Appends a decimal number at the end of this string. */
+    String& operator<< (const unsigned short number) throw();
+    /** Appends a decimal number at the end of this string. */
     String& operator<< (const int number) throw();
     /** Appends a decimal number at the end of this string. */
     String& operator<< (const unsigned int number) throw();
+    /** Appends a decimal number at the end of this string. */
+    String& operator<< (const long number) throw();
+    /** Appends a decimal number at the end of this string. */
+    String& operator<< (const unsigned long number) throw();
     /** Appends a decimal number at the end of this string. */
     String& operator<< (const float number) throw();
     /** Appends a decimal number at the end of this string. */
@@ -8014,21 +8020,18 @@ private:
 /**
     Macro to declare member variables and methods for a singleton class.
 
-    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
+    To use this, add the line juce_DeclareSingleton (MyClass, doNotRecreateAfterDeletion)
     to the class's definition.
-
-    If allowOnlyOneInstance == true, it won't allow the object to be created
-    more than once in the process's lifetime.
 
     Then put a macro juce_ImplementSingleton (MyClass) along with the class's
     implementation code.
 
-    Clients can then call the static MyClass::getInstance() to get a pointer to the
-    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
-    is currently extant
+    It's also a very good idea to also add the call clearSingletonInstance() in your class's
+    destructor, in case it is deleted by other means than deleteInstance()
 
-    it's a very good idea to also add the call clearSingletonInstance() to the
-    destructor of the class, in case it is deleted by other means than deleteInstance()
+    Clients can then call the static method MyClass::getInstance() to get a pointer
+    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
+    no instance currently exists.
 
     e.g. @code
 
@@ -8060,13 +8063,18 @@ private:
 
     @endcode
 
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
     If you know that your object will only be created and deleted by a single thread, you
     can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
     of this one.
 
     @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
 */
-#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
+#define juce_DeclareSingleton(classname, doNotRecreateAfterDeletion) \
 \
     static classname* _singletonInstance;  \
     static JUCE_NAMESPACE::CriticalSection _singletonLock; \
@@ -8082,7 +8090,7 @@ private:
                 static bool alreadyInside = false; \
                 static bool createdOnceAlready = false; \
 \
-                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+                const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
                 jassert (! problem); \
                 if (! problem) \
                 { \
@@ -8139,13 +8147,18 @@ private:
     only ever be created or deleted by a single thread, then this is a
     more efficient version to use.
 
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
     See the documentation for juce_DeclareSingleton for more information about
     how to use it, the only difference being that you have to use
     juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
 
     @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
 */
-#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
+#define juce_DeclareSingleton_SingleThreaded(classname, doNotRecreateAfterDeletion) \
 \
     static classname* _singletonInstance;  \
 \
@@ -8156,7 +8169,7 @@ private:
             static bool alreadyInside = false; \
             static bool createdOnceAlready = false; \
 \
-            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+            const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
             jassert (! problem); \
             if (! problem) \
             { \
@@ -15116,6 +15129,9 @@ private:
     String jobName;
     ThreadPool* pool;
     bool shouldStop, isActive, shouldBeDeleted;
+
+    ThreadPoolJob (const ThreadPoolJob&);
+    const ThreadPoolJob& operator= (const ThreadPoolJob&);
 };
 
 /**
@@ -16657,6 +16673,16 @@ public:
         points. */
     bool isOnlyTranslation() const throw();
 
+    /** If this transform is only a translation, this returns the X offset.
+        @see isOnlyTranslation
+    */
+    float getTranslationX() const throw()                   { return mat02; }
+
+    /** If this transform is only a translation, this returns the X offset.
+        @see isOnlyTranslation
+    */
+    float getTranslationY() const throw()                   { return mat12; }
+
     juce_UseDebuggingNewOperator
 
     /* The transform matrix is:
@@ -17138,6 +17164,11 @@ public:
     */
     EdgeTable (const Rectangle& rectangleToAdd) throw();
 
+    /** Creates an edge table containing a rectangle.
+    */
+    EdgeTable (const float x, const float y,
+               const float w, const float h) throw();
+
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other) throw();
 
@@ -17147,10 +17178,12 @@ public:
     /** Destructor. */
     ~EdgeTable() throw();
 
-    /*void clipToRectangle (const Rectangle& r) throw();
+    void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (Image& image, int x, int y) throw();*/
+    void clipToImageAlpha (const Image& image, int x, int y) throw();
+    bool isEmpty() const throw();
+    const Rectangle& getMaximumBounds() const throw()       { return bounds; }
 
     /** Reduces the amount of space the table has allocated.
 
@@ -17187,17 +17220,14 @@ public:
             {
                 int x = *++line;
                 jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
-                int level = *++line;
                 int levelAccumulator = 0;
 
-                iterationCallback.setEdgeTableYPos (y);
+                iterationCallback.setEdgeTableYPos (bounds.getY() + y);
 
                 while (--numPoints >= 0)
                 {
-                    int correctedLevel = abs (level);
-                    if (correctedLevel >> 8)
-                        correctedLevel = 0xff;
-
+                    const int level = *++line;
+                    jassert (((unsigned int) level) < (unsigned int) 256);
                     const int endX = *++line;
                     jassert (endX >= x);
                     const int endOfRun = (endX >> 8);
@@ -17206,13 +17236,13 @@ public:
                     {
                         // small segment within the same pixel, so just save it for the next
                         // time round..
-                        levelAccumulator += (endX - x) * correctedLevel;
+                        levelAccumulator += (endX - x) * level;
                     }
                     else
                     {
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
-                        levelAccumulator += (0xff - (x & 0xff)) * correctedLevel;
+                        levelAccumulator += (0xff - (x & 0xff)) * level;
                         levelAccumulator >>= 8;
                         x >>= 8;
 
@@ -17224,21 +17254,20 @@ public:
                             iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
                         }
 
-                        // if there's a segment of solid pixels, do it all in one go..
-                        if (correctedLevel > 0)
+                        // if there's a run of similar pixels, do it all in one go..
+                        if (level > 0)
                         {
                             jassert (endOfRun <= bounds.getRight());
                             const int numPix = endOfRun - ++x;
 
                             if (numPix > 0)
-                                iterationCallback.handleEdgeTableLine (x, numPix, correctedLevel);
+                                iterationCallback.handleEdgeTableLine (x, numPix, level);
                         }
 
                         // save the bit at the end to be drawn next time round the loop.
-                        levelAccumulator = (endX & 0xff) * correctedLevel;
+                        levelAccumulator = (endX & 0xff) * level;
                     }
 
-                    level += *++line;
                     x = endX;
                 }
 
@@ -17266,7 +17295,6 @@ private:
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
-    void clearLineSection (const int y, int minX, int maxX) throw();
     void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
 };
 
@@ -18789,6 +18817,8 @@ private:
   #define PACKED
 #endif
 
+class PixelRGB;
+
 /**
     Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
     operations with it.
@@ -18836,6 +18866,13 @@ public:
 
         argb = sargb;
     }
+
+    /** Blends another pixel onto this one.
+
+        This takes into account the opacity of the pixel being overlaid, and blends
+        it accordingly.
+    */
+    forcedinline void blend (const PixelRGB& src) throw();
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
@@ -19051,6 +19088,12 @@ public:
         set (src);
     }
 
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) throw()
+    {
+        blend (PixelARGB (src.getARGB()));
+    }
+
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
         The opacity of the pixel being overlaid is scaled by the extraAlpha factor before
@@ -19138,6 +19181,130 @@ private:
     uint8 b, g, r;
 #endif
 
+} PACKED;
+
+forcedinline void PixelARGB::blend (const PixelRGB& src) throw()
+{
+    set (src);
+}
+
+/**
+    Represents an 8-bit single-channel pixel, and can perform compositing operations on it.
+
+    This is used internally by the imaging classes.
+
+    @see PixelARGB, PixelRGB
+*/
+class JUCE_API  PixelAlpha
+{
+public:
+    /** Creates a pixel without defining its colour. */
+    PixelAlpha() throw() {}
+    ~PixelAlpha() throw() {}
+
+    /** Creates a pixel from a 32-bit argb value.
+
+        (The argb format is that used by PixelARGB)
+    */
+    PixelAlpha (const uint32 argb) throw()
+    {
+        a = (uint8) (argb >> 24);
+    }
+
+    forcedinline uint32 getARGB() const throw()     { return (((uint32) a) << 24) | (((uint32) a) << 16) | (((uint32) a) << 8) | a; }
+    forcedinline uint32 getRB() const throw()       { return (((uint32) a) << 16) | a; }
+    forcedinline uint32 getAG() const throw()       { return (((uint32) a) << 16) | a; }
+
+    forcedinline uint8 getAlpha() const throw()     { return a; }
+    forcedinline uint8 getRed() const throw()       { return 0; }
+    forcedinline uint8 getGreen() const throw()     { return 0; }
+    forcedinline uint8 getBlue() const throw()      { return 0; }
+
+    /** Blends another pixel onto this one.
+
+        This takes into account the opacity of the pixel being overlaid, and blends
+        it accordingly.
+    */
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src) throw()
+    {
+        const int srcA = src.getAlpha();
+        a = (uint8) ((a * (0x100 - srcA) >> 8) + srcA);
+    }
+
+    /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
+
+        The opacity of the pixel being overlaid is scaled by the extraAlpha factor before
+        being used, so this can blend semi-transparently from a PixelRGB argument.
+    */
+    template <class Pixel>
+    forcedinline void blend (const Pixel& src, uint32 extraAlpha) throw()
+    {
+        ++extraAlpha;
+        const int srcAlpha = (extraAlpha * src.getAlpha()) >> 8;
+        a = (uint8) ((a * (0x100 - srcAlpha) >> 8) + srcAlpha);
+    }
+
+    /** Blends another pixel with this one, creating a colour that is somewhere
+        between the two, as specified by the amount.
+    */
+    template <class Pixel>
+    forcedinline void tween (const Pixel& src, const uint32 amount) throw()
+    {
+        a += ((src,getAlpha() - a) * amount) >> 8;
+    }
+
+    /** Copies another pixel colour over this one.
+
+        This doesn't blend it - this colour is simply replaced by the other one.
+    */
+    template <class Pixel>
+    forcedinline void set (const Pixel& src) throw()
+    {
+        a = src.getAlpha();
+    }
+
+    /** Replaces the colour's alpha value with another one. */
+    forcedinline void setAlpha (const uint8 newAlpha) throw()
+    {
+        a = newAlpha;
+    }
+
+    /** Multiplies the colour's alpha value with another one. */
+    forcedinline void multiplyAlpha (int multiplier) throw()
+    {
+        ++multiplier;
+        a = (uint8) ((a * multiplier) >> 8);
+    }
+
+    forcedinline void multiplyAlpha (const float multiplier) throw()
+    {
+        a = (uint8) (a * multiplier);
+    }
+
+    /** Sets the pixel's colour from individual components. */
+    forcedinline void setARGB (const uint8 a_, const uint8 r, const uint8 g, const uint8 b) throw()
+    {
+        a = a_;
+    }
+
+    /** Premultiplies the pixel's RGB values by its alpha. */
+    forcedinline void premultiply() throw()
+    {
+    }
+
+    /** Unpremultiplies the pixel's RGB values. */
+    forcedinline void unpremultiply() throw()
+    {
+    }
+
+    forcedinline void desaturate() throw()
+    {
+    }
+
+private:
+
+    uint8 a : 8;
 } PACKED;
 
 #if JUCE_MSVC
@@ -39252,55 +39419,44 @@ public:
     */
     virtual void desaturate();
 
-    /** Locks some of the pixels in the image so they can be read and written to.
+    /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
 
-        This returns a pointer to some memory containing the pixels in the given
-        rectangle. It also returns values for the line and pixel stride used within
-        the data. The format of the pixel data is the same as that of this image.
+        You should only use this class as a last resort - messing about with the internals of
+        an image is only recommended for people who really know what they're doing!
 
-        When you've finished reading and changing the data, you must call
-        releasePixelDataReadWrite() to give the pixels back to the image.
+        A BitmapData object should be used as a temporary, stack-based object. Don't keep one
+        hanging around while the image is being used elsewhere.
 
-        For images that are stored in memory, this method may just return a direct
-        pointer to the image's data, but other types of image may be stored elsewhere,
-        e.g. in video memory, and if so, this lockPixelDataReadWrite() and
-        releasePixelDataReadWrite() may need to create a temporary copy in main memory.
+        Depending on the way the image class is implemented, this may create a temporary buffer
+        which is copied back to the image when the object is deleted, or it may just get a pointer
+        directly into the image's raw data.
 
-        If you only need read-access to the pixel data, use lockPixelDataReadOnly()
-        instead.
-
-        @see releasePixelDataReadWrite, lockPixelDataReadOnly
+        You can use the stride and data values in this class directly, but don't alter them!
+        The actual format of the pixel data depends on the image's format - see Image::getFormat(),
+        and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
     */
-    virtual uint8* lockPixelDataReadWrite (int x, int y, int w, int h, int& lineStride, int& pixelStride);
+    class BitmapData
+    {
+    public:
+        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
+        BitmapData (const Image& image, int x, int y, int w, int h) throw();
+        ~BitmapData() throw();
 
-    /** Releases a block of memory that was locked with lockPixelDataReadWrite().
-    */
-    virtual void releasePixelDataReadWrite (void* sourceData);
+        /** Returns a pointer to the start of a line in the image.
+            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+            sure it's not out-of-range.
+        */
+        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
 
-    /** Locks some of the pixels in the image so they can be read.
+        /** Returns a pointer to a pixel in the image.
+            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+            not out-of-range.
+        */
+        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
 
-        This returns a pointer to some memory containing the pixels in the given
-        rectangle. It also returns values for the line and pixel stride used within
-        the data. The format of the pixel data is the same as that of this image.
-
-        When you've finished reading the data, you must call releasePixelDataReadOnly()
-        to let the image free the memory if necessary.
-
-        For images that are stored in memory, this method may just return a direct
-        pointer to the image's data, but other types of image may be stored elsewhere,
-        e.g. in video memory, and if so, this lockPixelDataReadWrite() and
-        releasePixelDataReadWrite() may need to create a temporary copy in main memory.
-
-        If you only need to read and write the pixel data, use lockPixelDataReadWrite()
-        instead.
-
-        @see releasePixelDataReadOnly, lockPixelDataReadWrite
-    */
-    virtual const uint8* lockPixelDataReadOnly (int x, int y, int w, int h, int& lineStride, int& pixelStride) const;
-
-    /** Releases a block of memory that was locked with lockPixelDataReadOnly().
-    */
-    virtual void releasePixelDataReadOnly (const void* sourceData) const;
+        uint8* data;
+        int lineStride, pixelStride, width, height;
+    };
 
     /** Copies some pixel values to a rectangle of the image.
 
@@ -39335,6 +39491,7 @@ public:
     virtual LowLevelGraphicsContext* createLowLevelContext();
 
 protected:
+    friend class BitmapData;
     const PixelFormat format;
     const int imageWidth, imageHeight;
 
@@ -39953,6 +40110,8 @@ public:
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
+class LLGCSavedState;
+
 /**
     A lowest-common-denominator implementation of LowLevelGraphicsContext that does all
     its rendering in memory.
@@ -40015,47 +40174,17 @@ public:
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
-    RectangleList* getRawClipRegion() throw()                   { return clip; }
-
     juce_UseDebuggingNewOperator
 
 protected:
 
     Image& image;
-    RectangleList* clip;
-    int xOffset, yOffset;
-    Font font;
-    Colour colour;
-    ColourGradient* gradient;
-    Graphics::ResamplingQuality interpolationQuality;
 
-    struct SavedState
-    {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
-                    const Font& font, const Colour& colour, ColourGradient* gradient,
-                    Graphics::ResamplingQuality interpolationQuality);
-        ~SavedState();
+    LLGCSavedState* currentState;
+    OwnedArray <LLGCSavedState> stateStack;
 
-        RectangleList* clip;
-        const int xOffset, yOffset;
-        Font font;
-        Colour colour;
-        ColourGradient* gradient;
-        Graphics::ResamplingQuality interpolationQuality;
-
-    private:
-        SavedState (const SavedState&);
-        const SavedState& operator= (const SavedState&);
-    };
-
-    OwnedArray <SavedState> stateStack;
-
-    void drawVertical (const int x, const double top, const double bottom);
+/*    void drawVertical (const int x, const double top, const double bottom);
     void drawHorizontal (const int y, const double top, const double bottom);
-
-    bool getPathBounds (int clipX, int clipY, int clipW, int clipH,
-                        const Path& path, const AffineTransform& transform,
-                        int& x, int& y, int& w, int& h) const;
 
     void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
 
@@ -40077,7 +40206,7 @@ protected:
     void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2);
 
     void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
-    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
+    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);*/
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);

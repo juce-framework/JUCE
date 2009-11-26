@@ -27,7 +27,7 @@
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
 #include "juce_LowLevelGraphicsContext.h"
-
+class LLGCSavedState;
 
 //==============================================================================
 /**
@@ -99,48 +99,17 @@ public:
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     //==============================================================================
-    RectangleList* getRawClipRegion() throw()                   { return clip; }
-
-    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
     //==============================================================================
     Image& image;
-    RectangleList* clip;
-    int xOffset, yOffset;
-    Font font;
-    Colour colour;
-    ColourGradient* gradient;
-    Graphics::ResamplingQuality interpolationQuality;
 
-    struct SavedState
-    {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
-                    const Font& font, const Colour& colour, ColourGradient* gradient,
-                    Graphics::ResamplingQuality interpolationQuality);
-        ~SavedState();
+    LLGCSavedState* currentState;
+    OwnedArray <LLGCSavedState> stateStack;
 
-        RectangleList* clip;
-        const int xOffset, yOffset;
-        Font font;
-        Colour colour;
-        ColourGradient* gradient;
-        Graphics::ResamplingQuality interpolationQuality;
-
-    private:
-        SavedState (const SavedState&);
-        const SavedState& operator= (const SavedState&);
-    };
-
-    OwnedArray <SavedState> stateStack;
-
-    void drawVertical (const int x, const double top, const double bottom);
+/*    void drawVertical (const int x, const double top, const double bottom);
     void drawHorizontal (const int y, const double top, const double bottom);
-
-    bool getPathBounds (int clipX, int clipY, int clipW, int clipH,
-                        const Path& path, const AffineTransform& transform,
-                        int& x, int& y, int& w, int& h) const;
 
     void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
 
@@ -164,7 +133,7 @@ protected:
     void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2);
 
     void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
-    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
+    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);*/
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);

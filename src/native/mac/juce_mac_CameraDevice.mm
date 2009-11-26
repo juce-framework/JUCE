@@ -148,22 +148,21 @@ public:
     static void drawNSBitmapIntoJuceImage (Image& dest, NSBitmapImageRep* source)
     {
         const ScopedAutoReleasePool pool;
-        int lineStride, pixelStride;
-        uint8* pixels = dest.lockPixelDataReadWrite (0, 0, dest.getWidth(), dest.getHeight(),
-                                                     lineStride, pixelStride);
+
+        const Image::BitmapData destData (dest, 0, 0, dest.getWidth(), dest.getHeight(), true);
 
         NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
-            initWithBitmapDataPlanes: &pixels
-                          pixelsWide: dest.getWidth()
-                          pixelsHigh: dest.getHeight()
+            initWithBitmapDataPlanes: (unsigned char**) &(destData.data)
+                          pixelsWide: destData.width
+                          pixelsHigh: destData.height
                        bitsPerSample: 8
-                     samplesPerPixel: pixelStride
+                     samplesPerPixel: destData.pixelStride
                             hasAlpha: dest.hasAlphaChannel()
                             isPlanar: NO
                       colorSpaceName: NSCalibratedRGBColorSpace
                         bitmapFormat: (NSBitmapFormat) 0
-                         bytesPerRow: lineStride
-                        bitsPerPixel: pixelStride * 8];
+                         bytesPerRow: destData.lineStride
+                        bitsPerPixel: destData.pixelStride * 8];
 
         [NSGraphicsContext saveGraphicsState];
         [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithBitmapImageRep: rep]];
@@ -173,11 +172,11 @@ public:
         [[NSGraphicsContext currentContext] flushGraphics];
         [NSGraphicsContext restoreGraphicsState];
 
-        uint8* start = pixels;
+        uint8* start = destData.data;
         for (int h = dest.getHeight(); --h >= 0;)
         {
             uint8* p = start;
-            start += lineStride;
+            start += destData.lineStride;
 
             for (int i = dest.getWidth(); --i >= 0;)
             {
@@ -194,11 +193,9 @@ public:
                 p[2] = oldp0;
 #endif
 
-                p += pixelStride;
+                p += destData.pixelStride;
             }
         }
-
-        dest.releasePixelDataReadWrite (pixels);
     }
 
     void callListeners (NSBitmapImageRep* bitmap)

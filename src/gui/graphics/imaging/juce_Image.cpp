@@ -82,10 +82,8 @@ Image::Image (const Image& other)
 
     imageData = (uint8*) juce_malloc (dataSize);
 
-    int ls, ps;
-    const uint8* srcData = other.lockPixelDataReadOnly (0, 0, imageWidth, imageHeight, ls, ps);
-    setPixelData (0, 0, imageWidth, imageHeight, srcData, ls);
-    other.releasePixelDataReadOnly (srcData);
+    BitmapData srcData (other, 0, 0, imageWidth, imageHeight);
+    setPixelData (0, 0, imageWidth, imageHeight, srcData.data, srcData.lineStride);
 }
 
 Image::~Image()
@@ -100,33 +98,27 @@ LowLevelGraphicsContext* Image::createLowLevelContext()
 }
 
 //==============================================================================
-uint8* Image::lockPixelDataReadWrite (int x, int y, int w, int h, int& ls, int& ps)
+Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const bool /*makeWritable*/) throw()
+    : data (image.imageData + image.lineStride * y + image.pixelStride * x),
+      lineStride (image.lineStride),
+      pixelStride (image.pixelStride),
+      width (w),
+      height (h)
 {
-    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= imageWidth && y + h <= imageHeight);
-    w = w;
-    h = h;
-
-    ls = lineStride;
-    ps = pixelStride;
-    return imageData + x * pixelStride + y * lineStride;
+    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 }
 
-void Image::releasePixelDataReadWrite (void*)
+Image::BitmapData::BitmapData (const Image& image, int x, int y, int w, int h) throw()
+    : data (image.imageData + image.lineStride * y + image.pixelStride * x),
+      lineStride (image.lineStride),
+      pixelStride (image.pixelStride),
+      width (w),
+      height (h)
 {
+    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 }
 
-const uint8* Image::lockPixelDataReadOnly (int x, int y, int w, int h, int& ls, int& ps) const
-{
-    jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= imageWidth && y + h <= imageHeight);
-    w = w;
-    h = h;
-
-    ls = lineStride;
-    ps = pixelStride;
-    return imageData + x * pixelStride + y * lineStride;
-}
-
-void Image::releasePixelDataReadOnly (const void*) const
+Image::BitmapData::~BitmapData() throw()
 {
 }
 
@@ -137,17 +129,14 @@ void Image::setPixelData (int x, int y, int w, int h,
 
     if (Rectangle::intersectRectangles (x, y, w, h, 0, 0, imageWidth, imageHeight))
     {
-        int ls, ps;
-        uint8* dest = lockPixelDataReadWrite (x, y, w, h, ls, ps);
+        const BitmapData dest (*this, x, y, w, h, true);
 
         for (int i = 0; i < h; ++i)
         {
-            memcpy (dest + ls * i,
+            memcpy (dest.getLinePointer(i),
                     sourcePixelData + sourceLineStride * i,
-                    w * pixelStride);
+                    w * dest.pixelStride);
         }
-
-        releasePixelDataReadWrite (dest);
     }
 }
 
@@ -157,21 +146,20 @@ void Image::clear (int dx, int dy, int dw, int dh,
 {
     const PixelARGB col (colourToClearTo.getPixelARGB());
 
-    int ls, ps;
-    uint8* dstData = lockPixelDataReadWrite (dx, dy, dw, dh, ls, ps);
-    uint8* dest = dstData;
+    const BitmapData destData (*this, dx, dy, dw, dh, true);
+    uint8* dest = destData.data;
 
     while (--dh >= 0)
     {
         uint8* line = dest;
-        dest += ls;
+        dest += destData.lineStride;
 
         if (isARGB())
         {
             for (int x = dw; --x >= 0;)
             {
                 ((PixelARGB*) line)->set (col);
-                line += ps;
+                line += destData.pixelStride;
             }
         }
         else if (isRGB())
@@ -179,7 +167,7 @@ void Image::clear (int dx, int dy, int dw, int dh,
             for (int x = dw; --x >= 0;)
             {
                 ((PixelRGB*) line)->set (col);
-                line += ps;
+                line += destData.pixelStride;
             }
         }
         else
@@ -187,12 +175,10 @@ void Image::clear (int dx, int dy, int dw, int dh,
             for (int x = dw; --x >= 0;)
             {
                 *line = col.getAlpha();
-                line += ps;
+                line += destData.pixelStride;
             }
         }
     }
-
-    releasePixelDataReadWrite (dstData);
 }
 
 Image* Image::createCopy (int newWidth, int newHeight,
@@ -229,16 +215,13 @@ Image* Image::createCopyOfAlphaChannel() const
     }
     else
     {
-        int dls, dps;
-        uint8* dstData = newImage->lockPixelDataReadWrite (0, 0, imageWidth, imageHeight, dls, dps);
-
-        int sls, sps;
-        const uint8* srcData = lockPixelDataReadOnly (0, 0, imageWidth, imageHeight, sls, sps);
+        const BitmapData destData (*newImage, 0, 0, imageWidth, imageHeight, true);
+        const BitmapData srcData (*this, 0, 0, imageWidth, imageHeight);
 
         for (int y = 0; y < imageHeight; ++y)
         {
-            const PixelARGB* src = (const PixelARGB*) (srcData + y * sls);
-            uint8* dst = dstData + y * dls;
+            const PixelARGB* src = (const PixelARGB*) srcData.getLinePointer(y);
+            uint8* dst = destData.getLinePointer (y);
 
             for (int x = imageWidth; --x >= 0;)
             {
@@ -246,9 +229,6 @@ Image* Image::createCopyOfAlphaChannel() const
                 ++src;
             }
         }
-
-        releasePixelDataReadOnly (srcData);
-        newImage->releasePixelDataReadWrite (dstData);
     }
 
     return newImage;
@@ -262,21 +242,18 @@ const Colour Image::getPixelAt (const int x, const int y) const
     if (((unsigned int) x) < (unsigned int) imageWidth
          && ((unsigned int) y) < (unsigned int) imageHeight)
     {
-        int ls, ps;
-        const uint8* const pixels = lockPixelDataReadOnly (x, y, 1, 1, ls, ps);
+        const BitmapData srcData (*this, x, y, 1, 1);
 
         if (isARGB())
         {
-            PixelARGB p (*(const PixelARGB*) pixels);
+            PixelARGB p (*(const PixelARGB*) srcData.data);
             p.unpremultiply();
             c = Colour (p.getARGB());
         }
         else if (isRGB())
-            c = Colour (((const PixelRGB*) pixels)->getARGB());
+            c = Colour (((const PixelRGB*) srcData.data)->getARGB());
         else
-            c = Colour ((uint8) 0, (uint8) 0, (uint8) 0, *pixels);
-
-        releasePixelDataReadOnly (pixels);
+            c = Colour ((uint8) 0, (uint8) 0, (uint8) 0, *(srcData.data));
     }
 
     return c;
@@ -288,18 +265,15 @@ void Image::setPixelAt (const int x, const int y,
     if (((unsigned int) x) < (unsigned int) imageWidth
          && ((unsigned int) y) < (unsigned int) imageHeight)
     {
-        int ls, ps;
-        uint8* const pixels = lockPixelDataReadWrite (x, y, 1, 1, ls, ps);
+        const BitmapData destData (*this, x, y, 1, 1, true);
         const PixelARGB col (colour.getPixelARGB());
 
         if (isARGB())
-            ((PixelARGB*) pixels)->set (col);
+            ((PixelARGB*) destData.data)->set (col);
         else if (isRGB())
-            ((PixelRGB*) pixels)->set (col);
+            ((PixelRGB*) destData.data)->set (col);
         else
-            *pixels = col.getAlpha();
-
-        releasePixelDataReadWrite (pixels);
+            *(destData.data) = col.getAlpha();
     }
 }
 
@@ -310,15 +284,12 @@ void Image::multiplyAlphaAt (const int x, const int y,
          && ((unsigned int) y) < (unsigned int) imageHeight
          && hasAlphaChannel())
     {
-        int ls, ps;
-        uint8* const pixels = lockPixelDataReadWrite (x, y, 1, 1, ls, ps);
+        const BitmapData destData (*this, x, y, 1, 1, true);
 
         if (isARGB())
-            ((PixelARGB*) pixels)->multiplyAlpha (multiplier);
+            ((PixelARGB*) destData.data)->multiplyAlpha (multiplier);
         else
-            *pixels = (uint8) (*pixels * multiplier);
-
-        releasePixelDataReadWrite (pixels);
+            *(destData.data) = (uint8) (*(destData.data) * multiplier);
     }
 }
 
@@ -326,19 +297,18 @@ void Image::multiplyAllAlphas (const float amountToMultiplyBy)
 {
     if (hasAlphaChannel())
     {
-        int ls, ps;
-        uint8* const pixels = lockPixelDataReadWrite (0, 0, getWidth(), getHeight(), ls, ps);
+        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), true);
 
         if (isARGB())
         {
             for (int y = 0; y < imageHeight; ++y)
             {
-                uint8* p = pixels + y * ls;
+                uint8* p = destData.getLinePointer (y);
 
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     ((PixelARGB*) p)->multiplyAlpha (amountToMultiplyBy);
-                    p += ps;
+                    p += destData.pixelStride;
                 }
             }
         }
@@ -346,17 +316,15 @@ void Image::multiplyAllAlphas (const float amountToMultiplyBy)
         {
             for (int y = 0; y < imageHeight; ++y)
             {
-                uint8* p = pixels + y * ls;
+                uint8* p = destData.getLinePointer (y);
 
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     *p = (uint8) (*p * amountToMultiplyBy);
-                    p += ps;
+                    p += destData.pixelStride;
                 }
             }
         }
-
-        releasePixelDataReadWrite (pixels);
     }
     else
     {
@@ -368,19 +336,18 @@ void Image::desaturate()
 {
     if (isARGB() || isRGB())
     {
-        int ls, ps;
-        uint8* const pixels = lockPixelDataReadWrite (0, 0, getWidth(), getHeight(), ls, ps);
+        const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), true);
 
         if (isARGB())
         {
             for (int y = 0; y < imageHeight; ++y)
             {
-                uint8* p = pixels + y * ls;
+                uint8* p = destData.getLinePointer (y);
 
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     ((PixelARGB*) p)->desaturate();
-                    p += ps;
+                    p += destData.pixelStride;
                 }
             }
         }
@@ -388,17 +355,15 @@ void Image::desaturate()
         {
             for (int y = 0; y < imageHeight; ++y)
             {
-                uint8* p = pixels + y * ls;
+                uint8* p = destData.getLinePointer (y);
 
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     ((PixelRGB*) p)->desaturate();
-                    p += ps;
+                    p += destData.pixelStride;
                 }
             }
         }
-
-        releasePixelDataReadWrite (pixels);
     }
 }
 
@@ -409,13 +374,12 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
         const uint8 threshold = (uint8) jlimit (0, 255, roundFloatToInt (alphaThreshold * 255.0f));
         SparseSet <int> pixelsOnRow;
 
-        int ls, ps;
-        const uint8* const pixels = lockPixelDataReadOnly (0, 0, imageWidth, imageHeight, ls, ps);
+        const BitmapData srcData (*this, 0, 0, getWidth(), getHeight());
 
         for (int y = 0; y < imageHeight; ++y)
         {
             pixelsOnRow.clear();
-            const uint8* lineData = pixels + ls * y;
+            const uint8* lineData = srcData.getLinePointer (y);
 
             if (isARGB())
             {
@@ -424,7 +388,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
                     if (((const PixelARGB*) lineData)->getAlpha() >= threshold)
                         pixelsOnRow.addRange (x, 1);
 
-                    lineData += ps;
+                    lineData += srcData.pixelStride;
                 }
             }
             else
@@ -434,7 +398,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
                     if (*lineData >= threshold)
                         pixelsOnRow.addRange (x, 1);
 
-                    lineData += ps;
+                    lineData += srcData.pixelStride;
                 }
             }
 
@@ -448,8 +412,6 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
 
             result.consolidate();
         }
-
-        releasePixelDataReadOnly (pixels);
     }
     else
     {
@@ -500,19 +462,18 @@ void Image::moveImageSection (int dx, int dy,
         const int maxX = jmax (dx, sx) + w;
         const int maxY = jmax (dy, sy) + h;
 
-        int ls, ps;
-        uint8* const pixels = lockPixelDataReadWrite (minX, minY, maxX - minX, maxY - minY, ls, ps);
+        const BitmapData destData (*this, minX, minY, maxX - minX, maxY - minY, true);
 
-        uint8* dst       = pixels + ls * (dy - minY) + ps * (dx - minX);
-        const uint8* src = pixels + ls * (sy - minY) + ps * (sx - minX);
+        uint8* dst       = destData.getPixelPointer (dx - minX, dy - minY);
+        const uint8* src = destData.getPixelPointer (sx - minX, sy - minY);
 
-        const int lineSize = ps * w;
+        const int lineSize = destData.pixelStride * w;
 
         if (dy > sy)
         {
             while (--h >= 0)
             {
-                const int offset = h * ls;
+                const int offset = h * destData.lineStride;
                 memmove (dst + offset, src + offset, lineSize);
             }
         }
@@ -521,12 +482,10 @@ void Image::moveImageSection (int dx, int dy,
             while (--h >= 0)
             {
                 memmove (dst, src, lineSize);
-                dst += ls;
-                src += ls;
+                dst += destData.lineStride;
+                src += destData.lineStride;
             }
         }
-
-        releasePixelDataReadWrite (pixels);
     }
 }
 
