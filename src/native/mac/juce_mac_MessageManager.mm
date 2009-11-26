@@ -50,30 +50,24 @@ class AppDelegateRedirector
 public:
     AppDelegateRedirector()
     {
-        CFRunLoopTimerContext context;
-        zerostruct (context);
-        context.info = this;
-
-        timer = CFRunLoopTimerCreate (kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 60.0, 60.0, 0, 0,
-                                      AppDelegateRedirector::timerCallbackStatic, &context);
-
 #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
-        CFRunLoopAddTimer (CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
+        runLoop = CFRunLoopGetMain();
 #else
-        CFRunLoopAddTimer (CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes);
+        runLoop = CFRunLoopGetCurrent();
 #endif
+        CFRunLoopSourceContext sourceContext;
+        zerostruct (sourceContext);
+        sourceContext.info = this;
+        sourceContext.perform = runLoopSourceCallback;
+        runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
+        CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
     }
 
     virtual ~AppDelegateRedirector()
     {
-        CFRunLoopTimerInvalidate (timer);
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
-        CFRunLoopRemoveTimer (CFRunLoopGetMain(), timer, kCFRunLoopCommonModes);
-#else
-        CFRunLoopRemoveTimer (CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes);
-#endif
-        CFRelease (timer);
+        CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
+        CFRunLoopSourceInvalidate (runLoopSource);
+        CFRelease (runLoopSource);
 
         while (messages.size() > 0)
             delete ((Message*) messages.remove(0));
@@ -138,34 +132,38 @@ public:
     void postMessage (void* m) throw()
     {
         messages.add (m);
-        CFRunLoopTimerSetNextFireDate (timer, CFAbsoluteTimeGetCurrent() - 0.5);
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
     }
 
 private:
-    CFRunLoopTimerRef timer;
+    CFRunLoopRef runLoop;
+    CFRunLoopSourceRef runLoopSource;
     Array <void*, CriticalSection> messages;
 
-    void timerCallback() throw()
+    void runLoopCallback() throw()
     {
-        const int numToDispatch = jmin (4, messages.size());
+        int numDispatched = 0;
 
-        for (int i = 0; i < numToDispatch; ++i)
+        do
         {
-            void* const nextMessage = messages[i];
+            void* const nextMessage = messages.remove (0);
 
-            if (nextMessage != 0)
-                MessageManager::getInstance()->deliverMessage (nextMessage);
-        }
+            if (nextMessage == 0)
+                return;
 
-        messages.removeRange (0, numToDispatch);
+            const ScopedAutoReleasePool pool;
+            MessageManager::getInstance()->deliverMessage (nextMessage);
 
-        if (messages.size() > 0)
-            CFRunLoopTimerSetNextFireDate (timer, CFAbsoluteTimeGetCurrent() - 0.5);
+        } while (++numDispatched <= 4);
+
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
     }
 
-    static void timerCallbackStatic (CFRunLoopTimerRef, void* info)
+    static void runLoopSourceCallback (void* info)
     {
-        ((AppDelegateRedirector*) info)->timerCallback();
+        ((AppDelegateRedirector*) info)->runLoopCallback();
     }
 };
 
@@ -397,14 +395,13 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
-    NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001];
+    NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001 + 1.0];
 
     while (! quitMessagePosted)
     {
         const ScopedAutoReleasePool pool;
 
-        [[NSRunLoop currentRunLoop] runMode: NSDefaultRunLoopMode
-                                 beforeDate: endDate];
+        CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.002, true);
 
         NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
                                         untilDate: endDate

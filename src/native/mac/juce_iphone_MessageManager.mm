@@ -166,27 +166,30 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 }
 
 //==============================================================================
-static CFRunLoopTimerRef messageTimer = 0;
+static CFRunLoopRef runLoop = 0;
+static CFRunLoopSourceRef runLoopSource = 0;
 static Array <void*, CriticalSection>* pendingMessages = 0;
 
-static void timerCallback (CFRunLoopTimerRef, void*)
+static void runLoopSourceCallback (void*)
 {
     if (pendingMessages != 0)
     {
-        const int numToDispatch = jmin (4, pendingMessages->size());
+        int numDispatched = 0;
 
-        for (int i = 0; i < numToDispatch; ++i)
+        do
         {
-            void* const nextMessage = (*pendingMessages)[i];
+            void* const nextMessage = pendingMessages->remove (0);
 
-            if (nextMessage != 0)
-                MessageManager::getInstance()->deliverMessage (nextMessage);
-        }
+            if (nextMessage == 0)
+                return;
 
-        pendingMessages->removeRange (0, numToDispatch);
+            const ScopedAutoReleasePool pool;
+            MessageManager::getInstance()->deliverMessage (nextMessage);
 
-        if (pendingMessages->size() > 0)
-            CFRunLoopTimerSetNextFireDate (messageTimer, CFAbsoluteTimeGetCurrent() - 0.5);
+        } while (++numDispatched <= 4);
+
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
     }
 }
 
@@ -194,10 +197,12 @@ void MessageManager::doPlatformSpecificInitialisation()
 {
     pendingMessages = new Array <void*, CriticalSection>();
 
-    messageTimer = CFRunLoopTimerCreate (kCFAllocatorDefault, CFAbsoluteTimeGetCurrent() + 60.0, 60.0,
-                                         0, 0, timerCallback, 0);
-
-    CFRunLoopAddTimer (CFRunLoopGetMain(), messageTimer, kCFRunLoopCommonModes);
+    runLoop = CFRunLoopGetCurrent();
+    CFRunLoopSourceContext sourceContext;
+    zerostruct (sourceContext);
+    sourceContext.perform = runLoopSourceCallback;
+    runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
+    CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
 
     if (juceAppDelegate == 0)
         juceAppDelegate = [[JuceAppDelegate alloc] init];
@@ -205,10 +210,9 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    CFRunLoopTimerInvalidate (messageTimer);
-    CFRunLoopRemoveTimer (CFRunLoopGetMain(), messageTimer, kCFRunLoopCommonModes);
-    CFRelease (messageTimer);
-    messageTimer = 0;
+    CFRunLoopSourceInvalidate (runLoopSource);
+    CFRelease (runLoopSource);
+    runLoopSource = 0;
 
     if (pendingMessages != 0)
     {
@@ -231,7 +235,8 @@ bool juce_postMessageToSystemQueue (void* message)
     if (pendingMessages != 0)
     {
         pendingMessages->add (message);
-        CFRunLoopTimerSetNextFireDate (messageTimer, CFAbsoluteTimeGetCurrent() - 1.0);
+        CFRunLoopSourceSignal (runLoopSource);
+        CFRunLoopWakeUp (runLoop);
     }
 
     return true;
