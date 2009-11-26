@@ -882,6 +882,21 @@ String& String::operator<< (const short number) throw()
     return *this;
 }
 
+String& String::operator<< (const unsigned short number) throw()
+{
+    return operator<< ((unsigned int) number);
+}
+
+String& String::operator<< (const long number) throw()
+{
+    return operator<< ((int) number);
+}
+
+String& String::operator<< (const unsigned long number) throw()
+{
+    return operator<< ((unsigned int) number);
+}
+
 String& String::operator<< (const double number) throw()
 {
     operator+= (String (number));

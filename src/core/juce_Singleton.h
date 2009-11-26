@@ -33,21 +33,18 @@
 /**
     Macro to declare member variables and methods for a singleton class.
 
-    To use this, add the line juce_DeclareSingleton (MyClass, allowOnlyOneInstance)
+    To use this, add the line juce_DeclareSingleton (MyClass, doNotRecreateAfterDeletion)
     to the class's definition.
-
-    If allowOnlyOneInstance == true, it won't allow the object to be created
-    more than once in the process's lifetime.
 
     Then put a macro juce_ImplementSingleton (MyClass) along with the class's
     implementation code.
 
-    Clients can then call the static MyClass::getInstance() to get a pointer to the
-    singleton, or MyClass::getInstanceWithoutCreating() which may return 0 if no instance
-    is currently extant
+    It's also a very good idea to also add the call clearSingletonInstance() in your class's
+    destructor, in case it is deleted by other means than deleteInstance()
 
-    it's a very good idea to also add the call clearSingletonInstance() to the
-    destructor of the class, in case it is deleted by other means than deleteInstance()
+    Clients can then call the static method MyClass::getInstance() to get a pointer
+    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
+    no instance currently exists.
 
     e.g. @code
 
@@ -80,13 +77,18 @@
 
     @endcode
 
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
     If you know that your object will only be created and deleted by a single thread, you
     can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
     of this one.
 
     @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
 */
-#define juce_DeclareSingleton(classname, allowOnlyOneInstance) \
+#define juce_DeclareSingleton(classname, doNotRecreateAfterDeletion) \
 \
     static classname* _singletonInstance;  \
     static JUCE_NAMESPACE::CriticalSection _singletonLock; \
@@ -102,7 +104,7 @@
                 static bool alreadyInside = false; \
                 static bool createdOnceAlready = false; \
 \
-                const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+                const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
                 jassert (! problem); \
                 if (! problem) \
                 { \
@@ -163,13 +165,18 @@
     only ever be created or deleted by a single thread, then this is a
     more efficient version to use.
 
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
     See the documentation for juce_DeclareSingleton for more information about
     how to use it, the only difference being that you have to use
     juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
 
     @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
 */
-#define juce_DeclareSingleton_SingleThreaded(classname, allowOnlyOneInstance) \
+#define juce_DeclareSingleton_SingleThreaded(classname, doNotRecreateAfterDeletion) \
 \
     static classname* _singletonInstance;  \
 \
@@ -180,7 +187,7 @@
             static bool alreadyInside = false; \
             static bool createdOnceAlready = false; \
 \
-            const bool problem = alreadyInside || ((allowOnlyOneInstance) && createdOnceAlready); \
+            const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
             jassert (! problem); \
             if (! problem) \
             { \

@@ -1109,6 +1109,9 @@ void AudioProcessorGraph::processBlock (AudioSampleBuffer& buffer, MidiBuffer& m
 
     for (i = 0; i < buffer.getNumChannels(); ++i)
         buffer.copyFrom (i, 0, currentAudioOutputBuffer, i, 0, numSamples);
+
+    midiMessages.clear();
+    midiMessages.addEvents (currentMidiOutputBuffer, 0, buffer.getNumSamples(), 0);
 }
 
 const String AudioProcessorGraph::getInputChannelName (const int channelIndex) const

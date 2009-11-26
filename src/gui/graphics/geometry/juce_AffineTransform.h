@@ -160,6 +160,16 @@ public:
         points. */
     bool isOnlyTranslation() const throw();
 
+    /** If this transform is only a translation, this returns the X offset.
+        @see isOnlyTranslation
+    */
+    float getTranslationX() const throw()                   { return mat02; }
+
+    /** If this transform is only a translation, this returns the X offset.
+        @see isOnlyTranslation
+    */
+    float getTranslationY() const throw()                   { return mat12; }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

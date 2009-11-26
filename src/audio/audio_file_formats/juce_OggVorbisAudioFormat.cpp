@@ -179,7 +179,7 @@ public:
                     float** dataIn = 0;
 
                     const int samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
-                    if (samps == 0)
+                    if (samps <= 0)
                         break;
 
                     jassert (samps <= numToRead);
