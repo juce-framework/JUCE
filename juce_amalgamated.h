@@ -19013,6 +19013,13 @@ public:
         }
     }
 
+    /** The indexes of the different components in the byte layout of this type of colour. */
+    #if JUCE_BIG_ENDIAN
+    enum { indexA = 0, indexR = 1, indexG = 2, indexB = 3 };
+    #else
+    enum { indexA = 3, indexR = 2, indexG = 1, indexB = 0 };
+    #endif
+
 private:
 
     union
@@ -19172,6 +19179,13 @@ public:
     {
         r = g = b = (uint8) (((int) r + (int) g + (int) b) / 3);
     }
+
+    /** The indexes of the different components in the byte layout of this type of colour. */
+    #if JUCE_MAC
+    enum { indexR = 0, indexG = 1, indexB = 2 };
+    #else
+    enum { indexR = 2, indexG = 1, indexB = 0 };
+    #endif
 
 private:
 

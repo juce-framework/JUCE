@@ -726,10 +726,10 @@ private:
                 c[2] += weight * src[6];
                 c[3] += weight * src[7];
 
-                dest->setARGB ((uint8) (c[3] >> 16),
-                               (uint8) (c[2] >> 16),
-                               (uint8) (c[1] >> 16),
-                               (uint8) (c[0] >> 16));
+                dest->setARGB ((uint8) (c[PixelARGB::indexA] >> 16),
+                               (uint8) (c[PixelARGB::indexR] >> 16),
+                               (uint8) (c[PixelARGB::indexG] >> 16),
+                               (uint8) (c[PixelARGB::indexB] >> 16));
             }
             else
             {
@@ -793,9 +793,9 @@ private:
                 c[2] += weight * src[5];
 
                 dest->setARGB ((uint8) 255,
-                               (uint8) (c[0] >> 16),
-                               (uint8) (c[1] >> 16),
-                               (uint8) (c[2] >> 16));
+                               (uint8) (c[PixelRGB::indexR] >> 16),
+                               (uint8) (c[PixelRGB::indexG] >> 16),
+                               (uint8) (c[PixelRGB::indexB] >> 16));
             }
             else
             {
