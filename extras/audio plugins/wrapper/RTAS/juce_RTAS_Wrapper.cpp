@@ -259,6 +259,8 @@ public:
                 deleteAndZero (wrapper);
 
                 wrapper = new EditorCompWrapper (hostWindow, editorComp, this);
+
+                process->touchAllParameters();
             }
             else
             {
@@ -784,6 +786,16 @@ protected:
     void audioProcessorChanged (AudioProcessor*)
     {
         // xxx is there an RTAS equivalent?
+    }
+
+    void touchAllParameters()
+    {
+        for (int i = 0; i < juceFilter->getNumParameters(); ++i)
+        {
+            audioProcessorParameterChangeGestureBegin (0, i);
+            audioProcessorParameterChanged (0, i, juceFilter->getParameter (i));
+            audioProcessorParameterChangeGestureEnd (0, i);
+        }
     }
 
     //==============================================================================

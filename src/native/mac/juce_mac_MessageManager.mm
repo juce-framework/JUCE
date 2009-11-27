@@ -395,22 +395,21 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
-    NSDate* endDate = [NSDate dateWithTimeIntervalSinceNow: millisecondsToRunFor * 0.001 + 1.0];
 
     while (! quitMessagePosted)
     {
         const ScopedAutoReleasePool pool;
 
-        CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.002, true);
+        CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 
         NSEvent* e = [NSApp nextEventMatchingMask: NSAnyEventMask
-                                        untilDate: endDate
+                                        untilDate: [NSDate dateWithTimeIntervalSinceNow: 0.001]
                                            inMode: NSDefaultRunLoopMode
                                           dequeue: YES];
 
         if (e != 0 && ! isEventBlockedByModalComps (e))
             [NSApp sendEvent: e];
-
+        
         if (Time::getMillisecondCounter() >= endTime)
             break;
     }
