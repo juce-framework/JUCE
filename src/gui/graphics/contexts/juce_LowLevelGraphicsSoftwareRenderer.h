@@ -49,45 +49,35 @@ public:
     //==============================================================================
     void setOrigin (int x, int y);
 
-    bool reduceClipRegion (int x, int y, int w, int h);
-    bool reduceClipRegion (const RectangleList& clipRegion);
-    void excludeClipRegion (int x, int y, int w, int h);
-
+    bool clipToRectangle (const Rectangle& r);
+    bool clipToRectangleList (const RectangleList& clipRegion);
+    void excludeClipRectangle (const Rectangle& r);
     void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImage (Image& image, int imageX, int imageY);
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
+
+    bool clipRegionIntersects (const Rectangle& r);
+    const Rectangle getClipBounds() const;
+    bool isClipEmpty() const;
 
     void saveState();
     void restoreState();
 
-    bool clipRegionIntersects (int x, int y, int w, int h);
-    const Rectangle getClipBounds() const;
-    bool isClipEmpty() const;
-
     //==============================================================================
     void setColour (const Colour& colour);
     void setGradient (const ColourGradient& gradient);
+    void setTiledFill (const Image& image, int x, int y);
+
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillAll (const bool replaceContents);
+    void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY);
+    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
-    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
-    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
-
-    //==============================================================================
-    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY);
-
-    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform);
-
-    //==============================================================================
     void drawLine (double x1, double y1, double x2, double y2);
 
     void drawVerticalLine (const int x, double top, double bottom);
@@ -95,6 +85,7 @@ public:
 
     //==============================================================================
     void setFont (const Font& newFont);
+    const Font getFont();
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
@@ -107,33 +98,6 @@ protected:
 
     LLGCSavedState* currentState;
     OwnedArray <LLGCSavedState> stateStack;
-
-/*    void drawVertical (const int x, const double top, const double bottom);
-    void drawHorizontal (const int y, const double top, const double bottom);
-
-    void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-
-    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform);
-    void clippedFillPathWithImage (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform,
-                                   const Image& image, int imageX, int imageY, float alpha);
-
-    void clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY);
-    void clippedFillAlphaChannelWithImage (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                           const Image& fillerImage, int fillerImageX, int fillerImageY, const float opacity);
-
-    //==============================================================================
-    void clippedBlendImage (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
-                            int destX, int destY, int destW, int destH, int sourceX, int sourceY);
-
-    void clippedBlendImageWarping (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
-                                   int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                   const AffineTransform& transform);
-
-    //==============================================================================
-    void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2);
-
-    void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
-    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);*/
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);

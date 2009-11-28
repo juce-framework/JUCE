@@ -323,11 +323,40 @@ const Point Path::getCurrentPosition() const
 void Path::addRectangle (const float x, const float y,
                          const float w, const float h) throw()
 {
-    startNewSubPath (x, y + h);
-    lineTo (x, y);
-    lineTo (x + w, y);
-    lineTo (x + w, y + h);
-    closeSubPath();
+    float x1 = x, y1 = y, x2 = x + w, y2 = y + h;
+
+    if (w < 0)
+        swapVariables (x1, x2);
+
+    if (h < 0)
+        swapVariables (y1, y2);
+
+    ensureAllocatedSize (numElements + 13);
+
+    elements [numElements++] = moveMarker;
+    elements [numElements++] = x1;
+    elements [numElements++] = y2;
+    elements [numElements++] = lineMarker;
+    elements [numElements++] = x1;
+    elements [numElements++] = y1;
+    elements [numElements++] = lineMarker;
+    elements [numElements++] = x2;
+    elements [numElements++] = y1;
+    elements [numElements++] = lineMarker;
+    elements [numElements++] = x2;
+    elements [numElements++] = y2;
+    elements [numElements++] = closeSubPathMarker;
+
+    pathXMin = jmin (pathXMin, x1);
+    pathXMax = jmax (pathXMax, x2);
+    pathYMin = jmin (pathYMin, y1);
+    pathYMax = jmax (pathYMax, y2);
+}
+
+void Path::addRectangle (const Rectangle& rectangle) throw()
+{
+    addRectangle ((float) rectangle.getX(), (float) rectangle.getY(),
+                  (float) rectangle.getWidth(), (float) rectangle.getHeight());
 }
 
 void Path::addRoundedRectangle (const float x, const float y,
@@ -1547,71 +1576,6 @@ bool Path::Iterator::next()
     }
 
     return false;
-}
-
-//==============================================================================
-class MaskBitmapRenderer
-{
-public:
-    MaskBitmapRenderer (const Image::BitmapData& destData_) throw()
-        : destData (destData_)
-    {
-    }
-
-    forcedinline void setEdgeTableYPos (const int y) throw()
-    {
-        lineStart = destData.getLinePointer (y);
-    }
-
-    forcedinline void handleEdgeTablePixel (const int x, const int alphaLevel) const throw()
-    {
-        lineStart [x] = (uint8) alphaLevel;
-    }
-
-    forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
-    {
-        uint8* d = lineStart + x;
-
-        while (--width >= 0)
-            *d++ = (uint8) alphaLevel;
-    }
-
-private:
-    const Image::BitmapData& destData;
-    uint8* lineStart;
-
-    MaskBitmapRenderer (const MaskBitmapRenderer&);
-    const MaskBitmapRenderer& operator= (const MaskBitmapRenderer&);
-};
-
-Image* Path::createMaskBitmap (const AffineTransform& transform,
-                               const Rectangle& clipRegion,
-                               Rectangle& imagePosition) const throw()
-{
-    if (isEmpty())
-        return 0;
-
-    float px, py, pw, ph;
-    getBoundsTransformed (transform, px, py, pw, ph);
-
-    imagePosition = clipRegion.getIntersection (Rectangle ((int) floorf (px), (int) floorf (py),
-                                                           roundFloatToInt (pw) + 2, roundFloatToInt (ph) + 2));
-
-    if (imagePosition.isEmpty())
-        return 0;
-
-    Image* im = Image::createNativeImage (Image::SingleChannel, imagePosition.getWidth(), imagePosition.getHeight(), true);
-
-    EdgeTable edgeTable (Rectangle (0, 0, imagePosition.getWidth(), imagePosition.getHeight()),
-                         *this, transform.translated ((float) -imagePosition.getX(), (float) -imagePosition.getY()));
-
-    const Image::BitmapData destData (*im, 0, 0, imagePosition.getWidth(), imagePosition.getHeight(), true);
-
-    jassert (destData.pixelStride == 1);
-    MaskBitmapRenderer renderer (destData);
-    edgeTable.iterate (renderer);
-
-    return im;
 }
 
 

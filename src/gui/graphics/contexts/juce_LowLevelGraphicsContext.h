@@ -66,57 +66,40 @@ public:
     */
     virtual void setOrigin (int x, int y) = 0;
 
-    /** Cliping co-ords are relative to the origin. */
-    virtual bool reduceClipRegion (int x, int y, int w, int h) = 0;
+    virtual bool clipToRectangle (const Rectangle& r) = 0;
+    virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
+    virtual void excludeClipRectangle (const Rectangle& r) = 0;
+    virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
+    virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform) = 0;
 
-    /** Cliping co-ords are relative to the origin. */
-    virtual bool reduceClipRegion (const RectangleList& clipRegion) = 0;
-
-    //virtual bool clipToPath (const Path& path) = 0;
-    //virtual bool clipToImageAlpha (Image& image, int imageX, int imageY) = 0;
-
-    /** Cliping co-ords are relative to the origin. */
-    virtual void excludeClipRegion (int x, int y, int w, int h) = 0;
+    virtual bool clipRegionIntersects (const Rectangle& r) = 0;
+    virtual const Rectangle getClipBounds() const = 0;
+    virtual bool isClipEmpty() const = 0;
 
     virtual void saveState() = 0;
     virtual void restoreState() = 0;
 
-    virtual bool clipRegionIntersects (int x, int y, int w, int h) = 0;
-    virtual const Rectangle getClipBounds() const = 0;
-    virtual bool isClipEmpty() const = 0;
-
     //==============================================================================
     virtual void setColour (const Colour& colour) = 0;
     virtual void setGradient (const ColourGradient& gradient) = 0;
+    virtual void setTiledFill (const Image& image, int x, int y) = 0;
+
     virtual void setOpacity (float opacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
     //==============================================================================
-    virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
+    virtual void fillRect (const Rectangle& r, const bool replaceExistingContents) = 0;
     virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-    virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY) = 0;
+    virtual void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                            const AffineTransform& transform, const bool fillEntireClipAsTiles) = 0;
 
-    virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
-    virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                            const Image& fillerImage, int fillerImageX, int fillerImageY) = 0;
-
-    //==============================================================================
-    virtual void blendImage (const Image& sourceImage,
-                             int destX, int destY, int destW, int destH, int sourceX, int sourceY) = 0;
-
-    virtual void blendImageWarping (const Image& sourceImage,
-                                    int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                    const AffineTransform& transform) = 0;
-
-    //==============================================================================
     virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
     virtual void drawVerticalLine (const int x, double top, double bottom) = 0;
     virtual void drawHorizontalLine (const int y, double left, double right) = 0;
 
     virtual void setFont (const Font& newFont) = 0;
-    virtual void drawGlyph (int glyphNumber, float x, float y) = 0;
+    virtual const Font getFont() = 0;
     virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 };
 

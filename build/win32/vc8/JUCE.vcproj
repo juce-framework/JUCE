@@ -2169,42 +2169,6 @@
 					Name="graphics"
 					>
 					<Filter
-						Name="brushes"
-						>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_Brush.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_Brush.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_GradientBrush.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_GradientBrush.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_ImageBrush.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_ImageBrush.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.cpp"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.h"
-							>
-						</File>
-					</Filter>
-					<Filter
 						Name="colour"
 						>
 						<File

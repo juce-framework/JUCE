@@ -78,9 +78,10 @@ public:
     void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (const Image& image, int x, int y) throw();
-    bool isEmpty() const throw();
+    void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
+    bool isEmpty() throw();
     const Rectangle& getMaximumBounds() const throw()       { return bounds; }
+    void translate (float dx, int dy) throw();
 
     /** Reduces the amount of space the table has allocated.
 
@@ -192,6 +193,7 @@ private:
     int* table;
     Rectangle bounds;
     int maxEdgesPerLine, lineStrideElements;
+    bool needToCheckEmptinesss;
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();

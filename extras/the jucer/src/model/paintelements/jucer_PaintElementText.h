@@ -57,8 +57,7 @@ public:
     //==============================================================================
     void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
     {
-        Brush* const brush = fillType.createBrush (getDocument(), parentArea);
-        g.setBrush (brush);
+        fillType.setFillType (g, getDocument(), parentArea);
 
         font = FontPropertyComponent::applyNameToFont (typefaceName, font);
         g.setFont (font);
@@ -67,8 +66,6 @@ public:
         g.drawText (replaceStringTranslations (text, owner->getDocument()),
                     r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                     justification, true);
-
-        delete brush;
     }
 
     void getEditableProperties (Array <PropertyComponent*>& properties)

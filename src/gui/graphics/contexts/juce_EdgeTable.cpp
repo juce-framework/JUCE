@@ -49,7 +49,8 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
                       const Path& path, const AffineTransform& transform) throw()
    : bounds (bounds_),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
-     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
+     needToCheckEmptinesss (true)
 {
     table = (int*) juce_malloc ((bounds.getHeight() + 1) * lineStrideElements * sizeof (int));
     int* t = table;
@@ -167,7 +168,8 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
 EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
    : bounds (rectangleToAdd),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
-     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
+     needToCheckEmptinesss (true)
 {
     table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
     *table = 0;
@@ -190,7 +192,8 @@ EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
 EdgeTable::EdgeTable (const float x, const float y, const float w, const float h) throw()
    : bounds (Rectangle ((int) floorf (x), roundFloatToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
-     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1)
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
+     needToCheckEmptinesss (true)
 {
     jassert (w > 0 && h > 0);
     table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
@@ -274,6 +277,7 @@ const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
     bounds = other.bounds;
     maxEdgesPerLine = other.maxEdgesPerLine;
     lineStrideElements = other.lineStrideElements;
+    needToCheckEmptinesss = other.needToCheckEmptinesss;
 
     const int tableSize = jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int);
     table = (int*) juce_malloc (tableSize);
@@ -356,6 +360,27 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
     line [n + 1] = x;
     line [n + 2] = winding;
     line[0]++;
+}
+
+void EdgeTable::translate (float dx, int dy) throw()
+{
+    bounds.setPosition (bounds.getX() + (int) floorf (dx), bounds.getY() + dy);
+
+    int* lineStart = table;
+    const int intDx = (int) (dx * 256.0f);
+
+    for (int i = bounds.getHeight(); --i >= 0;)
+    {
+        int* line = lineStart;
+        lineStart += lineStrideElements;
+        int num = *line++;
+
+        while (--num >= 0)
+        {
+            *line += intDx;
+            line += 2;
+        }
+    }
 }
 
 void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) throw()
@@ -482,6 +507,7 @@ void EdgeTable::clipToRectangle (const Rectangle& r) throw()
 
     if (clipped.isEmpty())
     {
+        needToCheckEmptinesss = false;
         bounds.setHeight (0);
     }
     else
@@ -505,6 +531,8 @@ void EdgeTable::clipToRectangle (const Rectangle& r) throw()
             for (int i = top; i < bottom; ++i)
                 intersectWithEdgeTableLine (i, rectLine);
         }
+
+        needToCheckEmptinesss = true;
     }
 }
 
@@ -523,6 +551,8 @@ void EdgeTable::excludeRectangle (const Rectangle& r) throw()
 
         for (int i = top; i < bottom; ++i)
             intersectWithEdgeTableLine (i, rectLine);
+
+        needToCheckEmptinesss = true;
     }
 }
 
@@ -532,6 +562,7 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
 
     if (clipped.isEmpty())
     {
+        needToCheckEmptinesss = false;
         bounds.setHeight (0);
     }
     else
@@ -555,109 +586,74 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
             intersectWithEdgeTableLine (i, otherLine);
             otherLine += other.lineStrideElements;
         }
+
+        needToCheckEmptinesss = true;
     }
 }
 
-void EdgeTable::clipToImageAlpha (const Image& image, int x, int y) throw()
+void EdgeTable::clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw()
 {
-    const Rectangle clipped (bounds.getIntersection (Rectangle (x, y, image.getWidth(), image.getHeight())));
+    y -= bounds.getY();
 
-    if (clipped.isEmpty())
+    if (y < 0 || y >= bounds.getHeight())
+        return;
+
+    needToCheckEmptinesss = true;
+
+    if (numPixels <= 0)
     {
+        table [lineStrideElements * y] = 0;
+        return;
+    }
+
+    int* tempLine = (int*) alloca ((numPixels * 2 + 4) * sizeof (int));
+    int destIndex = 0, lastLevel = 0;
+
+    while (--numPixels >= 0)
+    {
+        const int alpha = *mask;
+        mask += maskStride;
+
+        if (alpha != lastLevel)
+        {
+            tempLine[++destIndex] = (x << 8);
+            tempLine[++destIndex] = alpha;
+            lastLevel = alpha;
+        }
+
+        ++x;
+    }
+
+    if (lastLevel > 0)
+    {
+        tempLine[++destIndex] = (x << 8);
+        tempLine[++destIndex] = 0;
+    }
+
+    tempLine[0] = destIndex >> 1;
+
+    intersectWithEdgeTableLine (y, tempLine);
+}
+
+bool EdgeTable::isEmpty() throw()
+{
+    if (needToCheckEmptinesss)
+    {
+        needToCheckEmptinesss = false;
+        int* t = table;
+
+        for (int i = bounds.getHeight(); --i >= 0;)
+        {
+            if (t[0] > 1)
+                return false;
+
+            t += lineStrideElements;
+        }
+
         bounds.setHeight (0);
     }
-    else
-    {
-        if (! image.hasAlphaChannel())
-        {
-            clipToRectangle (clipped);
-            return;
-        }
 
-        const int top = clipped.getY() - bounds.getY();
-        const int bottom = clipped.getBottom() - bounds.getY();
-
-        if (bottom < bounds.getHeight())
-            bounds.setHeight (bottom);
-
-        if (clipped.getRight() < bounds.getRight())
-            bounds.setRight (clipped.getRight());
-
-        for (int i = top; --i >= 0;)
-            table [lineStrideElements * i] = 0;
-
-        int imageX = clipped.getX() - x;
-        int imageY = clipped.getY() - y;
-
-        int* temp = (int*) alloca ((clipped.getWidth() * 2 + 4) * sizeof (int));
-
-        Image::BitmapData srcData (image, imageX, imageY, clipped.getWidth(), clipped.getHeight());
-
-        for (int i = 0; i < clipped.getHeight(); ++i)
-        {
-            int destIndex = 0, lastLevel = 0;
-            const uint8* pixels = srcData.getLinePointer (i);
-
-            if (image.getFormat() == Image::ARGB)
-            {
-                for (int px = 0; px < clipped.getWidth(); ++px)
-                {
-                    const int alpha = ((const PixelARGB*) pixels)->getAlpha();
-                    pixels += srcData.pixelStride;
-
-                    if (alpha != lastLevel)
-                    {
-                        temp[++destIndex] = (clipped.getX() + px) << 8;
-                        temp[++destIndex] = alpha;
-                        lastLevel = alpha;
-                    }
-                }
-            }
-            else
-            {
-                jassert (image.getFormat() == Image::SingleChannel);
-
-                for (int px = 0; px < clipped.getWidth(); ++px)
-                {
-                    const int alpha = *pixels;
-                    pixels += srcData.pixelStride;
-
-                    if (alpha != lastLevel)
-                    {
-                        temp[++destIndex] = (clipped.getX() + px) << 8;
-                        temp[++destIndex] = alpha;
-                        lastLevel = alpha;
-                    }
-                }
-            }
-
-            if (lastLevel > 0)
-            {
-                temp[++destIndex] = clipped.getRight() << 8;
-                temp[++destIndex] = 0;
-            }
-
-            temp[0] = destIndex >> 1;
-
-            intersectWithEdgeTableLine (top + i, temp);
-            ++y;
-        }
-    }
-}
-
-bool EdgeTable::isEmpty() const throw()
-{
-    int* t = table;
-
-    for (int i = bounds.getHeight(); --i >= 0;)
-    {
-        if (t[0] > 1)
-            return false;
-
-        t += lineStrideElements;
-    }
-
-    return true;
+    return bounds.getHeight() == 0;
 }
 
 END_JUCE_NAMESPACE

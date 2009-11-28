@@ -110,15 +110,14 @@ void FillType::reset()
 }
 
 //==============================================================================
-Brush* FillType::createBrush (JucerDocument* const document,
-                              const Rectangle& parentArea)
+void FillType::setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea)
 {
     if (mode == solidColour)
     {
         ImageCache::release (image);
         image = 0;
 
-        return new SolidColourBrush (colour);
+        g.setColour (colour);
     }
     else if (mode == imageBrush)
     {
@@ -126,7 +125,7 @@ Brush* FillType::createBrush (JucerDocument* const document,
 
         Rectangle r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));
 
-        return new ImageBrush (image, r.getX(), r.getY(), (float) imageOpacity);
+        g.setTiledImageFill (*image, r.getX(), r.getY(), (float) imageOpacity);
     }
     else
     {
@@ -136,9 +135,9 @@ Brush* FillType::createBrush (JucerDocument* const document,
         Rectangle r1 (gradPos1.getRectangle (parentArea, document->getComponentLayout()));
         Rectangle r2 (gradPos2.getRectangle (parentArea, document->getComponentLayout()));
 
-        return new GradientBrush (gradCol1, (float) r1.getX(), (float) r1.getY(),
-                                  gradCol2, (float) r2.getX(), (float) r2.getY(),
-                                  mode == radialGradient);
+        g.setGradientFill (ColourGradient (gradCol1, (float) r1.getX(), (float) r1.getY(),
+                                           gradCol2, (float) r2.getX(), (float) r2.getY(),
+                                           mode == radialGradient));
     }
 }
 

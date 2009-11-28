@@ -7108,98 +7108,6 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_PerformanceCounter.h *********/
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-#define __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-
-/** A timer for measuring performance of code and dumping the results to a file.
-
-    e.g. @code
-
-        PerformanceCounter pc ("fish", 50, "/temp/myfishlog.txt");
-
-        for (;;)
-        {
-            pc.start();
-
-            doSomethingFishy();
-
-            pc.stop();
-        }
-    @endcode
-
-    In this example, the time of each period between calling start/stop will be
-    measured and averaged over 50 runs, and the results printed to a file
-    every 50 times round the loop.
-*/
-class JUCE_API  PerformanceCounter
-{
-public:
-
-    /** Creates a PerformanceCounter object.
-
-        @param counterName      the name used when printing out the statistics
-        @param runsPerPrintout  the number of start/stop iterations before calling
-                                printStatistics()
-        @param loggingFile      a file to dump the results to - if this is File::nonexistent,
-                                the results are just written to the debugger output
-    */
-    PerformanceCounter (const String& counterName,
-                        int runsPerPrintout = 100,
-                        const File& loggingFile = File::nonexistent);
-
-    /** Destructor. */
-    ~PerformanceCounter();
-
-    /** Starts timing.
-
-        @see stop
-    */
-    void start();
-
-    /** Stops timing and prints out the results.
-
-        The number of iterations before doing a printout of the
-        results is set in the constructor.
-
-        @see start
-    */
-    void stop();
-
-    /** Dumps the current metrics to the debugger output and to a file.
-
-        As well as using Logger::outputDebugString to print the results,
-        this will write then to the file specified in the constructor (if
-        this was valid).
-    */
-    void printStatistics();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    String name;
-    int numRuns, runsPerPrint;
-    double totalTime;
-    int64 started;
-    File outputFile;
-};
-
-#endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-/********* End of inlined file: juce_PerformanceCounter.h *********/
-
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 
 /********* Start of inlined file: juce_PlatformUtilities.h *********/
@@ -7469,6 +7377,485 @@ private:
 
 #endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 /********* End of inlined file: juce_PlatformUtilities.h *********/
+
+#endif
+#ifndef __JUCE_MEMORY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_PerformanceCounter.h *********/
+#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+#define __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+
+/** A timer for measuring performance of code and dumping the results to a file.
+
+    e.g. @code
+
+        PerformanceCounter pc ("fish", 50, "/temp/myfishlog.txt");
+
+        for (;;)
+        {
+            pc.start();
+
+            doSomethingFishy();
+
+            pc.stop();
+        }
+    @endcode
+
+    In this example, the time of each period between calling start/stop will be
+    measured and averaged over 50 runs, and the results printed to a file
+    every 50 times round the loop.
+*/
+class JUCE_API  PerformanceCounter
+{
+public:
+
+    /** Creates a PerformanceCounter object.
+
+        @param counterName      the name used when printing out the statistics
+        @param runsPerPrintout  the number of start/stop iterations before calling
+                                printStatistics()
+        @param loggingFile      a file to dump the results to - if this is File::nonexistent,
+                                the results are just written to the debugger output
+    */
+    PerformanceCounter (const String& counterName,
+                        int runsPerPrintout = 100,
+                        const File& loggingFile = File::nonexistent);
+
+    /** Destructor. */
+    ~PerformanceCounter();
+
+    /** Starts timing.
+
+        @see stop
+    */
+    void start();
+
+    /** Stops timing and prints out the results.
+
+        The number of iterations before doing a printout of the
+        results is set in the constructor.
+
+        @see start
+    */
+    void stop();
+
+    /** Dumps the current metrics to the debugger output and to a file.
+
+        As well as using Logger::outputDebugString to print the results,
+        this will write then to the file specified in the constructor (if
+        this was valid).
+    */
+    void printStatistics();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    String name;
+    int numRuns, runsPerPrint;
+    double totalTime;
+    int64 started;
+    File outputFile;
+};
+
+#endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+/********* End of inlined file: juce_PerformanceCounter.h *********/
+
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_Singleton.h *********/
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+#define __JUCE_SINGLETON_JUCEHEADER__
+
+/********* Start of inlined file: juce_ScopedLock.h *********/
+#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
+#define __JUCE_SCOPEDLOCK_JUCEHEADER__
+
+/**
+    Automatically locks and unlocks a CriticalSection object.
+
+    Use one of these as a local variable to control access to a CriticalSection.
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ...do some stuff...
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedUnlock
+*/
+class JUCE_API  ScopedLock
+{
+public:
+
+    /** Creates a ScopedLock.
+
+        As soon as it is created, this will lock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be unlocked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
+
+    /** Destructor.
+
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedLock() throw()                                { lock_.exit(); }
+
+private:
+
+    const CriticalSection& lock_;
+
+    ScopedLock (const ScopedLock&);
+    const ScopedLock& operator= (const ScopedLock&);
+};
+
+/**
+    Automatically unlocks and re-locks a CriticalSection object.
+
+    This is the reverse of a ScopedLock object - instead of locking the critical
+    section for the lifetime of this object, it unlocks it.
+
+    Make sure you don't try to unlock critical sections that aren't actually locked!
+
+    e.g. @code
+
+    CriticalSection myCriticalSection;
+
+    for (;;)
+    {
+        const ScopedLock myScopedLock (myCriticalSection);
+        // myCriticalSection is now locked
+
+        ... do some stuff with it locked ..
+
+        while (xyz)
+        {
+            ... do some stuff with it locked ..
+
+            const ScopedUnlock unlocker (myCriticalSection);
+
+            // myCriticalSection is now unlocked for the remainder of this block,
+            // and re-locked at the end.
+
+            ...do some stuff with it unlocked ...
+        }
+
+        // myCriticalSection gets unlocked here.
+    }
+    @endcode
+
+    @see CriticalSection, ScopedLock
+*/
+class ScopedUnlock
+{
+public:
+
+    /** Creates a ScopedUnlock.
+
+        As soon as it is created, this will unlock the CriticalSection, and
+        when the ScopedLock object is deleted, the CriticalSection will
+        be re-locked.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen! Best just to use it
+        as a local stack object, rather than creating one with the new() operator.
+    */
+    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
+
+    /** Destructor.
+
+        The CriticalSection will be unlocked when the destructor is called.
+
+        Make sure this object is created and deleted by the same thread,
+        otherwise there are no guarantees what will happen!
+    */
+    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
+
+private:
+
+    const CriticalSection& lock_;
+
+    ScopedUnlock (const ScopedLock&);
+    const ScopedUnlock& operator= (const ScopedUnlock&);
+};
+
+#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
+/********* End of inlined file: juce_ScopedLock.h *********/
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    To use this, add the line juce_DeclareSingleton (MyClass, doNotRecreateAfterDeletion)
+    to the class's definition.
+
+    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
+    implementation code.
+
+    It's also a very good idea to also add the call clearSingletonInstance() in your class's
+    destructor, in case it is deleted by other means than deleteInstance()
+
+    Clients can then call the static method MyClass::getInstance() to get a pointer
+    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
+    no instance currently exists.
+
+    e.g. @code
+
+        class MySingleton
+        {
+        public:
+            MySingleton()
+            {
+            }
+
+            ~MySingleton()
+            {
+                // this ensures that no dangling pointers are left when the
+                // singleton is deleted.
+                clearSingletonInstance();
+            }
+
+            juce_DeclareSingleton (MySingleton, false)
+        };
+
+        juce_ImplementSingleton (MySingleton)
+
+        // example of usage:
+        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
+
+        ...
+
+        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
+
+    @endcode
+
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
+    If you know that your object will only be created and deleted by a single thread, you
+    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
+    of this one.
+
+    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
+*/
+#define juce_DeclareSingleton(classname, doNotRecreateAfterDeletion) \
+\
+    static classname* _singletonInstance;  \
+    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        {\
+            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+\
+            if (_singletonInstance == 0) \
+            { \
+                static bool alreadyInside = false; \
+                static bool createdOnceAlready = false; \
+\
+                const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
+                jassert (! problem); \
+                if (! problem) \
+                { \
+                    createdOnceAlready = true; \
+                    alreadyInside = true; \
+                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                    alreadyInside = false; \
+\
+                    _singletonInstance = newObject; \
+                } \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton macro.
+
+    After adding the juce_DeclareSingleton to the class definition, this macro has
+    to be used in the cpp file.
+*/
+#define juce_ImplementSingleton(classname) \
+\
+    classname* classname::_singletonInstance = 0; \
+    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
+    section to make access to it thread-safe. If you know that your object will
+    only ever be created or deleted by a single thread, then this is a
+    more efficient version to use.
+
+    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
+    than once during the process's lifetime - i.e. after you've created and deleted the
+    object, getInstance() will refuse to create another one. This can be useful to stop
+    objects being accidentally re-created during your app's shutdown code.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
+*/
+#define juce_DeclareSingleton_SingleThreaded(classname, doNotRecreateAfterDeletion) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+        { \
+            static bool alreadyInside = false; \
+            static bool createdOnceAlready = false; \
+\
+            const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
+            jassert (! problem); \
+            if (! problem) \
+            { \
+                createdOnceAlready = true; \
+                alreadyInside = true; \
+                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
+                alreadyInside = false; \
+\
+                _singletonInstance = newObject; \
+            } \
+        } \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/**
+    Macro to declare member variables and methods for a singleton class.
+
+    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
+    for recursion or repeated instantiation. It's intended for use as a lightweight
+    version of a singleton, where you're using it in very straightforward
+    circumstances and don't need the extra checking.
+
+    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
+    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
+
+    See the documentation for juce_DeclareSingleton for more information about
+    how to use it, the only difference being that you have to use
+    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
+
+    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
+*/
+#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
+\
+    static classname* _singletonInstance;  \
+\
+    static classname* getInstance() \
+    { \
+        if (_singletonInstance == 0) \
+            _singletonInstance = new classname(); \
+\
+        return _singletonInstance; \
+    } \
+\
+    static inline classname* getInstanceWithoutCreating() throw() \
+    { \
+        return _singletonInstance; \
+    } \
+\
+    static void deleteInstance() \
+    { \
+        if (_singletonInstance != 0) \
+        { \
+            classname* const old = _singletonInstance; \
+            _singletonInstance = 0; \
+            delete old; \
+        } \
+    } \
+\
+    void clearSingletonInstance() throw() \
+    { \
+        if (_singletonInstance == this) \
+            _singletonInstance = 0; \
+    }
+
+/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
+
+    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
+    to the class definition, this macro has to be used somewhere in the cpp file.
+*/
+#define juce_ImplementSingleton_SingleThreaded(classname) \
+\
+    classname* classname::_singletonInstance = 0;
+
+#endif   // __JUCE_SINGLETON_JUCEHEADER__
+/********* End of inlined file: juce_Singleton.h *********/
 
 #endif
 #ifndef __JUCE_RANDOM_JUCEHEADER__
@@ -7879,399 +8266,6 @@ private:
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_Singleton.h *********/
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
-#define __JUCE_SINGLETON_JUCEHEADER__
-
-/********* Start of inlined file: juce_ScopedLock.h *********/
-#ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
-#define __JUCE_SCOPEDLOCK_JUCEHEADER__
-
-/**
-    Automatically locks and unlocks a CriticalSection object.
-
-    Use one of these as a local variable to control access to a CriticalSection.
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
-    {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
-
-        ...do some stuff...
-
-        // myCriticalSection gets unlocked here.
-    }
-    @endcode
-
-    @see CriticalSection, ScopedUnlock
-*/
-class JUCE_API  ScopedLock
-{
-public:
-
-    /** Creates a ScopedLock.
-
-        As soon as it is created, this will lock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be unlocked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedLock() throw()                                { lock_.exit(); }
-
-private:
-
-    const CriticalSection& lock_;
-
-    ScopedLock (const ScopedLock&);
-    const ScopedLock& operator= (const ScopedLock&);
-};
-
-/**
-    Automatically unlocks and re-locks a CriticalSection object.
-
-    This is the reverse of a ScopedLock object - instead of locking the critical
-    section for the lifetime of this object, it unlocks it.
-
-    Make sure you don't try to unlock critical sections that aren't actually locked!
-
-    e.g. @code
-
-    CriticalSection myCriticalSection;
-
-    for (;;)
-    {
-        const ScopedLock myScopedLock (myCriticalSection);
-        // myCriticalSection is now locked
-
-        ... do some stuff with it locked ..
-
-        while (xyz)
-        {
-            ... do some stuff with it locked ..
-
-            const ScopedUnlock unlocker (myCriticalSection);
-
-            // myCriticalSection is now unlocked for the remainder of this block,
-            // and re-locked at the end.
-
-            ...do some stuff with it unlocked ...
-        }
-
-        // myCriticalSection gets unlocked here.
-    }
-    @endcode
-
-    @see CriticalSection, ScopedLock
-*/
-class ScopedUnlock
-{
-public:
-
-    /** Creates a ScopedUnlock.
-
-        As soon as it is created, this will unlock the CriticalSection, and
-        when the ScopedLock object is deleted, the CriticalSection will
-        be re-locked.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
-    */
-    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
-
-    /** Destructor.
-
-        The CriticalSection will be unlocked when the destructor is called.
-
-        Make sure this object is created and deleted by the same thread,
-        otherwise there are no guarantees what will happen!
-    */
-    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
-
-private:
-
-    const CriticalSection& lock_;
-
-    ScopedUnlock (const ScopedLock&);
-    const ScopedUnlock& operator= (const ScopedUnlock&);
-};
-
-#endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedLock.h *********/
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    To use this, add the line juce_DeclareSingleton (MyClass, doNotRecreateAfterDeletion)
-    to the class's definition.
-
-    Then put a macro juce_ImplementSingleton (MyClass) along with the class's
-    implementation code.
-
-    It's also a very good idea to also add the call clearSingletonInstance() in your class's
-    destructor, in case it is deleted by other means than deleteInstance()
-
-    Clients can then call the static method MyClass::getInstance() to get a pointer
-    to the singleton, or MyClass::getInstanceWithoutCreating() which will return 0 if
-    no instance currently exists.
-
-    e.g. @code
-
-        class MySingleton
-        {
-        public:
-            MySingleton()
-            {
-            }
-
-            ~MySingleton()
-            {
-                // this ensures that no dangling pointers are left when the
-                // singleton is deleted.
-                clearSingletonInstance();
-            }
-
-            juce_DeclareSingleton (MySingleton, false)
-        };
-
-        juce_ImplementSingleton (MySingleton)
-
-        // example of usage:
-        MySingleton* m = MySingleton::getInstance(); // creates the singleton if there isn't already one.
-
-        ...
-
-        MySingleton::deleteInstance(); // safely deletes the singleton (if it's been created).
-
-    @endcode
-
-    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
-    than once during the process's lifetime - i.e. after you've created and deleted the
-    object, getInstance() will refuse to create another one. This can be useful to stop
-    objects being accidentally re-created during your app's shutdown code.
-
-    If you know that your object will only be created and deleted by a single thread, you
-    can use the slightly more efficient juce_DeclareSingleton_SingleThreaded() macro instead
-    of this one.
-
-    @see juce_ImplementSingleton, juce_DeclareSingleton_SingleThreaded
-*/
-#define juce_DeclareSingleton(classname, doNotRecreateAfterDeletion) \
-\
-    static classname* _singletonInstance;  \
-    static JUCE_NAMESPACE::CriticalSection _singletonLock; \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        {\
-            const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-\
-            if (_singletonInstance == 0) \
-            { \
-                static bool alreadyInside = false; \
-                static bool createdOnceAlready = false; \
-\
-                const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
-                jassert (! problem); \
-                if (! problem) \
-                { \
-                    createdOnceAlready = true; \
-                    alreadyInside = true; \
-                    classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                    alreadyInside = false; \
-\
-                    _singletonInstance = newObject; \
-                } \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton macro.
-
-    After adding the juce_DeclareSingleton to the class definition, this macro has
-    to be used in the cpp file.
-*/
-#define juce_ImplementSingleton(classname) \
-\
-    classname* classname::_singletonInstance = 0; \
-    JUCE_NAMESPACE::CriticalSection classname::_singletonLock;
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is exactly the same as juce_DeclareSingleton, but doesn't use a critical
-    section to make access to it thread-safe. If you know that your object will
-    only ever be created or deleted by a single thread, then this is a
-    more efficient version to use.
-
-    If doNotRecreateAfterDeletion = true, it won't allow the object to be created more
-    than once during the process's lifetime - i.e. after you've created and deleted the
-    object, getInstance() will refuse to create another one. This can be useful to stop
-    objects being accidentally re-created during your app's shutdown code.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton, juce_DeclareSingleton_SingleThreaded_Minimal
-*/
-#define juce_DeclareSingleton_SingleThreaded(classname, doNotRecreateAfterDeletion) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-        { \
-            static bool alreadyInside = false; \
-            static bool createdOnceAlready = false; \
-\
-            const bool problem = alreadyInside || ((doNotRecreateAfterDeletion) && createdOnceAlready); \
-            jassert (! problem); \
-            if (! problem) \
-            { \
-                createdOnceAlready = true; \
-                alreadyInside = true; \
-                classname* newObject = new classname();  /* (use a stack variable to avoid setting the newObject value before the class has finished its constructor) */ \
-                alreadyInside = false; \
-\
-                _singletonInstance = newObject; \
-            } \
-        } \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/**
-    Macro to declare member variables and methods for a singleton class.
-
-    This is like juce_DeclareSingleton_SingleThreaded, but doesn't do any checking
-    for recursion or repeated instantiation. It's intended for use as a lightweight
-    version of a singleton, where you're using it in very straightforward
-    circumstances and don't need the extra checking.
-
-    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
-    to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
-
-    See the documentation for juce_DeclareSingleton for more information about
-    how to use it, the only difference being that you have to use
-    juce_ImplementSingleton_SingleThreaded instead of juce_ImplementSingleton.
-
-    @see juce_ImplementSingleton_SingleThreaded, juce_DeclareSingleton
-*/
-#define juce_DeclareSingleton_SingleThreaded_Minimal(classname) \
-\
-    static classname* _singletonInstance;  \
-\
-    static classname* getInstance() \
-    { \
-        if (_singletonInstance == 0) \
-            _singletonInstance = new classname(); \
-\
-        return _singletonInstance; \
-    } \
-\
-    static inline classname* getInstanceWithoutCreating() throw() \
-    { \
-        return _singletonInstance; \
-    } \
-\
-    static void deleteInstance() \
-    { \
-        if (_singletonInstance != 0) \
-        { \
-            classname* const old = _singletonInstance; \
-            _singletonInstance = 0; \
-            delete old; \
-        } \
-    } \
-\
-    void clearSingletonInstance() throw() \
-    { \
-        if (_singletonInstance == this) \
-            _singletonInstance = 0; \
-    }
-
-/** This is a counterpart to the juce_DeclareSingleton_SingleThreaded macro.
-
-    After adding juce_DeclareSingleton_SingleThreaded or juce_DeclareSingleton_SingleThreaded_Minimal
-    to the class definition, this macro has to be used somewhere in the cpp file.
-*/
-#define juce_ImplementSingleton_SingleThreaded(classname) \
-\
-    classname* classname::_singletonInstance = 0;
-
-#endif   // __JUCE_SINGLETON_JUCEHEADER__
-/********* End of inlined file: juce_Singleton.h *********/
-
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
 
 /********* Start of inlined file: juce_SystemStats.h *********/
@@ -8419,9 +8413,6 @@ public:
 /********* End of inlined file: juce_SystemStats.h *********/
 
 #endif
-#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TIME_JUCEHEADER__
 
 #endif
@@ -8516,6 +8507,15 @@ private:
 
 #endif   // __JUCE_UUID_JUCEHEADER__
 /********* End of inlined file: juce_Uuid.h *********/
+
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
@@ -15027,6 +15027,116 @@ private:
 #ifndef __JUCE_THREAD_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
+
+/********* Start of inlined file: juce_TimeSliceThread.h *********/
+#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
+#define __JUCE_TIMESLICETHREAD_JUCEHEADER__
+
+/**
+    Used by the TimeSliceThread class.
+
+    To register your class with a TimeSliceThread, derive from this class and
+    use the TimeSliceThread::addTimeSliceClient() method to add it to the list.
+
+    Make sure you always call TimeSliceThread::removeTimeSliceClient() before
+    deleting your client!
+
+    @see TimeSliceThread
+*/
+class JUCE_API  TimeSliceClient
+{
+public:
+    /** Destructor. */
+    virtual ~TimeSliceClient()   {}
+
+    /** Called back by a TimeSliceThread.
+
+        When you register this class with it, a TimeSliceThread will repeatedly call
+        this method.
+
+        The implementation of this method should use its time-slice to do something that's
+        quick - never block for longer than absolutely necessary.
+
+        @returns    Your method should return true if it needs more time, or false if it's
+                    not too busy and doesn't need calling back urgently. If all the thread's
+                    clients indicate that they're not busy, then it'll save CPU by sleeping for
+                    up to half a second in between callbacks. You can force the TimeSliceThread
+                    to wake up and poll again immediately by calling its notify() method.
+    */
+    virtual bool useTimeSlice() = 0;
+};
+
+/**
+    A thread that keeps a list of clients, and calls each one in turn, giving them
+    all a chance to run some sort of short task.
+
+    @see TimeSliceClient, Thread
+*/
+class JUCE_API  TimeSliceThread   : public Thread
+{
+public:
+
+    /**
+        Creates a TimeSliceThread.
+
+        When first created, the thread is not running. Use the startThread()
+        method to start it.
+    */
+    TimeSliceThread (const String& threadName);
+
+    /** Destructor.
+
+        Deleting a Thread object that is running will only give the thread a
+        brief opportunity to stop itself cleanly, so it's recommended that you
+        should always call stopThread() with a decent timeout before deleting,
+        to avoid the thread being forcibly killed (which is a Bad Thing).
+    */
+    ~TimeSliceThread();
+
+    /** Adds a client to the list.
+
+        The client's callbacks will start immediately (possibly before the method
+        has returned).
+    */
+    void addTimeSliceClient (TimeSliceClient* const client);
+
+    /** Removes a client from the list.
+
+        This method will make sure that all callbacks to the client have completely
+        finished before the method returns.
+    */
+    void removeTimeSliceClient (TimeSliceClient* const client);
+
+    /** Returns the number of registered clients. */
+    int getNumClients() const throw();
+
+    /** Returns one of the registered clients. */
+    TimeSliceClient* getClient (const int index) const throw();
+
+    /** @internal */
+    void run();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    CriticalSection callbackLock, listLock;
+    Array <TimeSliceClient*> clients;
+    int index;
+    TimeSliceClient* clientBeingCalled;
+    bool clientsChanged;
+
+    TimeSliceThread (const TimeSliceThread&);
+    const TimeSliceThread& operator= (const TimeSliceThread&);
+};
+
+#endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
+/********* End of inlined file: juce_TimeSliceThread.h *********/
+
+#endif
+#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadPool.h *********/
@@ -15285,116 +15395,6 @@ private:
 
 #endif   // __JUCE_THREADPOOL_JUCEHEADER__
 /********* End of inlined file: juce_ThreadPool.h *********/
-
-#endif
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
-
-/********* Start of inlined file: juce_TimeSliceThread.h *********/
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
-#define __JUCE_TIMESLICETHREAD_JUCEHEADER__
-
-/**
-    Used by the TimeSliceThread class.
-
-    To register your class with a TimeSliceThread, derive from this class and
-    use the TimeSliceThread::addTimeSliceClient() method to add it to the list.
-
-    Make sure you always call TimeSliceThread::removeTimeSliceClient() before
-    deleting your client!
-
-    @see TimeSliceThread
-*/
-class JUCE_API  TimeSliceClient
-{
-public:
-    /** Destructor. */
-    virtual ~TimeSliceClient()   {}
-
-    /** Called back by a TimeSliceThread.
-
-        When you register this class with it, a TimeSliceThread will repeatedly call
-        this method.
-
-        The implementation of this method should use its time-slice to do something that's
-        quick - never block for longer than absolutely necessary.
-
-        @returns    Your method should return true if it needs more time, or false if it's
-                    not too busy and doesn't need calling back urgently. If all the thread's
-                    clients indicate that they're not busy, then it'll save CPU by sleeping for
-                    up to half a second in between callbacks. You can force the TimeSliceThread
-                    to wake up and poll again immediately by calling its notify() method.
-    */
-    virtual bool useTimeSlice() = 0;
-};
-
-/**
-    A thread that keeps a list of clients, and calls each one in turn, giving them
-    all a chance to run some sort of short task.
-
-    @see TimeSliceClient, Thread
-*/
-class JUCE_API  TimeSliceThread   : public Thread
-{
-public:
-
-    /**
-        Creates a TimeSliceThread.
-
-        When first created, the thread is not running. Use the startThread()
-        method to start it.
-    */
-    TimeSliceThread (const String& threadName);
-
-    /** Destructor.
-
-        Deleting a Thread object that is running will only give the thread a
-        brief opportunity to stop itself cleanly, so it's recommended that you
-        should always call stopThread() with a decent timeout before deleting,
-        to avoid the thread being forcibly killed (which is a Bad Thing).
-    */
-    ~TimeSliceThread();
-
-    /** Adds a client to the list.
-
-        The client's callbacks will start immediately (possibly before the method
-        has returned).
-    */
-    void addTimeSliceClient (TimeSliceClient* const client);
-
-    /** Removes a client from the list.
-
-        This method will make sure that all callbacks to the client have completely
-        finished before the method returns.
-    */
-    void removeTimeSliceClient (TimeSliceClient* const client);
-
-    /** Returns the number of registered clients. */
-    int getNumClients() const throw();
-
-    /** Returns one of the registered clients. */
-    TimeSliceClient* getClient (const int index) const throw();
-
-    /** @internal */
-    void run();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    CriticalSection callbackLock, listLock;
-    Array <TimeSliceClient*> clients;
-    int index;
-    TimeSliceClient* clientBeingCalled;
-    bool clientsChanged;
-
-    TimeSliceThread (const TimeSliceThread&);
-    const TimeSliceThread& operator= (const TimeSliceThread&);
-};
-
-#endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
-/********* End of inlined file: juce_TimeSliceThread.h *********/
-
-#endif
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
 
 #endif
 
@@ -17181,9 +17181,10 @@ public:
     void clipToRectangle (const Rectangle& r) throw();
     void excludeRectangle (const Rectangle& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipToImageAlpha (const Image& image, int x, int y) throw();
-    bool isEmpty() const throw();
+    void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
+    bool isEmpty() throw();
     const Rectangle& getMaximumBounds() const throw()       { return bounds; }
+    void translate (float dx, int dy) throw();
 
     /** Reduces the amount of space the table has allocated.
 
@@ -17292,6 +17293,7 @@ private:
     int* table;
     Rectangle bounds;
     int maxEdgesPerLine, lineStrideElements;
+    bool needToCheckEmptinesss;
 
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
@@ -17483,6 +17485,15 @@ public:
     */
     void addRectangle (const float x, const float y,
                        const float w, const float h) throw();
+
+    /** Adds a rectangle to the path.
+
+        The rectangle is added as a new sub-path. (Any currently open paths will be
+        left open).
+
+        @see addRoundedRectangle, addTriangle
+    */
+    void addRectangle (const Rectangle& rectangle) throw();
 
     /** Adds a rectangle with rounded corners to the path.
 
@@ -17869,21 +17880,6 @@ public:
         @see toString()
     */
     void restoreFromString (const String& stringVersion);
-
-    /** Creates a single-channel bitmap containing a mask of this path.
-
-        The smallest bitmap that contains the path will be created, and on return, the
-        imagePosition rectangle indicates the position of the newly created image, relative
-        to the path's origin.
-
-        Only the intersection of the path's bounds with the specified clipRegion rectangle
-        will be rendered.
-
-        If the path is empty or doesn't intersect the clip region, this may return 0.
-    */
-    Image* createMaskBitmap (const AffineTransform& transform,
-                             const Rectangle& clipRegion,
-                             Rectangle& imagePosition) const throw();
 
     juce_UseDebuggingNewOperator
 
@@ -18358,23 +18354,6 @@ public:
         edge of the last character is.
     */
     void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw();
-
-    /** Renders a glyph in a context without using methods other than the context's glyph-rendering
-        methods.
-
-        For smaller fonts, this uses an internal cache of glyph images to speed things up, and renders
-        them using the context's image blending methods. For larger fonts, it gets the glyph's path
-        from the typeface and renders it as a shape.
-
-        This method is primarily called by graphics contexts as a way of drawing a glyph if they can't do
-        it by native means.
-    */
-    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, float x, float y);
-
-    /** Renders a transformed glyph using path-filling techniques rather than calling a context's
-        actual glyph-rendering methods.
-    */
-    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, const AffineTransform& transform);
 
     /** Returns the typeface used by this font.
 
@@ -19852,159 +19831,6 @@ private:
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
 /********* End of inlined file: juce_ColourGradient.h *********/
 
-/********* Start of inlined file: juce_SolidColourBrush.h *********/
-#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
-#define __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
-
-/********* Start of inlined file: juce_Brush.h *********/
-#ifndef __JUCE_BRUSH_JUCEHEADER__
-#define __JUCE_BRUSH_JUCEHEADER__
-
-class Path;
-class AffineTransform;
-class LowLevelGraphicsContext;
-class Image;
-class Graphics;
-
-/**
-    A brush is used to fill areas with colours, patterns, or images.
-
-    The Graphics class has an idea of a current brush which it uses to render
-    shapes, rectangles, lines, text, etc.
-
-    This is the base class - there are subclasses for useful types of fill pattern,
-    and applications can define their own brushes too.
-
-    @see Graphics::setBrush, SolidColourBrush, GradientBrush, ImageBrush
-*/
-class JUCE_API  Brush
-{
-protected:
-
-    /** Creates a Brush.
-
-        (Nothing much happens in the base class).
-    */
-    Brush() throw();
-
-public:
-    /** Destructor. */
-    virtual ~Brush() throw();
-
-    /** Creates a copy of whatever class of Brush this is. */
-    virtual Brush* createCopy() const throw() = 0;
-
-    /** Does whatever is relevent to transform the geometry of this brush. */
-    virtual void applyTransform (const AffineTransform& transform) throw() = 0;
-
-    /** Does whatever is relevent to change the opacity of this brush. */
-    virtual void multiplyOpacity (const float multiple) throw() = 0;
-
-    /** Must return true if this brush won't draw any pixels. */
-    virtual bool isInvisible() const throw() = 0;
-
-    virtual void paintPath (LowLevelGraphicsContext& context,
-                            const Path& path, const AffineTransform& transform) throw() = 0;
-
-    virtual void paintRectangle (LowLevelGraphicsContext& context,
-                                 int x, int y, int w, int h) throw() = 0;
-
-    virtual void paintAlphaChannel (LowLevelGraphicsContext& context,
-                                    const Image& alphaChannelImage, int imageX, int imageY,
-                                    int x, int y, int w, int h) throw() = 0;
-
-    virtual void paintVerticalLine (LowLevelGraphicsContext& context,
-                                    int x, float y1, float y2) throw();
-
-    virtual void paintHorizontalLine (LowLevelGraphicsContext& context,
-                                      int y, float x1, float x2) throw();
-
-    virtual void paintLine (LowLevelGraphicsContext& context,
-                            float x1, float y1, float x2, float y2) throw();
-
-private:
-
-    Brush (const Brush&);
-    const Brush& operator= (const Brush&);
-};
-
-#endif   // __JUCE_BRUSH_JUCEHEADER__
-/********* End of inlined file: juce_Brush.h *********/
-
-/**
-    A Brush that fills its area with a solid (or semi-transparent) colour.
-
-    An application won't normally need to use this class directly, as drawing
-    with solid colours is taken care of automatically by the Graphics class
-    (it actually uses one of these brushes internally when you set the colour
-    with the Graphics::setColour() method).
-
-    @see Brush, Graphics::setBrush, GradientBrush, ImageBrush
-*/
-class JUCE_API  SolidColourBrush  : public Brush
-{
-public:
-
-    /** Creates a SolidColourBrush to draw with the given colour.
-
-        The colour can be changed later with the setColour() method.
-    */
-    SolidColourBrush (const Colour& colour) throw();
-
-    /** Creates a SolidColourBrush set to black.
-
-        The colour can be changed later with the setColour() method.
-    */
-    SolidColourBrush() throw();
-
-    /** Destructor. */
-    ~SolidColourBrush() throw();
-
-    /** Returns the colour currently being used. */
-    const Colour& getColour() const throw()             { return colour; }
-
-    /** Sets the colour to use for drawing. */
-    void setColour (const Colour& newColour) throw()    { colour = newColour; }
-
-    Brush* createCopy() const throw();
-
-    void applyTransform (const AffineTransform& transform) throw();
-
-    bool isInvisible() const throw();
-
-    void multiplyOpacity (const float multiple) throw();
-
-    void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform) throw();
-
-    void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h) throw();
-
-    void paintAlphaChannel (LowLevelGraphicsContext& context,
-                            const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h) throw();
-
-    void paintVerticalLine (LowLevelGraphicsContext& context,
-                            int x, float y1, float y2) throw();
-
-    void paintHorizontalLine (LowLevelGraphicsContext& context,
-                              int y, float x1, float x2) throw();
-
-    void paintLine (LowLevelGraphicsContext& context,
-                    float x1, float y1, float x2, float y2) throw();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Colour colour;
-
-    SolidColourBrush (const SolidColourBrush&);
-    const SolidColourBrush& operator= (const SolidColourBrush&);
-};
-
-#endif   // __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
-/********* End of inlined file: juce_SolidColourBrush.h *********/
-
 /********* Start of inlined file: juce_RectanglePlacement.h *********/
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 #define __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
@@ -20173,7 +19999,7 @@ public:
         If a brush is being used when this method is called, the brush will be deselected,
         and any subsequent drawing will be done with a solid colour brush instead.
 
-        @see setOpacity, setBrush
+        @see setOpacity
     */
     void setColour (const Colour& newColour) throw();
 
@@ -20188,18 +20014,6 @@ public:
     */
     void setOpacity (const float newOpacity) throw();
 
-    /** Changes the current brush to use for drawing.
-
-        If a null pointer is passed in, the context will revert to using a solid
-        colour for drawing (using the last colour set by setColour()).
-
-        If a brush is passed in, a copy of it will be used for subsequent drawing
-        operations until setColour() or setBrush() is called.
-
-        @see SolidColourBrush, GradientBrush, ImageBrush, Brush
-    */
-    void setBrush (const Brush* const newBrush) throw();
-
     /** Sets the context to use a gradient for its fill pattern.
     */
     void setGradientFill (const ColourGradient& gradient) throw();
@@ -20208,7 +20022,7 @@ public:
         Make sure that you don't delete this image while it's still being used by
         this context!
     */
-    void setTiledImageFill (Image& imageToUse,
+    void setTiledImageFill (const Image& imageToUse,
                             const int anchorX,
                             const int anchorY,
                             const float opacity) throw();
@@ -20780,12 +20594,13 @@ public:
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
 
-    /*class FillType
+    class FillType
     {
     public:
+        FillType() throw();
         FillType (const Colour& colour) throw();
         FillType (const ColourGradient& gradient) throw();
-        FillType (Image* image, int x, int y) throw();
+        FillType (Image* const image, const int x, const int y) throw();
         FillType (const FillType& other) throw();
         const FillType& operator= (const FillType& other) throw();
         ~FillType() throw();
@@ -20796,35 +20611,22 @@ public:
 
         void setColour (const Colour& newColour) throw();
         void setGradient (const ColourGradient& newGradient) throw();
-        void setTiledImage (Image* image, const int imageX, const int imageY) throw();
+        void setTiledImage (const Image& image, const int imageX, const int imageY) throw();
 
         Colour colour;
         ColourGradient* gradient;
-        Image* image;
+        const Image* image;
         int imageX, imageY;
 
         juce_UseDebuggingNewOperator
-    };*/
+    };
 
 private:
 
     LowLevelGraphicsContext* const context;
     const bool ownsContext;
 
-    struct GraphicsState
-    {
-        GraphicsState() throw();
-        GraphicsState (const GraphicsState&) throw();
-        ~GraphicsState() throw();
-
-        Brush* brush;
-        Font font;
-    };
-
-    GraphicsState* state;
-    OwnedArray <GraphicsState> stateStack;
     bool saveStatePending;
-
     void saveStateIfPending() throw();
 
     const Graphics& operator= (const Graphics& other);
@@ -37405,248 +37207,6 @@ public:
 /********* End of inlined file: juce_AiffAudioFormat.h *********/
 
 #endif
-#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioCDBurner.h *********/
-#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
-#define __JUCE_AUDIOCDBURNER_JUCEHEADER__
-
-#if JUCE_USE_CDBURNER
-
-/**
-*/
-class AudioCDBurner
-{
-public:
-
-    /** Returns a list of available optical drives.
-
-        Use openDevice() to open one of the items from this list.
-    */
-    static const StringArray findAvailableDevices();
-
-    /** Tries to open one of the optical drives.
-
-        The deviceIndex is an index into the array returned by findAvailableDevices().
-    */
-    static AudioCDBurner* openDevice (const int deviceIndex);
-
-    /** Destructor. */
-    ~AudioCDBurner();
-
-    /** Returns true if there's a writable disk in the drive.
-    */
-    bool isDiskPresent() const;
-
-    /** Returns the number of free blocks on the disk.
-
-        There are 75 blocks per second, at 44100Hz.
-    */
-    int getNumAvailableAudioBlocks() const;
-
-    /** Adds a track to be written.
-
-        The source passed-in here will be kept by this object, and it will
-        be used and deleted at some point in the future, either during the
-        burn() method or when this AudioCDBurner object is deleted. Your caller
-        method shouldn't keep a reference to it or use it again after passing
-        it in here.
-    */
-    bool addAudioTrack (AudioSource* source, int numSamples);
-
-    /**
-
-        Return true to cancel the current burn operation
-    */
-    class BurnProgressListener
-    {
-    public:
-        BurnProgressListener() throw() {}
-        virtual ~BurnProgressListener() {}
-
-        /** Called at intervals to report on the progress of the AudioCDBurner.
-
-            To cancel the burn, return true from this.
-        */
-        virtual bool audioCDBurnProgress (float proportionComplete) = 0;
-    };
-
-    const String burn (BurnProgressListener* listener,
-                       const bool ejectDiscAfterwards,
-                       const bool peformFakeBurnForTesting);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    AudioCDBurner (const int deviceIndex);
-
-    void* internal;
-};
-
-#endif
-#endif   // __JUCE_AUDIOCDBURNER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDBurner.h *********/
-
-#endif
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AudioCDReader.h *********/
-#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
-#define __JUCE_AUDIOCDREADER_JUCEHEADER__
-
-#if JUCE_USE_CDREADER
-
-#if JUCE_MAC
-
-#endif
-
-/**
-    A type of AudioFormatReader that reads from an audio CD.
-
-    One of these can be used to read a CD as if it's one big audio stream. Use the
-    getPositionOfTrackStart() method to find where the individual tracks are
-    within the stream.
-
-    @see AudioFormatReader
-*/
-class JUCE_API  AudioCDReader  : public AudioFormatReader
-{
-public:
-
-    /** Returns a list of names of Audio CDs currently available for reading.
-
-        If there's a CD drive but no CD in it, this might return an empty list, or
-        possibly a device that can be opened but which has no tracks, depending
-        on the platform.
-
-        @see createReaderForCD
-    */
-    static const StringArray getAvailableCDNames();
-
-    /** Tries to create an AudioFormatReader that can read from an Audio CD.
-
-        @param index    the index of one of the available CDs - use getAvailableCDNames()
-                        to find out how many there are.
-        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
-                        caller will be responsible for deleting the object returned.
-    */
-    static AudioCDReader* createReaderForCD (const int index);
-
-    /** Destructor. */
-    ~AudioCDReader();
-
-    /** Implementation of the AudioFormatReader method. */
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      int64 startSampleInFile, int numSamples);
-
-    /** Checks whether the CD has been removed from the drive.
-    */
-    bool isCDStillPresent() const;
-
-    /** Returns the total number of tracks (audio + data).
-    */
-    int getNumTracks() const;
-
-    /** Finds the sample offset of the start of a track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    int getPositionOfTrackStart (int trackNum) const;
-
-    /** Returns true if a given track is an audio track.
-
-        @param trackNum     the track number, where 0 is the first track.
-    */
-    bool isTrackAudio (int trackNum) const;
-
-    /** Refreshes the object's table of contents.
-
-        If the disc has been ejected and a different one put in since this
-        object was created, this will cause it to update its idea of how many tracks
-        there are, etc.
-    */
-    void refreshTrackLengths();
-
-    /** Enables scanning for indexes within tracks.
-
-        @see getLastIndex
-    */
-    void enableIndexScanning (bool enabled);
-
-    /** Returns the index number found during the last read() call.
-
-        Index scanning is turned off by default - turn it on with enableIndexScanning().
-
-        Then when the read() method is called, if it comes across an index within that
-        block, the index number is stored and returned by this method.
-
-        Some devices might not support indexes, of course.
-
-        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
-
-        @see enableIndexScanning
-    */
-    int getLastIndex() const;
-
-    /** Scans a track to find the position of any indexes within it.
-
-        @param trackNumber  the track to look in, where 0 is the first track on the disc
-        @returns    an array of sample positions of any index points found (not including
-                    the index that marks the start of the track)
-    */
-    const Array <int> findIndexesInTrack (const int trackNumber);
-
-    /** Returns the CDDB id number for the CD.
-
-        It's not a great way of identifying a disc, but it's traditional.
-    */
-    int getCDDBId();
-
-    /** Tries to eject the disk.
-
-        Of course this might not be possible, if some other process is using it.
-    */
-    void ejectDisk();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-#if JUCE_MAC
-    File volumeDir;
-    OwnedArray<File> tracks;
-    Array <int> trackStartSamples;
-    int currentReaderTrack;
-    AudioFormatReader* reader;
-    AudioCDReader (const File& volume);
-public:
-    static int compareElements (const File* const, const File* const) throw();
-private:
-
-#elif JUCE_WINDOWS
-    int numTracks;
-    int trackStarts[100];
-    bool audioTracks [100];
-    void* handle;
-    bool indexingEnabled;
-    int lastIndex, firstFrameInBuffer, samplesInBuffer;
-    MemoryBlock buffer;
-    AudioCDReader (void* handle);
-    int getIndexAt (int samplePos);
-
-#elif JUCE_LINUX
-    AudioCDReader();
-#endif
-
-    AudioCDReader (const AudioCDReader&);
-    const AudioCDReader& operator= (const AudioCDReader&);
-};
-
-#endif
-#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDReader.h *********/
-
-#endif
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
 
 #endif
@@ -38108,114 +37668,6 @@ public:
 /********* End of inlined file: juce_FlacAudioFormat.h *********/
 
 #endif
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
-#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
-
-/**
-    Reads and writes the Ogg-Vorbis audio format.
-
-    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
-    and make sure your include search path and library search path are set up to find
-    the Vorbis and Ogg header files and static libraries.
-
-    @see AudioFormat,
-*/
-class JUCE_API  OggVorbisAudioFormat : public AudioFormat
-{
-public:
-
-    OggVorbisAudioFormat();
-    ~OggVorbisAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-    bool isCompressed();
-    const StringArray getQualityOptions();
-
-    /** Tries to estimate the quality level of an ogg file based on its size.
-
-        If it can't read the file for some reason, this will just return 1 (medium quality),
-        otherwise it will return the approximate quality setting that would have been used
-        to create the file.
-
-        @see getQualityOptions
-    */
-    int estimateOggFileQuality (const File& source);
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
-
-#endif
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
-#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-
-#if JUCE_QUICKTIME
-
-/**
-    Uses QuickTime to read the audio track a movie or media file.
-
-    As well as QuickTime movies, this should also manage to open other audio
-    files that quicktime can understand, like mp3, m4a, etc.
-
-    @see AudioFormat
-*/
-class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
-{
-public:
-
-    /** Creates a format object. */
-    QuickTimeAudioFormat();
-
-    /** Destructor. */
-    ~QuickTimeAudioFormat();
-
-    const Array <int> getPossibleSampleRates();
-    const Array <int> getPossibleBitDepths();
-    bool canDoStereo();
-    bool canDoMono();
-
-    AudioFormatReader* createReaderFor (InputStream* sourceStream,
-                                        const bool deleteStreamIfOpeningFails);
-
-    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
-                                        double sampleRateToUse,
-                                        unsigned int numberOfChannels,
-                                        int bitsPerSample,
-                                        const StringPairArray& metadataValues,
-                                        int qualityOptionIndex);
-
-    juce_UseDebuggingNewOperator
-};
-
-#endif
-#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
-
-#endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
 /********* Start of inlined file: juce_WavAudioFormat.h *********/
@@ -38336,6 +37788,356 @@ public:
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 /********* End of inlined file: juce_WavAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioCDReader.h *********/
+#ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
+#define __JUCE_AUDIOCDREADER_JUCEHEADER__
+
+#if JUCE_USE_CDREADER
+
+#if JUCE_MAC
+
+#endif
+
+/**
+    A type of AudioFormatReader that reads from an audio CD.
+
+    One of these can be used to read a CD as if it's one big audio stream. Use the
+    getPositionOfTrackStart() method to find where the individual tracks are
+    within the stream.
+
+    @see AudioFormatReader
+*/
+class JUCE_API  AudioCDReader  : public AudioFormatReader
+{
+public:
+
+    /** Returns a list of names of Audio CDs currently available for reading.
+
+        If there's a CD drive but no CD in it, this might return an empty list, or
+        possibly a device that can be opened but which has no tracks, depending
+        on the platform.
+
+        @see createReaderForCD
+    */
+    static const StringArray getAvailableCDNames();
+
+    /** Tries to create an AudioFormatReader that can read from an Audio CD.
+
+        @param index    the index of one of the available CDs - use getAvailableCDNames()
+                        to find out how many there are.
+        @returns        a new AudioCDReader object, or 0 if it couldn't be created. The
+                        caller will be responsible for deleting the object returned.
+    */
+    static AudioCDReader* createReaderForCD (const int index);
+
+    /** Destructor. */
+    ~AudioCDReader();
+
+    /** Implementation of the AudioFormatReader method. */
+    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples);
+
+    /** Checks whether the CD has been removed from the drive.
+    */
+    bool isCDStillPresent() const;
+
+    /** Returns the total number of tracks (audio + data).
+    */
+    int getNumTracks() const;
+
+    /** Finds the sample offset of the start of a track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    int getPositionOfTrackStart (int trackNum) const;
+
+    /** Returns true if a given track is an audio track.
+
+        @param trackNum     the track number, where 0 is the first track.
+    */
+    bool isTrackAudio (int trackNum) const;
+
+    /** Refreshes the object's table of contents.
+
+        If the disc has been ejected and a different one put in since this
+        object was created, this will cause it to update its idea of how many tracks
+        there are, etc.
+    */
+    void refreshTrackLengths();
+
+    /** Enables scanning for indexes within tracks.
+
+        @see getLastIndex
+    */
+    void enableIndexScanning (bool enabled);
+
+    /** Returns the index number found during the last read() call.
+
+        Index scanning is turned off by default - turn it on with enableIndexScanning().
+
+        Then when the read() method is called, if it comes across an index within that
+        block, the index number is stored and returned by this method.
+
+        Some devices might not support indexes, of course.
+
+        (If you don't know what CD indexes are, it's unlikely you'll ever need them).
+
+        @see enableIndexScanning
+    */
+    int getLastIndex() const;
+
+    /** Scans a track to find the position of any indexes within it.
+
+        @param trackNumber  the track to look in, where 0 is the first track on the disc
+        @returns    an array of sample positions of any index points found (not including
+                    the index that marks the start of the track)
+    */
+    const Array <int> findIndexesInTrack (const int trackNumber);
+
+    /** Returns the CDDB id number for the CD.
+
+        It's not a great way of identifying a disc, but it's traditional.
+    */
+    int getCDDBId();
+
+    /** Tries to eject the disk.
+
+        Of course this might not be possible, if some other process is using it.
+    */
+    void ejectDisk();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+#if JUCE_MAC
+    File volumeDir;
+    OwnedArray<File> tracks;
+    Array <int> trackStartSamples;
+    int currentReaderTrack;
+    AudioFormatReader* reader;
+    AudioCDReader (const File& volume);
+public:
+    static int compareElements (const File* const, const File* const) throw();
+private:
+
+#elif JUCE_WINDOWS
+    int numTracks;
+    int trackStarts[100];
+    bool audioTracks [100];
+    void* handle;
+    bool indexingEnabled;
+    int lastIndex, firstFrameInBuffer, samplesInBuffer;
+    MemoryBlock buffer;
+    AudioCDReader (void* handle);
+    int getIndexAt (int samplePos);
+
+#elif JUCE_LINUX
+    AudioCDReader();
+#endif
+
+    AudioCDReader (const AudioCDReader&);
+    const AudioCDReader& operator= (const AudioCDReader&);
+};
+
+#endif
+#endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
+/********* End of inlined file: juce_AudioCDReader.h *********/
+
+#endif
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+#ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+
+/**
+    Reads and writes the Ogg-Vorbis audio format.
+
+    To compile this, you'll need to set the JUCE_USE_OGGVORBIS flag in juce_Config.h,
+    and make sure your include search path and library search path are set up to find
+    the Vorbis and Ogg header files and static libraries.
+
+    @see AudioFormat,
+*/
+class JUCE_API  OggVorbisAudioFormat : public AudioFormat
+{
+public:
+
+    OggVorbisAudioFormat();
+    ~OggVorbisAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+    bool isCompressed();
+    const StringArray getQualityOptions();
+
+    /** Tries to estimate the quality level of an ogg file based on its size.
+
+        If it can't read the file for some reason, this will just return 1 (medium quality),
+        otherwise it will return the approximate quality setting that would have been used
+        to create the file.
+
+        @see getQualityOptions
+    */
+    int estimateOggFileQuality (const File& source);
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+#ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+#define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+
+#if JUCE_QUICKTIME
+
+/**
+    Uses QuickTime to read the audio track a movie or media file.
+
+    As well as QuickTime movies, this should also manage to open other audio
+    files that quicktime can understand, like mp3, m4a, etc.
+
+    @see AudioFormat
+*/
+class JUCE_API  QuickTimeAudioFormat  : public AudioFormat
+{
+public:
+
+    /** Creates a format object. */
+    QuickTimeAudioFormat();
+
+    /** Destructor. */
+    ~QuickTimeAudioFormat();
+
+    const Array <int> getPossibleSampleRates();
+    const Array <int> getPossibleBitDepths();
+    bool canDoStereo();
+    bool canDoMono();
+
+    AudioFormatReader* createReaderFor (InputStream* sourceStream,
+                                        const bool deleteStreamIfOpeningFails);
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex);
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif
+#endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
+/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+
+#endif
+#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
+
+/********* Start of inlined file: juce_AudioCDBurner.h *********/
+#ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
+#define __JUCE_AUDIOCDBURNER_JUCEHEADER__
+
+#if JUCE_USE_CDBURNER
+
+/**
+*/
+class AudioCDBurner
+{
+public:
+
+    /** Returns a list of available optical drives.
+
+        Use openDevice() to open one of the items from this list.
+    */
+    static const StringArray findAvailableDevices();
+
+    /** Tries to open one of the optical drives.
+
+        The deviceIndex is an index into the array returned by findAvailableDevices().
+    */
+    static AudioCDBurner* openDevice (const int deviceIndex);
+
+    /** Destructor. */
+    ~AudioCDBurner();
+
+    /** Returns true if there's a writable disk in the drive.
+    */
+    bool isDiskPresent() const;
+
+    /** Returns the number of free blocks on the disk.
+
+        There are 75 blocks per second, at 44100Hz.
+    */
+    int getNumAvailableAudioBlocks() const;
+
+    /** Adds a track to be written.
+
+        The source passed-in here will be kept by this object, and it will
+        be used and deleted at some point in the future, either during the
+        burn() method or when this AudioCDBurner object is deleted. Your caller
+        method shouldn't keep a reference to it or use it again after passing
+        it in here.
+    */
+    bool addAudioTrack (AudioSource* source, int numSamples);
+
+    /**
+
+        Return true to cancel the current burn operation
+    */
+    class BurnProgressListener
+    {
+    public:
+        BurnProgressListener() throw() {}
+        virtual ~BurnProgressListener() {}
+
+        /** Called at intervals to report on the progress of the AudioCDBurner.
+
+            To cancel the burn, return true from this.
+        */
+        virtual bool audioCDBurnProgress (float proportionComplete) = 0;
+    };
+
+    const String burn (BurnProgressListener* listener,
+                       const bool ejectDiscAfterwards,
+                       const bool peformFakeBurnForTesting);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    AudioCDBurner (const int deviceIndex);
+
+    void* internal;
+};
+
+#endif
+#endif   // __JUCE_AUDIOCDBURNER_JUCEHEADER__
+/********* End of inlined file: juce_AudioCDBurner.h *********/
 
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -39173,435 +38975,6 @@ private:
 #ifndef __JUCE_TIMER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_BRUSH_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_GRADIENTBRUSH_JUCEHEADER__
-
-/********* Start of inlined file: juce_GradientBrush.h *********/
-#ifndef __JUCE_GRADIENTBRUSH_JUCEHEADER__
-#define __JUCE_GRADIENTBRUSH_JUCEHEADER__
-
-/**
-    A Brush that fills areas with a colour gradient.
-
-    The gradient can either be linear or circular.
-
-    @see Brush, Graphics::setBrush, SolidColourBrush, ImageBrush
-*/
-class JUCE_API  GradientBrush  : public Brush
-{
-public:
-
-    /** Creates a gradient brush, ready for use in Graphics::setBrush().
-
-        (x1, y1) is the location relative to the origin of the Graphics context,
-        at which the colour should be colour1. Likewise for (x2, y2) and colour2.
-
-        If isRadial is true, the colours form a circular gradient with (x1, y1) at
-        its centre.
-
-        The alpha transparencies of the colours are used, so the brush
-        need not be completely opaque. Note that this means that if you
-        blend from transparent to a solid colour, the RGB of the transparent
-        colour will become visible in parts of the gradient. e.g. blending
-        from Colour::transparentBlack to Colours::white will produce a
-        grey colour, but Colour::transparentWhite to Colours::white will be
-        white all the way across.
-
-        @see ColourGradient
-    */
-    GradientBrush (const Colour& colour1,
-                   const float x1,
-                   const float y1,
-                   const Colour& colour2,
-                   const float x2,
-                   const float y2,
-                   const bool isRadial) throw();
-
-    /** Creates a gradient brush from a ColourGradient object.
-    */
-    GradientBrush (const ColourGradient& gradient) throw();
-
-    /** Destructor. */
-    ~GradientBrush() throw();
-
-    /** Returns the current gradient information */
-    const ColourGradient& getGradient() const throw()       { return gradient; }
-
-    Brush* createCopy() const throw();
-
-    void applyTransform (const AffineTransform& transform) throw();
-
-    void multiplyOpacity (const float multiple) throw();
-
-    bool isInvisible() const throw();
-
-    void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform) throw();
-
-    void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h) throw();
-
-    void paintAlphaChannel (LowLevelGraphicsContext& context,
-                            const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h) throw();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    ColourGradient gradient;
-
-private:
-    GradientBrush (const GradientBrush&);
-    const GradientBrush& operator= (const GradientBrush&);
-};
-
-#endif   // __JUCE_GRADIENTBRUSH_JUCEHEADER__
-/********* End of inlined file: juce_GradientBrush.h *********/
-
-#endif
-#ifndef __JUCE_IMAGEBRUSH_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImageBrush.h *********/
-#ifndef __JUCE_IMAGEBRUSH_JUCEHEADER__
-#define __JUCE_IMAGEBRUSH_JUCEHEADER__
-
-/********* Start of inlined file: juce_Image.h *********/
-#ifndef __JUCE_IMAGE_JUCEHEADER__
-#define __JUCE_IMAGE_JUCEHEADER__
-
-/**
-    Holds a fixed-size bitmap.
-
-    The image is stored in either 24-bit RGB or 32-bit premultiplied-ARGB format.
-
-    To draw into an image, create a Graphics object for it.
-    e.g. @code
-
-    // create a transparent 500x500 image..
-    Image myImage (Image::RGB, 500, 500, true);
-
-    Graphics g (myImage);
-    g.setColour (Colours::red);
-    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
-    @endcode
-
-    Other useful ways to create an image are with the ImageCache class, or the
-    ImageFileFormat, which provides a way to load common image files.
-
-    @see Graphics, ImageFileFormat, ImageCache, ImageConvolutionKernel
-*/
-class JUCE_API  Image
-{
-public:
-
-    enum PixelFormat
-    {
-        RGB,                /**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
-        ARGB,               /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
-        SingleChannel       /**<< each pixel is a 1-byte alpha channel value. */
-    };
-
-    /** Creates an in-memory image with a specified size and format.
-
-        To create an image that can use native OS rendering methods, see createNativeImage().
-
-        @param format           the number of colour channels in the image
-        @param imageWidth       the desired width of the image, in pixels - this value must be
-                                greater than zero (otherwise a width of 1 will be used)
-        @param imageHeight      the desired width of the image, in pixels - this value must be
-                                greater than zero (otherwise a height of 1 will be used)
-        @param clearImage       if true, the image will initially be cleared to black or transparent
-                                black. If false, the image may contain random data, and the
-                                user will have to deal with this
-    */
-    Image (const PixelFormat format,
-           const int imageWidth,
-           const int imageHeight,
-           const bool clearImage);
-
-    /** Creates a copy of another image.
-
-        @see createCopy
-    */
-    Image (const Image& other);
-
-    /** Destructor. */
-    virtual ~Image();
-
-    /** Tries to create an image that is uses native drawing methods when you render
-        onto it.
-
-        On some platforms this will just return a normal software-based image.
-    */
-    static Image* createNativeImage (const PixelFormat format,
-                                     const int imageWidth,
-                                     const int imageHeight,
-                                     const bool clearImage);
-
-    /** Returns the image's width (in pixels). */
-    int getWidth() const throw()                    { return imageWidth; }
-
-    /** Returns the image's height (in pixels). */
-    int getHeight() const throw()                   { return imageHeight; }
-
-    /** Returns the image's pixel format. */
-    PixelFormat getFormat() const throw()           { return format; }
-
-    /** True if the image's format is ARGB. */
-    bool isARGB() const throw()                     { return format == ARGB; }
-
-    /** True if the image's format is RGB. */
-    bool isRGB() const throw()                      { return format == RGB; }
-
-    /** True if the image contains an alpha-channel. */
-    bool hasAlphaChannel() const throw()            { return format != RGB; }
-
-    /** Clears a section of the image with a given colour.
-
-        This won't do any alpha-blending - it just sets all pixels in the image to
-        the given colour (which may be non-opaque if the image has an alpha channel).
-    */
-    virtual void clear (int x, int y, int w, int h,
-                        const Colour& colourToClearTo = Colour (0x00000000));
-
-    /** Returns a new image that's a copy of this one.
-
-        A new size for the copied image can be specified, or values less than
-        zero can be passed-in to use the image's existing dimensions.
-
-        It's up to the caller to delete the image when no longer needed.
-    */
-    virtual Image* createCopy (int newWidth = -1,
-                               int newHeight = -1,
-                               const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
-
-    /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
-    */
-    virtual Image* createCopyOfAlphaChannel() const;
-
-    /** Returns the colour of one of the pixels in the image.
-
-        If the co-ordinates given are beyond the image's boundaries, this will
-        return Colours::transparentBlack.
-
-        (0, 0) is the image's top-left corner.
-
-        @see getAlphaAt, setPixelAt, blendPixelAt
-    */
-    virtual const Colour getPixelAt (const int x, const int y) const;
-
-    /** Sets the colour of one of the image's pixels.
-
-        If the co-ordinates are beyond the image's boundaries, then nothing will
-        happen.
-
-        Note that unlike blendPixelAt(), this won't do any alpha-blending, it'll
-        just replace the existing pixel with the given one. The colour's opacity
-        will be ignored if this image doesn't have an alpha-channel.
-
-        (0, 0) is the image's top-left corner.
-
-        @see blendPixelAt
-    */
-    virtual void setPixelAt (const int x, const int y, const Colour& colour);
-
-    /** Changes the opacity of a pixel.
-
-        This only has an effect if the image has an alpha channel and if the
-        given co-ordinates are inside the image's boundary.
-
-        The multiplier must be in the range 0 to 1.0, and the current alpha
-        at the given co-ordinates will be multiplied by this value.
-
-        @see getAlphaAt, setPixelAt
-    */
-    virtual void multiplyAlphaAt (const int x, const int y, const float multiplier);
-
-    /** Changes the overall opacity of the image.
-
-        This will multiply the alpha value of each pixel in the image by the given
-        amount (limiting the resulting alpha values between 0 and 255). This allows
-        you to make an image more or less transparent.
-
-        If the image doesn't have an alpha channel, this won't have any effect.
-    */
-    virtual void multiplyAllAlphas (const float amountToMultiplyBy);
-
-    /** Changes all the colours to be shades of grey, based on their current luminosity.
-    */
-    virtual void desaturate();
-
-    /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
-
-        You should only use this class as a last resort - messing about with the internals of
-        an image is only recommended for people who really know what they're doing!
-
-        A BitmapData object should be used as a temporary, stack-based object. Don't keep one
-        hanging around while the image is being used elsewhere.
-
-        Depending on the way the image class is implemented, this may create a temporary buffer
-        which is copied back to the image when the object is deleted, or it may just get a pointer
-        directly into the image's raw data.
-
-        You can use the stride and data values in this class directly, but don't alter them!
-        The actual format of the pixel data depends on the image's format - see Image::getFormat(),
-        and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
-    */
-    class BitmapData
-    {
-    public:
-        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
-        BitmapData (const Image& image, int x, int y, int w, int h) throw();
-        ~BitmapData() throw();
-
-        /** Returns a pointer to the start of a line in the image.
-            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
-            sure it's not out-of-range.
-        */
-        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
-
-        /** Returns a pointer to a pixel in the image.
-            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
-            not out-of-range.
-        */
-        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
-
-        uint8* data;
-        int lineStride, pixelStride, width, height;
-    };
-
-    /** Copies some pixel values to a rectangle of the image.
-
-        The format of the pixel data must match that of the image itself, and the
-        rectangle supplied must be within the image's bounds.
-    */
-    virtual void setPixelData (int destX, int destY, int destW, int destH,
-                               const uint8* sourcePixelData, int sourceLineStride);
-
-    /** Copies a section of the image to somewhere else within itself.
-    */
-    virtual void moveImageSection (int destX, int destY,
-                                   int sourceX, int sourceY,
-                                   int width, int height);
-
-    /** Creates a RectangleList containing rectangles for all non-transparent pixels
-        of the image.
-
-        @param result           the list that will have the area added to it
-        @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
-                                above this level will be considered opaque
-    */
-    void createSolidAreaMask (RectangleList& result,
-                              const float alphaThreshold = 0.5f) const;
-
-    juce_UseDebuggingNewOperator
-
-    /** Creates a context suitable for drawing onto this image.
-
-        Don't call this method directly! It's used internally by the Graphics class.
-    */
-    virtual LowLevelGraphicsContext* createLowLevelContext();
-
-protected:
-    friend class BitmapData;
-    const PixelFormat format;
-    const int imageWidth, imageHeight;
-
-    /** Used internally so that subclasses can call a constructor that doesn't allocate memory */
-    Image (const PixelFormat format,
-           const int imageWidth,
-           const int imageHeight);
-
-    int pixelStride, lineStride;
-    uint8* imageData;
-
-private:
-
-    const Image& operator= (const Image&);
-};
-
-#endif   // __JUCE_IMAGE_JUCEHEADER__
-/********* End of inlined file: juce_Image.h *********/
-
-/**
-    A Brush that fills areas with tiled repetitions of an image.
-
-    @see Brush, Graphics::setBrush, SolidColourBrush, GradientBrush
-*/
-class JUCE_API  ImageBrush  : public Brush
-{
-public:
-
-    /* Creates an image brush, ready for use in Graphics::setBrush().
-
-       (x, y) is an anchor point for the top-left of the image
-       A reference to the image passed in will be kept, so don't delete
-       it within the lifetime of this object
-    */
-    ImageBrush (Image* const image,
-                const int anchorX,
-                const int anchorY,
-                const float opacity) throw();
-
-    /** Destructor. */
-    ~ImageBrush() throw();
-
-    /** Returns the image currently being used. */
-    Image* getImage() const throw()             { return image; }
-
-    /** Returns the current anchor X position. */
-    int getAnchorX() const throw()              { return anchorX; }
-
-    /** Returns the current anchor Y position. */
-    int getAnchorY() const throw()              { return anchorY; }
-
-    /** Returns the current opacity. */
-    float getOpacity() const throw()            { return opacity; }
-
-    Brush* createCopy() const throw();
-
-    void applyTransform (const AffineTransform& transform) throw();
-
-    void multiplyOpacity (const float multiple) throw();
-
-    bool isInvisible() const throw();
-
-    void paintPath (LowLevelGraphicsContext& context,
-                    const Path& path, const AffineTransform& transform) throw();
-
-    void paintRectangle (LowLevelGraphicsContext& context,
-                         int x, int y, int w, int h) throw();
-
-    void paintAlphaChannel (LowLevelGraphicsContext& context,
-                            const Image& alphaChannelImage, int imageX, int imageY,
-                            int x, int y, int w, int h) throw();
-
-    juce_UseDebuggingNewOperator
-
-protected:
-    Image* image;
-    int anchorX, anchorY;
-    float opacity;
-
-private:
-    ImageBrush (const ImageBrush&);
-    const ImageBrush& operator= (const ImageBrush&);
-
-    void getStartXY (int& x, int& y) const throw();
-};
-
-#endif   // __JUCE_IMAGEBRUSH_JUCEHEADER__
-/********* End of inlined file: juce_ImageBrush.h *********/
-
-#endif
-#ifndef __JUCE_SOLIDCOLOURBRUSH_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_COLOUR_JUCEHEADER__
 
 #endif
@@ -39611,7 +38984,10 @@ private:
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_FONT_JUCEHEADER__
+#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TYPEFACE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
@@ -39733,7 +39109,7 @@ private:
 /********* End of inlined file: juce_TextLayout.h *********/
 
 #endif
-#ifndef __JUCE_TYPEFACE_JUCEHEADER__
+#ifndef __JUCE_FONT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
@@ -40020,10 +39396,16 @@ private:
 /********* End of inlined file: juce_GlyphArrangement.h *********/
 
 #endif
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
+#ifndef __JUCE_GRAPHICS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_EDGETABLE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
@@ -40031,6 +39413,264 @@ private:
 /********* Start of inlined file: juce_LowLevelGraphicsContext.h *********/
 #ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
+
+/********* Start of inlined file: juce_Image.h *********/
+#ifndef __JUCE_IMAGE_JUCEHEADER__
+#define __JUCE_IMAGE_JUCEHEADER__
+
+/**
+    Holds a fixed-size bitmap.
+
+    The image is stored in either 24-bit RGB or 32-bit premultiplied-ARGB format.
+
+    To draw into an image, create a Graphics object for it.
+    e.g. @code
+
+    // create a transparent 500x500 image..
+    Image myImage (Image::RGB, 500, 500, true);
+
+    Graphics g (myImage);
+    g.setColour (Colours::red);
+    g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
+    @endcode
+
+    Other useful ways to create an image are with the ImageCache class, or the
+    ImageFileFormat, which provides a way to load common image files.
+
+    @see Graphics, ImageFileFormat, ImageCache, ImageConvolutionKernel
+*/
+class JUCE_API  Image
+{
+public:
+
+    enum PixelFormat
+    {
+        RGB,                /**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
+        ARGB,               /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
+        SingleChannel       /**<< each pixel is a 1-byte alpha channel value. */
+    };
+
+    /** Creates an in-memory image with a specified size and format.
+
+        To create an image that can use native OS rendering methods, see createNativeImage().
+
+        @param format           the number of colour channels in the image
+        @param imageWidth       the desired width of the image, in pixels - this value must be
+                                greater than zero (otherwise a width of 1 will be used)
+        @param imageHeight      the desired width of the image, in pixels - this value must be
+                                greater than zero (otherwise a height of 1 will be used)
+        @param clearImage       if true, the image will initially be cleared to black or transparent
+                                black. If false, the image may contain random data, and the
+                                user will have to deal with this
+    */
+    Image (const PixelFormat format,
+           const int imageWidth,
+           const int imageHeight,
+           const bool clearImage);
+
+    /** Creates a copy of another image.
+
+        @see createCopy
+    */
+    Image (const Image& other);
+
+    /** Destructor. */
+    virtual ~Image();
+
+    /** Tries to create an image that is uses native drawing methods when you render
+        onto it.
+
+        On some platforms this will just return a normal software-based image.
+    */
+    static Image* createNativeImage (const PixelFormat format,
+                                     const int imageWidth,
+                                     const int imageHeight,
+                                     const bool clearImage);
+
+    /** Returns the image's width (in pixels). */
+    int getWidth() const throw()                    { return imageWidth; }
+
+    /** Returns the image's height (in pixels). */
+    int getHeight() const throw()                   { return imageHeight; }
+
+    /** Returns the image's pixel format. */
+    PixelFormat getFormat() const throw()           { return format; }
+
+    /** True if the image's format is ARGB. */
+    bool isARGB() const throw()                     { return format == ARGB; }
+
+    /** True if the image's format is RGB. */
+    bool isRGB() const throw()                      { return format == RGB; }
+
+    /** True if the image contains an alpha-channel. */
+    bool hasAlphaChannel() const throw()            { return format != RGB; }
+
+    /** Clears a section of the image with a given colour.
+
+        This won't do any alpha-blending - it just sets all pixels in the image to
+        the given colour (which may be non-opaque if the image has an alpha channel).
+    */
+    virtual void clear (int x, int y, int w, int h,
+                        const Colour& colourToClearTo = Colour (0x00000000));
+
+    /** Returns a new image that's a copy of this one.
+
+        A new size for the copied image can be specified, or values less than
+        zero can be passed-in to use the image's existing dimensions.
+
+        It's up to the caller to delete the image when no longer needed.
+    */
+    virtual Image* createCopy (int newWidth = -1,
+                               int newHeight = -1,
+                               const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+
+    /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
+    */
+    virtual Image* createCopyOfAlphaChannel() const;
+
+    /** Returns the colour of one of the pixels in the image.
+
+        If the co-ordinates given are beyond the image's boundaries, this will
+        return Colours::transparentBlack.
+
+        (0, 0) is the image's top-left corner.
+
+        @see getAlphaAt, setPixelAt, blendPixelAt
+    */
+    virtual const Colour getPixelAt (const int x, const int y) const;
+
+    /** Sets the colour of one of the image's pixels.
+
+        If the co-ordinates are beyond the image's boundaries, then nothing will
+        happen.
+
+        Note that unlike blendPixelAt(), this won't do any alpha-blending, it'll
+        just replace the existing pixel with the given one. The colour's opacity
+        will be ignored if this image doesn't have an alpha-channel.
+
+        (0, 0) is the image's top-left corner.
+
+        @see blendPixelAt
+    */
+    virtual void setPixelAt (const int x, const int y, const Colour& colour);
+
+    /** Changes the opacity of a pixel.
+
+        This only has an effect if the image has an alpha channel and if the
+        given co-ordinates are inside the image's boundary.
+
+        The multiplier must be in the range 0 to 1.0, and the current alpha
+        at the given co-ordinates will be multiplied by this value.
+
+        @see getAlphaAt, setPixelAt
+    */
+    virtual void multiplyAlphaAt (const int x, const int y, const float multiplier);
+
+    /** Changes the overall opacity of the image.
+
+        This will multiply the alpha value of each pixel in the image by the given
+        amount (limiting the resulting alpha values between 0 and 255). This allows
+        you to make an image more or less transparent.
+
+        If the image doesn't have an alpha channel, this won't have any effect.
+    */
+    virtual void multiplyAllAlphas (const float amountToMultiplyBy);
+
+    /** Changes all the colours to be shades of grey, based on their current luminosity.
+    */
+    virtual void desaturate();
+
+    /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
+
+        You should only use this class as a last resort - messing about with the internals of
+        an image is only recommended for people who really know what they're doing!
+
+        A BitmapData object should be used as a temporary, stack-based object. Don't keep one
+        hanging around while the image is being used elsewhere.
+
+        Depending on the way the image class is implemented, this may create a temporary buffer
+        which is copied back to the image when the object is deleted, or it may just get a pointer
+        directly into the image's raw data.
+
+        You can use the stride and data values in this class directly, but don't alter them!
+        The actual format of the pixel data depends on the image's format - see Image::getFormat(),
+        and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
+    */
+    class BitmapData
+    {
+    public:
+        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
+        BitmapData (const Image& image, int x, int y, int w, int h) throw();
+        ~BitmapData() throw();
+
+        /** Returns a pointer to the start of a line in the image.
+            The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+            sure it's not out-of-range.
+        */
+        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
+
+        /** Returns a pointer to a pixel in the image.
+            The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+            not out-of-range.
+        */
+        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
+
+        uint8* data;
+        int lineStride, pixelStride, width, height;
+    };
+
+    /** Copies some pixel values to a rectangle of the image.
+
+        The format of the pixel data must match that of the image itself, and the
+        rectangle supplied must be within the image's bounds.
+    */
+    virtual void setPixelData (int destX, int destY, int destW, int destH,
+                               const uint8* sourcePixelData, int sourceLineStride);
+
+    /** Copies a section of the image to somewhere else within itself.
+    */
+    virtual void moveImageSection (int destX, int destY,
+                                   int sourceX, int sourceY,
+                                   int width, int height);
+
+    /** Creates a RectangleList containing rectangles for all non-transparent pixels
+        of the image.
+
+        @param result           the list that will have the area added to it
+        @param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
+                                above this level will be considered opaque
+    */
+    void createSolidAreaMask (RectangleList& result,
+                              const float alphaThreshold = 0.5f) const;
+
+    juce_UseDebuggingNewOperator
+
+    /** Creates a context suitable for drawing onto this image.
+
+        Don't call this method directly! It's used internally by the Graphics class.
+    */
+    virtual LowLevelGraphicsContext* createLowLevelContext();
+
+protected:
+    friend class BitmapData;
+    const PixelFormat format;
+    const int imageWidth, imageHeight;
+
+    /** Used internally so that subclasses can call a constructor that doesn't allocate memory */
+    Image (const PixelFormat format,
+           const int imageWidth,
+           const int imageHeight);
+
+    int pixelStride, lineStride;
+    uint8* imageData;
+
+private:
+
+    const Image& operator= (const Image&);
+};
+
+#endif   // __JUCE_IMAGE_JUCEHEADER__
+/********* End of inlined file: juce_Image.h *********/
 
 /**
     Interface class for graphics context objects, used internally by the Graphics class.
@@ -40064,53 +39704,38 @@ public:
     */
     virtual void setOrigin (int x, int y) = 0;
 
-    /** Cliping co-ords are relative to the origin. */
-    virtual bool reduceClipRegion (int x, int y, int w, int h) = 0;
+    virtual bool clipToRectangle (const Rectangle& r) = 0;
+    virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
+    virtual void excludeClipRectangle (const Rectangle& r) = 0;
+    virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
+    virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform) = 0;
 
-    /** Cliping co-ords are relative to the origin. */
-    virtual bool reduceClipRegion (const RectangleList& clipRegion) = 0;
-
-    //virtual bool clipToPath (const Path& path) = 0;
-    //virtual bool clipToImageAlpha (Image& image, int imageX, int imageY) = 0;
-
-    /** Cliping co-ords are relative to the origin. */
-    virtual void excludeClipRegion (int x, int y, int w, int h) = 0;
+    virtual bool clipRegionIntersects (const Rectangle& r) = 0;
+    virtual const Rectangle getClipBounds() const = 0;
+    virtual bool isClipEmpty() const = 0;
 
     virtual void saveState() = 0;
     virtual void restoreState() = 0;
 
-    virtual bool clipRegionIntersects (int x, int y, int w, int h) = 0;
-    virtual const Rectangle getClipBounds() const = 0;
-    virtual bool isClipEmpty() const = 0;
-
     virtual void setColour (const Colour& colour) = 0;
     virtual void setGradient (const ColourGradient& gradient) = 0;
+    virtual void setTiledFill (const Image& image, int x, int y) = 0;
+
     virtual void setOpacity (float opacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
-    virtual void fillRect (int x, int y, int w, int h, const bool replaceExistingContents) = 0;
+    virtual void fillRect (const Rectangle& r, const bool replaceExistingContents) = 0;
     virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-    virtual void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                    const Image& image, int imageX, int imageY) = 0;
-
-    virtual void fillAlphaChannel (const Image& alphaImage, int alphaImageX, int alphaImageY) = 0;
-    virtual void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                            const Image& fillerImage, int fillerImageX, int fillerImageY) = 0;
-
-    virtual void blendImage (const Image& sourceImage,
-                             int destX, int destY, int destW, int destH, int sourceX, int sourceY) = 0;
-
-    virtual void blendImageWarping (const Image& sourceImage,
-                                    int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                    const AffineTransform& transform) = 0;
+    virtual void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                            const AffineTransform& transform, const bool fillEntireClipAsTiles) = 0;
 
     virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
     virtual void drawVerticalLine (const int x, double top, double bottom) = 0;
     virtual void drawHorizontalLine (const int y, double left, double right) = 0;
 
     virtual void setFont (const Font& newFont) = 0;
-    virtual void drawGlyph (int glyphNumber, float x, float y) = 0;
+    virtual const Font getFont() = 0;
     virtual void drawGlyph (int glyphNumber, const AffineTransform& transform) = 0;
 };
 
@@ -40144,40 +39769,32 @@ public:
 
     void setOrigin (int x, int y);
 
-    bool reduceClipRegion (int x, int y, int w, int h);
-    bool reduceClipRegion (const RectangleList& clipRegion);
-    void excludeClipRegion (int x, int y, int w, int h);
-
+    bool clipToRectangle (const Rectangle& r);
+    bool clipToRectangleList (const RectangleList& clipRegion);
+    void excludeClipRectangle (const Rectangle& r);
     void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImage (Image& image, int imageX, int imageY);
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
+
+    bool clipRegionIntersects (const Rectangle& r);
+    const Rectangle getClipBounds() const;
+    bool isClipEmpty() const;
 
     void saveState();
     void restoreState();
 
-    bool clipRegionIntersects (int x, int y, int w, int h);
-    const Rectangle getClipBounds() const;
-    bool isClipEmpty() const;
-
     void setColour (const Colour& colour);
     void setGradient (const ColourGradient& gradient);
+    void setTiledFill (const Image& image, int x, int y);
+
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillAll (const bool replaceContents);
+    void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY);
-
-    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
-    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
-
-    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY);
-
-    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform);
+    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
     void drawLine (double x1, double y1, double x2, double y2);
 
@@ -40185,6 +39802,7 @@ public:
     void drawHorizontalLine (const int x, double top, double bottom);
 
     void setFont (const Font& newFont);
+    const Font getFont();
     void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
@@ -40197,43 +39815,12 @@ protected:
     LLGCSavedState* currentState;
     OwnedArray <LLGCSavedState> stateStack;
 
-/*    void drawVertical (const int x, const double top, const double bottom);
-    void drawHorizontal (const int y, const double top, const double bottom);
-
-    void clippedFillRectWithColour (const Rectangle& clipRect, int x, int y, int w, int h, const Colour& colour, const bool replaceExistingContents);
-
-    void clippedFillPath (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform);
-    void clippedFillPathWithImage (int clipX, int clipY, int clipW, int clipH, const Path& path, const AffineTransform& transform,
-                                   const Image& image, int imageX, int imageY, float alpha);
-
-    void clippedFillAlphaChannel (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY);
-    void clippedFillAlphaChannelWithImage (int clipX, int clipY, int clipW, int clipH, const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                           const Image& fillerImage, int fillerImageX, int fillerImageY, const float opacity);
-
-    void clippedBlendImage (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
-                            int destX, int destY, int destW, int destH, int sourceX, int sourceY);
-
-    void clippedBlendImageWarping (int clipX, int clipY, int clipW, int clipH, const Image& sourceImage,
-                                   int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                                   const AffineTransform& transform);
-
-    void clippedDrawLine (int clipX, int clipY, int clipW, int clipH, double x1, double y1, double x2, double y2);
-
-    void clippedDrawVerticalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);
-    void clippedDrawHorizontalLine (int clipX, int clipY, int clipW, int clipH, const int x, double top, double bottom);*/
-
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 /********* End of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h *********/
-
-#endif
-#ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
@@ -40348,7 +39935,7 @@ protected:
 /********* End of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
 
 #endif
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
+#ifndef __JUCE_PATH_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BORDERSIZE_JUCEHEADER__
@@ -40357,108 +39944,13 @@ protected:
 #ifndef __JUCE_LINE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_PATH_JUCEHEADER__
+#ifndef __JUCE_POINT_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_PATHITERATOR_JUCEHEADER__
-
-/********* Start of inlined file: juce_PathIterator.h *********/
-#ifndef __JUCE_PATHITERATOR_JUCEHEADER__
-#define __JUCE_PATHITERATOR_JUCEHEADER__
-
-/**
-    Flattens a Path object into a series of straight-line sections.
-
-    Use one of these to iterate through a Path object, and it will convert
-    all the curves into line sections so it's easy to render or perform
-    geometric operations on.
-
-    @see Path
-*/
-class JUCE_API  PathFlatteningIterator
-{
-public:
-
-    /** Creates a PathFlatteningIterator.
-
-        After creation, use the next() method to initialise the fields in the
-        object with the first line's position.
-
-        @param path         the path to iterate along
-        @param transform    a transform to apply to each point in the path being iterated
-        @param tolerence    the amount by which the curves are allowed to deviate from the
-                            lines into which they are being broken down - a higher tolerence
-                            is a bit faster, but less smooth.
-    */
-    PathFlatteningIterator (const Path& path,
-                            const AffineTransform& transform = AffineTransform::identity,
-                            float tolerence = 6.0f) throw();
-
-    /** Destructor. */
-    ~PathFlatteningIterator() throw();
-
-    /** Fetches the next line segment from the path.
-
-        This will update the member variables x1, y1, x2, y2, subPathIndex and closesSubPath
-        so that they describe the new line segment.
-
-        @returns false when there are no more lines to fetch.
-    */
-    bool next() throw();
-
-    /** The x position of the start of the current line segment. */
-    float x1;
-    /** The y position of the start of the current line segment. */
-    float y1;
-    /** The x position of the end of the current line segment. */
-    float x2;
-    /** The y position of the end of the current line segment. */
-    float y2;
-
-    /** Indicates whether the current line segment is closing a sub-path.
-
-        If the current line is the one that connects the end of a sub-path
-        back to the start again, this will be true.
-    */
-    bool closesSubPath;
-
-    /** The index of the current line within the current sub-path.
-
-        E.g. you can use this to see whether the line is the first one in the
-        subpath by seeing if it's 0.
-    */
-    int subPathIndex;
-
-    /** Returns true if the current segment is the last in the current sub-path. */
-    bool isLastInSubpath() const throw()    { return stackPos == stackBase
-                                                      && (index >= path.numElements
-                                                           || points [index] == Path::moveMarker); }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    const Path& path;
-    const AffineTransform transform;
-    float* points;
-    float tolerence, subPathCloseX, subPathCloseY;
-    bool isIdentityTransform;
-
-    float* stackBase;
-    float* stackPos;
-    int index, stackSize;
-
-    PathFlatteningIterator (const PathFlatteningIterator&);
-    const PathFlatteningIterator& operator= (const PathFlatteningIterator&);
-};
-
-#endif   // __JUCE_PATHITERATOR_JUCEHEADER__
-/********* End of inlined file: juce_PathIterator.h *********/
+#ifndef __JUCE_RECTANGLE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_POINT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
@@ -40775,10 +40267,105 @@ private:
 /********* End of inlined file: juce_PositionedRectangle.h *********/
 
 #endif
-#ifndef __JUCE_RECTANGLE_JUCEHEADER__
+#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
+#ifndef __JUCE_PATHITERATOR_JUCEHEADER__
+
+/********* Start of inlined file: juce_PathIterator.h *********/
+#ifndef __JUCE_PATHITERATOR_JUCEHEADER__
+#define __JUCE_PATHITERATOR_JUCEHEADER__
+
+/**
+    Flattens a Path object into a series of straight-line sections.
+
+    Use one of these to iterate through a Path object, and it will convert
+    all the curves into line sections so it's easy to render or perform
+    geometric operations on.
+
+    @see Path
+*/
+class JUCE_API  PathFlatteningIterator
+{
+public:
+
+    /** Creates a PathFlatteningIterator.
+
+        After creation, use the next() method to initialise the fields in the
+        object with the first line's position.
+
+        @param path         the path to iterate along
+        @param transform    a transform to apply to each point in the path being iterated
+        @param tolerence    the amount by which the curves are allowed to deviate from the
+                            lines into which they are being broken down - a higher tolerence
+                            is a bit faster, but less smooth.
+    */
+    PathFlatteningIterator (const Path& path,
+                            const AffineTransform& transform = AffineTransform::identity,
+                            float tolerence = 6.0f) throw();
+
+    /** Destructor. */
+    ~PathFlatteningIterator() throw();
+
+    /** Fetches the next line segment from the path.
+
+        This will update the member variables x1, y1, x2, y2, subPathIndex and closesSubPath
+        so that they describe the new line segment.
+
+        @returns false when there are no more lines to fetch.
+    */
+    bool next() throw();
+
+    /** The x position of the start of the current line segment. */
+    float x1;
+    /** The y position of the start of the current line segment. */
+    float y1;
+    /** The x position of the end of the current line segment. */
+    float x2;
+    /** The y position of the end of the current line segment. */
+    float y2;
+
+    /** Indicates whether the current line segment is closing a sub-path.
+
+        If the current line is the one that connects the end of a sub-path
+        back to the start again, this will be true.
+    */
+    bool closesSubPath;
+
+    /** The index of the current line within the current sub-path.
+
+        E.g. you can use this to see whether the line is the first one in the
+        subpath by seeing if it's 0.
+    */
+    int subPathIndex;
+
+    /** Returns true if the current segment is the last in the current sub-path. */
+    bool isLastInSubpath() const throw()    { return stackPos == stackBase
+                                                      && (index >= path.numElements
+                                                           || points [index] == Path::moveMarker); }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    const Path& path;
+    const AffineTransform transform;
+    float* points;
+    float tolerence, subPathCloseX, subPathCloseY;
+    bool isIdentityTransform;
+
+    float* stackBase;
+    float* stackPos;
+    int index, stackSize;
+
+    PathFlatteningIterator (const PathFlatteningIterator&);
+    const PathFlatteningIterator& operator= (const PathFlatteningIterator&);
+};
+
+#endif   // __JUCE_PATHITERATOR_JUCEHEADER__
+/********* End of inlined file: juce_PathIterator.h *********/
+
+#endif
+#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
@@ -40908,9 +40495,6 @@ private:
 #endif
 #endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
 /********* End of inlined file: juce_CameraDevice.h *********/
-
-#endif
-#ifndef __JUCE_IMAGE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_IMAGECACHE_JUCEHEADER__
@@ -41050,6 +40634,9 @@ private:
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__
 /********* End of inlined file: juce_ImageCache.h *********/
+
+#endif
+#ifndef __JUCE_IMAGE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
@@ -41744,6 +41331,78 @@ private:
 /********* End of inlined file: juce_DrawableImage.h *********/
 
 #endif
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+
+/********* Start of inlined file: juce_DrawableText.h *********/
+#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
+#define __JUCE_DRAWABLETEXT_JUCEHEADER__
+
+/**
+    A drawable object which renders a line of text.
+
+    @see Drawable
+*/
+class JUCE_API  DrawableText  : public Drawable
+{
+public:
+
+    /** Creates a DrawableText object. */
+    DrawableText();
+
+    /** Destructor. */
+    virtual ~DrawableText();
+
+    /** Sets the block of text to render */
+    void setText (const GlyphArrangement& newText);
+
+    /** Sets a single line of text to render.
+
+        This is a convenient method of adding a single line - for
+        more complex text, use the setText() that takes a
+        GlyphArrangement instead.
+    */
+    void setText (const String& newText, const Font& fontToUse);
+
+    /** Returns the text arrangement that was set with setText(). */
+    const GlyphArrangement& getText() const throw()         { return text; }
+
+    /** Sets the colour of the text. */
+    void setColour (const Colour& newColour);
+
+    /** Returns the current text colour. */
+    const Colour& getColour() const throw()                 { return colour; }
+
+    /** @internal */
+    void render (const Drawable::RenderingContext& context) const;
+    /** @internal */
+    void getBounds (float& x, float& y, float& width, float& height) const;
+    /** @internal */
+    bool hitTest (float x, float y) const;
+    /** @internal */
+    Drawable* createCopy() const;
+    /** @internal */
+    bool readBinary (InputStream& input);
+    /** @internal */
+    bool writeBinary (OutputStream& output) const;
+    /** @internal */
+    bool readXml (const XmlElement& xml);
+    /** @internal */
+    void writeXml (XmlElement& xml) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    GlyphArrangement text;
+    Colour colour;
+
+    DrawableText (const DrawableText&);
+    const DrawableText& operator= (const DrawableText&);
+};
+
+#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
+/********* End of inlined file: juce_DrawableText.h *********/
+
+#endif
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
 
 /********* Start of inlined file: juce_DrawablePath.h *********/
@@ -41848,78 +41507,6 @@ private:
 
 #endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
 /********* End of inlined file: juce_DrawablePath.h *********/
-
-#endif
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
-
-/********* Start of inlined file: juce_DrawableText.h *********/
-#ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
-#define __JUCE_DRAWABLETEXT_JUCEHEADER__
-
-/**
-    A drawable object which renders a line of text.
-
-    @see Drawable
-*/
-class JUCE_API  DrawableText  : public Drawable
-{
-public:
-
-    /** Creates a DrawableText object. */
-    DrawableText();
-
-    /** Destructor. */
-    virtual ~DrawableText();
-
-    /** Sets the block of text to render */
-    void setText (const GlyphArrangement& newText);
-
-    /** Sets a single line of text to render.
-
-        This is a convenient method of adding a single line - for
-        more complex text, use the setText() that takes a
-        GlyphArrangement instead.
-    */
-    void setText (const String& newText, const Font& fontToUse);
-
-    /** Returns the text arrangement that was set with setText(). */
-    const GlyphArrangement& getText() const throw()         { return text; }
-
-    /** Sets the colour of the text. */
-    void setColour (const Colour& newColour);
-
-    /** Returns the current text colour. */
-    const Colour& getColour() const throw()                 { return colour; }
-
-    /** @internal */
-    void render (const Drawable::RenderingContext& context) const;
-    /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
-    /** @internal */
-    bool hitTest (float x, float y) const;
-    /** @internal */
-    Drawable* createCopy() const;
-    /** @internal */
-    bool readBinary (InputStream& input);
-    /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    GlyphArrangement text;
-    Colour colour;
-
-    DrawableText (const DrawableText&);
-    const DrawableText& operator= (const DrawableText&);
-};
-
-#endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
-/********* End of inlined file: juce_DrawableText.h *********/
 
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
@@ -45213,9 +44800,6 @@ private:
 /********* End of inlined file: juce_CodeEditorComponent.h *********/
 
 #endif
-#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
 
 /********* Start of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
@@ -45258,6 +44842,9 @@ public:
 
 #endif   // __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
 /********* End of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
+
+#endif
+#ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CODETOKENISER_JUCEHEADER__
@@ -48150,10 +47737,10 @@ private:
 /********* End of inlined file: juce_ToolbarItemPalette.h *********/
 
 #endif
-#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_TREEVIEW_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TREEVIEW_JUCEHEADER__
+#ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -48347,10 +47934,10 @@ private:
 /********* End of inlined file: juce_ChoicePropertyComponent.h *********/
 
 #endif
-#ifndef __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_PROPERTYPANEL_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_PROPERTYPANEL_JUCEHEADER__
+#ifndef __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
@@ -51451,6 +51038,9 @@ private:
 /********* End of inlined file: juce_FileChooser.h *********/
 
 #endif
+#ifndef __JUCE_FILEFILTER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileChooserDialogBox.h *********/
@@ -51571,9 +51161,6 @@ private:
 /********* End of inlined file: juce_FileChooserDialogBox.h *********/
 
 #endif
-#ifndef __JUCE_FILEFILTER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileListComponent.h *********/
@@ -51643,6 +51230,78 @@ private:
 
 #endif
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of selected files in the tree.
+    */
+    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile (int index) const throw();
+
+    /** Returns the first of the files that the user has currently selected.
+
+        Returns File::nonexistent if none is selected.
+    */
+    const File getSelectedFile() const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
@@ -51744,78 +51403,6 @@ private:
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileSearchPathListComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of selected files in the tree.
-    */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -52009,52 +51596,6 @@ private:
 /********* End of inlined file: juce_FilenameComponent.h *********/
 
 #endif
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
-#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-
-/**
-    A simple preview component that shows thumbnails of image files.
-
-    @see FileChooserDialogBox, FilePreviewComponent
-*/
-class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
-                                         private Timer
-{
-public:
-
-    /** Creates an ImagePreviewComponent. */
-    ImagePreviewComponent();
-
-    /** Destructor. */
-    ~ImagePreviewComponent();
-
-    /** @internal */
-    void selectedFileChanged (const File& newSelectedFile);
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void timerCallback();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    File fileToLoad;
-    Image* currentThumbnail;
-    String currentDetails;
-
-    void getThumbSize (int& w, int& h) const;
-
-    ImagePreviewComponent (const ImagePreviewComponent&);
-    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
-};
-
-#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ImagePreviewComponent.h *********/
-
-#endif
 #ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 
 /********* Start of inlined file: juce_WildcardFileFilter.h *********/
@@ -52103,6 +51644,52 @@ private:
 
 #endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 /********* End of inlined file: juce_WildcardFileFilter.h *********/
+
+#endif
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
+#ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+#define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+
+/**
+    A simple preview component that shows thumbnails of image files.
+
+    @see FileChooserDialogBox, FilePreviewComponent
+*/
+class JUCE_API  ImagePreviewComponent  : public FilePreviewComponent,
+                                         private Timer
+{
+public:
+
+    /** Creates an ImagePreviewComponent. */
+    ImagePreviewComponent();
+
+    /** Destructor. */
+    ~ImagePreviewComponent();
+
+    /** @internal */
+    void selectedFileChanged (const File& newSelectedFile);
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    void timerCallback();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    File fileToLoad;
+    Image* currentThumbnail;
+    String currentDetails;
+
+    void getThumbSize (int& w, int& h) const;
+
+    ImagePreviewComponent (const ImagePreviewComponent&);
+    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+};
+
+#endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_ImagePreviewComponent.h *********/
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -54383,64 +53970,6 @@ private:
 /********* End of inlined file: juce_PreferencesPanel.h *********/
 
 #endif
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
-#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-
-#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
-
-/**
-    On Windows only, this component sits in the taskbar tray as a small icon.
-
-    To use it, just create one of these components, but don't attempt to make it
-    visible, add it to a parent, or put it on the desktop.
-
-    You can then call setIconImage() to create an icon for it in the taskbar.
-
-    To change the icon's tooltip, you can use setIconTooltip().
-
-    To respond to mouse-events, you can override the normal mouseDown(),
-    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
-    position will not be valid, you can use this to respond to clicks. Traditionally
-    you'd use a left-click to show your application's window, and a right-click
-    to show a pop-up menu.
-*/
-class JUCE_API  SystemTrayIconComponent  : public Component
-{
-public:
-
-    SystemTrayIconComponent();
-
-    /** Destructor. */
-    ~SystemTrayIconComponent();
-
-    /** Changes the image shown in the taskbar.
-    */
-    void setIconImage (const Image& newImage);
-
-    /** Changes the tooltip that Windows shows above the icon. */
-    void setIconTooltip (const String& tooltip);
-
-#if JUCE_LINUX
-    /** @internal */
-    void paint (Graphics& g);
-#endif
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
-};
-
-#endif
-#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
-
-#endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_WebBrowserComponent.h *********/
@@ -54545,6 +54074,64 @@ private:
 #endif
 #endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_WebBrowserComponent.h *********/
+
+#endif
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+#ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+#define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+
+#if JUCE_WINDOWS || JUCE_LINUX || DOXYGEN
+
+/**
+    On Windows only, this component sits in the taskbar tray as a small icon.
+
+    To use it, just create one of these components, but don't attempt to make it
+    visible, add it to a parent, or put it on the desktop.
+
+    You can then call setIconImage() to create an icon for it in the taskbar.
+
+    To change the icon's tooltip, you can use setIconTooltip().
+
+    To respond to mouse-events, you can override the normal mouseDown(),
+    mouseUp(), mouseDoubleClick() and mouseMove() methods, and although the x, y
+    position will not be valid, you can use this to respond to clicks. Traditionally
+    you'd use a left-click to show your application's window, and a right-click
+    to show a pop-up menu.
+*/
+class JUCE_API  SystemTrayIconComponent  : public Component
+{
+public:
+
+    SystemTrayIconComponent();
+
+    /** Destructor. */
+    ~SystemTrayIconComponent();
+
+    /** Changes the image shown in the taskbar.
+    */
+    void setIconImage (const Image& newImage);
+
+    /** Changes the tooltip that Windows shows above the icon. */
+    void setIconTooltip (const String& tooltip);
+
+#if JUCE_LINUX
+    /** @internal */
+    void paint (Graphics& g);
+#endif
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    SystemTrayIconComponent (const SystemTrayIconComponent&);
+    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+};
+
+#endif
+#endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
 
 #endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__

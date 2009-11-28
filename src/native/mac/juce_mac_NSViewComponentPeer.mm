@@ -1471,7 +1471,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
                                            roundFloatToInt (rects[i].size.height)));
     }
 
-    if (context.reduceClipRegion (clip))
+    if (context.clipToRectangleList (clip))
     {
         insideDrawRect = true;
         handlePaint (context);

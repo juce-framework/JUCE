@@ -46,7 +46,7 @@ public:
     bool operator!= (const FillType& other) const throw();
 
     //==============================================================================
-    Brush* createBrush (JucerDocument* const document, const Rectangle& parentArea);
+    void setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea);
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const;
 

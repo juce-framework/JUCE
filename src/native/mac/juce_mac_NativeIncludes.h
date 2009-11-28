@@ -35,7 +35,7 @@
 
 #include "../../core/juce_StandardHeader.h"
 
-#define USE_COREGRAPHICS_RENDERING 0
+#define USE_COREGRAPHICS_RENDERING 1
 
 #if JUCE_IPHONE
  #import <Foundation/Foundation.h>

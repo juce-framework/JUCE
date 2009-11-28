@@ -32,7 +32,6 @@
 #include "../geometry/juce_Line.h"
 #include "../colour/juce_Colours.h"
 #include "../colour/juce_ColourGradient.h"
-#include "../brushes/juce_SolidColourBrush.h"
 #include "juce_RectanglePlacement.h"
 class LowLevelGraphicsContext;
 class Image;
@@ -79,7 +78,7 @@ public:
         If a brush is being used when this method is called, the brush will be deselected,
         and any subsequent drawing will be done with a solid colour brush instead.
 
-        @see setOpacity, setBrush
+        @see setOpacity
     */
     void setColour (const Colour& newColour) throw();
 
@@ -94,18 +93,6 @@ public:
     */
     void setOpacity (const float newOpacity) throw();
 
-    /** Changes the current brush to use for drawing.
-
-        If a null pointer is passed in, the context will revert to using a solid
-        colour for drawing (using the last colour set by setColour()).
-
-        If a brush is passed in, a copy of it will be used for subsequent drawing
-        operations until setColour() or setBrush() is called.
-
-        @see SolidColourBrush, GradientBrush, ImageBrush, Brush
-    */
-    void setBrush (const Brush* const newBrush) throw();
-
     /** Sets the context to use a gradient for its fill pattern.
     */
     void setGradientFill (const ColourGradient& gradient) throw();
@@ -114,7 +101,7 @@ public:
         Make sure that you don't delete this image while it's still being used by
         this context!
     */
-    void setTiledImageFill (Image& imageToUse,
+    void setTiledImageFill (const Image& imageToUse,
                             const int anchorX,
                             const int anchorY,
                             const float opacity) throw();
@@ -698,12 +685,13 @@ public:
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
 
     //==============================================================================
-    /*class FillType
+    class FillType
     {
     public:
+        FillType() throw();
         FillType (const Colour& colour) throw();
         FillType (const ColourGradient& gradient) throw();
-        FillType (Image* image, int x, int y) throw();
+        FillType (Image* const image, const int x, const int y) throw();
         FillType (const FillType& other) throw();
         const FillType& operator= (const FillType& other) throw();
         ~FillType() throw();
@@ -714,35 +702,22 @@ public:
 
         void setColour (const Colour& newColour) throw();
         void setGradient (const ColourGradient& newGradient) throw();
-        void setTiledImage (Image* image, const int imageX, const int imageY) throw();
+        void setTiledImage (const Image& image, const int imageX, const int imageY) throw();
 
         Colour colour;
         ColourGradient* gradient;
-        Image* image;
+        const Image* image;
         int imageX, imageY;
 
         juce_UseDebuggingNewOperator
-    };*/
+    };
 
 private:
     //==============================================================================
     LowLevelGraphicsContext* const context;
     const bool ownsContext;
 
-    struct GraphicsState
-    {
-        GraphicsState() throw();
-        GraphicsState (const GraphicsState&) throw();
-        ~GraphicsState() throw();
-
-        Brush* brush;
-        Font font;
-    };
-
-    GraphicsState* state;
-    OwnedArray <GraphicsState> stateStack;
     bool saveStatePending;
-
     void saveStateIfPending() throw();
 
     const Graphics& operator= (const Graphics& other);

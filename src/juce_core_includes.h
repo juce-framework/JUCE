@@ -41,8 +41,8 @@
 #ifndef __JUCE_LOGGER_JUCEHEADER__
  #include "core/juce_Logger.h"
 #endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
- #include "core/juce_MathsFunctions.h"
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+ #include "core/juce_PlatformUtilities.h"
 #endif
 #ifndef __JUCE_MEMORY_JUCEHEADER__
  #include "core/juce_Memory.h"
@@ -53,8 +53,8 @@
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
  #include "core/juce_PlatformDefs.h"
 #endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
- #include "core/juce_PlatformUtilities.h"
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+ #include "core/juce_Singleton.h"
 #endif
 #ifndef __JUCE_RANDOM_JUCEHEADER__
  #include "core/juce_Random.h"
@@ -62,23 +62,23 @@
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
  #include "core/juce_RelativeTime.h"
 #endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
- #include "core/juce_Singleton.h"
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
- #include "core/juce_StandardHeader.h"
-#endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
  #include "core/juce_SystemStats.h"
-#endif
-#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
- #include "core/juce_TargetPlatform.h"
 #endif
 #ifndef __JUCE_TIME_JUCEHEADER__
  #include "core/juce_Time.h"
 #endif
 #ifndef __JUCE_UUID_JUCEHEADER__
  #include "core/juce_Uuid.h"
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+ #include "core/juce_StandardHeader.h"
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+ #include "core/juce_MathsFunctions.h"
+#endif
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
+ #include "core/juce_TargetPlatform.h"
 #endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
  #include "containers/juce_Array.h"
@@ -236,14 +236,14 @@
 #ifndef __JUCE_THREAD_JUCEHEADER__
  #include "threads/juce_Thread.h"
 #endif
-#ifndef __JUCE_THREADPOOL_JUCEHEADER__
- #include "threads/juce_ThreadPool.h"
-#endif
 #ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
  #include "threads/juce_TimeSliceThread.h"
 #endif
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
  #include "threads/juce_WaitableEvent.h"
+#endif
+#ifndef __JUCE_THREADPOOL_JUCEHEADER__
+ #include "threads/juce_ThreadPool.h"
 #endif
 
 #endif

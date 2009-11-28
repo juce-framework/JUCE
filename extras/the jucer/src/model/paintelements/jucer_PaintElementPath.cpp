@@ -242,24 +242,16 @@ static void drawArrow (Graphics& g, float x1, float y1, float x2, float y2)
 
 void PaintElementPath::draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
 {
-    Brush* const brush = fillType.createBrush (getDocument(), parentArea);
-    g.setBrush (brush);
-
     updateStoredPath (layout, parentArea);
-
     path.setUsingNonZeroWinding (nonZeroWinding);
-    g.fillPath (path);
 
-    delete brush;
+    fillType.setFillType (g, getDocument(), parentArea);
+    g.fillPath (path);
 
     if (isStrokePresent)
     {
-        Brush* const brush = strokeType.fill.createBrush (getDocument(), parentArea);
-        g.setBrush (brush);
-
+        strokeType.fill.setFillType (g, getDocument(), parentArea);
         g.strokePath (path, getStrokeType().stroke);
-
-        delete brush;
     }
 }
 

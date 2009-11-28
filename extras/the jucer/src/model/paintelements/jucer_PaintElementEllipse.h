@@ -45,23 +45,17 @@ public:
 
     void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
     {
-        Brush* const brush = fillType.createBrush (getDocument(), parentArea);
-        g.setBrush (brush);
+        fillType.setFillType (g, getDocument(), parentArea);
 
         Rectangle r (position.getRectangle (parentArea, layout));
         g.fillEllipse ((float) r.getX(), (float) r.getY(), (float) r.getWidth(), (float) r.getHeight());
 
-        delete brush;
-
         if (isStrokePresent)
         {
-            Brush* const brush = strokeType.fill.createBrush (getDocument(), parentArea);
-            g.setBrush (brush);
+            strokeType.fill.setFillType (g, getDocument(), parentArea);
 
             g.drawEllipse ((float) r.getX(), (float) r.getY(), (float) r.getWidth(), (float) r.getHeight(),
                            getStrokeType().stroke.getStrokeThickness());
-
-            delete brush;
         }
     }
 

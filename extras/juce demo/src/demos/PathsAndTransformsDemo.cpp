@@ -130,20 +130,18 @@ public:
         }
         else if (type == 2 || type == 3)
         {
-            GradientBrush gb (Colours::blue.withAlpha ((float) opacitySlider->getValue()),
-                              getWidth() * 0.5f, getHeight() * 0.5f,
-                              Colours::red.withAlpha ((float) opacitySlider->getValue()),
-                              getWidth() * 0.6f, getHeight() * 0.7f,
-                              type == 3);
+            ColourGradient gradient (Colours::blue.withAlpha ((float) opacitySlider->getValue()),
+                                     getWidth() * 0.5f, getHeight() * 0.5f,
+                                     Colours::red.withAlpha ((float) opacitySlider->getValue()),
+                                     getWidth() * 0.6f, getHeight() * 0.7f,
+                                     type == 3);
 
-            g.setBrush (&gb);
+            g.setGradientFill (gradient);
             g.fillPath (shape, getTransform());
         }
         else if (type == 8)
         {
-            ImageBrush ib (image, 100, 100, (float) opacitySlider->getValue());
-
-            g.setBrush (&ib);
+            g.setTiledImageFill (*image, 100, 100, (float) opacitySlider->getValue());
             g.fillPath (shape, getTransform());
         }
         else if (type == 4 || type == 5)
@@ -179,16 +177,16 @@ public:
         }
         else if (type == 7)
         {
-            GradientBrush gb (Colours::blue.withAlpha ((float) opacitySlider->getValue()),
-                              getWidth() * 0.5f, getHeight() * 0.5f,
-                              Colours::red.withAlpha ((float) opacitySlider->getValue()),
-                              getWidth() * 0.6f, getHeight() * 0.7f,
-                              false);
-
-            g.setBrush (&gb);
-
             if (image != 0)
             {
+                ColourGradient gradient (Colours::blue.withAlpha ((float) opacitySlider->getValue()),
+                                         getWidth() * 0.5f, getHeight() * 0.5f,
+                                         Colours::red.withAlpha ((float) opacitySlider->getValue()),
+                                         getWidth() * 0.6f, getHeight() * 0.7f,
+                                         false);
+
+                g.setGradientFill (gradient);
+
                 g.drawImageTransformed (image,
                                         0, 0, image->getWidth(), image->getHeight(),
                                         AffineTransform::translation (-0.5f * image->getWidth(), -0.5f * image->getHeight())
@@ -198,11 +196,10 @@ public:
         }
         else if (type == 9)
         {
-            ImageBrush ib (image, 100, 100, (float) opacitySlider->getValue());
-            g.setBrush (&ib);
-
             if (image != 0)
             {
+                g.setTiledImageFill (*image, 100, 100, (float) opacitySlider->getValue());
+
                 g.drawImageTransformed (image,
                                         0, 0, image->getWidth(), image->getHeight(),
                                         AffineTransform::translation (-0.5f * image->getWidth(),

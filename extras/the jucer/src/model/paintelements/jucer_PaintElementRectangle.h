@@ -60,23 +60,17 @@ public:
         Component parentComponent;
         parentComponent.setBounds (parentArea);
 
-        Brush* const brush = fillType.createBrush (getDocument(), parentArea);
-        g.setBrush (brush);
+        fillType.setFillType (g, getDocument(), parentArea);
 
         const Rectangle r (position.getRectangle (parentArea, layout));
         g.fillRect (r);
 
-        delete brush;
-
         if (isStrokePresent)
         {
-            Brush* const brush = strokeType.fill.createBrush (getDocument(), parentArea);
-            g.setBrush (brush);
+            strokeType.fill.setFillType (g, getDocument(), parentArea);
 
             g.drawRect (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                         roundDoubleToInt (getStrokeType().stroke.getStrokeThickness()));
-
-            delete brush;
         }
     }
 

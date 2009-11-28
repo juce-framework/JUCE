@@ -47,25 +47,18 @@ public:
     //==============================================================================
     void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
     {
-        Brush* const brush = fillType.createBrush (getDocument(), parentArea);
-        g.setBrush (brush);
-
         double x, y, w, h;
         position.getRectangleDouble (x, y, w, h, parentArea, layout);
 
+        fillType.setFillType (g, getDocument(), parentArea);
         g.fillRoundedRectangle ((float) x, (float) y, (float) w, (float) h, (float) cornerSize);
-
-        delete brush;
 
         if (isStrokePresent)
         {
-            Brush* const brush = strokeType.fill.createBrush (getDocument(), parentArea);
-            g.setBrush (brush);
+            strokeType.fill.setFillType (g, getDocument(), parentArea);
 
             g.drawRoundedRectangle ((float) x, (float) y, (float) w, (float) h, (float) cornerSize,
                                     getStrokeType().stroke.getStrokeThickness());
-
-            delete brush;
         }
     }
 

@@ -308,24 +308,6 @@ public:
     void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const throw();
 
     //==============================================================================
-    /** Renders a glyph in a context without using methods other than the context's glyph-rendering
-        methods.
-
-        For smaller fonts, this uses an internal cache of glyph images to speed things up, and renders
-        them using the context's image blending methods. For larger fonts, it gets the glyph's path
-        from the typeface and renders it as a shape.
-
-        This method is primarily called by graphics contexts as a way of drawing a glyph if they can't do
-        it by native means.
-    */
-    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, float x, float y);
-
-    /** Renders a transformed glyph using path-filling techniques rather than calling a context's
-        actual glyph-rendering methods.
-    */
-    void renderGlyphIndirectly (LowLevelGraphicsContext& g, int glyphNumber, const AffineTransform& transform);
-
-    //==============================================================================
     /** Returns the typeface used by this font.
 
         Note that the object returned may go out of scope if this font is deleted

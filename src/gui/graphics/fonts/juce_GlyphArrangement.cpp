@@ -45,7 +45,7 @@ void PositionedGlyph::draw (const Graphics& g) const throw()
     if (! isWhitespace())
     {
         g.getInternalContext()->setFont (font);
-        g.getInternalContext()->drawGlyph (glyph, x, y);
+        g.getInternalContext()->drawGlyph (glyph, AffineTransform::translation (x, y));
     }
 }
 

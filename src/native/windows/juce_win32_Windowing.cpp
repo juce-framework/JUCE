@@ -1253,7 +1253,7 @@ private:
             updateCurrentModifiers();
 
             LowLevelGraphicsSoftwareRenderer context (*offscreenImage);
-            context.reduceClipRegion (contextClip);
+            context.clipToRectangleList (contextClip);
             context.setOrigin (-x, -y);
 
             handlePaint (context);

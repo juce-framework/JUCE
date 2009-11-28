@@ -31,8 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../fonts/juce_GlyphArrangement.h"
 #include "../geometry/juce_PathStrokeType.h"
 #include "juce_LowLevelGraphicsContext.h"
-#include "../brushes/juce_GradientBrush.h"
-#include "../brushes/juce_ImageBrush.h"
 
 static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
 
@@ -65,7 +63,6 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext()
 Graphics::Graphics (Image& imageToDrawOnto) throw()
     : context (imageToDrawOnto.createLowLevelContext()),
       ownsContext (true),
-      state (new GraphicsState()),
       saveStatePending (false)
 {
     resetToDefaultState();
@@ -74,7 +71,6 @@ Graphics::Graphics (Image& imageToDrawOnto) throw()
 Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
     : context (internalContext),
       ownsContext (false),
-      state (new GraphicsState()),
       saveStatePending (false)
 {
     resetToDefaultState();
@@ -82,8 +78,6 @@ Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
 
 Graphics::~Graphics() throw()
 {
-    delete state;
-
     if (ownsContext)
         delete context;
 }
@@ -106,20 +100,20 @@ bool Graphics::reduceClipRegion (const int x, const int y,
                                  const int w, const int h) throw()
 {
     saveStateIfPending();
-    return context->reduceClipRegion (x, y, w, h);
+    return context->clipToRectangle (Rectangle (x, y, w, h));
 }
 
 bool Graphics::reduceClipRegion (const RectangleList& clipRegion) throw()
 {
     saveStateIfPending();
-    return context->reduceClipRegion (clipRegion);
+    return context->clipToRectangleList (clipRegion);
 }
 
 void Graphics::excludeClipRegion (const int x, const int y,
                                   const int w, const int h) throw()
 {
     saveStateIfPending();
-    context->excludeClipRegion (x, y, w, h);
+    context->excludeClipRectangle (Rectangle (x, y, w, h));
 }
 
 bool Graphics::isClipEmpty() const throw()
@@ -141,29 +135,9 @@ void Graphics::saveState() throw()
 void Graphics::restoreState() throw()
 {
     if (saveStatePending)
-    {
         saveStatePending = false;
-    }
     else
-    {
-        const int stackSize = stateStack.size();
-
-        if (stackSize > 0)
-        {
-            context->restoreState();
-
-            delete state;
-            state = stateStack.getUnchecked (stackSize - 1);
-
-            stateStack.removeLast (1, false);
-        }
-        else
-        {
-            // Trying to call restoreState() more times than you've called saveState() !
-            // Be careful to correctly match each saveState() with exactly one call to restoreState().
-            jassertfalse
-        }
-    }
+        context->restoreState();
 }
 
 void Graphics::saveStateIfPending() throw()
@@ -171,9 +145,7 @@ void Graphics::saveStateIfPending() throw()
     if (saveStatePending)
     {
         saveStatePending = false;
-
         context->saveState();
-        stateStack.add (new GraphicsState (*state));
     }
 }
 
@@ -187,15 +159,13 @@ void Graphics::setOrigin (const int newOriginX,
 bool Graphics::clipRegionIntersects (const int x, const int y,
                                      const int w, const int h) const throw()
 {
-    return context->clipRegionIntersects (x, y, w, h);
+    return context->clipRegionIntersects (Rectangle (x, y, w, h));
 }
 
 //==============================================================================
 void Graphics::setColour (const Colour& newColour) throw()
 {
     saveStateIfPending();
-
-    deleteAndZero (state->brush);
     context->setColour (newColour);
 }
 
@@ -205,75 +175,26 @@ void Graphics::setOpacity (const float newOpacity) throw()
     context->setOpacity (newOpacity);
 }
 
-void Graphics::setBrush (const Brush* const newBrush) throw()
-{
-    saveStateIfPending();
-    delete state->brush;
-    state->brush = 0;
-
-    if (newBrush != 0)
-    {
-        const SolidColourBrush* cb = dynamic_cast <const SolidColourBrush*> (newBrush);
-
-        if (cb != 0)
-        {
-            setColour (cb->getColour());
-        }
-        else
-        {
-            const GradientBrush* gb = dynamic_cast <const GradientBrush*> (newBrush);
-
-            if (gb != 0)
-            {
-                setGradientFill (gb->getGradient());
-            }
-            else
-            {
-                state->brush = newBrush->createCopy();
-            }
-        }
-    }
-}
-
 void Graphics::setGradientFill (const ColourGradient& gradient) throw()
 {
     saveStateIfPending();
-    deleteAndZero (state->brush);
     context->setGradient (gradient);
 }
 
-void Graphics::setTiledImageFill (Image& imageToUse,
+void Graphics::setTiledImageFill (const Image& imageToUse,
                                   const int anchorX,
                                   const int anchorY,
                                   const float opacity) throw()
 {
     saveStateIfPending();
-    delete state->brush;
-    state->brush = new ImageBrush (&imageToUse, anchorX, anchorY, opacity);
-}
-
-//==============================================================================
-Graphics::GraphicsState::GraphicsState() throw()
-    : brush (0)
-{
-}
-
-Graphics::GraphicsState::GraphicsState (const GraphicsState& other) throw()
-    : brush (other.brush != 0 ? other.brush->createCopy() : 0),
-      font (other.font)
-{
-}
-
-Graphics::GraphicsState::~GraphicsState() throw()
-{
-    delete brush;
+    context->setTiledFill (imageToUse, anchorX, anchorY);
+    context->setOpacity (opacity);
 }
 
 //==============================================================================
 void Graphics::setFont (const Font& newFont) throw()
 {
     saveStateIfPending();
-    state->font = newFont;
     context->setFont (newFont);
 }
 
@@ -281,8 +202,9 @@ void Graphics::setFont (const float newFontHeight,
                         const int newFontStyleFlags) throw()
 {
     saveStateIfPending();
-    state->font.setSizeAndStyle (newFontHeight, newFontStyleFlags, 1.0f, 0);
-    context->setFont (state->font);
+    Font f (context->getFont());
+    f.setSizeAndStyle (newFontHeight, newFontStyleFlags, 1.0f, 0);
+    context->setFont (f);
 }
 
 //==============================================================================
@@ -294,7 +216,7 @@ void Graphics::drawSingleLineText (const String& text,
          && startX < context->getClipBounds().getRight())
     {
         GlyphArrangement arr;
-        arr.addLineOfText (state->font, text, (float) startX, (float) baselineY);
+        arr.addLineOfText (context->getFont(), text, (float) startX, (float) baselineY);
         arr.draw (*this);
     }
 }
@@ -305,7 +227,7 @@ void Graphics::drawTextAsPath (const String& text,
     if (text.isNotEmpty())
     {
         GlyphArrangement arr;
-        arr.addLineOfText (state->font, text, 0.0f, 0.0f);
+        arr.addLineOfText (context->getFont(), text, 0.0f, 0.0f);
         arr.draw (*this, transform);
     }
 }
@@ -319,7 +241,7 @@ void Graphics::drawMultiLineText (const String& text,
          && startX < context->getClipBounds().getRight())
     {
         GlyphArrangement arr;
-        arr.addJustifiedText (state->font, text,
+        arr.addJustifiedText (context->getFont(), text,
                               (float) startX, (float) baselineY, (float) maximumLineWidth,
                               Justification::left);
         arr.draw (*this);
@@ -334,11 +256,11 @@ void Graphics::drawText (const String& text,
                          const Justification& justificationType,
                          const bool useEllipsesIfTooBig) const throw()
 {
-    if (text.isNotEmpty() && context->clipRegionIntersects (x, y, width, height))
+    if (text.isNotEmpty() && context->clipRegionIntersects (Rectangle (x, y, width, height)))
     {
         GlyphArrangement arr;
 
-        arr.addCurtailedLineOfText (state->font, text,
+        arr.addCurtailedLineOfText (context->getFont(), text,
                                     0.0f, 0.0f, (float)width,
                                     useEllipsesIfTooBig);
 
@@ -361,11 +283,11 @@ void Graphics::drawFittedText (const String& text,
 {
     if (text.isNotEmpty()
          && width > 0 && height > 0
-         && context->clipRegionIntersects (x, y, width, height))
+         && context->clipRegionIntersects (Rectangle (x, y, width, height)))
     {
         GlyphArrangement arr;
 
-        arr.addFittedText (state->font, text,
+        arr.addFittedText (context->getFont(), text,
                            (float) x, (float) y,
                            (float) width, (float) height,
                            justification,
@@ -385,18 +307,12 @@ void Graphics::fillRect (int x,
     // passing in a silly number can cause maths problems in rendering!
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
 
-    if (state->brush == 0)
-        context->fillRect (x, y, width, height, false);
-    else
-        state->brush->paintRectangle (*context, x, y, width, height);
+    context->fillRect (Rectangle (x, y, width, height), false);
 }
 
 void Graphics::fillRect (const Rectangle& r) const throw()
 {
-    fillRect (r.getX(),
-              r.getY(),
-              r.getWidth(),
-              r.getHeight());
+    context->fillRect (r, false);
 }
 
 void Graphics::fillRect (const float x,
@@ -414,13 +330,7 @@ void Graphics::fillRect (const float x,
 
 void Graphics::setPixel (int x, int y) const throw()
 {
-    if (context->clipRegionIntersects (x, y, 1, 1))
-    {
-        if (state->brush == 0)
-            context->fillRect (x, y, 1, 1, false);
-        else
-            state->brush->paintRectangle (*context, x, y, 1, 1);
-    }
+    context->fillRect (Rectangle (x, y, 1, 1), false);
 }
 
 void Graphics::fillAll() const throw()
@@ -436,7 +346,7 @@ void Graphics::fillAll (const Colour& colourToUse) const throw()
 
         context->saveState();
         context->setColour (colourToUse);
-        context->fillRect (clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight(), false);
+        context->fillRect (clip, false);
         context->restoreState();
     }
 }
@@ -447,24 +357,16 @@ void Graphics::fillPath (const Path& path,
                          const AffineTransform& transform) const throw()
 {
     if ((! context->isClipEmpty()) && ! path.isEmpty())
-    {
-        if (state->brush == 0)
-            context->fillPath (path, transform);
-        else
-            state->brush->paintPath (*context, path, transform);
-    }
+        context->fillPath (path, transform);
 }
 
 void Graphics::strokePath (const Path& path,
                            const PathStrokeType& strokeType,
                            const AffineTransform& transform) const throw()
 {
-//    if ((! state->colour.isTransparent()) || state->brush != 0)
-    {
-        Path stroke;
-        strokeType.createStrokedPath (stroke, path, transform);
-        fillPath (stroke);
-    }
+    Path stroke;
+    strokeType.createStrokedPath (stroke, path, transform);
+    fillPath (stroke);
 }
 
 //==============================================================================
@@ -477,21 +379,10 @@ void Graphics::drawRect (const int x,
     // passing in a silly number can cause maths problems in rendering!
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
 
-    if (state->brush == 0)
-    {
-        context->fillRect (x, y, width, lineThickness, false);
-        context->fillRect (x, y + lineThickness, lineThickness, height - lineThickness * 2, false);
-        context->fillRect (x + width - lineThickness, y + lineThickness, lineThickness, height - lineThickness * 2, false);
-        context->fillRect (x, y + height - lineThickness, width, lineThickness, false);
-    }
-    else
-    {
-        Brush& b = *(state->brush);
-        b.paintRectangle (*context, x, y, width, lineThickness);
-        b.paintRectangle (*context, x, y + lineThickness, lineThickness, height - lineThickness * 2);
-        b.paintRectangle (*context, x + width - lineThickness, y + lineThickness, lineThickness, height - lineThickness * 2);
-        b.paintRectangle (*context, x, y + height - lineThickness, width, lineThickness);
-    }
+    context->fillRect (Rectangle (x, y, width, lineThickness), false);
+    context->fillRect (Rectangle (x, y + lineThickness, lineThickness, height - lineThickness * 2), false);
+    context->fillRect (Rectangle (x + width - lineThickness, y + lineThickness, lineThickness, height - lineThickness * 2), false);
+    context->fillRect (Rectangle (x, y + height - lineThickness, width, lineThickness), false);
 }
 
 void Graphics::drawRect (const float x,
@@ -545,13 +436,13 @@ void Graphics::drawBevel (const int x,
                                          : oldOpacity;
 
             context->setColour (topLeftColour.withMultipliedAlpha (op));
-            context->fillRect (x + i, y + i, width - i * 2, 1, false);
+            context->fillRect (Rectangle (x + i, y + i, width - i * 2, 1), false);
             context->setColour (topLeftColour.withMultipliedAlpha (op * 0.75f));
-            context->fillRect (x + i, y + i + 1, 1, height - i * 2 - 2, false);
+            context->fillRect (Rectangle (x + i, y + i + 1, 1, height - i * 2 - 2), false);
             context->setColour (bottomRightColour.withMultipliedAlpha (op));
-            context->fillRect (x + i, y + height - i - 1, width - i * 2, 1, false);
+            context->fillRect (Rectangle (x + i, y + height - i - 1, width - i * 2, 1), false);
             context->setColour (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
-            context->fillRect (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2, false);
+            context->fillRect (Rectangle (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
         }
 
         context->restoreState();
@@ -667,7 +558,7 @@ void Graphics::fillCheckerBoard (int x, int y,
         if (colour1 == colour2)
         {
             context->setColour (colour1);
-            context->fillRect (x, y, width, height, false);
+            context->fillRect (Rectangle (x, y, width, height), false);
         }
         else
         {
@@ -684,9 +575,7 @@ void Graphics::fillCheckerBoard (int x, int y,
                 for (int xx = x; xx < right; xx += checkWidth)
                 {
                     context->setColour (((cx++ & 1) == 0) ? colour1 : colour2);
-                    context->fillRect (xx, y,
-                                       jmin (checkWidth, right - xx),
-                                       jmin (checkHeight, bottom - y),
+                    context->fillRect (Rectangle (xx, y, jmin (checkWidth, right - xx), jmin (checkHeight, bottom - y)),
                                        false);
                 }
 
@@ -702,30 +591,17 @@ void Graphics::fillCheckerBoard (int x, int y,
 //==============================================================================
 void Graphics::drawVerticalLine (const int x, float top, float bottom) const throw()
 {
-    if (state->brush == 0)
-        context->drawVerticalLine (x, top, bottom);
-    else
-        state->brush->paintVerticalLine (*context, x, top, bottom);
+    context->drawVerticalLine (x, top, bottom);
 }
 
 void Graphics::drawHorizontalLine (const int y, float left, float right) const throw()
 {
-    if (state->brush == 0)
-        context->drawHorizontalLine (y, left, right);
-    else
-        state->brush->paintHorizontalLine (*context, y, left, right);
+    context->drawHorizontalLine (y, left, right);
 }
 
-void Graphics::drawLine (float x1, float y1,
-                         float x2, float y2) const throw()
+void Graphics::drawLine (float x1, float y1, float x2, float y2) const throw()
 {
-    if (! context->isClipEmpty())
-    {
-        if (state->brush == 0)
-            context->drawLine (x1, y1, x2, y2);
-        else
-            state->brush->paintLine (*context, x1, y1, x2, y2);
-    }
+    context->drawLine (x1, y1, x2, y2);
 }
 
 void Graphics::drawLine (const float startX,
@@ -864,126 +740,14 @@ void Graphics::drawImage (const Image* const imageToDraw,
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (dx, dy, dw, dh);
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (sx, sy, sw, sh);
 
-    if (imageToDraw == 0 || ! context->clipRegionIntersects  (dx, dy, dw, dh))
+    if (! context->clipRegionIntersects  (Rectangle (dx, dy, dw, dh)))
         return;
 
-    if (sw == dw && sh == dh)
-    {
-        if (sx < 0)
-        {
-            dx -= sx;
-            dw += sx;
-            sw += sx;
-            sx = 0;
-        }
-
-        if (sx + sw > imageToDraw->getWidth())
-        {
-            const int amount = sx + sw - imageToDraw->getWidth();
-            dw -= amount;
-            sw -= amount;
-        }
-
-        if (sy < 0)
-        {
-            dy -= sy;
-            dh += sy;
-            sh += sy;
-            sy = 0;
-        }
-
-        if (sy + sh > imageToDraw->getHeight())
-        {
-            const int amount = sy + sh - imageToDraw->getHeight();
-            dh -= amount;
-            sh -= amount;
-        }
-
-        if (dw <= 0 || dh <= 0 || sw <= 0 || sh <= 0)
-            return;
-
-        if (fillAlphaChannelWithCurrentBrush)
-        {
-            if (state->brush == 0)
-            {
-                context->saveState();
-
-                if (context->reduceClipRegion (dx, dy, dw, dh))
-                    context->fillAlphaChannel (*imageToDraw, dx - sx, dy - sy);
-
-                context->restoreState();
-            }
-            else
-            {
-                state->brush->paintAlphaChannel (*context, *imageToDraw,
-                                                 dx - sx, dy - sy,
-                                                 dx, dy, dw, dh);
-            }
-        }
-        else
-        {
-            context->blendImage (*imageToDraw,
-                                 dx, dy, dw, dh, sx, sy);
-        }
-    }
-    else
-    {
-        if (dw <= 0 || dh <= 0 || sw <= 0 || sh <= 0)
-            return;
-
-        if (fillAlphaChannelWithCurrentBrush)
-        {
-            if (imageToDraw->isRGB())
-            {
-                fillRect (dx, dy, dw, dh);
-            }
-            else
-            {
-                int tx = dx;
-                int ty = dy;
-                int tw = dw;
-                int th = dh;
-
-                if (context->getClipBounds().intersectRectangle (tx, ty, tw, th))
-                {
-                    Image temp (imageToDraw->getFormat(), tw, th, true);
-                    Graphics g (temp);
-//xxx                    g.setImageResamplingQuality (state->quality);
-                    g.setOrigin (dx - tx, dy - ty);
-
-                    g.drawImage (imageToDraw,
-                                 0, 0, dw, dh,
-                                 sx, sy, sw, sh,
-                                 false);
-
-                    if (state->brush == 0)
-                    {
-                        context->saveState();
-
-                        if (context->reduceClipRegion (tx, ty, tw, th))
-                            context->fillAlphaChannel (temp, tx, ty);
-
-                        context->restoreState();
-                    }
-                    else
-                    {
-                        state->brush->paintAlphaChannel (*context, temp, tx, ty, tx, ty, tw, th);
-                    }
-                }
-            }
-        }
-        else
-        {
-            context->blendImageWarping (*imageToDraw,
-                                        sx, sy, sw, sh,
-                                        AffineTransform::translation ((float) -sx,
-                                                                      (float) -sy)
-                                                        .scaled (dw / (float) sw,
-                                                                 dh / (float) sh)
-                                                        .translated ((float) dx,
-                                                                     (float) dy));
-        }
-    }
+    drawImageTransformed (imageToDraw, sx, sy, sw, sh,
+                          AffineTransform::translation ((float) -sx, (float) -sy)
+                                          .scaled (dw / (float) sw, dh / (float) sh)
+                                          .translated ((float) dx, (float) dy),
+                          fillAlphaChannelWithCurrentBrush);
 }
 
 void Graphics::drawImageTransformed (const Image* const imageToDraw,
@@ -994,72 +758,96 @@ void Graphics::drawImageTransformed (const Image* const imageToDraw,
                                      const AffineTransform& transform,
                                      const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
-    if (imageToDraw != 0
-         && (! context->isClipEmpty())
-         && ! transform.isSingularity())
+    if (imageToDraw != 0 && ! context->isClipEmpty())
     {
-        if (transform.isIdentity())
+        const Rectangle srcClip (Rectangle (sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight));
+
+        if (fillAlphaChannelWithCurrentBrush)
         {
-            drawImage (imageToDraw,
-                       sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight,
-                       sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight,
-                       fillAlphaChannelWithCurrentBrush);
-        }
-        else if (fillAlphaChannelWithCurrentBrush)
-        {
-            Path p;
-            p.addRectangle ((float) sourceClipX, (float) sourceClipY,
-                            (float) sourceClipWidth, (float) sourceClipHeight);
-
-            p.applyTransform (transform);
-
-            float dx, dy, dw, dh;
-            p.getBounds (dx, dy, dw, dh);
-            int tx = (int) dx;
-            int ty = (int) dy;
-            int tw = roundFloatToInt (dw) + 2;
-            int th = roundFloatToInt (dh) + 2;
-
-            if (context->getClipBounds().intersectRectangle (tx, ty, tw, th))
-            {
-                Image temp (imageToDraw->getFormat(), tw, th, true);
-                Graphics g (temp);
-//xxx                g.setImageResamplingQuality (state->quality);
-
-                g.drawImageTransformed (imageToDraw,
-                                        sourceClipX,
-                                        sourceClipY,
-                                        sourceClipWidth,
-                                        sourceClipHeight,
-                                        transform.translated ((float) -tx, (float) -ty),
-                                        false);
-
-                if (state->brush == 0)
-                {
-                    context->saveState();
-
-                    if (context->reduceClipRegion (tx, ty, tw, th))
-                        context->fillAlphaChannel (temp, tx, ty);
-
-                    context->restoreState();
-                }
-                else
-                {
-                    state->brush->paintAlphaChannel (*context, temp, tx, ty, tx, ty, tw, th);
-                }
-            }
+            context->saveState();
+            context->clipToImageAlpha (*imageToDraw, srcClip, transform);
+            fillAll();
+            context->restoreState();
         }
         else
         {
-            context->blendImageWarping (*imageToDraw,
-                                        sourceClipX,
-                                        sourceClipY,
-                                        sourceClipWidth,
-                                        sourceClipHeight,
-                                        transform);
+            context->drawImage (*imageToDraw, srcClip, transform, false);
         }
     }
 }
 
+//==============================================================================
+Graphics::FillType::FillType() throw()
+    : colour (0xff000000), gradient (0),
+      image (0), imageX (0), imageY (0)
+{
+}
+
+Graphics::FillType::FillType (const Colour& colour_) throw()
+    : colour (colour_), gradient (0),
+      image (0), imageX (0), imageY (0)
+{
+}
+
+Graphics::FillType::FillType (const ColourGradient& gradient) throw()
+    : colour (0xff000000), gradient (new ColourGradient (gradient)),
+      image (0), imageX (0), imageY (0)
+{
+}
+
+Graphics::FillType::FillType (Image* const image_, const int x, const int y) throw()
+    : colour (0xff000000), gradient (0),
+      image (image_), imageX (x), imageY (y)
+{
+}
+
+Graphics::FillType::FillType (const FillType& other) throw()
+    : colour (other.colour),
+      gradient (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0),
+      image (other.image), imageX (other.imageX), imageY (other.imageY)
+{
+}
+
+const Graphics::FillType& Graphics::FillType::operator= (const FillType& other) throw()
+{
+    if (this != &other)
+    {
+        colour = other.colour;
+        delete gradient;
+        gradient = (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0);
+        image = other.image;
+        imageX = other.imageX;
+        imageY = other.imageY;
+    }
+
+    return *this;
+}
+
+Graphics::FillType::~FillType() throw()
+{
+    delete gradient;
+}
+
+void Graphics::FillType::setColour (const Colour& newColour) throw()
+{
+    deleteAndZero (gradient);
+    colour = newColour;
+}
+
+void Graphics::FillType::setGradient (const ColourGradient& newGradient) throw()
+{
+    if (gradient != 0)
+        *gradient = newGradient;
+    else
+        gradient = new ColourGradient (newGradient);
+}
+
+void Graphics::FillType::setTiledImage (const Image& image_, const int imageX_, const int imageY_) throw()
+{
+    deleteAndZero (gradient);
+    image = &image_;
+    imageX = imageX_;
+    imageY = imageY_;
+}
 
 END_JUCE_NAMESPACE

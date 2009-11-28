@@ -221,6 +221,15 @@ public:
     void addRectangle (const float x, const float y,
                        const float w, const float h) throw();
 
+    /** Adds a rectangle to the path.
+
+        The rectangle is added as a new sub-path. (Any currently open paths will be
+        left open).
+
+        @see addRoundedRectangle, addTriangle
+    */
+    void addRectangle (const Rectangle& rectangle) throw();
+
     /** Adds a rectangle with rounded corners to the path.
 
         The rectangle is added as a new sub-path. (Any currently open paths will be
@@ -616,21 +625,6 @@ public:
     */
     void restoreFromString (const String& stringVersion);
 
-    //==============================================================================
-    /** Creates a single-channel bitmap containing a mask of this path.
-
-        The smallest bitmap that contains the path will be created, and on return, the
-        imagePosition rectangle indicates the position of the newly created image, relative
-        to the path's origin.
-
-        Only the intersection of the path's bounds with the specified clipRegion rectangle
-        will be rendered.
-
-        If the path is empty or doesn't intersect the clip region, this may return 0.
-    */
-    Image* createMaskBitmap (const AffineTransform& transform,
-                             const Rectangle& clipRegion,
-                             Rectangle& imagePosition) const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

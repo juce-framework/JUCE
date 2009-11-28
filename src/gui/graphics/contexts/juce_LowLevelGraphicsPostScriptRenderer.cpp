@@ -613,7 +613,10 @@ void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, float x, fl
 
 void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
-    font.renderGlyphIndirectly (*this, glyphNumber, transform);
+    Path p;
+    font.getTypeface()->getOutlineForGlyph (glyphNumber, p);
+
+    fillPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight()).followedBy (transform));
 }
 
 END_JUCE_NAMESPACE

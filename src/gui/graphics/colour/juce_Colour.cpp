@@ -301,12 +301,18 @@ const Colour Colour::overlaidWith (const Colour& src) const throw()
 
 const Colour Colour::interpolatedWith (const Colour& other, float proportionOfOther) const throw()
 {
-    const int amount = jlimit (0, 256, (int) (proportionOfOther * 256.0f));
+    if (proportionOfOther <= 0)
+        return *this;
 
-    return Colour ((uint8) (getRed() + (((other.getRed() - getRed()) * amount) >> 8)),
-                   (uint8) (getGreen() + (((other.getGreen() - getGreen()) * amount) >> 8)),
-                   (uint8) (getBlue() + (((other.getBlue() - getBlue()) * amount) >> 8)),
-                   (uint8) (getAlpha() + (((other.getAlpha() - getAlpha()) * amount) >> 8)));
+    if (proportionOfOther >= 1.0f)
+        return other;
+
+    PixelARGB c1 (getPixelARGB());
+    const PixelARGB c2 (other.getPixelARGB());
+    c1.tween (c2, roundFloatToInt (proportionOfOther * 255.0f));
+    c1.unpremultiply();
+
+    return Colour (c1.getARGB());
 }
 
 //==============================================================================
