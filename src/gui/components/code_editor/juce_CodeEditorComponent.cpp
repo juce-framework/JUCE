@@ -618,8 +618,11 @@ void CodeEditorComponent::insertTextAtCaret (const String& newText)
 
 void CodeEditorComponent::insertTabAtCaret()
 {
-    if (CharacterFunctions::isWhitespace (caretPos.getCharacter()))
+    if (CharacterFunctions::isWhitespace (caretPos.getCharacter())
+         && caretPos.getLineNumber() == caretPos.movedBy (1).getLineNumber())
+    {
         moveCaretTo (document.findWordBreakAfter (caretPos), false);
+    }
 
     if (useSpacesForTabs)
     {

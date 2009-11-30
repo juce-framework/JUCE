@@ -1359,8 +1359,14 @@ private:
             {
                 // If we have an unused keypress, move the key-focus to a host window
                 // and re-inject the event..
-                [[hostWindow parentWindow] makeKeyWindow];
-                [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+                static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
+
+                if (lastEventTime != [[NSApp currentEvent] timestamp])
+                {
+                    lastEventTime = [[NSApp currentEvent] timestamp];
+                    [[hostWindow parentWindow] makeKeyWindow];
+                    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+                }
             }
 
             return false;

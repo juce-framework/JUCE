@@ -31,6 +31,7 @@
 class CoreGraphicsImage : public Image
 {
 public:
+    //==============================================================================
     CoreGraphicsImage (const PixelFormat format,
                        const int imageWidth,
                        const int imageHeight,
@@ -41,9 +42,7 @@ public:
                                                                      : CGColorSpaceCreateDeviceRGB();
 
         context = CGBitmapContextCreate (imageData, imageWidth, imageHeight, 8, lineStride,
-                                         colourSpace,
-                                         format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
-                                                               : kCGBitmapByteOrderDefault);
+                                         colourSpace, getCGImageFlags (*this));
 
         CGColorSpaceRelease (colourSpace);
     }
@@ -55,7 +54,64 @@ public:
 
     LowLevelGraphicsContext* createLowLevelContext();
 
+    //==============================================================================
+    static CGImageRef createImage (const Image& juceImage, const bool forAlpha, CGColorSpaceRef colourSpace) throw()
+    {
+        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (&juceImage);
+
+        if (nativeImage != 0 && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
+        {
+            return CGBitmapContextCreateImage (nativeImage->context);
+        }
+        else
+        {
+            const Image::BitmapData srcData (juceImage, 0, 0, juceImage.getWidth(), juceImage.getHeight());
+
+            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.pixelStride, 0);
+
+            CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
+                                                 8, srcData.pixelStride * 8, srcData.lineStride,
+                                                 colourSpace, getCGImageFlags (juceImage), provider,
+                                                 0, true, kCGRenderingIntentDefault);
+
+            CGDataProviderRelease (provider);
+            return imageRef;
+        }
+    }
+
+    static NSImage* createNSImage (const Image& image)
+    {
+        const ScopedAutoReleasePool pool;
+
+        NSImage* im = [[NSImage alloc] init];
+        [im setSize: NSMakeSize (image.getWidth(), image.getHeight())];
+        [im lockFocus];
+
+        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
+        CGImageRef imageRef = createImage (image, false, colourSpace);
+        CGColorSpaceRelease (colourSpace);
+
+        CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+        CGContextDrawImage (cg, CGRectMake (0, 0, image.getWidth(), image.getHeight()), imageRef);
+
+        CGImageRelease (imageRef);
+        [im unlockFocus];
+
+        return im;
+    }
+
+    //==============================================================================
     CGContextRef context;
+
+private:
+    static CGBitmapInfo getCGImageFlags (const Image& image) throw()
+    {
+#if JUCE_BIG_ENDIAN
+        return image.getFormat() == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big) : kCGBitmapByteOrderDefault;
+#else
+        return image.getFormat() == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault;
+#endif
+    }
 };
 
 Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
@@ -146,7 +202,7 @@ public:
         if (! transform.isSingularity())
         {
             Image* singleChannelImage = createAlphaChannelImage (sourceImage);
-            CGImageRef image = createImage (*singleChannelImage, true);
+            CGImageRef image = CoreGraphicsImage::createImage (*singleChannelImage, true, greyColourSpace);
 
             flip();
             AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
@@ -315,7 +371,7 @@ public:
     void drawImage (const Image& sourceImage, const Rectangle& srcClip,
                     const AffineTransform& transform, const bool fillEntireClipAsTiles)
     {
-        CGImageRef fullImage = createImage (sourceImage, false);
+        CGImageRef fullImage = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace);
         CGImageRef image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), sourceImage.getHeight() - srcClip.getBottom(),
                                                                                 srcClip.getWidth(), srcClip.getHeight()));
         CGImageRelease (fullImage);
@@ -611,35 +667,6 @@ private:
                 jassertfalse
                 break;
             }
-        }
-    }
-
-    CGImageRef createImage (const Image& juceImage, const bool forAlpha) const throw()
-    {
-        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (&juceImage);
-
-        if (nativeImage != 0 && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
-        {
-            return CGBitmapContextCreateImage (nativeImage->context);
-        }
-        else
-        {
-            const Image::BitmapData srcData (juceImage, 0, 0, juceImage.getWidth(), juceImage.getHeight());
-
-            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.pixelStride, 0);
-            CGColorSpaceRef colourSpace = forAlpha ? greyColourSpace : rgbColourSpace;
-
-            CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
-                                                 8, srcData.pixelStride * 8, srcData.lineStride,
-                                                 colourSpace,
-                                                 (juceImage.hasAlphaChannel() && ! forAlpha)
-                                                     ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little)
-                                                     : kCGBitmapByteOrderDefault,
-                                                 provider,
-                                                 0, true, kCGRenderingIntentDefault);
-
-            CGDataProviderRelease (provider);
-            return imageRef;
         }
     }
 

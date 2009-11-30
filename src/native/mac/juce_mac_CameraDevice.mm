@@ -145,63 +145,12 @@ public:
             [session removeOutput: imageOutput];
     }
 
-    static void drawNSBitmapIntoJuceImage (Image& dest, NSBitmapImageRep* source)
+    void callListeners (CIImage* frame, int w, int h)
     {
-        const ScopedAutoReleasePool pool;
-
-        const Image::BitmapData destData (dest, 0, 0, dest.getWidth(), dest.getHeight(), true);
-
-        NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
-            initWithBitmapDataPlanes: (unsigned char**) &(destData.data)
-                          pixelsWide: destData.width
-                          pixelsHigh: destData.height
-                       bitsPerSample: 8
-                     samplesPerPixel: destData.pixelStride
-                            hasAlpha: dest.hasAlphaChannel()
-                            isPlanar: NO
-                      colorSpaceName: NSCalibratedRGBColorSpace
-                        bitmapFormat: (NSBitmapFormat) 0
-                         bytesPerRow: destData.lineStride
-                        bitsPerPixel: destData.pixelStride * 8];
-
-        [NSGraphicsContext saveGraphicsState];
-        [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithBitmapImageRep: rep]];
-
-        [source drawAtPoint: NSZeroPoint];
-
-        [[NSGraphicsContext currentContext] flushGraphics];
-        [NSGraphicsContext restoreGraphicsState];
-
-        uint8* start = destData.data;
-        for (int h = dest.getHeight(); --h >= 0;)
-        {
-            uint8* p = start;
-            start += destData.lineStride;
-
-            for (int i = dest.getWidth(); --i >= 0;)
-            {
-#if JUCE_BIG_ENDIAN
-                const uint8 oldp3 = p[3];
-                const uint8 oldp1 = p[1];
-                p[3] = p[0];
-                p[0] = oldp1;
-                p[1] = p[2];
-                p[2] = oldp3;
-#else
-                const uint8 oldp0 = p[0];
-                p[0] = p[2];
-                p[2] = oldp0;
-#endif
-
-                p += destData.pixelStride;
-            }
-        }
-    }
-
-    void callListeners (NSBitmapImageRep* bitmap)
-    {
-        Image image (Image::ARGB, [bitmap size].width, [bitmap size].height, false);
-        drawNSBitmapIntoJuceImage (image, bitmap);
+        CoreGraphicsImage image (Image::ARGB, w, h, false);
+        CIContext* cic = [CIContext contextWithCGContext: image.context options: nil];
+        [cic drawImage: frame inRect: CGRectMake (0, 0, w, h) fromRect: CGRectMake (0, 0, w, h)];
+        CGContextFlush (image.context);
 
         const ScopedLock sl (listenerLock);
 
@@ -251,10 +200,10 @@ END_JUCE_NAMESPACE
          fromConnection: (QTCaptureConnection*) connection
 {
     const ScopedAutoReleasePool pool;
-    CIImage* image = [CIImage imageWithCVImageBuffer: videoFrame];
-    NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc] initWithCIImage: image] autorelease];
 
-    internal->callListeners (bitmap);
+    internal->callListeners ([CIImage imageWithCVImageBuffer: videoFrame],
+                             CVPixelBufferGetWidth (videoFrame),
+                             CVPixelBufferGetHeight (videoFrame));
 }
 
 - (void) captureOutput: (QTCaptureFileOutput*) captureOutput

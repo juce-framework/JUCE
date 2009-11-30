@@ -29,40 +29,11 @@
 
 #if JUCE_MAC
 
-//==============================================================================
-static NSImage* juceImageToNSImage (const Image& image)
-{
-    const ScopedAutoReleasePool pool;
-
-    const Image::BitmapData srcData (image, 0, 0, image.getWidth(), image.getHeight());
-
-    NSBitmapImageRep* rep = [[NSBitmapImageRep alloc]
-        initWithBitmapDataPlanes: NULL
-                      pixelsWide: srcData.width
-                      pixelsHigh: srcData.height
-                   bitsPerSample: 8
-                 samplesPerPixel: image.hasAlphaChannel() ? 4 : 3
-                        hasAlpha: image.hasAlphaChannel()
-                        isPlanar: NO
-                  colorSpaceName: NSCalibratedRGBColorSpace
-                    bitmapFormat: (NSBitmapFormat) 0
-                     bytesPerRow: srcData.lineStride
-                    bitsPerPixel: srcData.pixelStride * 8];
-
-    unsigned char* newData = [rep bitmapData];
-    memcpy (newData, srcData.data, srcData.lineStride * srcData.height);
-
-    NSImage* im = [[NSImage alloc] init];
-    [im addRepresentation: rep];
-    [rep release];
-
-    return im;
-}
 
 //==============================================================================
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
-    NSImage* im = juceImageToNSImage (image);
+    NSImage* im = CoreGraphicsImage::createNSImage (image);
     NSCursor* c = [[NSCursor alloc] initWithImage: im
                                           hotSpot: NSMakePoint (hotspotX, hotspotY)];
     [im release];

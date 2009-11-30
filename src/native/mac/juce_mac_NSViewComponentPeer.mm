@@ -556,123 +556,6 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class JuceNSImage
-{
-public:
-    JuceNSImage (const int width, const int height, const bool hasAlpha)
-        : juceImage (hasAlpha ? Image::ARGB : Image::RGB,
-                     width, height, hasAlpha),
-          srcData (juceImage, 0, 0, width, height)
-    {
-        imageRep = [[NSBitmapImageRep alloc]
-            initWithBitmapDataPlanes: (unsigned char**) &(srcData.data)
-                          pixelsWide: width
-                          pixelsHigh: height
-                       bitsPerSample: 8
-                     samplesPerPixel: srcData.pixelStride
-                            hasAlpha: hasAlpha
-                            isPlanar: NO
-                      colorSpaceName: NSCalibratedRGBColorSpace
-                        bitmapFormat: /*NSAlphaFirstBitmapFormat*/ (NSBitmapFormat) 0
-                         bytesPerRow: srcData.lineStride
-                        bitsPerPixel: 8 * srcData.pixelStride ];
-    }
-
-    ~JuceNSImage()
-    {
-        [imageRep release];
-    }
-
-    Image& getJuceImage() throw()     { return juceImage; }
-
-    void draw (const float x, const float y,
-               const RectangleList& clip,
-               const int originX, const int originY) const
-    {
-        // Our data is BGRA and the damned image rep only takes RGBA, so
-        // we need to byte-swap the active areas if there's an alpha channel...
-        if (juceImage.hasAlphaChannel())
-        {
-            RectangleList::Iterator iter (clip);
-            while (iter.next())
-            {
-                const Rectangle* const r = iter.getRectangle();
-
-                swapRGBOrder (r->getX() + originX,
-                              r->getY() + originY,
-                              r->getWidth(),
-                              r->getHeight());
-            }
-        }
-
-        NSPoint p;
-        p.x = x;
-        p.y = y;
-        [imageRep drawAtPoint: p];
-    }
-
-    void drawNSImage (NSImage* imageToDraw)
-    {
-        const ScopedAutoReleasePool pool;
-
-        [NSGraphicsContext saveGraphicsState];
-        [NSGraphicsContext setCurrentContext:
-            [NSGraphicsContext graphicsContextWithBitmapImageRep: imageRep]];
-
-        [imageToDraw drawAtPoint: NSZeroPoint
-                        fromRect: NSMakeRect (0, 0, [imageToDraw size].width, [imageToDraw size].height)
-                       operation: NSCompositeSourceOver
-                        fraction: 1.0f];
-
-        [[NSGraphicsContext currentContext] flushGraphics];
-        [NSGraphicsContext restoreGraphicsState];
-
-        if (juceImage.hasAlphaChannel())
-            swapRGBOrder (0, 0, juceImage.getWidth(), juceImage.getHeight());
-    }
-
-private:
-    Image juceImage;
-    NSBitmapImageRep* imageRep;
-    const Image::BitmapData srcData;
-
-    void swapRGBOrder (const int x, const int y, const int w, int h) const
-    {
-#if JUCE_BIG_ENDIAN
-        jassert (srcData.pixelStride == 4);
-#endif
-        jassert (Rectangle (0, 0, juceImage.getWidth(), juceImage.getHeight())
-                 .contains (Rectangle (x, y, w, h)));
-
-        uint8* start = srcData.getPixelPointer (x, y);
-
-        while (--h >= 0)
-        {
-            uint8* p = start;
-            start += srcData.lineStride;
-
-            for (int i = w; --i >= 0;)
-            {
-#if JUCE_BIG_ENDIAN
-                const uint8 oldp3 = p[3];
-                const uint8 oldp1 = p[1];
-                p[3] = p[0];
-                p[0] = oldp1;
-                p[1] = p[2];
-                p[2] = oldp3;
-#else
-                const uint8 oldp0 = p[0];
-                p[0] = p[2];
-                p[2] = oldp0;
-#endif
-
-                p += srcData.pixelStride;
-            }
-        }
-    }
-};
-
-//==============================================================================
 static ComponentPeer* currentlyFocusedPeer = 0;
 static VoidArray keysCurrentlyDown;
 
@@ -1435,28 +1318,26 @@ void NSViewComponentPeer::drawRect (NSRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
-#if USE_COREGRAPHICS_RENDERING
     CGContextRef cg = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
 
     if (! component->isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
+#if USE_COREGRAPHICS_RENDERING
     CoreGraphicsContext context (cg, [view frame].size.height);
 
     insideDrawRect = true;
     handlePaint (context);
     insideDrawRect = false;
 #else
-    const float y = [view frame].size.height - (r.origin.y + r.size.height);
+    Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
+                (int) (r.size.width + 0.5f),
+                (int) (r.size.height + 0.5f),
+                ! getComponent()->isOpaque());
 
-    JuceNSImage temp ((int) (r.size.width + 0.5f),
-                      (int) (r.size.height + 0.5f),
-                      ! getComponent()->isOpaque());
-
-    LowLevelGraphicsSoftwareRenderer context (temp.getJuceImage());
-    const int originX = -roundFloatToInt (r.origin.x);
-    const int originY = -roundFloatToInt (y);
-    context.setOrigin (originX, originY);
+    LowLevelGraphicsSoftwareRenderer context (temp);
+    context.setOrigin (-roundFloatToInt (r.origin.x),
+                       -roundFloatToInt ([view frame].size.height - (r.origin.y + r.size.height)));
 
     const NSRect* rects = 0;
     NSInteger numRects = 0;
@@ -1477,7 +1358,11 @@ void NSViewComponentPeer::drawRect (NSRect r)
         handlePaint (context);
         insideDrawRect = false;
 
-        temp.draw (r.origin.x, r.origin.y, clip, originX, originY);
+        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
+        CGImageRef image = CoreGraphicsImage::createImage (temp, false, colourSpace);
+        CGColorSpaceRelease (colourSpace);
+        CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, temp.getWidth(), temp.getHeight()), image);
+        CGImageRelease (image);
     }
 #endif
 }
@@ -1567,22 +1452,25 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-static Image* NSImageToJuceImage (NSImage* image)
-{
-    JuceNSImage juceIm ((int) [image size].width,
-                        (int) [image size].height,
-                        true);
-
-    juceIm.drawNSImage (image);
-    return juceIm.getJuceImage().createCopy();
-}
-
 Image* juce_createIconForFile (const File& file)
 {
     const ScopedAutoReleasePool pool;
 
-    NSImage* im = [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (file.getFullPathName())];
-    return NSImageToJuceImage (im);
+    NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: juceStringToNS (file.getFullPathName())];
+
+    CoreGraphicsImage* result = new CoreGraphicsImage (Image::ARGB, (int) [image size].width, (int) [image size].height, true);
+
+    [NSGraphicsContext saveGraphicsState];
+    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: result->context flipped: false]];
+
+    [image drawAtPoint: NSMakePoint (0, 0)
+              fromRect: NSMakeRect (0, 0, [image size].width, [image size].height)
+             operation: NSCompositeSourceOver fraction: 1.0f];
+
+    [[NSGraphicsContext currentContext] flushGraphics];
+    [NSGraphicsContext restoreGraphicsState];
+
+    return result;
 }
 
 //==============================================================================
