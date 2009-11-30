@@ -133,6 +133,7 @@
 #endif
 
 #include "../juce_PluginHeaders.h"
+#include "../juce_PluginHostType.h"
 
 
 #ifdef _MSC_VER

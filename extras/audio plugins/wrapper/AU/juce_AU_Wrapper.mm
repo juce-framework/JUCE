@@ -30,6 +30,7 @@
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #include "../juce_PluginHeaders.h"
+#include "../juce_PluginHostType.h"
 
 #if JucePlugin_Build_AU
 
