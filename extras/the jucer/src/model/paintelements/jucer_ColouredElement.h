@@ -52,15 +52,15 @@ public:
     void getColourSpecificProperties (Array <PropertyComponent*>& properties);
 
     //==============================================================================
-    const FillType& getFillType() throw();
-    void setFillType (const FillType& newType, const bool undoable);
+    const JucerFillType& getFillType() throw();
+    void setFillType (const JucerFillType& newType, const bool undoable);
 
     bool isStrokeEnabled() const throw();
     void enableStroke (bool enable, const bool undoable);
 
     const StrokeType& getStrokeType() throw();
     void setStrokeType (const PathStrokeType& newType, const bool undoable);
-    void setStrokeFill (const FillType& newType, const bool undoable);
+    void setStrokeFill (const JucerFillType& newType, const bool undoable);
 
     //==============================================================================
     const Rectangle getCurrentBounds (const Rectangle& parentArea) const;
@@ -76,7 +76,7 @@ public:
     juce_UseDebuggingNewOperator
 
 protected:
-    FillType fillType;
+    JucerFillType fillType;
 
     bool isStrokePresent;
     const bool showOutline, showJointAndEnd;

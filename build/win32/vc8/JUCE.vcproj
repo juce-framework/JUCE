@@ -2212,6 +2212,14 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\gui\graphics\contexts\juce_FillType.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\graphics\contexts\juce_FillType.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\gui\graphics\contexts\juce_Graphics.cpp"
 							>
 						</File>

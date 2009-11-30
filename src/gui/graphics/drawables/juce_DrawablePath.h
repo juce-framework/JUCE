@@ -57,33 +57,33 @@ public:
     /** Returns the current path. */
     const Path& getPath() const throw()                         { return path; }
 
-    /** Sets a colour to fill the path with.
+    /** Sets a fill type for the path.
 
         This colour is used to fill the path - if you don't want the path to be
-        filled (e.g. if you're just drawing an outline), set this colour to be
-        transparent.
+        filled (e.g. if you're just drawing an outline), set this to a transparent
+        colour.
 
-        @see setPath, setOutlineColour, setFillGradient
+        @see setPath, setStrokeFill
     */
-    void setFillColour (const Colour& newColour) throw();
+    void setFill (const FillType& newFill) throw();
 
-    /** Sets a gradient to use to fill the path.
+    /** Returns the current fill type.
+        @see setFill
     */
-    void setFillGradient (const ColourGradient& newGradient) throw();
+    const FillType& getFill() const throw()                     { return mainFill; }
 
-    /** Sets the colour with which the outline will be drawn.
-        @see setStrokeGradient
+    /** Sets the fill type with which the outline will be drawn.
+        @see setFill
     */
-    void setStrokeColour (const Colour& newStrokeColour) throw();
+    void setStrokeFill (const FillType& newStrokeFill) throw();
 
-    /** Sets a gradient with with the outline will be drawn.
-        @see setStrokeColour
+    /** Returns the current stroke fill.
+        @see setStrokeFill
     */
-    void setStrokeGradient (const ColourGradient& newStrokeGradient) throw();
+    const FillType& getStrokeFill() const throw()               { return strokeFill; }
 
     /** Changes the properties of the outline that will be drawn around the path.
         If the stroke has 0 thickness, no stroke will be drawn.
-
         @see setStrokeThickness, setStrokeColour
     */
     void setStrokeType (const PathStrokeType& newStrokeType) throw();
@@ -94,7 +94,7 @@ public:
     void setStrokeThickness (const float newThickness) throw();
 
     /** Returns the current outline style. */
-    const PathStrokeType& getStrokeType() const throw()      { return strokeType; }
+    const PathStrokeType& getStrokeType() const throw()         { return strokeType; }
 
 
     //==============================================================================
@@ -119,10 +119,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Path path, outline;
-    Colour fillColour, strokeColour;
-    ColourGradient* fillGradient;
-    ColourGradient* strokeGradient;
+    Path path, stroke;
+    FillType mainFill, strokeFill;
     PathStrokeType strokeType;
 
     void updateOutline();

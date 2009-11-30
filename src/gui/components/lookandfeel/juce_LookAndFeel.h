@@ -594,6 +594,8 @@ public:
     //==============================================================================
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
 
+    virtual void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription);
+
     //==============================================================================
     /**
     */

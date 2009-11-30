@@ -72,7 +72,7 @@ public:
 
         if (isStroke)
         {
-            FillType f (e->getStrokeType().fill);
+            JucerFillType f (e->getStrokeType().fill);
 
             if (isStart)
                 f.gradPos1 = newPos;
@@ -83,7 +83,7 @@ public:
         }
         else
         {
-            FillType f (e->getFillType());
+            JucerFillType f (e->getFillType());
 
             if (isStart)
                 f.gradPos1 = newPos;
@@ -100,11 +100,11 @@ public:
 
         ColouredElement* e = dynamic_cast <ColouredElement*> (owner);
 
-        FillType f (isStroke ? e->getStrokeType().fill
-                             : e->getFillType());
+        JucerFillType f (isStroke ? e->getStrokeType().fill
+                                  : e->getFillType());
 
-        setVisible (f.mode == FillType::linearGradient
-                     || f.mode == FillType::radialGradient);
+        setVisible (f.mode == JucerFillType::linearGradient
+                     || f.mode == JucerFillType::radialGradient);
     }
 
 private:

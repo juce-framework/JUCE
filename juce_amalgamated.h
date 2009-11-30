@@ -19703,6 +19703,10 @@ private:
 #endif   // __JUCE_COLOURS_JUCEHEADER__
 /********* End of inlined file: juce_Colours.h *********/
 
+/********* Start of inlined file: juce_FillType.h *********/
+#ifndef __JUCE_GRAPHICS_JUCEHEADER__x
+#define __JUCE_GRAPHICS_JUCEHEADER__x
+
 /********* Start of inlined file: juce_ColourGradient.h *********/
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 #define __JUCE_COLOURGRADIENT_JUCEHEADER__
@@ -19798,7 +19802,7 @@ public:
 
         The caller must delete the array that is returned using juce_free().
     */
-    PixelARGB* createLookupTable (int& numEntries) const throw();
+    PixelARGB* createLookupTable (const AffineTransform& transform, int& numEntries) const throw();
 
     /** Returns true if all colours are opaque. */
     bool isOpaque() const throw();
@@ -19819,9 +19823,6 @@ public:
     */
     bool isRadial;
 
-    /** A transform to apply to the resultant gradient shape */
-    AffineTransform transform;
-
     juce_UseDebuggingNewOperator
 
 private:
@@ -19830,6 +19831,92 @@ private:
 
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
 /********* End of inlined file: juce_ColourGradient.h *********/
+
+class Image;
+
+/**
+    Represents a colour or fill pattern to use for rendering paths.
+
+    This is used by the Graphics and DrawablePath classes as a way to encapsulate
+    a brush type. It can either be a solid colour, a gradient, or a tiled image.
+
+    @see Graphics::setFillType, DrawablePath::setFill
+*/
+class JUCE_API  FillType
+{
+public:
+    /** Creates a default fill type, of solid black. */
+    FillType() throw();
+
+    /** Creates a fill type of a solid colour.
+        @see setColour
+    */
+    FillType (const Colour& colour) throw();
+
+    /** Creates a gradient fill type.
+        @see setGradient
+    */
+    FillType (const ColourGradient& gradient) throw();
+
+    /** Creates a tiled image fill type. The transform allows you to set the scaling, offset
+        and rotation of the pattern.
+        @see setTiledImage
+    */
+    FillType (const Image& image, const AffineTransform& transform) throw();
+
+    /** Creates a copy of another FillType. */
+    FillType (const FillType& other) throw();
+
+    /** Makes a copy of another FillType. */
+    const FillType& operator= (const FillType& other) throw();
+
+    /** Destructor. */
+    ~FillType() throw();
+
+    /** Returns true if this is a solid colour fill, and not a gradient or image. */
+    bool isColour() const throw()           { return gradient == 0 && image == 0; }
+
+    /** Returns true if this is a gradient fill. */
+    bool isGradient() const throw()         { return gradient != 0; }
+
+    /** Returns true if this is a tiled image pattern fill. */
+    bool isTiledImage() const throw()       { return image != 0; }
+
+    /** Turns this object into a solid colour fill.
+        If the object was an image or gradient, those fields will no longer be valid. */
+    void setColour (const Colour& newColour) throw();
+
+    /** Turns this object into a gradient fill. */
+    void setGradient (const ColourGradient& newGradient) throw();
+
+    /** Turns this object into a tiled image fill type. The transform allows you to set
+        the scaling, offset and rotation of the pattern.
+    */
+    void setTiledImage (const Image& image, const AffineTransform& transform) throw();
+
+    /** Returns the solid colour being used. */
+    Colour colour;
+
+    /** Returns the gradient that should be used for filling.
+        This will be zero if the object is some other type of fill.
+    */
+    ColourGradient* gradient;
+
+    /** Returns the image that should be used for tiling.
+        The FillType object just keeps a pointer to this image, it doesn't own it, so you have to
+        be careful to make sure the image doesn't get deleted while it's being used.
+    */
+    const Image* image;
+
+    /** The transform that should be applied to the image or gradient that's being drawn.
+    */
+    AffineTransform transform;
+
+    juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_GRAPHICS_JUCEHEADER__
+/********* End of inlined file: juce_FillType.h *********/
 
 /********* Start of inlined file: juce_RectanglePlacement.h *********/
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
@@ -20026,6 +20113,11 @@ public:
                             const int anchorX,
                             const int anchorY,
                             const float opacity) throw();
+
+    /** Changes the current fill settings.
+        @see setColour, setGradientFill, setTiledImageFill
+    */
+    void setFillType (const FillType& newFill) throw();
 
     /** Changes the font to use for subsequent text-drawing functions.
 
@@ -20533,7 +20625,7 @@ public:
     /** Intersects the current clipping region with another region.
 
         @returns true if the resulting clipping region is non-zero in size
-        @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
+        @see setOrigin, clipRegionIntersects
     */
     bool reduceClipRegion (const int x, const int y,
                            const int width, const int height) throw();
@@ -20541,9 +20633,33 @@ public:
     /** Intersects the current clipping region with a rectangle list region.
 
         @returns true if the resulting clipping region is non-zero in size
-        @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
+        @see setOrigin, clipRegionIntersects
     */
     bool reduceClipRegion (const RectangleList& clipRegion) throw();
+
+    /** Intersects the current clipping region with a path.
+
+        @returns true if the resulting clipping region is non-zero in size
+        @see reduceClipRegion
+    */
+    bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity) throw();
+
+    /** Intersects the current clipping region with an image's alpha-channel.
+
+        The current clipping path is intersected with the area covered by this image's
+        alpha-channel, after the image has been transformed by the specified matrix.
+
+        @param image    the image whose alpha-channel should be used. If the image doesn't
+                        have an alpha-channel, it is treated as entirely opaque.
+        @param sourceClipRegion     a subsection of the image that should be used. To use the
+                                    entire image, just pass a rectangle of bounds
+                                    (0, 0, image.getWidth(), image.getHeight()).
+        @param transform    a matrix to apply to the image
+        @returns true if the resulting clipping region is non-zero in size
+        @see reduceClipRegion
+    */
+    bool reduceClipRegion (const Image& image, const Rectangle& sourceClipRegion,
+                           const AffineTransform& transform) throw();
 
     /** Excludes a rectangle to stop it being drawn into. */
     void excludeClipRegion (const int x, const int y,
@@ -20593,33 +20709,6 @@ public:
 
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
-
-    class FillType
-    {
-    public:
-        FillType() throw();
-        FillType (const Colour& colour) throw();
-        FillType (const ColourGradient& gradient) throw();
-        FillType (Image* const image, const int x, const int y) throw();
-        FillType (const FillType& other) throw();
-        const FillType& operator= (const FillType& other) throw();
-        ~FillType() throw();
-
-        bool isColour() const throw()       { return gradient == 0 && image == 0; }
-        bool isGradient() const throw()     { return gradient != 0; }
-        bool isTiledImage() const throw()   { return image != 0; }
-
-        void setColour (const Colour& newColour) throw();
-        void setGradient (const ColourGradient& newGradient) throw();
-        void setTiledImage (const Image& image, const int imageX, const int imageY) throw();
-
-        Colour colour;
-        ColourGradient* gradient;
-        const Image* image;
-        int imageX, imageY;
-
-        juce_UseDebuggingNewOperator
-    };
 
 private:
 
@@ -39717,9 +39806,7 @@ public:
     virtual void saveState() = 0;
     virtual void restoreState() = 0;
 
-    virtual void setColour (const Colour& colour) = 0;
-    virtual void setGradient (const ColourGradient& gradient) = 0;
-    virtual void setTiledFill (const Image& image, int x, int y) = 0;
+    virtual void setFill (const FillType& fillType) = 0;
 
     virtual void setOpacity (float opacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
@@ -39782,14 +39869,10 @@ public:
     void saveState();
     void restoreState();
 
-    void setColour (const Colour& colour);
-    void setGradient (const ColourGradient& gradient);
-    void setTiledFill (const Image& image, int x, int y);
-
+    void setFill (const FillType& fillType);
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillAll (const bool replaceContents);
     void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
@@ -39848,45 +39931,36 @@ public:
     bool isVectorDevice() const;
     void setOrigin (int x, int y);
 
-    bool reduceClipRegion (int x, int y, int w, int h);
-    bool reduceClipRegion (const RectangleList& clipRegion);
-    void excludeClipRegion (int x, int y, int w, int h);
+    bool clipToRectangle (const Rectangle& r);
+    bool clipToRectangleList (const RectangleList& clipRegion);
+    void excludeClipRectangle (const Rectangle& r);
+    void clipToPath (const Path& path, const AffineTransform& transform);
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
 
     void saveState();
     void restoreState();
 
-    bool clipRegionIntersects (int x, int y, int w, int h);
+    bool clipRegionIntersects (const Rectangle& r);
     const Rectangle getClipBounds() const;
     bool isClipEmpty() const;
 
-    void setColour (const Colour& colour);
-    void setGradient (const ColourGradient& gradient);
+    void setFill (const FillType& fillType);
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY);
-
-    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
-    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
-
-    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY);
-
-    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform);
+    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
     void drawLine (double x1, double y1, double x2, double y2);
 
     void drawVerticalLine (const int x, double top, double bottom);
     void drawHorizontalLine (const int x, double top, double bottom);
 
+    const Font getFont();
     void setFont (const Font& newFont);
-    void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     juce_UseDebuggingNewOperator
@@ -39894,27 +39968,21 @@ public:
 protected:
 
     OutputStream& out;
-    RectangleList* clip;
-    int totalWidth, totalHeight, xOffset, yOffset;
+    int totalWidth, totalHeight;
     bool needToClip;
-    Colour lastColour, colour;
-    ColourGradient* gradient;
-    Font font;
+    Colour lastColour;
 
     struct SavedState
     {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
-                    const Colour& colour, ColourGradient* const gradient, const Font& font);
+        SavedState();
         ~SavedState();
 
-        RectangleList* clip;
-        const int xOffset, yOffset;
-        Colour colour;
-        ColourGradient* gradient;
+        RectangleList clip;
+        int xOffset, yOffset;
+        FillType fillType;
         Font font;
 
     private:
-        SavedState (const SavedState&);
         const SavedState& operator= (const SavedState&);
     };
 
@@ -41434,33 +41502,33 @@ public:
     /** Returns the current path. */
     const Path& getPath() const throw()                         { return path; }
 
-    /** Sets a colour to fill the path with.
+    /** Sets a fill type for the path.
 
         This colour is used to fill the path - if you don't want the path to be
-        filled (e.g. if you're just drawing an outline), set this colour to be
-        transparent.
+        filled (e.g. if you're just drawing an outline), set this to a transparent
+        colour.
 
-        @see setPath, setOutlineColour, setFillGradient
+        @see setPath, setStrokeFill
     */
-    void setFillColour (const Colour& newColour) throw();
+    void setFill (const FillType& newFill) throw();
 
-    /** Sets a gradient to use to fill the path.
+    /** Returns the current fill type.
+        @see setFill
     */
-    void setFillGradient (const ColourGradient& newGradient) throw();
+    const FillType& getFill() const throw()                     { return mainFill; }
 
-    /** Sets the colour with which the outline will be drawn.
-        @see setStrokeGradient
+    /** Sets the fill type with which the outline will be drawn.
+        @see setFill
     */
-    void setStrokeColour (const Colour& newStrokeColour) throw();
+    void setStrokeFill (const FillType& newStrokeFill) throw();
 
-    /** Sets a gradient with with the outline will be drawn.
-        @see setStrokeColour
+    /** Returns the current stroke fill.
+        @see setStrokeFill
     */
-    void setStrokeGradient (const ColourGradient& newStrokeGradient) throw();
+    const FillType& getStrokeFill() const throw()               { return strokeFill; }
 
     /** Changes the properties of the outline that will be drawn around the path.
         If the stroke has 0 thickness, no stroke will be drawn.
-
         @see setStrokeThickness, setStrokeColour
     */
     void setStrokeType (const PathStrokeType& newStrokeType) throw();
@@ -41471,7 +41539,7 @@ public:
     void setStrokeThickness (const float newThickness) throw();
 
     /** Returns the current outline style. */
-    const PathStrokeType& getStrokeType() const throw()      { return strokeType; }
+    const PathStrokeType& getStrokeType() const throw()         { return strokeType; }
 
     /** @internal */
     void render (const Drawable::RenderingContext& context) const;
@@ -41493,10 +41561,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Path path, outline;
-    Colour fillColour, strokeColour;
-    ColourGradient* fillGradient;
-    ColourGradient* strokeGradient;
+    Path path, stroke;
+    FillType mainFill, strokeFill;
     PathStrokeType strokeType;
 
     void updateOutline();
@@ -44093,6 +44159,21 @@ public:
     */
     virtual const String getDescriptionForKeyPress (const KeyPress& key);
 
+    /** A set of colour IDs to use to change the colour of various aspects of the editor.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        To change the colours of the menu that pops up
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId  = 0x100ad00,    /**< The background colour to fill the editor background. */
+        textColourId        = 0x100ad01,    /**< The colour for the text. */
+    };
+
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
@@ -44116,7 +44197,6 @@ private:
     friend class KeyCategoryTreeViewItem;
     friend class KeyMappingItemComponent;
     friend class KeyMappingChangeButton;
-    Colour backgroundColour, textColour;
     TextButton* resetButton;
 
     void assignNewKey (const CommandID commandID, int index);
@@ -54871,6 +54951,8 @@ public:
     virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
 
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
+
+    virtual void drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription);
 
     /**
     */

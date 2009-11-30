@@ -58,22 +58,22 @@ public:
 
     void setIndex (const int newIndex)
     {
-        FillType fill (isForStroke ? owner->getStrokeType().fill
-                                   : owner->getFillType());
+        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
+                                        : owner->getFillType());
 
         switch (newIndex)
         {
         case 0:
-            fill.mode = FillType::solidColour;
+            fill.mode = JucerFillType::solidColour;
             break;
         case 1:
-            fill.mode = FillType::linearGradient;
+            fill.mode = JucerFillType::linearGradient;
             break;
         case 2:
-            fill.mode = FillType::radialGradient;
+            fill.mode = JucerFillType::radialGradient;
             break;
         case 3:
-            fill.mode = FillType::imageBrush;
+            fill.mode = JucerFillType::imageBrush;
             break;
 
         default:
@@ -92,13 +92,13 @@ public:
         switch (isForStroke ? owner->getStrokeType().fill.mode
                             : owner->getFillType().mode)
         {
-        case FillType::solidColour:
+        case JucerFillType::solidColour:
             return 0;
-        case FillType::linearGradient:
+        case JucerFillType::linearGradient:
             return 1;
-        case FillType::radialGradient:
+        case JucerFillType::radialGradient:
             return 2;
-        case FillType::imageBrush:
+        case JucerFillType::imageBrush:
             return 3;
         default:
             jassertfalse
@@ -151,8 +151,8 @@ public:
     {
         owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        FillType fill (isForStroke ? owner->getStrokeType().fill
-                                   : owner->getFillType());
+        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
+                                        : owner->getFillType());
 
         switch (type)
         {
@@ -181,8 +181,8 @@ public:
 
     const Colour getColour() const
     {
-        const FillType fill (isForStroke ? owner->getStrokeType().fill
-                                         : owner->getFillType());
+        const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
+                                              : owner->getFillType());
 
         switch (type)
         {
@@ -248,8 +248,8 @@ public:
     //==============================================================================
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        FillType fill (isForStroke ? owner->getStrokeType().fill
-                                   : owner->getFillType());
+        JucerFillType fill (isForStroke ? owner->getStrokeType().fill
+                                        : owner->getFillType());
 
         if (isStart)
             fill.gradPos1 = newPos;
@@ -264,8 +264,8 @@ public:
 
     const RelativePositionedRectangle getPosition() const
     {
-        const FillType fill (isForStroke ? owner->getStrokeType().fill
-                                         : owner->getFillType());
+        const JucerFillType fill (isForStroke ? owner->getStrokeType().fill
+                                              : owner->getFillType());
 
         return isStart ? fill.gradPos1
                        : fill.gradPos2;
@@ -472,14 +472,14 @@ public:
     {
         if (isForStroke)
         {
-            FillType type (element->getStrokeType().fill);
+            JucerFillType type (element->getStrokeType().fill);
             type.imageResourceName = newName;
 
             element->setStrokeFill (type, true);
         }
         else
         {
-            FillType type (element->getFillType());
+            JucerFillType type (element->getFillType());
             type.imageResourceName = newName;
 
             element->setFillType (type, true);
@@ -523,13 +523,13 @@ public:
     {
         if (isForStroke)
         {
-            FillType type (owner->getStrokeType().fill);
+            JucerFillType type (owner->getStrokeType().fill);
             type.imageAnchor = newPos;
             owner->setStrokeFill (type, true);
         }
         else
         {
-            FillType type (owner->getFillType());
+            JucerFillType type (owner->getFillType());
             type.imageAnchor = newPos;
             owner->setFillType (type, true);
         }
@@ -572,14 +572,14 @@ public:
 
         if (isForStroke)
         {
-            FillType type (element->getStrokeType().fill);
+            JucerFillType type (element->getStrokeType().fill);
             type.imageOpacity = newValue;
 
             element->setStrokeFill (type, true);
         }
         else
         {
-            FillType type (element->getFillType());
+            JucerFillType type (element->getFillType());
             type.imageOpacity = newValue;
 
             element->setFillType (type, true);
@@ -634,12 +634,12 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 
     switch (getFillType().mode)
     {
-    case FillType::solidColour:
+    case JucerFillType::solidColour:
         properties.add (new ElementFillColourProperty (T("colour"), this, ElementFillColourProperty::solidColour, false));
         break;
 
-    case FillType::linearGradient:
-    case FillType::radialGradient:
+    case JucerFillType::linearGradient:
+    case JucerFillType::radialGradient:
         properties.add (new ElementFillColourProperty (T("colour 1"), this, ElementFillColourProperty::gradientColour1, false));
         properties.add (new ElementFillPositionProperty (this, T("x1"), PositionPropertyBase::componentX, true, false));
         properties.add (new ElementFillPositionProperty (this, T("y1"), PositionPropertyBase::componentY, true, false));
@@ -648,7 +648,7 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
         properties.add (new ElementFillPositionProperty (this, T("y2"), PositionPropertyBase::componentY, false, false));
         break;
 
-    case FillType::imageBrush:
+    case JucerFillType::imageBrush:
         properties.add (new ImageBrushResourceProperty (this, false));
         properties.add (new ImageBrushPositionProperty (this, T("anchor x"), PositionPropertyBase::componentX, false));
         properties.add (new ImageBrushPositionProperty (this, T("anchor y"), PositionPropertyBase::componentY, false));
@@ -678,12 +678,12 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 
             switch (getStrokeType().fill.mode)
             {
-            case FillType::solidColour:
+            case JucerFillType::solidColour:
                 properties.add (new ElementFillColourProperty (T("colour"), this, ElementFillColourProperty::solidColour, true));
                 break;
 
-            case FillType::linearGradient:
-            case FillType::radialGradient:
+            case JucerFillType::linearGradient:
+            case JucerFillType::radialGradient:
                 properties.add (new ElementFillColourProperty (T("colour 1"), this, ElementFillColourProperty::gradientColour1, true));
                 properties.add (new ElementFillPositionProperty (this, T("x1"), PositionPropertyBase::componentX, true, true));
                 properties.add (new ElementFillPositionProperty (this, T("y1"), PositionPropertyBase::componentY, true, true));
@@ -692,7 +692,7 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
                 properties.add (new ElementFillPositionProperty (this, T("y2"), PositionPropertyBase::componentY, false, true));
                 break;
 
-            case FillType::imageBrush:
+            case JucerFillType::imageBrush:
                 properties.add (new ImageBrushResourceProperty (this, true));
                 properties.add (new ImageBrushPositionProperty (this, T("stroke anchor x"), PositionPropertyBase::componentX, true));
                 properties.add (new ImageBrushPositionProperty (this, T("stroke anchor y"), PositionPropertyBase::componentY, true));
@@ -708,7 +708,7 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 }
 
 //==============================================================================
-const FillType& ColouredElement::getFillType() throw()
+const JucerFillType& ColouredElement::getFillType() throw()
 {
     return fillType;
 }
@@ -716,7 +716,7 @@ const FillType& ColouredElement::getFillType() throw()
 class FillTypeChangeAction  : public PaintElementUndoableAction <ColouredElement>
 {
 public:
-    FillTypeChangeAction (ColouredElement* const element, const FillType& newState_)
+    FillTypeChangeAction (ColouredElement* const element, const JucerFillType& newState_)
         : PaintElementUndoableAction <ColouredElement> (element),
           newState (newState_)
     {
@@ -738,10 +738,10 @@ public:
     }
 
 private:
-    FillType newState, oldState;
+    JucerFillType newState, oldState;
 };
 
-void ColouredElement::setFillType (const FillType& newType, const bool undoable)
+void ColouredElement::setFillType (const JucerFillType& newType, const bool undoable)
 {
     if (fillType != newType)
     {
@@ -878,7 +878,7 @@ void ColouredElement::setStrokeType (const PathStrokeType& newType, const bool u
 class StrokeFillTypeChangeAction  : public PaintElementUndoableAction <ColouredElement>
 {
 public:
-    StrokeFillTypeChangeAction (ColouredElement* const element, const FillType& newState_)
+    StrokeFillTypeChangeAction (ColouredElement* const element, const JucerFillType& newState_)
         : PaintElementUndoableAction <ColouredElement> (element),
           newState (newState_)
     {
@@ -900,10 +900,10 @@ public:
     }
 
 private:
-    FillType newState, oldState;
+    JucerFillType newState, oldState;
 };
 
-void ColouredElement::setStrokeFill (const FillType& newType, const bool undoable)
+void ColouredElement::setStrokeFill (const JucerFillType& newType, const bool undoable)
 {
     if (strokeType.fill != newType)
     {

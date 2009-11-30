@@ -70,7 +70,6 @@
 		84816E8D10809DCB008FEC33 /* juce_BlowFish.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E942104036B3006A1807 /* juce_BlowFish.h */; };
 		84816E8E10809DCB008FEC33 /* juce_BooleanPropertyComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAE010403709006A1807 /* juce_BooleanPropertyComponent.h */; };
 		84816E8F10809DCB008FEC33 /* juce_BorderSize.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB5A10403709006A1807 /* juce_BorderSize.h */; };
-		84816E9010809DCB008FEC33 /* juce_Brush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1C10403709006A1807 /* juce_Brush.h */; };
 		84816E9110809DCB008FEC33 /* juce_BubbleComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAF210403709006A1807 /* juce_BubbleComponent.h */; };
 		84816E9210809DCB008FEC33 /* juce_BubbleMessageComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAF410403709006A1807 /* juce_BubbleMessageComponent.h */; };
 		84816E9310809DCB008FEC33 /* juce_BufferedInputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E99F104036D6006A1807 /* juce_BufferedInputStream.h */; };
@@ -143,7 +142,6 @@
 		84816ED610809DCB008FEC33 /* juce_GIFLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB7710403709006A1807 /* juce_GIFLoader.h */; };
 		84816ED710809DCB008FEC33 /* juce_GlowEffect.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB4910403709006A1807 /* juce_GlowEffect.h */; };
 		84816ED810809DCB008FEC33 /* juce_GlyphArrangement.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB5110403709006A1807 /* juce_GlyphArrangement.h */; };
-		84816ED910809DCB008FEC33 /* juce_GradientBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1E10403709006A1807 /* juce_GradientBrush.h */; };
 		84816EDA10809DCB008FEC33 /* juce_Graphics.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2F10403709006A1807 /* juce_Graphics.h */; };
 		84816EDB10809DCB008FEC33 /* juce_GroupComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAAB10403709006A1807 /* juce_GroupComponent.h */; };
 		84816EDC10809DCB008FEC33 /* juce_GZIPCompressorOutputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E9A3104036D6006A1807 /* juce_GZIPCompressorOutputStream.h */; };
@@ -152,7 +150,6 @@
 		84816EDF10809DCB008FEC33 /* juce_IIRFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E7B710403614006A1807 /* juce_IIRFilter.h */; };
 		84816EE010809DCB008FEC33 /* juce_IIRFilterAudioSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E79F10403614006A1807 /* juce_IIRFilterAudioSource.h */; };
 		84816EE110809DCB008FEC33 /* juce_Image.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6E10403709006A1807 /* juce_Image.h */; };
-		84816EE210809DCB008FEC33 /* juce_ImageBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2010403709006A1807 /* juce_ImageBrush.h */; };
 		84816EE310809DCB008FEC33 /* juce_ImageButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA5710403709006A1807 /* juce_ImageButton.h */; };
 		84816EE410809DCB008FEC33 /* juce_ImageCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB7010403709006A1807 /* juce_ImageCache.h */; };
 		84816EE510809DCB008FEC33 /* juce_ImageConvolutionKernel.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB7210403709006A1807 /* juce_ImageConvolutionKernel.h */; };
@@ -275,7 +272,6 @@
 		84816F5B10809DCB008FEC33 /* juce_SliderListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA6B10403709006A1807 /* juce_SliderListener.h */; };
 		84816F5C10809DCB008FEC33 /* juce_SliderPropertyComponent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAEA10403709006A1807 /* juce_SliderPropertyComponent.h */; };
 		84816F5D10809DCB008FEC33 /* juce_Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E99A104036D6006A1807 /* juce_Socket.h */; };
-		84816F5E10809DCB008FEC33 /* juce_SolidColourBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2210403709006A1807 /* juce_SolidColourBrush.h */; };
 		84816F5F10809DCB008FEC33 /* juce_SortedSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E8DC10403671006A1807 /* juce_SortedSet.h */; };
 		84816F6010809DCB008FEC33 /* juce_SparseSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E8DD10403671006A1807 /* juce_SparseSet.h */; };
 		84816F6110809DCB008FEC33 /* juce_SplashScreen.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1210403709006A1807 /* juce_SplashScreen.h */; };
@@ -372,7 +368,6 @@
 		84816FBC10809E00008FEC33 /* juce_BlowFish.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E941104036B3006A1807 /* juce_BlowFish.cpp */; };
 		84816FBD10809E00008FEC33 /* juce_BooleanPropertyComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EADF10403709006A1807 /* juce_BooleanPropertyComponent.cpp */; };
 		84816FBE10809E00008FEC33 /* juce_BorderSize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB5910403709006A1807 /* juce_BorderSize.cpp */; };
-		84816FBF10809E00008FEC33 /* juce_Brush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1B10403709006A1807 /* juce_Brush.cpp */; };
 		84816FC010809E00008FEC33 /* juce_BubbleComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAF110403709006A1807 /* juce_BubbleComponent.cpp */; };
 		84816FC110809E00008FEC33 /* juce_BubbleMessageComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAF310403709006A1807 /* juce_BubbleMessageComponent.cpp */; };
 		84816FC210809E00008FEC33 /* juce_BufferedInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E99E104036D6006A1807 /* juce_BufferedInputStream.cpp */; };
@@ -434,7 +429,6 @@
 		84816FFA10809E00008FEC33 /* juce_GIFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB7610403709006A1807 /* juce_GIFLoader.cpp */; };
 		84816FFB10809E00008FEC33 /* juce_GlowEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB4810403709006A1807 /* juce_GlowEffect.cpp */; };
 		84816FFC10809E00008FEC33 /* juce_GlyphArrangement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB5010403709006A1807 /* juce_GlyphArrangement.cpp */; };
-		84816FFD10809E00008FEC33 /* juce_GradientBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1D10403709006A1807 /* juce_GradientBrush.cpp */; };
 		84816FFE10809E00008FEC33 /* juce_Graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB2E10403709006A1807 /* juce_Graphics.cpp */; };
 		84816FFF10809E00008FEC33 /* juce_GroupComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAAA10403709006A1807 /* juce_GroupComponent.cpp */; };
 		8481700010809E00008FEC33 /* juce_GZIPCompressorOutputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E9A2104036D6006A1807 /* juce_GZIPCompressorOutputStream.cpp */; };
@@ -443,7 +437,6 @@
 		8481700310809E00008FEC33 /* juce_IIRFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E7B610403614006A1807 /* juce_IIRFilter.cpp */; };
 		8481700410809E00008FEC33 /* juce_IIRFilterAudioSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E79E10403614006A1807 /* juce_IIRFilterAudioSource.cpp */; };
 		8481700510809E00008FEC33 /* juce_Image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6D10403709006A1807 /* juce_Image.cpp */; };
-		8481700610809E00008FEC33 /* juce_ImageBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1F10403709006A1807 /* juce_ImageBrush.cpp */; };
 		8481700710809E00008FEC33 /* juce_ImageButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EA5610403709006A1807 /* juce_ImageButton.cpp */; };
 		8481700810809E00008FEC33 /* juce_ImageCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6F10403709006A1807 /* juce_ImageCache.cpp */; };
 		8481700910809E00008FEC33 /* juce_ImageConvolutionKernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB7110403709006A1807 /* juce_ImageConvolutionKernel.cpp */; };
@@ -566,7 +559,6 @@
 		8481707F10809E00008FEC33 /* juce_Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EA6910403709006A1807 /* juce_Slider.cpp */; };
 		8481708010809E00008FEC33 /* juce_SliderPropertyComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAE910403709006A1807 /* juce_SliderPropertyComponent.cpp */; };
 		8481708110809E00008FEC33 /* juce_Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E999104036D6006A1807 /* juce_Socket.cpp */; };
-		8481708210809E00008FEC33 /* juce_SolidColourBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB2110403709006A1807 /* juce_SolidColourBrush.cpp */; };
 		8481708310809E00008FEC33 /* juce_SplashScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1110403709006A1807 /* juce_SplashScreen.cpp */; };
 		8481708410809E00008FEC33 /* juce_StretchableLayoutManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAB410403709006A1807 /* juce_StretchableLayoutManager.cpp */; };
 		8481708510809E00008FEC33 /* juce_StretchableLayoutResizerBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EAB610403709006A1807 /* juce_StretchableLayoutResizerBar.cpp */; };
@@ -1128,14 +1120,6 @@
 		84F1EC911040370A006A1807 /* juce_TooltipWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1610403709006A1807 /* juce_TooltipWindow.h */; };
 		84F1EC921040370A006A1807 /* juce_TopLevelWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1710403709006A1807 /* juce_TopLevelWindow.cpp */; };
 		84F1EC931040370A006A1807 /* juce_TopLevelWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1810403709006A1807 /* juce_TopLevelWindow.h */; };
-		84F1EC941040370A006A1807 /* juce_Brush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1B10403709006A1807 /* juce_Brush.cpp */; };
-		84F1EC951040370A006A1807 /* juce_Brush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1C10403709006A1807 /* juce_Brush.h */; };
-		84F1EC961040370A006A1807 /* juce_GradientBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1D10403709006A1807 /* juce_GradientBrush.cpp */; };
-		84F1EC971040370A006A1807 /* juce_GradientBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB1E10403709006A1807 /* juce_GradientBrush.h */; };
-		84F1EC981040370A006A1807 /* juce_ImageBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB1F10403709006A1807 /* juce_ImageBrush.cpp */; };
-		84F1EC991040370A006A1807 /* juce_ImageBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2010403709006A1807 /* juce_ImageBrush.h */; };
-		84F1EC9A1040370A006A1807 /* juce_SolidColourBrush.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB2110403709006A1807 /* juce_SolidColourBrush.cpp */; };
-		84F1EC9B1040370A006A1807 /* juce_SolidColourBrush.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2210403709006A1807 /* juce_SolidColourBrush.h */; };
 		84F1EC9C1040370A006A1807 /* juce_Colour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB2410403709006A1807 /* juce_Colour.cpp */; };
 		84F1EC9D1040370A006A1807 /* juce_ColourGradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB2510403709006A1807 /* juce_ColourGradient.cpp */; };
 		84F1EC9E1040370A006A1807 /* juce_ColourGradient.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB2610403709006A1807 /* juce_ColourGradient.h */; };
@@ -1215,6 +1199,8 @@
 		84F1ECE81040370A006A1807 /* juce_GIFLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB7710403709006A1807 /* juce_GIFLoader.h */; };
 		84F1ECE91040370A006A1807 /* juce_JPEGLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB7810403709006A1807 /* juce_JPEGLoader.cpp */; };
 		84F1ECEA1040370A006A1807 /* juce_PNGLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB7910403709006A1807 /* juce_PNGLoader.cpp */; };
+		84F29A9F10C2EFA5005014DF /* juce_FillType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */; };
+		84F29AA010C2EFA5005014DF /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1739,14 +1725,6 @@
 		84F1EB1610403709006A1807 /* juce_TooltipWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_TooltipWindow.h; path = ../../src/gui/components/windows/juce_TooltipWindow.h; sourceTree = SOURCE_ROOT; };
 		84F1EB1710403709006A1807 /* juce_TopLevelWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_TopLevelWindow.cpp; path = ../../src/gui/components/windows/juce_TopLevelWindow.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB1810403709006A1807 /* juce_TopLevelWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_TopLevelWindow.h; path = ../../src/gui/components/windows/juce_TopLevelWindow.h; sourceTree = SOURCE_ROOT; };
-		84F1EB1B10403709006A1807 /* juce_Brush.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Brush.cpp; path = ../../src/gui/graphics/brushes/juce_Brush.cpp; sourceTree = SOURCE_ROOT; };
-		84F1EB1C10403709006A1807 /* juce_Brush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Brush.h; path = ../../src/gui/graphics/brushes/juce_Brush.h; sourceTree = SOURCE_ROOT; };
-		84F1EB1D10403709006A1807 /* juce_GradientBrush.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GradientBrush.cpp; path = ../../src/gui/graphics/brushes/juce_GradientBrush.cpp; sourceTree = SOURCE_ROOT; };
-		84F1EB1E10403709006A1807 /* juce_GradientBrush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_GradientBrush.h; path = ../../src/gui/graphics/brushes/juce_GradientBrush.h; sourceTree = SOURCE_ROOT; };
-		84F1EB1F10403709006A1807 /* juce_ImageBrush.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ImageBrush.cpp; path = ../../src/gui/graphics/brushes/juce_ImageBrush.cpp; sourceTree = SOURCE_ROOT; };
-		84F1EB2010403709006A1807 /* juce_ImageBrush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ImageBrush.h; path = ../../src/gui/graphics/brushes/juce_ImageBrush.h; sourceTree = SOURCE_ROOT; };
-		84F1EB2110403709006A1807 /* juce_SolidColourBrush.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_SolidColourBrush.cpp; path = ../../src/gui/graphics/brushes/juce_SolidColourBrush.cpp; sourceTree = SOURCE_ROOT; };
-		84F1EB2210403709006A1807 /* juce_SolidColourBrush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_SolidColourBrush.h; path = ../../src/gui/graphics/brushes/juce_SolidColourBrush.h; sourceTree = SOURCE_ROOT; };
 		84F1EB2410403709006A1807 /* juce_Colour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Colour.cpp; path = ../../src/gui/graphics/colour/juce_Colour.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB2510403709006A1807 /* juce_ColourGradient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ColourGradient.cpp; path = ../../src/gui/graphics/colour/juce_ColourGradient.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB2610403709006A1807 /* juce_ColourGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ColourGradient.h; path = ../../src/gui/graphics/colour/juce_ColourGradient.h; sourceTree = SOURCE_ROOT; };
@@ -1826,6 +1804,8 @@
 		84F1EB7710403709006A1807 /* juce_GIFLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_GIFLoader.h; path = ../../src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.h; sourceTree = SOURCE_ROOT; };
 		84F1EB7810403709006A1807 /* juce_JPEGLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_JPEGLoader.cpp; path = ../../src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB7910403709006A1807 /* juce_PNGLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PNGLoader.cpp; path = ../../src/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp; sourceTree = SOURCE_ROOT; };
+		84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_FillType.cpp; sourceTree = "<group>"; };
+		84F29A9E10C2EFA5005014DF /* juce_FillType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_FillType.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -2730,7 +2710,6 @@
 		84F1EB1910403709006A1807 /* graphics */ = {
 			isa = PBXGroup;
 			children = (
-				84F1EB1A10403709006A1807 /* brushes */,
 				84F1EB2310403709006A1807 /* colour */,
 				84F1EB2B10403709006A1807 /* contexts */,
 				84F1EB3910403709006A1807 /* drawables */,
@@ -2741,22 +2720,6 @@
 			);
 			name = graphics;
 			path = ../../src/gui/graphics;
-			sourceTree = SOURCE_ROOT;
-		};
-		84F1EB1A10403709006A1807 /* brushes */ = {
-			isa = PBXGroup;
-			children = (
-				84F1EB1B10403709006A1807 /* juce_Brush.cpp */,
-				84F1EB1C10403709006A1807 /* juce_Brush.h */,
-				84F1EB1D10403709006A1807 /* juce_GradientBrush.cpp */,
-				84F1EB1E10403709006A1807 /* juce_GradientBrush.h */,
-				84F1EB1F10403709006A1807 /* juce_ImageBrush.cpp */,
-				84F1EB2010403709006A1807 /* juce_ImageBrush.h */,
-				84F1EB2110403709006A1807 /* juce_SolidColourBrush.cpp */,
-				84F1EB2210403709006A1807 /* juce_SolidColourBrush.h */,
-			);
-			name = brushes;
-			path = ../../src/gui/graphics/brushes;
 			sourceTree = SOURCE_ROOT;
 		};
 		84F1EB2310403709006A1807 /* colour */ = {
@@ -2779,6 +2742,8 @@
 			children = (
 				84F1EB2C10403709006A1807 /* juce_EdgeTable.cpp */,
 				84F1EB2D10403709006A1807 /* juce_EdgeTable.h */,
+				84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */,
+				84F29A9E10C2EFA5005014DF /* juce_FillType.h */,
 				84F1EB2E10403709006A1807 /* juce_Graphics.cpp */,
 				84F1EB2F10403709006A1807 /* juce_Graphics.h */,
 				84F1EB3010403709006A1807 /* juce_Justification.cpp */,
@@ -2961,7 +2926,6 @@
 				84816E8D10809DCB008FEC33 /* juce_BlowFish.h in Headers */,
 				84816E8E10809DCB008FEC33 /* juce_BooleanPropertyComponent.h in Headers */,
 				84816E8F10809DCB008FEC33 /* juce_BorderSize.h in Headers */,
-				84816E9010809DCB008FEC33 /* juce_Brush.h in Headers */,
 				84816E9110809DCB008FEC33 /* juce_BubbleComponent.h in Headers */,
 				84816E9210809DCB008FEC33 /* juce_BubbleMessageComponent.h in Headers */,
 				84816E9310809DCB008FEC33 /* juce_BufferedInputStream.h in Headers */,
@@ -3034,7 +2998,6 @@
 				84816ED610809DCB008FEC33 /* juce_GIFLoader.h in Headers */,
 				84816ED710809DCB008FEC33 /* juce_GlowEffect.h in Headers */,
 				84816ED810809DCB008FEC33 /* juce_GlyphArrangement.h in Headers */,
-				84816ED910809DCB008FEC33 /* juce_GradientBrush.h in Headers */,
 				84816EDA10809DCB008FEC33 /* juce_Graphics.h in Headers */,
 				84816EDB10809DCB008FEC33 /* juce_GroupComponent.h in Headers */,
 				84816EDC10809DCB008FEC33 /* juce_GZIPCompressorOutputStream.h in Headers */,
@@ -3043,7 +3006,6 @@
 				84816EDF10809DCB008FEC33 /* juce_IIRFilter.h in Headers */,
 				84816EE010809DCB008FEC33 /* juce_IIRFilterAudioSource.h in Headers */,
 				84816EE110809DCB008FEC33 /* juce_Image.h in Headers */,
-				84816EE210809DCB008FEC33 /* juce_ImageBrush.h in Headers */,
 				84816EE310809DCB008FEC33 /* juce_ImageButton.h in Headers */,
 				84816EE410809DCB008FEC33 /* juce_ImageCache.h in Headers */,
 				84816EE510809DCB008FEC33 /* juce_ImageConvolutionKernel.h in Headers */,
@@ -3166,7 +3128,6 @@
 				84816F5B10809DCB008FEC33 /* juce_SliderListener.h in Headers */,
 				84816F5C10809DCB008FEC33 /* juce_SliderPropertyComponent.h in Headers */,
 				84816F5D10809DCB008FEC33 /* juce_Socket.h in Headers */,
-				84816F5E10809DCB008FEC33 /* juce_SolidColourBrush.h in Headers */,
 				84816F5F10809DCB008FEC33 /* juce_SortedSet.h in Headers */,
 				84816F6010809DCB008FEC33 /* juce_SparseSet.h in Headers */,
 				84816F6110809DCB008FEC33 /* juce_SplashScreen.h in Headers */,
@@ -3504,10 +3465,6 @@
 				84F1EC8F1040370A006A1807 /* juce_ThreadWithProgressWindow.h in Headers */,
 				84F1EC911040370A006A1807 /* juce_TooltipWindow.h in Headers */,
 				84F1EC931040370A006A1807 /* juce_TopLevelWindow.h in Headers */,
-				84F1EC951040370A006A1807 /* juce_Brush.h in Headers */,
-				84F1EC971040370A006A1807 /* juce_GradientBrush.h in Headers */,
-				84F1EC991040370A006A1807 /* juce_ImageBrush.h in Headers */,
-				84F1EC9B1040370A006A1807 /* juce_SolidColourBrush.h in Headers */,
 				84F1EC9E1040370A006A1807 /* juce_ColourGradient.h in Headers */,
 				84F1ECA01040370A006A1807 /* juce_Colours.h in Headers */,
 				84F1ECA11040370A006A1807 /* juce_PixelFormats.h in Headers */,
@@ -3554,6 +3511,7 @@
 				84AB91FE10A078190048FC39 /* juce_CodeEditorComponent.h in Headers */,
 				84AB920010A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h in Headers */,
 				84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */,
+				84F29AA010C2EFA5005014DF /* juce_FillType.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3656,7 +3614,6 @@
 				84816FBC10809E00008FEC33 /* juce_BlowFish.cpp in Sources */,
 				84816FBD10809E00008FEC33 /* juce_BooleanPropertyComponent.cpp in Sources */,
 				84816FBE10809E00008FEC33 /* juce_BorderSize.cpp in Sources */,
-				84816FBF10809E00008FEC33 /* juce_Brush.cpp in Sources */,
 				84816FC010809E00008FEC33 /* juce_BubbleComponent.cpp in Sources */,
 				84816FC110809E00008FEC33 /* juce_BubbleMessageComponent.cpp in Sources */,
 				84816FC210809E00008FEC33 /* juce_BufferedInputStream.cpp in Sources */,
@@ -3718,7 +3675,6 @@
 				84816FFA10809E00008FEC33 /* juce_GIFLoader.cpp in Sources */,
 				84816FFB10809E00008FEC33 /* juce_GlowEffect.cpp in Sources */,
 				84816FFC10809E00008FEC33 /* juce_GlyphArrangement.cpp in Sources */,
-				84816FFD10809E00008FEC33 /* juce_GradientBrush.cpp in Sources */,
 				84816FFE10809E00008FEC33 /* juce_Graphics.cpp in Sources */,
 				84816FFF10809E00008FEC33 /* juce_GroupComponent.cpp in Sources */,
 				8481700010809E00008FEC33 /* juce_GZIPCompressorOutputStream.cpp in Sources */,
@@ -3727,7 +3683,6 @@
 				8481700310809E00008FEC33 /* juce_IIRFilter.cpp in Sources */,
 				8481700410809E00008FEC33 /* juce_IIRFilterAudioSource.cpp in Sources */,
 				8481700510809E00008FEC33 /* juce_Image.cpp in Sources */,
-				8481700610809E00008FEC33 /* juce_ImageBrush.cpp in Sources */,
 				8481700710809E00008FEC33 /* juce_ImageButton.cpp in Sources */,
 				8481700810809E00008FEC33 /* juce_ImageCache.cpp in Sources */,
 				8481700910809E00008FEC33 /* juce_ImageConvolutionKernel.cpp in Sources */,
@@ -3850,7 +3805,6 @@
 				8481707F10809E00008FEC33 /* juce_Slider.cpp in Sources */,
 				8481708010809E00008FEC33 /* juce_SliderPropertyComponent.cpp in Sources */,
 				8481708110809E00008FEC33 /* juce_Socket.cpp in Sources */,
-				8481708210809E00008FEC33 /* juce_SolidColourBrush.cpp in Sources */,
 				8481708310809E00008FEC33 /* juce_SplashScreen.cpp in Sources */,
 				8481708410809E00008FEC33 /* juce_StretchableLayoutManager.cpp in Sources */,
 				8481708510809E00008FEC33 /* juce_StretchableLayoutResizerBar.cpp in Sources */,
@@ -4144,10 +4098,6 @@
 				84F1EC8E1040370A006A1807 /* juce_ThreadWithProgressWindow.cpp in Sources */,
 				84F1EC901040370A006A1807 /* juce_TooltipWindow.cpp in Sources */,
 				84F1EC921040370A006A1807 /* juce_TopLevelWindow.cpp in Sources */,
-				84F1EC941040370A006A1807 /* juce_Brush.cpp in Sources */,
-				84F1EC961040370A006A1807 /* juce_GradientBrush.cpp in Sources */,
-				84F1EC981040370A006A1807 /* juce_ImageBrush.cpp in Sources */,
-				84F1EC9A1040370A006A1807 /* juce_SolidColourBrush.cpp in Sources */,
 				84F1EC9C1040370A006A1807 /* juce_Colour.cpp in Sources */,
 				84F1EC9D1040370A006A1807 /* juce_ColourGradient.cpp in Sources */,
 				84F1EC9F1040370A006A1807 /* juce_Colours.cpp in Sources */,
@@ -4195,6 +4145,7 @@
 				84AB91FB10A078190048FC39 /* juce_CodeDocument.cpp in Sources */,
 				84AB91FD10A078190048FC39 /* juce_CodeEditorComponent.cpp in Sources */,
 				84AB91FF10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
+				84F29A9F10C2EFA5005014DF /* juce_FillType.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

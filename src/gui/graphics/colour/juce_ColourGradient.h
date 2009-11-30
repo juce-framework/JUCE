@@ -126,7 +126,7 @@ public:
 
         The caller must delete the array that is returned using juce_free().
     */
-    PixelARGB* createLookupTable (int& numEntries) const throw();
+    PixelARGB* createLookupTable (const AffineTransform& transform, int& numEntries) const throw();
 
     /** Returns true if all colours are opaque. */
     bool isOpaque() const throw();
@@ -147,9 +147,6 @@ public:
         If false, the gradient is linear between the two points.
     */
     bool isRadial;
-
-    /** A transform to apply to the resultant gradient shape */
-    AffineTransform transform;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

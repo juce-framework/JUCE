@@ -49,6 +49,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../controls/juce_ToolbarItemComponent.h"
 #include "../controls/juce_ProgressBar.h"
 #include "../controls/juce_TreeView.h"
+#include "../keyboard/juce_KeyMappingEditorComponent.h"
 #include "../code_editor/juce_CodeEditorComponent.h"
 #include "../filebrowser/juce_FilenameComponent.h"
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
@@ -217,6 +218,9 @@ LookAndFeel::LookAndFeel()
 
         ColourSelector::backgroundColourId,         0xffe5e5e5,
         ColourSelector::labelTextColourId,          0xff000000,
+
+        KeyMappingEditorComponent::backgroundColourId,      0x00000000,
+        KeyMappingEditorComponent::textColourId,            0xff000000,
 
         FileSearchPathListComponent::backgroundColourId,    0xffffffff,
     };
@@ -2340,7 +2344,7 @@ Button* LookAndFeel::createTabBarExtrasButton()
 
     DrawablePath ellipse;
     ellipse.setPath (p);
-    ellipse.setFillColour (Colour (0x99ffffff));
+    ellipse.setFill (Colour (0x99ffffff));
 
     p.clear();
     p.addEllipse (0.0f, 0.0f, 100.0f, 100.0f);
@@ -2351,13 +2355,13 @@ Button* LookAndFeel::createTabBarExtrasButton()
 
     DrawablePath dp;
     dp.setPath (p);
-    dp.setFillColour (Colour (0x59000000));
+    dp.setFill (Colour (0x59000000));
 
     DrawableComposite normalImage;
     normalImage.insertDrawable (ellipse);
     normalImage.insertDrawable (dp);
 
-    dp.setFillColour (Colour (0xcc000000));
+    dp.setFill (Colour (0xcc000000));
 
     DrawableComposite overImage;
     overImage.insertDrawable (ellipse);
@@ -2604,7 +2608,7 @@ Button* LookAndFeel::createFileBrowserGoUpButton()
     arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
-    arrowImage.setFillColour (Colours::black.withAlpha (0.4f));
+    arrowImage.setFill (Colours::black.withAlpha (0.4f));
     arrowImage.setPath (arrowPath);
 
     goUpButton->setImages (&arrowImage);
@@ -2754,6 +2758,51 @@ void LookAndFeel::drawLevelMeter (Graphics& g, int width, int height, float leve
                                              : Colours::red);
 
         g.fillRoundedRectangle (3.0f + i * w + w * 0.1f, 3.0f, w * 0.8f, height - 6.0f, w * 0.4f);
+    }
+}
+
+//==============================================================================
+void LookAndFeel::drawKeymapChangeButton (Graphics& g, int width, int height, Button& button, const String& keyDescription)
+{
+    const Colour textColour (button.findColour (KeyMappingEditorComponent::textColourId, true));
+
+    if (keyDescription.isNotEmpty())
+    {
+        if (button.isEnabled())
+        {
+            const float alpha = button.isDown() ? 0.3f : (button.isOver() ? 0.15f : 0.08f);
+            g.fillAll (textColour.withAlpha (alpha));
+
+            g.setOpacity (0.3f);
+            g.drawBevel (0, 0, width, height, 2);
+        }
+
+        g.setColour (textColour);
+        g.setFont (height * 0.6f);
+        g.drawFittedText (keyDescription,
+                          3, 0, width - 6, height,
+                          Justification::centred, 1);
+    }
+    else
+    {
+        const float thickness = 7.0f;
+        const float indent = 22.0f;
+
+        Path p;
+        p.addEllipse (0.0f, 0.0f, 100.0f, 100.0f);
+        p.addRectangle (indent, 50.0f - thickness, 100.0f - indent * 2.0f, thickness * 2.0f);
+        p.addRectangle (50.0f - thickness, indent, thickness * 2.0f, 50.0f - indent - thickness);
+        p.addRectangle (50.0f - thickness, 50.0f + thickness, thickness * 2.0f, 50.0f - indent - thickness);
+        p.setUsingNonZeroWinding (false);
+
+        g.setColour (textColour.withAlpha (button.isDown() ? 0.7f : (button.isOver() ? 0.5f : 0.3f)));
+        g.fillPath (p, p.getTransformToScaleToFit (2.0f, 2.0f, width - 4.0f, height - 4.0f, true));
+    }
+
+    if (button.hasKeyboardFocus (false))
+    {
+        g.setColour (textColour.withAlpha (0.4f));
+        g.drawRect (0, 0, width, height);
     }
 }
 

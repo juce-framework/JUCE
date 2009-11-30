@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_KeyMappingEditorComponent.h"
 #include "../menus/juce_PopupMenu.h"
 #include "../windows/juce_AlertWindow.h"
+#include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../../text/juce_LocalisedStrings.h"
 
 const int maxKeys = 3;
@@ -67,44 +68,8 @@ public:
 
     void paintButton (Graphics& g, bool isOver, bool isDown)
     {
-        if (keyNum >= 0)
-        {
-            if (isEnabled())
-            {
-                const float alpha = isDown ? 0.3f : (isOver ? 0.15f : 0.08f);
-                g.fillAll (owner->textColour.withAlpha (alpha));
-
-                g.setOpacity (0.3f);
-                g.drawBevel (0, 0, getWidth(), getHeight(), 2);
-            }
-
-            g.setColour (owner->textColour);
-            g.setFont (getHeight() * 0.6f);
-            g.drawFittedText (getName(),
-                              3, 0, getWidth() - 6, getHeight(),
-                              Justification::centred, 1);
-        }
-        else
-        {
-            const float thickness = 7.0f;
-            const float indent = 22.0f;
-
-            Path p;
-            p.addEllipse (0.0f, 0.0f, 100.0f, 100.0f);
-            p.addRectangle (indent, 50.0f - thickness, 100.0f - indent * 2.0f, thickness * 2.0f);
-            p.addRectangle (50.0f - thickness, indent, thickness * 2.0f, 50.0f - indent - thickness);
-            p.addRectangle (50.0f - thickness, 50.0f + thickness, thickness * 2.0f, 50.0f - indent - thickness);
-            p.setUsingNonZeroWinding (false);
-
-            g.setColour (owner->textColour.withAlpha (isDown ? 0.7f : (isOver ? 0.5f : 0.3f)));
-            g.fillPath (p, p.getTransformToScaleToFit (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, true));
-        }
-
-        if (hasKeyboardFocus (false))
-        {
-            g.setColour (owner->textColour.withAlpha (0.4f));
-            g.drawRect (0, 0, getWidth(), getHeight());
-        }
+        getLookAndFeel().drawKeymapChangeButton (g, getWidth(), getHeight(), *this,
+                                                 keyNum >= 0 ? getName() : String::empty);
     }
 
     void clicked()
@@ -199,7 +164,7 @@ public:
     void paint (Graphics& g)
     {
         g.setFont (getHeight() * 0.7f);
-        g.setColour (owner->textColour);
+        g.setColour (findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawFittedText (owner->getMappings()->getCommandManager()->getNameOfCommand (commandID),
                           4, 0, jmax (40, getChildComponent (0)->getX() - 5), getHeight(),
@@ -287,7 +252,7 @@ public:
     void paintItem (Graphics& g, int width, int height)
     {
         g.setFont (height * 0.6f, Font::bold);
-        g.setColour (owner->textColour);
+        g.setColour (owner->findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (categoryName,
                     2, 0, width - 2, height,
@@ -329,8 +294,7 @@ private:
 //==============================================================================
 KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet* const mappingManager,
                                                       const bool showResetToDefaultButton)
-    : mappings (mappingManager),
-      textColour (Colours::black)
+    : mappings (mappingManager)
 {
     jassert (mappingManager != 0); // can't be null!
 
@@ -347,7 +311,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet* const 
     }
 
     addAndMakeVisible (tree = new TreeView());
-    tree->setColour (TreeView::backgroundColourId, backgroundColour);
+    tree->setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree->setRootItemVisible (false);
     tree->setDefaultOpenness (true);
     tree->setRootItem (this);
@@ -371,11 +335,11 @@ const String KeyMappingEditorComponent::getUniqueName() const
 }
 
 void KeyMappingEditorComponent::setColours (const Colour& mainBackground,
-                                            const Colour& textColour_)
+                                            const Colour& textColour)
 {
-    backgroundColour = mainBackground;
-    textColour = textColour_;
-    tree->setColour (TreeView::backgroundColourId, backgroundColour);
+    setColour (backgroundColourId, mainBackground);
+    setColour (textColourId, textColour);
+    tree->setColour (TreeView::backgroundColourId, mainBackground);
 }
 
 void KeyMappingEditorComponent::parentHierarchyChanged()

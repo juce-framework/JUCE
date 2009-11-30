@@ -50,50 +50,39 @@ public:
     bool isVectorDevice() const;
     void setOrigin (int x, int y);
 
-    bool reduceClipRegion (int x, int y, int w, int h);
-    bool reduceClipRegion (const RectangleList& clipRegion);
-    void excludeClipRegion (int x, int y, int w, int h);
+    bool clipToRectangle (const Rectangle& r);
+    bool clipToRectangleList (const RectangleList& clipRegion);
+    void excludeClipRectangle (const Rectangle& r);
+    void clipToPath (const Path& path, const AffineTransform& transform);
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
 
     void saveState();
     void restoreState();
 
-    bool clipRegionIntersects (int x, int y, int w, int h);
+    bool clipRegionIntersects (const Rectangle& r);
     const Rectangle getClipBounds() const;
     bool isClipEmpty() const;
 
     //==============================================================================
-    void setColour (const Colour& colour);
-    void setGradient (const ColourGradient& gradient);
+    void setFill (const FillType& fillType);
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillRect (int x, int y, int w, int h, const bool replaceExistingContents);
+    void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void fillPathWithImage (const Path& path, const AffineTransform& transform,
-                            const Image& image, int imageX, int imageY);
+    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
-    void fillAlphaChannel (const Image& alphaImage, int imageX, int imageY);
-    void fillAlphaChannelWithImage (const Image& alphaImage, int alphaImageX, int alphaImageY,
-                                    const Image& fillerImage, int fillerImageX, int fillerImageY);
-
-    //==============================================================================
-    void blendImage (const Image& sourceImage, int destX, int destY, int destW, int destH,
-                     int sourceX, int sourceY);
-
-    void blendImageWarping (const Image& sourceImage, int srcClipX, int srcClipY, int srcClipW, int srcClipH,
-                            const AffineTransform& transform);
-
-    //==============================================================================
     void drawLine (double x1, double y1, double x2, double y2);
 
     void drawVerticalLine (const int x, double top, double bottom);
     void drawHorizontalLine (const int x, double top, double bottom);
 
     //==============================================================================
+    const Font getFont();
     void setFont (const Font& newFont);
-    void drawGlyph (int glyphNumber, float x, float y);
     void drawGlyph (int glyphNumber, const AffineTransform& transform);
 
     //==============================================================================
@@ -102,27 +91,21 @@ public:
 protected:
     //==============================================================================
     OutputStream& out;
-    RectangleList* clip;
-    int totalWidth, totalHeight, xOffset, yOffset;
+    int totalWidth, totalHeight;
     bool needToClip;
-    Colour lastColour, colour;
-    ColourGradient* gradient;
-    Font font;
+    Colour lastColour;
 
     struct SavedState
     {
-        SavedState (RectangleList* const clip, const int xOffset, const int yOffset,
-                    const Colour& colour, ColourGradient* const gradient, const Font& font);
+        SavedState();
         ~SavedState();
 
-        RectangleList* clip;
-        const int xOffset, yOffset;
-        Colour colour;
-        ColourGradient* gradient;
+        RectangleList clip;
+        int xOffset, yOffset;
+        FillType fillType;
         Font font;
 
     private:
-        SavedState (const SavedState&);
         const SavedState& operator= (const SavedState&);
     };
 

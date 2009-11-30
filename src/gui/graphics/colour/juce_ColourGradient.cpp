@@ -138,7 +138,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
 }
 
 //==============================================================================
-PixelARGB* ColourGradient::createLookupTable (int& numEntries) const throw()
+PixelARGB* ColourGradient::createLookupTable (const AffineTransform& transform, int& numEntries) const throw()
 {
 #ifdef JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of

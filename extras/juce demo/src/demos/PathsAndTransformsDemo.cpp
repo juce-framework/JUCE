@@ -301,10 +301,10 @@ private:
         dp.setPath (shape);
 
         dp.setStrokeThickness (4.0f);
-        dp.setStrokeColour (Colours::blue);
+        dp.setStrokeFill (Colours::blue);
 
-        dp.setFillGradient (ColourGradient (Colours::red.withAlpha (0.4f), -100.0f, -100.0f,
-                                            Colours::green.withAlpha (0.6f), 100.0f, 100.0f, false));
+        dp.setFill (ColourGradient (Colours::red.withAlpha (0.4f), -100.0f, -100.0f,
+                                    Colours::green.withAlpha (0.6f), 100.0f, 100.0f, false));
 
         dc->insertDrawable (dp);
 

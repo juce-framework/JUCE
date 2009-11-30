@@ -99,6 +99,21 @@ public:
     */
     virtual const String getDescriptionForKeyPress (const KeyPress& key);
 
+    //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the editor.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        To change the colours of the menu that pops up
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId  = 0x100ad00,    /**< The background colour to fill the editor background. */
+        textColourId        = 0x100ad01,    /**< The colour for the text. */
+    };
 
     //==============================================================================
     /** @internal */
@@ -124,7 +139,6 @@ private:
     friend class KeyCategoryTreeViewItem;
     friend class KeyMappingItemComponent;
     friend class KeyMappingChangeButton;
-    Colour backgroundColour, textColour;
     TextButton* resetButton;
 
     void assignNewKey (const CommandID commandID, int index);

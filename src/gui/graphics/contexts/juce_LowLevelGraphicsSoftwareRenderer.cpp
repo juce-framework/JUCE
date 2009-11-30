@@ -109,7 +109,6 @@ private:
         {
             dest->blend (colour);
             ++dest;
-
         } while (--width > 0);
     }
 
@@ -173,7 +172,7 @@ private:
 class LinearGradientPixelGenerator
 {
 public:
-    LinearGradientPixelGenerator (const ColourGradient& gradient, const PixelARGB* const lookupTable_, const int numEntries_)
+    LinearGradientPixelGenerator (const ColourGradient& gradient, const AffineTransform& transform, const PixelARGB* const lookupTable_, const int numEntries_)
         : lookupTable (lookupTable_), numEntries (numEntries_)
     {
         jassert (numEntries_ >= 0);
@@ -182,16 +181,16 @@ public:
         float x2 = gradient.x2;
         float y2 = gradient.y2;
 
-        if (! gradient.transform.isIdentity())
+        if (! transform.isIdentity())
         {
             const Line l (x2, y2, x1, y1);
             const Point p3 = l.getPointAlongLine (0.0, 100.0f);
             float x3 = p3.getX();
             float y3 = p3.getY();
 
-            gradient.transform.transformPoint (x1, y1);
-            gradient.transform.transformPoint (x2, y2);
-            gradient.transform.transformPoint (x3, y3);
+            transform.transformPoint (x1, y1);
+            transform.transformPoint (x2, y2);
+            transform.transformPoint (x3, y3);
 
             const Line l2 (x2, y2, x3, y3);
             const float prop = l2.findNearestPointTo (x1, y1);
@@ -254,7 +253,7 @@ private:
 class RadialGradientPixelGenerator
 {
 public:
-    RadialGradientPixelGenerator (const ColourGradient& gradient,
+    RadialGradientPixelGenerator (const ColourGradient& gradient, const AffineTransform&,
                                   const PixelARGB* const lookupTable_, const int numEntries_) throw()
         : lookupTable (lookupTable_),
           numEntries (numEntries_),
@@ -298,10 +297,10 @@ protected:
 class TransformedRadialGradientPixelGenerator   : public RadialGradientPixelGenerator
 {
 public:
-    TransformedRadialGradientPixelGenerator (const ColourGradient& gradient,
+    TransformedRadialGradientPixelGenerator (const ColourGradient& gradient, const AffineTransform& transform,
                                              const PixelARGB* const lookupTable_, const int numEntries_) throw()
-        : RadialGradientPixelGenerator (gradient, lookupTable_, numEntries_),
-          inverseTransform (gradient.transform.inverted())
+        : RadialGradientPixelGenerator (gradient, transform, lookupTable_, numEntries_),
+          inverseTransform (transform.inverted())
     {
         tM10 = inverseTransform.mat10;
         tM00 = inverseTransform.mat00;
@@ -340,9 +339,9 @@ template <class PixelType, class GradientType>
 class GradientEdgeTableRenderer  : public GradientType
 {
 public:
-    GradientEdgeTableRenderer (const Image::BitmapData& destData_, const ColourGradient& gradient,
+    GradientEdgeTableRenderer (const Image::BitmapData& destData_, const ColourGradient& gradient, const AffineTransform& transform,
                                const PixelARGB* const lookupTable, const int numEntries) throw()
-        : GradientType (gradient, lookupTable, numEntries - 1),
+        : GradientType (gradient, transform, lookupTable, numEntries - 1),
           destData (destData_)
     {
     }
@@ -367,7 +366,6 @@ public:
             do
             {
                 (dest++)->blend (GradientType::getPixel (x++), alphaLevel);
-
             } while (--width > 0);
         }
         else
@@ -375,7 +373,6 @@ public:
             do
             {
                 (dest++)->blend (GradientType::getPixel (x++));
-
             } while (--width > 0);
         }
     }
@@ -490,7 +487,6 @@ private:
         do
         {
             dest++ ->blend (*src++);
-
         } while (--width > 0);
     }
 
@@ -886,7 +882,7 @@ class LLGCSavedState
 {
 public:
     LLGCSavedState (const Rectangle& clip_, const int xOffset_, const int yOffset_,
-                    const Font& font_, const Graphics::FillType& fillType_,
+                    const Font& font_, const FillType& fillType_,
                     const Graphics::ResamplingQuality interpolationQuality_) throw()
         : edgeTable (new EdgeTableHolder (EdgeTable (clip_))),
           xOffset (xOffset_), yOffset (yOffset_),
@@ -909,15 +905,17 @@ public:
     bool clipToRectangle (const Rectangle& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
-        edgeTable->edgeTable.clipToRectangle (r);
+        edgeTable->edgeTable.clipToRectangle (r.translated (xOffset, yOffset));
         return ! edgeTable->edgeTable.isEmpty();
     }
 
     bool clipToRectangleList (const RectangleList& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
+        RectangleList temp (r);
+        temp.offsetAll (xOffset, yOffset);
         RectangleList totalArea (edgeTable->edgeTable.getMaximumBounds());
-        totalArea.subtract (r);
+        totalArea.subtract (temp);
 
         for (RectangleList::Iterator i (totalArea); i.next();)
             edgeTable->edgeTable.excludeRectangle (*i.getRectangle());
@@ -928,14 +926,14 @@ public:
     bool excludeClipRectangle (const Rectangle& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
-        edgeTable->edgeTable.excludeRectangle (r);
+        edgeTable->edgeTable.excludeRectangle (r.translated (xOffset, yOffset));
         return ! edgeTable->edgeTable.isEmpty();
     }
 
     void clipToPath (const Path& p, const AffineTransform& transform) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
-        EdgeTable et (edgeTable->edgeTable.getMaximumBounds(), p, transform);
+        EdgeTable et (edgeTable->edgeTable.getMaximumBounds(), p, transform.translated ((float) xOffset, (float) yOffset));
         edgeTable->edgeTable.clipToEdgeTable (et);
     }
 
@@ -951,33 +949,26 @@ public:
             jassert (! replaceContents); // that option is just for solid colours
 
             ColourGradient g2 (*(fillType.gradient));
-            const bool isIdentity = g2.transform.isOnlyTranslation();
+            AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
+            const bool isIdentity = transform.isOnlyTranslation();
 
             if (isIdentity)
             {
                 // If our translation doesn't involve any distortion, we can speed it up..
-                const float tx = g2.transform.getTranslationX() + xOffset;
-                const float ty = g2.transform.getTranslationY() + yOffset;
-
-                g2.x1 += tx;
-                g2.x2 += tx;
-                g2.y1 += ty;
-                g2.y2 += ty;
-            }
-            else
-            {
-                g2.transform = g2.transform.translated ((float) xOffset, (float) yOffset);
+                transform.transformPoint (g2.x1, g2.y1);
+                transform.transformPoint (g2.x2, g2.y2);
+                transform = AffineTransform::identity;
             }
 
             int numLookupEntries;
-            PixelARGB* const lookupTable = g2.createLookupTable (numLookupEntries);
+            PixelARGB* const lookupTable = g2.createLookupTable (transform, numLookupEntries);
             jassert (numLookupEntries > 0);
 
             switch (image.getFormat())
             {
-                case Image::ARGB:   renderGradient <PixelARGB>  (et, destData, g2, lookupTable, numLookupEntries, isIdentity); break;
-                case Image::RGB:    renderGradient <PixelRGB>   (et, destData, g2, lookupTable, numLookupEntries, isIdentity); break;
-                default:            renderGradient <PixelAlpha> (et, destData, g2, lookupTable, numLookupEntries, isIdentity); break;
+                case Image::ARGB:   renderGradient <PixelARGB>  (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
+                case Image::RGB:    renderGradient <PixelRGB>   (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
+                default:            renderGradient <PixelAlpha> (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
             }
 
             juce_free (lookupTable);
@@ -985,7 +976,7 @@ public:
         else if (fillType.isTiledImage())
         {
             renderImage (image, *(fillType.image), Rectangle (0, 0, fillType.image->getWidth(), fillType.image->getHeight()),
-                         AffineTransform::translation ((float) fillType.imageX, (float) fillType.imageY), &et);
+                         fillType.transform, &et);
         }
         else
         {
@@ -1061,18 +1052,19 @@ public:
     }
 
     //==============================================================================
-    void clipToImageAlpha (const Image& image, const Rectangle& srcClip, const AffineTransform& transform) throw()
+    void clipToImageAlpha (const Image& image, const Rectangle& srcClip, const AffineTransform& t) throw()
     {
         if (! image.hasAlphaChannel())
         {
             Path p;
             p.addRectangle (srcClip);
-            clipToPath (p, transform);
+            clipToPath (p, t);
             return;
         }
 
         dupeEdgeTableIfMultiplyReferenced();
 
+        const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
         const Image::BitmapData srcData (image, srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
         const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
         EdgeTable& et = edgeTable->edgeTable;
@@ -1145,9 +1137,7 @@ public:
     class EdgeTableHolder  : public ReferenceCountedObject
     {
     public:
-        EdgeTableHolder (const EdgeTable& e) throw()
-            : edgeTable (e)
-        {}
+        EdgeTableHolder (const EdgeTable& e) throw() : edgeTable (e) {}
 
         EdgeTable edgeTable;
     };
@@ -1155,7 +1145,7 @@ public:
     ReferenceCountedObjectPtr<EdgeTableHolder> edgeTable;
     int xOffset, yOffset;
     Font font;
-    Graphics::FillType fillType;
+    FillType fillType;
     Graphics::ResamplingQuality interpolationQuality;
 
 private:
@@ -1169,7 +1159,7 @@ private:
 
     //==============================================================================
     template <class DestPixelType>
-    void renderGradient (EdgeTable& et, const Image::BitmapData& destData, const ColourGradient& g,
+    void renderGradient (EdgeTable& et, const Image::BitmapData& destData, const ColourGradient& g, const AffineTransform& transform,
                          const PixelARGB* const lookupTable, const int numLookupEntries, const bool isIdentity) throw()
     {
         jassert (destData.pixelStride == sizeof (DestPixelType));
@@ -1178,18 +1168,18 @@ private:
         {
             if (isIdentity)
             {
-                GradientEdgeTableRenderer <DestPixelType, RadialGradientPixelGenerator> renderer (destData, g, lookupTable, numLookupEntries);
+                GradientEdgeTableRenderer <DestPixelType, RadialGradientPixelGenerator> renderer (destData, g, transform, lookupTable, numLookupEntries);
                 et.iterate (renderer);
             }
             else
             {
-                GradientEdgeTableRenderer <DestPixelType, TransformedRadialGradientPixelGenerator> renderer (destData, g, lookupTable, numLookupEntries);
+                GradientEdgeTableRenderer <DestPixelType, TransformedRadialGradientPixelGenerator> renderer (destData, g, transform, lookupTable, numLookupEntries);
                 et.iterate (renderer);
             }
         }
         else
         {
-            GradientEdgeTableRenderer <DestPixelType, LinearGradientPixelGenerator> renderer (destData, g, lookupTable, numLookupEntries);
+            GradientEdgeTableRenderer <DestPixelType, LinearGradientPixelGenerator> renderer (destData, g, transform, lookupTable, numLookupEntries);
             et.iterate (renderer);
         }
     }
@@ -1286,7 +1276,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image
       stateStack (20)
 {
     currentState = new LLGCSavedState (Rectangle (0, 0, image_.getWidth(), image_.getHeight()),
-                                       0, 0, Font(), Graphics::FillType(), Graphics::mediumResamplingQuality);
+                                       0, 0, Font(), FillType(), Graphics::mediumResamplingQuality);
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
@@ -1308,30 +1298,27 @@ void LowLevelGraphicsSoftwareRenderer::setOrigin (int x, int y)
 
 bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle& r)
 {
-    return currentState->clipToRectangle (r.translated (currentState->xOffset, currentState->yOffset));
+    return currentState->clipToRectangle (r);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipToRectangleList (const RectangleList& clipRegion)
 {
-    RectangleList temp (clipRegion);
-    temp.offsetAll (currentState->xOffset, currentState->yOffset);
-
-    return currentState->clipToRectangleList (temp);
+    return currentState->clipToRectangleList (clipRegion);
 }
 
 void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle& r)
 {
-    currentState->excludeClipRectangle (r.translated (currentState->xOffset, currentState->yOffset));
+    currentState->excludeClipRectangle (r);
 }
 
 void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const AffineTransform& transform)
 {
-    currentState->clipToPath (path, transform.translated ((float) currentState->xOffset, (float) currentState->yOffset));
+    currentState->clipToPath (path, transform);
 }
 
 void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform)
 {
-    currentState->clipToImageAlpha (sourceImage, srcClip, transform.translated ((float) currentState->xOffset, (float) currentState->yOffset));
+    currentState->clipToImageAlpha (sourceImage, srcClip, transform);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle& r)
@@ -1373,19 +1360,9 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::setColour (const Colour& colour)
+void LowLevelGraphicsSoftwareRenderer::setFill (const FillType& fillType)
 {
-    currentState->fillType.setColour (colour);
-}
-
-void LowLevelGraphicsSoftwareRenderer::setGradient (const ColourGradient& gradient)
-{
-    currentState->fillType.setGradient (gradient);
-}
-
-void LowLevelGraphicsSoftwareRenderer::setTiledFill (const Image& image, int x, int y)
-{
-    currentState->fillType.setTiledImage (image, x, y);
+    currentState->fillType = fillType;
 }
 
 void LowLevelGraphicsSoftwareRenderer::setOpacity (float opacity)
@@ -1455,7 +1432,8 @@ public:
     GlyphCache() throw()
         : accessCounter (0), hits (0), misses (0)
     {
-        enlargeCache (120);
+        for (int i = 120; --i >= 0;)
+            glyphs.add (new CachedGlyph());
     }
 
     ~GlyphCache() throw()
@@ -1491,15 +1469,15 @@ public:
             }
         }
 
-        ++misses;
-
-        if (hits + misses > (glyphs.size() << 4))
+        if (hits + ++misses > (glyphs.size() << 4))
         {
             if (misses * 2 > hits)
-                enlargeCache (glyphs.size() + 32);
+            {
+                for (int i = 32; --i >= 0;)
+                    glyphs.add (new CachedGlyph());
+            }
 
-            hits = 0;
-            misses = 0;
+            hits = misses = 0;
             oldest = glyphs.getLast();
         }
 
@@ -1513,16 +1491,8 @@ public:
     class CachedGlyph
     {
     public:
-        CachedGlyph() throw()
-            : glyph (0), lastAccessCount (0)
-        {
-            edgeTable = 0;
-        }
-
-        ~CachedGlyph() throw()
-        {
-            delete edgeTable;
-        }
+        CachedGlyph() throw() : glyph (0), lastAccessCount (0), edgeTable (0) {}
+        ~CachedGlyph() throw()  { delete edgeTable; }
 
         void draw (LLGCSavedState& state, Image& image, const float x, const float y) const throw()
         {
@@ -1575,12 +1545,6 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    void enlargeCache (const int num) throw()
-    {
-        while (glyphs.size() < num)
-            glyphs.add (new CachedGlyph());
-    }
-
     OwnedArray <CachedGlyph> glyphs;
     int accessCounter, hits, misses;
 
@@ -1615,7 +1579,6 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
     {
         Path p;
         f.getTypeface()->getOutlineForGlyph (glyphNumber, p);
-
         fillPath (p, AffineTransform::scale (f.getHeight() * f.getHorizontalScale(), f.getHeight()).followedBy (transform));
     }
 }

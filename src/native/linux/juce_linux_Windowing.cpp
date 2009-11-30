@@ -1799,7 +1799,7 @@ private:
 
                 context.setOrigin (-totalArea.getX(), -totalArea.getY());
 
-                if (context.reduceClipRegion (regionsNeedingRepaint))
+                if (context.clipToRectangleList (regionsNeedingRepaint))
                     peer->handlePaint (context);
 
                 if (! peer->maskedRegion.isEmpty())
@@ -2570,31 +2570,52 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
 #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
 
-    if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error)
-         && XineramaIsActive (display))
+    if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
     {
-        int numMonitors = 0;
-        XineramaScreenInfo* const screens = XineramaQueryScreens (display, &numMonitors);
+        typedef Bool (*tXineramaIsActive) (Display*);
+        typedef XineramaScreenInfo* (*tXineramaQueryScreens) (Display*, int*);
 
-        if (screens != 0)
+        static tXineramaIsActive xXineramaIsActive = 0;
+        static tXineramaQueryScreens xXineramaQueryScreens = 0;
+
+        if (xXineramaIsActive == 0 || xXineramaQueryScreens == 0)
         {
-            for (int i = numMonitors; --i >= 0;)
+            void* h = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
+
+            if (h != 0)
             {
-                int index = screens[i].screen_number;
-
-                if (index >= 0)
-                {
-                    while (monitorCoords.size() < index)
-                        monitorCoords.add (Rectangle (0, 0, 0, 0));
-
-                    monitorCoords.set (index, Rectangle (screens[i].x_org,
-                                                         screens[i].y_org,
-                                                         screens[i].width,
-                                                         screens[i].height));
-                }
+                xXineramaIsActive = (tXineramaIsActive) dlsym (h, "XineramaIsActive");
+                xXineramaQueryScreens = (tXineramaQueryScreens) dlsym (h, "XineramaQueryScreens");
             }
+        }
 
-            XFree (screens);
+        if (xXineramaIsActive != 0
+            && xXineramaQueryScreens != 0
+            && xXineramaIsActive (display))
+        {
+            int numMonitors = 0;
+            XineramaScreenInfo* const screens = xXineramaQueryScreens (display, &numMonitors);
+
+            if (screens != 0)
+            {
+                for (int i = numMonitors; --i >= 0;)
+                {
+                    int index = screens[i].screen_number;
+
+                    if (index >= 0)
+                    {
+                        while (monitorCoords.size() < index)
+                            monitorCoords.add (Rectangle (0, 0, 0, 0));
+
+                        monitorCoords.set (index, Rectangle (screens[i].x_org,
+                                                             screens[i].y_org,
+                                                             screens[i].width,
+                                                             screens[i].height));
+                    }
+                }
+
+                XFree (screens);
+            }
         }
     }
 

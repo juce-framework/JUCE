@@ -51,7 +51,7 @@ public:
 
     //==============================================================================
     PathStrokeType stroke;
-    FillType fill;
+    JucerFillType fill;
 
     //==============================================================================
     bool operator== (const StrokeType& other) const throw();

@@ -41,7 +41,7 @@ StrokeType::~StrokeType()
 void StrokeType::reset()
 {
     stroke = PathStrokeType (5.0f);
-    fill = FillType();
+    fill = JucerFillType();
     fill.colour = Colours::black;
 }
 

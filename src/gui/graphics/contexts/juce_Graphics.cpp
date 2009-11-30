@@ -86,7 +86,7 @@ Graphics::~Graphics() throw()
 void Graphics::resetToDefaultState() throw()
 {
     saveStateIfPending();
-    context->setColour (Colours::black);
+    context->setFill (FillType());
     context->setFont (Font());
     context->setInterpolationQuality (defaultQuality);
 }
@@ -107,6 +107,20 @@ bool Graphics::reduceClipRegion (const RectangleList& clipRegion) throw()
 {
     saveStateIfPending();
     return context->clipToRectangleList (clipRegion);
+}
+
+bool Graphics::reduceClipRegion (const Path& path, const AffineTransform& transform) throw()
+{
+    saveStateIfPending();
+    context->clipToPath (path, transform);
+    return ! context->isClipEmpty();
+}
+
+bool Graphics::reduceClipRegion (const Image& image, const Rectangle& sourceClipRegion, const AffineTransform& transform) throw()
+{
+    saveStateIfPending();
+    context->clipToImageAlpha (image, sourceClipRegion, transform);
+    return ! context->isClipEmpty();
 }
 
 void Graphics::excludeClipRegion (const int x, const int y,
@@ -166,7 +180,7 @@ bool Graphics::clipRegionIntersects (const int x, const int y,
 void Graphics::setColour (const Colour& newColour) throw()
 {
     saveStateIfPending();
-    context->setColour (newColour);
+    context->setFill (FillType (newColour));
 }
 
 void Graphics::setOpacity (const float newOpacity) throw()
@@ -178,7 +192,7 @@ void Graphics::setOpacity (const float newOpacity) throw()
 void Graphics::setGradientFill (const ColourGradient& gradient) throw()
 {
     saveStateIfPending();
-    context->setGradient (gradient);
+    context->setFill (FillType (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse,
@@ -187,8 +201,14 @@ void Graphics::setTiledImageFill (const Image& imageToUse,
                                   const float opacity) throw()
 {
     saveStateIfPending();
-    context->setTiledFill (imageToUse, anchorX, anchorY);
+    context->setFill (FillType (imageToUse, AffineTransform::translation ((float) anchorX, (float) anchorY)));
     context->setOpacity (opacity);
+}
+
+void Graphics::setFillType (const FillType& newFill) throw()
+{
+    saveStateIfPending();
+    context->setFill (newFill);
 }
 
 //==============================================================================
@@ -345,7 +365,7 @@ void Graphics::fillAll (const Colour& colourToUse) const throw()
         const Rectangle clip (context->getClipBounds());
 
         context->saveState();
-        context->setColour (colourToUse);
+        context->setFill (FillType (colourToUse));
         context->fillRect (clip, false);
         context->restoreState();
     }
@@ -435,13 +455,13 @@ void Graphics::drawBevel (const int x,
             const float op = useGradient ? ramp * (sharpEdgeOnOutside ? bevelThickness - i : i)
                                          : oldOpacity;
 
-            context->setColour (topLeftColour.withMultipliedAlpha (op));
+            context->setFill (FillType (topLeftColour.withMultipliedAlpha (op)));
             context->fillRect (Rectangle (x + i, y + i, width - i * 2, 1), false);
-            context->setColour (topLeftColour.withMultipliedAlpha (op * 0.75f));
+            context->setFill (FillType (topLeftColour.withMultipliedAlpha (op * 0.75f)));
             context->fillRect (Rectangle (x + i, y + i + 1, 1, height - i * 2 - 2), false);
-            context->setColour (bottomRightColour.withMultipliedAlpha (op));
+            context->setFill (FillType (bottomRightColour.withMultipliedAlpha (op)));
             context->fillRect (Rectangle (x + i, y + height - i - 1, width - i * 2, 1), false);
-            context->setColour (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
+            context->setFill (FillType (bottomRightColour.withMultipliedAlpha (op  * 0.75f)));
             context->fillRect (Rectangle (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
         }
 
@@ -557,7 +577,7 @@ void Graphics::fillCheckerBoard (int x, int y,
 
         if (colour1 == colour2)
         {
-            context->setColour (colour1);
+            context->setFill (FillType (colour1));
             context->fillRect (Rectangle (x, y, width, height), false);
         }
         else
@@ -574,7 +594,7 @@ void Graphics::fillCheckerBoard (int x, int y,
 
                 for (int xx = x; xx < right; xx += checkWidth)
                 {
-                    context->setColour (((cx++ & 1) == 0) ? colour1 : colour2);
+                    context->setFill (FillType (((cx++ & 1) == 0) ? colour1 : colour2));
                     context->fillRect (Rectangle (xx, y, jmin (checkWidth, right - xx), jmin (checkHeight, bottom - y)),
                                        false);
                 }
@@ -776,78 +796,5 @@ void Graphics::drawImageTransformed (const Image* const imageToDraw,
     }
 }
 
-//==============================================================================
-Graphics::FillType::FillType() throw()
-    : colour (0xff000000), gradient (0),
-      image (0), imageX (0), imageY (0)
-{
-}
-
-Graphics::FillType::FillType (const Colour& colour_) throw()
-    : colour (colour_), gradient (0),
-      image (0), imageX (0), imageY (0)
-{
-}
-
-Graphics::FillType::FillType (const ColourGradient& gradient) throw()
-    : colour (0xff000000), gradient (new ColourGradient (gradient)),
-      image (0), imageX (0), imageY (0)
-{
-}
-
-Graphics::FillType::FillType (Image* const image_, const int x, const int y) throw()
-    : colour (0xff000000), gradient (0),
-      image (image_), imageX (x), imageY (y)
-{
-}
-
-Graphics::FillType::FillType (const FillType& other) throw()
-    : colour (other.colour),
-      gradient (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0),
-      image (other.image), imageX (other.imageX), imageY (other.imageY)
-{
-}
-
-const Graphics::FillType& Graphics::FillType::operator= (const FillType& other) throw()
-{
-    if (this != &other)
-    {
-        colour = other.colour;
-        delete gradient;
-        gradient = (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0);
-        image = other.image;
-        imageX = other.imageX;
-        imageY = other.imageY;
-    }
-
-    return *this;
-}
-
-Graphics::FillType::~FillType() throw()
-{
-    delete gradient;
-}
-
-void Graphics::FillType::setColour (const Colour& newColour) throw()
-{
-    deleteAndZero (gradient);
-    colour = newColour;
-}
-
-void Graphics::FillType::setGradient (const ColourGradient& newGradient) throw()
-{
-    if (gradient != 0)
-        *gradient = newGradient;
-    else
-        gradient = new ColourGradient (newGradient);
-}
-
-void Graphics::FillType::setTiledImage (const Image& image_, const int imageX_, const int imageY_) throw()
-{
-    deleteAndZero (gradient);
-    image = &image_;
-    imageX = imageX_;
-    imageY = imageY_;
-}
 
 END_JUCE_NAMESPACE

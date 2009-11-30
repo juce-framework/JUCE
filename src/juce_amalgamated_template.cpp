@@ -288,6 +288,7 @@
 #include "gui/graphics/colour/juce_ColourGradient.cpp"
 #include "gui/graphics/colour/juce_Colours.cpp"
 #include "gui/graphics/contexts/juce_EdgeTable.cpp"
+#include "gui/graphics/contexts/juce_FillType.cpp"
 #include "gui/graphics/contexts/juce_Graphics.cpp"
 #include "gui/graphics/contexts/juce_Justification.cpp"
 #include "gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.cpp"

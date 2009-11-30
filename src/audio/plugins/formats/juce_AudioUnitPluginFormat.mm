@@ -1521,7 +1521,10 @@ const String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String&
 
 bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
-    return File (desc.fileOrIdentifier).exists();
+    if (desc.fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
+        return fileMightContainThisPluginType (desc.fileOrIdentifier);
+    else
+        return File (desc.fileOrIdentifier).exists();
 }
 
 const FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()

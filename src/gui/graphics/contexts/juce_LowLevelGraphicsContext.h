@@ -80,9 +80,7 @@ public:
     virtual void restoreState() = 0;
 
     //==============================================================================
-    virtual void setColour (const Colour& colour) = 0;
-    virtual void setGradient (const ColourGradient& gradient) = 0;
-    virtual void setTiledFill (const Image& image, int x, int y) = 0;
+    virtual void setFill (const FillType& fillType) = 0;
 
     virtual void setOpacity (float opacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;

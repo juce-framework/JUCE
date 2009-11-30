@@ -557,7 +557,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
         DrawableButton* b = new DrawableButton ("minimise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
-        dp.setFillColour (Colours::black.withAlpha (0.3f));
+        dp.setFill (Colours::black.withAlpha (0.3f));
         b->setImages (&dp);
         return b;
     }
@@ -569,7 +569,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
         DrawableButton* b = new DrawableButton ("maximise", DrawableButton::ImageFitted);
         DrawablePath dp;
         dp.setPath (shape);
-        dp.setFillColour (Colours::black.withAlpha (0.3f));
+        dp.setFill (Colours::black.withAlpha (0.3f));
         b->setImages (&dp);
         return b;
     }

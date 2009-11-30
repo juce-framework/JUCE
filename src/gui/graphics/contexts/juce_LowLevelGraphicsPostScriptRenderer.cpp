@@ -59,13 +59,10 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
     : out (resultingPostScript),
       totalWidth (totalWidth_),
       totalHeight (totalHeight_),
-      xOffset (0),
-      yOffset (0),
-      needToClip (true),
-      colour (Colours::black),
-      gradient (0)
+      needToClip (true)
 {
-    clip = new RectangleList (Rectangle (0, 0, totalWidth_, totalHeight_));
+    stateStack.add (new SavedState());
+    stateStack.getLast()->clip = Rectangle (0, 0, totalWidth_, totalHeight_);
 
     const float scale = jmin ((520.0f / totalWidth_), (750.0f / totalHeight));
 
@@ -102,8 +99,6 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
 
 LowLevelGraphicsPostScriptRenderer::~LowLevelGraphicsPostScriptRenderer()
 {
-    delete clip;
-    delete gradient;
 }
 
 //==============================================================================
@@ -116,91 +111,84 @@ void LowLevelGraphicsPostScriptRenderer::setOrigin (int x, int y)
 {
     if (x != 0 || y != 0)
     {
-        xOffset += x;
-        yOffset += y;
+        stateStack.getLast()->xOffset += x;
+        stateStack.getLast()->yOffset += y;
         needToClip = true;
     }
 }
 
-bool LowLevelGraphicsPostScriptRenderer::reduceClipRegion (int x, int y, int w, int h)
+bool LowLevelGraphicsPostScriptRenderer::clipToRectangle (const Rectangle& r)
 {
     needToClip = true;
-    return clip->clipTo (Rectangle (x + xOffset, y + yOffset, w, h));
+    return stateStack.getLast()->clip.clipTo (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
 }
 
-bool LowLevelGraphicsPostScriptRenderer::reduceClipRegion (const RectangleList& clipRegion)
+bool LowLevelGraphicsPostScriptRenderer::clipToRectangleList (const RectangleList& clipRegion)
 {
     needToClip = true;
-    return clip->clipTo (clipRegion);
+    return stateStack.getLast()->clip.clipTo (clipRegion);
 }
 
-void LowLevelGraphicsPostScriptRenderer::excludeClipRegion (int x, int y, int w, int h)
+void LowLevelGraphicsPostScriptRenderer::excludeClipRectangle (const Rectangle& r)
 {
     needToClip = true;
-    clip->subtract (Rectangle (x + xOffset, y + yOffset, w, h));
+    stateStack.getLast()->clip.subtract (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
 }
 
-bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (int x, int y, int w, int h)
+void LowLevelGraphicsPostScriptRenderer::clipToPath (const Path& path, const AffineTransform& transform)
 {
-    return clip->intersectsRectangle (Rectangle (x + xOffset, y + yOffset, w, h));
+    writeClip();
+
+    Path p (path);
+    p.applyTransform (transform.translated ((float) stateStack.getLast()->xOffset, (float) stateStack.getLast()->yOffset));
+    writePath (p);
+    out << "clip\n";
+}
+
+void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform)
+{
+    needToClip = true;
+    jassertfalse // xxx
+}
+
+bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (const Rectangle& r)
+{
+    return stateStack.getLast()->clip.intersectsRectangle (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
 }
 
 const Rectangle LowLevelGraphicsPostScriptRenderer::getClipBounds() const
 {
-    return clip->getBounds().translated (-xOffset, -yOffset);
+    return stateStack.getLast()->clip.getBounds().translated (-stateStack.getLast()->xOffset,
+                                                              -stateStack.getLast()->yOffset);
 }
 
 bool LowLevelGraphicsPostScriptRenderer::isClipEmpty() const
 {
-    return clip->isEmpty();
+    return stateStack.getLast()->clip.isEmpty();
 }
 
 //==============================================================================
-LowLevelGraphicsPostScriptRenderer::SavedState::SavedState (RectangleList* const clip_,
-                                                            const int xOffset_, const int yOffset_,
-                                                            const Colour& colour_, ColourGradient* const gradient_,
-                                                            const Font& font_)
-    : clip (clip_),
-      xOffset (xOffset_),
-      yOffset (yOffset_),
-      colour (colour_),
-      gradient (gradient_),
-      font (font_)
+LowLevelGraphicsPostScriptRenderer::SavedState::SavedState()
+    : xOffset (0),
+      yOffset (0)
 {
 }
 
 LowLevelGraphicsPostScriptRenderer::SavedState::~SavedState()
 {
-    delete clip;
-    delete gradient;
 }
 
 void LowLevelGraphicsPostScriptRenderer::saveState()
 {
-    stateStack.add (new SavedState (new RectangleList (*clip), xOffset, yOffset, colour,
-                                    gradient != 0 ? new ColourGradient (*gradient) : 0, font));
+    stateStack.add (new SavedState (*stateStack.getLast()));
 }
 
 void LowLevelGraphicsPostScriptRenderer::restoreState()
 {
-    SavedState* const top = stateStack.getLast();
+    jassert (stateStack.size() > 0);
 
-    if (top != 0)
-    {
-        swapVariables (clip, top->clip);
-        swapVariables (gradient, top->gradient);
-        colour = top->colour;
-        xOffset = top->xOffset;
-        yOffset = top->yOffset;
-        font = top->font;
-
+    if (stateStack.size() > 0)
         stateStack.removeLast();
-        needToClip = true;
-    }
-    else
-    {
-        jassertfalse // trying to pop with an empty stack!
-    }
 }
 
 //==============================================================================
@@ -214,7 +202,7 @@ void LowLevelGraphicsPostScriptRenderer::writeClip()
 
         int itemsOnLine = 0;
 
-        for (RectangleList::Iterator i (*clip); i.next();)
+        for (RectangleList::Iterator i (stateStack.getLast()->clip); i.next();)
         {
             if (++itemsOnLine == 6)
             {
@@ -336,16 +324,9 @@ void LowLevelGraphicsPostScriptRenderer::writeTransform (const AffineTransform& 
 }
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::setColour (const Colour& colour_)
+void LowLevelGraphicsPostScriptRenderer::setFill (const FillType& fillType)
 {
-    colour = colour_;
-    deleteAndZero (gradient);
-}
-
-void LowLevelGraphicsPostScriptRenderer::setGradient (const ColourGradient& gradient_)
-{
-    delete gradient;
-    gradient = new ColourGradient (gradient_);
+    stateStack.getLast()->fillType = fillType;
 }
 
 void LowLevelGraphicsPostScriptRenderer::setOpacity (float opacity)
@@ -357,22 +338,21 @@ void LowLevelGraphicsPostScriptRenderer::setInterpolationQuality (Graphics::Resa
 }
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::fillRect (int x, int y, int w, int h, const bool /*replaceExistingContents*/)
+void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle& r, const bool /*replaceExistingContents*/)
 {
-    if (gradient == 0)
+    if (stateStack.getLast()->fillType.isColour())
     {
         writeClip();
-        writeColour (colour);
+        writeColour (stateStack.getLast()->fillType.colour);
 
-        x += xOffset;
-        y += yOffset;
+        Rectangle r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
 
-        out << x << ' ' << -(y + h) << ' ' << w << ' ' << h << " rectfill\n";
+        out << r2.getX() << ' ' << -r2.getBottom() << ' ' << r2.getWidth() << ' ' << r2.getHeight() << " rectfill\n";
     }
     else
     {
         Path p;
-        p.addRectangle ((float) x, (float) y, (float) w, (float) h);
+        p.addRectangle (r);
         fillPath (p, AffineTransform::identity);
     }
 
@@ -381,19 +361,20 @@ void LowLevelGraphicsPostScriptRenderer::fillRect (int x, int y, int w, int h, c
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const AffineTransform& t)
 {
-    if (gradient == 0)
+    if (stateStack.getLast()->fillType.isColour())
     {
         writeClip();
 
         Path p (path);
-        p.applyTransform (t.translated ((float) xOffset, (float) yOffset));
+        p.applyTransform (t.translated ((float) stateStack.getLast()->xOffset,
+                                        (float) stateStack.getLast()->yOffset));
         writePath (p);
 
-        writeColour (colour);
+        writeColour (stateStack.getLast()->fillType.colour);
 
         out << "fill\n";
     }
-    else
+    else if (stateStack.getLast()->fillType.isGradient())
     {
         // this doesn't work correctly yet - it could be improved to handle solid gradients, but
         // postscript can't do semi-transparent ones.
@@ -404,76 +385,20 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
 
         {
             Path p (path);
-            p.applyTransform (t.translated ((float) xOffset, (float) yOffset));
+            p.applyTransform (t.translated ((float) stateStack.getLast()->xOffset, (float) stateStack.getLast()->yOffset));
             writePath (p);
             out << "clip\n";
         }
 
-        const Rectangle bounds (clip->getBounds());
+        const Rectangle bounds (stateStack.getLast()->clip.getBounds());
 
         // ideally this would draw lots of lines or ellipses to approximate the gradient, but for the
         // time-being, this just fills it with the average colour..
-        writeColour (gradient->getColourAtPosition (0.5));
+        writeColour (stateStack.getLast()->fillType.gradient->getColourAtPosition (0.5));
         out << bounds.getX() << ' ' << -bounds.getBottom() << ' ' << bounds.getWidth() << ' ' << bounds.getHeight() << " rectfill\n";
 
         out << "grestore\n";
     }
-}
-
-void LowLevelGraphicsPostScriptRenderer::fillPathWithImage (const Path& path, const AffineTransform& transform,
-                                                            const Image& sourceImage,
-                                                            int imageX, int imageY)
-{
-    writeClip();
-
-    out << "gsave ";
-    Path p (path);
-    p.applyTransform (transform.translated ((float) xOffset, (float) yOffset));
-    writePath (p);
-    out << "clip\n";
-
-    blendImage (sourceImage, imageX, imageY, sourceImage.getWidth(), sourceImage.getHeight(), 0, 0);
-
-    out << "grestore\n";
-}
-
-
-//==============================================================================
-void LowLevelGraphicsPostScriptRenderer::fillAlphaChannel (const Image& /*clipImage*/, int x, int y)
-{
-    x += xOffset;
-    y += yOffset;
-
-    writeClip();
-
-    if (gradient == 0)
-    {
-        writeColour (colour);
-    }
-
-    notPossibleInPostscriptAssert   // you can disable this warning by setting the WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS flag at the top of this file
-}
-
-void LowLevelGraphicsPostScriptRenderer::fillAlphaChannelWithImage (const Image& /*alphaImage*/, int alphaImageX, int alphaImageY,
-                                                                    const Image& /*fillerImage*/, int fillerImageX, int fillerImageY)
-{
-    alphaImageX += xOffset;
-    alphaImageY += yOffset;
-
-    fillerImageX += xOffset;
-    fillerImageY += yOffset;
-
-    writeClip();
-
-    notPossibleInPostscriptAssert   // you can disable this warning by setting the WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS flag at the top of this file
-}
-
-//==============================================================================
-void LowLevelGraphicsPostScriptRenderer::blendImage (const Image& sourceImage, int dx, int dy, int dw, int dh, int sx, int sy)
-{
-    blendImageWarping (sourceImage,
-                       sx, sy, dw, dh,
-                       AffineTransform::translation ((float) dx, (float) dy));
 }
 
 //==============================================================================
@@ -535,23 +460,21 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
     out << "\n>}\n";
 }
 
-void LowLevelGraphicsPostScriptRenderer::blendImageWarping (const Image& sourceImage,
-                                                            int srcClipX, int srcClipY,
-                                                            int srcClipW, int srcClipH,
-                                                            const AffineTransform& t)
+void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const Rectangle& srcClip,
+                                                    const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
-    const int w = jmin (sourceImage.getWidth(), srcClipX + srcClipW);
-    const int h = jmin (sourceImage.getHeight(), srcClipY + srcClipH);
+    const int w = jmin (sourceImage.getWidth(), srcClip.getRight());
+    const int h = jmin (sourceImage.getHeight(), srcClip.getBottom());
 
     writeClip();
 
     out << "gsave ";
-    writeTransform (t.translated ((float) xOffset, (float) yOffset)
-                     .scaled (1.0f, -1.0f));
+    writeTransform (transform.translated ((float) stateStack.getLast()->xOffset, (float) stateStack.getLast()->yOffset)
+                             .scaled (1.0f, -1.0f));
 
     RectangleList imageClip;
     sourceImage.createSolidAreaMask (imageClip, 0.5f);
-    imageClip.clipTo (Rectangle (srcClipX, srcClipY, srcClipW, srcClipH));
+    imageClip.clipTo (srcClip);
 
     out << "newpath ";
     int itemsOnLine = 0;
@@ -574,7 +497,7 @@ void LowLevelGraphicsPostScriptRenderer::blendImageWarping (const Image& sourceI
     out << w << ' ' << h << " scale\n";
     out << w << ' ' << h << " 8 [" << w << " 0 0 -" << h << ' ' << (int) 0 << ' ' << h << " ]\n";
 
-    writeImage (sourceImage, srcClipX, srcClipY, srcClipW, srcClipH);
+    writeImage (sourceImage, srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
 
     out << "false 3 colorimage grestore\n";
     needToClip = true;
@@ -603,19 +526,19 @@ void LowLevelGraphicsPostScriptRenderer::drawHorizontalLine (const int y, double
 //==============================================================================
 void LowLevelGraphicsPostScriptRenderer::setFont (const Font& newFont)
 {
-    font = newFont;
+    stateStack.getLast()->font = newFont;
 }
 
-void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, float x, float y)
+const Font LowLevelGraphicsPostScriptRenderer::getFont()
 {
-    drawGlyph (glyphNumber, AffineTransform::translation (x, y));
+    return stateStack.getLast()->font;
 }
 
 void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
 {
     Path p;
+    Font& font = stateStack.getLast()->font;
     font.getTypeface()->getOutlineForGlyph (glyphNumber, p);
-
     fillPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight()).followedBy (transform));
 }
 

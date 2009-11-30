@@ -31,7 +31,7 @@
 #include "../geometry/juce_PathStrokeType.h"
 #include "../geometry/juce_Line.h"
 #include "../colour/juce_Colours.h"
-#include "../colour/juce_ColourGradient.h"
+#include "juce_FillType.h"
 #include "juce_RectanglePlacement.h"
 class LowLevelGraphicsContext;
 class Image;
@@ -105,6 +105,11 @@ public:
                             const int anchorX,
                             const int anchorY,
                             const float opacity) throw();
+
+    /** Changes the current fill settings.
+        @see setColour, setGradientFill, setTiledImageFill
+    */
+    void setFillType (const FillType& newFill) throw();
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
@@ -622,7 +627,7 @@ public:
     /** Intersects the current clipping region with another region.
 
         @returns true if the resulting clipping region is non-zero in size
-        @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
+        @see setOrigin, clipRegionIntersects
     */
     bool reduceClipRegion (const int x, const int y,
                            const int width, const int height) throw();
@@ -630,9 +635,33 @@ public:
     /** Intersects the current clipping region with a rectangle list region.
 
         @returns true if the resulting clipping region is non-zero in size
-        @see setOrigin, clipRegionIntersects, getClipLeft, getClipRight, getClipWidth, getClipHeight
+        @see setOrigin, clipRegionIntersects
     */
     bool reduceClipRegion (const RectangleList& clipRegion) throw();
+
+    /** Intersects the current clipping region with a path.
+
+        @returns true if the resulting clipping region is non-zero in size
+        @see reduceClipRegion
+    */
+    bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity) throw();
+
+    /** Intersects the current clipping region with an image's alpha-channel.
+
+        The current clipping path is intersected with the area covered by this image's
+        alpha-channel, after the image has been transformed by the specified matrix.
+
+        @param image    the image whose alpha-channel should be used. If the image doesn't
+                        have an alpha-channel, it is treated as entirely opaque.
+        @param sourceClipRegion     a subsection of the image that should be used. To use the
+                                    entire image, just pass a rectangle of bounds
+                                    (0, 0, image.getWidth(), image.getHeight()).
+        @param transform    a matrix to apply to the image
+        @returns true if the resulting clipping region is non-zero in size
+        @see reduceClipRegion
+    */
+    bool reduceClipRegion (const Image& image, const Rectangle& sourceClipRegion,
+                           const AffineTransform& transform) throw();
 
     /** Excludes a rectangle to stop it being drawn into. */
     void excludeClipRegion (const int x, const int y,
@@ -683,34 +712,6 @@ public:
 
     /** @internal */
     LowLevelGraphicsContext* getInternalContext() const throw()     { return context; }
-
-    //==============================================================================
-    class FillType
-    {
-    public:
-        FillType() throw();
-        FillType (const Colour& colour) throw();
-        FillType (const ColourGradient& gradient) throw();
-        FillType (Image* const image, const int x, const int y) throw();
-        FillType (const FillType& other) throw();
-        const FillType& operator= (const FillType& other) throw();
-        ~FillType() throw();
-
-        bool isColour() const throw()       { return gradient == 0 && image == 0; }
-        bool isGradient() const throw()     { return gradient != 0; }
-        bool isTiledImage() const throw()   { return image != 0; }
-
-        void setColour (const Colour& newColour) throw();
-        void setGradient (const ColourGradient& newGradient) throw();
-        void setTiledImage (const Image& image, const int imageX, const int imageY) throw();
-
-        Colour colour;
-        ColourGradient* gradient;
-        const Image* image;
-        int imageX, imageY;
-
-        juce_UseDebuggingNewOperator
-    };
 
 private:
     //==============================================================================

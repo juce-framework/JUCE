@@ -63,15 +63,11 @@ public:
     void restoreState();
 
     //==============================================================================
-    void setColour (const Colour& colour);
-    void setGradient (const ColourGradient& gradient);
-    void setTiledFill (const Image& image, int x, int y);
-
+    void setFill (const FillType& fillType);
     void setOpacity (float opacity);
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillAll (const bool replaceContents);
     void fillRect (const Rectangle& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 

@@ -28,13 +28,13 @@
 
 
 //==============================================================================
-FillType::FillType()
+JucerFillType::JucerFillType()
     : image (0)
 {
     reset();
 }
 
-FillType::FillType (const FillType& other)
+JucerFillType::JucerFillType (const JucerFillType& other)
 {
     image = 0;
     mode = other.mode;
@@ -48,7 +48,7 @@ FillType::FillType (const FillType& other)
     imageAnchor = other.imageAnchor;
 }
 
-const FillType& FillType::operator= (const FillType& other)
+const JucerFillType& JucerFillType::operator= (const JucerFillType& other)
 {
     ImageCache::release (image);
     image = 0;
@@ -66,12 +66,12 @@ const FillType& FillType::operator= (const FillType& other)
     return *this;
 }
 
-FillType::~FillType()
+JucerFillType::~JucerFillType()
 {
     ImageCache::release (image);
 }
 
-bool FillType::operator== (const FillType& other) const throw()
+bool JucerFillType::operator== (const JucerFillType& other) const throw()
 {
     return mode == other.mode
         && colour == other.colour
@@ -84,12 +84,12 @@ bool FillType::operator== (const FillType& other) const throw()
         && imageAnchor == other.imageAnchor;
 }
 
-bool FillType::operator!= (const FillType& other) const throw()
+bool JucerFillType::operator!= (const JucerFillType& other) const throw()
 {
     return ! operator== (other);
 }
 
-void FillType::reset()
+void JucerFillType::reset()
 {
     ImageCache::release (image);
     image = 0;
@@ -110,7 +110,7 @@ void FillType::reset()
 }
 
 //==============================================================================
-void FillType::setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea)
+void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea)
 {
     if (mode == solidColour)
     {
@@ -141,7 +141,7 @@ void FillType::setFillType (Graphics& g, JucerDocument* const document, const Re
     }
 }
 
-void FillType::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const
+void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const
 {
     String s;
 
@@ -203,7 +203,7 @@ void FillType::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode
     paintMethodCode += s;
 }
 
-const String FillType::toString() const
+const String JucerFillType::toString() const
 {
     switch (mode)
     {
@@ -235,7 +235,7 @@ const String FillType::toString() const
     return String::empty;
 }
 
-void FillType::restoreFromString (const String& s)
+void JucerFillType::restoreFromString (const String& s)
 {
     reset();
 
@@ -278,7 +278,7 @@ void FillType::restoreFromString (const String& s)
     }
 }
 
-bool FillType::isOpaque() const
+bool JucerFillType::isOpaque() const
 {
     switch (mode)
     {
@@ -302,7 +302,7 @@ bool FillType::isOpaque() const
     return false;
 }
 
-bool FillType::isInvisible() const
+bool JucerFillType::isInvisible() const
 {
     switch (mode)
     {
@@ -324,7 +324,7 @@ bool FillType::isInvisible() const
     return false;
 }
 
-void FillType::loadImage (JucerDocument* const document)
+void JucerFillType::loadImage (JucerDocument* const document)
 {
     if (image == 0)
     {

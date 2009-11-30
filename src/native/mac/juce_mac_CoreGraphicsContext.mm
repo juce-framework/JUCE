@@ -209,24 +209,16 @@ public:
     }
 
     //==============================================================================
-    void setColour (const Colour& colour)
+    void setFill (const FillType& fillType)
     {
-        state->fillType.setColour (colour);
+        state->fillType = fillType;
 
-        CGContextSetRGBFillColor (context,
-                                  colour.getFloatRed(), colour.getFloatGreen(),
-                                  colour.getFloatBlue(), colour.getFloatAlpha());
-        CGContextSetAlpha (context, 1.0f);
-    }
-
-    void setGradient (const ColourGradient& gradient)
-    {
-        state->fillType.setGradient (gradient);
-    }
-
-    void setTiledFill (const Image& image, int x, int y)
-    {
-        state->fillType.setTiledImage (image, x, y);
+        if (fillType.isColour())
+        {
+            CGContextSetRGBFillColor (context, fillType.colour.getFloatRed(), fillType.colour.getFloatGreen(),
+                                      fillType.colour.getFloatBlue(), fillType.colour.getFloatAlpha());
+            CGContextSetAlpha (context, 1.0f);
+        }
     }
 
     void setOpacity (float opacity)
@@ -272,7 +264,6 @@ public:
             {
                 CGContextSaveGState (context);
                 CGContextClipToRect (context, cgRect);
-                flip();
                 drawGradient();
                 CGContextRestoreGState (context);
             }
@@ -281,7 +272,7 @@ public:
                 CGContextSaveGState (context);
                 CGContextClipToRect (context, cgRect);
                 drawImage (*(state->fillType.image), Rectangle (0, 0, state->fillType.image->getWidth(), state->fillType.image->getHeight()),
-                           AffineTransform::translation (state->fillType.imageX, state->fillType.imageY), true);
+                           state->fillType.transform, true);
                 CGContextRestoreGState (context);
             }
         }
@@ -302,22 +293,21 @@ public:
             else
                 CGContextEOFillPath (context);
         }
-        else if (state->fillType.isGradient())
-        {
-            createPath (path, transform);
-            CGContextClip (context);
-            flip();
-            applyTransform (state->fillType.gradient->transform);
-            drawGradient();
-        }
         else
         {
             createPath (path, transform);
-            CGContextClip (context);
-            drawImage (*(state->fillType.image), Rectangle (0, 0, state->fillType.image->getWidth(), state->fillType.image->getHeight()),
-                       AffineTransform::translation (state->fillType.imageX, state->fillType.imageY), true);
-        }
 
+            if (path.isUsingNonZeroWinding())
+                CGContextClip (context);
+            else
+                CGContextEOClip (context);
+
+            if (state->fillType.isGradient())
+                drawGradient();
+            else
+                drawImage (*(state->fillType.image), Rectangle (0, 0, state->fillType.image->getWidth(), state->fillType.image->getHeight()),
+                           state->fillType.transform, true);
+        }
 
         CGContextRestoreGState (context);
     }
@@ -492,7 +482,7 @@ private:
         {
         }
 
-        Graphics::FillType fillType;
+        FillType fillType;
         Font font;
         CGFontRef fontRef;
         CGAffineTransform fontTransform;
@@ -517,10 +507,10 @@ private:
         outData[3] = colour.getAlpha() / 255.0f;
     }
 
-    CGShadingRef createGradient (const ColourGradient* const gradient) throw()
+    CGShadingRef createGradient (const AffineTransform& transform, const ColourGradient* const gradient) throw()
     {
         delete gradientLookupTable;
-        gradientLookupTable = gradient->createLookupTable (numGradientLookupEntries);
+        gradientLookupTable = gradient->createLookupTable (transform, numGradientLookupEntries);
         --numGradientLookupEntries;
 
         CGShadingRef result = 0;
@@ -546,10 +536,13 @@ private:
 
     void drawGradient() throw()
     {
+        flip();
+        applyTransform (state->fillType.transform);
+
         CGContextSetAlpha (context, 1.0f);
         CGContextSetInterpolationQuality (context, kCGInterpolationDefault); // (This is required for 10.4, where there's a crash if
                                                                              // you draw a gradient with high quality interp enabled).
-        CGShadingRef shading = createGradient (state->fillType.gradient);
+        CGShadingRef shading = createGradient (state->fillType.transform, state->fillType.gradient);
         CGContextDrawShading (context, shading);
         CGShadingRelease (shading);
     }

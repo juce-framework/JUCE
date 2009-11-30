@@ -33,17 +33,17 @@
 /**
     Defines a brush to be used to fill a shape.
 */
-class FillType
+class JucerFillType
 {
 public:
     //==============================================================================
-    FillType();
-    FillType (const FillType& other);
-    const FillType& operator= (const FillType& other);
-    ~FillType();
+    JucerFillType();
+    JucerFillType (const JucerFillType& other);
+    const JucerFillType& operator= (const JucerFillType& other);
+    ~JucerFillType();
 
-    bool operator== (const FillType& other) const throw();
-    bool operator!= (const FillType& other) const throw();
+    bool operator== (const JucerFillType& other) const throw();
+    bool operator!= (const JucerFillType& other) const throw();
 
     //==============================================================================
     void setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea);
