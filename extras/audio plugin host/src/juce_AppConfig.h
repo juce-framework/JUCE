@@ -38,6 +38,14 @@
     to an explicit 0 or 1 in here.
 */
 
+
+/*  Because the host may be loading juce plugins that contain the same symbols as itself,
+    there's endless opportunity for the dynamic loader to bugger up . So, we'll make the host
+    use a different namespace and obj-C classnames, to try to avoid this as much as possible.
+*/
+#define JUCE_ObjCExtraSuffix JuceDemoHost
+#define JUCE_NAMESPACE JuceDemoHost
+
 #define JUCE_PLUGINHOST_VST  1
 #define JUCE_PLUGINHOST_AU  1
 #define JUCE_SUPPORT_CARBON 1

@@ -233,20 +233,20 @@
 		};
 		C0E91ACA08A95435008D54AB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 84FC4CD80CD8894600850651 /* juce.xcconfig */;
 			buildSettings = {
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = PluginHost;
+				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(inherited)";
-				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
 		C0E91ACB08A95435008D54AB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 84FC4CD80CD8894600850651 /* juce.xcconfig */;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = PluginHost;
 				SEPARATE_STRIP = YES;
 				USER_HEADER_SEARCH_PATHS = "~/SDKs/vstsdk2.4 $(inherited)";

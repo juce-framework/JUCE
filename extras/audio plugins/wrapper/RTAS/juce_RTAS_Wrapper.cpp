@@ -605,7 +605,7 @@ protected:
         if (! midiEvents.isEmpty())
         {
 #if JucePlugin_ProducesMidiOutput
-            const juce::uint8* midiEventData;
+            const JUCE_NAMESPACE::uint8* midiEventData;
             int midiEventSize, midiEventPosition;
             MidiBuffer::Iterator i (midiEvents);
 

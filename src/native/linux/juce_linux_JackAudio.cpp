@@ -135,7 +135,7 @@ public:
         jassert (deviceName.isNotEmpty());
 
         jack_status_t status;
-        client = juce::jack_client_open (JUCE_JACK_CLIENT_NAME, JackNoStartServer, &status);
+        client = JUCE_NAMESPACE::jack_client_open (JUCE_JACK_CLIENT_NAME, JackNoStartServer, &status);
 
         if (client == 0)
         {
@@ -143,7 +143,7 @@ public:
         }
         else
         {
-            juce::jack_set_error_function (errorCallback);
+            JUCE_NAMESPACE::jack_set_error_function (errorCallback);
 
             // open input ports
             const StringArray inputChannels (getInputChannelNames());
@@ -152,8 +152,8 @@ public:
                 String inputName;
                 inputName << "in_" << (++totalNumberOfInputChannels);
 
-                inputPorts.add (juce::jack_port_register (client, (const char*) inputName,
-                                                          JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
+                inputPorts.add (JUCE_NAMESPACE::jack_port_register (client, (const char*) inputName,
+                                                                    JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
             }
 
             // open output ports
@@ -163,8 +163,8 @@ public:
                 String outputName;
                 outputName << "out_" << (++totalNumberOfOutputChannels);
 
-                outputPorts.add (juce::jack_port_register (client, (const char*) outputName,
-                                                           JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
+                outputPorts.add (JUCE_NAMESPACE::jack_port_register (client, (const char*) outputName,
+                                                                     JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
             }
 
             inChans = (float**) juce_calloc (sizeof (float*) * (totalNumberOfInputChannels + 2));
@@ -177,7 +177,7 @@ public:
         close();
         if (client != 0)
         {
-            juce::jack_client_close (client);
+            JUCE_NAMESPACE::jack_client_close (client);
             client = 0;
         }
 
@@ -188,8 +188,8 @@ public:
     const StringArray getChannelNames (bool forInput) const
     {
         StringArray names;
-        const char** const ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */
-                                                         forInput ? JackPortIsInput : JackPortIsOutput);
+        const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */
+                                                                   forInput ? JackPortIsInput : JackPortIsOutput);
 
         if (ports != 0)
         {
@@ -211,10 +211,10 @@ public:
     const StringArray getOutputChannelNames()   { return getChannelNames (false); }
     const StringArray getInputChannelNames()    { return getChannelNames (true); }
     int getNumSampleRates()                     { return client != 0 ? 1 : 0; }
-    double getSampleRate (int index)            { return client != 0 ? juce::jack_get_sample_rate (client) : 0; }
+    double getSampleRate (int index)            { return client != 0 ? JUCE_NAMESPACE::jack_get_sample_rate (client) : 0; }
     int getNumBufferSizesAvailable()            { return client != 0 ? 1 : 0; }
     int getBufferSizeSamples (int index)        { return getDefaultBufferSize(); }
-    int getDefaultBufferSize()                  { return client != 0 ? juce::jack_get_buffer_size (client) : 0; }
+    int getDefaultBufferSize()                  { return client != 0 ? JUCE_NAMESPACE::jack_get_buffer_size (client) : 0; }
 
     const String open (const BitArray& inputChannels, const BitArray& outputChannels,
                        double sampleRate, int bufferSizeSamples)
@@ -228,14 +228,14 @@ public:
         lastError = String::empty;
         close();
 
-        juce::jack_set_process_callback (client, processCallback, this);
-        juce::jack_on_shutdown (client, shutdownCallback, this);
-        juce::jack_activate (client);
+        JUCE_NAMESPACE::jack_set_process_callback (client, processCallback, this);
+        JUCE_NAMESPACE::jack_on_shutdown (client, shutdownCallback, this);
+        JUCE_NAMESPACE::jack_activate (client);
         isOpen_ = true;
 
         if (! inputChannels.isEmpty())
         {
-            const char** const ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
+            const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
 
             if (ports != 0)
             {
@@ -247,7 +247,7 @@ public:
 
                     if (inputChannels[i] && portName.upToFirstOccurrenceOf (T(":"), false, false) == getName())
                     {
-                        int error = juce::jack_connect (client, ports[i], juce::jack_port_name ((jack_port_t*) inputPorts[i]));
+                        int error = JUCE_NAMESPACE::jack_connect (client, ports[i], JUCE_NAMESPACE::jack_port_name ((jack_port_t*) inputPorts[i]));
                         if (error != 0)
                             jack_Log ("Cannot connect input port " + String (i) + " (" + String (ports[i]) + "), error " + String (error));
                     }
@@ -259,7 +259,7 @@ public:
 
         if (! outputChannels.isEmpty())
         {
-            const char** const ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
+            const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
 
             if (ports != 0)
             {
@@ -271,7 +271,7 @@ public:
 
                     if (outputChannels[i] && portName.upToFirstOccurrenceOf (T(":"), false, false) == getName())
                     {
-                        int error = juce::jack_connect (client, juce::jack_port_name ((jack_port_t*) outputPorts[i]), ports[i]);
+                        int error = JUCE_NAMESPACE::jack_connect (client, JUCE_NAMESPACE::jack_port_name ((jack_port_t*) outputPorts[i]), ports[i]);
                         if (error != 0)
                             jack_Log ("Cannot connect output port " + String (i) + " (" + String (ports[i]) + "), error " + String (error));
                     }
@@ -290,9 +290,9 @@ public:
 
         if (client != 0)
         {
-            juce::jack_deactivate (client);
-            juce::jack_set_process_callback (client, processCallback, 0);
-            juce::jack_on_shutdown (client, shutdownCallback, 0);
+            JUCE_NAMESPACE::jack_deactivate (client);
+            JUCE_NAMESPACE::jack_set_process_callback (client, processCallback, 0);
+            JUCE_NAMESPACE::jack_on_shutdown (client, shutdownCallback, 0);
         }
 
         isOpen_ = false;
@@ -334,7 +334,7 @@ public:
         BitArray outputBits;
 
         for (int i = 0; i < outputPorts.size(); i++)
-            if (juce::jack_port_connected ((jack_port_t*) outputPorts [i]))
+            if (JUCE_NAMESPACE::jack_port_connected ((jack_port_t*) outputPorts [i]))
                 outputBits.setBit (i);
 
         return outputBits;
@@ -345,7 +345,7 @@ public:
         BitArray inputBits;
 
         for (int i = 0; i < inputPorts.size(); i++)
-            if (juce::jack_port_connected ((jack_port_t*) inputPorts [i]))
+            if (JUCE_NAMESPACE::jack_port_connected ((jack_port_t*) inputPorts [i]))
                 inputBits.setBit (i);
 
         return inputBits;
@@ -356,7 +356,7 @@ public:
         int latency = 0;
 
         for (int i = 0; i < outputPorts.size(); i++)
-            latency = jmax (latency, (int) juce::jack_port_get_total_latency (client, (jack_port_t*) outputPorts [i]));
+            latency = jmax (latency, (int) JUCE_NAMESPACE::jack_port_get_total_latency (client, (jack_port_t*) outputPorts [i]));
 
         return latency;
     }
@@ -366,7 +366,7 @@ public:
         int latency = 0;
 
         for (int i = 0; i < inputPorts.size(); i++)
-            latency = jmax (latency, (int) juce::jack_port_get_total_latency (client, (jack_port_t*) inputPorts [i]));
+            latency = jmax (latency, (int) JUCE_NAMESPACE::jack_port_get_total_latency (client, (jack_port_t*) inputPorts [i]));
 
         return latency;
     }
@@ -381,7 +381,7 @@ private:
         for (i = 0; i < totalNumberOfInputChannels; ++i)
         {
             jack_default_audio_sample_t* in
-                = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), numSamples);
+                = (jack_default_audio_sample_t*) JUCE_NAMESPACE::jack_port_get_buffer ((jack_port_t*) inputPorts.getUnchecked(i), numSamples);
 
             if (in != 0)
                 inChans [numActiveInChans++] = (float*) in;
@@ -390,7 +390,7 @@ private:
         for (i = 0; i < totalNumberOfOutputChannels; ++i)
         {
             jack_default_audio_sample_t* out
-                = (jack_default_audio_sample_t*) juce::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), numSamples);
+                = (jack_default_audio_sample_t*) JUCE_NAMESPACE::jack_port_get_buffer ((jack_port_t*) outputPorts.getUnchecked(i), numSamples);
 
             if (out != 0)
                 outChans [numActiveOutChans++] = (float*) out;
@@ -489,7 +489,7 @@ public:
 
         // open a dummy client
         jack_status_t status;
-        jack_client_t* client = juce::jack_client_open ("JuceJackDummy", JackNoStartServer, &status);
+        jack_client_t* client = JUCE_NAMESPACE::jack_client_open ("JuceJackDummy", JackNoStartServer, &status);
 
         if (client == 0)
         {
@@ -498,7 +498,7 @@ public:
         else
         {
             // scan for output devices
-            const char** ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
+            const char** ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
 
             if (ports != 0)
             {
@@ -522,7 +522,7 @@ public:
             }
 
             // scan for input devices
-            ports = juce::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
+            ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
 
             if (ports != 0)
             {
@@ -545,7 +545,7 @@ public:
                 free (ports);
             }
 
-            juce::jack_client_close (client);
+            JUCE_NAMESPACE::jack_client_close (client);
         }
     }
 

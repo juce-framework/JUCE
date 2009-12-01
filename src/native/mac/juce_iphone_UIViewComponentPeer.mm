@@ -742,7 +742,7 @@ void UIViewComponentPeer::drawRect (CGRect r)
 
 bool UIViewComponentPeer::canBecomeKeyWindow()
 {
-    return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+    return (getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowIgnoresKeyPresses) == 0;
 }
 
 bool UIViewComponentPeer::windowShouldClose()

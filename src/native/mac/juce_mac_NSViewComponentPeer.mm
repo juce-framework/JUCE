@@ -543,10 +543,10 @@ END_JUCE_NAMESPACE
 
 - (void) windowWillMove: (NSNotification*) notification
 {
-    if (juce::Component::getCurrentlyModalComponent() != 0
+    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != 0
           && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
-          && (owner->getStyleFlags() & juce::ComponentPeer::windowHasTitleBar) != 0)
-        juce::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+          && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
+        JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
 }
 
 @end
@@ -1369,7 +1369,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
 
 bool NSViewComponentPeer::canBecomeKeyWindow()
 {
-    return (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+    return (getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowIgnoresKeyPresses) == 0;
 }
 
 bool NSViewComponentPeer::windowShouldClose()

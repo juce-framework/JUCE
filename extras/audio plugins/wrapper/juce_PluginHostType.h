@@ -134,6 +134,6 @@ private:
 #else
         #error
 #endif
-        return String::fromUTF8 ((const juce::uint8*) buffer.getData(), size);
+        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer.getData(), size);
     }
 };
