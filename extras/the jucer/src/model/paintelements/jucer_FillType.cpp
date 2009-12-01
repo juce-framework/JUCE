@@ -158,9 +158,7 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
             positionToCode (gradPos1, code.document->getComponentLayout(), x1, y1, w, h);
             positionToCode (gradPos2, code.document->getComponentLayout(), x2, y2, w, h);
 
-            const int brushNum = code.getUniqueSuffix();
-
-            s << "GradientBrush gradient_" << brushNum << " (";
+            s << "g.setGradientFill (ColourGradient (";
 
             const String indent (String::repeatedString (T(" "), s.length()));
 
@@ -168,8 +166,7 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
               << indent << castToFloat (x1) << ", " << castToFloat (y1) << ",\n"
               << indent << colourToCode (gradCol2) << ",\n"
               << indent << castToFloat (x2) << ", " << castToFloat (y2) << ",\n"
-              << indent << boolToString (mode == radialGradient) << ");\n"
-              << "g.setBrush (&gradient_" << brushNum << ");\n";
+              << indent << boolToString (mode == radialGradient) << "));\n";
             break;
         }
 
@@ -182,16 +179,14 @@ void JucerFillType::fillInGeneratedCode (GeneratedCode& code, String& paintMetho
             String x, y, w, h;
             positionToCode (imageAnchor, code.document->getComponentLayout(), x, y, w, h);
 
-            const int brushNum = code.getUniqueSuffix();
-
-            s << "ImageBrush imageBrush_" << brushNum << " (";
+            s << "g.setTiledImageFill (*";
 
             const String indent (String::repeatedString (T(" "), s.length()));
 
             s << imageVariable << ",\n"
               << indent << x << ", " << y << ",\n"
-              << indent << valueToFloat (imageOpacity) << ");\n"
-              << "g.setBrush (&imageBrush_" << brushNum << ");\n";
+              << indent << valueToFloat (imageOpacity) << ");\n";
+
             break;
         }
 
