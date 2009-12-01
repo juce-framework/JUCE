@@ -79,6 +79,7 @@ public:
         }
     }
 
+#if JUCE_MAC
     static NSImage* createNSImage (const Image& image)
     {
         const ScopedAutoReleasePool pool;
@@ -99,6 +100,7 @@ public:
 
         return im;
     }
+#endif
 
     //==============================================================================
     CGContextRef context;
@@ -280,6 +282,7 @@ public:
     void setOpacity (float opacity)
     {
         state->fillType.colour = state->fillType.colour.withAlpha (opacity);
+        setFill (state->fillType);
     }
 
     void setInterpolationQuality (Graphics::ResamplingQuality quality)

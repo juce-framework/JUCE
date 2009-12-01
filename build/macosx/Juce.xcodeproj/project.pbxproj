@@ -15,6 +15,11 @@
 		840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */; };
 		840F1DA710AD6750002A03A6 /* juce_CPlusPlusCodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */; };
 		840F80BC092B399D005E7B4E /* juce.h in Headers */ = {isa = PBXBuildFile; fileRef = 840F80BB092B399D005E7B4E /* juce.h */; };
+		844BB95B10C5578800DF5536 /* juce_TargetPlatform.h in Headers */ = {isa = PBXBuildFile; fileRef = 8481730E10832513008FEC33 /* juce_TargetPlatform.h */; };
+		844BB95C10C5579A00DF5536 /* juce_FillType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */; };
+		844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
+		844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
+		844BB95F10C557A800DF5536 /* juce_Config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8456EC6508A2A6C80087C412 /* juce_Config.h */; };
 		84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
 		84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
 		84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */; };
@@ -3189,6 +3194,9 @@
 				840F1DA410AD674E002A03A6 /* juce_CodeEditorComponent.h in Headers */,
 				840F1DA510AD674F002A03A6 /* juce_CodeTokeniser.h in Headers */,
 				840F1DA710AD6750002A03A6 /* juce_CPlusPlusCodeTokeniser.h in Headers */,
+				844BB95B10C5578800DF5536 /* juce_TargetPlatform.h in Headers */,
+				844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */,
+				844BB95F10C557A800DF5536 /* juce_Config.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3856,6 +3864,8 @@
 				840F1DA110AD674C002A03A6 /* juce_CodeDocument.cpp in Sources */,
 				840F1DA310AD674D002A03A6 /* juce_CodeEditorComponent.cpp in Sources */,
 				840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
+				844BB95C10C5579A00DF5536 /* juce_FillType.cpp in Sources */,
+				844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
