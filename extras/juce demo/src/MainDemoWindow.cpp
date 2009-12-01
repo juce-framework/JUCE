@@ -46,7 +46,7 @@ class ContentComp  : public Component,
 
     enum CommandIDs
     {
-        showPathsAndTransforms     = 0x2000,
+        showRendering              = 0x2000,
         showFontsAndText           = 0x2001,
         showWidgets                = 0x2002,
         showThreading              = 0x2003,
@@ -75,7 +75,7 @@ public:
           currentDemo (0),
           currentDemoId (0)
     {
-        invokeDirectly (showPathsAndTransforms, true);
+        invokeDirectly (showRendering, true);
     }
 
     ~ContentComp()
@@ -121,7 +121,7 @@ public:
 
         if (menuIndex == 0)
         {
-            menu.addCommandItem (commandManager, showPathsAndTransforms);
+            menu.addCommandItem (commandManager, showRendering);
             menu.addCommandItem (commandManager, showFontsAndText);
             menu.addCommandItem (commandManager, showWidgets);
             menu.addCommandItem (commandManager, showThreading);
@@ -153,6 +153,16 @@ public:
 #if ! JUCE_LINUX
             menu.addCommandItem (commandManager, goToKioskMode);
 #endif
+
+            StringArray renderingEngines (getPeer()->getAvailableRenderingEngines());
+            if (renderingEngines.size() > 1)
+            {
+                menu.addSeparator();
+
+                for (int i = 0; i < renderingEngines.size(); ++i)
+                    menu.addItem (5001 + i, "Use " + renderingEngines[i], true,
+                                  i == getPeer()->getCurrentRenderingEngine());
+            }
         }
 
         return menu;
@@ -161,8 +171,11 @@ public:
     void menuItemSelected (int menuItemID,
                            int topLevelMenuIndex)
     {
-        // all our menu items are invoked automatically as commands, so no need to do
-        // anything in this callback
+        // most of our menu items are invoked automatically as commands, but we can handle the
+        // other special cases here..
+
+        if (menuItemID >= 5001 && menuItemID < 5010)
+            getPeer()->setCurrentRenderingEngine (menuItemID - 5001);
     }
 
     //==============================================================================
@@ -180,7 +193,7 @@ public:
     void getAllCommands (Array <CommandID>& commands)
     {
         // this returns the set of all commands that this target can perform..
-        const CommandID ids[] = { showPathsAndTransforms,
+        const CommandID ids[] = { showRendering,
                                   showFontsAndText,
                                   showWidgets,
                                   showThreading,
@@ -218,9 +231,9 @@ public:
 
         switch (commandID)
         {
-        case showPathsAndTransforms:
-            result.setInfo (T("Paths and Transforms"), T("Shows the paths & transforms demo"), demosCategory, 0);
-            result.setTicked (currentDemoId == showPathsAndTransforms);
+        case showRendering:
+            result.setInfo (T("Graphics Rendering"), T("Shows the graphics demo"), demosCategory, 0);
+            result.setTicked (currentDemoId == showRendering);
             result.addDefaultKeypress (T('1'), ModifierKeys::commandModifier);
             break;
 
@@ -353,9 +366,9 @@ public:
     {
         switch (info.commandID)
         {
-        case showPathsAndTransforms:
-            showDemo (createPathsAndTransformsDemo());
-            currentDemoId = showPathsAndTransforms;
+        case showRendering:
+            showDemo (createRenderingDemo());
+            currentDemoId = showRendering;
             break;
 
         case showFontsAndText:

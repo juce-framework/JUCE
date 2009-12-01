@@ -279,9 +279,9 @@ public:
         }
     }
 
-    void setOpacity (float opacity)
+    void setOpacity (float newOpacity)
     {
-        state->fillType.colour = state->fillType.colour.withAlpha (opacity);
+        state->fillType.setOpacity (newOpacity);
         setFill (state->fillType);
     }
 
@@ -380,7 +380,7 @@ public:
         CGImageRelease (fullImage);
 
         CGContextSaveGState (context);
-        CGContextSetAlpha (context, state->fillType.colour.getFloatAlpha());
+        CGContextSetAlpha (context, state->fillType.getOpacity());
 
         flip();
         applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
@@ -566,26 +566,27 @@ private:
         outData[3] = colour.getAlpha() / 255.0f;
     }
 
-    CGShadingRef createGradient (const AffineTransform& transform, const ColourGradient* const gradient) throw()
+    CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient) throw()
     {
+//        gradient.multiplyOpacity (state->fillType.getOpacity());
         delete gradientLookupTable;
-        gradientLookupTable = gradient->createLookupTable (transform, numGradientLookupEntries);
+        gradientLookupTable = gradient.createLookupTable (transform, numGradientLookupEntries);
         --numGradientLookupEntries;
 
         CGShadingRef result = 0;
         CGFunctionRef function = CGFunctionCreate ((void*) this, 1, 0, 4, 0, &gradientCallbacks);
-        CGPoint p1 (CGPointMake (gradient->x1, gradient->y1));
+        CGPoint p1 (CGPointMake (gradient.x1, gradient.y1));
 
-        if (gradient->isRadial)
+        if (gradient.isRadial)
         {
             result = CGShadingCreateRadial (rgbColourSpace, p1, 0,
-                                            p1, hypotf (gradient->x1 - gradient->x2, gradient->y1 - gradient->y2),
+                                            p1, hypotf (gradient.x1 - gradient.x2, gradient.y1 - gradient.y2),
                                             function, true, true);
         }
         else
         {
             result = CGShadingCreateAxial (rgbColourSpace, p1,
-                                           CGPointMake (gradient->x2, gradient->y2),
+                                           CGPointMake (gradient.x2, gradient.y2),
                                            function, true, true);
         }
 
@@ -598,10 +599,9 @@ private:
         flip();
         applyTransform (state->fillType.transform);
 
-        CGContextSetAlpha (context, 1.0f);
         CGContextSetInterpolationQuality (context, kCGInterpolationDefault); // (This is required for 10.4, where there's a crash if
                                                                              // you draw a gradient with high quality interp enabled).
-        CGShadingRef shading = createGradient (state->fillType.transform, state->fillType.gradient);
+        CGShadingRef shading = createGradient (state->fillType.transform, *(state->fillType.gradient));
         CGContextDrawShading (context, shading);
         CGShadingRelease (shading);
     }

@@ -949,6 +949,7 @@ public:
             jassert (! replaceContents); // that option is just for solid colours
 
             ColourGradient g2 (*(fillType.gradient));
+            g2.multiplyOpacity (fillType.getOpacity());
             AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
             const bool isIdentity = transform.isOnlyTranslation();
 
@@ -1365,9 +1366,9 @@ void LowLevelGraphicsSoftwareRenderer::setFill (const FillType& fillType)
     currentState->fillType = fillType;
 }
 
-void LowLevelGraphicsSoftwareRenderer::setOpacity (float opacity)
+void LowLevelGraphicsSoftwareRenderer::setOpacity (float newOpacity)
 {
-    currentState->fillType.colour = currentState->fillType.colour.withAlpha (opacity);
+    currentState->fillType.setOpacity (newOpacity);
 }
 
 void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::ResamplingQuality quality)
@@ -1414,15 +1415,21 @@ void LowLevelGraphicsSoftwareRenderer::drawLine (double x1, double y1, double x2
 
 void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top, double bottom)
 {
-    EdgeTable et ((float) (x + currentState->xOffset), (float) (top + currentState->yOffset), 1.0f, (float) (bottom - top));
-    currentState->fillEdgeTable (image, et);
+    if (bottom > top)
+    {
+        EdgeTable et ((float) (x + currentState->xOffset), (float) (top + currentState->yOffset), 1.0f, (float) (bottom - top));
+        currentState->fillEdgeTable (image, et);
+    }
 }
 
 void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double left, double right)
 {
-    EdgeTable et ((float) (left + currentState->xOffset), (float) (y + currentState->yOffset),
-                  (float) (right - left), 1.0f);
-    currentState->fillEdgeTable (image, et);
+    if (right > left)
+    {
+        EdgeTable et ((float) (left + currentState->xOffset), (float) (y + currentState->yOffset),
+                      (float) (right - left), 1.0f);
+        currentState->fillEdgeTable (image, et);
+    }
 }
 
 //==============================================================================
@@ -1519,7 +1526,7 @@ public:
                 const AffineTransform transform (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight));
 
                 float px, py, pw, ph;
-                glyphPath.getBoundsTransformed (transform, px, py, pw, ph);
+                glyphPath.getBoundsTransformed (transform.translated (0.0f, -0.5f), px, py, pw, ph);
 
                 Rectangle clip ((int) floorf (px), (int) floorf (py),
                                 roundFloatToInt (pw) + 2, roundFloatToInt (ph) + 2);
@@ -1573,7 +1580,7 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
     {
         GlyphCache::getInstance()->drawGlyph (*currentState, image, f, glyphNumber,
                                               transform.getTranslationX() + (float) currentState->xOffset,
-                                              roundFloatToInt (transform.getTranslationY() + (float) currentState->yOffset));
+                                              transform.getTranslationY() + (float) currentState->yOffset);
     }
     else
     {

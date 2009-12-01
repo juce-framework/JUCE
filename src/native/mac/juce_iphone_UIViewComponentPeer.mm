@@ -186,7 +186,11 @@ static int getModifierForButtonNumber (const int num) throw()
                             : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
 }
 
-static int64 getMouseTime (UIEvent* e)  { return (int64) ([e timestamp] * 1000.0); }
+static int64 getMouseTime (UIEvent* e) throw()
+{
+    return (Time::currentTimeMillis() - Time::getMillisecondCounter())
+            + (int64) ([e timestamp] * 1000.0);
+}
 
 int juce_lastMouseX = 0, juce_lastMouseY = 0;
 

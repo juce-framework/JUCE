@@ -19894,17 +19894,36 @@ public:
     */
     void setTiledImage (const Image& image, const AffineTransform& transform) throw();
 
-    /** Returns the solid colour being used. */
+    /** Changes the opacity that should be used.
+        If the fill is a solid colour, this just changes the opacity of that colour. For
+        gradients and image tiles, it changes the opacity that will be used for them.
+    */
+    void setOpacity (const float newOpacity) throw();
+
+    /** Returns the current opacity to be applied to the colour, gradient, or image.
+        @see setOpacity
+    */
+    float getOpacity() const throw()        { return colour.getFloatAlpha(); }
+
+    /** The solid colour being used.
+
+        If the fill type is not a solid colour, the alpha channel of this colour indicates
+        the opacity that should be used for the fill, and the RGB channels are ignored.
+    */
     Colour colour;
 
     /** Returns the gradient that should be used for filling.
         This will be zero if the object is some other type of fill.
+        If a gradient is active, the overall opacity with which it should be applied
+        is indicated by the alpha channel of the colour variable.
     */
     ColourGradient* gradient;
 
     /** Returns the image that should be used for tiling.
         The FillType object just keeps a pointer to this image, it doesn't own it, so you have to
         be careful to make sure the image doesn't get deleted while it's being used.
+        If an image fill is active, the overall opacity with which it should be applied
+        is indicated by the alpha channel of the colour variable.
     */
     const Image* image;
 
@@ -21502,6 +21521,10 @@ public:
     static bool isValidPeer (const ComponentPeer* const peer) throw();
 
     static void bringModalComponentToFront();
+
+    virtual const StringArray getAvailableRenderingEngines() throw();
+    virtual int getCurrentRenderingEngine() throw();
+    virtual void setCurrentRenderingEngine (int index) throw();
 
     juce_UseDebuggingNewOperator
 
@@ -39807,8 +39830,7 @@ public:
     virtual void restoreState() = 0;
 
     virtual void setFill (const FillType& fillType) = 0;
-
-    virtual void setOpacity (float opacity) = 0;
+    virtual void setOpacity (float newOpacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
     virtual void fillRect (const Rectangle& r, const bool replaceExistingContents) = 0;

@@ -354,6 +354,11 @@ public:
     static void bringModalComponentToFront();
 
     //==============================================================================
+    virtual const StringArray getAvailableRenderingEngines() throw();
+    virtual int getCurrentRenderingEngine() throw();
+    virtual void setCurrentRenderingEngine (int index) throw();
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:

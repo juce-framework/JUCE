@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_FillType.h"
+#include "../colour/juce_Colours.h"
 
 
 //==============================================================================
@@ -95,6 +96,7 @@ void FillType::setGradient (const ColourGradient& newGradient) throw()
     {
         image = 0;
         gradient = new ColourGradient (newGradient);
+        colour = Colours::black;
     }
 }
 
@@ -103,7 +105,12 @@ void FillType::setTiledImage (const Image& image_, const AffineTransform& transf
     deleteAndZero (gradient);
     image = &image_;
     transform = transform_;
+    colour = Colours::black;
 }
 
+void FillType::setOpacity (const float newOpacity) throw()
+{
+    colour = colour.withAlpha (newOpacity);
+}
 
 END_JUCE_NAMESPACE

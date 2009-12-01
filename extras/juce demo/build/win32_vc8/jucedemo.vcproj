@@ -393,29 +393,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\demos\PathsAndTransformsDemo.cpp"
+					RelativePath="..\..\src\demos\QuickTimeDemo.cpp"
 					>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions=""
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\..\src\demos\QuickTimeDemo.cpp"
+					RelativePath="..\..\src\demos\RenderingTestComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\demos\RenderingTestComponent.h"
 					>
 				</File>
 				<File

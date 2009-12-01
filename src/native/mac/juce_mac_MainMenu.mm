@@ -361,6 +361,28 @@ END_JUCE_NAMESPACE
 
     if ([[item representedObject] isKindOfClass: [NSArray class]])
     {
+        // If the menu is being triggered by a keypress, the OS will have picked it up before we had a chance to offer it to
+        // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
+        // into the focused component and let it trigger the menu item indirectly.
+        NSEvent* e = [NSApp currentEvent];
+        if ([e type] == NSKeyDown || [e type] == NSKeyUp)
+        {
+            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->isValidComponent())
+            {
+                JUCE_NAMESPACE::NSViewComponentPeer* peer = dynamic_cast <JUCE_NAMESPACE::NSViewComponentPeer*> (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->getPeer());
+
+                if (peer != 0)
+                {
+                    if ([e type] == NSKeyDown)
+                        peer->redirectKeyDown (e);
+                    else
+                        peer->redirectKeyUp (e);
+
+                    return;
+                }
+            }
+        }
+
         NSArray* info = (NSArray*) [item representedObject];
 
         owner->invoke ([item tag],

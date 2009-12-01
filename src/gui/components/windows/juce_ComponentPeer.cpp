@@ -776,5 +776,21 @@ void ComponentPeer::addMaskedRegion (int x, int y, int w, int h) throw()
     maskedRegion.add (x, y, w, h);
 }
 
+//==============================================================================
+const StringArray ComponentPeer::getAvailableRenderingEngines() throw()
+{
+    StringArray s;
+    s.add ("Software Renderer");
+    return s;
+}
+
+int ComponentPeer::getCurrentRenderingEngine() throw()
+{
+    return 0;
+}
+
+void ComponentPeer::setCurrentRenderingEngine (int /*index*/) throw()
+{
+}
 
 END_JUCE_NAMESPACE

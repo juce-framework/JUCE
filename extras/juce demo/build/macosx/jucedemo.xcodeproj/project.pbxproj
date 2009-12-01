@@ -12,13 +12,13 @@
 		841FE43F0E8ABDD4003C3263 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FE4390E8ABDD4003C3263 /* IOKit.framework */; };
 		841FE4400E8ABDD4003C3263 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FE43A0E8ABDD4003C3263 /* OpenGL.framework */; };
 		841FE4410E8ABDD4003C3263 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841FE43B0E8ABDD4003C3263 /* WebKit.framework */; };
+		8429581F10BDF8AA0029323B /* RenderingTestComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8429581D10BDF8AA0029323B /* RenderingTestComponent.cpp */; };
 		8450577A0EB52CE500029DFF /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 845057790EB52CE500029DFF /* QuickTime.framework */; };
 		847F4D900E8AC35C00F64426 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 847F4D8F0E8AC35C00F64426 /* QTKit.framework */; };
 		847F4EA60E8BA9C300F64426 /* DragAndDropDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4E9B0E8BA9C300F64426 /* DragAndDropDemo.cpp */; };
 		847F4EA70E8BA9C300F64426 /* FontsAndTextDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4E9C0E8BA9C300F64426 /* FontsAndTextDemo.cpp */; };
 		847F4EA80E8BA9C300F64426 /* InterprocessCommsDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4E9D0E8BA9C300F64426 /* InterprocessCommsDemo.cpp */; };
 		847F4EA90E8BA9C300F64426 /* OpenGLDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4E9E0E8BA9C300F64426 /* OpenGLDemo.cpp */; };
-		847F4EAA0E8BA9C300F64426 /* PathsAndTransformsDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4E9F0E8BA9C300F64426 /* PathsAndTransformsDemo.cpp */; };
 		847F4EAB0E8BA9C300F64426 /* QuickTimeDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EA00E8BA9C300F64426 /* QuickTimeDemo.cpp */; };
 		847F4EAC0E8BA9C300F64426 /* TableDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EA10E8BA9C300F64426 /* TableDemo.cpp */; };
 		847F4EAD0E8BA9C300F64426 /* ThreadingDemo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847F4EA20E8BA9C300F64426 /* ThreadingDemo.cpp */; };
@@ -50,13 +50,14 @@
 		841FE4390E8ABDD4003C3263 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		841FE43A0E8ABDD4003C3263 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		841FE43B0E8ABDD4003C3263 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
+		8429581D10BDF8AA0029323B /* RenderingTestComponent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RenderingTestComponent.cpp; path = ../../src/demos/RenderingTestComponent.cpp; sourceTree = SOURCE_ROOT; };
+		8429581E10BDF8AA0029323B /* RenderingTestComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RenderingTestComponent.h; path = ../../src/demos/RenderingTestComponent.h; sourceTree = SOURCE_ROOT; };
 		845057790EB52CE500029DFF /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		847F4D8F0E8AC35C00F64426 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		847F4E9B0E8BA9C300F64426 /* DragAndDropDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropDemo.cpp; path = ../../src/demos/DragAndDropDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4E9C0E8BA9C300F64426 /* FontsAndTextDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontsAndTextDemo.cpp; path = ../../src/demos/FontsAndTextDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4E9D0E8BA9C300F64426 /* InterprocessCommsDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InterprocessCommsDemo.cpp; path = ../../src/demos/InterprocessCommsDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4E9E0E8BA9C300F64426 /* OpenGLDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenGLDemo.cpp; path = ../../src/demos/OpenGLDemo.cpp; sourceTree = SOURCE_ROOT; };
-		847F4E9F0E8BA9C300F64426 /* PathsAndTransformsDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 2; name = PathsAndTransformsDemo.cpp; path = ../../src/demos/PathsAndTransformsDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EA00E8BA9C300F64426 /* QuickTimeDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QuickTimeDemo.cpp; path = ../../src/demos/QuickTimeDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EA10E8BA9C300F64426 /* TableDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableDemo.cpp; path = ../../src/demos/TableDemo.cpp; sourceTree = SOURCE_ROOT; };
 		847F4EA20E8BA9C300F64426 /* ThreadingDemo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadingDemo.cpp; path = ../../src/demos/ThreadingDemo.cpp; sourceTree = SOURCE_ROOT; };
@@ -196,7 +197,8 @@
 				847F4E9C0E8BA9C300F64426 /* FontsAndTextDemo.cpp */,
 				847F4E9D0E8BA9C300F64426 /* InterprocessCommsDemo.cpp */,
 				847F4E9E0E8BA9C300F64426 /* OpenGLDemo.cpp */,
-				847F4E9F0E8BA9C300F64426 /* PathsAndTransformsDemo.cpp */,
+				8429581D10BDF8AA0029323B /* RenderingTestComponent.cpp */,
+				8429581E10BDF8AA0029323B /* RenderingTestComponent.h */,
 				847F4EA00E8BA9C300F64426 /* QuickTimeDemo.cpp */,
 				847F4EA10E8BA9C300F64426 /* TableDemo.cpp */,
 				847F4EA20E8BA9C300F64426 /* ThreadingDemo.cpp */,
@@ -264,7 +266,6 @@
 				847F4EA70E8BA9C300F64426 /* FontsAndTextDemo.cpp in Sources */,
 				847F4EA80E8BA9C300F64426 /* InterprocessCommsDemo.cpp in Sources */,
 				847F4EA90E8BA9C300F64426 /* OpenGLDemo.cpp in Sources */,
-				847F4EAA0E8BA9C300F64426 /* PathsAndTransformsDemo.cpp in Sources */,
 				847F4EAB0E8BA9C300F64426 /* QuickTimeDemo.cpp in Sources */,
 				847F4EAC0E8BA9C300F64426 /* TableDemo.cpp in Sources */,
 				847F4EAD0E8BA9C300F64426 /* ThreadingDemo.cpp in Sources */,
@@ -283,6 +284,7 @@
 				84913FE21063947900456AFC /* AudioDemoTabComponent.cpp in Sources */,
 				849144091064E54800456AFC /* AudioDemoRecordPage.cpp in Sources */,
 				84EDCA1F10A19E730079DB17 /* CodeEditorDemo.cpp in Sources */,
+				8429581F10BDF8AA0029323B /* RenderingTestComponent.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

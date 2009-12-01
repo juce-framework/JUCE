@@ -81,8 +81,7 @@ public:
 
     //==============================================================================
     virtual void setFill (const FillType& fillType) = 0;
-
-    virtual void setOpacity (float opacity) = 0;
+    virtual void setOpacity (float newOpacity) = 0;
     virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
     //==============================================================================

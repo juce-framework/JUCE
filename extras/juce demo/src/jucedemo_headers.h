@@ -42,7 +42,7 @@
 
 // Pre-declare the functions that create each of the demo components..
 Component* createFontsAndTextDemo();
-Component* createPathsAndTransformsDemo();
+Component* createRenderingDemo();
 Component* createWidgetsDemo (ApplicationCommandManager* commandManager);
 Component* createThreadingDemo();
 Component* createTreeViewDemo();

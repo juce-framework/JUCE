@@ -149,6 +149,9 @@ public:
     void toFront (bool makeActiveWindow);
     void toBehind (ComponentPeer* other);
     void setIcon (const Image& newIcon);
+    const StringArray getAvailableRenderingEngines() throw();
+    int getCurrentRenderingEngine() throw();
+    void setCurrentRenderingEngine (int index) throw();
 
     /* When you use multiple DLLs which share similarly-named obj-c classes - like
        for example having more than one juce plugin loaded into a host, then when a
@@ -207,7 +210,7 @@ public:
 
     NSWindow* window;
     JuceNSView* view;
-    bool isSharedWindow, fullScreen, insideDrawRect;
+    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics;
 };
 
 //==============================================================================
@@ -634,7 +637,11 @@ void ModifierKeys::updateCurrentModifiers() throw()
     currentModifierFlags = currentModifiers;
 }
 
-static int64 getMouseTime (NSEvent* e)  { return (int64) [e timestamp] * 1000.0; }
+static int64 getMouseTime (NSEvent* e) throw()
+{
+    return (Time::currentTimeMillis() - Time::getMillisecondCounter())
+            + (int64) ([e timestamp] * 1000.0);
+}
 
 static void getMousePos (NSEvent* e, NSView* view, int& x, int& y)
 {
@@ -659,7 +666,12 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component,
       view (0),
       isSharedWindow (viewToAttachTo != 0),
       fullScreen (false),
-      insideDrawRect (false)
+      insideDrawRect (false),
+#if USE_COREGRAPHICS_RENDERING
+      usingCoreGraphics (true)
+#else
+      usingCoreGraphics (false)
+#endif
 {
     NSRect r;
     r.origin.x = 0;
@@ -1324,45 +1336,78 @@ void NSViewComponentPeer::drawRect (NSRect r)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
 #if USE_COREGRAPHICS_RENDERING
-    CoreGraphicsContext context (cg, [view frame].size.height);
-
-    insideDrawRect = true;
-    handlePaint (context);
-    insideDrawRect = false;
-#else
-    Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
-                (int) (r.size.width + 0.5f),
-                (int) (r.size.height + 0.5f),
-                ! getComponent()->isOpaque());
-
-    LowLevelGraphicsSoftwareRenderer context (temp);
-    context.setOrigin (-roundFloatToInt (r.origin.x),
-                       -roundFloatToInt ([view frame].size.height - (r.origin.y + r.size.height)));
-
-    const NSRect* rects = 0;
-    NSInteger numRects = 0;
-    [view getRectsBeingDrawn: &rects count: &numRects];
-
-    RectangleList clip;
-    for (int i = 0; i < numRects; ++i)
+    if (usingCoreGraphics)
     {
-        clip.addWithoutMerging (Rectangle (roundFloatToInt (rects[i].origin.x),
-                                           roundFloatToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
-                                           roundFloatToInt (rects[i].size.width),
-                                           roundFloatToInt (rects[i].size.height)));
-    }
+        CoreGraphicsContext context (cg, [view frame].size.height);
 
-    if (context.clipToRectangleList (clip))
-    {
         insideDrawRect = true;
         handlePaint (context);
         insideDrawRect = false;
+    }
+    else
+#endif
+    {
+        Image temp (getComponent()->isOpaque() ? Image::RGB : Image::ARGB,
+                    (int) (r.size.width + 0.5f),
+                    (int) (r.size.height + 0.5f),
+                    ! getComponent()->isOpaque());
 
-        CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-        CGImageRef image = CoreGraphicsImage::createImage (temp, false, colourSpace);
-        CGColorSpaceRelease (colourSpace);
-        CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, temp.getWidth(), temp.getHeight()), image);
-        CGImageRelease (image);
+        LowLevelGraphicsSoftwareRenderer context (temp);
+        context.setOrigin (-roundFloatToInt (r.origin.x),
+                           -roundFloatToInt ([view frame].size.height - (r.origin.y + r.size.height)));
+
+        const NSRect* rects = 0;
+        NSInteger numRects = 0;
+        [view getRectsBeingDrawn: &rects count: &numRects];
+
+        RectangleList clip;
+        for (int i = 0; i < numRects; ++i)
+        {
+            clip.addWithoutMerging (Rectangle (roundFloatToInt (rects[i].origin.x),
+                                               roundFloatToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
+                                               roundFloatToInt (rects[i].size.width),
+                                               roundFloatToInt (rects[i].size.height)));
+        }
+
+        if (context.clipToRectangleList (clip))
+        {
+            insideDrawRect = true;
+            handlePaint (context);
+            insideDrawRect = false;
+
+            CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
+            CGImageRef image = CoreGraphicsImage::createImage (temp, false, colourSpace);
+            CGColorSpaceRelease (colourSpace);
+            CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, temp.getWidth(), temp.getHeight()), image);
+            CGImageRelease (image);
+        }
+    }
+}
+
+const StringArray NSViewComponentPeer::getAvailableRenderingEngines() throw()
+{
+    StringArray s;
+    s.add ("Software Renderer");
+
+#if USE_COREGRAPHICS_RENDERING
+    s.add ("CoreGraphics Renderer");
+#endif
+
+    return s;
+}
+
+int NSViewComponentPeer::getCurrentRenderingEngine() throw()
+{
+    return usingCoreGraphics ? 1 : 0;
+}
+
+void NSViewComponentPeer::setCurrentRenderingEngine (int index) throw()
+{
+#if USE_COREGRAPHICS_RENDERING
+    if (usingCoreGraphics != (index > 0))
+    {
+        usingCoreGraphics = index > 0;
+        [view setNeedsDisplay: true];
     }
 #endif
 }

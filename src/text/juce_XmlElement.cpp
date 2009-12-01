@@ -430,13 +430,27 @@ bool XmlElement::writeToFile (const File& f,
                  << dtd << "\r\n";
 
             writeElementAsText (*out, 0, lineWrapLength);
-
             delete out;
 
-            if (tempFile.moveFileTo (f))
-                return true;
+            if (! tempFile.exists())
+                return false;
 
-            tempFile.deleteFile();
+            int i;
+            for (i = 5; --i >= 0;)
+            {
+                if (tempFile.moveFileTo (f))
+                    return true;
+
+                Thread::sleep (100);
+            }
+
+            for (i = 5; --i >= 0;)
+            {
+                if (tempFile.deleteFile())
+                    break;
+
+                Thread::sleep (100);
+            }
         }
     }
 
