@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_XmlElement.h"
 #include "../io/streams/juce_MemoryOutputStream.h"
 #include "../io/files/juce_FileOutputStream.h"
+#include "../threads/juce_Thread.h"
 
 
 //==============================================================================
