@@ -211,10 +211,10 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
 
 int SystemStats::getNumCpus() throw()
 {
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
-    return MPProcessors();
-#else
+#if JUCE_IPHONE || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     return [[NSProcessInfo processInfo] activeProcessorCount];
+#else
+    return MPProcessors();
 #endif
 }
 

@@ -976,8 +976,7 @@ public:
         }
         else if (fillType.isTiledImage())
         {
-            renderImage (image, *(fillType.image), Rectangle (0, 0, fillType.image->getWidth(), fillType.image->getHeight()),
-                         fillType.transform, &et);
+            renderImage (image, *(fillType.image), fillType.image->getBounds(), fillType.transform, &et);
         }
         else
         {
@@ -997,8 +996,6 @@ public:
                       const AffineTransform& t, const EdgeTable* const tiledFillClipRegion) throw()
     {
         const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
-
-        jassert (Rectangle (0, 0, sourceImage.getWidth(), sourceImage.getHeight()).contains (srcClip));
 
         const Image::BitmapData destData (destImage, 0, 0, destImage.getWidth(), destImage.getHeight(), true);
         const Image::BitmapData srcData (sourceImage, srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
@@ -1021,7 +1018,7 @@ public:
                 }
                 else
                 {
-                    EdgeTable et (srcRect.getIntersection (Rectangle (0, 0, destImage.getWidth(), destImage.getHeight())));
+                    EdgeTable et (srcRect.getIntersection (destImage.getBounds()));
                     et.clipToEdgeTable (edgeTable->edgeTable);
 
                     if (! et.isEmpty())
@@ -1276,8 +1273,7 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image
     : image (image_),
       stateStack (20)
 {
-    currentState = new LLGCSavedState (Rectangle (0, 0, image_.getWidth(), image_.getHeight()),
-                                       0, 0, Font(), FillType(), Graphics::mediumResamplingQuality);
+    currentState = new LLGCSavedState (image_.getBounds(), 0, 0, Font(), FillType(), Graphics::mediumResamplingQuality);
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
@@ -1401,6 +1397,8 @@ void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineT
 void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const Rectangle& srcClip,
                                                   const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
+    jassert (sourceImage.getBounds().contains (srcClip));
+
     currentState->renderImage (image, sourceImage, srcClip, transform,
                                fillEntireClipAsTiles ? &(currentState->edgeTable->edgeTable) : 0);
 }

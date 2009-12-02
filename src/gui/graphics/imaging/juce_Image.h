@@ -109,6 +109,11 @@ public:
     /** Returns the image's height (in pixels). */
     int getHeight() const throw()                   { return imageHeight; }
 
+    /** Returns a rectangle with the same size as this image.
+        The rectangle is always at position (0, 0).
+    */
+    const Rectangle getBounds() const throw()       { return Rectangle (0, 0, imageWidth, imageHeight); }
+
     /** Returns the image's pixel format. */
     PixelFormat getFormat() const throw()           { return format; }
 

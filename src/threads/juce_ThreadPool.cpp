@@ -135,6 +135,7 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::addJob (ThreadPoolJob* const job)
 {
+    jassert (job != 0);
     jassert (job->pool == 0);
 
     if (job->pool == 0)
@@ -257,25 +258,33 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
 
 bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
                                 const int timeOutMs,
-                                const bool deleteInactiveJobs)
+                                const bool deleteInactiveJobs,
+                                ThreadPool::JobSelector* selectedJobsToRemove)
 {
+    Array <ThreadPoolJob*> jobsToWaitFor;
+
     lock.enter();
 
     for (int i = jobs.size(); --i >= 0;)
     {
         ThreadPoolJob* const job = (ThreadPoolJob*) jobs.getUnchecked(i);
-
-        if (job->isActive)
+        
+        if (selectedJobsToRemove == 0 || selectedJobsToRemove->isJobSuitable (job))
         {
-            if (interruptRunningJobs)
-                job->signalJobShouldExit();
-        }
-        else
-        {
-            jobs.remove (i);
+            if (job->isActive)
+            {
+                jobsToWaitFor.add (job);
 
-            if (deleteInactiveJobs)
-                delete job;
+                if (interruptRunningJobs)
+                    job->signalJobShouldExit();
+            }
+            else
+            {
+                jobs.remove (i);
+
+                if (deleteInactiveJobs)
+                    delete job;
+            }
         }
     }
 
@@ -283,12 +292,19 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
 
     const uint32 start = Time::getMillisecondCounter();
 
-    while (jobs.size() > 0)
+    for (;;)
     {
+        for (int i = jobsToWaitFor.size(); --i >= 0;)
+            if (! isJobRunning (jobsToWaitFor.getUnchecked (i)))
+                jobsToWaitFor.remove (i);
+
+        if (jobsToWaitFor.size() == 0)
+            break;
+
         if (timeOutMs >= 0 && Time::getMillisecondCounter() >= start + timeOutMs)
             return false;
 
-        jobFinishedSignal.wait (2);
+        jobFinishedSignal.wait (20);
     }
 
     return true;

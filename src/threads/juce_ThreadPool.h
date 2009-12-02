@@ -179,6 +179,24 @@ public:
     ~ThreadPool();
 
     //==============================================================================
+    /** A callback class used when you need to select which ThreadPoolJob objects are suitable
+        for some kind of operation.
+        @see ThreadPool::removeAllJobs
+    */
+    class JUCE_API  JobSelector
+    {
+    public:
+        virtual ~JobSelector() {}
+
+        /** Should return true if the specified thread matches your criteria for whatever
+            operation that this object is being used for.
+         
+            Any implementation of this method must be extremely fast and thread-safe!
+        */
+        virtual bool isJobSuitable (ThreadPoolJob* job) = 0;
+    };
+
+    //==============================================================================
     /** Adds a job to the queue.
 
         Once a job has been added, then the next time a thread is free, it will run
@@ -209,7 +227,7 @@ public:
                     const bool interruptIfRunning,
                     const int timeOutMilliseconds);
 
-    /** Tries clear all jobs from the pool.
+    /** Tries to remove all jobs from the pool.
 
         @param interruptRunningJobs if true, then all running jobs will have their ThreadPoolJob::signalJobShouldExit()
                                     methods called to try to interrupt them
@@ -219,12 +237,15 @@ public:
                                     they will simply be removed from the pool. Jobs that are already running when
                                     this method is called can choose whether they should be deleted by
                                     returning jobHasFinishedAndShouldBeDeleted from their runJob() method.
+        @param selectedJobsToRemove if this is non-zero, the JobSelector object is asked to decide which
+                                    jobs should be removed. If it is zero, all jobs are removed
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
-                    expires while waiting for them to stop
+                    expires while waiting for one or more jobs to stop
     */
     bool removeAllJobs (const bool interruptRunningJobs,
                         const int timeOutMilliseconds,
-                        const bool deleteInactiveJobs = false);
+                        const bool deleteInactiveJobs = false,
+                        JobSelector* selectedJobsToRemove = 0);
 
     /** Returns the number of jobs currently running or queued.
     */

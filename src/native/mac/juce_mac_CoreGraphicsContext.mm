@@ -330,8 +330,7 @@ public:
             {
                 CGContextSaveGState (context);
                 CGContextClipToRect (context, cgRect);
-                drawImage (*(state->fillType.image), Rectangle (0, 0, state->fillType.image->getWidth(), state->fillType.image->getHeight()),
-                           state->fillType.transform, true);
+                drawImage (*(state->fillType.image), state->fillType.image->getBounds(), state->fillType.transform, true);
                 CGContextRestoreGState (context);
             }
         }
@@ -364,8 +363,7 @@ public:
             if (state->fillType.isGradient())
                 drawGradient();
             else
-                drawImage (*(state->fillType.image), Rectangle (0, 0, state->fillType.image->getWidth(), state->fillType.image->getHeight()),
-                           state->fillType.transform, true);
+                drawImage (*(state->fillType.image), state->fillType.image->getBounds(), state->fillType.transform, true);
         }
 
         CGContextRestoreGState (context);
@@ -374,10 +372,17 @@ public:
     void drawImage (const Image& sourceImage, const Rectangle& srcClip,
                     const AffineTransform& transform, const bool fillEntireClipAsTiles)
     {
+        jassert (sourceImage.getBounds().contains (srcClip));
+
         CGImageRef fullImage = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace);
-        CGImageRef image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), sourceImage.getHeight() - srcClip.getBottom(),
-                                                                                srcClip.getWidth(), srcClip.getHeight()));
-        CGImageRelease (fullImage);
+        CGImageRef image = fullImage;
+
+        if (srcClip != sourceImage.getBounds())
+        {
+            image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), sourceImage.getHeight() - srcClip.getBottom(),
+                                                                         srcClip.getWidth(), srcClip.getHeight()));
+            CGImageRelease (fullImage);
+        }
 
         CGContextSaveGState (context);
         CGContextSetAlpha (context, state->fillType.getOpacity());
@@ -424,7 +429,7 @@ public:
             CGContextDrawImage (context, imageRect, image);
         }
 
-        CGImageRelease (image);
+        CGImageRelease (image); // (This causes a memory bug in iPhone sim 3.0 - try upgrading to a later version if you hit this)
         CGContextRestoreGState (context);
     }
 
@@ -568,7 +573,6 @@ private:
 
     CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient) throw()
     {
-//        gradient.multiplyOpacity (state->fillType.getOpacity());
         delete gradientLookupTable;
         gradientLookupTable = gradient.createLookupTable (transform, numGradientLookupEntries);
         --numGradientLookupEntries;
@@ -602,6 +606,7 @@ private:
         CGContextSetInterpolationQuality (context, kCGInterpolationDefault); // (This is required for 10.4, where there's a crash if
                                                                              // you draw a gradient with high quality interp enabled).
         CGShadingRef shading = createGradient (state->fillType.transform, *(state->fillType.gradient));
+        CGContextSetAlpha (context, state->fillType.getOpacity());
         CGContextDrawShading (context, shading);
         CGShadingRelease (shading);
     }
