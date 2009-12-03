@@ -379,7 +379,7 @@ public:
 
         if (srcClip != sourceImage.getBounds())
         {
-            image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), sourceImage.getHeight() - srcClip.getBottom(),
+            image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), srcClip.getY(),
                                                                          srcClip.getWidth(), srcClip.getHeight()));
             CGImageRelease (fullImage);
         }
@@ -388,8 +388,8 @@ public:
         CGContextSetAlpha (context, state->fillType.getOpacity());
 
         flip();
-        applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
-        CGRect imageRect = CGRectMake (0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+        applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, srcClip.getHeight()).followedBy (transform));
+        CGRect imageRect = CGRectMake (0, 0, srcClip.getWidth(), srcClip.getHeight());
 
         if (fillEntireClipAsTiles)
         {
@@ -404,8 +404,8 @@ public:
             {
                 // Fallback to manually doing a tiled fill on 10.4
                 CGRect clip = CGRectIntegral (CGContextGetClipBoundingBox (context));
-                const int iw = sourceImage.getWidth();
-                const int ih = sourceImage.getHeight();
+                const int iw = srcClip.getWidth();
+                const int ih = srcClip.getHeight();
 
                 int x = 0, y = 0;
                 while (x > clip.origin.x)   x -= iw;

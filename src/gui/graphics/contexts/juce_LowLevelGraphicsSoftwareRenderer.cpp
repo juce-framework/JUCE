@@ -1005,24 +1005,25 @@ public:
         if (transform.isOnlyTranslation())
         {
             // If our translation doesn't involve any distortion, just use a simple blit..
-            const int tx = (int) (transform.getTranslationX() * 256.0f);
-            const int ty = (int) (transform.getTranslationY() * 256.0f);
+            int tx = (int) (transform.getTranslationX() * 256.0f);
+            int ty = (int) (transform.getTranslationY() * 256.0f);
 
             if ((! betterQuality) || ((tx | ty) & 224) == 0)
             {
-                const Rectangle srcRect (srcClip.translated ((tx + 128) >> 8, (ty + 128) >> 8));
+                tx = ((tx + 128) >> 8);
+                ty = ((ty + 128) >> 8);
 
                 if (tiledFillClipRegion != 0)
                 {
-                    blittedRenderImage3 <true> (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, srcRect.getX(), srcRect.getY());
+                    blittedRenderImage3 <true> (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, tx, ty);
                 }
                 else
                 {
-                    EdgeTable et (srcRect.getIntersection (destImage.getBounds()));
+                    EdgeTable et (Rectangle (tx, ty, srcClip.getWidth(), srcClip.getHeight()).getIntersection (destImage.getBounds()));
                     et.clipToEdgeTable (edgeTable->edgeTable);
 
                     if (! et.isEmpty())
-                        blittedRenderImage3 <false> (sourceImage, destImage, et, destData, srcData, alpha, srcRect.getX(), srcRect.getY());
+                        blittedRenderImage3 <false> (sourceImage, destImage, et, destData, srcData, alpha, tx, ty);
                 }
 
                 return;
@@ -1039,7 +1040,7 @@ public:
         else
         {
             Path p;
-            p.addRectangle (srcClip);
+            p.addRectangle (0.0f, 0.0f, (float) srcClip.getWidth(), (float) srcClip.getHeight());
 
             EdgeTable et (edgeTable->edgeTable.getMaximumBounds(), p, transform);
             et.clipToEdgeTable (edgeTable->edgeTable);

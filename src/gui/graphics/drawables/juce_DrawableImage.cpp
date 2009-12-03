@@ -94,16 +94,14 @@ void DrawableImage::render (const Drawable::RenderingContext& context) const
         if (opacity > 0.0f && ! overlayColour.isOpaque())
         {
             context.g.setOpacity (context.opacity * opacity);
-            context.g.drawImageTransformed (image,
-                                            0, 0, image->getWidth(), image->getHeight(),
+            context.g.drawImageTransformed (image, image->getBounds(),
                                             context.transform, false);
         }
 
         if (! overlayColour.isTransparent())
         {
             context.g.setColour (overlayColour.withMultipliedAlpha (context.opacity));
-            context.g.drawImageTransformed (image,
-                                            0, 0, image->getWidth(), image->getHeight(),
+            context.g.drawImageTransformed (image, image->getBounds(),
                                             context.transform, true);
         }
     }

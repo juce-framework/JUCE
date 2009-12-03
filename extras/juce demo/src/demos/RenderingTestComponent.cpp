@@ -271,9 +271,7 @@ private:
                                                    .followedBy (getTransform()));
 
         g.setOpacity ((float) owner.opacitySlider->getValue());
-        g.drawImageTransformed (image, 0, 0,
-                                image->getWidth(),
-                                image->getHeight(),
+        g.drawImageTransformed (image, image->getBounds(),
                                 transform, false);
     }
 
@@ -327,7 +325,7 @@ private:
             g.drawHorizontalLine (y, x - width, x + width);
         }
 
-        g.setColour (Colours::yellow.withAlpha ((float) owner.opacitySlider->getValue()));
+        g.setColour (Colours::red.withAlpha ((float) owner.opacitySlider->getValue()));
         g.drawLine (bouncingPointX[0], bouncingPointY[0], bouncingPointX[1], bouncingPointY[1]);
         g.drawLine (getWidth() - bouncingPointX[0], getHeight() - bouncingPointY[0],
                     getWidth() - bouncingPointX[1], getHeight() - bouncingPointY[1]);

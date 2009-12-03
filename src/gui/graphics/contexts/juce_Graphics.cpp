@@ -760,27 +760,23 @@ void Graphics::drawImage (const Image* const imageToDraw,
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (dx, dy, dw, dh);
     ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (sx, sy, sw, sh);
 
-    if (! context->clipRegionIntersects  (Rectangle (dx, dy, dw, dh)))
-        return;
-
-    drawImageTransformed (imageToDraw, sx, sy, sw, sh,
-                          AffineTransform::translation ((float) -sx, (float) -sy)
-                                          .scaled (dw / (float) sw, dh / (float) sh)
-                                          .translated ((float) dx, (float) dy),
-                          fillAlphaChannelWithCurrentBrush);
+    if (context->clipRegionIntersects  (Rectangle (dx, dy, dw, dh)))
+    {
+        drawImageTransformed (imageToDraw, Rectangle (sx, sy, sw, sh),
+                              AffineTransform::scale (dw / (float) sw, dh / (float) sh)
+                                              .translated ((float) dx, (float) dy),
+                              fillAlphaChannelWithCurrentBrush);
+    }
 }
 
 void Graphics::drawImageTransformed (const Image* const imageToDraw,
-                                     int sourceClipX,
-                                     int sourceClipY,
-                                     int sourceClipWidth,
-                                     int sourceClipHeight,
+                                     const Rectangle& imageSubRegion,
                                      const AffineTransform& transform,
                                      const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     if (imageToDraw != 0 && ! context->isClipEmpty())
     {
-        const Rectangle srcClip (Rectangle (sourceClipX, sourceClipY, sourceClipWidth, sourceClipHeight));
+        const Rectangle srcClip (imageSubRegion.getIntersection (imageToDraw->getBounds()));
 
         if (fillAlphaChannelWithCurrentBrush)
         {

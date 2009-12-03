@@ -559,8 +559,12 @@ public:
         This lets you throw the image around in some wacky ways, rotate it, shear,
         scale it, etc.
 
-        A clipping subregion is specified within the source image and no pixels
-        outside this region will be used.
+        A subregion is specified within the source image, and all transformations
+        will be treated as relative to the origin of this sub-region. So, for example if
+        your subregion is (50, 50, 100, 100), and your transform is a translation of (20, 20),
+        the resulting pixel drawn at (20, 20) in the destination context is from (50, 50) in
+        your image. If you want to use the whole image, then Image::getBounds() returns a 
+        suitable rectangle to use as the imageSubRegion parameter.
 
         Images are composited using the context's current opacity, so if you
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
@@ -572,10 +576,7 @@ public:
         @see setImageResamplingQuality, drawImage
     */
     void drawImageTransformed (const Image* const imageToDraw,
-                               int sourceClipX,
-                               int sourceClipY,
-                               int sourceClipWidth,
-                               int sourceClipHeight,
+                               const Rectangle& imageSubRegion,
                                const AffineTransform& transform,
                                const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
