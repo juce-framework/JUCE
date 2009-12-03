@@ -357,7 +357,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs) throw()
 {
     if (reentrancyLevel++ == 0)
     {
-        internal = CreateMutex (0, TRUE, name);
+        internal = CreateMutex (0, TRUE, "Global\\" + name);
 
         if (internal != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
         {

@@ -35,6 +35,7 @@ public:
     {
         setOpaque (true);
         averageTime = 0;
+        svgDrawable = 0;
 
         rgbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoJpeg_jpg, RenderingTestComponent::demoJpeg_jpgSize);
         argbImage = ImageFileFormat::loadFrom (RenderingTestComponent::demoPng_png, RenderingTestComponent::demoPng_pngSize);
@@ -334,7 +335,7 @@ private:
 
     void createSVGDrawable()
     {
-        svgDrawable = 0;
+        deleteAndZero (svgDrawable);
 
         MemoryInputStream iconsFileStream (BinaryData::icons_zip, BinaryData::icons_zipSize, false);
         ZipFile icons (&iconsFileStream, false);

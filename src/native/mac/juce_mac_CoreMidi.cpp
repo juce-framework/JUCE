@@ -236,8 +236,8 @@ static bool makeSureClientExists()
 class MidiPortAndEndpoint
 {
 public:
-    MidiPortAndEndpoint (MIDIPortRef port, MIDIEndpointRef endpoint) throw()
-        : port (port), endPoint (endpoint)
+    MidiPortAndEndpoint (MIDIPortRef port_, MIDIEndpointRef endPoint_) throw()
+        : port (port_), endPoint (endPoint_)
     {
     }
 
@@ -246,7 +246,7 @@ public:
         if (port != 0)
             MIDIPortDispose (port);
 
-        if (endPoint != 0)
+        if (port == 0 && endPoint != 0) // if port == 0, it means we created the endpoint, so it's safe to delete it
             MIDIEndpointDispose (endPoint);
     }
 
