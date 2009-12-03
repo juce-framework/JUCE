@@ -268,7 +268,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
     for (int i = jobs.size(); --i >= 0;)
     {
         ThreadPoolJob* const job = (ThreadPoolJob*) jobs.getUnchecked(i);
-        
+
         if (selectedJobsToRemove == 0 || selectedJobsToRemove->isJobSuitable (job))
         {
             if (job->isActive)

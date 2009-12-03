@@ -950,6 +950,8 @@ public:
 
             ColourGradient g2 (*(fillType.gradient));
             g2.multiplyOpacity (fillType.getOpacity());
+            g2.x1 -= 0.5f; g2.y1 -= 0.5f;
+            g2.x2 -= 0.5f; g2.y2 -= 0.5f;
             AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
             const bool isIdentity = transform.isOnlyTranslation();
 

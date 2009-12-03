@@ -563,7 +563,7 @@ public:
         will be treated as relative to the origin of this sub-region. So, for example if
         your subregion is (50, 50, 100, 100), and your transform is a translation of (20, 20),
         the resulting pixel drawn at (20, 20) in the destination context is from (50, 50) in
-        your image. If you want to use the whole image, then Image::getBounds() returns a 
+        your image. If you want to use the whole image, then Image::getBounds() returns a
         suitable rectangle to use as the imageSubRegion parameter.
 
         Images are composited using the context's current opacity, so if you

@@ -190,7 +190,7 @@ public:
 
         /** Should return true if the specified thread matches your criteria for whatever
             operation that this object is being used for.
-         
+
             Any implementation of this method must be extremely fast and thread-safe!
         */
         virtual bool isJobSuitable (ThreadPoolJob* job) = 0;

@@ -101,7 +101,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
                 do
                 {
                     const int step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
-                    int x = roundDoubleToInt (startX + multiplier * (y1 - startY));
+                    int x = roundDoubleToInt (startX + multiplier * ((y1 + (step >> 1)) - startY));
 
                     if (x < leftLimit)
                         x = leftLimit;
