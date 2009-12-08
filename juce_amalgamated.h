@@ -6801,8 +6801,15 @@ public:
         default viewer application.
 
         - if it's a folder, it will be opened in Explorer, Finder, or equivalent.
+
+        @see revealToUser
     */
     bool startAsProcess (const String& parameters = String::empty) const throw();
+
+    /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
+        @see startAsProcess
+    */
+    void revealToUser() const throw();
 
     /** A set of types of location that can be passed to the getSpecialLocation() method.
     */
@@ -11982,6 +11989,9 @@ public:
     bool isString() const throw()       { return type == stringType; }
     bool isObject() const throw()       { return type == objectType; }
     bool isMethod() const throw()       { return type == methodType; }
+
+    bool operator== (const var& other) const throw();
+    bool operator!= (const var& other) const throw();
 
     class JUCE_API  identifier
     {
@@ -50715,11 +50725,16 @@ public:
     /** Destructor. */
     virtual ~DirectoryContentsDisplayComponent();
 
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    virtual const File getSelectedFile() const = 0;
+    virtual int getNumSelectedFiles() const = 0;
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    virtual const File getSelectedFile (int index) const = 0;
 
     /** Scrolls this view to the top. */
     virtual void scrollToTop() = 0;
@@ -50838,22 +50853,26 @@ class JUCE_API  FileBrowserComponent  : public Component,
                                         private FileBrowserListener,
                                         private TextEditorListener,
                                         private ButtonListener,
-                                        private ComboBoxListener
+                                        private ComboBoxListener,
+                                        private FileFilter
 {
 public:
 
-    /** Various modes that the browser can be used in.
+    /** Various options for the browser.
 
-        One of these is passed into the constructor.
+        A combination of these is passed into the FileBrowserComponent constructor.
     */
-    enum FileChooserMode
+    enum FileChooserFlags
     {
-        loadFileMode,           /**< the component should allow the user to choose an existing
-                                     file with the intention of opening it. */
-        saveFileMode,           /**< the component should allow the user to specify the name of
-                                     a file that will be used to save something. */
-        chooseDirectoryMode     /**< the component should allow the user to select an existing
-                                     directory. */
+        openMode                = 1,    /**< the component should allow the user to choose an existing
+                                             file with the intention of opening it. */
+        saveMode                = 2,    /**< the component should allow the user to specify the name of
+                                             a file that will be used to save something. */
+        canSelectFiles          = 4,    /**< */
+        canSelectDirectories    = 8,    /**< */
+        canSelectMultipleItems  = 16,   /**< */
+        useTreeView             = 32,   /**< */
+        filenameBoxIsReadOnly   = 64    /**< */
     };
 
     /** Creates a FileBrowserComponent.
@@ -50875,33 +50894,40 @@ public:
         @param filenameTextBoxIsReadOnly    if true, the user won't be allowed to type their own
                                         text into the filename box.
     */
-    FileBrowserComponent (FileChooserMode browserMode,
+    FileBrowserComponent (int flags,
                           const File& initialFileOrDirectory,
                           const FileFilter* fileFilter,
-                          FilePreviewComponent* previewComp,
-                          const bool useTreeView = false,
-                          const bool filenameTextBoxIsReadOnly = false);
+                          FilePreviewComponent* previewComp);
 
     /** Destructor. */
     ~FileBrowserComponent();
 
-    /** Returns the file that the user has currently chosen.
+    /** Returns the number of files that the user has got selected.
+        If multiple select isn't active, this will only be 0 or 1. To get the complete
+        list of files they've chosen, pass an index to getCurrentFile().
+    */
+    int getNumSelectedFiles() const throw();
+
+    /** Returns one of the files that the user has chosen.
+        If the box has multi-select enabled, the index lets you specify which of the files
+        to get - see getNumSelectedFiles() to find out how many files were chosen.
         @see getHighlightedFile
     */
-    const File getCurrentFile() const throw();
+    const File getSelectedFile (int index) const throw();
 
-    /** Returns true if the current file is usable.
+    /** Returns true if the currently selected file(s) are usable.
 
         This can be used to decide whether the user can press "ok" for the
         current file. What it does depends on the mode, so for example in an "open"
-        mode, the current file is only valid if one has been selected and if the file
-        exists. In a "save" mode, a non-existent file would also be valid.
+        mode, this only returns true if a file has been selected and if it exists.
+        In a "save" mode, a non-existent file would also be valid.
     */
     bool currentFileIsValid() const;
 
-    /** This returns the item in the view that is currently highlighted.
+    /** This returns the last item in the view that the user has highlighted.
         This may be different from getCurrentFile(), which returns the value
-        that is shown in the filename box.
+        that is shown in the filename box, and if there are multiple selections,
+        this will only return one of them.
         @see getCurrentFile
     */
     const File getHighlightedFile() const throw();
@@ -50918,15 +50944,16 @@ public:
     /** Refreshes the directory that's currently being listed. */
     void refresh();
 
-    /** Returns the browser's current mode. */
-    FileChooserMode getMode() const throw()                     { return mode; }
-
     /** Returns a verb to describe what should happen when the file is accepted.
 
         E.g. if browsing in "load file" mode, this will be "Open", if in "save file"
         mode, it'll be "Save", etc.
     */
     virtual const String getActionVerb() const;
+
+    /** Returns true if the saveMode flag was set when this component was created.
+    */
+    bool isSaveMode() const throw();
 
     /** Adds a listener to be told when the user selects and clicks on files.
 
@@ -50962,6 +50989,10 @@ public:
     void fileClicked (const File& f, const MouseEvent& e);
     /** @internal */
     void fileDoubleClicked (const File& f);
+    /** @internal */
+    bool isFileSuitable (const File& file) const;
+    /** @internal */
+    bool isDirectorySuitable (const File&) const;
 
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const throw();
@@ -50974,10 +51005,11 @@ protected:
 private:
 
     DirectoryContentsList* fileList;
-    FileFilter* directoriesOnlyFilter;
+    const FileFilter* fileFilter;
 
-    FileChooserMode mode;
+    int flags;
     File currentRoot;
+    OwnedArray <File> chosenFiles;
     SortedSet <void*> listeners;
 
     DirectoryContentsDisplayComponent* fileListComponent;
@@ -50989,6 +51021,7 @@ private:
     TimeSliceThread thread;
 
     void sendListenerChangeMessage();
+    bool isFileOrDirSuitable (const File& f) const;
 
     FileBrowserComponent (const FileBrowserComponent&);
     const FileBrowserComponent& operator= (const FileBrowserComponent&);
@@ -51112,6 +51145,13 @@ public:
     */
     bool browseForDirectory();
 
+    /** Same as browseForFileToOpen, but allows the user to select multiple files and directories.
+
+        The files that are returned can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = 0);
+
     /** Returns the last file that was chosen by one of the browseFor methods.
 
         After calling the appropriate browseFor... method, this method lets you
@@ -51145,7 +51185,8 @@ private:
     OwnedArray <File> results;
     bool useNativeDialogBox;
 
-    bool showDialog (const bool isDirectory,
+    bool showDialog (const bool selectsDirectories,
+                     const bool selectsFiles,
                      const bool isSave,
                      const bool warnAboutOverwritingExistingFiles,
                      const bool selectMultipleFiles,
@@ -51155,7 +51196,8 @@ private:
                                     const String& title,
                                     const File& file,
                                     const String& filters,
-                                    bool isDirectory,
+                                    bool selectsDirectories,
+                                    bool selectsFiles,
                                     bool isSave,
                                     bool warnAboutOverwritingExistingFiles,
                                     bool selectMultipleFiles,
@@ -51320,11 +51362,16 @@ public:
     /** Destructor. */
     ~FileListComponent();
 
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    const File getSelectedFile() const;
+    int getNumSelectedFiles() const;
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    const File getSelectedFile (int index = 0) const;
 
     /** Scrolls to the top of the list. */
     void scrollToTop();
@@ -51389,21 +51436,16 @@ public:
     /** Destructor. */
     ~FileTreeComponent();
 
-    /** Returns the number of selected files in the tree.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+    int getNumSelectedFiles() const                 { return TreeView::getNumSelectedItems(); }
 
     /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
     */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
+    const File getSelectedFile (int index = 0) const;
 
     /** Scrolls the list to the top. */
     void scrollToTop();
@@ -51752,7 +51794,8 @@ public:
         The description is a name to show the user in a list of possible patterns, so
         for the wav/aiff example, your description might be "audio files".
     */
-    WildcardFileFilter (const String& wildcardPatterns,
+    WildcardFileFilter (const String& fileWildcardPatterns,
+                        const String& directoryWildcardPatterns,
                         const String& description);
 
     /** Destructor. */
@@ -51767,7 +51810,10 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    StringArray wildcards;
+    StringArray fileWildcards, directoryWildcards;
+
+    static void parse (const String& pattern, StringArray& result) throw();
+    static bool match (const File& file, const StringArray& wildcards) throw();
 };
 
 #endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__

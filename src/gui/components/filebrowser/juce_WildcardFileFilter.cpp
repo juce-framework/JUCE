@@ -31,30 +31,46 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-WildcardFileFilter::WildcardFileFilter (const String& wildcardPatterns,
+WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
+                                        const String& directoryWildcardPatterns,
                                         const String& description)
-    : FileFilter (description.isEmpty() ? wildcardPatterns
-                                        : (description + T(" (") + wildcardPatterns + T(")")))
+    : FileFilter (description.isEmpty() ? fileWildcardPatterns
+                                        : (description + T(" (") + fileWildcardPatterns + T(")")))
 {
-    wildcards.addTokens (wildcardPatterns.toLowerCase(), T(";,"), T("\"'"));
-
-    wildcards.trim();
-    wildcards.removeEmptyStrings();
-
-    // special case for *.*, because people use it to mean "any file", but it
-    // would actually ignore files with no extension.
-    for (int i = wildcards.size(); --i >= 0;)
-        if (wildcards[i] == T("*.*"))
-            wildcards.set (i, T("*"));
+    parse (fileWildcardPatterns, fileWildcards);
+    parse (directoryWildcardPatterns, directoryWildcards);
 }
 
 WildcardFileFilter::~WildcardFileFilter()
 {
 }
 
+bool WildcardFileFilter::isFileSuitable (const File& file) const
+{
+    return match (file, fileWildcards);
+}
+
+bool WildcardFileFilter::isDirectorySuitable (const File& file) const
+{
+    return match (file, directoryWildcards);
+}
 
 //==============================================================================
-bool WildcardFileFilter::isFileSuitable (const File& file) const
+void WildcardFileFilter::parse (const String& pattern, StringArray& result) throw()
+{
+    result.addTokens (pattern.toLowerCase(), T(";,"), T("\"'"));
+
+    result.trim();
+    result.removeEmptyStrings();
+
+    // special case for *.*, because people use it to mean "any file", but it
+    // would actually ignore files with no extension.
+    for (int i = result.size(); --i >= 0;)
+        if (result[i] == T("*.*"))
+            result.set (i, T("*"));
+}
+
+bool WildcardFileFilter::match (const File& file, const StringArray& wildcards) throw()
 {
     const String filename (file.getFileName());
 
@@ -63,11 +79,6 @@ bool WildcardFileFilter::isFileSuitable (const File& file) const
             return true;
 
     return false;
-}
-
-bool WildcardFileFilter::isDirectorySuitable (const File&) const
-{
-    return true;
 }
 
 

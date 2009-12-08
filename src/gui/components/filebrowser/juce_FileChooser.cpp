@@ -120,9 +120,11 @@ bool FileChooser::showDialog (const bool selectsDirectories,
                                         && previewComponent->getHeight() > 10));
 
 #if JUCE_WINDOWS
-    if (useNativeDialogBox)
-#else
+    if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
+#elif JUCE_MAC
     if (useNativeDialogBox && (previewComponent == 0))
+#else
+    if (false)
 #endif
     {
         showPlatformDialog (results, title, startingFile, filters,
@@ -133,14 +135,23 @@ bool FileChooser::showDialog (const bool selectsDirectories,
     }
     else
     {
-        jassert (! selectMultipleFiles); // not yet implemented for juce dialogs!
+        WildcardFileFilter wildcard (selectsFiles ? filters : String::empty,
+                                     selectsDirectories ? "*" : String::empty,
+                                     String::empty);
 
-        WildcardFileFilter wildcard (filters, String::empty);
+        int flags = isSave ? FileBrowserComponent::saveMode
+                           : FileBrowserComponent::openMode;
 
-        FileBrowserComponent browserComponent (selectsDirectories ? FileBrowserComponent::chooseDirectoryMode
-                                                                  : (isSave ? FileBrowserComponent::saveFileMode
-                                                                            : FileBrowserComponent::loadFileMode),
-                                               startingFile, &wildcard, previewComponent);
+        if (selectsFiles)
+            flags |= FileBrowserComponent::canSelectFiles;
+
+        if (selectsDirectories)
+            flags |= FileBrowserComponent::canSelectDirectories;
+
+        if (selectMultipleFiles)
+            flags |= FileBrowserComponent::canSelectMultipleItems;
+
+        FileBrowserComponent browserComponent (flags, startingFile, &wildcard, previewComponent);
 
         FileChooserDialogBox box (title, String::empty,
                                   browserComponent,
@@ -148,7 +159,10 @@ bool FileChooser::showDialog (const bool selectsDirectories,
                                   browserComponent.findColour (AlertWindow::backgroundColourId));
 
         if (box.show())
-            results.add (new File (browserComponent.getCurrentFile()));
+        {
+            for (int i = 0; i < browserComponent.getNumSelectedFiles(); ++i)
+                results.add (new File (browserComponent.getSelectedFile (i)));
+        }
     }
 
     if (currentlyFocused != 0 && ! currentlyFocusedChecker->hasBeenDeleted())

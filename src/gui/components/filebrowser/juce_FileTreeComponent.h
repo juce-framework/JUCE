@@ -55,21 +55,16 @@ public:
     ~FileTreeComponent();
 
     //==============================================================================
-    /** Returns the number of selected files in the tree.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    int getNumSelectedFiles() const throw()         { return TreeView::getNumSelectedItems(); }
+    int getNumSelectedFiles() const                 { return TreeView::getNumSelectedItems(); }
 
     /** Returns one of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
     */
-    const File getSelectedFile (int index) const throw();
-
-    /** Returns the first of the files that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
-    */
-    const File getSelectedFile() const;
+    const File getSelectedFile (int index = 0) const;
 
     /** Scrolls the list to the top. */
     void scrollToTop();

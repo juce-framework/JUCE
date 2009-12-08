@@ -59,11 +59,16 @@ public:
     ~FileListComponent();
 
     //==============================================================================
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    const File getSelectedFile() const;
+    int getNumSelectedFiles() const;
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    const File getSelectedFile (int index = 0) const;
 
     /** Scrolls to the top of the list. */
     void scrollToTop();

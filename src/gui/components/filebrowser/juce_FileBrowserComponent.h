@@ -50,22 +50,26 @@ class JUCE_API  FileBrowserComponent  : public Component,
                                         private FileBrowserListener,
                                         private TextEditorListener,
                                         private ButtonListener,
-                                        private ComboBoxListener
+                                        private ComboBoxListener,
+                                        private FileFilter
 {
 public:
     //==============================================================================
-    /** Various modes that the browser can be used in.
+    /** Various options for the browser.
 
-        One of these is passed into the constructor.
+        A combination of these is passed into the FileBrowserComponent constructor.
     */
-    enum FileChooserMode
+    enum FileChooserFlags
     {
-        loadFileMode,           /**< the component should allow the user to choose an existing
-                                     file with the intention of opening it. */
-        saveFileMode,           /**< the component should allow the user to specify the name of
-                                     a file that will be used to save something. */
-        chooseDirectoryMode     /**< the component should allow the user to select an existing
-                                     directory. */
+        openMode                = 1,    /**< the component should allow the user to choose an existing
+                                             file with the intention of opening it. */
+        saveMode                = 2,    /**< the component should allow the user to specify the name of
+                                             a file that will be used to save something. */
+        canSelectFiles          = 4,    /**< */
+        canSelectDirectories    = 8,    /**< */
+        canSelectMultipleItems  = 16,   /**< */
+        useTreeView             = 32,   /**< */
+        filenameBoxIsReadOnly   = 64    /**< */
     };
 
     //==============================================================================
@@ -88,34 +92,41 @@ public:
         @param filenameTextBoxIsReadOnly    if true, the user won't be allowed to type their own
                                         text into the filename box.
     */
-    FileBrowserComponent (FileChooserMode browserMode,
+    FileBrowserComponent (int flags,
                           const File& initialFileOrDirectory,
                           const FileFilter* fileFilter,
-                          FilePreviewComponent* previewComp,
-                          const bool useTreeView = false,
-                          const bool filenameTextBoxIsReadOnly = false);
+                          FilePreviewComponent* previewComp);
 
     /** Destructor. */
     ~FileBrowserComponent();
 
     //==============================================================================
-    /** Returns the file that the user has currently chosen.
+    /** Returns the number of files that the user has got selected.
+        If multiple select isn't active, this will only be 0 or 1. To get the complete
+        list of files they've chosen, pass an index to getCurrentFile().
+    */
+    int getNumSelectedFiles() const throw();
+
+    /** Returns one of the files that the user has chosen.
+        If the box has multi-select enabled, the index lets you specify which of the files
+        to get - see getNumSelectedFiles() to find out how many files were chosen.
         @see getHighlightedFile
     */
-    const File getCurrentFile() const throw();
+    const File getSelectedFile (int index) const throw();
 
-    /** Returns true if the current file is usable.
+    /** Returns true if the currently selected file(s) are usable.
 
         This can be used to decide whether the user can press "ok" for the
         current file. What it does depends on the mode, so for example in an "open"
-        mode, the current file is only valid if one has been selected and if the file
-        exists. In a "save" mode, a non-existent file would also be valid.
+        mode, this only returns true if a file has been selected and if it exists.
+        In a "save" mode, a non-existent file would also be valid.
     */
     bool currentFileIsValid() const;
 
-    /** This returns the item in the view that is currently highlighted.
+    /** This returns the last item in the view that the user has highlighted.
         This may be different from getCurrentFile(), which returns the value
-        that is shown in the filename box.
+        that is shown in the filename box, and if there are multiple selections,
+        this will only return one of them.
         @see getCurrentFile
     */
     const File getHighlightedFile() const throw();
@@ -133,15 +144,16 @@ public:
     /** Refreshes the directory that's currently being listed. */
     void refresh();
 
-    /** Returns the browser's current mode. */
-    FileChooserMode getMode() const throw()                     { return mode; }
-
     /** Returns a verb to describe what should happen when the file is accepted.
 
         E.g. if browsing in "load file" mode, this will be "Open", if in "save file"
         mode, it'll be "Save", etc.
     */
     virtual const String getActionVerb() const;
+
+    /** Returns true if the saveMode flag was set when this component was created.
+    */
+    bool isSaveMode() const throw();
 
     //==============================================================================
     /** Adds a listener to be told when the user selects and clicks on files.
@@ -180,6 +192,10 @@ public:
     void fileClicked (const File& f, const MouseEvent& e);
     /** @internal */
     void fileDoubleClicked (const File& f);
+    /** @internal */
+    bool isFileSuitable (const File& file) const;
+    /** @internal */
+    bool isDirectorySuitable (const File&) const;
 
     /** @internal */
     FilePreviewComponent* getPreviewComponent() const throw();
@@ -192,10 +208,11 @@ protected:
 private:
     //==============================================================================
     DirectoryContentsList* fileList;
-    FileFilter* directoriesOnlyFilter;
+    const FileFilter* fileFilter;
 
-    FileChooserMode mode;
+    int flags;
     File currentRoot;
+    OwnedArray <File> chosenFiles;
     SortedSet <void*> listeners;
 
     DirectoryContentsDisplayComponent* fileListComponent;
@@ -207,6 +224,7 @@ private:
     TimeSliceThread thread;
 
     void sendListenerChangeMessage();
+    bool isFileOrDirSuitable (const File& f) const;
 
     FileBrowserComponent (const FileBrowserComponent&);
     const FileBrowserComponent& operator= (const FileBrowserComponent&);

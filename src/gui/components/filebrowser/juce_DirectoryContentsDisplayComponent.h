@@ -48,11 +48,16 @@ public:
     virtual ~DirectoryContentsDisplayComponent();
 
     //==============================================================================
-    /** Returns the file that the user has currently selected.
-
-        Returns File::nonexistent if none is selected.
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
     */
-    virtual const File getSelectedFile() const = 0;
+    virtual int getNumSelectedFiles() const = 0;
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    virtual const File getSelectedFile (int index) const = 0;
 
     /** Scrolls this view to the top. */
     virtual void scrollToTop() = 0;

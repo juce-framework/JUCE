@@ -50,9 +50,14 @@ FileListComponent::~FileListComponent()
     deleteAllChildren();
 }
 
-const File FileListComponent::getSelectedFile() const
+int FileListComponent::getNumSelectedFiles() const
 {
-    return fileList.getFile (getSelectedRow());
+    return getNumSelectedRows();
+}
+
+const File FileListComponent::getSelectedFile (int index) const
+{
+    return fileList.getFile (getSelectedRow (index));
 }
 
 void FileListComponent::scrollToTop()

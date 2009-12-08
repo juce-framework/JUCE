@@ -52,7 +52,8 @@ public:
         The description is a name to show the user in a list of possible patterns, so
         for the wav/aiff example, your description might be "audio files".
     */
-    WildcardFileFilter (const String& wildcardPatterns,
+    WildcardFileFilter (const String& fileWildcardPatterns,
+                        const String& directoryWildcardPatterns,
                         const String& description);
 
     /** Destructor. */
@@ -65,12 +66,14 @@ public:
     /** This always returns true. */
     bool isDirectorySuitable (const File& file) const;
 
-
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    StringArray wildcards;
+    StringArray fileWildcards, directoryWildcards;
+
+    static void parse (const String& pattern, StringArray& result) throw();
+    static bool match (const File& file, const StringArray& wildcards) throw();
 };
 
 

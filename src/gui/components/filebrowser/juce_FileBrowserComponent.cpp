@@ -37,29 +37,24 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class DirectoriesOnlyFilter    : public FileFilter
-{
-public:
-    DirectoriesOnlyFilter() : FileFilter (String::empty) {}
-
-    bool isFileSuitable (const File&) const         { return false; }
-    bool isDirectorySuitable (const File&) const    { return true; }
-};
-
-
-//==============================================================================
-FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
+FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
-                                            const FileFilter* fileFilter,
-                                            FilePreviewComponent* previewComp_,
-                                            const bool useTreeView,
-                                            const bool filenameTextBoxIsReadOnly)
-   : directoriesOnlyFilter (0),
-     mode (mode_),
+                                            const FileFilter* fileFilter_,
+                                            FilePreviewComponent* previewComp_)
+   : FileFilter (String::empty),
+     fileFilter (fileFilter_),
+     flags (flags_),
      listeners (2),
      previewComp (previewComp_),
      thread ("Juce FileBrowser")
 {
+    // You need to specify one or other of the open/save flags..
+    jassert ((flags & (saveMode | openMode)) != 0);
+    jassert ((flags & (saveMode | openMode)) != (saveMode | openMode));
+
+    // You need to specify at least one of these flags..
+    jassert ((flags & (canSelectFiles | canSelectDirectories)) != 0);
+
     String filename;
 
     if (initialFileOrDirectory == File::nonexistent)
@@ -72,18 +67,20 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     }
     else
     {
+        chosenFiles.add (new File (initialFileOrDirectory));
         currentRoot = initialFileOrDirectory.getParentDirectory();
         filename = initialFileOrDirectory.getFileName();
     }
 
-    if (mode_ == chooseDirectoryMode)
-        fileFilter = directoriesOnlyFilter = new DirectoriesOnlyFilter();
+    fileList = new DirectoryContentsList (this, thread);
 
-    fileList = new DirectoryContentsList (fileFilter, thread);
-
-    if (useTreeView)
+    if ((flags & useTreeView) != 0)
     {
         FileTreeComponent* const tree = new FileTreeComponent (*fileList);
+
+        if ((flags & canSelectMultipleItems) != 0)
+            tree->setMultiSelectEnabled (true);
+
         addAndMakeVisible (tree);
         fileListComponent = tree;
     }
@@ -91,6 +88,10 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     {
         FileListComponent* const list = new FileListComponent (*fileList);
         list->setOutlineThickness (1);
+
+        if ((flags & canSelectMultipleItems) != 0)
+            list->setMultipleSelectionEnabled (true);
+
         addAndMakeVisible (list);
         fileListComponent = list;
     }
@@ -118,11 +119,11 @@ FileBrowserComponent::FileBrowserComponent (FileChooserMode mode_,
     filenameBox->setMultiLine (false);
     filenameBox->setSelectAllWhenFocused (true);
     filenameBox->setText (filename, false);
-    filenameBox->addListener (this);
-    filenameBox->setReadOnly (filenameTextBoxIsReadOnly);
 
-    Label* label = new Label ("f", (mode == chooseDirectoryMode) ? TRANS("folder:")
-                                                                 : TRANS("file:"));
+    filenameBox->addListener (this);
+    filenameBox->setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
+
+    Label* label = new Label ("f", TRANS("file:"));
     addAndMakeVisible (label);
     label->attachToComponent (filenameBox, true);
 
@@ -145,10 +146,7 @@ FileBrowserComponent::~FileBrowserComponent()
         removeChildComponent (previewComp);
 
     deleteAllChildren();
-
     deleteAndZero (fileList);
-    delete directoriesOnlyFilter;
-
     thread.stopThread (10000);
 }
 
@@ -167,19 +165,33 @@ void FileBrowserComponent::removeListener (FileBrowserListener* const listener) 
 }
 
 //==============================================================================
-const File FileBrowserComponent::getCurrentFile() const throw()
+bool FileBrowserComponent::isSaveMode() const throw()
 {
-    return currentRoot.getChildFile (filenameBox->getText());
+    return (flags & saveMode) != 0;
+}
+
+int FileBrowserComponent::getNumSelectedFiles() const throw()
+{
+    if (chosenFiles.size() == 0 && currentFileIsValid())
+        return 1;
+
+    return chosenFiles.size();
+}
+
+const File FileBrowserComponent::getSelectedFile (int index) const throw()
+{
+    if (! filenameBox->isReadOnly())
+        return currentRoot.getChildFile (filenameBox->getText());
+    else
+        return chosenFiles[index] != 0 ? *chosenFiles[index] : File::nonexistent;
 }
 
 bool FileBrowserComponent::currentFileIsValid() const
 {
-    if (mode == saveFileMode)
-        return ! getCurrentFile().isDirectory();
-    else if (mode == loadFileMode)
-        return getCurrentFile().existsAsFile();
-    else if (mode == chooseDirectoryMode)
-        return getCurrentFile().isDirectory();
+    if (isSaveMode())
+        return ! getSelectedFile (0).isDirectory();
+    else
+        return getSelectedFile (0).exists();
 
     jassertfalse
     return false;
@@ -187,7 +199,28 @@ bool FileBrowserComponent::currentFileIsValid() const
 
 const File FileBrowserComponent::getHighlightedFile() const throw()
 {
-    return fileListComponent->getSelectedFile();
+    return fileListComponent->getSelectedFile (0);
+}
+
+//==============================================================================
+bool FileBrowserComponent::isFileSuitable (const File& file) const
+{
+    return (flags & canSelectFiles) != 0 ? (fileFilter == 0 || fileFilter->isFileSuitable (file))
+                                         : false;
+}
+
+bool FileBrowserComponent::isDirectorySuitable (const File&) const
+{
+    return true;
+}
+
+bool FileBrowserComponent::isFileOrDirSuitable (const File& f) const
+{
+    if (f.isDirectory())
+        return (flags & canSelectDirectories) != 0 && (fileFilter == 0 || fileFilter->isDirectorySuitable (f));
+
+    return (flags & canSelectFiles) != 0 && f.exists()
+             && (fileFilter == 0 || fileFilter->isFileSuitable (f));
 }
 
 //==============================================================================
@@ -201,9 +234,6 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     if (currentRoot != newRootDirectory)
     {
         fileListComponent->scrollToTop();
-
-        if (mode == chooseDirectoryMode)
-            filenameBox->setText (String::empty, false);
 
         String path (newRootDirectory.getFullPathName());
 
@@ -256,8 +286,7 @@ void FileBrowserComponent::refresh()
 
 const String FileBrowserComponent::getActionVerb() const
 {
-    return (mode == chooseDirectoryMode) ? TRANS("Choose")
-                                         : ((mode == saveFileMode) ? TRANS("Save") : TRANS("Open"));
+    return isSaveMode() ? TRANS("Save") : TRANS("Open");
 }
 
 FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const throw()
@@ -280,7 +309,7 @@ void FileBrowserComponent::sendListenerChangeMessage()
     ComponentDeletionWatcher deletionWatcher (this);
 
     if (previewComp != 0)
-        previewComp->selectedFileChanged (getCurrentFile());
+        previewComp->selectedFileChanged (getSelectedFile (0));
 
     jassert (! deletionWatcher.hasBeenDeleted());
 
@@ -297,13 +326,28 @@ void FileBrowserComponent::sendListenerChangeMessage()
 
 void FileBrowserComponent::selectionChanged()
 {
-    const File selected (fileListComponent->getSelectedFile());
+    StringArray newFilenames;
+    bool resetChosenFiles = true;
 
-    if ((mode == chooseDirectoryMode && selected.isDirectory())
-         || selected.existsAsFile())
+    for (int i = 0; i < fileListComponent->getNumSelectedFiles(); ++i)
     {
-        filenameBox->setText (selected.getRelativePathFrom (getRoot()), false);
+        const File f (fileListComponent->getSelectedFile (i));
+
+        if (isFileOrDirSuitable (f))
+        {
+            if (resetChosenFiles)
+            {
+                chosenFiles.clear();
+                resetChosenFiles = false;
+            }
+
+            chosenFiles.add (new File (f));
+            newFilenames.add (f.getRelativePathFrom (getRoot()));
+        }
     }
+
+    if (newFilenames.size() > 0)
+        filenameBox->setText (newFilenames.joinIntoString (T(", ")), false);
 
     sendListenerChangeMessage();
 }
@@ -375,17 +419,20 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
         if (f.isDirectory())
         {
             setRoot (f);
+            chosenFiles.clear();
             filenameBox->setText (String::empty);
         }
         else
         {
             setRoot (f.getParentDirectory());
+            chosenFiles.clear();
+            chosenFiles.add (new File (f));
             filenameBox->setText (f.getFileName());
         }
     }
     else
     {
-        fileDoubleClicked (getCurrentFile());
+        fileDoubleClicked (getSelectedFile (0));
     }
 }
 
@@ -395,7 +442,7 @@ void FileBrowserComponent::textEditorEscapeKeyPressed (TextEditor&)
 
 void FileBrowserComponent::textEditorFocusLost (TextEditor&)
 {
-    if (mode != saveFileMode)
+    if (! isSaveMode())
         selectionChanged();
 }
 
