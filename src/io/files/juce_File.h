@@ -729,8 +729,15 @@ public:
         default viewer application.
 
         - if it's a folder, it will be opened in Explorer, Finder, or equivalent.
+
+        @see revealToUser
     */
     bool startAsProcess (const String& parameters = String::empty) const throw();
+
+    /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
+        @see startAsProcess
+    */
+    void revealToUser() const throw();
 
     //==============================================================================
     /** A set of types of location that can be passed to the getSpecialLocation() method.

@@ -279,6 +279,27 @@ DynamicObject* var::getObject() const throw()
     return type == objectType ? value.objectValue : 0;
 }
 
+bool var::operator== (const var& other) const throw()
+{
+    switch (type)
+    {
+        case voidType:      return other.isVoid();
+        case intType:       return value.intValue == (int) other;
+        case boolType:      return value.boolValue == (bool) other;
+        case doubleType:    return value.doubleValue == (double) other;
+        case stringType:    return (*(value.stringValue)) == other.toString();
+        case objectType:    return value.objectValue == other.getObject();
+        default:            jassertfalse; break;
+    }
+
+    return false;
+}
+
+bool var::operator!= (const var& other) const throw()
+{
+    return ! operator== (other);
+}
+
 const var var::operator[] (const var::identifier& propertyName) const throw()
 {
     if (type == objectType && value.objectValue != 0)

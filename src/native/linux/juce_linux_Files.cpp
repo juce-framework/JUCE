@@ -417,10 +417,11 @@ bool juce_launchFile (const String& fileName,
     cmdString << " " << parameters;
 
     if (URL::isProbablyAWebsiteURL (fileName)
+         || cmdString.startsWithIgnoreCase (T("file:"))
          || URL::isProbablyAnEmailAddress (fileName))
     {
         // create a command that tries to launch a bunch of likely browsers
-        const char* const browserNames[] = { "/etc/alternatives/x-www-browser", "firefox", "mozilla", "konqueror", "opera" };
+        const char* const browserNames[] = { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla", "konqueror", "opera" };
 
         StringArray cmdLines;
 
@@ -429,9 +430,6 @@ bool juce_launchFile (const String& fileName,
 
         cmdString = cmdLines.joinIntoString (T(" || "));
     }
-
-    if (cmdString.startsWithIgnoreCase (T("file:")))
-        cmdString = cmdString.substring (5);
 
     const char* const argv[4] = { "/bin/sh", "-c", (const char*) cmdString.toUTF8(), 0 };
 
@@ -448,5 +446,14 @@ bool juce_launchFile (const String& fileName,
 
     return cpid >= 0;
 }
+
+void File::revealToUser() const throw()
+{
+    if (isDirectory())
+        startAsProcess();
+    else if (getParentDirectory().exists())
+        getParentDirectory().startAsProcess();
+}
+
 
 #endif

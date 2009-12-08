@@ -497,6 +497,16 @@ bool juce_launchFile (const String& fileName,
 #endif
 }
 
+void File::revealToUser() const throw()
+{
+#if ! JUCE_IPHONE
+    if (exists())
+        [[NSWorkspace sharedWorkspace] selectFile: juceStringToNS (getFullPathName()) inFileViewerRootedAtPath: @""];
+    else if (getParentDirectory().exists())
+        getParentDirectory().revealToUser();
+#endif
+}
+
 //==============================================================================
 #if ! JUCE_IPHONE
 bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)

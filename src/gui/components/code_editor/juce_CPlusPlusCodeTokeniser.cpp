@@ -46,14 +46,14 @@ namespace CppTokeniser
 static bool isIdentifierStart (const tchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
-            || c == T('_');
+            || c == T('_') || c == T('@');
 }
 
 static bool isIdentifierBody (const tchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
             || CharacterFunctions::isDigit (c)
-            || c == T('_');
+            || c == T('_') || c == T('@');
 }
 
 static int parseIdentifier (CodeDocument::Iterator& source) throw()
@@ -80,7 +80,9 @@ static int parseIdentifier (CodeDocument::Iterator& source) throw()
     static const tchar* keywordsOther[] =
         { T("const_cast"), T("continue"), T("default"), T("explicit"), T("mutable"), T("namespace"),
           T("operator"), T("private"), T("protected"), T("register"), T("reinterpret_cast"), T("static_cast"),
-          T("template"), T("typedef"), T("typename"), T("unsigned"), T("virtual"), T("volatile"), 0 };
+          T("template"), T("typedef"), T("typename"), T("unsigned"), T("virtual"), T("volatile"),
+          T("@implementation"), T("@interface"), T("@end"), T("@synthesize"), T("@dynamic"), T("@public"),
+          T("@private"), T("@property"), T("@protected"), T("@class"), 0 };
 
     int tokenLength = 0;
     tchar possibleIdentifier [19];

@@ -58,22 +58,27 @@ FileChooser::~FileChooser()
 
 bool FileChooser::browseForFileToOpen (FilePreviewComponent* previewComponent)
 {
-    return showDialog (false, false, false, false, previewComponent);
+    return showDialog (false, true, false, false, false, previewComponent);
 }
 
 bool FileChooser::browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent)
 {
-    return showDialog (false, false, false, true, previewComponent);
+    return showDialog (false, true, false, false, true, previewComponent);
+}
+
+bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent)
+{
+    return showDialog (true, true, false, false, true, previewComponent);
 }
 
 bool FileChooser::browseForFileToSave (const bool warnAboutOverwritingExistingFiles)
 {
-    return showDialog (false, true, warnAboutOverwritingExistingFiles, false, 0);
+    return showDialog (false, true, true, warnAboutOverwritingExistingFiles, false, 0);
 }
 
 bool FileChooser::browseForDirectory()
 {
-    return showDialog (true, false, false, false, 0);
+    return showDialog (true, false, false, false, false, 0);
 }
 
 const File FileChooser::getResult() const
@@ -95,7 +100,8 @@ const OwnedArray <File>& FileChooser::getResults() const
     return results;
 }
 
-bool FileChooser::showDialog (const bool isDirectory,
+bool FileChooser::showDialog (const bool selectsDirectories,
+                              const bool selectsFiles,
                               const bool isSave,
                               const bool warnAboutOverwritingExistingFiles,
                               const bool selectMultipleFiles,
@@ -120,7 +126,7 @@ bool FileChooser::showDialog (const bool isDirectory,
 #endif
     {
         showPlatformDialog (results, title, startingFile, filters,
-                            isDirectory, isSave,
+                            selectsDirectories, selectsFiles, isSave,
                             warnAboutOverwritingExistingFiles,
                             selectMultipleFiles,
                             previewComponent);
@@ -131,9 +137,9 @@ bool FileChooser::showDialog (const bool isDirectory,
 
         WildcardFileFilter wildcard (filters, String::empty);
 
-        FileBrowserComponent browserComponent (isDirectory ? FileBrowserComponent::chooseDirectoryMode
-                                                           : (isSave ? FileBrowserComponent::saveFileMode
-                                                                     : FileBrowserComponent::loadFileMode),
+        FileBrowserComponent browserComponent (selectsDirectories ? FileBrowserComponent::chooseDirectoryMode
+                                                                  : (isSave ? FileBrowserComponent::saveFileMode
+                                                                            : FileBrowserComponent::loadFileMode),
                                                startingFile, &wildcard, previewComponent);
 
         FileChooserDialogBox box (title, String::empty,

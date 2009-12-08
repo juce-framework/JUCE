@@ -136,6 +136,13 @@ public:
     */
     bool browseForDirectory();
 
+    /** Same as browseForFileToOpen, but allows the user to select multiple files and directories.
+
+        The files that are returned can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = 0);
+
     //==============================================================================
     /** Returns the last file that was chosen by one of the browseFor methods.
 
@@ -171,7 +178,8 @@ private:
     OwnedArray <File> results;
     bool useNativeDialogBox;
 
-    bool showDialog (const bool isDirectory,
+    bool showDialog (const bool selectsDirectories,
+                     const bool selectsFiles,
                      const bool isSave,
                      const bool warnAboutOverwritingExistingFiles,
                      const bool selectMultipleFiles,
@@ -181,7 +189,8 @@ private:
                                     const String& title,
                                     const File& file,
                                     const String& filters,
-                                    bool isDirectory,
+                                    bool selectsDirectories,
+                                    bool selectsFiles,
                                     bool isSave,
                                     bool warnAboutOverwritingExistingFiles,
                                     bool selectMultipleFiles,

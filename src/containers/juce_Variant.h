@@ -91,6 +91,9 @@ public:
     bool isObject() const throw()       { return type == objectType; }
     bool isMethod() const throw()       { return type == methodType; }
 
+    bool operator== (const var& other) const throw();
+    bool operator!= (const var& other) const throw();
+
     //==============================================================================
     class JUCE_API  identifier
     {

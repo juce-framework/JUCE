@@ -677,6 +677,14 @@ bool juce_launchFile (const String& fileName,
     return hInstance > (HINSTANCE) 32;
 }
 
+void File::revealToUser() const throw()
+{
+    if (isDirectory())
+        startAsProcess();
+    else if (getParentDirectory().exists())
+        getParentDirectory().startAsProcess();
+}
+
 //==============================================================================
 struct NamedPipeInternal
 {

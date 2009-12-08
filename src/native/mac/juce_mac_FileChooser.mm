@@ -84,6 +84,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       const File& currentFileOrDirectory,
                                       const String& filter,
                                       bool selectsDirectory,
+                                      bool selectsFiles,
                                       bool isSaveDialogue,
                                       bool warnAboutOverwritingExistingFiles,
                                       bool selectMultipleFiles,
@@ -108,7 +109,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     {
         NSOpenPanel* openPanel = (NSOpenPanel*) panel;
         [openPanel setCanChooseDirectories: selectsDirectory];
-        [openPanel setCanChooseFiles: ! selectsDirectory];
+        [openPanel setCanChooseFiles: selectsFiles];
         [openPanel setAllowsMultipleSelection: selectMultipleFiles];
     }
 
@@ -157,6 +158,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       const File& currentFileOrDirectory,
                                       const String& filter,
                                       bool selectsDirectory,
+                                      bool selectsFiles,
                                       bool isSaveDialogue,
                                       bool warnAboutOverwritingExistingFiles,
                                       bool selectMultipleFiles,

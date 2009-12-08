@@ -172,18 +172,27 @@ public:
 
     bool clipToRectangleList (const RectangleList& clipRegion)
     {
-        const int numRects = clipRegion.getNumRectangles();
-        CGRect* const rects = new CGRect [numRects];
-        for (int i = 0; i < numRects; ++i)
+        if (clipRegion.isEmpty())
         {
-            const Rectangle& r = clipRegion.getRectangle(i);
-            rects[i] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+            CGContextClipToRect (context, CGRectMake (0, 0, 0, 0));
+            return false;
         }
+        else
+        {
+            const int numRects = clipRegion.getNumRectangles();
 
-        CGContextClipToRects (context, rects, numRects);
-        delete[] rects;
+            CGRect* const rects = new CGRect [numRects];
+            for (int i = 0; i < numRects; ++i)
+            {
+                const Rectangle& r = clipRegion.getRectangle(i);
+                rects[i] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+            }
 
-        return ! isClipEmpty();
+            CGContextClipToRects (context, rects, numRects);
+            delete[] rects;
+
+            return ! isClipEmpty();
+        }
     }
 
     void excludeClipRectangle (const Rectangle& r)
