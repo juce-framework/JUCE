@@ -241,11 +241,12 @@ public:
 
     /** Returns true if this message is a 'key-up' event.
 
-        This will also return true for a note-on event with a velocity of 0.
+        If returnTrueForNoteOnVelocity0 is true, then his will also return true
+        for a note-on event with a velocity of 0.
 
         @see isNoteOn, getNoteNumber, getVelocity, noteOff
     */
-    bool isNoteOff() const throw();
+    bool isNoteOff (const bool returnTrueForNoteOnVelocity0 = true) const throw();
 
     /** Creates a key-up message.
 

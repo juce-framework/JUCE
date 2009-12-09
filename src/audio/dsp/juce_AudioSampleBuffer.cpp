@@ -454,14 +454,21 @@ void AudioSampleBuffer::copyFrom (const int destChannel,
     jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
     jassert (source != 0);
 
-    if (numSamples > 0 && gain != 0)
+    if (numSamples > 0)
     {
         float* d = channels [destChannel] + destStartSample;
 
         if (gain != 1.0f)
         {
-            while (--numSamples >= 0)
-                *d++ = gain * *source++;
+            if (gain == 0)
+            {
+                zeromem (d, sizeof (float) * numSamples);
+            }
+            else
+            {
+                while (--numSamples >= 0)
+                    *d++ = gain * *source++;
+            }
         }
         else
         {

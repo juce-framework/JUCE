@@ -140,6 +140,12 @@ public:
     void setDefaultSansSerifTypefaceName (const String& newName);
 
     //==============================================================================
+    /** Override this to get the chance to swap a component's mouse cursor for a
+        customised one.
+    */
+    virtual const MouseCursor getMouseCursorFor (Component& component);
+
+    //==============================================================================
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,
                                        Button& button,

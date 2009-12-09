@@ -25851,11 +25851,12 @@ public:
 
     /** Returns true if this message is a 'key-up' event.
 
-        This will also return true for a note-on event with a velocity of 0.
+        If returnTrueForNoteOnVelocity0 is true, then his will also return true
+        for a note-on event with a velocity of 0.
 
         @see isNoteOn, getNoteNumber, getVelocity, noteOff
     */
-    bool isNoteOff() const throw();
+    bool isNoteOff (const bool returnTrueForNoteOnVelocity0 = true) const throw();
 
     /** Creates a key-up message.
 
@@ -54755,6 +54756,11 @@ public:
         you should instead override getTypefaceForFont() to create and return the typeface.
     */
     void setDefaultSansSerifTypefaceName (const String& newName);
+
+    /** Override this to get the chance to swap a component's mouse cursor for a
+        customised one.
+    */
+    virtual const MouseCursor getMouseCursorFor (Component& component);
 
     /** Draws the lozenge-shaped background for a standard button. */
     virtual void drawButtonBackground (Graphics& g,

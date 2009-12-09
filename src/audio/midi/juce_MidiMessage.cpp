@@ -310,10 +310,10 @@ bool MidiMessage::isNoteOn (const bool returnTrueForVelocity0) const throw()
              && (returnTrueForVelocity0 || data[2] != 0);
 }
 
-bool MidiMessage::isNoteOff() const throw()
+bool MidiMessage::isNoteOff (const bool returnTrueForNoteOnVelocity0) const throw()
 {
     return ((data[0] & 0xf0) == 0x80)
-            || ((data[2] == 0) && ((data[0] & 0xf0) == 0x90));
+            || (returnTrueForNoteOnVelocity0 && (data[2] == 0) && ((data[0] & 0xf0) == 0x90));
 }
 
 bool MidiMessage::isNoteOnOrOff() const throw()

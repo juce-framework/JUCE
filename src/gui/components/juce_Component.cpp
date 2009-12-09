@@ -1619,7 +1619,7 @@ void Component::internalUpdateMouseCursor (bool forcedUpdate) throw()
 
     if (peer != 0)
     {
-        MouseCursor mc (getMouseCursor());
+        MouseCursor mc (getLookAndFeel().getMouseCursorFor (*this));
 
         if (isUnboundedMouseModeOn && (unboundedMouseOffsetX != 0
                                         || unboundedMouseOffsetY != 0
