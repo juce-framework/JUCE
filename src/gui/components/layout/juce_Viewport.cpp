@@ -124,6 +124,44 @@ void Viewport::setViewPositionProportionately (const double x,
                          jmax (0, roundDoubleToInt (y * (contentComp->getHeight() - getHeight()))));
 }
 
+bool Viewport::autoScroll (int mouseX, int mouseY, int activeBorderThickness, int maximumSpeed)
+{
+    if (contentComp != 0)
+    {
+        int dx = 0, dy = 0;
+
+        if (mouseX < activeBorderThickness)
+            dx = activeBorderThickness - mouseX;
+        else if (mouseX >= contentHolder->getWidth() - activeBorderThickness)
+            dx = (contentHolder->getWidth() - activeBorderThickness) - mouseX;
+
+        if (dx < 0)
+            dx = jmax (dx, -maximumSpeed, contentHolder->getWidth() - contentComp->getRight());
+        else
+            dx = jmin (dx, maximumSpeed, -contentComp->getX());
+
+        if (mouseY < activeBorderThickness)
+            dy = activeBorderThickness - mouseY;
+        else if (mouseY >= contentHolder->getHeight() - activeBorderThickness)
+            dy = (contentHolder->getHeight() - activeBorderThickness) - mouseY;
+
+        if (dy < 0)
+            dy = jmax (dy, -maximumSpeed, contentHolder->getHeight() - contentComp->getBottom());
+        else
+            dy = jmin (dy, maximumSpeed, -contentComp->getY());
+
+        if (dx != 0 || dy != 0)
+        {
+            contentComp->setTopLeftPosition (contentComp->getX() + dx,
+                                             contentComp->getY() + dy);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Viewport::componentMovedOrResized (Component&, bool, bool)
 {
     updateVisibleRegion();

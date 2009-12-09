@@ -140,6 +140,7 @@ LookAndFeel::LookAndFeel()
 
         TreeView::linesColourId,                    0x4c000000,
         TreeView::backgroundColourId,               0x00000000,
+        TreeView::dragAndDropIndicatorColourId,     0x80ff0000,
 
         PopupMenu::backgroundColourId,              0xffffffff,
         PopupMenu::textColourId,                    0xff000000,

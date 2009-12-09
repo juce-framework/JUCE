@@ -29,7 +29,10 @@
 #include "../layout/juce_Viewport.h"
 #include "../../../text/juce_XmlElement.h"
 #include "../../../events/juce_AsyncUpdater.h"
+#include "../mouse/juce_FileDragAndDropTarget.h"
+#include "../mouse/juce_DragAndDropTarget.h"
 class TreeView;
+
 
 //==============================================================================
 /**
@@ -336,6 +339,7 @@ public:
     */
     virtual const String getTooltip();
 
+    //==============================================================================
     /** To allow items from your treeview to be dragged-and-dropped, implement this method.
 
         If this returns a non-empty name then when the user drags an item, the treeview will
@@ -346,10 +350,53 @@ public:
         If you need more complex drag-and-drop behaviour, you can use custom components for
         the items, and use those to trigger the drag.
 
+        To accept drag-and-drop in your tree, see isInterestedInDragSource(),
+        isInterestedInFileDrag(), etc.
+
         @see DragAndDropContainer::startDragging
     */
     virtual const String getDragSourceDescription();
 
+    /** If you want your item to be able to have files drag-and-dropped onto it, implement this
+        method and return true.
+
+        If you return true and allow some files to be dropped, you'll also need to implement the
+        filesDropped() method to do something with them.
+
+        Note that this will be called often, so make your implementation very quick! There's
+        certainly no time to try opening the files and having a think about what's inside them!
+
+        For responding to internal drag-and-drop of other types of object, see isInterestedInDragSource().
+        @see FileDragAndDropTarget::isInterestedInFileDrag, isInterestedInDragSource
+    */
+    virtual bool isInterestedInFileDrag (const StringArray& files);
+
+    /** When files are dropped into this item, this callback is invoked.
+
+        For this to work, you'll need to have also implemented isInterestedInFileDrag().
+        The insertIndex value indicates where in the list of sub-items the files were dropped.
+        @see FileDragAndDropTarget::filesDropped, isInterestedInFileDrag
+    */
+    virtual void filesDropped (const StringArray& files, int insertIndex);
+
+    /** If you want your item to act as a DragAndDropTarget, implement this method and return true.
+
+        If you implement this method, you'll also need to implement itemDropped() in order to handle
+        the items when they are dropped.
+        To respond to drag-and-drop of files from external applications, see isInterestedInFileDrag().
+        @see DragAndDropTarget::isInterestedInDragSource, itemDropped
+    */
+    virtual bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+
+    /** When a things are dropped into this item, this callback is invoked.
+
+        For this to work, you need to have also implemented isInterestedInDragSource().
+        The insertIndex value indicates where in the list of sub-items the new items should be placed.
+        @see isInterestedInDragSource, DragAndDropTarget::itemDropped
+    */
+    virtual void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
+
+    //==============================================================================
     /** Sets a flag to indicate that the item wants to be allowed
         to draw all the way across to the left edge of the treeview.
 
@@ -364,6 +411,44 @@ public:
         highlighted item.
     */
     void setDrawsInLeftMargin (bool canDrawInLeftMargin) throw();
+
+    //==============================================================================
+    /** Saves the current state of open/closed nodes so it can be restored later.
+
+        This takes a snapshot of which sub-nodes have been explicitly opened or closed,
+        and records it as XML. To identify node objects it uses the
+        TreeViewItem::getUniqueName() method to create named paths. This
+        means that the same state of open/closed nodes can be restored to a
+        completely different instance of the tree, as long as it contains nodes
+        whose unique names are the same.
+
+        You'd normally want to use TreeView::getOpennessState() rather than call it
+        for a specific item, but this can be handy if you need to briefly save the state
+        for a section of the tree.
+
+        The caller is responsible for deleting the object that is returned.
+        @see TreeView::getOpennessState, restoreOpennessState
+    */
+    XmlElement* getOpennessState() const throw();
+
+    /** Restores the openness of this item and all its sub-items from a saved state.
+
+        See TreeView::restoreOpennessState for more details.
+
+        You'd normally want to use TreeView::restoreOpennessState() rather than call it
+        for a specific item, but this can be handy if you need to briefly save the state
+        for a section of the tree.
+
+        @see TreeView::restoreOpennessState, getOpennessState
+    */
+    void restoreOpennessState (const XmlElement& xml) throw();
+
+    //==============================================================================
+    /** Returns the index of this item in its parent's sub-items. */
+    int getIndexInParent() const throw();
+
+    /** Returns true if this item is the last of its parent's sub-itens. */
+    bool isLastOfSiblings() const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -387,12 +472,9 @@ private:
     int getIndentX() const throw();
     void setOwnerView (TreeView* const newOwner) throw();
     void paintRecursively (Graphics& g, int width);
+    TreeViewItem* getTopLevelItem() throw();
     TreeViewItem* findItemRecursively (int y) throw();
     TreeViewItem* getDeepestOpenParentItem() throw();
-    void restoreFromXml (const XmlElement& e);
-    XmlElement* createXmlOpenness() const;
-    bool isLastOfSiblings() const throw();
-    TreeViewItem* getTopLevelItem() throw();
     int getNumRows() const throw();
     TreeViewItem* getItemOnRow (int index) throw();
     void deselectAllRecursively();
@@ -414,6 +496,8 @@ private:
 */
 class JUCE_API  TreeView  : public Component,
                             public SettableTooltipClient,
+                            public FileDragAndDropTarget,
+                            public DragAndDropTarget,
                             private AsyncUpdater
 {
 public:
@@ -549,6 +633,11 @@ public:
     */
     TreeViewItem* getItemOnRow (int index) const;
 
+    /** Returns the item that contains a given y position.
+        The y is relative to the top of the TreeView component.
+    */
+    TreeViewItem* getItemAt (int yPosition) const throw();
+
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
     void scrollToKeepItemVisible (TreeViewItem* item);
 
@@ -605,8 +694,9 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId      = 0x1000500,    /**< A background colour to fill the component with. */
-        linesColourId           = 0x1000501     /**< The colour to draw the lines with.*/
+        backgroundColourId            = 0x1000500, /**< A background colour to fill the component with. */
+        linesColourId                 = 0x1000501, /**< The colour to draw the lines with.*/
+        dragAndDropIndicatorColourId  = 0x1000502  /**< The colour to use for the drag-and-drop target position indicator. */
     };
 
     //==============================================================================
@@ -620,6 +710,26 @@ public:
     void colourChanged();
     /** @internal */
     void enablementChanged();
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void fileDragEnter (const StringArray& files, int x, int y);
+    /** @internal */
+    void fileDragMove (const StringArray& files, int x, int y);
+    /** @internal */
+    void fileDragExit (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int x, int y);
+    /** @internal */
+    bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+    /** @internal */
+    void itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    /** @internal */
+    void itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    /** @internal */
+    void itemDragExit (const String& sourceDescription, Component* sourceComponent);
+    /** @internal */
+    void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
 
     juce_UseDebuggingNewOperator
 
@@ -629,6 +739,8 @@ private:
     Viewport* viewport;
     CriticalSection nodeAlterationLock;
     TreeViewItem* rootItem;
+    Component* dragInsertPointHighlight;
+    Component* dragTargetGroupHighlight;
     int indentSize;
     bool defaultOpenness : 1;
     bool needsRecalculating : 1;
@@ -640,6 +752,13 @@ private:
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
     void updateButtonUnderMouse (const MouseEvent& e);
+    void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) throw();
+    void hideDragHighlight() throw();
+    void handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+    TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
+                                     const StringArray& files, const String& sourceDescription,
+                                     Component* sourceComponent) const throw();
 
     TreeView (const TreeView&);
     const TreeView& operator= (const TreeView&);

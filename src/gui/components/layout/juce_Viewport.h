@@ -104,6 +104,23 @@ public:
     void setViewPositionProportionately (const double proportionX,
                                          const double proportionY);
 
+    /** If the specified position is at the edges of the viewport, this method scrolls
+        the viewport to bring that position nearer to the centre.
+
+        Call this if you're dragging an object inside a viewport and want to make it scroll
+        when the user approaches an edge. You might also find Component::beginDragAutoRepeat()
+        useful when auto-scrolling.
+
+        @param mouseX       the x position, relative to the Viewport's top-left
+        @param mouseY       the y position, relative to the Viewport's top-left
+        @param distanceFromEdge     specifies how close to an edge the position needs to be
+                            before the viewport should scroll in that direction
+        @param maximumSpeed the maximum number of pixels that the viewport is allowed
+                            to scroll by.
+        @returns            true if the viewport was scrolled
+    */
+    bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
+
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition
     */

@@ -147,7 +147,8 @@ public:
                         Image* dragImage = Component::createComponentSnapshot (pos, true);
                         dragImage->multiplyAllAlphas (0.6f);
 
-                        dragContainer->startDragging (dragDescription, owner, dragImage, true);
+                        Point imageOffset ((float) (pos.getX() - e.x), (float) (pos.getY() - e.y));
+                        dragContainer->startDragging (dragDescription, owner, dragImage, true, &imageOffset);
                     }
                     else
                     {
@@ -403,6 +404,8 @@ private:
 TreeView::TreeView (const String& componentName)
     : Component (componentName),
       rootItem (0),
+      dragInsertPointHighlight (0),
+      dragTargetGroupHighlight (0),
       indentSize (24),
       defaultOpenness (false),
       needsRecalculating (true),
@@ -550,6 +553,15 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
     return 0;
 }
 
+TreeViewItem* TreeView::getItemAt (int y) const throw()
+{
+    TreeViewContentComponent* const tc = (TreeViewContentComponent*) viewport->getViewedComponent();
+    int x;
+    relativePositionToOtherComponent (tc, x, y);
+    Rectangle pos;
+    return tc->findItemAt (y, pos);
+}
+
 //==============================================================================
 XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
 {
@@ -557,7 +569,7 @@ XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) co
 
     if (rootItem != 0)
     {
-        e = rootItem->createXmlOpenness();
+        e = rootItem->getOpennessState();
 
         if (e != 0 && alsoIncludeScrollPosition)
             e->setAttribute (T("scrollPos"), viewport->getViewPositionY());
@@ -570,7 +582,7 @@ void TreeView::restoreOpennessState (const XmlElement& newState)
 {
     if (rootItem != 0)
     {
-        rootItem->restoreFromXml (newState);
+        rootItem->restoreOpennessState (newState);
 
         if (newState.hasAttribute (T("scrollPos")))
             viewport->setViewPosition (viewport->getViewPositionX(),
@@ -780,6 +792,245 @@ void TreeView::handleAsyncUpdate()
     }
 }
 
+//==============================================================================
+class TreeViewDragInsertPointHighlight : public Component
+{
+public:
+    TreeViewDragInsertPointHighlight()
+        : lastItem (0)
+    {
+        setSize (100, 12);
+        setAlwaysOnTop (true);
+        setInterceptsMouseClicks (false, false);
+    }
+
+    ~TreeViewDragInsertPointHighlight() {}
+
+    void setTargetPosition (TreeViewItem* const item, int insertIndex, const int x, const int y, const int width) throw()
+    {
+        lastItem = item;
+        lastIndex = insertIndex;
+        const int offset = getHeight() / 2;
+        setBounds (x - offset, y - offset, width - (x - offset), getHeight());
+    }
+
+    void paint (Graphics& g)
+    {
+        Path p;
+        const float h = (float) getHeight();
+        p.addEllipse (2.0f, 2.0f, h - 4.0f, h - 4.0f);
+        p.startNewSubPath (h - 2.0f, h / 2.0f);
+        p.lineTo ((float) getWidth(), h / 2.0f);
+
+        g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
+        g.strokePath (p, PathStrokeType (2.0f));
+    }
+
+    TreeViewItem* lastItem;
+    int lastIndex;
+};
+
+class TreeViewDragTargetGroupHighlight : public Component
+{
+public:
+    TreeViewDragTargetGroupHighlight()
+    {
+        setAlwaysOnTop (true);
+        setInterceptsMouseClicks (false, false);
+    }
+
+    ~TreeViewDragTargetGroupHighlight() {}
+
+    void setTargetPosition (TreeViewItem* const item) throw()
+    {
+        Rectangle r (item->getItemPosition (true));
+        r.setHeight (item->getItemHeight());
+        setBounds (r);
+    }
+
+    void paint (Graphics& g)
+    {
+        g.setColour (findColour (TreeView::dragAndDropIndicatorColourId, true));
+        g.drawRoundedRectangle (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 3.0f, 2.0f);
+    }
+};
+
+//==============================================================================
+void TreeView::showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) throw()
+{
+    beginDragAutoRepeat (1000 / 30);
+
+    if (dragInsertPointHighlight == 0)
+    {
+        addAndMakeVisible (dragInsertPointHighlight = new TreeViewDragInsertPointHighlight());
+        addAndMakeVisible (dragTargetGroupHighlight = new TreeViewDragTargetGroupHighlight());
+    }
+
+    ((TreeViewDragInsertPointHighlight*) dragInsertPointHighlight)
+        ->setTargetPosition (item, insertIndex, x, y, viewport->getViewWidth());
+
+    ((TreeViewDragTargetGroupHighlight*) dragTargetGroupHighlight)
+        ->setTargetPosition (item);
+}
+
+void TreeView::hideDragHighlight() throw()
+{
+    deleteAndZero (dragInsertPointHighlight);
+    deleteAndZero (dragTargetGroupHighlight);
+}
+
+TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
+                                           const StringArray& files, const String& sourceDescription,
+                                           Component* sourceComponent) const throw()
+{
+    insertIndex = 0;
+    TreeViewItem* item = getItemAt (y);
+
+    if (item == 0 || item->parentItem == 0)
+        return 0;
+
+    Rectangle itemPos (item->getItemPosition (true));
+    insertIndex = item->getIndexInParent();
+    const int oldY = y;
+    y = itemPos.getY();
+
+    if (item->getNumSubItems() == 0 || ! item->isOpen())
+    {
+        if (files.size() > 0 ? item->isInterestedInFileDrag (files)
+                             : item->isInterestedInDragSource (sourceDescription, sourceComponent))
+        {
+            // Check if we're trying to drag into an empty group item..
+            if (oldY > itemPos.getY() + itemPos.getHeight() / 4
+                 && oldY < itemPos.getBottom() - itemPos.getHeight() / 4)
+            {
+                insertIndex = 0;
+                x = itemPos.getX() + getIndentSize();
+                y = itemPos.getBottom();
+                return item;
+            }
+        }
+    }
+
+    if (oldY > itemPos.getCentreY())
+    {
+        y += item->getItemHeight();
+
+        while (item->isLastOfSiblings() && item->parentItem != 0
+                && item->parentItem->parentItem != 0)
+        {
+            if (x > itemPos.getX())
+                break;
+
+            item = item->parentItem;
+            itemPos = item->getItemPosition (true);
+            insertIndex = item->getIndexInParent();
+        }
+
+        ++insertIndex;
+    }
+
+    x = itemPos.getX();
+    return item->parentItem;
+}
+
+void TreeView::handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y)
+{
+    const bool scrolled = viewport->autoScroll (x, y, 20, 10);
+
+    int insertIndex;
+    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, sourceDescription, sourceComponent);
+
+    if (item != 0)
+    {
+        if (scrolled || dragInsertPointHighlight == 0
+             || ((TreeViewDragInsertPointHighlight*) dragInsertPointHighlight)->lastItem != item
+             || ((TreeViewDragInsertPointHighlight*) dragInsertPointHighlight)->lastIndex != insertIndex)
+        {
+            if (files.size() > 0 ? item->isInterestedInFileDrag (files)
+                                 : item->isInterestedInDragSource (sourceDescription, sourceComponent))
+                showDragHighlight (item, insertIndex, x, y);
+            else
+                hideDragHighlight();
+        }
+    }
+    else
+    {
+        hideDragHighlight();
+    }
+}
+
+void TreeView::handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y)
+{
+    hideDragHighlight();
+
+    int insertIndex;
+    TreeViewItem* const item = getInsertPosition (x, y, insertIndex, files, sourceDescription, sourceComponent);
+
+    if (item != 0)
+    {
+        if (files.size() > 0)
+        {
+            if (item->isInterestedInFileDrag (files))
+                item->filesDropped (files, insertIndex);
+        }
+        else
+        {
+            if (item->isInterestedInDragSource (sourceDescription, sourceComponent))
+                item->itemDropped (sourceDescription, sourceComponent, insertIndex);
+        }
+    }
+}
+
+//==============================================================================
+bool TreeView::isInterestedInFileDrag (const StringArray& files)
+{
+    return true;
+}
+
+void TreeView::fileDragEnter (const StringArray& files, int x, int y)
+{
+    fileDragMove (files, x, y);
+}
+
+void TreeView::fileDragMove (const StringArray& files, int x, int y)
+{
+    handleDrag (files, String::empty, 0, x, y);
+}
+
+void TreeView::fileDragExit (const StringArray& files)
+{
+    hideDragHighlight();
+}
+
+void TreeView::filesDropped (const StringArray& files, int x, int y)
+{
+    handleDrop (files, String::empty, 0, x, y);
+}
+
+bool TreeView::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+{
+    return true;
+}
+
+void TreeView::itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y)
+{
+    itemDragMove (sourceDescription, sourceComponent, x, y);
+}
+
+void TreeView::itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y)
+{
+    handleDrag (StringArray(), sourceDescription, sourceComponent, x, y);
+}
+
+void TreeView::itemDragExit (const String& sourceDescription, Component* sourceComponent)
+{
+    hideDragHighlight();
+}
+
+void TreeView::itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y)
+{
+    handleDrop (StringArray(), sourceDescription, sourceComponent, x, y);
+}
 
 //==============================================================================
 void TreeViewContentComponent::paint (Graphics& g)
@@ -1010,6 +1261,24 @@ const String TreeViewItem::getDragSourceDescription()
     return String::empty;
 }
 
+bool TreeViewItem::isInterestedInFileDrag (const StringArray& files)
+{
+    return false;
+}
+
+void TreeViewItem::filesDropped (const StringArray& files, int insertIndex)
+{
+}
+
+bool TreeViewItem::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+{
+    return false;
+}
+
+void TreeViewItem::itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex)
+{
+}
+
 const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLeft) const throw()
 {
     const int indentX = getIndentX();
@@ -1236,6 +1505,14 @@ bool TreeViewItem::isLastOfSiblings() const throw()
         || parentItem->subItems.getLast() == this;
 }
 
+int TreeViewItem::getIndexInParent() const throw()
+{
+    if (parentItem == 0)
+        return 0;
+
+    return parentItem->subItems.indexOf (this);
+}
+
 TreeViewItem* TreeViewItem::getTopLevelItem() throw()
 {
     return (parentItem == 0) ? this
@@ -1300,7 +1577,7 @@ TreeViewItem* TreeViewItem::findItemRecursively (int y) throw()
             {
                 TreeViewItem* const ti = subItems.getUnchecked(i);
 
-                if (ti->totalHeight >= y)
+                if (y < ti->totalHeight)
                     return ti->findItemRecursively (y);
 
                 y -= ti->totalHeight;
@@ -1399,7 +1676,7 @@ TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const throw(
     return 0;
 }
 
-void TreeViewItem::restoreFromXml (const XmlElement& e)
+void TreeViewItem::restoreOpennessState (const XmlElement& e) throw()
 {
     if (e.hasTagName (T("CLOSED")))
     {
@@ -1419,7 +1696,7 @@ void TreeViewItem::restoreFromXml (const XmlElement& e)
 
                 if (ti->getUniqueName() == id)
                 {
-                    ti->restoreFromXml (*n);
+                    ti->restoreOpennessState (*n);
                     break;
                 }
             }
@@ -1427,38 +1704,35 @@ void TreeViewItem::restoreFromXml (const XmlElement& e)
     }
 }
 
-XmlElement* TreeViewItem::createXmlOpenness() const
+XmlElement* TreeViewItem::getOpennessState() const throw()
 {
-    if (openness != opennessDefault)
+    const String name (getUniqueName());
+
+    if (name.isNotEmpty())
     {
-        const String name (getUniqueName());
+        XmlElement* e;
 
-        if (name.isNotEmpty())
+        if (isOpen())
         {
-            XmlElement* e;
+            e = new XmlElement (T("OPEN"));
 
-            if (isOpen())
-            {
-                e = new XmlElement (T("OPEN"));
-
-                for (int i = 0; i < subItems.size(); ++i)
-                    e->addChildElement (subItems.getUnchecked(i)->createXmlOpenness());
-            }
-            else
-            {
-                e = new XmlElement (T("CLOSED"));
-            }
-
-            e->setAttribute (T("id"), name);
-
-            return e;
+            for (int i = 0; i < subItems.size(); ++i)
+                e->addChildElement (subItems.getUnchecked(i)->getOpennessState());
         }
         else
         {
-            // trying to save the openness for an element that has no name - this won't
-            // work because it needs the names to identify what to open.
-            jassertfalse
+            e = new XmlElement (T("CLOSED"));
         }
+
+        e->setAttribute (T("id"), name);
+
+        return e;
+    }
+    else
+    {
+        // trying to save the openness for an element that has no name - this won't
+        // work because it needs the names to identify what to open.
+        jassertfalse
     }
 
     return 0;

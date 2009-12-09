@@ -55,7 +55,7 @@ private:
     ComponentDeletionWatcher* currentlyOverWatcher;
 
     String dragDesc;
-    int xOff, yOff;
+    const int imageX, imageY;
     bool hasCheckedForExternalDrag, drawImage;
 
     DragImageComponent (const DragImageComponent&);
@@ -65,13 +65,16 @@ public:
     DragImageComponent (Image* const im,
                         const String& desc,
                         Component* const s,
-                        DragAndDropContainer* const o)
+                        DragAndDropContainer* const o,
+                        const int imageX_, const int imageY_)
         : image (im),
           source (s),
           owner (o),
           currentlyOver (0),
           currentlyOverWatcher (0),
           dragDesc (desc),
+          imageX (imageX_),
+          imageY (imageY_),
           hasCheckedForExternalDrag (false),
           drawImage (true)
     {
@@ -86,13 +89,6 @@ public:
 
         mouseDragSourceWatcher = new ComponentDeletionWatcher (mouseDragSource);
         mouseDragSource->addMouseListener (this, false);
-
-        int mx, my;
-        Desktop::getLastMouseDownPosition (mx, my);
-        source->globalPositionToRelative (mx, my);
-
-        xOff = jlimit (0, im->getWidth(), mx);
-        yOff = jlimit (0, im->getHeight(), my);
 
         startTimer (200);
 
@@ -240,13 +236,13 @@ public:
         // a modal loop and deletes this object before it returns)
         const String dragDescLocal (dragDesc);
 
-        int newX = x - xOff;
-        int newY = y - yOff;
+        int newX = x + imageX;
+        int newY = y + imageY;
 
         if (getParentComponent() != 0)
             getParentComponent()->globalPositionToRelative (newX, newY);
 
-        if (newX != getX() || newY != getY())
+        //if (newX != getX() || newY != getY())
         {
             setTopLeftPosition (newX, newY);
 
@@ -351,19 +347,18 @@ DragAndDropContainer::DragAndDropContainer()
 
 DragAndDropContainer::~DragAndDropContainer()
 {
-    if (dragImageComponent != 0)
-        delete dragImageComponent;
+    delete dragImageComponent;
 }
 
 void DragAndDropContainer::startDragging (const String& sourceDescription,
                                           Component* sourceComponent,
                                           Image* im,
-                                          const bool allowDraggingToExternalWindows)
+                                          const bool allowDraggingToExternalWindows,
+                                          const Point* imageOffsetFromMouse)
 {
     if (dragImageComponent != 0)
     {
-        if (im != 0)
-            delete im;
+        delete im;
     }
     else
     {
@@ -373,6 +368,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         {
             int mx, my;
             Desktop::getLastMouseDownPosition (mx, my);
+            int imageX = 0, imageY = 0;
 
             if (im == 0)
             {
@@ -417,13 +413,27 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                         }
                     }
                 }
+
+                imageX = -cx;
+                imageY = -cy;
+            }
+            else
+            {
+                if (imageOffsetFromMouse == 0)
+                {
+                    imageX = im->getWidth() / -2;
+                    imageY = im->getHeight() / -2;
+                }
+                else
+                {
+                    imageX = (int) imageOffsetFromMouse->getX();
+                    imageY = (int) imageOffsetFromMouse->getY();
+                }
             }
 
             DragImageComponent* const dic
-                = new DragImageComponent (im,
-                                          sourceDescription,
-                                          sourceComponent,
-                                          this);
+                = new DragImageComponent (im, sourceDescription, sourceComponent,
+                                          this, imageX, imageY);
 
             dragImageComponent = dic;
             currentDragDesc = sourceDescription;
@@ -449,8 +459,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             // is also a Component.
             jassertfalse
 
-            if (im != 0)
-                delete im;
+            delete im;
         }
     }
 }

@@ -31567,6 +31567,23 @@ public:
     void setViewPositionProportionately (const double proportionX,
                                          const double proportionY);
 
+    /** If the specified position is at the edges of the viewport, this method scrolls
+        the viewport to bring that position nearer to the centre.
+
+        Call this if you're dragging an object inside a viewport and want to make it scroll
+        when the user approaches an edge. You might also find Component::beginDragAutoRepeat()
+        useful when auto-scrolling.
+
+        @param mouseX       the x position, relative to the Viewport's top-left
+        @param mouseY       the y position, relative to the Viewport's top-left
+        @param distanceFromEdge     specifies how close to an edge the position needs to be
+                            before the viewport should scroll in that direction
+        @param maximumSpeed the maximum number of pixels that the viewport is allowed
+                            to scroll by.
+        @returns            true if the viewport was scrolled
+    */
+    bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
+
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition
     */
@@ -42491,11 +42508,16 @@ public:
         @param allowDraggingToOtherJuceWindows   if true, the dragged component will appear as a desktop
                                     window, and can be dragged to DragAndDropTargets that are the
                                     children of components other than this one.
+        @param imageOffsetFromMouse if an image has been passed-in, this specifies the offset
+                                    at which the image should be drawn from the mouse. If it isn't
+                                    specified, then the image will be centred around the mouse. If
+                                    an image hasn't been passed-in, this will be ignored.
     */
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
                         Image* dragImage = 0,
-                        const bool allowDraggingToOtherJuceWindows = false);
+                        const bool allowDraggingToOtherJuceWindows = false,
+                        const Point* imageOffsetFromMouse = 0);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
@@ -43549,6 +43571,88 @@ private:
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
 #define __JUCE_TREEVIEW_JUCEHEADER__
 
+/********* Start of inlined file: juce_FileDragAndDropTarget.h *********/
+#ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+#define __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+
+/**
+    Components derived from this class can have files dropped onto them by an external application.
+
+    @see DragAndDropContainer
+*/
+class JUCE_API  FileDragAndDropTarget
+{
+public:
+    /** Destructor. */
+    virtual ~FileDragAndDropTarget()  {}
+
+    /** Callback to check whether this target is interested in the set of files being offered.
+
+        Note that this will be called repeatedly when the user is dragging the mouse around over your
+        component, so don't do anything time-consuming in here, like opening the files to have a look
+        inside them!
+
+        @param files        the set of (absolute) pathnames of the files that the user is dragging
+        @returns            true if this component wants to receive the other callbacks regarging this
+                            type of object; if it returns false, no other callbacks will be made.
+    */
+    virtual bool isInterestedInFileDrag (const StringArray& files) = 0;
+
+    /** Callback to indicate that some files are being dragged over this component.
+
+        This gets called when the user moves the mouse into this component while dragging.
+
+        Use this callback as a trigger to make your component repaint itself to give the
+        user feedback about whether the files can be dropped here or not.
+
+        @param files        the set of (absolute) pathnames of the files that the user is dragging
+        @param x            the mouse x position, relative to this component
+        @param y            the mouse y position, relative to this component
+    */
+    virtual void fileDragEnter (const StringArray& files, int x, int y);
+
+    /** Callback to indicate that the user is dragging some files over this component.
+
+        This gets called when the user moves the mouse over this component while dragging.
+        Normally overriding itemDragEnter() and itemDragExit() are enough, but
+        this lets you know what happens in-between.
+
+        @param files        the set of (absolute) pathnames of the files that the user is dragging
+        @param x            the mouse x position, relative to this component
+        @param y            the mouse y position, relative to this component
+    */
+    virtual void fileDragMove (const StringArray& files, int x, int y);
+
+    /** Callback to indicate that the mouse has moved away from this component.
+
+        This gets called when the user moves the mouse out of this component while dragging
+        the files.
+
+        If you've used fileDragEnter() to repaint your component and give feedback, use this
+        as a signal to repaint it in its normal state.
+
+        @param files        the set of (absolute) pathnames of the files that the user is dragging
+    */
+    virtual void fileDragExit (const StringArray& files);
+
+    /** Callback to indicate that the user has dropped the files onto this component.
+
+        When the user drops the files, this get called, and you can use the files in whatever
+        way is appropriate.
+
+        Note that after this is called, the fileDragExit method may not be called, so you should
+        clean up in here if there's anything you need to do when the drag finishes.
+
+        @param files        the set of (absolute) pathnames of the files that the user is dragging
+        @param x            the mouse x position, relative to this component
+        @param y            the mouse y position, relative to this component
+    */
+    virtual void filesDropped (const StringArray& files, int x, int y) = 0;
+};
+
+#endif   // __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
+/********* End of inlined file: juce_FileDragAndDropTarget.h *********/
+
 class TreeView;
 
 /**
@@ -43860,9 +43964,51 @@ public:
         If you need more complex drag-and-drop behaviour, you can use custom components for
         the items, and use those to trigger the drag.
 
+        To accept drag-and-drop in your tree, see isInterestedInDragSource(),
+        isInterestedInFileDrag(), etc.
+
         @see DragAndDropContainer::startDragging
     */
     virtual const String getDragSourceDescription();
+
+    /** If you want your item to be able to have files drag-and-dropped onto it, implement this
+        method and return true.
+
+        If you return true and allow some files to be dropped, you'll also need to implement the
+        filesDropped() method to do something with them.
+
+        Note that this will be called often, so make your implementation very quick! There's
+        certainly no time to try opening the files and having a think about what's inside them!
+
+        For responding to internal drag-and-drop of other types of object, see isInterestedInDragSource().
+        @see FileDragAndDropTarget::isInterestedInFileDrag, isInterestedInDragSource
+    */
+    virtual bool isInterestedInFileDrag (const StringArray& files);
+
+    /** When files are dropped into this item, this callback is invoked.
+
+        For this to work, you'll need to have also implemented isInterestedInFileDrag().
+        The insertIndex value indicates where in the list of sub-items the files were dropped.
+        @see FileDragAndDropTarget::filesDropped, isInterestedInFileDrag
+    */
+    virtual void filesDropped (const StringArray& files, int insertIndex);
+
+    /** If you want your item to act as a DragAndDropTarget, implement this method and return true.
+
+        If you implement this method, you'll also need to implement itemDropped() in order to handle
+        the items when they are dropped.
+        To respond to drag-and-drop of files from external applications, see isInterestedInFileDrag().
+        @see DragAndDropTarget::isInterestedInDragSource, itemDropped
+    */
+    virtual bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+
+    /** When a things are dropped into this item, this callback is invoked.
+
+        For this to work, you need to have also implemented isInterestedInDragSource().
+        The insertIndex value indicates where in the list of sub-items the new items should be placed.
+        @see isInterestedInDragSource, DragAndDropTarget::itemDropped
+    */
+    virtual void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex);
 
     /** Sets a flag to indicate that the item wants to be allowed
         to draw all the way across to the left edge of the treeview.
@@ -43878,6 +44024,42 @@ public:
         highlighted item.
     */
     void setDrawsInLeftMargin (bool canDrawInLeftMargin) throw();
+
+    /** Saves the current state of open/closed nodes so it can be restored later.
+
+        This takes a snapshot of which sub-nodes have been explicitly opened or closed,
+        and records it as XML. To identify node objects it uses the
+        TreeViewItem::getUniqueName() method to create named paths. This
+        means that the same state of open/closed nodes can be restored to a
+        completely different instance of the tree, as long as it contains nodes
+        whose unique names are the same.
+
+        You'd normally want to use TreeView::getOpennessState() rather than call it
+        for a specific item, but this can be handy if you need to briefly save the state
+        for a section of the tree.
+
+        The caller is responsible for deleting the object that is returned.
+        @see TreeView::getOpennessState, restoreOpennessState
+    */
+    XmlElement* getOpennessState() const throw();
+
+    /** Restores the openness of this item and all its sub-items from a saved state.
+
+        See TreeView::restoreOpennessState for more details.
+
+        You'd normally want to use TreeView::restoreOpennessState() rather than call it
+        for a specific item, but this can be handy if you need to briefly save the state
+        for a section of the tree.
+
+        @see TreeView::restoreOpennessState, getOpennessState
+    */
+    void restoreOpennessState (const XmlElement& xml) throw();
+
+    /** Returns the index of this item in its parent's sub-items. */
+    int getIndexInParent() const throw();
+
+    /** Returns true if this item is the last of its parent's sub-itens. */
+    bool isLastOfSiblings() const throw();
 
     juce_UseDebuggingNewOperator
 
@@ -43900,12 +44082,9 @@ private:
     int getIndentX() const throw();
     void setOwnerView (TreeView* const newOwner) throw();
     void paintRecursively (Graphics& g, int width);
+    TreeViewItem* getTopLevelItem() throw();
     TreeViewItem* findItemRecursively (int y) throw();
     TreeViewItem* getDeepestOpenParentItem() throw();
-    void restoreFromXml (const XmlElement& e);
-    XmlElement* createXmlOpenness() const;
-    bool isLastOfSiblings() const throw();
-    TreeViewItem* getTopLevelItem() throw();
     int getNumRows() const throw();
     TreeViewItem* getItemOnRow (int index) throw();
     void deselectAllRecursively();
@@ -43925,6 +44104,8 @@ private:
 */
 class JUCE_API  TreeView  : public Component,
                             public SettableTooltipClient,
+                            public FileDragAndDropTarget,
+                            public DragAndDropTarget,
                             private AsyncUpdater
 {
 public:
@@ -44057,6 +44238,11 @@ public:
     */
     TreeViewItem* getItemOnRow (int index) const;
 
+    /** Returns the item that contains a given y position.
+        The y is relative to the top of the TreeView component.
+    */
+    TreeViewItem* getItemAt (int yPosition) const throw();
+
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
     void scrollToKeepItemVisible (TreeViewItem* item);
 
@@ -44111,8 +44297,9 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId      = 0x1000500,    /**< A background colour to fill the component with. */
-        linesColourId           = 0x1000501     /**< The colour to draw the lines with.*/
+        backgroundColourId            = 0x1000500, /**< A background colour to fill the component with. */
+        linesColourId                 = 0x1000501, /**< The colour to draw the lines with.*/
+        dragAndDropIndicatorColourId  = 0x1000502  /**< The colour to use for the drag-and-drop target position indicator. */
     };
 
     /** @internal */
@@ -44125,6 +44312,26 @@ public:
     void colourChanged();
     /** @internal */
     void enablementChanged();
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void fileDragEnter (const StringArray& files, int x, int y);
+    /** @internal */
+    void fileDragMove (const StringArray& files, int x, int y);
+    /** @internal */
+    void fileDragExit (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int x, int y);
+    /** @internal */
+    bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent);
+    /** @internal */
+    void itemDragEnter (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    /** @internal */
+    void itemDragMove (const String& sourceDescription, Component* sourceComponent, int x, int y);
+    /** @internal */
+    void itemDragExit (const String& sourceDescription, Component* sourceComponent);
+    /** @internal */
+    void itemDropped (const String& sourceDescription, Component* sourceComponent, int x, int y);
 
     juce_UseDebuggingNewOperator
 
@@ -44134,6 +44341,8 @@ private:
     Viewport* viewport;
     CriticalSection nodeAlterationLock;
     TreeViewItem* rootItem;
+    Component* dragInsertPointHighlight;
+    Component* dragTargetGroupHighlight;
     int indentSize;
     bool defaultOpenness : 1;
     bool needsRecalculating : 1;
@@ -44145,6 +44354,13 @@ private:
     void handleAsyncUpdate();
     void moveSelectedRow (int delta);
     void updateButtonUnderMouse (const MouseEvent& e);
+    void showDragHighlight (TreeViewItem* item, int insertIndex, int x, int y) throw();
+    void hideDragHighlight() throw();
+    void handleDrag (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+    void handleDrop (const StringArray& files, const String& sourceDescription, Component* sourceComponent, int x, int y);
+    TreeViewItem* getInsertPosition (int& x, int& y, int& insertIndex,
+                                     const StringArray& files, const String& sourceDescription,
+                                     Component* sourceComponent) const throw();
 
     TreeView (const TreeView&);
     const TreeView& operator= (const TreeView&);
@@ -45489,88 +45705,6 @@ private:
 
 #endif
 #ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileDragAndDropTarget.h *********/
-#ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-#define __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-
-/**
-    Components derived from this class can have files dropped onto them by an external application.
-
-    @see DragAndDropContainer
-*/
-class JUCE_API  FileDragAndDropTarget
-{
-public:
-    /** Destructor. */
-    virtual ~FileDragAndDropTarget()  {}
-
-    /** Callback to check whether this target is interested in the set of files being offered.
-
-        Note that this will be called repeatedly when the user is dragging the mouse around over your
-        component, so don't do anything time-consuming in here, like opening the files to have a look
-        inside them!
-
-        @param files        the set of (absolute) pathnames of the files that the user is dragging
-        @returns            true if this component wants to receive the other callbacks regarging this
-                            type of object; if it returns false, no other callbacks will be made.
-    */
-    virtual bool isInterestedInFileDrag (const StringArray& files) = 0;
-
-    /** Callback to indicate that some files are being dragged over this component.
-
-        This gets called when the user moves the mouse into this component while dragging.
-
-        Use this callback as a trigger to make your component repaint itself to give the
-        user feedback about whether the files can be dropped here or not.
-
-        @param files        the set of (absolute) pathnames of the files that the user is dragging
-        @param x            the mouse x position, relative to this component
-        @param y            the mouse y position, relative to this component
-    */
-    virtual void fileDragEnter (const StringArray& files, int x, int y);
-
-    /** Callback to indicate that the user is dragging some files over this component.
-
-        This gets called when the user moves the mouse over this component while dragging.
-        Normally overriding itemDragEnter() and itemDragExit() are enough, but
-        this lets you know what happens in-between.
-
-        @param files        the set of (absolute) pathnames of the files that the user is dragging
-        @param x            the mouse x position, relative to this component
-        @param y            the mouse y position, relative to this component
-    */
-    virtual void fileDragMove (const StringArray& files, int x, int y);
-
-    /** Callback to indicate that the mouse has moved away from this component.
-
-        This gets called when the user moves the mouse out of this component while dragging
-        the files.
-
-        If you've used fileDragEnter() to repaint your component and give feedback, use this
-        as a signal to repaint it in its normal state.
-
-        @param files        the set of (absolute) pathnames of the files that the user is dragging
-    */
-    virtual void fileDragExit (const StringArray& files);
-
-    /** Callback to indicate that the user has dropped the files onto this component.
-
-        When the user drops the files, this get called, and you can use the files in whatever
-        way is appropriate.
-
-        Note that after this is called, the fileDragExit method may not be called, so you should
-        clean up in here if there's anything you need to do when the drag finishes.
-
-        @param files        the set of (absolute) pathnames of the files that the user is dragging
-        @param x            the mouse x position, relative to this component
-        @param y            the mouse y position, relative to this component
-    */
-    virtual void filesDropped (const StringArray& files, int x, int y) = 0;
-};
-
-#endif   // __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-/********* End of inlined file: juce_FileDragAndDropTarget.h *********/
 
 #endif
 #ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__

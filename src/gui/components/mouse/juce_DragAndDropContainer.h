@@ -85,11 +85,16 @@ public:
         @param allowDraggingToOtherJuceWindows   if true, the dragged component will appear as a desktop
                                     window, and can be dragged to DragAndDropTargets that are the
                                     children of components other than this one.
+        @param imageOffsetFromMouse if an image has been passed-in, this specifies the offset
+                                    at which the image should be drawn from the mouse. If it isn't
+                                    specified, then the image will be centred around the mouse. If
+                                    an image hasn't been passed-in, this will be ignored.
     */
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
                         Image* dragImage = 0,
-                        const bool allowDraggingToOtherJuceWindows = false);
+                        const bool allowDraggingToOtherJuceWindows = false,
+                        const Point* imageOffsetFromMouse = 0);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
