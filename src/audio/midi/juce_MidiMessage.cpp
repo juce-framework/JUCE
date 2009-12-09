@@ -304,10 +304,10 @@ void MidiMessage::setChannel (const int channel) throw()
                             | (uint8)(channel - 1));
 }
 
-bool MidiMessage::isNoteOn() const throw()
+bool MidiMessage::isNoteOn (const bool returnTrueForVelocity0) const throw()
 {
     return ((data[0] & 0xf0) == 0x90)
-             && (data[2] != 0);
+             && (returnTrueForVelocity0 || data[2] != 0);
 }
 
 bool MidiMessage::isNoteOff() const throw()

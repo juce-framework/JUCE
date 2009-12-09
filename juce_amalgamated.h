@@ -25817,11 +25817,15 @@ public:
 
     /** Returns true if this message is a 'key-down' event.
 
-        This will return false for a note-on event with a velocity of 0.
+        @param returnTrueForVelocity0   if true, then if this event is a note-on with
+                        velocity 0, it will still be considered to be a note-on and the
+                        method will return true. If returnTrueForVelocity0 is false, then
+                        if this is a note-on event with velocity 0, it'll be regarded as
+                        a note-off, and the method will return false
 
         @see isNoteOff, getNoteNumber, getVelocity, noteOn
     */
-    bool isNoteOn() const throw();
+    bool isNoteOn (const bool returnTrueForVelocity0 = false) const throw();
 
     /** Creates a key-down message (using a floating-point velocity).
 
