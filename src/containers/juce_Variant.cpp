@@ -300,6 +300,56 @@ bool var::operator!= (const var& other) const throw()
     return ! operator== (other);
 }
 
+void var::writeToStream (OutputStream& output) const throw()
+{
+    switch (type)
+    {
+        case voidType:      output.writeCompressedInt (0); break;
+        case intType:       output.writeCompressedInt (5); output.writeByte (1); output.writeInt (value.intValue); break;
+        case boolType:      output.writeCompressedInt (1); output.writeByte (value.boolValue ? 2 : 3); break;
+        case doubleType:    output.writeCompressedInt (9); output.writeByte (4); output.writeDouble (value.doubleValue); break;
+        case stringType:
+        {
+            const int len = value.stringValue->copyToUTF8 (0, -1);
+            output.writeCompressedInt (len + 1);
+            output.writeByte (5);
+            uint8* const temp = (uint8*) juce_malloc (len);
+            value.stringValue->copyToUTF8 (temp);
+            output.write (temp, len);
+            juce_free (temp);
+            break;
+        }
+        case objectType:    output.writeCompressedInt (0); jassertfalse; break; // Can't write an object to a stream!
+        default:            jassertfalse; break; // Is this a corrupted object?
+    }
+}
+
+const var var::readFromStream (InputStream& input) throw()
+{
+    const int numBytes = input.readCompressedInt();
+
+    if (numBytes > 0)
+    {
+        switch (input.readByte())
+        {
+            case 1:     return var (input.readInt());
+            case 2:     return var (true);
+            case 3:     return var (false);
+            case 4:     return var (input.readDouble());
+            case 5:
+            {
+                MemoryBlock mb;
+                input.readIntoMemoryBlock (mb, numBytes - 1);
+                return var (String::fromUTF8 ((const uint8*) mb.getData(), mb.getSize()));
+            }
+
+            default:    input.skipNextBytes (numBytes - 1); break;
+        }
+    }
+
+    return var();
+}
+
 const var var::operator[] (const var::identifier& propertyName) const throw()
 {
     if (type == objectType && value.objectValue != 0)

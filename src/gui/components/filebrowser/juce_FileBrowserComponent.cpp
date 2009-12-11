@@ -192,9 +192,6 @@ bool FileBrowserComponent::currentFileIsValid() const
         return ! getSelectedFile (0).isDirectory();
     else
         return getSelectedFile (0).exists();
-
-    jassertfalse
-    return false;
 }
 
 const File FileBrowserComponent::getHighlightedFile() const throw()

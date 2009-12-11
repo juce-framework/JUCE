@@ -11992,6 +11992,17 @@ public:
     bool operator== (const var& other) const throw();
     bool operator!= (const var& other) const throw();
 
+    /** Writes a binary representation of this value to a stream.
+        The data can be read back later using readFromStream().
+    */
+    void writeToStream (OutputStream& output) const throw();
+
+    /** Reads back a stored binary representation of a value.
+        The data in the stream must have been written using writeToStream(), or this
+        will have unpredictable results.
+    */
+    static const var readFromStream (InputStream& input) throw();
+
     class JUCE_API  identifier
     {
     public:

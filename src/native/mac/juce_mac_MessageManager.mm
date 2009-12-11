@@ -296,7 +296,23 @@ void MessageManager::runDispatchLoop()
         // must only be called by the message thread!
         jassert (isThisTheMessageThread());
 
+#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
+        @try
+        {
+            [NSApp run];
+        }
+        @catch (NSException* e)
+        {
+            // An AppKit exception will kill the app, but at least this provides a chance to log it.,
+            std::runtime_error ex (std::string ("NSException: ") + [[e name] UTF8String] + ", Reason:" + [[e reason] UTF8String]);
+            JUCEApplication::sendUnhandledException (&ex, __FILE__, __LINE__);
+        }
+        @finally
+        {
+        }
+#else
         [NSApp run];
+#endif
     }
 }
 

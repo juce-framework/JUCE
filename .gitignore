@@ -15,6 +15,9 @@
 *.manifest.res
 *.o
 *.d
+.DS_Store
+.svn
+profile
 extras/juce demo/build/macosx/build
 extras/juce demo/build/iphone/build
 extras/juce demo/build/linux/build
@@ -30,4 +33,3 @@ bin/intermediate*
 bin/lib*
 bin/jucelib*
 bin/JUCE*
-
