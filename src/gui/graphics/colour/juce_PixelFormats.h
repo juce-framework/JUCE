@@ -38,6 +38,7 @@
 #endif
 
 class PixelRGB;
+class PixelAlpha;
 
 /**
     Represents a 32-bit ARGB pixel with premultiplied alpha, and can perform compositing
@@ -75,8 +76,7 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
-    template <class Pixel>
-    forcedinline void blend (const Pixel& src) throw()
+    forcedinline void blend (const PixelARGB& src) throw()
     {
         uint32 sargb = src.getARGB();
         const uint32 alpha = 0x100 - (sargb >> 24);
@@ -92,7 +92,16 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
+    forcedinline void blend (const PixelAlpha& src) throw();
+
+
+    /** Blends another pixel onto this one.
+
+        This takes into account the opacity of the pixel being overlaid, and blends
+        it accordingly.
+    */
     forcedinline void blend (const PixelRGB& src) throw();
+
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
@@ -318,11 +327,7 @@ public:
         set (src);
     }
 
-    template <class Pixel>
-    forcedinline void blend (const Pixel& src) throw()
-    {
-        blend (PixelARGB (src.getARGB()));
-    }
+    forcedinline void blend (const PixelAlpha& src) throw();
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
 
@@ -545,6 +550,24 @@ private:
     //==============================================================================
     uint8 a : 8;
 } PACKED;
+
+forcedinline void PixelRGB::blend (const PixelAlpha& src) throw()
+{
+    blend (PixelARGB (src.getARGB()));
+}
+
+
+forcedinline void PixelARGB::blend (const PixelAlpha& src) throw()
+{
+    uint32 sargb = src.getARGB();
+    const uint32 alpha = 0x100 - (sargb >> 24);
+
+    sargb += 0x00ff00ff & ((getRB() * alpha) >> 8);
+    sargb += 0xff00ff00 & (getAG() * alpha);
+
+    argb = sargb;
+}
+
 
 #if JUCE_MSVC
   #pragma pack (pop)

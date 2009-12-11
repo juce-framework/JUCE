@@ -125,7 +125,10 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (isEnabled() && ! (e.mouseWasClicked() || isDragging))
+        if (isEnabled()
+             && ! (isDragging || e.mouseWasClicked()
+                    || e.getDistanceFromDragStart() < 5
+                    || e.mods.isPopupMenu()))
         {
             isDragging = true;
 
@@ -886,7 +889,7 @@ TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
     insertIndex = 0;
     TreeViewItem* item = getItemAt (y);
 
-    if (item == 0 || item->parentItem == 0)
+    if (item == 0)
         return 0;
 
     Rectangle itemPos (item->getItemPosition (true));

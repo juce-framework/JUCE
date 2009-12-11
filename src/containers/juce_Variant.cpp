@@ -207,12 +207,12 @@ var::operator int() const throw()
 {
     switch (type)
     {
-        case voidType:
-        case objectType:    break;
+        case voidType:      break;
         case intType:       return value.intValue;
         case boolType:      return value.boolValue ? 1 : 0;
         case doubleType:    return (int) value.doubleValue;
         case stringType:    return value.stringValue->getIntValue();
+        case objectType:    break;
         default:            jassertfalse; break;
     }
 
@@ -224,13 +224,13 @@ var::operator bool() const throw()
     switch (type)
     {
         case voidType:      break;
-        case objectType:    return value.objectValue != 0;
         case intType:       return value.intValue != 0;
         case boolType:      return value.boolValue;
         case doubleType:    return value.doubleValue != 0;
         case stringType:    return value.stringValue->getIntValue() != 0
                                     || value.stringValue->trim().equalsIgnoreCase (T("true"))
                                     || value.stringValue->trim().equalsIgnoreCase (T("yes"));
+        case objectType:    return value.objectValue != 0;
         default:            jassertfalse; break;
     }
 
@@ -241,12 +241,12 @@ var::operator double() const throw()
 {
     switch (type)
     {
-        case voidType:
-        case objectType:    break;
+        case voidType:      break;
         case intType:       return value.intValue;
         case boolType:      return value.boolValue ? 1.0 : 0.0;
         case doubleType:    return value.doubleValue;
         case stringType:    return value.stringValue->getDoubleValue();
+        case objectType:    break;
         default:            jassertfalse; break;
     }
 
@@ -257,12 +257,12 @@ const String var::toString() const throw()
 {
     switch (type)
     {
-        case voidType:
-        case objectType:    return "Object 0x" + String::toHexString ((int) (pointer_sized_int) value.objectValue);
+        case voidType:      return String::empty;
         case intType:       return String (value.intValue);
         case boolType:      return value.boolValue ? T("1") : T("0");
         case doubleType:    return String (value.doubleValue);
         case stringType:    return *(value.stringValue);
+        case objectType:    return "Object 0x" + String::toHexString ((int) (pointer_sized_int) value.objectValue);
         default:            jassertfalse; break;
     }
 

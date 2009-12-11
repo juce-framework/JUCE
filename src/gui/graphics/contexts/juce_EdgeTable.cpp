@@ -54,7 +54,8 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
 {
     table = (int*) juce_malloc ((bounds.getHeight() + 1) * lineStrideElements * sizeof (int));
     int* t = table;
-    for (int i = bounds.getHeight(); --i >= 0;)
+    int i = 0;
+    for (i = bounds.getHeight(); --i >= 0;)
     {
         *t = 0;
         t += lineStrideElements;
@@ -119,7 +120,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
     // Convert the table from relative windings to absolute levels..
     int* lineStart = table;
 
-    for (int i = bounds.getHeight(); --i >= 0;)
+    for (i = bounds.getHeight(); --i >= 0;)
     {
         int* line = lineStart;
         lineStart += lineStrideElements;
@@ -576,12 +577,13 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
         if (clipped.getRight() < bounds.getRight())
             bounds.setRight (clipped.getRight());
 
-        for (int i = top; --i >= 0;)
+        int i = 0;
+        for (i = top; --i >= 0;)
             table [lineStrideElements * i] = 0;
 
         const int* otherLine = other.table + other.lineStrideElements * (clipped.getY() - other.bounds.getY());
 
-        for (int i = top; i < bottom; ++i)
+        for (i = top; i < bottom; ++i)
         {
             intersectWithEdgeTableLine (i, otherLine);
             otherLine += other.lineStrideElements;

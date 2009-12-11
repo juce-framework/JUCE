@@ -156,8 +156,6 @@ public:
     /** Appends a decimal number at the end of this string. */
     String& operator<< (const short number) throw();
     /** Appends a decimal number at the end of this string. */
-    String& operator<< (const unsigned short number) throw();
-    /** Appends a decimal number at the end of this string. */
     String& operator<< (const int number) throw();
     /** Appends a decimal number at the end of this string. */
     String& operator<< (const unsigned int number) throw();

@@ -875,7 +875,7 @@ const String BitArray::toString (const int base, const int minimumNumCharacters)
     const int length = s.length();
 
     if (length < minimumNumCharacters)
-        s = String::repeatedString (T("0"), minimumNumCharacters - length);
+        s = String::repeatedString (T("0"), minimumNumCharacters - length) + s;
 
     return isNegative() ? T("-") + s : s;
 }

@@ -969,9 +969,9 @@ public:
 
             switch (image.getFormat())
             {
-                case Image::ARGB:   renderGradient <PixelARGB>  (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
-                case Image::RGB:    renderGradient <PixelRGB>   (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
-                default:            renderGradient <PixelAlpha> (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity); break;
+                case Image::ARGB:   renderGradient (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity, (PixelARGB*) 0); break;
+                case Image::RGB:    renderGradient (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity, (PixelRGB*) 0); break;
+                default:            renderGradient (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity, (PixelAlpha*) 0); break;
             }
 
             juce_free (lookupTable);
@@ -986,9 +986,9 @@ public:
 
             switch (image.getFormat())
             {
-                case Image::ARGB:   renderSolidFill2 <PixelARGB>  (et, destData, fillColour, replaceContents); break;
-                case Image::RGB:    renderSolidFill2 <PixelRGB>   (et, destData, fillColour, replaceContents); break;
-                default:            renderSolidFill2 <PixelAlpha> (et, destData, fillColour, replaceContents); break;
+                case Image::ARGB:   renderSolidFill (et, destData, fillColour, replaceContents, (PixelARGB*) 0); break;
+                case Image::RGB:    renderSolidFill (et, destData, fillColour, replaceContents, (PixelRGB*) 0); break;
+                default:            renderSolidFill (et, destData, fillColour, replaceContents, (PixelAlpha*) 0); break;
             }
         }
     }
@@ -1017,7 +1017,7 @@ public:
 
                 if (tiledFillClipRegion != 0)
                 {
-                    blittedRenderImage3 <true> (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, tx, ty);
+                    blittedRenderImage (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, tx, ty, true);
                 }
                 else
                 {
@@ -1025,7 +1025,7 @@ public:
                     et.clipToEdgeTable (edgeTable->edgeTable);
 
                     if (! et.isEmpty())
-                        blittedRenderImage3 <false> (sourceImage, destImage, et, destData, srcData, alpha, tx, ty);
+                        blittedRenderImage (sourceImage, destImage, et, destData, srcData, alpha, tx, ty, false);
                 }
 
                 return;
@@ -1037,7 +1037,7 @@ public:
 
         if (tiledFillClipRegion != 0)
         {
-            transformedRenderImage3 <true> (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, transform, betterQuality);
+            transformedRenderImage (sourceImage, destImage, *tiledFillClipRegion, destData, srcData, alpha, transform, betterQuality, true);
         }
         else
         {
@@ -1048,7 +1048,7 @@ public:
             et.clipToEdgeTable (edgeTable->edgeTable);
 
             if (! et.isEmpty())
-                transformedRenderImage3 <false> (sourceImage, destImage, et, destData, srcData, alpha, transform, betterQuality);
+                transformedRenderImage (sourceImage, destImage, et, destData, srcData, alpha, transform, betterQuality, false);
         }
     }
 
@@ -1082,9 +1082,9 @@ public:
                 const int imageY = ((ty + 128) >> 8);
 
                 if (image.getFormat() == Image::ARGB)
-                    straightClipImage <PixelARGB> (et, srcData, imageX, imageY);
+                    straightClipImage (et, srcData, imageX, imageY, (PixelARGB*)0);
                 else
-                    straightClipImage <PixelAlpha> (et, srcData, imageX, imageY);
+                    straightClipImage (et, srcData, imageX, imageY, (PixelAlpha*)0);
 
                 return;
             }
@@ -1106,14 +1106,14 @@ public:
         if (! et.isEmpty())
         {
             if (image.getFormat() == Image::ARGB)
-                transformedClipImage <PixelARGB> (et, srcData, transform, betterQuality);
+                transformedClipImage (et, srcData, transform, betterQuality, (PixelARGB*)0);
             else
-                transformedClipImage <PixelAlpha> (et, srcData, transform, betterQuality);
+                transformedClipImage (et, srcData, transform, betterQuality, (PixelAlpha*)0);
         }
     }
 
     template <class SrcPixelType>
-    void transformedClipImage (EdgeTable& et, const Image::BitmapData& srcData, const AffineTransform& transform, const bool betterQuality) throw()
+    void transformedClipImage (EdgeTable& et, const Image::BitmapData& srcData, const AffineTransform& transform, const bool betterQuality, const SrcPixelType *) throw()
     {
         TransformedImageFillEdgeTableRenderer <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, transform, 255, betterQuality);
 
@@ -1123,7 +1123,7 @@ public:
     }
 
     template <class SrcPixelType>
-    void straightClipImage (EdgeTable& et, const Image::BitmapData& srcData, int imageX, int imageY) throw()
+    void straightClipImage (EdgeTable& et, const Image::BitmapData& srcData, int imageX, int imageY, const SrcPixelType *) throw()
     {
         Rectangle r (imageX, imageY, srcData.width, srcData.height);
         et.clipToRectangle (r);
@@ -1161,7 +1161,7 @@ private:
     //==============================================================================
     template <class DestPixelType>
     void renderGradient (EdgeTable& et, const Image::BitmapData& destData, const ColourGradient& g, const AffineTransform& transform,
-                         const PixelARGB* const lookupTable, const int numLookupEntries, const bool isIdentity) throw()
+                         const PixelARGB* const lookupTable, const int numLookupEntries, const bool isIdentity, DestPixelType*) throw()
     {
         jassert (destData.pixelStride == sizeof (DestPixelType));
 
@@ -1186,86 +1186,139 @@ private:
     }
 
     //==============================================================================
-    template <class DestPixelType, bool replaceContents>
-    void renderSolidFill1 (EdgeTable& et, const Image::BitmapData& destData, const PixelARGB& fillColour) throw()
+    template <class DestPixelType>
+    void renderSolidFill (EdgeTable& et, const Image::BitmapData& destData, const PixelARGB& fillColour, const bool replaceContents, DestPixelType*) throw()
     {
         jassert (destData.pixelStride == sizeof (DestPixelType));
-        SolidColourEdgeTableRenderer <DestPixelType, replaceContents> renderer (destData, fillColour);
-        et.iterate (renderer);
-    }
-
-    template <class DestPixelType>
-    void renderSolidFill2 (EdgeTable& et, const Image::BitmapData& destData, const PixelARGB& fillColour, const bool replaceContents) throw()
-    {
         if (replaceContents)
-            renderSolidFill1 <DestPixelType, true> (et, destData, fillColour);
+        {
+            SolidColourEdgeTableRenderer <DestPixelType, true> r (destData, fillColour);
+            et.iterate (r);
+        }
         else
-            renderSolidFill1 <DestPixelType, false> (et, destData, fillColour);
-    }
-
-    //==============================================================================
-    template <class SrcPixelType, class DestPixelType, bool repeatPattern>
-    void transformedRenderImage1 (const EdgeTable& et, const Image::BitmapData& destData, const Image::BitmapData& srcData,
-                                  const int alpha, const AffineTransform& transform, const bool betterQuality) throw()
-    {
-        TransformedImageFillEdgeTableRenderer <DestPixelType, SrcPixelType, repeatPattern> renderer (destData, srcData, transform, alpha, betterQuality);
-        et.iterate (renderer);
-    }
-
-    template <class SrcPixelType, bool repeatPattern>
-    void transformedRenderImage2 (Image& destImage, const EdgeTable& et, const Image::BitmapData& destData, const Image::BitmapData& srcData,
-                                  const int alpha, const AffineTransform& transform, const bool betterQuality) throw()
-    {
-        switch (destImage.getFormat())
         {
-            case Image::ARGB:   transformedRenderImage1 <SrcPixelType, PixelARGB, repeatPattern>  (et, destData, srcData, alpha, transform, betterQuality); break;
-            case Image::RGB:    transformedRenderImage1 <SrcPixelType, PixelRGB, repeatPattern>   (et, destData, srcData, alpha, transform, betterQuality); break;
-            default:            transformedRenderImage1 <SrcPixelType, PixelAlpha, repeatPattern> (et, destData, srcData, alpha, transform, betterQuality); break;
-        }
-    }
-
-    template <bool repeatPattern>
-    void transformedRenderImage3 (const Image& srcImage, Image& destImage, const EdgeTable& et, const Image::BitmapData& destData, const Image::BitmapData& srcData,
-                                  const int alpha, const AffineTransform& transform, const bool betterQuality) throw()
-    {
-        switch (srcImage.getFormat())
-        {
-            case Image::ARGB:   transformedRenderImage2 <PixelARGB,  repeatPattern> (destImage, et, destData, srcData, alpha, transform, betterQuality); break;
-            case Image::RGB:    transformedRenderImage2 <PixelRGB,   repeatPattern> (destImage, et, destData, srcData, alpha, transform, betterQuality); break;
-            default:            transformedRenderImage2 <PixelAlpha, repeatPattern> (destImage, et, destData, srcData, alpha, transform, betterQuality); break;
+            SolidColourEdgeTableRenderer <DestPixelType, false> r (destData, fillColour);
+            et.iterate (r);
         }
     }
 
     //==============================================================================
-    template <class SrcPixelType, class DestPixelType, bool repeatPattern>
-    void blittedRenderImage1 (const EdgeTable& et, const Image::BitmapData& destData, const Image::BitmapData& srcData,
-                              const int alpha, int x, int y) throw()
-    {
-        ImageFillEdgeTableRenderer <DestPixelType, SrcPixelType, repeatPattern> renderer (destData, srcData, alpha, x, y);
-        et.iterate (renderer);
-    }
-
-    template <class SrcPixelType, bool repeatPattern>
-    void blittedRenderImage2 (Image& destImage, const EdgeTable& et, const Image::BitmapData& destData,
-                              const Image::BitmapData& srcData, const int alpha, int x, int y) throw()
+    void transformedRenderImage (const Image& srcImage, Image& destImage, const EdgeTable& et, const Image::BitmapData& destData, const Image::BitmapData& srcData,
+                                 const int alpha, const AffineTransform& transform, const bool betterQuality, const bool repeatPattern) throw()
     {
         switch (destImage.getFormat())
         {
-            case Image::ARGB:   blittedRenderImage1 <SrcPixelType, PixelARGB,  repeatPattern> (et, destData, srcData, alpha, x, y); break;
-            case Image::RGB:    blittedRenderImage1 <SrcPixelType, PixelRGB,   repeatPattern> (et, destData, srcData, alpha, x, y); break;
-            default:            blittedRenderImage1 <SrcPixelType, PixelAlpha, repeatPattern> (et, destData, srcData, alpha, x, y); break;
+        case Image::ARGB:
+            switch (srcImage.getFormat())
+            {
+            case Image::ARGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            case Image::RGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            default:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            }
+            break;
+        case Image::RGB:
+            switch (srcImage.getFormat())
+            {
+            case Image::ARGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            case Image::RGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            default:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            }
+            break;
+        default:
+            switch (srcImage.getFormat())
+            {
+            case Image::ARGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            case Image::RGB:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            default:
+                if (repeatPattern) { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                else               { TransformedImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, false> r (destData, srcData, transform, alpha, betterQuality); et.iterate (r); }
+                break;
+            }
+            break;
         }
     }
 
-    template <bool repeatPattern>
-    void blittedRenderImage3 (const Image& srcImage, Image& destImage, const EdgeTable& et, const Image::BitmapData& destData,
-                              const Image::BitmapData& srcData, const int alpha, int x, int y) throw()
+    //==============================================================================
+    void blittedRenderImage (const Image& srcImage, Image& destImage, const EdgeTable& et, const Image::BitmapData& destData,
+                             const Image::BitmapData& srcData, const int alpha, int x, int y, const bool repeatPattern) throw()
     {
-        switch (srcImage.getFormat())
+        switch (destImage.getFormat())
         {
-            case Image::ARGB:   blittedRenderImage2 <PixelARGB,  repeatPattern> (destImage, et, destData, srcData, alpha, x, y); break;
-            case Image::RGB:    blittedRenderImage2 <PixelRGB,   repeatPattern> (destImage, et, destData, srcData, alpha, x, y); break;
-            default:            blittedRenderImage2 <PixelAlpha, repeatPattern> (destImage, et, destData, srcData, alpha, x, y); break;
+            case Image::ARGB:
+                switch (srcImage.getFormat())
+                {
+                case Image::ARGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelARGB, PixelARGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelARGB, PixelARGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                case Image::RGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelARGB, PixelRGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelARGB, PixelRGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                default:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelARGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                }
+            break;
+            case Image::RGB:
+                switch (srcImage.getFormat())
+                {
+                case Image::ARGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelRGB, PixelARGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelRGB, PixelARGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                case Image::RGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelRGB, PixelRGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelRGB, PixelRGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                default:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelRGB, PixelAlpha, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                }
+            break;
+            default:
+                switch (srcImage.getFormat())
+                {
+                case Image::ARGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelAlpha, PixelARGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                case Image::RGB:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelAlpha, PixelRGB, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                default:
+                    if (repeatPattern) { ImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, true> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    else               { ImageFillEdgeTableRenderer <PixelAlpha, PixelAlpha, false> r (destData, srcData, alpha, x, y); et.iterate (r); }
+                    break;
+                }
+            break;
         }
     }
 };
