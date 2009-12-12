@@ -86,6 +86,9 @@
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "containers/juce_ArrayAllocationBase.h"
 #endif
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+ #include "containers/juce_Variant.h"
+#endif
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
  #include "containers/juce_BitArray.h"
 #endif
@@ -113,11 +116,11 @@
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
  #include "containers/juce_SparseSet.h"
 #endif
-#ifndef __JUCE_VARIANT_JUCEHEADER__
- #include "containers/juce_Variant.h"
-#endif
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
  #include "containers/juce_VoidArray.h"
+#endif
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+ #include "containers/juce_ValueTree.h"
 #endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
  #include "io/files/juce_DirectoryIterator.h"
@@ -188,11 +191,11 @@
 #ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
  #include "io/streams/juce_SubregionStream.h"
 #endif
-#ifndef __JUCE_STRING_JUCEHEADER__
- #include "text/juce_String.h"
-#endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
  #include "text/juce_LocalisedStrings.h"
+#endif
+#ifndef __JUCE_STRING_JUCEHEADER__
+ #include "text/juce_String.h"
 #endif
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
  #include "text/juce_CharacterFunctions.h"
@@ -236,14 +239,14 @@
 #ifndef __JUCE_THREAD_JUCEHEADER__
  #include "threads/juce_Thread.h"
 #endif
+#ifndef __JUCE_THREADPOOL_JUCEHEADER__
+ #include "threads/juce_ThreadPool.h"
+#endif
 #ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
  #include "threads/juce_TimeSliceThread.h"
 #endif
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
  #include "threads/juce_WaitableEvent.h"
-#endif
-#ifndef __JUCE_THREADPOOL_JUCEHEADER__
- #include "threads/juce_ThreadPool.h"
 #endif
 
 #endif

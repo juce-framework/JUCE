@@ -15,6 +15,8 @@
 		840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */; };
 		840F1DA710AD6750002A03A6 /* juce_CPlusPlusCodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */; };
 		840F80BC092B399D005E7B4E /* juce.h in Headers */ = {isa = PBXBuildFile; fileRef = 840F80BB092B399D005E7B4E /* juce.h */; };
+		843D4A3B10D3C54500624BA6 /* juce_ValueTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */; };
+		843D4A3C10D3C54500624BA6 /* juce_ValueTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */; };
 		844BB95B10C5578800DF5536 /* juce_TargetPlatform.h in Headers */ = {isa = PBXBuildFile; fileRef = 8481730E10832513008FEC33 /* juce_TargetPlatform.h */; };
 		844BB95C10C5579A00DF5536 /* juce_FillType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */; };
 		844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
@@ -1210,6 +1212,8 @@
 
 /* Begin PBXFileReference section */
 		840F80BB092B399D005E7B4E /* juce.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = juce.h; path = ../../juce.h; sourceTree = SOURCE_ROOT; };
+		843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_ValueTree.cpp; sourceTree = "<group>"; };
+		843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_ValueTree.h; sourceTree = "<group>"; };
 		8456EC6508A2A6C80087C412 /* juce_Config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = juce_Config.h; path = ../../juce_Config.h; sourceTree = SOURCE_ROOT; };
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
 		84816E3510809B4F008FEC33 /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2162,6 +2166,8 @@
 				84F1E8DB10403671006A1807 /* juce_ReferenceCountedObject.h */,
 				84F1E8DC10403671006A1807 /* juce_SortedSet.h */,
 				84F1E8DD10403671006A1807 /* juce_SparseSet.h */,
+				843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */,
+				843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */,
 				84F1E8DE10403671006A1807 /* juce_Variant.cpp */,
 				84F1E8DF10403671006A1807 /* juce_Variant.h */,
 				84F1E8E010403671006A1807 /* juce_VoidArray.h */,
@@ -3520,6 +3526,7 @@
 				84AB920010A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h in Headers */,
 				84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */,
 				84F29AA010C2EFA5005014DF /* juce_FillType.h in Headers */,
+				843D4A3C10D3C54500624BA6 /* juce_ValueTree.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4156,6 +4163,7 @@
 				84AB91FD10A078190048FC39 /* juce_CodeEditorComponent.cpp in Sources */,
 				84AB91FF10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
 				84F29A9F10C2EFA5005014DF /* juce_FillType.cpp in Sources */,
+				843D4A3B10D3C54500624BA6 /* juce_ValueTree.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

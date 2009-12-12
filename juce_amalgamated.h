@@ -8530,155 +8530,231 @@ private:
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
+#ifndef __JUCE_VARIANT_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+/********* Start of inlined file: juce_Variant.h *********/
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+#define __JUCE_VARIANT_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
-
-/********* Start of inlined file: juce_PropertySet.h *********/
-#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
-#define __JUCE_PROPERTYSET_JUCEHEADER__
-
-/********* Start of inlined file: juce_StringPairArray.h *********/
-#ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
-#define __JUCE_STRINGPAIRARRAY_JUCEHEADER__
+/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 
 /**
-    A container for holding a set of strings which are keyed by another string.
+    Adds reference-counting to an object.
 
-    @see StringArray
+    To add reference-counting to a class, derive it from this class, and
+    use the ReferenceCountedObjectPtr class to point to it.
+
+    e.g. @code
+    class MyClass : public ReferenceCountedObject
+    {
+        void foo();
+
+        // This is a neat way of declaring a typedef for a pointer class,
+        // rather than typing out the full templated name each time..
+        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
+    };
+
+    MyClass::Ptr p = new MyClass();
+    MyClass::Ptr p2 = p;
+    p = 0;
+    p2->foo();
+    @endcode
+
+    Once a new ReferenceCountedObject has been assigned to a pointer, be
+    careful not to delete the object manually.
+
+    @see ReferenceCountedObjectPtr, ReferenceCountedArray
 */
-class JUCE_API  StringPairArray
+class JUCE_API  ReferenceCountedObject
 {
 public:
 
-    /** Creates an empty array */
-    StringPairArray (const bool ignoreCaseWhenComparingKeys = true) throw();
+    /** Increments the object's reference count.
 
-    /** Creates a copy of another array */
-    StringPairArray (const StringPairArray& other) throw();
+        This is done automatically by the smart pointer, but is public just
+        in case it's needed for nefarious purposes.
+    */
+    inline void incReferenceCount() throw()
+    {
+        atomicIncrement (refCounts);
+
+        jassert (refCounts > 0);
+    }
+
+    /** Decreases the object's reference count.
+
+        If the count gets to zero, the object will be deleted.
+    */
+    inline void decReferenceCount() throw()
+    {
+        jassert (refCounts > 0);
+
+        if (atomicDecrementAndReturn (refCounts) == 0)
+            delete this;
+    }
+
+    /** Returns the object's current reference count. */
+    inline int getReferenceCount() const throw()
+    {
+        return refCounts;
+    }
+
+protected:
+
+    /** Creates the reference-counted object (with an initial ref count of zero). */
+    ReferenceCountedObject()
+        : refCounts (0)
+    {
+    }
 
     /** Destructor. */
-    ~StringPairArray() throw();
-
-    /** Copies the contents of another string array into this one */
-    const StringPairArray& operator= (const StringPairArray& other) throw();
-
-    /** Compares two arrays.
-
-        Comparisons are case-sensitive.
-
-        @returns    true only if the other array contains exactly the same strings with the same keys
-    */
-    bool operator== (const StringPairArray& other) const throw();
-
-    /** Compares two arrays.
-
-        Comparisons are case-sensitive.
-
-        @returns    false if the other array contains exactly the same strings with the same keys
-    */
-    bool operator!= (const StringPairArray& other) const throw();
-
-    /** Finds the value corresponding to a key string.
-
-        If no such key is found, this will just return an empty string. To check whether
-        a given key actually exists (because it might actually be paired with an empty string), use
-        the getAllKeys() method to obtain a list.
-
-        Obviously the reference returned shouldn't be stored for later use, as the
-        string it refers to may disappear when the array changes.
-
-        @see getValue
-    */
-    const String& operator[] (const String& key) const throw();
-
-    /** Finds the value corresponding to a key string.
-
-        If no such key is found, this will just return the value provided as a default.
-
-        @see operator[]
-    */
-    const String getValue (const String& key, const String& defaultReturnValue) const;
-
-    /** Returns a list of all keys in the array. */
-    const StringArray& getAllKeys() const throw()       { return keys; }
-
-    /** Returns a list of all values in the array. */
-    const StringArray& getAllValues() const throw()     { return values; }
-
-    /** Returns the number of strings in the array */
-    inline int size() const throw()                     { return keys.size(); };
-
-    /** Adds or amends a key/value pair.
-
-        If a value already exists with this key, its value will be overwritten,
-        otherwise the key/value pair will be added to the array.
-    */
-    void set (const String& key,
-              const String& value) throw();
-
-    /** Adds the items from another array to this one.
-
-        This is equivalent to using set() to add each of the pairs from the other array.
-    */
-    void addArray (const StringPairArray& other);
-
-    /** Removes all elements from the array. */
-    void clear() throw();
-
-    /** Removes a string from the array based on its key.
-
-        If the key isn't found, nothing will happen.
-    */
-    void remove (const String& key) throw();
-
-    /** Removes a string from the array based on its index.
-
-        If the index is out-of-range, no action will be taken.
-    */
-    void remove (const int index) throw();
-
-    /** Indicates whether to use a case-insensitive search when looking up a key string.
-    */
-    void setIgnoresCase (const bool shouldIgnoreCase) throw();
-
-    /** Returns a descriptive string containing the items.
-
-        This is handy for dumping the contents of an array.
-    */
-    const String getDescription() const;
-
-    /** Reduces the amount of storage being used by the array.
-
-        Arrays typically allocate slightly more storage than they need, and after
-        removing elements, they may have quite a lot of unused space allocated.
-        This method will reduce the amount of allocated storage to a minimum.
-    */
-    void minimiseStorageOverheads() throw();
-
-    juce_UseDebuggingNewOperator
+    virtual ~ReferenceCountedObject()
+    {
+        // it's dangerous to delete an object that's still referenced by something else!
+        jassert (refCounts == 0);
+    }
 
 private:
-    StringArray keys, values;
-    bool ignoreCase;
+
+    int refCounts;
 };
 
-#endif   // __JUCE_STRINGPAIRARRAY_JUCEHEADER__
-/********* End of inlined file: juce_StringPairArray.h *********/
+/**
+    Used to point to an object of type ReferenceCountedObject.
 
-/********* Start of inlined file: juce_XmlElement.h *********/
-#ifndef __JUCE_XMLELEMENT_JUCEHEADER__
-#define __JUCE_XMLELEMENT_JUCEHEADER__
+    It's wise to use a typedef instead of typing out the templated name
+    each time - e.g.
+
+    typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
+
+    @see ReferenceCountedObject, ReferenceCountedObjectArray
+*/
+template <class ReferenceCountedObjectClass>
+class ReferenceCountedObjectPtr
+{
+public:
+
+    /** Creates a pointer to a null object. */
+    inline ReferenceCountedObjectPtr() throw()
+        : referencedObject (0)
+    {
+    }
+
+    /** Creates a pointer to an object.
+
+        This will increment the object's reference-count if it is non-null.
+    */
+    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
+        : referencedObject (refCountedObject)
+    {
+        if (refCountedObject != 0)
+            refCountedObject->incReferenceCount();
+    }
+
+    /** Copies another pointer.
+
+        This will increment the object's reference-count (if it is non-null).
+    */
+    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
+        : referencedObject (other.referencedObject)
+    {
+        if (referencedObject != 0)
+            referencedObject->incReferenceCount();
+    }
+
+    /** Changes this pointer to point at a different object.
+
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+    {
+        ReferenceCountedObjectClass* const newObject = other.referencedObject;
+
+        if (newObject != referencedObject)
+        {
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
+            referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
+        }
+
+        return *this;
+    }
+
+    /** Changes this pointer to point at a different object.
+
+        The reference count of the old object is decremented, and it might be
+        deleted if it hits zero. The new object's count is incremented.
+    */
+    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
+    {
+        if (referencedObject != newObject)
+        {
+            if (newObject != 0)
+                newObject->incReferenceCount();
+
+            ReferenceCountedObjectClass* const oldObject = referencedObject;
+            referencedObject = newObject;
+
+            if (oldObject != 0)
+                oldObject->decReferenceCount();
+        }
+
+        return *this;
+    }
+
+    /** Destructor.
+
+        This will decrement the object's reference-count, and may delete it if it
+        gets to zero.
+    */
+    inline ~ReferenceCountedObjectPtr()
+    {
+        if (referencedObject != 0)
+            referencedObject->decReferenceCount();
+    }
+
+    /** Returns the object that this pointer references.
+
+        The pointer returned may be zero, of course.
+    */
+    inline operator ReferenceCountedObjectClass*() const throw()
+    {
+        return referencedObject;
+    }
+
+    /** Returns true if this pointer refers to the given object. */
+    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
+    {
+        return referencedObject == object;
+    }
+
+    /** Returns true if this pointer doesn't refer to the given object. */
+    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
+    {
+        return referencedObject != object;
+    }
+
+    // the -> operator is called on the referenced object
+    inline ReferenceCountedObjectClass* operator->() const throw()
+    {
+        return referencedObject;
+    }
+
+private:
+
+    ReferenceCountedObjectClass* referencedObject;
+};
+
+#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+/********* End of inlined file: juce_ReferenceCountedObject.h *********/
 
 /********* Start of inlined file: juce_OutputStream.h *********/
 #ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
@@ -9154,6 +9230,375 @@ protected:
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /********* End of inlined file: juce_OutputStream.h *********/
+
+class JUCE_API  DynamicObject;
+
+/**
+    A variant class, that can be used to hold a range of primitive values.
+
+    A var object can hold a range of simple primitive values, strings, or
+    a reference-counted pointer to a DynamicObject. The var class is intended
+    to act like the values used in dynamic scripting languages.
+
+    @see DynamicObject
+*/
+class JUCE_API  var
+{
+public:
+
+    typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
+
+    /** Creates a void variant. */
+    var() throw();
+
+    /** Destructor. */
+    ~var();
+
+    var (const var& valueToCopy) throw();
+    var (const int value) throw();
+    var (const bool value) throw();
+    var (const double value) throw();
+    var (const char* const value) throw();
+    var (const juce_wchar* const value) throw();
+    var (const String& value) throw();
+    var (DynamicObject* const object) throw();
+    var (MethodFunction method) throw();
+
+    const var& operator= (const var& valueToCopy) throw();
+    const var& operator= (const int value) throw();
+    const var& operator= (const bool value) throw();
+    const var& operator= (const double value) throw();
+    const var& operator= (const char* const value) throw();
+    const var& operator= (const juce_wchar* const value) throw();
+    const var& operator= (const String& value) throw();
+    const var& operator= (DynamicObject* const object) throw();
+    const var& operator= (MethodFunction method) throw();
+
+    operator int() const throw();
+    operator bool() const throw();
+    operator double() const throw();
+    operator const String() const throw();
+    const String toString() const throw();
+    DynamicObject* getObject() const throw();
+
+    bool isVoid() const throw()         { return type == voidType; }
+    bool isInt() const throw()          { return type == intType; }
+    bool isBool() const throw()         { return type == boolType; }
+    bool isDouble() const throw()       { return type == doubleType; }
+    bool isString() const throw()       { return type == stringType; }
+    bool isObject() const throw()       { return type == objectType; }
+    bool isMethod() const throw()       { return type == methodType; }
+
+    bool operator== (const var& other) const throw();
+    bool operator!= (const var& other) const throw();
+
+    /** Writes a binary representation of this value to a stream.
+        The data can be read back later using readFromStream().
+    */
+    void writeToStream (OutputStream& output) const throw();
+
+    /** Reads back a stored binary representation of a value.
+        The data in the stream must have been written using writeToStream(), or this
+        will have unpredictable results.
+    */
+    static const var readFromStream (InputStream& input) throw();
+
+    class JUCE_API  identifier
+    {
+    public:
+        identifier (const char* const name) throw();
+        identifier (const String& name) throw();
+        ~identifier() throw();
+
+        bool operator== (const identifier& other) const throw()   { return hashCode == other.hashCode; }
+
+        String name;
+        int hashCode;
+    };
+
+    /** If this variant is an object, this returns one of its properties. */
+    const var operator[] (const identifier& propertyName) const throw();
+
+    /** If this variant is an object, this invokes one of its methods with no arguments. */
+    const var call (const identifier& method) const;
+    /** If this variant is an object, this invokes one of its methods with one argument. */
+    const var call (const identifier& method, const var& arg1) const;
+    /** If this variant is an object, this invokes one of its methods with 2 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2) const;
+    /** If this variant is an object, this invokes one of its methods with 3 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
+    /** If this variant is an object, this invokes one of its methods with 4 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    /** If this variant is an object, this invokes one of its methods with 5 arguments. */
+    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
+
+    /** If this variant is an object, this invokes one of its methods with a list of arguments. */
+    const var invoke (const identifier& method, const var* arguments, int numArguments) const;
+
+    /** If this variant is a method pointer, this invokes it on a target object. */
+    const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    enum Type
+    {
+        voidType = 0,
+        intType,
+        boolType,
+        doubleType,
+        stringType,
+        objectType,
+        methodType
+    };
+
+    Type type;
+
+    union
+    {
+        int intValue;
+        bool boolValue;
+        double doubleValue;
+        String* stringValue;
+        DynamicObject* objectValue;
+        MethodFunction methodValue;
+    } value;
+
+    void releaseValue() throw();
+};
+
+/**
+    Represents a dynamically implemented object.
+
+    An instance of this class can be used to store named properties, and
+    by subclassing hasMethod() and invokeMethod(), you can give your object
+    methods.
+
+    This is intended for use as a wrapper for scripting language objects.
+*/
+class JUCE_API  DynamicObject  : public ReferenceCountedObject
+{
+public:
+
+    DynamicObject();
+
+    /** Destructor. */
+    virtual ~DynamicObject();
+
+    /** Returns true if the object has a property with this name.
+        Note that if the property is actually a method, this will return false.
+    */
+    virtual bool hasProperty (const var::identifier& propertyName) const;
+
+    /** Returns a named property.
+
+        This returns a void if no such property exists.
+    */
+    virtual const var getProperty (const var::identifier& propertyName) const;
+
+    /** Sets a named property. */
+    virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+
+    /** Removes a named property. */
+    virtual void removeProperty (const var::identifier& propertyName);
+
+    /** Checks whether this object has the specified method.
+
+        The default implementation of this just checks whether there's a property
+        with this name that's actually a method, but this can be overridden for
+        building objects with dynamic invocation.
+    */
+    virtual bool hasMethod (const var::identifier& methodName) const;
+
+    /** Invokes a named method on this object.
+
+        The default implementation looks up the named property, and if it's a method
+        call, then it invokes it.
+
+        This method is virtual to allow more dynamic invocation to used for objects
+        where the methods may not already be set as properies.
+    */
+    virtual const var invokeMethod (const var::identifier& methodName,
+                                    const var* parameters,
+                                    int numParameters);
+
+    /** Sets up a method.
+
+        This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
+        helps to avoid accidentally invoking the wrong type of var constructor. It also makes
+        the code easier to read,
+
+        The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
+        @code
+        setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
+        @endcode
+    */
+    void setMethod (const var::identifier& methodName,
+                    var::MethodFunction methodFunction);
+
+    /** Removes all properties and methods from the object. */
+    void clear();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Array <int> propertyIds;
+    OwnedArray <var> propertyValues;
+};
+
+#endif   // __JUCE_VARIANT_JUCEHEADER__
+/********* End of inlined file: juce_Variant.h *********/
+
+#endif
+#ifndef __JUCE_BITARRAY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
+
+/********* Start of inlined file: juce_PropertySet.h *********/
+#ifndef __JUCE_PROPERTYSET_JUCEHEADER__
+#define __JUCE_PROPERTYSET_JUCEHEADER__
+
+/********* Start of inlined file: juce_StringPairArray.h *********/
+#ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
+#define __JUCE_STRINGPAIRARRAY_JUCEHEADER__
+
+/**
+    A container for holding a set of strings which are keyed by another string.
+
+    @see StringArray
+*/
+class JUCE_API  StringPairArray
+{
+public:
+
+    /** Creates an empty array */
+    StringPairArray (const bool ignoreCaseWhenComparingKeys = true) throw();
+
+    /** Creates a copy of another array */
+    StringPairArray (const StringPairArray& other) throw();
+
+    /** Destructor. */
+    ~StringPairArray() throw();
+
+    /** Copies the contents of another string array into this one */
+    const StringPairArray& operator= (const StringPairArray& other) throw();
+
+    /** Compares two arrays.
+
+        Comparisons are case-sensitive.
+
+        @returns    true only if the other array contains exactly the same strings with the same keys
+    */
+    bool operator== (const StringPairArray& other) const throw();
+
+    /** Compares two arrays.
+
+        Comparisons are case-sensitive.
+
+        @returns    false if the other array contains exactly the same strings with the same keys
+    */
+    bool operator!= (const StringPairArray& other) const throw();
+
+    /** Finds the value corresponding to a key string.
+
+        If no such key is found, this will just return an empty string. To check whether
+        a given key actually exists (because it might actually be paired with an empty string), use
+        the getAllKeys() method to obtain a list.
+
+        Obviously the reference returned shouldn't be stored for later use, as the
+        string it refers to may disappear when the array changes.
+
+        @see getValue
+    */
+    const String& operator[] (const String& key) const throw();
+
+    /** Finds the value corresponding to a key string.
+
+        If no such key is found, this will just return the value provided as a default.
+
+        @see operator[]
+    */
+    const String getValue (const String& key, const String& defaultReturnValue) const;
+
+    /** Returns a list of all keys in the array. */
+    const StringArray& getAllKeys() const throw()       { return keys; }
+
+    /** Returns a list of all values in the array. */
+    const StringArray& getAllValues() const throw()     { return values; }
+
+    /** Returns the number of strings in the array */
+    inline int size() const throw()                     { return keys.size(); };
+
+    /** Adds or amends a key/value pair.
+
+        If a value already exists with this key, its value will be overwritten,
+        otherwise the key/value pair will be added to the array.
+    */
+    void set (const String& key,
+              const String& value) throw();
+
+    /** Adds the items from another array to this one.
+
+        This is equivalent to using set() to add each of the pairs from the other array.
+    */
+    void addArray (const StringPairArray& other);
+
+    /** Removes all elements from the array. */
+    void clear() throw();
+
+    /** Removes a string from the array based on its key.
+
+        If the key isn't found, nothing will happen.
+    */
+    void remove (const String& key) throw();
+
+    /** Removes a string from the array based on its index.
+
+        If the index is out-of-range, no action will be taken.
+    */
+    void remove (const int index) throw();
+
+    /** Indicates whether to use a case-insensitive search when looking up a key string.
+    */
+    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+
+    /** Returns a descriptive string containing the items.
+
+        This is handy for dumping the contents of an array.
+    */
+    const String getDescription() const;
+
+    /** Reduces the amount of storage being used by the array.
+
+        Arrays typically allocate slightly more storage than they need, and after
+        removing elements, they may have quite a lot of unused space allocated.
+        This method will reduce the amount of allocated storage to a minimum.
+    */
+    void minimiseStorageOverheads() throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    StringArray keys, values;
+    bool ignoreCase;
+};
+
+#endif   // __JUCE_STRINGPAIRARRAY_JUCEHEADER__
+/********* End of inlined file: juce_StringPairArray.h *********/
+
+/********* Start of inlined file: juce_XmlElement.h *********/
+#ifndef __JUCE_XMLELEMENT_JUCEHEADER__
+#define __JUCE_XMLELEMENT_JUCEHEADER__
 
 /** A handy macro to make it easy to iterate all the child elements in an XmlElement.
 
@@ -10015,226 +10460,6 @@ private:
 /********* Start of inlined file: juce_ReferenceCountedArray.h *********/
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-
-/**
-    Adds reference-counting to an object.
-
-    To add reference-counting to a class, derive it from this class, and
-    use the ReferenceCountedObjectPtr class to point to it.
-
-    e.g. @code
-    class MyClass : public ReferenceCountedObject
-    {
-        void foo();
-
-        // This is a neat way of declaring a typedef for a pointer class,
-        // rather than typing out the full templated name each time..
-        typedef ReferenceCountedObjectPtr<MyClass> Ptr;
-    };
-
-    MyClass::Ptr p = new MyClass();
-    MyClass::Ptr p2 = p;
-    p = 0;
-    p2->foo();
-    @endcode
-
-    Once a new ReferenceCountedObject has been assigned to a pointer, be
-    careful not to delete the object manually.
-
-    @see ReferenceCountedObjectPtr, ReferenceCountedArray
-*/
-class JUCE_API  ReferenceCountedObject
-{
-public:
-
-    /** Increments the object's reference count.
-
-        This is done automatically by the smart pointer, but is public just
-        in case it's needed for nefarious purposes.
-    */
-    inline void incReferenceCount() throw()
-    {
-        atomicIncrement (refCounts);
-
-        jassert (refCounts > 0);
-    }
-
-    /** Decreases the object's reference count.
-
-        If the count gets to zero, the object will be deleted.
-    */
-    inline void decReferenceCount() throw()
-    {
-        jassert (refCounts > 0);
-
-        if (atomicDecrementAndReturn (refCounts) == 0)
-            delete this;
-    }
-
-    /** Returns the object's current reference count. */
-    inline int getReferenceCount() const throw()
-    {
-        return refCounts;
-    }
-
-protected:
-
-    /** Creates the reference-counted object (with an initial ref count of zero). */
-    ReferenceCountedObject()
-        : refCounts (0)
-    {
-    }
-
-    /** Destructor. */
-    virtual ~ReferenceCountedObject()
-    {
-        // it's dangerous to delete an object that's still referenced by something else!
-        jassert (refCounts == 0);
-    }
-
-private:
-
-    int refCounts;
-};
-
-/**
-    Used to point to an object of type ReferenceCountedObject.
-
-    It's wise to use a typedef instead of typing out the templated name
-    each time - e.g.
-
-    typedef ReferenceCountedObjectPtr<MyClass> MyClassPtr;
-
-    @see ReferenceCountedObject, ReferenceCountedObjectArray
-*/
-template <class ReferenceCountedObjectClass>
-class ReferenceCountedObjectPtr
-{
-public:
-
-    /** Creates a pointer to a null object. */
-    inline ReferenceCountedObjectPtr() throw()
-        : referencedObject (0)
-    {
-    }
-
-    /** Creates a pointer to an object.
-
-        This will increment the object's reference-count if it is non-null.
-    */
-    inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
-        : referencedObject (refCountedObject)
-    {
-        if (refCountedObject != 0)
-            refCountedObject->incReferenceCount();
-    }
-
-    /** Copies another pointer.
-
-        This will increment the object's reference-count (if it is non-null).
-    */
-    inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
-        : referencedObject (other.referencedObject)
-    {
-        if (referencedObject != 0)
-            referencedObject->incReferenceCount();
-    }
-
-    /** Changes this pointer to point at a different object.
-
-        The reference count of the old object is decremented, and it might be
-        deleted if it hits zero. The new object's count is incremented.
-    */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
-    {
-        ReferenceCountedObjectClass* const newObject = other.referencedObject;
-
-        if (newObject != referencedObject)
-        {
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != 0)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
-    }
-
-    /** Changes this pointer to point at a different object.
-
-        The reference count of the old object is decremented, and it might be
-        deleted if it hits zero. The new object's count is incremented.
-    */
-    const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
-    {
-        if (referencedObject != newObject)
-        {
-            if (newObject != 0)
-                newObject->incReferenceCount();
-
-            ReferenceCountedObjectClass* const oldObject = referencedObject;
-            referencedObject = newObject;
-
-            if (oldObject != 0)
-                oldObject->decReferenceCount();
-        }
-
-        return *this;
-    }
-
-    /** Destructor.
-
-        This will decrement the object's reference-count, and may delete it if it
-        gets to zero.
-    */
-    inline ~ReferenceCountedObjectPtr()
-    {
-        if (referencedObject != 0)
-            referencedObject->decReferenceCount();
-    }
-
-    /** Returns the object that this pointer references.
-
-        The pointer returned may be zero, of course.
-    */
-    inline operator ReferenceCountedObjectClass*() const throw()
-    {
-        return referencedObject;
-    }
-
-    /** Returns true if this pointer refers to the given object. */
-    inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject == object;
-    }
-
-    /** Returns true if this pointer doesn't refer to the given object. */
-    inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
-    {
-        return referencedObject != object;
-    }
-
-    // the -> operator is called on the referenced object
-    inline ReferenceCountedObjectClass* operator->() const throw()
-    {
-        return referencedObject;
-    }
-
-private:
-
-    ReferenceCountedObjectClass* referencedObject;
-};
-
-#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedObject.h *********/
 
 /**
     Holds a list of objects derived from ReferenceCountedObject.
@@ -11925,232 +12150,863 @@ private:
 /********* End of inlined file: juce_SparseSet.h *********/
 
 #endif
-#ifndef __JUCE_VARIANT_JUCEHEADER__
-
-/********* Start of inlined file: juce_Variant.h *********/
-#ifndef __JUCE_VARIANT_JUCEHEADER__
-#define __JUCE_VARIANT_JUCEHEADER__
-
-class JUCE_API  DynamicObject;
-
-/**
-    A variant class, that can be used to hold a range of primitive values.
-
-    A var object can hold a range of simple primitive values, strings, or
-    a reference-counted pointer to a DynamicObject. The var class is intended
-    to act like the values used in dynamic scripting languages.
-
-    @see DynamicObject
-*/
-class JUCE_API  var
-{
-public:
-
-    typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
-
-    /** Creates a void variant. */
-    var() throw();
-
-    /** Destructor. */
-    ~var();
-
-    var (const var& valueToCopy) throw();
-    var (const int value) throw();
-    var (const bool value) throw();
-    var (const double value) throw();
-    var (const char* const value) throw();
-    var (const juce_wchar* const value) throw();
-    var (const String& value) throw();
-    var (DynamicObject* const object) throw();
-    var (MethodFunction method) throw();
-
-    const var& operator= (const var& valueToCopy) throw();
-    const var& operator= (const int value) throw();
-    const var& operator= (const bool value) throw();
-    const var& operator= (const double value) throw();
-    const var& operator= (const char* const value) throw();
-    const var& operator= (const juce_wchar* const value) throw();
-    const var& operator= (const String& value) throw();
-    const var& operator= (DynamicObject* const object) throw();
-    const var& operator= (MethodFunction method) throw();
-
-    operator int() const throw();
-    operator bool() const throw();
-    operator double() const throw();
-    operator const String() const throw();
-    const String toString() const throw();
-    DynamicObject* getObject() const throw();
-
-    bool isVoid() const throw()         { return type == voidType; }
-    bool isInt() const throw()          { return type == intType; }
-    bool isBool() const throw()         { return type == boolType; }
-    bool isDouble() const throw()       { return type == doubleType; }
-    bool isString() const throw()       { return type == stringType; }
-    bool isObject() const throw()       { return type == objectType; }
-    bool isMethod() const throw()       { return type == methodType; }
-
-    bool operator== (const var& other) const throw();
-    bool operator!= (const var& other) const throw();
-
-    /** Writes a binary representation of this value to a stream.
-        The data can be read back later using readFromStream().
-    */
-    void writeToStream (OutputStream& output) const throw();
-
-    /** Reads back a stored binary representation of a value.
-        The data in the stream must have been written using writeToStream(), or this
-        will have unpredictable results.
-    */
-    static const var readFromStream (InputStream& input) throw();
-
-    class JUCE_API  identifier
-    {
-    public:
-        identifier (const char* const name) throw();
-        identifier (const String& name) throw();
-        ~identifier() throw();
-
-        bool operator== (const identifier& other) const throw()   { return hashCode == other.hashCode; }
-
-        String name;
-        int hashCode;
-    };
-
-    /** If this variant is an object, this returns one of its properties. */
-    const var operator[] (const identifier& propertyName) const throw();
-
-    /** If this variant is an object, this invokes one of its methods with no arguments. */
-    const var call (const identifier& method) const;
-    /** If this variant is an object, this invokes one of its methods with one argument. */
-    const var call (const identifier& method, const var& arg1) const;
-    /** If this variant is an object, this invokes one of its methods with 2 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2) const;
-    /** If this variant is an object, this invokes one of its methods with 3 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
-    /** If this variant is an object, this invokes one of its methods with 4 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
-    /** If this variant is an object, this invokes one of its methods with 5 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
-
-    /** If this variant is an object, this invokes one of its methods with a list of arguments. */
-    const var invoke (const identifier& method, const var* arguments, int numArguments) const;
-
-    /** If this variant is a method pointer, this invokes it on a target object. */
-    const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    enum Type
-    {
-        voidType = 0,
-        intType,
-        boolType,
-        doubleType,
-        stringType,
-        objectType,
-        methodType
-    };
-
-    Type type;
-
-    union
-    {
-        int intValue;
-        bool boolValue;
-        double doubleValue;
-        String* stringValue;
-        DynamicObject* objectValue;
-        MethodFunction methodValue;
-    } value;
-
-    void releaseValue() throw();
-};
-
-/**
-    Represents a dynamically implemented object.
-
-    An instance of this class can be used to store named properties, and
-    by subclassing hasMethod() and invokeMethod(), you can give your object
-    methods.
-
-    This is intended for use as a wrapper for scripting language objects.
-*/
-class JUCE_API  DynamicObject  : public ReferenceCountedObject
-{
-public:
-
-    DynamicObject();
-
-    /** Destructor. */
-    virtual ~DynamicObject();
-
-    /** Returns true if the object has a property with this name.
-        Note that if the property is actually a method, this will return false.
-    */
-    virtual bool hasProperty (const var::identifier& propertyName) const;
-
-    /** Returns a named property.
-
-        This returns a void if no such property exists.
-    */
-    virtual const var getProperty (const var::identifier& propertyName) const;
-
-    /** Sets a named property. */
-    virtual void setProperty (const var::identifier& propertyName, const var& newValue);
-
-    /** Removes a named property. */
-    virtual void removeProperty (const var::identifier& propertyName);
-
-    /** Checks whether this object has the specified method.
-
-        The default implementation of this just checks whether there's a property
-        with this name that's actually a method, but this can be overridden for
-        building objects with dynamic invocation.
-    */
-    virtual bool hasMethod (const var::identifier& methodName) const;
-
-    /** Invokes a named method on this object.
-
-        The default implementation looks up the named property, and if it's a method
-        call, then it invokes it.
-
-        This method is virtual to allow more dynamic invocation to used for objects
-        where the methods may not already be set as properies.
-    */
-    virtual const var invokeMethod (const var::identifier& methodName,
-                                    const var* parameters,
-                                    int numParameters);
-
-    /** Sets up a method.
-
-        This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
-        helps to avoid accidentally invoking the wrong type of var constructor. It also makes
-        the code easier to read,
-
-        The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
-        @code
-        setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
-        @endcode
-    */
-    void setMethod (const var::identifier& methodName,
-                    var::MethodFunction methodFunction);
-
-    /** Removes all properties and methods from the object. */
-    void clear();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    Array <int> propertyIds;
-    OwnedArray <var> propertyValues;
-};
-
-#endif   // __JUCE_VARIANT_JUCEHEADER__
-/********* End of inlined file: juce_Variant.h *********/
+#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+
+/********* Start of inlined file: juce_ValueTree.h *********/
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+#define __JUCE_VALUETREE_JUCEHEADER__
+
+/********* Start of inlined file: juce_UndoManager.h *********/
+#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
+#define __JUCE_UNDOMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeBroadcaster.h *********/
+#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+#define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeListenerList.h *********/
+#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+#define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeListener.h *********/
+#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
+#define __JUCE_CHANGELISTENER_JUCEHEADER__
+
+/**
+    Receives callbacks about changes to some kind of object.
+
+    Many objects use a ChangeListenerList to keep a set of listeners which they
+    will inform when something changes. A subclass of ChangeListener
+    is used to receive these callbacks.
+
+    Note that the major difference between an ActionListener and a ChangeListener
+    is that for a ChangeListener, multiple changes will be coalesced into fewer
+    callbacks, but ActionListeners perform one callback for every event posted.
+
+    @see ChangeListenerList, ChangeBroadcaster, ActionListener
+*/
+class JUCE_API  ChangeListener
+{
+public:
+    /** Destructor. */
+    virtual ~ChangeListener()  {}
+
+    /** Overridden by your subclass to receive the callback.
+
+        @param objectThatHasChanged the value that was passed to the
+                                    ChangeListenerList::sendChangeMessage() method
+    */
+    virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
+};
+
+#endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
+/********* End of inlined file: juce_ChangeListener.h *********/
+
+/********* Start of inlined file: juce_MessageListener.h *********/
+#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
+#define __JUCE_MESSAGELISTENER_JUCEHEADER__
+
+/********* Start of inlined file: juce_Message.h *********/
+#ifndef __JUCE_MESSAGE_JUCEHEADER__
+#define __JUCE_MESSAGE_JUCEHEADER__
+
+class MessageListener;
+class MessageManager;
+
+/** The base class for objects that can be delivered to a MessageListener.
+
+    The simplest Message object contains a few integer and pointer parameters
+    that the user can set, and this is enough for a lot of purposes. For passing more
+    complex data, subclasses of Message can also be used.
+
+    @see MessageListener, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  Message
+{
+public:
+
+    /** Creates an uninitialised message.
+
+        The class's variables will also be left uninitialised.
+    */
+    Message() throw();
+
+    /** Creates a message object, filling in the member variables.
+
+        The corresponding public member variables will be set from the parameters
+        passed in.
+    */
+    Message (const int intParameter1,
+             const int intParameter2,
+             const int intParameter3,
+             void* const pointerParameter) throw();
+
+    /** Destructor. */
+    virtual ~Message() throw();
+
+    // These values can be used for carrying simple data that the application needs to
+    // pass around. For more complex messages, just create a subclass.
+
+    int intParameter1;          /**< user-defined integer value. */
+    int intParameter2;          /**< user-defined integer value. */
+    int intParameter3;          /**< user-defined integer value. */
+    void* pointerParameter;     /**< user-defined pointer value. */
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class MessageListener;
+    friend class MessageManager;
+    MessageListener* messageRecipient;
+
+    Message (const Message&);
+    const Message& operator= (const Message&);
+};
+
+#endif   // __JUCE_MESSAGE_JUCEHEADER__
+/********* End of inlined file: juce_Message.h *********/
+
+/**
+    MessageListener subclasses can post and receive Message objects.
+
+    @see Message, MessageManager, ActionListener, ChangeListener
+*/
+class JUCE_API  MessageListener
+{
+protected:
+
+    /** Creates a MessageListener. */
+    MessageListener() throw();
+
+public:
+
+    /** Destructor.
+
+        When a MessageListener is deleted, it removes itself from a global list
+        of registered listeners, so that the isValidMessageListener() method
+        will no longer return true.
+    */
+    virtual ~MessageListener();
+
+    /** This is the callback method that receives incoming messages.
+
+        This is called by the MessageManager from its dispatch loop.
+
+        @see postMessage
+    */
+    virtual void handleMessage (const Message& message) = 0;
+
+    /** Sends a message to the message queue, for asynchronous delivery to this listener
+        later on.
+
+        This method can be called safely by any thread.
+
+        @param message      the message object to send - this will be deleted
+                            automatically by the message queue, so don't keep any
+                            references to it after calling this method.
+        @see handleMessage
+    */
+    void postMessage (Message* const message) const throw();
+
+    /** Checks whether this MessageListener has been deleted.
+
+        Although not foolproof, this method is safe to call on dangling or null
+        pointers. A list of active MessageListeners is kept internally, so this
+        checks whether the object is on this list or not.
+
+        Note that it's possible to get a false-positive here, if an object is
+        deleted and another is subsequently created that happens to be at the
+        exact same memory location, but I can't think of a good way of avoiding
+        this.
+    */
+    bool isValidMessageListener() const throw();
+};
+
+#endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
+/********* End of inlined file: juce_MessageListener.h *********/
+
+/**
+    A set of ChangeListeners.
+
+    Listeners can be added and removed from the list, and change messages can be
+    broadcast to all the listeners.
+
+    @see ChangeListener, ChangeBroadcaster
+*/
+class JUCE_API  ChangeListenerList  : public MessageListener
+{
+public:
+
+    /** Creates an empty list. */
+    ChangeListenerList() throw();
+
+    /** Destructor. */
+    ~ChangeListenerList() throw();
+
+    /** Adds a listener to the list.
+
+        (Trying to add a listener that's already on the list will have no effect).
+    */
+    void addChangeListener (ChangeListener* const listener) throw();
+
+    /** Removes a listener from the list.
+
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeChangeListener (ChangeListener* const listener) throw();
+
+    /** Removes all listeners from the list. */
+    void removeAllChangeListeners() throw();
+
+    /** Posts an asynchronous change message to all the listeners.
+
+        If a message has already been sent and hasn't yet been delivered, this
+        method won't send another - in this way it coalesces multiple frequent
+        changes into fewer actual callbacks to the ChangeListeners. Contrast this
+        with the ActionListener, which posts a new event for every call to its
+        sendActionMessage() method.
+
+        Only listeners which are on the list when the change event is delivered
+        will receive the event - and this may include listeners that weren't on
+        the list when the change message was sent.
+
+        @param objectThatHasChanged     this pointer is passed to the
+                                        ChangeListener::changeListenerCallback() method,
+                                        and can be any value the application needs
+        @see sendSynchronousChangeMessage
+    */
+    void sendChangeMessage (void* objectThatHasChanged) throw();
+
+    /** This will synchronously callback all the ChangeListeners.
+
+        Use this if you need to synchronously force a call to all the
+        listeners' ChangeListener::changeListenerCallback() methods.
+    */
+    void sendSynchronousChangeMessage (void* objectThatHasChanged);
+
+    /** If a change message has been sent but not yet dispatched, this will
+        use sendSynchronousChangeMessage() to make the callback immediately.
+    */
+    void dispatchPendingMessages();
+
+    /** @internal */
+    void handleMessage (const Message&);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    SortedSet <void*> listeners;
+    CriticalSection lock;
+    void* lastChangedObject;
+    bool messagePending;
+
+    ChangeListenerList (const ChangeListenerList&);
+    const ChangeListenerList& operator= (const ChangeListenerList&);
+};
+
+#endif   // __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+/********* End of inlined file: juce_ChangeListenerList.h *********/
+
+/** Manages a list of ChangeListeners, and can send them messages.
+
+    To quickly add methods to your class that can add/remove change
+    listeners and broadcast to them, you can derive from this.
+
+    @see ChangeListenerList, ChangeListener
+*/
+class JUCE_API  ChangeBroadcaster
+{
+public:
+
+    /** Creates an ChangeBroadcaster. */
+    ChangeBroadcaster() throw();
+
+    /** Destructor. */
+    virtual ~ChangeBroadcaster();
+
+    /** Adds a listener to the list.
+
+        (Trying to add a listener that's already on the list will have no effect).
+    */
+    void addChangeListener (ChangeListener* const listener) throw();
+
+    /** Removes a listener from the list.
+
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeChangeListener (ChangeListener* const listener) throw();
+
+    /** Removes all listeners from the list. */
+    void removeAllChangeListeners() throw();
+
+    /** Broadcasts a change message to all the registered listeners.
+
+        The message will be delivered asynchronously by the event thread, so this
+        method will not directly call any of the listeners. For a synchronous
+        message, use sendSynchronousChangeMessage().
+
+        @see ChangeListenerList::sendActionMessage
+    */
+    void sendChangeMessage (void* objectThatHasChanged) throw();
+
+    /** Sends a synchronous change message to all the registered listeners.
+
+        @see ChangeListenerList::sendSynchronousChangeMessage
+    */
+    void sendSynchronousChangeMessage (void* objectThatHasChanged);
+
+    /** If a change message has been sent but not yet dispatched, this will
+        use sendSynchronousChangeMessage() to make the callback immediately.
+    */
+    void dispatchPendingMessages();
+
+private:
+
+    ChangeListenerList changeListenerList;
+
+    ChangeBroadcaster (const ChangeBroadcaster&);
+    const ChangeBroadcaster& operator= (const ChangeBroadcaster&);
+};
+
+#endif   // __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+/********* End of inlined file: juce_ChangeBroadcaster.h *********/
+
+/********* Start of inlined file: juce_UndoableAction.h *********/
+#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
+#define __JUCE_UNDOABLEACTION_JUCEHEADER__
+
+/**
+    Used by the UndoManager class to store an action which can be done
+    and undone.
+
+    @see UndoManager
+*/
+class JUCE_API  UndoableAction
+{
+protected:
+    /** Creates an action. */
+    UndoableAction() throw()    {}
+
+public:
+    /** Destructor. */
+    virtual ~UndoableAction()   {}
+
+    /** Overridden by a subclass to perform the action.
+
+        This method is called by the UndoManager, and shouldn't be used directly by
+        applications.
+
+        Be careful not to make any calls in a perform() method that could call
+        recursively back into the UndoManager::perform() method
+
+        @returns    true if the action could be performed.
+        @see UndoManager::perform
+    */
+    virtual bool perform() = 0;
+
+    /** Overridden by a subclass to undo the action.
+
+        This method is called by the UndoManager, and shouldn't be used directly by
+        applications.
+
+        Be careful not to make any calls in an undo() method that could call
+        recursively back into the UndoManager::perform() method
+
+        @returns    true if the action could be undone without any errors.
+        @see UndoManager::perform
+    */
+    virtual bool undo() = 0;
+
+    /** Returns a value to indicate how much memory this object takes up.
+
+        Because the UndoManager keeps a list of UndoableActions, this is used
+        to work out how much space each one will take up, so that the UndoManager
+        can work out how many to keep.
+
+        The default value returned here is 10 - units are arbitrary and
+        don't have to be accurate.
+
+        @see UndoManager::getNumberOfUnitsTakenUpByStoredCommands,
+             UndoManager::setMaxNumberOfStoredUnits
+    */
+    virtual int getSizeInUnits()    { return 10; }
+};
+
+#endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
+/********* End of inlined file: juce_UndoableAction.h *********/
+
+/**
+    Manages a list of undo/redo commands.
+
+    An UndoManager object keeps a list of past actions and can use these actions
+    to move backwards and forwards through an undo history.
+
+    To use it, create subclasses of UndoableAction which perform all the
+    actions you need, then when you need to actually perform an action, create one
+    and pass it to the UndoManager's perform() method.
+
+    The manager also uses the concept of 'transactions' to group the actions
+    together - all actions performed between calls to beginNewTransaction() are
+    grouped together and are all undone/redone as a group.
+
+    The UndoManager is a ChangeBroadcaster, so listeners can register to be told
+    when actions are performed or undone.
+
+    @see UndoableAction
+*/
+class JUCE_API  UndoManager  : public ChangeBroadcaster
+{
+public:
+
+    /** Creates an UndoManager.
+
+        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
+                                            to indicate how much storage it takes up
+                                            (UndoableAction::getSizeInUnits()), so this
+                                            lets you specify the maximum total number of
+                                            units that the undomanager is allowed to
+                                            keep in memory before letting the older actions
+                                            drop off the end of the list.
+        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
+                                            that will be kept, even if this involves exceeding
+                                            the amount of space specified in maxNumberOfUnitsToKeep
+    */
+    UndoManager (const int maxNumberOfUnitsToKeep = 30000,
+                 const int minimumTransactionsToKeep = 30);
+
+    /** Destructor. */
+    ~UndoManager();
+
+    /** Deletes all stored actions in the list. */
+    void clearUndoHistory();
+
+    /** Returns the current amount of space to use for storing UndoableAction objects.
+
+        @see setMaxNumberOfStoredUnits
+    */
+    int getNumberOfUnitsTakenUpByStoredCommands() const;
+
+    /** Sets the amount of space that can be used for storing UndoableAction objects.
+
+        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
+                                            to indicate how much storage it takes up
+                                            (UndoableAction::getSizeInUnits()), so this
+                                            lets you specify the maximum total number of
+                                            units that the undomanager is allowed to
+                                            keep in memory before letting the older actions
+                                            drop off the end of the list.
+        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
+                                            that will be kept, even if this involves exceeding
+                                            the amount of space specified in maxNumberOfUnitsToKeep
+        @see getNumberOfUnitsTakenUpByStoredCommands
+    */
+    void setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
+                                    const int minimumTransactionsToKeep);
+
+    /** Performs an action and adds it to the undo history list.
+
+        @param action   the action to perform - this will be deleted by the UndoManager
+                        when no longer needed
+        @param actionName   if this string is non-empty, the current transaction will be
+                            given this name; if it's empty, the current transaction name will
+                            be left unchanged. See setCurrentTransactionName()
+        @returns true if the command succeeds - see UndoableAction::perform
+        @see beginNewTransaction
+    */
+    bool perform (UndoableAction* const action,
+                  const String& actionName = String::empty);
+
+    /** Starts a new group of actions that together will be treated as a single transaction.
+
+        All actions that are passed to the perform() method between calls to this
+        method are grouped together and undone/redone together by a single call to
+        undo() or redo().
+
+        @param actionName   a description of the transaction that is about to be
+                            performed
+    */
+    void beginNewTransaction (const String& actionName = String::empty);
+
+    /** Changes the name stored for the current transaction.
+
+        Each transaction is given a name when the beginNewTransaction() method is
+        called, but this can be used to change that name without starting a new
+        transaction.
+    */
+    void setCurrentTransactionName (const String& newName);
+
+    /** Returns true if there's at least one action in the list to undo.
+
+        @see getUndoDescription, undo, canRedo
+    */
+    bool canUndo() const;
+
+    /** Returns the description of the transaction that would be next to get undone.
+
+        The description returned is the one that was passed into beginNewTransaction
+        before the set of actions was performed.
+
+        @see undo
+    */
+    const String getUndoDescription() const;
+
+    /** Tries to roll-back the last transaction.
+
+        @returns    true if the transaction can be undone, and false if it fails, or
+                    if there aren't any transactions to undo
+    */
+    bool undo();
+
+    /** Tries to roll-back any actions that were added to the current transaction.
+
+        This will perform an undo() only if there are some actions in the undo list
+        that were added after the last call to beginNewTransaction().
+
+        This is useful because it lets you call beginNewTransaction(), then
+        perform an operation which may or may not actually perform some actions, and
+        then call this method to get rid of any actions that might have been done
+        without it rolling back the previous transaction if nothing was actually
+        done.
+
+        @returns true if any actions were undone.
+    */
+    bool undoCurrentTransactionOnly();
+
+    /** Returns a list of the UndoableAction objects that have been performed during the
+        transaction that is currently open.
+
+        Effectively, this is the list of actions that would be undone if undoCurrentTransactionOnly()
+        were to be called now.
+
+        The first item in the list is the earliest action performed.
+    */
+    void getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const;
+
+    /** Returns true if there's at least one action in the list to redo.
+
+        @see getRedoDescription, redo, canUndo
+    */
+    bool canRedo() const;
+
+    /** Returns the description of the transaction that would be next to get redone.
+
+        The description returned is the one that was passed into beginNewTransaction
+        before the set of actions was performed.
+
+        @see redo
+    */
+    const String getRedoDescription() const;
+
+    /** Tries to redo the last transaction that was undone.
+
+        @returns    true if the transaction can be redone, and false if it fails, or
+                    if there aren't any transactions to redo
+    */
+    bool redo();
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    OwnedArray <OwnedArray <UndoableAction> > transactions;
+    StringArray transactionNames;
+    String currentTransactionName;
+    int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
+    bool newTransaction, reentrancyCheck;
+
+    // disallow copy constructor
+    UndoManager (const UndoManager&);
+    const UndoManager& operator= (const UndoManager&);
+};
+
+#endif   // __JUCE_UNDOMANAGER_JUCEHEADER__
+/********* End of inlined file: juce_UndoManager.h *********/
+
+/**
+    A powerful tree structure that can be used to hold free-form data, and which can
+    handle its own undo and redo behaviour.
+
+    A ValueTree contains a list of named properties as var objects, and also holds
+    any number of sub-trees.
+
+    Create ValueTree objects on the stack, and don't be afraid to copy them around, as
+    they are simply a lightweight reference to a shared data container. Creating a copy
+    of another ValueTree simply creates a new reference to the same underlying object - to
+    make a separate, deep copy of a tree you should explicitly call createCopy().
+
+    Each ValueTree has a type name, in much the same way as an XmlElement has a tag name,
+    and much of the structure of a ValueTree is similar to an XmlElement tree.
+    You can convert a ValueTree to and from an XmlElement, and as long as the XML doesn't
+    contain text elements, the conversion works well and makes a good serialisation
+    format.
+
+    All the methods that change data take an optional UndoManager, which will be used
+    to track any changes to the object. For this to work, you have to be careful to
+    consistently always use the same UndoManager for all operations to any node inside
+    the tree.
+
+    Nodes can only be a child of one parent at a time, so if you're moving a node from
+    one tree to another, be careful to always remove it first, before adding it. This
+    could also mess up your undo/redo chain, so be wary!
+
+    Listeners can be added to a ValueTree to be told when properies change and when
+    nodes are added or removed.
+
+    @see var, XmlElement
+*/
+class JUCE_API  ValueTree
+{
+public:
+
+    /** Creates an empty ValueTree with the given type name.
+        Like an XmlElement, each ValueTree node has a type, which you can access with
+        getType() and hasType().
+    */
+    ValueTree (const String& type) throw();
+
+    /** Creates a reference to another ValueTree. */
+    ValueTree (const ValueTree& other) throw();
+
+    /** Makes this object reference another node. */
+    const ValueTree& operator= (const ValueTree& other) throw();
+
+    /** Destructor. */
+    ~ValueTree() throw();
+
+    /** Returns true if both this and the other tree node refer to the same underlying structure.
+        Note that this isn't a value comparison - two independently-created trees which
+        contain identical data are not considered equal.
+    */
+    bool operator== (const ValueTree& other) const throw();
+
+    /** Returns true if this and the other node refer to different underlying structures.
+        Note that this isn't a value comparison - two independently-created trees which
+        contain identical data are not considered equal.
+    */
+    bool operator!= (const ValueTree& other) const throw();
+
+    /** Returns true if this node refers to some valid data.
+        It's hard to create an invalid node, but you might get one returned, e.g. by an out-of-range
+        call to getChild().
+    */
+    bool isValid() const throw()                    { return object != 0; }
+
+    /** Returns a deep copy of this tree and all its sub-nodes. */
+    ValueTree createCopy() const throw();
+
+    /** Returns the type of this node.
+        The type is specified when the ValueTree is created.
+        @see hasType
+    */
+    const String getType() const throw();
+
+    /** Returns true if the node has this type.
+        The comparison is case-sensitive.
+    */
+    bool hasType (const String& typeName) const throw();
+
+    /** Returns the value of a named property.
+        If no such property has been set, this will return a void variant.
+        You can also use operator[] to get a property.
+        @see var, setProperty, hasProperty
+    */
+    const var getProperty (const var::identifier& name) const throw();
+
+    /** Returns the value of a named property.
+        If no such property has been set, this will return a void variant. This is the same as
+        calling getProperty().
+        @see getProperty
+    */
+    const var operator[] (const var::identifier& name) const throw();
+
+    /** Changes a named property of the node.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+        @see var, getProperty, removeProperty
+    */
+    void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager) throw();
+
+    /** Returns true if the node contains a named property. */
+    bool hasProperty (const var::identifier& name) const throw();
+
+    /** Removes a property from the node.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void removeProperty (const var::identifier& name, UndoManager* const undoManager) throw();
+
+    /** Removes all properties from the node.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void removeAllProperties (UndoManager* const undoManager) throw();
+
+    /** Returns the total number of properties that the node contains.
+        @see getProperty.
+    */
+    int getNumProperties() const throw();
+
+    /** Returns the identifier of the property with a given index.
+        @see getNumProperties
+    */
+    const var::identifier getPropertyName (int index) const throw();
+
+    /** Returns the number of child nodes belonging to this one.
+        @see getChild
+    */
+    int getNumChildren() const throw();
+
+    /** Returns one of this node's child nodes.
+        If the index is out of range, it'll return an invalid node. (See isValid() to find out
+        whether a node is valid).
+    */
+    ValueTree getChild (int index) const throw();
+
+    /** Looks for a child node with the speficied type name.
+        If no such node is found, it'll return an invalid node. (See isValid() to find out
+        whether a node is valid).
+    */
+    ValueTree getChildWithName (const String& type) const throw();
+
+    /** Adds a child to this node.
+
+        Make sure that the child is removed from any former parent node before calling this, or
+        you'll hit an assertion.
+
+        If the index is < 0 or greater than the current number of child nodes, the new node will
+        be added at the end of the list.
+
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void addChild (ValueTree child, int index, UndoManager* const undoManager) throw();
+
+    /** Removes the specified child from this node's child-list.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void removeChild (ValueTree& child, UndoManager* const undoManager) throw();
+
+    /** Removes a child from this node's child-list.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void removeChild (const int childIndex, UndoManager* const undoManager) throw();
+
+    /** Removes all child-nodes from this node.
+        If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
+        so that this change can be undone.
+    */
+    void removeAllChildren (UndoManager* const undoManager) throw();
+
+    /** Returns true if this node is anywhere below the specified parent node.
+        This returns true if the node is a child-of-a-child, as well as a direct child.
+    */
+    bool isAChildOf (const ValueTree& possibleParent) const throw();
+
+    /** Returns the parent node that contains this one.
+        If the node has no parent, this will return an invalid node. (See isValid() to find out
+        whether a node is valid).
+    */
+    ValueTree getParent() const throw();
+
+    /** Creates an XmlElement that holds a complete image of this node and all its children.
+
+        If this node is invalid, this may return 0. Otherwise, the XML that is produced can
+        be used to recreate a similar node by calling fromXml()
+        @see fromXml
+    */
+    XmlElement* createXml() const throw();
+
+    /** Tries to recreate a node from its XML representation.
+
+        This isn't designed to cope with random XML data - for a sensible result, it should only
+        be fed XML that was created by the createXml() method.
+    */
+    static ValueTree fromXml (const XmlElement& xml) throw();
+
+    /** Listener class for events that happen to a ValueTree.
+
+        To get events from a ValueTree, make your class implement this interface, and use
+        ValueTree::addListener() and ValueTree::removeListener() to register it.
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() {}
+
+        /** This method is called when one or more of the properties of this node have changed. */
+        virtual void ValueTreePropertyChanged (ValueTree& tree) = 0;
+
+        /** This method is called when one or more of the children of this node have been added or removed. */
+        virtual void ValueTreeChildrenChanged (ValueTree& tree) = 0;
+
+        /** This method is called when this node has been added or removed from a parent node. */
+        virtual void ValueTreeParentChanged() = 0;
+    };
+
+    /** Adds a listener to receive callbacks when this node is changed. */
+    void addListener (Listener* listener) throw();
+
+    /** Removes a listener that was previously added with addListener(). */
+    void removeListener (Listener* listener) throw();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class ValueTreeSetPropertyAction;
+    friend class ValueTreeChildChangeAction;
+
+    class SharedObject    : public ReferenceCountedObject
+    {
+    public:
+        SharedObject (const String& type) throw();
+        SharedObject (const SharedObject& other) throw();
+        ~SharedObject() throw();
+
+        struct Property
+        {
+            Property (const var::identifier& id, const var& value) throw();
+
+            var::identifier id;
+            var value;
+        };
+
+        const String type;
+        OwnedArray <Property> properties;
+        ReferenceCountedArray <SharedObject> children;
+        SortedSet <Listener*> listeners;
+        SharedObject* parent;
+
+        void sendPropertyChangeMessage();
+        void sendChildChangeMessage();
+        void sendParentChangeMessage();
+        const var getProperty (const var::identifier& name) const throw();
+        void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager) throw();
+        bool hasProperty (const var::identifier& name) const throw();
+        void removeProperty (const var::identifier& name, UndoManager* const undoManager) throw();
+        void removeAllProperties (UndoManager* const undoManager) throw();
+        bool isAChildOf (const SharedObject* const possibleParent) const throw();
+        ValueTree getChildWithName (const String& type) const throw();
+        void addChild (SharedObject* child, int index, UndoManager* const undoManager) throw();
+        void removeChild (const int childIndex, UndoManager* const undoManager) throw();
+        void removeAllChildren (UndoManager* const undoManager) throw();
+        XmlElement* createXml() const throw();
+    };
+
+    typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
+
+    ReferenceCountedObjectPtr <SharedObject> object;
+
+    ValueTree (SharedObject* const object_) throw();
+};
+
+#endif   // __JUCE_VALUETREE_JUCEHEADER__
+/********* End of inlined file: juce_ValueTree.h *********/
 
 #endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
@@ -13961,9 +14817,6 @@ private:
 /********* End of inlined file: juce_SubregionStream.h *********/
 
 #endif
-#ifndef __JUCE_STRING_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 
 /********* Start of inlined file: juce_LocalisedStrings.h *********/
@@ -14125,6 +14978,9 @@ private:
 
 #endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 /********* End of inlined file: juce_LocalisedStrings.h *********/
+
+#endif
+#ifndef __JUCE_STRING_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
@@ -15047,116 +15903,6 @@ private:
 #ifndef __JUCE_THREAD_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
-
-/********* Start of inlined file: juce_TimeSliceThread.h *********/
-#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
-#define __JUCE_TIMESLICETHREAD_JUCEHEADER__
-
-/**
-    Used by the TimeSliceThread class.
-
-    To register your class with a TimeSliceThread, derive from this class and
-    use the TimeSliceThread::addTimeSliceClient() method to add it to the list.
-
-    Make sure you always call TimeSliceThread::removeTimeSliceClient() before
-    deleting your client!
-
-    @see TimeSliceThread
-*/
-class JUCE_API  TimeSliceClient
-{
-public:
-    /** Destructor. */
-    virtual ~TimeSliceClient()   {}
-
-    /** Called back by a TimeSliceThread.
-
-        When you register this class with it, a TimeSliceThread will repeatedly call
-        this method.
-
-        The implementation of this method should use its time-slice to do something that's
-        quick - never block for longer than absolutely necessary.
-
-        @returns    Your method should return true if it needs more time, or false if it's
-                    not too busy and doesn't need calling back urgently. If all the thread's
-                    clients indicate that they're not busy, then it'll save CPU by sleeping for
-                    up to half a second in between callbacks. You can force the TimeSliceThread
-                    to wake up and poll again immediately by calling its notify() method.
-    */
-    virtual bool useTimeSlice() = 0;
-};
-
-/**
-    A thread that keeps a list of clients, and calls each one in turn, giving them
-    all a chance to run some sort of short task.
-
-    @see TimeSliceClient, Thread
-*/
-class JUCE_API  TimeSliceThread   : public Thread
-{
-public:
-
-    /**
-        Creates a TimeSliceThread.
-
-        When first created, the thread is not running. Use the startThread()
-        method to start it.
-    */
-    TimeSliceThread (const String& threadName);
-
-    /** Destructor.
-
-        Deleting a Thread object that is running will only give the thread a
-        brief opportunity to stop itself cleanly, so it's recommended that you
-        should always call stopThread() with a decent timeout before deleting,
-        to avoid the thread being forcibly killed (which is a Bad Thing).
-    */
-    ~TimeSliceThread();
-
-    /** Adds a client to the list.
-
-        The client's callbacks will start immediately (possibly before the method
-        has returned).
-    */
-    void addTimeSliceClient (TimeSliceClient* const client);
-
-    /** Removes a client from the list.
-
-        This method will make sure that all callbacks to the client have completely
-        finished before the method returns.
-    */
-    void removeTimeSliceClient (TimeSliceClient* const client);
-
-    /** Returns the number of registered clients. */
-    int getNumClients() const throw();
-
-    /** Returns one of the registered clients. */
-    TimeSliceClient* getClient (const int index) const throw();
-
-    /** @internal */
-    void run();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    CriticalSection callbackLock, listLock;
-    Array <TimeSliceClient*> clients;
-    int index;
-    TimeSliceClient* clientBeingCalled;
-    bool clientsChanged;
-
-    TimeSliceThread (const TimeSliceThread&);
-    const TimeSliceThread& operator= (const TimeSliceThread&);
-};
-
-#endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
-/********* End of inlined file: juce_TimeSliceThread.h *********/
-
-#endif
-#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadPool.h *********/
@@ -15435,6 +16181,116 @@ private:
 
 #endif   // __JUCE_THREADPOOL_JUCEHEADER__
 /********* End of inlined file: juce_ThreadPool.h *********/
+
+#endif
+#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
+
+/********* Start of inlined file: juce_TimeSliceThread.h *********/
+#ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
+#define __JUCE_TIMESLICETHREAD_JUCEHEADER__
+
+/**
+    Used by the TimeSliceThread class.
+
+    To register your class with a TimeSliceThread, derive from this class and
+    use the TimeSliceThread::addTimeSliceClient() method to add it to the list.
+
+    Make sure you always call TimeSliceThread::removeTimeSliceClient() before
+    deleting your client!
+
+    @see TimeSliceThread
+*/
+class JUCE_API  TimeSliceClient
+{
+public:
+    /** Destructor. */
+    virtual ~TimeSliceClient()   {}
+
+    /** Called back by a TimeSliceThread.
+
+        When you register this class with it, a TimeSliceThread will repeatedly call
+        this method.
+
+        The implementation of this method should use its time-slice to do something that's
+        quick - never block for longer than absolutely necessary.
+
+        @returns    Your method should return true if it needs more time, or false if it's
+                    not too busy and doesn't need calling back urgently. If all the thread's
+                    clients indicate that they're not busy, then it'll save CPU by sleeping for
+                    up to half a second in between callbacks. You can force the TimeSliceThread
+                    to wake up and poll again immediately by calling its notify() method.
+    */
+    virtual bool useTimeSlice() = 0;
+};
+
+/**
+    A thread that keeps a list of clients, and calls each one in turn, giving them
+    all a chance to run some sort of short task.
+
+    @see TimeSliceClient, Thread
+*/
+class JUCE_API  TimeSliceThread   : public Thread
+{
+public:
+
+    /**
+        Creates a TimeSliceThread.
+
+        When first created, the thread is not running. Use the startThread()
+        method to start it.
+    */
+    TimeSliceThread (const String& threadName);
+
+    /** Destructor.
+
+        Deleting a Thread object that is running will only give the thread a
+        brief opportunity to stop itself cleanly, so it's recommended that you
+        should always call stopThread() with a decent timeout before deleting,
+        to avoid the thread being forcibly killed (which is a Bad Thing).
+    */
+    ~TimeSliceThread();
+
+    /** Adds a client to the list.
+
+        The client's callbacks will start immediately (possibly before the method
+        has returned).
+    */
+    void addTimeSliceClient (TimeSliceClient* const client);
+
+    /** Removes a client from the list.
+
+        This method will make sure that all callbacks to the client have completely
+        finished before the method returns.
+    */
+    void removeTimeSliceClient (TimeSliceClient* const client);
+
+    /** Returns the number of registered clients. */
+    int getNumClients() const throw();
+
+    /** Returns one of the registered clients. */
+    TimeSliceClient* getClient (const int index) const throw();
+
+    /** @internal */
+    void run();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    CriticalSection callbackLock, listLock;
+    Array <TimeSliceClient*> clients;
+    int index;
+    TimeSliceClient* clientBeingCalled;
+    bool clientsChanged;
+
+    TimeSliceThread (const TimeSliceThread&);
+    const TimeSliceThread& operator= (const TimeSliceThread&);
+};
+
+#endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
+/********* End of inlined file: juce_TimeSliceThread.h *********/
+
+#endif
+#ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
 
 #endif
 
@@ -19763,8 +20619,8 @@ private:
 /********* End of inlined file: juce_Colours.h *********/
 
 /********* Start of inlined file: juce_FillType.h *********/
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__x
-#define __JUCE_GRAPHICS_JUCEHEADER__x
+#ifndef __JUCE_FILLTYPE_JUCEHEADER__
+#define __JUCE_FILLTYPE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ColourGradient.h *********/
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
@@ -19993,7 +20849,7 @@ public:
     juce_UseDebuggingNewOperator
 };
 
-#endif   // __JUCE_GRAPHICS_JUCEHEADER__
+#endif   // __JUCE_FILLTYPE_JUCEHEADER__
 /********* End of inlined file: juce_FillType.h *********/
 
 /********* Start of inlined file: juce_RectanglePlacement.h *********/
@@ -21151,129 +22007,6 @@ private:
 
 class Component;
 class Graphics;
-
-/********* Start of inlined file: juce_MessageListener.h *********/
-#ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
-#define __JUCE_MESSAGELISTENER_JUCEHEADER__
-
-/********* Start of inlined file: juce_Message.h *********/
-#ifndef __JUCE_MESSAGE_JUCEHEADER__
-#define __JUCE_MESSAGE_JUCEHEADER__
-
-class MessageListener;
-class MessageManager;
-
-/** The base class for objects that can be delivered to a MessageListener.
-
-    The simplest Message object contains a few integer and pointer parameters
-    that the user can set, and this is enough for a lot of purposes. For passing more
-    complex data, subclasses of Message can also be used.
-
-    @see MessageListener, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  Message
-{
-public:
-
-    /** Creates an uninitialised message.
-
-        The class's variables will also be left uninitialised.
-    */
-    Message() throw();
-
-    /** Creates a message object, filling in the member variables.
-
-        The corresponding public member variables will be set from the parameters
-        passed in.
-    */
-    Message (const int intParameter1,
-             const int intParameter2,
-             const int intParameter3,
-             void* const pointerParameter) throw();
-
-    /** Destructor. */
-    virtual ~Message() throw();
-
-    // These values can be used for carrying simple data that the application needs to
-    // pass around. For more complex messages, just create a subclass.
-
-    int intParameter1;          /**< user-defined integer value. */
-    int intParameter2;          /**< user-defined integer value. */
-    int intParameter3;          /**< user-defined integer value. */
-    void* pointerParameter;     /**< user-defined pointer value. */
-
-    juce_UseDebuggingNewOperator
-
-private:
-    friend class MessageListener;
-    friend class MessageManager;
-    MessageListener* messageRecipient;
-
-    Message (const Message&);
-    const Message& operator= (const Message&);
-};
-
-#endif   // __JUCE_MESSAGE_JUCEHEADER__
-/********* End of inlined file: juce_Message.h *********/
-
-/**
-    MessageListener subclasses can post and receive Message objects.
-
-    @see Message, MessageManager, ActionListener, ChangeListener
-*/
-class JUCE_API  MessageListener
-{
-protected:
-
-    /** Creates a MessageListener. */
-    MessageListener() throw();
-
-public:
-
-    /** Destructor.
-
-        When a MessageListener is deleted, it removes itself from a global list
-        of registered listeners, so that the isValidMessageListener() method
-        will no longer return true.
-    */
-    virtual ~MessageListener();
-
-    /** This is the callback method that receives incoming messages.
-
-        This is called by the MessageManager from its dispatch loop.
-
-        @see postMessage
-    */
-    virtual void handleMessage (const Message& message) = 0;
-
-    /** Sends a message to the message queue, for asynchronous delivery to this listener
-        later on.
-
-        This method can be called safely by any thread.
-
-        @param message      the message object to send - this will be deleted
-                            automatically by the message queue, so don't keep any
-                            references to it after calling this method.
-        @see handleMessage
-    */
-    void postMessage (Message* const message) const throw();
-
-    /** Checks whether this MessageListener has been deleted.
-
-        Although not foolproof, this method is safe to call on dangling or null
-        pointers. A list of active MessageListeners is kept internally, so this
-        checks whether the object is on this list or not.
-
-        Note that it's possible to get a false-positive here, if an object is
-        deleted and another is subsequently created that happens to be at the
-        exact same memory location, but I can't think of a good way of avoiding
-        this.
-    */
-    bool isValidMessageListener() const throw();
-};
-
-#endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_MessageListener.h *********/
 
 class ComponentBoundsConstrainer;
 class ComponentDeletionWatcher;
@@ -25205,194 +25938,6 @@ public:
 #ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
 #define __JUCE_PROPERTIESFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChangeBroadcaster.h *********/
-#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-#define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ChangeListenerList.h *********/
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-#define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-
-/********* Start of inlined file: juce_ChangeListener.h *********/
-#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
-#define __JUCE_CHANGELISTENER_JUCEHEADER__
-
-/**
-    Receives callbacks about changes to some kind of object.
-
-    Many objects use a ChangeListenerList to keep a set of listeners which they
-    will inform when something changes. A subclass of ChangeListener
-    is used to receive these callbacks.
-
-    Note that the major difference between an ActionListener and a ChangeListener
-    is that for a ChangeListener, multiple changes will be coalesced into fewer
-    callbacks, but ActionListeners perform one callback for every event posted.
-
-    @see ChangeListenerList, ChangeBroadcaster, ActionListener
-*/
-class JUCE_API  ChangeListener
-{
-public:
-    /** Destructor. */
-    virtual ~ChangeListener()  {}
-
-    /** Overridden by your subclass to receive the callback.
-
-        @param objectThatHasChanged the value that was passed to the
-                                    ChangeListenerList::sendChangeMessage() method
-    */
-    virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
-};
-
-#endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_ChangeListener.h *********/
-
-/**
-    A set of ChangeListeners.
-
-    Listeners can be added and removed from the list, and change messages can be
-    broadcast to all the listeners.
-
-    @see ChangeListener, ChangeBroadcaster
-*/
-class JUCE_API  ChangeListenerList  : public MessageListener
-{
-public:
-
-    /** Creates an empty list. */
-    ChangeListenerList() throw();
-
-    /** Destructor. */
-    ~ChangeListenerList() throw();
-
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
-    */
-    void addChangeListener (ChangeListener* const listener) throw();
-
-    /** Removes a listener from the list.
-
-        If the listener isn't on the list, this won't have any effect.
-    */
-    void removeChangeListener (ChangeListener* const listener) throw();
-
-    /** Removes all listeners from the list. */
-    void removeAllChangeListeners() throw();
-
-    /** Posts an asynchronous change message to all the listeners.
-
-        If a message has already been sent and hasn't yet been delivered, this
-        method won't send another - in this way it coalesces multiple frequent
-        changes into fewer actual callbacks to the ChangeListeners. Contrast this
-        with the ActionListener, which posts a new event for every call to its
-        sendActionMessage() method.
-
-        Only listeners which are on the list when the change event is delivered
-        will receive the event - and this may include listeners that weren't on
-        the list when the change message was sent.
-
-        @param objectThatHasChanged     this pointer is passed to the
-                                        ChangeListener::changeListenerCallback() method,
-                                        and can be any value the application needs
-        @see sendSynchronousChangeMessage
-    */
-    void sendChangeMessage (void* objectThatHasChanged) throw();
-
-    /** This will synchronously callback all the ChangeListeners.
-
-        Use this if you need to synchronously force a call to all the
-        listeners' ChangeListener::changeListenerCallback() methods.
-    */
-    void sendSynchronousChangeMessage (void* objectThatHasChanged);
-
-    /** If a change message has been sent but not yet dispatched, this will
-        use sendSynchronousChangeMessage() to make the callback immediately.
-    */
-    void dispatchPendingMessages();
-
-    /** @internal */
-    void handleMessage (const Message&);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    SortedSet <void*> listeners;
-    CriticalSection lock;
-    void* lastChangedObject;
-    bool messagePending;
-
-    ChangeListenerList (const ChangeListenerList&);
-    const ChangeListenerList& operator= (const ChangeListenerList&);
-};
-
-#endif   // __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-/********* End of inlined file: juce_ChangeListenerList.h *********/
-
-/** Manages a list of ChangeListeners, and can send them messages.
-
-    To quickly add methods to your class that can add/remove change
-    listeners and broadcast to them, you can derive from this.
-
-    @see ChangeListenerList, ChangeListener
-*/
-class JUCE_API  ChangeBroadcaster
-{
-public:
-
-    /** Creates an ChangeBroadcaster. */
-    ChangeBroadcaster() throw();
-
-    /** Destructor. */
-    virtual ~ChangeBroadcaster();
-
-    /** Adds a listener to the list.
-
-        (Trying to add a listener that's already on the list will have no effect).
-    */
-    void addChangeListener (ChangeListener* const listener) throw();
-
-    /** Removes a listener from the list.
-
-        If the listener isn't on the list, this won't have any effect.
-    */
-    void removeChangeListener (ChangeListener* const listener) throw();
-
-    /** Removes all listeners from the list. */
-    void removeAllChangeListeners() throw();
-
-    /** Broadcasts a change message to all the registered listeners.
-
-        The message will be delivered asynchronously by the event thread, so this
-        method will not directly call any of the listeners. For a synchronous
-        message, use sendSynchronousChangeMessage().
-
-        @see ChangeListenerList::sendActionMessage
-    */
-    void sendChangeMessage (void* objectThatHasChanged) throw();
-
-    /** Sends a synchronous change message to all the registered listeners.
-
-        @see ChangeListenerList::sendSynchronousChangeMessage
-    */
-    void sendSynchronousChangeMessage (void* objectThatHasChanged);
-
-    /** If a change message has been sent but not yet dispatched, this will
-        use sendSynchronousChangeMessage() to make the callback immediately.
-    */
-    void dispatchPendingMessages();
-
-private:
-
-    ChangeListenerList changeListenerList;
-
-    ChangeBroadcaster (const ChangeBroadcaster&);
-    const ChangeBroadcaster& operator= (const ChangeBroadcaster&);
-};
-
-#endif   // __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-/********* End of inlined file: juce_ChangeBroadcaster.h *********/
-
 /** Wrapper on a file that stores a list of key/value data pairs.
 
     Useful for storing application settings, etc. See the PropertySet class for
@@ -27331,9 +27876,6 @@ private:
 /********* End of inlined file: juce_MidiKeyboardState.h *********/
 
 #endif
-#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 
 /********* Start of inlined file: juce_MidiMessageCollector.h *********/
@@ -27569,6 +28111,9 @@ private:
 
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -33387,261 +33932,6 @@ private:
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 #define __JUCE_TEXTEDITOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_UndoManager.h *********/
-#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
-#define __JUCE_UNDOMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_UndoableAction.h *********/
-#ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
-#define __JUCE_UNDOABLEACTION_JUCEHEADER__
-
-/**
-    Used by the UndoManager class to store an action which can be done
-    and undone.
-
-    @see UndoManager
-*/
-class JUCE_API  UndoableAction
-{
-protected:
-    /** Creates an action. */
-    UndoableAction() throw()    {}
-
-public:
-    /** Destructor. */
-    virtual ~UndoableAction()   {}
-
-    /** Overridden by a subclass to perform the action.
-
-        This method is called by the UndoManager, and shouldn't be used directly by
-        applications.
-
-        Be careful not to make any calls in a perform() method that could call
-        recursively back into the UndoManager::perform() method
-
-        @returns    true if the action could be performed.
-        @see UndoManager::perform
-    */
-    virtual bool perform() = 0;
-
-    /** Overridden by a subclass to undo the action.
-
-        This method is called by the UndoManager, and shouldn't be used directly by
-        applications.
-
-        Be careful not to make any calls in an undo() method that could call
-        recursively back into the UndoManager::perform() method
-
-        @returns    true if the action could be undone without any errors.
-        @see UndoManager::perform
-    */
-    virtual bool undo() = 0;
-
-    /** Returns a value to indicate how much memory this object takes up.
-
-        Because the UndoManager keeps a list of UndoableActions, this is used
-        to work out how much space each one will take up, so that the UndoManager
-        can work out how many to keep.
-
-        The default value returned here is 10 - units are arbitrary and
-        don't have to be accurate.
-
-        @see UndoManager::getNumberOfUnitsTakenUpByStoredCommands,
-             UndoManager::setMaxNumberOfStoredUnits
-    */
-    virtual int getSizeInUnits()    { return 10; }
-};
-
-#endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
-/********* End of inlined file: juce_UndoableAction.h *********/
-
-/**
-    Manages a list of undo/redo commands.
-
-    An UndoManager object keeps a list of past actions and can use these actions
-    to move backwards and forwards through an undo history.
-
-    To use it, create subclasses of UndoableAction which perform all the
-    actions you need, then when you need to actually perform an action, create one
-    and pass it to the UndoManager's perform() method.
-
-    The manager also uses the concept of 'transactions' to group the actions
-    together - all actions performed between calls to beginNewTransaction() are
-    grouped together and are all undone/redone as a group.
-
-    The UndoManager is a ChangeBroadcaster, so listeners can register to be told
-    when actions are performed or undone.
-
-    @see UndoableAction
-*/
-class JUCE_API  UndoManager  : public ChangeBroadcaster
-{
-public:
-
-    /** Creates an UndoManager.
-
-        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
-                                            to indicate how much storage it takes up
-                                            (UndoableAction::getSizeInUnits()), so this
-                                            lets you specify the maximum total number of
-                                            units that the undomanager is allowed to
-                                            keep in memory before letting the older actions
-                                            drop off the end of the list.
-        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
-                                            that will be kept, even if this involves exceeding
-                                            the amount of space specified in maxNumberOfUnitsToKeep
-    */
-    UndoManager (const int maxNumberOfUnitsToKeep = 30000,
-                 const int minimumTransactionsToKeep = 30);
-
-    /** Destructor. */
-    ~UndoManager();
-
-    /** Deletes all stored actions in the list. */
-    void clearUndoHistory();
-
-    /** Returns the current amount of space to use for storing UndoableAction objects.
-
-        @see setMaxNumberOfStoredUnits
-    */
-    int getNumberOfUnitsTakenUpByStoredCommands() const;
-
-    /** Sets the amount of space that can be used for storing UndoableAction objects.
-
-        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
-                                            to indicate how much storage it takes up
-                                            (UndoableAction::getSizeInUnits()), so this
-                                            lets you specify the maximum total number of
-                                            units that the undomanager is allowed to
-                                            keep in memory before letting the older actions
-                                            drop off the end of the list.
-        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
-                                            that will be kept, even if this involves exceeding
-                                            the amount of space specified in maxNumberOfUnitsToKeep
-        @see getNumberOfUnitsTakenUpByStoredCommands
-    */
-    void setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
-                                    const int minimumTransactionsToKeep);
-
-    /** Performs an action and adds it to the undo history list.
-
-        @param action   the action to perform - this will be deleted by the UndoManager
-                        when no longer needed
-        @param actionName   if this string is non-empty, the current transaction will be
-                            given this name; if it's empty, the current transaction name will
-                            be left unchanged. See setCurrentTransactionName()
-        @returns true if the command succeeds - see UndoableAction::perform
-        @see beginNewTransaction
-    */
-    bool perform (UndoableAction* const action,
-                  const String& actionName = String::empty);
-
-    /** Starts a new group of actions that together will be treated as a single transaction.
-
-        All actions that are passed to the perform() method between calls to this
-        method are grouped together and undone/redone together by a single call to
-        undo() or redo().
-
-        @param actionName   a description of the transaction that is about to be
-                            performed
-    */
-    void beginNewTransaction (const String& actionName = String::empty);
-
-    /** Changes the name stored for the current transaction.
-
-        Each transaction is given a name when the beginNewTransaction() method is
-        called, but this can be used to change that name without starting a new
-        transaction.
-    */
-    void setCurrentTransactionName (const String& newName);
-
-    /** Returns true if there's at least one action in the list to undo.
-
-        @see getUndoDescription, undo, canRedo
-    */
-    bool canUndo() const;
-
-    /** Returns the description of the transaction that would be next to get undone.
-
-        The description returned is the one that was passed into beginNewTransaction
-        before the set of actions was performed.
-
-        @see undo
-    */
-    const String getUndoDescription() const;
-
-    /** Tries to roll-back the last transaction.
-
-        @returns    true if the transaction can be undone, and false if it fails, or
-                    if there aren't any transactions to undo
-    */
-    bool undo();
-
-    /** Tries to roll-back any actions that were added to the current transaction.
-
-        This will perform an undo() only if there are some actions in the undo list
-        that were added after the last call to beginNewTransaction().
-
-        This is useful because it lets you call beginNewTransaction(), then
-        perform an operation which may or may not actually perform some actions, and
-        then call this method to get rid of any actions that might have been done
-        without it rolling back the previous transaction if nothing was actually
-        done.
-
-        @returns true if any actions were undone.
-    */
-    bool undoCurrentTransactionOnly();
-
-    /** Returns a list of the UndoableAction objects that have been performed during the
-        transaction that is currently open.
-
-        Effectively, this is the list of actions that would be undone if undoCurrentTransactionOnly()
-        were to be called now.
-
-        The first item in the list is the earliest action performed.
-    */
-    void getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const;
-
-    /** Returns true if there's at least one action in the list to redo.
-
-        @see getRedoDescription, redo, canUndo
-    */
-    bool canRedo() const;
-
-    /** Returns the description of the transaction that would be next to get redone.
-
-        The description returned is the one that was passed into beginNewTransaction
-        before the set of actions was performed.
-
-        @see redo
-    */
-    const String getRedoDescription() const;
-
-    /** Tries to redo the last transaction that was undone.
-
-        @returns    true if the transaction can be redone, and false if it fails, or
-                    if there aren't any transactions to redo
-    */
-    bool redo();
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    OwnedArray <OwnedArray <UndoableAction> > transactions;
-    StringArray transactionNames;
-    String currentTransactionName;
-    int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
-    bool newTransaction, reentrancyCheck;
-
-    // disallow copy constructor
-    UndoManager (const UndoManager&);
-    const UndoManager& operator= (const UndoManager&);
-};
-
-#endif   // __JUCE_UNDOMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_UndoManager.h *********/
-
 class TextEditor;
 class TextHolderComponent;
 
@@ -36519,6 +36809,11 @@ public:
         @see DragAndDropContainer::startDragging
     */
     virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+
+    /** You can override this to provide tool tips for specific rows.
+        @see TooltipClient
+    */
+    virtual const String getTooltipForRow (int row);
 };
 
 /**
@@ -39169,6 +39464,9 @@ private:
 #ifndef __JUCE_TIMER_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_COLOUR_JUCEHEADER__
 
 #endif
@@ -39176,9 +39474,6 @@ private:
 
 #endif
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TYPEFACE_JUCEHEADER__
@@ -39590,7 +39885,7 @@ private:
 /********* End of inlined file: juce_GlyphArrangement.h *********/
 
 #endif
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__
+#ifndef __JUCE_FILLTYPE_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
@@ -39937,6 +40232,9 @@ public:
 
 #endif   // __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 /********* End of inlined file: juce_LowLevelGraphicsContext.h *********/
+
+#endif
+#ifndef __JUCE_GRAPHICS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
@@ -43366,11 +43664,10 @@ private:
 #ifndef __JUCE_KEYLISTENER_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_KEYPRESS_JUCEHEADER__
 
-/********* Start of inlined file: juce_KeyMappingEditorComponent.h *********/
-#ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
-#define __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+#endif
+#ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
 
 /********* Start of inlined file: juce_KeyPressMappingSet.h *********/
 #ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
@@ -43600,6 +43897,19 @@ private:
 
 #endif   // __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
 /********* End of inlined file: juce_KeyPressMappingSet.h *********/
+
+#endif
+#ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_KeyMappingEditorComponent.h *********/
+#ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
+#define __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
 
 /********* Start of inlined file: juce_TreeView.h *********/
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
@@ -44515,18 +44825,6 @@ private:
 
 #endif   // __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_KeyMappingEditorComponent.h *********/
-
-#endif
-#ifndef __JUCE_KEYPRESS_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
@@ -45732,9 +46030,6 @@ private:
 /********* End of inlined file: juce_ComponentDragger.h *********/
 
 #endif
-#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
 
 #endif
@@ -46354,13 +46649,13 @@ private:
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_LABEL_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_LISTBOX_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
@@ -47897,9 +48192,6 @@ private:
 /********* End of inlined file: juce_TableListBox.h *********/
 
 #endif
-#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
 
 #endif
@@ -47988,6 +48280,9 @@ public:
 /********* End of inlined file: juce_ToolbarItemFactory.h *********/
 
 #endif
+#ifndef __JUCE_LISTBOX_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ToolbarItemPalette.h *********/
@@ -48044,6 +48339,9 @@ private:
 
 #endif
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
@@ -50959,7 +51257,157 @@ protected:
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+#ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileListComponent.h *********/
+#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a listbox.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileTreeComponent
+*/
+class JUCE_API  FileListComponent  : public ListBox,
+                                     public DirectoryContentsDisplayComponent,
+                                     private ListBoxModel,
+                                     private ChangeListener
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileListComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileListComponent();
+
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
+    */
+    int getNumSelectedFiles() const;
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    const File getSelectedFile (int index = 0) const;
+
+    /** Scrolls to the top of the list. */
+    void scrollToTop();
+
+    /** @internal */
+    void changeListenerCallback (void*);
+    /** @internal */
+    int getNumRows();
+    /** @internal */
+    void paintListBoxItem (int, Graphics&, int, int, bool);
+    /** @internal */
+    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
+    /** @internal */
+    void selectedRowsChanged (int lastRowSelected);
+    /** @internal */
+    void deleteKeyPressed (int currentSelectedRow);
+    /** @internal */
+    void returnKeyPressed (int currentSelectedRow);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    FileListComponent (const FileListComponent&);
+    const FileListComponent& operator= (const FileListComponent&);
+
+    File lastDirectory;
+};
+
+#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileListComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILEFILTER_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileTreeComponent.h *********/
+#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
+#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
+
+/**
+    A component that displays the files in a directory as a treeview.
+
+    This implements the DirectoryContentsDisplayComponent base class so that
+    it can be used in a FileBrowserComponent.
+
+    To attach a listener to it, use its DirectoryContentsDisplayComponent base
+    class and the FileBrowserListener class.
+
+    @see DirectoryContentsList, FileListComponent
+*/
+class JUCE_API  FileTreeComponent  : public TreeView,
+                                     public DirectoryContentsDisplayComponent
+{
+public:
+
+    /** Creates a listbox to show the contents of a specified directory.
+    */
+    FileTreeComponent (DirectoryContentsList& listToShow);
+
+    /** Destructor. */
+    ~FileTreeComponent();
+
+    /** Returns the number of files the user has got selected.
+        @see getSelectedFile
+    */
+    int getNumSelectedFiles() const                 { return TreeView::getNumSelectedItems(); }
+
+    /** Returns one of the files that the user has currently selected.
+        The index should be in the range 0 to (getNumSelectedFiles() - 1).
+        @see getNumSelectedFiles
+    */
+    const File getSelectedFile (int index = 0) const;
+
+    /** Scrolls the list to the top. */
+    void scrollToTop();
+
+    /** Setting a name for this allows tree items to be dragged.
+
+        The string that you pass in here will be returned by the getDragSourceDescription()
+        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
+    */
+    void setDragAndDropDescription (const String& description) throw();
+
+    /** Returns the last value that was set by setDragAndDropDescription().
+    */
+    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String dragAndDropDescription;
+
+    FileTreeComponent (const FileTreeComponent&);
+    const FileTreeComponent& operator= (const FileTreeComponent&);
+};
+
+#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileTreeComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileChooserDialogBox.h *********/
+#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
+#define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 
 /********* Start of inlined file: juce_FileBrowserComponent.h *********/
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
@@ -51198,193 +51646,6 @@ private:
 #endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_FileBrowserComponent.h *********/
 
-#endif
-#ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileChooser.h *********/
-#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
-#define __JUCE_FILECHOOSER_JUCEHEADER__
-
-/**
-    Creates a dialog box to choose a file or directory to load or save.
-
-    To use a FileChooser:
-    - create one (as a local stack variable is the neatest way)
-    - call one of its browseFor.. methods
-    - if this returns true, the user has selected a file, so you can retrieve it
-      with the getResult() method.
-
-    e.g. @code
-    void loadMooseFile()
-    {
-        FileChooser myChooser ("Please select the moose you want to load...",
-                               File::getSpecialLocation (File::userHomeDirectory),
-                               "*.moose");
-
-        if (myChooser.browseForFileToOpen())
-        {
-            File mooseFile (myChooser.getResult());
-
-            loadMoose (mooseFile);
-        }
-    }
-    @endcode
-*/
-class JUCE_API  FileChooser
-{
-public:
-
-    /** Creates a FileChooser.
-
-        After creating one of these, use one of the browseFor... methods to display it.
-
-        @param dialogBoxTitle           a text string to display in the dialog box to
-                                        tell the user what's going on
-        @param initialFileOrDirectory   the file or directory that should be selected when
-                                        the dialog box opens. If this parameter is set to
-                                        File::nonexistent, a sensible default directory
-                                        will be used instead.
-        @param filePatternsAllowed      a set of file patterns to specify which files can be
-                                        selected - each pattern should be separated by a
-                                        comma or semi-colon, e.g. "*" or "*.jpg;*.gif". An
-                                        empty string means that all files are allowed
-        @param useOSNativeDialogBox     if true, then a native dialog box will be used if
-                                        possible; if false, then a Juce-based browser dialog
-                                        box will always be used
-        @see browseForFileToOpen, browseForFileToSave, browseForDirectory
-    */
-    FileChooser (const String& dialogBoxTitle,
-                 const File& initialFileOrDirectory = File::nonexistent,
-                 const String& filePatternsAllowed = String::empty,
-                 const bool useOSNativeDialogBox = true);
-
-    /** Destructor. */
-    ~FileChooser();
-
-    /** Shows a dialog box to choose a file to open.
-
-        This will display the dialog box modally, using an "open file" mode, so that
-        it won't allow non-existent files or directories to be chosen.
-
-        @param previewComponent   an optional component to display inside the dialog
-                                  box to show special info about the files that the user
-                                  is browsing. The component will not be deleted by this
-                                  object, so the caller must take care of it.
-        @returns    true if the user selected a file, in which case, use the getResult()
-                    method to find out what it was. Returns false if they cancelled instead.
-        @see browseForFileToSave, browseForDirectory
-    */
-    bool browseForFileToOpen (FilePreviewComponent* previewComponent = 0);
-
-    /** Same as browseForFileToOpen, but allows the user to select multiple files.
-
-        The files that are returned can be obtained by calling getResults(). See
-        browseForFileToOpen() for more info about the behaviour of this method.
-    */
-    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
-
-    /** Shows a dialog box to choose a file to save.
-
-        This will display the dialog box modally, using an "save file" mode, so it
-        will allow non-existent files to be chosen, but not directories.
-
-        @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
-                    the user if they're sure they want to overwrite a file that already
-                    exists
-        @returns    true if the user chose a file and pressed 'ok', in which case, use
-                    the getResult() method to find out what the file was. Returns false
-                    if they cancelled instead.
-        @see browseForFileToOpen, browseForDirectory
-    */
-    bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
-
-    /** Shows a dialog box to choose a directory.
-
-        This will display the dialog box modally, using an "open directory" mode, so it
-        will only allow directories to be returned, not files.
-
-        @returns    true if the user chose a directory and pressed 'ok', in which case, use
-                    the getResult() method to find out what they chose. Returns false
-                    if they cancelled instead.
-        @see browseForFileToOpen, browseForFileToSave
-    */
-    bool browseForDirectory();
-
-    /** Same as browseForFileToOpen, but allows the user to select multiple files and directories.
-
-        The files that are returned can be obtained by calling getResults(). See
-        browseForFileToOpen() for more info about the behaviour of this method.
-    */
-    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = 0);
-
-    /** Returns the last file that was chosen by one of the browseFor methods.
-
-        After calling the appropriate browseFor... method, this method lets you
-        find out what file or directory they chose.
-
-        Note that the file returned is only valid if the browse method returned true (i.e.
-        if the user pressed 'ok' rather than cancelling).
-
-        If you're using a multiple-file select, then use the getResults() method instead,
-        to obtain the list of all files chosen.
-
-        @see getResults
-    */
-    const File getResult() const;
-
-    /** Returns a list of all the files that were chosen during the last call to a
-        browse method.
-
-        This array may be empty if no files were chosen, or can contain multiple entries
-        if multiple files were chosen.
-
-        @see getResult
-    */
-    const OwnedArray <File>& getResults() const;
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String title, filters;
-    File startingFile;
-    OwnedArray <File> results;
-    bool useNativeDialogBox;
-
-    bool showDialog (const bool selectsDirectories,
-                     const bool selectsFiles,
-                     const bool isSave,
-                     const bool warnAboutOverwritingExistingFiles,
-                     const bool selectMultipleFiles,
-                     FilePreviewComponent* const previewComponent);
-
-    static void showPlatformDialog (OwnedArray<File>& results,
-                                    const String& title,
-                                    const File& file,
-                                    const String& filters,
-                                    bool selectsDirectories,
-                                    bool selectsFiles,
-                                    bool isSave,
-                                    bool warnAboutOverwritingExistingFiles,
-                                    bool selectMultipleFiles,
-                                    FilePreviewComponent* previewComponent);
-};
-
-#endif   // __JUCE_FILECHOOSER_JUCEHEADER__
-/********* End of inlined file: juce_FileChooser.h *********/
-
-#endif
-#ifndef __JUCE_FILEFILTER_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileChooserDialogBox.h *********/
-#ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-#define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-
 /**
     A file open/save dialog box.
 
@@ -51499,248 +51760,7 @@ private:
 /********* End of inlined file: juce_FileChooserDialogBox.h *********/
 
 #endif
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileListComponent.h *********/
-#ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a listbox.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileTreeComponent
-*/
-class JUCE_API  FileListComponent  : public ListBox,
-                                     public DirectoryContentsDisplayComponent,
-                                     private ListBoxModel,
-                                     private ChangeListener
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileListComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileListComponent();
-
-    /** Returns the number of files the user has got selected.
-        @see getSelectedFile
-    */
-    int getNumSelectedFiles() const;
-
-    /** Returns one of the files that the user has currently selected.
-        The index should be in the range 0 to (getNumSelectedFiles() - 1).
-        @see getNumSelectedFiles
-    */
-    const File getSelectedFile (int index = 0) const;
-
-    /** Scrolls to the top of the list. */
-    void scrollToTop();
-
-    /** @internal */
-    void changeListenerCallback (void*);
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int, Graphics&, int, int, bool);
-    /** @internal */
-    Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void deleteKeyPressed (int currentSelectedRow);
-    /** @internal */
-    void returnKeyPressed (int currentSelectedRow);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    FileListComponent (const FileListComponent&);
-    const FileListComponent& operator= (const FileListComponent&);
-
-    File lastDirectory;
-};
-
-#endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileListComponent.h *********/
-
-#endif
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
-#ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
-#define __JUCE_FILETREECOMPONENT_JUCEHEADER__
-
-/**
-    A component that displays the files in a directory as a treeview.
-
-    This implements the DirectoryContentsDisplayComponent base class so that
-    it can be used in a FileBrowserComponent.
-
-    To attach a listener to it, use its DirectoryContentsDisplayComponent base
-    class and the FileBrowserListener class.
-
-    @see DirectoryContentsList, FileListComponent
-*/
-class JUCE_API  FileTreeComponent  : public TreeView,
-                                     public DirectoryContentsDisplayComponent
-{
-public:
-
-    /** Creates a listbox to show the contents of a specified directory.
-    */
-    FileTreeComponent (DirectoryContentsList& listToShow);
-
-    /** Destructor. */
-    ~FileTreeComponent();
-
-    /** Returns the number of files the user has got selected.
-        @see getSelectedFile
-    */
-    int getNumSelectedFiles() const                 { return TreeView::getNumSelectedItems(); }
-
-    /** Returns one of the files that the user has currently selected.
-        The index should be in the range 0 to (getNumSelectedFiles() - 1).
-        @see getNumSelectedFiles
-    */
-    const File getSelectedFile (int index = 0) const;
-
-    /** Scrolls the list to the top. */
-    void scrollToTop();
-
-    /** Setting a name for this allows tree items to be dragged.
-
-        The string that you pass in here will be returned by the getDragSourceDescription()
-        of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
-    */
-    void setDragAndDropDescription (const String& description) throw();
-
-    /** Returns the last value that was set by setDragAndDropDescription().
-    */
-    const String& getDragAndDropDescription() const throw()      { return dragAndDropDescription; }
-
-    juce_UseDebuggingNewOperator
-
-private:
-    String dragAndDropDescription;
-
-    FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
-};
-
-#endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
-
-#endif
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
-#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-
-/**
-    Shows a set of file paths in a list, allowing them to be added, removed or
-    re-ordered.
-
-    @see FileSearchPath
-*/
-class JUCE_API  FileSearchPathListComponent  : public Component,
-                                               public SettableTooltipClient,
-                                               public FileDragAndDropTarget,
-                                               private ButtonListener,
-                                               private ListBoxModel
-{
-public:
-
-    /** Creates an empty FileSearchPathListComponent.
-
-    */
-    FileSearchPathListComponent();
-
-    /** Destructor. */
-    ~FileSearchPathListComponent();
-
-    /** Returns the path as it is currently shown. */
-    const FileSearchPath& getPath() const throw()                   { return path; }
-
-    /** Changes the current path. */
-    void setPath (const FileSearchPath& newPath);
-
-    /** Sets a file or directory to be the default starting point for the browser to show.
-
-        This is only used if the current file hasn't been set.
-    */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
-
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
-
-        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
-        methods.
-
-        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
-    */
-    enum ColourIds
-    {
-        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
-                                                  Make this transparent if you don't want the background to be filled. */
-    };
-
-    /** @internal */
-    int getNumRows();
-    /** @internal */
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
-    /** @internal */
-    void deleteKeyPressed (int lastRowSelected);
-    /** @internal */
-    void returnKeyPressed (int lastRowSelected);
-    /** @internal */
-    void listBoxItemDoubleClicked (int row, const MouseEvent&);
-    /** @internal */
-    void selectedRowsChanged (int lastRowSelected);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files);
-    /** @internal */
-    void filesDropped (const StringArray& files, int, int);
-    /** @internal */
-    void buttonClicked (Button* button);
-
-    juce_UseDebuggingNewOperator
-
-private:
-
-    FileSearchPath path;
-    File defaultBrowseTarget;
-
-    ListBox* listBox;
-    Button* addButton;
-    Button* removeButton;
-    Button* changeButton;
-    Button* upButton;
-    Button* downButton;
-
-    void changed() throw();
-    void updateButtons() throw();
-
-    FileSearchPathListComponent (const FileSearchPathListComponent&);
-    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
-};
-
-#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -51934,6 +51954,107 @@ private:
 /********* End of inlined file: juce_FilenameComponent.h *********/
 
 #endif
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
+#ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+#define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+
+/**
+    Shows a set of file paths in a list, allowing them to be added, removed or
+    re-ordered.
+
+    @see FileSearchPath
+*/
+class JUCE_API  FileSearchPathListComponent  : public Component,
+                                               public SettableTooltipClient,
+                                               public FileDragAndDropTarget,
+                                               private ButtonListener,
+                                               private ListBoxModel
+{
+public:
+
+    /** Creates an empty FileSearchPathListComponent.
+
+    */
+    FileSearchPathListComponent();
+
+    /** Destructor. */
+    ~FileSearchPathListComponent();
+
+    /** Returns the path as it is currently shown. */
+    const FileSearchPath& getPath() const throw()                   { return path; }
+
+    /** Changes the current path. */
+    void setPath (const FileSearchPath& newPath);
+
+    /** Sets a file or directory to be the default starting point for the browser to show.
+
+        This is only used if the current file hasn't been set.
+    */
+    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+
+    /** A set of colour IDs to use to change the colour of various aspects of the label.
+
+        These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
+        methods.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        backgroundColourId      = 0x1004100, /**< The background colour to fill the component with.
+                                                  Make this transparent if you don't want the background to be filled. */
+    };
+
+    /** @internal */
+    int getNumRows();
+    /** @internal */
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected);
+    /** @internal */
+    void deleteKeyPressed (int lastRowSelected);
+    /** @internal */
+    void returnKeyPressed (int lastRowSelected);
+    /** @internal */
+    void listBoxItemDoubleClicked (int row, const MouseEvent&);
+    /** @internal */
+    void selectedRowsChanged (int lastRowSelected);
+    /** @internal */
+    void resized();
+    /** @internal */
+    void paint (Graphics& g);
+    /** @internal */
+    bool isInterestedInFileDrag (const StringArray& files);
+    /** @internal */
+    void filesDropped (const StringArray& files, int, int);
+    /** @internal */
+    void buttonClicked (Button* button);
+
+    juce_UseDebuggingNewOperator
+
+private:
+
+    FileSearchPath path;
+    File defaultBrowseTarget;
+
+    ListBox* listBox;
+    Button* addButton;
+    Button* removeButton;
+    Button* changeButton;
+    Button* upButton;
+    Button* downButton;
+
+    void changed() throw();
+    void updateButtons() throw();
+
+    FileSearchPathListComponent (const FileSearchPathListComponent&);
+    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+};
+
+#endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+
+#endif
 #ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 
 /********* Start of inlined file: juce_WildcardFileFilter.h *********/
@@ -52032,6 +52153,183 @@ private:
 
 #endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
 /********* End of inlined file: juce_ImagePreviewComponent.h *********/
+
+#endif
+#ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
+
+/********* Start of inlined file: juce_FileChooser.h *********/
+#ifndef __JUCE_FILECHOOSER_JUCEHEADER__
+#define __JUCE_FILECHOOSER_JUCEHEADER__
+
+/**
+    Creates a dialog box to choose a file or directory to load or save.
+
+    To use a FileChooser:
+    - create one (as a local stack variable is the neatest way)
+    - call one of its browseFor.. methods
+    - if this returns true, the user has selected a file, so you can retrieve it
+      with the getResult() method.
+
+    e.g. @code
+    void loadMooseFile()
+    {
+        FileChooser myChooser ("Please select the moose you want to load...",
+                               File::getSpecialLocation (File::userHomeDirectory),
+                               "*.moose");
+
+        if (myChooser.browseForFileToOpen())
+        {
+            File mooseFile (myChooser.getResult());
+
+            loadMoose (mooseFile);
+        }
+    }
+    @endcode
+*/
+class JUCE_API  FileChooser
+{
+public:
+
+    /** Creates a FileChooser.
+
+        After creating one of these, use one of the browseFor... methods to display it.
+
+        @param dialogBoxTitle           a text string to display in the dialog box to
+                                        tell the user what's going on
+        @param initialFileOrDirectory   the file or directory that should be selected when
+                                        the dialog box opens. If this parameter is set to
+                                        File::nonexistent, a sensible default directory
+                                        will be used instead.
+        @param filePatternsAllowed      a set of file patterns to specify which files can be
+                                        selected - each pattern should be separated by a
+                                        comma or semi-colon, e.g. "*" or "*.jpg;*.gif". An
+                                        empty string means that all files are allowed
+        @param useOSNativeDialogBox     if true, then a native dialog box will be used if
+                                        possible; if false, then a Juce-based browser dialog
+                                        box will always be used
+        @see browseForFileToOpen, browseForFileToSave, browseForDirectory
+    */
+    FileChooser (const String& dialogBoxTitle,
+                 const File& initialFileOrDirectory = File::nonexistent,
+                 const String& filePatternsAllowed = String::empty,
+                 const bool useOSNativeDialogBox = true);
+
+    /** Destructor. */
+    ~FileChooser();
+
+    /** Shows a dialog box to choose a file to open.
+
+        This will display the dialog box modally, using an "open file" mode, so that
+        it won't allow non-existent files or directories to be chosen.
+
+        @param previewComponent   an optional component to display inside the dialog
+                                  box to show special info about the files that the user
+                                  is browsing. The component will not be deleted by this
+                                  object, so the caller must take care of it.
+        @returns    true if the user selected a file, in which case, use the getResult()
+                    method to find out what it was. Returns false if they cancelled instead.
+        @see browseForFileToSave, browseForDirectory
+    */
+    bool browseForFileToOpen (FilePreviewComponent* previewComponent = 0);
+
+    /** Same as browseForFileToOpen, but allows the user to select multiple files.
+
+        The files that are returned can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
+
+    /** Shows a dialog box to choose a file to save.
+
+        This will display the dialog box modally, using an "save file" mode, so it
+        will allow non-existent files to be chosen, but not directories.
+
+        @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
+                    the user if they're sure they want to overwrite a file that already
+                    exists
+        @returns    true if the user chose a file and pressed 'ok', in which case, use
+                    the getResult() method to find out what the file was. Returns false
+                    if they cancelled instead.
+        @see browseForFileToOpen, browseForDirectory
+    */
+    bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
+
+    /** Shows a dialog box to choose a directory.
+
+        This will display the dialog box modally, using an "open directory" mode, so it
+        will only allow directories to be returned, not files.
+
+        @returns    true if the user chose a directory and pressed 'ok', in which case, use
+                    the getResult() method to find out what they chose. Returns false
+                    if they cancelled instead.
+        @see browseForFileToOpen, browseForFileToSave
+    */
+    bool browseForDirectory();
+
+    /** Same as browseForFileToOpen, but allows the user to select multiple files and directories.
+
+        The files that are returned can be obtained by calling getResults(). See
+        browseForFileToOpen() for more info about the behaviour of this method.
+    */
+    bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = 0);
+
+    /** Returns the last file that was chosen by one of the browseFor methods.
+
+        After calling the appropriate browseFor... method, this method lets you
+        find out what file or directory they chose.
+
+        Note that the file returned is only valid if the browse method returned true (i.e.
+        if the user pressed 'ok' rather than cancelling).
+
+        If you're using a multiple-file select, then use the getResults() method instead,
+        to obtain the list of all files chosen.
+
+        @see getResults
+    */
+    const File getResult() const;
+
+    /** Returns a list of all the files that were chosen during the last call to a
+        browse method.
+
+        This array may be empty if no files were chosen, or can contain multiple entries
+        if multiple files were chosen.
+
+        @see getResult
+    */
+    const OwnedArray <File>& getResults() const;
+
+    juce_UseDebuggingNewOperator
+
+private:
+    String title, filters;
+    File startingFile;
+    OwnedArray <File> results;
+    bool useNativeDialogBox;
+
+    bool showDialog (const bool selectsDirectories,
+                     const bool selectsFiles,
+                     const bool isSave,
+                     const bool warnAboutOverwritingExistingFiles,
+                     const bool selectMultipleFiles,
+                     FilePreviewComponent* const previewComponent);
+
+    static void showPlatformDialog (OwnedArray<File>& results,
+                                    const String& title,
+                                    const File& file,
+                                    const String& filters,
+                                    bool selectsDirectories,
+                                    bool selectsFiles,
+                                    bool isSave,
+                                    bool warnAboutOverwritingExistingFiles,
+                                    bool selectMultipleFiles,
+                                    FilePreviewComponent* previewComponent);
+};
+
+#endif   // __JUCE_FILECHOOSER_JUCEHEADER__
+/********* End of inlined file: juce_FileChooser.h *********/
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -52368,9 +52666,6 @@ private:
 /********* End of inlined file: juce_AlertWindow.h *********/
 
 #endif
-#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
-
-#endif
 #ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_DialogWindow.h *********/
@@ -52613,6 +52908,12 @@ private:
 /********* End of inlined file: juce_SplashScreen.h *********/
 
 #endif
+#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
 /********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
@@ -52749,10 +53050,7 @@ private:
 /********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
 
 #endif
-#ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
+#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__

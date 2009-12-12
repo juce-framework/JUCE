@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_GRAPHICS_JUCEHEADER__x
-#define __JUCE_GRAPHICS_JUCEHEADER__x
+#ifndef __JUCE_FILLTYPE_JUCEHEADER__
+#define __JUCE_FILLTYPE_JUCEHEADER__
 
 #include "../colour/juce_ColourGradient.h"
 class Image;
@@ -132,4 +132,4 @@ public:
 };
 
 
-#endif   // __JUCE_GRAPHICS_JUCEHEADER__
+#endif   // __JUCE_FILLTYPE_JUCEHEADER__

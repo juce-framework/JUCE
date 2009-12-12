@@ -147,6 +147,11 @@ public:
         @see DragAndDropContainer::startDragging
     */
     virtual const String getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
+
+    /** You can override this to provide tool tips for specific rows.
+        @see TooltipClient
+    */
+    virtual const String getTooltipForRow (int row);
 };
 
 

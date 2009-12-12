@@ -34,7 +34,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class ListBoxRowComponent  : public Component
+class ListBoxRowComponent  : public Component,
+                             public TooltipClient
 {
 public:
     ListBoxRowComponent (ListBox& owner_)
@@ -162,6 +163,14 @@ public:
     {
         if (getNumChildComponents() > 0)
             getChildComponent(0)->setBounds (0, 0, getWidth(), getHeight());
+    }
+
+    const String getTooltip()
+    {
+        if (owner.getModel() != 0)
+            return owner.getModel()->getTooltipForRow (row);
+
+        return String::empty;
     }
 
     juce_UseDebuggingNewOperator
@@ -963,6 +972,11 @@ void ListBoxModel::listWasScrolled()
 }
 
 const String ListBoxModel::getDragSourceDescription (const SparseSet<int>&)
+{
+    return String::empty;
+}
+
+const String ListBoxModel::getTooltipForRow (int row)
 {
     return String::empty;
 }
