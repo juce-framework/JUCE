@@ -197,6 +197,8 @@ void AudioThumbnail::clear()
 
 void AudioThumbnail::loadFrom (InputStream& input)
 {
+    const ScopedLock sl (readerLock);
+
     data.setSize (0);
     input.readIntoMemoryBlock (data);
 
@@ -223,14 +225,14 @@ void AudioThumbnail::saveTo (OutputStream& output) const
     swapEndiannessIfNeeded (d);
 }
 
-bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& reader)
+bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& fileReader)
 {
     AudioThumbnailDataFormat* d = (AudioThumbnailDataFormat*) data.getData();
 
-    d->totalSamples = reader.lengthInSamples;
-    d->numChannels = jmin (2, reader.numChannels);
+    d->totalSamples = fileReader.lengthInSamples;
+    d->numChannels = jmin (2, fileReader.numChannels);
     d->numFinishedSamples = 0;
-    d->sampleRate = roundDoubleToInt (reader.sampleRate);
+    d->sampleRate = roundDoubleToInt (fileReader.sampleRate);
     d->numThumbnailSamples = (int) (d->totalSamples / d->samplesPerThumbSample) + 1;
 
     data.setSize (sizeof (AudioThumbnailDataFormat) + 3 + d->numThumbnailSamples * d->numChannels * 2);
@@ -241,7 +243,7 @@ bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& reader)
     return d->totalSamples > 0;
 }
 
-bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& reader)
+bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& fileReader)
 {
     AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
 
@@ -249,7 +251,7 @@ bool AudioThumbnail::readNextBlockFromAudioFile (AudioFormatReader& reader)
     {
         const int numToDo = (int) jmin ((int64) 65536, d->totalSamples - d->numFinishedSamples);
 
-        generateSection (reader,
+        generateSection (fileReader,
                          d->numFinishedSamples,
                          numToDo);
 
@@ -279,7 +281,7 @@ double AudioThumbnail::getTotalLength() const throw()
         return 0.0;
 }
 
-void AudioThumbnail::generateSection (AudioFormatReader& reader,
+void AudioThumbnail::generateSection (AudioFormatReader& fileReader,
                                       int64 startSample,
                                       int numSamples)
 {
@@ -299,12 +301,12 @@ void AudioThumbnail::generateSection (AudioFormatReader& reader,
 
         float lowestLeft, highestLeft, lowestRight, highestRight;
 
-        reader.readMaxLevels (sourceStart,
-                              sourceEnd - sourceStart,
-                              lowestLeft,
-                              highestLeft,
-                              lowestRight,
-                              highestRight);
+        fileReader.readMaxLevels (sourceStart,
+                                  sourceEnd - sourceStart,
+                                  lowestLeft,
+                                  highestLeft,
+                                  lowestRight,
+                                  highestRight);
 
         int n = i * 2;
 
@@ -425,7 +427,7 @@ void AudioThumbnail::refillCache (const int numSamples,
     {
         for (int channelNum = 0; channelNum < numChannelsCached; ++channelNum)
         {
-            char* const data = getChannelData (channelNum);
+            char* const channelData = getChannelData (channelNum);
             char* cacheData = ((char*) cachedLevels.getData()) + channelNum * 2;
 
             const double timeToThumbSampleFactor = d->sampleRate / (double) d->samplesPerThumbSample;
@@ -438,7 +440,7 @@ void AudioThumbnail::refillCache (const int numSamples,
             {
                 const int nextSample = roundDoubleToInt ((startTime + timePerPixel) * timeToThumbSampleFactor);
 
-                if (sample >= 0 && data != 0)
+                if (sample >= 0 && channelData != 0)
                 {
                     char mx = -128;
                     char mn = 127;
@@ -449,8 +451,8 @@ void AudioThumbnail::refillCache (const int numSamples,
                             break;
 
                         const int n = sample << 1;
-                        const char sampMin = data [n];
-                        const char sampMax = data [n + 1];
+                        const char sampMin = channelData [n];
+                        const char sampMax = channelData [n + 1];
 
                         if (sampMin < mn)
                             mn = sampMin;

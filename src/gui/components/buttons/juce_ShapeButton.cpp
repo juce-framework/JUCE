@@ -31,11 +31,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ShapeButton::ShapeButton (const String& text,
+ShapeButton::ShapeButton (const String& text_,
                           const Colour& normalColour_,
                           const Colour& overColour_,
                           const Colour& downColour_)
-  : Button (text),
+  : Button (text_),
     normalColour (normalColour_),
     overColour (overColour_),
     downColour (downColour_),

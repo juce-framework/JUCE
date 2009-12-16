@@ -394,7 +394,7 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
 
         // ideally this would draw lots of lines or ellipses to approximate the gradient, but for the
         // time-being, this just fills it with the average colour..
-        writeColour (stateStack.getLast()->fillType.gradient->getColourAtPosition (0.5));
+        writeColour (stateStack.getLast()->fillType.gradient->getColourAtPosition (0.5f));
         out << bounds.getX() << ' ' << -bounds.getBottom() << ' ' << bounds.getWidth() << ' ' << bounds.getHeight() << " rectfill\n";
 
         out << "grestore\n";

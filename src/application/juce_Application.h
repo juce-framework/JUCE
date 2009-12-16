@@ -291,6 +291,9 @@ private:
     bool stillInitialising;
     InterProcessLock* appLock;
 
+    JUCEApplication (const JUCEApplication&);
+    const JUCEApplication& operator= (const JUCEApplication&);
+
 public:
     /** @internal */
     bool initialiseApp (String& commandLine);

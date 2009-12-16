@@ -1122,6 +1122,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\containers\juce_ValueTree.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_ValueTree.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\containers\juce_Variant.cpp"
 					>
 				</File>

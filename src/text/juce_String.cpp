@@ -2254,13 +2254,13 @@ const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) t
 
             while (--numExtraValues >= 0 && i < bufferSizeBytes)
             {
-                const uint8 c = buffer[i];
+                const uint8 nextByte = buffer[i];
 
-                if ((c & 0xc0) != 0x80)
+                if ((nextByte & 0xc0) != 0x80)
                     break;
 
                 n <<= 6;
-                n |= (c & 0x3f);
+                n |= (nextByte & 0x3f);
                 ++i;
             }
 

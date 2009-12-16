@@ -183,6 +183,16 @@ public:
     */
     ValueTree getChildWithName (const String& type) const throw();
 
+    /** Looks for the first child node that has the speficied property value.
+
+        This will scan the child nodes in order, until it finds one that has property that matches
+        the specified value.
+
+        If no such node is found, it'll return an invalid node. (See isValid() to find out
+        whether a node is valid).
+    */
+    ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
+
     /** Adds a child to this node.
 
         Make sure that the child is removed from any former parent node before calling this, or
@@ -242,6 +252,20 @@ public:
     static ValueTree fromXml (const XmlElement& xml) throw();
 
     //==============================================================================
+    /** Stores this tree (and all its children) in a binary format.
+
+        Once written, the data can be read back with readFromStream().
+
+        It's much faster to load/save your tree in binary form than as XML, but
+        obviously isn't human-readable.
+    */
+    void writeToStream (OutputStream& output) throw();
+
+    /** Reloads a tree from a stream that was written with writeToStream().
+    */
+    static ValueTree readFromStream (InputStream& input) throw();
+
+    //==============================================================================
     /** Listener class for events that happen to a ValueTree.
 
         To get events from a ValueTree, make your class implement this interface, and use
@@ -254,13 +278,13 @@ public:
         virtual ~Listener() {}
 
         /** This method is called when one or more of the properties of this node have changed. */
-        virtual void ValueTreePropertyChanged (ValueTree& tree) = 0;
+        virtual void valueTreePropertyChanged (ValueTree& tree) = 0;
 
         /** This method is called when one or more of the children of this node have been added or removed. */
-        virtual void ValueTreeChildrenChanged (ValueTree& tree) = 0;
+        virtual void valueTreeChildrenChanged (ValueTree& tree) = 0;
 
         /** This method is called when this node has been added or removed from a parent node. */
-        virtual void ValueTreeParentChanged() = 0;
+        virtual void valueTreeParentChanged() = 0;
     };
 
     /** Adds a listener to receive callbacks when this node is changed. */
@@ -285,9 +309,9 @@ private:
 
         struct Property
         {
-            Property (const var::identifier& id, const var& value) throw();
+            Property (const var::identifier& name, const var& value) throw();
 
-            var::identifier id;
+            var::identifier name;
             var value;
         };
 
@@ -307,6 +331,7 @@ private:
         void removeAllProperties (UndoManager* const undoManager) throw();
         bool isAChildOf (const SharedObject* const possibleParent) const throw();
         ValueTree getChildWithName (const String& type) const throw();
+        ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
         void addChild (SharedObject* child, int index, UndoManager* const undoManager) throw();
         void removeChild (const int childIndex, UndoManager* const undoManager) throw();
         void removeAllChildren (UndoManager* const undoManager) throw();

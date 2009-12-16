@@ -241,6 +241,10 @@ public:
 
         uint8* data;
         int lineStride, pixelStride, width, height;
+
+    private:
+        BitmapData (const BitmapData&);
+        const BitmapData& operator= (const BitmapData&);
     };
 
     /** Copies some pixel values to a rectangle of the image.

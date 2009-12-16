@@ -578,13 +578,13 @@ class WavAudioFormatWriter  : public AudioFormatWriter
 public:
     //==============================================================================
     WavAudioFormatWriter (OutputStream* const out,
-                          const double sampleRate,
+                          const double sampleRate_,
                           const unsigned int numChannels_,
                           const int bits,
                           const StringPairArray& metadataValues)
         : AudioFormatWriter (out,
                              wavFormatName,
-                             sampleRate,
+                             sampleRate_,
                              numChannels_,
                              bits),
           lengthInSamples (0),

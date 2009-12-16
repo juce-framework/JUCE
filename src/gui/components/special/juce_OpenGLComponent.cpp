@@ -199,13 +199,13 @@ void OpenGLComponent::setPixelFormat (const OpenGLPixelFormat& formatToUse)
     }
 }
 
-void OpenGLComponent::shareWith (OpenGLContext* context)
+void OpenGLComponent::shareWith (OpenGLContext* c)
 {
-    if (contextToShareListsWith != context)
+    if (contextToShareListsWith != c)
     {
         const ScopedLock sl (contextLock);
         deleteContext();
-        contextToShareListsWith = context;
+        contextToShareListsWith = c;
     }
 }
 

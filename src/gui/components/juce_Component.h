@@ -1116,7 +1116,7 @@ public:
 
         @see isFocusContainer, createFocusTraverser, moveKeyboardFocusToSibling
     */
-    void setFocusContainer (const bool isFocusContainer) throw();
+    void setFocusContainer (const bool shouldBeFocusContainer) throw();
 
     /** Returns true if this component has been marked as a focus container.
 

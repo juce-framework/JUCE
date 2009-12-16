@@ -124,8 +124,8 @@ private:
 
 
 //==============================================================================
-GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner)
-    : AudioProcessorEditor (owner)
+GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const owner_)
+    : AudioProcessorEditor (owner_)
 {
     setOpaque (true);
 
@@ -133,16 +133,16 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
 
     Array <PropertyComponent*> params;
 
-    const int numParams = owner->getNumParameters();
+    const int numParams = owner_->getNumParameters();
     int totalHeight = 0;
 
     for (int i = 0; i < numParams; ++i)
     {
-        String name (owner->getParameterName (i));
+        String name (owner_->getParameterName (i));
         if (name.trim().isEmpty())
             name = "Unnamed";
 
-        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, owner, i);
+        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, owner_, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }

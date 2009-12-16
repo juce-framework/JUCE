@@ -211,18 +211,17 @@ public:
     virtual int readCompressedInt();
 
     //==============================================================================
-    /** Reads a string from the stream, up to the next linefeed or carriage return.
+    /** Reads a UTF8 string from the stream, up to the next linefeed or carriage return.
 
-        The stream is treated as 8-bit characters encoded with the system's default encoding,
-        and this will read up to the next "\n" or "\r\n" or end-of-stream.
+        This will read up to the next "\n" or "\r\n" or end-of-stream.
 
-        After this call, the stream's position will be left pointing to the character
+        After this call, the stream's position will be left pointing to the next character
         following the line-feed, but the linefeeds aren't included in the string that
         is returned.
     */
     virtual const String readNextLine();
 
-    /** Reads a zero-terminated string from the stream.
+    /** Reads a zero-terminated UTF8 string from the stream.
 
         This will read characters from the stream until it hits a zero character or
         end-of-stream.

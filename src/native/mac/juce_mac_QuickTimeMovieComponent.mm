@@ -90,13 +90,13 @@ static QTMovie* openMovieFromStream (InputStream* movieStream, File& movieFile)
 }
 
 bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
-                                         const bool isControllerVisible)
+                                         const bool isControllerVisible_)
 {
-    return loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible);
+    return loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible_);
 }
 
 bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
-                                         const bool controllerVisible)
+                                         const bool controllerVisible_)
 {
     closeMovie();
 
@@ -113,14 +113,14 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
     [theMovie retain];
     QTMovieView* view = (QTMovieView*) getView();
     [view setMovie: theMovie];
-    [view setControllerVisible: controllerVisible];
+    [view setControllerVisible: controllerVisible_];
     setLooping (looping);
 
     return movie != nil;
 }
 
 bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
-                                         const bool isControllerVisible)
+                                         const bool isControllerVisible_)
 {
     // unfortunately, QTMovie objects can only be created on the main thread..
     jassert (MessageManager::getInstance()->isThisTheMessageThread());

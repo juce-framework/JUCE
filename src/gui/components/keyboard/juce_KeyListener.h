@@ -74,11 +74,6 @@ public:
         @see KeyPress, Component::keyStateChanged
     */
     virtual bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
-
-private:
-    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
-    // subclass to use the new parameters to keyStateChanged)
-    virtual void keyStateChanged (Component*) {};
 };
 
 

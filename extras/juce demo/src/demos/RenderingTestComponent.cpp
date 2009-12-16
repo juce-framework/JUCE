@@ -558,7 +558,7 @@ RenderingTestComponent::RenderingTestComponent ()
     setSize (600, 400);
 
     //[Constructor] You can add your own custom stuff here..
-    testTypeComboBox->setSelectedId (1);
+    testTypeComboBox->setSelectedId (2);
     sizeSlider->setValue (1.0, false);
     opacitySlider->setValue (1.0, false);
     highQualityToggle->setToggleState (true, false);

@@ -186,6 +186,8 @@ public:
         text-file! It's intended for storing a string for later retrieval
         by InputStream::readString.
 
+        It writes the string to the stream as UTF8, with a null character terminating it.
+
         For appending text to a file, instead use writeText, printf, or operator<<
 
         @see InputStream::readString, writeText, printf, operator<<

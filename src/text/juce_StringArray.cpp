@@ -41,34 +41,34 @@ StringArray::StringArray (const StringArray& other) throw()
     addArray (other);
 }
 
-StringArray::StringArray (const juce_wchar** const strings,
+StringArray::StringArray (const juce_wchar** const initialStrings,
                           const int numberOfStrings) throw()
 {
     for (int i = 0; i < numberOfStrings; ++i)
-        add (strings [i]);
+        add (initialStrings [i]);
 }
 
-StringArray::StringArray (const char** const strings,
+StringArray::StringArray (const char** const initialStrings,
                           const int numberOfStrings) throw()
 {
     for (int i = 0; i < numberOfStrings; ++i)
-        add (strings [i]);
+        add (initialStrings [i]);
 }
 
-StringArray::StringArray (const juce_wchar** const strings) throw()
+StringArray::StringArray (const juce_wchar** const initialStrings) throw()
 {
     int i = 0;
 
-    while (strings[i] != 0)
-        add (strings [i++]);
+    while (initialStrings[i] != 0)
+        add (initialStrings [i++]);
 }
 
-StringArray::StringArray (const char** const strings) throw()
+StringArray::StringArray (const char** const initialStrings) throw()
 {
     int i = 0;
 
-    while (strings[i] != 0)
-        add (strings [i++]);
+    while (initialStrings[i] != 0)
+        add (initialStrings [i++]);
 }
 
 const StringArray& StringArray::operator= (const StringArray& other) throw()

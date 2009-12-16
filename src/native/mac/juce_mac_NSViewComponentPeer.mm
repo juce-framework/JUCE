@@ -658,10 +658,10 @@ static int getModifierForButtonNumber (const int num) throw()
 }
 
 //==============================================================================
-NSViewComponentPeer::NSViewComponentPeer (Component* const component,
+NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
                                           const int windowStyleFlags,
                                           NSView* viewToAttachTo)
-    : ComponentPeer (component, windowStyleFlags),
+    : ComponentPeer (component_, windowStyleFlags),
       window (0),
       view (0),
       isSharedWindow (viewToAttachTo != 0),

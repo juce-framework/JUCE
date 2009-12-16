@@ -128,7 +128,7 @@ public:
 
         if (needsItalicTransform)
         {
-            pathTransform = pathTransform.sheared (-0.15, 0);
+            pathTransform = pathTransform.sheared (-0.15f, 0.0f);
             renderingTransform.c = 0.15f;
         }
 

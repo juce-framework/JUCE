@@ -197,7 +197,7 @@ void Thread::stopThread (const int timeOutMilliseconds) throw()
             threadHandle_ = 0;
             threadId_ = 0;
 
-            const ScopedLock sl (runningThreadsLock);
+            const ScopedLock sl2 (runningThreadsLock);
             runningThreads.removeValue (this);
         }
     }

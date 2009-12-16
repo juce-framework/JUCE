@@ -663,26 +663,24 @@ int File::findChildFiles (OwnedArray<File>& results,
         const String path (juce_addTrailingSeparator (fullPath));
 
         String filename;
-        bool isDirectory, isHidden;
+        bool itemIsDirectory, itemIsHidden;
 
-        void* const handle = juce_findFileStart (path,
-                                                 wildCardPattern,
-                                                 filename,
-                                                 &isDirectory, &isHidden,
+        void* const handle = juce_findFileStart (path, wildCardPattern, filename,
+                                                 &itemIsDirectory, &itemIsHidden,
                                                  0, 0, 0, 0);
 
         if (handle != 0)
         {
             do
             {
-                if (fileTypeMatches (whatToLookFor, isDirectory, isHidden)
+                if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden)
                      && ! filename.containsOnly (T(".")))
                 {
                     results.add (new File (path + filename, 0));
                     ++total;
                 }
 
-            } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
+            } while (juce_findFileNext (handle, filename, &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0));
 
             juce_findFileClose (handle);
         }
@@ -723,25 +721,23 @@ int File::getNumberOfChildFiles (const int whatToLookFor,
     if (isDirectory())
     {
         String filename;
-        bool isDirectory, isHidden;
+        bool itemIsDirectory, itemIsHidden;
 
-        void* const handle = juce_findFileStart (fullPath,
-                                                 wildCardPattern,
-                                                 filename,
-                                                 &isDirectory, &isHidden,
+        void* const handle = juce_findFileStart (fullPath, wildCardPattern, filename,
+                                                 &itemIsDirectory, &itemIsHidden,
                                                  0, 0, 0, 0);
 
         if (handle != 0)
         {
             do
             {
-                if (fileTypeMatches (whatToLookFor, isDirectory, isHidden)
+                if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden)
                      && ! filename.containsOnly (T(".")))
                 {
                     ++count;
                 }
 
-            } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
+            } while (juce_findFileNext (handle, filename, &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0));
 
             juce_findFileClose (handle);
         }
@@ -762,22 +758,22 @@ bool File::containsSubDirectories() const throw()
     if (isDirectory())
     {
         String filename;
-        bool isDirectory, isHidden;
+        bool itemIsDirectory, itemIsHidden;
         void* const handle = juce_findFileStart (juce_addTrailingSeparator (fullPath),
                                                  T("*"), filename,
-                                                 &isDirectory, &isHidden, 0, 0, 0, 0);
+                                                 &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0);
 
         if (handle != 0)
         {
             do
             {
-                if (isDirectory)
+                if (itemIsDirectory)
                 {
                     result = true;
                     break;
                 }
 
-            } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
+            } while (juce_findFileNext (handle, filename, &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0));
 
             juce_findFileClose (handle);
         }

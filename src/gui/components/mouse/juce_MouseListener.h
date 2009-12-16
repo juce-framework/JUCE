@@ -161,13 +161,6 @@ public:
     virtual void mouseWheelMove     (const MouseEvent& e,
                                      float wheelIncrementX,
                                      float wheelIncrementY);
-
-
-private:
-    // XXX Deprecated! The parameters for this method have changed to accommodate horizonatal scroll-wheels.
-    // This line is here to cause a syntax error if you're trying to use the old-style definition, so
-    // if that happens, update your code to use the new one above.
-    virtual int mouseWheelMove (const MouseEvent&, float) { return 0; }
 };
 
 

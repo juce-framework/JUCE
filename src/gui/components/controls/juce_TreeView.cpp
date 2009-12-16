@@ -1563,27 +1563,27 @@ TreeViewItem* TreeViewItem::getItemOnRow (int index) throw()
     return 0;
 }
 
-TreeViewItem* TreeViewItem::findItemRecursively (int y) throw()
+TreeViewItem* TreeViewItem::findItemRecursively (int targetY) throw()
 {
-    if (((unsigned int) y) < (unsigned int) totalHeight)
+    if (((unsigned int) targetY) < (unsigned int) totalHeight)
     {
         const int h = itemHeight;
 
-        if (y < h)
+        if (targetY < h)
             return this;
 
         if (isOpen())
         {
-            y -= h;
+            targetY -= h;
 
             for (int i = 0; i < subItems.size(); ++i)
             {
                 TreeViewItem* const ti = subItems.getUnchecked(i);
 
-                if (y < ti->totalHeight)
-                    return ti->findItemRecursively (y);
+                if (targetY < ti->totalHeight)
+                    return ti->findItemRecursively (targetY);
 
-                y -= ti->totalHeight;
+                targetY -= ti->totalHeight;
             }
         }
     }

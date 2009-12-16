@@ -74,13 +74,15 @@ void DrawablePath::setStrokeThickness (const float newThickness) throw()
 //==============================================================================
 void DrawablePath::render (const Drawable::RenderingContext& context) const
 {
-    FillType f (mainFill);
-    if (f.isGradient())
-        f.gradient->multiplyOpacity (context.opacity);
+    {
+        FillType f (mainFill);
+        if (f.isGradient())
+            f.gradient->multiplyOpacity (context.opacity);
 
-    f.transform = f.transform.followedBy (context.transform);
-    context.g.setFillType (f);
-    context.g.fillPath (path, context.transform);
+        f.transform = f.transform.followedBy (context.transform);
+        context.g.setFillType (f);
+        context.g.fillPath (path, context.transform);
+    }
 
     if (strokeType.getStrokeThickness() > 0.0f)
     {
@@ -127,226 +129,120 @@ Drawable* DrawablePath::createCopy() const
 }
 
 //==============================================================================
-static const FillType readColourFromBinary (InputStream& input)
+static const FillType readFillTypeFromTree (const ValueTree& v)
 {
-    switch (input.readByte())
+    const String type (v["type"].toString());
+
+    if (type.equalsIgnoreCase (T("solid")))
     {
-        case 1:
-            return FillType (Colour ((uint32) input.readInt()));
+        const String colour (v ["colour"].toString());
+        return FillType (Colour (colour.isEmpty() ? (uint32) 0xff000000
+                                                  : (uint32) colour.getHexValue32()));
+    }
+    else if (type.equalsIgnoreCase ("gradient"))
+    {
+        ColourGradient g;
+        g.x1 = v["x1"];
+        g.y1 = v["y1"];
+        g.x2 = v["x2"];
+        g.y2 = v["y2"];
+        g.isRadial = v["radial"];
 
-        case 2:
-        {
-            ColourGradient g;
-            g.x1 = input.readFloat();
-            g.y1 = input.readFloat();
-            g.x2 = input.readFloat();
-            g.y2 = input.readFloat();
-            g.isRadial = input.readByte() != 0;
+        StringArray colours;
+        colours.addTokens (v["colours"].toString(), false);
 
-            const int numColours = input.readCompressedInt();
-            for (int i = 0; i < numColours; ++i)
-            {
-                double proportion = (double) input.readFloat();
-                const Colour col ((uint32) input.readInt());
-                g.addColour (proportion, col);
-            }
+        for (int i = 0; i < colours.size() / 2; ++i)
+            g.addColour (colours[i * 2].getDoubleValue(),
+                         Colour ((uint32)  colours[i * 2 + 1].getHexValue32()));
 
-            return FillType (g);
-        }
-
-        default:
-            break;
+        return FillType (g);
     }
 
+    jassertfalse
     return FillType();
 }
 
-static void writeColourToBinary (OutputStream& output, const FillType& fillType)
+static ValueTree createTreeForFillType (const String& tagName, const FillType& fillType)
 {
-    if (fillType.isColour())
-    {
-        output.writeByte (1);
-        output.writeInt ((int) fillType.colour.getARGB());
-    }
-    else if (fillType.isGradient())
-    {
-        output.writeByte (2);
-
-        output.writeFloat (fillType.gradient->x1);
-        output.writeFloat (fillType.gradient->y1);
-        output.writeFloat (fillType.gradient->x2);
-        output.writeFloat (fillType.gradient->y2);
-        output.writeByte (fillType.gradient->isRadial ? 1 : 0);
-
-        output.writeCompressedInt (fillType.gradient->getNumColours());
-
-        for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
-        {
-            output.writeFloat ((float) fillType.gradient->getColourPosition (i));
-            output.writeInt ((int) fillType.gradient->getColour (i).getARGB());
-        }
-    }
-    else
-    {
-        jassertfalse // xxx
-    }
-
-}
-
-static const FillType readColourFromXml (const XmlElement* xml)
-{
-    if (xml != 0)
-    {
-        const String type (xml->getStringAttribute (T("type")));
-
-        if (type.equalsIgnoreCase (T("solid")))
-        {
-            return FillType (Colour ((uint32) xml->getStringAttribute (T("colour"), T("ff000000")).getHexValue32()));
-        }
-        else if (type.equalsIgnoreCase (T("gradient")))
-        {
-            ColourGradient g;
-            g.x1 = (float) xml->getDoubleAttribute (T("x1"));
-            g.y1 = (float) xml->getDoubleAttribute (T("y1"));
-            g.x2 = (float) xml->getDoubleAttribute (T("x2"));
-            g.y2 = (float) xml->getDoubleAttribute (T("y2"));
-            g.isRadial = xml->getBoolAttribute (T("radial"), false);
-
-            StringArray colours;
-            colours.addTokens (xml->getStringAttribute (T("colours")), false);
-
-            for (int i = 0; i < colours.size() / 2; ++i)
-                g.addColour (colours[i * 2].getDoubleValue(),
-                             Colour ((uint32)  colours[i * 2 + 1].getHexValue32()));
-
-            return FillType (g);
-        }
-        else
-        {
-            jassertfalse
-        }
-    }
-
-    return FillType();
-}
-
-static XmlElement* writeColourToXml (const String& tagName, const FillType& fillType)
-{
-    XmlElement* const xml = new XmlElement (tagName);
+    ValueTree v (tagName);
 
     if (fillType.isColour())
     {
-        xml->setAttribute (T("type"), T("solid"));
-        xml->setAttribute (T("colour"), String::toHexString ((int) fillType.colour.getARGB()));
+        v.setProperty ("type", T("solid"), 0);
+        v.setProperty ("colour", String::toHexString ((int) fillType.colour.getARGB()), 0);
     }
     else if (fillType.isGradient())
     {
-        xml->setAttribute (T("type"), T("gradient"));
-
-        xml->setAttribute (T("x1"), fillType.gradient->x1);
-        xml->setAttribute (T("y1"), fillType.gradient->y1);
-        xml->setAttribute (T("x2"), fillType.gradient->x2);
-        xml->setAttribute (T("y2"), fillType.gradient->y2);
-        xml->setAttribute (T("radial"), fillType.gradient->isRadial);
+        v.setProperty ("type", T("gradient"), 0);
+        v.setProperty ("x1", fillType.gradient->x1, 0);
+        v.setProperty ("y1", fillType.gradient->y1, 0);
+        v.setProperty ("x2", fillType.gradient->x2, 0);
+        v.setProperty ("y2", fillType.gradient->y2, 0);
+        v.setProperty ("radial", fillType.gradient->isRadial, 0);
 
         String s;
         for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
             s << " " << fillType.gradient->getColourPosition (i)
               << " " << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
 
-        xml->setAttribute (T("colours"), s.trimStart());
+        v.setProperty ("colours", s.trimStart(), 0);
     }
     else
     {
         jassertfalse //xxx
     }
 
-    return xml;
+    return v;
 }
 
-bool DrawablePath::readBinary (InputStream& input)
+ValueTree DrawablePath::createValueTree() const throw()
 {
-    mainFill = readColourFromBinary (input);
-    strokeFill = readColourFromBinary (input);
+    ValueTree v (T("Path"));
 
-    const float strokeThickness = input.readFloat();
-    const int jointStyle = input.readByte();
-    const int endStyle = input.readByte();
+    v.addChild (createTreeForFillType (T("fill"), mainFill), -1, 0);
+    v.addChild (createTreeForFillType (T("stroke"), strokeFill), -1, 0);
 
-    strokeType = PathStrokeType (strokeThickness,
-                                 jointStyle == 1 ? PathStrokeType::curved
-                                                 : (jointStyle == 2 ? PathStrokeType::beveled
-                                                                    : PathStrokeType::mitered),
-                                 endStyle == 1 ? PathStrokeType::square
-                                               : (endStyle == 2 ? PathStrokeType::rounded
-                                                                : PathStrokeType::butt));
+    if (getName().isNotEmpty())
+        v.setProperty ("id", getName(), 0);
 
-    const int pathSize = input.readInt();
-    MemoryBlock pathData;
-    input.readIntoMemoryBlock (pathData, pathSize);
+    v.setProperty ("strokeWidth", (double) strokeType.getStrokeThickness(), 0);
+    v.setProperty ("jointStyle", strokeType.getJointStyle() == PathStrokeType::mitered
+                                    ? T("miter") : (strokeType.getJointStyle() == PathStrokeType::curved ? T("curved") : T("bevel")), 0);
+    v.setProperty ("capStyle", strokeType.getEndStyle() == PathStrokeType::butt
+                                    ? T("butt") : (strokeType.getEndStyle() == PathStrokeType::square ? T("square") : T("round")), 0);
+    v.setProperty ("path", path.toString(), 0);
 
-    if (pathData.getSize() != pathSize)
-        return false;
-
-    path.clear();
-    path.loadPathFromData ((const uint8*) pathData.getData(), pathSize);
-    updateOutline();
-    return true;
+    return v;
 }
 
-bool DrawablePath::writeBinary (OutputStream& output) const
+DrawablePath* DrawablePath::createFromValueTree (const ValueTree& tree) throw()
 {
-    writeColourToBinary (output, mainFill);
-    writeColourToBinary (output, strokeFill);
+    if (! tree.hasType ("Path"))
+        return 0;
 
-    output.writeFloat (strokeType.getStrokeThickness());
-    output.writeByte (strokeType.getJointStyle() == PathStrokeType::mitered ? 0
-                        : (strokeType.getJointStyle() == PathStrokeType::curved ? 1 : 2));
-    output.writeByte (strokeType.getEndStyle() == PathStrokeType::butt ? 0
-                        : (strokeType.getEndStyle() == PathStrokeType::square ? 1 : 2));
+    DrawablePath* p = new DrawablePath();
 
-    MemoryOutputStream out;
-    path.writePathToStream (out);
-    output.writeInt (out.getDataSize());
-    output.write (out.getData(), out.getDataSize());
-    return true;
-}
+    p->setName (tree ["id"]);
+    p->mainFill = readFillTypeFromTree (tree.getChildWithName (T("fill")));
+    p->strokeFill = readFillTypeFromTree (tree.getChildWithName (T("stroke")));
 
-bool DrawablePath::readXml (const XmlElement& xml)
-{
-    mainFill = readColourFromXml (xml.getChildByName (T("fill")));
-    strokeFill = readColourFromXml (xml.getChildByName (T("stroke")));
+    const String jointStyle (tree ["jointStyle"].toString());
+    const String endStyle (tree ["capStyle"].toString());
 
-    const String jointStyle (xml.getStringAttribute (T("jointStyle"), String::empty));
-    const String endStyle (xml.getStringAttribute (T("capStyle"), String::empty));
-    strokeType = PathStrokeType ((float) xml.getDoubleAttribute (T("strokeWidth"), 0.0),
-                                 jointStyle.equalsIgnoreCase (T("curved")) ? PathStrokeType::curved
-                                                                           : (jointStyle.equalsIgnoreCase (T("bevel")) ? PathStrokeType::beveled
-                                                                                                                       : PathStrokeType::mitered),
-                                 endStyle.equalsIgnoreCase (T("square")) ? PathStrokeType::square
-                                                                         : (endStyle.equalsIgnoreCase (T("round")) ? PathStrokeType::rounded
-                                                                                                                   : PathStrokeType::butt));
+    p->strokeType
+        = PathStrokeType (tree ["strokeWidth"],
+                          jointStyle.equalsIgnoreCase (T("curved")) ? PathStrokeType::curved
+                                                                    : (jointStyle.equalsIgnoreCase (T("bevel")) ? PathStrokeType::beveled
+                                                                                                                : PathStrokeType::mitered),
+                          endStyle.equalsIgnoreCase (T("square")) ? PathStrokeType::square
+                                                                  : (endStyle.equalsIgnoreCase (T("round")) ? PathStrokeType::rounded
+                                                                                                            : PathStrokeType::butt));
 
-    path.clear();
-    path.restoreFromString (xml.getAllSubText());
-    updateOutline();
-    return true;
-}
+    p->path.clear();
+    p->path.restoreFromString (tree ["path"]);
+    p->updateOutline();
 
-void DrawablePath::writeXml (XmlElement& xml) const
-{
-    xml.addChildElement (writeColourToXml (T("fill"), mainFill));
-    xml.addChildElement (writeColourToXml (T("stroke"), strokeFill));
-
-    xml.setAttribute (T("strokeWidth"), (double) strokeType.getStrokeThickness());
-    xml.setAttribute (T("jointStyle"),
-                      strokeType.getJointStyle() == PathStrokeType::mitered ? T("miter")
-                        : (strokeType.getJointStyle() == PathStrokeType::curved ? T("curved") : T("bevel")));
-    xml.setAttribute (T("capStyle"),
-                      strokeType.getEndStyle() == PathStrokeType::butt ? T("butt")
-                        : (strokeType.getEndStyle() == PathStrokeType::square ? T("square") : T("round")));
-
-    xml.addTextElement (path.toString());
+    return p;
 }
 
 

@@ -140,13 +140,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    bool readBinary (InputStream& input);
+    ValueTree createValueTree() const throw();
     /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
+    static DrawableComposite* createFromValueTree (const ValueTree& tree) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

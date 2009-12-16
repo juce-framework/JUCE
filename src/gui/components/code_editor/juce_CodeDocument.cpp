@@ -227,11 +227,11 @@ CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
 }
 
 CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
-                                  const int characterPos) throw()
+                                  const int characterPos_) throw()
     : owner (const_cast <CodeDocument*> (ownerDocument)),
       positionMaintained (false)
 {
-    setPosition (characterPos);
+    setPosition (characterPos_);
 }
 
 CodeDocument::Position::Position (const Position& other) throw()

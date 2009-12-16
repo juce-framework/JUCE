@@ -39,7 +39,7 @@ public:
     //==============================================================================
     SVGState (const XmlElement* const topLevel)
         : topLevelXml (topLevel),
-          x (0), y (0),
+          elementX (0), elementY (0),
           width (512), height (512),
           viewBoxW (0), viewBoxH (0)
     {
@@ -64,8 +64,8 @@ public:
         if (xml.hasAttribute (T("transform")))
             newState.addTransform (xml);
 
-        newState.x = getCoordLength (xml.getStringAttribute (T("x"), String (newState.x)), viewBoxW);
-        newState.y = getCoordLength (xml.getStringAttribute (T("y"), String (newState.y)), viewBoxH);
+        newState.elementX = getCoordLength (xml.getStringAttribute (T("x"), String (newState.elementX)), viewBoxW);
+        newState.elementY = getCoordLength (xml.getStringAttribute (T("y"), String (newState.elementY)), viewBoxH);
         newState.width = getCoordLength (xml.getStringAttribute (T("width"), String (newState.width)), viewBoxW);
         newState.height = getCoordLength (xml.getStringAttribute (T("height"), String (newState.height)), viewBoxH);
 
@@ -136,7 +136,7 @@ public:
 private:
     //==============================================================================
     const XmlElement* const topLevelXml;
-    float x, y, width, height, viewBoxW, viewBoxH;
+    float elementX, elementY, width, height, viewBoxW, viewBoxH;
     AffineTransform transform;
     String cssStyleText;
 
@@ -595,9 +595,9 @@ private:
 
     //==============================================================================
     Drawable* parseShape (const XmlElement& xml, Path& path,
-                          const bool parseTransform = true) const
+                          const bool shouldParseTransform = true) const
     {
-        if (parseTransform && xml.hasAttribute (T("transform")))
+        if (shouldParseTransform && xml.hasAttribute (T("transform")))
         {
             SVGState newState (*this);
             newState.addTransform (xml);
@@ -730,8 +730,8 @@ private:
 
                 float width = viewBoxW;
                 float height = viewBoxH;
-                float dx = 0.0;
-                float dy = 0.0;
+                float dx = 0.0f;
+                float dy = 0.0f;
 
                 const bool userSpace = fillXml->getStringAttribute (T("gradientUnits")).equalsIgnoreCase (T("userSpaceOnUse"));
 

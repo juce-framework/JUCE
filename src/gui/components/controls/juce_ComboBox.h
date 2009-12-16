@@ -149,7 +149,7 @@ public:
         current selection - it just stops the user choosing that item from the list.
     */
     void setItemEnabled (const int itemId,
-                         const bool isEnabled) throw();
+                         const bool shouldBeEnabled) throw();
 
     /** Changes the text for an existing item.
     */

@@ -69,6 +69,9 @@ private:
     void* fileHandle;
     int64 currentPosition, totalSize;
     bool needToSeek;
+
+    FileInputStream (const FileInputStream&);
+    const FileInputStream& operator= (const FileInputStream&);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__

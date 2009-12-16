@@ -379,58 +379,62 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
     }
 }
 
-const String XmlElement::createDocument (const String& dtd,
+const String XmlElement::createDocument (const String& dtdToUse,
                                          const bool allOnOneLine,
                                          const bool includeXmlHeader,
-                                         const tchar* const encoding,
+                                         const tchar* const encodingType,
                                          const int lineWrapLength) const throw()
 {
-    String doc;
-    doc.preallocateStorage (1024);
-
-    if (includeXmlHeader)
-    {
-        doc << "<?xml version=\"1.0\" encoding=\""
-            << encoding;
-
-        if (allOnOneLine)
-            doc += "\"?> ";
-        else
-            doc += "\"?>\n\n";
-    }
-
-    if (dtd.isNotEmpty())
-    {
-        if (allOnOneLine)
-            doc << dtd << " ";
-        else
-            doc << dtd << "\r\n";
-    }
-
     MemoryOutputStream mem (2048, 4096);
-    writeElementAsText (mem, allOnOneLine ? -1 : 0, lineWrapLength);
+    writeToStream (mem, dtdToUse, allOnOneLine, includeXmlHeader, encodingType, lineWrapLength);
 
-    return doc + String (mem.getData(),
-                         mem.getDataSize());
+    return String (mem.getData(), mem.getDataSize());
 }
 
-bool XmlElement::writeToFile (const File& f,
-                              const String& dtd,
-                              const tchar* const encoding,
+void XmlElement::writeToStream (OutputStream& output,
+                                const String& dtdToUse,
+                                const bool allOnOneLine,
+                                const bool includeXmlHeader,
+                                const tchar* const encodingType,
+                                const int lineWrapLength) const throw()
+{
+    if (includeXmlHeader)
+    {
+        output << "<?xml version=\"1.0\" encoding=\"" << encodingType;
+
+        if (allOnOneLine)
+            output << "\"?> ";
+        else
+            output << "\"?>\r\n\r\n";
+    }
+
+    if (dtdToUse.isNotEmpty())
+    {
+        output << dtdToUse;
+
+        if (allOnOneLine)
+            output << " ";
+        else
+            output << "\r\n";
+    }
+
+    writeElementAsText (output, allOnOneLine ? -1 : 0, lineWrapLength);
+}
+
+bool XmlElement::writeToFile (const File& file,
+                              const String& dtdToUse,
+                              const tchar* const encodingType,
                               const int lineWrapLength) const throw()
 {
-    if (f.hasWriteAccess())
+    if (file.hasWriteAccess())
     {
-        const File tempFile (f.getNonexistentSibling());
+        const File tempFile (file.getNonexistentSibling());
 
         FileOutputStream* const out = tempFile.createOutputStream();
 
         if (out != 0)
         {
-            *out << "<?xml version=\"1.0\" encoding=\"" << encoding << "\"?>\r\n\r\n"
-                 << dtd << "\r\n";
-
-            writeElementAsText (*out, 0, lineWrapLength);
+            writeToStream (*out, dtdToUse, false, true, encodingType, lineWrapLength);
             delete out;
 
             if (! tempFile.exists())
@@ -439,7 +443,7 @@ bool XmlElement::writeToFile (const File& f,
             int i;
             for (i = 5; --i >= 0;)
             {
-                if (tempFile.moveFileTo (f))
+                if (tempFile.moveFileTo (file))
                     return true;
 
                 Thread::sleep (100);

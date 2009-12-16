@@ -156,12 +156,12 @@ void ComboBox::addSectionHeading (const String& headingName) throw()
 }
 
 void ComboBox::setItemEnabled (const int itemId,
-                               const bool isEnabled) throw()
+                               const bool shouldBeEnabled) throw()
 {
     ItemInfo* const item = getItemForId (itemId);
 
     if (item != 0)
-        item->isEnabled = isEnabled;
+        item->isEnabled = shouldBeEnabled;
 }
 
 void ComboBox::changeItemText (const int itemId,

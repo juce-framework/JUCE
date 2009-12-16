@@ -2842,7 +2842,7 @@ protected:
     }
 
     /** Destructor. */
-    ~ArrayAllocationBase() throw()
+    virtual ~ArrayAllocationBase()
     {
         delete[] elements;
     }
@@ -3336,8 +3336,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
+    OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity_),
           numUsed (0)
     {
     }
@@ -4612,8 +4612,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    Array (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
+    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity_),
          numUsed (0)
     {
     }
@@ -7295,6 +7295,9 @@ public:
 
 private:
     void* pool;
+
+    ScopedAutoReleasePool (const ScopedAutoReleasePool&);
+    const ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
 
 #endif
@@ -7377,6 +7380,9 @@ private:
     int remoteId;
 
     bool open (const bool openInExclusiveMode) throw();
+
+    AppleRemoteDevice (const AppleRemoteDevice&);
+    const AppleRemoteDevice& operator= (const AppleRemoteDevice&);
 };
 
 #endif
@@ -8940,18 +8946,17 @@ public:
     */
     virtual int readCompressedInt();
 
-    /** Reads a string from the stream, up to the next linefeed or carriage return.
+    /** Reads a UTF8 string from the stream, up to the next linefeed or carriage return.
 
-        The stream is treated as 8-bit characters encoded with the system's default encoding,
-        and this will read up to the next "\n" or "\r\n" or end-of-stream.
+        This will read up to the next "\n" or "\r\n" or end-of-stream.
 
-        After this call, the stream's position will be left pointing to the character
+        After this call, the stream's position will be left pointing to the next character
         following the line-feed, but the linefeeds aren't included in the string that
         is returned.
     */
     virtual const String readNextLine();
 
-    /** Reads a zero-terminated string from the stream.
+    /** Reads a zero-terminated UTF8 string from the stream.
 
         This will read characters from the stream until it hits a zero character or
         end-of-stream.
@@ -9168,6 +9173,8 @@ public:
         text-file! It's intended for storing a string for later retrieval
         by InputStream::readString.
 
+        It writes the string to the stream as UTF8, with a null character terminating it.
+
         For appending text to a file, instead use writeText, printf, or operator<<
 
         @see InputStream::readString, writeText, printf, operator<<
@@ -9276,6 +9283,7 @@ public:
 
     operator int() const throw();
     operator bool() const throw();
+    operator float() const throw();
     operator double() const throw();
     operator const String() const throw();
     const String toString() const throw();
@@ -9751,13 +9759,34 @@ public:
         @param lineWrapLength   the line length that will be used before items get placed on
                                 a new line. This isn't an absolute maximum length, it just
                                 determines how lists of attributes get broken up
-        @see writeToFile
+        @see writeToStream, writeToFile
     */
     const String createDocument (const String& dtdToUse,
                                  const bool allOnOneLine = false,
                                  const bool includeXmlHeader = true,
                                  const tchar* const encodingType = JUCE_T("UTF-8"),
                                  const int lineWrapLength = 60) const throw();
+
+    /** Writes the document to a stream as UTF-8.
+
+        @param dtdToUse         the DTD to add to the document
+        @param allOnOneLine     if true, this means that the document will not contain any
+                                linefeeds, so it'll be smaller but not very easy to read.
+        @param includeXmlHeader whether to add the "<?xml version..etc" line at the start of the
+                                document
+        @param encodingType     the character encoding format string to put into the xml
+                                header
+        @param lineWrapLength   the line length that will be used before items get placed on
+                                a new line. This isn't an absolute maximum length, it just
+                                determines how lists of attributes get broken up
+        @see writeToFile, createDocument
+    */
+    void writeToStream (OutputStream& output,
+                        const String& dtdToUse,
+                        const bool allOnOneLine = false,
+                        const bool includeXmlHeader = true,
+                        const tchar* const encodingType = JUCE_T("UTF-8"),
+                        const int lineWrapLength = 60) const throw();
 
     /** Writes the element to a file as an XML document.
 
@@ -10223,6 +10252,9 @@ private:
 
         String name, value;
         XmlAttributeNode* next;
+
+    private:
+        const XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
     XmlAttributeNode* attributes;
@@ -10486,8 +10518,8 @@ public:
 
         @see ReferenceCountedObject, ArrayAllocationBase, Array, OwnedArray
     */
-    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity),
+    ReferenceCountedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
+        : ArrayAllocationBase <ObjectClass*> (granularity_),
           numUsed (0)
     {
     }
@@ -11259,8 +11291,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
+    SortedSet (const int granularity_ = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity_),
          numUsed (0)
     {
     }
@@ -12871,6 +12903,16 @@ public:
     */
     ValueTree getChildWithName (const String& type) const throw();
 
+    /** Looks for the first child node that has the speficied property value.
+
+        This will scan the child nodes in order, until it finds one that has property that matches
+        the specified value.
+
+        If no such node is found, it'll return an invalid node. (See isValid() to find out
+        whether a node is valid).
+    */
+    ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
+
     /** Adds a child to this node.
 
         Make sure that the child is removed from any former parent node before calling this, or
@@ -12928,6 +12970,19 @@ public:
     */
     static ValueTree fromXml (const XmlElement& xml) throw();
 
+    /** Stores this tree (and all its children) in a binary format.
+
+        Once written, the data can be read back with readFromStream().
+
+        It's much faster to load/save your tree in binary form than as XML, but
+        obviously isn't human-readable.
+    */
+    void writeToStream (OutputStream& output) throw();
+
+    /** Reloads a tree from a stream that was written with writeToStream().
+    */
+    static ValueTree readFromStream (InputStream& input) throw();
+
     /** Listener class for events that happen to a ValueTree.
 
         To get events from a ValueTree, make your class implement this interface, and use
@@ -12940,13 +12995,13 @@ public:
         virtual ~Listener() {}
 
         /** This method is called when one or more of the properties of this node have changed. */
-        virtual void ValueTreePropertyChanged (ValueTree& tree) = 0;
+        virtual void valueTreePropertyChanged (ValueTree& tree) = 0;
 
         /** This method is called when one or more of the children of this node have been added or removed. */
-        virtual void ValueTreeChildrenChanged (ValueTree& tree) = 0;
+        virtual void valueTreeChildrenChanged (ValueTree& tree) = 0;
 
         /** This method is called when this node has been added or removed from a parent node. */
-        virtual void ValueTreeParentChanged() = 0;
+        virtual void valueTreeParentChanged() = 0;
     };
 
     /** Adds a listener to receive callbacks when this node is changed. */
@@ -12970,9 +13025,9 @@ private:
 
         struct Property
         {
-            Property (const var::identifier& id, const var& value) throw();
+            Property (const var::identifier& name, const var& value) throw();
 
-            var::identifier id;
+            var::identifier name;
             var value;
         };
 
@@ -12992,6 +13047,7 @@ private:
         void removeAllProperties (UndoManager* const undoManager) throw();
         bool isAChildOf (const SharedObject* const possibleParent) const throw();
         ValueTree getChildWithName (const String& type) const throw();
+        ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
         void addChild (SharedObject* child, int index, UndoManager* const undoManager) throw();
         void removeChild (const int childIndex, UndoManager* const undoManager) throw();
         void removeAllChildren (UndoManager* const undoManager) throw();
@@ -13141,6 +13197,9 @@ private:
     void* fileHandle;
     int64 currentPosition, totalSize;
     bool needToSeek;
+
+    FileInputStream (const FileInputStream&);
+    const FileInputStream& operator= (const FileInputStream&);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__
@@ -16990,12 +17049,6 @@ public:
     virtual void mouseWheelMove     (const MouseEvent& e,
                                      float wheelIncrementX,
                                      float wheelIncrementY);
-
-private:
-    // XXX Deprecated! The parameters for this method have changed to accommodate horizonatal scroll-wheels.
-    // This line is here to cause a syntax error if you're trying to use the old-style definition, so
-    // if that happens, update your code to use the new one above.
-    virtual int mouseWheelMove (const MouseEvent&, float) { return 0; }
 };
 
 #endif   // __JUCE_MOUSELISTENER_JUCEHEADER__
@@ -17339,11 +17392,6 @@ public:
         @see KeyPress, Component::keyStateChanged
     */
     virtual bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
-
-private:
-    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
-    // subclass to use the new parameters to keyStateChanged)
-    virtual void keyStateChanged (Component*) {};
 };
 
 #endif   // __JUCE_KEYLISTENER_JUCEHEADER__
@@ -23404,7 +23452,7 @@ public:
 
         @see isFocusContainer, createFocusTraverser, moveKeyboardFocusToSibling
     */
-    void setFocusContainer (const bool isFocusContainer) throw();
+    void setFocusContainer (const bool shouldBeFocusContainer) throw();
 
     /** Returns true if this component has been marked as a focus container.
 
@@ -24833,6 +24881,9 @@ private:
 
     friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, const bool async);
+
+    ApplicationCommandTarget (const ApplicationCommandTarget&);
+    const ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
@@ -25119,6 +25170,9 @@ private:
     int appReturnValue;
     bool stillInitialising;
     InterProcessLock* appLock;
+
+    JUCEApplication (const JUCEApplication&);
+    const JUCEApplication& operator= (const JUCEApplication&);
 
 public:
     /** @internal */
@@ -34993,7 +35047,7 @@ public:
         current selection - it just stops the user choosing that item from the list.
     */
     void setItemEnabled (const int itemId,
-                         const bool isEnabled) throw();
+                         const bool shouldBeEnabled) throw();
 
     /** Changes the text for an existing item.
     */
@@ -39353,6 +39407,9 @@ private:
     void* sharedEvents;
 
     void init (Thread* const thread, ThreadPoolJob* const job) throw();
+
+    MessageManagerLock (const MessageManagerLock&);
+    const MessageManagerLock& operator= (const MessageManagerLock&);
 };
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
@@ -40111,6 +40168,10 @@ public:
 
         uint8* data;
         int lineStride, pixelStride, width, height;
+
+    private:
+        BitmapData (const BitmapData&);
+        const BitmapData& operator= (const BitmapData&);
     };
 
     /** Copies some pixel values to a rectangle of the image.
@@ -41528,30 +41589,16 @@ public:
     */
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
-    /**
+    /** Tries to create a Drawable from a previously-saved ValueTree.
+        The ValueTree must have been created by the createValueTree() method.
     */
-    static Drawable* readFromBinaryStream (InputStream& input);
+    static Drawable* createFromValueTree (const ValueTree& tree) throw();
 
-    /**
+    /** Creates a ValueTree to represent this Drawable.
+        The VarTree that is returned can be turned back into a Drawable with
+        createFromValueTree().
     */
-    bool writeToBinaryStream (OutputStream& output) const;
-
-    /**
-    */
-    static Drawable* readFromXml (const XmlElement& xml);
-
-    /**
-    */
-    XmlElement* createXml() const;
-
-    /** @internal */
-    virtual bool readBinary (InputStream& input) = 0;
-    /** @internal */
-    virtual bool writeBinary (OutputStream& output) const = 0;
-    /** @internal */
-    virtual bool readXml (const XmlElement& xml) = 0;
-    /** @internal */
-    virtual void writeXml (XmlElement& xml) const = 0;
+    virtual ValueTree createValueTree() const throw() = 0;
 
     juce_UseDebuggingNewOperator
 
@@ -41679,13 +41726,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    bool readBinary (InputStream& input);
+    ValueTree createValueTree() const throw();
     /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
+    static DrawableComposite* createFromValueTree (const ValueTree& tree) throw();
 
     juce_UseDebuggingNewOperator
 
@@ -41782,13 +41825,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    bool readBinary (InputStream& input);
+    ValueTree createValueTree() const throw();
     /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
+    static DrawableImage* createFromValueTree (const ValueTree& tree) throw();
 
     juce_UseDebuggingNewOperator
 
@@ -41856,13 +41895,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    bool readBinary (InputStream& input);
+    ValueTree createValueTree() const throw();
     /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
+    static DrawableText* createFromValueTree (const ValueTree& tree) throw();
 
     juce_UseDebuggingNewOperator
 
@@ -41957,13 +41992,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    bool readBinary (InputStream& input);
+    ValueTree createValueTree() const throw();
     /** @internal */
-    bool writeBinary (OutputStream& output) const;
-    /** @internal */
-    bool readXml (const XmlElement& xml);
-    /** @internal */
-    void writeXml (XmlElement& xml) const;
+    static DrawablePath* createFromValueTree (const ValueTree& tree) throw();
 
     juce_UseDebuggingNewOperator
 

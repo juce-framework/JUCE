@@ -184,7 +184,7 @@ public:
         if (! transform.isIdentity())
         {
             const Line l (x2, y2, x1, y1);
-            const Point p3 = l.getPointAlongLine (0.0, 100.0f);
+            const Point p3 = l.getPointAlongLine (0.0f, 100.0f);
             float x3 = p3.getX();
             float y3 = p3.getY();
 
@@ -261,9 +261,9 @@ public:
           gy1 (gradient.y1)
     {
         jassert (numEntries_ >= 0);
-        const float dx = gradient.x1 - gradient.x2;
-        const float dy = gradient.y1 - gradient.y2;
-        maxDist = dx * dx + dy * dy;
+        const float gdx = gradient.x1 - gradient.x2;
+        const float gdy = gradient.y1 - gradient.y2;
+        maxDist = gdx * gdx + gdy * gdy;
         invScale = numEntries / sqrt (maxDist);
         jassert (roundDoubleToInt (sqrt (maxDist) * invScale) <= numEntries);
     }
@@ -340,8 +340,8 @@ class GradientEdgeTableRenderer  : public GradientType
 {
 public:
     GradientEdgeTableRenderer (const Image::BitmapData& destData_, const ColourGradient& gradient, const AffineTransform& transform,
-                               const PixelARGB* const lookupTable, const int numEntries) throw()
-        : GradientType (gradient, transform, lookupTable, numEntries - 1),
+                               const PixelARGB* const lookupTable_, const int numEntries_) throw()
+        : GradientType (gradient, transform, lookupTable_, numEntries_ - 1),
           destData (destData_)
     {
     }
@@ -465,8 +465,8 @@ public:
     void clipEdgeTableLine (EdgeTable& et, int x, int y, int width) throw()
     {
         jassert (x - xOffset >= 0 && x + width - xOffset <= srcData.width);
-        SrcPixelType* sourceLineStart = (SrcPixelType*) srcData.getLinePointer (y - yOffset);
-        uint8* mask = (uint8*) (sourceLineStart + x - xOffset);
+        SrcPixelType* s = (SrcPixelType*) srcData.getLinePointer (y - yOffset);
+        uint8* mask = (uint8*) (s + x - xOffset);
 
         if (sizeof (SrcPixelType) == sizeof (PixelARGB))
             mask += PixelARGB::indexA;

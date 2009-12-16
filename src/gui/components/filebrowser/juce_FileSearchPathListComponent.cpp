@@ -60,7 +60,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
 
     {
         Path arrowPath;
-        arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
+        arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0f, 40.0f, 100.0f, 50.0f);
         DrawablePath arrowImage;
         arrowImage.setFill (Colours::black.withAlpha (0.4f));
         arrowImage.setPath (arrowPath);

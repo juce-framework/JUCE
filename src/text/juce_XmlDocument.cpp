@@ -294,12 +294,12 @@ void XmlDocument::readQuotedString (String& result) throw()
 
     while (! outOfData)
     {
-        const tchar character = readNextChar();
+        const tchar c = readNextChar();
 
-        if (character == quote)
+        if (c == quote)
             break;
 
-        if (character == T('&'))
+        if (c == T('&'))
         {
             --input;
             readEntity (result);
@@ -412,9 +412,9 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
                     {
                         skipNextWhiteSpace();
 
-                        const tchar c = *input;
+                        const tchar nextChar = *input;
 
-                        if (c == T('"') || c == T('\''))
+                        if (nextChar == T('"') || nextChar == T('\''))
                         {
                             XmlElement::XmlAttributeNode* const newAtt
                                 = new XmlElement::XmlAttributeNode (String (attNameStart, attNameLen),
@@ -605,13 +605,13 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
 
                     for (;;)
                     {
-                        const tchar c = *input;
+                        const tchar nextChar = *input;
 
-                        if (c == T('<') || c == T('&'))
+                        if (nextChar == T('<') || nextChar == T('&'))
                         {
                             break;
                         }
-                        else if (c == 0)
+                        else if (nextChar == 0)
                         {
                             setLastError ("unmatched tags", false);
                             outOfData = true;

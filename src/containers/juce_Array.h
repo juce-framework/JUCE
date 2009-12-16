@@ -64,8 +64,8 @@ public:
 
         @see ArrayAllocationBase
     */
-    Array (const int granularity = juceDefaultArrayGranularity) throw()
-       : ArrayAllocationBase <ElementType> (granularity),
+    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
+       : ArrayAllocationBase <ElementType> (granularity_),
          numUsed (0)
     {
     }

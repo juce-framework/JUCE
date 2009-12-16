@@ -29,7 +29,9 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Drawable.h"
 #include "juce_DrawableComposite.h"
+#include "juce_DrawablePath.h"
 #include "juce_DrawableImage.h"
+#include "juce_DrawableText.h"
 #include "../imaging/juce_ImageFileFormat.h"
 #include "../../../text/juce_XmlDocument.h"
 #include "../../../io/files/juce_FileInputStream.h"
@@ -143,62 +145,24 @@ Drawable* Drawable::createFromImageFile (const File& file)
 }
 
 //==============================================================================
-Drawable* Drawable::readFromBinaryStream (InputStream& input)
+Drawable* Drawable::createFromValueTree (const ValueTree& tree) throw()
 {
-    char header[8];
-    if (input.read (header, sizeof (header)) != sizeof (header))
-        return 0;
+    Drawable* d = DrawablePath::createFromValueTree (tree);
 
-    DrawableComposite* result = 0;
-
-    if (memcmp (header, "JuceDrw1", sizeof (header)) == 0)
+    if (d == 0)
     {
-        result = new DrawableComposite();
+        d = DrawableComposite::createFromValueTree (tree);
 
-        if (! result->readBinary (input))
-            deleteAndZero (result);
+        if (d == 0)
+        {
+            d = DrawableImage::createFromValueTree (tree);
+
+            if (d == 0)
+                d = DrawableText::createFromValueTree (tree);
+        }
     }
 
-    return result;
-}
-
-bool Drawable::writeToBinaryStream (OutputStream& output) const
-{
-    output.write ("JuceDrw1", 8);
-    return writeBinary (output);
-}
-
-Drawable* Drawable::readFromXml (const XmlElement& xml)
-{
-    DrawableComposite* result = 0;
-
-    if (xml.hasTagName (T("JuceDrawable")))
-    {
-        result = new DrawableComposite();
-
-        if (! result->readXml (xml))
-            deleteAndZero (result);
-    }
-
-    return result;
-}
-
-XmlElement* Drawable::createXml() const
-{
-    if (dynamic_cast <const DrawableComposite*> (this) == 0)
-    {
-        DrawableComposite tempDC;
-        tempDC.insertDrawable (const_cast <Drawable*> (this));
-        XmlElement* result = tempDC.createXml();
-        tempDC.removeDrawable (0, false);
-        return result;
-    }
-    else
-    {
-        XmlElement* e = new XmlElement (T("JuceDrawable"));
-        writeXml (*e);
-        return e;
-    }
+    return d;
 }
 
 

@@ -49,9 +49,9 @@ public:
     {
     }
 
-    const String getTextFromValue (double currentValue)
+    const String getTextFromValue (double value)
     {
-        return String::formatted (T("%02X"), (int)currentValue);
+        return String::formatted (T("%02X"), (int) value);
     }
 
     double getValueFromText (const String& text)

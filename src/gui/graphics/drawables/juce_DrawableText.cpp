@@ -88,27 +88,29 @@ Drawable* DrawableText::createCopy() const
 }
 
 //==============================================================================
-bool DrawableText::readBinary (InputStream& input)
+ValueTree DrawableText::createValueTree() const throw()
 {
-    jassertfalse; //xxx TODO
-    return false;
+    ValueTree v (T("Text"));
+
+    if (getName().isNotEmpty())
+        v.setProperty ("id", getName(), 0);
+
+    jassertfalse // xxx not finished!
+    return v;
 }
 
-bool DrawableText::writeBinary (OutputStream& output) const
+DrawableText* DrawableText::createFromValueTree (const ValueTree& tree) throw()
 {
-    jassertfalse; //xxx TODO
-    return false;
-}
+    if (! tree.hasType ("Text"))
+        return 0;
 
-bool DrawableText::readXml (const XmlElement& xml)
-{
-    jassertfalse; //xxx TODO
-    return false;
-}
+    DrawableText* dt = new DrawableText();
 
-void DrawableText::writeXml (XmlElement& xml) const
-{
-    jassertfalse; //xxx TODO
+    dt->setName (tree ["id"]);
+
+    jassertfalse // xxx not finished!
+
+    return dt;
 }
 
 

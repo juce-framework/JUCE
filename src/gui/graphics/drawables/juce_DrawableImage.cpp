@@ -155,71 +155,18 @@ Drawable* DrawableImage::createCopy() const
 }
 
 //==============================================================================
-bool DrawableImage::readBinary (InputStream& input)
+ValueTree DrawableImage::createValueTree() const throw()
 {
-    opacity = input.readFloat();
-    overlayColour = Colour (input.readInt());
+    ValueTree v (T("Image"));
 
-    const int dataLen = input.readInt();
+    if (getName().isNotEmpty())
+        v.setProperty ("id", getName(), 0);
 
-    if (dataLen > 0)
-    {
-        MemoryBlock imageData;
-        input.readIntoMemoryBlock (imageData, dataLen);
-
-        Image* im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
-        if (im == 0)
-            return false;
-
-        setImage (im, true);
-    }
-
-    return true;
-}
-
-bool DrawableImage::writeBinary (OutputStream& output) const
-{
-    MemoryOutputStream imageData;
-
-    if (image != 0)
-    {
-        PNGImageFormat pngFormat;
-        if (! pngFormat.writeImageToStream (*image, imageData))
-            return false;
-    }
-
-    output.writeFloat (opacity);
-    output.writeInt (overlayColour.getARGB());
-    output.writeInt (imageData.getDataSize());
-    output.write (imageData.getData(), imageData.getDataSize());
-    return true;
-}
-
-bool DrawableImage::readXml (const XmlElement& xml)
-{
-    opacity = (float) xml.getDoubleAttribute (T("opacity"), 1.0);
-    overlayColour = Colour (xml.getStringAttribute (T("overlay"), T("0")).getHexValue32());
-
-    MemoryBlock imageData;
-    if (imageData.fromBase64Encoding (xml.getAllSubText()))
-    {
-        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
-        if (im == 0)
-            return false;
-
-        setImage (im, true);
-    }
-
-    return true;
-}
-
-void DrawableImage::writeXml (XmlElement& xml) const
-{
     if (opacity < 1.0f)
-        xml.setAttribute (T("opacity"), (double) opacity);
+        v.setProperty ("opacity", (double) opacity, 0);
 
     if (! overlayColour.isTransparent())
-        xml.setAttribute (T("overlay"), String::toHexString ((int) overlayColour.getARGB()));
+        v.setProperty ("overlay", String::toHexString ((int) overlayColour.getARGB()), 0);
 
     if (image != 0)
     {
@@ -232,9 +179,36 @@ void DrawableImage::writeXml (XmlElement& xml) const
             for (int i = (base64.length() & ~127); i >= 0; i -= 128)
                 base64 = base64.substring (0, i) + "\n" + base64.substring (i);
 
-            xml.addTextElement (base64);
+            v.setProperty ("data", base64, 0);
         }
     }
+
+    return v;
 }
+
+DrawableImage* DrawableImage::createFromValueTree (const ValueTree& tree) throw()
+{
+    if (! tree.hasType ("Image"))
+        return 0;
+
+    DrawableImage* di = new DrawableImage();
+
+    di->setName (tree ["id"]);
+    di->opacity = tree.hasProperty ("opacity") ? (float) tree ["opacity"] : 1.0f;
+    di->overlayColour = Colour (tree ["overlay"].toString().getHexValue32());
+
+    MemoryBlock imageData;
+    if (imageData.fromBase64Encoding (tree ["data"]))
+    {
+        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
+        if (im == 0)
+            return false;
+
+        di->setImage (im, true);
+    }
+
+    return di;
+}
+
 
 END_JUCE_NAMESPACE

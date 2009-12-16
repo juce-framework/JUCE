@@ -333,6 +333,21 @@ void Path::addRectangle (const float x, const float y,
 
     ensureAllocatedSize (numElements + 13);
 
+    if (numElements == 0)
+    {
+        pathXMin = x1;
+        pathXMax = x2;
+        pathYMin = y1;
+        pathYMax = y2;
+    }
+    else
+    {
+        pathXMin = jmin (pathXMin, x1);
+        pathXMax = jmax (pathXMax, x2);
+        pathYMin = jmin (pathYMin, y1);
+        pathYMax = jmax (pathYMax, y2);
+    }
+
     elements [numElements++] = moveMarker;
     elements [numElements++] = x1;
     elements [numElements++] = y2;
@@ -346,11 +361,6 @@ void Path::addRectangle (const float x, const float y,
     elements [numElements++] = x2;
     elements [numElements++] = y2;
     elements [numElements++] = closeSubPathMarker;
-
-    pathXMin = jmin (pathXMin, x1);
-    pathXMax = jmax (pathXMax, x2);
-    pathYMin = jmin (pathYMin, y1);
-    pathYMax = jmax (pathYMax, y2);
 }
 
 void Path::addRectangle (const Rectangle& rectangle) throw()

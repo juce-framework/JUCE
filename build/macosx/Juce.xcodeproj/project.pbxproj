@@ -650,6 +650,8 @@
 		84AB91FF10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F910A078190048FC39 /* juce_CPlusPlusCodeTokeniser.cpp */; };
 		84AB920010A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */; };
 		84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */; };
+		84B2053E10D535EC008B4A79 /* juce_ValueTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */; };
+		84B2053F10D535EC008B4A79 /* juce_ValueTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */; };
 		84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
 		84F1E6E810403605006A1807 /* juce_Application.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DD10403605006A1807 /* juce_Application.h */; };
@@ -3203,6 +3205,7 @@
 				844BB95B10C5578800DF5536 /* juce_TargetPlatform.h in Headers */,
 				844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */,
 				844BB95F10C557A800DF5536 /* juce_Config.h in Headers */,
+				84B2053E10D535EC008B4A79 /* juce_ValueTree.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3873,6 +3876,7 @@
 				840F1DA610AD674F002A03A6 /* juce_CPlusPlusCodeTokeniser.cpp in Sources */,
 				844BB95C10C5579A00DF5536 /* juce_FillType.cpp in Sources */,
 				844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */,
+				84B2053F10D535EC008B4A79 /* juce_ValueTree.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4212,7 +4216,6 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				STRIP_STYLE = "non-global";
 			};
@@ -4258,7 +4261,10 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_MISSING_PARENTHESES = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PRODUCT_NAME = juce;
 				RUN_CLANG_STATIC_ANALYZER = YES;

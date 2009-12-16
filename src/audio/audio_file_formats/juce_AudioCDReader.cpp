@@ -133,7 +133,7 @@ void AudioCDReader::refreshTrackLengths()
 
             if (r != 0)
             {
-                sample += r->lengthInSamples;
+                sample += (int) r->lengthInSamples;
                 delete r;
             }
         }

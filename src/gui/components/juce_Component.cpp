@@ -1464,7 +1464,7 @@ int Component::runModalLoop()
     return returnValue;
 }
 
-void Component::enterModalState (const bool takeKeyboardFocus)
+void Component::enterModalState (const bool takeKeyboardFocus_)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1483,7 +1483,7 @@ void Component::enterModalState (const bool takeKeyboardFocus)
         flags.currentlyModalFlag = true;
         setVisible (true);
 
-        if (takeKeyboardFocus)
+        if (takeKeyboardFocus_)
             grabKeyboardFocus();
     }
 }
@@ -3235,9 +3235,9 @@ bool Component::getWantsKeyboardFocus() const throw()
     return flags.wantsFocusFlag && ! flags.isDisabledFlag;
 }
 
-void Component::setFocusContainer (const bool isFocusContainer) throw()
+void Component::setFocusContainer (const bool shouldBeFocusContainer) throw()
 {
-    flags.isFocusContainerFlag = isFocusContainer;
+    flags.isFocusContainerFlag = shouldBeFocusContainer;
 }
 
 bool Component::isFocusContainer() const throw()

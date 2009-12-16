@@ -308,6 +308,9 @@ private:
     void* sharedEvents;
 
     void init (Thread* const thread, ThreadPoolJob* const job) throw();
+
+    MessageManagerLock (const MessageManagerLock&);
+    const MessageManagerLock& operator= (const MessageManagerLock&);
 };
 
 

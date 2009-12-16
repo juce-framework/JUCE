@@ -99,6 +99,8 @@ int InputStream::readCompressedInt()
             if (read (&num, numBytes) != numBytes)
                 return 0;
 
+            num = (int) swapIfBigEndian ((uint32) num);
+
             if (negative)
                 num = -num;
         }
@@ -112,7 +114,7 @@ int64 InputStream::readInt64()
     char temp [8];
 
     if (read (temp, 8) == 8)
-        return (int64) swapIfBigEndian (*(uint64*)temp);
+        return (int64) swapIfBigEndian (*(uint64*) temp);
     else
         return 0;
 }
@@ -122,7 +124,7 @@ int64 InputStream::readInt64BigEndian()
     char temp [8];
 
     if (read (temp, 8) == 8)
-        return (int64) swapIfLittleEndian (*(uint64*)temp);
+        return (int64) swapIfLittleEndian (*(uint64*) temp);
     else
         return 0;
 }
@@ -157,76 +159,51 @@ double InputStream::readDoubleBigEndian()
 
 const String InputStream::readString()
 {
-    const int tempBufferSize = 256;
-    uint8 temp [tempBufferSize];
+    MemoryBlock buffer (256);
+    uint8* data = (uint8*) buffer.getData();
     int i = 0;
 
-    while ((temp [i++] = readByte()) != 0)
+    while ((data[i] = readByte()) != 0)
     {
-        if (i == tempBufferSize)
+        if (++i >= buffer.getSize())
         {
-            // too big for our quick buffer, so read it in blocks..
-            String result (String::fromUTF8 (temp, i));
-            i = 0;
-
-            for (;;)
-            {
-                if ((temp [i++] = readByte()) == 0)
-                {
-                    result += String::fromUTF8 (temp, i - 1);
-                    break;
-                }
-                else if (i == tempBufferSize)
-                {
-                    result += String::fromUTF8 (temp, i);
-                    i = 0;
-                }
-            }
-
-            return result;
+            buffer.setSize (buffer.getSize() + 512);
+            data = (uint8*) buffer.getData();
         }
     }
 
-    return String::fromUTF8 (temp, i - 1);
+    return String::fromUTF8 (data, i);
 }
 
 const String InputStream::readNextLine()
 {
-    String s;
-    const int maxChars = 256;
-    tchar buffer [maxChars];
-    int charsInBuffer = 0;
+    MemoryBlock buffer (256);
+    uint8* data = (uint8*) buffer.getData();
+    int i = 0;
 
-    while (! isExhausted())
+    while ((data[i] = readByte()) != 0)
     {
-        const uint8 c = readByte();
-        const int64 lastPos = getPosition();
-
-        if (c == '\n')
-        {
+        if (data[i] == '\n')
             break;
-        }
-        else if (c == '\r')
+
+        if (data[i] == '\r')
         {
+            const int64 lastPos = getPosition();
+
             if (readByte() != '\n')
                 setPosition (lastPos);
 
             break;
         }
 
-        buffer [charsInBuffer++] = c;
-
-        if (charsInBuffer == maxChars)
+        if (++i >= buffer.getSize())
         {
-            s.append (buffer, maxChars);
-            charsInBuffer = 0;
+            buffer.setSize (buffer.getSize() + 512);
+            data = (uint8*) buffer.getData();
         }
     }
 
-    if (charsInBuffer > 0)
-        s.append (buffer, charsInBuffer);
-
-    return s;
+    return String::fromUTF8 (data, i);
 }
 
 int InputStream::readIntoMemoryBlock (MemoryBlock& block,

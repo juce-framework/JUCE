@@ -42,8 +42,8 @@ FillType::FillType (const Colour& colour_) throw()
 {
 }
 
-FillType::FillType (const ColourGradient& gradient) throw()
-    : colour (0xff000000), gradient (new ColourGradient (gradient)), image (0)
+FillType::FillType (const ColourGradient& gradient_) throw()
+    : colour (0xff000000), gradient (new ColourGradient (gradient_)), image (0)
 {
 }
 

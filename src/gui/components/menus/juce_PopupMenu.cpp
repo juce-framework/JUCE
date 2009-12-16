@@ -928,12 +928,12 @@ private:
         do
         {
             ++numColumns;
-            totalW = workOutBestSize (numColumns, maxMenuW);
+            totalW = workOutBestSize (maxMenuW);
 
             if (totalW > maxMenuW)
             {
                 numColumns = jmax (1, numColumns - 1);
-                totalW = workOutBestSize (numColumns, maxMenuW); // to update col widths
+                totalW = workOutBestSize (maxMenuW); // to update col widths
                 break;
             }
             else if (totalW > maxMenuW / 2 || contentHeight < maxMenuH)
@@ -951,7 +951,7 @@ private:
         height = actualH + borderSize * 2;
     }
 
-    int workOutBestSize (const int numColumns, const int maxMenuW)
+    int workOutBestSize (const int maxMenuW)
     {
         int totalW = 0;
         contentHeight = 0;

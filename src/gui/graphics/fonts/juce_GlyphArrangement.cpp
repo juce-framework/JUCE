@@ -752,7 +752,7 @@ void GlyphArrangement::spreadOutLine (const int start, const int num, const floa
 
             for (int i = 0; i < num; ++i)
             {
-                glyphs.getUnchecked (start + i)->moveBy (deltaX, 0.0);
+                glyphs.getUnchecked (start + i)->moveBy (deltaX, 0.0f);
 
                 if (glyphs.getUnchecked (start + i)->isWhitespace())
                     deltaX += extraPaddingBetweenWords;

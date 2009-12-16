@@ -187,13 +187,34 @@ public:
         @param lineWrapLength   the line length that will be used before items get placed on
                                 a new line. This isn't an absolute maximum length, it just
                                 determines how lists of attributes get broken up
-        @see writeToFile
+        @see writeToStream, writeToFile
     */
     const String createDocument (const String& dtdToUse,
                                  const bool allOnOneLine = false,
                                  const bool includeXmlHeader = true,
                                  const tchar* const encodingType = JUCE_T("UTF-8"),
                                  const int lineWrapLength = 60) const throw();
+
+    /** Writes the document to a stream as UTF-8.
+
+        @param dtdToUse         the DTD to add to the document
+        @param allOnOneLine     if true, this means that the document will not contain any
+                                linefeeds, so it'll be smaller but not very easy to read.
+        @param includeXmlHeader whether to add the "<?xml version..etc" line at the start of the
+                                document
+        @param encodingType     the character encoding format string to put into the xml
+                                header
+        @param lineWrapLength   the line length that will be used before items get placed on
+                                a new line. This isn't an absolute maximum length, it just
+                                determines how lists of attributes get broken up
+        @see writeToFile, createDocument
+    */
+    void writeToStream (OutputStream& output,
+                        const String& dtdToUse,
+                        const bool allOnOneLine = false,
+                        const bool includeXmlHeader = true,
+                        const tchar* const encodingType = JUCE_T("UTF-8"),
+                        const int lineWrapLength = 60) const throw();
 
     /** Writes the element to a file as an XML document.
 
@@ -668,6 +689,9 @@ private:
 
         String name, value;
         XmlAttributeNode* next;
+
+    private:
+        const XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
     XmlAttributeNode* attributes;

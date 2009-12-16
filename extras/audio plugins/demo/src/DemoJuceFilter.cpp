@@ -115,12 +115,12 @@ const String DemoJuceFilter::getOutputChannelName (const int channelIndex) const
 
 bool DemoJuceFilter::isInputChannelStereoPair (int index) const
 {
-    return false;
+    return true;
 }
 
 bool DemoJuceFilter::isOutputChannelStereoPair (int index) const
 {
-    return false;
+    return true;
 }
 
 bool DemoJuceFilter::acceptsMidi() const

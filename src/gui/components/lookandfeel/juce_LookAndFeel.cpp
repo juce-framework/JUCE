@@ -649,8 +649,8 @@ void LookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
         Image im (Image::ARGB, width, height, true);
 
         {
-            Graphics g (im);
-            drawGlassLozenge (g, 1.0f, 1.0f,
+            Graphics g2 (im);
+            drawGlassLozenge (g2, 1.0f, 1.0f,
                               (float) (width - 2),
                               (float) (height - 2),
                               foreground,
@@ -2612,7 +2612,7 @@ Button* LookAndFeel::createFileBrowserGoUpButton()
     DrawableButton* goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
 
     Path arrowPath;
-    arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0, 40.0f, 100.0f, 50.0f);
+    arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0f, 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
     arrowImage.setFill (Colours::black.withAlpha (0.4f));

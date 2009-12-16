@@ -242,9 +242,9 @@ uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const thr
 }
 
 //==============================================================================
-MidiBuffer::Iterator::Iterator (const MidiBuffer& buffer) throw()
-    : buffer (buffer),
-      data (buffer.elements)
+MidiBuffer::Iterator::Iterator (const MidiBuffer& buffer_) throw()
+    : buffer (buffer_),
+      data (buffer_.elements)
 {
 }
 

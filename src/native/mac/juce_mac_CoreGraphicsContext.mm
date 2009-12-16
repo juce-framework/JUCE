@@ -32,11 +32,11 @@ class CoreGraphicsImage : public Image
 {
 public:
     //==============================================================================
-    CoreGraphicsImage (const PixelFormat format,
-                       const int imageWidth,
-                       const int imageHeight,
+    CoreGraphicsImage (const PixelFormat format_,
+                       const int imageWidth_,
+                       const int imageHeight_,
                        const bool clearImage)
-        : Image (format, imageWidth, imageHeight, clearImage)
+        : Image (format_, imageWidth_, imageHeight_, clearImage)
     {
         CGColorSpaceRef colourSpace = format == Image::SingleChannel ? CGColorSpaceCreateDeviceGray()
                                                                      : CGColorSpaceCreateDeviceRGB();
@@ -451,20 +451,20 @@ public:
                                     state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
                                     state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
 
-        CGPoint line[] = { { x1 + 0.5f, flipHeight - (y1 + 0.5f) },
-                           { x2 + 0.5f, flipHeight - (y2 + 0.5f) } };
+        CGPoint line[] = { { (float) x1 + 0.5f, flipHeight - ((float) y1 + 0.5f) },
+                           { (float) x2 + 0.5f, flipHeight - ((float) y2 + 0.5f) } };
 
         CGContextStrokeLineSegments (context, line, 1);
     }
 
     void drawVerticalLine (const int x, double top, double bottom)
     {
-        CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
+        CGContextFillRect (context, CGRectMake (x, flipHeight - (float) bottom, 1.0f, (float) (bottom - top)));
     }
 
     void drawHorizontalLine (const int y, double left, double right)
     {
-        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
+        CGContextFillRect (context, CGRectMake ((float) left, flipHeight - (y + 1.0f), (float) (right - left), 1.0f));
     }
 
     void setFont (const Font& newFont)

@@ -28,6 +28,7 @@
 
 #include "../contexts/juce_Graphics.h"
 #include "../../../text/juce_XmlElement.h"
+#include "../../../containers/juce_ValueTree.h"
 
 
 //==============================================================================
@@ -180,31 +181,16 @@ public:
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
     //==============================================================================
-    /**
+    /** Tries to create a Drawable from a previously-saved ValueTree.
+        The ValueTree must have been created by the createValueTree() method.
     */
-    static Drawable* readFromBinaryStream (InputStream& input);
+    static Drawable* createFromValueTree (const ValueTree& tree) throw();
 
-    /**
+    /** Creates a ValueTree to represent this Drawable.
+        The VarTree that is returned can be turned back into a Drawable with
+        createFromValueTree().
     */
-    bool writeToBinaryStream (OutputStream& output) const;
-
-    /**
-    */
-    static Drawable* readFromXml (const XmlElement& xml);
-
-    /**
-    */
-    XmlElement* createXml() const;
-
-    //==============================================================================
-    /** @internal */
-    virtual bool readBinary (InputStream& input) = 0;
-    /** @internal */
-    virtual bool writeBinary (OutputStream& output) const = 0;
-    /** @internal */
-    virtual bool readXml (const XmlElement& xml) = 0;
-    /** @internal */
-    virtual void writeXml (XmlElement& xml) const = 0;
+    virtual ValueTree createValueTree() const throw() = 0;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

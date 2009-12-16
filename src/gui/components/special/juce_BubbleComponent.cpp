@@ -109,10 +109,10 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
     setPosition (Rectangle (tx, ty, componentToPointTo->getWidth(), componentToPointTo->getHeight()));
 }
 
-void BubbleComponent::setPosition (const int arrowTipX,
-                                   const int arrowTipY)
+void BubbleComponent::setPosition (const int arrowTipX_,
+                                   const int arrowTipY_)
 {
-    setPosition (Rectangle (arrowTipX, arrowTipY, 1, 1));
+    setPosition (Rectangle (arrowTipX_, arrowTipY_, 1, 1));
 }
 
 //==============================================================================

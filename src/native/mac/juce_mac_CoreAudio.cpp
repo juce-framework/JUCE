@@ -676,7 +676,7 @@ public:
                     // Sometimes the two linked devices seem to get their callbacks in
                     // parallel, so we need to lock both devices to stop the input data being
                     // changed while inside our callback..
-                    const ScopedLock sl (inputDevice->callbackLock);
+                    const ScopedLock sl2 (inputDevice->callbackLock);
 
                     callback->audioDeviceIOCallback ((const float**) inputDevice->tempInputBuffers,
                                                      inputDevice->numInputChans,

@@ -35,6 +35,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../threads/juce_Thread.h"
 #include "../text/juce_LocalisedStrings.h"
 #include "juce_PlatformUtilities.h"
+#include "../io/streams/juce_MemoryOutputStream.h"
+#include "../io/streams/juce_MemoryInputStream.h"
 void juce_initialiseStrings();
 
 
@@ -57,21 +59,51 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 #endif
 
 #ifdef JUCE_DEBUG
-        // Some simple test code to keep an eye on things and make sure these functions
-        // work ok on all platforms. Let me know if any of these assertions fail!
-        int n = 1;
-        atomicIncrement (n);
-        jassert (atomicIncrementAndReturn (n) == 3);
-        atomicDecrement (n);
-        jassert (atomicDecrementAndReturn (n) == 1);
+        {
+            // Some simple test code to keep an eye on things and make sure these functions
+            // work ok on all platforms. Let me know if any of these assertions fail!
+            int n = 1;
+            atomicIncrement (n);
+            jassert (atomicIncrementAndReturn (n) == 3);
+            atomicDecrement (n);
+            jassert (atomicDecrementAndReturn (n) == 1);
 
-        jassert (swapByteOrder ((uint32) 0x11223344) == 0x44332211);
+            jassert (swapByteOrder ((uint32) 0x11223344) == 0x44332211);
 
-        // quick test to make sure the run-time lib doesn't crash on freeing a null-pointer.
-        SystemStats* nullPointer = 0;
-        juce_free (nullPointer);
-        delete[] nullPointer;
-        delete nullPointer;
+            // quick test to make sure the run-time lib doesn't crash on freeing a null-pointer.
+            SystemStats* nullPointer = 0;
+            juce_free (nullPointer);
+            delete[] nullPointer;
+            delete nullPointer;
+
+            // Some quick stream tests..
+            int randomInt = Random::getSystemRandom().nextInt();
+            int64 randomInt64 = Random::getSystemRandom().nextInt64();
+            double randomDouble = Random::getSystemRandom().nextDouble();
+            String randomString;
+            for (int i = 50; --i >= 0;)
+                randomString << (juce_wchar) (Random::getSystemRandom().nextInt() & 0xffff);
+
+            MemoryOutputStream mo;
+            mo.writeInt (randomInt);
+            mo.writeIntBigEndian (randomInt);
+            mo.writeCompressedInt (randomInt);
+            mo.writeString (randomString);
+            mo.writeInt64 (randomInt64);
+            mo.writeInt64BigEndian (randomInt64);
+            mo.writeDouble (randomDouble);
+            mo.writeDoubleBigEndian (randomDouble);
+
+            MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
+            jassert (mi.readInt() == randomInt);
+            jassert (mi.readIntBigEndian() == randomInt);
+            jassert (mi.readCompressedInt() == randomInt);
+            jassert (mi.readString() == randomString);
+            jassert (mi.readInt64() == randomInt64);
+            jassert (mi.readInt64BigEndian() == randomInt64);
+            jassert (mi.readDouble() == randomDouble);
+            jassert (mi.readDoubleBigEndian() == randomDouble);
+        }
 #endif
         // Now the real initialisation..
 

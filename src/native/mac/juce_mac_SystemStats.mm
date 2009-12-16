@@ -145,7 +145,7 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     size_t memSize = sizeof (mem);
     int mib[] = { CTL_HW, HW_MEMSIZE };
     sysctl (mib, 2, &mem, &memSize, 0, 0);
-    return mem / (1024 * 1024);
+    return (int) (mem / (1024 * 1024));
 }
 
 bool SystemStats::hasMMX() throw()
@@ -206,7 +206,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
     if (speedSize == 4)
         speedHz >>= 32;
 #endif
-    return speedHz / 1000000;
+    return (int) (speedHz / 1000000);
 }
 
 int SystemStats::getNumCpus() throw()

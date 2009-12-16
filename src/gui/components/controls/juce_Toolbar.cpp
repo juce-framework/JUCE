@@ -46,8 +46,8 @@ const tchar* const Toolbar::toolbarDragDescriptor = T("_toolbarItem_");
 class ToolbarSpacerComp  : public ToolbarItemComponent
 {
 public:
-    ToolbarSpacerComp (const int itemId, const float fixedSize_, const bool drawBar_)
-        : ToolbarItemComponent (itemId, String::empty, false),
+    ToolbarSpacerComp (const int itemId_, const float fixedSize_, const bool drawBar_)
+        : ToolbarItemComponent (itemId_, String::empty, false),
           fixedSize (fixedSize_),
           drawBar (drawBar_)
     {

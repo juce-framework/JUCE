@@ -66,8 +66,8 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
     {
         const ScopedUnlock ul (listLock); // unlock first to get the order right..
 
-        const ScopedLock sl1 (callbackLock);
-        const ScopedLock sl2 (listLock);
+        const ScopedLock sl2 (callbackLock);
+        const ScopedLock sl3 (listLock);
 
         clients.removeValue (client);
     }
@@ -82,10 +82,10 @@ int TimeSliceThread::getNumClients() const throw()
     return clients.size();
 }
 
-TimeSliceClient* TimeSliceThread::getClient (const int index) const throw()
+TimeSliceClient* TimeSliceThread::getClient (const int i) const throw()
 {
     const ScopedLock sl (listLock);
-    return clients [index];
+    return clients [i];
 }
 
 //==============================================================================
@@ -101,7 +101,7 @@ void TimeSliceThread::run()
             const ScopedLock sl (callbackLock);
 
             {
-                const ScopedLock sl (listLock);
+                const ScopedLock sl2 (listLock);
 
                 if (clients.size() > 0)
                 {

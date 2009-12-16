@@ -161,7 +161,7 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
 
             while (--n >= 0 && ! startedOne)
             {
-                for (int i = numThreads; --i >= 0;)
+                for (i = numThreads; --i >= 0;)
                 {
                     if (! threads[i]->isThreadRunning())
                     {

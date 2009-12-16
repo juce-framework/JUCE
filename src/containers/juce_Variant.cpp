@@ -237,6 +237,11 @@ var::operator bool() const throw()
     return false;
 }
 
+var::operator float() const throw()
+{
+    return (float) operator double();
+}
+
 var::operator double() const throw()
 {
     switch (type)
@@ -250,7 +255,7 @@ var::operator double() const throw()
         default:            jassertfalse; break;
     }
 
-    return 0;
+    return 0.0;
 }
 
 const String var::toString() const throw()
@@ -310,7 +315,7 @@ void var::writeToStream (OutputStream& output) const throw()
         case doubleType:    output.writeCompressedInt (9); output.writeByte (4); output.writeDouble (value.doubleValue); break;
         case stringType:
         {
-            const int len = value.stringValue->copyToUTF8 (0, -1);
+            const int len = value.stringValue->copyToUTF8 (0);
             output.writeCompressedInt (len + 1);
             output.writeByte (5);
             uint8* const temp = (uint8*) juce_malloc (len);
@@ -419,12 +424,14 @@ var::identifier::identifier (const String& name_) throw()
     : name (name_),
       hashCode (name_.hashCode())
 {
+    jassert (name_.isNotEmpty());
 }
 
 var::identifier::identifier (const char* const name_) throw()
     : name (name_),
       hashCode (name.hashCode())
 {
+    jassert (name.isNotEmpty());
 }
 
 var::identifier::~identifier() throw()

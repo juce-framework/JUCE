@@ -210,6 +210,9 @@ public:
 
 private:
     void* pool;
+
+    ScopedAutoReleasePool (const ScopedAutoReleasePool&);
+    const ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
 
 #endif
@@ -297,6 +300,9 @@ private:
     int remoteId;
 
     bool open (const bool openInExclusiveMode) throw();
+
+    AppleRemoteDevice (const AppleRemoteDevice&);
+    const AppleRemoteDevice& operator= (const AppleRemoteDevice&);
 };
 
 #endif

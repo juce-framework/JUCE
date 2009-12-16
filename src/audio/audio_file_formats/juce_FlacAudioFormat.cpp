@@ -314,12 +314,12 @@ public:
 
     //==============================================================================
     FlacWriter (OutputStream* const out,
-                const double sampleRate,
-                const int numChannels,
+                const double sampleRate_,
+                const int numChannels_,
                 const int bitsPerSample_)
         : AudioFormatWriter (out, flacFormatName,
-                             sampleRate,
-                             numChannels,
+                             sampleRate_,
+                             numChannels_,
                              bitsPerSample_)
     {
         using namespace FlacNamespace;
@@ -366,14 +366,14 @@ public:
 
         if (bitsToShift > 0)
         {
-            const int numChannels = (samplesToWrite[1] == 0) ? 1 : 2;
-            temp.setSize (sizeof (int) * numSamples * numChannels);
+            const int numChannelsToWrite = (samplesToWrite[1] == 0) ? 1 : 2;
+            temp.setSize (sizeof (int) * numSamples * numChannelsToWrite);
 
             buf[0] = (int*) temp.getData();
             buf[1] = buf[0] + numSamples;
             buf[2] = 0;
 
-            for (int i = numChannels; --i >= 0;)
+            for (int i = numChannelsToWrite; --i >= 0;)
             {
                 if (samplesToWrite[i] != 0)
                 {
@@ -426,12 +426,12 @@ public:
         packUint32 ((FLAC__uint32) info.total_samples, buffer + 14, 4);
         memcpy (buffer + 18, info.md5sum, 16);
 
-        const bool ok = output->setPosition (4);
-        (void) ok;
+        const bool seekOk = output->setPosition (4);
+        (void) seekOk;
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header
-        jassert (ok);
+        jassert (seekOk);
 
         output->writeIntBigEndian (FLAC__STREAM_METADATA_STREAMINFO_LENGTH);
         output->write (buffer, FLAC__STREAM_METADATA_STREAMINFO_LENGTH);

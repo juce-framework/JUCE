@@ -194,7 +194,7 @@ int GIFLoader::processExtension (const int type, int& transparent)
     return n;
 }
 
-int GIFLoader::getCode (const int codeSize, const bool initialise)
+int GIFLoader::getCode (const int codeSize_, const bool initialise)
 {
     if (initialise)
     {
@@ -204,7 +204,7 @@ int GIFLoader::getCode (const int codeSize, const bool initialise)
         return 0;
     }
 
-    if ((currentBit + codeSize) >= lastBit)
+    if ((currentBit + codeSize_) >= lastBit)
     {
         if (finished)
             return -1;
@@ -225,13 +225,13 @@ int GIFLoader::getCode (const int codeSize, const bool initialise)
     int result = 0;
     int i = currentBit;
 
-    for (int j = 0; j < codeSize; ++j)
+    for (int j = 0; j < codeSize_; ++j)
     {
         result |= ((buffer[i >> 3] & (1 << (i & 7))) != 0) << j;
         ++i;
     }
 
-    currentBit += codeSize;
+    currentBit += codeSize_;
 
     return result;
 }

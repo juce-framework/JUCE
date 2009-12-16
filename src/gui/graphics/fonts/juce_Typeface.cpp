@@ -339,7 +339,7 @@ float CustomTypeface::getStringWidth (const String& text)
     return x;
 }
 
-void CustomTypeface::getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets)
+void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array<float>& xOffsets)
 {
     xOffsets.add (0);
     float x = 0;
@@ -353,7 +353,7 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& glyphs,
         if (glyph != 0)
         {
             x += glyph->getHorizontalSpacing (*t);
-            glyphs.add ((int) glyph->character);
+            resultGlyphs.add ((int) glyph->character);
             xOffsets.add (x);
         }
     }

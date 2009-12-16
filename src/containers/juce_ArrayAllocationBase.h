@@ -63,7 +63,7 @@ protected:
     }
 
     /** Destructor. */
-    ~ArrayAllocationBase() throw()
+    virtual ~ArrayAllocationBase()
     {
         delete[] elements;
     }

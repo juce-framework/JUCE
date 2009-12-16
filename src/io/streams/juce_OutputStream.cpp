@@ -124,6 +124,7 @@ void OutputStream::writeCompressedInt (int value)
         numSigBytes |= 0x80;
 
     writeByte ((char) numSigBytes);
+    un = swapIfBigEndian (un);
     write (&un, numSigBytes);
 }
 

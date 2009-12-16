@@ -258,6 +258,9 @@ private:
 
     friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, const bool async);
+
+    ApplicationCommandTarget (const ApplicationCommandTarget&);
+    const ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
 };
 
 

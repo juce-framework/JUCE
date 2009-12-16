@@ -187,184 +187,18 @@ Drawable* DrawableComposite::createCopy() const
 }
 
 //==============================================================================
-const char juce_drawableCompositeTransformFlag = 't';
-const char juce_drawableCompositeBinaryType = 'C';
-const char juce_drawablePathBinaryType = 'P';
-const char juce_drawableImageBinaryType = 'I';
-const char juce_drawableTextBinaryType = 'T';
-
-bool DrawableComposite::readBinary (InputStream& input)
+ValueTree DrawableComposite::createValueTree() const throw()
 {
-    AffineTransform transform;
+    ValueTree v (T("Group"));
 
-    while (! input.isExhausted())
-    {
-        const int n = input.readByte();
+    if (getName().isNotEmpty())
+        v.setProperty ("id", getName(), 0);
 
-        if (n == 0)
-            break;
-
-        if (n == juce_drawableCompositeTransformFlag)
-        {
-            float f[6];
-            for (int i = 0; i < 6; ++i)
-                f[i] = input.readFloat();
-
-            transform = AffineTransform (f[0], f[1], f[2], f[3], f[4], f[5]);
-        }
-        else
-        {
-            Drawable* d = 0;
-
-            switch (n)
-            {
-                case juce_drawableCompositeBinaryType:      d = new DrawableComposite(); break;
-                case juce_drawablePathBinaryType:           d = new DrawablePath(); break;
-                case juce_drawableImageBinaryType:          d = new DrawableImage(); break;
-                case juce_drawableTextBinaryType:           d = new DrawableText(); break;
-                default:                                    jassertfalse; return false;
-            }
-
-            d->setName (input.readString());
-
-            if (! d->readBinary (input))
-            {
-                delete d;
-                return false;
-            }
-
-            insertDrawable (d, transform);
-            transform = AffineTransform::identity;
-        }
-    }
-
-    return true;
-}
-
-bool DrawableComposite::writeBinary (OutputStream& output) const
-{
     for (int i = 0; i < drawables.size(); ++i)
     {
-        AffineTransform* transform = transforms.getUnchecked(i);
-
-        if (transform != 0)
-        {
-            output.writeByte (juce_drawableCompositeTransformFlag);
-            output.writeFloat (transform->mat00);
-            output.writeFloat (transform->mat01);
-            output.writeFloat (transform->mat02);
-            output.writeFloat (transform->mat10);
-            output.writeFloat (transform->mat11);
-            output.writeFloat (transform->mat12);
-        }
-
         Drawable* const d = drawables.getUnchecked(i);
 
-        char typeFlag;
-
-        if (dynamic_cast <DrawableComposite*> (d) != 0)
-            typeFlag = juce_drawableCompositeBinaryType;
-        else if (dynamic_cast <DrawablePath*> (d) != 0)
-            typeFlag = juce_drawablePathBinaryType;
-        else if (dynamic_cast <DrawableImage*> (d) != 0)
-            typeFlag = juce_drawableImageBinaryType;
-        else if (dynamic_cast <DrawableText*> (d) != 0)
-            typeFlag = juce_drawableTextBinaryType;
-        else
-        {
-            jassertfalse;
-            continue;
-        }
-
-        output.writeByte (typeFlag);
-        output.writeString (d->getName());
-        d->writeBinary (output);
-    }
-
-    output.writeByte (0);
-    return true;
-}
-
-//==============================================================================
-const tchar* juce_drawableCompositeXmlTag = T("Group");
-const tchar* juce_drawablePathXmlTag = T("Path");
-const tchar* juce_drawableImageXmlTag = T("Image");
-const tchar* juce_drawableTextXmlTag = T("Text");
-
-bool DrawableComposite::readXml (const XmlElement& xml)
-{
-    forEachXmlChildElement (xml, e)
-    {
-        Drawable* d = 0;
-
-        if (e->hasTagName (juce_drawableCompositeXmlTag))
-            d = new DrawableComposite();
-        else if (e->hasTagName (juce_drawablePathXmlTag))
-            d = new DrawablePath();
-        else if (e->hasTagName (juce_drawableImageXmlTag))
-            d = new DrawableImage();
-        else if (e->hasTagName (juce_drawableTextXmlTag))
-            d = new DrawableText();
-        else
-        {
-            jassertfalse;
-            return false;
-        }
-
-        d->setName (e->getStringAttribute (T("id")));
-
-        if (! d->readXml (*e))
-        {
-            jassertfalse;
-            delete d;
-            return false;
-        }
-
-        AffineTransform transform;
-        const String transformAtt (e->getStringAttribute (T("transform")));
-
-        if (transformAtt.isNotEmpty())
-        {
-            StringArray tokens;
-            tokens.addTokens (transformAtt.trim(), false);
-            tokens.removeEmptyStrings (true);
-
-            if (tokens.size() == 6)
-            {
-                float f[6];
-                for (int i = 0; i < 6; ++i)
-                    f[i] = (float) tokens[i].getDoubleValue();
-
-                transform = AffineTransform (f[0], f[1], f[2], f[3], f[4], f[5]);
-            }
-        }
-
-        insertDrawable (d, transform);
-    }
-
-    return true;
-}
-
-void DrawableComposite::writeXml (XmlElement& xml) const
-{
-    for (int i = 0; i < drawables.size(); ++i)
-    {
-        XmlElement* e = 0;
-        Drawable* const d = drawables.getUnchecked(i);
-
-        if (dynamic_cast <DrawableComposite*> (d) != 0)
-            e = new XmlElement (juce_drawableCompositeXmlTag);
-        else if (dynamic_cast <DrawablePath*> (d) != 0)
-            e = new XmlElement (juce_drawablePathXmlTag);
-        else if (dynamic_cast <DrawableImage*> (d) != 0)
-            e = new XmlElement (juce_drawableImageXmlTag);
-        else if (dynamic_cast <DrawableText*> (d) != 0)
-            e = new XmlElement (juce_drawableTextXmlTag);
-        else
-        {
-            jassertfalse;
-            continue;
-        }
+        ValueTree child (d->createValueTree());
 
         AffineTransform* transform = transforms.getUnchecked(i);
 
@@ -374,16 +208,55 @@ void DrawableComposite::writeXml (XmlElement& xml) const
             t <<  transform->mat00 << " " << transform->mat01 << " " << transform->mat02 << " "
               << transform->mat10 << " " << transform->mat11 << " " << transform->mat12;
 
-            e->setAttribute (T("transform"), t);
+            child.setProperty ("transform", t, 0);
         }
 
-        if (d->getName().isNotEmpty())
-            e->setAttribute (T("id"), d->getName());
-
-        d->writeXml (*e);
-
-        xml.addChildElement (e);
+        v.addChild (child, -1, 0);
     }
+
+    return v;
 }
+
+DrawableComposite* DrawableComposite::createFromValueTree (const ValueTree& tree) throw()
+{
+    if (! tree.hasType ("Group"))
+        return 0;
+
+    DrawableComposite* dc = new DrawableComposite();
+    dc->setName (tree ["id"]);
+
+    for (int i = 0; i < tree.getNumChildren(); ++i)
+    {
+        ValueTree childTree (tree.getChild (i));
+        Drawable* d = Drawable::createFromValueTree (childTree);
+
+        if (d != 0)
+        {
+            AffineTransform transform;
+            const String transformAtt (childTree ["transform"].toString());
+
+            if (transformAtt.isNotEmpty())
+            {
+                StringArray tokens;
+                tokens.addTokens (transformAtt.trim(), false);
+                tokens.removeEmptyStrings (true);
+
+                if (tokens.size() == 6)
+                {
+                    float f[6];
+                    for (int j = 0; j < 6; ++j)
+                        f[j] = (float) tokens[j].getDoubleValue();
+
+                    transform = AffineTransform (f[0], f[1], f[2], f[3], f[4], f[5]);
+                }
+            }
+
+            dc->insertDrawable (d, transform);
+        }
+    }
+
+    return dc;
+}
+
 
 END_JUCE_NAMESPACE

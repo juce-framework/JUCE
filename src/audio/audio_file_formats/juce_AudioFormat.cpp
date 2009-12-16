@@ -153,7 +153,7 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
 
     if (usesFloatingPointData)
     {
-        float lmin = 1.0e6;
+        float lmin = 1.0e6f;
         float lmax = -lmin;
         float rmin = lmin;
         float rmax = lmax;

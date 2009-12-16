@@ -198,10 +198,10 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     jassert (sampsInBuffer >= 0);
 }
 
-void ResamplingAudioSource::createLowPass (const double ratio)
+void ResamplingAudioSource::createLowPass (const double frequencyRatio)
 {
-    const double proportionalRate = (ratio > 1.0) ? 0.5 / ratio
-                                                  : 0.5 * ratio;
+    const double proportionalRate = (frequencyRatio > 1.0) ? 0.5 / frequencyRatio
+                                                           : 0.5 * frequencyRatio;
 
     const double n = 1.0 / tan (double_Pi * jmax (0.001, proportionalRate));
     const double nSquared = n * n;

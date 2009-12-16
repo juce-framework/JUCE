@@ -414,7 +414,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     while (! quitMessagePosted)
     {
-        const ScopedAutoReleasePool pool;
+        const ScopedAutoReleasePool pool2;
 
         CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 

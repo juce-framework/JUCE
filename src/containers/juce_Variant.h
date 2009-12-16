@@ -80,6 +80,7 @@ public:
 
     operator int() const throw();
     operator bool() const throw();
+    operator float() const throw();
     operator double() const throw();
     operator const String() const throw();
     const String toString() const throw();

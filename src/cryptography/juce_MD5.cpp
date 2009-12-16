@@ -271,7 +271,7 @@ static inline void II (uint32& a, const uint32 b, const uint32 c, const uint32 d
     a = rotateLeft (a, s) + b;
 }
 
-void MD5::ProcessContext::transform (const uint8* const buffer)
+void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
 {
     uint32 a = state[0];
     uint32 b = state[1];
@@ -279,7 +279,7 @@ void MD5::ProcessContext::transform (const uint8* const buffer)
     uint32 d = state[3];
     uint32 x[16];
 
-    decode (x, buffer, 64);
+    decode (x, bufferToTransform, 64);
 
     FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
     FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */

@@ -33,9 +33,9 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 WildcardFileFilter::WildcardFileFilter (const String& fileWildcardPatterns,
                                         const String& directoryWildcardPatterns,
-                                        const String& description)
-    : FileFilter (description.isEmpty() ? fileWildcardPatterns
-                                        : (description + T(" (") + fileWildcardPatterns + T(")")))
+                                        const String& description_)
+    : FileFilter (description_.isEmpty() ? fileWildcardPatterns
+                                         : (description_ + T(" (") + fileWildcardPatterns + T(")")))
 {
     parse (fileWildcardPatterns, fileWildcards);
     parse (directoryWildcardPatterns, directoryWildcards);
