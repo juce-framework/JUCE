@@ -264,6 +264,7 @@ public:
             NSMenu* sub = createMenu (*iter.subMenu, iter.itemName, topLevelMenuId, topLevelIndex);
             [sub setDelegate: nil];
             [menuToAddTo setSubmenu: sub forItem: item];
+            [sub release];
         }
         else
         {
