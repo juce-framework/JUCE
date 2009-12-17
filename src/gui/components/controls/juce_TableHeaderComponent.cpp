@@ -937,6 +937,8 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 
     if (m.getNumItems() > 0)
     {
+        m.setLookAndFeel (&getLookAndFeel());
+
         const int result = m.show();
 
         if (result != 0)
