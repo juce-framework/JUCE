@@ -90,8 +90,9 @@ class ValueTreeChildChangeAction  : public UndoableAction
 public:
     ValueTreeChildChangeAction (const ValueTree::SharedObjectPtr& target_, const int childIndex_,
                                 const ValueTree::SharedObjectPtr& newChild_) throw()
-        : target (target_), childIndex (childIndex_),
+        : target (target_),
           child (newChild_ != 0 ? newChild_ : target_->children [childIndex_]),
+          childIndex (childIndex_),
           isDeleting (newChild_ == 0)
     {
         jassert (child != 0);

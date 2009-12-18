@@ -47,7 +47,7 @@ const int juceDefaultArrayGranularity = 8;
 template <class ElementType>
 class ArrayAllocationBase
 {
-protected:
+public:
     //==============================================================================
     /** Creates an empty array.
 

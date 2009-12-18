@@ -212,16 +212,16 @@ bool CodeDocument::Iterator::isEOF() const throw()
 
 //==============================================================================
 CodeDocument::Position::Position() throw()
-    : owner (0), line (0), indexInLine (0),
-      characterPos (0), positionMaintained (false)
+    : owner (0), characterPos (0), line (0),
+      indexInLine (0), positionMaintained (false)
 {
 }
 
 CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
                                   const int line_, const int indexInLine_) throw()
     : owner (const_cast <CodeDocument*> (ownerDocument)),
-      line (line_), indexInLine (indexInLine_),
-      characterPos (0), positionMaintained (false)
+      characterPos (0), line (line_),
+      indexInLine (indexInLine_), positionMaintained (false)
 {
     setLineAndIndex (line_, indexInLine_);
 }
@@ -235,9 +235,8 @@ CodeDocument::Position::Position (const CodeDocument* const ownerDocument,
 }
 
 CodeDocument::Position::Position (const Position& other) throw()
-    : owner (other.owner), line (other.line),
-      indexInLine (other.indexInLine), characterPos (other.characterPos),
-      positionMaintained (false)
+    : owner (other.owner), characterPos (other.characterPos), line (other.line),
+      indexInLine (other.indexInLine), positionMaintained (false)
 {
     jassert (*this == other);
 }

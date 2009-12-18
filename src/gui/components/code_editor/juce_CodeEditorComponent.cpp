@@ -277,16 +277,16 @@ private:
 CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
                                           CodeTokeniser* const codeTokeniser_)
     : document (document_),
-      codeTokeniser (codeTokeniser_),
+      firstLineOnScreen (0),
       gutter (5),
       spacesPerTab (4),
       lineHeight (0),
-      firstLineOnScreen (0),
       linesOnScreen (0),
       columnsOnScreen (0),
       scrollbarThickness (16),
+      useSpacesForTabs (false),
       xOffset (0),
-      useSpacesForTabs (false)
+      codeTokeniser (codeTokeniser_)
 {
     caretPos = CodeDocument::Position (&document_, 0, 0);
     caretPos.setPositionMaintained (true);

@@ -53,7 +53,7 @@
 template <class ObjectClass,
           class TypeOfCriticalSectionToUse = DummyCriticalSection>
 
-class OwnedArray   : private ArrayAllocationBase <ObjectClass*>
+class OwnedArray
 {
 public:
     //==============================================================================
@@ -62,11 +62,9 @@ public:
         @param granularity  this is the size of increment by which the internal storage
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
-
-        @see ArrayAllocationBase
     */
     OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity_),
+        : data (granularity_),
           numUsed (0)
     {
     }
@@ -90,10 +88,10 @@ public:
         if (deleteObjects)
         {
             while (numUsed > 0)
-                delete this->elements [--numUsed];
+                delete data.elements [--numUsed];
         }
 
-        this->setAllocatedSize (0);
+        data.setAllocatedSize (0);
         numUsed = 0;
         lock.exit();
     }
@@ -119,7 +117,7 @@ public:
     {
         lock.enter();
         ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-                                            ? this->elements [index]
+                                            ? data.elements [index]
                                             : (ObjectClass*) 0;
         lock.exit();
 
@@ -135,7 +133,7 @@ public:
     {
         lock.enter();
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ObjectClass* const result = this->elements [index];
+        ObjectClass* const result = data.elements [index];
         lock.exit();
 
         return result;
@@ -149,7 +147,7 @@ public:
     inline ObjectClass* getFirst() const throw()
     {
         lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [0]
+        ObjectClass* const result = (numUsed > 0) ? data.elements [0]
                                                   : (ObjectClass*) 0;
         lock.exit();
         return result;
@@ -163,7 +161,7 @@ public:
     inline ObjectClass* getLast() const throw()
     {
         lock.enter();
-        ObjectClass* const result = (numUsed > 0) ? this->elements [numUsed - 1]
+        ObjectClass* const result = (numUsed > 0) ? data.elements [numUsed - 1]
                                                   : (ObjectClass*) 0;
         lock.exit();
 
@@ -181,13 +179,13 @@ public:
         int result = -1;
 
         lock.enter();
-        ObjectClass* const* e = this->elements;
+        ObjectClass* const* e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToLookFor == *e)
             {
-                result = (int) (e - this->elements);
+                result = (int) (e - data.elements);
                 break;
             }
 
@@ -207,7 +205,7 @@ public:
     {
         lock.enter();
 
-        ObjectClass* const* e = this->elements;
+        ObjectClass* const* e = data.elements;
         int i = numUsed;
 
         while (i >= 4)
@@ -256,8 +254,8 @@ public:
     void add (const ObjectClass* const newObject) throw()
     {
         lock.enter();
-        this->ensureAllocatedSize (numUsed + 1);
-        this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+        data.ensureAllocatedSize (numUsed + 1);
+        data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
         lock.exit();
     }
 
@@ -288,9 +286,9 @@ public:
             if (indexToInsertAt > numUsed)
                 indexToInsertAt = numUsed;
 
-            this->ensureAllocatedSize (numUsed + 1);
+            data.ensureAllocatedSize (numUsed + 1);
 
-            ObjectClass** const e = this->elements + indexToInsertAt;
+            ObjectClass** const e = data.elements + indexToInsertAt;
             const int numToMove = numUsed - indexToInsertAt;
 
             if (numToMove > 0)
@@ -350,18 +348,18 @@ public:
             {
                 if (deleteOldElement)
                 {
-                    toDelete = this->elements [indexToChange];
+                    toDelete = data.elements [indexToChange];
 
                     if (toDelete == newObject)
                         toDelete = 0;
                 }
 
-                this->elements [indexToChange] = const_cast <ObjectClass*> (newObject);
+                data.elements [indexToChange] = const_cast <ObjectClass*> (newObject);
             }
             else
             {
-                this->ensureAllocatedSize (numUsed + 1);
-                this->elements [numUsed++] = const_cast <ObjectClass*> (newObject);
+                data.ensureAllocatedSize (numUsed + 1);
+                data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
             }
 
             lock.exit();
@@ -388,7 +386,7 @@ public:
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
         lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
         lock.exit();
     }
 
@@ -422,7 +420,7 @@ public:
                 lock.exit();
                 return -1;
             }
-            else if (comparator.compareElements (objectToLookFor, this->elements [start]) == 0)
+            else if (comparator.compareElements (objectToLookFor, data.elements [start]) == 0)
             {
                 lock.exit();
                 return start;
@@ -436,7 +434,7 @@ public:
                     lock.exit();
                     return -1;
                 }
-                else if (comparator.compareElements (objectToLookFor, this->elements [halfway]) >= 0)
+                else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
                     start = halfway;
                 else
                     end = halfway;
@@ -463,7 +461,7 @@ public:
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
-            ObjectClass** const e = this->elements + indexToRemove;
+            ObjectClass** const e = data.elements + indexToRemove;
 
             if (deleteObject)
                 toDelete = *e;
@@ -474,7 +472,7 @@ public:
             if (numToShift > 0)
                 memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
 
-            if ((numUsed << 1) < this->numAllocated)
+            if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
 
@@ -495,13 +493,13 @@ public:
                        const bool deleteObject = true)
     {
         lock.enter();
-        ObjectClass** e = this->elements;
+        ObjectClass** e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToRemove == *e)
             {
-                remove ((int) (e - this->elements), deleteObject);
+                remove ((int) (e - data.elements), deleteObject);
                 break;
             }
 
@@ -538,13 +536,13 @@ public:
             {
                 for (int i = startIndex; i < endIndex; ++i)
                 {
-                    delete this->elements [i];
-                    this->elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                    delete data.elements [i];
+                    data.elements [i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
 
             const int rangeSize = endIndex - startIndex;
-            ObjectClass** e = this->elements + startIndex;
+            ObjectClass** e = data.elements + startIndex;
             int numToShift = numUsed - endIndex;
             numUsed -= rangeSize;
 
@@ -554,7 +552,7 @@ public:
                 ++e;
             }
 
-            if ((numUsed << 1) < this->numAllocated)
+            if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
 
@@ -598,8 +596,8 @@ public:
         if (((unsigned int) index1) < (unsigned int) numUsed
              && ((unsigned int) index2) < (unsigned int) numUsed)
         {
-            swapVariables (this->elements [index1],
-                           this->elements [index2]);
+            swapVariables (data.elements [index1],
+                           data.elements [index2]);
         }
 
         lock.exit();
@@ -630,22 +628,22 @@ public:
                 if (((unsigned int) newIndex) >= (unsigned int) numUsed)
                     newIndex = numUsed - 1;
 
-                ObjectClass* const value = this->elements [currentIndex];
+                ObjectClass* const value = data.elements [currentIndex];
 
                 if (newIndex > currentIndex)
                 {
-                    memmove (this->elements + currentIndex,
-                             this->elements + currentIndex + 1,
+                    memmove (data.elements + currentIndex,
+                             data.elements + currentIndex + 1,
                              (newIndex - currentIndex) * sizeof (ObjectClass*));
                 }
                 else
                 {
-                    memmove (this->elements + newIndex + 1,
-                             this->elements + newIndex,
+                    memmove (data.elements + newIndex + 1,
+                             data.elements + newIndex,
                              (currentIndex - newIndex) * sizeof (ObjectClass*));
                 }
 
-                this->elements [newIndex] = value;
+                data.elements [newIndex] = value;
             }
 
             lock.exit();
@@ -662,9 +660,9 @@ public:
     {
         lock.enter();
         otherArray.lock.enter();
-        swapVariables <int> (this->numUsed, otherArray.numUsed);
-        swapVariables <ObjectClass**> (this->elements, otherArray.elements);
-        swapVariables <int> (this->numAllocated, otherArray.numAllocated);
+        swapVariables <int> (numUsed, otherArray.numUsed);
+        swapVariables <ObjectClass**> (data.elements, otherArray.data.elements);
+        swapVariables <int> (data.numAllocated, otherArray.data.numAllocated);
         otherArray.lock.exit();
         lock.exit();
     }
@@ -682,14 +680,14 @@ public:
 
         if (numUsed == 0)
         {
-            this->setAllocatedSize (0);
+            data.setAllocatedSize (0);
         }
         else
         {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+            const int newAllocation = data.granularity * (numUsed / data.granularity + 1);
 
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
+            if (newAllocation < data.numAllocated)
+                data.setAllocatedSize (newAllocation);
         }
 
         lock.exit();
@@ -703,7 +701,7 @@ public:
     */
     void ensureStorageAllocated (const int minNumElements) throw()
     {
-        this->ensureAllocatedSize (minNumElements);
+        data.ensureAllocatedSize (minNumElements);
     }
 
     //==============================================================================
@@ -740,7 +738,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         lock.enter();
-        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
         lock.exit();
     }
 
@@ -774,6 +772,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    ArrayAllocationBase <ObjectClass*> data;
     int numUsed;
     TypeOfCriticalSectionToUse lock;
 

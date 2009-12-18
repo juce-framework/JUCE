@@ -263,7 +263,7 @@ public:
 
         ColourSelector colourSelector2;
         colourSelector2.setName (T("text"));
-        colourSelector2.setCurrentColour (findColour (TextButton::textColourId));
+        colourSelector2.setCurrentColour (findColour (TextButton::textColourOffId));
         colourSelector2.addChangeListener (this);
 
         // and add the selectors as custom menu items to a PopupMenu, putting
@@ -285,7 +285,7 @@ public:
         ColourSelector* cs = (ColourSelector*) source;
 
         if (cs->getName() == T("text"))
-            setColour (TextButton::textColourId, cs->getCurrentColour());
+            setColour (TextButton::textColourOffId, cs->getCurrentColour());
         else
             setColour (TextButton::buttonColourId, cs->getCurrentColour());
     }

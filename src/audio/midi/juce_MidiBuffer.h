@@ -39,7 +39,7 @@
 
     @see MidiMessage
 */
-class JUCE_API  MidiBuffer  : private ArrayAllocationBase <uint8>
+class JUCE_API  MidiBuffer
 {
 public:
     //==============================================================================
@@ -226,6 +226,7 @@ public:
 
 private:
     friend class MidiBuffer::Iterator;
+    ArrayAllocationBase <uint8> data;
     int bytesUsed;
 
     uint8* findEventAfter (uint8* d, const int samplePosition) const throw();

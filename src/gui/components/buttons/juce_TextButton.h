@@ -71,7 +71,8 @@ public:
         buttonOnColourId                = 0x1000101,  /**< The colour used to fill the button shape (when the button is toggled
                                                            'on'). The look-and-feel class might re-interpret this to add
                                                            effects, etc. */
-        textColourId                    = 0x1000102   /**< The colour to use for the button's text. */
+        textColourOffId                 = 0x1000102,  /**< The colour to use for the button's text when the button's toggle state is "off". */
+        textColourOnId                  = 0x1000103   /**< The colour to use for the button's text.when the button's toggle state is "on". */
     };
 
     //==============================================================================

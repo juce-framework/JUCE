@@ -450,6 +450,15 @@ public:
     /** Returns true if this item is the last of its parent's sub-itens. */
     bool isLastOfSiblings() const throw();
 
+    /** Creates a string that can be used to uniquely retrieve this item in the tree.
+
+        The string that is returned can be passed to TreeView::findItemFromIdentifierString().
+        The string takes the form of a path, constructed from the getUniqueName() of this
+        item and all its parents, so these must all be correctly implemented for it to work.
+        @see TreeView::findItemFromIdentifierString, getUniqueName
+    */
+    const String getItemIdentifierString() const;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -481,6 +490,7 @@ private:
     int countSelectedItemsRecursively() const throw();
     TreeViewItem* getSelectedItemWithIndex (int index) throw();
     TreeViewItem* getNextVisibleItem (const bool recurse) const throw();
+    TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
     TreeViewItem (const TreeViewItem&);
     const TreeViewItem& operator= (const TreeViewItem&);
@@ -653,6 +663,13 @@ public:
         @see getIndentSize
     */
     void setIndentSize (const int newIndentSize);
+
+    /** Searches the tree for an item with the specified identifier.
+        The identifer string must have been created by calling TreeViewItem::getItemIdentifierString().
+        If no such item exists, this will return false. If the item is found, all of its items
+        will be automatically opened.
+    */
+    TreeViewItem* findItemFromIdentifierString (const String& identifierString) const;
 
     //==============================================================================
     /** Saves the current state of open/closed nodes so it can be restored later.

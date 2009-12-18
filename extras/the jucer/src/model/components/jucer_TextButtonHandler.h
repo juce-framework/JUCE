@@ -42,7 +42,8 @@ public:
     {
         registerColour (TextButton::buttonColourId, "background (normal)", "bgColOff");
         registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
-        registerColour (TextButton::textColourId, "text colour", "textCol");
+        registerColour (TextButton::textColourOnId, "text colour (normal)", "textCol");
+        registerColour (TextButton::textColourOffId, "text colour (on)", "textColOn");
     }
 
     //==============================================================================

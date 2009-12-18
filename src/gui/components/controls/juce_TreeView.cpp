@@ -565,6 +565,14 @@ TreeViewItem* TreeView::getItemAt (int y) const throw()
     return tc->findItemAt (y, pos);
 }
 
+TreeViewItem* TreeView::findItemFromIdentifierString (const String& identifierString) const
+{
+    if (rootItem == 0)
+        return 0;
+
+    return rootItem->findItemFromIdentifierString (identifierString);
+}
+
 //==============================================================================
 XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
 {
@@ -1674,6 +1682,44 @@ TreeViewItem* TreeViewItem::getNextVisibleItem (const bool recurse) const throw(
             return parentItem->getNextVisibleItem (false);
 
         return parentItem->subItems [nextIndex];
+    }
+
+    return 0;
+}
+
+const String TreeViewItem::getItemIdentifierString() const
+{
+    String s;
+
+    if (parentItem != 0)
+        s = parentItem->getItemIdentifierString();
+
+    return s + T("/") + getUniqueName().replaceCharacter (T('/'), T('\\'));
+}
+
+TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifierString)
+{
+    const String uid (getUniqueName());
+
+    if (uid == identifierString)
+        return this;
+
+    if (identifierString.startsWith (uid + T("/")))
+    {
+        const String remainingPath (identifierString.substring (uid.length() + 1));
+
+        bool wasOpen = isOpen();
+        setOpen (true);
+
+        for (int i = subItems.size(); --i >= 0;)
+        {
+            TreeViewItem* item = subItems.getUnchecked(i)->findItemFromIdentifierString (remainingPath);
+
+            if (item != 0)
+                return item;
+        }
+
+        setOpen (wasOpen);
     }
 
     return 0;

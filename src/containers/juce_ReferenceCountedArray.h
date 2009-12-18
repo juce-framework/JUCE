@@ -46,7 +46,7 @@
     @see Array, OwnedArray, StringArray
 */
 template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSection>
-class ReferenceCountedArray   : private ArrayAllocationBase <ObjectClass*>
+class ReferenceCountedArray
 {
 public:
     //==============================================================================
@@ -56,26 +56,26 @@ public:
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
 
-        @see ReferenceCountedObject, ArrayAllocationBase, Array, OwnedArray
+        @see ReferenceCountedObject, Array, OwnedArray
     */
     ReferenceCountedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : ArrayAllocationBase <ObjectClass*> (granularity_),
+        : data (granularity_),
           numUsed (0)
     {
     }
 
     /** Creates a copy of another array */
     ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
-        : ArrayAllocationBase <ObjectClass*> (other.granularity)
+        : data (other.data.granularity)
     {
         other.lockArray();
         numUsed = other.numUsed;
-        this->setAllocatedSize (numUsed);
-        memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
+        data.setAllocatedSize (numUsed);
+        memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
 
         for (int i = numUsed; --i >= 0;)
-            if (this->elements[i] != 0)
-                this->elements[i]->incReferenceCount();
+            if (data.elements[i] != 0)
+                data.elements[i]->incReferenceCount();
 
         other.unlockArray();
     }
@@ -93,15 +93,15 @@ public:
 
             clear();
 
-            this->granularity = other.granularity;
-            this->ensureAllocatedSize (other.numUsed);
+            data.granularity = other.granularity;
+            data.ensureAllocatedSize (other.numUsed);
             numUsed = other.numUsed;
-            memcpy (this->elements, other.elements, numUsed * sizeof (ObjectClass*));
+            memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
             minimiseStorageOverheads();
 
             for (int i = numUsed; --i >= 0;)
-                if (this->elements[i] != 0)
-                    this->elements[i]->incReferenceCount();
+                if (data.elements[i] != 0)
+                    data.elements[i]->incReferenceCount();
 
             lock.exit();
             other.unlockArray();
@@ -129,11 +129,11 @@ public:
         lock.enter();
 
         while (numUsed > 0)
-            if (this->elements [--numUsed] != 0)
-                this->elements [numUsed]->decReferenceCount();
+            if (data.elements [--numUsed] != 0)
+                data.elements [numUsed]->decReferenceCount();
 
         jassert (numUsed == 0);
-        this->setAllocatedSize (0);
+        data.setAllocatedSize (0);
 
         lock.exit();
     }
@@ -156,7 +156,7 @@ public:
     {
         lock.enter();
         const ReferenceCountedObjectPtr<ObjectClass> result ((((unsigned int) index) < (unsigned int) numUsed)
-                                                                ? this->elements [index]
+                                                                ? data.elements [index]
                                                                 : (ObjectClass*) 0);
         lock.exit();
         return result;
@@ -171,7 +171,7 @@ public:
     {
         lock.enter();
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        const ReferenceCountedObjectPtr<ObjectClass> result (this->elements [index]);
+        const ReferenceCountedObjectPtr<ObjectClass> result (data.elements [index]);
         lock.exit();
         return result;
     }
@@ -184,7 +184,7 @@ public:
     inline const ReferenceCountedObjectPtr<ObjectClass> getFirst() const throw()
     {
         lock.enter();
-        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? this->elements [0]
+        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? data.elements [0]
                                                                            : (ObjectClass*) 0);
         lock.exit();
 
@@ -199,7 +199,7 @@ public:
     inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
     {
         lock.enter();
-        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? this->elements [numUsed - 1]
+        const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? data.elements [numUsed - 1]
                                                                            : (ObjectClass*) 0);
         lock.exit();
 
@@ -217,13 +217,13 @@ public:
         int result = -1;
 
         lock.enter();
-        ObjectClass** e = this->elements;
+        ObjectClass** e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToLookFor == *e)
             {
-                result = (int) (e - this->elements);
+                result = (int) (e - data.elements);
                 break;
             }
 
@@ -242,7 +242,7 @@ public:
     bool contains (const ObjectClass* const objectToLookFor) const throw()
     {
         lock.enter();
-        ObjectClass** e = this->elements;
+        ObjectClass** e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
         {
@@ -269,8 +269,8 @@ public:
     void add (ObjectClass* const newObject) throw()
     {
         lock.enter();
-        this->ensureAllocatedSize (numUsed + 1);
-        this->elements [numUsed++] = newObject;
+        data.ensureAllocatedSize (numUsed + 1);
+        data.elements [numUsed++] = newObject;
 
         if (newObject != 0)
             newObject->incReferenceCount();
@@ -301,9 +301,9 @@ public:
             if (indexToInsertAt > numUsed)
                 indexToInsertAt = numUsed;
 
-            this->ensureAllocatedSize (numUsed + 1);
+            data.ensureAllocatedSize (numUsed + 1);
 
-            ObjectClass** const e = this->elements + indexToInsertAt;
+            ObjectClass** const e = data.elements + indexToInsertAt;
             const int numToMove = numUsed - indexToInsertAt;
 
             if (numToMove > 0)
@@ -364,15 +364,15 @@ public:
 
             if (indexToChange < numUsed)
             {
-                if (this->elements [indexToChange] != 0)
-                    this->elements [indexToChange]->decReferenceCount();
+                if (data.elements [indexToChange] != 0)
+                    data.elements [indexToChange]->decReferenceCount();
 
-                this->elements [indexToChange] = newObject;
+                data.elements [indexToChange] = newObject;
             }
             else
             {
-                this->ensureAllocatedSize (numUsed + 1);
-                this->elements [numUsed++] = newObject;
+                data.ensureAllocatedSize (numUsed + 1);
+                data.elements [numUsed++] = newObject;
             }
 
             lock.exit();
@@ -406,7 +406,7 @@ public:
 
         if (numElementsToAdd > 0)
         {
-            this->ensureAllocatedSize (numUsed + numElementsToAdd);
+            data.ensureAllocatedSize (numUsed + numElementsToAdd);
 
             while (--numElementsToAdd >= 0)
                 add (arrayToAddFrom.getUnchecked (startIndex++));
@@ -432,7 +432,7 @@ public:
                     ObjectClass* newObject) throw()
     {
         lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
         lock.exit();
     }
 
@@ -446,9 +446,9 @@ public:
                              ObjectClass* newObject) throw()
     {
         lock.enter();
-        const int index = findInsertIndexInSortedArray (comparator, this->elements, newObject, 0, numUsed);
+        const int index = findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed);
 
-        if (index > 0 && comparator.compareElements (newObject, this->elements [index - 1]) == 0)
+        if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
             set (index - 1, newObject); // replace an existing object that matches
         else
             insert (index, newObject);  // no match, so insert the new one
@@ -476,7 +476,7 @@ public:
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
-            ObjectClass** const e = this->elements + indexToRemove;
+            ObjectClass** const e = data.elements + indexToRemove;
 
             if (*e != 0)
                 (*e)->decReferenceCount();
@@ -487,7 +487,7 @@ public:
             if (numberToShift > 0)
                 memmove (e, e + 1, numberToShift * sizeof (ObjectClass*));
 
-            if ((numUsed << 1) < this->numAllocated)
+            if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
 
@@ -537,15 +537,15 @@ public:
             int i;
             for (i = start; i < end; ++i)
             {
-                if (this->elements[i] != 0)
+                if (data.elements[i] != 0)
                 {
-                    this->elements[i]->decReferenceCount();
-                    this->elements[i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
+                    data.elements[i]->decReferenceCount();
+                    data.elements[i] = 0; // (in case one of the destructors accesses this array and hits a dangling pointer)
                 }
             }
 
             const int rangeSize = end - start;
-            ObjectClass** e = this->elements + start;
+            ObjectClass** e = data.elements + start;
             i = numUsed - end;
             numUsed -= rangeSize;
 
@@ -555,7 +555,7 @@ public:
                 ++e;
             }
 
-            if ((numUsed << 1) < this->numAllocated)
+            if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
 
@@ -596,8 +596,8 @@ public:
         if (((unsigned int) index1) < (unsigned int) numUsed
              && ((unsigned int) index2) < (unsigned int) numUsed)
         {
-            swapVariables (this->elements [index1],
-                           this->elements [index2]);
+            swapVariables (data.elements [index1],
+                           data.elements [index2]);
         }
 
         lock.exit();
@@ -628,22 +628,22 @@ public:
                 if (((unsigned int) newIndex) >= (unsigned int) numUsed)
                     newIndex = numUsed - 1;
 
-                ObjectClass* const value = this->elements [currentIndex];
+                ObjectClass* const value = data.elements [currentIndex];
 
                 if (newIndex > currentIndex)
                 {
-                    memmove (this->elements + currentIndex,
-                             this->elements + currentIndex + 1,
+                    memmove (data.elements + currentIndex,
+                             data.elements + currentIndex + 1,
                              (newIndex - currentIndex) * sizeof (ObjectClass*));
                 }
                 else
                 {
-                    memmove (this->elements + newIndex + 1,
-                             this->elements + newIndex,
+                    memmove (data.elements + newIndex + 1,
+                             data.elements + newIndex,
                              (currentIndex - newIndex) * sizeof (ObjectClass*));
                 }
 
-                this->elements [newIndex] = value;
+                data.elements [newIndex] = value;
             }
 
             lock.exit();
@@ -666,7 +666,7 @@ public:
         {
             for (int i = numUsed; --i >= 0;)
             {
-                if (this->elements [i] != other.elements [i])
+                if (data.elements [i] != other.data.elements [i])
                 {
                     result = false;
                     break;
@@ -724,7 +724,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         lock.enter();
-        sortArray (comparator, this->elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
         lock.exit();
     }
 
@@ -741,14 +741,14 @@ public:
 
         if (numUsed == 0)
         {
-            this->setAllocatedSize (0);
+            data.setAllocatedSize (0);
         }
         else
         {
-            const int newAllocation = this->granularity * (numUsed / this->granularity + 1);
+            const int newAllocation = data.granularity * (numUsed / data.granularity + 1);
 
-            if (newAllocation < this->numAllocated)
-                this->setAllocatedSize (newAllocation);
+            if (newAllocation < data.numAllocated)
+                data.setAllocatedSize (newAllocation);
         }
 
         lock.exit();
@@ -784,6 +784,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    ArrayAllocationBase <ObjectClass*> data;
     int numUsed;
     TypeOfCriticalSectionToUse lock;
 };

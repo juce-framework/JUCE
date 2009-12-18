@@ -114,7 +114,8 @@ LookAndFeel::LookAndFeel()
     {
         TextButton::buttonColourId,                 textButtonColour,
         TextButton::buttonOnColourId,               0xff4444ff,
-        TextButton::textColourId,                   0xff000000,
+        TextButton::textColourOnId,                 0xff000000,
+        TextButton::textColourOffId,                0xff000000,
 
         ComboBox::buttonColourId,                   0xffbbbbff,
         ComboBox::outlineColourId,                  standardOutlineColour,
@@ -386,7 +387,8 @@ void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
 {
     Font font (getFontForTextButton (button));
     g.setFont (font);
-    g.setColour (button.findColour (TextButton::textColourId)
+    g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
+                                                            : TextButton::textColourOffId)
                        .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
 
     const int yIndent = jmin (4, button.proportionOfHeight (0.3f));

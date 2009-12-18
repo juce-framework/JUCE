@@ -257,7 +257,7 @@ AudioDemoRecordPage::AudioDemoRecordPage (AudioDeviceManager& deviceManager_)
     recordButton->setButtonText (T("Record"));
     recordButton->addButtonListener (this);
     recordButton->setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
-    recordButton->setColour (TextButton::textColourId, Colours::black);
+    recordButton->setColour (TextButton::textColourOffId, Colours::black);
 
 
     //[UserPreSize]

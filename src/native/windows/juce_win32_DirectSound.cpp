@@ -464,10 +464,20 @@ public:
             return true;
 
         DWORD playCursor, writeCursor;
-        HRESULT hr = pOutputBuffer->GetCurrentPosition (&playCursor, &writeCursor);
 
-        if (hr != S_OK)
+        for (;;)
         {
+            HRESULT hr = pOutputBuffer->GetCurrentPosition (&playCursor, &writeCursor);
+
+            if (hr == MAKE_HRESULT (1, 0x878, 150)) // DSERR_BUFFERLOST
+            {
+                pOutputBuffer->Restore();
+                continue;
+            }
+
+            if (hr == S_OK)
+                break;
+
             logError (hr);
             jassertfalse
             return true;

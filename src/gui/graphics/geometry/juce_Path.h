@@ -69,7 +69,7 @@ class Image;
 
     @see PathFlatteningIterator, PathStrokeType, Graphics
 */
-class JUCE_API  Path  : private ArrayAllocationBase <float>
+class JUCE_API  Path
 {
 public:
     //==============================================================================
@@ -632,6 +632,7 @@ public:
 private:
     friend class PathFlatteningIterator;
     friend class Path::Iterator;
+    ArrayAllocationBase <float> data;
     int numElements;
     float pathXMin, pathXMax, pathYMin, pathYMax;
     bool useNonZeroWinding;
