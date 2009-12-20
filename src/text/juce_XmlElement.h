@@ -197,6 +197,7 @@ public:
 
     /** Writes the document to a stream as UTF-8.
 
+        @param output           the stream to write to
         @param dtdToUse         the DTD to add to the document
         @param allOnOneLine     if true, this means that the document will not contain any
                                 linefeeds, so it'll be smaller but not very easy to read.

@@ -58,8 +58,8 @@ public:
 
         @see ReferenceCountedObject, Array, OwnedArray
     */
-    ReferenceCountedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : data (granularity_),
+    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : data (granularity),
           numUsed (0)
     {
     }

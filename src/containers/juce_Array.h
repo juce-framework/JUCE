@@ -62,8 +62,8 @@ public:
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
     */
-    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : data (granularity_),
+    Array (const int granularity = juceDefaultArrayGranularity) throw()
+       : data (granularity),
          numUsed (0)
     {
     }

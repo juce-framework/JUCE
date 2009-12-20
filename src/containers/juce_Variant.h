@@ -117,7 +117,11 @@ public:
         identifier (const String& name) throw();
         ~identifier() throw();
 
-        bool operator== (const identifier& other) const throw()   { return hashCode == other.hashCode; }
+        bool operator== (const identifier& other) const throw()
+        {
+            return hashCode == other.hashCode;
+            jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
+        }
 
         String name;
         int hashCode;

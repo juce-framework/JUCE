@@ -3334,8 +3334,8 @@ public:
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
     */
-    OwnedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : data (granularity_),
+    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : data (granularity),
           numUsed (0)
     {
     }
@@ -4609,8 +4609,8 @@ public:
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
     */
-    Array (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : data (granularity_),
+    Array (const int granularity = juceDefaultArrayGranularity) throw()
+       : data (granularity),
          numUsed (0)
     {
     }
@@ -9316,7 +9316,11 @@ public:
         identifier (const String& name) throw();
         ~identifier() throw();
 
-        bool operator== (const identifier& other) const throw()   { return hashCode == other.hashCode; }
+        bool operator== (const identifier& other) const throw()
+        {
+            return hashCode == other.hashCode;
+            jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
+        }
 
         String name;
         int hashCode;
@@ -9767,6 +9771,7 @@ public:
 
     /** Writes the document to a stream as UTF-8.
 
+        @param output           the stream to write to
         @param dtdToUse         the DTD to add to the document
         @param allOnOneLine     if true, this means that the document will not contain any
                                 linefeeds, so it'll be smaller but not very easy to read.
@@ -10516,8 +10521,8 @@ public:
 
         @see ReferenceCountedObject, Array, OwnedArray
     */
-    ReferenceCountedArray (const int granularity_ = juceDefaultArrayGranularity) throw()
-        : data (granularity_),
+    ReferenceCountedArray (const int granularity = juceDefaultArrayGranularity) throw()
+        : data (granularity),
           numUsed (0)
     {
     }
@@ -11288,8 +11293,8 @@ public:
         used by the array will grow. Only change it from the default if you know the
         array is going to be very big and needs to be able to grow efficiently.
     */
-    SortedSet (const int granularity_ = juceDefaultArrayGranularity) throw()
-       : data (granularity_),
+    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
+       : data (granularity),
          numUsed (0)
     {
     }
@@ -51529,21 +51534,25 @@ public:
     */
     enum FileChooserFlags
     {
-        openMode                = 1,    /**< the component should allow the user to choose an existing
-                                             file with the intention of opening it. */
-        saveMode                = 2,    /**< the component should allow the user to specify the name of
-                                             a file that will be used to save something. */
-        canSelectFiles          = 4,    /**< */
-        canSelectDirectories    = 8,    /**< */
-        canSelectMultipleItems  = 16,   /**< */
-        useTreeView             = 32,   /**< */
-        filenameBoxIsReadOnly   = 64    /**< */
+        openMode                = 1,    /**< specifies that the component should allow the user to
+                                             choose an existing file with the intention of opening it. */
+        saveMode                = 2,    /**< specifies that the component should allow the user to specify
+                                             the name of a file that will be used to save something. */
+        canSelectFiles          = 4,    /**< specifies that the user can select files (can be used in
+                                             conjunction with canSelectDirectories). */
+        canSelectDirectories    = 8,    /**< specifies that the user can select directories (can be used in
+                                             conjuction with canSelectFiles). */
+        canSelectMultipleItems  = 16,   /**< specifies that the user can select multiple items. */
+        useTreeView             = 32,   /**< specifies that a tree-view should be shown instead of a file list. */
+        filenameBoxIsReadOnly   = 64    /**< specifies that the user can't type directly into the filename box. */
     };
 
     /** Creates a FileBrowserComponent.
 
-        @param browserMode              The intended purpose for the browser - see the
-                                        FileChooserMode enum for the various options
+        @param flags                    A combination of flags from the FileChooserFlags enumeration,
+                                        used to specify the component's behaviour. The flags must contain
+                                        either openMode or saveMode, and canSelectFiles and/or
+                                        canSelectDirectories.
         @param initialFileOrDirectory   The file or directory that should be selected when
                                         the component begins. If this is File::nonexistent,
                                         a default directory will be chosen.
@@ -51554,10 +51563,6 @@ public:
                                         is deleted.
         @param previewComp              an optional preview component that will be used to
                                         show previews of files that the user selects
-        @param useTreeView              if this is false, the files are shown in a list; if true,
-                                        they are shown in a treeview
-        @param filenameTextBoxIsReadOnly    if true, the user won't be allowed to type their own
-                                        text into the filename box.
     */
     FileBrowserComponent (int flags,
                           const File& initialFileOrDirectory,
