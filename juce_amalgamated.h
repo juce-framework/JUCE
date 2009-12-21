@@ -442,12 +442,19 @@
 
 // If only building the core classes, we can explicitly turn off some features to avoid including them:
 #if JUCE_ONLY_BUILD_CORE_LIBRARY
+  #undef  JUCE_QUICKTIME
   #define JUCE_QUICKTIME 0
+  #undef  JUCE_OPENGL
   #define JUCE_OPENGL 0
+  #undef JUCE_USE_CDBURNER
   #define JUCE_USE_CDBURNER 0
+  #undef JUCE_USE_CDREADER
   #define JUCE_USE_CDREADER 0
+  #undef JUCE_WEB_BROWSER
   #define JUCE_WEB_BROWSER 0
+  #undef JUCE_PLUGINHOST_AU
   #define JUCE_PLUGINHOST_AU 0
+  #undef JUCE_PLUGINHOST_VST
   #define JUCE_PLUGINHOST_VST 0
 #endif
 
@@ -9318,8 +9325,8 @@ public:
 
         bool operator== (const identifier& other) const throw()
         {
-            return hashCode == other.hashCode;
             jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
+            return hashCode == other.hashCode;
         }
 
         String name;

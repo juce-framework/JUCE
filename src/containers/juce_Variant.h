@@ -119,8 +119,8 @@ public:
 
         bool operator== (const identifier& other) const throw()
         {
-            return hashCode == other.hashCode;
             jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
+            return hashCode == other.hashCode;
         }
 
         String name;
