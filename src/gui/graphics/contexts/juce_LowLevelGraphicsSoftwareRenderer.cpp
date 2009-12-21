@@ -517,8 +517,15 @@ public:
           pixelOffset (betterQuality_ ? 0.5f : 0.0f),
           pixelOffsetInt (betterQuality_ ? -128 : 0),
           maxX (srcData_.width - 1),
-          maxY (srcData_.height - 1)
+          maxY (srcData_.height - 1),
+          scratchSize (2048)
     {
+        scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+    }
+
+    ~TransformedImageFillEdgeTableRenderer() throw()
+    {
+        juce_free (scratchBuffer);
     }
 
     forcedinline void setEdgeTableYPos (const int newY) throw()
@@ -540,7 +547,14 @@ public:
 
     forcedinline void handleEdgeTableLine (const int x, int width, int alphaLevel) throw()
     {
-        SrcPixelType* span = (SrcPixelType*) alloca (sizeof (SrcPixelType) * width);
+        if (width > scratchSize)
+        {
+            scratchSize = width;
+            juce_free (scratchBuffer);
+            scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+        }
+
+        SrcPixelType* span = scratchBuffer;
         generate (span, x, width);
 
         DestPixelType* dest = linePixels + x;
@@ -565,7 +579,14 @@ public:
 
     void clipEdgeTableLine (EdgeTable& et, int x, int y_, int width) throw()
     {
-        uint8* mask = (uint8*) alloca (sizeof (SrcPixelType) * width);
+        if (width > scratchSize)
+        {
+            scratchSize = width;
+            juce_free (scratchBuffer);
+            scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+        }
+
+        uint8* mask = (uint8*) scratchBuffer;
         y = y_;
         generate ((SrcPixelType*) mask, x, width);
 
@@ -872,6 +893,8 @@ private:
     const int pixelOffsetInt, maxX, maxY;
     int y;
     DestPixelType* linePixels;
+    SrcPixelType* scratchBuffer;
+    int scratchSize;
 
     TransformedImageFillEdgeTableRenderer (const TransformedImageFillEdgeTableRenderer&);
     const TransformedImageFillEdgeTableRenderer& operator= (const TransformedImageFillEdgeTableRenderer&);
