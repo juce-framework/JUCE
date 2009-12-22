@@ -119,7 +119,7 @@ void OutputStream::writeCompressedInt (int value)
         un >>= 8;
     }
 
-    data[0] = num;
+    data[0] = (uint8) num;
 
     if (value < 0)
         data[0] |= 0x80;

@@ -430,7 +430,9 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     checkMessageManagerIsLocked
 
-    if (! isOpaque())
+    if (isOpaque())
+        styleWanted &= ~ComponentPeer::windowIsSemiTransparent;
+    else
         styleWanted |= ComponentPeer::windowIsSemiTransparent;
 
     int currentStyleFlags = 0;

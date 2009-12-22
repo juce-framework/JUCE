@@ -338,6 +338,8 @@ private:
         XmlElement* createXml() const throw();
     };
 
+    friend class SharedObject;
+
     typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
 
     ReferenceCountedObjectPtr <SharedObject> object;

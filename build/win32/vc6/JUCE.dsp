@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "../../../bin/intermediate_win32/static"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /G6 /MT /GR /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /G6 /MD /GR /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "../../../bin/intermediate_win32/staticdebug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /G6 /MTd /W3 /Gm /GR /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
+# ADD CPP /nologo /G6 /MDd /W3 /Gm /GR /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
@@ -702,42 +702,6 @@ SOURCE=..\..\..\src\events\juce_Timer.h
 # Begin Group "graphics"
 
 # PROP Default_Filter ""
-# Begin Group "brushes"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_Brush.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_Brush.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_GradientBrush.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_GradientBrush.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_ImageBrush.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_ImageBrush.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\brushes\juce_SolidColourBrush.h
-# End Source File
-# End Group
 # Begin Group "colour"
 
 # PROP Default_Filter ""
@@ -780,6 +744,14 @@ SOURCE=..\..\..\src\gui\graphics\contexts\juce_EdgeTable.cpp
 # Begin Source File
 
 SOURCE=..\..\..\src\gui\graphics\contexts\juce_EdgeTable.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_FillType.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\graphics\contexts\juce_FillType.h
 # End Source File
 # Begin Source File
 
@@ -2145,6 +2117,14 @@ SOURCE=..\..\..\src\containers\juce_SortedSet.h
 # Begin Source File
 
 SOURCE=..\..\..\src\containers\juce_SparseSet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_ValueTree.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_ValueTree.h
 # End Source File
 # Begin Source File
 

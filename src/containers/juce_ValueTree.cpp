@@ -491,7 +491,7 @@ bool ValueTree::hasProperty (const var::identifier& name) const throw()
 void ValueTree::removeProperty (const var::identifier& name, UndoManager* const undoManager) throw()
 {
     if (object != 0)
-        return object->removeProperty (name, undoManager);
+        object->removeProperty (name, undoManager);
 }
 
 void ValueTree::removeAllProperties (UndoManager* const undoManager) throw()
