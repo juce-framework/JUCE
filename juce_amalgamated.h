@@ -46986,6 +46986,11 @@ public:
     */
     void setVelocityBasedMode (const bool isVelocityBased) throw();
 
+    /** Returns true if velocity-based mode is active.
+        @see setVelocityBasedMode
+    */
+    bool getVelocityBasedMode() const throw()                   { return isVelocityBased; }
+
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
 
         These apply when you've used setVelocityBasedMode() to turn on velocity mode,
@@ -47003,6 +47008,26 @@ public:
                                     const int threshold = 1,
                                     const double offset = 0.0,
                                     const bool userCanPressKeyToSwapMode = true) throw();
+
+    /** Returns the velocity sensitivity setting.
+        @see setVelocityModeParameters
+    */
+    double getVelocitySensitivity() const throw()               { return velocityModeSensitivity; }
+
+    /** Returns the velocity threshold setting.
+        @see setVelocityModeParameters
+    */
+    int getVelocityThreshold() const throw()                    { return velocityModeThreshold; }
+
+    /** Returns the velocity offset setting.
+        @see setVelocityModeParameters
+    */
+    double getVelocityOffset() const throw()                    { return velocityModeOffset; }
+
+    /** Returns the velocity user key setting.
+        @see setVelocityModeParameters
+    */
+    bool getVelocityModeIsSwappable() const throw()             { return userKeyOverridesVelocity; }
 
     /** Sets up a skew factor to alter the way values are distributed.
 

@@ -86,27 +86,24 @@ int InputStream::readIntBigEndian()
 
 int InputStream::readCompressedInt()
 {
-    int num = 0;
+    const unsigned char sizeByte = readByte();
+    if (sizeByte == 0)
+        return 0;
 
-    if (! isExhausted())
+    const int numBytes = (sizeByte & 0x7f);
+    if (numBytes > 4)
     {
-        unsigned char numBytes = readByte();
-        const bool negative = (numBytes & 0x80) != 0;
-        numBytes &= 0x7f;
-
-        if (numBytes <= 4)
-        {
-            if (read (&num, numBytes) != numBytes)
-                return 0;
-
-            num = (int) swapIfBigEndian ((uint32) num);
-
-            if (negative)
-                num = -num;
-        }
+        jassertfalse    // trying to read corrupt data - this method must only be used
+                        // to read data that was written by OutputStream::writeCompressedInt()
+        return 0;
     }
 
-    return num;
+    char bytes[4] = { 0, 0, 0, 0 };
+    if (read (bytes, numBytes) != numBytes)
+        return 0;
+
+    const int num = (int) littleEndianInt (bytes);
+    return (sizeByte >> 7) ? -num : num;
 }
 
 int64 InputStream::readInt64()

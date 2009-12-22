@@ -251,8 +251,8 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
     if (movie != 0)
     {
         NSSize s = [[theMovie attributeForKey: QTMovieNaturalSizeAttribute] sizeValue];
-        width = s.width;
-        height = s.height;
+        width = (int) s.width;
+        height = (int) s.height;
     }
 }
 

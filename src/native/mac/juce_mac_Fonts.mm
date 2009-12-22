@@ -203,7 +203,7 @@ public:
         const int length = text.length();
         CGGlyph* const glyphs = createGlyphsForString (text, length);
 
-        int x = 0;
+        float x = 0;
 
 #if SUPPORT_ONLY_10_4_FONTS
         NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
@@ -273,7 +273,7 @@ public:
             NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
             [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
-            int x = 0;
+            float x = 0;
             for (int i = 0; i < length; ++i)
             {
                 x += advances[i].width;

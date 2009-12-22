@@ -483,7 +483,7 @@ bool juce_launchFile (const String& fileName,
 
             ok = [[NSWorkspace sharedWorkspace] openURLs: urls
                                  withAppBundleIdentifier: [[NSBundle bundleWithPath: juceStringToNS (fileName)] bundleIdentifier]
-                                                 options: nil
+                                                 options: 0
                           additionalEventParamDescriptor: nil
                                        launchIdentifiers: nil];
         }

@@ -73,7 +73,7 @@ const StringPairArray WavAudioFormat::createBWAVMetadata (const String& descript
 #if JUCE_MSVC
   #pragma pack (push, 1)
   #define PACKED
-#elif defined (JUCE_GCC)
+#elif JUCE_GCC
   #define PACKED __attribute__((packed))
 #else
   #define PACKED

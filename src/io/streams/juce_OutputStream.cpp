@@ -109,23 +109,22 @@ void OutputStream::writeCompressedInt (int value)
 {
     unsigned int un = (value < 0) ? (unsigned int) -value
                                   : (unsigned int) value;
-    unsigned int tn = un;
 
-    int numSigBytes = 0;
+    uint8 data[5];
+    int num = 0;
 
-    do
+    while (un > 0)
     {
-        tn >>= 8;
-        numSigBytes++;
+        data[++num] = (uint8) un;
+        un >>= 8;
+    }
 
-    } while (tn & 0xff);
+    data[0] = num;
 
     if (value < 0)
-        numSigBytes |= 0x80;
+        data[0] |= 0x80;
 
-    writeByte ((char) numSigBytes);
-    un = swapIfBigEndian (un);
-    write (&un, numSigBytes);
+    write (data, num + 1);
 }
 
 void OutputStream::writeInt64 (int64 value)

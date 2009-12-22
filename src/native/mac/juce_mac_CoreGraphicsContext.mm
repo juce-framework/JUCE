@@ -420,8 +420,8 @@ public:
                 while (x > clip.origin.x)   x -= iw;
                 while (y > clip.origin.y)   y -= ih;
 
-                const int right = clip.origin.x + clip.size.width;
-                const int bottom = clip.origin.y + clip.size.height;
+                const int right = (int) (clip.origin.x + clip.size.width);
+                const int bottom = (int) (clip.origin.y + clip.size.height);
 
                 while (y < bottom)
                 {

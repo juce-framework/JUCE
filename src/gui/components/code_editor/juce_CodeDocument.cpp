@@ -580,7 +580,7 @@ void CodeDocument::setSavePoint() throw()
 
 bool CodeDocument::hasChangedSinceSavePoint() const throw()
 {
-    return currentActionIndex == indexOfSavedState;
+    return currentActionIndex != indexOfSavedState;
 }
 
 //==============================================================================
