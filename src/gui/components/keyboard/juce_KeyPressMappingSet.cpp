@@ -69,6 +69,11 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                                       const KeyPress& newKeyPress,
                                       int insertIndex) throw()
 {
+    // If you specify an upper-case letter but no shift key, how is the user supposed to press it!?
+    // Stick to lower-case letters when defining a keypress, to avoid ambiguity.
+    jassert (! (CharacterFunctions::isUpperCase (newKeyPress.getTextCharacter())
+                 && ! newKeyPress.getModifiers().isShiftDown()));
+
     if (findCommandForKeyPress (newKeyPress) != commandID)
     {
         removeKeyPress (newKeyPress);
