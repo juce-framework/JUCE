@@ -136,6 +136,7 @@ public:
           numGradientLookupEntries (0)
     {
         CGContextRetain (context);
+        CGContextSaveGState(context);
         CGContextSetShouldSmoothFonts (context, true);
         CGContextSetShouldAntialias (context, true);
         CGContextSetBlendMode (context, kCGBlendModeNormal);
@@ -149,6 +150,7 @@ public:
 
     ~CoreGraphicsContext()
     {
+        CGContextRestoreGState (context);
         CGContextRelease (context);
         CGColorSpaceRelease (rgbColourSpace);
         CGColorSpaceRelease (greyColourSpace);

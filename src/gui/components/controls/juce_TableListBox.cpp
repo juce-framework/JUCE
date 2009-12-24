@@ -200,23 +200,7 @@ public:
                 if (dragDescription.isNotEmpty())
                 {
                     isDragging = true;
-
-                    DragAndDropContainer* const dragContainer
-                        = DragAndDropContainer::findParentDragContainerFor (this);
-
-                    if (dragContainer != 0)
-                    {
-                        Image* dragImage = owner.createSnapshotOfSelectedRows();
-                        dragImage->multiplyAllAlphas (0.6f);
-
-                        dragContainer->startDragging (dragDescription, &owner, dragImage, true);
-                    }
-                    else
-                    {
-                        // to be able to do a drag-and-drop operation, the listbox needs to
-                        // be inside a component which is also a DragAndDropContainer.
-                        jassertfalse
-                    }
+                    owner.startDragAndDrop (e, dragDescription);
                 }
             }
         }

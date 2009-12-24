@@ -137,23 +137,7 @@ public:
                 if (dragDescription.isNotEmpty())
                 {
                     isDragging = true;
-
-                    DragAndDropContainer* const dragContainer
-                        = DragAndDropContainer::findParentDragContainerFor (this);
-
-                    if (dragContainer != 0)
-                    {
-                        Image* dragImage = owner.createSnapshotOfSelectedRows();
-                        dragImage->multiplyAllAlphas (0.6f);
-
-                        dragContainer->startDragging (dragDescription, &owner, dragImage, true);
-                    }
-                    else
-                    {
-                        // to be able to do a drag-and-drop operation, the listbox needs to
-                        // be inside a component which is also a DragAndDropContainer.
-                        jassertfalse
-                    }
+                    owner.startDragAndDrop (e, dragDescription);
                 }
             }
         }
@@ -904,36 +888,76 @@ void ListBox::repaintRow (const int rowNumber) throw()
     repaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
 }
 
-Image* ListBox::createSnapshotOfSelectedRows()
+Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 {
-    Image* snapshot = Image::createNativeImage (Image::ARGB, getWidth(), getHeight(), true);
-    Graphics g (*snapshot);
-
+    Rectangle imageArea;
     const int firstRow = getRowContainingPosition (0, 0);
 
-    for (int i = getNumRowsOnScreen() + 2; --i >= 0;)
+    int i;
+    for (i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
         Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
 
         if (rowComp != 0 && isRowSelected (firstRow + i))
         {
-            g.saveState();
-
             int x = 0, y = 0;
             rowComp->relativePositionToOtherComponent (this, x, y);
 
-            g.setOrigin (x, y);
-            g.reduceClipRegion (0, 0, rowComp->getWidth(), rowComp->getHeight());
+            const Rectangle rowRect (x, y, rowComp->getWidth(), rowComp->getHeight());
 
-            rowComp->paintEntireComponent (g);
+            if (imageArea.isEmpty())
+                imageArea = rowRect;
+            else
+                imageArea = imageArea.getUnion (rowRect);
+        }
+    }
 
-            g.restoreState();
+    imageArea = imageArea.getIntersection (Rectangle (0, 0, getWidth(), getHeight()));
+    imageX = imageArea.getX();
+    imageY = imageArea.getY();
+    Image* snapshot = Image::createNativeImage (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
+
+    for (i = getNumRowsOnScreen() + 2; --i >= 0;)
+    {
+        Component* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i);
+
+        if (rowComp != 0 && isRowSelected (firstRow + i))
+        {
+            int x = 0, y = 0;
+            rowComp->relativePositionToOtherComponent (this, x, y);
+
+            Graphics g (*snapshot);
+            g.setOrigin (x - imageX, y - imageY);
+            if (g.reduceClipRegion (0, 0, rowComp->getWidth(), rowComp->getHeight()))
+                rowComp->paintEntireComponent (g);
         }
     }
 
     return snapshot;
 }
 
+void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescription)
+{
+    DragAndDropContainer* const dragContainer
+        = DragAndDropContainer::findParentDragContainerFor (this);
+
+    if (dragContainer != 0)
+    {
+        int x, y;
+        Image* dragImage = createSnapshotOfSelectedRows (x, y);
+        dragImage->multiplyAllAlphas (0.6f);
+
+        MouseEvent e2 (e.getEventRelativeTo (this));
+        const Point p ((float) (x - e2.x), (float) (y - e2.y));
+        dragContainer->startDragging (dragDescription, this, dragImage, true, &p);
+    }
+    else
+    {
+        // to be able to do a drag-and-drop operation, the listbox needs to
+        // be inside a component which is also a DragAndDropContainer.
+        jassertfalse
+    }
+}
 
 //==============================================================================
 Component* ListBoxModel::refreshComponentForRow (int, bool, Component* existingComponentToUpdate)

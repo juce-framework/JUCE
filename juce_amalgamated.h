@@ -37244,7 +37244,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    Image* createSnapshotOfSelectedRows();
+    Image* createSnapshotOfSelectedRows (int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
@@ -37275,6 +37275,8 @@ public:
     void mouseUp (const MouseEvent&);
     /** @internal */
     void colourChanged();
+    /** @internal */
+    void startDragAndDrop (const MouseEvent& e, const String& dragDescription);
 
     juce_UseDebuggingNewOperator
 
