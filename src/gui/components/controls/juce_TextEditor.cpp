@@ -34,7 +34,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 
-#define SHOULD_WRAP(x, wrapwidth)       (((x) - 0.0001f) >= (wrapwidth))
 
 //==============================================================================
 // a word or space that can't be broken down any further
@@ -406,12 +405,11 @@ public:
         jassert (wordWrapWidth_ > 0);
 
         if (sections.size() > 0)
+        {
             currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
 
-        if (currentSection != 0)
-        {
-            lineHeight = currentSection->font.getHeight();
-            maxDescent = currentSection->font.getDescent();
+            if (currentSection != 0)
+                beginNewLine();
         }
     }
 
@@ -460,7 +458,7 @@ public:
 
                 int split;
                 for (split = 0; split < g.getNumGlyphs(); ++split)
-                    if (SHOULD_WRAP (g.getGlyph (split).getRight(), wordWrapWidth))
+                    if (shouldWrap (g.getGlyph (split).getRight()))
                         break;
 
                 if (split > 0 && split <= numRemaining)
@@ -492,9 +490,6 @@ public:
 
                 atomIndex = 0;
                 currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
-
-                lineHeight = jmax (lineHeight, currentSection->font.getHeight());
-                maxDescent = jmax (maxDescent, currentSection->font.getDescent());
             }
             else
             {
@@ -525,7 +520,7 @@ public:
                         lineHeight2 = jmax (lineHeight2, s->font.getHeight());
                         maxDescent2 = jmax (maxDescent2, s->font.getDescent());
 
-                        if (SHOULD_WRAP (right, wordWrapWidth))
+                        if (shouldWrap (right))
                         {
                             lineHeight = lineHeight2;
                             maxDescent = maxDescent2;
@@ -547,17 +542,14 @@ public:
             indexInText += atom->numChars;
 
             if (atom->isNewLine())
-            {
-                atomX = 0;
-                lineY += lineHeight;
-            }
+                beginNewLine();
         }
 
         atom = currentSection->getAtom (atomIndex);
         atomRight = atomX + atom->width;
         ++atomIndex;
 
-        if (SHOULD_WRAP (atomRight, wordWrapWidth) || forceNewLine)
+        if (shouldWrap (atomRight) || forceNewLine)
         {
             if (atom->isWhitespace())
             {
@@ -566,36 +558,78 @@ public:
             }
             else
             {
-                return wrapCurrentAtom();
+                atomRight = atom->width;
+
+                if (shouldWrap (atomRight))  // atom too big to fit on a line, so break it up..
+                {
+                    tempAtom = *atom;
+                    tempAtom.width = 0;
+                    tempAtom.numChars = 0;
+                    atom = &tempAtom;
+
+                    if (atomX > 0)
+                        beginNewLine();
+
+                    return next();
+                }
+
+                beginNewLine();
+                return true;
             }
         }
 
         return true;
     }
 
-    bool wrapCurrentAtom() throw()
+    void beginNewLine() throw()
     {
-        atomRight = atom->width;
-
-        if (SHOULD_WRAP (atomRight, wordWrapWidth))  // atom too big to fit on a line, so break it up..
-        {
-            tempAtom = *atom;
-            tempAtom.width = 0;
-            tempAtom.numChars = 0;
-            atom = &tempAtom;
-
-            if (atomX > 0)
-            {
-                atomX = 0;
-                lineY += lineHeight;
-            }
-
-            return next();
-        }
-
         atomX = 0;
         lineY += lineHeight;
-        return true;
+
+        int tempSectionIndex = sectionIndex;
+        int tempAtomIndex = atomIndex;
+        const UniformTextSection* section = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
+
+        lineHeight = section->font.getHeight();
+        maxDescent = section->font.getDescent();
+
+        float x = (atom != 0) ? atom->width : 0;
+
+        while (! shouldWrap (x))
+        {
+            if (tempSectionIndex >= sections.size())
+                break;
+
+            bool checkSize = false;
+
+            if (tempAtomIndex >= section->getNumAtoms())
+            {
+                if (++tempSectionIndex >= sections.size())
+                    break;
+
+                tempAtomIndex = 0;
+                section = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
+                checkSize = true;
+            }
+
+            const TextAtom* const nextAtom = section->getAtom (tempAtomIndex);
+
+            if (nextAtom == 0)
+                break;
+
+            x += nextAtom->width;
+
+            if (shouldWrap (x) || nextAtom->isNewLine())
+                break;
+
+            if (checkSize)
+            {
+                lineHeight = jmax (lineHeight, section->font.getHeight());
+                maxDescent = jmax (maxDescent, section->font.getDescent());
+            }
+
+            ++tempAtomIndex;
+        }
     }
 
     //==============================================================================
@@ -714,66 +748,16 @@ public:
     }
 
     //==============================================================================
-    void updateLineHeight() throw()
-    {
-        float x = atomRight;
-
-        int tempSectionIndex = sectionIndex;
-        int tempAtomIndex = atomIndex;
-        const UniformTextSection* currentSection = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
-
-        while (! SHOULD_WRAP (x, wordWrapWidth))
-        {
-            if (tempSectionIndex >= sections.size())
-                break;
-
-            bool checkSize = false;
-
-            if (tempAtomIndex >= currentSection->getNumAtoms())
-            {
-                if (++tempSectionIndex >= sections.size())
-                    break;
-
-                tempAtomIndex = 0;
-                currentSection = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
-                checkSize = true;
-            }
-
-            const TextAtom* const atom = currentSection->getAtom (tempAtomIndex);
-
-            if (atom == 0)
-                break;
-
-            x += atom->width;
-
-            if (SHOULD_WRAP (x, wordWrapWidth) || atom->isNewLine())
-                break;
-
-            if (checkSize)
-            {
-                lineHeight = jmax (lineHeight, currentSection->font.getHeight());
-                maxDescent = jmax (maxDescent, currentSection->font.getDescent());
-            }
-
-            ++tempAtomIndex;
-        }
-    }
-
     bool getCharPosition (const int index, float& cx, float& cy, float& lineHeight_) throw()
     {
         while (next())
         {
-            if (indexInText + atom->numChars >= index)
+            if (indexInText + atom->numChars > index)
             {
-                updateLineHeight();
-
-                if (indexInText + atom->numChars > index)
-                {
-                    cx = indexToX (index);
-                    cy = lineY;
-                    lineHeight_ = lineHeight;
-                    return true;
-                }
+                cx = indexToX (index);
+                cy = lineY;
+                lineHeight_ = lineHeight;
+                return true;
             }
         }
 
@@ -813,6 +797,11 @@ private:
                 lineY += lineHeight;
             }
         }
+    }
+
+    bool shouldWrap (const float x) const throw()
+    {
+        return (x - 0.0001f) >= wordWrapWidth;
     }
 };
 
@@ -1716,8 +1705,6 @@ void TextEditor::drawContent (Graphics& g)
 
             while (i2.next() && i2.lineY < clip.getBottom())
             {
-                i2.updateLineHeight();
-
                 if (i2.lineY + i2.lineHeight >= clip.getY()
                      && selectionEnd >= i2.indexInText
                      && selectionStart <= i2.indexInText + i2.atom->numChars)
@@ -1731,8 +1718,6 @@ void TextEditor::drawContent (Graphics& g)
 
         while (i.next() && i.lineY < clip.getBottom())
         {
-            i.updateLineHeight();
-
             if (i.lineY + i.lineHeight >= clip.getY())
             {
                 if (selectionEnd >= i.indexInText
@@ -2553,9 +2538,6 @@ int TextEditor::indexAtPosition (const float x, const float y) throw()
 
         while (i.next())
         {
-            if (i.lineY + getHeight() > y)
-                i.updateLineHeight();
-
             if (i.lineY + i.lineHeight > y)
             {
                 if (i.lineY > y)

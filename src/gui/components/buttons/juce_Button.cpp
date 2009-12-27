@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Button.h"
 #include "../juce_ComponentDeletionWatcher.h"
 #include "../keyboard/juce_KeyPressMappingSet.h"
+#include "../../../text/juce_LocalisedStrings.h"
 
 
 //==============================================================================
@@ -99,7 +100,7 @@ const String Button::getTooltip()
             const String key (keyPresses.getReference(i).getTextDescription());
 
             if (key.length() == 1)
-                tt << " [shortcut: '" << key << "']";
+                tt << " [" << TRANS("shortcut") << ": '" << key << "']";
             else
                 tt << " [" << key << ']';
         }

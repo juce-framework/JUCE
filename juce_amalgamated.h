@@ -53878,7 +53878,7 @@ public:
 
         @see setMidiChannel
     */
-    void setVelocity (const float velocity);
+    void setVelocity (const float velocity, const bool useMousePositionForVelocity);
 
     /** Changes the midi channel number that will be used for events triggered by clicking
         on the component.
@@ -54178,7 +54178,7 @@ private:
     BitArray keysPressed, keysCurrentlyDrawnDown;
 
     int rangeStart, rangeEnd, firstKey;
-    bool canScroll, mouseDragging;
+    bool canScroll, mouseDragging, useMousePositionForVelocity;
     Button* scrollDown;
     Button* scrollUp;
 
@@ -54188,8 +54188,8 @@ private:
     int octaveNumForMiddleC;
 
     void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-    int xyToNote (int x, int y);
-    int remappedXYToNote (int x, int y) const;
+    int xyToNote (int x, int y, float& mousePositionVelocity);
+    int remappedXYToNote (int x, int y, float& mousePositionVelocity) const;
     void resetAnyKeysInUse();
     void updateNoteUnderMouse (int x, int y);
     void repaintNote (const int midiNoteNumber);
