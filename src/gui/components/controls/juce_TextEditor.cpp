@@ -1796,6 +1796,7 @@ void TextEditor::mouseDown (const MouseEvent& e)
         else
         {
             PopupMenu m;
+            m.setLookAndFeel (&getLookAndFeel());
             addPopupMenuItems (m, &e);
 
             menuActive = true;
@@ -1814,7 +1815,7 @@ void TextEditor::mouseDrag (const MouseEvent& e)
     {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
         {
-           moveCursorTo (getTextIndexAt (e.x, e.y), true);
+            moveCursorTo (getTextIndexAt (e.x, e.y), true);
         }
     }
 }

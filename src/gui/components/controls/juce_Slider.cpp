@@ -978,6 +978,7 @@ void Slider::mouseDown (const MouseEvent& e)
             menuShown = true;
 
             PopupMenu m;
+            m.setLookAndFeel (&getLookAndFeel());
             m.addItem (1, TRANS ("velocity-sensitive mode"), true, isVelocityBased);
             m.addSeparator();
 

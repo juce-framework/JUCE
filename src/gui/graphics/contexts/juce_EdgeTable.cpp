@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_EdgeTable.h"
 #include "../geometry/juce_PathIterator.h"
 #include "../imaging/juce_Image.h"
+#include "../geometry/juce_RectangleList.h"
 
 const int juce_edgeTableDefaultEdgesPerLine = 32;
 
@@ -54,8 +55,8 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
 {
     table = (int*) juce_malloc ((bounds.getHeight() + 1) * lineStrideElements * sizeof (int));
     int* t = table;
-    int i = 0;
-    for (i = bounds.getHeight(); --i >= 0;)
+
+    for (int i = bounds.getHeight(); --i >= 0;)
     {
         *t = 0;
         t += lineStrideElements;
@@ -117,53 +118,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
         }
     }
 
-    // Convert the table from relative windings to absolute levels..
-    int* lineStart = table;
-
-    for (i = bounds.getHeight(); --i >= 0;)
-    {
-        int* line = lineStart;
-        lineStart += lineStrideElements;
-
-        int num = *line;
-        if (num == 0)
-            continue;
-
-        int level = 0;
-
-        if (path.isUsingNonZeroWinding())
-        {
-            while (--num > 0)
-            {
-                line += 2;
-                level += *line;
-                int corrected = abs (level);
-                if (corrected >> 8)
-                    corrected = 255;
-
-                *line = corrected;
-            }
-        }
-        else
-        {
-            while (--num > 0)
-            {
-                line += 2;
-                level += *line;
-                int corrected = abs (level);
-                if (corrected >> 8)
-                {
-                    corrected &= 511;
-                    if (corrected >> 8)
-                        corrected = 511 - corrected;
-                }
-
-                *line = corrected;
-            }
-        }
-
-        line[2] = 0; // force the last level to 0, just in case something went wrong in creating the table
-    }
+    sanitiseLevels (path.isUsingNonZeroWinding());
 }
 
 EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
@@ -188,6 +143,40 @@ EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
         t[4] = 0;
         t += lineStrideElements;
     }
+}
+
+EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
+   : bounds (rectanglesToAdd.getBounds()),
+     maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
+     lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
+     needToCheckEmptinesss (true)
+{
+    table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
+
+    int* t = table;
+    for (int i = bounds.getHeight(); --i >= 0;)
+    {
+        *t = 0;
+        t += lineStrideElements;
+    }
+
+    for (RectangleList::Iterator iter (rectanglesToAdd); iter.next();)
+    {
+        const Rectangle* const r = iter.getRectangle();
+
+        const int x1 = r->getX() << 8;
+        const int x2 = r->getRight() << 8;
+        int y = r->getY() - bounds.getY();
+
+        for (int j = r->getHeight(); --j >= 0;)
+        {
+            addEdgePoint (x1, y, 255);
+            addEdgePoint (x2, y, -255);
+            ++y;
+        }
+    }
+
+    sanitiseLevels (true);
 }
 
 EdgeTable::EdgeTable (const float x, const float y, const float w, const float h) throw()
@@ -292,6 +281,57 @@ EdgeTable::~EdgeTable() throw()
 }
 
 //==============================================================================
+void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) throw()
+{
+    // Convert the table from relative windings to absolute levels..
+    int* lineStart = table;
+
+    for (int i = bounds.getHeight(); --i >= 0;)
+    {
+        int* line = lineStart;
+        lineStart += lineStrideElements;
+
+        int num = *line;
+        if (num == 0)
+            continue;
+
+        int level = 0;
+
+        if (useNonZeroWinding)
+        {
+            while (--num > 0)
+            {
+                line += 2;
+                level += *line;
+                int corrected = abs (level);
+                if (corrected >> 8)
+                    corrected = 255;
+
+                *line = corrected;
+            }
+        }
+        else
+        {
+            while (--num > 0)
+            {
+                line += 2;
+                level += *line;
+                int corrected = abs (level);
+                if (corrected >> 8)
+                {
+                    corrected &= 511;
+                    if (corrected >> 8)
+                        corrected = 511 - corrected;
+                }
+
+                *line = corrected;
+            }
+        }
+
+        line[2] = 0; // force the last level to 0, just in case something went wrong in creating the table
+    }
+}
+
 void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
 {
     if (newNumEdgesPerLine != maxEdgesPerLine)

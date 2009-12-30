@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_PathIterator.h"
 #include "juce_Line.h"
 #include "../../../io/streams/juce_MemoryInputStream.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
 #include "../imaging/juce_Image.h"
 
 // tests that some co-ords aren't NaNs
@@ -1365,10 +1366,9 @@ void Path::writePathToStream (OutputStream& dest) const
 
 const String Path::toString() const
 {
-    String s;
-    s.preallocateStorage (numElements * 4);
+    MemoryOutputStream s (2048, 2048);
     if (! useNonZeroWinding)
-        s << T("a ");
+        s << "a ";
 
     int i = 0;
     float lastMarker = 0.0f;
@@ -1376,38 +1376,38 @@ const String Path::toString() const
     while (i < numElements)
     {
         const float marker = data.elements [i++];
-        tchar markerChar = 0;
+        char markerChar = 0;
         int numCoords = 0;
 
         if (marker == moveMarker)
         {
-            markerChar = T('m');
+            markerChar = 'm';
             numCoords = 2;
         }
         else if (marker == lineMarker)
         {
-            markerChar = T('l');
+            markerChar = 'l';
             numCoords = 2;
         }
         else if (marker == quadMarker)
         {
-            markerChar = T('q');
+            markerChar = 'q';
             numCoords = 4;
         }
         else if (marker == cubicMarker)
         {
-            markerChar = T('c');
+            markerChar = 'c';
             numCoords = 6;
         }
         else
         {
             jassert (marker == closeSubPathMarker);
-            markerChar = T('z');
+            markerChar = 'z';
         }
 
         if (marker != lastMarker)
         {
-            s << markerChar << T(' ');
+            s << markerChar << ' ';
             lastMarker = marker;
         }
 
@@ -1415,17 +1415,28 @@ const String Path::toString() const
         {
             String n (data.elements [i++], 3);
 
-            while (n.endsWithChar (T('0')))
-                n = n.dropLastCharacters (1);
+            if (n.endsWithChar (T('0')))
+            {
+                do
+                {
+                    n = n.dropLastCharacters (1);
+                } while (n.endsWithChar (T('0')));
 
-            if (n.endsWithChar (T('.')))
-                n = n.dropLastCharacters (1);
+                if (n.endsWithChar (T('.')))
+                    n = n.dropLastCharacters (1);
+            }
 
-            s << n << T(' ');
+            s << n << ' ';
         }
     }
 
-    return s.trimEnd();
+    const char* const result = (const char*) s.getData();
+    int len = s.getDataSize();
+
+    while (len > 0 && CharacterFunctions::isWhitespace (result [len - 1]))
+        --len;
+
+    return String (result, len);
 }
 
 static const String nextToken (const tchar*& t)

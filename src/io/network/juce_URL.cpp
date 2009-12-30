@@ -516,6 +516,8 @@ const URL URL::withFileToUpload (const String& parameterName,
                                  const File& fileToUpload,
                                  const String& mimeType) const
 {
+    jassert (mimeType.isNotEmpty()); // You need to supply a mime type!
+
     URL u (*this);
     u.filesToUpload.set (parameterName, fileToUpload.getFullPathName());
     u.mimeTypes.set (parameterName, mimeType);

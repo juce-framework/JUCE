@@ -41,13 +41,13 @@ BEGIN_JUCE_NAMESPACE
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
-#if JUCE_MSVC && JUCE_DEBUG
- #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
-#endif
-
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4127) // "expression is constant" warning
+
+ #if JUCE_DEBUG
+  #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
+ #endif
 #endif
 
 //==============================================================================
@@ -935,13 +935,10 @@ public:
     bool clipToRectangleList (const RectangleList& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
-        RectangleList temp (r);
-        temp.offsetAll (xOffset, yOffset);
-        RectangleList totalArea (edgeTable->edgeTable.getMaximumBounds());
-        totalArea.subtract (temp);
-
-        for (RectangleList::Iterator i (totalArea); i.next();)
-            edgeTable->edgeTable.excludeRectangle (*i.getRectangle());
+        RectangleList offsetList (r);
+        offsetList.offsetAll (xOffset, yOffset);
+        EdgeTable e2 (offsetList);
+        edgeTable->edgeTable.clipToEdgeTable (e2);
 
         return ! edgeTable->edgeTable.isEmpty();
     }

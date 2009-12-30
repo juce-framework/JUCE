@@ -626,7 +626,6 @@ public:
     {
         arrayToAddFrom.lockArray();
         lock.enter();
-        jassert (this != &arrayToAddFrom);
 
         if (startIndex < 0)
         {
@@ -637,7 +636,8 @@ public:
         if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
             numElementsToAdd = arrayToAddFrom.size() - startIndex;
 
-        addArray ((const ElementType*) (arrayToAddFrom.data.elements + startIndex), numElementsToAdd);
+        while (--numElementsToAdd >= 0)
+            add (arrayToAddFrom.getUnchecked (startIndex++));
 
         lock.exit();
         arrayToAddFrom.unlockArray();

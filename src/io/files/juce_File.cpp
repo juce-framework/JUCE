@@ -864,15 +864,25 @@ bool File::hasFileExtension (const String& possibleSuffix) const throw()
     if (possibleSuffix.isEmpty())
         return fullPath.lastIndexOfChar (T('.')) <= fullPath.lastIndexOfChar (separator);
 
-    if (fullPath.endsWithIgnoreCase (possibleSuffix))
+    const int semicolon = possibleSuffix.indexOfChar (0, T(';'));
+
+    if (semicolon >= 0)
     {
-        if (possibleSuffix.startsWithChar (T('.')))
-            return true;
+        return hasFileExtension (possibleSuffix.substring (0, semicolon).trimEnd())
+                || hasFileExtension (possibleSuffix.substring (semicolon + 1).trimStart());
+    }
+    else
+    {
+        if (fullPath.endsWithIgnoreCase (possibleSuffix))
+        {
+            if (possibleSuffix.startsWithChar (T('.')))
+                return true;
 
-        const int dotPos = fullPath.length() - possibleSuffix.length() - 1;
+            const int dotPos = fullPath.length() - possibleSuffix.length() - 1;
 
-        if (dotPos >= 0)
-            return fullPath [dotPos] == T('.');
+            if (dotPos >= 0)
+                return fullPath [dotPos] == T('.');
+        }
     }
 
     return false;

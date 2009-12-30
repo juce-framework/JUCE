@@ -30,6 +30,7 @@
 #include "../geometry/juce_Rectangle.h"
 #include "../../../containers/juce_MemoryBlock.h"
 class Path;
+class RectangleList;
 class Image;
 
 
@@ -59,6 +60,10 @@ public:
     /** Creates an edge table containing a rectangle.
     */
     EdgeTable (const Rectangle& rectangleToAdd) throw();
+
+    /** Creates an edge table containing a rectangle list.
+    */
+    EdgeTable (const RectangleList& rectanglesToAdd) throw();
 
     /** Creates an edge table containing a rectangle.
     */
@@ -198,6 +203,7 @@ private:
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
     void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
+    void sanitiseLevels (const bool useNonZeroWinding) throw();
 };
 
 

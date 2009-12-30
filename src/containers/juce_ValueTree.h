@@ -41,7 +41,7 @@
     any number of sub-trees.
 
     Create ValueTree objects on the stack, and don't be afraid to copy them around, as
-    they are simply a lightweight reference to a shared data container. Creating a copy
+    they're simply a lightweight reference to a shared data container. Creating a copy
     of another ValueTree simply creates a new reference to the same underlying object - to
     make a separate, deep copy of a tree you should explicitly call createCopy().
 
@@ -49,16 +49,18 @@
     and much of the structure of a ValueTree is similar to an XmlElement tree.
     You can convert a ValueTree to and from an XmlElement, and as long as the XML doesn't
     contain text elements, the conversion works well and makes a good serialisation
-    format.
+    format. They can also be serialised to a binary format, which is very fast and compact.
 
     All the methods that change data take an optional UndoManager, which will be used
     to track any changes to the object. For this to work, you have to be careful to
     consistently always use the same UndoManager for all operations to any node inside
     the tree.
 
-    Nodes can only be a child of one parent at a time, so if you're moving a node from
+    A ValueTree can only be a child of one parent at a time, so if you're moving one from
     one tree to another, be careful to always remove it first, before adding it. This
-    could also mess up your undo/redo chain, so be wary!
+    could also mess up your undo/redo chain, so be wary! In a debug build you should hit
+    assertions if you try to do anything dangerous, but there are still plenty of ways it
+    could go wrong.
 
     Listeners can be added to a ValueTree to be told when properies change and when
     nodes are added or removed.
