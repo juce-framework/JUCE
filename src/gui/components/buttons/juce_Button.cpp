@@ -40,7 +40,6 @@ Button::Button (const String& name)
     keySource (0),
     text (name),
     buttonListeners (2),
-    repeatTimer (0),
     buttonPressTime (0),
     lastTimeCallbackTime (0),
     commandManagerToUse (0),
@@ -67,7 +66,7 @@ Button::~Button()
     if (commandManagerToUse != 0)
         commandManagerToUse->removeListener (this);
 
-    delete repeatTimer;
+    repeatTimer = 0;
     clearShortcuts();
 }
 

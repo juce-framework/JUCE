@@ -163,7 +163,6 @@ private:
 ZipFile::ZipFile (InputStream* const source_,
                   const bool deleteStreamWhenDestroyed_) throw()
    : inputStream (source_),
-     inputSource (0),
      deleteStreamWhenDestroyed (deleteStreamWhenDestroyed_)
 #ifdef JUCE_DEBUG
      , numOpenStreams (0)
@@ -197,15 +196,10 @@ ZipFile::ZipFile (InputSource* const inputSource_)
 ZipFile::~ZipFile() throw()
 {
     for (int i = entries.size(); --i >= 0;)
-    {
-        ZipEntryInfo* const zei = (ZipEntryInfo*) entries [i];
-        delete zei;
-    }
+        delete (ZipEntryInfo*) entries.getUnchecked(i);
 
     if (deleteStreamWhenDestroyed)
         delete inputStream;
-
-    delete inputSource;
 
 #ifdef JUCE_DEBUG
     // If you hit this assertion, it means you've created a stream to read
@@ -287,13 +281,13 @@ void ZipFile::sortEntriesByFilename()
 //==============================================================================
 void ZipFile::init()
 {
+    ScopedPointer <InputStream> toDelete;
     InputStream* in = inputStream;
-    bool deleteInput = false;
 
     if (inputSource != 0)
     {
-        deleteInput = true;
         in = inputSource->createInputStream();
+        toDelete = in;
     }
 
     if (in != 0)
@@ -352,9 +346,6 @@ void ZipFile::init()
                 }
             }
         }
-
-        if (deleteInput)
-            delete in;
     }
 }
 
@@ -409,7 +400,7 @@ void ZipFile::uncompressTo (const File& targetDirectory,
         }
         else
         {
-            InputStream* const in = createStreamForEntry (i);
+            ScopedPointer <InputStream> in (createStreamForEntry (i));
 
             if (in != 0)
             {
@@ -419,20 +410,18 @@ void ZipFile::uncompressTo (const File& targetDirectory,
                 if ((! targetFile.exists())
                      && targetFile.getParentDirectory().createDirectory())
                 {
-                    FileOutputStream* const out = targetFile.createOutputStream();
+                    ScopedPointer <FileOutputStream> out (targetFile.createOutputStream());
 
                     if (out != 0)
                     {
                         out->writeFromInputStream (*in, -1);
-                        delete out;
+                        out = 0;
 
                         targetFile.setCreationTime (zei.entry.fileTime);
                         targetFile.setLastModificationTime (zei.entry.fileTime);
                         targetFile.setLastAccessTime (zei.entry.fileTime);
                     }
                 }
-
-                delete in;
             }
         }
     }

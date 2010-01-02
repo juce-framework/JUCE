@@ -49,9 +49,9 @@ public:
     String text;
     const Colour textColour;
     const bool active, isSeparator, isTicked, usesColour;
-    Image* image;
+    ScopedPointer <Image> image;
     PopupMenuCustomComponent* const customComp;
-    PopupMenu* subMenu;
+    ScopedPointer <PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
 
     //==============================================================================
@@ -61,9 +61,7 @@ public:
           isSeparator (true),
           isTicked (false),
           usesColour (false),
-          image (0),
           customComp (0),
-          subMenu (0),
           commandManager (0)
     {
     }
@@ -85,11 +83,11 @@ public:
           isSeparator (false),
           isTicked (isTicked_),
           usesColour (usesColour_),
-          image (0),
           customComp (customComp_),
           commandManager (commandManager_)
     {
-        subMenu = (subMenu_ != 0) ? new PopupMenu (*subMenu_) : 0;
+        if (subMenu_ != 0)
+            subMenu = new PopupMenu (*subMenu_);
 
         if (customComp != 0)
             customComp->refCount_++;
@@ -137,13 +135,9 @@ public:
     {
         if (other.subMenu != 0)
             subMenu = new PopupMenu (*(other.subMenu));
-        else
-            subMenu = 0;
 
         if (other.image != 0)
             image = other.image->createCopy();
-        else
-            image = 0;
 
         if (customComp != 0)
             customComp->refCount_++;
@@ -151,9 +145,6 @@ public:
 
     ~MenuItemInfo() throw()
     {
-        delete subMenu;
-        delete image;
-
         if (customComp != 0 && --(customComp->refCount_) == 0)
             delete customComp;
     }
@@ -294,7 +285,6 @@ public:
          menuBarComponent (0),
          managerOfChosenCommand (0),
          componentAttachedTo (0),
-         attachedCompWatcher (0),
          lastMouseX (0),
          lastMouseY (0),
          minimumWidth (0),
@@ -335,7 +325,7 @@ public:
         delete activeSubMenu;
 
         deleteAllChildren();
-        delete attachedCompWatcher;
+        attachedCompWatcher = 0;
     }
 
     //==============================================================================
@@ -357,7 +347,7 @@ public:
         {
             int totalItems = 0;
 
-            PopupMenuWindow* const mw = new PopupMenuWindow();
+            ScopedPointer <PopupMenuWindow> mw (new PopupMenuWindow());
             mw->setLookAndFeel (menu.lookAndFeel);
             mw->setWantsKeyboardFocus (false);
             mw->minimumWidth = minimumWidth;
@@ -373,17 +363,12 @@ public:
                 ++totalItems;
             }
 
-            if (totalItems == 0)
-            {
-                delete mw;
-            }
-            else
+            if (totalItems > 0)
             {
                 mw->owner = owner_;
                 mw->menuBarComponent = menuBarComponent;
                 mw->managerOfChosenCommand = managerOfChosenCommand;
                 mw->componentAttachedTo = componentAttachedTo;
-                delete mw->attachedCompWatcher;
                 mw->attachedCompWatcher = componentAttachedTo != 0 ? new ComponentDeletionWatcher (componentAttachedTo) : 0;
 
                 mw->calculateWindowPos (minX, maxX, minY, maxY, alignToRectangle);
@@ -402,7 +387,7 @@ public:
                 mw->addToDesktop (ComponentPeer::windowIsTemporary
                                     | mw->getLookAndFeel().getMenuWindowFlags());
 
-                return mw;
+                return mw.release();
             }
         }
 
@@ -774,7 +759,7 @@ private:
     Component* menuBarComponent;
     ApplicationCommandManager** managerOfChosenCommand;
     Component* componentAttachedTo;
-    ComponentDeletionWatcher* attachedCompWatcher;
+    ScopedPointer <ComponentDeletionWatcher> attachedCompWatcher;
     Rectangle windowPos;
     int lastMouseX, lastMouseY;
     int minimumWidth, maximumNumColumns, standardItemHeight;
@@ -1337,10 +1322,7 @@ PopupMenu::~PopupMenu() throw()
 void PopupMenu::clear() throw()
 {
     for (int i = items.size(); --i >= 0;)
-    {
-        MenuItemInfo* const mi = (MenuItemInfo*) items.getUnchecked(i);
-        delete mi;
-    }
+        delete (MenuItemInfo*) items.getUnchecked(i);
 
     items.clear();
     separatorPending = false;
@@ -1610,29 +1592,28 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
 {
     Component* const prevFocused = Component::getCurrentlyFocusedComponent();
 
-    ComponentDeletionWatcher* deletionChecker1 = 0;
+    ScopedPointer <ComponentDeletionWatcher> deletionChecker[2];
     if (prevFocused != 0)
-        deletionChecker1 = new ComponentDeletionWatcher (prevFocused);
+        deletionChecker[0] = new ComponentDeletionWatcher (prevFocused);
 
     Component* const prevTopLevel = (prevFocused != 0) ? prevFocused->getTopLevelComponent() : 0;
 
-    ComponentDeletionWatcher* deletionChecker2 = 0;
     if (prevTopLevel != 0)
-        deletionChecker2 = new ComponentDeletionWatcher (prevTopLevel);
+        deletionChecker[1] = new ComponentDeletionWatcher (prevTopLevel);
 
     wasHiddenBecauseOfAppChange = false;
 
     int result = 0;
     ApplicationCommandManager* managerOfChosenCommand = 0;
 
-    Component* const popupComp = createMenuComponent (x, y, w, h,
-                                                      itemIdThatMustBeVisible,
-                                                      minimumWidth,
-                                                      maximumNumColumns > 0 ? maximumNumColumns : 7,
-                                                      standardItemHeight,
-                                                      alignToRectangle, 0,
-                                                      &managerOfChosenCommand,
-                                                      componentAttachedTo);
+    ScopedPointer <Component> popupComp (createMenuComponent (x, y, w, h,
+                                                              itemIdThatMustBeVisible,
+                                                              minimumWidth,
+                                                              maximumNumColumns > 0 ? maximumNumColumns : 7,
+                                                              standardItemHeight,
+                                                              alignToRectangle, 0,
+                                                              &managerOfChosenCommand,
+                                                              componentAttachedTo));
 
     if (popupComp != 0)
     {
@@ -1641,20 +1622,17 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
                                      // be stuck behind other comps that are already modal..
 
         result = popupComp->runModalLoop();
-        delete popupComp;
+        popupComp = 0;
 
         if (! wasHiddenBecauseOfAppChange)
         {
-            if (deletionChecker2 != 0 && ! deletionChecker2->hasBeenDeleted())
+            if (deletionChecker[1] != 0 && ! deletionChecker[1]->hasBeenDeleted())
                 prevTopLevel->toFront (true);
 
-            if (deletionChecker1 != 0 && ! deletionChecker1->hasBeenDeleted())
+            if (deletionChecker[0] != 0 && ! deletionChecker[0]->hasBeenDeleted())
                 prevFocused->grabKeyboardFocus();
         }
     }
-
-    delete deletionChecker1;
-    delete deletionChecker2;
 
     if (managerOfChosenCommand != 0 && result != 0)
     {

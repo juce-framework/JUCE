@@ -457,7 +457,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
         HWND hwnd = (HWND) peer->getNativeHandle();
 
-        ActiveXControlData* const info = new ActiveXControlData (hwnd, this);
+        ScopedPointer <ActiveXControlData> info (new ActiveXControlData (hwnd, this));
 
         HRESULT hr;
         if ((hr = OleCreate (*(const IID*) controlIID, IID_IOleObject, 1 /*OLERENDER_DRAW*/, 0,
@@ -476,7 +476,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
                 if (info->control->DoVerb (OLEIVERB_SHOW, 0, info->clientSite, 0, hwnd, &rect) == S_OK)
                 {
-                    control = info;
+                    control = info.release();
                     setControlBounds (Rectangle (x, y, getWidth(), getHeight()));
 
                     info->controlHWND = getHWND (this);
@@ -491,8 +491,6 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                 }
             }
         }
-
-        delete info;
     }
 
     return false;

@@ -207,7 +207,7 @@ protected:
 
 private:
     //==============================================================================
-    DirectoryContentsList* fileList;
+    ScopedPointer <DirectoryContentsList> fileList;
     const FileFilter* fileFilter;
 
     int flags;

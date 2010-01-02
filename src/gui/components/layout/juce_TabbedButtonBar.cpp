@@ -282,10 +282,7 @@ void TabbedButtonBar::removeTab (const int tabIndex)
         tabs.remove (tabIndex);
         tabColours.remove (tabIndex);
 
-        TabBarButton* const tb = getTabButton (tabIndex);
-
-        if (tb != 0)
-            delete tb;
+        delete getTabButton (tabIndex);
 
         for (int i = tabIndex + 1; i <= tabs.size(); ++i)
         {

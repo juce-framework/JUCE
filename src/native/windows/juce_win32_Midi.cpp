@@ -360,27 +360,23 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
         }
     }
 
-    MidiInput* const in = new MidiInput (name);
-    MidiInThread* const thread = new MidiInThread (in, callback);
+    ScopedPointer <MidiInput> in (new MidiInput (name));
+    ScopedPointer <MidiInThread> thread (new MidiInThread (in, callback));
 
     HMIDIIN h;
     HRESULT err = midiInOpen (&h, deviceId,
                               (DWORD_PTR) &midiInCallback,
-                              (DWORD_PTR) thread,
+                              (DWORD_PTR) (MidiInThread*) thread,
                               CALLBACK_FUNCTION);
 
     if (err == MMSYSERR_NOERROR)
     {
         thread->hIn = h;
-        in->internal = (void*) thread;
-        return in;
+        in->internal = (void*) thread.release();
+        return in.release();
     }
-    else
-    {
-        delete in;
-        delete thread;
-        return 0;
-    }
+
+    return 0;
 }
 
 MidiInput::MidiInput (const String& name_)

@@ -47,7 +47,6 @@ SamplerSound::SamplerSound (const String& name_,
 
     if (sourceSampleRate <= 0 || source.lengthInSamples <= 0)
     {
-        data = 0;
         length = 0;
         attackSamples = 0;
         releaseSamples = 0;
@@ -68,8 +67,6 @@ SamplerSound::SamplerSound (const String& name_,
 
 SamplerSound::~SamplerSound()
 {
-    delete data;
-    data = 0;
 }
 
 //==============================================================================

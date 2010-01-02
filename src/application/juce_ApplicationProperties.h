@@ -148,8 +148,7 @@ public:
 
 private:
     //==============================================================================
-    PropertiesFile* userProps;
-    PropertiesFile* commonProps;
+    ScopedPointer <PropertiesFile> userProps, commonProps;
 
     String appName, fileSuffix, folderName;
     int msBeforeSaving, options;

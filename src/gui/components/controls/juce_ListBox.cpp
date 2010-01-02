@@ -872,9 +872,7 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 {
     if (headerComponent != newHeaderComponent)
     {
-        if (headerComponent != 0)
-            delete headerComponent;
-
+        delete headerComponent;
         headerComponent = newHeaderComponent;
 
         addAndMakeVisible (newHeaderComponent);

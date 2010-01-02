@@ -36,13 +36,13 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 PreferencesPanel::PreferencesPanel()
-    : currentPage (0),
-      buttonSize (70)
+    : buttonSize (70)
 {
 }
 
 PreferencesPanel::~PreferencesPanel()
 {
+    currentPage = 0;
     deleteAllChildren();
 }
 
@@ -155,7 +155,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
     {
         currentPageName = pageName;
 
-        deleteAndZero (currentPage);
+        currentPage = 0;
         currentPage = createComponentForPage (pageName);
 
         if (currentPage != 0)

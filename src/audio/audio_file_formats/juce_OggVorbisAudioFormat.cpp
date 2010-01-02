@@ -478,12 +478,12 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 
     if (in != 0)
     {
-        AudioFormatReader* const r = createReaderFor (in, true);
+        ScopedPointer <AudioFormatReader> r (createReaderFor (in, true));
 
         if (r != 0)
         {
             const int64 numSamps = r->lengthInSamples;
-            delete r;
+            r = 0;
 
             const int64 fileNumSamps = source.getSize() / 4;
             const double ratio = numSamps / (double) fileNumSamps;

@@ -147,8 +147,7 @@ TopLevelWindow::TopLevelWindow (const String& name,
     : Component (name),
       useDropShadow (true),
       useNativeTitleBar (false),
-      windowIsActive_ (false),
-      shadower (0)
+      windowIsActive_ (false)
 {
     setOpaque (true);
 
@@ -164,7 +163,7 @@ TopLevelWindow::TopLevelWindow (const String& name,
 
 TopLevelWindow::~TopLevelWindow()
 {
-    deleteAndZero (shadower);
+    shadower = 0;
     TopLevelWindowManager::getInstance()->removeWindow (this);
 }
 
@@ -220,7 +219,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
 
     if (isOnDesktop())
     {
-        deleteAndZero (shadower);
+        shadower = 0;
         Component::addToDesktop (getDesktopWindowStyleFlags());
     }
     else
@@ -237,7 +236,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         }
         else
         {
-            deleteAndZero (shadower);
+            shadower = 0;
         }
     }
 }

@@ -422,17 +422,17 @@ private:
     OwnedArray <AudioDeviceSetup> lastDeviceTypeConfigs;
 
     AudioDeviceSetup currentSetup;
-    AudioIODevice* currentAudioDevice;
+    ScopedPointer <AudioIODevice> currentAudioDevice;
     SortedSet <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BitArray inputChannels, outputChannels;
-    XmlElement* lastExplicitSettings;
+    ScopedPointer <XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
     bool useInputNames;
     int inputLevelMeasurementEnabledCount;
     double inputLevel;
-    AudioSampleBuffer* testSound;
+    ScopedPointer <AudioSampleBuffer> testSound;
     int testSoundPosition;
     AudioSampleBuffer tempBuffer;
 
@@ -441,7 +441,7 @@ private:
     Array <MidiInputCallback*> midiCallbacks;
     Array <MidiInput*> midiCallbackDevices;
     String defaultMidiOutputName;
-    MidiOutput* defaultMidiOutput;
+    ScopedPointer <MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
     double cpuUsageMs, timeToCpuScale;

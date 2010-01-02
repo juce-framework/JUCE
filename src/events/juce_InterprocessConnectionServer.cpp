@@ -28,12 +28,12 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_InterprocessConnectionServer.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
 InterprocessConnectionServer::InterprocessConnectionServer()
-    : Thread ("Juce IPC server"),
-      socket (0)
+    : Thread ("Juce IPC server")
 {
 }
 
@@ -55,7 +55,7 @@ bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber)
         return true;
     }
 
-    deleteAndZero (socket);
+    socket = 0;
     return false;
 }
 
@@ -67,28 +67,21 @@ void InterprocessConnectionServer::stop()
         socket->close();
 
     stopThread (4000);
-
-    deleteAndZero (socket);
+    socket = 0;
 }
 
 void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != 0)
     {
-        StreamingSocket* const clientSocket = socket->waitForNextConnection();
+        ScopedPointer <StreamingSocket> clientSocket (socket->waitForNextConnection());
 
         if (clientSocket != 0)
         {
             InterprocessConnection* newConnection = createConnectionObject();
 
             if (newConnection != 0)
-            {
-                newConnection->initialiseWithSocket (clientSocket);
-            }
-            else
-            {
-                delete clientSocket;
-            }
+                newConnection->initialiseWithSocket (clientSocket.release());
         }
     }
 }

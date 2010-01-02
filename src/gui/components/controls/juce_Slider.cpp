@@ -141,7 +141,7 @@ Slider::Slider (const String& name)
 
 Slider::~Slider()
 {
-    deleteAndZero (popupDisplay);
+    popupDisplay = 0;
     deleteAllChildren();
 }
 
@@ -1099,7 +1099,7 @@ void Slider::mouseUp (const MouseEvent&)
 
         sendDragEnd();
 
-        deleteAndZero (popupDisplay);
+        popupDisplay = 0;
 
         if (style == IncDecButtons)
         {

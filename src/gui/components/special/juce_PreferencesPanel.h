@@ -137,7 +137,7 @@ public:
 private:
     //==============================================================================
     String currentPageName;
-    Component* currentPage;
+    ScopedPointer <Component> currentPage;
     int buttonSize;
 
     PreferencesPanel (const PreferencesPanel&);

@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/streams/juce_MemoryOutputStream.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../threads/juce_Thread.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -430,12 +431,12 @@ bool XmlElement::writeToFile (const File& file,
     {
         const File tempFile (file.getNonexistentSibling());
 
-        FileOutputStream* const out = tempFile.createOutputStream();
+        ScopedPointer <FileOutputStream> out (tempFile.createOutputStream());
 
         if (out != 0)
         {
             writeToStream (*out, dtdToUse, false, true, encodingType, lineWrapLength);
-            delete out;
+            out = 0;
 
             if (! tempFile.exists())
                 return false;

@@ -29,6 +29,7 @@
 #include "juce_ArrayAllocationBase.h"
 #include "juce_ElementComparator.h"
 #include "../threads/juce_CriticalSection.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -341,7 +342,7 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ObjectClass* toDelete = 0;
+            ScopedPointer <ObjectClass> toDelete;
             lock.enter();
 
             if (indexToChange < numUsed)
@@ -363,8 +364,6 @@ public:
             }
 
             lock.exit();
-
-            delete toDelete;
         }
     }
 
@@ -456,8 +455,8 @@ public:
     void remove (const int indexToRemove,
                  const bool deleteObject = true)
     {
+        ScopedPointer <ObjectClass> toDelete;
         lock.enter();
-        ObjectClass* toDelete = 0;
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
@@ -477,8 +476,6 @@ public:
         }
 
         lock.exit();
-
-        delete toDelete;
     }
 
     /** Removes a specified object from the array.

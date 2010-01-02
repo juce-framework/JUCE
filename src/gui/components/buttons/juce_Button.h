@@ -464,7 +464,7 @@ private:
     SortedSet <void*> buttonListeners;
 
     friend class InternalButtonRepeatTimer;
-    Timer* repeatTimer;
+    ScopedPointer <Timer> repeatTimer;
     uint32 buttonPressTime, lastTimeCallbackTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;

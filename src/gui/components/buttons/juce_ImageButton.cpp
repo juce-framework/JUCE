@@ -55,29 +55,9 @@ ImageButton::~ImageButton()
 
 void ImageButton::deleteImages()
 {
-    if (normalImage != 0)
-    {
-        if (ImageCache::isImageInCache (normalImage))
-            ImageCache::release (normalImage);
-        else
-            delete normalImage;
-    }
-
-    if (overImage != 0)
-    {
-        if (ImageCache::isImageInCache (overImage))
-            ImageCache::release (overImage);
-        else
-            delete overImage;
-    }
-
-    if (downImage != 0)
-    {
-        if (ImageCache::isImageInCache (downImage))
-            ImageCache::release (downImage);
-        else
-            delete downImage;
-    }
+    ImageCache::releaseOrDelete (normalImage);
+    ImageCache::releaseOrDelete (overImage);
+    ImageCache::releaseOrDelete (downImage);
 }
 
 void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,

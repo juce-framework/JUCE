@@ -56,6 +56,9 @@
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
  #include "containers/juce_ReferenceCountedObject.h"
 #endif
+#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
+ #include "containers/juce_ScopedPointer.h"
+#endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
  #include "containers/juce_SortedSet.h"
 #endif

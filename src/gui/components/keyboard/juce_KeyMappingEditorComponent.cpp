@@ -381,7 +381,7 @@ void KeyMappingEditorComponent::buttonClicked (Button* button)
 
 void KeyMappingEditorComponent::changeListenerCallback (void*)
 {
-    XmlElement* openness = tree->getOpennessState (true);
+    ScopedPointer <XmlElement> openness (tree->getOpennessState (true));
 
     clearSubItems();
 
@@ -401,10 +401,7 @@ void KeyMappingEditorComponent::changeListenerCallback (void*)
     }
 
     if (openness != 0)
-    {
         tree->restoreOpennessState (*openness);
-        delete openness;
-    }
 }
 
 //==============================================================================

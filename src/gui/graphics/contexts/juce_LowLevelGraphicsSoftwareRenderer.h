@@ -92,7 +92,7 @@ protected:
     //==============================================================================
     Image& image;
 
-    LLGCSavedState* currentState;
+    ScopedPointer <LLGCSavedState> currentState;
     OwnedArray <LLGCSavedState> stateStack;
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);

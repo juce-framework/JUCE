@@ -56,8 +56,7 @@ MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
       indexToShowAgain (-1),
       lastMouseX (0),
       lastMouseY (0),
-      inModalState (false),
-      currentPopup (0)
+      inModalState (false)
 {
     setRepaintsOnMouseActivity (true);
     setWantsKeyboardFocus (false);
@@ -71,7 +70,7 @@ MenuBarComponent::~MenuBarComponent()
     setModel (0);
 
     Desktop::getInstance().removeGlobalMouseListener (this);
-    deleteAndZero (currentPopup);
+    currentPopup = 0;
 }
 
 void MenuBarComponent::setModel (MenuBarModel* const newModel)
@@ -173,7 +172,7 @@ void MenuBarComponent::updateItemUnderMouse (int x, int y)
 
 void MenuBarComponent::hideCurrentMenu()
 {
-    deleteAndZero (currentPopup);
+    currentPopup = 0;
     repaint();
 }
 
@@ -191,12 +190,12 @@ void MenuBarComponent::showMenu (int index)
         indexToShowAgain = -1;
         currentPopupIndex = -1;
         itemUnderMouse = index;
-        deleteAndZero (currentPopup);
+        currentPopup = 0;
         menuBarItemsChanged (0);
 
         Component* const prevFocused = getCurrentlyFocusedComponent();
 
-        ComponentDeletionWatcher* prevCompDeletionChecker = 0;
+        ScopedPointer <ComponentDeletionWatcher> prevCompDeletionChecker;
         if (prevFocused != 0)
             prevCompDeletionChecker = new ComponentDeletionWatcher (prevFocused);
 
@@ -246,13 +245,10 @@ void MenuBarComponent::showMenu (int index)
             result = currentPopup->runModalLoop();
 
             if (deletionChecker.hasBeenDeleted())
-            {
-                delete prevCompDeletionChecker;
                 return;
-            }
 
             const int lastPopupIndex = currentPopupIndex;
-            deleteAndZero (currentPopup);
+            currentPopup = 0;
             currentPopupIndex = -1;
 
             if (result != 0)
@@ -280,13 +276,8 @@ void MenuBarComponent::showMenu (int index)
         inModalState = false;
         exitModalState (0);
 
-        if (prevCompDeletionChecker != 0)
-        {
-            if (! prevCompDeletionChecker->hasBeenDeleted())
-                prevFocused->grabKeyboardFocus();
-
-            delete prevCompDeletionChecker;
-        }
+        if (prevCompDeletionChecker != 0 && ! prevCompDeletionChecker->hasBeenDeleted())
+            prevFocused->grabKeyboardFocus();
 
         int mx, my;
         getMouseXYRelative (mx, my);
@@ -356,7 +347,7 @@ void MenuBarComponent::mouseUp (const MouseEvent& e)
 
     updateItemUnderMouse (e2.x, e2.y);
 
-    if (itemUnderMouse < 0 && dynamic_cast <DummyMenuComponent*> (currentPopup) != 0)
+    if (itemUnderMouse < 0 && dynamic_cast <DummyMenuComponent*> ((Component*) currentPopup) != 0)
         hideCurrentMenu();
 }
 

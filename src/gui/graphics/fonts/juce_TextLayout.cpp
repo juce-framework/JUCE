@@ -137,10 +137,7 @@ TextLayout::~TextLayout() throw()
 void TextLayout::clear() throw()
 {
     for (int i = tokens.size(); --i >= 0;)
-    {
-        TextLayoutToken* const t = (TextLayoutToken*)tokens.getUnchecked(i);
-        delete t;
-    }
+        delete (TextLayoutToken*) tokens.getUnchecked(i);
 
     tokens.clear();
     totalLines = 0;

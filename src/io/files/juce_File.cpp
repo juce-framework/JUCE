@@ -925,17 +925,12 @@ FileInputStream* File::createInputStream() const throw()
 
 FileOutputStream* File::createOutputStream (const int bufferSize) const throw()
 {
-    FileOutputStream* const out = new FileOutputStream (*this, bufferSize);
+    ScopedPointer <FileOutputStream> out (new FileOutputStream (*this, bufferSize));
 
     if (out->failedToOpen())
-    {
-        delete out;
         return 0;
-    }
-    else
-    {
-        return out;
-    }
+
+    return out.release();
 }
 
 //==============================================================================
@@ -944,13 +939,12 @@ bool File::appendData (const void* const dataToAppend,
 {
     if (numberOfBytes > 0)
     {
-        FileOutputStream* const out = createOutputStream();
+        const ScopedPointer <FileOutputStream> out (createOutputStream());
 
         if (out == 0)
             return false;
 
         out->write (dataToAppend, numberOfBytes);
-        delete out;
     }
 
     return true;
@@ -980,13 +974,11 @@ bool File::appendText (const String& text,
                        const bool asUnicode,
                        const bool writeUnicodeHeaderBytes) const throw()
 {
-    FileOutputStream* const out = createOutputStream();
+    const ScopedPointer <FileOutputStream> out (createOutputStream());
 
     if (out != 0)
     {
         out->writeText (text, asUnicode, writeUnicodeHeaderBytes);
-        delete out;
-
         return true;
     }
 

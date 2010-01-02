@@ -97,7 +97,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    AudioSampleBuffer* data;
+    ScopedPointer <AudioSampleBuffer> data;
     double sourceSampleRate;
     BitArray midiNotes;
     int length, attackSamples, releaseSamples;

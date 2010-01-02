@@ -184,8 +184,7 @@ GZIPDecompressorInputStream::~GZIPDecompressorInputStream()
     if (deleteSourceWhenDestroyed)
         delete sourceStream;
 
-    GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-    delete h;
+    delete (GZIPDecompressHelper*) helper;
 }
 
 int64 GZIPDecompressorInputStream::getTotalLength()
@@ -273,8 +272,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
         else
         {
             // reset the stream and start again..
-            GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-            delete h;
+            delete (GZIPDecompressHelper*) helper;
 
             isEof = false;
             activeBufferSize = 0;

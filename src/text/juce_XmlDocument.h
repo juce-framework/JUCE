@@ -137,7 +137,7 @@ private:
     String lastError, dtdText;
     StringArray tokenisedDTD;
     bool needToLoadDTD, ignoreEmptyTextElements;
-    InputSource* inputSource;
+    ScopedPointer <InputSource> inputSource;
 
     void setLastError (const String& desc, const bool carryOn) throw();
     void skipHeader() throw();

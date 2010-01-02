@@ -29,14 +29,13 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_InterprocessConnection.h"
 #include "../threads/juce_ScopedLock.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
 InterprocessConnection::InterprocessConnection (const bool callbacksOnMessageThread,
                                                 const uint32 magicMessageHeaderNumber)
     : Thread ("Juce IPC connection"),
-      socket (0),
-      pipe (0),
       callbackConnectionState (false),
       useMessageThread (callbacksOnMessageThread),
       magicMessageHeader (magicMessageHeaderNumber),
@@ -69,7 +68,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     }
     else
     {
-        deleteAndZero (socket);
+        socket = 0;
         return false;
     }
 }
@@ -79,20 +78,17 @@ bool InterprocessConnection::connectToPipe (const String& pipeName,
 {
     disconnect();
 
-    NamedPipe* const newPipe = new NamedPipe();
+    ScopedPointer <NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->openExisting (pipeName))
     {
         const ScopedLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = pipeReceiveMessageTimeoutMs;
-        initialiseWithPipe (newPipe);
+        initialiseWithPipe (newPipe.release());
         return true;
     }
-    else
-    {
-        delete newPipe;
-        return false;
-    }
+
+    return false;
 }
 
 bool InterprocessConnection::createPipe (const String& pipeName,
@@ -100,20 +96,17 @@ bool InterprocessConnection::createPipe (const String& pipeName,
 {
     disconnect();
 
-    NamedPipe* const newPipe = new NamedPipe();
+    ScopedPointer <NamedPipe> newPipe (new NamedPipe());
 
     if (newPipe->createNewPipe (pipeName))
     {
         const ScopedLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = pipeReceiveMessageTimeoutMs;
-        initialiseWithPipe (newPipe);
+        initialiseWithPipe (newPipe.release());
         return true;
     }
-    else
-    {
-        delete newPipe;
-        return false;
-    }
+
+    return false;
 }
 
 void InterprocessConnection::disconnect()
@@ -131,8 +124,8 @@ void InterprocessConnection::disconnect()
 
     {
         const ScopedLock sl (pipeAndSocketLock);
-        deleteAndZero (socket);
-        deleteAndZero (pipe);
+        socket = 0;
+        pipe = 0;
     }
 
     connectionLostInt();
@@ -223,12 +216,11 @@ void InterprocessConnection::handleMessage (const Message& message)
         switch (message.intParameter2)
         {
         case 0:
-        {
-            MemoryBlock* const data = (MemoryBlock*) message.pointerParameter;
-            messageReceived (*data);
-            delete data;
-            break;
-        }
+            {
+                ScopedPointer <MemoryBlock> data ((MemoryBlock*) message.pointerParameter);
+                messageReceived (*data);
+                break;
+            }
 
         case 1:
             connectionMade();
@@ -320,7 +312,7 @@ bool InterprocessConnection::readNextMessageInt()
     {
         {
             const ScopedLock sl (pipeAndSocketLock);
-            deleteAndZero (socket);
+            socket = 0;
         }
 
         connectionLostInt();
@@ -342,7 +334,7 @@ void InterprocessConnection::run()
             {
                 {
                     const ScopedLock sl (pipeAndSocketLock);
-                    deleteAndZero (socket);
+                    socket = 0;
                 }
 
                 connectionLostInt();
@@ -364,7 +356,7 @@ void InterprocessConnection::run()
             {
                 {
                     const ScopedLock sl (pipeAndSocketLock);
-                    deleteAndZero (pipe);
+                    pipe = 0;
                 }
 
                 connectionLostInt();

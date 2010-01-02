@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_AudioTransportSource.h"
 #include "../../threads/juce_ScopedLock.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -78,8 +79,8 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
     PositionableAudioSource* newPositionableSource = 0;
     AudioSource* newMasterSource = 0;
 
-    ResamplingAudioSource* oldResamplerSource = resamplerSource;
-    BufferingAudioSource* oldBufferingSource = bufferingSource;
+    ScopedPointer <ResamplingAudioSource> oldResamplerSource (resamplerSource);
+    ScopedPointer <BufferingAudioSource> oldBufferingSource (bufferingSource);
     AudioSource* oldMasterSource = masterSource;
 
     if (newSource != 0)
@@ -121,9 +122,6 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
     if (oldMasterSource != 0)
         oldMasterSource->releaseResources();
-
-    delete oldResamplerSource;
-    delete oldBufferingSource;
 }
 
 void AudioTransportSource::start()

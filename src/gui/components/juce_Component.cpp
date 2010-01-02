@@ -1412,7 +1412,7 @@ int Component::runModalLoop()
 
     Component* const prevFocused = getCurrentlyFocusedComponent();
 
-    ComponentDeletionWatcher* deletionChecker = 0;
+    ScopedPointer <ComponentDeletionWatcher> deletionChecker;
     if (prevFocused != 0)
         deletionChecker = new ComponentDeletionWatcher (prevFocused);
 
@@ -1455,13 +1455,8 @@ int Component::runModalLoop()
 
     modalComponentStack.removeValue (this);
 
-    if (deletionChecker != 0)
-    {
-        if (! deletionChecker->hasBeenDeleted())
-            prevFocused->grabKeyboardFocus();
-
-        delete deletionChecker;
-    }
+    if (deletionChecker != 0 && ! deletionChecker->hasBeenDeleted())
+        prevFocused->grabKeyboardFocus();
 
     return returnValue;
 }
@@ -3339,12 +3334,12 @@ void Component::grabFocusInternal (const FocusChangeType cause, const bool canTr
             else
             {
                 // find the default child component..
-                KeyboardFocusTraverser* const traverser = createFocusTraverser();
+                ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
 
                 if (traverser != 0)
                 {
                     Component* const defaultComp = traverser->getDefaultComponent (this);
-                    delete traverser;
+                    traverser = 0;
 
                     if (defaultComp != 0)
                     {
@@ -3381,13 +3376,13 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
 
     if (parentComponent_ != 0)
     {
-        KeyboardFocusTraverser* const traverser = createFocusTraverser();
+        ScopedPointer <KeyboardFocusTraverser> traverser (createFocusTraverser());
 
         if (traverser != 0)
         {
             Component* const nextComp = moveToNext ? traverser->getNextComponent (this)
                                                    : traverser->getPreviousComponent (this);
-            delete traverser;
+            traverser = 0;
 
             if (nextComp != 0)
             {

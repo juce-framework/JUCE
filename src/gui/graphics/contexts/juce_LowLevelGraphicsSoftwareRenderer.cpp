@@ -1349,7 +1349,6 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
 {
-    delete currentState;
 }
 
 bool LowLevelGraphicsSoftwareRenderer::isVectorDevice() const
@@ -1417,7 +1416,6 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
 
     if (top != 0)
     {
-        delete currentState;
         currentState = top;
         stateStack.removeLast (1, false);
     }
@@ -1567,8 +1565,8 @@ public:
     class CachedGlyph
     {
     public:
-        CachedGlyph() throw() : glyph (0), lastAccessCount (0), edgeTable (0) {}
-        ~CachedGlyph() throw()  { delete edgeTable; }
+        CachedGlyph() : glyph (0), lastAccessCount (0) {}
+        ~CachedGlyph()  {}
 
         void draw (LLGCSavedState& state, Image& image, const float x, const float y) const throw()
         {
@@ -1584,7 +1582,7 @@ public:
         {
             font = newFont;
             glyph = glyphNumber;
-            deleteAndZero (edgeTable);
+            edgeTable = 0;
 
             Path glyphPath;
             font.getTypeface()->getOutlineForGlyph (glyphNumber, glyphPath);
@@ -1611,7 +1609,7 @@ public:
         juce_UseDebuggingNewOperator
 
     private:
-        EdgeTable* edgeTable;
+        ScopedPointer <EdgeTable> edgeTable;
 
         CachedGlyph (const CachedGlyph&);
         const CachedGlyph& operator= (const CachedGlyph&);

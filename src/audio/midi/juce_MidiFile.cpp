@@ -44,8 +44,7 @@ struct TimeSigInfo
 };
 
 MidiFile::MidiFile() throw()
-   : numTracks (0),
-     timeFormat ((short)(unsigned short)0xe728)
+   : timeFormat ((short) (unsigned short) 0xe728)
 {
 }
 
@@ -56,27 +55,23 @@ MidiFile::~MidiFile() throw()
 
 void MidiFile::clear() throw()
 {
-    while (numTracks > 0)
-        delete tracks [--numTracks];
+    tracks.clear();
 }
 
 //==============================================================================
 int MidiFile::getNumTracks() const throw()
 {
-    return numTracks;
+    return tracks.size();
 }
 
 const MidiMessageSequence* MidiFile::getTrack (const int index) const throw()
 {
-    return (((unsigned int) index) < (unsigned int) numTracks) ? tracks[index] : 0;
+    return tracks [index];
 }
 
 void MidiFile::addTrack (const MidiMessageSequence& trackSequence) throw()
 {
-    jassert (numTracks < numElementsInArray (tracks));
-
-    if (numTracks < numElementsInArray (tracks))
-        tracks [numTracks++] = new MidiMessageSequence (trackSequence);
+    tracks.add (new MidiMessageSequence (trackSequence));
 }
 
 //==============================================================================
@@ -99,13 +94,13 @@ void MidiFile::setSmpteTimeFormat (const int framesPerSecond,
 //==============================================================================
 void MidiFile::findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const
 {
-    for (int i = numTracks; --i >= 0;)
+    for (int i = tracks.size(); --i >= 0;)
     {
-        const int numEvents = tracks[i]->getNumEvents();
+        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
 
         for (int j = 0; j < numEvents; ++j)
         {
-            const MidiMessage& m = tracks[i]->getEventPointer (j)->message;
+            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
 
             if (m.isTempoMetaEvent())
                 tempoChangeEvents.addEvent (m);
@@ -115,13 +110,13 @@ void MidiFile::findAllTempoEvents (MidiMessageSequence& tempoChangeEvents) const
 
 void MidiFile::findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const
 {
-    for (int i = numTracks; --i >= 0;)
+    for (int i = tracks.size(); --i >= 0;)
     {
-        const int numEvents = tracks[i]->getNumEvents();
+        const int numEvents = tracks.getUnchecked(i)->getNumEvents();
 
         for (int j = 0; j < numEvents; ++j)
         {
-            const MidiMessage& m = tracks[i]->getEventPointer (j)->message;
+            const MidiMessage& m = tracks.getUnchecked(i)->getEventPointer (j)->message;
 
             if (m.isTimeSignatureMetaEvent())
                 timeSigEvents.addEvent (m);
@@ -133,8 +128,8 @@ double MidiFile::getLastTimestamp() const
 {
     double t = 0.0;
 
-    for (int i = numTracks; --i >= 0;)
-        t = jmax (t, tracks[i]->getEndTime());
+    for (int i = tracks.size(); --i >= 0;)
+        t = jmax (t, tracks.getUnchecked(i)->getEndTime());
 
     return t;
 }
@@ -366,9 +361,9 @@ void MidiFile::convertTimestampTicksToSeconds()
     findAllTempoEvents (tempoEvents);
     findAllTimeSigEvents (tempoEvents);
 
-    for (int i = 0; i < numTracks; ++i)
+    for (int i = 0; i < tracks.size(); ++i)
     {
-        MidiMessageSequence& ms = *tracks[i];
+        MidiMessageSequence& ms = *tracks.getUnchecked(i);
 
         for (int j = ms.getNumEvents(); --j >= 0;)
         {
@@ -408,10 +403,10 @@ bool MidiFile::writeTo (OutputStream& out)
     out.writeIntBigEndian ((int) bigEndianInt ("MThd"));
     out.writeIntBigEndian (6);
     out.writeShortBigEndian (1); // type
-    out.writeShortBigEndian (numTracks);
+    out.writeShortBigEndian (tracks.size());
     out.writeShortBigEndian (timeFormat);
 
-    for (int i = 0; i < numTracks; ++i)
+    for (int i = 0; i < tracks.size(); ++i)
         writeTrack (out, i);
 
     out.flush();

@@ -48,7 +48,7 @@ void Logger::setCurrentLogger (Logger* const newLogger,
     Logger* const oldLogger = currentLogger;
     currentLogger = newLogger;
 
-    if (deleteOldLogger && (oldLogger != 0))
+    if (deleteOldLogger)
         delete oldLogger;
 }
 

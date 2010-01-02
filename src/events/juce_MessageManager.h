@@ -174,8 +174,8 @@ private:
     friend class CallbackMessage;
     static MessageManager* instance;
 
-    SortedSet<const MessageListener*> messageListeners;
-    ActionListenerList* broadcastListeners;
+    SortedSet <const MessageListener*> messageListeners;
+    ScopedPointer <ActionListenerList> broadcastListeners;
 
     friend class JUCEApplication;
     bool quitMessagePosted, quitMessageReceived;

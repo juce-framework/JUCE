@@ -153,7 +153,6 @@ public:
         CGContextRelease (context);
         CGColorSpaceRelease (rgbColourSpace);
         CGColorSpaceRelease (greyColourSpace);
-        delete state;
     }
 
     //==============================================================================
@@ -263,7 +262,6 @@ public:
 
         if (top != 0)
         {
-            delete state;
             state = top;
             stateStack.removeLast (1, false);
         }
@@ -559,7 +557,7 @@ private:
         CGAffineTransform fontTransform;
     };
 
-    SavedState* state;
+    ScopedPointer <SavedState> state;
     OwnedArray <SavedState> stateStack;
     HeapBlock <PixelARGB> gradientLookupTable;
     int numGradientLookupEntries;

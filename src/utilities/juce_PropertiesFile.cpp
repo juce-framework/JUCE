@@ -61,7 +61,7 @@ PropertiesFile::PropertiesFile (const File& f,
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsCompressedBinary
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsXML);
 
-    InputStream* fileStream = f.createInputStream();
+    ScopedPointer <InputStream> fileStream (f.createInputStream());
 
     if (fileStream != 0)
     {
@@ -69,15 +69,15 @@ PropertiesFile::PropertiesFile (const File& f,
 
         if (magicNumber == propFileMagicNumberCompressed)
         {
-            fileStream = new SubregionStream (fileStream, 4, -1, true);
-            fileStream = new GZIPDecompressorInputStream (fileStream, true);
+            fileStream = new GZIPDecompressorInputStream (new SubregionStream (fileStream.release(), 4, -1, true),
+                                                          true);
 
             magicNumber = propFileMagicNumber;
         }
 
         if (magicNumber == propFileMagicNumber)
         {
-            BufferedInputStream in (fileStream, 2048, true);
+            BufferedInputStream in (fileStream.release(), 2048, true);
 
             int numValues = in.readInt();
 
@@ -94,14 +94,13 @@ PropertiesFile::PropertiesFile (const File& f,
         else
         {
             // Not a binary props file - let's see if it's XML..
-            delete fileStream;
+            fileStream = 0;
 
             XmlDocument parser (f);
-            XmlElement* doc = parser.getDocumentElement (true);
+            ScopedPointer <XmlElement> doc (parser.getDocumentElement (true));
 
             if (doc != 0 && doc->hasTagName (propertyFileXmlTag))
             {
-                delete doc;
                 doc = parser.getDocumentElement();
 
                 if (doc != 0)
@@ -124,8 +123,6 @@ PropertiesFile::PropertiesFile (const File& f,
                     // must be a pretty broken XML file we're trying to parse here!
                     jassertfalse
                 }
-
-                delete doc;
             }
         }
     }
@@ -164,7 +161,7 @@ bool PropertiesFile::save()
 
     if ((options & storeAsXML) != 0)
     {
-        XmlElement* const doc = new XmlElement (propertyFileXmlTag);
+        XmlElement doc (propertyFileXmlTag);
 
         for (int i = 0; i < getAllProperties().size(); ++i)
         {
@@ -180,19 +177,15 @@ bool PropertiesFile::save()
             else
                 e->setAttribute (T("val"), getAllProperties().getAllValues() [i]);
 
-            doc->addChildElement (e);
+            doc.addChildElement (e);
         }
 
-        const bool ok = doc->writeToFile (file, String::empty);
-
-        delete doc;
-
-        return ok;
+        return doc.writeToFile (file, String::empty);
     }
     else
     {
         const File tempFile (file.getNonexistentSibling (false));
-        OutputStream* out = tempFile.createOutputStream();
+        ScopedPointer <OutputStream> out (tempFile.createOutputStream());
 
         if (out != 0)
         {
@@ -201,7 +194,7 @@ bool PropertiesFile::save()
                 out->writeInt (propFileMagicNumberCompressed);
                 out->flush();
 
-                out = new GZIPCompressorOutputStream (out, 9, true);
+                out = new GZIPCompressorOutputStream (out.release(), 9, true);
             }
             else
             {
@@ -222,7 +215,7 @@ bool PropertiesFile::save()
             }
 
             out->flush();
-            delete out;
+            out = 0;
 
             if (tempFile.moveFileTo (file))
             {

@@ -798,30 +798,26 @@ static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const Strin
 
     const File dest (file.getNonexistentSibling());
 
-    OutputStream* outStream = dest.createOutputStream();
-
-    if (outStream != 0)
     {
-        AudioFormatReader* reader = wav.createReaderFor (file.createInputStream(), true);
+        ScopedPointer <OutputStream> outStream (dest.createOutputStream());
 
-        if (reader != 0)
+        if (outStream != 0)
         {
-            AudioFormatWriter* writer = wav.createWriterFor (outStream, reader->sampleRate,
-                                                             reader->numChannels, reader->bitsPerSample,
-                                                             metadata, 0);
+            ScopedPointer <AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
 
-            if (writer != 0)
+            if (reader != 0)
             {
-                ok = writer->writeFromAudioReader (*reader, 0, -1);
+                ScopedPointer <AudioFormatWriter> writer (wav.createWriterFor (outStream, reader->sampleRate,
+                                                                               reader->numChannels, reader->bitsPerSample,
+                                                                               metadata, 0));
 
-                outStream = 0;
-                delete writer;
+                if (writer != 0)
+                {
+                    ok = writer->writeFromAudioReader (*reader, 0, -1);
+                    outStream.release();
+                }
             }
-
-            delete reader;
         }
-
-        delete outStream;
     }
 
     if (ok)
@@ -835,13 +831,13 @@ static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const Strin
 
 bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata)
 {
-    WavAudioFormatReader* reader = (WavAudioFormatReader*) createReaderFor (wavFile.createInputStream(), true);
+    ScopedPointer <WavAudioFormatReader> reader ((WavAudioFormatReader*) createReaderFor (wavFile.createInputStream(), true));
 
     if (reader != 0)
     {
         const int64 bwavPos = reader->bwavChunkStart;
         const int64 bwavSize = reader->bwavSize;
-        delete reader;
+        reader = 0;
 
         if (bwavSize > 0)
         {
@@ -852,11 +848,12 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
                 // the new one will fit in the space available, so write it directly..
                 const int64 oldSize = wavFile.getSize();
 
-                FileOutputStream* out = wavFile.createOutputStream();
-                out->setPosition (bwavPos);
-                out->write (chunk.getData(), chunk.getSize());
-                out->setPosition (oldSize);
-                delete out;
+                {
+                    ScopedPointer <FileOutputStream> out (wavFile.createOutputStream());
+                    out->setPosition (bwavPos);
+                    out->write (chunk.getData(), chunk.getSize());
+                    out->setPosition (oldSize);
+                }
 
                 jassert (wavFile.getSize() == oldSize);
 

@@ -276,7 +276,7 @@ bool KeyPressMappingSet::restoreFromXml (const XmlElement& xmlVersion)
 
 XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefaultSet) const
 {
-    KeyPressMappingSet* defaultSet = 0;
+    ScopedPointer <KeyPressMappingSet> defaultSet;
 
     if (saveDifferencesFromDefaultSet)
     {
@@ -329,8 +329,6 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
                 }
             }
         }
-
-        delete defaultSet;
     }
 
     return doc;

@@ -338,11 +338,11 @@ protected:
 
 #endif
 
-    ResizableCornerComponent* resizableCorner;
-    ResizableBorderComponent* resizableBorder;
+    ScopedPointer <ResizableCornerComponent> resizableCorner;
+    ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
-    Component* contentComponent;
+    ScopedPointer <Component> contentComponent;
     bool resizeToFitContent, fullscreen;
     ComponentDragger dragger;
     Rectangle lastNonFullScreenPos;

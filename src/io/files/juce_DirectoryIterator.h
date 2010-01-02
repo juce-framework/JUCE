@@ -27,6 +27,7 @@
 #define __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 
 #include "juce_File.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -105,7 +106,7 @@ private:
     String wildCard;
     int index;
     const int whatToLookFor;
-    DirectoryIterator* subIterator;
+    ScopedPointer <DirectoryIterator> subIterator;
 
     DirectoryIterator (const DirectoryIterator&);
     const DirectoryIterator& operator= (const DirectoryIterator&);

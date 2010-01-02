@@ -108,8 +108,7 @@ public:
         : owner (owner_),
           h (h_), s (s_), v (v_),
           lastHue (0.0f),
-          edge (edgeSize),
-          colours (0)
+          edge (edgeSize)
     {
         addAndMakeVisible (marker = new ColourSpaceMarker());
         setMouseCursor (MouseCursor::CrosshairCursor);
@@ -118,7 +117,6 @@ public:
     ~ColourSpaceView()
     {
         deleteAllChildren();
-        delete colours;
     }
 
     void paint (Graphics& g)
@@ -169,7 +167,7 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
-            deleteAndZero (colours);
+            colours = 0;
             repaint();
         }
 
@@ -178,12 +176,12 @@ public:
 
     void resized()
     {
-        deleteAndZero (colours);
+        colours = 0;
         updateMarker();
     }
 
 private:
-    Image* colours;
+    ScopedPointer <Image> colours;
 
     void updateMarker() const throw()
     {
@@ -576,10 +574,7 @@ void ColourSelector::resized()
         {
             int i;
             for (i = swatchComponents.size(); --i >= 0;)
-            {
-                SwatchComponent* const sc = (SwatchComponent*) swatchComponents.getUnchecked(i);
-                delete sc;
-            }
+                delete (SwatchComponent*) swatchComponents.getUnchecked(i);
 
             for (i = 0; i < numSwatches; ++i)
             {

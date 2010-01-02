@@ -182,8 +182,8 @@ public:
                                 const MidiMessageSequence::MidiEventHolder* const second) throw();
 
 private:
-    MidiMessageSequence* tracks [128];
-    short numTracks, timeFormat;
+    OwnedArray <MidiMessageSequence> tracks;
+    short timeFormat;
 
     MidiFile (const MidiFile&);
     const MidiFile& operator= (const MidiFile&);

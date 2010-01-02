@@ -152,10 +152,10 @@ public:
 private:
     AudioFormatManager& formatManagerToUse;
     AudioThumbnailCache& cache;
-    InputSource* source;
+    ScopedPointer <InputSource> source;
 
     CriticalSection readerLock;
-    AudioFormatReader* reader;
+    ScopedPointer <AudioFormatReader> reader;
 
     MemoryBlock data, cachedLevels;
     int orginalSamplesPerThumbnailSample;

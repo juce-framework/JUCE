@@ -463,9 +463,8 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
 
 void TreeView::deleteRootItem()
 {
-    TreeViewItem* const oldItem = rootItem;
+    const ScopedPointer <TreeViewItem> deleter (rootItem);
     setRootItem (0);
-    delete oldItem;
 }
 
 

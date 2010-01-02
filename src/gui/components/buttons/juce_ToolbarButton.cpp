@@ -46,8 +46,6 @@ ToolbarButton::ToolbarButton (const int itemId_,
 
 ToolbarButton::~ToolbarButton()
 {
-    delete normalImage;
-    delete toggledOnImage;
 }
 
 //==============================================================================

@@ -83,7 +83,7 @@ private:
     bool reentrant;
     int lastX, lastY, lastWidth, lastHeight;
 #ifdef JUCE_DEBUG
-    ComponentDeletionWatcher* deletionWatcher;
+    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
 #endif
 
     void unregister() throw();

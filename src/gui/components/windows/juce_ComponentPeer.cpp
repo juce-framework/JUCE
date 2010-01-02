@@ -64,7 +64,6 @@ ComponentPeer::ComponentPeer (Component* const component_,
       lastPaintTime (0),
       constrainer (0),
       lastFocusedComponent (0),
-      dragAndDropTargetComponent (0),
       lastDragAndDropCompUnderMouse (0),
       fakeMouseMessageSent (false),
       isWindowMinimised (false)
@@ -75,7 +74,6 @@ ComponentPeer::ComponentPeer (Component* const component_,
 ComponentPeer::~ComponentPeer()
 {
     heavyweightPeers.removeValue (this);
-    delete dragAndDropTargetComponent;
 
     Desktop::getInstance().triggerFocusCallback();
 }
@@ -687,7 +685,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
             if (lastTarget != 0)
                 lastTarget->fileDragExit (files);
 
-            deleteAndZero (dragAndDropTargetComponent);
+            dragAndDropTargetComponent = 0;
 
             if (newTarget != 0)
             {
@@ -730,7 +728,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, int x, int y)
     {
         FileDragAndDropTarget* const target = const_cast <FileDragAndDropTarget*> (dynamic_cast <const FileDragAndDropTarget*> (dragAndDropTargetComponent->getComponent()));
 
-        deleteAndZero (dragAndDropTargetComponent);
+        dragAndDropTargetComponent = 0;
         lastDragAndDropCompUnderMouse = 0;
 
         if (target != 0)

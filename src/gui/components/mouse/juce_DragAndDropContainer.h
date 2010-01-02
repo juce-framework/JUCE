@@ -180,7 +180,7 @@ protected:
 
 private:
     friend class DragImageComponent;
-    Component* dragImageComponent;
+    ScopedPointer <Component> dragImageComponent;
     String currentDragDesc;
 };
 

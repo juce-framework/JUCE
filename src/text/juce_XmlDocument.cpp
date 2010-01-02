@@ -48,8 +48,7 @@ static bool isXmlIdentifierChar_Slow (const tchar c) throw()
 //==============================================================================
 XmlDocument::XmlDocument (const String& documentText) throw()
     : originalText (documentText),
-      ignoreEmptyTextElements (true),
-      inputSource (0)
+      ignoreEmptyTextElements (true)
 {
 }
 
@@ -60,16 +59,11 @@ XmlDocument::XmlDocument (const File& file)
 
 XmlDocument::~XmlDocument() throw()
 {
-    delete inputSource;
 }
 
 void XmlDocument::setInputSource (InputSource* const newSource) throw()
 {
-    if (inputSource != newSource)
-    {
-        delete inputSource;
-        inputSource = newSource;
-    }
+    inputSource = newSource;
 }
 
 void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw()
@@ -83,14 +77,13 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 
     if (textToParse.isEmpty() && inputSource != 0)
     {
-        InputStream* const in = inputSource->createInputStream();
+        ScopedPointer <InputStream> in (inputSource->createInputStream());
 
         if (in != 0)
         {
             MemoryBlock data;
 
             in->readIntoMemoryBlock (data, onlyReadOuterDocumentElement ? 8192 : -1);
-            delete in;
 
             if (data.getSize() >= 2
                  && ((data[0] == (char)-2 && data[1] == (char)-1)
@@ -127,12 +120,10 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 
         if (input != 0)
         {
-            XmlElement* const result = readNextElement (! onlyReadOuterDocumentElement);
+            ScopedPointer <XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 
-            if (errorOccurred)
-                delete result;
-            else
-                return result;
+            if (! errorOccurred)
+                return result.release();
         }
         else
         {
@@ -156,20 +147,15 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn) throw()
 
 const String XmlDocument::getFileContents (const String& filename) const
 {
-    String result;
-
     if (inputSource != 0)
     {
-        InputStream* const in = inputSource->createInputStreamFor (filename.trim().unquoted());
+        const ScopedPointer <InputStream> in (inputSource->createInputStreamFor (filename.trim().unquoted()));
 
         if (in != 0)
-        {
-            result = in->readEntireStreamAsString();
-            delete in;
-        }
+            return in->readEntireStreamAsString();
     }
 
-    return result;
+    return String::empty;
 }
 
 tchar XmlDocument::readNextChar() throw()

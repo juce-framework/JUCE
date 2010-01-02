@@ -248,9 +248,9 @@ public:
 private:
     int titleBarHeight, menuBarHeight, requiredButtons;
     bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
-    Button* titleBarButtons [3];
-    Image* titleBarIcon;
-    MenuBarComponent* menuBar;
+    ScopedPointer <Button> titleBarButtons [3];
+    ScopedPointer <Image> titleBarIcon;
+    ScopedPointer <MenuBarComponent> menuBar;
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy   : public ButtonListener

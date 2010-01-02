@@ -59,7 +59,7 @@ ImageCache::~ImageCache()
 
     for (int i = images.size(); --i >= 0;)
     {
-        CachedImageInfo* const ci = (CachedImageInfo*)(images.getUnchecked(i));
+        CachedImageInfo* const ci = (CachedImageInfo*) images.getUnchecked(i);
         delete ci->image;
         delete ci;
     }
@@ -132,6 +132,14 @@ void ImageCache::release (Image* const imageToRelease)
             }
         }
     }
+}
+
+void ImageCache::releaseOrDelete (Image* const imageToRelease)
+{
+    if (isImageInCache (imageToRelease))
+        release (imageToRelease);
+    else
+        delete imageToRelease;
 }
 
 bool ImageCache::isImageInCache (Image* const imageToLookFor)

@@ -413,7 +413,7 @@ private:
 
     OwnedArray <ColumnInfo> columns;
     Array <TableHeaderListener*> listeners;
-    Component* dragOverlayComp;
+    ScopedPointer <Component> dragOverlayComp;
 
     bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;

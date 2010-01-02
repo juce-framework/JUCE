@@ -1193,7 +1193,7 @@ public:
     ~VSTPluginWindow()
     {
 #if JUCE_MAC
-        deleteAndZero (innerWrapper);
+        innerWrapper = 0;
 #else
         closePluginWindow();
 #endif
@@ -1889,7 +1889,7 @@ private:
     };
 
     friend class InnerWrapperComponent;
-    InnerWrapperComponent* innerWrapper;
+    ScopedPointer <InnerWrapperComponent> innerWrapper;
 
     void resized()
     {
@@ -2825,7 +2825,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    VSTPluginInstance* instance = dynamic_cast <VSTPluginInstance*> (createInstanceFromDescription (desc));
+    ScopedPointer <VSTPluginInstance> instance (dynamic_cast <VSTPluginInstance*> (createInstanceFromDescription (desc)));
 
     if (instance == 0)
         return;
@@ -2892,13 +2892,11 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& resul
     {
         // crashed while loading...
     }
-
-    deleteAndZero (instance);
 }
 
 AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
 {
-    VSTPluginInstance* result = 0;
+    ScopedPointer <VSTPluginInstance> result;
 
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
@@ -2922,14 +2920,14 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
             }
             else
             {
-                deleteAndZero (result);
+                result = 0;
             }
         }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
     }
 
-    return result;
+    return result.release();
 }
 
 bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)

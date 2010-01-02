@@ -200,7 +200,7 @@ private:
     const int itemId;
     ToolbarEditingMode mode;
     Toolbar::ToolbarItemStyle toolbarStyle;
-    Component* overlayComp;
+    ScopedPointer <Component> overlayComp;
     int dragOffsetX, dragOffsetY;
     bool isActive, isBeingDragged, isBeingUsedAsAButton;
     Rectangle contentArea;

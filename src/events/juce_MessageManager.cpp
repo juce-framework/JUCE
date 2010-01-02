@@ -47,8 +47,7 @@ MessageManager* MessageManager::instance = 0;
 static const int quitMessageId = 0xfffff321;
 
 MessageManager::MessageManager() throw()
-  : broadcastListeners (0),
-    quitMessagePosted (false),
+  : quitMessagePosted (false),
     quitMessageReceived (false),
     threadWithLock (0)
 {
@@ -57,7 +56,7 @@ MessageManager::MessageManager() throw()
 
 MessageManager::~MessageManager() throw()
 {
-    deleteAndZero (broadcastListeners);
+    broadcastListeners = 0;
 
     doPlatformSpecificShutdown();
 
@@ -102,7 +101,7 @@ void MessageManager::postCallbackMessage (Message* const message)
 // not for public use..
 void MessageManager::deliverMessage (void* message)
 {
-    Message* const m = (Message*) message;
+    const ScopedPointer <Message> m ((Message*) message);
     MessageListener* const recipient = m->messageRecipient;
 
     JUCE_TRY
@@ -119,7 +118,7 @@ void MessageManager::deliverMessage (void* message)
             }
             else
             {
-                CallbackMessage* const cm = dynamic_cast <CallbackMessage*> (m);
+                CallbackMessage* const cm = dynamic_cast <CallbackMessage*> ((Message*) m);
 
                 if (cm != 0)
                     cm->messageCallback();
@@ -127,8 +126,6 @@ void MessageManager::deliverMessage (void* message)
         }
     }
     JUCE_CATCH_EXCEPTION
-
-    delete m;
 }
 
 //==============================================================================

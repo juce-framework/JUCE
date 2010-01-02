@@ -81,8 +81,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Drawable* const normalImage;
-    Drawable* const toggledOnImage;
+    ScopedPointer <Drawable> normalImage, toggledOnImage;
 
     ToolbarButton (const ToolbarButton&);
     const ToolbarButton& operator= (const ToolbarButton&);

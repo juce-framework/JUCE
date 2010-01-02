@@ -141,10 +141,8 @@ public:
 
     Image* decodeImage (InputStream& in)
     {
-        GIFLoader* const loader = new GIFLoader (in);
-        Image* const im = loader->getImage();
-        delete loader;
-        return im;
+        const ScopedPointer <GIFLoader> loader (new GIFLoader (in));
+        return loader->getImage();
     }
 
     bool writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)

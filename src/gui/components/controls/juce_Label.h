@@ -316,10 +316,10 @@ private:
     String text;
     Font font;
     Justification justification;
-    TextEditor* editor;
+    ScopedPointer <TextEditor> editor;
     SortedSet <void*> listeners;
     Component* ownerComponent;
-    ComponentDeletionWatcher* deletionWatcher;
+    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
     bool editSingleClick : 1;

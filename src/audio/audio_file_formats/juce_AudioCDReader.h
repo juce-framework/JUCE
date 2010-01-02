@@ -155,7 +155,7 @@ private:
     OwnedArray<File> tracks;
     Array <int> trackStartSamples;
     int currentReaderTrack;
-    AudioFormatReader* reader;
+    ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 public:
     static int compareElements (const File* const, const File* const) throw();

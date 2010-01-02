@@ -30,6 +30,7 @@
 #include "../threads/juce_Thread.h"
 #include "../io/network/juce_Socket.h"
 #include "../io/files/juce_NamedPipe.h"
+#include "../containers/juce_ScopedPointer.h"
 class InterprocessConnectionServer;
 
 
@@ -186,8 +187,8 @@ public:
 
 private:
     CriticalSection pipeAndSocketLock;
-    StreamingSocket* socket;
-    NamedPipe* pipe;
+    ScopedPointer <StreamingSocket> socket;
+    ScopedPointer <NamedPipe> pipe;
     bool callbackConnectionState;
     const bool useMessageThread;
     const uint32 magicMessageHeader;

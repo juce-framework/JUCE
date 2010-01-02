@@ -160,7 +160,7 @@ protected:
 private:
     friend class TopLevelWindowManager;
     bool useDropShadow, useNativeTitleBar, windowIsActive_;
-    DropShadower* shadower;
+    ScopedPointer <DropShadower> shadower;
 
     void setWindowActive (const bool isNowActive) throw();
 

@@ -4933,6 +4933,158 @@ private:
 #ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 #define __JUCE_OWNEDARRAY_JUCEHEADER__
 
+/********* Start of inlined file: juce_ScopedPointer.h *********/
+#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
+#define __JUCE_SCOPEDPOINTER_JUCEHEADER__
+
+/**
+    This class holds a pointer which is automatically deleted when this object goes
+    out of scope.
+
+    Once a pointer has been passed to a ScopedPointer, it will make sure that the pointer
+    gets deleted when the ScopedPointer is deleted. Using the ScopedPointer on the stack or
+    as member variables is a good way to use RAII to avoid accidentally leaking dynamically
+    created objects.
+
+    A ScopedPointer can be used in pretty much the same way that you'd use a normal pointer
+    to an object. If you use the assignment operator to assign a different object to a
+    ScopedPointer, the old one will be automatically deleted.
+
+    If you need to get a pointer out of a ScopedPointer without it being deleted, you
+    can use the release() method.
+*/
+template <class ObjectType>
+class ScopedPointer
+{
+public:
+
+    /** Creates a ScopedPointer containing a null pointer. */
+    inline ScopedPointer()  : object (0)
+    {
+    }
+
+    /** Creates a ScopedPointer that owns the specified object. */
+    inline ScopedPointer (ObjectType* const objectToTakePossessionOf)
+        : object (objectToTakePossessionOf)
+    {
+    }
+
+    /** Creates a ScopedPointer that takes its pointer from another ScopedPointer.
+
+        Because a pointer can only belong to one ScopedPointer, this transfers
+        the pointer from the other object to this one, and the other object is reset to
+        be a null pointer.
+    */
+    ScopedPointer (ScopedPointer& objectToTransferFrom)
+        : object (objectToTransferFrom.object)
+    {
+        objectToTransferFrom.object = 0;
+    }
+
+    /** Destructor.
+        This will delete the object that this ScopedPointer currently refers to.
+    */
+    inline ~ScopedPointer()                                                 { delete object; }
+
+    /** Changes this ScopedPointer to point to a new object.
+
+        Because a pointer can only belong to one ScopedPointer, this transfers
+        the pointer from the other object to this one, and the other object is reset to
+        be a null pointer.
+
+        If this ScopedPointer already points to an object, that object
+        will first be deleted.
+    */
+    const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
+    {
+        if (this != &objectToTransferFrom)
+        {
+            // Two ScopedPointers should never be able to refer to the same object - if
+            // this happens, you must have done something dodgy!
+            jassert (object != objectToTransferFrom.object);
+
+            ObjectType* const oldObject = object;
+            object = objectToTransferFrom.object;
+            objectToTransferFrom.object = 0;
+            delete oldObject;
+        }
+
+        return *this;
+    }
+
+    /** Changes this ScopedPointer to point to a new object.
+
+        If this ScopedPointer already points to an object, that object
+        will first be deleted.
+
+        The pointer that you pass is may be null.
+    */
+    const ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
+    {
+        if (object != newObjectToTakePossessionOf)
+        {
+            ObjectType* const oldObject = object;
+            object = newObjectToTakePossessionOf;
+            delete oldObject;
+        }
+
+        return *this;
+    }
+
+    /** Returns the object that this ScopedPointer refers to.
+    */
+    inline operator ObjectType*() const                                     { return object; }
+
+    /** Returns the object that this ScopedPointer refers to.
+    */
+    inline  ObjectType& operator*() const                                   { return *object; }
+
+    /** Lets you access methods and properties of the object that this ScopedPointer refers to. */
+    inline ObjectType* operator->() const                                   { return object; }
+
+    /** Returns a pointer to the object by casting it to whatever type you need. */
+    template <class CastType>
+    inline operator CastType*() const                                       { return static_cast <CastType*> (object); }
+
+    /** Returns a reference to the address of the object that this ScopedPointer refers to. */
+    inline ObjectType** operator&() const                                   { return (ObjectType**) &object; }
+
+    /** Removes the current object from this ScopedPointer without deleting it.
+
+        This will return the current object, and set the ScopedPointer to a null pointer.
+    */
+    ObjectType* release()                                                   { ObjectType* const o = object; object = 0; return o; }
+
+    /** Compares the pointer with another pointer.
+        This can be handy for checking whether this is a null pointer.
+    */
+    inline bool operator== (const ObjectType* const otherPointer) const     { return otherPointer == object; }
+
+    /** Compares the pointer with another pointer.
+        This can be handy for checking whether this is a null pointer.
+    */
+    inline bool operator!= (const ObjectType* const otherPointer) const     { return otherPointer != object; }
+
+    /** Swaps this object with that of another ScopedPointer.
+        The two objects simply exchange their pointers.
+    */
+    void swapWith (ScopedPointer <ObjectType>& other)
+    {
+        // Two ScopedPointers should never be able to refer to the same object - if
+        // this happens, you must have done something dodgy!
+        jassert (object != other.object);
+
+        swapVariables (object, other.object);
+    }
+
+private:
+
+    ObjectType* object;
+};
+
+#endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
+/********* End of inlined file: juce_ScopedPointer.h *********/
+
 /** An array designed for holding objects.
 
     This holds a list of pointers to objects, and will automatically
@@ -5238,7 +5390,7 @@ public:
     {
         if (indexToChange >= 0)
         {
-            ObjectClass* toDelete = 0;
+            ScopedPointer <ObjectClass> toDelete;
             lock.enter();
 
             if (indexToChange < numUsed)
@@ -5260,8 +5412,6 @@ public:
             }
 
             lock.exit();
-
-            delete toDelete;
         }
     }
 
@@ -5352,8 +5502,8 @@ public:
     void remove (const int indexToRemove,
                  const bool deleteObject = true)
     {
+        ScopedPointer <ObjectClass> toDelete;
         lock.enter();
-        ObjectClass* toDelete = 0;
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
@@ -5373,8 +5523,6 @@ public:
         }
 
         lock.exit();
-
-        delete toDelete;
     }
 
     /** Removes a specified object from the array.
@@ -10019,6 +10167,9 @@ private:
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
 
 /********* Start of inlined file: juce_SortedSet.h *********/
@@ -12293,7 +12444,7 @@ public:
 private:
     File logFile;
     CriticalSection logLock;
-    FileOutputStream* logStream;
+    ScopedPointer <FileOutputStream> logStream;
 
     void trimFileSize (int maxFileSizeBytes) const;
 
@@ -13688,7 +13839,7 @@ private:
     String wildCard;
     int index;
     const int whatToLookFor;
-    DirectoryIterator* subIterator;
+    ScopedPointer <DirectoryIterator> subIterator;
 
     DirectoryIterator (const DirectoryIterator&);
     const DirectoryIterator& operator= (const DirectoryIterator&);
@@ -14197,7 +14348,7 @@ private:
     friend class ZipInputStream;
     CriticalSection lock;
     InputStream* inputStream;
-    InputSource* inputSource;
+    ScopedPointer <InputSource> inputSource;
 
     bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
@@ -15435,7 +15586,7 @@ private:
     String lastError, dtdText;
     StringArray tokenisedDTD;
     bool needToLoadDTD, ignoreEmptyTextElements;
-    InputSource* inputSource;
+    ScopedPointer <InputSource> inputSource;
 
     void setLastError (const String& desc, const bool carryOn) throw();
     void skipHeader() throw();
@@ -21162,7 +21313,7 @@ public:
         If a gradient is active, the overall opacity with which it should be applied
         is indicated by the alpha channel of the colour variable.
     */
-    ColourGradient* gradient;
+    ScopedPointer <ColourGradient> gradient;
 
     /** Returns the image that should be used for tiling.
         The FillType object just keeps a pointer to this image, it doesn't own it, so you have to
@@ -22667,7 +22818,7 @@ protected:
 private:
 
     Component* lastFocusedComponent;
-    ComponentDeletionWatcher* dragAndDropTargetComponent;
+    ScopedPointer <ComponentDeletionWatcher> dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
@@ -26218,7 +26369,7 @@ private:
 
     OwnedArray <ApplicationCommandInfo> commands;
     SortedSet <void*> listeners;
-    KeyPressMappingSet* keyMappings;
+    ScopedPointer <KeyPressMappingSet> keyMappings;
     ApplicationCommandTarget* firstTarget;
 
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info) const;
@@ -26528,8 +26679,7 @@ public:
 
 private:
 
-    PropertiesFile* userProps;
-    PropertiesFile* commonProps;
+    ScopedPointer <PropertiesFile> userProps, commonProps;
 
     String appName, fileSuffix, folderName;
     int msBeforeSaving, options;
@@ -27789,7 +27939,7 @@ private:
     OwnedArray<File> tracks;
     Array <int> trackStartSamples;
     int currentReaderTrack;
-    AudioFormatReader* reader;
+    ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 public:
     static int compareElements (const File* const, const File* const) throw();
@@ -28127,10 +28277,10 @@ public:
 private:
     AudioFormatManager& formatManagerToUse;
     AudioThumbnailCache& cache;
-    InputSource* source;
+    ScopedPointer <InputSource> source;
 
     CriticalSection readerLock;
-    AudioFormatReader* reader;
+    ScopedPointer <AudioFormatReader> reader;
 
     MemoryBlock data, cachedLevels;
     int orginalSamplesPerThumbnailSample;
@@ -31884,7 +32034,7 @@ private:
     SortedSet <void*> buttonListeners;
 
     friend class InternalButtonRepeatTimer;
-    Timer* repeatTimer;
+    ScopedPointer <Timer> repeatTimer;
     uint32 buttonPressTime, lastTimeCallbackTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
@@ -33759,10 +33909,10 @@ private:
     String text;
     Font font;
     Justification justification;
-    TextEditor* editor;
+    ScopedPointer <TextEditor> editor;
     SortedSet <void*> listeners;
     Component* ownerComponent;
-    ComponentDeletionWatcher* deletionWatcher;
+    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
     bool editSingleClick : 1;
@@ -34502,17 +34652,17 @@ private:
     OwnedArray <AudioDeviceSetup> lastDeviceTypeConfigs;
 
     AudioDeviceSetup currentSetup;
-    AudioIODevice* currentAudioDevice;
+    ScopedPointer <AudioIODevice> currentAudioDevice;
     SortedSet <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
     BitArray inputChannels, outputChannels;
-    XmlElement* lastExplicitSettings;
+    ScopedPointer <XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
     bool useInputNames;
     int inputLevelMeasurementEnabledCount;
     double inputLevel;
-    AudioSampleBuffer* testSound;
+    ScopedPointer <AudioSampleBuffer> testSound;
     int testSoundPosition;
     AudioSampleBuffer tempBuffer;
 
@@ -34521,7 +34671,7 @@ private:
     Array <MidiInputCallback*> midiCallbacks;
     Array <MidiInput*> midiCallbackDevices;
     String defaultMidiOutputName;
-    MidiOutput* defaultMidiOutput;
+    ScopedPointer <MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
     double cpuUsageMs, timeToCpuScale;
@@ -35066,8 +35216,8 @@ public:
                                 const MidiMessageSequence::MidiEventHolder* const second) throw();
 
 private:
-    MidiMessageSequence* tracks [128];
-    short numTracks, timeFormat;
+    OwnedArray <MidiMessageSequence> tracks;
+    short timeFormat;
 
     MidiFile (const MidiFile&);
     const MidiFile& operator= (const MidiFile&);
@@ -38914,7 +39064,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    AudioSampleBuffer* data;
+    ScopedPointer <AudioSampleBuffer> data;
     double sourceSampleRate;
     BitArray midiNotes;
     int length, attackSamples, releaseSamples;
@@ -39321,8 +39471,8 @@ public:
 
 private:
     CriticalSection pipeAndSocketLock;
-    StreamingSocket* socket;
-    NamedPipe* pipe;
+    ScopedPointer <StreamingSocket> socket;
+    ScopedPointer <NamedPipe> pipe;
     bool callbackConnectionState;
     const bool useMessageThread;
     const uint32 magicMessageHeader;
@@ -39412,7 +39562,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    StreamingSocket* volatile socket;
+    ScopedPointer <StreamingSocket> socket;
 
     void run();
 
@@ -39568,8 +39718,8 @@ private:
     friend class CallbackMessage;
     static MessageManager* instance;
 
-    SortedSet<const MessageListener*> messageListeners;
-    ActionListenerList* broadcastListeners;
+    SortedSet <const MessageListener*> messageListeners;
+    ScopedPointer <ActionListenerList> broadcastListeners;
 
     friend class JUCEApplication;
     bool quitMessagePosted, quitMessageReceived;
@@ -40228,14 +40378,8 @@ protected:
 private:
 
     ButtonStyle style;
-    Drawable* normalImage;
-    Drawable* overImage;
-    Drawable* downImage;
-    Drawable* disabledImage;
-    Drawable* normalImageOn;
-    Drawable* overImageOn;
-    Drawable* downImageOn;
-    Drawable* disabledImageOn;
+    ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage;
+    ScopedPointer <Drawable> normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Colour backgroundOff, backgroundOn;
     int edgeIndent;
 
@@ -40915,7 +41059,7 @@ protected:
 
 private:
     friend class DragImageComponent;
-    Component* dragImageComponent;
+    ScopedPointer <Component> dragImageComponent;
     String currentDragDesc;
 };
 
@@ -41470,7 +41614,7 @@ private:
     const int itemId;
     ToolbarEditingMode mode;
     Toolbar::ToolbarItemStyle toolbarStyle;
-    Component* overlayComp;
+    ScopedPointer <Component> overlayComp;
     int dragOffsetX, dragOffsetY;
     bool isActive, isBeingDragged, isBeingUsedAsAButton;
     Rectangle contentArea;
@@ -41531,8 +41675,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Drawable* const normalImage;
-    Drawable* const toggledOnImage;
+    ScopedPointer <Drawable> normalImage, toggledOnImage;
 
     ToolbarButton (const ToolbarButton&);
     const ToolbarButton& operator= (const ToolbarButton&);
@@ -43108,7 +43251,7 @@ private:
     Label* valueBox;
     Button* incButton;
     Button* decButton;
-    Component* popupDisplay;
+    ScopedPointer <Component> popupDisplay;
     Component* parentForPopupDisplay;
 
     float getLinearSliderPos (const double value);
@@ -43508,7 +43651,7 @@ private:
 
     OwnedArray <ColumnInfo> columns;
     Array <TableHeaderListener*> listeners;
-    Component* dragOverlayComp;
+    ScopedPointer <Component> dragOverlayComp;
 
     bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
@@ -45619,7 +45762,7 @@ protected:
 
 private:
 
-    DirectoryContentsList* fileList;
+    ScopedPointer <DirectoryContentsList> fileList;
     const FileFilter* fileFilter;
 
     int flags;
@@ -46036,7 +46179,7 @@ protected:
 private:
     friend class TopLevelWindowManager;
     bool useDropShadow, useNativeTitleBar, windowIsActive_;
-    DropShadower* shadower;
+    ScopedPointer <DropShadower> shadower;
 
     void setWindowActive (const bool isNowActive) throw();
 
@@ -46740,11 +46883,11 @@ protected:
 
 #endif
 
-    ResizableCornerComponent* resizableCorner;
-    ResizableBorderComponent* resizableBorder;
+    ScopedPointer <ResizableCornerComponent> resizableCorner;
+    ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
-    Component* contentComponent;
+    ScopedPointer <Component> contentComponent;
     bool resizeToFitContent, fullscreen;
     ComponentDragger dragger;
     Rectangle lastNonFullScreenPos;
@@ -47635,7 +47778,7 @@ public:
 
 private:
     File fileToLoad;
-    Image* currentThumbnail;
+    ScopedPointer <Image> currentThumbnail;
     String currentDetails;
 
     void getThumbSize (int& w, int& h) const;
@@ -48138,7 +48281,7 @@ private:
     bool reentrant;
     int lastX, lastY, lastWidth, lastHeight;
 #ifdef JUCE_DEBUG
-    ComponentDeletionWatcher* deletionWatcher;
+    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
 #endif
 
     void unregister() throw();
@@ -48936,7 +49079,7 @@ private:
     int itemUnderMouse, currentPopupIndex, topLevelIndexClicked, indexToShowAgain;
     int lastMouseX, lastMouseY;
     bool inModalState;
-    Component* currentPopup;
+    ScopedPointer <Component> currentPopup;
 
     int getItemAt (int x, int y);
     void updateItemUnderMouse (const int x, const int y);
@@ -49160,9 +49303,9 @@ public:
 private:
     int titleBarHeight, menuBarHeight, requiredButtons;
     bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
-    Button* titleBarButtons [3];
-    Image* titleBarIcon;
-    MenuBarComponent* menuBar;
+    ScopedPointer <Button> titleBarButtons [3];
+    ScopedPointer <Image> titleBarIcon;
+    ScopedPointer <MenuBarComponent> menuBar;
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy   : public ButtonListener
@@ -53112,7 +53255,7 @@ public:
 
 private:
     friend class NSViewComponentInternal;
-    NSViewComponentInternal* info;
+    ScopedPointer <NSViewComponentInternal> info;
 
     NSViewComponent (const NSViewComponent&);
     const NSViewComponent& operator= (const NSViewComponent&);
@@ -53543,7 +53686,7 @@ public:
 private:
 
     String currentPageName;
-    Component* currentPage;
+    ScopedPointer <Component> currentPage;
     int buttonSize;
 
     PreferencesPanel (const PreferencesPanel&);
@@ -54160,7 +54303,6 @@ private:
     Image* backgroundImage;
     Time earliestTimeToDelete;
     int originalClickCounter;
-    bool isImageInCache;
 
     SplashScreen (const SplashScreen&);
     const SplashScreen& operator= (const SplashScreen&);
@@ -54293,7 +54435,7 @@ private:
     void timerCallback();
 
     double progress;
-    AlertWindow* alertWindow;
+    ScopedPointer <AlertWindow> alertWindow;
     String message;
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;
@@ -54572,7 +54714,7 @@ protected:
 
     Image& image;
 
-    LLGCSavedState* currentState;
+    ScopedPointer <LLGCSavedState> currentState;
     OwnedArray <LLGCSavedState> stateStack;
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
@@ -55740,6 +55882,13 @@ public:
         @see getFromFile, getFromMemory
     */
     static void release (Image* const imageToRelease);
+
+    /** Releases an image if it's in the cache, or deletes it if it isn't cached.
+
+        This is a handy function to use if you want to delete an image but are afraid that
+        it might be cached.
+    */
+    static void releaseOrDelete (Image* const imageToRelease);
 
     /** Checks whether an image is in the cache or not.
 

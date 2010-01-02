@@ -338,12 +338,12 @@ AudioCDBurner::~AudioCDBurner()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    AudioCDBurner* b = new AudioCDBurner (deviceIndex);
+    ScopedPointer <AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
     if (b->internal == 0)
-        deleteAndZero (b);
+        b = 0;
 
-    return b;
+    return b.release();
 }
 
 static NSArray* findDiskBurnerDevices()

@@ -123,23 +123,21 @@ private:
 
 //==============================================================================
 NSViewComponent::NSViewComponent()
-    : info (0)
 {
 }
 
 NSViewComponent::~NSViewComponent()
 {
-    delete info;
 }
 
 void NSViewComponent::setView (void* view)
 {
     if (view != getView())
     {
-        deleteAndZero (info);
-
         if (view != 0)
             info = new NSViewComponentInternal ((NSView*) view, this);
+        else
+            info = 0;
     }
 }
 

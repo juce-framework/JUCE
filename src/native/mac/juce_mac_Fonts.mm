@@ -49,9 +49,6 @@ public:
     //==============================================================================
     MacTypeface (const Font& font)
         : Typeface (font.getTypefaceName())
-#if ! SUPPORT_ONLY_10_4_FONTS
-          , charToGlyphMapper (0)
-#endif
     {
         const ScopedAutoReleasePool pool;
         renderingTransform = CGAffineTransformIdentity;
@@ -179,10 +176,6 @@ public:
 #endif
         if (fontRef != 0)
             CGFontRelease (fontRef);
-
-#if ! SUPPORT_ONLY_10_4_FONTS
-        delete charToGlyphMapper;
-#endif
     }
 
     float getAscent() const
@@ -482,7 +475,7 @@ private:
         }
     };
 
-    CharToGlyphMapper* charToGlyphMapper;
+    ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
 #endif
 };
 

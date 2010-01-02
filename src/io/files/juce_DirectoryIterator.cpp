@@ -46,8 +46,7 @@ DirectoryIterator::DirectoryIterator (const File& directory,
                                       const int whatToLookFor_) throw()
   : wildCard (wc),
     index (-1),
-    whatToLookFor (whatToLookFor_),
-    subIterator (0)
+    whatToLookFor (whatToLookFor_)
 {
     // you have to specify the type of files you're looking for!
     jassert ((whatToLookFor_ & (File::findFiles | File::findDirectories)) != 0);
@@ -108,8 +107,6 @@ DirectoryIterator::DirectoryIterator (const File& directory,
 
 DirectoryIterator::~DirectoryIterator() throw()
 {
-    if (subIterator != 0)
-        delete subIterator;
 }
 
 bool DirectoryIterator::next() throw()
@@ -119,7 +116,7 @@ bool DirectoryIterator::next() throw()
         if (subIterator->next())
             return true;
 
-        deleteAndZero (subIterator);
+        subIterator = 0;
     }
 
     if (index >= filesFound.size() + dirsFound.size() - 1)

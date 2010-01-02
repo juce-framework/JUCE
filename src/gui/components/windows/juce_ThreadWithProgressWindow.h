@@ -29,6 +29,7 @@
 #include "../windows/juce_AlertWindow.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../threads/juce_Thread.h"
+#include "../../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -152,7 +153,7 @@ private:
     void timerCallback();
 
     double progress;
-    AlertWindow* alertWindow;
+    ScopedPointer <AlertWindow> alertWindow;
     String message;
     CriticalSection messageLock;
     const int timeOutMsWhenCancelling;

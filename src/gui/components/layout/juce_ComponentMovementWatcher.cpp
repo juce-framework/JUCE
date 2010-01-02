@@ -53,10 +53,6 @@ ComponentMovementWatcher::~ComponentMovementWatcher()
     component->removeComponentListener (this);
 
     unregister();
-
-#ifdef JUCE_DEBUG
-    delete deletionWatcher;
-#endif
 }
 
 //==============================================================================

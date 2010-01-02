@@ -109,7 +109,7 @@ private:
     int itemUnderMouse, currentPopupIndex, topLevelIndexClicked, indexToShowAgain;
     int lastMouseX, lastMouseY;
     bool inModalState;
-    Component* currentPopup;
+    ScopedPointer <Component> currentPopup;
 
     int getItemAt (int x, int y);
     void updateItemUnderMouse (const int x, const int y);

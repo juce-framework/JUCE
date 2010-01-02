@@ -321,7 +321,7 @@ private:
     //==============================================================================
     OwnedArray <ApplicationCommandInfo> commands;
     SortedSet <void*> listeners;
-    KeyPressMappingSet* keyMappings;
+    ScopedPointer <KeyPressMappingSet> keyMappings;
     ApplicationCommandTarget* firstTarget;
 
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info) const;

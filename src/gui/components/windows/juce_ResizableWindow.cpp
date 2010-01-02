@@ -38,9 +38,6 @@ BEGIN_JUCE_NAMESPACE
 ResizableWindow::ResizableWindow (const String& name,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
-      resizableCorner (0),
-      resizableBorder (0),
-      contentComponent (0),
       resizeToFitContent (false),
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
@@ -61,9 +58,6 @@ ResizableWindow::ResizableWindow (const String& name,
                                   const Colour& backgroundColour_,
                                   const bool addToDesktop_)
     : TopLevelWindow (name, addToDesktop_),
-      resizableCorner (0),
-      resizableBorder (0),
-      contentComponent (0),
       resizeToFitContent (false),
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
@@ -82,9 +76,9 @@ ResizableWindow::ResizableWindow (const String& name,
 
 ResizableWindow::~ResizableWindow()
 {
-    deleteAndZero (resizableCorner);
-    deleteAndZero (resizableBorder);
-    deleteAndZero (contentComponent);
+    resizableCorner = 0;
+    resizableBorder = 0;
+    contentComponent = 0;
 
     // have you been adding your own components directly to this window..? tut tut tut.
     // Read the instructions for using a ResizableWindow!
@@ -108,12 +102,10 @@ void ResizableWindow::setContentComponent (Component* const newContentComponent,
 {
     resizeToFitContent = resizeToFit;
 
-    if (contentComponent != newContentComponent)
+    if (newContentComponent != (Component*) contentComponent)
     {
-        if (deleteOldOne)
-            delete contentComponent;
-        else
-            removeChildComponent (contentComponent);
+        if (! deleteOldOne)
+            removeChildComponent (contentComponent.release());
 
         contentComponent = newContentComponent;
 
@@ -224,7 +216,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     {
         if (useBottomRightCornerResizer)
         {
-            deleteAndZero (resizableBorder);
+            resizableBorder = 0;
 
             if (resizableCorner == 0)
             {
@@ -234,7 +226,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         }
         else
         {
-            deleteAndZero (resizableCorner);
+            resizableCorner = 0;
 
             if (resizableBorder == 0)
                 Component::addChildComponent (resizableBorder = new ResizableBorderComponent (this, constrainer));
@@ -242,8 +234,8 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     }
     else
     {
-        deleteAndZero (resizableCorner);
-        deleteAndZero (resizableBorder);
+        resizableCorner = 0;
+        resizableBorder = 0;
     }
 
     if (isUsingNativeTitleBar())
@@ -285,8 +277,8 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
         const bool useBottomRightCornerResizer = resizableCorner != 0;
         const bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != 0;
 
-        deleteAndZero (resizableCorner);
-        deleteAndZero (resizableBorder);
+        resizableCorner = 0;
+        resizableBorder = 0;
 
         setResizable (shouldBeResizable, useBottomRightCornerResizer);
 

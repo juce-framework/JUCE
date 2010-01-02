@@ -153,8 +153,7 @@ GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
 {
     flush();
 
-    GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
-    delete h;
+    delete (GZIPCompressorHelper*) helper;
 
     if (deleteDestStream)
         delete destStream;

@@ -38,9 +38,7 @@ juce_ImplementSingleton (ApplicationProperties)
 
 //==============================================================================
 ApplicationProperties::ApplicationProperties() throw()
-    : userProps (0),
-      commonProps (0),
-      msBeforeSaving (3000),
+    : msBeforeSaving (3000),
       options (PropertiesFile::storeAsBinary),
       commonSettingsAreReadOnly (0)
 {
@@ -153,8 +151,8 @@ bool ApplicationProperties::saveIfNeeded()
 
 void ApplicationProperties::closeFiles()
 {
-    deleteAndZero (userProps);
-    deleteAndZero (commonProps);
+    userProps = 0;
+    commonProps = 0;
 }
 
 

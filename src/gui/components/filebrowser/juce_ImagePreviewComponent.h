@@ -60,7 +60,7 @@ public:
 
 private:
     File fileToLoad;
-    Image* currentThumbnail;
+    ScopedPointer <Image> currentThumbnail;
     String currentDetails;
 
     void getThumbSize (int& w, int& h) const;

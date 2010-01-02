@@ -47,7 +47,6 @@ public:
 
     ~DragOverlayComp()
     {
-        delete image;
     }
 
     void paint (Graphics& g)
@@ -56,7 +55,7 @@ public:
     }
 
 private:
-    Image* image;
+    ScopedPointer <Image> image;
 
     DragOverlayComp (const DragOverlayComp&);
     const DragOverlayComp& operator= (const DragOverlayComp&);
@@ -66,7 +65,6 @@ private:
 //==============================================================================
 TableHeaderComponent::TableHeaderComponent()
     : listeners (2),
-      dragOverlayComp (0),
       columnsChanged (false),
       columnsResized (false),
       sortChanged (false),
@@ -81,7 +79,7 @@ TableHeaderComponent::TableHeaderComponent()
 
 TableHeaderComponent::~TableHeaderComponent()
 {
-    delete dragOverlayComp;
+    dragOverlayComp = 0;
 }
 
 //==============================================================================
@@ -465,7 +463,7 @@ const String TableHeaderComponent::toString() const
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
 {
     XmlDocument doc (storedVersion);
-    XmlElement* const storedXml = doc.getDocumentElement();
+    ScopedPointer <XmlElement> storedXml (doc.getDocumentElement());
 
     int index = 0;
 
@@ -493,8 +491,6 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
         setSortColumnId (storedXml->getIntAttribute (T("sortedCol")),
                          storedXml->getBoolAttribute (T("sortForwards"), true));
     }
-
-    delete storedXml;
 }
 
 //==============================================================================
@@ -619,7 +615,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
          && columnIdBeingDragged == 0
          && ! (e.mouseWasClicked() || e.mods.isPopupMenu()))
     {
-        deleteAndZero (dragOverlayComp);
+        dragOverlayComp = 0;
 
         columnIdBeingResized = getResizeDraggerAt (e.getMouseDownX());
 
@@ -799,7 +795,7 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
     if (columnIdUnderMouse != 0 && e.mouseWasClicked() && ! e.mods.isPopupMenu())
         columnClicked (columnIdUnderMouse, e.mods);
 
-    deleteAndZero (dragOverlayComp);
+    dragOverlayComp = 0;
 }
 
 const MouseCursor TableHeaderComponent::getMouseCursor()

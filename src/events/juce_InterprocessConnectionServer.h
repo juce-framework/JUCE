@@ -88,7 +88,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    StreamingSocket* volatile socket;
+    ScopedPointer <StreamingSocket> socket;
 
     void run();
 

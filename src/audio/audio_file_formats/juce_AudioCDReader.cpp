@@ -89,8 +89,6 @@ AudioCDReader::AudioCDReader (const File& volume)
 
 AudioCDReader::~AudioCDReader()
 {
-    if (reader != 0)
-        delete reader;
 }
 
 static int getTrackNumber (const File& file)
@@ -129,13 +127,10 @@ void AudioCDReader::refreshTrackLengths()
 
         if (in != 0)
         {
-            AudioFormatReader* const r = format.createReaderFor (in, true);
+            ScopedPointer <AudioFormatReader> r (format.createReaderFor (in, true));
 
             if (r != 0)
-            {
                 sample += (int) r->lengthInSamples;
-                delete r;
-            }
         }
     }
 
@@ -164,7 +159,7 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
 
         if (track != currentReaderTrack)
         {
-            deleteAndZero (reader);
+            reader = 0;
 
             if (tracks [track] != 0)
             {

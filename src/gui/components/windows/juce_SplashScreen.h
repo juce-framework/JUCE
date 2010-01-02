@@ -144,7 +144,6 @@ private:
     Image* backgroundImage;
     Time earliestTimeToDelete;
     int originalClickCounter;
-    bool isImageInCache;
 
     SplashScreen (const SplashScreen&);
     const SplashScreen& operator= (const SplashScreen&);

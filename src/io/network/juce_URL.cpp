@@ -458,10 +458,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                              timeOutMs);
 
     if (wi->isError())
-    {
-        delete wi;
-        wi = 0;
-    }
+        deleteAndZero (wi);
 
     return wi;
 }
@@ -470,13 +467,11 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 bool URL::readEntireBinaryStream (MemoryBlock& destData,
                                   const bool usePostCommand) const
 {
-    InputStream* const in = createInputStream (usePostCommand);
+    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
 
     if (in != 0)
     {
         in->readIntoMemoryBlock (destData, -1);
-        delete in;
-
         return true;
     }
 
@@ -485,16 +480,12 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
 
 const String URL::readEntireTextStream (const bool usePostCommand) const
 {
-    String result;
-    InputStream* const in = createInputStream (usePostCommand);
+    const ScopedPointer <InputStream> in (createInputStream (usePostCommand));
 
     if (in != 0)
-    {
-        result = in->readEntireStreamAsString();
-        delete in;
-    }
+        return in->readEntireStreamAsString();
 
-    return result;
+    return String::empty;
 }
 
 XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const

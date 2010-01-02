@@ -44,15 +44,13 @@ class DragImageComponent  : public Component,
                             public Timer
 {
 private:
-    Image* image;
+    ScopedPointer <Image> image;
     Component* const source;
     DragAndDropContainer* const owner;
 
-    ComponentDeletionWatcher* sourceWatcher;
+    ScopedPointer <ComponentDeletionWatcher> sourceWatcher, mouseDragSourceWatcher, currentlyOverWatcher;
     Component* mouseDragSource;
-    ComponentDeletionWatcher* mouseDragSourceWatcher;
     DragAndDropTarget* currentlyOver;
-    ComponentDeletionWatcher* currentlyOverWatcher;
 
     String dragDesc;
     const int imageX, imageY;
@@ -71,7 +69,6 @@ public:
           source (s),
           owner (o),
           currentlyOver (0),
-          currentlyOverWatcher (0),
           dragDesc (desc),
           imageX (imageX_),
           imageY (imageY_),
@@ -98,8 +95,8 @@ public:
 
     ~DragImageComponent()
     {
-        if (owner->dragImageComponent == this)
-            owner->dragImageComponent = 0;
+        if ((DragImageComponent*) owner->dragImageComponent == this)
+            owner->dragImageComponent.release();
 
         if (! mouseDragSourceWatcher->hasBeenDeleted())
         {
@@ -109,11 +106,6 @@ public:
                 if (currentlyOver->isInterestedInDragSource (dragDesc, source))
                     currentlyOver->itemDragExit (dragDesc, source);
         }
-
-        delete mouseDragSourceWatcher;
-        delete sourceWatcher;
-        delete image;
-        delete currentlyOverWatcher;
     }
 
     void paint (Graphics& g)
@@ -220,8 +212,8 @@ public:
                 // a modal loop and deletes this object before the method completes)
                 const String dragDescLocal (dragDesc);
 
+                currentlyOverWatcher = 0;
                 currentlyOver = 0;
-                deleteAndZero (currentlyOverWatcher);
 
                 ddt->itemDropped (dragDescLocal, source, relX, relY);
             }
@@ -267,7 +259,7 @@ public:
                 }
 
                 currentlyOver = ddt;
-                deleteAndZero (currentlyOverWatcher);
+                currentlyOverWatcher = 0;
 
                 if (ddt != 0)
                 {
@@ -280,7 +272,7 @@ public:
             else if (currentlyOverWatcher != 0 && currentlyOverWatcher->hasBeenDeleted())
             {
                 currentlyOver = 0;
-                deleteAndZero (currentlyOverWatcher);
+                currentlyOverWatcher = 0;
             }
 
             if (currentlyOver != 0
@@ -341,26 +333,23 @@ public:
 
 //==============================================================================
 DragAndDropContainer::DragAndDropContainer()
-   : dragImageComponent (0)
 {
 }
 
 DragAndDropContainer::~DragAndDropContainer()
 {
-    delete dragImageComponent;
+    dragImageComponent = 0;
 }
 
 void DragAndDropContainer::startDragging (const String& sourceDescription,
                                           Component* sourceComponent,
-                                          Image* im,
+                                          Image* dragImage_,
                                           const bool allowDraggingToExternalWindows,
                                           const Point* imageOffsetFromMouse)
 {
-    if (dragImageComponent != 0)
-    {
-        delete im;
-    }
-    else
+    ScopedPointer <Image> dragImage (dragImage_);
+
+    if (dragImageComponent == 0)
     {
         Component* const thisComp = dynamic_cast <Component*> (this);
 
@@ -370,35 +359,34 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             Desktop::getLastMouseDownPosition (mx, my);
             int imageX = 0, imageY = 0;
 
-            if (im == 0)
+            if (dragImage == 0)
             {
-                im = sourceComponent->createComponentSnapshot (Rectangle (0, 0, sourceComponent->getWidth(), sourceComponent->getHeight()));
+                dragImage = sourceComponent->createComponentSnapshot (Rectangle (0, 0, sourceComponent->getWidth(), sourceComponent->getHeight()));
 
-                if (im->getFormat() != Image::ARGB)
+                if (dragImage->getFormat() != Image::ARGB)
                 {
-                    Image* newIm = Image::createNativeImage (Image::ARGB, im->getWidth(), im->getHeight(), true);
+                    Image* newIm = Image::createNativeImage (Image::ARGB, dragImage->getWidth(), dragImage->getHeight(), true);
                     Graphics g2 (*newIm);
-                    g2.drawImageAt (im, 0, 0);
+                    g2.drawImageAt (dragImage, 0, 0);
 
-                    delete im;
-                    im = newIm;
+                    dragImage = newIm;
                 }
 
-                im->multiplyAllAlphas (0.6f);
+                dragImage->multiplyAllAlphas (0.6f);
 
                 const int lo = 150;
                 const int hi = 400;
 
                 int rx = mx, ry = my;
                 sourceComponent->globalPositionToRelative (rx, ry);
-                const int cx = jlimit (0, im->getWidth(), rx);
-                const int cy = jlimit (0, im->getHeight(), ry);
+                const int cx = jlimit (0, dragImage->getWidth(), rx);
+                const int cy = jlimit (0, dragImage->getHeight(), ry);
 
-                for (int y = im->getHeight(); --y >= 0;)
+                for (int y = dragImage->getHeight(); --y >= 0;)
                 {
                     const double dy = (y - cy) * (y - cy);
 
-                    for (int x = im->getWidth(); --x >= 0;)
+                    for (int x = dragImage->getWidth(); --x >= 0;)
                     {
                         const int dx = x - cx;
                         const int distance = roundDoubleToInt (sqrt (dx * dx + dy));
@@ -409,7 +397,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                                                                 : (hi - distance) / (float) (hi - lo)
                                                                    + Random::getSystemRandom().nextFloat() * 0.008f;
 
-                            im->multiplyAlphaAt (x, y, alpha);
+                            dragImage->multiplyAlphaAt (x, y, alpha);
                         }
                     }
                 }
@@ -421,8 +409,8 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             {
                 if (imageOffsetFromMouse == 0)
                 {
-                    imageX = im->getWidth() / -2;
-                    imageY = im->getHeight() / -2;
+                    imageX = dragImage->getWidth() / -2;
+                    imageY = dragImage->getHeight() / -2;
                 }
                 else
                 {
@@ -431,35 +419,31 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                 }
             }
 
-            DragImageComponent* const dic
-                = new DragImageComponent (im, sourceDescription, sourceComponent,
-                                          this, imageX, imageY);
+            dragImageComponent = new DragImageComponent (dragImage.release(), sourceDescription, sourceComponent,
+                                                         this, imageX, imageY);
 
-            dragImageComponent = dic;
             currentDragDesc = sourceDescription;
 
             if (allowDraggingToExternalWindows)
             {
                 if (! Desktop::canUseSemiTransparentWindows())
-                    dic->setOpaque (true);
+                    dragImageComponent->setOpaque (true);
 
-                dic->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                    | ComponentPeer::windowIsTemporary
-                                    | ComponentPeer::windowIgnoresKeyPresses);
+                dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
+                                                   | ComponentPeer::windowIsTemporary
+                                                   | ComponentPeer::windowIgnoresKeyPresses);
             }
             else
-                thisComp->addChildComponent (dic);
+                thisComp->addChildComponent (dragImageComponent);
 
-            dic->updateLocation (false, mx, my);
-            dic->setVisible (true);
+            ((DragImageComponent*) dragImageComponent)->updateLocation (false, mx, my);
+            dragImageComponent->setVisible (true);
         }
         else
         {
             // this class must only be implemented by an object that
             // is also a Component.
             jassertfalse
-
-            delete im;
         }
     }
 }

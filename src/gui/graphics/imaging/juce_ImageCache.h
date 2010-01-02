@@ -101,6 +101,13 @@ public:
     */
     static void release (Image* const imageToRelease);
 
+    /** Releases an image if it's in the cache, or deletes it if it isn't cached.
+
+        This is a handy function to use if you want to delete an image but are afraid that
+        it might be cached.
+    */
+    static void releaseOrDelete (Image* const imageToRelease);
+
     /** Checks whether an image is in the cache or not.
 
         @returns true if the image is currently in the cache

@@ -277,7 +277,7 @@ bool DirectoryContentsList::addFile (const String& filename,
               || ((! isDir) && fileFilter->isFileSuitable (file))
               || (isDir && fileFilter->isDirectorySuitable (file))))
     {
-        FileInfo* const info = new FileInfo();
+        ScopedPointer <FileInfo> info (new FileInfo());
 
         info->filename = filename;
         info->fileSize = fileSize;
@@ -289,15 +289,10 @@ bool DirectoryContentsList::addFile (const String& filename,
         const ScopedLock sl (fileListLock);
 
         for (int i = files.size(); --i >= 0;)
-        {
             if (files.getUnchecked(i)->filename == info->filename)
-            {
-                delete info;
                 return false;
-            }
-        }
 
-        files.addSorted (*this, info);
+        files.addSorted (*this, info.release());
         return true;
     }
 

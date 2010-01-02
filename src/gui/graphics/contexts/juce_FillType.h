@@ -27,6 +27,7 @@
 #define __JUCE_FILLTYPE_JUCEHEADER__
 
 #include "../colour/juce_ColourGradient.h"
+#include "../../../containers/juce_ScopedPointer.h"
 class Image;
 
 
@@ -114,7 +115,7 @@ public:
         If a gradient is active, the overall opacity with which it should be applied
         is indicated by the alpha channel of the colour variable.
     */
-    ColourGradient* gradient;
+    ScopedPointer <ColourGradient> gradient;
 
     /** Returns the image that should be used for tiling.
         The FillType object just keeps a pointer to this image, it doesn't own it, so you have to

@@ -153,7 +153,6 @@ ToolbarItemComponent::ToolbarItemComponent (const int itemId_,
       itemId (itemId_),
       mode (normalMode),
       toolbarStyle (Toolbar::iconsOnly),
-      overlayComp (0),
       dragOffsetX (0),
       dragOffsetY (0),
       isActive (true),
@@ -167,7 +166,7 @@ ToolbarItemComponent::ToolbarItemComponent (const int itemId_,
 ToolbarItemComponent::~ToolbarItemComponent()
 {
     jassert (overlayComp == 0 || overlayComp->isValidComponent());
-    delete overlayComp;
+    overlayComp = 0;
 }
 
 Toolbar* ToolbarItemComponent::getToolbar() const
@@ -255,7 +254,6 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
         if (mode == normalMode)
         {
             jassert (overlayComp == 0 || overlayComp->isValidComponent());
-            delete overlayComp;
             overlayComp = 0;
         }
         else if (overlayComp == 0)

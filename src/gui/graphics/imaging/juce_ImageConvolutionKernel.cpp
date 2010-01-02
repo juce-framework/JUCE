@@ -108,7 +108,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                                            int dw,
                                            int dh) const
 {
-    Image* imageCreated = 0;
+    ScopedPointer <Image> imageCreated;
 
     if (sourceImage == 0)
     {
@@ -255,8 +255,6 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
             }
         }
     }
-
-    delete imageCreated;
 }
 
 END_JUCE_NAMESPACE

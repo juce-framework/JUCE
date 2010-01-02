@@ -308,8 +308,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
 MidiOutput::~MidiOutput()
 {
-    MidiPortAndEndpoint* const mpe = (MidiPortAndEndpoint*) internal;
-    delete mpe;
+    delete (MidiPortAndEndpoint*) internal;
 }
 
 void MidiOutput::reset()
@@ -549,7 +548,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                 {
                     MIDIPortRef port;
 
-                    MidiPortAndCallback* const mpc = new MidiPortAndCallback();
+                    ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback());
                     mpc->active = false;
 
                     if (OK (MIDIInputPortCreate (globalMidiClient, pname, midiInputProc, mpc, &port)))
@@ -566,17 +565,12 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                             mi->internal = (void*) mpc;
 
                             const ScopedLock sl (callbackLock);
-                            activeCallbacks.add (mpc);
+                            activeCallbacks.add (mpc.release());
                         }
                         else
                         {
                             OK (MIDIPortDispose (port));
-                            delete mpc;
                         }
-                    }
-                    else
-                    {
-                        delete mpc;
                     }
                 }
             }
@@ -594,7 +588,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
     if (makeSureClientExists())
     {
-        MidiPortAndCallback* const mpc = new MidiPortAndCallback();
+        ScopedPointer <MidiPortAndCallback> mpc (new MidiPortAndCallback());
         mpc->active = false;
 
         MIDIEndpointRef endPoint;
@@ -611,11 +605,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
             mi->internal = (void*) mpc;
 
             const ScopedLock sl (callbackLock);
-            activeCallbacks.add (mpc);
-        }
-        else
-        {
-            delete mpc;
+            activeCallbacks.add (mpc.release());
         }
 
         CFRelease (name);

@@ -243,7 +243,7 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
     if (comp == 0)
     {
         delete existingComponentToUpdate;
-        existingComponentToUpdate = comp = new FileListItemComponent (*this, fileList.getTimeSliceThread());
+        comp = new FileListItemComponent (*this, fileList.getTimeSliceThread());
     }
 
     DirectoryContentsList::FileInfo fileInfo;

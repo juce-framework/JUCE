@@ -97,7 +97,7 @@ public:
 private:
     File logFile;
     CriticalSection logLock;
-    FileOutputStream* logStream;
+    ScopedPointer <FileOutputStream> logStream;
 
     void trimFileSize (int maxFileSizeBytes) const;
 

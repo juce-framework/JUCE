@@ -36,14 +36,6 @@ DrawableButton::DrawableButton (const String& name,
                                 const DrawableButton::ButtonStyle buttonStyle)
     : Button (name),
       style (buttonStyle),
-      normalImage (0),
-      overImage (0),
-      downImage (0),
-      disabledImage (0),
-      normalImageOn (0),
-      overImageOn (0),
-      downImageOn (0),
-      disabledImageOn (0),
       edgeIndent (3)
 {
     if (buttonStyle == ImageOnButtonBackground)
@@ -66,14 +58,6 @@ DrawableButton::~DrawableButton()
 //==============================================================================
 void DrawableButton::deleteImages()
 {
-    deleteAndZero (normalImage);
-    deleteAndZero (overImage);
-    deleteAndZero (downImage);
-    deleteAndZero (disabledImage);
-    deleteAndZero (normalImageOn);
-    deleteAndZero (overImageOn);
-    deleteAndZero (downImageOn);
-    deleteAndZero (disabledImageOn);
 }
 
 void DrawableButton::setImages (const Drawable* normal,

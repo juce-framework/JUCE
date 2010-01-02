@@ -150,7 +150,7 @@ private:
     friend class ZipInputStream;
     CriticalSection lock;
     InputStream* inputStream;
-    InputSource* inputSource;
+    ScopedPointer <InputSource> inputSource;
 
     bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;

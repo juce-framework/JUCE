@@ -2693,9 +2693,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
                   16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39, 132,117,151,116,132,146,248,60,209,138,
                   98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-            Image* const image = ImageFileFormat::loadFrom ((const char*) dragHandData, sizeof (dragHandData));
+            const ScopedPointer <Image> image (ImageFileFormat::loadFrom ((const char*) dragHandData, sizeof (dragHandData)));
             dragHandCursor = juce_createMouseCursorFromImage (*image, 8, 7);
-            delete image;
         }
 
         return dragHandCursor;

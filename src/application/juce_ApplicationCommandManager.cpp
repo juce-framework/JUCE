@@ -49,7 +49,7 @@ ApplicationCommandManager::ApplicationCommandManager()
 ApplicationCommandManager::~ApplicationCommandManager()
 {
     Desktop::getInstance().removeFocusChangeListener (this);
-    deleteAndZero (keyMappings);
+    keyMappings = 0;
 }
 
 //==============================================================================

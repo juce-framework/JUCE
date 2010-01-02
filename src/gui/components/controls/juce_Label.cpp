@@ -38,10 +38,8 @@ Label::Label (const String& componentName,
       text (labelText),
       font (15.0f),
       justification (Justification::centredLeft),
-      editor (0),
       listeners (2),
       ownerComponent (0),
-      deletionWatcher (0),
       horizontalBorderSize (3),
       verticalBorderSize (1),
       minimumHorizontalScale (0.7f),
@@ -59,10 +57,7 @@ Label::~Label()
     if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
         ownerComponent->removeComponentListener (this);
 
-    deleteAndZero (deletionWatcher);
-
-    if (editor != 0)
-        delete editor;
+    editor = 0;
 }
 
 //==============================================================================
@@ -136,7 +131,7 @@ void Label::attachToComponent (Component* owner,
     if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
         ownerComponent->removeComponentListener (this);
 
-    deleteAndZero (deletionWatcher);
+    deletionWatcher = 0;
     ownerComponent = owner;
 
     leftOfOwnerComp = onLeft;
@@ -251,7 +246,7 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents();
 
-        deleteAndZero (editor);
+        editor = 0;
         repaint();
 
         if (changed)

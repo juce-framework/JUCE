@@ -43,17 +43,15 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
 
 static void* juce_cursorFromData (const unsigned char* data, const int size, float hx, float hy) throw()
 {
-    Image* const im = ImageFileFormat::loadFrom ((const char*) data, size);
+    ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) data, size));
     jassert (im != 0);
 
     if (im == 0)
         return 0;
 
-    void* const curs = juce_createMouseCursorFromImage (*im,
-                                                        (int) (hx * im->getWidth()),
-                                                        (int) (hy * im->getHeight()));
-    delete im;
-    return curs;
+    return juce_createMouseCursorFromImage (*im,
+                                            (int) (hx * im->getWidth()),
+                                            (int) (hy * im->getHeight()));
 }
 
 static void* juce_cursorFromWebKitFile (const char* filename, float hx, float hy)

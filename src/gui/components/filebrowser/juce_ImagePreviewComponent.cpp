@@ -34,13 +34,11 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ImagePreviewComponent::ImagePreviewComponent()
-    : currentThumbnail (0)
 {
 }
 
 ImagePreviewComponent::~ImagePreviewComponent()
 {
-    delete currentThumbnail;
 }
 
 //==============================================================================
@@ -70,11 +68,11 @@ void ImagePreviewComponent::timerCallback()
 {
     stopTimer();
 
-    deleteAndZero (currentThumbnail);
+    currentThumbnail = 0;
     currentDetails = String::empty;
     repaint();
 
-    FileInputStream* const in = fileToLoad.createInputStream();
+    ScopedPointer <FileInputStream> in (fileToLoad.createInputStream());
 
     if (in != 0)
     {
@@ -97,14 +95,9 @@ void ImagePreviewComponent::timerCallback()
 
                 getThumbSize (w, h);
 
-                Image* const reduced = currentThumbnail->createCopy (w, h);
-
-                delete currentThumbnail;
-                currentThumbnail = reduced;
+                currentThumbnail = currentThumbnail->createCopy (w, h);
             }
         }
-
-        delete in;
     }
 }
 

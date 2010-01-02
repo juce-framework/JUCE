@@ -55,7 +55,6 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
 ThreadWithProgressWindow::~ThreadWithProgressWindow()
 {
     stopThread (timeOutMsWhenCancelling);
-    delete alertWindow;
 }
 
 bool ThreadWithProgressWindow::runThread (const int priority)

@@ -682,7 +682,6 @@ public:
         destroyWindow();
 
         windowH = 0;
-        delete repainter;
     }
 
     //==============================================================================
@@ -1714,7 +1713,6 @@ private:
     public:
         LinuxRepaintManager (LinuxComponentPeer* const peer_)
             : peer (peer_),
-              image (0),
               lastTimeImageUsed (0)
         {
 #if JUCE_USE_XSHM
@@ -1736,7 +1734,6 @@ private:
 
         ~LinuxRepaintManager()
         {
-            delete image;
         }
 
         void timerCallback()
@@ -1749,7 +1746,7 @@ private:
             else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
             {
                 stopTimer();
-                deleteAndZero (image);
+                image = 0;
             }
         }
 
@@ -1772,8 +1769,6 @@ private:
                 if (image == 0 || image->getWidth() < totalArea.getWidth()
                      || image->getHeight() < totalArea.getHeight())
                 {
-                    delete image;
-
 #if JUCE_USE_XSHM
                     image = new XBitmapImage (useARGBImagesForRendering ? Image::ARGB
                                                                         : Image::RGB,
@@ -1816,7 +1811,7 @@ private:
 
     private:
         LinuxComponentPeer* const peer;
-        XBitmapImage* image;
+        ScopedPointer <XBitmapImage> image;
         uint32 lastTimeImageUsed;
         RectangleList regionsNeedingRepaint;
 
@@ -1827,7 +1822,7 @@ private:
         const LinuxRepaintManager& operator= (const LinuxRepaintManager&);
     };
 
-    LinuxRepaintManager* repainter;
+    ScopedPointer <LinuxRepaintManager> repainter;
 
     friend class LinuxRepaintManager;
     Window windowH, parentWindow;
@@ -2800,11 +2795,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            Image* const im = ImageFileFormat::loadFrom ((const char*) dragHandData, dragHandDataSize);
-            void* const dragHandCursor = juce_createMouseCursorFromImage (*im, 8, 7);
-            delete im;
-
-            return dragHandCursor;
+            const ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) dragHandData, dragHandDataSize));
+            return juce_createMouseCursorFromImage (*im, 8, 7);
         }
 
         case MouseCursor::CopyingCursor:
@@ -2817,11 +2809,8 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            Image* const im = ImageFileFormat::loadFrom ((const char*) copyCursorData, copyCursorSize);
-            void* const copyCursor = juce_createMouseCursorFromImage (*im, 1, 3);
-            delete im;
-
-            return copyCursor;
+            const ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) copyCursorData, copyCursorSize));
+            return juce_createMouseCursorFromImage (*im, 1, 3);
         }
 
         case MouseCursor::WaitCursor:

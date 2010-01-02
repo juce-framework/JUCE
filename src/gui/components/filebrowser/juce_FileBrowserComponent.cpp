@@ -146,7 +146,7 @@ FileBrowserComponent::~FileBrowserComponent()
         removeChildComponent (previewComp);
 
     deleteAllChildren();
-    deleteAndZero (fileList);
+    fileList = 0;
     thread.stopThread (10000);
 }
 

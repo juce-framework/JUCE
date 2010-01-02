@@ -242,9 +242,7 @@ FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
 
 FileTreeComponent::~FileTreeComponent()
 {
-    TreeViewItem* const root = getRootItem();
-    setRootItem (0);
-    delete root;
+    deleteRootItem();
 }
 
 //==============================================================================

@@ -165,14 +165,8 @@ protected:
 private:
     //==============================================================================
     ButtonStyle style;
-    Drawable* normalImage;
-    Drawable* overImage;
-    Drawable* downImage;
-    Drawable* disabledImage;
-    Drawable* normalImageOn;
-    Drawable* overImageOn;
-    Drawable* downImageOn;
-    Drawable* disabledImageOn;
+    ScopedPointer <Drawable> normalImage, overImage, downImage, disabledImage;
+    ScopedPointer <Drawable> normalImageOn, overImageOn, downImageOn, disabledImageOn;
     Colour backgroundOff, backgroundOn;
     int edgeIndent;
 

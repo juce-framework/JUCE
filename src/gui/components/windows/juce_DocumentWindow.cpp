@@ -48,12 +48,8 @@ DocumentWindow::DocumentWindow (const String& title,
       positionTitleBarButtonsOnLeft (false),
 #endif
       drawTitleTextCentred (true),
-      titleBarIcon (0),
-      menuBar (0),
       menuBarModel (0)
 {
-    zeromem (titleBarButtons, sizeof (titleBarButtons));
-
     setResizeLimits (128, 128, 32768, 32768);
 
     lookAndFeelChanged();
@@ -61,11 +57,10 @@ DocumentWindow::DocumentWindow (const String& title,
 
 DocumentWindow::~DocumentWindow()
 {
-    for (int i = 0; i < 3; ++i)
-        delete titleBarButtons[i];
+    for (int i = numElementsInArray (titleBarButtons); --i >= 0;)
+        titleBarButtons[i] = 0;
 
-    delete titleBarIcon;
-    delete menuBar;
+    menuBar = 0;
 }
 
 //==============================================================================
@@ -87,11 +82,7 @@ void DocumentWindow::setName (const String& newName)
 
 void DocumentWindow::setIcon (const Image* imageToUse)
 {
-    deleteAndZero (titleBarIcon);
-
-    if (imageToUse != 0)
-        titleBarIcon = imageToUse->createCopy();
-
+    titleBarIcon = imageToUse != 0 ? imageToUse->createCopy() : 0;
     repaintTitleBar();
 }
 
@@ -121,7 +112,6 @@ void DocumentWindow::setMenuBar (MenuBarModel* menuBarModel_,
 {
     if (menuBarModel != menuBarModel_)
     {
-        delete menuBar;
         menuBar = 0;
 
         menuBarModel = menuBarModel_;
@@ -302,8 +292,8 @@ int DocumentWindow::getDesktopWindowStyleFlags() const
 void DocumentWindow::lookAndFeelChanged()
 {
     int i;
-    for (i = 0; i < 3; ++i)
-        deleteAndZero (titleBarButtons[i]);
+    for (i = numElementsInArray (titleBarButtons); --i >= 0;)
+        titleBarButtons[i] = 0;
 
     if (! isUsingNativeTitleBar())
     {
@@ -353,7 +343,7 @@ void DocumentWindow::activeWindowStatusChanged()
 {
     ResizableWindow::activeWindowStatusChanged();
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = numElementsInArray (titleBarButtons); --i >= 0;)
         if (titleBarButtons[i] != 0)
             titleBarButtons[i]->setEnabled (isActiveWindow());
 

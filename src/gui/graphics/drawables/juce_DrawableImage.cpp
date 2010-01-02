@@ -51,12 +51,7 @@ DrawableImage::~DrawableImage()
 void DrawableImage::clearImage()
 {
     if (canDeleteImage && image != 0)
-    {
-        if (ImageCache::isImageInCache (image))
-            ImageCache::release (image);
-        else
-            delete image;
-    }
+        ImageCache::releaseOrDelete (image);
 
     image = 0;
 }

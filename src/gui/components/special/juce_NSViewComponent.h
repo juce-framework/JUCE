@@ -79,7 +79,7 @@ public:
 
 private:
     friend class NSViewComponentInternal;
-    NSViewComponentInternal* info;
+    ScopedPointer <NSViewComponentInternal> info;
 
     NSViewComponent (const NSViewComponent&);
     const NSViewComponent& operator= (const NSViewComponent&);

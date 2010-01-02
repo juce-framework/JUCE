@@ -72,8 +72,6 @@ AudioThumbnail::AudioThumbnail (const int orginalSamplesPerThumbnailSample_,
                                 AudioThumbnailCache& cacheToUse)
     : formatManagerToUse (formatManagerToUse_),
       cache (cacheToUse),
-      source (0),
-      reader (0),
       orginalSamplesPerThumbnailSample (orginalSamplesPerThumbnailSample_)
 {
     clear();
@@ -84,9 +82,7 @@ AudioThumbnail::~AudioThumbnail()
     cache.removeThumbnail (this);
 
     const ScopedLock sl (readerLock);
-    deleteAndZero (reader);
-
-    delete source;
+    reader = 0;
 }
 
 void AudioThumbnail::setSource (InputSource* const newSource)
@@ -94,9 +90,7 @@ void AudioThumbnail::setSource (InputSource* const newSource)
     cache.removeThumbnail (this);
     timerCallback(); // stops the timer and deletes the reader
 
-    delete source;
     source = newSource;
-
     clear();
 
     if (newSource != 0
@@ -170,7 +164,7 @@ void AudioThumbnail::timerCallback()
     stopTimer();
 
     const ScopedLock sl (readerLock);
-    deleteAndZero (reader);
+    reader = 0;
 }
 
 void AudioThumbnail::clear()

@@ -36,6 +36,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../application/juce_Application.h"
+#include "../../../containers/juce_ScopedPointer.h"
 
 static const int titleH = 24;
 static const int iconWidth = 80;
@@ -614,14 +615,12 @@ private:
         LookAndFeel& lf = associatedComponent->isValidComponent() ? associatedComponent->getLookAndFeel()
                                                                   : LookAndFeel::getDefaultLookAndFeel();
 
-        Component* const alertBox = lf.createAlertWindow (title, message, button1, button2, button3,
-                                                          iconType, numButtons, associatedComponent);
+        ScopedPointer <Component> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
+                                                                  iconType, numButtons, associatedComponent));
 
         jassert (alertBox != 0); // you have to return one of these!
 
-        const int result = alertBox->runModalLoop();
-        delete alertBox;
-        return result;
+        return alertBox->runModalLoop();
     }
 
     static void* showCallback (void* userData)

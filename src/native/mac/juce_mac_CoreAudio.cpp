@@ -719,7 +719,7 @@ public:
     CoreAudioInternal* getRelatedDevice() const
     {
         UInt32 size = 0;
-        CoreAudioInternal* result = 0;
+        ScopedPointer <CoreAudioInternal> result;
 
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyRelatedDevices;
@@ -749,13 +749,13 @@ public:
                              || (result->inChanNames.size() + result->outChanNames.size()) == 0)
                             break;
 
-                        deleteAndZero (result);
+                        result = 0;
                     }
                 }
             }
         }
 
-        return result;
+        return result.release();
     }
 
     //==============================================================================

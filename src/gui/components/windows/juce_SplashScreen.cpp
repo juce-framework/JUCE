@@ -35,18 +35,14 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 SplashScreen::SplashScreen()
-    : backgroundImage (0),
-      isImageInCache (false)
+    : backgroundImage (0)
 {
     setOpaque (true);
 }
 
 SplashScreen::~SplashScreen()
 {
-    if (isImageInCache)
-        ImageCache::release (backgroundImage);
-    else
-        delete backgroundImage;
+    ImageCache::releaseOrDelete (backgroundImage);
 }
 
 //==============================================================================
@@ -62,8 +58,6 @@ void SplashScreen::show (const String& title,
 
     if (backgroundImage_ != 0)
     {
-        isImageInCache = ImageCache::isImageInCache (backgroundImage_);
-
         setOpaque (! backgroundImage_->hasAlphaChannel());
 
         show (title,

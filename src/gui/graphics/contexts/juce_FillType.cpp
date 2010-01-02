@@ -33,12 +33,12 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 FillType::FillType() throw()
-    : colour (0xff000000), gradient (0), image (0)
+    : colour (0xff000000), image (0)
 {
 }
 
 FillType::FillType (const Colour& colour_) throw()
-    : colour (colour_), gradient (0), image (0)
+    : colour (colour_), image (0)
 {
 }
 
@@ -48,8 +48,7 @@ FillType::FillType (const ColourGradient& gradient_) throw()
 }
 
 FillType::FillType (const Image& image_, const AffineTransform& transform_) throw()
-    : colour (0xff000000), gradient (0),
-      image (&image_), transform (transform_)
+    : colour (0xff000000), image (&image_), transform (transform_)
 {
 }
 
@@ -65,7 +64,6 @@ const FillType& FillType::operator= (const FillType& other) throw()
     if (this != &other)
     {
         colour = other.colour;
-        delete gradient;
         gradient = (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0);
         image = other.image;
         transform = other.transform;
@@ -76,12 +74,11 @@ const FillType& FillType::operator= (const FillType& other) throw()
 
 FillType::~FillType() throw()
 {
-    delete gradient;
 }
 
 void FillType::setColour (const Colour& newColour) throw()
 {
-    deleteAndZero (gradient);
+    gradient = 0;
     image = 0;
     colour = newColour;
 }
@@ -102,7 +99,7 @@ void FillType::setGradient (const ColourGradient& newGradient) throw()
 
 void FillType::setTiledImage (const Image& image_, const AffineTransform& transform_) throw()
 {
-    deleteAndZero (gradient);
+    gradient = 0;
     image = &image_;
     transform = transform_;
     colour = Colours::black;

@@ -104,20 +104,15 @@ Drawable* Drawable::createFromImageData (const void* data, const int numBytes)
         const String asString (String::createStringFromData (data, numBytes));
 
         XmlDocument doc (asString);
-        XmlElement* const outer = doc.getDocumentElement (true);
+        ScopedPointer <XmlElement> outer (doc.getDocumentElement (true));
 
         if (outer != 0 && outer->hasTagName (T("svg")))
         {
-            XmlElement* const svg = doc.getDocumentElement();
+            ScopedPointer <XmlElement> svg (doc.getDocumentElement());
 
             if (svg != 0)
-            {
                 result = Drawable::createFromSVG (*svg);
-                delete svg;
-            }
         }
-
-        delete outer;
     }
 
     return result;
@@ -133,15 +128,9 @@ Drawable* Drawable::createFromImageDataStream (InputStream& dataSource)
 
 Drawable* Drawable::createFromImageFile (const File& file)
 {
-    FileInputStream* fin = file.createInputStream();
+    const ScopedPointer <FileInputStream> fin (file.createInputStream());
 
-    if (fin == 0)
-        return 0;
-
-    Drawable* d = createFromImageDataStream (*fin);
-    delete fin;
-
-    return d;
+    return fin != 0 ? createFromImageDataStream (*fin) : 0;
 }
 
 //==============================================================================

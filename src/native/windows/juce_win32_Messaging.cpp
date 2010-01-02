@@ -66,9 +66,8 @@ static LRESULT CALLBACK juce_MessageWndProc (HWND h,
             }
             else if (message == broadcastId)
             {
-                String* const messageString = (String*) lParam;
+                const ScopedPointer <String> messageString ((String*) lParam);
                 MessageManager::getInstance()->deliverBroadcastMessage (*messageString);
-                delete messageString;
                 return 0;
             }
             else if (message == WM_COPYDATA && ((const COPYDATASTRUCT*) lParam)->dwData == broadcastId)

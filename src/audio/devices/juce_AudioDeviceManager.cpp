@@ -59,12 +59,10 @@ AudioDeviceManager::AudioDeviceManager()
     : currentAudioDevice (0),
       numInputChansNeeded (0),
       numOutputChansNeeded (2),
-      lastExplicitSettings (0),
       listNeedsScanning (true),
       useInputNames (false),
       inputLevelMeasurementEnabledCount (0),
       inputLevel (0),
-      testSound (0),
       tempBuffer (2, 2),
       enabledMidiInputs (4),
       midiCallbacks (4),
@@ -78,10 +76,8 @@ AudioDeviceManager::AudioDeviceManager()
 
 AudioDeviceManager::~AudioDeviceManager()
 {
-    deleteAndZero (currentAudioDevice);
-    deleteAndZero (defaultMidiOutput);
-    delete lastExplicitSettings;
-    delete testSound;
+    currentAudioDevice = 0;
+    defaultMidiOutput = 0;
 }
 
 
@@ -164,7 +160,6 @@ const String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
 
     if (e != 0 && e->hasTagName (T("DEVICESETUP")))
     {
-        delete lastExplicitSettings;
         lastExplicitSettings = new XmlElement (*e);
 
         String error;
@@ -324,7 +319,7 @@ void AudioDeviceManager::getAudioDeviceSetup (AudioDeviceSetup& setup)
 
 void AudioDeviceManager::deleteCurrentDevice()
 {
-    deleteAndZero (currentAudioDevice);
+    currentAudioDevice = 0;
     currentSetup.inputDeviceName = String::empty;
     currentSetup.outputDeviceName = String::empty;
 }
@@ -526,13 +521,13 @@ void AudioDeviceManager::stopDevice()
     if (currentAudioDevice != 0)
         currentAudioDevice->stop();
 
-    deleteAndZero (testSound);
+    testSound = 0;
 }
 
 void AudioDeviceManager::closeAudioDevice()
 {
     stopDevice();
-    deleteAndZero (currentAudioDevice);
+    currentAudioDevice = 0;
 }
 
 void AudioDeviceManager::restartLastAudioDevice()
@@ -556,7 +551,6 @@ void AudioDeviceManager::restartLastAudioDevice()
 
 void AudioDeviceManager::updateXml()
 {
-    delete lastExplicitSettings;
     lastExplicitSettings = new XmlElement (T("DEVICESETUP"));
 
     lastExplicitSettings->setAttribute (T("deviceType"), currentDeviceType);
@@ -719,10 +713,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
         testSoundPosition += numSamps;
         if (testSoundPosition >= testSound->getNumSamples())
-        {
-            delete testSound;
             testSound = 0;
-        }
     }
 }
 
@@ -887,7 +878,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& deviceName)
             for (int i = oldCallbacks.size(); --i >= 0;)
                 oldCallbacks.getUnchecked(i)->audioDeviceStopped();
 
-        deleteAndZero (defaultMidiOutput);
+        defaultMidiOutput = 0;
         defaultMidiOutputName = deviceName;
 
         if (deviceName.isNotEmpty())
@@ -936,8 +927,7 @@ void AudioDeviceManager::CallbackHandler::handleIncomingMidiMessage (MidiInput* 
 void AudioDeviceManager::playTestSound()
 {
     audioCallbackLock.enter();
-    AudioSampleBuffer* oldSound = testSound;
-    testSound = 0;
+    AudioSampleBuffer* oldSound = testSound.release();
     audioCallbackLock.exit();
     delete oldSound;
 

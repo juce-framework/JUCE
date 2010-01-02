@@ -102,10 +102,7 @@ public:
     void clear() throw()
     {
         for (int i = atoms.size(); --i >= 0;)
-        {
-            TextAtom* const atom = getAtom(i);
-            delete atom;
-        }
+            delete getAtom(i);
 
         atoms.clear();
     }

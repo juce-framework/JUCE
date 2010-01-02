@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_MD5.h"
 #include "../io/files/juce_FileInputStream.h"
+#include "../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -115,17 +116,12 @@ MD5::MD5 (InputStream& input, int numBytesToRead)
 
 MD5::MD5 (const File& file)
 {
-    FileInputStream* const fin = file.createInputStream();
+    const ScopedPointer <FileInputStream> fin (file.createInputStream());
 
     if (fin != 0)
-    {
         processStream (*fin, -1);
-        delete fin;
-    }
     else
-    {
         zeromem (result, sizeof (result));
-    }
 }
 
 MD5::~MD5()

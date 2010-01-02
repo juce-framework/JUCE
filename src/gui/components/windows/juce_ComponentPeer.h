@@ -377,7 +377,7 @@ protected:
 private:
     //==============================================================================
     Component* lastFocusedComponent;
-    ComponentDeletionWatcher* dragAndDropTargetComponent;
+    ScopedPointer <ComponentDeletionWatcher> dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 

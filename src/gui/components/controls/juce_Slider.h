@@ -751,7 +751,7 @@ private:
     Label* valueBox;
     Button* incButton;
     Button* decButton;
-    Component* popupDisplay;
+    ScopedPointer <Component> popupDisplay;
     Component* parentForPopupDisplay;
 
     float getLinearSliderPos (const double value);

@@ -193,9 +193,8 @@ ApplicationCommandTarget::CommandTargetMessageInvoker::~CommandTargetMessageInvo
 
 void ApplicationCommandTarget::CommandTargetMessageInvoker::handleMessage (const Message& message)
 {
-    InvocationInfo* const info = (InvocationInfo*) message.pointerParameter;
+    const ScopedPointer <InvocationInfo> info ((InvocationInfo*) message.pointerParameter);
     owner->tryToInvoke (*info, false);
-    delete info;
 }
 
 
