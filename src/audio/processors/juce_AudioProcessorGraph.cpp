@@ -508,7 +508,7 @@ public:
           totalChans (jmax (1, totalChans_)),
           midiBufferToUse (midiBufferToUse_)
     {
-        channels = (float**) juce_calloc (sizeof (float*) * totalChans);
+        channels.calloc (totalChans);
 
         while (audioChannelsToUse.size() < totalChans)
             audioChannelsToUse.add (0);
@@ -516,7 +516,6 @@ public:
 
     ~ProcessBufferOp() throw()
     {
-        juce_free (channels);
     }
 
     void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples) throw()
@@ -534,7 +533,7 @@ public:
 
 private:
     Array <int> audioChannelsToUse;
-    float** channels;
+    HeapBlock <float*> channels;
     int totalChans;
     int midiBufferToUse;
 

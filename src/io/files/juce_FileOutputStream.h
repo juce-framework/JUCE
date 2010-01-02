@@ -84,7 +84,7 @@ private:
     void* fileHandle;
     int64 currentPosition;
     int bufferSize, bytesInBuffer;
-    char* buffer;
+    HeapBlock <char> buffer;
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__

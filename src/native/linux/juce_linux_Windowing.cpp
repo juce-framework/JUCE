@@ -392,7 +392,7 @@ static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& i
 {
     const int width = image.getWidth();
     const int height = image.getHeight();
-    uint32* const colour = (uint32*) juce_malloc (width * height * sizeof (uint32));
+    HeapBlock <uint32> colour (width * height);
     int index = 0;
 
     for (int y = 0; y < height; ++y)
@@ -408,7 +408,6 @@ static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& i
     GC gc = XCreateGC (display, pixmap, 0, 0);
     XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
     XFreeGC (display, gc);
-    juce_free (colour);
 
     return pixmap;
 }
@@ -418,7 +417,8 @@ static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& ima
     const int width = image.getWidth();
     const int height = image.getHeight();
     const int stride = (width + 7) >> 3;
-    uint8* const mask = (uint8*) juce_calloc (stride * height);
+    HeapBlock <uint8> mask;
+    mask.calloc (stride * height);
     const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
     for (int y = 0; y < height; ++y)
@@ -433,12 +433,8 @@ static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& ima
         }
     }
 
-    Pixmap pixmap = XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                                 (char*) mask, width, height, 1, 0, 1);
-
-    juce_free (mask);
-
-    return pixmap;
+    return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
+                                        (char*) mask, width, height, 1, 0, 1);
 }
 
 
@@ -506,7 +502,8 @@ public:
         if (! usingXShm)
 #endif
         {
-            imageData = (uint8*) juce_malloc (lineStride * h);
+            imageDataAllocated.malloc (lineStride * h);
+            imageData = imageDataAllocated;
 
             if (format_ == ARGB && clearImage)
                 zeromem (imageData, h * lineStride);
@@ -534,7 +531,8 @@ public:
                 const int pixelStride = 2;
                 const int lineStride = ((w * pixelStride + 3) & ~3);
 
-                xImage->data = (char*) juce_malloc (lineStride * h);
+                imageData16Bit.malloc (lineStride * h);
+                xImage->data = imageData16Bit;
                 xImage->bitmap_pad = 16;
                 xImage->depth = pixelStride * 8;
                 xImage->bytes_per_line = lineStride;
@@ -567,13 +565,9 @@ public:
         else
 #endif
         {
-            juce_free (xImage->data);
             xImage->data = 0;
             XDestroyImage (xImage);
         }
-
-        if (! is16Bit)
-            imageData = 0; // to stop the base class freeing this (for the 16-bit version we want it to free it)
     }
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
@@ -629,6 +623,7 @@ public:
 private:
     XImage* xImage;
     const bool is16Bit;
+    HeapBlock <char> imageData16Bit;
 
 #if JUCE_USE_XSHM
     XShmSegmentInfo segmentInfo;
@@ -1094,7 +1089,7 @@ public:
     void setIcon (const Image& newIcon)
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        unsigned long* const data = (unsigned long*) juce_malloc (dataSize * sizeof (uint32));
+        HeapBlock <unsigned long> data (dataSize);
 
         int index = 0;
         data[index++] = newIcon.getWidth();
@@ -1108,8 +1103,6 @@ public:
                          XInternAtom (display, "_NET_WM_ICON", False),
                          XA_CARDINAL, 32, PropModeReplace,
                          (unsigned char*) data, dataSize);
-
-        juce_free (data);
 
         deleteIconPixmaps();
 
@@ -2739,8 +2732,9 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     }
 
     const int stride = (cursorW + 7) >> 3;
-    uint8* const maskPlane = (uint8*) juce_calloc (stride * cursorH);
-    uint8* const sourcePlane = (uint8*) juce_calloc (stride * cursorH);
+    HeapBlock <uint8> maskPlane, sourcePlane;
+    maskPlane.calloc (stride * cursorH);
+    sourcePlane.calloc (stride * cursorH);
 
     const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
@@ -2763,9 +2757,6 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
 
     Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, (char*) sourcePlane, cursorW, cursorH, 0xffff, 0, 1);
     Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, (char*) maskPlane, cursorW, cursorH, 0xffff, 0, 1);
-
-    juce_free (maskPlane);
-    juce_free (sourcePlane);
 
     XColor white, black;
     black.red = black.green = black.blue = 0;

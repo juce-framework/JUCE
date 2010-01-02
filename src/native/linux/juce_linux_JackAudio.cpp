@@ -127,8 +127,6 @@ public:
           outputId (outputId_),
           isOpen_ (false),
           callback (0),
-          inChans (0),
-          outChans (0),
           totalNumberOfInputChannels (0),
           totalNumberOfOutputChannels (0)
     {
@@ -167,8 +165,8 @@ public:
                                                                      JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
             }
 
-            inChans = (float**) juce_calloc (sizeof (float*) * (totalNumberOfInputChannels + 2));
-            outChans = (float**) juce_calloc (sizeof (float*) * (totalNumberOfOutputChannels + 2));
+            inChans.calloc (totalNumberOfInputChannels + 2);
+            outChans.calloc (totalNumberOfOutputChannels + 2);
         }
     }
 
@@ -180,9 +178,6 @@ public:
             JUCE_NAMESPACE::jack_client_close (client);
             client = 0;
         }
-
-        juce_free (inChans);
-        juce_free (outChans);
     }
 
     const StringArray getChannelNames (bool forInput) const
@@ -447,8 +442,7 @@ private:
     AudioIODeviceCallback* callback;
     CriticalSection callbackLock;
 
-    float** inChans;
-    float** outChans;
+    HeapBlock <float*> inChans, outChans;
     int totalNumberOfInputChannels;
     int totalNumberOfOutputChannels;
     VoidArray inputPorts, outputPorts;

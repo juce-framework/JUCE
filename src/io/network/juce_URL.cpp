@@ -550,7 +550,7 @@ const StringPairArray& URL::getMimeTypesOfUploadFiles() const throw()
 const String URL::removeEscapeChars (const String& s)
 {
     const int len = s.length();
-    uint8* const resultUTF8 = (uint8*) juce_calloc (len * 4);
+    HeapBlock <uint8> resultUTF8 (len * 4);
     uint8* r = resultUTF8;
 
     for (int i = 0; i < len; ++i)
@@ -572,9 +572,7 @@ const String URL::removeEscapeChars (const String& s)
         *r++ = c;
     }
 
-    const String stringResult (String::fromUTF8 (resultUTF8));
-    juce_free (resultUTF8);
-    return stringResult;
+    return String::fromUTF8 (resultUTF8);
 }
 
 const String URL::addEscapeChars (const String& s, const bool isParameter)

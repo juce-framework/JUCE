@@ -88,7 +88,6 @@ public:
          optionalDllForDirectLoading (optionalDllForDirectLoading_),
          currentBitDepth (16),
          currentSampleRate (0),
-         tempBuffer (0),
          isOpen_ (false),
          isStarted (false),
          postOutput (true),
@@ -115,8 +114,6 @@ public:
         close();
         log ("ASIO - exiting");
         removeCurrentDriver();
-
-        juce_free (tempBuffer);
     }
 
     void updateSampleRates()
@@ -451,9 +448,7 @@ public:
             {
                 buffersCreated = true;
 
-                juce_free (tempBuffer);
-
-                tempBuffer = (float*) juce_calloc (totalBuffers * currentBlockSizeSamples * sizeof (float) + 128);
+                tempBuffer.calloc (totalBuffers * currentBlockSizeSamples + 32);
 
                 int n = 0;
                 Array <int> types;
@@ -840,7 +835,7 @@ private:
     bool outputChannelLittleEndian [maxASIOChannels];
 
     WaitableEvent event1;
-    float* tempBuffer;
+    HeapBlock <float> tempBuffer;
     int volatile bufferIndex, numActiveInputChans, numActiveOutputChans;
 
     bool isOpen_, isStarted;

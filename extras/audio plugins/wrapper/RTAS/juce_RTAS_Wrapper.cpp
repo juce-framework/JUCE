@@ -159,7 +159,6 @@ public:
     JucePlugInProcess()
         : midiBufferNode (0),
           midiTransport (0),
-          channels (0),
           prepared (false),
           sampleRate (44100.0)
     {
@@ -183,7 +182,6 @@ public:
             juceFilter->releaseResources();
 
         delete juceFilter;
-        juce_free (channels);
 
         if (--numInstances == 0)
             shutdownJuce_GUI();
@@ -509,9 +507,8 @@ protected:
             sampleRate = gProcessGroup->GetSampleRate();
             jassert (sampleRate > 0);
 
-            juce_free (channels);
-            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(),
-                                                                      juceFilter->getNumOutputChannels()));
+            channels.calloc (jmax (juceFilter->getNumInputChannels(),
+                                   juceFilter->getNumOutputChannels()));
 
             juceFilter->setPlayConfigDetails (fNumInputs, fNumOutputs,
                                               sampleRate, mRTGlobals->mHWBufferSizeInSamples);
@@ -807,7 +804,7 @@ private:
     DirectMidiPacket midiBuffer [midiBufferSize];
 
     JUCE_NAMESPACE::MemoryBlock tempFilterData;
-    float** channels;
+    HeapBlock <float*> channels;
     bool prepared;
     double sampleRate;
 

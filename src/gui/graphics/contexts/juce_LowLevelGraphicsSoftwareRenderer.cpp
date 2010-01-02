@@ -41,13 +41,13 @@ BEGIN_JUCE_NAMESPACE
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
+#if JUCE_MSVC && JUCE_DEBUG
+ #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
+#endif
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4127) // "expression is constant" warning
-
- #if JUCE_DEBUG
-  #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
- #endif
 #endif
 
 //==============================================================================
@@ -520,12 +520,11 @@ public:
           maxY (srcData_.height - 1),
           scratchSize (2048)
     {
-        scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+        scratchBuffer.malloc (scratchSize);
     }
 
     ~TransformedImageFillEdgeTableRenderer() throw()
     {
-        juce_free (scratchBuffer);
     }
 
     forcedinline void setEdgeTableYPos (const int newY) throw()
@@ -550,8 +549,7 @@ public:
         if (width > scratchSize)
         {
             scratchSize = width;
-            juce_free (scratchBuffer);
-            scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+            scratchBuffer.malloc (scratchSize);
         }
 
         SrcPixelType* span = scratchBuffer;
@@ -582,8 +580,7 @@ public:
         if (width > scratchSize)
         {
             scratchSize = width;
-            juce_free (scratchBuffer);
-            scratchBuffer = (SrcPixelType*) juce_malloc (scratchSize * sizeof (SrcPixelType));
+            scratchBuffer.malloc (scratchSize);
         }
 
         uint8* mask = (uint8*) scratchBuffer;
@@ -893,7 +890,7 @@ private:
     const int pixelOffsetInt, maxX, maxY;
     int y;
     DestPixelType* linePixels;
-    SrcPixelType* scratchBuffer;
+    HeapBlock <SrcPixelType> scratchBuffer;
     int scratchSize;
 
     TransformedImageFillEdgeTableRenderer (const TransformedImageFillEdgeTableRenderer&);
@@ -983,8 +980,8 @@ public:
                 transform = AffineTransform::identity;
             }
 
-            int numLookupEntries;
-            PixelARGB* const lookupTable = g2.createLookupTable (transform, numLookupEntries);
+            HeapBlock <PixelARGB> lookupTable;
+            const int numLookupEntries = g2.createLookupTable (transform, lookupTable);
             jassert (numLookupEntries > 0);
 
             switch (image.getFormat())
@@ -993,8 +990,6 @@ public:
                 case Image::RGB:    renderGradient (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity, (PixelRGB*) 0); break;
                 default:            renderGradient (et, destData, g2, transform, lookupTable, numLookupEntries, isIdentity, (PixelAlpha*) 0); break;
             }
-
-            juce_free (lookupTable);
         }
         else if (fillType.isTiledImage())
         {

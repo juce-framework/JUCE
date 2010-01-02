@@ -30,6 +30,7 @@
 #include "juce_ScopedLock.h"
 #include "../text/juce_StringArray.h"
 #include "../containers/juce_VoidArray.h"
+#include "../containers/juce_HeapBlock.h"
 class ThreadPool;
 class ThreadPoolThread;
 
@@ -299,7 +300,7 @@ public:
 private:
     const int numThreads, threadStopTimeout;
     int priority;
-    Thread** threads;
+    HeapBlock <Thread*> threads;
     VoidArray jobs;
 
     CriticalSection lock;

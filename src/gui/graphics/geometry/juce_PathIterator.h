@@ -110,7 +110,7 @@ private:
     float tolerence, subPathCloseX, subPathCloseY;
     bool isIdentityTransform;
 
-    float* stackBase;
+    HeapBlock <float> stackBase;
     float* stackPos;
     int index, stackSize;
 

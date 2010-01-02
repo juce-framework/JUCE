@@ -769,7 +769,7 @@ private:
     MidiBuffer incomingMidi;
     VSTMidiEventList midiEventsToSend;
     VstTimeInfo vstHostTime;
-    float** channels;
+    HeapBlock <float*> channels;
 
     ReferenceCountedObjectPtr <ModuleHandle> module;
 
@@ -808,7 +808,6 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
       initialised (false),
       isPowerOn (false),
       tempBuffer (1, 1),
-      channels (0),
       module (module_)
 {
     try
@@ -894,9 +893,6 @@ VSTPluginInstance::~VSTPluginInstance()
         module = 0;
         effect = 0;
     }
-
-    juce_free (channels);
-    channels = 0;
 }
 
 //==============================================================================
@@ -964,8 +960,7 @@ void VSTPluginInstance::prepareToPlay (double sampleRate_,
 
     setLatencySamples (effect->initialDelay);
 
-    juce_free (channels);
-    channels = (float**) juce_calloc (sizeof (float*) * jmax (16, getNumOutputChannels() + 2, getNumInputChannels() + 2));
+    channels.calloc (jmax (16, getNumOutputChannels(), getNumInputChannels()) + 2);
 
     vstHostTime.tempo = 120.0;
     vstHostTime.timeSigNumerator = 4;
@@ -1020,8 +1015,7 @@ void VSTPluginInstance::releaseResources()
     incomingMidi.clear();
 
     midiEventsToSend.freeEvents();
-    juce_free (channels);
-    channels = 0;
+    channels.free();
 }
 
 void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,

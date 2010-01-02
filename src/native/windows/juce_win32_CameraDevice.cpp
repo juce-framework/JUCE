@@ -196,14 +196,14 @@ public:
             if (getPin (filter, PINDIR_OUTPUT, &pin))
             {
                 ComSmartPtr <IAMPushSource> pushSource;
-                hr = pin->QueryInterface (IID_IAMPushSource, (void**) &pushSource);
+                HRESULT hr = pin->QueryInterface (IID_IAMPushSource, (void**) &pushSource);
 
                 if (pushSource != 0)
                 {
                     REFERENCE_TIME latency = 0;
-                    hr = ps->GetLatency (&latency);
+                    hr = pushSource->GetLatency (&latency);
 
-                    firstRecordedTime -= RelativeTime ((double) latency);
+                    firstRecordedTime = firstRecordedTime - RelativeTime ((double) latency);
                 }
             }
         }

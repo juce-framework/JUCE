@@ -276,17 +276,17 @@ public:
                         bwavSize = length;
 
                         // Broadcast-wav extension chunk..
-                        BWAVChunk* const bwav = (BWAVChunk*) juce_calloc (jmax (length + 1, (int) sizeof (BWAVChunk)));
+                        HeapBlock <BWAVChunk> bwav;
+                        bwav.calloc (jmax (length + 1, (int) sizeof (BWAVChunk)), 1);
                         input->read (bwav, length);
                         bwav->copyTo (metadataValues);
-                        juce_free (bwav);
                     }
                     else if (chunkType == chunkName ("smpl"))
                     {
-                        SMPLChunk* const smpl = (SMPLChunk*) juce_calloc (jmax (length + 1, (int) sizeof (SMPLChunk)));
+                        HeapBlock <SMPLChunk> smpl;
+                        smpl.calloc (jmax (length + 1, (int) sizeof (SMPLChunk)), 1);
                         input->read (smpl, length);
                         smpl->copyTo (metadataValues, length);
-                        juce_free (smpl);
                     }
                     else if (chunkEnd <= input->getPosition())
                     {

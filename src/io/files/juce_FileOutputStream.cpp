@@ -58,7 +58,7 @@ FileOutputStream::FileOutputStream (const File& f,
         }
     }
 
-    buffer = (char*) juce_malloc (jmax (bufferSize_, 16));
+    buffer.malloc (jmax (bufferSize_, 16));
 }
 
 FileOutputStream::~FileOutputStream()
@@ -66,7 +66,6 @@ FileOutputStream::~FileOutputStream()
     flush();
 
     juce_fileClose (fileHandle);
-    juce_free (buffer);
 }
 
 int64 FileOutputStream::getPosition()

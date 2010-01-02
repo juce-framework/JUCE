@@ -49,7 +49,7 @@ using namespace zlibNamespace;
 class GZIPCompressorHelper
 {
 private:
-    z_stream* stream;
+    HeapBlock <z_stream> stream;
     uint8* data;
     int dataSize, compLevel, strategy;
     bool setParams;
@@ -66,7 +66,7 @@ public:
           finished (false),
           shouldFinish (false)
     {
-        stream = (z_stream*) juce_calloc (sizeof (z_stream));
+        stream.calloc (1);
 
         if (deflateInit2 (stream,
                           compLevel,
@@ -75,18 +75,14 @@ public:
                           8,
                           strategy) != Z_OK)
         {
-            juce_free (stream);
-            stream = 0;
+            stream.free();
         }
     }
 
     ~GZIPCompressorHelper()
     {
         if (stream != 0)
-        {
             deflateEnd (stream);
-            juce_free (stream);
-        }
     }
 
     bool needsInput() const throw()
@@ -143,14 +139,14 @@ GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const dest
                                                         const bool deleteDestStream_,
                                                         const bool noWrap)
   : destStream (destStream_),
-    deleteDestStream (deleteDestStream_)
+    deleteDestStream (deleteDestStream_),
+    buffer (gzipCompBufferSize)
 {
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
 
     helper = new GZIPCompressorHelper (compressionLevel, noWrap);
 
-    buffer = (uint8*) juce_malloc (gzipCompBufferSize);
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
@@ -159,8 +155,6 @@ GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
 
     GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
     delete h;
-
-    juce_free (buffer);
 
     if (deleteDestStream)
         delete destStream;

@@ -30,6 +30,7 @@
 #include "../streams/juce_InputStream.h"
 #include "../streams/juce_InputSource.h"
 #include "../../threads/juce_CriticalSection.h"
+#include "../../containers/juce_VoidArray.h"
 
 
 //==============================================================================

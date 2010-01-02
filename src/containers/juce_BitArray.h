@@ -28,6 +28,7 @@
 
 #include "../text/juce_String.h"
 #include "juce_Array.h"
+#include "juce_HeapBlock.h"
 class MemoryBlock;
 
 
@@ -334,7 +335,7 @@ public:
 
 private:
     void ensureSize (const int numVals) throw();
-    unsigned int* values;
+    HeapBlock <unsigned int> values;
     int numValues, highestBit;
     bool negative;
 };

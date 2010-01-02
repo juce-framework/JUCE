@@ -77,16 +77,11 @@ public:
          started (false),
          sampleRate (0),
          bufferSize (512),
-         audioBuffer (0),
          numInputChans (0),
          numOutputChans (0),
          callbacksAllowed (true),
          numInputChannelInfos (0),
-         numOutputChannelInfos (0),
-         tempInputBuffers (0),
-         tempOutputBuffers (0),
-         inputChannelInfo (0),
-         outputChannelInfo (0)
+         numOutputChannelInfos (0)
     {
         jassert (deviceID != 0);
 
@@ -111,24 +106,15 @@ public:
 
         stop (false);
         delete inputDevice;
-
-        juce_free (audioBuffer);
-        juce_free (tempInputBuffers);
-        juce_free (tempOutputBuffers);
-        juce_free (inputChannelInfo);
-        juce_free (outputChannelInfo);
     }
 
     void allocateTempBuffers()
     {
         const int tempBufSize = bufferSize + 4;
-        juce_free (audioBuffer);
-        audioBuffer = (float*) juce_calloc ((numInputChans + numOutputChans) * tempBufSize * sizeof (float));
+        audioBuffer.calloc ((numInputChans + numOutputChans) * tempBufSize);
 
-        juce_free (tempInputBuffers);
-        tempInputBuffers = (float**) juce_calloc (sizeof (float*) * (numInputChans + 2));
-        juce_free (tempOutputBuffers);
-        tempOutputBuffers = (float**) juce_calloc (sizeof (float*) * (numOutputChans + 2));
+        tempInputBuffers.calloc (numInputChans + 2);
+        tempOutputBuffers.calloc (numOutputChans + 2);
 
         int i, count = 0;
         for (i = 0; i < numInputChans; ++i)
@@ -151,7 +137,8 @@ public:
 
         if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
-            AudioBufferList* const bufList = (AudioBufferList*) juce_calloc (size);
+            HeapBlock <AudioBufferList> bufList;
+            bufList.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
             {
@@ -211,8 +198,6 @@ public:
                     }
                 }
             }
-
-            juce_free (bufList);
         }
     }
 
@@ -252,7 +237,8 @@ public:
 
         if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
-            AudioValueRange* ranges = (AudioValueRange*) juce_calloc (size);
+            HeapBlock <AudioValueRange> ranges;
+            ranges.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
             {
@@ -273,8 +259,6 @@ public:
                 if (bufferSize > 0)
                     bufferSizes.addIfNotAlreadyThere (bufferSize);
             }
-
-            juce_free (ranges);
         }
 
         if (bufferSizes.size() == 0 && bufferSize > 0)
@@ -288,7 +272,8 @@ public:
 
         if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
-            AudioValueRange* ranges = (AudioValueRange*) juce_calloc (size);
+            HeapBlock <AudioValueRange> ranges;
+            ranges.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, ranges)))
             {
@@ -307,8 +292,6 @@ public:
                     }
                 }
             }
-
-            juce_free (ranges);
         }
 
         if (sampleRates.size() == 0 && sampleRate > 0)
@@ -340,12 +323,10 @@ public:
         inChanNames.clear();
         outChanNames.clear();
 
-        juce_free (inputChannelInfo);
-        inputChannelInfo = (CallbackDetailsForChannel*) juce_calloc (sizeof (CallbackDetailsForChannel) * (numInputChans + 2));
+        inputChannelInfo.calloc (numInputChans + 2);
         numInputChannelInfos = 0;
 
-        juce_free (outputChannelInfo);
-        outputChannelInfo = (CallbackDetailsForChannel*) juce_calloc (sizeof (CallbackDetailsForChannel) * (numOutputChans + 2));
+        outputChannelInfo.calloc (numOutputChans + 2);
         numOutputChannelInfos = 0;
 
         fillInChannelInfo (true);
@@ -356,36 +337,31 @@ public:
     const StringArray getSources (bool input)
     {
         StringArray s;
-        int num = 0;
-        OSType* types = getAllDataSourcesForDevice (deviceID, input, num);
+        HeapBlock <OSType> types;
+        const int num = getAllDataSourcesForDevice (deviceID, input, types);
 
-        if (types != 0)
+        for (int i = 0; i < num; ++i)
         {
-            for (int i = 0; i < num; ++i)
+            AudioValueTranslation avt;
+            char buffer[256];
+
+            avt.mInputData = (void*) &(types[i]);
+            avt.mInputDataSize = sizeof (UInt32);
+            avt.mOutputData = buffer;
+            avt.mOutputDataSize = 256;
+
+            UInt32 transSize = sizeof (avt);
+
+            AudioObjectPropertyAddress pa;
+            pa.mSelector = kAudioDevicePropertyDataSourceNameForID;
+            pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+            pa.mElement = kAudioObjectPropertyElementMaster;
+
+            if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &transSize, &avt)))
             {
-                AudioValueTranslation avt;
-                char buffer[256];
-
-                avt.mInputData = (void*) &(types[i]);
-                avt.mInputDataSize = sizeof (UInt32);
-                avt.mOutputData = buffer;
-                avt.mOutputDataSize = 256;
-
-                UInt32 transSize = sizeof (avt);
-
-                AudioObjectPropertyAddress pa;
-                pa.mSelector = kAudioDevicePropertyDataSourceNameForID;
-                pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-                pa.mElement = kAudioObjectPropertyElementMaster;
-
-                if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &transSize, &avt)))
-                {
-                    DBG (buffer);
-                    s.add (buffer);
-                }
+                DBG (buffer);
+                s.add (buffer);
             }
-
-            juce_free (types);
         }
 
         return s;
@@ -406,21 +382,16 @@ public:
         {
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &currentSourceID)))
             {
-                int num = 0;
-                OSType* const types = getAllDataSourcesForDevice (deviceID, input, num);
+                HeapBlock <OSType> types;
+                const int num = getAllDataSourcesForDevice (deviceID, input, types);
 
-                if (types != 0)
+                for (int i = 0; i < num; ++i)
                 {
-                    for (int i = 0; i < num; ++i)
+                    if (types[num] == currentSourceID)
                     {
-                        if (types[num] == currentSourceID)
-                        {
-                            result = i;
-                            break;
-                        }
+                        result = i;
+                        break;
                     }
-
-                    juce_free (types);
                 }
             }
         }
@@ -432,24 +403,19 @@ public:
     {
         if (deviceID != 0)
         {
-            int num = 0;
-            OSType* types = getAllDataSourcesForDevice (deviceID, input, num);
+            HeapBlock <OSType> types;
+            const int num = getAllDataSourcesForDevice (deviceID, input, types);
 
-            if (types != 0)
+            if (((unsigned int) index) < (unsigned int) num)
             {
-                if (((unsigned int) index) < (unsigned int) num)
-                {
-                    AudioObjectPropertyAddress pa;
-                    pa.mSelector = kAudioDevicePropertyDataSource;
-                    pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-                    pa.mElement = kAudioObjectPropertyElementMaster;
+                AudioObjectPropertyAddress pa;
+                pa.mSelector = kAudioDevicePropertyDataSource;
+                pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+                pa.mElement = kAudioObjectPropertyElementMaster;
 
-                    OSType typeId = types[index];
+                OSType typeId = types[index];
 
-                    OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (typeId), &typeId));
-                }
-
-                juce_free (types);
+                OK (AudioObjectSetPropertyData (deviceID, &pa, 0, 0, sizeof (typeId), &typeId));
             }
         }
     }
@@ -764,7 +730,8 @@ public:
              && AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size) == noErr
              && size > 0)
         {
-            AudioDeviceID* devs = (AudioDeviceID*) juce_calloc (size);
+            HeapBlock <AudioDeviceID> devs;
+            devs.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, devs)))
             {
@@ -786,8 +753,6 @@ public:
                     }
                 }
             }
-
-            juce_free (devs);
         }
 
         return result;
@@ -815,7 +780,7 @@ private:
     bool started;
     double sampleRate;
     int bufferSize;
-    float* audioBuffer;
+    HeapBlock <float> audioBuffer;
     int numInputChans, numOutputChans;
     bool callbacksAllowed;
 
@@ -827,10 +792,8 @@ private:
     };
 
     int numInputChannelInfos, numOutputChannelInfos;
-    CallbackDetailsForChannel* inputChannelInfo;
-    CallbackDetailsForChannel* outputChannelInfo;
-    float** tempInputBuffers;
-    float** tempOutputBuffers;
+    HeapBlock <CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
+    HeapBlock <float*> tempInputBuffers, tempOutputBuffers;
 
     CoreAudioInternal (const CoreAudioInternal&);
     const CoreAudioInternal& operator= (const CoreAudioInternal&);
@@ -875,34 +838,24 @@ private:
     }
 
     //==============================================================================
-    static OSType* getAllDataSourcesForDevice (AudioDeviceID deviceID, const bool input, int& num)
+    static int getAllDataSourcesForDevice (AudioDeviceID deviceID, const bool input, HeapBlock <OSType>& types)
     {
-        OSType* types = 0;
-        UInt32 size = 0;
-        num = 0;
-
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyDataSources;
         pa.mScope = kAudioObjectPropertyScopeWildcard;
         pa.mElement = kAudioObjectPropertyElementMaster;
+        UInt32 size = 0;
 
         if (deviceID != 0
              && OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
-            types = (OSType*) juce_calloc (size);
+            types.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, types)))
-            {
-                num = size / sizeof (OSType);
-            }
-            else
-            {
-                juce_free (types);
-                types = 0;
-            }
+                return size / sizeof (OSType);
         }
 
-        return types;
+        return 0;
     }
 };
 
@@ -1193,7 +1146,8 @@ public:
 
         if (OK (AudioObjectGetPropertyDataSize (kAudioObjectSystemObject, &pa, 0, 0, &size)))
         {
-            AudioDeviceID* const devs = (AudioDeviceID*) juce_calloc (size);
+            HeapBlock <AudioDeviceID> devs;
+            devs.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, devs)))
             {
@@ -1231,8 +1185,6 @@ public:
 
                 alreadyLogged = true;
             }
-
-            juce_free (devs);
         }
 
         inputDeviceNames.appendNumbersToDuplicates (false, true);
@@ -1340,7 +1292,8 @@ private:
 
         if (OK (AudioObjectGetPropertyDataSize (deviceID, &pa, 0, 0, &size)))
         {
-            AudioBufferList* const bufList = (AudioBufferList*) juce_calloc (size);
+            HeapBlock <AudioBufferList> bufList;
+            bufList.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, bufList)))
             {
@@ -1352,8 +1305,6 @@ private:
                     total += b.mNumberChannels;
                 }
             }
-
-            juce_free (bufList);
         }
 
         return total;

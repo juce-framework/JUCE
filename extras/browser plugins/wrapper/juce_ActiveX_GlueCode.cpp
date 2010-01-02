@@ -124,7 +124,9 @@ public:
             }
             else
             {
-                var* args = (var*) juce_calloc (sizeof (var) * numArgs);
+                HeapBlock <var> args;
+                args.calloc (numArgs);
+
                 for (int j = 0; j < numArgs; ++j)
                     args[(numArgs - 1) - j] = variantTojuceVar (pDispParams->rgvarg[j]);
 
@@ -132,8 +134,6 @@ public:
 
                 for (int j = 0; j < numArgs; ++j)
                     args[j] = var();
-
-                juce_free (args);
             }
 
             if (pVarResult != 0)
@@ -329,7 +329,8 @@ public:
         DISPID id = 0;
         if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK)
         {
-            VARIANT* params = (VARIANT*) juce_calloc (sizeof (VARIANT) * (numParameters + 1));
+            HeapBlock <VARIANT> params;
+            params.calloc (numParameters + 1);
 
             for (int i = 0; i < numParameters; ++i)
                 juceVarToVariant (parameters[(numParameters - 1) - i], params[i]);
@@ -352,8 +353,6 @@ public:
                 returnValue = variantTojuceVar (result);
                 VariantClear (&result);
             }
-
-            juce_free (params);
         }
 
         return returnValue;
@@ -558,7 +557,8 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
 
     if (size > 0)
     {
-        void* const exeInfo = juce_calloc (size);
+        HeapBlock <char> exeInfo;
+        exeInfo.calloc (size);
 
         if (GetFileVersionInfo (exeFileName, 0, size, exeInfo))
         {
@@ -577,8 +577,6 @@ static const String getExeVersion (const String& exeFileName, const String& fiel
 
             resultString = String (result, resultLen);
         }
-
-        juce_free (exeInfo);
     }
 
     return resultString;

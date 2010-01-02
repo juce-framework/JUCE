@@ -211,7 +211,6 @@ public:
     {
         DeleteDC (hdc);
         DeleteObject (hBitmap);
-        imageData = 0; // to stop the base class freeing this
     }
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
@@ -1814,415 +1813,415 @@ public:
 private:
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
+        if (isValidPeer (this))
         {
-            if (isValidPeer (this))
+            switch (message)
             {
-                switch (message)
-                {
-                    case WM_NCHITTEST:
-                        if (hasTitleBar())
-                            break;
+                //==============================================================================
+                case WM_NCHITTEST:
+                    if ((styleFlags & windowIgnoresMouseClicks) != 0)
+                        return HTTRANSPARENT;
 
-                        return HTCLIENT;
+                    if (hasTitleBar())
+                        break;
 
-                    //==============================================================================
-                    case WM_PAINT:
+                    return HTCLIENT;
+
+                //==============================================================================
+                case WM_PAINT:
+                    handlePaintMessage();
+                    return 0;
+
+                case WM_NCPAINT:
+                    if (wParam != 1)
                         handlePaintMessage();
-                        return 0;
 
-                    case WM_NCPAINT:
-                        if (wParam != 1)
-                            handlePaintMessage();
+                    if (hasTitleBar())
+                        break;
 
-                        if (hasTitleBar())
-                            break;
+                    return 0;
 
-                        return 0;
+                case WM_ERASEBKGND:
+                case WM_NCCALCSIZE:
+                    if (hasTitleBar())
+                        break;
 
-                    case WM_ERASEBKGND:
-                    case WM_NCCALCSIZE:
-                        if (hasTitleBar())
-                            break;
+                    return 1;
 
-                        return 1;
+                //==============================================================================
+                case WM_MOUSEMOVE:
+                    doMouseMove (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
+                    return 0;
 
-                    //==============================================================================
-                    case WM_MOUSEMOVE:
-                        doMouseMove (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
-                        return 0;
+                case WM_MOUSELEAVE:
+                    doMouseExit();
+                    return 0;
 
-                    case WM_MOUSELEAVE:
-                        doMouseExit();
-                        return 0;
+                case WM_LBUTTONDOWN:
+                case WM_MBUTTONDOWN:
+                case WM_RBUTTONDOWN:
+                    doMouseDown (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
+                    return 0;
 
-                    case WM_LBUTTONDOWN:
-                    case WM_MBUTTONDOWN:
-                    case WM_RBUTTONDOWN:
-                        doMouseDown (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
-                        return 0;
+                case WM_LBUTTONUP:
+                case WM_MBUTTONUP:
+                case WM_RBUTTONUP:
+                    doMouseUp (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
+                    return 0;
 
-                    case WM_LBUTTONUP:
-                    case WM_MBUTTONUP:
-                    case WM_RBUTTONUP:
-                        doMouseUp (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
-                        return 0;
+                case WM_CAPTURECHANGED:
+                    doCaptureChanged();
+                    return 0;
 
-                    case WM_CAPTURECHANGED:
-                        doCaptureChanged();
-                        return 0;
+                case WM_NCMOUSEMOVE:
+                    if (hasTitleBar())
+                        break;
 
-                    case WM_NCMOUSEMOVE:
-                        if (hasTitleBar())
-                            break;
+                    return 0;
 
-                        return 0;
+                case 0x020A: /* WM_MOUSEWHEEL */
+                    doMouseWheel (wParam, true);
+                    return 0;
 
-                    case 0x020A: /* WM_MOUSEWHEEL */
-                        doMouseWheel (wParam, true);
-                        return 0;
+                case 0x020E: /* WM_MOUSEHWHEEL */
+                    doMouseWheel (wParam, false);
+                    return 0;
 
-                    case 0x020E: /* WM_MOUSEHWHEEL */
-                        doMouseWheel (wParam, false);
-                        return 0;
+                //==============================================================================
+                case WM_WINDOWPOSCHANGING:
+                    if ((styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+                    {
+                        WINDOWPOS* const wp = (WINDOWPOS*) lParam;
 
-                    //==============================================================================
-                    case WM_WINDOWPOSCHANGING:
-                        if ((styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable))
+                        if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE))
                         {
-                            WINDOWPOS* const wp = (WINDOWPOS*) lParam;
-
-                            if ((wp->flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE))
+                            if (constrainer != 0)
                             {
-                                if (constrainer != 0)
-                                {
-                                    const Rectangle current (component->getX() - windowBorder.getLeft(),
-                                                             component->getY() - windowBorder.getTop(),
-                                                             component->getWidth() + windowBorder.getLeftAndRight(),
-                                                             component->getHeight() + windowBorder.getTopAndBottom());
+                                const Rectangle current (component->getX() - windowBorder.getLeft(),
+                                                         component->getY() - windowBorder.getTop(),
+                                                         component->getWidth() + windowBorder.getLeftAndRight(),
+                                                         component->getHeight() + windowBorder.getTopAndBottom());
 
-                                    constrainer->checkBounds (wp->x, wp->y, wp->cx, wp->cy,
-                                                              current,
-                                                              Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                              wp->y != current.getY() && wp->y + wp->cy == current.getBottom(),
-                                                              wp->x != current.getX() && wp->x + wp->cx == current.getRight(),
-                                                              wp->y == current.getY() && wp->y + wp->cy != current.getBottom(),
-                                                              wp->x == current.getX() && wp->x + wp->cx != current.getRight());
-                                }
+                                constrainer->checkBounds (wp->x, wp->y, wp->cx, wp->cy,
+                                                          current,
+                                                          Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
+                                                          wp->y != current.getY() && wp->y + wp->cy == current.getBottom(),
+                                                          wp->x != current.getX() && wp->x + wp->cx == current.getRight(),
+                                                          wp->y == current.getY() && wp->y + wp->cy != current.getBottom(),
+                                                          wp->x == current.getX() && wp->x + wp->cx != current.getRight());
                             }
                         }
+                    }
 
+                    return 0;
+
+                case WM_WINDOWPOSCHANGED:
+                    handleMovedOrResized();
+
+                    if (dontRepaint)
+                        break;  // needed for non-accelerated openGL windows to draw themselves correctly..
+
+                    return 0;
+
+                //==============================================================================
+                case WM_KEYDOWN:
+                case WM_SYSKEYDOWN:
+                    if (doKeyDown (wParam))
                         return 0;
 
-                    case WM_WINDOWPOSCHANGED:
-                        handleMovedOrResized();
+                    break;
 
-                        if (dontRepaint)
-                            break;  // needed for non-accelerated openGL windows to draw themselves correctly..
-                        else
-                            return 0;
-
-                    //==============================================================================
-                    case WM_KEYDOWN:
-                    case WM_SYSKEYDOWN:
-                        if (doKeyDown (wParam))
-                            return 0;
-
-                        break;
-
-                    case WM_KEYUP:
-                    case WM_SYSKEYUP:
-                        if (doKeyUp (wParam))
-                            return 0;
-
-                        break;
-
-                    case WM_CHAR:
-                        if (doKeyChar ((int) wParam, lParam))
-                            return 0;
-
-                        break;
-
-                    case WM_APPCOMMAND:
-                        if (doAppCommand (lParam))
-                            return TRUE;
-
-                        break;
-
-                    //==============================================================================
-                    case WM_SETFOCUS:
-                        updateKeyModifiers();
-                        handleFocusGain();
-                        break;
-
-                    case WM_KILLFOCUS:
-                        if (hasCreatedCaret)
-                        {
-                            hasCreatedCaret = false;
-                            DestroyCaret();
-                        }
-
-                        handleFocusLoss();
-                        break;
-
-                    case WM_ACTIVATEAPP:
-                        // Windows does weird things to process priority when you swap apps,
-                        // so this forces an update when the app is brought to the front
-                        if (wParam != FALSE)
-                            juce_repeatLastProcessPriority();
-                        else
-                            Desktop::getInstance().setKioskModeComponent (0); // turn kiosk mode off if we lose focus
-
-                        juce_CheckCurrentlyFocusedTopLevelWindow();
-                        modifiersAtLastCallback = -1;
+                case WM_KEYUP:
+                case WM_SYSKEYUP:
+                    if (doKeyUp (wParam))
                         return 0;
 
-                    case WM_ACTIVATE:
-                        if (LOWORD (wParam) == WA_ACTIVE || LOWORD (wParam) == WA_CLICKACTIVE)
-                        {
-                            modifiersAtLastCallback = -1;
-                            updateKeyModifiers();
+                    break;
 
-                            if (isMinimised())
-                            {
-                                component->repaint();
-                                handleMovedOrResized();
-
-                                if (! isValidMessageListener())
-                                    return 0;
-                            }
-
-                            if (LOWORD (wParam) == WA_CLICKACTIVE
-                                 && component->isCurrentlyBlockedByAnotherModalComponent())
-                            {
-                                int mx, my;
-                                component->getMouseXYRelative (mx, my);
-                                Component* const underMouse = component->getComponentAt (mx, my);
-
-                                if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
-                                    Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
-
-                                return 0;
-                            }
-
-                            handleBroughtToFront();
-
-                            if (component->isCurrentlyBlockedByAnotherModalComponent())
-                                Component::getCurrentlyModalComponent()->toFront (true);
-
-                            return 0;
-                        }
-
-                        break;
-
-                    case WM_NCACTIVATE:
-                        // while a temporary window is being shown, prevent Windows from deactivating the
-                        // title bars of our main windows.
-                        if (wParam == 0 && ! shouldDeactivateTitleBar)
-                            wParam = TRUE; // change this and let it get passed to the DefWindowProc.
-
-                        break;
-
-                    case WM_MOUSEACTIVATE:
-                        if (! component->getMouseClickGrabsKeyboardFocus())
-                            return MA_NOACTIVATE;
-
-                        break;
-
-                    case WM_SHOWWINDOW:
-                        if (wParam != 0)
-                            handleBroughtToFront();
-
-                        break;
-
-                    case WM_CLOSE:
-                        if (! component->isCurrentlyBlockedByAnotherModalComponent())
-                            handleUserClosingWindow();
-
+                case WM_CHAR:
+                    if (doKeyChar ((int) wParam, lParam))
                         return 0;
 
-                    case WM_QUIT:
-                        if (JUCEApplication::getInstance() != 0)
-                            JUCEApplication::getInstance()->systemRequestedQuit();
-                        return 0;
+                    break;
 
-                    case WM_QUERYENDSESSION:
-                        if (JUCEApplication::getInstance() != 0)
-                        {
-                            JUCEApplication::getInstance()->systemRequestedQuit();
-                            return MessageManager::getInstance()->hasStopMessageBeenSent();
-                        }
+                case WM_APPCOMMAND:
+                    if (doAppCommand (lParam))
                         return TRUE;
 
-                    //==============================================================================
-                    case WM_TRAYNOTIFY:
+                    break;
+
+                //==============================================================================
+                case WM_SETFOCUS:
+                    updateKeyModifiers();
+                    handleFocusGain();
+                    break;
+
+                case WM_KILLFOCUS:
+                    if (hasCreatedCaret)
+                    {
+                        hasCreatedCaret = false;
+                        DestroyCaret();
+                    }
+
+                    handleFocusLoss();
+                    break;
+
+                case WM_ACTIVATEAPP:
+                    // Windows does weird things to process priority when you swap apps,
+                    // so this forces an update when the app is brought to the front
+                    if (wParam != FALSE)
+                        juce_repeatLastProcessPriority();
+                    else
+                        Desktop::getInstance().setKioskModeComponent (0); // turn kiosk mode off if we lose focus
+
+                    juce_CheckCurrentlyFocusedTopLevelWindow();
+                    modifiersAtLastCallback = -1;
+                    return 0;
+
+                case WM_ACTIVATE:
+                    if (LOWORD (wParam) == WA_ACTIVE || LOWORD (wParam) == WA_CLICKACTIVE)
+                    {
+                        modifiersAtLastCallback = -1;
+                        updateKeyModifiers();
+
+                        if (isMinimised())
+                        {
+                            component->repaint();
+                            handleMovedOrResized();
+
+                            if (! isValidMessageListener())
+                                return 0;
+                        }
+
+                        if (LOWORD (wParam) == WA_CLICKACTIVE
+                             && component->isCurrentlyBlockedByAnotherModalComponent())
+                        {
+                            int mx, my;
+                            component->getMouseXYRelative (mx, my);
+                            Component* const underMouse = component->getComponentAt (mx, my);
+
+                            if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
+                                Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+
+                            return 0;
+                        }
+
+                        handleBroughtToFront();
+
                         if (component->isCurrentlyBlockedByAnotherModalComponent())
+                            Component::getCurrentlyModalComponent()->toFront (true);
+
+                        return 0;
+                    }
+
+                    break;
+
+                case WM_NCACTIVATE:
+                    // while a temporary window is being shown, prevent Windows from deactivating the
+                    // title bars of our main windows.
+                    if (wParam == 0 && ! shouldDeactivateTitleBar)
+                        wParam = TRUE; // change this and let it get passed to the DefWindowProc.
+
+                    break;
+
+                case WM_MOUSEACTIVATE:
+                    if (! component->getMouseClickGrabsKeyboardFocus())
+                        return MA_NOACTIVATE;
+
+                    break;
+
+                case WM_SHOWWINDOW:
+                    if (wParam != 0)
+                        handleBroughtToFront();
+
+                    break;
+
+                case WM_CLOSE:
+                    if (! component->isCurrentlyBlockedByAnotherModalComponent())
+                        handleUserClosingWindow();
+
+                    return 0;
+
+                case WM_QUIT:
+                    if (JUCEApplication::getInstance() != 0)
+                        JUCEApplication::getInstance()->systemRequestedQuit();
+                    return 0;
+
+                case WM_QUERYENDSESSION:
+                    if (JUCEApplication::getInstance() != 0)
+                    {
+                        JUCEApplication::getInstance()->systemRequestedQuit();
+                        return MessageManager::getInstance()->hasStopMessageBeenSent();
+                    }
+                    return TRUE;
+
+                //==============================================================================
+                case WM_TRAYNOTIFY:
+                    if (component->isCurrentlyBlockedByAnotherModalComponent())
+                    {
+                        if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
+                             || lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
                         {
-                            if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN
-                                 || lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
-                            {
-                                Component* const current = Component::getCurrentlyModalComponent();
+                            Component* const current = Component::getCurrentlyModalComponent();
 
-                                if (current != 0)
-                                    current->inputAttemptWhenModal();
-                            }
+                            if (current != 0)
+                                current->inputAttemptWhenModal();
                         }
-                        else
+                    }
+                    else
+                    {
+                        const int oldModifiers = currentModifiers;
+
+                        MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
+                                      getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
+
+                        if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
+                            e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::leftButtonModifier);
+                        else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
+                            e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::rightButtonModifier);
+
+                        if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
                         {
-                            const int oldModifiers = currentModifiers;
+                            SetFocus (hwnd);
+                            SetForegroundWindow (hwnd);
 
-                            MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
-                                          getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
-
-                            if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
-                                e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::leftButtonModifier);
-                            else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
-                                e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::rightButtonModifier);
-
-                            if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
-                            {
-                                SetFocus (hwnd);
-                                SetForegroundWindow (hwnd);
-
-                                component->mouseDown (e);
-                            }
-                            else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
-                            {
-                                e.mods = ModifierKeys (oldModifiers);
-                                component->mouseUp (e);
-                            }
-                            else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
-                            {
-                                e.mods = ModifierKeys (oldModifiers);
-                                component->mouseDoubleClick (e);
-                            }
-                            else if (lParam == WM_MOUSEMOVE)
-                            {
-                                component->mouseMove (e);
-                            }
+                            component->mouseDown (e);
                         }
+                        else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
+                        {
+                            e.mods = ModifierKeys (oldModifiers);
+                            component->mouseUp (e);
+                        }
+                        else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
+                        {
+                            e.mods = ModifierKeys (oldModifiers);
+                            component->mouseDoubleClick (e);
+                        }
+                        else if (lParam == WM_MOUSEMOVE)
+                        {
+                            component->mouseMove (e);
+                        }
+                    }
+
+                    break;
+
+                //==============================================================================
+                case WM_SYNCPAINT:
+                    return 0;
+
+                case WM_PALETTECHANGED:
+                    InvalidateRect (h, 0, 0);
+                    break;
+
+                case WM_DISPLAYCHANGE:
+                    InvalidateRect (h, 0, 0);
+                    createPaletteIfNeeded = true;
+                    // intentional fall-through...
+                case WM_SETTINGCHANGE:  // note the fall-through in the previous case!
+                    doSettingChange();
+                    break;
+
+                case WM_INITMENU:
+                    if (! hasTitleBar())
+                    {
+                        if (isFullScreen())
+                        {
+                            EnableMenuItem ((HMENU) wParam, SC_RESTORE, MF_BYCOMMAND | MF_ENABLED);
+                            EnableMenuItem ((HMENU) wParam, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
+                        }
+                        else if (! isMinimised())
+                        {
+                            EnableMenuItem ((HMENU) wParam, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
+                        }
+                    }
+                    break;
+
+                case WM_SYSCOMMAND:
+                    switch (wParam & 0xfff0)
+                    {
+                    case SC_CLOSE:
+                        if (sendInputAttemptWhenModalMessage())
+                            return 0;
+
+                        if (hasTitleBar())
+                        {
+                            PostMessage (h, WM_CLOSE, 0, 0);
+                            return 0;
+                        }
+                        break;
+
+                    case SC_KEYMENU:
+                        // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very
+                        // obscure situations that can arise if a modal loop is started from an alt-key
+                        // keypress).
+
+                        if (hasTitleBar() && h == GetCapture())
+                            ReleaseCapture();
 
                         break;
 
-                    //==============================================================================
-                    case WM_SYNCPAINT:
+                    case SC_MAXIMIZE:
+                        if (sendInputAttemptWhenModalMessage())
+                            return 0;
+
+                        setFullScreen (true);
                         return 0;
 
-                    case WM_PALETTECHANGED:
-                        InvalidateRect (h, 0, 0);
-                        break;
+                    case SC_MINIMIZE:
+                        if (sendInputAttemptWhenModalMessage())
+                            return 0;
 
-                    case WM_DISPLAYCHANGE:
-                        InvalidateRect (h, 0, 0);
-                        createPaletteIfNeeded = true;
-                        // intentional fall-through...
-                    case WM_SETTINGCHANGE:  // note the fall-through in the previous case!
-                        doSettingChange();
-                        break;
-
-                    case WM_INITMENU:
                         if (! hasTitleBar())
+                        {
+                            setMinimised (true);
+                            return 0;
+                        }
+                        break;
+
+                    case SC_RESTORE:
+                        if (sendInputAttemptWhenModalMessage())
+                            return 0;
+
+                        if (hasTitleBar())
                         {
                             if (isFullScreen())
                             {
-                                EnableMenuItem ((HMENU) wParam, SC_RESTORE, MF_BYCOMMAND | MF_ENABLED);
-                                EnableMenuItem ((HMENU) wParam, SC_MOVE, MF_BYCOMMAND | MF_GRAYED);
-                            }
-                            else if (! isMinimised())
-                            {
-                                EnableMenuItem ((HMENU) wParam, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
+                                setFullScreen (false);
+                                return 0;
                             }
                         }
-                        break;
-
-                    case WM_SYSCOMMAND:
-                        switch (wParam & 0xfff0)
+                        else
                         {
-                        case SC_CLOSE:
-                            if (sendInputAttemptWhenModalMessage())
-                                return 0;
+                            if (isMinimised())
+                                setMinimised (false);
+                            else if (isFullScreen())
+                                setFullScreen (false);
 
-                            if (hasTitleBar())
-                            {
-                                PostMessage (h, WM_CLOSE, 0, 0);
-                                return 0;
-                            }
-                            break;
-
-                        case SC_KEYMENU:
-                            // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very
-                            // obscure situations that can arise if a modal loop is started from an alt-key
-                            // keypress).
-
-                            if (hasTitleBar() && h == GetCapture())
-                                ReleaseCapture();
-
-                            break;
-
-                        case SC_MAXIMIZE:
-                            if (sendInputAttemptWhenModalMessage())
-                                return 0;
-
-                            setFullScreen (true);
                             return 0;
-
-                        case SC_MINIMIZE:
-                            if (sendInputAttemptWhenModalMessage())
-                                return 0;
-
-                            if (! hasTitleBar())
-                            {
-                                setMinimised (true);
-                                return 0;
-                            }
-                            break;
-
-                        case SC_RESTORE:
-                            if (sendInputAttemptWhenModalMessage())
-                                return 0;
-
-                            if (hasTitleBar())
-                            {
-                                if (isFullScreen())
-                                {
-                                    setFullScreen (false);
-                                    return 0;
-                                }
-                            }
-                            else
-                            {
-                                if (isMinimised())
-                                    setMinimised (false);
-                                else if (isFullScreen())
-                                    setFullScreen (false);
-
-                                return 0;
-                            }
-
-                            break;
                         }
 
                         break;
+                    }
 
-                    case WM_NCLBUTTONDOWN:
-                    case WM_NCRBUTTONDOWN:
-                    case WM_NCMBUTTONDOWN:
-                        sendInputAttemptWhenModalMessage();
-                        break;
+                    break;
 
-                    //case WM_IME_STARTCOMPOSITION;
-                      //  return 0;
+                case WM_NCLBUTTONDOWN:
+                case WM_NCRBUTTONDOWN:
+                case WM_NCMBUTTONDOWN:
+                    sendInputAttemptWhenModalMessage();
+                    break;
 
-                    case WM_GETDLGCODE:
-                        return DLGC_WANTALLKEYS;
+                //case WM_IME_STARTCOMPOSITION;
+                  //  return 0;
 
-                    default:
-                        break;
-                }
+                case WM_GETDLGCODE:
+                    return DLGC_WANTALLKEYS;
+
+                default:
+                    break;
             }
         }
 
-        // (the message manager lock exits before calling this, to avoid deadlocks if
-        // this calls into non-juce windows)
         return DefWindowProc (h, message, wParam, lParam);
     }
 
@@ -2635,8 +2634,9 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     else
     {
         const int stride = (maxW + 7) >> 3;
-        uint8* const andPlane = (uint8*) juce_calloc (stride * maxH);
-        uint8* const xorPlane = (uint8*) juce_calloc (stride * maxH);
+        HeapBlock <uint8> andPlane, xorPlane;
+        andPlane.calloc (stride * maxH);
+        xorPlane.calloc (stride * maxH);
         int index = 0;
 
         for (int y = 0; y < maxH; ++y)
@@ -2657,9 +2657,6 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
         }
 
         cursorH = CreateCursor (0, hotspotX, hotspotY, maxW, maxH, andPlane, xorPlane);
-
-        juce_free (andPlane);
-        juce_free (xorPlane);
     }
 
     delete newIm;

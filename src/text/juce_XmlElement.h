@@ -594,10 +594,10 @@ public:
 
         if (num > 1)
         {
-            XmlElement** const elems = getChildElementsAsArray (num);
-            sortArray (comparator, elems, 0, num - 1, retainOrderOfEquivalentItems);
+            HeapBlock <XmlElement*> elems (num);
+            getChildElementsAsArray (elems);
+            sortArray (comparator, (XmlElement**) elems, 0, num - 1, retainOrderOfEquivalentItems);
             reorderChildElements (elems, num);
-            delete[] elems;
         }
     }
 
@@ -706,7 +706,7 @@ private:
                              const int indentationLevel,
                              const int lineWrapLength) const throw();
 
-    XmlElement** getChildElementsAsArray (const int) const throw();
+    void getChildElementsAsArray (XmlElement**) const throw();
     void reorderChildElements (XmlElement** const, const int) throw();
 };
 

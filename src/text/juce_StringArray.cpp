@@ -93,13 +93,8 @@ bool StringArray::operator== (const StringArray& other) const throw()
         return false;
 
     for (int i = size(); --i >= 0;)
-    {
-        if (*(String*) other.strings.getUnchecked(i)
-               != *(String*) strings.getUnchecked(i))
-        {
+        if (*other.strings.getUnchecked(i) != *strings.getUnchecked(i))
             return false;
-        }
-    }
 
     return true;
 }
@@ -111,19 +106,13 @@ bool StringArray::operator!= (const StringArray& other) const throw()
 
 void StringArray::clear() throw()
 {
-    for (int i = size(); --i >= 0;)
-    {
-        String* const s = (String*) strings.getUnchecked(i);
-        delete s;
-    }
-
     strings.clear();
 }
 
 const String& StringArray::operator[] (const int index) const throw()
 {
     if (((unsigned int) index) < (unsigned int) strings.size())
-        return *(const String*) (strings.getUnchecked (index));
+        return *strings.getUnchecked (index);
 
     return String::empty;
 }
@@ -160,22 +149,18 @@ void StringArray::addArray (const StringArray& otherArray,
         numElementsToAdd = otherArray.size() - startIndex;
 
     while (--numElementsToAdd >= 0)
-        strings.add (new String (*(const String*) otherArray.strings.getUnchecked (startIndex++)));
+        strings.add (new String (*otherArray.strings.getUnchecked (startIndex++)));
 }
 
 void StringArray::set (const int index,
                        const String& newString) throw()
 {
-    String* const s = (String*) strings [index];
+    String* const s = strings [index];
 
     if (s != 0)
-    {
         *s = newString;
-    }
     else if (index >= 0)
-    {
         add (newString);
-    }
 }
 
 bool StringArray::contains (const String& stringToLookFor,
@@ -184,13 +169,13 @@ bool StringArray::contains (const String& stringToLookFor,
     if (ignoreCase)
     {
         for (int i = size(); --i >= 0;)
-            if (stringToLookFor.equalsIgnoreCase (*(const String*)(strings.getUnchecked(i))))
+            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToLookFor))
                 return true;
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (stringToLookFor == *(const String*)(strings.getUnchecked(i)))
+            if (stringToLookFor == *strings.getUnchecked(i))
                 return true;
     }
 
@@ -210,7 +195,7 @@ int StringArray::indexOf (const String& stringToLookFor,
     {
         while (i < numElements)
         {
-            if (stringToLookFor.equalsIgnoreCase (*(const String*) strings.getUnchecked (i)))
+            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToLookFor))
                 return i;
 
             ++i;
@@ -220,7 +205,7 @@ int StringArray::indexOf (const String& stringToLookFor,
     {
         while (i < numElements)
         {
-            if (stringToLookFor == *(const String*) strings.getUnchecked (i))
+            if (stringToLookFor == *strings.getUnchecked (i))
                 return i;
 
             ++i;
@@ -233,13 +218,7 @@ int StringArray::indexOf (const String& stringToLookFor,
 //==============================================================================
 void StringArray::remove (const int index) throw()
 {
-    String* const s = (String*) strings [index];
-
-    if (s != 0)
-    {
-        strings.remove (index);
-        delete s;
-    }
+    strings.remove (index);
 }
 
 void StringArray::removeString (const String& stringToRemove,
@@ -248,14 +227,14 @@ void StringArray::removeString (const String& stringToRemove,
     if (ignoreCase)
     {
         for (int i = size(); --i >= 0;)
-            if (stringToRemove.equalsIgnoreCase (*(const String*) strings.getUnchecked (i)))
-                remove (i);
+            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToRemove))
+                strings.remove (i);
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (stringToRemove == *(const String*) strings.getUnchecked (i))
-                remove (i);
+            if (stringToRemove == *strings.getUnchecked (i))
+                strings.remove (i);
     }
 }
 
@@ -265,14 +244,14 @@ void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings) throw(
     if (removeWhitespaceStrings)
     {
         for (int i = size(); --i >= 0;)
-            if (! ((const String*) strings.getUnchecked(i))->containsNonWhitespaceChars())
-                remove (i);
+            if (! strings.getUnchecked(i)->containsNonWhitespaceChars())
+                strings.remove (i);
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (((const String*) strings.getUnchecked(i))->isEmpty())
-                remove (i);
+            if (strings.getUnchecked(i)->isEmpty())
+                strings.remove (i);
     }
 }
 
@@ -280,7 +259,7 @@ void StringArray::trim() throw()
 {
     for (int i = size(); --i >= 0;)
     {
-        String& s = *(String*) strings.getUnchecked(i);
+        String& s = *strings.getUnchecked(i);
         s = s.trim();
     }
 }
@@ -339,13 +318,13 @@ const String StringArray::joinIntoString (const String& separator,
         return String::empty;
 
     if (start == last - 1)
-        return *(const String*) strings.getUnchecked (start);
+        return *strings.getUnchecked (start);
 
     const int separatorLen = separator.length();
     int charsNeeded = separatorLen * (last - start - 1);
 
     for (int i = start; i < last; ++i)
-        charsNeeded += ((const String*) strings.getUnchecked(i))->length();
+        charsNeeded += strings.getUnchecked(i)->length();
 
     String result;
     result.preallocateStorage (charsNeeded);
@@ -354,7 +333,7 @@ const String StringArray::joinIntoString (const String& separator,
 
     while (start < last)
     {
-        const String& s = *(const String*) strings.getUnchecked (start);
+        const String& s = *strings.getUnchecked (start);
         const int len = s.length();
 
         if (len > 0)
@@ -520,7 +499,7 @@ void StringArray::removeDuplicates (const bool ignoreCase) throw()
 {
     for (int i = 0; i < size() - 1; ++i)
     {
-        const String& s = *(String*) strings.getUnchecked(i);
+        const String& s = *strings.getUnchecked(i);
 
         int nextIndex = i + 1;
 
@@ -531,7 +510,7 @@ void StringArray::removeDuplicates (const bool ignoreCase) throw()
             if (nextIndex < 0)
                 break;
 
-            remove (nextIndex);
+            strings.remove (nextIndex);
         }
     }
 }
@@ -543,7 +522,7 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
 {
     for (int i = 0; i < size() - 1; ++i)
     {
-        String& s = *(String*) strings.getUnchecked(i);
+        String& s = *strings.getUnchecked(i);
 
         int nextIndex = indexOf (s, ignoreCase, i + 1);
 

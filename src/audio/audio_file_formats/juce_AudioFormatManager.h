@@ -28,6 +28,7 @@
 
 #include "juce_AudioFormat.h"
 #include "../../core/juce_Singleton.h"
+#include "../../containers/juce_VoidArray.h"
 
 
 //==============================================================================

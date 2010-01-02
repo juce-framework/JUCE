@@ -41,18 +41,35 @@ AudioSampleBuffer::AudioSampleBuffer (const int numChannels_,
     jassert (numSamples >= 0);
     jassert (numChannels_ > 0);
 
-    allocatedBytes = numChannels * numSamples * sizeof (float) + 32;
-    allocatedData = (float*) juce_malloc (allocatedBytes);
-    channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
+    allocateData();
+}
 
-    float* chan = allocatedData;
-    for (int i = 0; i < numChannels_; ++i)
+AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) throw()
+  : numChannels (other.numChannels),
+    size (other.size)
+{
+    allocateData();
+    const int numBytes = size * sizeof (float);
+
+    for (int i = 0; i < numChannels; ++i)
+        memcpy (channels[i], other.channels[i], numBytes);
+}
+
+void AudioSampleBuffer::allocateData()
+{
+    const int channelListSize = (numChannels + 1) * sizeof (float*);
+    allocatedBytes = numChannels * size * sizeof (float) + channelListSize + 32;
+    allocatedData.malloc (allocatedBytes);
+    channels = (float**) allocatedData;
+
+    float* chan = (float*) (allocatedData + channelListSize);
+    for (int i = 0; i < numChannels; ++i)
     {
         channels[i] = chan;
-        chan += numSamples;
+        chan += size;
     }
 
-    channels [numChannels_] = 0;
+    channels [numChannels] = 0;
 }
 
 AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
@@ -60,45 +77,41 @@ AudioSampleBuffer::AudioSampleBuffer (float** dataToReferTo,
                                       const int numSamples) throw()
     : numChannels (numChannels_),
       size (numSamples),
-      allocatedBytes (0),
-      allocatedData (0)
+      allocatedBytes (0)
 {
     jassert (numChannels_ > 0);
-
-    // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
-    if (numChannels_ < numElementsInArray (preallocatedChannelSpace))
-        channels = (float**) preallocatedChannelSpace;
-    else
-        channels = (float**) juce_malloc ((numChannels_ + 1) * sizeof (float*));
-
-    for (int i = 0; i < numChannels_; ++i)
-    {
-        // you have to pass in the same number of valid pointers as numChannels
-        jassert (dataToReferTo[i] != 0);
-
-        channels[i] = dataToReferTo[i];
-    }
-
-    channels [numChannels_] = 0;
+    allocateChannels (dataToReferTo);
 }
 
 void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
-                                          const int numChannels_,
-                                          const int numSamples) throw()
+                                          const int newNumChannels,
+                                          const int newNumSamples) throw()
 {
-    jassert (numChannels_ > 0);
+    jassert (newNumChannels > 0);
 
-    juce_free (allocatedData);
-    allocatedData = 0;
     allocatedBytes = 0;
+    allocatedData.free();
 
-    if (numChannels_ > numChannels)
-        channels = (float**) juce_realloc (channels, (numChannels_ + 1) * sizeof (float*));
+    numChannels = newNumChannels;
+    size = newNumSamples;
 
-    numChannels = numChannels_;
-    size = numSamples;
+    allocateChannels (dataToReferTo);
+}
 
-    for (int i = 0; i < numChannels_; ++i)
+void AudioSampleBuffer::allocateChannels (float** const dataToReferTo)
+{
+    // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
+    if (numChannels < numElementsInArray (preallocatedChannelSpace))
+    {
+        channels = (float**) preallocatedChannelSpace;
+    }
+    else
+    {
+        allocatedData.malloc (numChannels + 1, sizeof (float*));
+        channels = (float**) allocatedData;
+    }
+
+    for (int i = 0; i < numChannels; ++i)
     {
         // you have to pass in the same number of valid pointers as numChannels
         jassert (dataToReferTo[i] != 0);
@@ -106,38 +119,7 @@ void AudioSampleBuffer::setDataToReferTo (float** dataToReferTo,
         channels[i] = dataToReferTo[i];
     }
 
-    channels [numChannels_] = 0;
-}
-
-AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) throw()
-  : numChannels (other.numChannels),
-    size (other.size)
-{
-    channels = (float**) juce_malloc ((other.numChannels + 1) * sizeof (float*));
-
-    if (other.allocatedData != 0)
-    {
-        allocatedBytes = numChannels * size * sizeof (float) + 32;
-        allocatedData = (float*) juce_malloc (allocatedBytes);
-
-        memcpy (allocatedData, other.allocatedData, allocatedBytes);
-
-        float* chan = allocatedData;
-        for (int i = 0; i < numChannels; ++i)
-        {
-            channels[i] = chan;
-            chan += size;
-        }
-
-        channels [numChannels] = 0;
-    }
-    else
-    {
-        allocatedData = 0;
-        allocatedBytes = 0;
-
-        memcpy (channels, other.channels, sizeof (channels));
-    }
+    channels [numChannels] = 0;
 }
 
 const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other) throw()
@@ -157,10 +139,6 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
 
 AudioSampleBuffer::~AudioSampleBuffer() throw()
 {
-    juce_free (allocatedData);
-
-    if (channels != (float**) preallocatedChannelSpace)
-        juce_free (channels);
 }
 
 void AudioSampleBuffer::setSize (const int newNumChannels,
@@ -173,26 +151,29 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {
-        const int newTotalBytes = newNumChannels * newNumSamples * sizeof (float) + 32;
+        const int channelListSize = (newNumChannels + 1) * sizeof (float*);
+        const int newTotalBytes = (newNumChannels * newNumSamples * sizeof (float)) + channelListSize + 32;
 
         if (keepExistingContent)
         {
-            float* const newData = (clearExtraSpace) ? (float*) juce_calloc (newTotalBytes)
-                                                     : (float*) juce_malloc (newTotalBytes);
+            HeapBlock <char> newData;
+            newData.allocate (newTotalBytes, clearExtraSpace);
 
-            const int sizeToCopy = sizeof (float) * jmin (newNumSamples, size);
+            const int numChansToCopy = jmin (numChannels, newNumChannels);
+            const int numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
 
-            for (int i = jmin (newNumChannels, numChannels); --i >= 0;)
+            float** const newChannels = (float**) newData;
+            float* newChan = (float*) (newData + channelListSize);
+            for (int i = 0; i < numChansToCopy; ++i)
             {
-                memcpy (newData + i * newNumSamples,
-                        channels[i],
-                        sizeToCopy);
+                memcpy (newChan, channels[i], numBytesToCopy);
+                newChannels[i] = newChan;
+                newChan += newNumSamples;
             }
 
-            juce_free (allocatedData);
-
-            allocatedData = newData;
+            allocatedData.swapWith (newData);
             allocatedBytes = newTotalBytes;
+            channels = (float**) allocatedData;
         }
         else
         {
@@ -203,29 +184,22 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             }
             else
             {
-                juce_free (allocatedData);
-
-                allocatedData = (clearExtraSpace) ? (float*) juce_calloc (newTotalBytes)
-                                                  : (float*) juce_malloc (newTotalBytes);
                 allocatedBytes = newTotalBytes;
+                allocatedData.allocate (newTotalBytes, clearExtraSpace);
+                channels = (float**) allocatedData;
+            }
+
+            float* chan = (float*) (allocatedData + channelListSize);
+            for (int i = 0; i < newNumChannels; ++i)
+            {
+                channels[i] = chan;
+                chan += newNumSamples;
             }
         }
 
-        size = newNumSamples;
-
-        if (newNumChannels > numChannels)
-            channels = (float**) juce_realloc (channels, (newNumChannels + 1) * sizeof (float*));
-
-        numChannels = newNumChannels;
-
-        float* chan = allocatedData;
-        for (int i = 0; i < newNumChannels; ++i)
-        {
-            channels[i] = chan;
-            chan += size;
-        }
-
         channels [newNumChannels] = 0;
+        size = newNumSamples;
+        numChannels = newNumChannels;
     }
 }
 
@@ -679,7 +653,8 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
         }
         else
         {
-            chans[0] = (int*) juce_malloc (sizeof (int) * numSamples * 2);
+            HeapBlock <int> tempBuffer (numSamples * 2);
+            chans[0] = tempBuffer;
 
             if (numChannels > 1)
                 chans[1] = chans[0] + numSamples;
@@ -711,8 +686,6 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
             }
 
             writer->write ((const int**) chans, numSamples);
-
-            juce_free (chans[0]);
         }
     }
 }

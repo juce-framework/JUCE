@@ -77,7 +77,7 @@ private:
     const bool deleteSourceWhenDestroyed;
     int bufferSize;
     int64 position, lastReadPos, bufferStart, bufferOverlap;
-    char* buffer;
+    HeapBlock <char> buffer;
     void ensureBuffered();
 
     BufferedInputStream (const BufferedInputStream&);

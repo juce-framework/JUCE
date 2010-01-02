@@ -106,7 +106,7 @@ ThreadPool::ThreadPool (const int numThreads_,
 {
     jassert (numThreads_ > 0); // not much point having one of these with no threads in it.
 
-    threads = (Thread**) juce_calloc (sizeof (Thread*) * numThreads);
+    threads.calloc (numThreads);
 
     for (int i = numThreads; --i >= 0;)
         threads[i] = new ThreadPoolThread (*this);
@@ -129,8 +129,6 @@ ThreadPool::~ThreadPool()
         threads[i]->stopThread (500);
         delete threads[i];
     }
-
-    juce_free (threads);
 }
 
 void ThreadPool::addJob (ThreadPoolJob* const job)

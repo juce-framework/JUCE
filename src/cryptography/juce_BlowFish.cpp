@@ -309,7 +309,7 @@ BlowFish::BlowFish (const uint8* keyData, int keyBytes)
     int i, j;
     for (i = 4; --i >= 0;)
     {
-        s[i] = (uint32*) juce_malloc (256 * sizeof (uint32));
+        s[i].malloc (256);
         memcpy (s[i], initialSValues + i * 256, 256 * sizeof (uint32));
     }
 
@@ -355,7 +355,7 @@ BlowFish::BlowFish (const uint8* keyData, int keyBytes)
 BlowFish::BlowFish (const BlowFish& other)
 {
     for (int i = 4; --i >= 0;)
-        s[i] = (uint32*) juce_malloc (256 * sizeof (uint32));
+        s[i].malloc (256);
 
     operator= (other);
 }
@@ -372,8 +372,6 @@ const BlowFish& BlowFish::operator= (const BlowFish& other)
 
 BlowFish::~BlowFish()
 {
-    for (int i = 4; --i >= 0;)
-        juce_free (s[i]);
 }
 
 uint32 BlowFish::F (uint32 x) const

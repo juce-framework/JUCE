@@ -128,7 +128,7 @@ class FontDCHolder  : private DeletedAtShutdown
 public:
     //==============================================================================
     FontDCHolder() throw()
-        : dc (0), kps (0), numKPs (0), size (0),
+        : dc (0), numKPs (0), size (0),
           bold (false), italic (false)
     {
     }
@@ -139,7 +139,6 @@ public:
         {
             DeleteDC (dc);
             DeleteObject (fontH);
-            juce_free (kps);
         }
 
         clearSingletonInstance();
@@ -161,8 +160,7 @@ public:
             {
                 DeleteDC (dc);
                 DeleteObject (fontH);
-                juce_free (kps);
-                kps = 0;
+                kps.free();
             }
 
             fontH = 0;
@@ -225,7 +223,7 @@ public:
         if (kps == 0)
         {
             numKPs = GetKerningPairs (dc, 0, 0);
-            kps = (KERNINGPAIR*) juce_calloc (sizeof (KERNINGPAIR) * numKPs);
+            kps.calloc (numKPs);
             GetKerningPairs (dc, numKPs, kps);
         }
 
@@ -239,7 +237,7 @@ private:
     HFONT fontH;
     HDC dc;
     String fontName;
-    KERNINGPAIR* kps;
+    HeapBlock <KERNINGPAIR> kps;
     int numKPs, size;
     bool bold, italic;
 
@@ -304,7 +302,7 @@ public:
 
         if (bufSize > 0)
         {
-            char* const data = (char*) juce_malloc (bufSize);
+            HeapBlock <char> data (bufSize);
 
             GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
                              bufSize, data, &identityMatrix);
@@ -372,8 +370,6 @@ public:
 
                 glyphPath.closeSubPath();
             }
-
-            juce_free (data);
         }
 
         addGlyph (character, glyphPath, gm.gmCellIncX / height);

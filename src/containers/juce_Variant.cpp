@@ -318,10 +318,9 @@ void var::writeToStream (OutputStream& output) const throw()
             const int len = value.stringValue->copyToUTF8 (0);
             output.writeCompressedInt (len + 1);
             output.writeByte (5);
-            uint8* const temp = (uint8*) juce_malloc (len);
+            HeapBlock <uint8> temp (len);
             value.stringValue->copyToUTF8 (temp);
             output.write (temp, len);
-            juce_free (temp);
             break;
         }
         case objectType:    output.writeCompressedInt (0); jassertfalse; break; // Can't write an object to a stream!

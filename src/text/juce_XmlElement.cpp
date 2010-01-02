@@ -1073,20 +1073,15 @@ XmlElement* XmlElement::findParentElementOf (const XmlElement* const elementToLo
     return 0;
 }
 
-XmlElement** XmlElement::getChildElementsAsArray (const int num) const throw()
+void XmlElement::getChildElementsAsArray (XmlElement** elems) const throw()
 {
-    XmlElement** const elems = new XmlElement* [num];
-
     XmlElement* e = firstChildElement;
-    int i = 0;
 
     while (e != 0)
     {
-        elems [i++] = e;
+        *elems++ = e;
         e = e->nextElement;
     }
-
-    return elems;
 }
 
 void XmlElement::reorderChildElements (XmlElement** const elems, const int num) throw()

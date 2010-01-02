@@ -81,7 +81,7 @@ using namespace zlibNamespace;
 class GZIPDecompressHelper
 {
 private:
-    z_stream* stream;
+    HeapBlock <z_stream> stream;
     uint8* data;
     int dataSize;
 
@@ -95,13 +95,12 @@ public:
           needsDictionary (false),
           error (false)
     {
-        stream = (z_stream*) juce_calloc (sizeof (z_stream));
+        stream.calloc (1);
 
         if (inflateInit2 (stream, (noWrap) ? -MAX_WBITS
                                            : MAX_WBITS) != Z_OK)
         {
-            juce_free (stream);
-            stream = 0;
+            stream.free();
             error = true;
             finished = true;
         }
@@ -110,10 +109,7 @@ public:
     ~GZIPDecompressHelper() throw()
     {
         if (stream != 0)
-        {
             inflateEnd (stream);
-            juce_free (stream);
-        }
     }
 
     bool needsInput() const throw()         { return dataSize <= 0; }
@@ -177,16 +173,14 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sou
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (sourceStream_->getPosition()),
-    currentPos (0)
+    currentPos (0),
+    buffer (gzipDecompBufferSize)
 {
-    buffer = (uint8*) juce_malloc (gzipDecompBufferSize);
     helper = new GZIPDecompressHelper (noWrap_);
 }
 
 GZIPDecompressorInputStream::~GZIPDecompressorInputStream()
 {
-    juce_free (buffer);
-
     if (deleteSourceWhenDestroyed)
         delete sourceStream;
 

@@ -276,7 +276,7 @@ private:
     CriticalSection lock;
     bool initialised, wantsMidiMessages, wasPlaying;
 
-    AudioBufferList* outputBufferList;
+    HeapBlock <AudioBufferList> outputBufferList;
     AudioTimeStamp timeStamp;
     AudioSampleBuffer* currentBuffer;
 
@@ -375,7 +375,6 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier
       initialised (false),
       wantsMidiMessages (false),
       audioUnit (0),
-      outputBufferList (0),
       currentBuffer (0)
 {
     try
@@ -419,8 +418,6 @@ AudioUnitPluginInstance::~AudioUnitPluginInstance()
             audioUnit = 0;
         }
     }
-
-    juce_free (outputBufferList);
 }
 
 bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIdentifier)
@@ -602,8 +599,7 @@ void AudioUnitPluginInstance::prepareToPlay (double sampleRate_,
                                     kAudioUnitScope_Output,
                                     0, &stream, sizeof (stream));
 
-        juce_free (outputBufferList);
-        outputBufferList = (AudioBufferList*) juce_calloc (sizeof (AudioBufferList) + sizeof (AudioBuffer) * (numOuts + 1));
+        outputBufferList.calloc (sizeof (AudioBufferList) + sizeof (AudioBuffer) * (numOuts + 1), 1);
         outputBufferList->mNumberBuffers = numOuts;
 
         for (int i = numOuts; --i >= 0;)
@@ -627,8 +623,7 @@ void AudioUnitPluginInstance::releaseResources()
         AudioUnitReset (audioUnit, kAudioUnitScope_Output, 0);
         AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
 
-        juce_free (outputBufferList);
-        outputBufferList = 0;
+        outputBufferList.free();
         currentBuffer = 0;
     }
 }
@@ -901,7 +896,8 @@ private:
              && AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                           0, &dataSize, &isWritable) == noErr)
         {
-            AudioUnitCocoaViewInfo* info = (AudioUnitCocoaViewInfo*) juce_calloc (dataSize);
+            HeapBlock <AudioUnitCocoaViewInfo> info;
+            info.calloc (dataSize, 1);
 
             if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                       0, info, &dataSize) == noErr)
@@ -926,8 +922,6 @@ private:
                     CFRelease (info->mCocoaAUViewBundleLocation);
                 }
             }
-
-            juce_free (info);
         }
 
         if (createGenericViewIfNeeded && (pluginView == 0))

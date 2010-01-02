@@ -28,6 +28,7 @@
 
 #include "../text/juce_String.h"
 #include "../containers/juce_OwnedArray.h"
+#include "../containers/juce_Array.h"
 #include "../text/juce_StringArray.h"
 #include "../events/juce_ChangeBroadcaster.h"
 #include "juce_UndoableAction.h"

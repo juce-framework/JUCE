@@ -532,7 +532,8 @@ const String File::getVersion() const throw()
 
     DWORD handle = 0;
     DWORD bufferSize = GetFileVersionInfoSize (getFullPathName(), &handle);
-    void* buffer = juce_calloc (bufferSize);
+    HeapBlock <char> buffer;
+    buffer.calloc (bufferSize);
 
     if (GetFileVersionInfo (getFullPathName(), 0, bufferSize, buffer))
     {
@@ -549,7 +550,6 @@ const String File::getVersion() const throw()
         }
     }
 
-    juce_free (buffer);
     return result;
 }
 

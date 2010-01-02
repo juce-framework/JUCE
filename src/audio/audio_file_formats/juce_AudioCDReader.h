@@ -29,6 +29,7 @@
 #if JUCE_USE_CDREADER
 
 #include "juce_AudioFormatReader.h"
+#include "../../containers/juce_Array.h"
 #include "../../text/juce_StringArray.h"
 #if JUCE_MAC
 #include "../../io/files/juce_File.h"

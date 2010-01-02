@@ -301,7 +301,7 @@ public:
 
         if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
         {
-            uint8* const buffer = (uint8*) juce_malloc (maxEventSize);
+            HeapBlock <uint8> buffer (maxEventSize);
 
             const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
             struct pollfd* const pfd = (struct pollfd*) alloca (numPfds * sizeof (struct pollfd));
@@ -345,7 +345,6 @@ public:
             }
 
             snd_midi_event_free (midiParser);
-            juce_free (buffer);
         }
     };
 

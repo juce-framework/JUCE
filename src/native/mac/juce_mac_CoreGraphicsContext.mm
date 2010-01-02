@@ -132,7 +132,6 @@ public:
     CoreGraphicsContext (CGContextRef context_, const float flipHeight_)
         : context (context_),
           flipHeight (flipHeight_),
-          gradientLookupTable (0),
           numGradientLookupEntries (0)
     {
         CGContextRetain (context);
@@ -155,7 +154,6 @@ public:
         CGColorSpaceRelease (rgbColourSpace);
         CGColorSpaceRelease (greyColourSpace);
         delete state;
-        delete gradientLookupTable;
     }
 
     //==============================================================================
@@ -183,7 +181,7 @@ public:
         {
             const int numRects = clipRegion.getNumRectangles();
 
-            CGRect* const rects = new CGRect [numRects];
+            HeapBlock <CGRect> rects (numRects);
             for (int i = 0; i < numRects; ++i)
             {
                 const Rectangle& r = clipRegion.getRectangle(i);
@@ -191,8 +189,6 @@ public:
             }
 
             CGContextClipToRects (context, rects, numRects);
-            delete[] rects;
-
             return ! isClipEmpty();
         }
     }
@@ -565,7 +561,7 @@ private:
 
     SavedState* state;
     OwnedArray <SavedState> stateStack;
-    PixelARGB* gradientLookupTable;
+    HeapBlock <PixelARGB> gradientLookupTable;
     int numGradientLookupEntries;
 
     static void gradientCallback (void* info, const CGFloat* inData, CGFloat* outData)
@@ -584,8 +580,7 @@ private:
 
     CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient) throw()
     {
-        delete gradientLookupTable;
-        gradientLookupTable = gradient.createLookupTable (transform, numGradientLookupEntries);
+        numGradientLookupEntries = gradient.createLookupTable (transform, gradientLookupTable);
         --numGradientLookupEntries;
 
         CGShadingRef result = 0;

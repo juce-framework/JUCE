@@ -334,7 +334,8 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         const int maxPacketSize = 256;
         int pos = 0, bytesLeft = message.getRawDataSize();
         const int numPackets = (bytesLeft + maxPacketSize - 1) / maxPacketSize;
-        MIDIPacketList* const packets = (MIDIPacketList*) juce_malloc (32 * numPackets + message.getRawDataSize());
+        HeapBlock <MIDIPacketList> packets;
+        packets.malloc (32 * numPackets + message.getRawDataSize(), 1);
         packets->numPackets = numPackets;
 
         MIDIPacket* p = packets->packet;
@@ -353,8 +354,6 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
             MIDISend (mpe->port, mpe->endPoint, packets);
         else
             MIDIReceived (mpe->endPoint, packets);
-
-        juce_free (packets);
     }
     else
     {

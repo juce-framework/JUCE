@@ -26,6 +26,7 @@
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 #define __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 
+#include "../../containers/juce_HeapBlock.h"
 class AudioFormatReader;
 class AudioFormatWriter;
 
@@ -425,8 +426,11 @@ public:
 private:
     int numChannels, size, allocatedBytes;
     float** channels;
-    float* allocatedData;
+    HeapBlock <char> allocatedData;
     float* preallocatedChannelSpace [32];
+
+    void allocateData();
+    void allocateChannels (float** const dataToReferTo);
 };
 
 

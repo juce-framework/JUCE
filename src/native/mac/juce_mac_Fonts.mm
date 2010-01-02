@@ -201,44 +201,37 @@ public:
             return 0;
 
         const int length = text.length();
-        CGGlyph* const glyphs = createGlyphsForString (text, length);
+        HeapBlock <CGGlyph> glyphs;
+        createGlyphsForString (text, length, glyphs);
 
         float x = 0;
 
 #if SUPPORT_ONLY_10_4_FONTS
-        NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+        HeapBlock <NSSize> advances (length);
         [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
         for (int i = 0; i < length; ++i)
             x += advances[i].width;
-
-        juce_free (advances);
 #else
   #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
-            NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+            HeapBlock <NSSize> advances (length);
             [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
             for (int i = 0; i < length; ++i)
                 x += advances[i].width;
-
-            juce_free (advances);
         }
         else
   #endif
         {
-            int* const advances = (int*) juce_malloc (length * sizeof (int));
+            HeapBlock <int> advances (length);
 
             if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
                 for (int i = 0; i < length; ++i)
                     x += advances[i];
-
-            juce_free (advances);
         }
 #endif
-
-        juce_free (glyphs);
 
         return x * unitsToHeightScaleFactor;
     }
@@ -251,10 +244,11 @@ public:
             return;
 
         const int length = text.length();
-        CGGlyph* const glyphs = createGlyphsForString (text, length);
+        HeapBlock <CGGlyph> glyphs;
+        createGlyphsForString (text, length, glyphs);
 
 #if SUPPORT_ONLY_10_4_FONTS
-        NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+        HeapBlock <NSSize> advances (length);
         [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
         int x = 0;
@@ -265,12 +259,11 @@ public:
             resultGlyphs.add (((NSGlyph*) glyphs)[i]);
         }
 
-        juce_free (advances);
 #else
   #if SUPPORT_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
-            NSSize* const advances = (NSSize*) juce_malloc (length * sizeof (NSSize));
+            HeapBlock <NSSize> advances (length);
             [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
 
             float x = 0;
@@ -280,13 +273,11 @@ public:
                 xOffsets.add (x * unitsToHeightScaleFactor);
                 resultGlyphs.add (((NSGlyph*) glyphs)[i]);
             }
-
-            juce_free (advances);
         }
         else
   #endif
         {
-            int* const advances = (int*) juce_malloc (length * sizeof (int));
+            HeapBlock <int> advances (length);
 
             if (CGFontGetGlyphAdvances (fontRef, glyphs, length, advances))
             {
@@ -298,12 +289,8 @@ public:
                     resultGlyphs.add (glyphs[i]);
                 }
             }
-
-            juce_free (advances);
         }
 #endif
-
-        juce_free (glyphs);
     }
 
     bool getOutlineForGlyph (int glyphNumber, Path& path)
@@ -369,19 +356,20 @@ private:
     AffineTransform pathTransform;
 #endif
 
-    CGGlyph* createGlyphsForString (const juce_wchar* const text, const int length) throw()
+    void createGlyphsForString (const juce_wchar* const text, const int length, HeapBlock <CGGlyph>& glyphs) throw()
     {
 #if SUPPORT_10_4_FONTS
   #if ! SUPPORT_ONLY_10_4_FONTS
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
   #endif
         {
-            NSGlyph* const g = (NSGlyph*) juce_malloc (sizeof (NSGlyph) * length);
+            glyphs.malloc (sizeof (NSGlyph) * length, 1);
+            NSGlyph* const g = (NSGlyph*) glyphs;
 
             for (int i = 0; i < length; ++i)
                 g[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text[i]];
 
-            return (CGGlyph*) g;
+            return;
         }
 #endif
 
@@ -389,12 +377,10 @@ private:
         if (charToGlyphMapper == 0)
             charToGlyphMapper = new CharToGlyphMapper (fontRef);
 
-        CGGlyph* const g = (CGGlyph*) juce_malloc (sizeof (CGGlyph) * length);
+        glyphs.malloc (length);
 
         for (int i = 0; i < length; ++i)
-            g[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text[i]);
-
-        return g;
+            glyphs[i] = (CGGlyph) charToGlyphMapper->getGlyphForCharacter (text[i]);
 #endif
     }
 

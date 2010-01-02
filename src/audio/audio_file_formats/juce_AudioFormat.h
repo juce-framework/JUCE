@@ -28,6 +28,7 @@
 
 #include "juce_AudioFormatReader.h"
 #include "juce_AudioFormatWriter.h"
+#include "../../containers/juce_Array.h"
 
 
 //==============================================================================

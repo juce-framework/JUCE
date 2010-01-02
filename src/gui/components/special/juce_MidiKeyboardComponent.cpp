@@ -702,7 +702,7 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
 
 void MidiKeyboardComponent::updateNoteUnderMouse (int x, int y)
 {
-    float mousePositionVelocity;
+    float mousePositionVelocity = 0.0f;
     const int newNote = (mouseDragging || isMouseOver())
                             ? xyToNote (x, y, mousePositionVelocity) : -1;
 

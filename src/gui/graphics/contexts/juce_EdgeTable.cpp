@@ -53,7 +53,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    table = (int*) juce_malloc ((bounds.getHeight() + 1) * lineStrideElements * sizeof (int));
+    table.malloc ((bounds.getHeight() + 1) * lineStrideElements);
     int* t = table;
 
     for (int i = bounds.getHeight(); --i >= 0;)
@@ -127,8 +127,8 @@ EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
-    *table = 0;
+    table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
+    table[0] = 0;
 
     const int x1 = rectangleToAdd.getX() << 8;
     const int x2 = rectangleToAdd.getRight() << 8;
@@ -151,7 +151,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
+    table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
 
     int* t = table;
     for (int i = bounds.getHeight(); --i >= 0;)
@@ -186,8 +186,8 @@ EdgeTable::EdgeTable (const float x, const float y, const float w, const float h
      needToCheckEmptinesss (true)
 {
     jassert (w > 0 && h > 0);
-    table = (int*) juce_malloc (jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int));
-    *table = 0;
+    table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
+    table[0] = 0;
 
     const int x1 = roundFloatToInt (x * 256.0f);
     const int x2 = roundFloatToInt ((x + w) * 256.0f);
@@ -262,22 +262,18 @@ EdgeTable::EdgeTable (const EdgeTable& other) throw()
 
 const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
 {
-    juce_free (table);
-
     bounds = other.bounds;
     maxEdgesPerLine = other.maxEdgesPerLine;
     lineStrideElements = other.lineStrideElements;
     needToCheckEmptinesss = other.needToCheckEmptinesss;
 
-    const int tableSize = jmax (1, bounds.getHeight()) * lineStrideElements * sizeof (int);
-    table = (int*) juce_malloc (tableSize);
+    table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
     copyEdgeTableData (table, lineStrideElements, other.table, lineStrideElements, bounds.getHeight());
     return *this;
 }
 
 EdgeTable::~EdgeTable() throw()
 {
-    juce_free (table);
 }
 
 //==============================================================================
@@ -340,12 +336,12 @@ void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine) throw()
 
         jassert (bounds.getHeight() > 0);
         const int newLineStrideElements = maxEdgesPerLine * 2 + 1;
-        int* const newTable = (int*) juce_malloc (bounds.getHeight() * newLineStrideElements * sizeof (int));
+
+        HeapBlock <int> newTable (bounds.getHeight() * newLineStrideElements);
 
         copyEdgeTableData (newTable, newLineStrideElements, table, lineStrideElements, bounds.getHeight());
 
-        juce_free (table);
-        table = newTable;
+        table.swapWith (newTable);
         lineStrideElements = newLineStrideElements;
     }
 }

@@ -119,8 +119,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    float** values;
-    int size;
+    HeapBlock <float> values;
+    const int size;
 
     // no reason not to implement these one day..
     ImageConvolutionKernel (const ImageConvolutionKernel&);

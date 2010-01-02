@@ -65,10 +65,9 @@ Image::Image (const PixelFormat format_,
 
     pixelStride = (format == RGB) ? 3 : ((format == ARGB) ? 4 : 1);
     lineStride = (pixelStride * jmax (1, imageWidth_) + 3) & ~3;
-    const int dataSize = lineStride * jmax (1, imageHeight_);
 
-    imageData = (uint8*) (clearImage ? juce_calloc (dataSize)
-                                     : juce_malloc (dataSize));
+    imageDataAllocated.allocate (lineStride * jmax (1, imageHeight_), clearImage);
+    imageData = imageDataAllocated;
 }
 
 Image::Image (const Image& other)
@@ -78,9 +77,9 @@ Image::Image (const Image& other)
 {
     pixelStride = (format == RGB) ? 3 : ((format == ARGB) ? 4 : 1);
     lineStride = (pixelStride * jmax (1, imageWidth) + 3) & ~3;
-    const int dataSize = lineStride * jmax (1, imageHeight);
 
-    imageData = (uint8*) juce_malloc (dataSize);
+    imageDataAllocated.malloc (lineStride * jmax (1, imageHeight));
+    imageData = imageDataAllocated;
 
     BitmapData srcData (other, 0, 0, imageWidth, imageHeight);
     setPixelData (0, 0, imageWidth, imageHeight, srcData.data, srcData.lineStride);
@@ -88,7 +87,6 @@ Image::Image (const Image& other)
 
 Image::~Image()
 {
-    juce_free (imageData);
 }
 
 //==============================================================================

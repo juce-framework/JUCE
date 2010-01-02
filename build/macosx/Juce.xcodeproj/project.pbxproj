@@ -643,6 +643,7 @@
 		8484E9D8103C95A6008B7C6C /* juce_posix_SharedCode.h in Headers */ = {isa = PBXBuildFile; fileRef = 8484E9D6103C95A6008B7C6C /* juce_posix_SharedCode.h */; };
 		8484E9D9103C95A6008B7C6C /* juce_posix_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */; };
 		84A63C02107DF286000326FD /* juce_mac_ObjCSuffix.h in Headers */ = {isa = PBXBuildFile; fileRef = 84A63C01107DF286000326FD /* juce_mac_ObjCSuffix.h */; };
+		84AB6F6E10EF948B00117E64 /* juce_HeapBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DEDD9E10EE496500909D01 /* juce_HeapBlock.h */; };
 		84AB91FB10A078190048FC39 /* juce_CodeDocument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F510A078190048FC39 /* juce_CodeDocument.cpp */; };
 		84AB91FC10A078190048FC39 /* juce_CodeDocument.h in Headers */ = {isa = PBXBuildFile; fileRef = 84AB91F610A078190048FC39 /* juce_CodeDocument.h */; };
 		84AB91FD10A078190048FC39 /* juce_CodeEditorComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84AB91F710A078190048FC39 /* juce_CodeEditorComponent.cpp */; };
@@ -653,6 +654,7 @@
 		84B2053E10D535EC008B4A79 /* juce_ValueTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */; };
 		84B2053F10D535EC008B4A79 /* juce_ValueTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */; };
 		84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
+		84DEDD9F10EE496500909D01 /* juce_HeapBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DEDD9E10EE496500909D01 /* juce_HeapBlock.h */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
 		84F1E6E810403605006A1807 /* juce_Application.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DD10403605006A1807 /* juce_Application.h */; };
 		84F1E6E910403605006A1807 /* juce_ApplicationCommandID.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */; };
@@ -1260,6 +1262,7 @@
 		84AB91FA10A078190048FC39 /* juce_CPlusPlusCodeTokeniser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CPlusPlusCodeTokeniser.h; path = components/code_editor/juce_CPlusPlusCodeTokeniser.h; sourceTree = "<group>"; };
 		84AB927110A082E30048FC39 /* juce_CodeTokeniser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_CodeTokeniser.h; path = components/code_editor/juce_CodeTokeniser.h; sourceTree = "<group>"; };
 		84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_mac_CoreGraphicsContext.mm; sourceTree = "<group>"; };
+		84DEDD9E10EE496500909D01 /* juce_HeapBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_HeapBlock.h; sourceTree = "<group>"; };
 		84F1E6DC10403605006A1807 /* juce_Application.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Application.cpp; path = ../../src/application/juce_Application.cpp; sourceTree = SOURCE_ROOT; };
 		84F1E6DD10403605006A1807 /* juce_Application.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Application.h; path = ../../src/application/juce_Application.h; sourceTree = SOURCE_ROOT; };
 		84F1E6DE10403605006A1807 /* juce_ApplicationCommandID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ApplicationCommandID.h; path = ../../src/application/juce_ApplicationCommandID.h; sourceTree = SOURCE_ROOT; };
@@ -2162,6 +2165,7 @@
 				84F1E8D510403671006A1807 /* juce_MemoryBlock.cpp */,
 				84F1E8D610403671006A1807 /* juce_MemoryBlock.h */,
 				84F1E8D710403671006A1807 /* juce_OwnedArray.h */,
+				84DEDD9E10EE496500909D01 /* juce_HeapBlock.h */,
 				84F1E8D810403671006A1807 /* juce_PropertySet.cpp */,
 				84F1E8D910403671006A1807 /* juce_PropertySet.h */,
 				84F1E8DA10403671006A1807 /* juce_ReferenceCountedArray.h */,
@@ -3206,6 +3210,7 @@
 				844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */,
 				844BB95F10C557A800DF5536 /* juce_Config.h in Headers */,
 				84B2053E10D535EC008B4A79 /* juce_ValueTree.h in Headers */,
+				84AB6F6E10EF948B00117E64 /* juce_HeapBlock.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3530,6 +3535,7 @@
 				84AB927210A082E30048FC39 /* juce_CodeTokeniser.h in Headers */,
 				84F29AA010C2EFA5005014DF /* juce_FillType.h in Headers */,
 				843D4A3C10D3C54500624BA6 /* juce_ValueTree.h in Headers */,
+				84DEDD9F10EE496500909D01 /* juce_HeapBlock.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

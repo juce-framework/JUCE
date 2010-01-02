@@ -178,17 +178,17 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
                               || pngInfoStruct->num_trans > 0;
 
         // Load the image into a temp buffer in the pnglib format..
-        uint8* const tempBuffer = (uint8*) juce_malloc (height * (width << 2));
+        HeapBlock <uint8> tempBuffer (height * (width << 2));
 
-        png_bytepp rows = (png_bytepp) juce_malloc (sizeof (png_bytep) * height);
-        int y;
-        for (y = (int) height; --y >= 0;)
-            rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
+        {
+            HeapBlock <png_bytep> rows (height);
+            for (int y = (int) height; --y >= 0;)
+                rows[y] = (png_bytep) (tempBuffer + (width << 2) * y);
 
-        png_read_image (pngReadStruct, rows);
-        png_read_end (pngReadStruct, pngInfoStruct);
+            png_read_image (pngReadStruct, rows);
+            png_read_end (pngReadStruct, pngInfoStruct);
+        }
 
-        juce_free (rows);
         png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
 
         // now convert the data to a juce image format..
@@ -201,7 +201,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
         uint8* srcRow = tempBuffer;
         uint8* destRow = destData.data;
 
-        for (y = 0; y < (int) height; ++y)
+        for (int y = 0; y < (int) height; ++y)
         {
             const uint8* src = srcRow;
             srcRow += (width << 2);
@@ -228,8 +228,6 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
                 }
             }
         }
-
-        juce_free (tempBuffer);
     }
 
     return image;
@@ -273,7 +271,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
                   PNG_COMPRESSION_TYPE_BASE,
                   PNG_FILTER_TYPE_BASE);
 
-    png_bytep rowData = (png_bytep) juce_malloc (width * 4 * sizeof (png_byte));
+    HeapBlock <png_byte> rowData (width * 4);
 
     png_color_8 sig_bit;
     sig_bit.red = 8;
@@ -321,8 +319,6 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
 
         png_write_rows (pngWriteStruct, &rowData, 1);
     }
-
-    juce_free (rowData);
 
     png_write_end (pngWriteStruct, pngInfoStruct);
     png_destroy_write_struct (&pngWriteStruct, &pngInfoStruct);

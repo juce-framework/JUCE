@@ -28,6 +28,7 @@
 
 #include "../../../utilities/juce_UndoManager.h"
 #include "../../graphics/colour/juce_Colour.h"
+#include "../../../containers/juce_VoidArray.h"
 class CodeDocumentLine;
 
 

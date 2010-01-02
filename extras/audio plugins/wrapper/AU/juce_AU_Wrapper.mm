@@ -127,7 +127,6 @@ public:
 #endif
           juceFilter (0),
           bufferSpace (2, 16),
-          channels (0),
           prepared (false)
     {
         if (activePlugins.size() + activeUIs.size() == 0)
@@ -161,9 +160,6 @@ public:
 
         delete juceFilter;
         juceFilter = 0;
-
-        juce_free (channels);
-        channels = 0;
 
         jassert (activePlugins.contains (this));
         activePlugins.removeValue (this);
@@ -659,9 +655,8 @@ public:
             midiEvents.clear();
             incomingEvents.clear();
 
-            juce_free (channels);
-            channels = (float**) juce_calloc (sizeof (float*) * jmax (juceFilter->getNumInputChannels(),
-                                                                      juceFilter->getNumOutputChannels()) + 4);
+            channels.calloc (jmax (juceFilter->getNumInputChannels(),
+                                   juceFilter->getNumOutputChannels()) + 4);
 
             prepared = true;
         }
@@ -940,7 +935,7 @@ protected:
 private:
     AudioProcessor* juceFilter;
     AudioSampleBuffer bufferSpace;
-    float** channels;
+    HeapBlock <float*> channels;
     MidiBuffer midiEvents, incomingEvents;
     bool prepared;
     SMPTETime lastSMPTETime;

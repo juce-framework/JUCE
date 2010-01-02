@@ -29,6 +29,7 @@
 #include "juce_Colour.h"
 #include "../geometry/juce_AffineTransform.h"
 #include "../../../containers/juce_Array.h"
+#include "../../../containers/juce_HeapBlock.h"
 
 
 //==============================================================================
@@ -123,10 +124,10 @@ public:
 
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.
-
-        The caller must delete the array that is returned using juce_free().
+        This will resize the HeapBlock, fill it with the colours, and will return the number of
+        colours that it added.
     */
-    PixelARGB* createLookupTable (const AffineTransform& transform, int& numEntries) const throw();
+    int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const throw();
 
     /** Returns true if all colours are opaque. */
     bool isOpaque() const throw();

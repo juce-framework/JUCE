@@ -73,7 +73,7 @@ public:
 private:
     OutputStream* const destStream;
     const bool deleteDestStream;
-    uint8* buffer;
+    HeapBlock <uint8> buffer;
     void* helper;
     bool doNextBlock();
 

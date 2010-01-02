@@ -138,7 +138,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
 }
 
 //==============================================================================
-PixelARGB* ColourGradient::createLookupTable (const AffineTransform& transform, int& numEntries) const throw()
+int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& lookupTable) const throw()
 {
 #ifdef JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of
@@ -153,9 +153,8 @@ PixelARGB* ColourGradient::createLookupTable (const AffineTransform& transform, 
     transform.transformPoint (tx2, ty2);
     const double distance = juce_hypot (tx1 - tx2, ty1 - ty2);
 
-    numEntries = jlimit (1, (numColours - 1) << 8, 3 * (int) distance);
-
-    PixelARGB* const lookupTable = (PixelARGB*) juce_calloc (numEntries * sizeof (PixelARGB));
+    const int numEntries = jlimit (1, (numColours - 1) << 8, 3 * (int) distance);
+    lookupTable.malloc (numEntries);
 
     if (numColours >= 2)
     {
@@ -191,7 +190,7 @@ PixelARGB* ColourGradient::createLookupTable (const AffineTransform& transform, 
         jassertfalse // no colours specified!
     }
 
-    return lookupTable;
+    return numEntries;
 }
 
 bool ColourGradient::isOpaque() const throw()

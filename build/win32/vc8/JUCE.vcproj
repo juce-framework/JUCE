@@ -1086,6 +1086,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\containers\juce_HeapBlock.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\containers\juce_MemoryBlock.cpp"
 					>
 				</File>

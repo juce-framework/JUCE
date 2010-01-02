@@ -2328,7 +2328,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
 
     hr = info->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
 
-    byte* const buffer = (byte*) juce_malloc (bytesPerBlock);
+    HeapBlock <byte> buffer (bytesPerBlock);
 
     AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
     int samplesDone = 0;
@@ -2365,8 +2365,6 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
         if (samplesDone >= numSamples)
             break;
     }
-
-    juce_free (buffer);
 
     hr = info->redbook->CloseAudioTrack();
 

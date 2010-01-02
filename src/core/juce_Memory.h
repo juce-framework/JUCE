@@ -37,13 +37,24 @@
     //==============================================================================
     // Win32 debug non-DLL versions..
 
-    /** This should be used instead of calling malloc directly. */
+    /** This should be used instead of calling malloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_malloc(numBytes)                 _malloc_dbg  (numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-    /** This should be used instead of calling calloc directly. */
+
+    /** This should be used instead of calling calloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_calloc(numBytes)                 _calloc_dbg  (1, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-    /** This should be used instead of calling realloc directly. */
+
+    /** This should be used instead of calling realloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_realloc(location, numBytes)      _realloc_dbg (location, numBytes, _NORMAL_BLOCK, __FILE__, __LINE__)
-    /** This should be used instead of calling free directly. */
+
+    /** This should be used instead of calling free directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_free(location)                   _free_dbg    (location, _NORMAL_BLOCK)
 
   #else
@@ -57,13 +68,24 @@
     extern JUCE_API void* juce_DebugRealloc (void* const block, const int size, const char* file, const int line);
     extern JUCE_API void juce_DebugFree (void* const block);
 
-    /** This should be used instead of calling malloc directly. */
+    /** This should be used instead of calling malloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_DebugMalloc (numBytes, __FILE__, __LINE__)
-    /** This should be used instead of calling calloc directly. */
+
+    /** This should be used instead of calling calloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_DebugCalloc (numBytes, __FILE__, __LINE__)
-    /** This should be used instead of calling realloc directly. */
+
+    /** This should be used instead of calling realloc directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_DebugRealloc (location, numBytes, __FILE__, __LINE__)
-    /** This should be used instead of calling free directly. */
+
+    /** This should be used instead of calling free directly.
+        Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+    */
     #define juce_free(location)                   JUCE_NAMESPACE::juce_DebugFree (location)
   #endif
 
@@ -89,13 +111,24 @@
   extern JUCE_API void* juce_Realloc (void* const block, const int size);
   extern JUCE_API void juce_Free (void* const block);
 
-  /** This should be used instead of calling malloc directly. */
+  /** This should be used instead of calling malloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_malloc(numBytes)                 JUCE_NAMESPACE::juce_Malloc (numBytes)
-  /** This should be used instead of calling calloc directly. */
+
+  /** This should be used instead of calling calloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_calloc(numBytes)                 JUCE_NAMESPACE::juce_Calloc (numBytes)
-  /** This should be used instead of calling realloc directly. */
+
+  /** This should be used instead of calling realloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_realloc(location, numBytes)      JUCE_NAMESPACE::juce_Realloc (location, numBytes)
-  /** This should be used instead of calling free directly. */
+
+  /** This should be used instead of calling free directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_free(location)                   JUCE_NAMESPACE::juce_Free (location)
 
   #define juce_UseDebuggingNewOperator \
@@ -108,13 +141,24 @@
   //==============================================================================
   // Mac, Linux and Win32 (release) versions..
 
-  /** This should be used instead of calling malloc directly. */
+  /** This should be used instead of calling malloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_malloc(numBytes)                 malloc (numBytes)
-  /** This should be used instead of calling calloc directly. */
+
+  /** This should be used instead of calling calloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_calloc(numBytes)                 calloc (1, numBytes)
-  /** This should be used instead of calling realloc directly. */
+
+  /** This should be used instead of calling realloc directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_realloc(location, numBytes)      realloc (location, numBytes)
-  /** This should be used instead of calling free directly. */
+
+  /** This should be used instead of calling free directly.
+      Only use direct memory allocation if there's really no way to use a HeapBlock object instead!
+  */
   #define juce_free(location)                   free (location)
 
 #endif

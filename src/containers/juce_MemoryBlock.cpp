@@ -32,8 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 MemoryBlock::MemoryBlock() throw()
-    : data (0),
-      size (0)
+    : size (0)
 {
 }
 
@@ -43,35 +42,28 @@ MemoryBlock::MemoryBlock (const int initialSize,
     if (initialSize > 0)
     {
         size = initialSize;
-
-        if (initialiseToZero)
-            data = (char*) juce_calloc (initialSize);
-        else
-            data = (char*) juce_malloc (initialSize);
+        data.allocate (initialSize, initialiseToZero);
     }
     else
     {
-        data = 0;
         size = 0;
     }
 }
 
 MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
-    : data (0),
-      size (other.size)
+    : size (other.size)
 {
     if (size > 0)
     {
         jassert (other.data != 0);
-        data = (char*) juce_malloc (size);
+        data.malloc (size);
         memcpy (data, other.data, size);
     }
 }
 
 MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
                           const int sizeInBytes) throw()
-    : data (0),
-      size (jmax (0, sizeInBytes))
+    : size (jmax (0, sizeInBytes))
 {
     jassert (sizeInBytes >= 0);
 
@@ -79,7 +71,7 @@ MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
     {
         jassert (dataToInitialiseFrom != 0); // non-zero size, but a zero pointer passed-in?
 
-        data = (char*) juce_malloc (size);
+        data.malloc (size);
 
         if (dataToInitialiseFrom != 0)
             memcpy (data, dataToInitialiseFrom, size);
@@ -90,8 +82,6 @@ MemoryBlock::~MemoryBlock() throw()
 {
     jassert (size >= 0);    // should never happen
     jassert (size == 0 || data != 0); // non-zero size but no data allocated?
-
-    juce_free (data);
 }
 
 const MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
@@ -126,25 +116,21 @@ void MemoryBlock::setSize (const int newSize,
     {
         if (newSize <= 0)
         {
-            juce_free (data);
-            data = 0;
+            data.free();
             size = 0;
         }
         else
         {
             if (data != 0)
             {
-                data = (char*) juce_realloc (data, newSize);
+                data.realloc (newSize);
 
                 if (initialiseToZero && (newSize > size))
                     zeromem (data + size, newSize - size);
             }
             else
             {
-                if (initialiseToZero)
-                    data = (char*) juce_calloc (newSize);
-                else
-                    data = (char*) juce_malloc (newSize);
+                data.allocate (newSize, initialiseToZero);
             }
 
             size = newSize;
@@ -242,7 +228,7 @@ void MemoryBlock::removeSection (int startByte, int numBytesToRemove) throw()
 
 const String MemoryBlock::toString() const throw()
 {
-    return String (data, size);
+    return String ((const char*) data, size);
 }
 
 //==============================================================================

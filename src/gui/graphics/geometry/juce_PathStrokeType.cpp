@@ -30,7 +30,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_PathStrokeType.h"
 #include "juce_PathIterator.h"
-#include "../../../containers/juce_VoidArray.h"
 
 
 //==============================================================================

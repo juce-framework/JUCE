@@ -85,7 +85,7 @@ public:
           lastThreadId (0),
           dataHandle (0)
     {
-        bufferList = (AudioBufferList*) juce_calloc (256);
+        bufferList.calloc (256, 1);
 
 #ifdef WIN32
         if (InitializeQTML (0) != noErr)
@@ -143,23 +143,21 @@ public:
         if (err != noErr)
             return;
 
-        AudioChannelLayout* const qt_audio_channel_layout
-                = (AudioChannelLayout*) juce_calloc (output_layout_size);
+        HeapBlock <AudioChannelLayout> qt_audio_channel_layout;
+        qt_audio_channel_layout.calloc (output_layout_size, 1);
 
         err = MovieAudioExtractionGetProperty (extractor,
                                                kQTPropertyClass_MovieAudioExtraction_Audio,
                                                kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
                                                output_layout_size, qt_audio_channel_layout, 0);
 
-        qt_audio_channel_layout->mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+        qt_audio_channel_layout[0].mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
 
         err = MovieAudioExtractionSetProperty (extractor,
                                                kQTPropertyClass_MovieAudioExtraction_Audio,
                                                kQTMovieAudioExtractionAudioPropertyID_AudioChannelLayout,
-                                               sizeof (qt_audio_channel_layout),
+                                               output_layout_size,
                                                qt_audio_channel_layout);
-
-        juce_free (qt_audio_channel_layout);
 
         err = MovieAudioExtractionGetProperty (extractor,
                                                kQTPropertyClass_MovieAudioExtraction_Audio,
@@ -223,7 +221,6 @@ public:
         DisposeMovie (movie);
 
         juce_free (bufferList->mBuffers[0].mData);
-        juce_free (bufferList);
 
 #if JUCE_MAC
         ExitMoviesOnThread ();
@@ -308,7 +305,7 @@ private:
     Thread::ThreadID lastThreadId;
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
-    AudioBufferList* bufferList;
+    HeapBlock <AudioBufferList> bufferList;
     Handle dataHandle;
 
     /*OSErr readMovieStream (long offset, long size, void* dataPtr)

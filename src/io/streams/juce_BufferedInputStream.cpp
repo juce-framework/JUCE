@@ -47,15 +47,13 @@ BufferedInputStream::BufferedInputStream (InputStream* const source_,
         bufferSize = jmin (jmax (32, sourceSize), bufferSize);
 
     bufferStart = position;
-    buffer = (char*) juce_malloc (bufferSize);
+    buffer.malloc (bufferSize);
 }
 
 BufferedInputStream::~BufferedInputStream() throw()
 {
     if (deleteSourceWhenDestroyed)
         delete source;
-
-    juce_free (buffer);
 }
 
 //==============================================================================
@@ -94,7 +92,7 @@ void BufferedInputStream::ensureBuffered()
              && position >= bufferStart)
         {
             const int bytesToKeep = (int) (lastReadPos - position);
-            memmove (buffer, buffer + position - bufferStart, bytesToKeep);
+            memmove (buffer, buffer + (int) (position - bufferStart), bytesToKeep);
 
             bufferStart = position;
 
@@ -122,7 +120,7 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
     if (position >= bufferStart
          && position + maxBytesToRead <= lastReadPos)
     {
-        memcpy (destBuffer, buffer + (position - bufferStart), maxBytesToRead);
+        memcpy (destBuffer, buffer + (int) (position - bufferStart), maxBytesToRead);
         position += maxBytesToRead;
 
         return maxBytesToRead;
@@ -140,7 +138,7 @@ int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
 
             if (bytesAvailable > 0)
             {
-                memcpy (destBuffer, buffer + (position - bufferStart), bytesAvailable);
+                memcpy (destBuffer, buffer + (int) (position - bufferStart), bytesAvailable);
                 maxBytesToRead -= bytesAvailable;
                 bytesRead += bytesAvailable;
                 position += bytesAvailable;
@@ -168,7 +166,7 @@ const String BufferedInputStream::readString()
     {
         const int maxChars = (int) (lastReadPos - position);
 
-        const char* const src = buffer + (position - bufferStart);
+        const char* const src = buffer + (int) (position - bufferStart);
 
         for (int i = 0; i < maxChars; ++i)
         {

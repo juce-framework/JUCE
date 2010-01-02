@@ -291,8 +291,8 @@ protected:
            const int imageHeight);
 
     int pixelStride, lineStride;
+    HeapBlock <uint8> imageDataAllocated;
     uint8* imageData;
-
 
 private:
     //==============================================================================

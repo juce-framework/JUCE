@@ -26,74 +26,20 @@
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
- #include "core/juce_Atomic.h"
-#endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
- #include "core/juce_DataConversions.h"
-#endif
-#ifndef __JUCE_FILELOGGER_JUCEHEADER__
- #include "core/juce_FileLogger.h"
-#endif
-#ifndef __JUCE_INITIALISATION_JUCEHEADER__
- #include "core/juce_Initialisation.h"
-#endif
-#ifndef __JUCE_LOGGER_JUCEHEADER__
- #include "core/juce_Logger.h"
-#endif
-#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
- #include "core/juce_PlatformUtilities.h"
-#endif
-#ifndef __JUCE_MEMORY_JUCEHEADER__
- #include "core/juce_Memory.h"
-#endif
-#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
- #include "core/juce_PerformanceCounter.h"
-#endif
-#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
- #include "core/juce_PlatformDefs.h"
-#endif
-#ifndef __JUCE_SINGLETON_JUCEHEADER__
- #include "core/juce_Singleton.h"
-#endif
-#ifndef __JUCE_RANDOM_JUCEHEADER__
- #include "core/juce_Random.h"
-#endif
-#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
- #include "core/juce_RelativeTime.h"
-#endif
-#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
- #include "core/juce_SystemStats.h"
-#endif
-#ifndef __JUCE_TIME_JUCEHEADER__
- #include "core/juce_Time.h"
-#endif
-#ifndef __JUCE_UUID_JUCEHEADER__
- #include "core/juce_Uuid.h"
-#endif
-#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
- #include "core/juce_StandardHeader.h"
-#endif
-#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
- #include "core/juce_MathsFunctions.h"
-#endif
-#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
- #include "core/juce_TargetPlatform.h"
-#endif
 #ifndef __JUCE_ARRAY_JUCEHEADER__
  #include "containers/juce_Array.h"
 #endif
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "containers/juce_ArrayAllocationBase.h"
 #endif
-#ifndef __JUCE_VARIANT_JUCEHEADER__
- #include "containers/juce_Variant.h"
-#endif
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
  #include "containers/juce_BitArray.h"
 #endif
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
  #include "containers/juce_ElementComparator.h"
+#endif
+#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+ #include "containers/juce_HeapBlock.h"
 #endif
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
  #include "containers/juce_MemoryBlock.h"
@@ -116,11 +62,80 @@
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
  #include "containers/juce_SparseSet.h"
 #endif
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+ #include "containers/juce_ValueTree.h"
+#endif
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+ #include "containers/juce_Variant.h"
+#endif
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
  #include "containers/juce_VoidArray.h"
 #endif
-#ifndef __JUCE_VALUETREE_JUCEHEADER__
- #include "containers/juce_ValueTree.h"
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+ #include "core/juce_Atomic.h"
+#endif
+#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+ #include "core/juce_DataConversions.h"
+#endif
+#ifndef __JUCE_FILELOGGER_JUCEHEADER__
+ #include "core/juce_FileLogger.h"
+#endif
+#ifndef __JUCE_INITIALISATION_JUCEHEADER__
+ #include "core/juce_Initialisation.h"
+#endif
+#ifndef __JUCE_LOGGER_JUCEHEADER__
+ #include "core/juce_Logger.h"
+#endif
+#ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+ #include "core/juce_MathsFunctions.h"
+#endif
+#ifndef __JUCE_MEMORY_JUCEHEADER__
+ #include "core/juce_Memory.h"
+#endif
+#ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
+ #include "core/juce_PerformanceCounter.h"
+#endif
+#ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
+ #include "core/juce_PlatformDefs.h"
+#endif
+#ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
+ #include "core/juce_PlatformUtilities.h"
+#endif
+#ifndef __JUCE_RANDOM_JUCEHEADER__
+ #include "core/juce_Random.h"
+#endif
+#ifndef __JUCE_RELATIVETIME_JUCEHEADER__
+ #include "core/juce_RelativeTime.h"
+#endif
+#ifndef __JUCE_SINGLETON_JUCEHEADER__
+ #include "core/juce_Singleton.h"
+#endif
+#ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
+ #include "core/juce_StandardHeader.h"
+#endif
+#ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
+ #include "core/juce_SystemStats.h"
+#endif
+#ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
+ #include "core/juce_TargetPlatform.h"
+#endif
+#ifndef __JUCE_TIME_JUCEHEADER__
+ #include "core/juce_Time.h"
+#endif
+#ifndef __JUCE_UUID_JUCEHEADER__
+ #include "core/juce_Uuid.h"
+#endif
+#ifndef __JUCE_BLOWFISH_JUCEHEADER__
+ #include "cryptography/juce_BlowFish.h"
+#endif
+#ifndef __JUCE_MD5_JUCEHEADER__
+ #include "cryptography/juce_MD5.h"
+#endif
+#ifndef __JUCE_PRIMES_JUCEHEADER__
+ #include "cryptography/juce_Primes.h"
+#endif
+#ifndef __JUCE_RSAKEY_JUCEHEADER__
+ #include "cryptography/juce_RSAKey.h"
 #endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
  #include "io/files/juce_DirectoryIterator.h"
@@ -142,18 +157,6 @@
 #endif
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
  #include "io/files/juce_ZipFile.h"
-#endif
-#ifndef __JUCE_BLOWFISH_JUCEHEADER__
- #include "cryptography/juce_BlowFish.h"
-#endif
-#ifndef __JUCE_MD5_JUCEHEADER__
- #include "cryptography/juce_MD5.h"
-#endif
-#ifndef __JUCE_PRIMES_JUCEHEADER__
- #include "cryptography/juce_Primes.h"
-#endif
-#ifndef __JUCE_RSAKEY_JUCEHEADER__
- #include "cryptography/juce_RSAKey.h"
 #endif
 #ifndef __JUCE_SOCKET_JUCEHEADER__
  #include "io/network/juce_Socket.h"
@@ -191,14 +194,14 @@
 #ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
  #include "io/streams/juce_SubregionStream.h"
 #endif
+#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
+ #include "text/juce_CharacterFunctions.h"
+#endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
  #include "text/juce_LocalisedStrings.h"
 #endif
 #ifndef __JUCE_STRING_JUCEHEADER__
  #include "text/juce_String.h"
-#endif
-#ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
- #include "text/juce_CharacterFunctions.h"
 #endif
 #ifndef __JUCE_STRINGARRAY_JUCEHEADER__
  #include "text/juce_StringArray.h"

@@ -195,7 +195,7 @@ public:
 
 private:
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-    int* table;
+    HeapBlock <int> table;
     Rectangle bounds;
     int maxEdgesPerLine, lineStrideElements;
     bool needToCheckEmptinesss;

@@ -29,6 +29,7 @@
 #include "juce_ReferenceCountedObject.h"
 #include "juce_OwnedArray.h"
 #include "../text/juce_StringArray.h"
+#include "../containers/juce_Array.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/streams/juce_InputStream.h"
 

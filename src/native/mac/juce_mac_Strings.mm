@@ -58,20 +58,15 @@ const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
     {
 #if JUCE_STRINGS_ARE_UNICODE
         CFRange range = { 0, CFStringGetLength (cfString) };
-        UniChar* const u = (UniChar*) juce_malloc (sizeof (UniChar) * (range.length + 1));
-
+        HeapBlock <UniChar> u (range.length + 1);
         CFStringGetCharacters (cfString, range, u);
         u[range.length] = 0;
-
         result = convertUTF16ToString (u);
-
-        juce_free (u);
 #else
         const int len = CFStringGetLength (cfString);
-        char* buffer = (char*) juce_malloc (len + 1);
+        HeapBlock <char> buffer (len + 1);
         CFStringGetCString (cfString, buffer, len + 1, CFStringGetSystemEncoding());
         result = buffer;
-        juce_free (buffer);
 #endif
     }
 
@@ -83,16 +78,12 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 #if JUCE_STRINGS_ARE_UNICODE
     const int len = s.length();
     const juce_wchar* t = (const juce_wchar*) s;
-
-    UniChar* temp = (UniChar*) juce_malloc (sizeof (UniChar) * len + 4);
+    HeapBlock <UniChar> temp (len + 2);
 
     for (int i = 0; i <= len; ++i)
         temp[i] = t[i];
 
-    CFStringRef result = CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
-    juce_free (temp);
-
-    return result;
+    return CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
 
 #else
     return CFStringCreateWithCString (kCFAllocatorDefault,
@@ -126,8 +117,9 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
     {
         const int len = s.length();
 
-        UniChar* const tempIn = (UniChar*) juce_calloc (sizeof (UniChar) * len + 4);
-        UniChar* const tempOut = (UniChar*) juce_calloc (sizeof (UniChar) * len + 4);
+        HeapBlock <UniChar> tempIn, tempOut;
+        tempIn.calloc (len + 2);
+        tempOut.calloc (len + 2);
 
         for (int i = 0; i <= len; ++i)
             tempIn[i] = s[i];
@@ -152,9 +144,6 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
             t[i] = 0;
         }
-
-        juce_free (tempIn);
-        juce_free (tempOut);
 
         DisposeUnicodeToTextInfo (&conversionInfo);
     }

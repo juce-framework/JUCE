@@ -383,7 +383,6 @@ public:
         hasShutdown = false;
         firstProcessCallback = true;
         shouldDeleteEditor = false;
-        channels = 0;
         speakerIn = kSpeakerArrEmpty;
         speakerOut = kSpeakerArrEmpty;
         speakerInChans = 0;
@@ -439,8 +438,7 @@ public:
 
         jassert (editorComp == 0);
 
-        juce_free (channels);
-        channels = 0;
+        channels.free();
         deleteTempChannels();
 
         jassert (activePlugins.contains (this));
@@ -766,8 +764,7 @@ public:
             return;
 
         isProcessing = true;
-        juce_free (channels);
-        channels = (float**) juce_calloc (sizeof (float*) * (numInChans + numOutChans));
+        channels.calloc (numInChans + numOutChans);
 
         double rate = getSampleRate();
         jassert (rate > 0);
@@ -813,8 +810,7 @@ public:
         outgoingEvents.freeEvents();
 
         isProcessing = false;
-        juce_free (channels);
-        channels = 0;
+        channels.free();
 
         deleteTempChannels();
     }
@@ -1398,15 +1394,14 @@ private:
     VstSpeakerArrangementType speakerIn, speakerOut;
     int speakerInChans, speakerOutChans;
     int numInChans, numOutChans;
-    float** channels;
+    HeapBlock <float*> channels;
     VoidArray tempChannels; // see note in processReplacing()
     bool hasCreatedTempChannels;
     bool shouldDeleteEditor;
 
     void deleteTempChannels()
     {
-        int i;
-        for (i = tempChannels.size(); --i >= 0;)
+        for (int i = tempChannels.size(); --i >= 0;)
             juce_free (tempChannels.getUnchecked(i));
 
         tempChannels.clear();

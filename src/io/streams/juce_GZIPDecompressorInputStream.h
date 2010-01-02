@@ -80,7 +80,7 @@ private:
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
-    uint8* buffer;
+    HeapBlock <uint8> buffer;
     void* helper;
 
     GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);

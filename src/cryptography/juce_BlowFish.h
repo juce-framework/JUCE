@@ -26,6 +26,8 @@
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
 #define __JUCE_BLOWFISH_JUCEHEADER__
 
+#include "../containers/juce_HeapBlock.h"
+
 
 //==============================================================================
 /**
@@ -64,7 +66,7 @@ public:
 
 private:
     uint32 p[18];
-    uint32* s[4];
+    HeapBlock <uint32> s[4];
 
     uint32 F (uint32 x) const;
 };

@@ -48,17 +48,16 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
       tolerence (tolerence_ * tolerence_),
       subPathCloseX (0),
       subPathCloseY (0),
+      stackBase (32),
       index (0),
       stackSize (32)
 {
-    stackBase = (float*) juce_malloc (stackSize * sizeof (float));
     isIdentityTransform = transform.isIdentity();
     stackPos = stackBase;
 }
 
 PathFlatteningIterator::~PathFlatteningIterator() throw()
 {
-    juce_free (stackBase);
 }
 
 bool PathFlatteningIterator::next() throw()
@@ -159,7 +158,7 @@ bool PathFlatteningIterator::next() throw()
             if (offset >= stackSize - 10)
             {
                 stackSize <<= 1;
-                stackBase = (float*) juce_realloc (stackBase, stackSize * sizeof (float));
+                stackBase.realloc (stackSize);
                 stackPos = stackBase + offset;
             }
 
@@ -209,7 +208,7 @@ bool PathFlatteningIterator::next() throw()
             if (offset >= stackSize - 16)
             {
                 stackSize <<= 1;
-                stackBase = (float*) juce_realloc (stackBase, stackSize * sizeof (float));
+                stackBase.realloc (stackSize);
                 stackPos = stackBase + offset;
             }
 

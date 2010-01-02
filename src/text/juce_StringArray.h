@@ -27,7 +27,7 @@
 #define __JUCE_STRINGARRAY_JUCEHEADER__
 
 #include "juce_String.h"
-#include "../containers/juce_VoidArray.h"
+#include "../containers/juce_OwnedArray.h"
 
 #ifndef DOXYGEN
  // (used in StringArray::appendNumbersToDuplicates)
@@ -325,7 +325,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray strings;
+    OwnedArray <String> strings;
 };
 
 

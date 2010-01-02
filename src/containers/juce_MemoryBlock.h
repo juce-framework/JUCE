@@ -27,6 +27,7 @@
 #define __JUCE_MEMORYBLOCK_JUCEHEADER__
 
 #include "../text/juce_String.h"
+#include "juce_HeapBlock.h"
 
 
 //==============================================================================
@@ -232,7 +233,7 @@ public:
 
 private:
     //==============================================================================
-    char* data;
+    HeapBlock <char> data;
     int size;
 };
 

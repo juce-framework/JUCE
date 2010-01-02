@@ -346,15 +346,11 @@ static CFStringRef juceStringToCFString (const String& s)
     const int len = s.length();
     const juce_wchar* const t = (const juce_wchar*) s;
 
-    UniChar* temp = (UniChar*) juce_malloc (sizeof (UniChar) * len + 4);
-
+    HeapBlock <UniChar> temp (len + 2);
     for (int i = 0; i <= len; ++i)
         temp[i] = t[i];
 
-    CFStringRef result = CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
-    juce_free (temp);
-
-    return result;
+    return CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
 }
 
 static bool openMovie (QTNewMoviePropertyElement* props, int prop, Movie& movie)

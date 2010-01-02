@@ -621,7 +621,7 @@ public:
 
         if (numParameters > 0)
         {
-            NPVariant* const params = (NPVariant*) juce_malloc (sizeof (NPVariant) * numParameters);
+            HeapBlock <NPVariant> params (numParameters);
 
             int i;
             for (i = 0; i < numParameters; ++i)
@@ -636,8 +636,6 @@ public:
 
             for (i = 0; i < numParameters; ++i)
                 browser.releasevariantvalue (&params[i]);
-
-            juce_free (params);
         }
         else
         {
@@ -688,7 +686,9 @@ private:
         if (o == 0 || ! o->hasMethod (methodName))
             return false;
 
-        var* params = (var*) juce_calloc (sizeof (var) * argCount);
+        HeapBlock <var> params;
+        params.calloc (argCount);
+
         for (uint32_t i = 0; i < argCount; ++i)
             params[i] = createValueFromNPVariant (npp, args[i]);
 
@@ -696,8 +696,6 @@ private:
 
         for (int i = argCount; --i >= 0;)
             params[i] = var();
-
-        juce_free (params);
 
         if (out != 0)
             createNPVariantFromValue (npp, *out, result);

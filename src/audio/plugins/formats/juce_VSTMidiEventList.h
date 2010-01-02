@@ -40,7 +40,7 @@ class VSTMidiEventList
 public:
     //==============================================================================
     VSTMidiEventList()
-        : events (0), numEventsUsed (0), numEventsAllocated (0)
+        : numEventsUsed (0), numEventsAllocated (0)
     {
     }
 
@@ -138,9 +138,9 @@ public:
             const int size = 20 + sizeof (VstEvent*) * numEventsNeeded;
 
             if (events == 0)
-                events = (VstEvents*) juce_calloc (size);
+                events.calloc (size, 1);
             else
-                events = (VstEvents*) juce_realloc (events, size);
+                events.realloc (size, 1);
 
             for (int i = numEventsAllocated; i < numEventsNeeded; ++i)
             {
@@ -170,15 +170,14 @@ public:
                 juce_free (e);
             }
 
-            juce_free (events);
-            events = 0;
+            events.free();
             numEventsUsed = 0;
             numEventsAllocated = 0;
         }
     }
 
     //==============================================================================
-    VstEvents* events;
+    HeapBlock <VstEvents> events;
 
 private:
     int numEventsUsed, numEventsAllocated;

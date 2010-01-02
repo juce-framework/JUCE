@@ -28,6 +28,7 @@
 
 #include "juce_AudioSource.h"
 #include "../../text/juce_XmlElement.h"
+#include "../../containers/juce_Array.h"
 
 
 //==============================================================================

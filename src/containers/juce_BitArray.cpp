@@ -39,7 +39,7 @@ BitArray::BitArray() throw()
       highestBit (-1),
       negative (false)
 {
-    values = (unsigned int*) juce_calloc (sizeof (unsigned int) * (numValues + 1));
+    values.calloc (numValues + 1);
 }
 
 BitArray::BitArray (const int value) throw()
@@ -47,7 +47,7 @@ BitArray::BitArray (const int value) throw()
       highestBit (31),
       negative (value < 0)
 {
-    values = (unsigned int*) juce_calloc (sizeof (unsigned int) * (numValues + 1));
+    values.calloc (numValues + 1);
     values[0] = abs (value);
     highestBit = getHighestBit();
 }
@@ -57,7 +57,7 @@ BitArray::BitArray (int64 value) throw()
       highestBit (63),
       negative (value < 0)
 {
-    values = (unsigned int*) juce_calloc (sizeof (unsigned int) * (numValues + 1));
+    values.calloc (numValues + 1);
 
     if (value < 0)
         value = -value;
@@ -72,7 +72,7 @@ BitArray::BitArray (const unsigned int value) throw()
       highestBit (31),
       negative (false)
 {
-    values = (unsigned int*) juce_calloc (sizeof (unsigned int) * (numValues + 1));
+    values.calloc (numValues + 1);
     values[0] = value;
     highestBit = getHighestBit();
 }
@@ -82,28 +82,23 @@ BitArray::BitArray (const BitArray& other) throw()
       highestBit (other.getHighestBit()),
       negative (other.negative)
 {
-    const int bytes = sizeof (unsigned int) * (numValues + 1);
-    values = (unsigned int*) juce_malloc (bytes);
-    memcpy (values, other.values, bytes);
+    values.malloc (numValues + 1);
+    memcpy (values, other.values, sizeof (unsigned int) * (numValues + 1));
 }
 
 BitArray::~BitArray() throw()
 {
-    juce_free (values);
 }
 
 const BitArray& BitArray::operator= (const BitArray& other) throw()
 {
     if (this != &other)
     {
-        juce_free (values);
-
         highestBit = other.getHighestBit();
         numValues = jmax (4, (highestBit >> 5) + 1);
         negative = other.negative;
-        const int memSize = sizeof (unsigned int) * (numValues + 1);
-        values = (unsigned int*)juce_malloc (memSize);
-        memcpy (values, other.values, memSize);
+        values.malloc (numValues + 1);
+        memcpy (values, other.values, sizeof (unsigned int) * (numValues + 1));
     }
 
     return *this;
@@ -167,9 +162,8 @@ void BitArray::clear() throw()
 {
     if (numValues > 16)
     {
-        juce_free (values);
         numValues = 4;
-        values = (unsigned int*) juce_calloc (sizeof (unsigned int) * (numValues + 1));
+        values.calloc (numValues + 1);
     }
     else
     {
@@ -821,7 +815,7 @@ void BitArray::ensureSize (const int numVals) throw()
     {
         int oldSize = numValues;
         numValues = ((numVals + 2) * 3) / 2;
-        values = (unsigned int*) juce_realloc (values, sizeof (unsigned int) * numValues + 4);
+        values.realloc (numValues + 1);
 
         while (oldSize < numValues)
             values [oldSize++] = 0;

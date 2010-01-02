@@ -32,22 +32,14 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ImageConvolutionKernel::ImageConvolutionKernel (const int size_) throw()
-    : size (size_)
+    : values (size_ * size_),
+      size (size_)
 {
-    values = new float* [size];
-
-    for (int i = size; --i >= 0;)
-        values[i] = new float [size];
-
     clear();
 }
 
 ImageConvolutionKernel::~ImageConvolutionKernel() throw()
 {
-    for (int i = size; --i >= 0;)
-        delete[] values[i];
-
-    delete[] values;
 }
 
 //==============================================================================
@@ -58,7 +50,7 @@ void ImageConvolutionKernel::setKernelValue (const int x,
     if (((unsigned int) x) < (unsigned int) size
          && ((unsigned int) y) < (unsigned int) size)
     {
-        values[x][y] = value;
+        values [x + y * size] = value;
     }
     else
     {
@@ -68,27 +60,24 @@ void ImageConvolutionKernel::setKernelValue (const int x,
 
 void ImageConvolutionKernel::clear() throw()
 {
-    for (int y = size; --y >= 0;)
-        for (int x = size; --x >= 0;)
-            values[x][y] = 0;
+    for (int i = size * size; --i >= 0;)
+        values[i] = 0;
 }
 
 void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum) throw()
 {
     double currentTotal = 0.0;
 
-    for (int y = size; --y >= 0;)
-        for (int x = size; --x >= 0;)
-            currentTotal += values[x][y];
+    for (int i = size * size; --i >= 0;)
+        currentTotal += values[i];
 
     rescaleAllValues ((float) (desiredTotalSum / currentTotal));
 }
 
 void ImageConvolutionKernel::rescaleAllValues (const float multiplier) throw()
 {
-    for (int y = size; --y >= 0;)
-        for (int x = size; --x >= 0;)
-            values[x][y] *= multiplier;
+    for (int i = size * size; --i >= 0;)
+        values[i] *= multiplier;
 }
 
 //==============================================================================
@@ -104,7 +93,7 @@ void ImageConvolutionKernel::createGaussianBlur (const float radius) throw()
             const int cx = x - centre;
             const int cy = y - centre;
 
-            values[x][y] = (float) exp (radiusFactor * (cx * cx + cy * cy));
+            values [x + y * size] = (float) exp (radiusFactor * (cx * cx + cy * cy));
         }
     }
 
@@ -190,7 +179,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
                             if (sx >= 0)
                             {
-                                const float kernelMult = values[xx][yy];
+                                const float kernelMult = values [xx + yy * size];
                                 c1 += kernelMult * *src++;
                                 c2 += kernelMult * *src++;
                                 c3 += kernelMult * *src++;
@@ -245,7 +234,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
                             if (sx >= 0)
                             {
-                                const float kernelMult = values[xx][yy];
+                                const float kernelMult = values [xx + yy * size];
                                 c1 += kernelMult * *src++;
                                 c2 += kernelMult * *src++;
                                 c3 += kernelMult * *src++;

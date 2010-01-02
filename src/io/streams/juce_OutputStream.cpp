@@ -170,18 +170,16 @@ void OutputStream::writeDoubleBigEndian (double value)
 void OutputStream::writeString (const String& text)
 {
     const int numBytes = text.copyToUTF8 (0);
-    uint8* const temp = (uint8*) juce_malloc (numBytes);
+    HeapBlock <uint8> temp (numBytes);
 
     text.copyToUTF8 (temp);
     write (temp, numBytes); // (numBytes includes the terminating null).
-
-    juce_free (temp);
 }
 
 void OutputStream::printf (const char* pf, ...)
 {
     unsigned int bufSize = 256;
-    char* buf = (char*) juce_malloc (bufSize);
+    HeapBlock <char> buf (bufSize);
 
     for (;;)
     {
@@ -202,12 +200,9 @@ void OutputStream::printf (const char* pf, ...)
             break;
         }
 
-        juce_free (buf);
         bufSize += 256;
-        buf = (char*) juce_malloc (bufSize);
+        buf.malloc (bufSize);
     }
-
-    juce_free (buf);
 }
 
 OutputStream& OutputStream::operator<< (const int number)

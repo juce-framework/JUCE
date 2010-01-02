@@ -326,7 +326,8 @@ bool juce_writeJPEGImageToStream (const Image& image,
     jpegCompStruct.dest = &dest;
 
     dest.output = &out;
-    dest.buffer = (char*) juce_malloc (bufferSize);
+    HeapBlock <char> tempBuffer (bufferSize);
+    dest.buffer = (char*) tempBuffer;
     dest.next_output_byte = (JOCTET*) dest.buffer;
     dest.free_in_buffer = bufferSize;
     dest.init_destination = jpegWriteInit;
@@ -381,8 +382,6 @@ bool juce_writeJPEGImageToStream (const Image& image,
 
     jpeg_finish_compress (&jpegCompStruct);
     jpeg_destroy_compress (&jpegCompStruct);
-
-    juce_free (dest.buffer);
 
     out.flush();
 

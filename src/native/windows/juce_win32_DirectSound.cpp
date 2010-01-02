@@ -1170,8 +1170,7 @@ private:
     int64 volatile lastBlockTime;
     double sampleRate;
     BitArray enabledInputs, enabledOutputs;
-    float** inputBuffers;
-    float** outputBuffers;
+    HeapBlock <float*> inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback;
     CriticalSection startStopLock;
@@ -1196,15 +1195,13 @@ private:
         for (i = 0; i < numInputBuffers; ++i)
             juce_free (inputBuffers[i]);
 
-        delete[] inputBuffers;
-        inputBuffers = 0;
+        inputBuffers.free();
         numInputBuffers = 0;
 
         for (i = 0; i < numOutputBuffers; ++i)
             juce_free (outputBuffers[i]);
 
-        delete[] outputBuffers;
-        outputBuffers = 0;
+        outputBuffers.free();
         numOutputBuffers = 0;
     }
 
@@ -1526,8 +1523,7 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
                             false);
 
     numInputBuffers = enabledInputs.countNumberOfSetBits();
-    inputBuffers = new float* [numInputBuffers + 2];
-    zeromem (inputBuffers, sizeof (float*) * numInputBuffers + 2);
+    inputBuffers.calloc (numInputBuffers + 2);
     int i, numIns = 0;
 
     for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
@@ -1554,8 +1550,7 @@ const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
                              false);
 
     numOutputBuffers = enabledOutputs.countNumberOfSetBits();
-    outputBuffers = new float* [numOutputBuffers + 2];
-    zeromem (outputBuffers, sizeof (float*) * numOutputBuffers + 2);
+    outputBuffers.calloc (numOutputBuffers + 2);
     int numOuts = 0;
 
     for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
