@@ -543,7 +543,7 @@ public:
         return true;
     }
 
-    void sendAUEvent (const AudioUnitEventType type, const int index) throw()
+    void sendAUEvent (const AudioUnitEventType type, const int index)
     {
         if (AUEventListenerNotify != 0)
         {
@@ -1185,8 +1185,8 @@ public:
         return noErr;
     }
 
-    AudioUnitCarbonViewEventListener getEventListener() const throw()   { return mEventListener; }
-    void* getEventListenerUserData() const throw()  { return mEventListenerUserData; }
+    AudioUnitCarbonViewEventListener getEventListener() const   { return mEventListener; }
+    void* getEventListenerUserData() const                      { return mEventListenerUserData; }
 
 private:
     void deleteUI()

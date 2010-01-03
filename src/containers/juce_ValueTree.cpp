@@ -519,7 +519,7 @@ int ValueTree::getNumChildren() const throw()
 
 ValueTree ValueTree::getChild (int index) const throw()
 {
-    return (SharedObject*) object->children [index];
+    return object != 0 ? (SharedObject*) object->children [index] : ValueTree ((SharedObject*) 0);
 }
 
 ValueTree ValueTree::getChildWithName (const String& type) const throw()
